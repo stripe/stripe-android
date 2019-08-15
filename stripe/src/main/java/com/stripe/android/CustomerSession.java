@@ -116,7 +116,7 @@ public class CustomerSession {
     @NonNull private final Set<String> mProductUsageTokens;
     @Nullable private final Calendar mProxyNowCalendar;
     @NonNull private final ThreadPoolExecutor mThreadPoolExecutor;
-    @NonNull private final StripeApiHandler mApiHandler;
+    @NonNull private final StripeRepository mStripeRepository;
     @NonNull private final String mPublishableKey;
     @Nullable private final String mStripeAccountId;
 
@@ -240,7 +240,7 @@ public class CustomerSession {
             @NonNull EphemeralKeyProvider keyProvider,
             @Nullable Calendar proxyNowCalendar,
             @NonNull ThreadPoolExecutor threadPoolExecutor,
-            @NonNull StripeApiHandler apiHandler,
+            @NonNull StripeRepository stripeRepository,
             @NonNull String publishableKey,
             @Nullable String stripeAccountId,
             boolean shouldPrefetchEphemeralKey) {
@@ -249,7 +249,7 @@ public class CustomerSession {
         mThreadPoolExecutor = threadPoolExecutor;
         mProxyNowCalendar = proxyNowCalendar;
         mProductUsageTokens = new HashSet<>();
-        mApiHandler = apiHandler;
+        mStripeRepository = stripeRepository;
         mStripeAccountId = stripeAccountId;
         mPublishableKey = publishableKey;
         mUiThreadHandler = new CustomerSessionHandler(new CustomerSessionHandler.Listener() {
@@ -774,7 +774,7 @@ public class CustomerSession {
             @NonNull CustomerEphemeralKey key,
             @NonNull String sourceId,
             @NonNull @Source.SourceType String sourceType) throws StripeException {
-        return mApiHandler.addCustomerSource(
+        return mStripeRepository.addCustomerSource(
                 key.getCustomerId(),
                 mPublishableKey,
                 new ArrayList<>(mProductUsageTokens),
@@ -788,7 +788,7 @@ public class CustomerSession {
     private Source deleteCustomerSourceWithKey(
             @NonNull CustomerEphemeralKey key,
             @NonNull String sourceId) throws StripeException {
-        return mApiHandler.deleteCustomerSource(
+        return mStripeRepository.deleteCustomerSource(
                 key.getCustomerId(),
                 mPublishableKey,
                 new ArrayList<>(mProductUsageTokens),
@@ -801,7 +801,7 @@ public class CustomerSession {
     private PaymentMethod attachCustomerPaymentMethodWithKey(
             @NonNull CustomerEphemeralKey key,
             @NonNull String paymentMethodId) throws StripeException {
-        return mApiHandler.attachPaymentMethod(
+        return mStripeRepository.attachPaymentMethod(
                 key.getCustomerId(),
                 mPublishableKey,
                 new ArrayList<>(mProductUsageTokens),
@@ -814,7 +814,7 @@ public class CustomerSession {
     private PaymentMethod detachCustomerPaymentMethodWithKey(
             @NonNull CustomerEphemeralKey key,
             @NonNull String paymentMethodId) throws StripeException {
-        return mApiHandler.detachPaymentMethod(
+        return mStripeRepository.detachPaymentMethod(
                 mPublishableKey,
                 new ArrayList<>(mProductUsageTokens),
                 paymentMethodId,
@@ -826,7 +826,7 @@ public class CustomerSession {
     private List<PaymentMethod> getCustomerPaymentMethodsWithKey(
             @NonNull CustomerEphemeralKey key,
             @NonNull String paymentMethodType) throws StripeException {
-        return mApiHandler.getPaymentMethods(
+        return mStripeRepository.getPaymentMethods(
                 key.getCustomerId(),
                 paymentMethodType,
                 mPublishableKey,
@@ -839,7 +839,7 @@ public class CustomerSession {
     private Customer setCustomerShippingInfoWithKey(
             @NonNull CustomerEphemeralKey key,
             @NonNull ShippingInformation shippingInformation) throws StripeException {
-        return mApiHandler.setCustomerShippingInfo(
+        return mStripeRepository.setCustomerShippingInfo(
                 key.getCustomerId(),
                 mPublishableKey,
                 new ArrayList<>(mProductUsageTokens),
@@ -853,7 +853,7 @@ public class CustomerSession {
             @NonNull CustomerEphemeralKey key,
             @NonNull String sourceId,
             @NonNull @Source.SourceType String sourceType) throws StripeException {
-        return mApiHandler.setDefaultCustomerSource(
+        return mStripeRepository.setDefaultCustomerSource(
                 key.getCustomerId(),
                 mPublishableKey,
                 new ArrayList<>(mProductUsageTokens),
@@ -875,7 +875,7 @@ public class CustomerSession {
     @Nullable
     private Customer retrieveCustomerWithKey(@NonNull CustomerEphemeralKey key)
             throws StripeException {
-        return mApiHandler.retrieveCustomer(key.getCustomerId(),
+        return mStripeRepository.retrieveCustomer(key.getCustomerId(),
                 ApiRequest.Options.create(key.getSecret(), mStripeAccountId));
     }
 

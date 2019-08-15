@@ -44,7 +44,7 @@ import java.util.Objects;
 /**
  * Handler for calls to the Stripe API.
  */
-class StripeApiHandler {
+class StripeApiHandler implements StripeRepository {
 
     private static final String DNS_CACHE_TTL_PROPERTY_NAME = "networkaddress.cache.ttl";
 
@@ -91,7 +91,8 @@ class StripeApiHandler {
      * provided
      */
     @Nullable
-    PaymentIntent confirmPaymentIntent(
+    @Override
+    public PaymentIntent confirmPaymentIntent(
             @NonNull ConfirmPaymentIntentParams confirmPaymentIntentParams,
             @NonNull ApiRequest.Options options)
             throws AuthenticationException,
@@ -129,7 +130,8 @@ class StripeApiHandler {
      * @param clientSecret client_secret of the PaymentIntent to retrieve
      */
     @Nullable
-    PaymentIntent retrievePaymentIntent(
+    @Override
+    public PaymentIntent retrievePaymentIntent(
             @NonNull String clientSecret,
             @NonNull ApiRequest.Options options)
             throws AuthenticationException,
@@ -163,7 +165,8 @@ class StripeApiHandler {
      * provided
      */
     @Nullable
-    SetupIntent confirmSetupIntent(
+    @Override
+    public SetupIntent confirmSetupIntent(
             @NonNull ConfirmSetupIntentParams confirmSetupIntentParams,
             @NonNull ApiRequest.Options options)
             throws AuthenticationException,
@@ -208,7 +211,8 @@ class StripeApiHandler {
      * @param clientSecret client_secret of the SetupIntent to retrieve
      */
     @Nullable
-    SetupIntent retrieveSetupIntent(
+    @Override
+    public SetupIntent retrieveSetupIntent(
             @NonNull String clientSecret,
             @NonNull ApiRequest.Options options)
             throws AuthenticationException,
@@ -247,7 +251,8 @@ class StripeApiHandler {
      * @throws APIException for unknown Stripe API errors. These should be rare.
      */
     @Nullable
-    Source createSource(
+    @Override
+    public Source createSource(
             @NonNull SourceParams sourceParams,
             @NonNull ApiRequest.Options options)
             throws AuthenticationException,
@@ -287,7 +292,8 @@ class StripeApiHandler {
      * @throws APIException for unknown Stripe API errors. These should be rare.
      */
     @Nullable
-    Source retrieveSource(
+    @Override
+    public Source retrieveSource(
             @NonNull String sourceId,
             @NonNull String clientSecret,
             @NonNull ApiRequest.Options options)
@@ -309,7 +315,8 @@ class StripeApiHandler {
     }
 
     @Nullable
-    PaymentMethod createPaymentMethod(
+    @Override
+    public PaymentMethod createPaymentMethod(
             @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
             @NonNull ApiRequest.Options options)
             throws AuthenticationException,
@@ -356,7 +363,8 @@ class StripeApiHandler {
      */
     @Nullable
     @SuppressWarnings("unchecked")
-    Token createToken(
+    @Override
+    public Token createToken(
             @NonNull Map<String, ?> tokenParams,
             @NonNull ApiRequest.Options options,
             @NonNull @Token.TokenType String tokenType)
@@ -387,7 +395,8 @@ class StripeApiHandler {
     }
 
     @Nullable
-    Source addCustomerSource(
+    @Override
+    public Source addCustomerSource(
             @NonNull String customerId,
             @NonNull String publishableKey,
             @NonNull List<String> productUsageTokens,
@@ -419,7 +428,8 @@ class StripeApiHandler {
     }
 
     @Nullable
-    Source deleteCustomerSource(
+    @Override
+    public Source deleteCustomerSource(
             @NonNull String customerId,
             @NonNull String publishableKey,
             @NonNull List<String> productUsageTokens,
@@ -448,7 +458,8 @@ class StripeApiHandler {
     }
 
     @Nullable
-    PaymentMethod attachPaymentMethod(
+    @Override
+    public PaymentMethod attachPaymentMethod(
             @NonNull String customerId,
             @NonNull String publishableKey,
             @NonNull List<String> productUsageTokens,
@@ -481,7 +492,8 @@ class StripeApiHandler {
     }
 
     @Nullable
-    PaymentMethod detachPaymentMethod(
+    @Override
+    public PaymentMethod detachPaymentMethod(
             @NonNull String publishableKey,
             @NonNull List<String> productUsageTokens,
             @NonNull String paymentMethodId,
@@ -512,7 +524,8 @@ class StripeApiHandler {
      * Retrieve a Customer's {@link PaymentMethod}s
      */
     @NonNull
-    List<PaymentMethod> getPaymentMethods(
+    @Override
+    public List<PaymentMethod> getPaymentMethods(
             @NonNull String customerId,
             @NonNull String paymentMethodType,
             @NonNull String publishableKey,
@@ -558,7 +571,8 @@ class StripeApiHandler {
     }
 
     @Nullable
-    Customer setDefaultCustomerSource(
+    @Override
+    public Customer setDefaultCustomerSource(
             @NonNull String customerId,
             @NonNull String publishableKey,
             @NonNull List<String> productUsageTokens,
@@ -592,7 +606,8 @@ class StripeApiHandler {
     }
 
     @Nullable
-    Customer setCustomerShippingInfo(
+    @Override
+    public Customer setCustomerShippingInfo(
             @NonNull String customerId,
             @NonNull String publishableKey,
             @NonNull List<String> productUsageTokens,
@@ -623,9 +638,9 @@ class StripeApiHandler {
         return Customer.fromString(response.getResponseBody());
     }
 
-
     @Nullable
-    Customer retrieveCustomer(@NonNull String customerId,
+    @Override
+    public Customer retrieveCustomer(@NonNull String customerId,
                               @NonNull ApiRequest.Options requestOptions)
             throws InvalidRequestException,
             APIConnectionException,
@@ -650,7 +665,8 @@ class StripeApiHandler {
     }
 
     @NonNull
-    String retrieveIssuingCardPin(
+    @Override
+    public String retrieveIssuingCardPin(
             @NonNull String cardId,
             @NonNull String verificationId,
             @NonNull String userOneTimeCode,
@@ -659,7 +675,8 @@ class StripeApiHandler {
             APIConnectionException,
             APIException,
             AuthenticationException,
-            CardException, JSONException {
+            CardException,
+            JSONException {
         final Map<String, Map<String, String>> params = new HashMap<>();
         params.put("verification", createVerificationParam(verificationId, userOneTimeCode));
 
@@ -673,7 +690,8 @@ class StripeApiHandler {
         return jsonResponse.getString("pin");
     }
 
-    void updateIssuingCardPin(
+    @Override
+    public void updateIssuingCardPin(
             @NonNull String cardId,
             @NonNull String newPin,
             @NonNull String verificationId,
@@ -724,7 +742,8 @@ class StripeApiHandler {
         return Stripe3ds2AuthResult.fromJson(new JSONObject(response.getResponseBody()));
     }
 
-    void start3ds2Auth(@NonNull Stripe3ds2AuthParams authParams,
+    @Override
+    public void start3ds2Auth(@NonNull Stripe3ds2AuthParams authParams,
                        @NonNull String stripeIntentId,
                        @NonNull ApiRequest.Options requestOptions,
                        @NonNull ApiResultCallback<Stripe3ds2AuthResult> callback) {
@@ -750,7 +769,8 @@ class StripeApiHandler {
         return response.isOk();
     }
 
-    void complete3ds2Auth(@NonNull String sourceId,
+    @Override
+    public void complete3ds2Auth(@NonNull String sourceId,
                           @NonNull ApiRequest.Options requestOptions,
                           @NonNull ApiResultCallback<Boolean> callback) {
         new Complete3ds2AuthTask(this, sourceId, requestOptions, callback)

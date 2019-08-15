@@ -77,7 +77,7 @@ public class PaymentSessionTest {
     @NonNull private final PaymentSessionData mPaymentSessionData = new PaymentSessionData();
 
     @Mock private Activity mActivity;
-    @Mock private StripeApiHandler mApiHandler;
+    @Mock private StripeRepository mStripeRepository;
     @Mock private ThreadPoolExecutor mThreadPoolExecutor;
     @Mock private PaymentSession.PaymentSessionListener mPaymentSessionListener;
     @Mock private CustomerSession mCustomerSession;
@@ -104,13 +104,13 @@ public class PaymentSessionTest {
                 PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON);
         assertNotNull(paymentMethod);
 
-        when(mApiHandler.retrieveCustomer(anyString(), ArgumentMatchers.<ApiRequest.Options>any()))
+        when(mStripeRepository.retrieveCustomer(anyString(), ArgumentMatchers.<ApiRequest.Options>any()))
                 .thenReturn(FIRST_CUSTOMER, SECOND_CUSTOMER);
-        when(mApiHandler.createPaymentMethod(
+        when(mStripeRepository.createPaymentMethod(
                 ArgumentMatchers.<PaymentMethodCreateParams>any(),
                 ArgumentMatchers.<ApiRequest.Options>any()
         )).thenReturn(paymentMethod);
-        when(mApiHandler.setDefaultCustomerSource(
+        when(mStripeRepository.setDefaultCustomerSource(
                 anyString(),
                 anyString(),
                 ArgumentMatchers.<String>anyList(),
@@ -380,7 +380,7 @@ public class PaymentSessionTest {
     @NonNull
     private CustomerSession createCustomerSession() {
         return new CustomerSession(ApplicationProvider.getApplicationContext(),
-                mEphemeralKeyProvider, null, mThreadPoolExecutor, mApiHandler,
+                mEphemeralKeyProvider, null, mThreadPoolExecutor, mStripeRepository,
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 "acct_abc123", true);
     }

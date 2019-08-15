@@ -50,13 +50,13 @@ public class IssuingCardPinServiceTest {
         TestEphemeralKeyProvider ephemeralKeyProvider = new TestEphemeralKeyProvider();
         ephemeralKeyProvider.setNextRawEphemeralKey(EPHEMERAL_KEY);
 
-        final StripeApiHandler apiHandler = new StripeApiHandler(
+        final StripeRepository stripeRepository = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
                 mStripeApiRequestExecutor,
                 new FakeFireAndForgetRequestExecutor(),
                 null);
 
-        mService = new IssuingCardPinService(ephemeralKeyProvider, apiHandler,
+        mService = new IssuingCardPinService(ephemeralKeyProvider, stripeRepository,
                 new OperationIdFactory());
     }
 

@@ -52,7 +52,7 @@ public class Stripe {
 
     @Nullable private static AppInfo sAppInfo;
 
-    @NonNull private final StripeApiHandler mApiHandler;
+    @NonNull private final StripeRepository mStripeRepository;
     @NonNull private final StripeNetworkUtils mStripeNetworkUtils;
     @NonNull private final PaymentController mPaymentController;
     @NonNull private final TokenCreator mTokenCreator;
@@ -95,7 +95,8 @@ public class Stripe {
     public Stripe(@NonNull Context context,
                   @NonNull String publishableKey,
                   @NonNull String stripeAccountId) {
-        this(context,
+        this(
+                context,
                 new StripeApiHandler(context, sAppInfo),
                 new StripeNetworkUtils(context),
                 ApiKeyValidator.get().requireValid(publishableKey),
@@ -104,20 +105,30 @@ public class Stripe {
     }
 
     Stripe(@NonNull Context context,
-           @NonNull final StripeApiHandler apiHandler,
+           @NonNull final StripeRepository stripeRepository,
            @NonNull StripeNetworkUtils stripeNetworkUtils,
            @Nullable String publishableKey,
            @Nullable String stripeAccountId) {
-        this(apiHandler, stripeNetworkUtils,
-                new PaymentController(context, apiHandler), publishableKey, stripeAccountId);
+        this(
+                stripeRepository,
+                stripeNetworkUtils,
+                new PaymentController(context, stripeRepository),
+                publishableKey,
+                stripeAccountId
+        );
     }
 
-    Stripe(@NonNull final StripeApiHandler apiHandler,
+    Stripe(@NonNull final StripeRepository stripeRepository,
            @NonNull StripeNetworkUtils stripeNetworkUtils,
            @NonNull PaymentController paymentController,
            @Nullable String publishableKey,
            @Nullable String stripeAccountId) {
-        this(apiHandler, stripeNetworkUtils, paymentController, publishableKey, stripeAccountId,
+        this(
+                stripeRepository,
+                stripeNetworkUtils,
+                paymentController,
+                publishableKey,
+                stripeAccountId,
                 new TokenCreator() {
                     @Override
                     public void create(
@@ -127,21 +138,22 @@ public class Stripe {
                             @Nullable final Executor executor,
                             @NonNull final ApiResultCallback<Token> callback) {
                         executeTask(executor,
-                                new CreateTokenTask(apiHandler, tokenParams, options,
+                                new CreateTokenTask(stripeRepository, tokenParams, options,
                                         tokenType, callback));
                     }
-                });
+                }
+        );
     }
 
     @VisibleForTesting
-    Stripe(@NonNull StripeApiHandler apiHandler,
+    Stripe(@NonNull StripeRepository stripeRepository,
            @NonNull StripeNetworkUtils stripeNetworkUtils,
            @NonNull PaymentController paymentController,
            @Nullable String publishableKey,
            @Nullable String stripeAccountId,
            @NonNull TokenCreator tokenCreator) {
         mApiKeyValidator = new ApiKeyValidator();
-        mApiHandler = apiHandler;
+        mStripeRepository = stripeRepository;
         mStripeNetworkUtils = stripeNetworkUtils;
         mPaymentController = paymentController;
         mTokenCreator = tokenCreator;
@@ -553,7 +565,7 @@ public class Stripe {
             APIException {
         final Map<String, Object> params = bankAccount.toParamMap();
         params.putAll(mStripeNetworkUtils.createUidParams());
-        return mApiHandler.createToken(
+        return mStripeRepository.createToken(
                 params,
                 ApiRequest.Options.create(publishableKey, mStripeAccountId),
                 Token.TokenType.BANK_ACCOUNT
@@ -623,8 +635,8 @@ public class Stripe {
             @NonNull String publishableKey,
             @Nullable Executor executor) {
         executeTask(executor,
-                new CreateSourceTask(mApiHandler, sourceParams, publishableKey, mStripeAccountId,
-                        callback));
+                new CreateSourceTask(mStripeRepository, sourceParams, publishableKey,
+                        mStripeAccountId, callback));
     }
 
     /**
@@ -654,8 +666,8 @@ public class Stripe {
             @NonNull ApiResultCallback<PaymentMethod> callback,
             @NonNull String publishableKey,
             @Nullable Executor executor) {
-        executeTask(executor, new CreatePaymentMethodTask(mApiHandler, paymentMethodCreateParams,
-                publishableKey, mStripeAccountId, callback));
+        executeTask(executor, new CreatePaymentMethodTask(mStripeRepository,
+                paymentMethodCreateParams, publishableKey, mStripeAccountId, callback));
     }
 
     /**
@@ -769,7 +781,7 @@ public class Stripe {
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        return mApiHandler.createSource(params,
+        return mStripeRepository.createSource(params,
                 ApiRequest.Options.create(publishableKey, mStripeAccountId));
     }
 
@@ -788,7 +800,7 @@ public class Stripe {
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        return mApiHandler.retrievePaymentIntent(
+        return mStripeRepository.retrievePaymentIntent(
                 clientSecret,
                 ApiRequest.Options.create(publishableKey, mStripeAccountId)
         );
@@ -819,7 +831,7 @@ public class Stripe {
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        return mApiHandler.confirmPaymentIntent(
+        return mStripeRepository.confirmPaymentIntent(
                 confirmPaymentIntentParams,
                 ApiRequest.Options.create(publishableKey, mStripeAccountId)
         );
@@ -851,7 +863,7 @@ public class Stripe {
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        return mApiHandler.retrieveSetupIntent(
+        return mStripeRepository.retrieveSetupIntent(
                 clientSecret,
                 ApiRequest.Options.create(publishableKey, mStripeAccountId)
         );
@@ -882,7 +894,7 @@ public class Stripe {
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        return mApiHandler.confirmSetupIntent(
+        return mStripeRepository.confirmSetupIntent(
                 confirmSetupIntentParams,
                 ApiRequest.Options.create(publishableKey, mStripeAccountId)
         );
@@ -902,7 +914,7 @@ public class Stripe {
             @NonNull String publishableKey)
             throws AuthenticationException, InvalidRequestException, APIConnectionException,
             APIException {
-        return mApiHandler.createPaymentMethod(paymentMethodCreateParams,
+        return mStripeRepository.createPaymentMethod(paymentMethodCreateParams,
                 ApiRequest.Options.create(publishableKey, mStripeAccountId));
     }
 
@@ -960,7 +972,7 @@ public class Stripe {
             APIConnectionException,
             CardException,
             APIException {
-        return mApiHandler.createToken(
+        return mStripeRepository.createToken(
                 mStripeNetworkUtils.createCardTokenParams(card),
                 ApiRequest.Options.create(publishableKey, mStripeAccountId),
                 Token.TokenType.CARD
@@ -1010,7 +1022,7 @@ public class Stripe {
             APIConnectionException,
             CardException,
             APIException {
-        return mApiHandler.createToken(
+        return mStripeRepository.createToken(
                 new PiiTokenParams(personalId).toParamMap(),
                 ApiRequest.Options.create(publishableKey, mStripeAccountId),
                 Token.TokenType.PII
@@ -1060,7 +1072,7 @@ public class Stripe {
             APIConnectionException,
             CardException,
             APIException {
-        return mApiHandler.createToken(
+        return mStripeRepository.createToken(
                 new CvcTokenParams(cvc).toParamMap(),
                 ApiRequest.Options.create(publishableKey, mStripeAccountId),
                 Token.TokenType.CVC_UPDATE
@@ -1112,7 +1124,7 @@ public class Stripe {
             APIConnectionException,
             APIException {
         try {
-            return mApiHandler.createToken(
+            return mStripeRepository.createToken(
                     accountParams.toParamMap(),
                     ApiRequest.Options.create(publishableKey, mStripeAccountId),
                     Token.TokenType.ACCOUNT
@@ -1174,7 +1186,7 @@ public class Stripe {
             InvalidRequestException,
             APIConnectionException,
             APIException {
-        return mApiHandler.retrieveSource(sourceId, clientSecret,
+        return mStripeRepository.retrieveSource(sourceId, clientSecret,
                 ApiRequest.Options.create(publishableKey, mStripeAccountId));
     }
 
@@ -1239,17 +1251,17 @@ public class Stripe {
     }
 
     private static class CreateSourceTask extends ApiOperation<Source> {
-        @NonNull private final StripeApiHandler mApiHandler;
+        @NonNull private final StripeRepository mStripeRepository;
         @NonNull private final SourceParams mSourceParams;
         @NonNull private final ApiRequest.Options mOptions;
 
-        CreateSourceTask(@NonNull StripeApiHandler apiHandler,
+        CreateSourceTask(@NonNull StripeRepository stripeRepository,
                          @NonNull SourceParams sourceParams,
                          @NonNull String publishableKey,
                          @Nullable String stripeAccount,
                          @NonNull ApiResultCallback<Source> callback) {
             super(callback);
-            mApiHandler = apiHandler;
+            mStripeRepository = stripeRepository;
             mSourceParams = sourceParams;
             mOptions = ApiRequest.Options.create(publishableKey, stripeAccount);
         }
@@ -1257,22 +1269,22 @@ public class Stripe {
         @Nullable
         @Override
         Source getResult() throws StripeException {
-                return mApiHandler.createSource(mSourceParams, mOptions);
+                return mStripeRepository.createSource(mSourceParams, mOptions);
         }
     }
 
     private static class CreatePaymentMethodTask extends ApiOperation<PaymentMethod> {
-        @NonNull private final StripeApiHandler mApiHandler;
+        @NonNull private final StripeRepository mStripeRepository;
         @NonNull private final PaymentMethodCreateParams mPaymentMethodCreateParams;
         @NonNull private final ApiRequest.Options mOptions;
 
-        CreatePaymentMethodTask(@NonNull StripeApiHandler apiHandler,
+        CreatePaymentMethodTask(@NonNull StripeRepository stripeRepository,
                                 @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
                                 @NonNull String publishableKey,
                                 @Nullable String stripeAccount,
                                 @NonNull ApiResultCallback<PaymentMethod> callback) {
             super(callback);
-            mApiHandler = apiHandler;
+            mStripeRepository = stripeRepository;
             mPaymentMethodCreateParams = paymentMethodCreateParams;
             mOptions = ApiRequest.Options.create(publishableKey, stripeAccount);
         }
@@ -1280,24 +1292,24 @@ public class Stripe {
         @Nullable
         @Override
         PaymentMethod getResult() throws StripeException {
-            return mApiHandler.createPaymentMethod(mPaymentMethodCreateParams, mOptions);
+            return mStripeRepository.createPaymentMethod(mPaymentMethodCreateParams, mOptions);
         }
     }
 
     private static class CreateTokenTask extends ApiOperation<Token> {
-        @NonNull private final StripeApiHandler mApiHandler;
+        @NonNull private final StripeRepository mStripeRepository;
         @NonNull private final Map<String, Object> mTokenParams;
         @NonNull private final ApiRequest.Options mOptions;
         @NonNull @Token.TokenType private final String mTokenType;
 
         CreateTokenTask(
-                @NonNull final StripeApiHandler apiHandler,
+                @NonNull final StripeRepository stripeRepository,
                 @NonNull final Map<String, Object> tokenParams,
                 @NonNull final ApiRequest.Options options,
                 @NonNull @Token.TokenType final String tokenType,
                 @NonNull final ApiResultCallback<Token> callback) {
             super(callback);
-            mApiHandler = apiHandler;
+            mStripeRepository = stripeRepository;
             mTokenParams = tokenParams;
             mTokenType = tokenType;
             mOptions = options;
@@ -1306,7 +1318,7 @@ public class Stripe {
         @Nullable
         @Override
         Token getResult() throws StripeException {
-            return mApiHandler.createToken(mTokenParams, mOptions, mTokenType);
+            return mStripeRepository.createToken(mTokenParams, mOptions, mTokenType);
         }
     }
 }

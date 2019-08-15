@@ -1399,11 +1399,11 @@ public class StripeTest {
     private Stripe createStripe(
             @NonNull String publishableKey,
             @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor) {
-        final StripeApiHandler apiHandler = createApiHandler(fireAndForgetRequestExecutor);
+        final StripeRepository stripeRepository = createStripeRepository(fireAndForgetRequestExecutor);
         return new Stripe(
-                apiHandler,
+                stripeRepository,
                 new StripeNetworkUtils(mContext),
-                new PaymentController(mContext, apiHandler),
+                new PaymentController(mContext, stripeRepository),
                 publishableKey,
                 null
         );
@@ -1411,12 +1411,12 @@ public class StripeTest {
 
     @NonNull
     private Stripe createStripe(@NonNull Stripe.TokenCreator tokenCreator) {
-        final StripeApiHandler apiHandler = createApiHandler(
+        final StripeRepository stripeRepository = createStripeRepository(
                 new FakeFireAndForgetRequestExecutor());
         return new Stripe(
-                apiHandler,
+                stripeRepository,
                 new StripeNetworkUtils(mContext),
-                new PaymentController(mContext, apiHandler),
+                new PaymentController(mContext, stripeRepository),
                 NON_LOGGING_PK,
                 null,
                 tokenCreator
@@ -1424,7 +1424,7 @@ public class StripeTest {
     }
 
     @NonNull
-    private StripeApiHandler createApiHandler(
+    private StripeRepository createStripeRepository(
             @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor) {
         return new StripeApiHandler(
                 mContext,
