@@ -48,17 +48,17 @@ class PaymentController {
     static final int SETUP_REQUEST_CODE = 50001;
 
     @NonNull private final StripeThreeDs2Service mThreeDs2Service;
-    @NonNull private final StripeApiHandler mApiHandler;
+    @NonNull private final StripeRepository mStripeRepository;
     @NonNull private final MessageVersionRegistry mMessageVersionRegistry;
     @NonNull private final PaymentAuthConfig mConfig;
     @NonNull private final FireAndForgetRequestExecutor mAnalyticsRequestExecutor;
     @NonNull private final AnalyticsDataFactory mAnalyticsDataFactory;
 
     PaymentController(@NonNull Context context,
-                      @NonNull StripeApiHandler apiHandler) {
+                      @NonNull StripeRepository stripeRepository) {
         this(context,
                 new StripeThreeDs2ServiceImpl(context, new StripeSSLSocketFactory()),
-                apiHandler,
+                stripeRepository,
                 new MessageVersionRegistry(),
                 PaymentAuthConfig.get(),
                 new StripeFireAndForgetRequestExecutor(),
@@ -68,7 +68,7 @@ class PaymentController {
     @VisibleForTesting
     PaymentController(@NonNull Context context,
                       @NonNull StripeThreeDs2Service threeDs2Service,
-                      @NonNull StripeApiHandler apiHandler,
+                      @NonNull StripeRepository stripeRepository,
                       @NonNull MessageVersionRegistry messageVersionRegistry,
                       @NonNull PaymentAuthConfig config,
                       @NonNull FireAndForgetRequestExecutor analyticsRequestExecutor,
@@ -77,7 +77,7 @@ class PaymentController {
         mThreeDs2Service = threeDs2Service;
         mThreeDs2Service.initialize(context, new StripeConfigParameters(), null,
                 config.stripe3ds2Config.uiCustomization.getUiCustomization());
-        mApiHandler = apiHandler;
+        mStripeRepository = stripeRepository;
         mMessageVersionRegistry = messageVersionRegistry;
         mAnalyticsRequestExecutor = analyticsRequestExecutor;
         mAnalyticsDataFactory = analyticsDataFactory;
@@ -89,7 +89,7 @@ class PaymentController {
     void startConfirmAndAuth(@NonNull AuthActivityStarter.Host host,
                              @NonNull ConfirmStripeIntentParams confirmStripeIntentParams,
                              @NonNull ApiRequest.Options requestOptions) {
-        new ConfirmStripeIntentTask(mApiHandler, confirmStripeIntentParams, requestOptions,
+        new ConfirmStripeIntentTask(mStripeRepository, confirmStripeIntentParams, requestOptions,
                 new ConfirmStripeIntentCallback(host, requestOptions, this,
                         getRequestCode(confirmStripeIntentParams)))
                 .execute();
@@ -98,7 +98,7 @@ class PaymentController {
     void startAuth(@NonNull final AuthActivityStarter.Host host,
                    @NonNull String clientSecret,
                    @NonNull final ApiRequest.Options requestOptions) {
-        new RetrieveIntentTask(mApiHandler,
+        new RetrieveIntentTask(mStripeRepository,
                 clientSecret,
                 requestOptions,
                 new ApiResultCallback<StripeIntent>() {
@@ -153,7 +153,7 @@ class PaymentController {
         @StripeIntentResult.Outcome final int flowOutcome =
                 data.getIntExtra(StripeIntentResultExtras.FLOW_OUTCOME,
                         StripeIntentResult.Outcome.UNKNOWN);
-        new RetrieveIntentTask(mApiHandler, getClientSecret(data), requestOptions,
+        new RetrieveIntentTask(mStripeRepository, getClientSecret(data), requestOptions,
                 new ApiResultCallback<StripeIntent>() {
                     @Override
                     public void onSuccess(@NonNull StripeIntent stripeIntent) {
@@ -196,7 +196,7 @@ class PaymentController {
                 data.getIntExtra(StripeIntentResultExtras.FLOW_OUTCOME,
                         StripeIntentResult.Outcome.UNKNOWN);
 
-        new RetrieveIntentTask(mApiHandler, getClientSecret(data), requestOptions,
+        new RetrieveIntentTask(mStripeRepository, getClientSecret(data), requestOptions,
                 new ApiResultCallback<StripeIntent>() {
                     @Override
                     public void onSuccess(@NonNull StripeIntent stripeIntent) {
@@ -356,11 +356,14 @@ class PaymentController {
                 timeout,
                 returnUrl
         );
-        mApiHandler.start3ds2Auth(authParams, StripeTextUtils.emptyIfNull(stripeIntent.getId()),
+        mStripeRepository.start3ds2Auth(
+                authParams,
+                StripeTextUtils.emptyIfNull(stripeIntent.getId()),
                 requestOptions,
-                new Stripe3ds2AuthCallback(host, mApiHandler, transaction, timeout,
+                new Stripe3ds2AuthCallback(host, mStripeRepository, transaction, timeout,
                         stripeIntent, stripe3ds2Fingerprint.source, requestOptions,
-                        mAnalyticsRequestExecutor, mAnalyticsDataFactory));
+                        mAnalyticsRequestExecutor, mAnalyticsDataFactory)
+        );
     }
 
     /**
@@ -385,16 +388,16 @@ class PaymentController {
     }
 
     private static final class RetrieveIntentTask extends ApiOperation<StripeIntent> {
-        @NonNull private final StripeApiHandler mApiHandler;
+        @NonNull private final StripeRepository mStripeRepository;
         @NonNull private final String mClientSecret;
         @NonNull private final ApiRequest.Options mRequestOptions;
 
-        private RetrieveIntentTask(@NonNull StripeApiHandler apiHandler,
+        private RetrieveIntentTask(@NonNull StripeRepository stripeRepository,
                                    @NonNull String clientSecret,
                                    @NonNull ApiRequest.Options requestOptions,
                                    @NonNull ApiResultCallback<StripeIntent> callback) {
             super(callback);
-            mApiHandler = apiHandler;
+            mStripeRepository = stripeRepository;
             mClientSecret = clientSecret;
             mRequestOptions = requestOptions;
         }
@@ -403,25 +406,25 @@ class PaymentController {
         @Override
         StripeIntent getResult() throws StripeException {
             if (mClientSecret.startsWith("pi_")) {
-                return mApiHandler.retrievePaymentIntent(mClientSecret, mRequestOptions);
+                return mStripeRepository.retrievePaymentIntent(mClientSecret, mRequestOptions);
             } else if (mClientSecret.startsWith("seti_")) {
-                return mApiHandler.retrieveSetupIntent(mClientSecret, mRequestOptions);
+                return mStripeRepository.retrieveSetupIntent(mClientSecret, mRequestOptions);
             }
             return null;
         }
     }
 
     private static final class ConfirmStripeIntentTask extends ApiOperation<StripeIntent> {
-        @NonNull private final StripeApiHandler mApiHandler;
+        @NonNull private final StripeRepository mStripeRepository;
         @NonNull private final ConfirmStripeIntentParams mParams;
         @NonNull private final ApiRequest.Options mRequestOptions;
 
-        private ConfirmStripeIntentTask(@NonNull StripeApiHandler apiHandler,
+        private ConfirmStripeIntentTask(@NonNull StripeRepository stripeRepository,
                                         @NonNull ConfirmStripeIntentParams params,
                                         @NonNull ApiRequest.Options requestOptions,
                                         @NonNull ApiResultCallback<StripeIntent> callback) {
             super(callback);
-            mApiHandler = apiHandler;
+            mStripeRepository = stripeRepository;
             mRequestOptions = requestOptions;
 
             // mark this request as `use_stripe_sdk=true`
@@ -432,12 +435,12 @@ class PaymentController {
         @Override
         StripeIntent getResult() throws StripeException {
             if (mParams instanceof ConfirmPaymentIntentParams) {
-                return mApiHandler.confirmPaymentIntent(
+                return mStripeRepository.confirmPaymentIntent(
                         (ConfirmPaymentIntentParams) mParams,
                         mRequestOptions
                 );
             } else if (mParams instanceof ConfirmSetupIntentParams) {
-                return mApiHandler.confirmSetupIntent(
+                return mStripeRepository.confirmSetupIntent(
                         (ConfirmSetupIntentParams) mParams,
                         mRequestOptions
                 );
@@ -478,7 +481,7 @@ class PaymentController {
     static final class Stripe3ds2AuthCallback
             implements ApiResultCallback<Stripe3ds2AuthResult> {
         @NonNull private final AuthActivityStarter.Host mHost;
-        @NonNull private final StripeApiHandler mApiHandler;
+        @NonNull private final StripeRepository mStripeRepository;
         @NonNull private final Transaction mTransaction;
         private final int mMaxTimeout;
         @NonNull private final StripeIntent mStripeIntent;
@@ -491,7 +494,7 @@ class PaymentController {
 
         private Stripe3ds2AuthCallback(
                 @NonNull AuthActivityStarter.Host host,
-                @NonNull StripeApiHandler apiHandler,
+                @NonNull StripeRepository stripeRepository,
                 @NonNull Transaction transaction,
                 int maxTimeout,
                 @NonNull StripeIntent stripeIntent,
@@ -499,7 +502,7 @@ class PaymentController {
                 @NonNull ApiRequest.Options requestOptions,
                 @NonNull FireAndForgetRequestExecutor analyticsRequestExecutor,
                 @NonNull AnalyticsDataFactory analyticsDataFactory) {
-            this(host, apiHandler, transaction, maxTimeout, stripeIntent,
+            this(host, stripeRepository, transaction, maxTimeout, stripeIntent,
                     sourceId, requestOptions,
                     new PaymentRelayStarter(host, getRequestCode(stripeIntent)),
                     analyticsRequestExecutor,
@@ -509,7 +512,7 @@ class PaymentController {
         @VisibleForTesting
         Stripe3ds2AuthCallback(
                 @NonNull AuthActivityStarter.Host host,
-                @NonNull StripeApiHandler apiHandler,
+                @NonNull StripeRepository stripeRepository,
                 @NonNull Transaction transaction,
                 int maxTimeout,
                 @NonNull StripeIntent stripeIntent,
@@ -519,7 +522,7 @@ class PaymentController {
                 @NonNull FireAndForgetRequestExecutor analyticsRequestExecutor,
                 @NonNull AnalyticsDataFactory analyticsDataFactory) {
             mHost = host;
-            mApiHandler = apiHandler;
+            mStripeRepository = stripeRepository;
             mTransaction = transaction;
             mMaxTimeout = maxTimeout;
             mStripeIntent = stripeIntent;
@@ -600,7 +603,7 @@ class PaymentController {
                     }
                     mTransaction.doChallenge(activity,
                             challengeParameters,
-                            PaymentAuth3ds2ChallengeStatusReceiver.create(mHost, mApiHandler,
+                            PaymentAuth3ds2ChallengeStatusReceiver.create(mHost, mStripeRepository,
                                     mStripeIntent, mSourceId, mRequestOptions,
                                     mAnalyticsRequestExecutor, mAnalyticsDataFactory,
                                     mTransaction),
@@ -616,7 +619,7 @@ class PaymentController {
 
         @NonNull private final AuthActivityStarter.Host mHost;
         @NonNull private final AuthActivityStarter<Stripe3ds2CompletionStarter.StartData> mStarter;
-        @NonNull private final StripeApiHandler mApiHandler;
+        @NonNull private final StripeRepository mStripeRepository;
         @NonNull private final StripeIntent mStripeIntent;
         @NonNull private final String mSourceId;
         @NonNull private final ApiRequest.Options mRequestOptions;
@@ -627,7 +630,7 @@ class PaymentController {
         @NonNull
         static PaymentAuth3ds2ChallengeStatusReceiver create(
                 @NonNull AuthActivityStarter.Host host,
-                @NonNull StripeApiHandler apiHandler,
+                @NonNull StripeRepository stripeRepository,
                 @NonNull StripeIntent stripeIntent,
                 @NonNull String sourceId,
                 @NonNull ApiRequest.Options requestOptions,
@@ -637,7 +640,7 @@ class PaymentController {
             return new PaymentAuth3ds2ChallengeStatusReceiver(
                     host,
                     new Stripe3ds2CompletionStarter(host, getRequestCode(stripeIntent)),
-                    apiHandler,
+                    stripeRepository,
                     stripeIntent,
                     sourceId,
                     requestOptions,
@@ -649,7 +652,7 @@ class PaymentController {
         PaymentAuth3ds2ChallengeStatusReceiver(
                 @NonNull AuthActivityStarter.Host host,
                 @NonNull AuthActivityStarter<Stripe3ds2CompletionStarter.StartData> starter,
-                @NonNull StripeApiHandler apiHandler,
+                @NonNull StripeRepository stripeRepository,
                 @NonNull StripeIntent stripeIntent,
                 @NonNull String sourceId,
                 @NonNull ApiRequest.Options requestOptions,
@@ -658,7 +661,7 @@ class PaymentController {
                 @NonNull Transaction transaction) {
             mHost = host;
             mStarter = starter;
-            mApiHandler = apiHandler;
+            mStripeRepository = stripeRepository;
             mStripeIntent = stripeIntent;
             mSourceId = sourceId;
             mRequestOptions = requestOptions;
@@ -774,7 +777,7 @@ class PaymentController {
                     )
             );
 
-            mApiHandler.complete3ds2Auth(mSourceId, mRequestOptions,
+            mStripeRepository.complete3ds2Auth(mSourceId, mRequestOptions,
                     new ApiResultCallback<Boolean>() {
                         @Override
                         public void onSuccess(@NonNull Boolean result) {

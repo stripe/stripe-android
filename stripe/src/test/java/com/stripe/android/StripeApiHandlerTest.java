@@ -324,7 +324,7 @@ public class StripeApiHandlerTest {
     public void createSource_withNonLoggingListener_doesNotLogButDoesCreateSource()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
-        final StripeApiHandler apiHandler = new StripeApiHandler(
+        final StripeRepository apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
                 new StripeApiRequestExecutor(),
                 new FakeFireAndForgetRequestExecutor(),
@@ -500,7 +500,7 @@ public class StripeApiHandlerTest {
                         options,
                         queryParams))))
                 .thenReturn(stripeResponse);
-        final StripeApiHandler apiHandler = new StripeApiHandler(
+        final StripeRepository apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
                 mStripeApiRequestExecutor,
                 new FakeFireAndForgetRequestExecutor(),
@@ -548,7 +548,7 @@ public class StripeApiHandlerTest {
                         options,
                         queryParams))))
                 .thenReturn(stripeResponse);
-        final StripeApiHandler apiHandler = new StripeApiHandler(
+        final StripeRepository apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
                 mStripeApiRequestExecutor,
                 new FakeFireAndForgetRequestExecutor(),

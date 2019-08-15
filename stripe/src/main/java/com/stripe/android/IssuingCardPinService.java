@@ -37,7 +37,7 @@ public class IssuingCardPinService
     @NonNull
     private final EphemeralKeyManager<IssuingCardEphemeralKey> mEphemeralKeyManager;
     @NonNull
-    private final StripeApiHandler mApiHandler;
+    private final StripeRepository mStripeRepository;
     @NonNull
     private final OperationIdFactory mOperationIdFactory;
     @NonNull
@@ -70,10 +70,10 @@ public class IssuingCardPinService
     @VisibleForTesting
     IssuingCardPinService(
             @NonNull EphemeralKeyProvider keyProvider,
-            @NonNull StripeApiHandler apiHandler,
+            @NonNull StripeRepository stripeRepository,
             @NonNull OperationIdFactory operationIdFactory) {
         mOperationIdFactory = operationIdFactory;
-        mApiHandler = apiHandler;
+        mStripeRepository = stripeRepository;
         mEphemeralKeyManager = new EphemeralKeyManager<>(
                 keyProvider,
                 this,
@@ -166,7 +166,7 @@ public class IssuingCardPinService
             final String userOneTimeCode =
                     (String) Objects.requireNonNull(arguments.get(ARGUMENT_ONE_TIME_CODE));
             try {
-                final String pin = mApiHandler.retrieveIssuingCardPin(cardId, verificationId,
+                final String pin = mStripeRepository.retrieveIssuingCardPin(cardId, verificationId,
                         userOneTimeCode, ephemeralKey.getSecret());
                 listener.onIssuingCardPinRetrieved(pin);
 
@@ -237,8 +237,8 @@ public class IssuingCardPinService
             final String userOneTimeCode =
                     (String) Objects.requireNonNull(arguments.get(ARGUMENT_ONE_TIME_CODE));
             try {
-                mApiHandler.updateIssuingCardPin(cardId, newPin, verificationId, userOneTimeCode,
-                        ephemeralKey.getSecret());
+                mStripeRepository.updateIssuingCardPin(cardId, newPin, verificationId,
+                        userOneTimeCode, ephemeralKey.getSecret());
                 listener.onIssuingCardPinUpdated();
             } catch (InvalidRequestException e) {
                 if ("expired".equals(e.getErrorCode())) {

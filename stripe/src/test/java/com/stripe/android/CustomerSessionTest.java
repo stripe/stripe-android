@@ -174,7 +174,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
             Customer.fromString(SECOND_TEST_CUSTOMER_OBJECT);
 
     @Mock private BroadcastReceiver mBroadcastReceiver;
-    @Mock private StripeApiHandler mApiHandler;
+    @Mock private StripeRepository mStripeRepository;
     @Mock private ThreadPoolExecutor mThreadPoolExecutor;
 
     @Captor private ArgumentCaptor<List<String>> mListArgumentCaptor;
@@ -222,10 +222,10 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         mPaymentMethod = PaymentMethod.fromString(PAYMENT_METHOD_OBJECT);
         assertNotNull(mPaymentMethod);
 
-        when(mApiHandler.retrieveCustomer(anyString(), ArgumentMatchers.<ApiRequest.Options>any()))
+        when(mStripeRepository.retrieveCustomer(anyString(), ArgumentMatchers.<ApiRequest.Options>any()))
                 .thenReturn(FIRST_CUSTOMER, SECOND_CUSTOMER);
 
-        when(mApiHandler.addCustomerSource(
+        when(mStripeRepository.addCustomerSource(
                 anyString(),
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 ArgumentMatchers.<String>anyList(),
@@ -235,7 +235,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         ))
                 .thenReturn(mAddedSource);
 
-        when(mApiHandler.deleteCustomerSource(
+        when(mStripeRepository.deleteCustomerSource(
                 anyString(),
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 ArgumentMatchers.<String>anyList(),
@@ -243,7 +243,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 ArgumentMatchers.<ApiRequest.Options>any()))
                 .thenReturn(Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE));
 
-        when(mApiHandler.setDefaultCustomerSource(
+        when(mStripeRepository.setDefaultCustomerSource(
                 anyString(),
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 ArgumentMatchers.<String>anyList(),
@@ -252,7 +252,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 ArgumentMatchers.<ApiRequest.Options>any()))
                 .thenReturn(SECOND_CUSTOMER);
 
-        when(mApiHandler.attachPaymentMethod(
+        when(mStripeRepository.attachPaymentMethod(
                 anyString(),
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 ArgumentMatchers.<String>anyList(),
@@ -261,7 +261,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         ))
                 .thenReturn(mPaymentMethod);
 
-        when(mApiHandler.detachPaymentMethod(
+        when(mStripeRepository.detachPaymentMethod(
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
@@ -269,7 +269,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         ))
                 .thenReturn(mPaymentMethod);
 
-        when(mApiHandler.getPaymentMethods(
+        when(mStripeRepository.getPaymentMethods(
                 anyString(),
                 eq("card"),
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
@@ -335,7 +335,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
         final CustomerSession customerSession = createCustomerSession(null);
 
-        verify(mApiHandler).retrieveCustomer(eq(firstKey.getCustomerId()),
+        verify(mStripeRepository).retrieveCustomer(eq(firstKey.getCustomerId()),
                 mRequestOptionsArgumentCaptor.capture());
         assertEquals(firstKey.getSecret(),
                 mRequestOptionsArgumentCaptor.getValue().apiKey);
@@ -362,7 +362,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
         assertNotNull(FIRST_CUSTOMER);
         assertNotNull(FIRST_CUSTOMER.getId());
-        verify(mApiHandler).setCustomerShippingInfo(
+        verify(mStripeRepository).setCustomerShippingInfo(
                 eq(FIRST_CUSTOMER.getId()),
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 mListArgumentCaptor.capture(),
@@ -420,11 +420,11 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         //  Make sure the value is cached.
         assertEquals(SECOND_CUSTOMER.getId(), customerSession.getCustomer().getId());
 
-        verify(mApiHandler).retrieveCustomer(eq(firstKey.getCustomerId()),
+        verify(mStripeRepository).retrieveCustomer(eq(firstKey.getCustomerId()),
                 mRequestOptionsArgumentCaptor.capture());
         assertEquals(firstKey.getSecret(),
                 mRequestOptionsArgumentCaptor.getValue().apiKey);
-        verify(mApiHandler).retrieveCustomer(eq(secondKey.getCustomerId()),
+        verify(mStripeRepository).retrieveCustomer(eq(secondKey.getCustomerId()),
                 mRequestOptionsArgumentCaptor.capture());
         assertEquals(secondKey.getSecret(),
                 mRequestOptionsArgumentCaptor.getValue().apiKey);
@@ -454,7 +454,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         assertEquals(firstKey.getCustomerId(), FIRST_CUSTOMER.getId());
         assertEquals(firstKey.getCustomerId(), customerSession.getCustomer().getId());
 
-        verify(mApiHandler).retrieveCustomer(eq(firstKey.getCustomerId()),
+        verify(mStripeRepository).retrieveCustomer(eq(firstKey.getCustomerId()),
                 mRequestOptionsArgumentCaptor.capture());
         assertEquals(firstKey.getSecret(),
                 mRequestOptionsArgumentCaptor.getValue().apiKey);
@@ -480,7 +480,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         assertNotNull(customerSession.getCustomer());
         //  Make sure the value is cached.
         assertEquals(FIRST_CUSTOMER.getId(), customerSession.getCustomer().getId());
-        verifyNoMoreInteractions(mApiHandler);
+        verifyNoMoreInteractions(mStripeRepository);
     }
 
     @Test
@@ -521,7 +521,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         assertTrue(customerSession.getProductUsageTokens().isEmpty());
         assertNotNull(FIRST_CUSTOMER);
         assertNotNull(FIRST_CUSTOMER.getId());
-        verify(mApiHandler).addCustomerSource(
+        verify(mStripeRepository).addCustomerSource(
                 eq(FIRST_CUSTOMER.getId()),
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 mListArgumentCaptor.capture(),
@@ -628,7 +628,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         assertTrue(customerSession.getProductUsageTokens().isEmpty());
         assertNotNull(FIRST_CUSTOMER);
         assertNotNull(FIRST_CUSTOMER.getId());
-        verify(mApiHandler).deleteCustomerSource(
+        verify(mStripeRepository).deleteCustomerSource(
                 eq(FIRST_CUSTOMER.getId()),
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 mListArgumentCaptor.capture(),
@@ -731,7 +731,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         assertTrue(customerSession.getProductUsageTokens().isEmpty());
         assertNotNull(FIRST_CUSTOMER);
         assertNotNull(FIRST_CUSTOMER.getId());
-        verify(mApiHandler).setDefaultCustomerSource(
+        verify(mStripeRepository).setDefaultCustomerSource(
                 eq(FIRST_CUSTOMER.getId()),
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 mListArgumentCaptor.capture(),
@@ -863,7 +863,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         assertTrue(customerSession.getProductUsageTokens().isEmpty());
         assertNotNull(FIRST_CUSTOMER);
         assertNotNull(FIRST_CUSTOMER.getId());
-        verify(mApiHandler).attachPaymentMethod(
+        verify(mStripeRepository).attachPaymentMethod(
                 eq(FIRST_CUSTOMER.getId()),
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 mListArgumentCaptor.capture(),
@@ -968,7 +968,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         assertTrue(customerSession.getProductUsageTokens().isEmpty());
         assertNotNull(FIRST_CUSTOMER);
         assertNotNull(FIRST_CUSTOMER.getId());
-        verify(mApiHandler).detachPaymentMethod(
+        verify(mStripeRepository).detachPaymentMethod(
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 mListArgumentCaptor.capture(),
                 eq("pm_abc123"),
@@ -1068,7 +1068,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         assertTrue(customerSession.getProductUsageTokens().isEmpty());
         assertNotNull(FIRST_CUSTOMER);
         assertNotNull(FIRST_CUSTOMER.getId());
-        verify(mApiHandler).getPaymentMethods(
+        verify(mStripeRepository).getPaymentMethods(
                 eq(FIRST_CUSTOMER.getId()),
                 eq("card"),
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
@@ -1090,7 +1090,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
     private void setupErrorProxy()
             throws StripeException {
-        when(mApiHandler.addCustomerSource(
+        when(mStripeRepository.addCustomerSource(
                 anyString(),
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 ArgumentMatchers.<String>anyList(),
@@ -1101,7 +1101,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 .thenThrow(new APIException("The card is invalid", "request_123", 404, null,
                         null));
 
-        when(mApiHandler.deleteCustomerSource(
+        when(mStripeRepository.deleteCustomerSource(
                 anyString(),
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 ArgumentMatchers.<String>anyList(),
@@ -1110,7 +1110,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 .thenThrow(new APIException("The card does not exist", "request_123", 404, null,
                         null));
 
-        when(mApiHandler.setDefaultCustomerSource(
+        when(mStripeRepository.setDefaultCustomerSource(
                 anyString(),
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 ArgumentMatchers.<String>anyList(),
@@ -1119,7 +1119,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 ArgumentMatchers.<ApiRequest.Options>any()))
                 .thenThrow(new APIException("auth error", "reqId", 405, null, null));
 
-        when(mApiHandler.attachPaymentMethod(
+        when(mStripeRepository.attachPaymentMethod(
                 anyString(),
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 ArgumentMatchers.<String>anyList(),
@@ -1129,7 +1129,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 .thenThrow(new APIException("The payment method is invalid", "request_123", 404,
                         null, null));
 
-        when(mApiHandler.detachPaymentMethod(
+        when(mStripeRepository.detachPaymentMethod(
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
                 ArgumentMatchers.<String>anyList(),
                 anyString(),
@@ -1137,7 +1137,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 .thenThrow(new APIException("The payment method does not exist", "request_123",
                         404, null, null));
 
-        when(mApiHandler.getPaymentMethods(
+        when(mStripeRepository.getPaymentMethods(
                 anyString(),
                 eq("card"),
                 eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
@@ -1150,7 +1150,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
     @NonNull
     private CustomerSession createCustomerSession(@Nullable Calendar calendar) {
         return new CustomerSession(ApplicationProvider.getApplicationContext(),
-                mEphemeralKeyProvider, calendar, mThreadPoolExecutor, mApiHandler,
+                mEphemeralKeyProvider, calendar, mThreadPoolExecutor, mStripeRepository,
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 "acct_abc123", true);
     }
