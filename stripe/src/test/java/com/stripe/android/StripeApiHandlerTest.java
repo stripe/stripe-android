@@ -324,12 +324,12 @@ public class StripeApiHandlerTest {
     public void createSource_withNonLoggingListener_doesNotLogButDoesCreateSource()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
-        final StripeRepository apiHandler = new StripeApiHandler(
+        final StripeApiHandler stripeApiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
                 new StripeApiRequestExecutor(),
                 new FakeFireAndForgetRequestExecutor(),
                 null);
-        final Source source = apiHandler.createSource(SourceParams.createCardParams(CARD),
+        final Source source = stripeApiHandler.createSource(SourceParams.createCardParams(CARD),
                 ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY));
 
         // Check that we get a token back; we don't care about its fields for this test.
@@ -500,11 +500,12 @@ public class StripeApiHandlerTest {
                         options,
                         queryParams))))
                 .thenReturn(stripeResponse);
-        final StripeRepository apiHandler = new StripeApiHandler(
+        final StripeApiHandler apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
                 mStripeApiRequestExecutor,
                 new FakeFireAndForgetRequestExecutor(),
-                null);
+                null
+        );
         final List<PaymentMethod> paymentMethods = apiHandler
                 .getPaymentMethods("cus_123", PaymentMethod.Type.Card.code,
                         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, new ArrayList<String>(),
@@ -548,11 +549,12 @@ public class StripeApiHandlerTest {
                         options,
                         queryParams))))
                 .thenReturn(stripeResponse);
-        final StripeRepository apiHandler = new StripeApiHandler(
+        final StripeApiHandler apiHandler = new StripeApiHandler(
                 ApplicationProvider.getApplicationContext(),
                 mStripeApiRequestExecutor,
                 new FakeFireAndForgetRequestExecutor(),
-                null);
+                null
+        );
         final List<PaymentMethod> paymentMethods = apiHandler
                 .getPaymentMethods("cus_123", PaymentMethod.Type.Card.code,
                         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, new ArrayList<String>(),
