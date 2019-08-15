@@ -10,7 +10,7 @@
 ### Install
 1. Clone the `stripe-android` repository.
 2. Open the project in Android Studio.
-3. After deploying the example backend to Heroku and configuring the app, build and run the project.
+3. After [deploying the example backend to Heroku](#deploy-the-example-backend-to-heroku) and [configuring the app](#configure-the-app), build and run the project.
 
 <img width="215" height="108" src="https://raw.githubusercontent.com/stripe/stripe-android/master/example/images/run.png" />
 
