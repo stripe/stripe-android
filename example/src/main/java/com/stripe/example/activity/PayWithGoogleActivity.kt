@@ -51,14 +51,9 @@ class PayWithGoogleActivity : AppCompatActivity() {
         isReadyToPay()
     }
 
-    private fun payWithGoogle() {
-        AutoResolveHelper.resolveTask(
-            paymentsClient.loadPaymentData(createGooglePayRequest()),
-            this@PayWithGoogleActivity,
-            LOAD_PAYMENT_DATA_REQUEST_CODE
-        )
-    }
-
+    /**
+     * Check that Google Pay is available and ready
+     */
     private fun isReadyToPay() {
         progressBar.visibility = View.VISIBLE
         val request = IsReadyToPayRequest.newBuilder()
@@ -87,6 +82,17 @@ class PayWithGoogleActivity : AppCompatActivity() {
                         Toast.LENGTH_LONG).show()
                 }
             }
+    }
+
+    /**
+     * Launch the Google Pay sheet
+     */
+    private fun payWithGoogle() {
+        AutoResolveHelper.resolveTask(
+            paymentsClient.loadPaymentData(createGooglePayRequest()),
+            this@PayWithGoogleActivity,
+            LOAD_PAYMENT_DATA_REQUEST_CODE
+        )
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -119,8 +125,6 @@ class PayWithGoogleActivity : AppCompatActivity() {
     }
 
     private fun handleGooglePayResult(data: Intent) {
-        progressBar.visibility = View.VISIBLE
-
         val paymentData = PaymentData.getFromIntent(data) ?: return
         val paymentMethodCreateParams =
             PaymentMethodCreateParams.createFromGooglePay(JSONObject(paymentData.toJson()))
@@ -128,58 +132,68 @@ class PayWithGoogleActivity : AppCompatActivity() {
         stripe.createPaymentMethod(paymentMethodCreateParams,
             object : ApiResultCallback<PaymentMethod> {
                 override fun onSuccess(result: PaymentMethod) {
-                    progressBar.visibility = View.INVISIBLE
-                    Toast.makeText(this@PayWithGoogleActivity,
-                        "Created PaymentMethod ${result.id}", Toast.LENGTH_LONG)
-                        .show()
                 }
 
                 override fun onError(e: Exception) {
-                    progressBar.visibility = View.INVISIBLE
-                    Toast.makeText(this@PayWithGoogleActivity,
-                        "Exception: " + e.localizedMessage, Toast.LENGTH_LONG)
-                        .show()
                 }
             })
     }
 
     /**
-     * @param isBillingAddressRequired see `billingAddressRequired` and `billingAddressParameters`
-     *                                 at https://developers.google.com/pay/api/android/reference/object#CardParameters
+     * @param isBillingAddressRequired Set to `true` if you require a billing address.
+     *                                 A billing address should only be requested if it's required to process the transaction.
+     *                                 Additional data requests can increase friction in the checkout process and lead to a lower conversion rate.
+     *
+     *                                 If `true`, `billingAddressParameters` will be set to `FULL`.
+     *
+     *                                 See [CardParameters#billingAddressRequired](https://developers.google.com/pay/api/android/reference/object#CardParameters) and
+     *                                 [CardParameters#billingAddressParameters](https://developers.google.com/pay/api/android/reference/object#CardParameters)
+     *
+     * @param isPhoneNumberRequired Set to `true` if a phone number is required to process the transaction.
+     *                              See [BillingAddressParameters.phoneNumberRequired](https://developers.google.com/pay/api/android/reference/object#BillingAddressParameters)
+     *
+     * @param isEmailRequired Set to `true` to request an email address.
+     *                        See [PaymentDataRequest#emailRequired](https://developers.google.com/pay/api/android/reference/object#PaymentDataRequest)
      */
     private fun createGooglePayRequest(
         isBillingAddressRequired: Boolean = true,
         isPhoneNumberRequired: Boolean = true,
         isEmailRequired: Boolean = true
     ): PaymentDataRequest {
+        /**
+         * Billing address format required to complete the transaction.
+         *
+         * `MIN`: Name, country code, and postal code (default).
+         * `FULL`: Name, street address, locality, region, country code, and postal code.
+         */
         val billingAddressFormat = if (isBillingAddressRequired) {
             "FULL"
         } else {
             "MIN"
         }
 
+        val billingAddressParams = JSONObject()
+            .put("phoneNumberRequired", isPhoneNumberRequired)
+            .put("format", billingAddressFormat)
+
+        val cardPaymentMethodParams = JSONObject()
+            .put("allowedAuthMethods", JSONArray()
+                .put("PAN_ONLY")
+                .put("CRYPTOGRAM_3DS"))
+            .put("allowedCardNetworks",
+                JSONArray()
+                    .put("AMEX")
+                    .put("DISCOVER")
+                    .put("JCB")
+                    .put("MASTERCARD")
+                    .put("VISA"))
+            .put("billingAddressRequired", isBillingAddressRequired)
+            .put("billingAddressParameters", billingAddressParams)
+
         val cardPaymentMethod = JSONObject()
             .put("type", "CARD")
             .put(
-                "parameters",
-                JSONObject()
-                    .put("allowedAuthMethods", JSONArray()
-                        .put("PAN_ONLY")
-                        .put("CRYPTOGRAM_3DS"))
-                    .put("allowedCardNetworks",
-                        JSONArray()
-                            .put("AMEX")
-                            .put("DISCOVER")
-                            .put("JCB")
-                            .put("MASTERCARD")
-                            .put("VISA"))
-                    .put("billingAddressRequired", isBillingAddressRequired)
-                    .put(
-                        "billingAddressParameters",
-                        JSONObject()
-                            .put("format", billingAddressFormat)
-                            .put("phoneNumberRequired", isPhoneNumberRequired)
-                    )
+                "parameters", cardPaymentMethodParams
             )
             .put("tokenizationSpecification", GooglePayConfig().tokenizationSpecification)
 
@@ -196,6 +210,7 @@ class PayWithGoogleActivity : AppCompatActivity() {
                 .put("merchantName", "Example Merchant"))
             .put("emailRequired", isEmailRequired)
             .toString()
+
         return PaymentDataRequest.fromJson(paymentDataRequest)
     }
 
