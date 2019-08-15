@@ -3,7 +3,7 @@
     <string name="pay_label">Pay %s</string>
     <string name="setup_payment_credentials">Setup Payment Credentials</string>
     <string name="completing_purchase">Completing purchase&#8230;</string>
-    <string name="add_credit_card">Add credit card</string>
+    <string name="add_payment_method">Add payment method</string>
     <string name="add_shipping_details">Add shipping address</string>
     <string name="purchase_successful">Your purchase was a success!</string>
     <string name="setup_successful">Your setup was a success!</string>

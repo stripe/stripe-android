@@ -32,7 +32,7 @@
                 android:id="@+id/payment_source"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/add_credit_card"
+                android:text="@string/add_payment_method"
                 android:drawablePadding="10dp"
                 android:drawableStart="@drawable/ic_material_credit_card"
                 android:drawableTint="?android:textColorPrimary"
