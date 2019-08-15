@@ -389,7 +389,7 @@ class PaymentActivity : AppCompatActivity() {
         } else if (stripeIntent.status == StripeIntent.Status.RequiresPaymentMethod) {
             // reset payment method and shipping if authentication fails
             paymentSession = createPaymentSession()
-            enterPaymentInfo.text = getString(R.string.add_credit_card)
+            enterPaymentInfo.text = getString(R.string.add_payment_method)
             enterShippingInfo.text = getString(R.string.add_shipping_details)
         } else {
             displayError(
