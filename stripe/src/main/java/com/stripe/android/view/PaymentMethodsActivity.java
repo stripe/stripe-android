@@ -42,11 +42,9 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
     static final int REQUEST_CODE_ADD_CARD = 700;
     private boolean mCommunicating;
-    @Nullable private PaymentMethodsAdapter mAdapter;
+    private PaymentMethodsAdapter mAdapter;
     private ProgressBar mProgressBar;
-    private RecyclerView mRecyclerView;
     private boolean mStartedFromPaymentSession;
-
     private CustomerSession mCustomerSession;
 
     /**
@@ -67,13 +65,20 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                 PaymentMethodsActivityStarter.Args.create(getIntent());
 
         mProgressBar = findViewById(R.id.payment_methods_progress_bar);
-        mRecyclerView = findViewById(R.id.payment_methods_recycler);
-        final View addCardView = findViewById(R.id.payment_methods_add_payment_container);
+
+        final RecyclerView recyclerView = findViewById(R.id.payment_methods_recycler);
+        mAdapter = new PaymentMethodsAdapter();
+        // init the RecyclerView
+        recyclerView.setHasFixedSize(false);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(mAdapter);
+        recyclerView.setItemAnimator(null);
 
         mCustomerSession = CustomerSession.getInstance();
         mStartedFromPaymentSession = args.isPaymentSessionActive;
 
         final boolean shouldShowPostalField = args.shouldRequirePostalCode;
+        final View addCardView = findViewById(R.id.payment_methods_add_payment_container);
         addCardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(@NonNull View view) {
@@ -163,19 +168,11 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     private void getCustomerPaymentMethods(@Nullable String selectPaymentMethodId) {
         setCommunicatingProgress(true);
         mCustomerSession.getPaymentMethods(PaymentMethod.Type.Card,
-                new GetPaymentMethodsRetrievalListener(this, selectPaymentMethodId));
+                new PaymentMethodsRetrievalListener(this, selectPaymentMethodId));
     }
 
     private void updatePaymentMethods(@NonNull List<PaymentMethod> paymentMethods,
                                       @Nullable String selectPaymentMethodId) {
-        if (mAdapter == null) {
-            mAdapter = new PaymentMethodsAdapter();
-            // init the RecyclerView
-            mRecyclerView.setHasFixedSize(false);
-            mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-            mRecyclerView.setAdapter(mAdapter);
-        }
-
         mAdapter.setPaymentMethods(paymentMethods);
         if (selectPaymentMethodId != null) {
             mAdapter.setSelectedPaymentMethod(selectPaymentMethodId);
@@ -205,8 +202,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     }
 
     private void setSelectionAndFinish() {
-        final PaymentMethod paymentMethod = mAdapter != null ?
-                mAdapter.getSelectedPaymentMethod() : null;
+        final PaymentMethod paymentMethod = mAdapter.getSelectedPaymentMethod();
         if (paymentMethod == null || paymentMethod.id == null) {
             cancelAndFinish();
             return;
@@ -230,13 +226,22 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                 .show();
     }
 
-    private static final class GetPaymentMethodsRetrievalListener extends
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        final PaymentMethod paymentMethod = mAdapter.getSelectedPaymentMethod();
+        if (paymentMethod != null) {
+            outState.putString(STATE_SELECTED_PAYMENT_METHOD_ID, paymentMethod.id);
+        }
+    }
+
+    private static final class PaymentMethodsRetrievalListener extends
             CustomerSession.ActivityPaymentMethodsRetrievalListener<PaymentMethodsActivity> {
 
         @Nullable final String mSelectPaymentMethodId;
 
-        GetPaymentMethodsRetrievalListener(@NonNull PaymentMethodsActivity activity,
-                                           @Nullable String selectPaymentMethodId) {
+        private PaymentMethodsRetrievalListener(@NonNull PaymentMethodsActivity activity,
+                                                @Nullable String selectPaymentMethodId) {
             super(activity);
             mSelectPaymentMethodId = selectPaymentMethodId;
         }
@@ -268,17 +273,6 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                     .translate(errorCode, errorMessage, stripeError);
             activity.showError(displayedError);
             activity.setCommunicatingProgress(false);
-        }
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        if (mAdapter != null) {
-            final PaymentMethod paymentMethod = mAdapter.getSelectedPaymentMethod();
-            if (paymentMethod != null) {
-                outState.putString(STATE_SELECTED_PAYMENT_METHOD_ID, paymentMethod.id);
-            }
         }
     }
 }
