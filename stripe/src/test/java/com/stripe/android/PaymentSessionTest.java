@@ -7,11 +7,6 @@ import android.support.annotation.NonNull;
 
 import androidx.test.core.app.ApplicationProvider;
 
-import com.stripe.android.exception.APIConnectionException;
-import com.stripe.android.exception.APIException;
-import com.stripe.android.exception.AuthenticationException;
-import com.stripe.android.exception.CardException;
-import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
@@ -36,6 +31,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -51,7 +47,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -77,7 +72,6 @@ public class PaymentSessionTest {
     @NonNull private final PaymentSessionData mPaymentSessionData = new PaymentSessionData();
 
     @Mock private Activity mActivity;
-    @Mock private StripeRepository mStripeRepository;
     @Mock private ThreadPoolExecutor mThreadPoolExecutor;
     @Mock private PaymentSession.PaymentSessionListener mPaymentSessionListener;
     @Mock private CustomerSession mCustomerSession;
@@ -91,34 +85,9 @@ public class PaymentSessionTest {
     @Captor private ArgumentCaptor<Intent> mIntentArgumentCaptor;
 
     @Before
-    public void setup()
-            throws CardException, APIException, InvalidRequestException, AuthenticationException,
-            APIConnectionException {
+    public void setup() {
         MockitoAnnotations.initMocks(this);
-
         PaymentConfiguration.init(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
-
-        assertNotNull(FIRST_CUSTOMER);
-
-        final PaymentMethod paymentMethod =
-                PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON);
-        assertNotNull(paymentMethod);
-
-        when(mStripeRepository.retrieveCustomer(anyString(), ArgumentMatchers.<ApiRequest.Options>any()))
-                .thenReturn(FIRST_CUSTOMER, SECOND_CUSTOMER);
-        when(mStripeRepository.createPaymentMethod(
-                ArgumentMatchers.<PaymentMethodCreateParams>any(),
-                ArgumentMatchers.<ApiRequest.Options>any()
-        )).thenReturn(paymentMethod);
-        when(mStripeRepository.setDefaultCustomerSource(
-                anyString(),
-                anyString(),
-                ArgumentMatchers.<String>anyList(),
-                anyString(),
-                anyString(),
-                ArgumentMatchers.<ApiRequest.Options>any()))
-                .thenReturn(SECOND_CUSTOMER);
-
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) {
@@ -380,8 +349,39 @@ public class PaymentSessionTest {
     @NonNull
     private CustomerSession createCustomerSession() {
         return new CustomerSession(ApplicationProvider.getApplicationContext(),
-                mEphemeralKeyProvider, null, mThreadPoolExecutor, mStripeRepository,
+                mEphemeralKeyProvider, null, mThreadPoolExecutor,
+                new FakeStripeRepository(),
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 "acct_abc123", true);
+    }
+
+    private static final class FakeStripeRepository extends AbsFakeStripeRepository {
+        @NonNull
+        @Override
+        public PaymentMethod createPaymentMethod(
+                @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
+                @NonNull ApiRequest.Options options) {
+            return Objects.requireNonNull(PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON));
+        }
+
+        @NonNull
+        @Override
+        public Customer setDefaultCustomerSource(
+                @NonNull String customerId,
+                @NonNull String publishableKey,
+                @NonNull List<String> productUsageTokens,
+                @NonNull String sourceId,
+                @NonNull String sourceType,
+                @NonNull ApiRequest.Options requestOptions) {
+            return SECOND_CUSTOMER;
+        }
+
+        @NonNull
+        @Override
+        public Customer retrieveCustomer(
+                @NonNull String customerId,
+                @NonNull ApiRequest.Options requestOptions) {
+            return FIRST_CUSTOMER;
+        }
     }
 }
