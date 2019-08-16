@@ -91,9 +91,12 @@ final class PaymentMethodsAdapter extends RecyclerView.Adapter<PaymentMethodsAda
             public void onClick(View view) {
                 final int currentPosition = holder.getAdapterPosition();
                 if (currentPosition != mSelectedIndex) {
+                    final int prevSelectedIndex = mSelectedIndex;
                     holder.toggleSelected();
                     setSelectedIndex(currentPosition);
-                    notifyDataSetChanged();
+
+                    notifyItemChanged(prevSelectedIndex);
+                    notifyItemChanged(currentPosition);
                 }
             }
         });
