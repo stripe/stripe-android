@@ -69,7 +69,7 @@ public class Stripe {
      */
     @Deprecated
     public Stripe(@NonNull Context context) {
-        this(context, new StripeApiHandler(context, sAppInfo), new StripeNetworkUtils(context),
+        this(context, new StripeApiRepository(context, sAppInfo), new StripeNetworkUtils(context),
                 null, null);
     }
 
@@ -80,7 +80,7 @@ public class Stripe {
      * @param publishableKey the client's publishable key
      */
     public Stripe(@NonNull Context context, @NonNull String publishableKey) {
-        this(context, new StripeApiHandler(context, sAppInfo), new StripeNetworkUtils(context),
+        this(context, new StripeApiRepository(context, sAppInfo), new StripeNetworkUtils(context),
                 ApiKeyValidator.get().requireValid(publishableKey), null);
     }
 
@@ -97,7 +97,7 @@ public class Stripe {
                   @NonNull String stripeAccountId) {
         this(
                 context,
-                new StripeApiHandler(context, sAppInfo),
+                new StripeApiRepository(context, sAppInfo),
                 new StripeNetworkUtils(context),
                 ApiKeyValidator.get().requireValid(publishableKey),
                 stripeAccountId

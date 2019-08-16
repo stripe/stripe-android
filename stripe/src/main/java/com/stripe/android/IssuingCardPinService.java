@@ -64,7 +64,7 @@ public class IssuingCardPinService
             @NonNull Context context,
             @NonNull EphemeralKeyProvider keyProvider,
             @Nullable AppInfo appInfo) {
-        this(keyProvider, new StripeApiHandler(context, appInfo), new OperationIdFactory());
+        this(keyProvider, new StripeApiRepository(context, appInfo), new OperationIdFactory());
     }
 
     @VisibleForTesting

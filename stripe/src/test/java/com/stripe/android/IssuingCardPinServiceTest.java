@@ -50,7 +50,7 @@ public class IssuingCardPinServiceTest {
         TestEphemeralKeyProvider ephemeralKeyProvider = new TestEphemeralKeyProvider();
         ephemeralKeyProvider.setNextRawEphemeralKey(EPHEMERAL_KEY);
 
-        final StripeRepository stripeRepository = new StripeApiHandler(
+        final StripeRepository stripeRepository = new StripeApiRepository(
                 ApplicationProvider.getApplicationContext(),
                 mStripeApiRequestExecutor,
                 new FakeFireAndForgetRequestExecutor(),

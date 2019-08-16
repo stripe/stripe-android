@@ -44,17 +44,17 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 /**
- * Test class for {@link StripeApiHandler}.
+ * Test class for {@link StripeApiRepository}.
  */
 @RunWith(RobolectricTestRunner.class)
-public class StripeApiHandlerTest {
+public class StripeApiRepositoryTest {
 
     private static final String STRIPE_ACCOUNT_RESPONSE_HEADER = "Stripe-Account";
 
     private static final Card CARD = Card.create("4242424242424242", 1, 2050, "123");
 
-    @NonNull private final StripeApiHandler mApiHandler =
-            new StripeApiHandler(ApplicationProvider.getApplicationContext(), null);
+    @NonNull private final StripeApiRepository mStripeApiRepository =
+            new StripeApiRepository(ApplicationProvider.getApplicationContext(), null);
 
     @Mock private ApiRequestExecutor mStripeApiRequestExecutor;
 
@@ -65,40 +65,40 @@ public class StripeApiHandlerTest {
 
     @Test
     public void testGetApiUrl() {
-        String tokensApi = StripeApiHandler.getTokensUrl();
+        String tokensApi = StripeApiRepository.getTokensUrl();
         assertEquals("https://api.stripe.com/v1/tokens", tokensApi);
     }
 
     @Test
     public void testGetSourcesUrl() {
-        String sourcesUrl = StripeApiHandler.getSourcesUrl();
+        String sourcesUrl = StripeApiRepository.getSourcesUrl();
         assertEquals("https://api.stripe.com/v1/sources", sourcesUrl);
     }
 
     @Test
     public void testGetRetrieveSourceUrl() {
-        String sourceUrlWithId = StripeApiHandler.getRetrieveSourceApiUrl("abc123");
+        String sourceUrlWithId = StripeApiRepository.getRetrieveSourceApiUrl("abc123");
         assertEquals("https://api.stripe.com/v1/sources/abc123", sourceUrlWithId);
     }
 
     @Test
     public void testGetRequestTokenApiUrl() {
         String tokenId = "tok_sample";
-        String requestApi = StripeApiHandler.getRetrieveTokenApiUrl(tokenId);
+        String requestApi = StripeApiRepository.getRetrieveTokenApiUrl(tokenId);
         assertEquals("https://api.stripe.com/v1/tokens/" + tokenId, requestApi);
     }
 
     @Test
     public void testGetRetrieveCustomerUrl() {
         String customerId = "cus_123abc";
-        String customerRequestUrl = StripeApiHandler.getRetrieveCustomerUrl(customerId);
+        String customerRequestUrl = StripeApiRepository.getRetrieveCustomerUrl(customerId);
         assertEquals("https://api.stripe.com/v1/customers/" + customerId, customerRequestUrl);
     }
 
     @Test
     public void testGetAddCustomerSourceUrl() {
         String customerId = "cus_123abc";
-        String addSourceUrl = StripeApiHandler.getAddCustomerSourceUrl(customerId);
+        String addSourceUrl = StripeApiRepository.getAddCustomerSourceUrl(customerId);
         assertEquals("https://api.stripe.com/v1/customers/" + customerId + "/sources",
                 addSourceUrl);
     }
@@ -107,7 +107,7 @@ public class StripeApiHandlerTest {
     public void testGetDeleteCustomerSourceUrl() {
         String customerId = "cus_123abc";
         String sourceId = "src_456xyz";
-        String deleteSourceUrl = StripeApiHandler.getDeleteCustomerSourceUrl(customerId, sourceId);
+        String deleteSourceUrl = StripeApiRepository.getDeleteCustomerSourceUrl(customerId, sourceId);
         assertEquals("https://api.stripe.com/v1/customers/" + customerId + "/sources/"
                         + sourceId,
                 deleteSourceUrl);
@@ -116,7 +116,7 @@ public class StripeApiHandlerTest {
     @Test
     public void testGetAttachPaymentMethodUrl() {
         final String paymentMethodId = "pm_1ETDEa2eZvKYlo2CN5828c52";
-        final String attachUrl = StripeApiHandler.getAttachPaymentMethodUrl(paymentMethodId);
+        final String attachUrl = StripeApiRepository.getAttachPaymentMethodUrl(paymentMethodId);
         final String expectedUrl = String.join("", "https://api.stripe.com/v1/payment_methods/",
                 paymentMethodId, "/attach");
         assertEquals(expectedUrl, attachUrl);
@@ -125,7 +125,7 @@ public class StripeApiHandlerTest {
     @Test
     public void testGetDetachPaymentMethodUrl() {
         final String paymentMethodId = "pm_1ETDEa2eZvKYlo2CN5828c52";
-        final String detachUrl = mApiHandler.getDetachPaymentMethodUrl(paymentMethodId);
+        final String detachUrl = mStripeApiRepository.getDetachPaymentMethodUrl(paymentMethodId);
         final String expectedUrl = String.join("", "https://api.stripe.com/v1/payment_methods/",
                 paymentMethodId, "/detach");
         assertEquals(expectedUrl, detachUrl);
@@ -134,32 +134,32 @@ public class StripeApiHandlerTest {
     @Test
     public void testGetPaymentMethodsUrl() {
         assertEquals("https://api.stripe.com/v1/payment_methods",
-                StripeApiHandler.getPaymentMethodsUrl());
+                StripeApiRepository.getPaymentMethodsUrl());
     }
 
     @Test
     public void testGetIssuingCardPinUrl() {
         assertEquals("https://api.stripe.com/v1/issuing/cards/card123/pin",
-                StripeApiHandler.getIssuingCardPinUrl("card123"));
+                StripeApiRepository.getIssuingCardPinUrl("card123"));
     }
 
     @Test
     public void testRetrievePaymentIntentUrl() {
         assertEquals("https://api.stripe.com/v1/payment_intents/pi123",
-                StripeApiHandler.getRetrievePaymentIntentUrl("pi123"));
+                StripeApiRepository.getRetrievePaymentIntentUrl("pi123"));
     }
 
     @Test
     public void testConfirmPaymentIntentUrl() {
         assertEquals("https://api.stripe.com/v1/payment_intents/pi123/confirm",
-                StripeApiHandler.getConfirmPaymentIntentUrl("pi123"));
+                StripeApiRepository.getConfirmPaymentIntentUrl("pi123"));
     }
 
     @Test
     public void createSource_shouldLogSourceCreation_andReturnSource()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
-        final Source source = mApiHandler.createSource(SourceParams.createCardParams(CARD),
+        final Source source = mStripeApiRepository.createSource(SourceParams.createCardParams(CARD),
                 ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY));
 
         // Check that we get a token back; we don't care about its fields for this test.
@@ -171,7 +171,7 @@ public class StripeApiHandlerTest {
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
         final String connectAccountId = "acct_1Acj2PBUgO3KuWzz";
-        final Source source = mApiHandler.createSource(SourceParams.createCardParams(CARD),
+        final Source source = mStripeApiRepository.createSource(SourceParams.createCardParams(CARD),
                 ApiRequest.Options.create(ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY, connectAccountId));
 
         // Check that we get a source back; we don't care about its fields for this test.
@@ -197,7 +197,7 @@ public class StripeApiHandlerTest {
                 new ThrowingRunnable() {
                     @Override
                     public void run() throws Throwable {
-                        mApiHandler.start3ds2Auth(authParams, "pi_12345",
+                        mStripeApiRepository.start3ds2Auth(authParams, "pi_12345",
                                 ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY));
                     }
                 });
@@ -213,7 +213,7 @@ public class StripeApiHandlerTest {
                 new ThrowingRunnable() {
                     @Override
                     public void run() throws Throwable {
-                        mApiHandler.complete3ds2Auth("src_123",
+                        mStripeApiRepository.complete3ds2Auth("src_123",
                                 ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY));
                     }
                 });
@@ -226,7 +226,7 @@ public class StripeApiHandlerTest {
     public void fireAnalyticsRequest_shouldReturnSuccessful() {
         // This is the one and only test where we actually log something, because
         // we are testing whether or not we log.
-        mApiHandler.fireAnalyticsRequest(new HashMap<String, Object>(),
+        mStripeApiRepository.fireAnalyticsRequest(new HashMap<String, Object>(),
                 ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY);
     }
 
@@ -235,9 +235,9 @@ public class StripeApiHandlerTest {
             throws CardException, APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
         final String connectAccountId = "acct_1Acj2PBUgO3KuWzz";
-        final StripeResponse response = mApiHandler.makeApiRequest(
+        final StripeResponse response = mStripeApiRepository.makeApiRequest(
                 ApiRequest.createPost(
-                        StripeApiHandler.getSourcesUrl(),
+                        StripeApiRepository.getSourcesUrl(),
                         SourceParams.createCardParams(CARD).toParamMap(),
                         ApiRequest.Options.create(
                                 ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
@@ -281,7 +281,7 @@ public class StripeApiHandlerTest {
                         clientSecret,
                         "yourapp://post-authentication-return-url"
                 );
-        final PaymentIntent paymentIntent = mApiHandler.confirmPaymentIntent(
+        final PaymentIntent paymentIntent = mStripeApiRepository.confirmPaymentIntent(
                 confirmPaymentIntentParams, ApiRequest.Options.create(publishableKey));
 
         assertNotNull(paymentIntent);
@@ -301,7 +301,7 @@ public class StripeApiHandlerTest {
                         clientSecret,
                         "yourapp://post-authentication-return-url"
                 );
-        final PaymentIntent paymentIntent = mApiHandler.confirmPaymentIntent(
+        final PaymentIntent paymentIntent = mStripeApiRepository.confirmPaymentIntent(
                 confirmPaymentIntentParams, ApiRequest.Options.create(publishableKey));
         assertNotNull(paymentIntent);
     }
@@ -313,7 +313,7 @@ public class StripeApiHandlerTest {
         String clientSecret = "temporarily put a private key here simulate the backend";
         String publishableKey = "put a public key that matches the private key here";
 
-        final PaymentIntent paymentIntent = mApiHandler.retrievePaymentIntent(
+        final PaymentIntent paymentIntent = mStripeApiRepository.retrievePaymentIntent(
                 clientSecret,
                 ApiRequest.Options.create(publishableKey)
         );
@@ -324,12 +324,12 @@ public class StripeApiHandlerTest {
     public void createSource_withNonLoggingListener_doesNotLogButDoesCreateSource()
             throws APIException, AuthenticationException, InvalidRequestException,
             APIConnectionException {
-        final StripeApiHandler stripeApiHandler = new StripeApiHandler(
+        final StripeRepository stripeApiRepository = new StripeApiRepository(
                 ApplicationProvider.getApplicationContext(),
                 new StripeApiRequestExecutor(),
                 new FakeFireAndForgetRequestExecutor(),
                 null);
-        final Source source = stripeApiHandler.createSource(SourceParams.createCardParams(CARD),
+        final Source source = stripeApiRepository.createSource(SourceParams.createCardParams(CARD),
                 ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY));
 
         // Check that we get a token back; we don't care about its fields for this test.
@@ -338,12 +338,11 @@ public class StripeApiHandlerTest {
 
     @Test
     public void fireAnalyticsRequest_whenShouldLogRequestIsFalse_doesNotCreateAConnection() {
-        final StripeApiHandler apiHandler = new StripeApiHandler(
-                ApplicationProvider.getApplicationContext(),
-                mStripeApiRequestExecutor,
-                new FakeFireAndForgetRequestExecutor(),
-                null);
-        apiHandler.fireAnalyticsRequest(new HashMap<String, Object>(), ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY);
+        final StripeApiRepository stripeApiRepository = create();
+        stripeApiRepository.fireAnalyticsRequest(
+                new HashMap<String, Object>(),
+                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+        );
         verifyNoMoreInteractions(mStripeApiRequestExecutor);
     }
 
@@ -489,7 +488,7 @@ public class StripeApiHandlerTest {
 
         final ApiRequest.Options options = ApiRequest.Options
                 .create(ApiKeyFixtures.FAKE_EPHEMERAL_KEY);
-        final String url = ApiRequest.createGet(StripeApiHandler.getPaymentMethodsUrl(),
+        final String url = ApiRequest.createGet(StripeApiRepository.getPaymentMethodsUrl(),
                 queryParams, options, null)
                 .getUrl();
 
@@ -500,13 +499,8 @@ public class StripeApiHandlerTest {
                         options,
                         queryParams))))
                 .thenReturn(stripeResponse);
-        final StripeApiHandler apiHandler = new StripeApiHandler(
-                ApplicationProvider.getApplicationContext(),
-                mStripeApiRequestExecutor,
-                new FakeFireAndForgetRequestExecutor(),
-                null
-        );
-        final List<PaymentMethod> paymentMethods = apiHandler
+        final StripeRepository stripeApiRepository = create();
+        final List<PaymentMethod> paymentMethods = stripeApiRepository
                 .getPaymentMethods("cus_123", PaymentMethod.Type.Card.code,
                         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, new ArrayList<String>(),
                         ApiRequest.Options.create(ApiKeyFixtures.FAKE_EPHEMERAL_KEY));
@@ -536,7 +530,7 @@ public class StripeApiHandlerTest {
         final ApiRequest.Options options = ApiRequest.Options
                 .create(ApiKeyFixtures.FAKE_EPHEMERAL_KEY);
         final String url = ApiRequest.createGet(
-                StripeApiHandler.getPaymentMethodsUrl(),
+                StripeApiRepository.getPaymentMethodsUrl(),
                 queryParams,
                 options,
                 null)
@@ -549,16 +543,21 @@ public class StripeApiHandlerTest {
                         options,
                         queryParams))))
                 .thenReturn(stripeResponse);
-        final StripeApiHandler apiHandler = new StripeApiHandler(
+        final StripeApiRepository stripeApiRepository = create();
+        final List<PaymentMethod> paymentMethods = stripeApiRepository
+                .getPaymentMethods("cus_123", PaymentMethod.Type.Card.code,
+                        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, new ArrayList<String>(),
+                        ApiRequest.Options.create(ApiKeyFixtures.FAKE_EPHEMERAL_KEY));
+        assertTrue(paymentMethods.isEmpty());
+    }
+
+    @NonNull
+    private StripeApiRepository create() {
+        return new StripeApiRepository(
                 ApplicationProvider.getApplicationContext(),
                 mStripeApiRequestExecutor,
                 new FakeFireAndForgetRequestExecutor(),
                 null
         );
-        final List<PaymentMethod> paymentMethods = apiHandler
-                .getPaymentMethods("cus_123", PaymentMethod.Type.Card.code,
-                        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, new ArrayList<String>(),
-                        ApiRequest.Options.create(ApiKeyFixtures.FAKE_EPHEMERAL_KEY));
-        assertTrue(paymentMethods.isEmpty());
     }
 }

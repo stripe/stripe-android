@@ -43,7 +43,7 @@ public class ApiRequestTest {
     public void getHeaders_withAllRequestOptions_properlyMapsRequestOptions() {
         final String stripeAccount = "acct_123abc";
         final Map<String, String> headerMap =
-                ApiRequest.createGet(StripeApiHandler.getSourcesUrl(),
+                ApiRequest.createGet(StripeApiRepository.getSourcesUrl(),
                         ApiRequest.Options.create(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                                 stripeAccount), null)
                         .getHeaders();
@@ -58,7 +58,7 @@ public class ApiRequestTest {
     @Test
     public void getHeaders_withOnlyRequiredOptions_doesNotAddEmptyOptions() {
         final Map<String, String> headerMap =
-                ApiRequest.createGet(StripeApiHandler.getSourcesUrl(),
+                ApiRequest.createGet(StripeApiRepository.getSourcesUrl(),
                         ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
                         .getHeaders();
 
@@ -70,7 +70,7 @@ public class ApiRequestTest {
     @Test
     public void getHeaders_containsPropertyMapValues() throws JSONException {
         final Map<String, String> headers =
-                ApiRequest.createGet(StripeApiHandler.getSourcesUrl(),
+                ApiRequest.createGet(StripeApiRepository.getSourcesUrl(),
                         ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
                         .getHeaders();
 
@@ -87,7 +87,7 @@ public class ApiRequestTest {
     @Test
     public void getHeaders_correctlyAddsExpectedAdditionalParameters() {
         final Map<String, String> headerMap =
-                ApiRequest.createGet(StripeApiHandler.getSourcesUrl(),
+                ApiRequest.createGet(StripeApiRepository.getSourcesUrl(),
                         ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
                         .getHeaders();
 
@@ -104,7 +104,7 @@ public class ApiRequestTest {
             throws UnsupportedEncodingException, InvalidRequestException {
         final Map<String, Object> cardMap =
                 mNetworkUtils.createCardTokenParams(CardFixtures.MINIMUM_CARD);
-        final String query = ApiRequest.createGet(StripeApiHandler.getSourcesUrl(), cardMap,
+        final String query = ApiRequest.createGet(StripeApiRepository.getSourcesUrl(), cardMap,
                 ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
                 .createQuery();
 
@@ -114,7 +114,7 @@ public class ApiRequestTest {
 
     @Test
     public void getContentType() {
-        final String contentType = ApiRequest.createGet(StripeApiHandler.getSourcesUrl(),
+        final String contentType = ApiRequest.createGet(StripeApiRepository.getSourcesUrl(),
                 ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
                 .getContentType();
         assertEquals("application/x-www-form-urlencoded; charset=UTF-8", contentType);
@@ -123,7 +123,7 @@ public class ApiRequestTest {
     @Test
     public void getOutputBytes_withEmptyBody_shouldHaveZeroLength()
             throws UnsupportedEncodingException, InvalidRequestException {
-        final byte[] output = ApiRequest.createPost(StripeApiHandler.getPaymentMethodsUrl(),
+        final byte[] output = ApiRequest.createPost(StripeApiRepository.getPaymentMethodsUrl(),
                 ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
                 .getOutputBytes();
         assertEquals(0, output.length);
@@ -135,7 +135,7 @@ public class ApiRequestTest {
         final Map<String, String> params = new HashMap<>();
         params.put("customer", "cus_123");
 
-        final byte[] output = ApiRequest.createPost(StripeApiHandler.getPaymentMethodsUrl(),
+        final byte[] output = ApiRequest.createPost(StripeApiRepository.getPaymentMethodsUrl(),
                 params,
                 ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
                 .getOutputBytes();
@@ -147,19 +147,19 @@ public class ApiRequestTest {
         final Map<String, String> params = new HashMap<>();
         params.put("customer", "cus_123");
         assertEquals(
-                ApiRequest.createPost(StripeApiHandler.getPaymentMethodsUrl(),
+                ApiRequest.createPost(StripeApiRepository.getPaymentMethodsUrl(),
                         params,
                         ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null),
-                ApiRequest.createPost(StripeApiHandler.getPaymentMethodsUrl(),
+                ApiRequest.createPost(StripeApiRepository.getPaymentMethodsUrl(),
                         params,
                         ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
         );
 
         assertNotEquals(
-                ApiRequest.createPost(StripeApiHandler.getPaymentMethodsUrl(),
+                ApiRequest.createPost(StripeApiRepository.getPaymentMethodsUrl(),
                         params,
                         ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null),
-                ApiRequest.createPost(StripeApiHandler.getPaymentMethodsUrl(),
+                ApiRequest.createPost(StripeApiRepository.getPaymentMethodsUrl(),
                         params,
                         ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
                                 "acct"), null)
@@ -169,7 +169,7 @@ public class ApiRequestTest {
     @Test
     public void getHeaders_withAppInfo() throws JSONException {
         final ApiRequest apiRequest = ApiRequest.createGet(
-                StripeApiHandler.getPaymentMethodsUrl(),
+                StripeApiRepository.getPaymentMethodsUrl(),
                 ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
                 AppInfoTest.APP_INFO);
         final Map<String, String> headers = apiRequest.getHeaders();

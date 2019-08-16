@@ -1426,7 +1426,7 @@ public class StripeTest {
     @NonNull
     private StripeRepository createStripeRepository(
             @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor) {
-        return new StripeApiHandler(
+        return new StripeApiRepository(
                 mContext,
                 new StripeApiRequestExecutor(),
                 fireAndForgetRequestExecutor,
