@@ -1,11 +1,11 @@
 # CHANGELOG
 
-## 10.3.0 - upcoming
+## 10.3.0 - 2018-08-16
 * [#1327](https://github.com/stripe/stripe-android/pull/1327) Deprecate `SourceCallback` and `TokenCallback`
     * Use `ApiResultCallback<Source>` and `ApiResultCallback<Token>` respectively
 * [#1332](https://github.com/stripe/stripe-android/pull/1332) Create `StripeParamsModel` interface for Stripe API param classes
 * [#1334](https://github.com/stripe/stripe-android/pull/1344) Remove `StripeModel#toMap()`
-* [#1340](https://github.com/stripe/stripe-android/pull/1340) Upgrade AGP to `3.5.0-rc03`
+* [#1340](https://github.com/stripe/stripe-android/pull/1340) Upgrade Android Gradle Plugin to `3.5.0-rc03`
 * [#1342](https://github.com/stripe/stripe-android/pull/1342) Update Builds Tools to `29.0.2`
 * [#1347](https://github.com/stripe/stripe-android/pull/1347) Mark `Stripe.setStripeAccount()` as deprecated
     * Use `new Stripe(context, "publishable_key", "stripe_account_id")` instead
