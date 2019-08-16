@@ -1,17 +1,20 @@
 # CHANGELOG
 
-## 10.3.0 - upcoming
+## 10.3.0 - 2018-08-16
 * [#1327](https://github.com/stripe/stripe-android/pull/1327) Deprecate `SourceCallback` and `TokenCallback`
     * Use `ApiResultCallback<Source>` and `ApiResultCallback<Token>` respectively
 * [#1332](https://github.com/stripe/stripe-android/pull/1332) Create `StripeParamsModel` interface for Stripe API param classes
 * [#1334](https://github.com/stripe/stripe-android/pull/1344) Remove `StripeModel#toMap()`
-* [#1340](https://github.com/stripe/stripe-android/pull/1340) Upgrade AGP to `3.5.0-rc03`
+* [#1340](https://github.com/stripe/stripe-android/pull/1340) Upgrade Android Gradle Plugin to `3.5.0-rc03`
 * [#1342](https://github.com/stripe/stripe-android/pull/1342) Update Builds Tools to `29.0.2`
 * [#1347](https://github.com/stripe/stripe-android/pull/1347) Mark `Stripe.setStripeAccount()` as deprecated
     * Use `new Stripe(context, "publishable_key", "stripe_account_id")` instead
 * [#1376](https://github.com/stripe/stripe-android/pull/1376) Add `shouldPrefetchEphemeralKey` arg to `CustomerSession.initCustomerSession()`
 * [#1378](https://github.com/stripe/stripe-android/pull/1378) Add `last_payment_error` field to PaymentIntent model
 * [#1379](https://github.com/stripe/stripe-android/pull/1379) Add `last_setup_error` field to SetupIntent model
+* [#1388](https://github.com/stripe/stripe-android/pull/1388) Update Stripe 3DS2 library to `v1.1.7`
+    * Fix issue in `PaymentAuthConfig.Stripe3ds2UiCustomization.Builder()` and `PaymentAuthConfig.Stripe3ds2UiCustomization.Builder.createWithAppTheme()` that was resulting in incorrect color customization on 3DS2 challenge screen 
+    * Improve accessibility of select options on 3DS2 challenge screen by setting minimum height to 48dp
 
 ## 10.2.1 - 2019-08-06
 * [#1314](https://github.com/stripe/stripe-android/pull/1314) Expose pinned API version via [Stripe.API_VERSION](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#API_VERSION)
