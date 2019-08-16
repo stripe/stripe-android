@@ -140,7 +140,7 @@ public class StripePaymentAuthTest {
     @NonNull
     private Stripe createStripe() {
         return new Stripe(
-                new StripeApiHandler(
+                new StripeApiRepository(
                         mContext,
                         new StripeApiRequestExecutor(),
                         new FakeFireAndForgetRequestExecutor(),

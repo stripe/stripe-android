@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 /**
- * Used by {@link StripeApiHandler} to make HTTP requests
+ * Used by {@link StripeApiRepository} to make HTTP requests
  */
 final class StripeApiRequestExecutor implements ApiRequestExecutor {
 

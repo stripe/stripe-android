@@ -42,9 +42,9 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Handler for calls to the Stripe API.
+ * An implementation of {@link StripeRepository} that makes network requests to the Stripe API.
  */
-class StripeApiHandler implements StripeRepository {
+final class StripeApiRepository implements StripeRepository {
 
     private static final String DNS_CACHE_TTL_PROPERTY_NAME = "networkaddress.cache.ttl";
 
@@ -55,26 +55,26 @@ class StripeApiHandler implements StripeRepository {
     @NonNull private final FireAndForgetRequestExecutor mFireAndForgetRequestExecutor;
     @Nullable private final AppInfo mAppInfo;
 
-    StripeApiHandler(@NonNull Context context, @Nullable AppInfo appInfo) {
+    StripeApiRepository(@NonNull Context context, @Nullable AppInfo appInfo) {
         this(context.getApplicationContext(), new StripeApiRequestExecutor(),
                 new StripeFireAndForgetRequestExecutor(), appInfo);
     }
 
     @VisibleForTesting
-    StripeApiHandler(@NonNull Context context,
-                     @NonNull ApiRequestExecutor stripeApiRequestExecutor,
-                     @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor,
-                     @Nullable AppInfo appInfo) {
+    StripeApiRepository(@NonNull Context context,
+                        @NonNull ApiRequestExecutor stripeApiRequestExecutor,
+                        @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor,
+                        @Nullable AppInfo appInfo) {
         this(context, stripeApiRequestExecutor, fireAndForgetRequestExecutor, appInfo,
                 new FingerprintRequestFactory(context));
     }
 
     @VisibleForTesting
-    StripeApiHandler(@NonNull Context context,
-                     @NonNull ApiRequestExecutor stripeApiRequestExecutor,
-                     @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor,
-                     @Nullable AppInfo appInfo,
-                     @NonNull FingerprintRequestFactory fingerprintRequestFactory) {
+    StripeApiRepository(@NonNull Context context,
+                        @NonNull ApiRequestExecutor stripeApiRequestExecutor,
+                        @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor,
+                        @Nullable AppInfo appInfo,
+                        @NonNull FingerprintRequestFactory fingerprintRequestFactory) {
         mStripeApiRequestExecutor = stripeApiRequestExecutor;
         mFireAndForgetRequestExecutor = fireAndForgetRequestExecutor;
         mAnalyticsDataFactory = new AnalyticsDataFactory(context);
@@ -1152,18 +1152,18 @@ class StripeApiHandler implements StripeRepository {
     }
 
     private static final class Start3ds2AuthTask extends ApiOperation<Stripe3ds2AuthResult> {
-        @NonNull private final StripeApiHandler mApiHandler;
+        @NonNull private final StripeApiRepository mStripeApiRepository;
         @NonNull private final Stripe3ds2AuthParams mParams;
         @NonNull private final String mStripeIntentId;
         @NonNull private final ApiRequest.Options mRequestOptions;
 
-        private Start3ds2AuthTask(@NonNull StripeApiHandler apiHandler,
+        private Start3ds2AuthTask(@NonNull StripeApiRepository stripeApiRepository,
                                   @NonNull Stripe3ds2AuthParams params,
                                   @NonNull String stripeIntentId,
                                   @NonNull ApiRequest.Options requestOptions,
                                   @NonNull ApiResultCallback<Stripe3ds2AuthResult> callback) {
             super(callback);
-            mApiHandler = apiHandler;
+            mStripeApiRepository = stripeApiRepository;
             mParams = params;
             mStripeIntentId = stripeIntentId;
             mRequestOptions = requestOptions;
@@ -1172,21 +1172,21 @@ class StripeApiHandler implements StripeRepository {
         @NonNull
         @Override
         Stripe3ds2AuthResult getResult() throws StripeException, JSONException {
-            return mApiHandler.start3ds2Auth(mParams, mStripeIntentId, mRequestOptions);
+            return mStripeApiRepository.start3ds2Auth(mParams, mStripeIntentId, mRequestOptions);
         }
     }
 
     private static final class Complete3ds2AuthTask extends ApiOperation<Boolean> {
-        @NonNull private final StripeApiHandler mApiHandler;
+        @NonNull private final StripeApiRepository mStripeApiRepository;
         @NonNull private final String mSourceId;
         @NonNull private final ApiRequest.Options mRequestOptions;
 
-        private Complete3ds2AuthTask(@NonNull StripeApiHandler apiHandler,
+        private Complete3ds2AuthTask(@NonNull StripeApiRepository stripeApiRepository,
                                      @NonNull String sourceId,
                                      @NonNull ApiRequest.Options requestOptions,
                                      @NonNull ApiResultCallback<Boolean> callback) {
             super(callback);
-            mApiHandler = apiHandler;
+            mStripeApiRepository = stripeApiRepository;
             mSourceId = sourceId;
             mRequestOptions = requestOptions;
         }
@@ -1194,7 +1194,7 @@ class StripeApiHandler implements StripeRepository {
         @NonNull
         @Override
         Boolean getResult() throws StripeException {
-            return mApiHandler.complete3ds2Auth(mSourceId, mRequestOptions);
+            return mStripeApiRepository.complete3ds2Auth(mSourceId, mRequestOptions);
         }
     }
 }

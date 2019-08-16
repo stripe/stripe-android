@@ -230,7 +230,7 @@ public class CustomerSession {
                             @Nullable AppInfo appInfo, @NonNull String publishableKey,
                             @Nullable String stripeAccountId, boolean shouldPrefetchEphemeralKey) {
         this(context, keyProvider, null, createThreadPoolExecutor(),
-                new StripeApiHandler(context, appInfo), publishableKey, stripeAccountId,
+                new StripeApiRepository(context, appInfo), publishableKey, stripeAccountId,
                 shouldPrefetchEphemeralKey);
     }
 
