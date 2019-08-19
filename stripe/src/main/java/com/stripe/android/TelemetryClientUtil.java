@@ -28,6 +28,8 @@ final class TelemetryClientUtil {
     private final String mPackageName;
     @NonNull
     private final PackageManager mPackageManager;
+    @NonNull
+    private final String mTimeZone;
 
     TelemetryClientUtil(@NonNull Context context) {
         this(context.getApplicationContext(), new UidSupplier(context));
@@ -38,7 +40,8 @@ final class TelemetryClientUtil {
                 uidSupplier,
                 context.getResources().getDisplayMetrics(),
                 ObjectUtils.getOrDefault(context.getPackageName(), ""),
-                context.getPackageManager()
+                context.getPackageManager(),
+                getTimeZone()
         );
     }
 
@@ -46,11 +49,13 @@ final class TelemetryClientUtil {
     TelemetryClientUtil(@NonNull Supplier<StripeUid> uidSupplier,
                         @NonNull DisplayMetrics displayMetrics,
                         @NonNull String packageName,
-                        @NonNull PackageManager packageManager) {
+                        @NonNull PackageManager packageManager,
+                        @NonNull String timeZone) {
         mDisplayMetrics = displayMetrics;
         mUidSupplier = uidSupplier;
         mPackageName = packageName;
         mPackageManager = packageManager;
+        mTimeZone = timeZone;
     }
 
     @NonNull
@@ -70,7 +75,7 @@ final class TelemetryClientUtil {
         firstMap.put("c", createSingleValuePair(Locale.getDefault().toString()));
         firstMap.put("d", createSingleValuePair(getAndroidVersionString()));
         firstMap.put("f", createSingleValuePair(getScreen()));
-        firstMap.put("g", createSingleValuePair(getTimeZoneString()));
+        firstMap.put("g", createSingleValuePair(mTimeZone));
         return firstMap;
     }
 
@@ -118,7 +123,7 @@ final class TelemetryClientUtil {
     }
 
     @NonNull
-    private static String getTimeZoneString() {
+    private static String getTimeZone() {
         final int minutes =
                 (int) TimeUnit.MINUTES.convert(TimeZone.getDefault().getRawOffset(),
                         TimeUnit.MILLISECONDS);

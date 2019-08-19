@@ -46,7 +46,8 @@ public class TelemetryClientUtilTest {
                 new FakeUidSupplier(),
                 context.getResources().getDisplayMetrics(),
                 "package_name",
-                context.getPackageManager()
+                context.getPackageManager(),
+                "-5"
         )
                 .createTelemetryMap();
         assertEquals(5, telemetryMap.size());
@@ -73,7 +74,8 @@ public class TelemetryClientUtilTest {
                 new FakeUidSupplier(),
                 context.getResources().getDisplayMetrics(),
                 "package_name",
-                mPackageManager
+                mPackageManager,
+                "-5"
         )
                 .createTelemetryMap();
 
