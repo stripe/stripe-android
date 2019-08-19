@@ -163,32 +163,20 @@ public class PaymentSession {
      *                 in payment session status, including networking status
      * @param paymentSessionConfig a {@link PaymentSessionConfig} used to decide which items are
      *                             necessary in the PaymentSession.
-     * @return {@code true} if the PaymentSession is initialized, {@code false} if a state error
-     * occurs. Failure can only occur if there is no initialized {@link CustomerSession}.
-     */
-    public boolean init(@NonNull PaymentSessionListener listener,
-                        @NonNull PaymentSessionConfig paymentSessionConfig) {
-        return init(listener, paymentSessionConfig, null);
-    }
-
-    /**
-     * Initialize the PaymentSession with a {@link PaymentSessionListener} to be notified of
-     * data changes.
-     *
-     * @param listener a {@link PaymentSessionListener} that will receive notifications of changes
-     *                 in payment session status, including networking status
-     * @param paymentSessionConfig a {@link PaymentSessionConfig} used to decide which items are
-     *                             necessary in the PaymentSession.
      * @param savedInstanceState a <code>Bundle</code> containing the saved state of a
      *                           PaymentSession that was stored in
      *                           {@link #savePaymentSessionInstanceState(Bundle)}
+     * @param shouldPrefetchCustomer If true, will immediately fetch the {@link Customer} associated
+     *                               with this session. Otherwise, will only fetch when needed.
+     *
      * @return {@code true} if the PaymentSession is initialized, {@code false} if a state error
      * occurs. Failure can only occur if there is no initialized {@link CustomerSession}.
      */
     public boolean init(
             @NonNull PaymentSessionListener listener,
             @NonNull PaymentSessionConfig paymentSessionConfig,
-            @Nullable Bundle savedInstanceState) {
+            @Nullable Bundle savedInstanceState,
+            boolean shouldPrefetchCustomer) {
 
         // Checking to make sure that there is a valid CustomerSession -- the getInstance() call
         // will throw a runtime exception if none is ready.
@@ -212,8 +200,44 @@ public class PaymentSession {
             }
         }
         mPaymentSessionConfig = paymentSessionConfig;
-        fetchCustomer();
+
+        if (shouldPrefetchCustomer) {
+            fetchCustomer();
+        }
+
         return true;
+    }
+
+    /**
+     * Initialize PaymentSession and prefetch Customer.
+     *
+     * See {@link #init(PaymentSessionListener, PaymentSessionConfig, Bundle, boolean)}
+     */
+    public boolean init(
+            @NonNull PaymentSessionListener listener,
+            @NonNull PaymentSessionConfig paymentSessionConfig,
+            @Nullable Bundle savedInstanceState) {
+        return init(listener, paymentSessionConfig, savedInstanceState, true);
+    }
+
+    /**
+     * See {@link #init(PaymentSessionListener, PaymentSessionConfig, Bundle, boolean)}
+     */
+    public boolean init(
+            @NonNull PaymentSessionListener listener,
+            @NonNull PaymentSessionConfig paymentSessionConfig,
+            boolean shouldPrefetchCustomer) {
+        return init(listener, paymentSessionConfig, null, shouldPrefetchCustomer);
+    }
+
+    /**
+     * Initialize PaymentSession and prefetch Customer.
+     *
+     * See {@link #init(PaymentSessionListener, PaymentSessionConfig, Bundle, boolean)}
+     */
+    public boolean init(@NonNull PaymentSessionListener listener,
+                        @NonNull PaymentSessionConfig paymentSessionConfig) {
+        return init(listener, paymentSessionConfig, null, true);
     }
 
     /**
