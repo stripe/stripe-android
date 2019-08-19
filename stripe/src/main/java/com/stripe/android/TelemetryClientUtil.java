@@ -55,7 +55,7 @@ final class TelemetryClientUtil {
 
     @NonNull
     Map<String, Object> createTelemetryMap() {
-        final Map<String, Object> telemetryMap = new HashMap<>();
+        final Map<String, Object> telemetryMap = new HashMap<>(5);
         telemetryMap.put("v2", 1);
         telemetryMap.put("tag", BuildConfig.VERSION_NAME);
         telemetryMap.put("src", "android-sdk");
@@ -66,7 +66,7 @@ final class TelemetryClientUtil {
 
     @NonNull
     private Map<String, Object> createFirstMap() {
-        final Map<String, Object> firstMap = new HashMap<>();
+        final Map<String, Object> firstMap = new HashMap<>(4);
         firstMap.put("c", createSingleValuePair(Locale.getDefault().toString()));
         firstMap.put("d", createSingleValuePair(getAndroidVersionString()));
         firstMap.put("f", createSingleValuePair(getScreen()));
@@ -76,7 +76,7 @@ final class TelemetryClientUtil {
 
     @NonNull
     private Map<String, Object> createSecondMap() {
-        final Map<String, Object> secondMap = new HashMap<>();
+        final Map<String, Object> secondMap = new HashMap<>(9);
         secondMap.put("d", getHashedMuid());
         secondMap.put("k", mPackageName);
         secondMap.put("o", Build.VERSION.RELEASE);
@@ -158,19 +158,23 @@ final class TelemetryClientUtil {
     }
 
     @NonNull
-    String getHashedId() {
-        final String id = mUidSupplier.get().value;
-        if (StripeTextUtils.isBlank(id)) {
+    String getHashedUid() {
+        final String uid = mUidSupplier.get().value;
+        if (StripeTextUtils.isBlank(uid)) {
             return "";
         }
 
-        final String hashId = StripeTextUtils.shaHashInput(id);
-        return hashId == null ? "" : hashId;
+        return ObjectUtils.getOrDefault(
+                StripeTextUtils.shaHashInput(uid),
+                ""
+        );
     }
 
     @NonNull
     private String getHashedMuid() {
-        final String hashed = StripeTextUtils.shaHashInput(mPackageName + getHashedId());
-        return hashed == null ? "" : hashed;
+        return ObjectUtils.getOrDefault(
+                StripeTextUtils.shaHashInput(mPackageName + getHashedUid()),
+                ""
+        );
     }
 }
