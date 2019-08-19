@@ -658,7 +658,7 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
 
     private void updateDrawable(@DrawableRes int iconResourceId, boolean needsTint) {
         final Drawable icon = ContextCompat.getDrawable(getContext(), iconResourceId);
-        Drawable[] drawables = mCardNumberEditText.getCompoundDrawables();
+        Drawable[] drawables = mCardNumberEditText.getCompoundDrawablesRelative();
         Drawable original = drawables[0];
         if (original == null) {
             return;
@@ -682,7 +682,7 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
         }
 
         mCardNumberEditText.setCompoundDrawablePadding(iconPadding);
-        mCardNumberEditText.setCompoundDrawables(compatIcon, null, null, null);
+        mCardNumberEditText.setCompoundDrawablesRelative(compatIcon, null, null, null);
     }
 
 }
