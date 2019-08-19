@@ -5,6 +5,8 @@ import android.content.Context;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 
+import com.stripe.android.utils.ObjectUtils;
+
 final class UidSupplier implements Supplier<StripeUid> {
     @NonNull private final ContentResolver mContentResolver;
 
@@ -15,7 +17,8 @@ final class UidSupplier implements Supplier<StripeUid> {
     @SuppressWarnings("HardwareIds")
     @NonNull
     public StripeUid get() {
-        return StripeUid.create(
-                Settings.Secure.getString(mContentResolver, Settings.Secure.ANDROID_ID));
+        final String androidId =
+                Settings.Secure.getString(mContentResolver, Settings.Secure.ANDROID_ID);
+        return StripeUid.create(ObjectUtils.getOrDefault(androidId, ""));
     }
 }

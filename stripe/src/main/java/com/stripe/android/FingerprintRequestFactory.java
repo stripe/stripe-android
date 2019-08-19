@@ -22,7 +22,7 @@ final class FingerprintRequestFactory implements Factory0<FingerprintRequest> {
     public FingerprintRequest create() {
         return new FingerprintRequest(
                 mTelemetryClientUtil.createTelemetryMap(),
-                mTelemetryClientUtil.getHashedId()
+                mTelemetryClientUtil.getHashedUid()
         );
     }
 }

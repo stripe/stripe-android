@@ -5,6 +5,11 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
+import android.util.DisplayMetrics;
+
+import com.stripe.android.utils.ObjectUtils;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -14,38 +19,71 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
-class TelemetryClientUtil {
-
-    @NonNull private final Context mContext;
-    @NonNull private final Supplier<StripeUid> mUidSupplier;
+final class TelemetryClientUtil {
+    @NonNull
+    private final DisplayMetrics mDisplayMetrics;
+    @NonNull
+    private final Supplier<StripeUid> mUidSupplier;
+    @NonNull
+    private final String mPackageName;
+    @NonNull
+    private final PackageManager mPackageManager;
+    @NonNull
+    private final String mTimeZone;
 
     TelemetryClientUtil(@NonNull Context context) {
-        this(context, new UidSupplier(context));
+        this(context.getApplicationContext(), new UidSupplier(context));
     }
 
     TelemetryClientUtil(@NonNull Context context, @NonNull Supplier<StripeUid> uidSupplier) {
-        mContext = context.getApplicationContext();
+        this(
+                uidSupplier,
+                context.getResources().getDisplayMetrics(),
+                ObjectUtils.getOrDefault(context.getPackageName(), ""),
+                context.getPackageManager(),
+                getTimeZone()
+        );
+    }
+
+    @VisibleForTesting
+    TelemetryClientUtil(@NonNull Supplier<StripeUid> uidSupplier,
+                        @NonNull DisplayMetrics displayMetrics,
+                        @NonNull String packageName,
+                        @NonNull PackageManager packageManager,
+                        @NonNull String timeZone) {
+        mDisplayMetrics = displayMetrics;
         mUidSupplier = uidSupplier;
+        mPackageName = packageName;
+        mPackageManager = packageManager;
+        mTimeZone = timeZone;
     }
 
     @NonNull
     Map<String, Object> createTelemetryMap() {
-        Map<String, Object> telemetryMap = new HashMap<>();
-        Map<String, Object> firstMap = new HashMap<>();
-        Map<String, Object> secondMap = new HashMap<>();
+        final Map<String, Object> telemetryMap = new HashMap<>(5);
         telemetryMap.put("v2", 1);
         telemetryMap.put("tag", BuildConfig.VERSION_NAME);
         telemetryMap.put("src", "android-sdk");
+        telemetryMap.put("a", createFirstMap());
+        telemetryMap.put("b", createSecondMap());
+        return telemetryMap;
+    }
 
+    @NonNull
+    private Map<String, Object> createFirstMap() {
+        final Map<String, Object> firstMap = new HashMap<>(4);
         firstMap.put("c", createSingleValuePair(Locale.getDefault().toString()));
         firstMap.put("d", createSingleValuePair(getAndroidVersionString()));
         firstMap.put("f", createSingleValuePair(getScreen()));
-        firstMap.put("g", createSingleValuePair(getTimeZoneString()));
-        telemetryMap.put("a", firstMap);
+        firstMap.put("g", createSingleValuePair(mTimeZone));
+        return firstMap;
+    }
 
+    @NonNull
+    private Map<String, Object> createSecondMap() {
+        final Map<String, Object> secondMap = new HashMap<>(9);
         secondMap.put("d", getHashedMuid());
-        String packageName = getPackageName();
-        secondMap.put("k", packageName);
+        secondMap.put("k", mPackageName);
         secondMap.put("o", Build.VERSION.RELEASE);
         secondMap.put("p", Build.VERSION.SDK_INT);
         secondMap.put("q", Build.MANUFACTURER);
@@ -53,38 +91,49 @@ class TelemetryClientUtil {
         secondMap.put("s", Build.MODEL);
         secondMap.put("t", Build.TAGS);
 
-        if (mContext.getPackageName() != null) {
-            try {
-                final PackageInfo pInfo = mContext.getPackageManager()
-                        .getPackageInfo(packageName, 0);
-                secondMap.put("l", pInfo.versionName);
-            } catch (PackageManager.NameNotFoundException ignored) { }
+        final String versionName = getVersionName();
+        if (versionName != null) {
+            secondMap.put("l", versionName);
         }
 
-        telemetryMap.put("b", secondMap);
-        return telemetryMap;
+        return secondMap;
+    }
+
+    @Nullable
+    private String getVersionName() {
+        if (!StripeTextUtils.isBlank(mPackageName)) {
+            try {
+                final PackageInfo packageInfo =
+                        mPackageManager.getPackageInfo(mPackageName, 0);
+                if (packageInfo != null && packageInfo.versionName != null) {
+                    return packageInfo.versionName;
+                }
+            } catch (PackageManager.NameNotFoundException ignored) {
+            }
+        }
+
+        return null;
     }
 
     @NonNull
-    private static Map<String, Object> createSingleValuePair(Object value) {
-        Map<String, Object> singleItemMap = new HashMap<>();
+    private static Map<String, Object> createSingleValuePair(@NonNull String value) {
+        final Map<String, Object> singleItemMap = new HashMap<>();
         singleItemMap.put("v", value);
         return singleItemMap;
     }
 
     @NonNull
-    private static String getTimeZoneString() {
-        int minutes =
+    private static String getTimeZone() {
+        final int minutes =
                 (int) TimeUnit.MINUTES.convert(TimeZone.getDefault().getRawOffset(),
                         TimeUnit.MILLISECONDS);
         if (minutes % 60 == 0) {
-            int hours = minutes / 60;
-            return String.valueOf(hours);
+            return String.valueOf(minutes / 60);
         }
 
-        BigDecimal decimalValue = new BigDecimal(minutes);
-        decimalValue = decimalValue.setScale(2, BigDecimal.ROUND_HALF_EVEN);
-        BigDecimal decHours = decimalValue.divide(
+        final BigDecimal decimalValue = new BigDecimal(minutes)
+                .setScale(2, BigDecimal.ROUND_HALF_EVEN);
+        final BigDecimal decHours = decimalValue.divide(
                 new BigDecimal(60),
                 new MathContext(2))
                 .setScale(2, BigDecimal.ROUND_HALF_EVEN);
@@ -93,49 +142,44 @@ class TelemetryClientUtil {
 
     @NonNull
     private String getScreen() {
-        if (mContext.getResources() == null) {
-            return "";
-        }
-
-        int width = mContext.getResources().getDisplayMetrics().widthPixels;
-        int height = mContext.getResources().getDisplayMetrics().heightPixels;
-        int density = mContext.getResources().getDisplayMetrics().densityDpi;
-
-        return String.format(Locale.ENGLISH, "%dw_%dh_%ddpi", width, height, density);
+        return String.format(
+                Locale.ENGLISH,
+                "%dw_%dh_%ddpi",
+                mDisplayMetrics.widthPixels,
+                mDisplayMetrics.heightPixels,
+                mDisplayMetrics.densityDpi
+        );
     }
 
     @NonNull
     private static String getAndroidVersionString() {
-        final String delimiter = " ";
-        return "Android" + delimiter +
-                Build.VERSION.RELEASE + delimiter +
-                Build.VERSION.CODENAME + delimiter +
-                Build.VERSION.SDK_INT;
+        return String.format(
+                Locale.US,
+                "Android %s %s %s",
+                Build.VERSION.RELEASE,
+                Build.VERSION.CODENAME,
+                Build.VERSION.SDK_INT
+        );
     }
 
     @NonNull
-    String getHashedId() {
-        final String id = mUidSupplier.get().value;
-        if (StripeTextUtils.isBlank(id)) {
+    String getHashedUid() {
+        final String uid = mUidSupplier.get().value;
+        if (StripeTextUtils.isBlank(uid)) {
             return "";
         }
 
-        final String hashId = StripeTextUtils.shaHashInput(id);
-        return hashId == null ? "" : hashId;
+        return ObjectUtils.getOrDefault(
+                StripeTextUtils.shaHashInput(uid),
+                ""
+        );
     }
 
     @NonNull
     private String getHashedMuid() {
-        final String hashed = StripeTextUtils.shaHashInput(getPackageName() + getHashedId());
-        return hashed == null ? "" : hashed;
-    }
-
-    @NonNull
-    private String getPackageName() {
-        if (mContext.getPackageName() == null) {
-            return "";
-        }
-        return mContext.getPackageName();
+        return ObjectUtils.getOrDefault(
+                StripeTextUtils.shaHashInput(mPackageName + getHashedUid()),
+                ""
+        );
     }
 }
-
