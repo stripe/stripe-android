@@ -41,7 +41,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     public static final String EXTRA_SELECTED_PAYMENT = "selected_payment";
     public static final String TOKEN_PAYMENT_METHODS_ACTIVITY = "PaymentMethodsActivity";
 
-    static final int REQUEST_CODE_ADD_PAYMENT_METHOD = 700;
+    static final int REQUEST_CODE_CREATE_PAYMENT_METHOD = 700;
     private boolean mCommunicating;
     private PaymentMethodsAdapter mAdapter;
     private ProgressBar mProgressBar;
@@ -108,18 +108,35 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_ADD_PAYMENT_METHOD && resultCode == RESULT_OK) {
-            initLoggingTokens();
+        if (requestCode == REQUEST_CODE_CREATE_PAYMENT_METHOD && resultCode == RESULT_OK) {
+            onPaymentMethodCreated(data);
+        }
+    }
 
-            if (data.hasExtra(EXTRA_NEW_PAYMENT_METHOD)) {
-                final PaymentMethod paymentMethod =
-                        data.getParcelableExtra(EXTRA_NEW_PAYMENT_METHOD);
-                getCustomerPaymentMethods(paymentMethod != null ? paymentMethod.id : null);
+    private void onPaymentMethodCreated(@Nullable Intent data) {
+        initLoggingTokens();
+
+        if (data != null && data.hasExtra(EXTRA_NEW_PAYMENT_METHOD)) {
+            final PaymentMethod paymentMethod =
+                    data.getParcelableExtra(EXTRA_NEW_PAYMENT_METHOD);
+
+            final PaymentMethod.Type type = paymentMethod != null ?
+                    PaymentMethod.Type.lookup(paymentMethod.type) : null;
+            if (type != null && !type.isReusable) {
+                // If the added Payment Method is not reusable, it also can't be attached to a
+                // customer, so immediately return to the launching host with the new
+                // Payment Method.
+                setResult(RESULT_OK,
+                        new Intent().putExtra(EXTRA_SELECTED_PAYMENT, paymentMethod));
+                finish();
             } else {
-                getCustomerPaymentMethods(null);
+                // Refresh the list of Payment Methods with the new Payment Method.
+                getCustomerPaymentMethods(paymentMethod != null ? paymentMethod.id : null);
             }
+        } else {
+            getCustomerPaymentMethods(null);
         }
     }
 

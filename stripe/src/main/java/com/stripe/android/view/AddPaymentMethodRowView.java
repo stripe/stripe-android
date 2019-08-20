@@ -20,7 +20,7 @@ abstract class AddPaymentMethodRowView extends FrameLayout {
             @Override
             public void onClick(@NonNull View view) {
                 new AddPaymentMethodActivityStarter(activity).startForResult(
-                        PaymentMethodsActivity.REQUEST_CODE_ADD_PAYMENT_METHOD, args);
+                        PaymentMethodsActivity.REQUEST_CODE_CREATE_PAYMENT_METHOD, args);
             }
         });
     }
