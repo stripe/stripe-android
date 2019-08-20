@@ -24,7 +24,7 @@ public class AddPaymentMethodFpxView extends AddPaymentMethodView {
     private AddPaymentMethodFpxView(@NonNull Context context) {
         super(context);
         inflate(getContext(), R.layout.add_payment_method_fpx_layout, this);
-        mAdapter = new Adapter();
+        mAdapter = new Adapter(new ThemeConfig(context));
         final RecyclerView recyclerView = findViewById(R.id.fpx_list);
         recyclerView.setAdapter(mAdapter);
         recyclerView.setHasFixedSize(true);
@@ -50,9 +50,12 @@ public class AddPaymentMethodFpxView extends AddPaymentMethodView {
     private static final class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
         private int mSelectedPosition = -1;
 
-        private Adapter() {
+        @NonNull private final ThemeConfig mThemeConfig;
+
+        private Adapter(@NonNull ThemeConfig themeConfig) {
             super();
             setHasStableIds(true);
+            mThemeConfig = themeConfig;
         }
 
         @NonNull
@@ -60,17 +63,25 @@ public class AddPaymentMethodFpxView extends AddPaymentMethodView {
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int i) {
             final View itemView = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.fpx_bank, parent, false);
-            return new ViewHolder(itemView);
+            return new ViewHolder(itemView, mThemeConfig);
         }
 
         @Override
         public void onBindViewHolder(@NonNull final ViewHolder viewHolder, int i) {
+            viewHolder.setSelected(i == mSelectedPosition);
             viewHolder.update(FpxBank.values()[i].displayName);
             viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     // TODO(mshafrir): update UI for selected bank
-                    mSelectedPosition = viewHolder.getAdapterPosition();
+                    final int currentPosition = viewHolder.getAdapterPosition();
+                    if (currentPosition != mSelectedPosition) {
+                        final int prevSelectedPosition = mSelectedPosition;
+                        mSelectedPosition = currentPosition;
+                        viewHolder.setSelected(true);
+                        notifyItemChanged(prevSelectedPosition);
+                        notifyItemChanged(currentPosition);
+                    }
                 }
             });
         }
@@ -96,15 +107,20 @@ public class AddPaymentMethodFpxView extends AddPaymentMethodView {
 
         private static final class ViewHolder extends RecyclerView.ViewHolder {
             @NonNull private final TextView mName;
+            @NonNull private final ThemeConfig mThemeConfig;
 
-            private ViewHolder(@NonNull View itemView) {
+            private ViewHolder(@NonNull View itemView, @NonNull ThemeConfig themeConfig) {
                 super(itemView);
-
                 mName = itemView.findViewById(R.id.name);
+                mThemeConfig = themeConfig;
             }
 
             void update(@NonNull String bankName) {
                 mName.setText(bankName);
+            }
+
+            void setSelected(boolean isSelected) {
+                mName.setTextColor(mThemeConfig.getTextColor(isSelected));
             }
         }
     }
