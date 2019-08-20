@@ -79,6 +79,17 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
             this.code = code;
             this.isReusable = isReusable;
         }
+
+        @Nullable
+        public static Type lookup(@Nullable String code) {
+            for (Type type : values()) {
+                if (type.code.equals(code)) {
+                    return type;
+                }
+            }
+
+            return null;
+        }
     }
 
     private PaymentMethod(@NonNull Builder builder) {
