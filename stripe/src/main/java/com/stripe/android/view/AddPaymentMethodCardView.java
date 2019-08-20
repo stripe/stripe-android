@@ -19,11 +19,11 @@ import com.stripe.android.model.PaymentMethodCreateParams;
  *
  * See {@link AddPaymentMethodActivity} for usage.
  */
-public class AddPaymentMethodCardView extends AddPaymentMethodView {
+final class AddPaymentMethodCardView extends AddPaymentMethodView {
     @NonNull private final CardMultilineWidget mCardMultilineWidget;
 
     @NonNull
-    public static AddPaymentMethodCardView create(@NonNull Context context,
+    static AddPaymentMethodCardView create(@NonNull Context context,
                                                   boolean shouldShowPostalCode) {
         return new AddPaymentMethodCardView(context, null, 0, shouldShowPostalCode);
     }
