@@ -1,6 +1,8 @@
 package com.stripe.android.view;
 
 import android.content.Context;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -13,17 +15,21 @@ import android.widget.TextView;
 import com.stripe.android.R;
 import com.stripe.android.model.PaymentMethodCreateParams;
 
-public class AddPaymentMethodFpxView extends AddPaymentMethodView {
+class AddPaymentMethodFpxView extends AddPaymentMethodView {
     @NonNull private final Adapter mAdapter;
 
     @NonNull
-    public static AddPaymentMethodFpxView create(@NonNull Context context) {
+    static AddPaymentMethodFpxView create(@NonNull Context context) {
         return new AddPaymentMethodFpxView(context);
     }
 
     private AddPaymentMethodFpxView(@NonNull Context context) {
         super(context);
         inflate(getContext(), R.layout.add_payment_method_fpx_layout, this);
+
+        // an id is required for state to be saved
+        setId(R.id.payment_methods_add_fpx);
+
         mAdapter = new Adapter(new ThemeConfig(context));
         final RecyclerView recyclerView = findViewById(R.id.fpx_list);
         recyclerView.setAdapter(mAdapter);
@@ -45,6 +51,22 @@ public class AddPaymentMethodFpxView extends AddPaymentMethodView {
                         .setBank(fpxBank.code)
                         .build()
         );
+    }
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        return new SavedState(super.onSaveInstanceState(), mAdapter.mSelectedPosition);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        if (state instanceof SavedState) {
+            final SavedState savedState = (SavedState) state;
+            super.onRestoreInstanceState(savedState.getSuperState());
+            mAdapter.updateSelected(savedState.selectedPosition);
+        } else {
+            super.onRestoreInstanceState(state);
+        }
     }
 
     private static final class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
@@ -105,6 +127,11 @@ public class AddPaymentMethodFpxView extends AddPaymentMethodView {
             }
         }
 
+        private void updateSelected(int position) {
+            mSelectedPosition = position;
+            notifyItemChanged(position);
+        }
+
         private static final class ViewHolder extends RecyclerView.ViewHolder {
             @NonNull private final TextView mName;
             @NonNull private final ThemeConfig mThemeConfig;
@@ -146,5 +173,38 @@ public class AddPaymentMethodFpxView extends AddPaymentMethodView {
             this.code = code;
             this.displayName = displayName;
         }
+    }
+
+    private static class SavedState extends BaseSavedState {
+        final int selectedPosition;
+
+        private SavedState(@Nullable Parcelable superState, int selectedPosition) {
+            super(superState);
+            this.selectedPosition = selectedPosition;
+        }
+
+        private SavedState(@NonNull Parcel in) {
+            super(in);
+            this.selectedPosition = in.readInt();
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeInt(selectedPosition);
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR =
+                new Parcelable.Creator<SavedState>() {
+                    @NonNull
+                    public SavedState createFromParcel(@NonNull Parcel in) {
+                        return new SavedState(in);
+                    }
+
+                    @NonNull
+                    public SavedState[] newArray(int size) {
+                        return new SavedState[size];
+                    }
+                };
     }
 }
