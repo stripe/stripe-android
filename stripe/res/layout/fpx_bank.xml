@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingEnd="@dimen/list_row_end_padding"
+    android:paddingStart="@dimen/list_row_start_padding"
+    android:minHeight="@dimen/list_row_height">
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical|start"
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium" />
+</LinearLayout>

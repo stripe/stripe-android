@@ -31,7 +31,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/payment_methods_toolbar"
-        android:layout_marginTop="@dimen/masked_card_list_top_margin"
+        android:layout_marginTop="@dimen/list_top_margin"
         />
 
     <LinearLayout
@@ -41,8 +41,8 @@
         android:layout_below="@id/payment_methods_recycler"
         android:layout_marginTop="@dimen/activity_total_margin"
         android:focusableInTouchMode="true"
-        android:paddingStart="@dimen/masked_card_row_start_padding"
-        android:paddingEnd="@dimen/masked_card_row_end_padding"
+        android:paddingStart="@dimen/list_row_start_padding"
+        android:paddingEnd="@dimen/list_row_end_padding"
         android:paddingTop="@dimen/add_payment_method_vertical_padding"
         android:paddingBottom="@dimen/add_payment_method_vertical_padding"
         android:background="@drawable/simple_button_background"
@@ -62,7 +62,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginStart="@dimen/masked_card_row_start_padding"
+            android:layout_marginStart="@dimen/list_row_start_padding"
             android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
             android:text="@string/payment_method_add_new_card"
             android:textColor="?attr/colorAccent"

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="acc_label_card_number">Card number</string>
     <string name="acc_label_expiry_date">Expiration date</string>
     <string name="acc_label_zip">ZIP Code</string>
@@ -108,6 +108,7 @@
     <!--Human-friendly label for something with $0 price-->
     <string name="price_free">Free</string>
     <string name="title_add_a_card">Add a Card</string>
+    <string name="title_bank_account" tools:ignore="MissingTranslation">Bank Account</string>
     <string name="title_payment_method">Payment Method</string>
     <!--Screen title telling users they should add an address-->
     <string name="title_add_an_address">Add an Address</string>
