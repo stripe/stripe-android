@@ -28,15 +28,15 @@ final class AddPaymentMethodCardView extends AddPaymentMethodView {
         return new AddPaymentMethodCardView(context, null, 0, shouldShowPostalCode);
     }
 
-    public AddPaymentMethodCardView(@NonNull Context context) {
+    AddPaymentMethodCardView(@NonNull Context context) {
         this(context, null);
     }
 
-    public AddPaymentMethodCardView(@NonNull Context context, @Nullable AttributeSet attrs) {
+    AddPaymentMethodCardView(@NonNull Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public AddPaymentMethodCardView(@NonNull Context context, @Nullable AttributeSet attrs,
+    AddPaymentMethodCardView(@NonNull Context context, @Nullable AttributeSet attrs,
                                     int defStyleAttr) {
         this(context, attrs, defStyleAttr, false);
     }

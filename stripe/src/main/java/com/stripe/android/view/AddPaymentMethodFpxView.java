@@ -196,9 +196,12 @@ final class AddPaymentMethodFpxView extends AddPaymentMethodView {
 
         public static final Parcelable.Creator<SavedState> CREATOR =
                 new Parcelable.Creator<SavedState>() {
-                    public SavedState createFromParcel(Parcel in) {
+                    @NonNull
+                    public SavedState createFromParcel(@NonNull Parcel in) {
                         return new SavedState(in);
                     }
+
+                    @NonNull
                     public SavedState[] newArray(int size) {
                         return new SavedState[size];
                     }
