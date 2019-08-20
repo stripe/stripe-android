@@ -2,4 +2,5 @@
 
 <resources>
     <item type="id" name="default_reader_id" />
+    <item type="id" name="payment_methods_add_card" />
 </resources>
