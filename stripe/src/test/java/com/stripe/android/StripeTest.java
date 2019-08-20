@@ -1197,7 +1197,7 @@ public class StripeTest {
                 .build();
 
         final PaymentMethodCreateParams paymentMethodCreateParams =
-                PaymentMethodCreateParamsFixtures.DEFAULT;
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD;
         final Stripe stripe = createStripe();
         final PaymentMethod createdPaymentMethod = stripe.createPaymentMethodSynchronous(
                 paymentMethodCreateParams);

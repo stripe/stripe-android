@@ -103,7 +103,7 @@ public class StripeNetworkUtilsTest {
     public void addUidParamsToPaymentIntent_withPaymentMethodParams_addsUidAtRightLevel() {
         final Map<String, Object> existingMap = new HashMap<>();
         final Map<String, Object> paymentMethodCreateParamsMap =
-                PaymentMethodCreateParamsFixtures.DEFAULT.toParamMap();
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD.toParamMap();
         existingMap.put(ConfirmPaymentIntentParams.API_PARAM_PAYMENT_METHOD_DATA,
                 paymentMethodCreateParamsMap);
 

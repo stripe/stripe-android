@@ -26,10 +26,17 @@ public final class PaymentMethodCreateParamsFixtures {
                             .build())
                     .build();
 
-    public static final PaymentMethodCreateParams DEFAULT =
+    public static final PaymentMethodCreateParams DEFAULT_CARD =
             PaymentMethodCreateParams.create(
                     CARD,
                     BILLING_DETAILS
+            );
+
+    public static final PaymentMethodCreateParams DEFAULT_FPX =
+            PaymentMethodCreateParams.create(
+                    new PaymentMethodCreateParams.Fpx.Builder()
+                            .setBank("hsbc")
+                            .build()
             );
 
     @NonNull

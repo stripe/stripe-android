@@ -74,7 +74,7 @@ public class ConfirmPaymentIntentParamsTest {
     @Test
     public void createWithPaymentMethodCreateParams_hasExpectedFields() {
         final PaymentMethodCreateParams paymentMethodCreateParams =
-                PaymentMethodCreateParamsFixtures.DEFAULT;
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD;
         final ConfirmPaymentIntentParams params = ConfirmPaymentIntentParams
                 .createWithPaymentMethodCreateParams(paymentMethodCreateParams,
                         CLIENT_SECRET, RETURN_URL);
@@ -100,7 +100,7 @@ public class ConfirmPaymentIntentParamsTest {
     @Test
     public void createConfirmPaymentIntentWithPaymentMethodCreateParams_withSavePaymentMethod_hasExpectedFields() {
         final PaymentMethodCreateParams paymentMethodCreateParams =
-                PaymentMethodCreateParamsFixtures.DEFAULT;
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD;
         final ConfirmPaymentIntentParams params = ConfirmPaymentIntentParams
                 .createWithPaymentMethodCreateParams(paymentMethodCreateParams,
                         CLIENT_SECRET, RETURN_URL, true);
@@ -222,7 +222,7 @@ public class ConfirmPaymentIntentParamsTest {
         extraParams.put("key", "value");
         final ConfirmPaymentIntentParams params =
                 ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-                        PaymentMethodCreateParamsFixtures.DEFAULT, CLIENT_SECRET, RETURN_URL, true, extraParams
+                        PaymentMethodCreateParamsFixtures.DEFAULT_CARD, CLIENT_SECRET, RETURN_URL, true, extraParams
                 );
 
         assertEquals(params, params.toBuilder().build());

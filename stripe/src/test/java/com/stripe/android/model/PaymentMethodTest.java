@@ -127,19 +127,8 @@ public class PaymentMethodTest {
 
     @Test
     public void toJson_withFpx_shouldCreateExpectedObject() throws JSONException {
-        final PaymentMethod paymentMethod = new PaymentMethod.Builder()
-                .setId("pm_1F5GlnH8dsfnfKo3gtixzcq0")
-                .setCreated(1565290527L)
-                .setLiveMode(true)
-                .setType("fpx")
-                .setBillingDetails(PaymentMethodFixtures.BILLING_DETAILS)
-                .setFpx(new PaymentMethod.Fpx.Builder()
-                        .setBank("hsbc")
-                        .setAccountHolderType("individual")
-                        .build())
-                .build();
-
-        assertEquals(paymentMethod, PaymentMethod.fromJson(new JSONObject(PM_FPX_JSON)));
+        assertEquals(PaymentMethodFixtures.FPX_PAYMENT_METHOD,
+                PaymentMethod.fromJson(new JSONObject(PM_FPX_JSON)));
     }
 
     @Test

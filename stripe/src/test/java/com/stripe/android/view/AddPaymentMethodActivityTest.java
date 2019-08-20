@@ -2,6 +2,7 @@ package com.stripe.android.view;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -16,6 +17,8 @@ import com.stripe.android.Stripe;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures;
+import com.stripe.android.model.PaymentMethodFixtures;
 import com.stripe.android.model.PaymentMethodTest;
 
 import org.junit.After;
@@ -43,7 +46,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -97,6 +100,7 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
 
     private void setUpForLocalTest() {
         mActivity = createActivity(new AddPaymentMethodActivityStarter.Args.Builder()
+                .setPaymentMethodType(PaymentMethod.Type.Card)
                 .build());
         mCardMultilineWidget = mActivity.findViewById(R.id.add_source_card_entry_widget);
         mProgressBar = mActivity.findViewById(R.id.progress_bar_as);
@@ -105,18 +109,22 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         mShadowActivity = shadowOf(mActivity);
     }
 
-    private void setUpForProxySessionTest() {
+    private void setUpForProxySessionTest(@NonNull PaymentMethod.Type paymentMethodType) {
         mActivity = createActivity(new AddPaymentMethodActivityStarter.Args.Builder()
                 .setShouldUpdateCustomer(true)
                 .setShouldRequirePostalCode(true)
                 .setIsPaymentSessionActive(true)
                 .setShouldInitCustomerSessionTokens(false)
-                .setPaymentMethodType(PaymentMethod.Type.Card)
+                .setPaymentMethodType(paymentMethodType)
                 .setPaymentConfiguration(PaymentConfiguration.getInstance())
                 .build());
-        mCardMultilineWidget = mActivity.findViewById(R.id.add_source_card_entry_widget);
+
         mProgressBar = mActivity.findViewById(R.id.progress_bar_as);
-        mWidgetControlGroup = new CardMultilineWidgetTest.WidgetControlGroup(mCardMultilineWidget);
+
+        if (PaymentMethod.Type.Card == paymentMethodType) {
+            mCardMultilineWidget = mActivity.findViewById(R.id.add_source_card_entry_widget);
+            mWidgetControlGroup = new CardMultilineWidgetTest.WidgetControlGroup(mCardMultilineWidget);
+        }
 
         mShadowActivity = shadowOf(mActivity);
         mActivity.initCustomerSessionTokens();
@@ -131,7 +139,7 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
 
     @Test
     public void testConstructionForCustomerSession() {
-        setUpForProxySessionTest();
+        setUpForProxySessionTest(PaymentMethod.Type.Card);
         assertNotNull(mCardMultilineWidget);
         assertEquals(View.VISIBLE, mWidgetControlGroup.postalCodeInputLayout.getVisibility());
     }
@@ -139,52 +147,69 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
     @Test
     public void softEnterKey_whenDataIsNotValid_doesNotHideKeyboardAndDoesNotFinish() {
         setUpForLocalTest();
-        // Note: these values do not match what is being mock-sent back in the result.
-        mWidgetControlGroup.cardNumberEditText.append(CardInputTestActivity.VALID_AMEX_NO_SPACES);
-        mWidgetControlGroup.expiryDateEditText.append("12");
-        mWidgetControlGroup.expiryDateEditText.append("50");
-        mWidgetControlGroup.cvcEditText.append("12");
-
-
         assertEquals(View.GONE, mProgressBar.getVisibility());
-
-        mActivity.createPaymentMethod(mStripe);
+        mActivity.createPaymentMethod(mStripe, null);
         verify(mStripe, never()).createPaymentMethod(
-                any(PaymentMethodCreateParams.class),
-                ArgumentMatchers.<ApiResultCallback<PaymentMethod>>any());
+                ArgumentMatchers.<PaymentMethodCreateParams>any(),
+                ArgumentMatchers.<ApiResultCallback<PaymentMethod>>any()
+        );
     }
 
     @Test
     public void addCardData_whenDataIsValidAndServerReturnsSuccess_finishesWithIntent() {
         setUpForLocalTest();
-
-        // Note: these values do not match what is being mock-sent back in the result.
-        mWidgetControlGroup.cardNumberEditText.append(CardInputTestActivity.VALID_AMEX_NO_SPACES);
-        mWidgetControlGroup.expiryDateEditText.append("12");
-        mWidgetControlGroup.expiryDateEditText.append("50");
-        mWidgetControlGroup.cvcEditText.append("1234");
-
         assertEquals(View.GONE, mProgressBar.getVisibility());
-
-        mActivity.createPaymentMethod(mStripe);
+        mActivity.createPaymentMethod(mStripe, PaymentMethodCreateParamsFixtures.DEFAULT_CARD);
         verifyFinishesWithIntent();
     }
 
     @Test
-    public void addCardData_whenServerReturnsSuccessAndUpdatesCustomer_finishesWithIntent() {
-        setUpForProxySessionTest();
+    public void addFpx_whenServerReturnsSuccessAndUpdatesCustomer_finishesWithIntent() {
+        setUpForProxySessionTest(PaymentMethod.Type.Fpx);
 
-        // Note: these values do not match what is being mock-sent back in the result.
-        mWidgetControlGroup.cardNumberEditText.append(CardInputTestActivity.VALID_AMEX_NO_SPACES);
-        mWidgetControlGroup.expiryDateEditText.append("12");
-        mWidgetControlGroup.expiryDateEditText.append("50");
-        mWidgetControlGroup.cvcEditText.append("1234");
-        mWidgetControlGroup.postalCodeEditText.append("90210");
+        assertEquals(View.GONE, mProgressBar.getVisibility());
+
+        mActivity.createPaymentMethod(mStripe, PaymentMethodCreateParamsFixtures.DEFAULT_FPX);
+        verify(mStripe).createPaymentMethod(
+                mParamsArgumentCaptor.capture(),
+                mCallbackArgumentCaptor.capture());
+        final PaymentMethodCreateParams params = mParamsArgumentCaptor.getValue();
+        final ApiResultCallback<PaymentMethod> callback = mCallbackArgumentCaptor.getValue();
+        assertNotNull(params);
+        assertNotNull(callback);
+
+        assertEquals(View.VISIBLE, mProgressBar.getVisibility());
+
+        final PaymentMethod expectedPaymentMethod = PaymentMethodFixtures.FPX_PAYMENT_METHOD;
+        assertNotNull(expectedPaymentMethod);
+        callback.onSuccess(expectedPaymentMethod);
+
+        verify(mCustomerSession).addProductUsageTokenIfValid(TOKEN_ADD_PAYMENT_METHOD_ACTIVITY);
+        verify(mCustomerSession).addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
+        verify(mCustomerSession, never()).attachPaymentMethod(
+                anyString(),
+                ArgumentMatchers.<CustomerSession.PaymentMethodRetrievalListener>any()
+        );
+
+        assertEquals(RESULT_OK, mShadowActivity.getResultCode());
+        final Intent intent = mShadowActivity.getResultIntent();
+
+        assertTrue(mActivity.isFinishing());
+        assertTrue(intent.hasExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD));
+        final PaymentMethod paymentMethod =
+                intent.getParcelableExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD);
+        assertNotNull(paymentMethod);
+        assertEquals(expectedPaymentMethod, paymentMethod);
+    }
+
+    @Test
+    public void addCardData_whenServerReturnsSuccessAndUpdatesCustomer_finishesWithIntent() {
+        setUpForProxySessionTest(PaymentMethod.Type.Card);
 
         assertEquals(View.GONE, mProgressBar.getVisibility());
         assertTrue(mCardMultilineWidget.isEnabled());
 
-        mActivity.createPaymentMethod(mStripe);
+        mActivity.createPaymentMethod(mStripe, PaymentMethodCreateParamsFixtures.DEFAULT_CARD);
         verify(mStripe).createPaymentMethod(
                 mParamsArgumentCaptor.capture(),
                 mCallbackArgumentCaptor.capture());
@@ -233,15 +258,9 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
                 Mockito.mock(StripeActivity.AlertMessageListener.class);
         mActivity.setAlertMessageListener(alertMessageListener);
 
-        // Note: these values do not match what is being mock-sent back in the result.
-        mWidgetControlGroup.cardNumberEditText.append(CardInputTestActivity.VALID_AMEX_NO_SPACES);
-        mWidgetControlGroup.expiryDateEditText.append("12");
-        mWidgetControlGroup.expiryDateEditText.append("50");
-        mWidgetControlGroup.cvcEditText.append("1234");
-
         assertEquals(View.GONE, mProgressBar.getVisibility());
 
-        mActivity.createPaymentMethod(mStripe);
+        mActivity.createPaymentMethod(mStripe, PaymentMethodCreateParamsFixtures.DEFAULT_CARD);
         verify(mStripe).createPaymentMethod(
                 mParamsArgumentCaptor.capture(),
                 mCallbackArgumentCaptor.capture());
@@ -265,22 +284,15 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
 
     @Test
     public void addCardData_whenPaymentMethodCreateWorksButAddToCustomerFails_showErrorNotFinish() {
-        setUpForProxySessionTest();
+        setUpForProxySessionTest(PaymentMethod.Type.Card);
         final StripeActivity.AlertMessageListener alertMessageListener =
                 Mockito.mock(StripeActivity.AlertMessageListener.class);
         mActivity.setAlertMessageListener(alertMessageListener);
 
-        // Note: these values do not match what is being mock-sent back in the result.
-        mWidgetControlGroup.cardNumberEditText.append(CardInputTestActivity.VALID_AMEX_NO_SPACES);
-        mWidgetControlGroup.expiryDateEditText.append("12");
-        mWidgetControlGroup.expiryDateEditText.append("50");
-        mWidgetControlGroup.cvcEditText.append("1234");
-        mWidgetControlGroup.postalCodeEditText.append("90210");
-
         assertEquals(View.GONE, mProgressBar.getVisibility());
         assertTrue(mCardMultilineWidget.isEnabled());
 
-        mActivity.createPaymentMethod(mStripe);
+        mActivity.createPaymentMethod(mStripe, PaymentMethodCreateParamsFixtures.DEFAULT_CARD);
         verify(mStripe).createPaymentMethod(
                 mParamsArgumentCaptor.capture(),
                 mCallbackArgumentCaptor.capture());
@@ -330,7 +342,8 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
     private void verifyFinishesWithIntent() {
         verify(mStripe).createPaymentMethod(
                 mParamsArgumentCaptor.capture(),
-                mCallbackArgumentCaptor.capture());
+                mCallbackArgumentCaptor.capture()
+        );
         final PaymentMethodCreateParams params = mParamsArgumentCaptor.getValue();
         final ApiResultCallback<PaymentMethod> callback = mCallbackArgumentCaptor.getValue();
         assertNotNull(params);

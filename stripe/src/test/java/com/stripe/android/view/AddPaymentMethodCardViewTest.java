@@ -33,7 +33,7 @@ public class AddPaymentMethodCardViewTest {
     @Test
     public void softEnterKey_whenDataIsValid_hidesKeyboardAndAttemptsToSave() {
         when(mAddPaymentMethodCardView.getCreateParams())
-                .thenReturn(PaymentMethodCreateParamsFixtures.DEFAULT);
+                .thenReturn(PaymentMethodCreateParamsFixtures.DEFAULT_CARD);
         new AddPaymentMethodCardView.OnEditorActionListenerImpl(
                 mActivity, mAddPaymentMethodCardView, mInputMethodManager)
                 .onEditorAction(null, EditorInfo.IME_ACTION_DONE, null);
