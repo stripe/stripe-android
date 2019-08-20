@@ -35,42 +35,9 @@
         />
 
     <LinearLayout
-        android:id="@+id/payment_methods_add_payment_container"
+        android:id="@+id/add_payment_methods"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/payment_methods_recycler"
-        android:layout_marginTop="@dimen/activity_total_margin"
-        android:focusableInTouchMode="true"
-        android:paddingStart="@dimen/list_row_start_padding"
-        android:paddingEnd="@dimen/list_row_end_padding"
-        android:paddingTop="@dimen/add_payment_method_vertical_padding"
-        android:paddingBottom="@dimen/add_payment_method_vertical_padding"
-        android:background="@drawable/simple_button_background"
-        android:orientation="horizontal">
-
-        <android.support.v7.widget.AppCompatImageView
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/masked_card_icon_width"
-            android:src="@drawable/ic_add_black_32dp"
-            android:tint="?attr/colorAccent"
-            android:focusableInTouchMode="false"
-            android:clickable="false"
-            android:layout_gravity="center_vertical|start"
-            />
-
-        <android.support.v7.widget.AppCompatTextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="@dimen/list_row_start_padding"
-            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
-            android:text="@string/payment_method_add_new_card"
-            android:textColor="?attr/colorAccent"
-            android:focusableInTouchMode="false"
-            android:clickable="false"
-            android:layout_gravity="center_vertical|start"
-            />
-
-    </LinearLayout>
-
+        android:layout_below="@id/payment_methods_recycler" />
 </RelativeLayout>

@@ -15,6 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.stripe.android.CustomerSession;
@@ -40,7 +41,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     public static final String EXTRA_SELECTED_PAYMENT = "selected_payment";
     public static final String TOKEN_PAYMENT_METHODS_ACTIVITY = "PaymentMethodsActivity";
 
-    static final int REQUEST_CODE_ADD_CARD = 700;
+    static final int REQUEST_CODE_ADD_PAYMENT_METHOD = 700;
     private boolean mCommunicating;
     private PaymentMethodsAdapter mAdapter;
     private ProgressBar mProgressBar;
@@ -77,22 +78,10 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         mCustomerSession = CustomerSession.getInstance();
         mStartedFromPaymentSession = args.isPaymentSessionActive;
 
-        final boolean shouldShowPostalField = args.shouldRequirePostalCode;
-        final View addCardView = findViewById(R.id.payment_methods_add_payment_container);
-        addCardView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(@NonNull View view) {
-                new AddPaymentMethodActivityStarter(PaymentMethodsActivity.this)
-                        .startForResult(REQUEST_CODE_ADD_CARD,
-                                new AddPaymentMethodActivityStarter.Args.Builder()
-                                        .setShouldUpdateCustomer(true)
-                                        .setShouldRequirePostalCode(shouldShowPostalField)
-                                        .setIsPaymentSessionActive(mStartedFromPaymentSession)
-                                        .setPaymentMethodType(PaymentMethod.Type.Card)
-                                        .setPaymentConfiguration(args.paymentConfiguration)
-                                        .build());
-            }
-        });
+        final ViewGroup addPaymentMethodsContainer = findViewById(R.id.add_payment_methods);
+
+        final View addCardView = new AddPaymentMethodCardRowView(this, args);
+        addPaymentMethodsContainer.addView(addCardView);
 
         final Toolbar toolbar = findViewById(R.id.payment_methods_toolbar);
         setSupportActionBar(toolbar);
@@ -118,7 +107,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_ADD_CARD && resultCode == RESULT_OK) {
+        if (requestCode == REQUEST_CODE_ADD_PAYMENT_METHOD && resultCode == RESULT_OK) {
             initLoggingTokens();
 
             if (data.hasExtra(EXTRA_NEW_PAYMENT_METHOD)) {

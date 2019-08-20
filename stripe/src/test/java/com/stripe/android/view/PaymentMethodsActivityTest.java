@@ -32,7 +32,7 @@ import java.util.List;
 import static android.app.Activity.RESULT_OK;
 import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
 import static com.stripe.android.view.PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT;
-import static com.stripe.android.view.PaymentMethodsActivity.REQUEST_CODE_ADD_CARD;
+import static com.stripe.android.view.PaymentMethodsActivity.REQUEST_CODE_ADD_PAYMENT_METHOD;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -49,10 +49,12 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(RobolectricTestRunner.class)
 public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActivity> {
+    private static final List<PaymentMethod> PAYMENT_METHODS = Arrays.asList(
+            PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON),
+            PaymentMethod.fromString(PaymentMethodsAdapterTest.PAYMENT_METHOD_JSON)
+    );
 
     @Mock private CustomerSession mCustomerSession;
-
-    private List<PaymentMethod> mPaymentMethods;
     @Captor private ArgumentCaptor<CustomerSession.PaymentMethodsRetrievalListener> mListenerArgumentCaptor;
 
     private PaymentMethodsActivity mPaymentMethodsActivity;
@@ -71,9 +73,6 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
         CustomerSessionTestHelper.setInstance(mCustomerSession);
         PaymentConfiguration.init(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
 
-        mPaymentMethods = Arrays.asList(PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON),
-                PaymentMethod.fromString(PaymentMethodsAdapterTest.PAYMENT_METHOD_JSON));
-
         mPaymentMethodsActivity = createActivity(
                 new PaymentMethodsActivityStarter.Args.Builder()
                         .setPaymentConfiguration(PaymentConfiguration.getInstance())
@@ -84,7 +83,7 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
         mProgressBar = mPaymentMethodsActivity.findViewById(R.id.payment_methods_progress_bar);
         mRecyclerView = mPaymentMethodsActivity.findViewById(R.id.payment_methods_recycler);
         mAddCardView = mPaymentMethodsActivity
-                .findViewById(R.id.payment_methods_add_payment_container);
+                .findViewById(R.id.payment_methods_add_card);
     }
 
     @After
@@ -110,7 +109,7 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
                 mListenerArgumentCaptor.getValue();
         assertNotNull(listener);
 
-        listener.onPaymentMethodsRetrieved(mPaymentMethods);
+        listener.onPaymentMethodsRetrieved(PAYMENT_METHODS);
 
         assertEquals(View.GONE, mProgressBar.getVisibility());
     }
@@ -134,7 +133,7 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
                 mListenerArgumentCaptor.getValue();
         assertNotNull(listener);
 
-        listener.onPaymentMethodsRetrieved(mPaymentMethods);
+        listener.onPaymentMethodsRetrieved(PAYMENT_METHODS);
 
         final PaymentMethodsAdapter paymentMethodsAdapter = (PaymentMethodsAdapter) mRecyclerView.getAdapter();
         assertNotNull(paymentMethodsAdapter);
@@ -162,7 +161,7 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
                 .build());
         mShadowActivity = Shadows.shadowOf(mPaymentMethodsActivity);
         mAddCardView =
-                mPaymentMethodsActivity.findViewById(R.id.payment_methods_add_payment_container);
+                mPaymentMethodsActivity.findViewById(R.id.payment_methods_add_card);
         mAddCardView.performClick();
         final ShadowActivity.IntentForResult intentForResult =
                 mShadowActivity.getNextStartedActivityForResult();
@@ -183,7 +182,7 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
         final Intent resultIntent = new Intent()
                 .putExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD, paymentMethod);
 
-        mPaymentMethodsActivity.onActivityResult(REQUEST_CODE_ADD_CARD, RESULT_OK, resultIntent);
+        mPaymentMethodsActivity.onActivityResult(REQUEST_CODE_ADD_PAYMENT_METHOD, RESULT_OK, resultIntent);
         assertEquals(View.VISIBLE, mProgressBar.getVisibility());
         verify(mCustomerSession, times(2)).getPaymentMethods(
                 eq(PaymentMethod.Type.Card), mListenerArgumentCaptor.capture());
@@ -192,7 +191,7 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
                 mListenerArgumentCaptor.getValue();
         assertNotNull(listener);
 
-        listener.onPaymentMethodsRetrieved(mPaymentMethods);
+        listener.onPaymentMethodsRetrieved(PAYMENT_METHODS);
         assertEquals(View.GONE, mProgressBar.getVisibility());
         assertNotNull(mRecyclerView.getAdapter());
         assertEquals(2, mRecyclerView.getAdapter().getItemCount());
@@ -218,7 +217,7 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
                 mListenerArgumentCaptor.getValue();
         assertNotNull(listener);
 
-        listener.onPaymentMethodsRetrieved(mPaymentMethods);
+        listener.onPaymentMethodsRetrieved(PAYMENT_METHODS);
         final PaymentMethodsAdapter paymentMethodsAdapter = (PaymentMethodsAdapter) mRecyclerView.getAdapter();
         assertNotNull(paymentMethodsAdapter);
         paymentMethodsAdapter.setSelectedIndex(0);
@@ -239,6 +238,6 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
         final PaymentMethod selectedPaymentMethod =
                 intent.getParcelableExtra(EXTRA_SELECTED_PAYMENT);
         assertNotNull(selectedPaymentMethod);
-        assertEquals(mPaymentMethods.get(0), selectedPaymentMethod);
+        assertEquals(PAYMENT_METHODS.get(0), selectedPaymentMethod);
     }
 }
