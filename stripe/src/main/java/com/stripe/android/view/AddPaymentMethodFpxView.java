@@ -15,7 +15,7 @@ import android.widget.TextView;
 import com.stripe.android.R;
 import com.stripe.android.model.PaymentMethodCreateParams;
 
-final class AddPaymentMethodFpxView extends AddPaymentMethodView {
+class AddPaymentMethodFpxView extends AddPaymentMethodView {
     @NonNull private final Adapter mAdapter;
 
     @NonNull
