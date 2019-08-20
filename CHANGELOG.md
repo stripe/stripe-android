@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 10.3.1 - 2018-08-20
+* [#1394](https://github.com/stripe/stripe-android/pull/1394) Add `shouldPrefetchCustomer` arg to `PaymentSession.init()`
+* [#1395](https://github.com/stripe/stripe-android/pull/1395) Fix inconsistent usage of relative attributes on card icon in `CardMultilineWidget`
+
 ## 10.3.0 - 2018-08-16
 * [#1327](https://github.com/stripe/stripe-android/pull/1327) Deprecate `SourceCallback` and `TokenCallback`
     * Use `ApiResultCallback<Source>` and `ApiResultCallback<Token>` respectively
