@@ -9,6 +9,10 @@ import android.widget.FrameLayout;
 import com.stripe.android.model.PaymentMethodCreateParams;
 
 abstract class AddPaymentMethodView extends FrameLayout {
+    AddPaymentMethodView(@NonNull Context context) {
+        super(context);
+    }
+
     AddPaymentMethodView(@NonNull Context context, @Nullable AttributeSet attrs,
                          int defStyleAttr) {
         super(context, attrs, defStyleAttr);
@@ -20,5 +24,5 @@ abstract class AddPaymentMethodView extends FrameLayout {
      */
     @Nullable abstract PaymentMethodCreateParams getCreateParams();
 
-    abstract void setCommunicatingProgress(boolean communicating);
+    void setCommunicatingProgress(boolean communicating) {}
 }

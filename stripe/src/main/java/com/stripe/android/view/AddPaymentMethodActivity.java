@@ -84,6 +84,9 @@ public class AddPaymentMethodActivity extends StripeActivity {
             case Card: {
                 return R.string.title_add_a_card;
             }
+            case Fpx: {
+                return R.string.title_bank_account;
+            }
             default: {
                 throw new IllegalArgumentException(
                         "Unsupported Payment Method type: " + paymentMethodType.code);
@@ -97,6 +100,9 @@ public class AddPaymentMethodActivity extends StripeActivity {
         switch (args.paymentMethodType) {
             case Card: {
                 return AddPaymentMethodCardView.create(this, args.shouldRequirePostalCode);
+            }
+            case Fpx: {
+                return AddPaymentMethodFpxView.create(this);
             }
             default: {
                 throw new IllegalArgumentException(
