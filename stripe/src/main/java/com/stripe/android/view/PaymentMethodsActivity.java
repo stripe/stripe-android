@@ -82,6 +82,9 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
         final View addCardView = new AddPaymentMethodCardRowView(this, args);
         addPaymentMethodsContainer.addView(addCardView);
+        if (args.paymentMethodTypes.contains(PaymentMethod.Type.Fpx)) {
+            addPaymentMethodsContainer.addView(new AddPaymentMethodFpxRowView(this, args));
+        }
 
         final Toolbar toolbar = findViewById(R.id.payment_methods_toolbar);
         setSupportActionBar(toolbar);
