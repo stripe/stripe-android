@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.annotation.VisibleForTesting;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 
 import com.stripe.android.ApiResultCallback;
 import com.stripe.android.CustomerSession;
@@ -77,6 +78,10 @@ public class AddPaymentMethodActivity extends StripeActivity {
         contentRoot.addView(mAddPaymentMethodView);
 
         setTitle(getTitleStringRes());
+
+        if (mPaymentMethodType == PaymentMethod.Type.Card) {
+            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        }
     }
 
     @StringRes
