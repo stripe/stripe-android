@@ -3,14 +3,12 @@ package com.stripe.android.view;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
-import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.graphics.ColorUtils;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.AppCompatTextView;
@@ -31,10 +29,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.stripe.android.view.ViewUtils.getThemeAccentColor;
-import static com.stripe.android.view.ViewUtils.getThemeColorControlNormal;
-import static com.stripe.android.view.ViewUtils.getThemeTextColorSecondary;
-
 /**
  * View that displays card information without revealing the entire number, usually for
  * selection in a list. The view can be toggled to "selected" state. Colors for the selected
@@ -52,15 +46,10 @@ public class MaskedCardView extends LinearLayout {
     @NonNull private final AppCompatTextView mCardInformationTextView;
     @NonNull private final AppCompatImageView mCheckMarkImageView;
 
-    @ColorInt private final int mSelectedAlphaColorInt;
-    @ColorInt private final int mSelectedColorInt;
-    @ColorInt private final int mUnselectedColorInt;
-    @ColorInt private final int mUnselectedTextAlphaColorInt;
-    @ColorInt private final int mUnselectedTextColorInt;
-    @NonNull private final int[] mTextColorValues;
-
     @NonNull private static final Map<String, Integer> ICON_RESOURCE_MAP = new HashMap<>();
     @NonNull private static final Map<String, Integer> BRAND_RESOURCE_MAP = new HashMap<>();
+
+    @NonNull private final ThemeConfig mThemeConfig;
 
     static {
         ICON_RESOURCE_MAP
@@ -103,31 +92,7 @@ public class MaskedCardView extends LinearLayout {
         mCardInformationTextView = findViewById(R.id.masked_card_info_view);
         mCheckMarkImageView = findViewById(R.id.masked_check_icon);
 
-        mSelectedColorInt = determineColor(
-                getThemeAccentColor(getContext()).data,
-                R.color.accent_color_default
-        );
-        mUnselectedColorInt = determineColor(
-                getThemeColorControlNormal(getContext()).data,
-                R.color.control_normal_color_default
-        );
-        mUnselectedTextColorInt = determineColor(
-                getThemeTextColorSecondary(getContext()).data,
-                R.color.color_text_secondary_default
-        );
-
-        mSelectedAlphaColorInt = ColorUtils.setAlphaComponent(mSelectedColorInt,
-                getResources().getInteger(R.integer.light_text_alpha_hex));
-        mUnselectedTextAlphaColorInt = ColorUtils.setAlphaComponent(mUnselectedTextColorInt,
-                getResources().getInteger(R.integer.light_text_alpha_hex));
-
-        mTextColorValues = new int[]{
-                mSelectedColorInt,
-                mSelectedAlphaColorInt,
-                mUnselectedTextColorInt,
-                mUnselectedTextAlphaColorInt
-
-        };
+        mThemeConfig = new ThemeConfig(context);
 
         initializeCheckMark();
         updateCheckMark();
@@ -167,7 +132,7 @@ public class MaskedCardView extends LinearLayout {
     @NonNull
     @VisibleForTesting
     int[] getTextColorValues() {
-        return mTextColorValues;
+        return mThemeConfig.textColorValues;
     }
 
     @PaymentMethod.Card.Brand
@@ -198,13 +163,14 @@ public class MaskedCardView extends LinearLayout {
             @DrawableRes int resourceId,
             @NonNull ImageView imageView,
             boolean isCheckMark) {
-        final Drawable icon = Objects.requireNonNull(
-                ContextCompat.getDrawable(getContext(), resourceId));
-        @ColorInt int tintColor = mIsSelected || isCheckMark ?
-                mSelectedColorInt : mUnselectedColorInt;
-        final Drawable compatIcon = DrawableCompat.wrap(icon);
-        DrawableCompat.setTint(compatIcon.mutate(), tintColor);
-        imageView.setImageDrawable(compatIcon);
+        final Drawable icon = DrawableCompat.wrap(
+                Objects.requireNonNull(ContextCompat.getDrawable(getContext(), resourceId))
+        );
+        DrawableCompat.setTint(
+                icon.mutate(),
+                mThemeConfig.getTintColor(mIsSelected || isCheckMark)
+        );
+        imageView.setImageDrawable(icon);
     }
 
     @NonNull
@@ -221,10 +187,8 @@ public class MaskedCardView extends LinearLayout {
         final int brandLength = brandText.length();
         final int last4length = mLast4.length();
         final int last4Start = totalLength - last4length;
-        @ColorInt final int textColor = mIsSelected ? mSelectedColorInt : mUnselectedTextColorInt;
-        @ColorInt final int lightTextColor = mIsSelected
-                ? mSelectedAlphaColorInt
-                : mUnselectedTextAlphaColorInt;
+        @ColorInt final int textColor = mThemeConfig.getTextColor(mIsSelected);
+        @ColorInt final int lightTextColor = mThemeConfig.getTextAlphaColor(mIsSelected);
 
         final SpannableString displayString = new SpannableString(cardEndingIn);
 
@@ -273,12 +237,5 @@ public class MaskedCardView extends LinearLayout {
         } else {
             mCheckMarkImageView.setVisibility(View.INVISIBLE);
         }
-    }
-
-    @ColorInt
-    private int determineColor(@ColorInt int defaultColor, @ColorRes int colorIfTransparent) {
-        return ViewUtils.isColorTransparent(defaultColor) ?
-                ContextCompat.getColor(getContext(), colorIfTransparent) :
-                defaultColor;
     }
 }
