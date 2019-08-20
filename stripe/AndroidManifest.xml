@@ -8,8 +8,7 @@
     <application>
         <activity
             android:name=".view.AddPaymentMethodActivity"
-            android:theme="@style/StripeDefaultTheme"
-            android:windowSoftInputMode="stateVisible" />
+            android:theme="@style/StripeDefaultTheme" />
 
         <activity
             android:name=".view.PaymentMethodsActivity"
