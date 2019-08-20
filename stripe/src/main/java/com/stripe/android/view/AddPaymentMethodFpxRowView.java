@@ -8,17 +8,15 @@ import com.stripe.android.R;
 import com.stripe.android.model.PaymentMethod;
 
 @SuppressLint("ViewConstructor")
-public class AddPaymentMethodCardRowView extends AddPaymentMethodRowView {
-    AddPaymentMethodCardRowView(@NonNull final Activity activity,
-                                @NonNull final PaymentMethodsActivityStarter.Args args) {
+public class AddPaymentMethodFpxRowView extends AddPaymentMethodRowView {
+    AddPaymentMethodFpxRowView(@NonNull final Activity activity,
+                               @NonNull final PaymentMethodsActivityStarter.Args args) {
         super(activity,
-                R.layout.add_payment_method_card_row,
-                R.id.payment_methods_add_card,
+                R.layout.add_payment_method_fpx_row,
+                R.id.payment_methods_add_fpx,
                 new AddPaymentMethodActivityStarter.Args.Builder()
-                        .setShouldUpdateCustomer(true)
-                        .setShouldRequirePostalCode(args.shouldRequirePostalCode)
                         .setIsPaymentSessionActive(args.isPaymentSessionActive)
-                        .setPaymentMethodType(PaymentMethod.Type.Card)
+                        .setPaymentMethodType(PaymentMethod.Type.Fpx)
                         .setPaymentConfiguration(args.paymentConfiguration)
                         .build());
     }
