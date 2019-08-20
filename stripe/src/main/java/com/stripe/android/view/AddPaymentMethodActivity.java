@@ -31,7 +31,6 @@ import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
  *
  * <p>Should be started with {@link AddPaymentMethodActivityStarter}.</p>
  */
-@SuppressWarnings("SwitchStatementWithTooFewBranches")
 public class AddPaymentMethodActivity extends StripeActivity {
 
     public static final String TOKEN_ADD_PAYMENT_METHOD_ACTIVITY = "AddPaymentMethodActivity";
@@ -41,8 +40,9 @@ public class AddPaymentMethodActivity extends StripeActivity {
     @Nullable private AddPaymentMethodView mAddPaymentMethodView;
     @Nullable private Stripe mStripe;
 
+    private PaymentMethod.Type mPaymentMethodType;
     private boolean mStartedFromPaymentSession;
-    private boolean mUpdatesCustomer;
+    private boolean mShouldAttachToCustomer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,13 +57,14 @@ public class AddPaymentMethodActivity extends StripeActivity {
             paymentConfiguration = PaymentConfiguration.getInstance();
         }
         mStripe = new Stripe(getApplicationContext(), paymentConfiguration.getPublishableKey());
+        mPaymentMethodType = args.paymentMethodType;
 
         configureView(args);
 
-        mUpdatesCustomer = args.shouldUpdateCustomer;
+        mShouldAttachToCustomer = mPaymentMethodType.isReusable && args.shouldUpdateCustomer;
         mStartedFromPaymentSession = args.isPaymentSessionActive;
 
-        if (mUpdatesCustomer && args.shouldInitCustomerSessionTokens) {
+        if (mShouldAttachToCustomer && args.shouldInitCustomerSessionTokens) {
             initCustomerSessionTokens();
         }
     }
@@ -75,12 +76,12 @@ public class AddPaymentMethodActivity extends StripeActivity {
         mAddPaymentMethodView = createPaymentMethodView(args);
         contentRoot.addView(mAddPaymentMethodView);
 
-        setTitle(getTitleStringRes(args.paymentMethodType));
+        setTitle(getTitleStringRes());
     }
 
     @StringRes
-    private int getTitleStringRes(@NonNull PaymentMethod.Type paymentMethodType) {
-        switch (paymentMethodType) {
+    private int getTitleStringRes() {
+        switch (mPaymentMethodType) {
             case Card: {
                 return R.string.title_add_a_card;
             }
@@ -89,7 +90,7 @@ public class AddPaymentMethodActivity extends StripeActivity {
             }
             default: {
                 throw new IllegalArgumentException(
-                        "Unsupported Payment Method type: " + paymentMethodType.code);
+                        "Unsupported Payment Method type: " + mPaymentMethodType.code);
             }
         }
     }
@@ -97,7 +98,7 @@ public class AddPaymentMethodActivity extends StripeActivity {
     @NonNull
     private AddPaymentMethodView createPaymentMethodView(
             @NonNull AddPaymentMethodActivityStarter.Args args) {
-        switch (args.paymentMethodType) {
+        switch (mPaymentMethodType) {
             case Card: {
                 return AddPaymentMethodCardView.create(this, args.shouldRequirePostalCode);
             }
@@ -106,47 +107,41 @@ public class AddPaymentMethodActivity extends StripeActivity {
             }
             default: {
                 throw new IllegalArgumentException(
-                        "Unsupported Payment Method type: " + args.paymentMethodType.code);
+                        "Unsupported Payment Method type: " + mPaymentMethodType.code);
             }
         }
     }
 
     @VisibleForTesting
     void initCustomerSessionTokens() {
-        logToCustomerSessionIf(TOKEN_ADD_PAYMENT_METHOD_ACTIVITY, mUpdatesCustomer);
-        logToCustomerSessionIf(TOKEN_PAYMENT_SESSION, mStartedFromPaymentSession);
+        CustomerSession.getInstance()
+                .addProductUsageTokenIfValid(TOKEN_ADD_PAYMENT_METHOD_ACTIVITY);
+        if (mStartedFromPaymentSession) {
+            CustomerSession.getInstance().addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
+        }
     }
 
     @Override
     protected void onActionSave() {
-        createPaymentMethod(Objects.requireNonNull(mStripe));
+        createPaymentMethod(Objects.requireNonNull(mStripe),
+                Objects.requireNonNull(mAddPaymentMethodView).getCreateParams());
     }
 
     @VisibleForTesting
-    void createPaymentMethod(@NonNull Stripe stripe) {
-        final PaymentMethodCreateParams params =
-                Objects.requireNonNull(mAddPaymentMethodView).getCreateParams();
+    void createPaymentMethod(@NonNull Stripe stripe, @Nullable PaymentMethodCreateParams params) {
         if (params == null) {
             return;
         }
 
         setCommunicatingProgress(true);
         stripe.createPaymentMethod(params,
-                new PaymentMethodCallbackImpl(this, mUpdatesCustomer));
+                new PaymentMethodCallbackImpl(this, mShouldAttachToCustomer));
     }
 
     private void attachPaymentMethodToCustomer(@NonNull final PaymentMethod paymentMethod) {
-        final CustomerSession.PaymentMethodRetrievalListener listener =
-                new PaymentMethodRetrievalListenerImpl(this);
-
         CustomerSession.getInstance()
-                .attachPaymentMethod(Objects.requireNonNull(paymentMethod.id), listener);
-    }
-
-    private void logToCustomerSessionIf(@NonNull String logToken, boolean condition) {
-        if (condition) {
-            CustomerSession.getInstance().addProductUsageTokenIfValid(logToken);
-        }
+                .attachPaymentMethod(Objects.requireNonNull(paymentMethod.id),
+                        new PaymentMethodRetrievalListenerImpl(this));
     }
 
     private void finishWithPaymentMethod(@NonNull PaymentMethod paymentMethod) {

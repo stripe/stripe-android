@@ -38,6 +38,19 @@ public final class PaymentMethodFixtures {
 
     public static final PaymentMethod CARD_PAYMENT_METHOD;
 
+    public static final PaymentMethod FPX_PAYMENT_METHOD =
+            new PaymentMethod.Builder()
+                    .setId("pm_1F5GlnH8dsfnfKo3gtixzcq0")
+                    .setCreated(1565290527L)
+                    .setLiveMode(true)
+                    .setType("fpx")
+                    .setBillingDetails(PaymentMethodFixtures.BILLING_DETAILS)
+                    .setFpx(new PaymentMethod.Fpx.Builder()
+                            .setBank("hsbc")
+                            .setAccountHolderType("individual")
+                            .build())
+                    .build();
+
     static {
         final Map<String, String> metadata = new HashMap<>();
         metadata.put("order_id", "123456789");
