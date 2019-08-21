@@ -16,7 +16,7 @@ internal object StoreUtils {
     }
 
     fun getPriceString(price: Long, currency: Currency?): String {
-        val displayCurrency = currency ?: Currency.getInstance("USD")
+        val displayCurrency = currency ?: Currency.getInstance(Settings.CURRENCY)
 
         val fractionDigits = displayCurrency.defaultFractionDigits
         val totalLength = price.toString().length

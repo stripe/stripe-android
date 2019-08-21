@@ -157,10 +157,11 @@ class PaymentActivity : AppCompatActivity() {
                 if (!isShippingInfoValid(shippingInformation)) {
                     shippingInfoProcessedIntent.putExtra(EXTRA_IS_SHIPPING_INFO_VALID, false)
                 } else {
-                    val shippingMethods = getValidShippingMethods(shippingInformation)
+                    val shippingMethods =
+                        getValidShippingMethods(shippingInformation)
                     shippingInfoProcessedIntent.putExtra(EXTRA_IS_SHIPPING_INFO_VALID, true)
                     shippingInfoProcessedIntent.putParcelableArrayListExtra(
-                        EXTRA_VALID_SHIPPING_METHODS, shippingMethods)
+                        EXTRA_VALID_SHIPPING_METHODS, ArrayList(shippingMethods))
                     shippingInfoProcessedIntent
                         .putExtra(EXTRA_DEFAULT_SHIPPING_METHOD, shippingMethods[0])
                 }
@@ -516,17 +517,22 @@ class PaymentActivity : AppCompatActivity() {
 
     private fun getValidShippingMethods(
         shippingInformation: ShippingInformation
-    ): ArrayList<ShippingMethod> {
-        val shippingMethods = ArrayList<ShippingMethod>()
-        shippingMethods.add(ShippingMethod("UPS Ground", "ups-ground",
-            "Arrives in 3-5 days", 0, "USD"))
-        shippingMethods.add(ShippingMethod("FedEx", "fedex",
-            "Arrives tomorrow", 599, "USD"))
-        if (shippingInformation.address != null && "94110" == shippingInformation.address!!.postalCode) {
-            shippingMethods.add(ShippingMethod("1 Hour Courier", "courier",
-                "Arrives in the next hour", 1099, "USD"))
+    ): List<ShippingMethod> {
+        val isCourierSupported = shippingInformation.address != null &&
+            "94110" == shippingInformation.address!!.postalCode
+        val courierMethod = if (isCourierSupported) {
+            ShippingMethod("1 Hour Courier", "courier",
+                "Arrives in the next hour", 1099, Settings.CURRENCY)
+        } else {
+            null
         }
-        return shippingMethods
+        return listOfNotNull(
+            ShippingMethod("UPS Ground", "ups-ground",
+                "Arrives in 3-5 days", 0, Settings.CURRENCY),
+            ShippingMethod("FedEx", "fedex",
+                "Arrives tomorrow", 599, Settings.CURRENCY),
+            courierMethod
+        )
     }
 
     private fun onPaymentSessionDataChanged(data: PaymentSessionData) {
