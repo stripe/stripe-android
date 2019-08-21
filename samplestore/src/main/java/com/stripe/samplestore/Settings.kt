@@ -23,4 +23,16 @@ internal object Settings {
      * See https://dashboard.stripe.com/test/connect/accounts/overview
      */
     val STRIPE_ACCOUNT_ID: String? = null
+
+    /**
+     * Three-letter ISO [currency code](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-currency),
+     * in lowercase. Must be a [supported currency](https://stripe.com/docs/currencies).
+     */
+    const val CURRENCY = "usd"
+
+    /**
+     * The list of [payment method types](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-payment_method_types)
+     * (e.g. card) that this PaymentIntent is allowed to use.
+     */
+    val ALLOWED_PAYMENT_METHOD_TYPES = listOf("usd")
 }

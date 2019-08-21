@@ -299,6 +299,8 @@ class PaymentActivity : AppCompatActivity() {
         val params = HashMap<String, Any>()
         params["amount"] = data.cartTotal.toString()
         params["payment_method"] = data.paymentMethod!!.id!!
+        params["payment_method_types"] = Settings.ALLOWED_PAYMENT_METHOD_TYPES
+        params["currency"] = Settings.CURRENCY
         params["customer_id"] = customerId
         if (data.shippingInformation != null) {
             params["shipping"] = data.shippingInformation!!.toParamMap()
@@ -317,8 +319,10 @@ class PaymentActivity : AppCompatActivity() {
     ): HashMap<String, Any> {
         val params = HashMap<String, Any>()
         params["payment_method"] = data.paymentMethod!!.id!!
+        params["payment_method_types"] = Settings.ALLOWED_PAYMENT_METHOD_TYPES
         params["customer_id"] = customerId
         params["return_url"] = "stripe://payment-auth-return"
+        params["currency"] = Settings.CURRENCY
         if (stripeAccountId != null) {
             params["stripe_account"] = stripeAccountId
         }
