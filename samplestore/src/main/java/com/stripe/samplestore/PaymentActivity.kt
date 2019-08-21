@@ -488,10 +488,26 @@ class PaymentActivity : AppCompatActivity() {
         setupPaymentCredentialsButton.isEnabled = java.lang.Boolean.TRUE == setupPaymentCredentialsButton.tag
     }
 
-    private fun formatSourceDescription(paymentMethod: PaymentMethod): String? {
-        return if (paymentMethod.card != null) {
-            paymentMethod.card!!.brand + "-" + paymentMethod.card!!.last4
-        } else null
+    private fun getPaymentMethodDescription(paymentMethod: PaymentMethod): String {
+        return when (paymentMethod.type) {
+            PaymentMethod.Type.Card.code -> {
+                paymentMethod.card?.let {
+                    "${getDisplayName(it.brand)}-${it.last4}"
+                } ?: ""
+            }
+            PaymentMethod.Type.Fpx.code -> {
+                paymentMethod.fpx?.let {
+                    "${getDisplayName(it.bank)} (FPX)"
+                } ?: ""
+            }
+            else -> ""
+        }
+    }
+
+    private fun getDisplayName(name: String?): String {
+        return (name ?: "")
+            .split("_")
+            .joinToString(separator = " ") { it.capitalize() }
     }
 
     private fun getValidShippingMethods(
@@ -519,7 +535,7 @@ class PaymentActivity : AppCompatActivity() {
         }
 
         if (data.paymentMethod != null) {
-            enterPaymentInfo.text = formatSourceDescription(data.paymentMethod!!)
+            enterPaymentInfo.text = getPaymentMethodDescription(data.paymentMethod!!)
         }
 
         if (data.isPaymentReadyToCharge) {
