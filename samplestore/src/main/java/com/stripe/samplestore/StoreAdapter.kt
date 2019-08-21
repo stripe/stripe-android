@@ -73,7 +73,7 @@ class StoreAdapter internal constructor(
         // Note: our sample backend assumes USD as currency. This code would be
         // otherwise functional if you switched that assumption on the backend and passed
         // currency code as a parameter.
-        currency = Currency.getInstance("USD")
+        currency = Currency.getInstance(Settings.CURRENCY)
         quantityOrdered = IntArray(EMOJI_CLOTHES.size)
     }
 
