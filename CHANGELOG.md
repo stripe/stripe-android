@@ -3,7 +3,35 @@
 ## 10.3.1 - 2018-08-22
 * [#1394](https://github.com/stripe/stripe-android/pull/1394) Add `shouldPrefetchCustomer` arg to `PaymentSession.init()`
 * [#1395](https://github.com/stripe/stripe-android/pull/1395) Fix inconsistent usage of relative attributes on card icon in `CardMultilineWidget`
-* [#1412](https://github.com/stripe/stripe-android/pull/1412) Make `AddPaymentMethodActivityStarter()` public
+* [#1412](https://github.com/stripe/stripe-android/pull/1412) Make `AddPaymentMethodActivityStarter()` available for starting `AddPaymentMethodActivity`
+  * ```
+    // Example usage
+
+    AddPaymentMethodActivityStarter(activity).startForResult(
+        AddPaymentMethodActivityStarter.Args.Builder()
+            .setShouldAttachToCustomer(true)
+            .setShouldRequirePostalCode(true)
+            .build()
+    )
+    ```
+* [#1417](https://github.com/stripe/stripe-android/pull/1417) Update Stripe 3DS2 library to `v1.2.0`
+    * Add support for updating status bar color and progress color using
+      `Stripe3ds2UiCustomization.Builder.createWithAppTheme(Activity)`
+      or UI customization builders
+
+      ```
+      // Example usage
+
+      Stripe3ds2UiCustomization.Builder.createWithAppTheme(this)
+
+      PaymentAuthConfig.Stripe3ds2UiCustomization.Builder()
+          .setAccentColor("#9cdbff")
+          .build()
+
+      PaymentAuthConfig.Stripe3ds2ToolbarCustomization.Builder()
+          .setStatusBarColor("#392996")
+          .build()
+      ```
 
 ## 10.3.0 - 2018-08-16
 * [#1327](https://github.com/stripe/stripe-android/pull/1327) Deprecate `SourceCallback` and `TokenCallback`
