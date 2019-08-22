@@ -341,8 +341,8 @@ class PaymentController {
                         stripe3ds2Fingerprint.directoryServerEncryption.directoryServerPublicKey,
                         stripe3ds2Fingerprint.directoryServerEncryption.keyId);
 
-        ChallengeProgressDialogActivity.show(activity, stripe3ds2Fingerprint.directoryServer.name
-                , false, mConfig.stripe3ds2Config.uiCustomization.getUiCustomization());
+        ChallengeProgressDialogActivity.show(activity, stripe3ds2Fingerprint.directoryServer.name,
+                false, mConfig.stripe3ds2Config.uiCustomization.getUiCustomization());
 
         final StripeIntent.RedirectData redirectData = stripeIntent.getRedirectData();
         final String returnUrl = redirectData != null ? redirectData.returnUrl : null;
