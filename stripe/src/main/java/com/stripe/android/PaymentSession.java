@@ -111,8 +111,10 @@ public class PaymentSession {
         } else if (resultCode == Activity.RESULT_OK) {
             switch (requestCode) {
                 case PaymentMethodsActivityStarter.REQUEST_CODE: {
-                    final PaymentMethod paymentMethod =
-                            data.getParcelableExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT);
+                    final PaymentMethodsActivityStarter.Result result =
+                            PaymentMethodsActivityStarter.Result.fromIntent(data);
+                    final PaymentMethod paymentMethod = result != null ?
+                            result.paymentMethod : null;
                     if (paymentMethod != null) {
                         persistPaymentMethod(paymentMethod);
                         mPaymentSessionData.setPaymentMethod(paymentMethod);

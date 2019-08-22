@@ -60,6 +60,10 @@ public abstract class ActivityStarter
     }
 
     public interface Args extends Parcelable {
-        String EXTRA = "EXTRA_ARGS";
+        String EXTRA = "extra_activity_args";
+    }
+
+    public interface Result extends Parcelable {
+        String EXTRA = "extra_activity_result";
     }
 }

@@ -38,7 +38,13 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     private static final String STATE_SELECTED_PAYMENT_METHOD_ID =
             "state_selected_payment_method_id";
 
+    /**
+     * @deprecated use {@link PaymentMethodsActivityStarter.Result#fromIntent(Intent)}
+     * to retrieve the result of this activity from an intent.
+     */
+    @Deprecated
     public static final String EXTRA_SELECTED_PAYMENT = "selected_payment";
+
     public static final String TOKEN_PAYMENT_METHODS_ACTIVITY = "PaymentMethodsActivity";
 
     private boolean mCommunicating;
@@ -128,9 +134,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                 // If the added Payment Method is not reusable, it also can't be attached to a
                 // customer, so immediately return to the launching host with the new
                 // Payment Method.
-                setResult(RESULT_OK,
-                        new Intent().putExtra(EXTRA_SELECTED_PAYMENT, paymentMethod));
-                finish();
+                finishWithPaymentMethod(paymentMethod);
             } else {
                 // Refresh the list of Payment Methods with the new Payment Method.
                 getCustomerPaymentMethods(paymentMethod != null ? paymentMethod.id : null);
@@ -217,7 +221,14 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             return;
         }
 
-        setResult(RESULT_OK, new Intent().putExtra(EXTRA_SELECTED_PAYMENT, paymentMethod));
+        finishWithPaymentMethod(paymentMethod);
+    }
+
+    private void finishWithPaymentMethod(@NonNull PaymentMethod paymentMethod) {
+        setResult(RESULT_OK, new Intent()
+                .putExtra(EXTRA_SELECTED_PAYMENT, paymentMethod)
+                .putExtras(new PaymentMethodsActivityStarter.Result(paymentMethod).toBundle())
+        );
         finish();
     }
 

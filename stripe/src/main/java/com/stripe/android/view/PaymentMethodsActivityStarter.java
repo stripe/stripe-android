@@ -2,6 +2,7 @@ package com.stripe.android.view;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
@@ -18,6 +19,14 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * A class to start {@link PaymentMethodsActivity}. Arguments for the activity can be specified
+ * with {@link Args} and constructed with {@link Args.Builder}.
+ *
+ * <p>The result data is a {@link Result} instance, obtained using
+ * {@link Result#fromIntent(Intent)}}. The result will be returned with request code
+ * {@link #REQUEST_CODE}.</p>
+ */
 public final class PaymentMethodsActivityStarter
         extends ActivityStarter<PaymentMethodsActivity, PaymentMethodsActivityStarter.Args> {
     public static final int REQUEST_CODE = 6000;
@@ -165,5 +174,75 @@ public final class PaymentMethodsActivityStarter
                 return new Args(this);
             }
         }
+    }
+
+    /**
+     * The result of a {@link PaymentMethodsActivity}.
+     *
+     * <p>Retrieve in <code>#onActivityResult()</code> using {@link #fromIntent(Intent)}.
+     */
+    public static final class Result implements ActivityStarter.Result {
+        @NonNull public final PaymentMethod paymentMethod;
+
+        /**
+         * @return the {@link Result} object from the given <code>Intent</code>
+         */
+        @Nullable
+        public static Result fromIntent(@NonNull Intent intent) {
+            return intent.getParcelableExtra(EXTRA);
+        }
+
+        public Result(@NonNull PaymentMethod paymentMethod) {
+            this.paymentMethod = paymentMethod;
+        }
+
+        private Result(@NonNull Parcel parcel) {
+            this.paymentMethod = Objects.requireNonNull(
+                    parcel.<PaymentMethod>readParcelable(PaymentMethod.class.getClassLoader())
+            );
+        }
+
+        @NonNull
+        public Bundle toBundle() {
+            final Bundle bundle = new Bundle();
+            bundle.putParcelable(EXTRA, this);
+            return bundle;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            dest.writeParcelable(paymentMethod, flags);
+        }
+
+        @Override
+        public int hashCode() {
+            return ObjectUtils.hash(paymentMethod);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            return super.equals(obj) || (obj instanceof Result && typedEquals((Result) obj));
+        }
+
+        private boolean typedEquals(@NonNull Result other) {
+            return ObjectUtils.equals(paymentMethod, other.paymentMethod);
+        }
+
+        public static final Creator<Result> CREATOR = new Creator<Result>() {
+            @Override
+            public Result createFromParcel(Parcel in) {
+                return new Result(in);
+            }
+
+            @Override
+            public Result[] newArray(int size) {
+                return new Result[size];
+            }
+        };
     }
 }

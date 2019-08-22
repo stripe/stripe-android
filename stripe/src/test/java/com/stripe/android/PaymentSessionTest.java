@@ -149,18 +149,18 @@ public class PaymentSessionTest {
         // We have already tested the functionality up to here.
         reset(mPaymentSessionListener);
 
+        final PaymentMethodsActivityStarter.Result result =
+                new PaymentMethodsActivityStarter.Result(PaymentMethodFixtures.CARD_PAYMENT_METHOD);
         final boolean handled = paymentSession.handlePaymentData(
                 PaymentMethodsActivityStarter.REQUEST_CODE, RESULT_OK,
-                new Intent().putExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT,
-                        PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON)));
+                new Intent().putExtras(result.toBundle()));
         assertTrue(handled);
 
         verify(mPaymentSessionListener)
                 .onPaymentSessionDataChanged(mPaymentSessionDataArgumentCaptor.capture());
         final PaymentSessionData data = mPaymentSessionDataArgumentCaptor.getValue();
         assertNotNull(data);
-        assertEquals(PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON),
-                data.getPaymentMethod());
+        assertEquals(PaymentMethodFixtures.CARD_PAYMENT_METHOD, data.getPaymentMethod());
     }
 
     @Test
