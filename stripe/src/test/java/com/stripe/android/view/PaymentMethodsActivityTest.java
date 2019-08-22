@@ -28,10 +28,10 @@ import org.robolectric.shadows.ShadowActivity;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static android.app.Activity.RESULT_OK;
 import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
-import static com.stripe.android.view.PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -234,11 +234,9 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
         assertEquals(RESULT_OK, mShadowActivity.getResultCode());
         final Intent intent = mShadowActivity.getResultIntent();
         assertNotNull(intent);
-        assertTrue(intent.hasExtra(EXTRA_SELECTED_PAYMENT));
 
-        final PaymentMethod selectedPaymentMethod =
-                intent.getParcelableExtra(EXTRA_SELECTED_PAYMENT);
-        assertNotNull(selectedPaymentMethod);
-        assertEquals(PAYMENT_METHODS.get(0), selectedPaymentMethod);
+        final PaymentMethodsActivityStarter.Result result =
+                Objects.requireNonNull(PaymentMethodsActivityStarter.Result.fromIntent(intent));
+        assertEquals(PAYMENT_METHODS.get(0), result.paymentMethod);
     }
 }

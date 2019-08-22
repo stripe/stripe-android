@@ -8,18 +8,14 @@ import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
-
 import com.stripe.android.CustomerSession
 import com.stripe.android.StripeError
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.view.AddPaymentMethodActivityStarter
-import com.stripe.android.view.PaymentMethodsActivity
 import com.stripe.android.view.PaymentMethodsActivityStarter
 import com.stripe.example.R
 import com.stripe.example.controller.ErrorDialogHandler
 import com.stripe.example.service.ExampleEphemeralKeyProvider
-
 import java.lang.ref.WeakReference
 
 /**
@@ -61,11 +57,10 @@ class CustomerSessionActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == AddPaymentMethodActivityStarter.REQUEST_CODE &&
+        if (requestCode == PaymentMethodsActivityStarter.REQUEST_CODE &&
             resultCode == Activity.RESULT_OK && data != null) {
-            val paymentMethod = data
-                .getParcelableExtra<PaymentMethod>(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT)
-
+            val paymentMethod =
+                PaymentMethodsActivityStarter.Result.fromIntent(data)?.paymentMethod
             if (paymentMethod?.card != null) {
                 selectedSourceTextView.text = buildCardString(paymentMethod.card!!)
             }
