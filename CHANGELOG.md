@@ -14,7 +14,7 @@
             .build()
     )
     ```
-* [#1417](https://github.com/stripe/stripe-android/pull/1417) Update Stripe 3DS2 library to `v1.2.0`
+* [#1417](https://github.com/stripe/stripe-android/pull/1417) Update Stripe 3DS2 library to `v1.2.1`
     * Add support for updating status bar color and progress color using
       `Stripe3ds2UiCustomization.Builder.createWithAppTheme(Activity)`
       or UI customization builders
