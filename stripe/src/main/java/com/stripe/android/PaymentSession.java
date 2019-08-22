@@ -27,9 +27,6 @@ public class PaymentSession {
     public static final String TOKEN_PAYMENT_SESSION = "PaymentSession";
     public static final String EXTRA_PAYMENT_SESSION_ACTIVE = "payment_session_active";
 
-    static final int PAYMENT_SHIPPING_DETAILS_REQUEST = 3004;
-    static final int PAYMENT_METHOD_REQUEST = 3003;
-
     public static final String PAYMENT_SESSION_DATA_KEY = "payment_session_data";
 
     @NonNull
@@ -103,8 +100,8 @@ public class PaymentSession {
      * otherwise {@code false}
      */
     public boolean handlePaymentData(int requestCode, int resultCode, @NonNull Intent data) {
-        if (requestCode != PAYMENT_METHOD_REQUEST &&
-                requestCode != PAYMENT_SHIPPING_DETAILS_REQUEST) {
+        if (requestCode != PaymentMethodsActivityStarter.REQUEST_CODE &&
+                requestCode != PaymentFlowActivityStarter.REQUEST_CODE) {
             return false;
         }
 
@@ -113,7 +110,7 @@ public class PaymentSession {
             return false;
         } else if (resultCode == Activity.RESULT_OK) {
             switch (requestCode) {
-                case PAYMENT_METHOD_REQUEST: {
+                case PaymentMethodsActivityStarter.REQUEST_CODE: {
                     final PaymentMethod paymentMethod =
                             data.getParcelableExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT);
                     if (paymentMethod != null) {
@@ -128,7 +125,7 @@ public class PaymentSession {
                     }
                     return true;
                 }
-                case PAYMENT_SHIPPING_DETAILS_REQUEST: {
+                case PaymentFlowActivityStarter.REQUEST_CODE: {
                     final PaymentSessionData paymentSessionData = data.getParcelableExtra(
                             PAYMENT_SESSION_DATA_KEY);
                     paymentSessionData.updateIsPaymentReadyToCharge(mPaymentSessionConfig);
@@ -283,7 +280,7 @@ public class PaymentSession {
      */
     public void presentPaymentMethodSelection(boolean shouldRequirePostalCode,
                                               @Nullable String userSelectedPaymentMethodId) {
-        mPaymentMethodsActivityStarter.startForResult(PAYMENT_METHOD_REQUEST,
+        mPaymentMethodsActivityStarter.startForResult(
                 new PaymentMethodsActivityStarter.Args.Builder()
                         .setInitialPaymentMethodId(
                                 getSelectedPaymentMethodId(userSelectedPaymentMethodId))
@@ -336,12 +333,13 @@ public class PaymentSession {
      * Launch the {@link PaymentFlowActivity} to allow the user to fill in payment details.
      */
     public void presentShippingFlow() {
-        mPaymentFlowActivityStarter.startForResult(PAYMENT_SHIPPING_DETAILS_REQUEST,
+        mPaymentFlowActivityStarter.startForResult(
                 new PaymentFlowActivityStarter.Args.Builder()
                         .setPaymentSessionConfig(mPaymentSessionConfig)
                         .setPaymentSessionData(mPaymentSessionData)
                         .setIsPaymentSessionActive(true)
-                        .build());
+                        .build()
+        );
     }
 
     /**

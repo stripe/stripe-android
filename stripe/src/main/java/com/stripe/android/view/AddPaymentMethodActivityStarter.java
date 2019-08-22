@@ -14,16 +14,24 @@ import com.stripe.android.utils.ObjectUtils;
 
 import java.util.Objects;
 
-public class AddPaymentMethodActivityStarter
+/**
+ * A class to start {@link AddPaymentMethodActivity}. Arguments for the activity can be
+ * specified with {@link Args} and constructed with {@link Args.Builder}.
+ *
+ * <p>The result will be returned with request code {@link #REQUEST_CODE}.</p>
+ */
+public final class AddPaymentMethodActivityStarter
         extends ActivityStarter<AddPaymentMethodActivity, AddPaymentMethodActivityStarter.Args> {
+    public static final int REQUEST_CODE = 6001;
+
     AddPaymentMethodActivityStarter(@NonNull Activity activity) {
-        super(activity, AddPaymentMethodActivity.class, Args.DEFAULT);
+        super(activity, AddPaymentMethodActivity.class, Args.DEFAULT, REQUEST_CODE);
     }
 
     public static final class Args implements ActivityStarter.Args {
         private static final Args DEFAULT = new Args.Builder().build();
 
-        final boolean shouldUpdateCustomer;
+        final boolean shouldAttachToCustomer;
         final boolean shouldRequirePostalCode;
         final boolean isPaymentSessionActive;
         final boolean shouldInitCustomerSessionTokens;
@@ -38,7 +46,7 @@ public class AddPaymentMethodActivityStarter
         }
 
         private Args(@NonNull AddPaymentMethodActivityStarter.Args.Builder builder) {
-            this.shouldUpdateCustomer = builder.mShouldUpdateCustomer;
+            this.shouldAttachToCustomer = builder.mShouldAttachToCustomer;
             this.shouldRequirePostalCode = builder.mShouldRequirePostalCode;
             this.isPaymentSessionActive = builder.mIsPaymentSessionActive;
             this.shouldInitCustomerSessionTokens = builder.mShouldInitCustomerSessionTokens;
@@ -50,7 +58,7 @@ public class AddPaymentMethodActivityStarter
         }
 
         private Args(@NonNull Parcel in) {
-            this.shouldUpdateCustomer = in.readInt() == 1;
+            this.shouldAttachToCustomer = in.readInt() == 1;
             this.shouldRequirePostalCode = in.readInt() == 1;
             this.isPaymentSessionActive = in.readInt() == 1;
             this.shouldInitCustomerSessionTokens = in.readInt() == 1;
@@ -66,7 +74,7 @@ public class AddPaymentMethodActivityStarter
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(shouldUpdateCustomer ? 1 : 0);
+            dest.writeInt(shouldAttachToCustomer ? 1 : 0);
             dest.writeInt(shouldRequirePostalCode ? 1 : 0);
             dest.writeInt(isPaymentSessionActive ? 1 : 0);
             dest.writeInt(shouldInitCustomerSessionTokens ? 1 : 0);
@@ -76,7 +84,7 @@ public class AddPaymentMethodActivityStarter
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(shouldUpdateCustomer, shouldRequirePostalCode,
+            return ObjectUtils.hash(shouldAttachToCustomer, shouldRequirePostalCode,
                     isPaymentSessionActive, shouldInitCustomerSessionTokens, paymentMethodType,
                     paymentConfiguration);
         }
@@ -87,7 +95,7 @@ public class AddPaymentMethodActivityStarter
         }
 
         private boolean typedEquals(@NonNull Args args) {
-            return ObjectUtils.equals(shouldUpdateCustomer, args.shouldUpdateCustomer) &&
+            return ObjectUtils.equals(shouldAttachToCustomer, args.shouldAttachToCustomer) &&
                     ObjectUtils.equals(shouldRequirePostalCode, args.shouldRequirePostalCode) &&
                     ObjectUtils.equals(isPaymentSessionActive, args.isPaymentSessionActive) &&
                     ObjectUtils.equals(shouldInitCustomerSessionTokens,
@@ -114,7 +122,7 @@ public class AddPaymentMethodActivityStarter
 
         public static final class Builder
                 implements ObjectBuilder<AddPaymentMethodActivityStarter.Args> {
-            private boolean mShouldUpdateCustomer;
+            private boolean mShouldAttachToCustomer;
             private boolean mShouldRequirePostalCode;
             private boolean mIsPaymentSessionActive = false;
             private boolean mShouldInitCustomerSessionTokens = true;
@@ -122,17 +130,21 @@ public class AddPaymentMethodActivityStarter
             @Nullable private PaymentConfiguration mPaymentConfiguration;
 
             /**
-             * If true, update using an already-initialized
-             * {@link com.stripe.android.CustomerSession}
+             * If true, the created Payment Method will be attached to the current Customer
+             * using an already-initialized {@link com.stripe.android.CustomerSession}.
              */
             @NonNull
-            Builder setShouldUpdateCustomer(boolean shouldUpdateCustomer) {
-                this.mShouldUpdateCustomer = shouldUpdateCustomer;
+            public Builder setShouldAttachToCustomer(boolean shouldAttachToCustomer) {
+                this.mShouldAttachToCustomer = shouldAttachToCustomer;
                 return this;
             }
 
+            /**
+             * If true, a postal code field will be shown and validated.
+             * Currently, only US ZIP Codes are supported.
+             */
             @NonNull
-            Builder setShouldRequirePostalCode(boolean shouldRequirePostalCode) {
+            public Builder setShouldRequirePostalCode(boolean shouldRequirePostalCode) {
                 this.mShouldRequirePostalCode = shouldRequirePostalCode;
                 return this;
             }

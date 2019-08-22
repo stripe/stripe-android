@@ -32,7 +32,6 @@ import java.util.List;
 import static android.app.Activity.RESULT_OK;
 import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
 import static com.stripe.android.view.PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT;
-import static com.stripe.android.view.PaymentMethodsActivity.REQUEST_CODE_CREATE_PAYMENT_METHOD;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -182,7 +181,9 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
         final Intent resultIntent = new Intent()
                 .putExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD, paymentMethod);
 
-        mPaymentMethodsActivity.onActivityResult(REQUEST_CODE_CREATE_PAYMENT_METHOD, RESULT_OK, resultIntent);
+        mPaymentMethodsActivity.onActivityResult(
+                AddPaymentMethodActivityStarter.REQUEST_CODE, RESULT_OK, resultIntent
+        );
         assertEquals(View.VISIBLE, mProgressBar.getVisibility());
         verify(mCustomerSession, times(2)).getPaymentMethods(
                 eq(PaymentMethod.Type.Card), mListenerArgumentCaptor.capture());

@@ -20,12 +20,14 @@ import java.util.Set;
 
 public final class PaymentMethodsActivityStarter
         extends ActivityStarter<PaymentMethodsActivity, PaymentMethodsActivityStarter.Args> {
+    public static final int REQUEST_CODE = 6000;
+
     public PaymentMethodsActivityStarter(@NonNull Activity activity) {
-        super(activity, PaymentMethodsActivity.class, Args.DEFAULT);
+        super(activity, PaymentMethodsActivity.class, Args.DEFAULT, REQUEST_CODE);
     }
 
     public PaymentMethodsActivityStarter(@NonNull Fragment fragment) {
-        super(fragment, PaymentMethodsActivity.class, Args.DEFAULT);
+        super(fragment, PaymentMethodsActivity.class, Args.DEFAULT, REQUEST_CODE);
     }
 
     public static final class Args implements ActivityStarter.Args {
@@ -145,16 +147,15 @@ public final class PaymentMethodsActivityStarter
             }
 
             @NonNull
-            public Builder setPaymentMethodTypes(
-                    @NonNull Set<PaymentMethod.Type> paymentMethodTypes) {
-                mPaymentMethodTypes = paymentMethodTypes;
+            public Builder setPaymentConfiguration(
+                    @Nullable PaymentConfiguration paymentConfiguration) {
+                this.mPaymentConfiguration = paymentConfiguration;
                 return this;
             }
 
             @NonNull
-            public Builder setPaymentConfiguration(
-                    @Nullable PaymentConfiguration paymentConfiguration) {
-                this.mPaymentConfiguration = paymentConfiguration;
+            Builder setPaymentMethodTypes(@NonNull Set<PaymentMethod.Type> paymentMethodTypes) {
+                mPaymentMethodTypes = paymentMethodTypes;
                 return this;
             }
 

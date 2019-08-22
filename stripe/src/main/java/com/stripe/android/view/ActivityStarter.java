@@ -15,37 +15,42 @@ public abstract class ActivityStarter
     @Nullable private final Fragment mFragment;
     @NonNull private final Class<TargetActivityType> mTargetClass;
     @NonNull private final ArgsType mDefaultArgs;
+    @NonNull private final int mRequestCode;
 
     ActivityStarter(@NonNull Activity activity,
                     @NonNull Class<TargetActivityType> targetClass,
-                    @NonNull ArgsType args) {
+                    @NonNull ArgsType args,
+                    int requestCode) {
         mActivity = activity;
         mFragment = null;
         mTargetClass = targetClass;
         mDefaultArgs = args;
+        mRequestCode = requestCode;
     }
 
     ActivityStarter(@NonNull Fragment fragment,
                     @NonNull Class<TargetActivityType> targetClass,
-                    @NonNull ArgsType args) {
+                    @NonNull ArgsType args,
+                    int requestCode) {
         mActivity = fragment.requireActivity();
         mFragment = fragment;
         mTargetClass = targetClass;
         mDefaultArgs = args;
+        mRequestCode = requestCode;
     }
 
-    public final void startForResult(final int requestCode) {
-        startForResult(requestCode, mDefaultArgs);
+    public final void startForResult() {
+        startForResult(mDefaultArgs);
     }
 
-    public final void startForResult(int requestCode, @NonNull ArgsType args) {
+    public final void startForResult(@NonNull ArgsType args) {
         final Intent intent = newIntent()
                 .putExtra(Args.EXTRA, args);
 
         if (mFragment != null) {
-            Objects.requireNonNull(mFragment).startActivityForResult(intent, requestCode);
+            Objects.requireNonNull(mFragment).startActivityForResult(intent, mRequestCode);
         } else {
-            mActivity.startActivityForResult(intent, requestCode);
+            mActivity.startActivityForResult(intent, mRequestCode);
         }
     }
 

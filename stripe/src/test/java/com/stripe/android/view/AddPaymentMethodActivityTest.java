@@ -111,7 +111,7 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
 
     private void setUpForProxySessionTest(@NonNull PaymentMethod.Type paymentMethodType) {
         mActivity = createActivity(new AddPaymentMethodActivityStarter.Args.Builder()
-                .setShouldUpdateCustomer(true)
+                .setShouldAttachToCustomer(true)
                 .setShouldRequirePostalCode(true)
                 .setIsPaymentSessionActive(true)
                 .setShouldInitCustomerSessionTokens(false)

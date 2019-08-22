@@ -41,7 +41,6 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     public static final String EXTRA_SELECTED_PAYMENT = "selected_payment";
     public static final String TOKEN_PAYMENT_METHODS_ACTIVITY = "PaymentMethodsActivity";
 
-    static final int REQUEST_CODE_CREATE_PAYMENT_METHOD = 700;
     private boolean mCommunicating;
     private PaymentMethodsAdapter mAdapter;
     private ProgressBar mProgressBar;
@@ -110,7 +109,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_CREATE_PAYMENT_METHOD && resultCode == RESULT_OK) {
+        if (requestCode == AddPaymentMethodActivityStarter.REQUEST_CODE &&
+                resultCode == RESULT_OK) {
             onPaymentMethodCreated(data);
         }
     }

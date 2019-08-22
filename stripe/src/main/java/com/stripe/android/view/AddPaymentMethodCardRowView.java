@@ -15,7 +15,7 @@ public class AddPaymentMethodCardRowView extends AddPaymentMethodRowView {
                 R.layout.add_payment_method_card_row,
                 R.id.payment_methods_add_card,
                 new AddPaymentMethodActivityStarter.Args.Builder()
-                        .setShouldUpdateCustomer(true)
+                        .setShouldAttachToCustomer(true)
                         .setShouldRequirePostalCode(args.shouldRequirePostalCode)
                         .setIsPaymentSessionActive(args.isPaymentSessionActive)
                         .setPaymentMethodType(PaymentMethod.Type.Card)
