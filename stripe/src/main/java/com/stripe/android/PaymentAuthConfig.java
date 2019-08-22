@@ -486,6 +486,20 @@ public final class PaymentAuthConfig {
             }
 
             /**
+             * Set the status bar color, if not provided a darkened version of the background
+             * color will be used.
+             *
+             * @param hexColor The status bar color in the format #RRGGBB or #AARRGGBB
+             * @throws RuntimeException If the color cannot be parsed
+             */
+            @NonNull
+            public Builder setStatusBarColor(@NonNull String hexColor)
+                    throws RuntimeException {
+                mToolbarCustomization.setStatusBarColor(hexColor);
+                return this;
+            }
+
+            /**
              * Set the toolbar's title
              *
              * @param headerText The toolbar's title text
@@ -702,6 +716,19 @@ public final class PaymentAuthConfig {
                     throws RuntimeException {
                 mUiCustomization
                         .setTextBoxCustomization(textBoxCustomization.mTextBoxCustomization);
+                return this;
+            }
+
+            /**
+             * Set the accent color
+             *
+             * @param hexColor The accent color in the format #RRGGBB or #AARRGGBB
+             * @throws RuntimeException If the color cannot be parsed
+             */
+            @NonNull
+            public Builder setAccentColor(@NonNull String hexColor)
+                    throws RuntimeException {
+                mUiCustomization.setAccentColor(hexColor);
                 return this;
             }
 
