@@ -17,12 +17,14 @@ import java.util.Objects;
 
 public final class PaymentFlowActivityStarter
         extends ActivityStarter<PaymentFlowActivity, PaymentFlowActivityStarter.Args> {
+    public static final int REQUEST_CODE = 6002;
+
     public PaymentFlowActivityStarter(@NonNull Activity activity) {
-        super(activity, PaymentFlowActivity.class, Args.DEFAULT);
+        super(activity, PaymentFlowActivity.class, Args.DEFAULT, REQUEST_CODE);
     }
 
     public PaymentFlowActivityStarter(@NonNull Fragment fragment) {
-        super(fragment, PaymentFlowActivity.class, Args.DEFAULT);
+        super(fragment, PaymentFlowActivity.class, Args.DEFAULT, REQUEST_CODE);
     }
 
     public static final class Args implements ActivityStarter.Args {

@@ -13,6 +13,7 @@ import com.stripe.android.CustomerSession
 import com.stripe.android.StripeError
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.view.AddPaymentMethodActivityStarter
 import com.stripe.android.view.PaymentMethodsActivity
 import com.stripe.android.view.PaymentMethodsActivityStarter
 import com.stripe.example.R
@@ -55,13 +56,15 @@ class CustomerSessionActivity : AppCompatActivity() {
     }
 
     private fun launchWithCustomer() {
-        PaymentMethodsActivityStarter(this).startForResult(REQUEST_CODE_SELECT_SOURCE)
+        PaymentMethodsActivityStarter(this).startForResult()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_CODE_SELECT_SOURCE && resultCode == Activity.RESULT_OK) {
-            val paymentMethod = data!!.getParcelableExtra<PaymentMethod>(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT)
+        if (requestCode == AddPaymentMethodActivityStarter.REQUEST_CODE &&
+            resultCode == Activity.RESULT_OK && data != null) {
+            val paymentMethod = data
+                .getParcelableExtra<PaymentMethod>(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT)
 
             if (paymentMethod?.card != null) {
                 selectedSourceTextView.text = buildCardString(paymentMethod.card!!)
@@ -110,9 +113,5 @@ class CustomerSessionActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    companion object {
-        private const val REQUEST_CODE_SELECT_SOURCE = 55
     }
 }

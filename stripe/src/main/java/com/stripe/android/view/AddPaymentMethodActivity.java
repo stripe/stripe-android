@@ -62,7 +62,7 @@ public class AddPaymentMethodActivity extends StripeActivity {
 
         configureView(args);
 
-        mShouldAttachToCustomer = mPaymentMethodType.isReusable && args.shouldUpdateCustomer;
+        mShouldAttachToCustomer = mPaymentMethodType.isReusable && args.shouldAttachToCustomer;
         mStartedFromPaymentSession = args.isPaymentSessionActive;
 
         if (mShouldAttachToCustomer && args.shouldInitCustomerSessionTokens) {

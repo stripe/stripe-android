@@ -150,7 +150,7 @@ public class PaymentSessionTest {
         reset(mPaymentSessionListener);
 
         final boolean handled = paymentSession.handlePaymentData(
-                PaymentSession.PAYMENT_METHOD_REQUEST, RESULT_OK,
+                PaymentMethodsActivityStarter.REQUEST_CODE, RESULT_OK,
                 new Intent().putExtra(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT,
                         PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON)));
         assertTrue(handled);
@@ -173,7 +173,7 @@ public class PaymentSessionTest {
         paymentSession.presentPaymentMethodSelection();
 
         verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(),
-                eq(PaymentSession.PAYMENT_METHOD_REQUEST));
+                eq(PaymentMethodsActivityStarter.REQUEST_CODE));
 
         final Intent intent = mIntentArgumentCaptor.getValue();
         assertNotNull(intent.getComponent());
@@ -194,7 +194,7 @@ public class PaymentSessionTest {
         paymentSession.presentPaymentMethodSelection(true);
 
         verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(),
-                eq(PaymentSession.PAYMENT_METHOD_REQUEST));
+                eq(PaymentMethodsActivityStarter.REQUEST_CODE));
         assertTrue(PaymentMethodsActivityStarter.Args.create(mIntentArgumentCaptor.getValue())
                 .shouldRequirePostalCode);
     }
@@ -333,7 +333,7 @@ public class PaymentSessionTest {
     @Test
     public void handlePaymentData_withValidRequestCodeAndCanceledResult_retrievesCustomer() {
         final PaymentSession paymentSession = createPaymentSession();
-        assertFalse(paymentSession.handlePaymentData(PaymentSession.PAYMENT_METHOD_REQUEST,
+        assertFalse(paymentSession.handlePaymentData(PaymentMethodsActivityStarter.REQUEST_CODE,
                 RESULT_CANCELED, new Intent()));
         verify(mCustomerSession).retrieveCurrentCustomer(
                 ArgumentMatchers.<CustomerSession.CustomerRetrievalListener>any());
