@@ -577,7 +577,7 @@ public final class PaymentAuthConfig {
      */
     public static final class Stripe3ds2UiCustomization {
 
-        @NonNull private final UiCustomization mUiCustomization;
+        @NonNull private final StripeUiCustomization mUiCustomization;
 
         /**
          * The type of button for which customization can be set
@@ -591,17 +591,17 @@ public final class PaymentAuthConfig {
             SELECT
         }
 
-        private Stripe3ds2UiCustomization(@NonNull UiCustomization uiCustomization) {
+        private Stripe3ds2UiCustomization(@NonNull StripeUiCustomization uiCustomization) {
             mUiCustomization = uiCustomization;
         }
 
         @NonNull
-        public UiCustomization getUiCustomization() {
+        public StripeUiCustomization getUiCustomization() {
             return mUiCustomization;
         }
 
         public static final class Builder implements ObjectBuilder<Stripe3ds2UiCustomization> {
-            @NonNull private final UiCustomization mUiCustomization;
+            @NonNull private final StripeUiCustomization mUiCustomization;
 
             @NonNull
             public static Builder createWithAppTheme(@NonNull Activity activity) {

@@ -155,9 +155,7 @@ public class PaymentControllerTest {
                 .start(ArgumentMatchers.<Runnable>any());
 
         verify(mActivity).startActivity(eq(
-                new Intent(mActivity, ChallengeProgressDialogActivity.class)
-                        .putExtra(ChallengeProgressDialogActivity.EXTRA_DIRECTORY_SERVER_NAME,
-                                Stripe3ds2Fingerprint.DirectoryServer.Visa.name)));
+                new Intent(mActivity, ChallengeProgressDialogActivity.class)));
 
         verify(mFireAndForgetRequestExecutor).executeAsync(mApiRequestArgumentCaptor.capture());
         final StripeRequest analyticsRequest = mApiRequestArgumentCaptor.getValue();
@@ -193,9 +191,7 @@ public class PaymentControllerTest {
                 .start(ArgumentMatchers.<Runnable>any());
 
         verify(mActivity).startActivity(eq(
-                new Intent(mActivity, ChallengeProgressDialogActivity.class)
-                        .putExtra(ChallengeProgressDialogActivity.EXTRA_DIRECTORY_SERVER_NAME,
-                                Stripe3ds2Fingerprint.DirectoryServer.Amex.name)));
+                new Intent(mActivity, ChallengeProgressDialogActivity.class)));
     }
 
     @Test
