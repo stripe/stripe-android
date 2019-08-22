@@ -264,6 +264,7 @@ public class PaymentAuthConfigTest extends BaseViewTest<Fake3ds2ChallengeActivit
         final ToolbarCustomization toolbarCustomization = new StripeToolbarCustomization();
         toolbarCustomization.setBackgroundColor("#FF222222");
         toolbarCustomization.setTextColor("#00000621");
+        toolbarCustomization.setStatusBarColor("#FF000000");
         assertEquals(toolbarCustomization,
                 uiCustomizationFromTheme.getUiCustomization().getToolbarCustomization());
     }
