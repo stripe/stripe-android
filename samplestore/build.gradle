@@ -59,13 +59,13 @@ dependencies {
 
     /* Needed for RxAndroid */
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
-    implementation 'io.reactivex.rxjava2:rxjava:2.2.11'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.12'
 
     /* Needed for Rx Bindings on views */
     implementation 'com.jakewharton.rxbinding2:rxbinding:2.2.0'
 
     /* Used for server calls */
-    implementation 'com.squareup.okio:okio:2.3.0'
+    implementation 'com.squareup.okio:okio:2.4.0'
     implementation 'com.squareup.retrofit2:retrofit:2.6.1'
     implementation 'com.facebook.stetho:stetho:1.5.1'
     implementation 'com.facebook.stetho:stetho-okhttp3:1.5.1'
