@@ -112,4 +112,14 @@ public class PaymentAuthWebViewTest {
                 "https://hooks.stripe.com/redirect/complete/src_1ExLWoCRMbs6FrXfjPJRYtng");
         verify(mActivity).finish();
     }
+
+    @Test
+    public void shouldOverrideUrlLoading_withOpaqueUri_shouldNotCrash() {
+        final String deepLink = "mailto:patrick@example.com?payment_intent=pi_123&" +
+                "payment_intent_client_secret=pi_123_secret_456&source_type=card";
+        final PaymentAuthWebView.PaymentAuthWebViewClient paymentAuthWebViewClient =
+                new PaymentAuthWebView.PaymentAuthWebViewClient(mActivity, mProgressBar,
+                        "pi_123_secret_456", null);
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, deepLink);
+    }
 }
