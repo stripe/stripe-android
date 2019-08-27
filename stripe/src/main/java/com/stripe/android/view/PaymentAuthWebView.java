@@ -129,11 +129,15 @@ class PaymentAuthWebView extends WebView {
                         mReturnUrl.getHost() != null &&
                         mReturnUrl.getHost().equals(uri.getHost());
             } else {
+                // Skip opaque (i.e. non-hierarchical) URIs
+                if (uri.isOpaque()) {
+                    return false;
+                }
+
                 // If the `returnUrl` is unknown, look for URIs that contain a
                 // `payment_intent_client_secret` or `setup_intent_client_secret`
                 // query parameter, and check if its values matches the given `clientSecret`
                 // as a query parameter.
-
                 final Set<String> paramNames = uri.getQueryParameterNames();
                 final String clientSecret;
                 if (paramNames.contains(PARAM_PAYMENT_CLIENT_SECRET)) {
