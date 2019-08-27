@@ -18,7 +18,7 @@ import java.util.Objects;
 /**
  * Model for PaymentMethod creation parameters.
  *
- * Used by {@link Stripe#createPaymentMethodSynchronous(PaymentMethodCreateParams, String)}
+ * Used by {@link Stripe#createPaymentMethodSynchronous(PaymentMethodCreateParams)}
  *
  * See <a href="https://stripe.com/docs/api/payment_methods/create">Create a PaymentMethod</a>.
  *
