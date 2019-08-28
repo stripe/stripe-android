@@ -38,7 +38,7 @@ public class PaymentRelayStarterTest {
 
     @Test
     public void start_withPaymentIntent_shouldSetCorrectIntentExtras() {
-        mStarter.start(new PaymentRelayStarter.Data(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2));
+        mStarter.start(PaymentRelayStarter.Data.create(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2));
         verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(), eq(500));
         final Intent intent = mIntentArgumentCaptor.getValue();
         assertEquals(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.getClientSecret(),
@@ -50,7 +50,7 @@ public class PaymentRelayStarterTest {
     @Test
     public void start_withException_shouldSetCorrectIntentExtras() {
         final Exception exception = new RuntimeException();
-        mStarter.start(new PaymentRelayStarter.Data(exception));
+        mStarter.start(PaymentRelayStarter.Data.create(exception));
         verify(mActivity).startActivityForResult(mIntentArgumentCaptor.capture(), eq(500));
         final Intent intent = mIntentArgumentCaptor.getValue();
         assertNull(intent.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET));

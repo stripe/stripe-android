@@ -555,7 +555,7 @@ public class PaymentControllerTest {
         verify(mPaymentRelayStarter)
                 .start(mRelayStarterDataArgumentCaptor.capture());
         assertEquals(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-                mRelayStarterDataArgumentCaptor.getValue().stripeIntent);
+                mRelayStarterDataArgumentCaptor.getValue().getStripeIntent());
 
         verify(mFireAndForgetRequestExecutor).executeAsync(mApiRequestArgumentCaptor.capture());
         final StripeRequest analyticsRequest = mApiRequestArgumentCaptor.getValue();
@@ -598,7 +598,7 @@ public class PaymentControllerTest {
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.ERROR);
         verify(mPaymentRelayStarter).start(mRelayStarterDataArgumentCaptor.capture());
         final Exception exception = Objects.requireNonNull(
-                mRelayStarterDataArgumentCaptor.getValue().exception);
+                mRelayStarterDataArgumentCaptor.getValue().getException());
         assertEquals("Error encountered during 3DS2 authentication request. " +
                         "Code: 302, Detail: null, " +
                         "Description: Data could not be decrypted by the receiving system due to technical or other reason., " +
