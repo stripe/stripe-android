@@ -94,7 +94,7 @@ internal class MaskedCardView @JvmOverloads constructor(
      * Toggle the view from selected to unselected or vice-versa.
      */
     fun toggleSelected() {
-        isSelected = !isSelected
+        setSelected(!isSelected)
     }
 
     private fun initializeCheckMark() {
