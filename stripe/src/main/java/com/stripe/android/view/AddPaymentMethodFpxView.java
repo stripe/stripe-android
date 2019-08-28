@@ -153,18 +153,24 @@ class AddPaymentMethodFpxView extends AddPaymentMethodView {
     }
 
     private enum FpxBank {
-        // TODO(mshafrir): add complete bank list
-
         AffinBank("affin_bank", "Affin Bank"),
         AllianceBankBusiness("alliance_bank", "Alliance Bank (Business)"),
         AmBank("ambank", "AmBank"),
+        BankIslam("bank_islam", "Bank Islam"),
         BankMuamalat("bank_muamalat", "Bank Muamalat"),
-        DeutscheBank("deutsche_bank", "Deutsche Bank"),
-        Maybank2e("maybank2e", "Maybank2E"),
-        PublicBankEnterprise("pb_enterprise", "PB Enterprise"),
+        BankRakyat("bank_rakyat", "Bank Rakyat"),
+        Bsn("bsn", "BSN"),
+        Cimb("cimb", "CIMB Clicks"),
+        HongLeongBank("hong_leong_bank", "Hong Leong Bank"),
+        Hsbc("hsbc", "HSBC BANK"),
+        Kfh("kfh", "KFH"),
+        Maybank2E("maybank2e", "Maybank2E"),
+        Maybank2U("maybank2u", "Maybank2U"),
+        Ocbc("ocbc", "OCBC Bank"),
+        PublicBank("public_bank", "Public Bank"),
+        Rhb("rhb", "RHB Bank"),
         StandardChartered("standard_chartered", "Standard Chartered"),
-        UobBank("uob", "UOB Bank"),
-        UobRegional("uob_regional", "UOB Regional");
+        UobBank("uob", "UOB Bank");
 
         @NonNull private final String code;
         @NonNull private final String displayName;
