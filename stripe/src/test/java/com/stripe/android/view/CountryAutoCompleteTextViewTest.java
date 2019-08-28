@@ -79,7 +79,7 @@ public class CountryAutoCompleteTextViewTest extends BaseViewTest<ShippingInfoTe
     @Test
     public void updateUIForCountryEntered_whenCountrySelectedNullAndNoLocale_doesNotCrash() {
         Locale.setDefault(Locale.CHINA);
-        mCountryAutoCompleteTextView.mCountrySelected = null;
+        mCountryAutoCompleteTextView.setSelectedCountryCode(null);
         mCountryAutoCompleteTextView.updateUiForCountryEntered(null);
     }
 
