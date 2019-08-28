@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:minHeight="@dimen/list_row_height"
     android:orientation="horizontal"
-    android:paddingStart="@dimen/list_row_start_padding"
+    android:paddingStart="16dp"
     android:paddingEnd="12dp">
 
     <android.support.v7.widget.AppCompatImageView
