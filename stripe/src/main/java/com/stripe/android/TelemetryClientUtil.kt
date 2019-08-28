@@ -1,0 +1,125 @@
+package com.stripe.android
+
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import android.support.annotation.VisibleForTesting
+import android.util.DisplayMetrics
+import java.math.BigDecimal
+import java.math.MathContext
+import java.util.Locale
+import java.util.TimeZone
+import java.util.concurrent.TimeUnit
+
+internal class TelemetryClientUtil @VisibleForTesting constructor(
+    private val uidSupplier: Supplier<StripeUid>,
+    private val displayMetrics: DisplayMetrics,
+    private val packageName: String,
+    private val packageManager: PackageManager,
+    private val timeZone: String
+) {
+
+    private val versionName: String?
+        get() {
+            if (!StripeTextUtils.isBlank(packageName)) {
+                try {
+                    val packageInfo = packageManager.getPackageInfo(packageName, 0)
+                    if (packageInfo?.versionName != null) {
+                        return packageInfo.versionName
+                    }
+                } catch (ignored: PackageManager.NameNotFoundException) {
+                }
+            }
+
+            return null
+        }
+
+    private val screen: String
+        get() =
+            "${displayMetrics.widthPixels}w_${displayMetrics.heightPixels}h_${displayMetrics.densityDpi}dpi"
+
+    private val androidVersionString: String
+        get() =
+            "Android ${Build.VERSION.RELEASE} ${Build.VERSION.CODENAME} ${Build.VERSION.SDK_INT}"
+
+    val hashedUid: String
+        get() {
+            val uid = uidSupplier.get().value
+            return if (StripeTextUtils.isBlank(uid)) {
+                ""
+            } else {
+                StripeTextUtils.shaHashInput(uid) ?: ""
+            }
+        }
+
+    private val hashedMuid: String
+        get() = StripeTextUtils.shaHashInput(packageName + hashedUid) ?: ""
+
+    constructor(context: Context) : this(context.applicationContext, UidSupplier(context))
+
+    constructor(context: Context, uidSupplier: Supplier<StripeUid>) : this(
+        uidSupplier,
+        context.resources.displayMetrics,
+        context.packageName ?: "",
+        context.packageManager,
+        createTimezone()
+    )
+
+    fun createTelemetryMap(): Map<String, Any> {
+        return mapOf(
+            "v2" to 1,
+            "tag" to BuildConfig.VERSION_NAME,
+            "src" to "android-sdk",
+            "a" to createFirstMap(),
+            "b" to createSecondMap()
+        )
+    }
+
+    private fun createFirstMap(): Map<String, Any> {
+        return mapOf(
+            "c" to createValueMap(Locale.getDefault().toString()),
+            "d" to createValueMap(androidVersionString),
+            "f" to createValueMap(screen),
+            "g" to createValueMap(timeZone)
+        )
+    }
+
+    private fun createSecondMap(): Map<String, Any> {
+        val params = mapOf(
+            "d" to hashedMuid,
+            "k" to packageName,
+            "o" to Build.VERSION.RELEASE,
+            "p" to Build.VERSION.SDK_INT,
+            "q" to Build.MANUFACTURER,
+            "r" to Build.BRAND,
+            "s" to Build.MODEL,
+            "t" to Build.TAGS
+        )
+
+        return versionName?.let {
+            params.plus("l" to it)
+        } ?: params
+    }
+
+    private fun createValueMap(value: String): Map<String, Any> {
+        return mapOf("v" to value)
+    }
+
+    companion object {
+        private fun createTimezone(): String {
+            val minutes = TimeUnit.MINUTES.convert(TimeZone.getDefault().rawOffset.toLong(),
+                TimeUnit.MILLISECONDS).toInt()
+            if (minutes % 60 == 0) {
+                return (minutes / 60).toString()
+            }
+
+            val decimalValue = BigDecimal(minutes)
+                .setScale(2, BigDecimal.ROUND_HALF_EVEN)
+            val decHours = decimalValue.divide(
+                BigDecimal(60),
+                MathContext(2))
+                .setScale(2, BigDecimal.ROUND_HALF_EVEN)
+            return decHours.toString()
+        }
+    }
+}
