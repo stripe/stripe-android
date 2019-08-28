@@ -4,7 +4,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -175,8 +174,9 @@ public class StripeTextUtilsTest {
 
     @Test
     public void shaHashInput_withText_returnsDifferentText() {
-        String unhashedText = "iamtheverymodelofamodernmajorgeneral";
-        String hashedText = StripeTextUtils.shaHashInput(unhashedText);
-        assertNotEquals(unhashedText, hashedText);
+        assertEquals(
+                "9D3B38F100AF0DBD0D0CB11EDF15E40BBF0820C8",
+                StripeTextUtils.shaHashInput("iamtheverymodelofamodernmajorgeneral")
+        );
     }
 }
