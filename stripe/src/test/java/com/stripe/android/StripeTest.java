@@ -498,11 +498,11 @@ public class StripeTest {
     @Test
     public void createSourceSynchronous_withWeChatPayParams_passesIntegrationTest()
             throws StripeException {
-        final Stripe stripe = createStripe();
+        final Stripe stripe = createStripe("pk_live_L4KL0pF017Jgv9hBaWzk4xoB");
         final SourceParams weChatPaySourceParams = SourceParams.createWeChatPayParams(
                 1000L,
                 "USD",
-                "wxa0df51ec63e578ce",
+                "wx65997d6307c3827d",
                 "WIDGET STORE"
         );
         final Source weChatPaySource = stripe.createSourceSynchronous(weChatPaySourceParams);
