@@ -183,6 +183,7 @@ public final class PaymentMethodsActivityStarter
      */
     public static final class Result implements ActivityStarter.Result {
         @NonNull public final PaymentMethod paymentMethod;
+        final boolean useGooglePay;
 
         /**
          * @return the {@link Result} object from the given <code>Intent</code>
@@ -194,12 +195,14 @@ public final class PaymentMethodsActivityStarter
 
         public Result(@NonNull PaymentMethod paymentMethod) {
             this.paymentMethod = paymentMethod;
+            this.useGooglePay = false;
         }
 
         private Result(@NonNull Parcel parcel) {
             this.paymentMethod = Objects.requireNonNull(
                     parcel.<PaymentMethod>readParcelable(PaymentMethod.class.getClassLoader())
             );
+            this.useGooglePay = parcel.readInt() == 1;
         }
 
         @NonNull
@@ -217,6 +220,7 @@ public final class PaymentMethodsActivityStarter
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeParcelable(paymentMethod, flags);
+            dest.writeInt(useGooglePay ? 1 : 0);
         }
 
         @Override
