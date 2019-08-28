@@ -66,9 +66,10 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
     private boolean mHasAdjustedDrawable;
     @Nullable private String mCustomCvcLabel;
 
-    private @Card.CardBrand
-    String mCardBrand;
+    private @Card.CardBrand String mCardBrand;
     private @ColorInt int mTintColorInt;
+
+    private String mCardHintText;
 
     public CardMultilineWidget(@NonNull Context context) {
         this(context, null);
@@ -117,6 +118,11 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
     @Override
     public void setCardInputListener(@Nullable CardInputListener cardInputListener) {
         mCardInputListener = cardInputListener;
+    }
+
+    @Override
+    public void setCardHint(@NonNull String cardHint) {
+        mCardHintText = cardHint;
     }
 
     /**
@@ -416,6 +422,7 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
 
     private void initView(@Nullable AttributeSet attrs, boolean shouldShowPostalCode) {
         mShouldShowPostalCode = shouldShowPostalCode;
+        mCardHintText = getResources().getString(R.string.card_number_hint);
 
         setOrientation(VERTICAL);
         inflate(getContext(), R.layout.card_multiline_widget, this);
@@ -554,8 +561,7 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
-                    mCardNumberEditText.setHintDelayed(
-                            R.string.card_number_hint, CARD_NUMBER_HINT_DELAY);
+                    mCardNumberEditText.setHintDelayed(mCardHintText, CARD_NUMBER_HINT_DELAY);
                     if (mCardInputListener != null) {
                         mCardInputListener.onFocusChange(FOCUS_CARD);
                     }

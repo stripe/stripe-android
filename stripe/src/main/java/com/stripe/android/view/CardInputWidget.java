@@ -218,6 +218,11 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
         setCardNumberIsViewed(!mCardNumberEditText.isCardNumberValid());
     }
 
+    @Override
+    public void setCardHint(@NonNull String cardHint) {
+        mCardNumberEditText.setHint(cardHint);
+    }
+
     /**
      * Set the expiration date. Method invokes completion listener and changes focus
      * to the CVC field if a valid date is entered.
