@@ -19,19 +19,19 @@ abstract class ApiOperation<ResultType>
     @Override
     protected final ResultWrapper<ResultType> doInBackground(Void... voids) {
         try {
-            return new ResultWrapper<>(getResult());
+            return ResultWrapper.create(getResult());
         } catch (StripeException | JSONException e) {
-            return new ResultWrapper<>(e);
+            return ResultWrapper.create(e);
         }
     }
 
     @Override
     protected final void onPostExecute(@NonNull ResultWrapper<ResultType> resultWrapper) {
         super.onPostExecute(resultWrapper);
-        if (resultWrapper.result != null) {
-            mCallback.onSuccess(resultWrapper.result);
-        } else if (resultWrapper.error != null) {
-            mCallback.onError(resultWrapper.error);
+        if (resultWrapper.getResult() != null) {
+            mCallback.onSuccess(resultWrapper.getResult());
+        } else if (resultWrapper.getError() != null) {
+            mCallback.onError(resultWrapper.getError());
         } else {
             mCallback.onError(new RuntimeException(
                     "The API operation returned neither a result or exception"));

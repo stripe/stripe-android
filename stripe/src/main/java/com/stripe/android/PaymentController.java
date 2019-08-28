@@ -321,7 +321,7 @@ class PaymentController {
     private void bypassAuth(@NonNull AuthActivityStarter.Host host,
                             @NonNull StripeIntent stripeIntent) {
         new PaymentRelayStarter(host, getRequestCode(stripeIntent))
-                .start(new PaymentRelayStarter.Data(stripeIntent));
+                .start(PaymentRelayStarter.Data.create(stripeIntent));
     }
 
     private void begin3ds2Auth(@NonNull AuthActivityStarter.Host host,
@@ -390,7 +390,7 @@ class PaymentController {
                                     int requestCode,
                                     @NonNull Exception exception) {
         new PaymentRelayStarter(host, requestCode)
-                .start(new PaymentRelayStarter.Data(exception));
+                .start(PaymentRelayStarter.Data.create(exception));
     }
 
     private static final class RetrieveIntentTask extends ApiOperation<StripeIntent> {
@@ -575,7 +575,7 @@ class PaymentController {
 
         @Override
         public void onError(@NonNull Exception e) {
-            mPaymentRelayStarter.start(new PaymentRelayStarter.Data(e));
+            mPaymentRelayStarter.start(PaymentRelayStarter.Data.create(e));
         }
 
         private void startFrictionlessFlow() {
@@ -588,7 +588,7 @@ class PaymentController {
                             mRequestOptions
                     )
             );
-            mPaymentRelayStarter.start(new PaymentRelayStarter.Data(mStripeIntent));
+            mPaymentRelayStarter.start(PaymentRelayStarter.Data.create(mStripeIntent));
         }
 
         private void startChallengeFlow(@NonNull Stripe3ds2AuthResult.Ares ares) {
