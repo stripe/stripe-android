@@ -12,7 +12,7 @@
         android:layout_width="@dimen/masked_card_icon_width"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|start"
-        android:src="@drawable/ic_unknown" />
+        android:src="@drawable/ic_bank_generic" />
 
     <android.support.v7.widget.AppCompatTextView
         android:id="@+id/name"
