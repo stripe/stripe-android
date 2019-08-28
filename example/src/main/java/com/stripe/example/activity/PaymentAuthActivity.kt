@@ -34,7 +34,7 @@ import java.util.HashMap
  */
 class PaymentAuthActivity : AppCompatActivity() {
 
-    private val mCompositeSubscription = CompositeDisposable()
+    private val compositeSubscription = CompositeDisposable()
 
     private lateinit var stripe: Stripe
     private lateinit var stripeService: StripeService
@@ -116,7 +116,7 @@ class PaymentAuthActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        mCompositeSubscription.dispose()
+        compositeSubscription.dispose()
         super.onDestroy()
     }
 
@@ -126,7 +126,7 @@ class PaymentAuthActivity : AppCompatActivity() {
     }
 
     private fun createPaymentIntent(stripeAccountId: String?) {
-        mCompositeSubscription.add(
+        compositeSubscription.add(
             stripeService.createPaymentIntent(createPaymentIntentParams(stripeAccountId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -140,7 +140,7 @@ class PaymentAuthActivity : AppCompatActivity() {
     }
 
     private fun createSetupIntent() {
-        mCompositeSubscription.add(
+        compositeSubscription.add(
             stripeService.createSetupIntent(HashMap(0))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -202,10 +202,10 @@ class PaymentAuthActivity : AppCompatActivity() {
     private class AuthResultListener constructor(
         activity: PaymentAuthActivity
     ) : ApiResultCallback<PaymentIntentResult> {
-        private val mActivityRef: WeakReference<PaymentAuthActivity> = WeakReference(activity)
+        private val activityRef: WeakReference<PaymentAuthActivity> = WeakReference(activity)
 
         override fun onSuccess(paymentIntentResult: PaymentIntentResult) {
-            val activity = mActivityRef.get() ?: return
+            val activity = activityRef.get() ?: return
 
             val paymentIntent = paymentIntentResult.intent
             activity.statusTextView.append("\n\n" +
@@ -215,7 +215,7 @@ class PaymentAuthActivity : AppCompatActivity() {
         }
 
         override fun onError(e: Exception) {
-            val activity = mActivityRef.get() ?: return
+            val activity = activityRef.get() ?: return
 
             activity.statusTextView.append("\n\nException: " + e.message)
             activity.onAuthComplete()

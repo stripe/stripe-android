@@ -17,8 +17,8 @@ class ExampleEphemeralKeyProvider(
     private val progressListener: ProgressListener
 ) : EphemeralKeyProvider {
 
-    private val mCompositeDisposable: CompositeDisposable = CompositeDisposable()
-    private val mStripeService: StripeService =
+    private val compositeDisposable: CompositeDisposable = CompositeDisposable()
+    private val stripeService: StripeService =
         RetrofitFactory.instance.create(StripeService::class.java)
 
     override fun createEphemeralKey(
@@ -27,7 +27,7 @@ class ExampleEphemeralKeyProvider(
     ) {
         val apiParamMap = hashMapOf("api_version" to apiVersion)
 
-        mCompositeDisposable.add(mStripeService.createEphemeralKey(apiParamMap)
+        compositeDisposable.add(stripeService.createEphemeralKey(apiParamMap)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(

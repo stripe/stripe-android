@@ -12,20 +12,20 @@ import java.util.ArrayList
  */
 class ListViewController(listView: ListView) {
 
-    private val mAdapter: SimpleAdapter
-    private val mCardTokens = ArrayList<Map<String, String>>()
-    private val mResources: Resources
+    private val adapter: SimpleAdapter
+    private val cardTokens = ArrayList<Map<String, String>>()
+    private val resources: Resources
 
     init {
         val context = listView.context
-        mResources = context.resources
-        mAdapter = SimpleAdapter(
+        resources = context.resources
+        adapter = SimpleAdapter(
             context,
-            mCardTokens,
+            cardTokens,
             R.layout.list_item_layout,
             arrayOf("last4", "tokenId"),
             intArrayOf(R.id.last4, R.id.tokenId))
-        listView.adapter = mAdapter
+        listView.adapter = adapter
     }
 
     internal fun addToList(token: Token) {
@@ -34,10 +34,10 @@ class ListViewController(listView: ListView) {
 
     internal fun addToList(last4: String, tokenId: String) {
         val map = hashMapOf(
-            "last4" to mResources.getString(R.string.endingIn) + " " + last4,
+            "last4" to resources.getString(R.string.endingIn) + " " + last4,
             "tokenId" to tokenId
         )
-        mCardTokens.add(map)
-        mAdapter.notifyDataSetChanged()
+        cardTokens.add(map)
+        adapter.notifyDataSetChanged()
     }
 }

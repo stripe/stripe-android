@@ -193,7 +193,7 @@ class PaymentSessionActivity : AppCompatActivity() {
 
     private class PaymentSessionListenerImpl internal constructor(
         activity: PaymentSessionActivity,
-        private val mCustomerSession: CustomerSession
+        private val customerSession: CustomerSession
     ) : PaymentSession.ActivityPaymentSessionListener<PaymentSessionActivity>(activity) {
 
         override fun onCommunicatingStateChanged(isCommunicating: Boolean) {
@@ -209,7 +209,7 @@ class PaymentSessionActivity : AppCompatActivity() {
         override fun onPaymentSessionDataChanged(data: PaymentSessionData) {
             val activity = listenerActivity ?: return
 
-            activity.onPaymentSessionDataChanged(mCustomerSession, data)
+            activity.onPaymentSessionDataChanged(customerSession, data)
         }
     }
 
@@ -239,10 +239,10 @@ class PaymentSessionActivity : AppCompatActivity() {
     private class ProgressListenerImpl internal constructor(
         activity: PaymentSessionActivity
     ) : ExampleEphemeralKeyProvider.ProgressListener {
-        private val mActivityRef: WeakReference<PaymentSessionActivity> = WeakReference(activity)
+        private val activityRef: WeakReference<PaymentSessionActivity> = WeakReference(activity)
 
         override fun onStringResponse(response: String) {
-            val activity = mActivityRef.get()
+            val activity = activityRef.get()
             if (activity != null && response.startsWith("Error: ")) {
                 activity.errorDialogHandler.show(response)
             }

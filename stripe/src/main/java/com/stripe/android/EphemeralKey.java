@@ -32,7 +32,7 @@ abstract class EphemeralKey extends StripeModel implements Parcelable {
     private static final String FIELD_ASSOCIATED_OBJECTS = "associated_objects";
     private static final String FIELD_TYPE = "type";
 
-    @NonNull final String mObjectId;
+    @NonNull final String objectId;
     private final long mCreated;
     private final long mExpires;
     @NonNull private final String mId;
@@ -51,7 +51,7 @@ abstract class EphemeralKey extends StripeModel implements Parcelable {
      */
     EphemeralKey(@NonNull Parcel in) {
         mCreated = in.readLong();
-        mObjectId = Objects.requireNonNull(in.readString());
+        objectId = Objects.requireNonNull(in.readString());
         mExpires = in.readLong();
         mId = Objects.requireNonNull(in.readString());
         mLiveMode = in.readInt() == 1;
@@ -70,7 +70,7 @@ abstract class EphemeralKey extends StripeModel implements Parcelable {
             @NonNull String secret,
             @NonNull String type) {
         mCreated = created;
-        mObjectId = objectId;
+        this.objectId = objectId;
         mExpires = expires;
         mId = id;
         mLiveMode = liveMode;
@@ -95,7 +95,7 @@ abstract class EphemeralKey extends StripeModel implements Parcelable {
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeLong(mCreated);
-        out.writeString(mObjectId);
+        out.writeString(objectId);
         out.writeLong(mExpires);
         out.writeString(mId);
         // There is no writeBoolean
@@ -164,7 +164,7 @@ abstract class EphemeralKey extends StripeModel implements Parcelable {
     }
 
     private boolean typedEquals(@NonNull EphemeralKey ephemeralKey) {
-        return ObjectUtils.equals(mObjectId, ephemeralKey.mObjectId)
+        return ObjectUtils.equals(objectId, ephemeralKey.objectId)
                 && mCreated == ephemeralKey.mCreated
                 && mExpires == ephemeralKey.mExpires
                 && ObjectUtils.equals(mId, ephemeralKey.mId)
@@ -176,7 +176,7 @@ abstract class EphemeralKey extends StripeModel implements Parcelable {
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mObjectId, mCreated, mExpires, mId, mLiveMode, mObject, mSecret,
+        return ObjectUtils.hash(objectId, mCreated, mExpires, mId, mLiveMode, mObject, mSecret,
                 mType);
     }
 

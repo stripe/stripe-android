@@ -14,53 +14,53 @@ import com.stripe.example.R
  */
 class AsyncTaskTokenController(
     button: Button,
-    private var mCardInputWidget: CardInputWidget?,
+    private var cardInputWidget: CardInputWidget?,
     context: Context,
-    private val mErrorDialogHandler: ErrorDialogHandler,
+    private val errorDialogHandler: ErrorDialogHandler,
     outputListController: ListViewController,
-    private val mProgressDialogController: ProgressDialogController,
+    private val progressDialogController: ProgressDialogController,
     publishableKey: String
 ) {
-    private val mStripe: Stripe = Stripe(context, publishableKey)
+    private val stripe: Stripe = Stripe(context, publishableKey)
 
     init {
         button.setOnClickListener {
             saveCard(TokenCallbackImpl(
-                mErrorDialogHandler,
+                errorDialogHandler,
                 outputListController,
-                mProgressDialogController
+                progressDialogController
             ))
         }
     }
 
     fun detach() {
-        mCardInputWidget = null
+        cardInputWidget = null
     }
 
     private fun saveCard(tokenCallback: ApiResultCallback<Token>) {
-        val cardToSave = mCardInputWidget?.card
+        val cardToSave = cardInputWidget?.card
         if (cardToSave == null) {
-            mErrorDialogHandler.show("Invalid Card Data")
+            errorDialogHandler.show("Invalid Card Data")
             return
         }
 
-        mProgressDialogController.show(R.string.progressMessage)
-        mStripe.createToken(cardToSave, tokenCallback)
+        progressDialogController.show(R.string.progressMessage)
+        stripe.createToken(cardToSave, tokenCallback)
     }
 
     private class TokenCallbackImpl constructor(
-        private val mErrorDialogHandler: ErrorDialogHandler,
-        private val mOutputListController: ListViewController,
-        private val mProgressDialogController: ProgressDialogController
+        private val errorDialogHandler: ErrorDialogHandler,
+        private val outputListController: ListViewController,
+        private val progressDialogController: ProgressDialogController
     ) : ApiResultCallback<Token> {
         override fun onSuccess(token: Token) {
-            mOutputListController.addToList(token)
-            mProgressDialogController.dismiss()
+            outputListController.addToList(token)
+            progressDialogController.dismiss()
         }
 
         override fun onError(error: Exception) {
-            mErrorDialogHandler.show(error.localizedMessage)
-            mProgressDialogController.dismiss()
+            errorDialogHandler.show(error.localizedMessage)
+            progressDialogController.dismiss()
         }
     }
 }

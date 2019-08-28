@@ -12,19 +12,19 @@ import java.lang.ref.WeakReference
  * Class used to show and hide the progress spinner.
  */
 class ProgressDialogController(
-    private val mFragmentManager: FragmentManager,
-    private val mRes: Resources
+    private val fragmentManager: FragmentManager,
+    private val res: Resources
 ) {
-    private var mProgressFragmentRef: WeakReference<ProgressDialogFragment>? = null
+    private var progressFragmentRef: WeakReference<ProgressDialogFragment>? = null
 
     private val dialogFragment: ProgressDialogFragment?
-        get() = if (mProgressFragmentRef != null) mProgressFragmentRef!!.get() else null
+        get() = if (progressFragmentRef != null) progressFragmentRef!!.get() else null
 
     fun show(@StringRes resId: Int) {
         dismiss()
-        val progressDialogFragment = ProgressDialogFragment.newInstance(mRes.getString(resId))
-        progressDialogFragment.show(mFragmentManager, "progress")
-        mProgressFragmentRef = WeakReference(progressDialogFragment)
+        val progressDialogFragment = ProgressDialogFragment.newInstance(res.getString(resId))
+        progressDialogFragment.show(fragmentManager, "progress")
+        progressFragmentRef = WeakReference(progressDialogFragment)
     }
 
     fun dismiss() {
@@ -32,9 +32,9 @@ class ProgressDialogController(
         if (progressDialogFragment != null) {
             progressDialogFragment.dismiss()
 
-            if (mProgressFragmentRef != null) {
-                mProgressFragmentRef!!.clear()
-                mProgressFragmentRef = null
+            if (progressFragmentRef != null) {
+                progressFragmentRef!!.clear()
+                progressFragmentRef = null
             }
         }
     }
