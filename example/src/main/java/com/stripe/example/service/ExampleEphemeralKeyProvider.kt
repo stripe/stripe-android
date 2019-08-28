@@ -13,7 +13,9 @@ import java.io.IOException
  * An implementation of [EphemeralKeyProvider] that can be used to generate
  * ephemeral keys on the backend.
  */
-class ExampleEphemeralKeyProvider(private val mProgressListener: ProgressListener) : EphemeralKeyProvider {
+class ExampleEphemeralKeyProvider(
+    private val progressListener: ProgressListener
+) : EphemeralKeyProvider {
 
     private val mCompositeDisposable: CompositeDisposable = CompositeDisposable()
     private val mStripeService: StripeService =
@@ -33,12 +35,12 @@ class ExampleEphemeralKeyProvider(private val mProgressListener: ProgressListene
                     try {
                         val rawKey = responseBody.string()
                         keyUpdateListener.onKeyUpdate(rawKey)
-                        mProgressListener.onStringResponse(rawKey)
+                        progressListener.onStringResponse(rawKey)
                     } catch (e: IOException) {
                         keyUpdateListener.onKeyUpdateFailure(0, e.message ?: "")
                     }
                 },
-                { throwable -> mProgressListener.onStringResponse(throwable.message ?: "") }))
+                { throwable -> progressListener.onStringResponse(throwable.message ?: "") }))
     }
 
     interface ProgressListener {

@@ -17,20 +17,20 @@ import com.stripe.example.controller.RxTokenController
  */
 class DependencyHandler(
     activity: AppCompatActivity,
-    private val mCardInputWidget: CardInputWidget,
+    private val cardInputWidget: CardInputWidget,
     outputListView: ListView,
-    private val mPublishableKey: String
+    private val publishableKey: String
 ) {
 
-    private var mAsyncTaskController: AsyncTaskTokenController? = null
-    private val mContext: Context = activity.applicationContext
-    private val mProgressDialogController: ProgressDialogController = ProgressDialogController(
+    private var asyncTaskController: AsyncTaskTokenController? = null
+    private val context: Context = activity.applicationContext
+    private val progressDialogController: ProgressDialogController = ProgressDialogController(
         activity.supportFragmentManager,
         activity.resources
     )
-    private val mErrorDialogHandler: ErrorDialogHandler = ErrorDialogHandler(activity)
-    private val mListViewController: ListViewController = ListViewController(outputListView)
-    private var mRxTokenController: RxTokenController? = null
+    private val errorDialogHandler: ErrorDialogHandler = ErrorDialogHandler(activity)
+    private val listViewController: ListViewController = ListViewController(outputListView)
+    private var rxTokenController: RxTokenController? = null
 
     /**
      * Attach a listener that creates a token using the [android.os.AsyncTask]-based method.
@@ -39,15 +39,15 @@ class DependencyHandler(
      * @param button a button that, when clicked, gets a token.
      */
     fun attachAsyncTaskTokenController(button: Button) {
-        if (mAsyncTaskController == null) {
-            mAsyncTaskController = AsyncTaskTokenController(
+        if (asyncTaskController == null) {
+            asyncTaskController = AsyncTaskTokenController(
                 button,
-                mCardInputWidget,
-                mContext,
-                mErrorDialogHandler,
-                mListViewController,
-                mProgressDialogController,
-                mPublishableKey)
+                cardInputWidget,
+                context,
+                errorDialogHandler,
+                listViewController,
+                progressDialogController,
+                publishableKey)
         }
     }
 
@@ -60,15 +60,15 @@ class DependencyHandler(
      * @param button a button that, when clicked, gets a token.
      */
     fun attachRxTokenController(button: Button) {
-        if (mRxTokenController == null) {
-            mRxTokenController = RxTokenController(
+        if (rxTokenController == null) {
+            rxTokenController = RxTokenController(
                 button,
-                mCardInputWidget,
-                mContext,
-                mErrorDialogHandler,
-                mListViewController,
-                mProgressDialogController,
-                mPublishableKey)
+                cardInputWidget,
+                context,
+                errorDialogHandler,
+                listViewController,
+                progressDialogController,
+                publishableKey)
         }
     }
 
@@ -77,15 +77,15 @@ class DependencyHandler(
      */
     fun clearReferences() {
 
-        if (mAsyncTaskController != null) {
-            mAsyncTaskController!!.detach()
+        if (asyncTaskController != null) {
+            asyncTaskController!!.detach()
         }
 
-        if (mRxTokenController != null) {
-            mRxTokenController!!.detach()
+        if (rxTokenController != null) {
+            rxTokenController!!.detach()
         }
 
-        mAsyncTaskController = null
-        mRxTokenController = null
+        asyncTaskController = null
+        rxTokenController = null
     }
 }

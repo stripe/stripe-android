@@ -49,8 +49,8 @@ public class PaymentFlowActivity extends StripeActivity {
 
         CustomerSession.getInstance().addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
         CustomerSession.getInstance().addProductUsageTokenIfValid(TOKEN_PAYMENT_FLOW_ACTIVITY);
-        mViewStub.setLayoutResource(R.layout.activity_shipping_flow);
-        mViewStub.inflate();
+        getViewStub().setLayoutResource(R.layout.activity_shipping_flow);
+        getViewStub().inflate();
         mViewPager = findViewById(R.id.shipping_flow_viewpager);
         mPaymentSessionData = args.paymentSessionData;
 

@@ -32,7 +32,6 @@ public class PaymentUtilsTest {
 
     @Test
     public void formatPriceString_whenUSLocale_rendersCorrectSymbols() {
-
         Locale.setDefault(Locale.US);
         assertEquals(PaymentUtils.formatPriceString(12300, Currency.getInstance("USD")), "$123.00");
 

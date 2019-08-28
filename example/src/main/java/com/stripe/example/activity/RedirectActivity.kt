@@ -27,7 +27,7 @@ import io.reactivex.schedulers.Schedulers
  * Activity that lets you redirect for a 3DS source verification.
  */
 class RedirectActivity : AppCompatActivity() {
-    private val mCompositeDisposable = CompositeDisposable()
+    private val compositeDisposable = CompositeDisposable()
 
     private lateinit var cardInputWidget: CardInputWidget
     private lateinit var mRedirectAdapter: RedirectAdapter
@@ -84,7 +84,7 @@ class RedirectActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        mCompositeDisposable.dispose()
+        compositeDisposable.dispose()
         super.onDestroy()
     }
 
@@ -104,7 +104,7 @@ class RedirectActivity : AppCompatActivity() {
             stripe.createSourceSynchronous(cardSourceParams)!!
         }
 
-        mCompositeDisposable.add(cardSourceObservable
+        compositeDisposable.add(cardSourceObservable
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnSubscribe { progressDialogController.show(R.string.createSource) }
@@ -154,7 +154,7 @@ class RedirectActivity : AppCompatActivity() {
             stripe.createSourceSynchronous(threeDParams)!!
         }
 
-        mCompositeDisposable.add(threeDSecureObservable
+        compositeDisposable.add(threeDSecureObservable
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnComplete { progressDialogController.dismiss() }

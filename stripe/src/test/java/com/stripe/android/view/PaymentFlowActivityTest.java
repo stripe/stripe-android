@@ -195,13 +195,13 @@ public class PaymentFlowActivityTest extends BaseViewTest<PaymentFlowActivity> {
 
         // invalid result
         paymentFlowActivity.onActionSave();
-        assertEquals(paymentFlowActivity.mProgressBar.getVisibility(), View.VISIBLE);
+        assertEquals(paymentFlowActivity.getProgressBar().getVisibility(), View.VISIBLE);
 
         final Intent onShippingInfoProcessedInvalid = new Intent(EVENT_SHIPPING_INFO_PROCESSED);
         onShippingInfoProcessedInvalid.putExtra(EXTRA_IS_SHIPPING_INFO_VALID, false);
         LocalBroadcastManager.getInstance(ApplicationProvider.getApplicationContext())
                 .sendBroadcast(onShippingInfoProcessedInvalid);
-        assertEquals(paymentFlowActivity.mProgressBar.getVisibility(), View.GONE);
+        assertEquals(paymentFlowActivity.getProgressBar().getVisibility(), View.GONE);
     }
 
     @Test
@@ -226,12 +226,12 @@ public class PaymentFlowActivityTest extends BaseViewTest<PaymentFlowActivity> {
         onShippingInfoProcessedValid.putExtra(EXTRA_VALID_SHIPPING_METHODS, shippingMethods);
         LocalBroadcastManager.getInstance(ApplicationProvider.getApplicationContext())
                 .sendBroadcast(onShippingInfoProcessedValid);
-        assertEquals(View.VISIBLE, paymentFlowActivity.mProgressBar.getVisibility());
+        assertEquals(View.VISIBLE, paymentFlowActivity.getProgressBar().getVisibility());
 
         final Intent shippingInfoSaved = new Intent(EVENT_SHIPPING_INFO_SAVED);
         LocalBroadcastManager.getInstance(ApplicationProvider.getApplicationContext())
                 .sendBroadcast(shippingInfoSaved);
-        assertEquals(View.GONE, paymentFlowActivity.mProgressBar.getVisibility());
+        assertEquals(View.GONE, paymentFlowActivity.getProgressBar().getVisibility());
     }
 
     @Test

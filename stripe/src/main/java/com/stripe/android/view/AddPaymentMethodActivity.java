@@ -71,8 +71,8 @@ public class AddPaymentMethodActivity extends StripeActivity {
     }
 
     private void configureView(@NonNull AddPaymentMethodActivityStarter.Args args) {
-        mViewStub.setLayoutResource(R.layout.add_payment_method_layout);
-        final ViewGroup contentRoot = (ViewGroup) mViewStub.inflate();
+        getViewStub().setLayoutResource(R.layout.add_payment_method_layout);
+        final ViewGroup contentRoot = (ViewGroup) getViewStub().inflate();
 
         mAddPaymentMethodView = createPaymentMethodView(args);
         contentRoot.addView(mAddPaymentMethodView);
@@ -157,7 +157,7 @@ public class AddPaymentMethodActivity extends StripeActivity {
 
     @Nullable
     IBinder getWindowToken() {
-        return mViewStub.getWindowToken();
+        return getViewStub().getWindowToken();
     }
 
     @Override
