@@ -1,5 +1,6 @@
 package com.stripe.android.view;
 
+import android.support.annotation.IntRange;
 import android.support.annotation.Nullable;
 
 import com.stripe.android.model.Card;
@@ -31,4 +32,11 @@ interface CardWidget {
     void setCardInputListener(@Nullable CardInputListener listener);
 
     void clear();
+
+    void setCardNumber(@Nullable String cardNumber);
+
+    void setExpiryDate(@IntRange(from = 1, to = 12) int month,
+                       @IntRange(from = 0, to = 9999) int year);
+
+    void setCvcCode(@Nullable String cvcCode);
 }

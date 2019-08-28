@@ -258,8 +258,19 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
      *
      * @param cardNumber card number to be set
      */
+    @Override
     public void setCardNumber(@Nullable String cardNumber) {
         mCardNumberEditText.setText(cardNumber);
+    }
+
+    @Override
+    public void setExpiryDate(int month, int year) {
+        mExpiryDateEditText.setText(DateUtils.createDateStringFromIntegerInput(month, year));
+    }
+
+    @Override
+    public void setCvcCode(@Nullable String cvcCode) {
+        mCvcEditText.setText(cvcCode);
     }
 
     /**
