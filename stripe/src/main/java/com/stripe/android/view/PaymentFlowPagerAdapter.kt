@@ -18,7 +18,7 @@ internal class PaymentFlowPagerAdapter(
     private val pages: MutableList<PaymentFlowPagerEnum>
 
     private var shippingInfoSaved: Boolean = false
-    private var validShippingMethods: List<ShippingMethod> = ArrayList()
+    private var validShippingMethods: List<ShippingMethod>? = ArrayList()
     private var defaultShippingMethod: ShippingMethod? = null
 
     init {
@@ -46,8 +46,8 @@ internal class PaymentFlowPagerAdapter(
     }
 
     fun setShippingMethods(
-        validShippingMethods: List<ShippingMethod>,
-        defaultShippingMethod: ShippingMethod
+        validShippingMethods: List<ShippingMethod>?,
+        defaultShippingMethod: ShippingMethod?
     ) {
         this.validShippingMethods = validShippingMethods
         this.defaultShippingMethod = defaultShippingMethod
