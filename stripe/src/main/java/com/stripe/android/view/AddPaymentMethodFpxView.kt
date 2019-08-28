@@ -1,8 +1,11 @@
 package com.stripe.android.view
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.os.Parcel
 import android.os.Parcelable
+import android.support.v4.widget.ImageViewCompat
+import android.support.v7.widget.AppCompatImageView
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -78,9 +81,8 @@ internal class AddPaymentMethodFpxView private constructor(
 
         override fun onBindViewHolder(viewHolder: ViewHolder, i: Int) {
             viewHolder.setSelected(i == selectedPosition)
-            viewHolder.update(FpxBank.values()[i].displayName)
+            viewHolder.update(FpxBank.values()[i])
             viewHolder.itemView.setOnClickListener {
-                // TODO(mshafrir): update UI for selected bank
                 val currentPosition = viewHolder.adapterPosition
                 if (currentPosition != selectedPosition) {
                     val prevSelectedPosition = selectedPosition
@@ -93,7 +95,7 @@ internal class AddPaymentMethodFpxView private constructor(
         }
 
         override fun getItemId(position: Int): Long {
-            return FpxBank.values()[position].hashCode().toLong()
+            return position.toLong()
         }
 
         override fun getItemCount(): Int {
@@ -109,14 +111,20 @@ internal class AddPaymentMethodFpxView private constructor(
             itemView: View,
             private val themeConfig: ThemeConfig
         ) : RecyclerView.ViewHolder(itemView) {
-            private val name: TextView = itemView.findViewById(R.id.name)
 
-            internal fun update(bankName: String) {
-                name.text = bankName
+            private val name: TextView = itemView.findViewById(R.id.name)
+            private val icon: AppCompatImageView = itemView.findViewById(R.id.icon)
+            private val checkMark: AppCompatImageView = itemView.findViewById(R.id.check_icon)
+
+            internal fun update(fpxBank: FpxBank) {
+                name.text = fpxBank.displayName
+                icon.setImageResource(fpxBank.brandIconResId)
             }
 
             internal fun setSelected(isSelected: Boolean) {
                 name.setTextColor(themeConfig.getTextColor(isSelected))
+                ImageViewCompat.setImageTintList(checkMark, ColorStateList.valueOf(themeConfig.getTintColor(isSelected)))
+                checkMark.visibility = if (isSelected) View.VISIBLE else View.GONE
             }
         }
     }
