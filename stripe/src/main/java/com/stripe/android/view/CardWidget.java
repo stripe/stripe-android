@@ -1,6 +1,7 @@
 package com.stripe.android.view;
 
 import android.support.annotation.IntRange;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.stripe.android.model.Card;
@@ -30,6 +31,8 @@ interface CardWidget {
     @Nullable PaymentMethodCreateParams getPaymentMethodCreateParams();
 
     void setCardInputListener(@Nullable CardInputListener listener);
+
+    void setCardHint(@NonNull String cardHint);
 
     void clear();
 

@@ -21,7 +21,7 @@
             android:value="true"/>
 
         <activity
-            android:name=".activity.PaymentActivity">
+            android:name=".activity.CardTokenActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
             </intent-filter>

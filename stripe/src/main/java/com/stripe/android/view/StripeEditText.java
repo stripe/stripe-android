@@ -152,6 +152,16 @@ public class StripeEditText extends AppCompatEditText {
         mHandler.postDelayed(hintRunnable, delayMilliseconds);
     }
 
+    public void setHintDelayed(@NonNull final String hint, long delayMilliseconds) {
+        final Runnable hintRunnable = new Runnable() {
+            @Override
+            public void run() {
+                setHint(hint);
+            }
+        };
+        mHandler.postDelayed(hintRunnable, delayMilliseconds);
+    }
+
     /**
      * Sets whether or not the text should be put into "error mode," which displays
      * the text in an error color determined by the original text color.

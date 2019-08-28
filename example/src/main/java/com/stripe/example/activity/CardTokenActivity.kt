@@ -6,13 +6,13 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.example.R
 import com.stripe.example.module.DependencyHandler
 
-class PaymentActivity : AppCompatActivity() {
+class CardTokenActivity : AppCompatActivity() {
 
     private lateinit var dependencyHandler: DependencyHandler
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.payment_activity)
+        setContentView(R.layout.card_token_activity)
 
         dependencyHandler = DependencyHandler(
             this,

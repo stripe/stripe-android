@@ -42,7 +42,7 @@ class LauncherActivity : AppCompatActivity() {
             Item(activity.getString(R.string.payment_auth_example),
                 PaymentAuthActivity::class.java),
             Item(activity.getString(R.string.create_card_tokens),
-                PaymentActivity::class.java),
+                CardTokenActivity::class.java),
             Item(activity.getString(R.string.create_card_payment_methods),
                 PaymentMultilineActivity::class.java),
             Item(activity.getString(R.string.create_three_d_secure),
