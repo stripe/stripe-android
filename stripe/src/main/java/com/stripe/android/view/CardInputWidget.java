@@ -213,7 +213,8 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
      *
      * @param cardNumber card number to be set
      */
-    public void setCardNumber(String cardNumber) {
+    @Override
+    public void setCardNumber(@Nullable String cardNumber) {
         mCardNumberEditText.setText(cardNumber);
         setCardNumberIsViewed(!mCardNumberEditText.isCardNumberValid());
     }
@@ -230,6 +231,7 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
      * @param month a month of the year, represented as a number between 1 and 12
      * @param year a year number, either in two-digit form or four-digit form
      */
+    @Override
     public void setExpiryDate(
             @IntRange(from = 1, to = 12) int month,
             @IntRange(from = 0, to = 9999) int year) {
@@ -242,7 +244,8 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
      *
      * @param cvcCode the CVC value to be set
      */
-    public void setCvcCode(String cvcCode) {
+    @Override
+    public void setCvcCode(@Nullable String cvcCode) {
         mCvcNumberEditText.setText(cvcCode);
     }
 
