@@ -52,10 +52,10 @@ class RedirectActivity : AppCompatActivity() {
         stripe = Stripe(applicationContext, publishableKey)
 
         val threeDSecureButton = findViewById<Button>(R.id.btn_three_d_secure)
-        threeDSecureButton.setOnClickListener { beginSequence(publishableKey) }
+        threeDSecureButton.setOnClickListener { beginSequence() }
 
         val threeDSyncButton = findViewById<Button>(R.id.btn_three_d_secure_sync)
-        threeDSyncButton.setOnClickListener { beginSequence(publishableKey) }
+        threeDSyncButton.setOnClickListener { beginSequence() }
 
         val recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
         val linearLayoutManager = LinearLayoutManager(this)
@@ -88,9 +88,9 @@ class RedirectActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    private fun beginSequence(publishableKey: String) {
+    private fun beginSequence() {
         val displayCard = cardInputWidget.card ?: return
-        createCardSource(displayCard, publishableKey)
+        createCardSource(displayCard)
     }
 
     /**
@@ -98,7 +98,7 @@ class RedirectActivity : AppCompatActivity() {
      *
      * @param card the [Card] used to create a source
      */
-    private fun createCardSource(card: Card, publishableKey: String) {
+    private fun createCardSource(card: Card) {
         val cardSourceParams = SourceParams.createCardParams(card)
         val cardSourceObservable = Observable.fromCallable {
             stripe.createSourceSynchronous(cardSourceParams)!!
@@ -126,7 +126,7 @@ class RedirectActivity : AppCompatActivity() {
                     // first create a 3DS Source.
                     if (SourceCardData.ThreeDSecureStatus.REQUIRED == threeDSecureStatus) {
                         // The card Source can be used to create a 3DS Source
-                        createThreeDSecureSource(source.id!!, publishableKey)
+                        createThreeDSecureSource(source.id!!)
                     } else {
                         progressDialogController.dismiss()
                     }
@@ -142,7 +142,7 @@ class RedirectActivity : AppCompatActivity() {
      *
      * @param sourceId the [Source.getId] from the [Card]-created [Source].
      */
-    private fun createThreeDSecureSource(sourceId: String, publishableKey: String) {
+    private fun createThreeDSecureSource(sourceId: String) {
         // This represents a request for a 3DS purchase of 10.00 euro.
         val threeDParams = SourceParams.createThreeDSecureParams(
             1000L,
@@ -151,7 +151,7 @@ class RedirectActivity : AppCompatActivity() {
             sourceId)
 
         val threeDSecureObservable = Observable.fromCallable {
-            stripe.createSourceSynchronous(threeDParams, publishableKey)!!
+            stripe.createSourceSynchronous(threeDParams)!!
         }
 
         mCompositeDisposable.add(threeDSecureObservable

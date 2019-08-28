@@ -88,7 +88,7 @@ public class StripeNetworkUtils {
 
     @NonNull
     Map<String, String> createUidParams() {
-        final String guid = mUidSupplier.get().value;
+        final String guid = mUidSupplier.get().getValue();
         if (StripeTextUtils.isBlank(guid)) {
             return new HashMap<>();
         }

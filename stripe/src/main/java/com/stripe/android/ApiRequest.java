@@ -33,7 +33,7 @@ final class ApiRequest extends StripeRequest {
                @Nullable AppInfo appInfo) {
         super(method, url, params, MIME_TYPE);
         this.options = options;
-        mApiVersion = ApiVersion.get().code;
+        mApiVersion = ApiVersion.get().getCode();
         mAppInfo = appInfo;
     }
 

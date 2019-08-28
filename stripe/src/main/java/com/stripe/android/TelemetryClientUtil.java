@@ -164,7 +164,7 @@ final class TelemetryClientUtil {
 
     @NonNull
     String getHashedUid() {
-        final String uid = mUidSupplier.get().value;
+        final String uid = mUidSupplier.get().getValue();
         if (StripeTextUtils.isBlank(uid)) {
             return "";
         }
