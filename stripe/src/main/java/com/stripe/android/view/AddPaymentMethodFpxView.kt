@@ -121,7 +121,7 @@ internal class AddPaymentMethodFpxView private constructor(
         }
     }
 
-    private enum class FpxBank(val code: String, val displayName: String) {
+    private enum class FpxBank(val code: String, val displayName: String, val brandIconResId: Int = 0) {
         AffinBank("affin_bank", "Affin Bank"),
         AllianceBankBusiness("alliance_bank", "Alliance Bank (Business)"),
         AmBank("ambank", "AmBank"),
