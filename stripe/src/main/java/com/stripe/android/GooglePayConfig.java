@@ -20,7 +20,7 @@ public final class GooglePayConfig {
 
     public GooglePayConfig(@NonNull String publishableKey) {
         mPublishableKey = ApiKeyValidator.get().requireValid(publishableKey);
-        mApiVersion = ApiVersion.get().code;
+        mApiVersion = ApiVersion.get().getCode();
     }
 
     /**

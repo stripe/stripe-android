@@ -51,7 +51,7 @@ public class ApiRequestTest {
         assertNotNull(headerMap);
         assertEquals("Bearer " + ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 headerMap.get("Authorization"));
-        assertEquals(ApiVersion.get().code, headerMap.get("Stripe-Version"));
+        assertEquals(ApiVersion.get().getCode(), headerMap.get("Stripe-Version"));
         assertEquals(stripeAccount, headerMap.get("Stripe-Account"));
     }
 

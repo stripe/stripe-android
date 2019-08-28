@@ -15,7 +15,7 @@ public class GooglePayConfigTest {
         final JSONObject params = tokenizationSpec.getJSONObject("parameters");
         assertEquals("stripe",
                 params.getString("gateway"));
-        assertEquals(ApiVersion.get().code,
+        assertEquals(ApiVersion.get().getCode(),
                 params.getString("stripe:version"));
         assertEquals(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 params.getString("stripe:publishableKey"));

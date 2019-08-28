@@ -35,7 +35,7 @@ class EphemeralKeyManager<TEphemeralKey extends EphemeralKey> {
         mListener = keyManagerListener;
         mTimeBufferInSeconds = timeBufferInSeconds;
         mOverrideCalendar = overrideCalendar;
-        mApiVersion = ApiVersion.get().code;
+        mApiVersion = ApiVersion.get().getCode();
 
         if (shouldPrefetchEphemeralKey) {
             retrieveEphemeralKey(operationIdFactory.create(), null, null);

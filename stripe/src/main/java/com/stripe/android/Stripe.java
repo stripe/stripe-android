@@ -45,7 +45,7 @@ import java.util.concurrent.Executor;
  */
 @SuppressWarnings("WeakerAccess")
 public class Stripe {
-    @NonNull public static final String API_VERSION = ApiVersion.get().code;
+    @NonNull public static final String API_VERSION = ApiVersion.get().getCode();
 
     @NonNull public static final String VERSION =
             String.format(Locale.ROOT, "AndroidBindings/%s", BuildConfig.VERSION_NAME);
@@ -476,11 +476,6 @@ public class Stripe {
     }
 
     /**
-     * Should be called via <code>Activity#onActivityResult(int, int, Intent)}}</code> to handle the
-     * result of a PaymentIntent automatic confirmation
-     * (see {@link #confirmPayment(Activity, ConfirmPaymentIntentParams, String)}) or manual
-     * confirmation (see {@link #authenticatePayment(Activity, String, String)}})
-     *
      * @deprecated use {@link #onPaymentResult(int, Intent, ApiResultCallback)} }
      */
     @Deprecated
@@ -520,10 +515,6 @@ public class Stripe {
     }
 
     /**
-     * Should be called via <code>Activity#onActivityResult(int, int, Intent)}}</code> to handle the
-     * result of a SetupIntent confirmation
-     * (see {@link #confirmSetupIntent(Activity, ConfirmSetupIntentParams)})
-     *
      * @deprecated use {@link #onSetupResult(int, Intent, ApiResultCallback)}
      */
     @Deprecated
@@ -584,15 +575,6 @@ public class Stripe {
     }
 
     /**
-     * Call to create a {@link Token} for a {@link BankAccount} with the publishable key and
-     * {@link Executor} specified.
-     *
-     * @param bankAccount the {@link BankAccount} for which to create a {@link Token}
-     * @param publishableKey the publishable key to use
-     * @param executor an {@link Executor} to run this operation on. If null, this is run on a
-     *         default non-ui executor
-     * @param callback a {@link ApiResultCallback} to receive the result or error message
-     *
      * @deprecated use {@link #createBankAccountToken(BankAccount, ApiResultCallback)}
      */
     @Deprecated
@@ -630,14 +612,7 @@ public class Stripe {
     }
 
     /**
-     * Call to create a {@link Token} for PII with the publishable key and
-     * {@link Executor} specified.
-     *
-     * @param personalId the personal id used to create this token
-     * @param publishableKey the publishable key to use
-     * @param executor an {@link Executor} to run this operation on. If null, this is run on a
-     *         default non-ui executor
-     * @param callback a {@link ApiResultCallback} to receive the result or error message
+     * @deprecated use {@link #createPiiToken(String, ApiResultCallback)}
      */
     @Deprecated
     public void createPiiToken(
@@ -686,18 +661,7 @@ public class Stripe {
     }
 
     /**
-     * Blocking method to create a {@link Token} using a {@link BankAccount}. Do not call this on
-     * the UI thread or your app will crash.
-     *
-     * @param bankAccount the {@link BankAccount} to use for this token
-     * @param publishableKey the publishable key to use with this request
-     * @return a {@link Token} that can be used for this {@link BankAccount}
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws CardException should not be thrown with this type of token, but is theoretically
-     *         possible given the underlying methods called
-     * @throws APIException any other type of problem
+     * @deprecated use {@link #createBankAccountTokenSynchronous(BankAccount)}
      */
     @Deprecated
     @Nullable
@@ -736,14 +700,7 @@ public class Stripe {
     }
 
     /**
-     * Call to create a {@link Token} for CVC with the publishable key and
-     * {@link Executor} specified.
-     *
-     * @param cvc the CVC used to create this token
-     * @param publishableKey the publishable key to use
-     * @param executor an {@link Executor} to run this operation on. If null, this is run on a
-     *         default non-ui executor
-     * @param callback a {@link ApiResultCallback} to receive the result or error message
+     * @deprecated use {@link #createCvcUpdateToken(String, ApiResultCallback)}
      */
     @Deprecated
     public void createCvcUpdateToken(
@@ -773,13 +730,7 @@ public class Stripe {
     }
 
     /**
-     * Create a {@link Source} using an {@link AsyncTask}.
-     *
-     * @param sourceParams the {@link SourceParams} to be used
-     * @param callback a {@link ApiResultCallback} to receive a result or an error message
-     * @param publishableKey the publishable api key to be used
-     * @param executor an {@link Executor} on which to execute the task,
-     *                 or <code>null</code> for default
+     * @deprecated use {@link #createSource(SourceParams, ApiResultCallback)}
      */
     @Deprecated
     public void createSource(
@@ -844,12 +795,6 @@ public class Stripe {
     }
 
     /**
-     * Call to create a {@link Token} with a specific public key.
-     *
-     * @param card the {@link Card} used for this transaction
-     * @param publishableKey the public key used for this transaction
-     * @param callback a {@link ApiResultCallback} to receive the result of this operation
-     *
      * @deprecated use {@link #createToken(Card, ApiResultCallback)}
      */
     @Deprecated
@@ -888,14 +833,6 @@ public class Stripe {
     }
 
     /**
-     * Call to create a {@link Token} with the publishable key and {@link Executor} specified.
-     *
-     * @param card the {@link Card} used for this token
-     * @param publishableKey the publishable key to use
-     * @param executor an {@link Executor} to run this operation on. If null, this is run on a
-     *         default non-ui executor
-     * @param callback a {@link ApiResultCallback} to receive the result or error message
-     *
      * @deprecated use {@link #createToken(Card, ApiResultCallback)}
      */
     @Deprecated
@@ -938,18 +875,6 @@ public class Stripe {
     }
 
     /**
-     * Blocking method to create a {@link Source} object.
-     * Do not call this on the UI thread or your app will crash.
-     *
-     * @param params a set of {@link SourceParams} with which to create the source
-     * @param publishableKey a publishable API key to use
-     * @return a {@link Source}, or {@code null} if a problem occurred
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with
-     *         Stripe's servers
-     *
      * @deprecated use {@link #createSourceSynchronous(SourceParams)}
      */
     @Deprecated
@@ -966,13 +891,6 @@ public class Stripe {
     }
 
     /**
-     * Blocking method to retrieve a {@link PaymentIntent} object.
-     * Do not call this on the UI thread or your app will crash.
-     *
-     * @param clientSecret the client_secret with which to retrieve the PaymentIntent
-     * @param publishableKey a publishable API key to use
-     * @return a {@link PaymentIntent} or {@code null} if a problem occurred
-     *
      * @deprecated use {@link #retrievePaymentIntentSynchronous(String)}
      */
     @Deprecated
@@ -1007,13 +925,6 @@ public class Stripe {
     }
 
     /**
-     * Blocking method to confirm a {@link PaymentIntent} object.
-     * Do not call this on the UI thread or your app will crash.
-     *
-     * @param confirmPaymentIntentParams a set of params with which to confirm the Payment Intent
-     * @param publishableKey a publishable API key to use
-     * @return a {@link PaymentIntent} or {@code null} if a problem occurred
-     *
      * @deprecated use {@link #confirmPaymentIntentSynchronous(ConfirmPaymentIntentParams)}
      */
     @Deprecated
@@ -1031,12 +942,6 @@ public class Stripe {
     }
 
     /**
-     * Blocking method to confirm a {@link PaymentIntent} object.
-     * Do not call this on the UI thread or your app will crash.
-     *
-     * @param confirmPaymentIntentParams a set of params with which to confirm the Payment Intent
-     * @return a {@link PaymentIntent} or {@code null} if a problem occurred
-     *
      * @deprecated use {@link #confirmPayment(Activity, ConfirmPaymentIntentParams)}
      */
     @Nullable
@@ -1051,13 +956,6 @@ public class Stripe {
     }
 
     /**
-     * Blocking method to retrieve a {@link SetupIntent} object.
-     * Do not call this on the UI thread or your app will crash.
-     *
-     * @param clientSecret client_secret of the SetupIntent to retrieve
-     * @param publishableKey a publishable API key to use
-     * @return a {@link SetupIntent} or {@code null} if a problem occurred
-     *
      * @deprecated use {@link #retrieveSetupIntentSynchronous(String)}
      */
     @Deprecated
@@ -1202,18 +1100,6 @@ public class Stripe {
     }
 
     /**
-     * Blocking method to create a {@link Token}. Do not call this on the UI thread or your app
-     * will crash.
-     *
-     * @param card the {@link Card} to use for this token
-     * @param publishableKey the publishable key to use with this request
-     * @return a {@link Token} that can be used for this card
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with
-     *         Stripe's servers)
-     *
      * @deprecated use {@link #createTokenSynchronous(Card)}
      */
     @Deprecated
@@ -1258,18 +1144,6 @@ public class Stripe {
     }
 
     /**
-     * Blocking method to create a {@link Token} for PII. Do not call this on the UI thread
-     * or your app will crash.
-     *
-     * @param personalId the personal ID to use for this token
-     * @param publishableKey the publishable key to use with this request
-     * @return a {@link Token} that can be used for this card
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with
-     *         Stripe's servers)
-     *
      * @deprecated use {@link #createPiiTokenSynchronous(String)}
      */
     @Deprecated
@@ -1315,18 +1189,6 @@ public class Stripe {
     }
 
     /**
-     * Blocking method to create a {@link Token} for CVC updating. Do not call this on the UI thread
-     * or your app will crash.
-     *
-     * @param cvc the CVC to use for this token
-     * @param publishableKey the publishable key to use with this request
-     * @return a {@link Token} that can be used for this card
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with
-     *         Stripe's servers)
-     *
      * @deprecated use {@link #createCvcUpdateTokenSynchronous(String)}
      */
     @Deprecated
@@ -1377,19 +1239,6 @@ public class Stripe {
     }
 
     /**
-     * Blocking method to create a {@link Token} for a Connect Account. Do not call this on the UI
-     * thread.
-     *
-     * @param accountParams params to use for this token.
-     * @param publishableKey the publishable key to use with this request. If null is passed in as
-     *         the publishable key, we will use the default publishable key.
-     * @return a {@link Token} that can be used for this account.
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with
-     *         Stripe's servers)
-     *
      * @deprecated use {@link #createAccountTokenSynchronous(AccountParams)}
      */
     @Deprecated
@@ -1441,21 +1290,6 @@ public class Stripe {
     }
 
     /**
-     * Retrieve an existing {@link Source} from the Stripe API. Note that this is a
-     * synchronous method, and cannot be called on the main thread. Doing so will cause your app
-     * to crash.
-     *
-     * @param sourceId the {@link Source#getId()} field of the desired Source object
-     * @param clientSecret the {@link Source#getClientSecret()} field of the desired Source object
-     * @param publishableKey a publishable API key to use
-     * @return a {@link Source} if one could be found based on the input params, or {@code null} if
-     *         no such Source could be found.
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with
-     *         Stripe's servers)
-     *
      * @deprecated use {@link #retrieveSourceSynchronous(String, String)}}
      */
     @Deprecated
