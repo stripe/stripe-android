@@ -68,7 +68,7 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
     }
 
     @VisibleForTesting
-    fun updateUiForCountryEntered(displayCountryEntered: String) {
+    fun updateUiForCountryEntered(displayCountryEntered: String?) {
         val countryCodeEntered = countryNameToCode[displayCountryEntered]
         if (countryCodeEntered != null) {
             if (selectedCountryCode == null || selectedCountryCode != countryCodeEntered) {
