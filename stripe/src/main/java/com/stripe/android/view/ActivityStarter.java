@@ -15,7 +15,7 @@ public abstract class ActivityStarter
     @Nullable private final Fragment mFragment;
     @NonNull private final Class<TargetActivityType> mTargetClass;
     @NonNull private final ArgsType mDefaultArgs;
-    @NonNull private final int mRequestCode;
+    private final int mRequestCode;
 
     ActivityStarter(@NonNull Activity activity,
                     @NonNull Class<TargetActivityType> targetClass,

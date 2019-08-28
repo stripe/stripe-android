@@ -10,7 +10,6 @@ import android.widget.AutoCompleteTextView
 import android.widget.FrameLayout
 import com.stripe.android.R
 import java.util.Locale
-import java.util.Objects
 
 internal class CountryAutoCompleteTextView @JvmOverloads constructor(
     context: Context,
@@ -39,7 +38,7 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
             val countryEntered = countryAutocomplete.text.toString()
             updateUiForCountryEntered(countryEntered)
         }
-        val defaultCountryEntered = Objects.requireNonNull<Any>(countryAdapter.getItem(0)) as String
+        val defaultCountryEntered = countryAdapter.getItem(0)
         updateUiForCountryEntered(defaultCountryEntered)
         countryAutocomplete.setText(defaultCountryEntered)
         countryAutocomplete.onFocusChangeListener = OnFocusChangeListener { _, focused ->
