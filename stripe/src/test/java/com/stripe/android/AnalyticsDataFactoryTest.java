@@ -121,8 +121,10 @@ public class AnalyticsDataFactoryTest {
                 null);
         assertEquals(expectedSize, loggingParams.size());
         assertEquals(API_KEY, loggingParams.get(AnalyticsDataFactory.FIELD_PUBLISHABLE_KEY));
-        assertEquals(AnalyticsDataFactory.getEventParamName(AnalyticsDataFactory.EventName.CONFIRM_PAYMENT_INTENT),
-                loggingParams.get(AnalyticsDataFactory.FIELD_EVENT));
+        assertEquals(
+                AnalyticsDataFactory.getEventParamName(AnalyticsDataFactory.EventName.CONFIRM_PAYMENT_INTENT),
+                loggingParams.get(AnalyticsDataFactory.FIELD_EVENT)
+        );
         assertEquals(AnalyticsDataFactory.getAnalyticsUa(),
                 loggingParams.get(AnalyticsDataFactory.FIELD_ANALYTICS_UA));
     }
