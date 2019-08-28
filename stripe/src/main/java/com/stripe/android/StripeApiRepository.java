@@ -589,7 +589,8 @@ final class StripeApiRepository implements StripeRepository {
 
         fireAnalyticsRequest(
                 mAnalyticsDataFactory.getEventLoggingParams(productUsageTokens, sourceType,
-                        null, publishableKey, AnalyticsDataFactory.EventName.DEFAULT_SOURCE),
+                        null, publishableKey,
+                        AnalyticsDataFactory.EventName.DEFAULT_SOURCE),
                 publishableKey
         );
 
