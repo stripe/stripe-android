@@ -73,7 +73,7 @@ public final class PaymentIntentFixtures {
                     "  payment_method_types: [\n" +
                     "    \"card\"\n" +
                     "  ],\n" +
-                    "  receipt_email: null,\n" +
+                    "  receipt_email: \"jenny@example.com\",\n" +
                     "  review: null,\n" +
                     "  setup_future_usage: null,\n" +
                     "  shipping: {\n" +

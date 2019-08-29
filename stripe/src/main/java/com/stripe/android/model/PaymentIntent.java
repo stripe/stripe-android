@@ -27,6 +27,7 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
  * <li><a href="https://stripe.com/docs/api/payment_intents">PaymentIntents API</a></li>
  * </ul>
  */
+@SuppressWarnings("WeakerAccess")
 public final class PaymentIntent extends StripeModel implements StripeIntent {
     private static final String VALUE_PAYMENT_INTENT = "payment_intent";
 
@@ -43,6 +44,7 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
     private static final String FIELD_LAST_PAYMENT_ERROR = "last_payment_error";
     private static final String FIELD_LIVEMODE = "livemode";
     private static final String FIELD_NEXT_ACTION = "next_action";
+    private static final String FIELD_PAYMENT_METHOD_ID = "payment_method_id";
     private static final String FIELD_PAYMENT_METHOD_TYPES = "payment_method_types";
     private static final String FIELD_RECEIPT_EMAIL = "receipt_email";
     private static final String FIELD_SOURCE = "source";
@@ -55,92 +57,165 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
     @Nullable private final String mObjectType;
     @NonNull private final List<String> mPaymentMethodTypes;
     @Nullable private final Long mAmount;
-    @Nullable private final Long mCanceledAt;
+    private final long mCanceledAt;
     @Nullable private final String mCaptureMethod;
     @Nullable private final String mClientSecret;
     @Nullable private final String mConfirmationMethod;
-    @Nullable private final Long mCreated;
+    private final long mCreated;
     @Nullable private final String mCurrency;
     @Nullable private final String mDescription;
     private final boolean mLiveMode;
     @Nullable private final Map<String, Object> mNextAction;
     @Nullable private final NextActionType mNextActionType;
+    @Nullable private final String mPaymentMethodId;
     @Nullable private final String mReceiptEmail;
     @Nullable private final String mSource;
     @Nullable private final Status mStatus;
     @Nullable private final Usage mSetupFutureUsage;
     @Nullable private final Error mLastPaymentError;
 
+    /**
+     * @return Unique identifier for the object.
+     */
     @Nullable
     @Override
     public String getId() {
         return mId;
     }
 
+    /**
+     * @return The list of payment method types (e.g. card) that this PaymentIntent is allowed to
+     * use.
+     */
     @NonNull
     public List<String> getPaymentMethodTypes() {
         return mPaymentMethodTypes;
     }
 
+    /**
+     * @return Amount intended to be collected by this PaymentIntent.
+     */
     @Nullable
     public Long getAmount() {
         return mAmount;
     }
 
-    @Nullable
-    public Long getCanceledAt() {
+    /**
+     * @return Populated when status is canceled, this is the time at which the PaymentIntent
+     * was canceled. Measured in seconds since the Unix epoch. If unavailable, will return 0.
+     */
+    public long getCanceledAt() {
         return mCanceledAt;
     }
 
+    /**
+     * @return One of <code>automatic</code> (default) or <code>manual</code>.
+     *
+     * <p>When the capture method is <code>automatic</code>,
+     * Stripe automatically captures funds when the customer authorizes the payment.
+     */
     @Nullable
     public String getCaptureMethod() {
         return mCaptureMethod;
     }
 
+    /**
+     * @return The client secret of this PaymentIntent. Used for client-side retrieval using a
+     * publishable key.
+     *
+     * <p>The client secret can be used to complete a payment from your frontend.
+     * It should not be stored, logged, embedded in URLs, or exposed to anyone other than the
+     * customer. Make sure that you have TLS enabled on any page that includes the client
+     * secret.</p>
+     */
     @Nullable
+    @Override
     public String getClientSecret() {
         return mClientSecret;
     }
 
+    /**
+     * @return One of automatic (default) or manual.
+     *
+     * <p>When the confirmation method is <code>automatic</code>, a PaymentIntent can be confirmed
+     * using a publishable key. After <code>next_action</code>s are handled, no additional
+     * confirmation is required to complete the payment.</p>
+     *
+     * <p>When the confirmation method is <code>manual</code>, all payment attempts must be made
+     * using a secret key. The PaymentIntent returns to the <code>requires_confirmation</code>
+     * state after handling <code>next_action</code>s, and requires your server to initiate each
+     * payment attempt with an explicit confirmation.</p>
+     */
     @Nullable
     public String getConfirmationMethod() {
         return mConfirmationMethod;
     }
 
-    @Nullable
-    public Long getCreated() {
+    /**
+     * @return Time at which the object was created. Measured in seconds since the Unix epoch.
+     */
+    @Override
+    public long getCreated() {
         return mCreated;
     }
 
+    /**
+     * @return Three-letter ISO currency code, in lowercase. Must be a supported currency.
+     */
     @Nullable
     public String getCurrency() {
         return mCurrency;
     }
 
+    /**
+     * @return An arbitrary string attached to the object. Often useful for displaying to users.
+     */
     @Nullable
+    @Override
     public String getDescription() {
         return mDescription;
     }
 
+    /**
+     * @return Has the value <code>true</code> if the object exists in live mode or the value
+     * <code>false</code> if the object exists in test mode.
+     */
     @Override
     public boolean isLiveMode() {
         return mLiveMode;
     }
 
+    /**
+     * @return ID of the payment method (a PaymentMethod, Card, BankAccount, or saved Source object)
+     * to attach to this PaymentIntent.
+     */
+    @Nullable
+    @Override
+    public String getPaymentMethodId() {
+        return mPaymentMethodId;
+    }
+
+    @Override
     public boolean requiresAction() {
         return mStatus == Status.RequiresAction;
     }
 
+    @Override
     public boolean requiresConfirmation() {
         return mStatus == Status.RequiresConfirmation;
     }
 
+    /**
+     * @return If present, this property tells you what actions you need to take in order for your
+     * customer to fulfill a payment using the provided source.
+     */
     @Nullable
     public Map<String, Object> getNextAction() {
         return mNextAction;
     }
 
     @Nullable
+    @Override
     public NextActionType getNextActionType() {
         return mNextActionType;
     }
@@ -167,6 +242,7 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
     }
 
     @Nullable
+    @Override
     public RedirectData getRedirectData() {
         if (NextActionType.RedirectToUrl != mNextActionType) {
             return null;
@@ -196,16 +272,26 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
         return null;
     }
 
+    /**
+     * @return Email address that the receipt for the resulting payment will be sent to.
+     */
     @Nullable
     public String getReceiptEmail() {
         return mReceiptEmail;
     }
 
+    /**
+     * @deprecated use {@link #getPaymentMethodId()}
+     */
+    @Deprecated
     @Nullable
     public String getSource() {
         return mSource;
     }
 
+    /**
+     * @return Status of this PaymentIntent.
+     */
     @Nullable
     public Status getStatus() {
         return mStatus;
@@ -224,15 +310,16 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
             @Nullable String objectType,
             @NonNull List<String> paymentMethodTypes,
             @Nullable Long amount,
-            @Nullable Long canceledAt,
+            long canceledAt,
             @Nullable String captureMethod,
             @Nullable String clientSecret,
             @Nullable String confirmationMethod,
-            @Nullable Long created,
+            long created,
             @Nullable String currency,
             @Nullable String description,
             boolean liveMode,
             @Nullable Map<String, Object> nextAction,
+            @Nullable String paymentMethodId,
             @Nullable String receiptEmail,
             @Nullable String source,
             @Nullable Status status,
@@ -251,6 +338,7 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
         mDescription = description;
         mLiveMode = liveMode;
         mNextAction = nextAction;
+        mPaymentMethodId = paymentMethodId;
         mReceiptEmail = receiptEmail;
         mSource = source;
         mStatus = status;
@@ -286,14 +374,15 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
         final List<String> paymentMethodTypes = jsonArrayToList(
                 jsonObject.optJSONArray(FIELD_PAYMENT_METHOD_TYPES));
         final Long amount = optLong(jsonObject, FIELD_AMOUNT);
-        final Long canceledAt = optLong(jsonObject, FIELD_CANCELED);
+        final Long canceledAt = jsonObject.optLong(FIELD_CANCELED);
         final String captureMethod = optString(jsonObject, FIELD_CAPTURE_METHOD);
         final String clientSecret = optString(jsonObject, FIELD_CLIENT_SECRET);
         final String confirmationMethod = optString(jsonObject, FIELD_CONFIRMATION_METHOD);
-        final Long created = optLong(jsonObject, FIELD_CREATED);
+        final long created = jsonObject.optLong(FIELD_CREATED);
         final String currency = optCurrency(jsonObject, FIELD_CURRENCY);
         final String description = optString(jsonObject, FIELD_DESCRIPTION);
         final boolean livemode = Boolean.TRUE.equals(optBoolean(jsonObject, FIELD_LIVEMODE));
+        final String paymentMethodId = optString(jsonObject, FIELD_PAYMENT_METHOD_ID);
         final String receiptEmail = optString(jsonObject, FIELD_RECEIPT_EMAIL);
         final Status status = Status.fromCode(optString(jsonObject, FIELD_STATUS));
         final Usage setupFutureUsage =
@@ -317,6 +406,7 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
                 description,
                 livemode,
                 nextAction,
+                paymentMethodId,
                 receiptEmail,
                 source,
                 status,
@@ -342,6 +432,7 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
                 && ObjectUtils.equals(mCurrency, paymentIntent.mCurrency)
                 && ObjectUtils.equals(mDescription, paymentIntent.mDescription)
                 && ObjectUtils.equals(mLiveMode, paymentIntent.mLiveMode)
+                && ObjectUtils.equals(mPaymentMethodId, paymentIntent.mPaymentMethodId)
                 && ObjectUtils.equals(mReceiptEmail, paymentIntent.mReceiptEmail)
                 && ObjectUtils.equals(mSource, paymentIntent.mSource)
                 && ObjectUtils.equals(mStatus, paymentIntent.mStatus)
@@ -356,8 +447,8 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
     public int hashCode() {
         return ObjectUtils.hash(mId, mObjectType, mAmount, mCanceledAt, mCaptureMethod,
                 mClientSecret, mConfirmationMethod, mCreated, mCurrency, mDescription, mLiveMode,
-                mReceiptEmail, mSource, mStatus, mPaymentMethodTypes, mNextAction,
-                mNextActionType, mSetupFutureUsage, mLastPaymentError);
+                mReceiptEmail, mSource, mStatus, mPaymentMethodTypes, mNextAction, mNextActionType,
+                mPaymentMethodId, mSetupFutureUsage, mLastPaymentError);
     }
 
     /**
@@ -365,6 +456,7 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
      *
      * See <a href="https://stripe.com/docs/api/payment_intents/object#payment_intent_object-last_payment_error">last_payment_error</a>.
      */
+    @SuppressWarnings("WeakerAccess")
     public static final class Error {
         private static final String FIELD_CHARGE = "charge";
         private static final String FIELD_CODE = "code";
