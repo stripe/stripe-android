@@ -35,7 +35,8 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
     private static final String FIELD_OBJECT = "object";
     private static final String FIELD_AMOUNT = "amount";
     private static final String FIELD_CREATED = "created";
-    private static final String FIELD_CANCELED = "canceled_at";
+    private static final String FIELD_CANCELED_AT = "canceled_at";
+    private static final String FIELD_CANCELLATION_REASON = "cancellation_reason";
     private static final String FIELD_CAPTURE_METHOD = "capture_method";
     private static final String FIELD_CLIENT_SECRET = "client_secret";
     private static final String FIELD_CONFIRMATION_METHOD = "confirmation_method";
@@ -58,6 +59,7 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
     @NonNull private final List<String> mPaymentMethodTypes;
     @Nullable private final Long mAmount;
     private final long mCanceledAt;
+    @Nullable private final CancellationReason mCancellationReason;
     @Nullable private final String mCaptureMethod;
     @Nullable private final String mClientSecret;
     @Nullable private final String mConfirmationMethod;
@@ -106,6 +108,14 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
      */
     public long getCanceledAt() {
         return mCanceledAt;
+    }
+
+    /**
+     * @return Reason for cancellation of this PaymentIntent
+     */
+    @Nullable
+    public CancellationReason getCancellationReason() {
+        return mCancellationReason;
     }
 
     /**
@@ -311,6 +321,7 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
             @NonNull List<String> paymentMethodTypes,
             @Nullable Long amount,
             long canceledAt,
+            @Nullable CancellationReason cancellationReason,
             @Nullable String captureMethod,
             @Nullable String clientSecret,
             @Nullable String confirmationMethod,
@@ -330,6 +341,7 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
         mPaymentMethodTypes = paymentMethodTypes;
         mAmount = amount;
         mCanceledAt = canceledAt;
+        mCancellationReason = cancellationReason;
         mCaptureMethod = captureMethod;
         mClientSecret = clientSecret;
         mConfirmationMethod = confirmationMethod;
@@ -374,7 +386,9 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
         final List<String> paymentMethodTypes = jsonArrayToList(
                 jsonObject.optJSONArray(FIELD_PAYMENT_METHOD_TYPES));
         final Long amount = optLong(jsonObject, FIELD_AMOUNT);
-        final Long canceledAt = jsonObject.optLong(FIELD_CANCELED);
+        final long canceledAt = jsonObject.optLong(FIELD_CANCELED_AT);
+        final CancellationReason cancellationReason =
+                CancellationReason.fromCode(optString(jsonObject, FIELD_CANCELLATION_REASON));
         final String captureMethod = optString(jsonObject, FIELD_CAPTURE_METHOD);
         final String clientSecret = optString(jsonObject, FIELD_CLIENT_SECRET);
         final String confirmationMethod = optString(jsonObject, FIELD_CONFIRMATION_METHOD);
@@ -398,6 +412,7 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
                 paymentMethodTypes,
                 amount,
                 canceledAt,
+                cancellationReason,
                 captureMethod,
                 clientSecret,
                 confirmationMethod,
@@ -425,6 +440,7 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
                 && ObjectUtils.equals(mObjectType, paymentIntent.mObjectType)
                 && ObjectUtils.equals(mAmount, paymentIntent.mAmount)
                 && ObjectUtils.equals(mCanceledAt, paymentIntent.mCanceledAt)
+                && ObjectUtils.equals(mCancellationReason, paymentIntent.mCancellationReason)
                 && ObjectUtils.equals(mCaptureMethod, paymentIntent.mCaptureMethod)
                 && ObjectUtils.equals(mClientSecret, paymentIntent.mClientSecret)
                 && ObjectUtils.equals(mConfirmationMethod, paymentIntent.mConfirmationMethod)
@@ -445,10 +461,11 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mId, mObjectType, mAmount, mCanceledAt, mCaptureMethod,
-                mClientSecret, mConfirmationMethod, mCreated, mCurrency, mDescription, mLiveMode,
-                mReceiptEmail, mSource, mStatus, mPaymentMethodTypes, mNextAction, mNextActionType,
-                mPaymentMethodId, mSetupFutureUsage, mLastPaymentError);
+        return ObjectUtils.hash(mId, mObjectType, mAmount, mCanceledAt, mCancellationReason,
+                mCaptureMethod, mClientSecret, mConfirmationMethod, mCreated, mCurrency,
+                mDescription, mLiveMode, mReceiptEmail, mSource, mStatus, mPaymentMethodTypes,
+                mNextAction, mNextActionType, mPaymentMethodId, mSetupFutureUsage,
+                mLastPaymentError);
     }
 
     /**
@@ -655,6 +672,33 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
 
                 return null;
             }
+        }
+    }
+
+    enum CancellationReason {
+        Duplicate("duplicate"),
+        Fraudulent("fraudulent"),
+        RequestedByCustomer("requested_by_customer"),
+        Abandoned("abandoned"),
+        FailedInvoice("failed_invoice"),
+        VoidInvoice("void_invoice"),
+        Automatic("automatic");
+
+        @NonNull private final String code;
+
+        CancellationReason(@NonNull String code) {
+            this.code = code;
+        }
+
+        @Nullable
+        static CancellationReason fromCode(@Nullable String code) {
+            for (CancellationReason cancellationReason : values()) {
+                if (cancellationReason.code.equals(code)) {
+                    return cancellationReason;
+                }
+            }
+
+            return null;
         }
     }
 }
