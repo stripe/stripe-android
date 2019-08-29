@@ -69,8 +69,13 @@ public class Stripe {
      */
     @Deprecated
     public Stripe(@NonNull Context context) {
-        this(context, new StripeApiRepository(context, sAppInfo), new StripeNetworkUtils(context),
-                null, null);
+        this(
+                context.getApplicationContext(),
+                new StripeApiRepository(context.getApplicationContext(), sAppInfo),
+                new StripeNetworkUtils(context.getApplicationContext()),
+                null,
+                null
+        );
     }
 
     /**
@@ -80,8 +85,13 @@ public class Stripe {
      * @param publishableKey the client's publishable key
      */
     public Stripe(@NonNull Context context, @NonNull String publishableKey) {
-        this(context, new StripeApiRepository(context, sAppInfo), new StripeNetworkUtils(context),
-                ApiKeyValidator.get().requireValid(publishableKey), null);
+        this(
+                context.getApplicationContext(),
+                new StripeApiRepository(context.getApplicationContext(), sAppInfo),
+                new StripeNetworkUtils(context.getApplicationContext()),
+                ApiKeyValidator.get().requireValid(publishableKey),
+                null
+        );
     }
 
     /**
@@ -96,9 +106,9 @@ public class Stripe {
                   @NonNull String publishableKey,
                   @NonNull String stripeAccountId) {
         this(
-                context,
-                new StripeApiRepository(context, sAppInfo),
-                new StripeNetworkUtils(context),
+                context.getApplicationContext(),
+                new StripeApiRepository(context.getApplicationContext(), sAppInfo),
+                new StripeNetworkUtils(context.getApplicationContext()),
                 ApiKeyValidator.get().requireValid(publishableKey),
                 stripeAccountId
         );
@@ -112,7 +122,7 @@ public class Stripe {
         this(
                 stripeRepository,
                 stripeNetworkUtils,
-                new PaymentController(context, stripeRepository),
+                new PaymentController(context.getApplicationContext(), stripeRepository),
                 publishableKey,
                 stripeAccountId
         );

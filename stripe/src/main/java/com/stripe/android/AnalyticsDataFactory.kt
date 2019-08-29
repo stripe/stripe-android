@@ -73,8 +73,6 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
         }
     }
 
-    constructor(context: Context) : this(context.packageManager, context.packageName)
-
     fun createAuthParams(
         @EventName eventName: String,
         intentId: String,
@@ -399,6 +397,14 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
                 "05" -> ThreeDS2UiType.HTML
                 else -> ThreeDS2UiType.NONE
             }
+        }
+
+        @JvmStatic
+        fun create(context: Context): AnalyticsDataFactory {
+            return AnalyticsDataFactory(
+                context.applicationContext.packageManager,
+                context.applicationContext.packageName
+            )
         }
     }
 }

@@ -45,7 +45,7 @@ internal class StripeApiRepository @VisibleForTesting @JvmOverloads constructor(
         FingerprintRequestFactory(context)
 ) : StripeRepository {
 
-    private val analyticsDataFactory: AnalyticsDataFactory = AnalyticsDataFactory(context)
+    private val analyticsDataFactory: AnalyticsDataFactory = AnalyticsDataFactory.create(context)
     private val networkUtils: StripeNetworkUtils = StripeNetworkUtils(context)
 
     /**

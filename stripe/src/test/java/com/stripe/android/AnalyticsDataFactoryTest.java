@@ -35,7 +35,7 @@ public class AnalyticsDataFactoryTest {
             Collections.singletonList("CardInputView");
 
     @NonNull private final AnalyticsDataFactory mAnalyticsDataFactory =
-            new AnalyticsDataFactory(ApplicationProvider.getApplicationContext());
+            AnalyticsDataFactory.create(ApplicationProvider.getApplicationContext());
 
     @Test
     public void getTokenCreationParams_withValidInput_createsCorrectMap() {
