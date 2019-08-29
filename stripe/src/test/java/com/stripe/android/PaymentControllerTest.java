@@ -106,7 +106,7 @@ public class PaymentControllerTest {
         MockitoAnnotations.initMocks(this);
         mHost = AuthActivityStarter.Host.create(mActivity);
         mAnalyticsDataFactory =
-                new AnalyticsDataFactory(ApplicationProvider.getApplicationContext());
+                AnalyticsDataFactory.create(ApplicationProvider.getApplicationContext());
         when(mTransaction.getAuthenticationRequestParameters())
                 .thenReturn(Stripe3ds2Fixtures.AREQ_PARAMS);
         when(mMessageVersionRegistry.getCurrent()).thenReturn(MESSAGE_VERSION);

@@ -63,7 +63,7 @@ class PaymentController {
                 new MessageVersionRegistry(),
                 PaymentAuthConfig.get(),
                 new StripeFireAndForgetRequestExecutor(),
-                new AnalyticsDataFactory(context.getApplicationContext()),
+                AnalyticsDataFactory.create(context.getApplicationContext()),
                 new ChallengeFlowStarterImpl());
     }
 
