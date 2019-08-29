@@ -28,9 +28,9 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
 
     private static final String FIELD_ID = "id";
     private static final String FIELD_OBJECT = "object";
+    private static final String FIELD_CANCELLATION_REASON = "cancellation_reason";
     private static final String FIELD_CREATED = "created";
     private static final String FIELD_CLIENT_SECRET = "client_secret";
-    private static final String FIELD_CUSTOMER = "customer";
     private static final String FIELD_DESCRIPTION = "description";
     private static final String FIELD_LAST_SETUP_ERROR = "last_setup_error";
     private static final String FIELD_LIVEMODE = "livemode";
@@ -44,9 +44,9 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
 
     @Nullable private final String mId;
     @Nullable private final String mObjectType;
+    @Nullable private final CancellationReason mCancellationReason;
     private final long mCreated;
     @Nullable private final String mClientSecret;
-    @Nullable private final String mCustomerId;
     @Nullable private final String mDescription;
     private final boolean mLiveMode;
     @Nullable private final Map<String, Object> mNextAction;
@@ -60,9 +60,9 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
     private SetupIntent(@NonNull Builder builder) {
         mId = builder.mId;
         mObjectType = builder.mObjectType;
+        mCancellationReason = builder.mCancellationReason;
         mCreated = builder.mCreated;
         mClientSecret = builder.mClientSecret;
-        mCustomerId = builder.mCustomerId;
         mDescription = builder.mDescription;
         mLiveMode = builder.mLiveMode;
         mNextAction = builder.mNextAction;
@@ -90,6 +90,14 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
     }
 
     /**
+     * @return Reason for cancellation of this SetupIntent.
+     */
+    @Nullable
+    public CancellationReason getCancellationReason() {
+        return mCancellationReason;
+    }
+
+    /**
      * @return Time at which the object was created. Measured in seconds since the Unix epoch.
      */
     @Override
@@ -103,7 +111,7 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
     @Deprecated
     @Nullable
     public String getCustomerId() {
-        return mCustomerId;
+        return null;
     }
 
     /**
@@ -275,7 +283,9 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
                 .setObjectType(optString(jsonObject, FIELD_OBJECT))
                 .setCreated(jsonObject.optLong(FIELD_CREATED))
                 .setClientSecret(optString(jsonObject, FIELD_CLIENT_SECRET))
-                .setCustomerId(optString(jsonObject, FIELD_CUSTOMER))
+                .setCancellationReason(CancellationReason.fromCode(
+                        optString(jsonObject, FIELD_CANCELLATION_REASON)
+                ))
                 .setDescription(optString(jsonObject, FIELD_DESCRIPTION))
                 .setLiveMode(jsonObject.optBoolean(FIELD_LIVEMODE))
                 .setPaymentMethodId(optString(jsonObject, FIELD_PAYMENT_METHOD))
@@ -298,7 +308,7 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
                 && ObjectUtils.equals(mObjectType, setupIntent.mObjectType)
                 && ObjectUtils.equals(mClientSecret, setupIntent.mClientSecret)
                 && ObjectUtils.equals(mCreated, setupIntent.mCreated)
-                && ObjectUtils.equals(mCustomerId, setupIntent.mCustomerId)
+                && ObjectUtils.equals(mCancellationReason, setupIntent.mCancellationReason)
                 && ObjectUtils.equals(mDescription, setupIntent.mDescription)
                 && ObjectUtils.equals(mLastSetupError, setupIntent.mLastSetupError)
                 && ObjectUtils.equals(mLiveMode, setupIntent.mLiveMode)
@@ -312,7 +322,7 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mId, mObjectType, mCustomerId, mClientSecret, mCreated,
+        return ObjectUtils.hash(mId, mObjectType, mCancellationReason, mClientSecret, mCreated,
                 mDescription, mLastSetupError, mLiveMode, mStatus, mPaymentMethodId,
                 mPaymentMethodTypes, mNextAction, mNextActionType, mUsage);
     }
@@ -320,9 +330,9 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
     private static final class Builder implements ObjectBuilder<SetupIntent> {
         @Nullable private String mId;
         @Nullable private String mObjectType;
+        @Nullable private CancellationReason mCancellationReason;
         private long mCreated;
         @Nullable private String mClientSecret;
-        @Nullable private String mCustomerId;
         @Nullable private String mDescription;
         private boolean mLiveMode;
         @Nullable private Map<String, Object> mNextAction;
@@ -357,8 +367,8 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
         }
 
         @NonNull
-        Builder setCustomerId(@Nullable String customerId) {
-            mCustomerId = customerId;
+        Builder setCancellationReason(@Nullable CancellationReason cancellationReason) {
+            mCancellationReason = cancellationReason;
             return this;
         }
 
@@ -603,6 +613,29 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
 
                 return null;
             }
+        }
+    }
+
+    public enum CancellationReason {
+        Duplicate("duplicate"),
+        RequestedByCustomer("requested_by_customer"),
+        Abandoned("abandoned");
+
+        @NonNull private final String code;
+
+        CancellationReason(@NonNull String code) {
+            this.code = code;
+        }
+
+        @Nullable
+        private static CancellationReason fromCode(@Nullable String code) {
+            for (CancellationReason cancellationReason : values()) {
+                if (cancellationReason.code.equals(code)) {
+                    return cancellationReason;
+                }
+            }
+
+            return null;
         }
     }
 }
