@@ -675,7 +675,7 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
         }
     }
 
-    enum CancellationReason {
+    public enum CancellationReason {
         Duplicate("duplicate"),
         Fraudulent("fraudulent"),
         RequestedByCustomer("requested_by_customer"),
@@ -691,7 +691,7 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
         }
 
         @Nullable
-        static CancellationReason fromCode(@Nullable String code) {
+        private static CancellationReason fromCode(@Nullable String code) {
             for (CancellationReason cancellationReason : values()) {
                 if (cancellationReason.code.equals(code)) {
                     return cancellationReason;

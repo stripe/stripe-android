@@ -64,4 +64,12 @@ public class SetupIntentTest {
                 lastSetupError.message
         );
     }
+
+    @Test
+    public void testCanceled() {
+        assertEquals(SetupIntent.Status.Canceled,
+                SetupIntentFixtures.CANCELLED.getStatus());
+        assertEquals(SetupIntent.CancellationReason.Abandoned,
+                SetupIntentFixtures.CANCELLED.getCancellationReason());
+    }
 }

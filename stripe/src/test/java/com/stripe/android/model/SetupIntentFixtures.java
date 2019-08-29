@@ -7,7 +7,7 @@ import java.util.Objects;
 public class SetupIntentFixtures {
 
     @NonNull
-    public static final String SI_NEXT_ACTION_REDIRECT_JSON = "{\n" +
+    static final String SI_NEXT_ACTION_REDIRECT_JSON = "{\n" +
             "  \"id\": \"seti_1EqTSZGMT9dGPIDGVzCUs6dV\",\n" +
             "  \"object\": \"setup_intent\",\n" +
             "  \"cancellation_reason\": null,\n" +
@@ -32,7 +32,7 @@ public class SetupIntentFixtures {
             "}";
 
     @NonNull
-    public static final SetupIntent SI_WITH_LAST_PAYMENT_ERROR = Objects.requireNonNull(
+    static final SetupIntent SI_WITH_LAST_PAYMENT_ERROR = Objects.requireNonNull(
             SetupIntent.fromString("{\n" +
                     "\t\"id\": \"seti_1EqTSZGMT9dGPIDGVzCUs6dV\",\n" +
                     "\t\"object\": \"setup_intent\",\n" +
@@ -102,6 +102,34 @@ public class SetupIntentFixtures {
                     "\t\"usage\": \"off_session\"\n" +
                     "}")
     );
+
+    static final SetupIntent CANCELLED = Objects.requireNonNull(SetupIntent.fromString("{\n" +
+            "  \"id\": \"seti_1FCoS9CRMbs6FrXfxFQOp8Mm\",\n" +
+            "  \"object\": \"setup_intent\",\n" +
+            "  \"application\": null,\n" +
+            "  \"cancellation_reason\": \"abandoned\",\n" +
+            "  \"client_secret\": \"seti_1FCoS9CRMbs6FrXfxFQOp8Mm_secret_FiEwNDtwMi\",\n" +
+            "  \"created\": 1567088301,\n" +
+            "  \"customer\": \"cus_FWhpaTLIPWLhpJ\",\n" +
+            "  \"description\": null,\n" +
+            "  \"last_setup_error\": null,\n" +
+            "  \"livemode\": false,\n" +
+            "  \"metadata\": {},\n" +
+            "  \"next_action\": null,\n" +
+            "  \"on_behalf_of\": null,\n" +
+            "  \"payment_method\": \"pm_1F1wa2CRMbs6FrXfm9XfWrGS\",\n" +
+            "  \"payment_method_options\": {\n" +
+            "    \"card\": {\n" +
+            "      \"request_three_d_secure\": \"automatic\"\n" +
+            "    }\n" +
+            "  },\n" +
+            "  \"payment_method_types\": [\n" +
+            "    \"card\"\n" +
+            "  ],\n" +
+            "  \"status\": \"canceled\",\n" +
+            "  \"usage\": \"off_session\"\n" +
+            "}"
+    ));
 
     @NonNull
     public static final SetupIntent SI_NEXT_ACTION_REDIRECT =

@@ -170,6 +170,8 @@ public class PaymentIntentTest {
 
     @Test
     public void testCanceled() {
+        assertEquals(PaymentIntent.Status.Canceled,
+                PaymentIntentFixtures.CANCELLED.getStatus());
         assertEquals(PaymentIntent.CancellationReason.Abandoned,
                 PaymentIntentFixtures.CANCELLED.getCancellationReason());
         assertEquals(1567091866L,
