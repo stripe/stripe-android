@@ -335,6 +335,74 @@ public final class PaymentIntentFixtures {
                     "\t\"status\": \"requires_payment_method\"\n" +
                     "}"));
 
+    public static final PaymentIntent CANCELLED = Objects.requireNonNull(PaymentIntent.fromString(
+            "{\n" +
+                    "  \"id\": \"pi_1FCpMECRMbs6FrXfVulorSf5\",\n" +
+                    "  \"object\": \"payment_intent\",\n" +
+                    "  \"amount\": 4000,\n" +
+                    "  \"amount_capturable\": 0,\n" +
+                    "  \"amount_received\": 0,\n" +
+                    "  \"application\": null,\n" +
+                    "  \"application_fee_amount\": null,\n" +
+                    "  \"canceled_at\": 1567091866,\n" +
+                    "  \"cancellation_reason\": \"abandoned\",\n" +
+                    "  \"capture_method\": \"automatic\",\n" +
+                    "  \"charges\": {\n" +
+                    "    \"object\": \"list\",\n" +
+                    "    \"data\": [],\n" +
+                    "    \"has_more\": false,\n" +
+                    "    \"total_count\": 0,\n" +
+                    "    \"url\": \"/v1/charges?payment_intent=pi_1FCpMECRMbs6FrXfVulorSf5\"\n" +
+                    "  },\n" +
+                    "  \"client_secret\": \"pi_1FCpMECRMbs6FrXfVulorSf5_secret_oSppt5A\",\n" +
+                    "  \"confirmation_method\": \"manual\",\n" +
+                    "  \"created\": 1567091778,\n" +
+                    "  \"currency\": \"usd\",\n" +
+                    "  \"customer\": \"cus_FWhpaTLIPWLhpJ\",\n" +
+                    "  \"description\": \"Example PaymentIntent\",\n" +
+                    "  \"invoice\": null,\n" +
+                    "  \"last_payment_error\": null,\n" +
+                    "  \"livemode\": false,\n" +
+                    "  \"metadata\": {\n" +
+                    "    \"order_id\": \"5278735C-1F40-407D-933A-286E463E72D8\"\n" +
+                    "  },\n" +
+                    "  \"next_action\": null,\n" +
+                    "  \"on_behalf_of\": null,\n" +
+                    "  \"payment_method\": null,\n" +
+                    "  \"payment_method_options\": {\n" +
+                    "    \"card\": {\n" +
+                    "      \"request_three_d_secure\": \"automatic\"\n" +
+                    "    }\n" +
+                    "  },\n" +
+                    "  \"payment_method_types\": [\n" +
+                    "    \"card\"\n" +
+                    "  ],\n" +
+                    "  \"receipt_email\": null,\n" +
+                    "  \"review\": null,\n" +
+                    "  \"setup_future_usage\": null,\n" +
+                    "  \"shipping\": {\n" +
+                    "    \"address\": {\n" +
+                    "      \"city\": \"San Francisco\",\n" +
+                    "      \"country\": \"US\",\n" +
+                    "      \"line1\": \"123 Market St\",\n" +
+                    "      \"line2\": \"#345\",\n" +
+                    "      \"postal_code\": \"94107\",\n" +
+                    "      \"state\": \"CA\"\n" +
+                    "    },\n" +
+                    "    \"carrier\": null,\n" +
+                    "    \"name\": \"Fake Name\",\n" +
+                    "    \"phone\": \"(555) 555-5555\",\n" +
+                    "    \"tracking_number\": null\n" +
+                    "  },\n" +
+                    "  \"source\": null,\n" +
+                    "  \"statement_descriptor\": null,\n" +
+                    "  \"statement_descriptor_suffix\": null,\n" +
+                    "  \"status\": \"canceled\",\n" +
+                    "  \"transfer_data\": null,\n" +
+                    "  \"transfer_group\": null\n" +
+                    "}"
+    ));
+
     public static final PaymentIntent.RedirectData REDIRECT_DATA =
             new PaymentIntent.RedirectData("https://example.com",
                     "yourapp://post-authentication-return-url");

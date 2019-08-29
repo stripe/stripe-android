@@ -14,28 +14,6 @@ import static org.junit.Assert.assertTrue;
 @RunWith(RobolectricTestRunner.class)
 public class PaymentIntentTest {
 
-    private static final String PAYMENT_INTENT_WITH_SOURCE_JSON = "{\n" +
-            "  \"id\": \"pi_1CkiBMLENEVhOs7YMtUehLau\",\n" +
-            "  \"object\": \"payment_intent\",\n" +
-            "  \"payment_method_types\": [\n" +
-            "    \"card\"\n" +
-            "  ],\n" +
-            "  \"amount\": 1000,\n" +
-            "  \"canceled_at\": 1530839340,\n" +
-            "  \"capture_method\": \"automatic\",\n" +
-            "  \"client_secret\": \"pi_1CkiBMLENEVhOs7YMtUehLau_secret_s4O8SDh7s6spSmHDw1VaYPGZA\",\n" +
-            "  \"confirmation_method\": \"publishable\",\n" +
-            "  \"created\": 1530838340,\n" +
-            "  \"currency\": \"usd\",\n" +
-            "  \"description\": \"Example PaymentIntent charge\",\n" +
-            "  \"livemode\": false,\n" +
-            "  \"next_action\": null,\n" +
-            "  \"receipt_email\": null,\n" +
-            "  \"shipping\": null,\n" +
-            "  \"source\": \"src_1CkiC3LENEVhOs7YMSa4yx4G\",\n" +
-            "  \"status\": \"succeeded\"\n" +
-            "}\n";
-
     private static final String BAD_URL = "nonsense-blahblah";
 
     private static final String PAYMENT_INTENT_WITH_SOURCE_WITH_BAD_AUTH_URL_JSON = "{\n" +
@@ -62,64 +40,6 @@ public class PaymentIntentTest {
             "  \"source\": \"src_1CkiC3LENEVhOs7YMSa4yx4G\",\n" +
             "  \"status\": \"requires_action\"\n" +
             "}\n";
-
-    private static final String PAYMENT_INTENT_WITH_PAYMENT_METHODS_JSON = "{\n" +
-            "  \"id\": \"pi_Aabcxyz01aDfoo\",\n" +
-            "  \"object\": \"payment_intent\",\n" +
-            "  \"amount\": 750,\n" +
-            "  \"amount_capturable\": 0,\n" +
-            "  \"amount_received\": 750,\n" +
-            "  \"application\": null,\n" +
-            "  \"application_fee_amount\": null,\n" +
-            "  \"canceled_at\": null,\n" +
-            "  \"cancellation_reason\": null,\n" +
-            "  \"capture_method\": \"automatic\",\n" +
-            "  \"charges\": {\n" +
-            "    \"object\": \"list\",\n" +
-            "    \"data\": [],\n" +
-            "    \"has_more\": false,\n" +
-            "    \"total_count\": 0,\n" +
-            "    \"url\": \"/v1/charges?payment_intent=pi_Aabcxyz01aDfoo\"\n" +
-            "  },\n" +
-            "  \"client_secret\": null,\n" +
-            "  \"confirmation_method\": \"publishable\",\n" +
-            "  \"created\": 123456789,\n" +
-            "  \"currency\": \"usd\",\n" +
-            "  \"customer\": null,\n" +
-            "  \"description\": \"PaymentIntent Description\",\n" +
-            "  \"last_payment_error\": null,\n" +
-            "  \"livemode\": false,\n" +
-            "  \"metadata\": {\n" +
-            "    \"order_id\": \"123456789\"\n" +
-            "  },\n" +
-            "  \"next_action\": null,\n" +
-            "  \"on_behalf_of\": null,\n" +
-            "  \"payment_method\": null,\n" +
-            "  \"payment_method_types\": [\n" +
-            "    \"card\"\n" +
-            "  ],\n" +
-            "  \"receipt_email\": \"jenny@example.com\",\n" +
-            "  \"review\": null,\n" +
-            "  \"shipping\": {\n" +
-            "    \"address\": {\n" +
-            "      \"city\": \"Stockholm\",\n" +
-            "      \"country\": \"Sweden\",\n" +
-            "      \"line1\": \"Mega street 5\",\n" +
-            "      \"line2\": \"Mega street 5\",\n" +
-            "      \"postal_code\": \"12233JJHH\",\n" +
-            "      \"state\": \"NYC\"\n" +
-            "    },\n" +
-            "    \"carrier\": null,\n" +
-            "    \"name\": \"Mohit  Name\",\n" +
-            "    \"phone\": null,\n" +
-            "    \"tracking_number\": null\n" +
-            "  },\n" +
-            "  \"source\": \"src_1E884r2eZvKYlo2CTft0qEyY\",\n" +
-            "  \"statement_descriptor\": \"PaymentIntent Statement Descriptor\",\n" +
-            "  \"status\": \"succeeded\",\n" +
-            "  \"transfer_data\": null,\n" +
-            "  \"transfer_group\": null\n" +
-            "}";
 
     private static final String PARTIAL_PAYMENT_INTENT_WITH_REDIRECT_URL_JSON = "{\n" +
             "\t\"id\": \"pi_Aabcxyz01aDfoo\",\n" +
@@ -198,6 +118,7 @@ public class PaymentIntentTest {
         assertEquals("manual", paymentIntent.getConfirmationMethod());
         assertNotNull(paymentIntent.getNextAction());
         assertEquals("jenny@example.com", paymentIntent.getReceiptEmail());
+        assertNull(paymentIntent.getCancellationReason());
     }
 
     @Test
@@ -245,5 +166,13 @@ public class PaymentIntentTest {
                 "The provided PaymentMethod has failed authentication. You can provide payment_method_data or a new PaymentMethod to attempt to fulfill this PaymentIntent again.",
                 lastPaymentError.message
         );
+    }
+
+    @Test
+    public void testCanceled() {
+        assertEquals(PaymentIntent.CancellationReason.Abandoned,
+                PaymentIntentFixtures.CANCELLED.getCancellationReason());
+        assertEquals(1567091866L,
+                PaymentIntentFixtures.CANCELLED.getCanceledAt());
     }
 }
