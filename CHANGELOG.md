@@ -1,10 +1,38 @@
 # CHANGELOG
 
+## 10.4.0 - 2018-08-30
+* [#1421](https://github.com/stripe/stripe-android/pull/1421) Create `PaymentMethodsActivityStarter.Result` to retrieve result of `PaymentMethodsActivity`
+* [#1427](https://github.com/stripe/stripe-android/pull/1427) Mark Stripe methods that accept a publishable key as deprecated
+    ```
+    // Example
+
+    // before
+    val stripe = Stripe(context)
+    stripe.createPaymentMethodSynchronous(params, "pk_test_demo123")
+
+    // after
+    val stripe = Stripe(context, "pk_test_demo123")
+    stripe.createPaymentMethodSynchronous(params)
+    ```
+* [#1433](https://github.com/stripe/stripe-android/pull/1433) Add `setCardHint()` to `CardInputWidget` and `CardMultilineWidget`
+* [#1434](https://github.com/stripe/stripe-android/pull/1434) Add setters on Card widgets for card number, expiration, and CVC
+* [#1438](https://github.com/stripe/stripe-android/pull/1438) Bump API version to `2019-08-14`
+* [#1446](https://github.com/stripe/stripe-android/pull/1446) Update `PaymentIntent` and `SetupIntent` models
+    * Add missing `PaymentIntent#getPaymentMethodId()`
+    * Mark `PaymentIntent#getSource()` as `@Deprecated` - use `PaymentIntent#getPaymentMethodId()`
+    * Mark `SetupIntent#getCustomerId()` as `@Deprecated` - this attribute is not available with a publishable key
+* [#1448](https://github.com/stripe/stripe-android/pull/1448) Update Gradle to 5.6.1
+* [#1449](https://github.com/stripe/stripe-android/pull/1449) Add support for `cancellation_reason` attribute to PaymentIntent
+* [#1450](https://github.com/stripe/stripe-android/pull/1450) Add support for `cancellation_reason` attribute to SetupIntent
+* [#1451](https://github.com/stripe/stripe-android/pull/1451) Update Stripe 3DS2 library to `v1.2.2`
+    * Dismiss keyboard after submitting 3DS2 form
+    * Exclude `org.ow2.asm:asm` dependency
+
 ## 10.3.1 - 2018-08-22
 * [#1394](https://github.com/stripe/stripe-android/pull/1394) Add `shouldPrefetchCustomer` arg to `PaymentSession.init()`
 * [#1395](https://github.com/stripe/stripe-android/pull/1395) Fix inconsistent usage of relative attributes on card icon in `CardMultilineWidget`
 * [#1412](https://github.com/stripe/stripe-android/pull/1412) Make `AddPaymentMethodActivityStarter()` available for starting `AddPaymentMethodActivity`
-  * ```
+    ```
     // Example usage
 
     AddPaymentMethodActivityStarter(activity).startForResult(
