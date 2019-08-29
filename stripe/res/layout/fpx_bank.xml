@@ -1,16 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingEnd="@dimen/list_row_end_padding"
-    android:paddingStart="@dimen/list_row_start_padding"
-    android:minHeight="@dimen/list_row_height">
+    android:minHeight="@dimen/list_row_height"
+    android:orientation="horizontal"
+    android:paddingStart="16dp"
+    android:paddingEnd="12dp">
+
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/icon"
+        android:layout_width="@dimen/masked_card_icon_width"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical|start"
+        android:src="@drawable/ic_bank_generic" />
 
     <android.support.v7.widget.AppCompatTextView
         android:id="@+id/name"
-        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|start"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_marginStart="8dp"
         android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium" />
+
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/check_icon"
+        android:layout_width="@dimen/masked_card_icon_width"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_checkmark" />
+
 </LinearLayout>
