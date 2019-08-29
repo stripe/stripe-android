@@ -7,7 +7,6 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -191,11 +190,14 @@ public class PaymentIntentTest {
 
     @Test
     public void parsePaymentIntentWithPaymentMethods() {
-        final PaymentIntent paymentIntent =
-                PaymentIntent.fromString(PAYMENT_INTENT_WITH_PAYMENT_METHODS_JSON);
-        assertNotNull(paymentIntent);
-        assertFalse(paymentIntent.requiresAction());
+        final PaymentIntent paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2;
+        assertTrue(paymentIntent.requiresAction());
         assertEquals("card", paymentIntent.getPaymentMethodTypes().get(0));
+        assertEquals(0, paymentIntent.getCanceledAt());
+        assertEquals("automatic", paymentIntent.getCaptureMethod());
+        assertEquals("manual", paymentIntent.getConfirmationMethod());
+        assertNotNull(paymentIntent.getNextAction());
+        assertEquals("jenny@example.com", paymentIntent.getReceiptEmail());
     }
 
     @Test

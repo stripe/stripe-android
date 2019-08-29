@@ -4,6 +4,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -14,11 +15,22 @@ public interface StripeIntent {
     @Nullable
     String getId();
 
+    long getCreated();
+
+    @Nullable
+    String getDescription();
+
     boolean isLiveMode();
 
     boolean requiresAction();
 
     boolean requiresConfirmation();
+
+    @Nullable
+    String getPaymentMethodId();
+
+    @NonNull
+    List<String> getPaymentMethodTypes();
 
     @Nullable
     PaymentIntent.NextActionType getNextActionType();

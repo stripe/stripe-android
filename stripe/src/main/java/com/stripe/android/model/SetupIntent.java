@@ -22,6 +22,7 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
  * A SetupIntent guides you through the process of setting up a customer's payment credentials for
  * future payments.
  */
+@SuppressWarnings("WeakerAccess")
 public final class SetupIntent extends StripeModel implements StripeIntent {
     private static final String VALUE_SETUP_INTENT = "setup_intent";
 
@@ -79,45 +80,84 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
         return clientSecret.split("_secret")[0];
     }
 
+    /**
+     * @return Unique identifier for the object.
+     */
     @Nullable
+    @Override
     public String getId() {
         return mId;
     }
 
+    /**
+     * @return Time at which the object was created. Measured in seconds since the Unix epoch.
+     */
+    @Override
     public long getCreated() {
         return mCreated;
     }
 
+    /**
+     * @deprecated this field is only available with a secret key
+     */
+    @Deprecated
     @Nullable
     public String getCustomerId() {
         return mCustomerId;
     }
 
+    /**
+     * @return An arbitrary string attached to the object. Often useful for displaying to users.
+     */
     @Nullable
     public String getDescription() {
         return mDescription;
     }
 
+    /**
+     * @return The error encountered in the previous SetupIntent confirmation.
+     */
     @Nullable
     public Error getLastSetupError() {
         return mLastSetupError;
     }
 
+    /**
+     * @return Has the value <code>true</code> if the object exists in live mode or the value
+     * <code>false</code> if the object exists in test mode.
+     */
     @Override
     public boolean isLiveMode() {
         return mLiveMode;
     }
 
+    /**
+     * @return ID of the payment method used with this SetupIntent.
+     */
     @Nullable
+    @Override
     public String getPaymentMethodId() {
         return mPaymentMethodId;
     }
 
+    /**
+     * @return The list of payment method types (e.g. card) that this SetupIntent is allowed to
+     * set up.
+     */
     @NonNull
+    @Override
     public List<String> getPaymentMethodTypes() {
         return mPaymentMethodTypes;
     }
 
+    /**
+     * @return Indicates how the payment method is intended to be used in the future.
+     *
+     * <p>Use <code>on_session</code> if you intend to only reuse the payment method when the
+     * customer is in your checkout flow. Use <code>off_session</code> if your customer may or
+     * may not be in your checkout flow. If not provided, this value defaults to
+     * <code>off_session</code>.</p>
+     */
     @Nullable
     public Usage getUsage() {
         return mUsage;
@@ -170,6 +210,14 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
         return null;
     }
 
+    /**
+     * @return The client secret of this SetupIntent. Used for client-side retrieval using a
+     * publishable key.
+     *
+     * <p>The client secret can be used to complete payment setup from your frontend. It should not
+     * be stored, logged, embedded in URLs, or exposed to anyone other than the customer. Make
+     * sure that you have TLS enabled on any page that includes the client secret.</p>
+     */
     @Nullable
     @Override
     public String getClientSecret() {
@@ -197,6 +245,9 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
         return new SdkData((Map<String, ?>) mNextAction.get(NextActionType.UseStripeSdk.code));
     }
 
+    /**
+     * @return Status of this SetupIntent.
+     */
     @Nullable
     @Override
     public Status getStatus() {
