@@ -14,6 +14,7 @@
     val stripe = Stripe(context, "pk_test_demo123")
     stripe.createPaymentMethodSynchronous(params)
     ```
+* [#1428](https://github.com/stripe/stripe-android/pull/1428) Guard against opaque URIs in `PaymentAuthWebViewClient`
 * [#1433](https://github.com/stripe/stripe-android/pull/1433) Add `setCardHint()` to `CardInputWidget` and `CardMultilineWidget`
 * [#1434](https://github.com/stripe/stripe-android/pull/1434) Add setters on Card widgets for card number, expiration, and CVC
 * [#1438](https://github.com/stripe/stripe-android/pull/1438) Bump API version to `2019-08-14`
