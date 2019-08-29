@@ -60,7 +60,8 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
     }
 
     @Retention(AnnotationRetention.SOURCE)
-    @StringDef(ThreeDS2UiType.NONE, ThreeDS2UiType.TEXT, ThreeDS2UiType.SINGLE_SELECT, ThreeDS2UiType.MULTI_SELECT, ThreeDS2UiType.OOB, ThreeDS2UiType.HTML)
+    @StringDef(ThreeDS2UiType.NONE, ThreeDS2UiType.TEXT, ThreeDS2UiType.SINGLE_SELECT,
+        ThreeDS2UiType.MULTI_SELECT, ThreeDS2UiType.OOB, ThreeDS2UiType.HTML)
     private annotation class ThreeDS2UiType {
         companion object {
             const val NONE = "none"
@@ -79,7 +80,7 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
         intentId: String,
         publishableKey: String
     ): Map<String, Any> {
-        return getEventLoggingParams(publishableKey, eventName)
+        return getEventLoggingParams(eventName, publishableKey)
             .plus(FIELD_INTENT_ID to intentId)
     }
 
@@ -89,7 +90,7 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
         uiTypeCode: String,
         publishableKey: String
     ): Map<String, Any> {
-        return getEventLoggingParams(publishableKey, eventName)
+        return getEventLoggingParams(eventName, publishableKey)
             .plus(FIELD_INTENT_ID to intentId)
             .plus(FIELD_3DS2_UI_TYPE to get3ds2UiType(uiTypeCode))
     }
@@ -99,7 +100,10 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
         runtimeErrorEvent: RuntimeErrorEvent,
         publishableKey: String
     ): Map<String, Any> {
-        return getEventLoggingParams(publishableKey, EventName.AUTH_3DS2_CHALLENGE_ERRORED)
+        return getEventLoggingParams(
+            EventName.AUTH_3DS2_CHALLENGE_ERRORED,
+            publishableKey
+        )
             .plus(FIELD_INTENT_ID to intentId)
             .plus(FIELD_ERROR_DATA to
                 mapOf(
@@ -124,28 +128,36 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
             "trans_id" to errorMessage.transactionID
         )
 
-        return getEventLoggingParams(publishableKey, EventName.AUTH_3DS2_CHALLENGE_ERRORED)
+        return getEventLoggingParams(
+            EventName.AUTH_3DS2_CHALLENGE_ERRORED,
+            publishableKey
+        )
             .plus(FIELD_INTENT_ID to intentId)
             .plus(FIELD_ERROR_DATA to errorData)
     }
 
     fun getTokenCreationParams(
         productUsageTokens: List<String>?,
-        publishableApiKey: String,
+        publishableKey: String,
         tokenType: String?
     ): Map<String, Any> {
         return getEventLoggingParams(
-            productUsageTokens, null,
-            tokenType,
-            publishableApiKey, EventName.TOKEN_CREATION)
+            EventName.TOKEN_CREATION,
+            publishableKey,
+            productUsageTokens = productUsageTokens,
+            tokenType = tokenType
+        )
     }
 
     fun createPaymentMethodCreationParams(
-        publishableApiKey: String,
+        publishableKey: String,
         paymentMethodId: String?
     ): Map<String, Any> {
         val params =
-            getEventLoggingParams(publishableApiKey, EventName.CREATE_PAYMENT_METHOD)
+            getEventLoggingParams(
+                EventName.CREATE_PAYMENT_METHOD,
+                publishableKey
+            )
         return if (paymentMethodId != null) {
             params.plus(FIELD_PAYMENT_METHOD_ID to paymentMethodId)
         } else {
@@ -155,13 +167,15 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
 
     fun getSourceCreationParams(
         productUsageTokens: List<String>?,
-        publishableApiKey: String,
+        publishableKey: String,
         @Source.SourceType sourceType: String
     ): Map<String, Any> {
         return getEventLoggingParams(
-            productUsageTokens,
-            sourceType, null,
-            publishableApiKey, EventName.SOURCE_CREATION)
+            EventName.SOURCE_CREATION,
+            publishableKey,
+            productUsageTokens = productUsageTokens,
+            sourceType = sourceType
+        )
     }
 
     fun getAddSourceParams(
@@ -170,24 +184,33 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
         @Source.SourceType sourceType: String
     ): Map<String, Any> {
         return getEventLoggingParams(
-            productUsageTokens,
-            sourceType, null,
-            publishableKey, EventName.ADD_SOURCE)
+            EventName.ADD_SOURCE,
+            publishableKey,
+            productUsageTokens = productUsageTokens,
+            sourceType = sourceType
+        )
     }
 
     fun getDeleteSourceParams(
         productUsageTokens: List<String>?,
         publishableKey: String
     ): Map<String, Any> {
-        return getEventLoggingParams(productUsageTokens, publishableKey, EventName.DELETE_SOURCE)
+        return getEventLoggingParams(
+            EventName.DELETE_SOURCE,
+            publishableKey,
+            productUsageTokens = productUsageTokens
+        )
     }
 
     fun getAttachPaymentMethodParams(
         productUsageTokens: List<String>?,
         publishableKey: String
     ): Map<String, Any> {
-        return getEventLoggingParams(productUsageTokens, publishableKey,
-            EventName.ATTACH_PAYMENT_METHOD)
+        return getEventLoggingParams(
+            EventName.ATTACH_PAYMENT_METHOD,
+            publishableKey,
+            productUsageTokens = productUsageTokens
+        )
     }
 
     fun getDetachPaymentMethodParams(
@@ -195,38 +218,42 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
         publishableKey: String
     ): Map<String, Any> {
         return getEventLoggingParams(
-            productUsageTokens,
+            EventName.DETACH_PAYMENT_METHOD,
             publishableKey,
-            EventName.DETACH_PAYMENT_METHOD
+            productUsageTokens = productUsageTokens
         )
     }
 
     fun getPaymentIntentConfirmationParams(
         productUsageTokens: List<String>?,
-        publishableApiKey: String,
+        publishableKey: String,
         @Source.SourceType sourceType: String?
     ): Map<String, Any> {
         return getEventLoggingParams(
-            productUsageTokens,
-            sourceType, null,
-            publishableApiKey, EventName.CONFIRM_PAYMENT_INTENT)
+            EventName.CONFIRM_PAYMENT_INTENT,
+            publishableKey,
+            productUsageTokens = productUsageTokens,
+            sourceType = sourceType
+        )
     }
 
     fun getPaymentIntentRetrieveParams(
         productUsageTokens: List<String>?,
-        publishableApiKey: String
+        publishableKey: String
     ): Map<String, Any> {
         return getEventLoggingParams(
-            productUsageTokens,
-            publishableApiKey, EventName.RETRIEVE_PAYMENT_INTENT)
+            EventName.RETRIEVE_PAYMENT_INTENT,
+            publishableKey,
+            productUsageTokens = productUsageTokens
+        )
     }
 
     fun getSetupIntentConfirmationParams(
-        publishableApiKey: String,
+        publishableKey: String,
         paymentMethodType: String?
     ): Map<String, Any> {
         val params =
-            getEventLoggingParams(publishableApiKey, EventName.CONFIRM_SETUP_INTENT)
+            getEventLoggingParams(EventName.CONFIRM_SETUP_INTENT, publishableKey)
         return if (paymentMethodType != null) {
             params.plus(FIELD_PAYMENT_METHOD_TYPE to paymentMethodType)
         } else {
@@ -234,36 +261,21 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
         }
     }
 
-    fun getSetupIntentRetrieveParams(publishableApiKey: String): Map<String, Any> {
-        return getEventLoggingParams(publishableApiKey, EventName.RETRIEVE_SETUP_INTENT)
-    }
-
-    private fun getEventLoggingParams(
-        publishableApiKey: String,
-        @EventName eventName: String
-    ): Map<String, Any> {
-        return getEventLoggingParams(null, null, null, publishableApiKey, eventName)
+    fun getSetupIntentRetrieveParams(publishableKey: String): Map<String, Any> {
+        return getEventLoggingParams(EventName.RETRIEVE_SETUP_INTENT, publishableKey)
     }
 
     fun getEventLoggingParams(
-        productUsageTokens: List<String>?,
-        publishableApiKey: String,
-        @EventName eventName: String
-    ): Map<String, Any> {
-        return getEventLoggingParams(productUsageTokens, null, null, publishableApiKey, eventName)
-    }
-
-    fun getEventLoggingParams(
-        productUsageTokens: List<String>?,
-        @Source.SourceType sourceType: String?,
-        @Token.TokenType tokenType: String?,
-        publishableApiKey: String,
-        @EventName eventName: String
+        @EventName eventName: String,
+        publishableKey: String,
+        productUsageTokens: List<String>? = null,
+        @Source.SourceType sourceType: String? = null,
+        @Token.TokenType tokenType: String? = null
     ): Map<String, Any> {
         val paramsObject = mapOf(
             FIELD_ANALYTICS_UA to analyticsUa,
             FIELD_EVENT to getEventParamName(eventName),
-            FIELD_PUBLISHABLE_KEY to publishableApiKey,
+            FIELD_PUBLISHABLE_KEY to publishableKey,
             FIELD_OS_NAME to Build.VERSION.CODENAME,
             FIELD_OS_RELEASE to Build.VERSION.RELEASE,
             FIELD_OS_VERSION to Build.VERSION.SDK_INT,

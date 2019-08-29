@@ -57,7 +57,7 @@ internal class TelemetryClientUtil @VisibleForTesting constructor(
 
     constructor(context: Context) : this(context.applicationContext, UidSupplier(context))
 
-    constructor(context: Context, uidSupplier: Supplier<StripeUid>) : this(
+    constructor(context: Context, uidSupplier: Supplier<StripeUid> = UidSupplier(context)) : this(
         uidSupplier,
         context.resources.displayMetrics,
         context.packageName ?: "",
