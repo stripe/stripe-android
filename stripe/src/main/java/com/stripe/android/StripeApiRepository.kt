@@ -27,7 +27,6 @@ import com.stripe.android.utils.ObjectUtils
 import java.net.HttpURLConnection
 import java.security.Security
 import java.util.Locale
-import java.util.Objects
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -136,8 +135,14 @@ internal class StripeApiRepository @VisibleForTesting @JvmOverloads constructor(
             fireFingerprintRequest()
             val setupIntentId = SetupIntent.parseIdFromClientSecret(
                 confirmSetupIntentParams.clientSecret)
-            val response = makeApiRequest(ApiRequest.createPost(
-                getConfirmSetupIntentUrl(setupIntentId), paramMap, options, appInfo))
+            val response = makeApiRequest(
+                ApiRequest.createPost(
+                    getConfirmSetupIntentUrl(setupIntentId),
+                    paramMap,
+                    options,
+                    appInfo
+                )
+            )
             val setupIntent = SetupIntent.fromString(response.responseBody)
 
             fireAnalyticsRequest(
@@ -168,16 +173,19 @@ internal class StripeApiRepository @VisibleForTesting @JvmOverloads constructor(
     ): SetupIntent? {
         try {
             fireFingerprintRequest()
-            fireAnalyticsRequest(analyticsDataFactory.getSetupIntentRetrieveParams(options.apiKey),
-                options.apiKey)
-            val setupIntentId = SetupIntent.parseIdFromClientSecret(
-                Objects.requireNonNull(clientSecret))
+            fireAnalyticsRequest(
+                analyticsDataFactory.getSetupIntentRetrieveParams(options.apiKey),
+                options.apiKey
+            )
+            val setupIntentId = SetupIntent.parseIdFromClientSecret(clientSecret)
             val response = makeApiRequest(
                 ApiRequest.createGet(
                     getRetrieveSetupIntentUrl(setupIntentId),
                     createClientSecretParam(clientSecret),
                     options,
-                    appInfo))
+                    appInfo
+                )
+            )
             return SetupIntent.fromString(response.responseBody)
         } catch (unexpected: CardException) {
             // This particular kind of exception should not be possible from a PaymentI API endpoint

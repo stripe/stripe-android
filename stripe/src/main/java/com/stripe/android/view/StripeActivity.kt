@@ -37,13 +37,8 @@ internal abstract class StripeActivity : AppCompatActivity() {
         progressBar = findViewById(R.id.progress_bar_as)
         val toolbar = findViewById<Toolbar>(R.id.toolbar_as)
         viewStub = findViewById(R.id.widget_viewstub_as)
-        if (supportActionBar != null) {
-            supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        }
         setSupportActionBar(toolbar)
-        if (supportActionBar != null) {
-            supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        }
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         setCommunicatingProgress(false)
         alertBroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
@@ -116,9 +111,7 @@ internal abstract class StripeActivity : AppCompatActivity() {
     }
 
     fun showError(error: String) {
-        if (alertMessageListener != null) {
-            alertMessageListener!!.onAlertMessageDisplayed(error)
-        }
+        alertMessageListener?.onAlertMessageDisplayed(error)
 
         AlertDialog.Builder(this)
             .setMessage(error)

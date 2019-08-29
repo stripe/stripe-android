@@ -114,8 +114,8 @@ public class PaymentControllerTest {
                 .thenReturn(ApplicationProvider.getApplicationContext());
         mController = new PaymentController(
                 ApplicationProvider.getApplicationContext(),
-                mThreeDs2Service,
                 new FakeStripeRepository(),
+                mThreeDs2Service,
                 mMessageVersionRegistry,
                 CONFIG,
                 mFireAndForgetRequestExecutor,
@@ -131,23 +131,23 @@ public class PaymentControllerTest {
         final PublicKey dsPublicKey =
                 Stripe3ds2Fingerprint.create(
                         Objects.requireNonNull(paymentIntent.getStripeSdkData()))
-                        .directoryServerEncryption
-                        .directoryServerPublicKey;
+                        .getDirectoryServerEncryption()
+                        .getDirectoryServerPublicKey();
         when(mThreeDs2Service.createTransaction(
-                eq(Stripe3ds2Fingerprint.DirectoryServer.Mastercard.id),
+                eq(Stripe3ds2Fingerprint.DirectoryServer.Mastercard.getId()),
                 eq(MESSAGE_VERSION),
                 eq(paymentIntent.isLiveMode()),
-                eq(Stripe3ds2Fingerprint.DirectoryServer.Mastercard.name),
+                eq(Stripe3ds2Fingerprint.DirectoryServer.Mastercard.getNetworkName()),
                 ArgumentMatchers.<X509Certificate>anyList(),
                 eq(dsPublicKey),
                 eq("7c4debe3f4af7f9d1569a2ffea4343c2566826ee")))
                 .thenReturn(mTransaction);
         mController.handleNextAction(mHost, paymentIntent, REQUEST_OPTIONS);
         verify(mThreeDs2Service).createTransaction(
-                eq(Stripe3ds2Fingerprint.DirectoryServer.Mastercard.id),
+                eq(Stripe3ds2Fingerprint.DirectoryServer.Mastercard.getId()),
                 eq(MESSAGE_VERSION),
                 eq(paymentIntent.isLiveMode()),
-                eq(Stripe3ds2Fingerprint.DirectoryServer.Mastercard.name),
+                eq(Stripe3ds2Fingerprint.DirectoryServer.Mastercard.getNetworkName()),
                 ArgumentMatchers.<X509Certificate>anyList(),
                 eq(dsPublicKey),
                 eq("7c4debe3f4af7f9d1569a2ffea4343c2566826ee"));
@@ -169,10 +169,10 @@ public class PaymentControllerTest {
     @Test
     public void handleNextAction_withAmexAnd3ds2_shouldStart3ds2ChallengeFlow() {
         when(mThreeDs2Service.createTransaction(
-                eq(Stripe3ds2Fingerprint.DirectoryServer.Amex.id),
+                eq(Stripe3ds2Fingerprint.DirectoryServer.Amex.getId()),
                 eq(MESSAGE_VERSION),
                 eq(PaymentIntentFixtures.PI_REQUIRES_AMEX_3DS2.isLiveMode()),
-                eq(Stripe3ds2Fingerprint.DirectoryServer.Amex.name),
+                eq(Stripe3ds2Fingerprint.DirectoryServer.Amex.getNetworkName()),
                 ArgumentMatchers.<X509Certificate>anyList(),
                 eq(Stripe3ds2FingerprintTest.DS_RSA_PUBLIC_KEY),
                 eq(PaymentIntentFixtures.KEY_ID)))
@@ -180,10 +180,10 @@ public class PaymentControllerTest {
         mController.handleNextAction(mHost, PaymentIntentFixtures.PI_REQUIRES_AMEX_3DS2,
                 REQUEST_OPTIONS);
         verify(mThreeDs2Service).createTransaction(
-                eq(Stripe3ds2Fingerprint.DirectoryServer.Amex.id),
+                eq(Stripe3ds2Fingerprint.DirectoryServer.Amex.getId()),
                 eq(MESSAGE_VERSION),
                 eq(PaymentIntentFixtures.PI_REQUIRES_AMEX_3DS2.isLiveMode()),
-                eq(Stripe3ds2Fingerprint.DirectoryServer.Amex.name),
+                eq(Stripe3ds2Fingerprint.DirectoryServer.Amex.getNetworkName()),
                 ArgumentMatchers.<X509Certificate>anyList(),
                 eq(Stripe3ds2FingerprintTest.DS_RSA_PUBLIC_KEY),
                 eq(PaymentIntentFixtures.KEY_ID));

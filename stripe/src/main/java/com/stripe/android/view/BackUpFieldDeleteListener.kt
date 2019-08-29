@@ -13,7 +13,7 @@ internal class BackUpFieldDeleteListener(
 ) : StripeEditText.DeleteEmptyListener {
 
     override fun onDeleteEmpty() {
-        val fieldText = backUpTarget.text!!.toString()
+        val fieldText = backUpTarget.text?.toString() ?: ""
         if (fieldText.length > 1) {
             backUpTarget.setText(
                 fieldText.substring(0, fieldText.length - 1))
