@@ -54,7 +54,7 @@ public class StripeApiRepositoryTest {
     private static final Card CARD = Card.create("4242424242424242", 1, 2050, "123");
 
     @NonNull private final StripeApiRepository mStripeApiRepository =
-            new StripeApiRepository(ApplicationProvider.getApplicationContext(), null);
+            new StripeApiRepository(ApplicationProvider.getApplicationContext());
 
     @Mock private ApiRequestExecutor mStripeApiRequestExecutor;
 
@@ -326,9 +326,9 @@ public class StripeApiRepositoryTest {
             APIConnectionException {
         final StripeRepository stripeApiRepository = new StripeApiRepository(
                 ApplicationProvider.getApplicationContext(),
-                new StripeApiRequestExecutor(),
-                new FakeFireAndForgetRequestExecutor(),
-                null);
+                null, new StripeApiRequestExecutor(),
+                new FakeFireAndForgetRequestExecutor()
+        );
         final Source source = stripeApiRepository.createSource(SourceParams.createCardParams(CARD),
                 ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY));
 
@@ -555,9 +555,9 @@ public class StripeApiRepositoryTest {
     private StripeApiRepository create() {
         return new StripeApiRepository(
                 ApplicationProvider.getApplicationContext(),
+                null,
                 mStripeApiRequestExecutor,
-                new FakeFireAndForgetRequestExecutor(),
-                null
+                new FakeFireAndForgetRequestExecutor()
         );
     }
 }

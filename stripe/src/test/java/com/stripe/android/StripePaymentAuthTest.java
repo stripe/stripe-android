@@ -142,9 +142,10 @@ public class StripePaymentAuthTest {
         return new Stripe(
                 new StripeApiRepository(
                         mContext,
+                        null,
                         new StripeApiRequestExecutor(),
-                        new FakeFireAndForgetRequestExecutor(),
-                        null),
+                        new FakeFireAndForgetRequestExecutor()
+                ),
                 new StripeNetworkUtils(mContext),
                 mPaymentController,
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,

@@ -1428,9 +1428,9 @@ public class StripeTest {
             @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor) {
         return new StripeApiRepository(
                 mContext,
+                null,
                 new StripeApiRequestExecutor(),
                 fireAndForgetRequestExecutor,
-                null,
                 new FingerprintRequestFactory(
                         new TelemetryClientUtil(mContext, new FakeUidSupplier())
                 )

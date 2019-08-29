@@ -52,9 +52,10 @@ public class IssuingCardPinServiceTest {
 
         final StripeRepository stripeRepository = new StripeApiRepository(
                 ApplicationProvider.getApplicationContext(),
+                null,
                 mStripeApiRequestExecutor,
-                new FakeFireAndForgetRequestExecutor(),
-                null);
+                new FakeFireAndForgetRequestExecutor()
+        );
 
         mService = new IssuingCardPinService(ephemeralKeyProvider, stripeRepository,
                 new OperationIdFactory());
