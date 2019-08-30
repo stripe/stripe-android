@@ -35,7 +35,7 @@ internal class PaymentAuthWebView : WebView {
         activity: Activity,
         progressBar: ProgressBar,
         clientSecret: String,
-        returnUrl: String
+        returnUrl: String?
     ) {
         webViewClient = PaymentAuthWebViewClient(activity, progressBar, clientSecret, returnUrl)
     }
