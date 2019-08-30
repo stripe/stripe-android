@@ -1,5 +1,7 @@
 package com.stripe.android.view;
 
+import android.support.annotation.NonNull;
+
 import androidx.test.core.app.ApplicationProvider;
 
 import org.junit.Before;
@@ -9,13 +11,11 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Test class for {@link CountryAdapter}
@@ -24,57 +24,67 @@ import static org.junit.Assert.assertTrue;
 public class CountryAdapterTest {
 
     private CountryAdapter mCountryAdapter;
+    private List<String> mOrderedCountries;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         Locale.setDefault(Locale.US);
 
-        final List<String> countries = new ArrayList<>(
-                CountryUtils.getCountryNameToCodeMap().keySet());
-        mCountryAdapter = new CountryAdapter(ApplicationProvider.getApplicationContext(),
-                countries);
+        mOrderedCountries = CountryUtils.getOrderedCountries(Locale.getDefault());
+        mCountryAdapter = new CountryAdapter(
+                ApplicationProvider.getApplicationContext(),
+                mOrderedCountries
+        );
     }
 
     @Test
-    public void getOrderedSystemLocalesTest() {
-        assertEquals(mCountryAdapter.getItem(0),
-                mCountryAdapter.getCurrentLocale().getDisplayCountry());
-        // Skip the first comparision since we moved the current locale up
-        for (int i = 2; i < mCountryAdapter.getCount(); i++) {
-            final String country = mCountryAdapter.getItem(i);
-            final String prevCountry = mCountryAdapter.getItem(i - 1);
-            assertFalse(
-                    "Countries are not ordered",
-                    prevCountry != null && country != null && country.compareTo(prevCountry) < 0
-            );
-        }
+    public void filter_whenEmptyConstraint_showsAllResults() {
+        mCountryAdapter.getFilter().filter("");
+        assertEquals(
+                mOrderedCountries,
+                getSuggestions()
+        );
     }
 
     @Test
     public void filter_whenCountryInputNoMatch_showsAllResults() {
-        final int initialCount = mCountryAdapter.getCount();
         mCountryAdapter.getFilter().filter("NONEXISTENT COUNTRY");
-        assertEquals(mCountryAdapter.getCount(), initialCount);
+        assertEquals(
+                mOrderedCountries,
+                getSuggestions()
+        );
     }
 
     @Test
     public void filter_whenCountryInputMatches_filters() {
-        final int initialCount = mCountryAdapter.getCount();
-        mCountryAdapter.getFilter().filter("a");
-        assertTrue(mCountryAdapter.getCount() < initialCount);
-
-        for (int i = 0; i < mCountryAdapter.getCount(); i++) {
-            final String suggestedCountry = mCountryAdapter.getItem(i);
-            assertNotNull(suggestedCountry);
-            assertTrue(suggestedCountry.toLowerCase(Locale.ROOT).startsWith("a"));
-        }
+        mCountryAdapter.getFilter().filter("United");
+        assertEquals(
+                Arrays.asList(
+                        "United States",
+                        "United Arab Emirates",
+                        "United Kingdom",
+                        "United States Minor Outlying Islands"
+                ),
+                getSuggestions()
+        );
     }
 
     @Test
     public void filter_whenCountryInputMatchesExactly_showsAllResults() {
-        final int initialCount = mCountryAdapter.getCount();
         mCountryAdapter.getFilter().filter("Uganda");
-        assertEquals(mCountryAdapter.getCount(), initialCount);
+        assertEquals(
+                mOrderedCountries,
+                getSuggestions()
+        );
+    }
+
+    @NonNull
+    private List<String> getSuggestions() {
+        final List<String> suggestions = new ArrayList<>(mCountryAdapter.getCount());
+        for (int i = 0; i < mCountryAdapter.getCount(); i++) {
+            suggestions.add(mCountryAdapter.getItem(i));
+        }
+        return suggestions;
     }
 }

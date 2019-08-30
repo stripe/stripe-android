@@ -1,8 +1,6 @@
 package com.stripe.android.view
 
 import android.content.Context
-import android.support.annotation.VisibleForTesting
-import android.support.v4.os.ConfigurationCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +8,6 @@ import android.widget.ArrayAdapter
 import android.widget.Filter
 import android.widget.TextView
 import com.stripe.android.R
-import java.util.ArrayList
 import java.util.Locale
 
 /**
@@ -18,59 +15,17 @@ import java.util.Locale
  */
 internal class CountryAdapter(
     context: Context,
-    countries: List<String>
+    private val initialCountries: List<String>
 ) : ArrayAdapter<String>(context, R.layout.menu_text_view) {
-    private val countries: List<String>
-    private val filter: Filter
-    private var suggestions: List<String>? = null
-
-    val currentLocale: Locale
-        @VisibleForTesting
-        get() = ConfigurationCompat.getLocales(context.resources.configuration).get(0)
-
-    init {
-        this.countries = getOrderedCountries(countries)
-        suggestions = this.countries
-        filter = object : Filter() {
-            override fun performFiltering(charSequence: CharSequence?): FilterResults {
-                val filterResults = FilterResults()
-                val suggestedCountries = ArrayList<String>()
-                if (charSequence == null) {
-                    filterResults.values = this@CountryAdapter.countries
-                    return filterResults
-                }
-                val charSequenceLowercase = charSequence.toString()
-                    .toLowerCase(Locale.ROOT)
-                for (country in this@CountryAdapter.countries) {
-                    if (country.toLowerCase(Locale.ROOT).startsWith(charSequenceLowercase)) {
-                        suggestedCountries.add(country)
-                    }
-                }
-                if (suggestedCountries.size == 0 || suggestedCountries.size == 1 &&
-                    suggestedCountries[0] == charSequence.toString()) {
-                    filterResults.values = this@CountryAdapter.countries
-                } else {
-                    filterResults.values = suggestedCountries
-                }
-                return filterResults
-            }
-
-            override fun publishResults(
-                constraint: CharSequence?,
-                filterResults: FilterResults?
-            ) {
-                suggestions = filterResults?.values as List<String>
-                notifyDataSetChanged()
-            }
-        }
-    }
+    private val countryFilter: Filter = createFilter()
+    private var suggestions: List<String>? = initialCountries
 
     override fun getCount(): Int {
-        return suggestions!!.size
+        return suggestions?.size ?: 0
     }
 
     override fun getItem(i: Int): String? {
-        return suggestions!![i]
+        return suggestions?.get(i)
     }
 
     override fun getItemId(i: Int): Long {
@@ -90,15 +45,43 @@ internal class CountryAdapter(
     }
 
     override fun getFilter(): Filter {
-        return filter
+        return countryFilter
     }
 
-    private fun getOrderedCountries(countries: List<String>): List<String> {
-        // Show user's current locale first, followed by countries alphabetized by display name
-        return listOf(currentLocale.displayCountry)
-            .plus(
-                countries.sortedWith(compareBy { it.toLowerCase(Locale.ROOT) })
-                    .minus(currentLocale.displayCountry)
-            )
+    private fun createFilter(): Filter {
+        return object : Filter() {
+            override fun performFiltering(constraint: CharSequence?): FilterResults {
+                val filterResults = FilterResults()
+                filterResults.values = constraint?.let {
+                    filteredSuggestedCountries(constraint)
+                } ?: this@CountryAdapter.initialCountries
+                return filterResults
+            }
+
+            override fun publishResults(
+                constraint: CharSequence?,
+                filterResults: FilterResults?
+            ) {
+                suggestions = filterResults?.values as List<String>
+                notifyDataSetChanged()
+            }
+
+            private fun filteredSuggestedCountries(constraint: CharSequence?): List<String> {
+                val suggestedCountries = this@CountryAdapter.initialCountries
+                    .filter {
+                        it.toLowerCase(Locale.ROOT).startsWith(
+                            constraint.toString().toLowerCase(Locale.ROOT)
+                        )
+                    }
+
+                return if (suggestedCountries.isEmpty() ||
+                    (suggestedCountries.size == 1 &&
+                        suggestedCountries[0] == constraint.toString())) {
+                    this@CountryAdapter.initialCountries
+                } else {
+                    suggestedCountries
+                }
+            }
+        }
     }
 }
