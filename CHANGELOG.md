@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 10.4.2 - 2019-08-30
+* [#1461](https://github.com/stripe/stripe-android/pull/1461) Fix crash in `PaymentAuthWebView`
+* [#1462](https://github.com/stripe/stripe-android/pull/1462) Animate selections in `PaymentMethodsActivity`
+
 ## 10.4.1 - 2019-08-30
 * [#1457](https://github.com/stripe/stripe-android/pull/1457) Fix crash in "Add an Address" screen when value for Country is empty
 
