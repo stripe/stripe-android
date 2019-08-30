@@ -16,7 +16,6 @@ import com.stripe.android.view.PaymentMethodsActivityStarter
 import com.stripe.example.R
 import com.stripe.example.controller.ErrorDialogHandler
 import com.stripe.example.service.ExampleEphemeralKeyProvider
-import java.lang.ref.WeakReference
 
 /**
  * An example activity that handles working with a [CustomerSession], allowing you to
@@ -40,7 +39,7 @@ class CustomerSessionActivity : AppCompatActivity() {
         errorDialogHandler = ErrorDialogHandler(this)
         CustomerSession.initCustomerSession(
             this,
-            ExampleEphemeralKeyProvider(ProgressListenerImpl(this)),
+            ExampleEphemeralKeyProvider(),
             false
         )
 
@@ -92,21 +91,6 @@ class CustomerSessionActivity : AppCompatActivity() {
 
         override fun onError(httpCode: Int, errorMessage: String, stripeError: StripeError?) {
             activity?.onRetrieveError(errorMessage)
-        }
-    }
-
-    private class ProgressListenerImpl constructor(
-        activity: CustomerSessionActivity
-    ) : ExampleEphemeralKeyProvider.ProgressListener {
-
-        private val activityRef: WeakReference<CustomerSessionActivity> = WeakReference(activity)
-
-        override fun onStringResponse(response: String) {
-            activityRef.get()?.let {
-                if (response.startsWith("Error: ")) {
-                    it.errorDialogHandler.show(response)
-                }
-            }
         }
     }
 }

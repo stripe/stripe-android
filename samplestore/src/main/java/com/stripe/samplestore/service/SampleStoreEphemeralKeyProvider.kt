@@ -8,10 +8,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import java.io.IOException
-import java.util.HashMap
 
 class SampleStoreEphemeralKeyProvider @JvmOverloads constructor(
-    private val progressListener: ProgressListener,
     private val stripeAccountId: String? = null
 ) : EphemeralKeyProvider {
 
@@ -23,37 +21,26 @@ class SampleStoreEphemeralKeyProvider @JvmOverloads constructor(
         @Size(min = 4) apiVersion: String,
         keyUpdateListener: EphemeralKeyUpdateListener
     ) {
-        val apiParamMap = HashMap<String, String>()
-        apiParamMap["api_version"] = apiVersion
+        val params = hashMapOf("api_version" to apiVersion)
         if (stripeAccountId != null) {
-            apiParamMap["stripe_account"] = stripeAccountId
+            params["stripe_account"] = stripeAccountId
         }
 
-        compositeDisposable.add(stripeService.createEphemeralKey(apiParamMap)
+        compositeDisposable.add(stripeService.createEphemeralKey(params)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                { response ->
-                    try {
-                        val rawKey = response.string()
-                        keyUpdateListener.onKeyUpdate(rawKey)
-                        progressListener.onStringResponse(rawKey)
-                    } catch (e: IOException) {
-                        keyUpdateListener
-                            .onKeyUpdateFailure(0, e.message ?: "")
-                    }
-                },
-                { throwable ->
-                    progressListener
-                        .onStringResponse(throwable.message ?: "")
-                }))
+            .subscribe { response ->
+                try {
+                    val rawKey = response.string()
+                    keyUpdateListener.onKeyUpdate(rawKey)
+                } catch (e: IOException) {
+                    keyUpdateListener
+                        .onKeyUpdateFailure(0, e.message ?: "")
+                }
+            })
     }
 
     fun destroy() {
         compositeDisposable.dispose()
-    }
-
-    interface ProgressListener {
-        fun onStringResponse(string: String)
     }
 }

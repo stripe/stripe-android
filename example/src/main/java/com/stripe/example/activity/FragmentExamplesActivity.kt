@@ -1,6 +1,5 @@
 package com.stripe.example.activity
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -272,8 +271,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
         }
 
         private fun createCustomerSession(): CustomerSession {
-            CustomerSession.initCustomerSession(requireContext(),
-                ExampleEphemeralKeyProvider(ProgressListenerImpl(requireActivity())))
+            CustomerSession.initCustomerSession(requireContext(), ExampleEphemeralKeyProvider())
             val customerSession = CustomerSession.getInstance()
             customerSession.retrieveCurrentCustomer(
                 object : CustomerSession.CustomerRetrievalListener {
@@ -287,19 +285,6 @@ class FragmentExamplesActivity : AppCompatActivity() {
                 }
             )
             return customerSession
-        }
-
-        private class ProgressListenerImpl internal constructor(
-            activity: Activity
-        ) : ExampleEphemeralKeyProvider.ProgressListener {
-            private val mActivityRef: WeakReference<Activity> = WeakReference(activity)
-
-            override fun onStringResponse(response: String) {
-                val activity = mActivityRef.get()
-                if (activity != null && response.startsWith("Error: ")) {
-                    Toast.makeText(activity, response, Toast.LENGTH_LONG).show()
-                }
-            }
         }
 
         private class PaymentAuthResultListener internal constructor(

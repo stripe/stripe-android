@@ -13,37 +13,28 @@ import java.io.IOException
  * An implementation of [EphemeralKeyProvider] that can be used to generate
  * ephemeral keys on the backend.
  */
-class ExampleEphemeralKeyProvider(
-    private val progressListener: ProgressListener
-) : EphemeralKeyProvider {
+class ExampleEphemeralKeyProvider : EphemeralKeyProvider {
 
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
     private val stripeService: StripeService =
-        RetrofitFactory.instance.create(StripeService::class.java)
+            RetrofitFactory.instance.create(StripeService::class.java)
 
     override fun createEphemeralKey(
         @Size(min = 4) apiVersion: String,
         keyUpdateListener: EphemeralKeyUpdateListener
     ) {
-        val apiParamMap = hashMapOf("api_version" to apiVersion)
-
-        compositeDisposable.add(stripeService.createEphemeralKey(apiParamMap)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                { responseBody ->
+        compositeDisposable.add(
+            stripeService.createEphemeralKey(hashMapOf("api_version" to apiVersion))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { responseBody ->
                     try {
-                        val rawKey = responseBody.string()
-                        keyUpdateListener.onKeyUpdate(rawKey)
-                        progressListener.onStringResponse(rawKey)
+                        val ephemeralKeyJson = responseBody.string()
+                        keyUpdateListener.onKeyUpdate(ephemeralKeyJson)
                     } catch (e: IOException) {
-                        keyUpdateListener.onKeyUpdateFailure(0, e.message ?: "")
+                        keyUpdateListener
+                            .onKeyUpdateFailure(0, e.message ?: "")
                     }
-                },
-                { throwable -> progressListener.onStringResponse(throwable.message ?: "") }))
-    }
-
-    interface ProgressListener {
-        fun onStringResponse(response: String)
+                })
     }
 }

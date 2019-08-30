@@ -15,7 +15,6 @@ import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
 import com.stripe.samplestore.service.SampleStoreEphemeralKeyProvider
 import io.reactivex.disposables.CompositeDisposable
-import java.lang.ref.WeakReference
 
 class StoreActivity : AppCompatActivity(), StoreAdapter.TotalItemsChangedListener {
 
@@ -120,27 +119,8 @@ class StoreActivity : AppCompatActivity(), StoreAdapter.TotalItemsChangedListene
 
     private fun setupCustomerSession(stripeAccountId: String?) {
         // CustomerSession only needs to be initialized once per app.
-        ephemeralKeyProvider = SampleStoreEphemeralKeyProvider(
-            ProgressListenerImpl(this),
-            stripeAccountId
-        )
+        ephemeralKeyProvider = SampleStoreEphemeralKeyProvider(stripeAccountId)
         CustomerSession.initCustomerSession(this, ephemeralKeyProvider, stripeAccountId)
-    }
-
-    private class ProgressListenerImpl constructor(
-        activity: Activity
-    ) : SampleStoreEphemeralKeyProvider.ProgressListener {
-        private val activityRef: WeakReference<Activity> = WeakReference(activity)
-
-        override fun onStringResponse(string: String) {
-            val activity = activityRef.get() ?: return
-
-            if (string.startsWith("Error: ")) {
-                AlertDialog.Builder(activity)
-                    .setMessage(string)
-                    .show()
-            }
-        }
     }
 
     companion object {
