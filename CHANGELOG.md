@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 10.4.1 - 2019-08-30
+* [#1457][https://github.com/stripe/stripe-android/pull/1457] Fix crash in "Add an Address" screen when value for Country is empty
+
 ## 10.4.0 - 2019-08-29
 * [#1421](https://github.com/stripe/stripe-android/pull/1421) Create `PaymentMethodsActivityStarter.Result` to retrieve result of `PaymentMethodsActivity`
 * [#1427](https://github.com/stripe/stripe-android/pull/1427) Mark Stripe methods that accept a publishable key as deprecated
