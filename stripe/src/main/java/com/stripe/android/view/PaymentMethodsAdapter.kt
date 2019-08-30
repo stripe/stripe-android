@@ -81,7 +81,6 @@ internal class PaymentMethodsAdapter : RecyclerView.Adapter<PaymentMethodsAdapte
             val currentPosition = holder.adapterPosition
             if (currentPosition != selectedIndex) {
                 val prevSelectedIndex = selectedIndex
-                holder.toggleSelected()
                 setSelectedIndex(currentPosition)
 
                 notifyItemChanged(prevSelectedIndex)
@@ -131,10 +130,6 @@ internal class PaymentMethodsAdapter : RecyclerView.Adapter<PaymentMethodsAdapte
 
         fun setSelected(selected: Boolean) {
             cardView.isSelected = selected
-        }
-
-        fun toggleSelected() {
-            cardView.toggleSelected()
         }
     }
 

@@ -90,13 +90,6 @@ internal class MaskedCardView @JvmOverloads constructor(
         cardInformationTextView.text = createDisplayString()
     }
 
-    /**
-     * Toggle the view from selected to unselected or vice-versa.
-     */
-    fun toggleSelected() {
-        setSelected(!isSelected)
-    }
-
     private fun initializeCheckMark() {
         updateDrawable(R.drawable.ic_checkmark, checkMarkImageView, true)
     }
