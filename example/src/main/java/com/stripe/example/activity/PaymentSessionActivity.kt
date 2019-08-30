@@ -31,7 +31,6 @@ import com.stripe.android.view.ShippingInfoWidget
 import com.stripe.example.R
 import com.stripe.example.controller.ErrorDialogHandler
 import com.stripe.example.service.ExampleEphemeralKeyProvider
-import java.lang.ref.WeakReference
 import java.util.ArrayList
 import java.util.Currency
 import java.util.Locale
@@ -104,7 +103,7 @@ class PaymentSessionActivity : AppCompatActivity() {
     private fun createCustomerSession(): CustomerSession {
         CustomerSession.initCustomerSession(
             this,
-            ExampleEphemeralKeyProvider(ProgressListenerImpl(this)),
+            ExampleEphemeralKeyProvider(),
             false
         )
         return CustomerSession.getInstance()
@@ -233,19 +232,6 @@ class PaymentSessionActivity : AppCompatActivity() {
         override fun onError(httpCode: Int, errorMessage: String, stripeError: StripeError?) {
             val activity = activity ?: return
             activity.progressBar.visibility = View.INVISIBLE
-        }
-    }
-
-    private class ProgressListenerImpl internal constructor(
-        activity: PaymentSessionActivity
-    ) : ExampleEphemeralKeyProvider.ProgressListener {
-        private val activityRef: WeakReference<PaymentSessionActivity> = WeakReference(activity)
-
-        override fun onStringResponse(response: String) {
-            val activity = activityRef.get()
-            if (activity != null && response.startsWith("Error: ")) {
-                activity.errorDialogHandler.show(response)
-            }
         }
     }
 
