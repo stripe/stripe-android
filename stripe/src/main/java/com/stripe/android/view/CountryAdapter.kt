@@ -55,8 +55,11 @@ internal class CountryAdapter(
                 return filterResults
             }
 
-            override fun publishResults(charSequence: CharSequence, filterResults: FilterResults) {
-                suggestions = filterResults.values as List<String>
+            override fun publishResults(
+                constraint: CharSequence?,
+                filterResults: FilterResults?
+            ) {
+                suggestions = filterResults?.values as List<String>
                 notifyDataSetChanged()
             }
         }
