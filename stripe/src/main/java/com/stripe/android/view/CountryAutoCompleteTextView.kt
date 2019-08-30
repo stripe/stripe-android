@@ -2,6 +2,7 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.support.annotation.VisibleForTesting
+import android.support.v4.os.ConfigurationCompat
 import android.util.AttributeSet
 import android.view.View
 import android.view.View.OnFocusChangeListener
@@ -17,7 +18,6 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
     private val countryAutocomplete: AutoCompleteTextView
-    private val countryNameToCode: Map<String, String>
 
     /**
      * @return 2 digit country code of the country selected by this input.
@@ -30,8 +30,12 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
     init {
         View.inflate(getContext(), R.layout.country_autocomplete_textview, this)
         countryAutocomplete = findViewById(R.id.autocomplete_country_cat)
-        countryNameToCode = CountryUtils.countryNameToCodeMap
-        val countryAdapter = CountryAdapter(getContext(), countryNameToCode.keys.toList())
+        val countryAdapter = CountryAdapter(
+            getContext(),
+            CountryUtils.getOrderedCountries(
+                ConfigurationCompat.getLocales(context.resources.configuration)[0]
+            )
+        )
         countryAutocomplete.threshold = 0
         countryAutocomplete.setAdapter(countryAdapter)
         countryAutocomplete.onItemClickListener = AdapterView.OnItemClickListener { _, _, _, _ ->
@@ -68,7 +72,7 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
 
     @VisibleForTesting
     fun updateUiForCountryEntered(displayCountryEntered: String?) {
-        val countryCodeEntered = countryNameToCode[displayCountryEntered]
+        val countryCodeEntered = CountryUtils.getCountryCode(displayCountryEntered)
         if (countryCodeEntered != null) {
             if (selectedCountryCode == null || selectedCountryCode != countryCodeEntered) {
                 selectedCountryCode = countryCodeEntered

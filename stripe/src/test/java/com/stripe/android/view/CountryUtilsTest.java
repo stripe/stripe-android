@@ -2,6 +2,9 @@ package com.stripe.android.view;
 
 import org.junit.Test;
 
+import java.util.Locale;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -16,5 +19,13 @@ public class CountryUtilsTest {
         assertTrue(CountryUtils.doesCountryUsePostalCode("UK"));
         assertTrue(CountryUtils.doesCountryUsePostalCode("CA"));
         assertFalse(CountryUtils.doesCountryUsePostalCode("DM"));
+    }
+
+    @Test
+    public void getOrderedCountries() {
+        assertEquals(
+                Locale.getDefault().getDisplayCountry(),
+                CountryUtils.getOrderedCountries(Locale.getDefault()).get(0)
+        );
     }
 }
