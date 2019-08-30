@@ -83,23 +83,6 @@ public class MaskedCardViewTest {
     }
 
     @Test
-    public void toggleSelected_switchesState() {
-        final PaymentMethod paymentMethod =
-                PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON);
-        assertNotNull(paymentMethod);
-        mMaskedCardView.setPaymentMethod(paymentMethod);
-        assertFalse(mMaskedCardView.isSelected());
-
-        mMaskedCardView.toggleSelected();
-        assertTrue(mMaskedCardView.isSelected());
-        assertEquals(View.VISIBLE, mSelectedImageView.getVisibility());
-
-        mMaskedCardView.toggleSelected();
-        assertFalse(mMaskedCardView.isSelected());
-        assertEquals(View.INVISIBLE, mSelectedImageView.getVisibility());
-    }
-
-    @Test
     public void whenSourceNotCard_doesNotCrash() {
         final PaymentMethod paymentMethod = new PaymentMethod.Builder().build();
         mMaskedCardView.setPaymentMethod(paymentMethod);
