@@ -3,16 +3,14 @@ package com.stripe.android.view;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -49,11 +47,12 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
     public static final String TOKEN_PAYMENT_METHODS_ACTIVITY = "PaymentMethodsActivity";
 
-    private boolean mCommunicating;
     private PaymentMethodsAdapter mAdapter;
     private ProgressBar mProgressBar;
     private boolean mStartedFromPaymentSession;
     private CustomerSession mCustomerSession;
+
+    @Nullable private PaymentMethod mTappedPaymentMethod = null;
 
     /**
      * @deprecated use {@link PaymentMethodsActivityStarter#newIntent()}
@@ -74,13 +73,39 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
         mProgressBar = findViewById(R.id.payment_methods_progress_bar);
 
+        final String initiallySelectedPaymentMethodId;
+        if (savedInstanceState != null &&
+                savedInstanceState.containsKey(STATE_SELECTED_PAYMENT_METHOD_ID)) {
+            initiallySelectedPaymentMethodId =
+                    savedInstanceState.getString(STATE_SELECTED_PAYMENT_METHOD_ID);
+        } else {
+            initiallySelectedPaymentMethodId = args.initialPaymentMethodId;
+        }
         final RecyclerView recyclerView = findViewById(R.id.payment_methods_recycler);
-        mAdapter = new PaymentMethodsAdapter();
+        mAdapter = new PaymentMethodsAdapter(initiallySelectedPaymentMethodId);
+        mAdapter.setListener(new PaymentMethodsAdapter.Listener() {
+            @Override
+            public void onClick(@NonNull PaymentMethod paymentMethod) {
+                mTappedPaymentMethod = paymentMethod;
+            }
+        });
+
         // init the RecyclerView
         recyclerView.setHasFixedSize(false);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(mAdapter);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setItemAnimator(new DefaultItemAnimator() {
+            @Override
+            public void onAnimationFinished(@NonNull RecyclerView.ViewHolder viewHolder) {
+                super.onAnimationFinished(viewHolder);
+
+                // wait until post-tap animations are completed before finishing activity
+                if (mTappedPaymentMethod != null) {
+                    setSelectionAndFinish(mTappedPaymentMethod);
+                    mTappedPaymentMethod = null;
+                }
+            }
+        });
 
         mCustomerSession = CustomerSession.getInstance();
         mStartedFromPaymentSession = args.isPaymentSessionActive;
@@ -97,18 +122,10 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
 
-        final String selectedPaymentMethodId;
-        if (savedInstanceState != null &&
-                savedInstanceState.containsKey(STATE_SELECTED_PAYMENT_METHOD_ID)) {
-            selectedPaymentMethodId =
-                    savedInstanceState.getString(STATE_SELECTED_PAYMENT_METHOD_ID);
-        } else {
-            selectedPaymentMethodId = args.initialPaymentMethodId;
-        }
-
-        getCustomerPaymentMethods(selectedPaymentMethodId);
+        fetchCustomerPaymentMethods();
 
         // This prevents the first click from being eaten by the focus.
         addCardView.requestFocusFromTouch();
@@ -121,6 +138,12 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                 resultCode == RESULT_OK) {
             onPaymentMethodCreated(data);
         }
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        setSelectionAndFinish(mAdapter.getSelectedPaymentMethod());
+        return true;
     }
 
     private void onPaymentMethodCreated(@Nullable Intent data) {
@@ -139,59 +162,26 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                 finishWithPaymentMethod(paymentMethod);
             } else {
                 // Refresh the list of Payment Methods with the new Payment Method.
-                getCustomerPaymentMethods(paymentMethod != null ? paymentMethod.id : null);
+                fetchCustomerPaymentMethods();
             }
         } else {
-            getCustomerPaymentMethods(null);
+            fetchCustomerPaymentMethods();
         }
     }
 
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        final MenuItem saveItem = menu.findItem(R.id.action_save);
-        final Drawable compatIcon = ViewUtils.getTintedIconWithAttribute(
-                this,
-                getTheme(),
-                R.attr.titleTextColor,
-                R.drawable.ic_checkmark);
-        saveItem.setIcon(compatIcon);
-        return super.onPrepareOptionsMenu(menu);
+    public void onBackPressed() {
+        setSelectionAndFinish(mAdapter.getSelectedPaymentMethod());
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.add_payment_method, menu);
-        menu.findItem(R.id.action_save).setEnabled(!mCommunicating);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_save) {
-            setSelectionAndFinish();
-            return true;
-        } else {
-            final boolean handled = super.onOptionsItemSelected(item);
-            if (!handled) {
-                onBackPressed();
-            }
-            return handled;
-        }
-    }
-
-    private void getCustomerPaymentMethods(@Nullable String selectPaymentMethodId) {
+    private void fetchCustomerPaymentMethods() {
         setCommunicatingProgress(true);
         mCustomerSession.getPaymentMethods(PaymentMethod.Type.Card,
-                new PaymentMethodsRetrievalListener(this, selectPaymentMethodId));
+                new PaymentMethodsRetrievalListener(this));
     }
 
-    private void updatePaymentMethods(@NonNull List<PaymentMethod> paymentMethods,
-                                      @Nullable String selectPaymentMethodId) {
+    private void updatePaymentMethods(@NonNull List<PaymentMethod> paymentMethods) {
         mAdapter.setPaymentMethods(paymentMethods);
-        if (selectPaymentMethodId != null) {
-            mAdapter.setSelectedPaymentMethod(selectPaymentMethodId);
-        }
     }
 
     private void initLoggingTokens() {
@@ -207,7 +197,6 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     }
 
     private void setCommunicatingProgress(boolean communicating) {
-        mCommunicating = communicating;
         if (communicating) {
             mProgressBar.setVisibility(View.VISIBLE);
         } else {
@@ -216,8 +205,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         supportInvalidateOptionsMenu();
     }
 
-    private void setSelectionAndFinish() {
-        final PaymentMethod paymentMethod = mAdapter.getSelectedPaymentMethod();
+    @VisibleForTesting
+    void setSelectionAndFinish(@Nullable PaymentMethod paymentMethod) {
         if (paymentMethod == null || paymentMethod.id == null) {
             cancelAndFinish();
             return;
@@ -260,12 +249,8 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     private static final class PaymentMethodsRetrievalListener extends
             CustomerSession.ActivityPaymentMethodsRetrievalListener<PaymentMethodsActivity> {
 
-        @Nullable final String mSelectPaymentMethodId;
-
-        private PaymentMethodsRetrievalListener(@NonNull PaymentMethodsActivity activity,
-                                                @Nullable String selectPaymentMethodId) {
+        private PaymentMethodsRetrievalListener(@NonNull PaymentMethodsActivity activity) {
             super(activity);
-            mSelectPaymentMethodId = selectPaymentMethodId;
         }
 
         @Override
@@ -275,7 +260,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                 return;
             }
 
-            activity.updatePaymentMethods(paymentMethods, mSelectPaymentMethodId);
+            activity.updatePaymentMethods(paymentMethods);
             activity.setCommunicatingProgress(false);
         }
 
