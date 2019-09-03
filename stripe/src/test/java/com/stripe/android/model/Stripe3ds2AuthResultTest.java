@@ -288,27 +288,27 @@ public class Stripe3ds2AuthResultTest {
     public void fromJson_invalidElementFormatJson_shouldPopulateErrorField() throws JSONException {
         final Stripe3ds2AuthResult result = Stripe3ds2AuthResult.fromJson(
                 new JSONObject(AUTH_RESULT_ERROR_INVALID_ELEMENT_FORMAT_JSON));
-        assertNull(result.ares);
-        assertNull(result.fallbackRedirectUrl);
-        assertNotNull(result.error);
+        assertNull(result.getAres());
+        assertNull(result.getFallbackRedirectUrl());
+        assertNotNull(result.getError());
         assertEquals(
                 "sdkMaxTimeout",
-                result.error.errorDetail);
+                result.getError().getErrorDetail());
         assertEquals(
                 "Format or value of one or more Data Elements is Invalid according to the Specification",
-                result.error.errorDescription);
+                result.getError().getErrorDescription());
     }
 
     @Test
     public void fromJson_fallbackRedirectUrl_shouldReturnValidRedirectData() throws JSONException {
         final Stripe3ds2AuthResult result = Stripe3ds2AuthResult.fromJson(
                 new JSONObject(AUTH_RESULT_FALLBACK_REDIRECT_URL_JSON));
-        assertNull(result.ares);
-        assertNull(result.error);
+        assertNull(result.getAres());
+        assertNull(result.getError());
 
         assertEquals(
                 "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW",
-                result.fallbackRedirectUrl
+                result.getFallbackRedirectUrl()
         );
     }
 }

@@ -61,21 +61,21 @@ public class Stripe3ds2FingerprintTest {
                 .getStripeSdkData();
         assertNotNull(sdkData);
         final Stripe3ds2Fingerprint stripe3ds2Fingerprint = Stripe3ds2Fingerprint.create(sdkData);
-        assertEquals("src_1ExkUeAWhjPjYwPiLWUvXrSA",
-                stripe3ds2Fingerprint.source);
+        assertEquals("src_1ExkUeAWhjPjYwPiLWUvXrSA", stripe3ds2Fingerprint.getSource());
         assertEquals(Stripe3ds2Fingerprint.DirectoryServer.Mastercard,
-                stripe3ds2Fingerprint.directoryServer);
+                stripe3ds2Fingerprint.getDirectoryServer());
         assertEquals("34b16ea1-1206-4ee8-84d2-d292bc73c2ae",
-                stripe3ds2Fingerprint.serverTransactionId);
+                stripe3ds2Fingerprint.getServerTransactionId());
 
-        assertNotNull(stripe3ds2Fingerprint.directoryServerEncryption);
-        assertEquals(Stripe3ds2Fingerprint.DirectoryServer.Mastercard.id,
-                stripe3ds2Fingerprint.directoryServerEncryption.directoryServerId);
-        assertNotNull(stripe3ds2Fingerprint.directoryServerEncryption.directoryServerPublicKey);
+        final Stripe3ds2Fingerprint.DirectoryServerEncryption directoryServerEncryption =
+                stripe3ds2Fingerprint.getDirectoryServerEncryption();
+        assertNotNull(stripe3ds2Fingerprint.getDirectoryServerEncryption());
+        assertEquals(Stripe3ds2Fingerprint.DirectoryServer.Mastercard.getId(),
+                directoryServerEncryption.getDirectoryServerId());
+        assertNotNull(directoryServerEncryption.getDirectoryServerPublicKey());
         assertEquals("7c4debe3f4af7f9d1569a2ffea4343c2566826ee",
-                stripe3ds2Fingerprint.directoryServerEncryption.keyId);
-        assertEquals(1,
-                stripe3ds2Fingerprint.directoryServerEncryption.rootCerts.size());
+                directoryServerEncryption.getKeyId());
+        assertEquals(1, directoryServerEncryption.getRootCerts().size());
     }
 
     @Test
@@ -84,20 +84,19 @@ public class Stripe3ds2FingerprintTest {
                 .getStripeSdkData();
         assertNotNull(sdkData);
         final Stripe3ds2Fingerprint stripe3ds2Fingerprint = Stripe3ds2Fingerprint.create(sdkData);
-        assertEquals("src_1EceOlCRMbs6FrXf2hqrI1g5",
-                stripe3ds2Fingerprint.source);
+        assertEquals("src_1EceOlCRMbs6FrXf2hqrI1g5", stripe3ds2Fingerprint.getSource());
         assertEquals(Stripe3ds2Fingerprint.DirectoryServer.Amex,
-                stripe3ds2Fingerprint.directoryServer);
+                stripe3ds2Fingerprint.getDirectoryServer());
         assertEquals("e64bb72f-60ac-4845-b8b6-47cfdb0f73aa",
-                stripe3ds2Fingerprint.serverTransactionId);
+                stripe3ds2Fingerprint.getServerTransactionId());
 
-        assertNotNull(stripe3ds2Fingerprint.directoryServerEncryption);
-        assertEquals(Stripe3ds2Fingerprint.DirectoryServer.Amex.id,
-                stripe3ds2Fingerprint.directoryServerEncryption.directoryServerId);
+        assertNotNull(stripe3ds2Fingerprint.getDirectoryServerEncryption());
+        assertEquals(Stripe3ds2Fingerprint.DirectoryServer.Amex.getId(),
+                stripe3ds2Fingerprint.getDirectoryServerEncryption().getDirectoryServerId());
         assertEquals(DS_RSA_PUBLIC_KEY,
-                stripe3ds2Fingerprint.directoryServerEncryption.directoryServerPublicKey);
+                stripe3ds2Fingerprint.getDirectoryServerEncryption().getDirectoryServerPublicKey());
         assertEquals("7c4debe3f4af7f9d1569a2ffea4343c2566826ee",
-                stripe3ds2Fingerprint.directoryServerEncryption.keyId);
+                stripe3ds2Fingerprint.getDirectoryServerEncryption().getKeyId());
     }
 
     @Test
@@ -116,11 +115,11 @@ public class Stripe3ds2FingerprintTest {
     }
 
     @NonNull
-    private static X509Certificate generateCertificate(@NonNull String certificate) {
+    private static X509Certificate generateCertificate(@NonNull String certificateData) {
         try {
             final CertificateFactory factory = CertificateFactory.getInstance("X.509");
             return (X509Certificate) factory
-                    .generateCertificate(new ByteArrayInputStream(certificate.getBytes()));
+                    .generateCertificate(new ByteArrayInputStream(certificateData.getBytes()));
         } catch (CertificateException e) {
             throw new RuntimeException(e);
         }

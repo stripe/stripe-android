@@ -1403,7 +1403,7 @@ public class StripeTest {
         return new Stripe(
                 stripeRepository,
                 new StripeNetworkUtils(mContext),
-                new PaymentController(mContext, stripeRepository),
+                PaymentController.create(mContext, stripeRepository),
                 publishableKey,
                 null
         );
@@ -1416,7 +1416,7 @@ public class StripeTest {
         return new Stripe(
                 stripeRepository,
                 new StripeNetworkUtils(mContext),
-                new PaymentController(mContext, stripeRepository),
+                PaymentController.create(mContext, stripeRepository),
                 NON_LOGGING_PK,
                 null,
                 tokenCreator

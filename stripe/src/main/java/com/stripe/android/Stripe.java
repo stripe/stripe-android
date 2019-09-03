@@ -122,7 +122,7 @@ public class Stripe {
         this(
                 stripeRepository,
                 stripeNetworkUtils,
-                new PaymentController(context.getApplicationContext(), stripeRepository),
+                PaymentController.create(context.getApplicationContext(), stripeRepository),
                 publishableKey,
                 stripeAccountId
         );
