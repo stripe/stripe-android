@@ -5,10 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import com.stripe.android.CustomerSession;
 import com.stripe.android.PaymentSessionData;
@@ -19,6 +22,7 @@ import com.stripe.android.model.ShippingMethod;
 import java.util.List;
 
 import static com.stripe.android.CustomerSession.EVENT_SHIPPING_INFO_SAVED;
+import static com.stripe.android.CustomerSession.getInstance;
 import static com.stripe.android.PaymentSession.PAYMENT_SESSION_DATA_KEY;
 import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
 
@@ -47,8 +51,9 @@ public class PaymentFlowActivity extends StripeActivity {
         final PaymentFlowActivityStarter.Args args =
                 PaymentFlowActivityStarter.Args.create(getIntent());
 
-        CustomerSession.getInstance().addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
-        CustomerSession.getInstance().addProductUsageTokenIfValid(TOKEN_PAYMENT_FLOW_ACTIVITY);
+        final CustomerSession customerSession = getInstance();
+        customerSession.addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION);
+        customerSession.addProductUsageTokenIfValid(TOKEN_PAYMENT_FLOW_ACTIVITY);
         getViewStub().setLayoutResource(R.layout.activity_shipping_flow);
         getViewStub().inflate();
         mViewPager = findViewById(R.id.shipping_flow_viewpager);
@@ -60,7 +65,7 @@ public class PaymentFlowActivity extends StripeActivity {
         }
 
         mPaymentFlowPagerAdapter =
-                new PaymentFlowPagerAdapter(this, args.paymentSessionConfig);
+                new PaymentFlowPagerAdapter(this, args.paymentSessionConfig, customerSession);
         mViewPager.setAdapter(mPaymentFlowPagerAdapter);
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -167,12 +172,24 @@ public class PaymentFlowActivity extends StripeActivity {
     }
 
     private void onShippingInfoSubmitted() {
+        hideKeyboard();
+
         final ShippingInfoWidget shippingInfoWidget = findViewById(R.id.shipping_info_widget);
         final ShippingInformation shippingInformation = shippingInfoWidget.getShippingInformation();
         if (shippingInformation != null) {
             mShippingInformationSubmitted = shippingInformation;
             setCommunicatingProgress(true);
             broadcastShippingInfoSubmitted(shippingInformation);
+        }
+    }
+
+    private void hideKeyboard() {
+        final InputMethodManager inputMethodManager =
+                (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (inputMethodManager.isAcceptingText()) {
+            final View currentFocus = getCurrentFocus();
+            final IBinder windowToken = currentFocus != null ? currentFocus.getWindowToken() : null;
+            inputMethodManager.hideSoftInputFromWindow(windowToken, 0);
         }
     }
 

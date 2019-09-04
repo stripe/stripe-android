@@ -13,7 +13,8 @@ import java.util.ArrayList
 
 internal class PaymentFlowPagerAdapter(
     private val context: Context,
-    private val paymentSessionConfig: PaymentSessionConfig
+    private val paymentSessionConfig: PaymentSessionConfig,
+    private val customerSession: CustomerSession
 ) : PagerAdapter() {
     private val pages: MutableList<PaymentFlowPagerEnum>
 
@@ -64,7 +65,7 @@ internal class PaymentFlowPagerAdapter(
         val layout = inflater
             .inflate(paymentFlowPagerEnum.layoutResId, collection, false) as ViewGroup
         if (paymentFlowPagerEnum == PaymentFlowPagerEnum.SHIPPING_METHOD) {
-            CustomerSession.getInstance()
+            customerSession
                 .addProductUsageTokenIfValid(PaymentFlowActivity.TOKEN_SHIPPING_METHOD_SCREEN)
             val selectShippingMethodWidget =
                 layout.findViewById<SelectShippingMethodWidget>(R.id.select_shipping_method_widget)
@@ -72,7 +73,7 @@ internal class PaymentFlowPagerAdapter(
                 .setShippingMethods(validShippingMethods, defaultShippingMethod)
         }
         if (paymentFlowPagerEnum == PaymentFlowPagerEnum.SHIPPING_INFO) {
-            CustomerSession.getInstance()
+            customerSession
                 .addProductUsageTokenIfValid(PaymentFlowActivity.TOKEN_SHIPPING_INFO_SCREEN)
             val shippingInfoWidget =
                 layout.findViewById<ShippingInfoWidget>(R.id.shipping_info_widget)
