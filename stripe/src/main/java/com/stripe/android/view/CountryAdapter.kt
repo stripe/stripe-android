@@ -16,7 +16,7 @@ import java.util.Locale
 internal class CountryAdapter(
     context: Context,
     private val initialCountries: List<String>
-) : ArrayAdapter<String>(context, R.layout.menu_text_view) {
+) : ArrayAdapter<String>(context, R.layout.country_text_view) {
     private val countryFilter: Filter = createFilter()
     private var suggestions: List<String>? = initialCountries
 
@@ -38,7 +38,7 @@ internal class CountryAdapter(
             view
         } else {
             val countryText = LayoutInflater.from(context).inflate(
-                R.layout.menu_text_view, viewGroup, false) as TextView
+                R.layout.country_text_view, viewGroup, false) as TextView
             countryText.text = getItem(i)
             countryText
         }

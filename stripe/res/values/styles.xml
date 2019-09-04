@@ -5,8 +5,8 @@
         <item name="colorControlNormal">@color/control_normal_color_default</item>
         <item name="colorPrimary">@color/toolbar_color_default</item>
         <item name="colorPrimaryDark">@color/toolbar_color_default_dark</item>
-        <item name="titleTextColor">@android:color/white</item>
-        <item name="android:textColorSecondary">@android:color/secondary_text_light</item>
+        <item name="titleTextColor">@color/title_text_color</item>
+        <item name="android:textColorSecondary">@color/text_color_secondary</item>
     </style>
 
     <style name="StripeToolBarStyle" parent="@style/ThemeOverlay.AppCompat">
