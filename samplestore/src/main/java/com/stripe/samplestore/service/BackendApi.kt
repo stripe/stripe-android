@@ -10,7 +10,7 @@ import retrofit2.http.POST
 /**
  * The [retrofit2.Retrofit] interface that creates our API service.
  */
-interface StripeService {
+interface BackendApi {
 
     /**
      * Returns the PaymentIntent client secret in the format shown below.

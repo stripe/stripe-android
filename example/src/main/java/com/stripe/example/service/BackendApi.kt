@@ -9,7 +9,7 @@ import retrofit2.http.POST
 /**
  * A Retrofit service used to communicate with a server.
  */
-interface StripeService {
+interface BackendApi {
 
     @FormUrlEncoded
     @POST("ephemeral_keys")

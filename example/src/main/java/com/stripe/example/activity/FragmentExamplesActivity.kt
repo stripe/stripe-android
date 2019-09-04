@@ -28,7 +28,7 @@ import com.stripe.android.view.ShippingInfoWidget
 import com.stripe.example.R
 import com.stripe.example.module.RetrofitFactory
 import com.stripe.example.service.ExampleEphemeralKeyProvider
-import com.stripe.example.service.StripeService
+import com.stripe.example.service.BackendApi
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -61,7 +61,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
 
         private lateinit var stripe: Stripe
         private lateinit var paymentSession: PaymentSession
-        private lateinit var stripeService: StripeService
+        private lateinit var backendApi: BackendApi
 
         private lateinit var progressBar: ProgressBar
         private lateinit var launchPaymentSessionButton: Button
@@ -72,7 +72,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
         override fun onActivityCreated(savedInstanceState: Bundle?) {
             super.onActivityCreated(savedInstanceState)
 
-            stripeService = RetrofitFactory.instance.create(StripeService::class.java)
+            backendApi = RetrofitFactory.instance.create(BackendApi::class.java)
             stripe = Stripe(requireContext(), PaymentConfiguration.getInstance().publishableKey)
             paymentSession = createPaymentSession(createCustomerSession())
 
@@ -147,7 +147,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
 
         private fun createPaymentIntent() {
             compositeDisposable.add(
-                stripeService.createPaymentIntent(createPaymentIntentParams())
+                backendApi.createPaymentIntent(createPaymentIntentParams())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnSubscribe {
@@ -160,7 +160,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
 
         private fun createSetupIntent() {
             compositeDisposable.add(
-                stripeService.createSetupIntent(HashMap(0))
+                backendApi.createSetupIntent(HashMap(0))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnSubscribe {

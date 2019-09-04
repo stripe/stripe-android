@@ -14,8 +14,8 @@ class SampleStoreEphemeralKeyProvider @JvmOverloads constructor(
 ) : EphemeralKeyProvider {
 
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
-    private val stripeService: StripeService =
-        RetrofitFactory.instance.create(StripeService::class.java)
+    private val backendApi: BackendApi =
+        RetrofitFactory.instance.create(BackendApi::class.java)
 
     override fun createEphemeralKey(
         @Size(min = 4) apiVersion: String,
@@ -26,7 +26,7 @@ class SampleStoreEphemeralKeyProvider @JvmOverloads constructor(
             params["stripe_account"] = stripeAccountId
         }
 
-        compositeDisposable.add(stripeService.createEphemeralKey(params)
+        compositeDisposable.add(backendApi.createEphemeralKey(params)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { response ->

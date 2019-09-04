@@ -42,7 +42,7 @@ import com.stripe.android.view.PaymentFlowExtras.EXTRA_DEFAULT_SHIPPING_METHOD
 import com.stripe.android.view.PaymentFlowExtras.EXTRA_IS_SHIPPING_INFO_VALID
 import com.stripe.android.view.PaymentFlowExtras.EXTRA_SHIPPING_INFO_DATA
 import com.stripe.android.view.PaymentFlowExtras.EXTRA_VALID_SHIPPING_METHODS
-import com.stripe.samplestore.service.StripeService
+import com.stripe.samplestore.service.BackendApi
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -70,7 +70,7 @@ class PaymentActivity : AppCompatActivity() {
 
     private lateinit var stripe: Stripe
     private lateinit var paymentSession: PaymentSession
-    private lateinit var service: StripeService
+    private lateinit var service: BackendApi
 
     private lateinit var storeCart: StoreCart
     private var shippingCosts = 0L
@@ -114,7 +114,7 @@ class PaymentActivity : AppCompatActivity() {
             Stripe(this, PaymentConfiguration.getInstance().publishableKey)
         }
 
-        service = RetrofitFactory.instance.create(StripeService::class.java)
+        service = RetrofitFactory.instance.create(BackendApi::class.java)
 
         val extras = intent.extras
         storeCart = extras?.getParcelable(EXTRA_CART)!!
