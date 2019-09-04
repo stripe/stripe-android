@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 10.4.3 - 2019-09-04
+* [#1471](https://github.com/stripe/stripe-android/pull/1471) Fix issue with `CardUtils` visibility
+
 ## 10.4.2 - 2019-08-30
 * [#1461](https://github.com/stripe/stripe-android/pull/1461) Fix crash in `PaymentAuthWebView`
 * [#1462](https://github.com/stripe/stripe-android/pull/1462) Animate selections in `PaymentMethodsActivity`
