@@ -2,7 +2,8 @@
 
 **Contents**
 1. [Setup](#setup)
-2. [Licenses](#licenses)
+2. [Demo](#demo)
+3. [Licenses](#licenses)
 
 ## Setup
 
@@ -40,6 +41,9 @@
    ```
    const val BASE_URL = "https://my-example-app.herokuapp.com"
    ```
+
+## Demo
+<img width="320" height="658" src="https://raw.githubusercontent.com/stripe/stripe-android/master/samplestore/assets/demo.gif" />
 
 ## Licenses
 - App icon from [Twemoji](https://github.com/twitter/twemoji)
