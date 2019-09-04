@@ -6,4 +6,6 @@
     <color name="color_text_unselected_primary_default">#e1e1e1</color>
     <color name="toolbar_color_default">#1f1f1f</color>
     <color name="toolbar_color_default_dark">#000000</color>
+
+    <color name="text_color_secondary">@android:color/secondary_text_dark</color>
 </resources>
