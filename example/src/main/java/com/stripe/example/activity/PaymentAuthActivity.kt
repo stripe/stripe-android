@@ -18,7 +18,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.example.R
 import com.stripe.example.Settings
 import com.stripe.example.module.RetrofitFactory
-import com.stripe.example.service.StripeService
+import com.stripe.example.service.BackendApi
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -37,7 +37,7 @@ class PaymentAuthActivity : AppCompatActivity() {
     private val compositeSubscription = CompositeDisposable()
 
     private lateinit var stripe: Stripe
-    private lateinit var stripeService: StripeService
+    private lateinit var backendApi: BackendApi
     private lateinit var statusTextView: TextView
     private lateinit var buyButton: Button
     private lateinit var setupButton: Button
@@ -63,7 +63,7 @@ class PaymentAuthActivity : AppCompatActivity() {
             statusTextView.text = savedInstanceState.getString(STATE_STATUS)
         }
 
-        stripeService = RetrofitFactory.instance.create(StripeService::class.java)
+        backendApi = RetrofitFactory.instance.create(BackendApi::class.java)
         stripe = if (stripeAccountId != null) {
             Stripe(this, PaymentConfiguration.getInstance().publishableKey, stripeAccountId)
         } else {
@@ -127,7 +127,7 @@ class PaymentAuthActivity : AppCompatActivity() {
 
     private fun createPaymentIntent(stripeAccountId: String?) {
         compositeSubscription.add(
-            stripeService.createPaymentIntent(createPaymentIntentParams(stripeAccountId))
+            backendApi.createPaymentIntent(createPaymentIntentParams(stripeAccountId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe {
@@ -141,7 +141,7 @@ class PaymentAuthActivity : AppCompatActivity() {
 
     private fun createSetupIntent() {
         compositeSubscription.add(
-            stripeService.createSetupIntent(HashMap(0))
+            backendApi.createSetupIntent(HashMap(0))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe {

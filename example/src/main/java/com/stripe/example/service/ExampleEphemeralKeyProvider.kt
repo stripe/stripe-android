@@ -16,15 +16,15 @@ import java.io.IOException
 class ExampleEphemeralKeyProvider : EphemeralKeyProvider {
 
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
-    private val stripeService: StripeService =
-            RetrofitFactory.instance.create(StripeService::class.java)
+    private val backendApi: BackendApi =
+            RetrofitFactory.instance.create(BackendApi::class.java)
 
     override fun createEphemeralKey(
         @Size(min = 4) apiVersion: String,
         keyUpdateListener: EphemeralKeyUpdateListener
     ) {
         compositeDisposable.add(
-            stripeService.createEphemeralKey(hashMapOf("api_version" to apiVersion))
+            backendApi.createEphemeralKey(hashMapOf("api_version" to apiVersion))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { responseBody ->

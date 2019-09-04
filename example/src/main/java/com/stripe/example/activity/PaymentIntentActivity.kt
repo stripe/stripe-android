@@ -20,7 +20,7 @@ import com.stripe.example.R
 import com.stripe.example.controller.ErrorDialogHandler
 import com.stripe.example.controller.ProgressDialogController
 import com.stripe.example.module.RetrofitFactory
-import com.stripe.example.service.StripeService
+import com.stripe.example.service.BackendApi
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -36,7 +36,7 @@ class PaymentIntentActivity : AppCompatActivity() {
     private val compositeDisposable = CompositeDisposable()
 
     private lateinit var stripe: Stripe
-    private lateinit var stripeService: StripeService
+    private lateinit var backendApi: BackendApi
     private lateinit var progressDialogController: ProgressDialogController
     private lateinit var errorDialogHandler: ErrorDialogHandler
     private lateinit var confirmPaymentIntent: Button
@@ -59,7 +59,7 @@ class PaymentIntentActivity : AppCompatActivity() {
         errorDialogHandler = ErrorDialogHandler(this)
         stripe = Stripe(applicationContext, PaymentConfiguration.getInstance().publishableKey)
         val retrofit = RetrofitFactory.instance
-        stripeService = retrofit.create(StripeService::class.java)
+        backendApi = retrofit.create(BackendApi::class.java)
 
         createPaymentIntent.setOnClickListener { createPaymentIntent() }
 
@@ -103,7 +103,7 @@ class PaymentIntentActivity : AppCompatActivity() {
 
     private fun createPaymentIntent() {
         val params = createPaymentIntentParams()
-        val disposable = stripeService.createPaymentIntent(params)
+        val disposable = backendApi.createPaymentIntent(params)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnSubscribe { progressDialogController.show(R.string.creating_payment_intent) }
