@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 11.0.0 - upcoming
+* [#1474](https://github.com/stripe/stripe-android/pull/1474) Fix darkmode issue with Country dropdown
+* [#1475](https://github.com/stripe/stripe-android/pull/1475) Hide keyboard after submitting on "Add an Address" screen
+* [#1478](https://github.com/stripe/stripe-android/pull/1478) Migrate to AndroidX
+* [#1479](https://github.com/stripe/stripe-android/pull/1479) Persist `PaymentConfiguration` to SharedPreferences
+* [#1480](https://github.com/stripe/stripe-android/pull/1480) Make Source immutable
+* [#1481](https://github.com/stripe/stripe-android/pull/1481) Remove `@Deprecated` methods from `StripeIntent` models
+    * Remove `PaymentIntent#getSource()`; use `PaymentIntent#getPaymentMethodId()`
+    * Remove `SetupIntent#getCustomerId()`
+    * Remove `SourceCallback`; use `ApiResultCallback<Source>`
+    * Remove `TokenCallback`; use `ApiResultCallback<Token>`
+* [#1485](https://github.com/stripe/stripe-android/pull/1485) Update 3DS2 SDK to 2.0.0
+
 ## 10.4.3 - 2019-09-04
 * [#1471](https://github.com/stripe/stripe-android/pull/1471) Fix issue with `CardUtils` visibility
 
