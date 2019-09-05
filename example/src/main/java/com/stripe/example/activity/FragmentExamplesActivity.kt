@@ -73,7 +73,10 @@ class FragmentExamplesActivity : AppCompatActivity() {
             super.onActivityCreated(savedInstanceState)
 
             backendApi = RetrofitFactory.instance.create(BackendApi::class.java)
-            stripe = Stripe(requireContext(), PaymentConfiguration.getInstance().publishableKey)
+            stripe = Stripe(
+                requireContext(),
+                PaymentConfiguration.getInstance(requireContext()).publishableKey
+            )
             paymentSession = createPaymentSession(createCustomerSession())
 
             val rootView = view!!

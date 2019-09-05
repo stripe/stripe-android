@@ -1,11 +1,14 @@
 package com.stripe.android.view;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.widget.ProgressBar;
+
+import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.ApiKeyFixtures;
 import com.stripe.android.ApiResultCallback;
@@ -59,6 +62,7 @@ import static org.robolectric.Shadows.shadowOf;
 @RunWith(RobolectricTestRunner.class)
 public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodActivity> {
 
+    private Context mContext;
     private CardMultilineWidget mCardMultilineWidget;
     private CardMultilineWidgetTest.WidgetControlGroup mWidgetControlGroup;
     private ProgressBar mProgressBar;
@@ -87,8 +91,11 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
     public void setup() {
         // The input in this test class will be invalid after 2050. Please update the test.
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
-        PaymentConfiguration.init(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
+
         MockitoAnnotations.initMocks(this);
+        mContext = ApplicationProvider.getApplicationContext();
+
+        PaymentConfiguration.init(mContext, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
         CustomerSessionTestHelper.setInstance(mCustomerSession);
     }
 
@@ -116,7 +123,7 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
                 .setIsPaymentSessionActive(true)
                 .setShouldInitCustomerSessionTokens(false)
                 .setPaymentMethodType(paymentMethodType)
-                .setPaymentConfiguration(PaymentConfiguration.getInstance())
+                .setPaymentConfiguration(PaymentConfiguration.getInstance(mContext))
                 .build());
 
         mProgressBar = mActivity.findViewById(R.id.progress_bar_as);

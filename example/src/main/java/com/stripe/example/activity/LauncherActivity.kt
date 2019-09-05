@@ -21,7 +21,7 @@ class LauncherActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_launcher)
 
-        PaymentConfiguration.init(Settings.PUBLISHABLE_KEY)
+        PaymentConfiguration.init(this, Settings.PUBLISHABLE_KEY)
 
         val examples = findViewById<RecyclerView>(R.id.examples)
         val linearLayoutManager = LinearLayoutManager(this)

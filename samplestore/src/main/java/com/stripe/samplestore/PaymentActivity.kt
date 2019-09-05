@@ -107,11 +107,11 @@ class PaymentActivity : AppCompatActivity() {
                 .build())
             .build())
 
+        val publishableKey = PaymentConfiguration.getInstance(this).publishableKey
         stripe = if (Settings.STRIPE_ACCOUNT_ID != null) {
-            Stripe(this, PaymentConfiguration.getInstance().publishableKey,
-                    Settings.STRIPE_ACCOUNT_ID)
+            Stripe(this, publishableKey, Settings.STRIPE_ACCOUNT_ID)
         } else {
-            Stripe(this, PaymentConfiguration.getInstance().publishableKey)
+            Stripe(this, publishableKey)
         }
 
         service = RetrofitFactory.instance.create(BackendApi::class.java)
