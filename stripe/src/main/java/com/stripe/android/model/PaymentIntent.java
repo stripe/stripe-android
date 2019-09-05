@@ -49,7 +49,6 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
     private static final String FIELD_PAYMENT_METHOD_ID = "payment_method_id";
     private static final String FIELD_PAYMENT_METHOD_TYPES = "payment_method_types";
     private static final String FIELD_RECEIPT_EMAIL = "receipt_email";
-    private static final String FIELD_SOURCE = "source";
     private static final String FIELD_STATUS = "status";
     private static final String FIELD_SETUP_FUTURE_USAGE = "setup_future_usage";
 
@@ -72,7 +71,6 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
     @Nullable private final NextActionType mNextActionType;
     @Nullable private final String mPaymentMethodId;
     @Nullable private final String mReceiptEmail;
-    @Nullable private final String mSource;
     @Nullable private final Status mStatus;
     @Nullable private final Usage mSetupFutureUsage;
     @Nullable private final Error mLastPaymentError;
@@ -292,15 +290,6 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
     }
 
     /**
-     * @deprecated use {@link #getPaymentMethodId()}
-     */
-    @Deprecated
-    @Nullable
-    public String getSource() {
-        return mSource;
-    }
-
-    /**
      * @return Status of this PaymentIntent.
      */
     @Nullable
@@ -333,7 +322,6 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
             @Nullable Map<String, Object> nextAction,
             @Nullable String paymentMethodId,
             @Nullable String receiptEmail,
-            @Nullable String source,
             @Nullable Status status,
             @Nullable Usage setupFutureUsage,
             @Nullable Error lastPaymentError) {
@@ -353,7 +341,6 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
         mNextAction = nextAction;
         mPaymentMethodId = paymentMethodId;
         mReceiptEmail = receiptEmail;
-        mSource = source;
         mStatus = status;
         mSetupFutureUsage = setupFutureUsage;
         mNextActionType = mNextAction != null ?
@@ -403,7 +390,6 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
         final Usage setupFutureUsage =
                 Usage.fromCode(optString(jsonObject, FIELD_SETUP_FUTURE_USAGE));
         final Map<String, Object> nextAction = optMap(jsonObject, FIELD_NEXT_ACTION);
-        final String source = optString(jsonObject, FIELD_SOURCE);
         final Error lastPaymentError =
                 Error.fromJson(jsonObject.optJSONObject(FIELD_LAST_PAYMENT_ERROR));
 
@@ -424,7 +410,6 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
                 nextAction,
                 paymentMethodId,
                 receiptEmail,
-                source,
                 status,
                 setupFutureUsage,
                 lastPaymentError
@@ -451,7 +436,6 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
                 && ObjectUtils.equals(mLiveMode, paymentIntent.mLiveMode)
                 && ObjectUtils.equals(mPaymentMethodId, paymentIntent.mPaymentMethodId)
                 && ObjectUtils.equals(mReceiptEmail, paymentIntent.mReceiptEmail)
-                && ObjectUtils.equals(mSource, paymentIntent.mSource)
                 && ObjectUtils.equals(mStatus, paymentIntent.mStatus)
                 && ObjectUtils.equals(mSetupFutureUsage, paymentIntent.mSetupFutureUsage)
                 && ObjectUtils.equals(mPaymentMethodTypes, paymentIntent.mPaymentMethodTypes)
@@ -464,7 +448,7 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
     public int hashCode() {
         return ObjectUtils.hash(mId, mObjectType, mAmount, mCanceledAt, mCancellationReason,
                 mCaptureMethod, mClientSecret, mConfirmationMethod, mCreated, mCurrency,
-                mDescription, mLiveMode, mReceiptEmail, mSource, mStatus, mPaymentMethodTypes,
+                mDescription, mLiveMode, mReceiptEmail, mStatus, mPaymentMethodTypes,
                 mNextAction, mNextActionType, mPaymentMethodId, mSetupFutureUsage,
                 mLastPaymentError);
     }

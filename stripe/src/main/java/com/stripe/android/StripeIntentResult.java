@@ -25,12 +25,10 @@ import java.util.Objects;
 public abstract class StripeIntentResult<T extends StripeIntent> {
     @NonNull private final T mStripeIntent;
     @Outcome private final int mOutcome;
-    @Status private final int mStatus;
 
-    StripeIntentResult(@NonNull T stripeIntent, @Status int outcome) {
+    StripeIntentResult(@NonNull T stripeIntent, @Outcome int outcome) {
         mStripeIntent = stripeIntent;
         mOutcome = determineOutcome(Objects.requireNonNull(stripeIntent.getStatus()), outcome);
-        mStatus = mOutcome;
     }
 
     @StripeIntentResult.Outcome
@@ -70,15 +68,6 @@ public abstract class StripeIntentResult<T extends StripeIntent> {
         return mOutcome;
     }
 
-    /**
-     * @deprecated use {@link #getOutcome()}
-     */
-    @Deprecated
-    @Status
-    public final int getStatus() {
-        return mStatus;
-    }
-
     @Override
     public final boolean equals(@Nullable Object obj) {
         return this == obj || (obj instanceof StripeIntentResult &&
@@ -102,36 +91,6 @@ public abstract class StripeIntentResult<T extends StripeIntent> {
     @IntDef({Outcome.UNKNOWN, Outcome.SUCCEEDED, Outcome.FAILED, Outcome.CANCELED,
             Outcome.TIMEDOUT})
     public @interface Outcome {
-        int UNKNOWN = 0;
-
-        /**
-         * Confirmation or payment authentication succeeded
-         */
-        int SUCCEEDED = 1;
-
-        /**
-         * Confirm or payment authentication failed
-         */
-        int FAILED = 2;
-
-        /**
-         * Payment authentication was canceled by the user
-         */
-        int CANCELED = 3;
-
-        /**
-         * Payment authentication timed-out
-         */
-        int TIMEDOUT = 4;
-    }
-
-    /**
-     * @deprecated use {@link Outcome}
-     */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({Status.UNKNOWN, Status.SUCCEEDED, Status.FAILED, Status.CANCELED, Status.TIMEDOUT})
-    @Deprecated
-    public @interface Status {
         int UNKNOWN = 0;
 
         /**
