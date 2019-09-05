@@ -1,6 +1,6 @@
 package com.stripe.android.model;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.util.Objects;
 

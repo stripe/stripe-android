@@ -1,21 +1,21 @@
 package com.stripe.android.model;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.Size;
-import android.support.annotation.StringDef;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.Size;
+import androidx.annotation.StringDef;
 
 import com.stripe.android.StripeTextUtils;
 import com.stripe.android.utils.ObjectUtils;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Model class representing a bank account that can be used to create a token

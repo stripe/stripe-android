@@ -2,7 +2,7 @@ package com.stripe.android
 
 import android.os.Handler
 import android.os.HandlerThread
-import android.support.annotation.VisibleForTesting
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.InvalidRequestException
 import java.io.Closeable

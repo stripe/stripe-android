@@ -1,6 +1,6 @@
 package com.stripe.example.controller
 
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 
 import com.stripe.example.R
 import com.stripe.example.dialog.ErrorDialogFragment

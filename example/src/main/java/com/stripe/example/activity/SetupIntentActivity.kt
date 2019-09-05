@@ -2,11 +2,11 @@ package com.stripe.example.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SetupIntentResult
@@ -62,7 +62,7 @@ class SetupIntentActivity : AppCompatActivity() {
         errorDialogHandler = ErrorDialogHandler(this)
 
         stripe = Stripe(this,
-            PaymentConfiguration.getInstance().publishableKey)
+            PaymentConfiguration.getInstance(this).publishableKey)
         val retrofit = RetrofitFactory.instance
         backendApi = retrofit.create(BackendApi::class.java)
 

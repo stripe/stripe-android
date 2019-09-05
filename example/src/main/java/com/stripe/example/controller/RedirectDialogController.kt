@@ -3,7 +3,7 @@ package com.stripe.example.controller
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
-import android.support.v7.app.AlertDialog
+import androidx.appcompat.app.AlertDialog
 
 import com.stripe.android.model.Card
 import com.stripe.example.R

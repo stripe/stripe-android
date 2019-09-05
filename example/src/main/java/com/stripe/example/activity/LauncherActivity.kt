@@ -3,14 +3,12 @@ package com.stripe.example.activity
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.PaymentConfiguration
 import com.stripe.example.R
 import com.stripe.example.Settings
@@ -21,11 +19,11 @@ class LauncherActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_launcher)
 
-        PaymentConfiguration.init(Settings.PUBLISHABLE_KEY)
+        PaymentConfiguration.init(this, Settings.PUBLISHABLE_KEY)
 
-        val examples = findViewById<RecyclerView>(R.id.examples)
-        val linearLayoutManager = LinearLayoutManager(this)
-        linearLayoutManager.orientation = LinearLayoutManager.VERTICAL
+        val examples = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.examples)
+        val linearLayoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
+        linearLayoutManager.orientation = androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
         examples.setHasFixedSize(true)
         examples.layoutManager = linearLayoutManager
         examples.adapter = ExamplesAdapter(this)
@@ -33,7 +31,7 @@ class LauncherActivity : AppCompatActivity() {
 
     private class ExamplesAdapter constructor(
         private val activity: Activity
-    ) : RecyclerView.Adapter<ExamplesAdapter.ExamplesViewHolder>() {
+    ) : androidx.recyclerview.widget.RecyclerView.Adapter<ExamplesAdapter.ExamplesViewHolder>() {
         private val items = listOf(
             Item(activity.getString(R.string.launch_payment_intent_example),
                 PaymentIntentActivity::class.java),
@@ -78,6 +76,6 @@ class LauncherActivity : AppCompatActivity() {
 
         private class ExamplesViewHolder constructor(
             itemView: View
-        ) : RecyclerView.ViewHolder(itemView)
+        ) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView)
     }
 }

@@ -1,14 +1,14 @@
 package com.stripe.android.view
 
 import android.content.Context
-import android.support.annotation.VisibleForTesting
-import android.support.v4.os.ConfigurationCompat
 import android.util.AttributeSet
 import android.view.View
 import android.view.View.OnFocusChangeListener
 import android.widget.AdapterView
 import android.widget.AutoCompleteTextView
 import android.widget.FrameLayout
+import androidx.annotation.VisibleForTesting
+import androidx.core.os.ConfigurationCompat
 import com.stripe.android.R
 import java.util.Locale
 

@@ -1,7 +1,7 @@
 package com.stripe.example.activity
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.PaymentConfiguration
 import com.stripe.example.R
 import com.stripe.example.module.DependencyHandler
@@ -18,7 +18,7 @@ class CardTokenActivity : AppCompatActivity() {
             this,
             findViewById(R.id.card_input_widget),
             findViewById(R.id.listview),
-            PaymentConfiguration.getInstance().publishableKey
+            PaymentConfiguration.getInstance(this).publishableKey
         )
 
         dependencyHandler.attachAsyncTaskTokenController(findViewById(R.id.save))

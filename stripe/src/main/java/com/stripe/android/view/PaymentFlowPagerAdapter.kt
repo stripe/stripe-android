@@ -1,10 +1,10 @@
 package com.stripe.android.view
 
 import android.content.Context
-import android.support.v4.view.PagerAdapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.viewpager.widget.PagerAdapter
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSessionConfig
 import com.stripe.android.R

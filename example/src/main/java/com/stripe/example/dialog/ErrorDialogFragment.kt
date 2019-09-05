@@ -3,11 +3,9 @@ package com.stripe.example.dialog
 import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
-
 import com.stripe.example.R
 
-class ErrorDialogFragment : DialogFragment() {
+class ErrorDialogFragment : androidx.fragment.app.DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val title = arguments!!.getString("title")

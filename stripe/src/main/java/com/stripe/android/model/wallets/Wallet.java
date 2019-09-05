@@ -2,16 +2,17 @@ package com.stripe.android.model.wallets;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.stripe.android.ObjectBuilder;
 import com.stripe.android.model.StripeModel;
 import com.stripe.android.utils.ObjectUtils;
 
-import org.json.JSONObject;
-
 import java.util.Objects;
+
+import org.json.JSONObject;
 
 import static com.stripe.android.model.StripeJsonUtils.optString;
 

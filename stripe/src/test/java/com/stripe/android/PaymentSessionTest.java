@@ -3,8 +3,8 @@ package com.stripe.android;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 
+import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.model.Customer;
@@ -87,7 +87,9 @@ public class PaymentSessionTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        PaymentConfiguration.init(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
+        PaymentConfiguration.init(ApplicationProvider.getApplicationContext(),
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
+
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) {
@@ -341,8 +343,8 @@ public class PaymentSessionTest {
 
     @NonNull
     private PaymentSession createPaymentSession() {
-        return new PaymentSession(mCustomerSession, mPaymentMethodsActivityStarter,
-                mPaymentFlowActivityStarter, mPaymentSessionData,
+        return new PaymentSession(ApplicationProvider.getApplicationContext(), mCustomerSession,
+                mPaymentMethodsActivityStarter, mPaymentFlowActivityStarter, mPaymentSessionData,
                 mPaymentSessionPrefs);
     }
 

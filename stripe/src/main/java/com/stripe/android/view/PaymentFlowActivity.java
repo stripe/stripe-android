@@ -6,12 +6,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.viewpager.widget.ViewPager;
 
 import com.stripe.android.CustomerSession;
 import com.stripe.android.PaymentSessionData;
@@ -25,6 +26,7 @@ import static com.stripe.android.CustomerSession.EVENT_SHIPPING_INFO_SAVED;
 import static com.stripe.android.CustomerSession.getInstance;
 import static com.stripe.android.PaymentSession.PAYMENT_SESSION_DATA_KEY;
 import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
+
 
 /**
  * Activity containing a two-part payment flow that allows users to provide a shipping address

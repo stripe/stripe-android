@@ -1,6 +1,6 @@
 package com.stripe.android.model
 
-import android.support.annotation.VisibleForTesting
+import androidx.annotation.VisibleForTesting
 import java.io.ByteArrayInputStream
 import java.security.PublicKey
 import java.security.cert.CertificateException

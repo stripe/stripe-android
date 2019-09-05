@@ -4,12 +4,13 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
-import android.support.annotation.VisibleForTesting;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.annotation.VisibleForTesting;
 
 import com.stripe.android.ApiResultCallback;
 import com.stripe.android.CustomerSession;
@@ -55,7 +56,7 @@ public class AddPaymentMethodActivity extends StripeActivity {
         if (args.paymentConfiguration != null) {
             paymentConfiguration = args.paymentConfiguration;
         } else {
-            paymentConfiguration = PaymentConfiguration.getInstance();
+            paymentConfiguration = PaymentConfiguration.getInstance(this);
         }
         mStripe = new Stripe(getApplicationContext(), paymentConfiguration.getPublishableKey());
         mPaymentMethodType = args.paymentMethodType;

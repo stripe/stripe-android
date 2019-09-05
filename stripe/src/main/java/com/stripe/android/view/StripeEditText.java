@@ -3,14 +3,6 @@ package com.stripe.android.view;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.Handler;
-import android.support.annotation.ColorInt;
-import android.support.annotation.ColorRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
-import android.support.design.widget.TextInputEditText;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.AppCompatEditText;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
@@ -20,6 +12,15 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionWrapper;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.ColorRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.appcompat.widget.AppCompatEditText;
+import androidx.core.content.ContextCompat;
+
+import com.google.android.material.textfield.TextInputEditText;
 import com.stripe.android.R;
 
 import static com.stripe.android.view.ViewUtils.isColorDark;
@@ -49,7 +50,7 @@ public class StripeEditText extends AppCompatEditText {
     }
 
     public StripeEditText(@NonNull Context context, @Nullable AttributeSet attrs) {
-        this(context, attrs, android.support.v7.appcompat.R.attr.editTextStyle);
+        this(context, attrs, androidx.appcompat.R.attr.editTextStyle);
     }
 
     public StripeEditText(@NonNull Context context, @Nullable AttributeSet attrs,

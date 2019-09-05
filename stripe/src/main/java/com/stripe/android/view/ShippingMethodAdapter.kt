@@ -1,6 +1,5 @@
 package com.stripe.android.view
 
-import android.support.v7.widget.RecyclerView
 import android.view.ViewGroup
 import com.stripe.android.model.ShippingMethod
 import java.util.ArrayList
@@ -8,7 +7,7 @@ import java.util.ArrayList
 /**
  * Adapter that populates a list with shipping methods
  */
-internal class ShippingMethodAdapter : RecyclerView.Adapter<ShippingMethodAdapter.ViewHolder>() {
+internal class ShippingMethodAdapter : androidx.recyclerview.widget.RecyclerView.Adapter<ShippingMethodAdapter.ViewHolder>() {
 
     private var shippingMethods: List<ShippingMethod> = ArrayList()
     private var selectedIndex = 0
@@ -52,7 +51,7 @@ internal class ShippingMethodAdapter : RecyclerView.Adapter<ShippingMethodAdapte
     internal class ViewHolder constructor(
         private val shippingMethodView: ShippingMethodView,
         adapter: ShippingMethodAdapter
-    ) : RecyclerView.ViewHolder(shippingMethodView) {
+    ) : androidx.recyclerview.widget.RecyclerView.ViewHolder(shippingMethodView) {
 
         init {
             shippingMethodView.setOnClickListener {

@@ -1,6 +1,6 @@
 package com.stripe.example.service
 
-import android.support.annotation.Size
+import androidx.annotation.Size
 import com.stripe.android.EphemeralKeyProvider
 import com.stripe.android.EphemeralKeyUpdateListener
 import com.stripe.example.module.RetrofitFactory

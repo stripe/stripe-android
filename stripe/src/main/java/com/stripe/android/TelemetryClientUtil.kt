@@ -3,8 +3,8 @@ package com.stripe.android
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import android.support.annotation.VisibleForTesting
 import android.util.DisplayMetrics
+import androidx.annotation.VisibleForTesting
 import java.math.BigDecimal
 import java.math.MathContext
 import java.util.Locale

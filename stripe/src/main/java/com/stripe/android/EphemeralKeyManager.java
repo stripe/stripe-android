@@ -1,15 +1,15 @@
 package com.stripe.android;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.net.HttpURLConnection;
 import java.util.Calendar;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 class EphemeralKeyManager<TEphemeralKey extends EphemeralKey> {
 

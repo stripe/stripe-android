@@ -2,15 +2,16 @@ package com.stripe.android.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.stripe.android.utils.ObjectUtils;
 
-import org.json.JSONObject;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import org.json.JSONObject;
 
 import static com.stripe.android.model.StripeJsonUtils.optString;
 

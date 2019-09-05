@@ -1,10 +1,10 @@
 package com.stripe.android.view
 
 import android.app.Activity
-import android.support.annotation.IdRes
-import android.support.annotation.LayoutRes
 import android.view.View
 import android.widget.FrameLayout
+import androidx.annotation.IdRes
+import androidx.annotation.LayoutRes
 
 internal abstract class AddPaymentMethodRowView(
     activity: Activity,

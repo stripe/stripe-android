@@ -7,12 +7,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.support.annotation.IntDef;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RestrictTo;
-import android.support.annotation.VisibleForTesting;
-import android.support.v4.content.LocalBroadcastManager;
+
+import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
+import androidx.annotation.VisibleForTesting;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Customer;
@@ -123,7 +124,7 @@ public class CustomerSession {
     /**
      * Create a CustomerSession with the provided {@link EphemeralKeyProvider}.
      *
-     * <p>You must call {@link PaymentConfiguration#init(String)} with your publishable key
+     * <p>You must call {@link PaymentConfiguration#init(Context, String)} with your publishable key
      * before calling this method.</p>
      *
      * @param context The application context
@@ -141,7 +142,7 @@ public class CustomerSession {
                                            @Nullable String stripeAccountId,
                                            boolean shouldPrefetchEphemeralKey) {
         setInstance(new CustomerSession(context, ephemeralKeyProvider, Stripe.getAppInfo(),
-                PaymentConfiguration.getInstance().getPublishableKey(),
+                PaymentConfiguration.getInstance(context).getPublishableKey(),
                 stripeAccountId, shouldPrefetchEphemeralKey));
     }
 

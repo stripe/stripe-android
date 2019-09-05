@@ -1,10 +1,13 @@
 package com.stripe.android.view;
 
+import android.content.Context;
 import android.content.Intent;
-import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
+
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.ApiKeyFixtures;
 import com.stripe.android.CustomerSession;
@@ -13,6 +16,10 @@ import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.R;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodTest;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 import org.junit.After;
 import org.junit.Before;
@@ -25,10 +32,6 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.Shadows;
 import org.robolectric.shadows.ShadowActivity;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 
 import static android.app.Activity.RESULT_OK;
 import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;
@@ -56,6 +59,7 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
     @Mock private CustomerSession mCustomerSession;
     @Captor private ArgumentCaptor<CustomerSession.PaymentMethodsRetrievalListener> mListenerArgumentCaptor;
 
+    private Context mContext;
     private PaymentMethodsActivity mPaymentMethodsActivity;
     private ProgressBar mProgressBar;
     private RecyclerView mRecyclerView;
@@ -69,12 +73,15 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+
+        mContext = ApplicationProvider.getApplicationContext();
+
         CustomerSessionTestHelper.setInstance(mCustomerSession);
-        PaymentConfiguration.init(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
+        PaymentConfiguration.init(mContext, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
 
         mPaymentMethodsActivity = createActivity(
                 new PaymentMethodsActivityStarter.Args.Builder()
-                        .setPaymentConfiguration(PaymentConfiguration.getInstance())
+                        .setPaymentConfiguration(PaymentConfiguration.getInstance(mContext))
                         .build()
         );
         mShadowActivity = Shadows.shadowOf(mPaymentMethodsActivity);
@@ -155,7 +162,7 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
     @Test
     public void onClickAddSourceView_whenStartedFromPaymentSession_launchesActivityWithLog() {
         mPaymentMethodsActivity = createActivity(new PaymentMethodsActivityStarter.Args.Builder()
-                .setPaymentConfiguration(PaymentConfiguration.getInstance())
+                .setPaymentConfiguration(PaymentConfiguration.getInstance(mContext))
                 .setIsPaymentSessionActive(true)
                 .build());
         mShadowActivity = Shadows.shadowOf(mPaymentMethodsActivity);

@@ -1,14 +1,11 @@
 package com.stripe.android.model;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringDef;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringDef;
+import androidx.annotation.VisibleForTesting;
 
 import com.stripe.android.utils.ObjectUtils;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -16,6 +13,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import static com.stripe.android.model.StripeJsonUtils.optInteger;
 import static com.stripe.android.model.StripeJsonUtils.optString;

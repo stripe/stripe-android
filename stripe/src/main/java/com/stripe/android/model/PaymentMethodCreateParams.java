@@ -1,19 +1,19 @@
 package com.stripe.android.model;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.stripe.android.ObjectBuilder;
 import com.stripe.android.Stripe;
 import com.stripe.android.utils.ObjectUtils;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Model for PaymentMethod creation parameters.

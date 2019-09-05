@@ -1,10 +1,13 @@
 package com.stripe.android;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import com.stripe.android.utils.ObjectUtils;
 
@@ -36,11 +39,22 @@ public final class PaymentConfiguration implements Parcelable {
                 }
             };
 
+    /**
+     * Attempts to load a {@link PaymentConfiguration} instance. First attempt to use the class's
+     * singleton instance. If unavailable, attempt to load from {@link Store}.
+     *
+     * @param context application context
+     * @return a {@link PaymentConfiguration} instance, or throw an exception
+     */
     @NonNull
-    public static PaymentConfiguration getInstance() {
+    public static PaymentConfiguration getInstance(@NonNull Context context) {
         if (mInstance == null) {
-            throw new IllegalStateException(
-                    "Attempted to get instance of PaymentConfiguration without initialization.");
+            final PaymentConfiguration loadedInstance = new Store(context).load();
+            if (loadedInstance != null) {
+                mInstance = loadedInstance;
+            } else {
+                throw new IllegalStateException("PaymentConfiguration was not initialized");
+            }
         }
         return mInstance;
     }
@@ -49,8 +63,9 @@ public final class PaymentConfiguration implements Parcelable {
      * A publishable key from the Dashboard's
      * <a href="https://dashboard.stripe.com/apikeys">API keys</a> page.
      */
-    public static void init(@NonNull String publishableKey) {
+    public static void init(@NonNull Context context, @NonNull String publishableKey) {
         mInstance = new PaymentConfiguration(publishableKey);
+        new Store(context).save(publishableKey);
     }
 
     @NonNull
@@ -86,5 +101,34 @@ public final class PaymentConfiguration implements Parcelable {
 
     private boolean typedEquals(@NonNull PaymentConfiguration obj) {
         return ObjectUtils.equals(mPublishableKey, obj.mPublishableKey);
+    }
+
+    /**
+     * Manages saving and loading {@link PaymentConfiguration} data to SharedPreferences.
+     */
+    private static final class Store {
+        @NonNull private final SharedPreferences mPrefs;
+        private static final String NAME = PaymentConfiguration.class.getCanonicalName();
+
+        private static final String KEY_PUBLISHABLE_KEY = "key_publishable_key";
+
+        private Store(@NonNull Context context) {
+            mPrefs = context.getApplicationContext().getSharedPreferences(NAME, 0);
+        }
+
+        private void save(@NonNull String publishableKey) {
+            mPrefs.edit()
+                    .putString(KEY_PUBLISHABLE_KEY, publishableKey)
+                    .apply();
+        }
+
+        @Nullable
+        private PaymentConfiguration load() {
+            final String publishableKey = mPrefs.getString(KEY_PUBLISHABLE_KEY, null);
+            if (publishableKey == null) {
+                return null;
+            }
+            return new PaymentConfiguration(publishableKey);
+        }
     }
 }

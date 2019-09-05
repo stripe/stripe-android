@@ -1,6 +1,6 @@
 package com.stripe.android.exception;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.stripe.android.StripeError;
 

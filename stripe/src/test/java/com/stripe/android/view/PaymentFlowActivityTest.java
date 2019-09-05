@@ -6,10 +6,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.ApiKeyFixtures;
@@ -78,7 +78,8 @@ public class PaymentFlowActivityTest extends BaseViewTest<PaymentFlowActivity> {
                 .getInstance(ApplicationProvider.getApplicationContext());
         mLocalBroadcastManager.registerReceiver(mBroadcastReceiver,
                 new IntentFilter(PaymentFlowExtras.EVENT_SHIPPING_INFO_SUBMITTED));
-        PaymentConfiguration.init(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
+        PaymentConfiguration.init(ApplicationProvider.getApplicationContext(),
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
         CustomerSession.initCustomerSession(ApplicationProvider.getApplicationContext(),
                 mEphemeralKeyProvider);
     }

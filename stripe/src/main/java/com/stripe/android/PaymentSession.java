@@ -1,13 +1,15 @@
 package com.stripe.android;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.IntRange;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
-import android.support.v4.app.Fragment;
+
+import androidx.annotation.IntRange;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+import androidx.fragment.app.Fragment;
 
 import com.stripe.android.model.Customer;
 import com.stripe.android.model.PaymentMethod;
@@ -36,6 +38,7 @@ public class PaymentSession {
     private final ActivityStarter<PaymentFlowActivity, PaymentFlowActivityStarter.Args>
             mPaymentFlowActivityStarter;
 
+    @NonNull private final Context mContext;
     @NonNull private final CustomerSession mCustomerSession;
     @NonNull private final PaymentSessionPrefs mPaymentSessionPrefs;
     private PaymentSessionData mPaymentSessionData;
@@ -51,23 +54,24 @@ public class PaymentSession {
      *                     passed back to this session.
      */
     public PaymentSession(@NonNull Activity activity) {
-        this(CustomerSession.getInstance(),
+        this(activity.getApplicationContext(),
+                CustomerSession.getInstance(),
                 new PaymentMethodsActivityStarter(activity),
                 new PaymentFlowActivityStarter(activity),
-                new PaymentSessionData(),
-                new PaymentSessionPrefs(activity));
+                new PaymentSessionData(), new PaymentSessionPrefs(activity));
     }
 
     public PaymentSession(@NonNull Fragment fragment) {
-        this(CustomerSession.getInstance(),
+        this(fragment.requireContext().getApplicationContext(),
+                CustomerSession.getInstance(),
                 new PaymentMethodsActivityStarter(fragment),
                 new PaymentFlowActivityStarter(fragment),
-                new PaymentSessionData(),
-                new PaymentSessionPrefs(fragment.requireActivity()));
+                new PaymentSessionData(), new PaymentSessionPrefs(fragment.requireActivity()));
     }
 
     @VisibleForTesting
     PaymentSession(
+            @NonNull Context context,
             @NonNull CustomerSession customerSession,
             @NonNull ActivityStarter<PaymentMethodsActivity, PaymentMethodsActivityStarter.Args>
                     paymentMethodsActivityStarter,
@@ -75,6 +79,7 @@ public class PaymentSession {
                     paymentFlowActivityStarter,
             @NonNull PaymentSessionData paymentSessionData,
             @NonNull PaymentSessionPrefs paymentSessionPrefs) {
+        mContext = context;
         mCustomerSession = customerSession;
         mPaymentMethodsActivityStarter = paymentMethodsActivityStarter;
         mPaymentFlowActivityStarter = paymentFlowActivityStarter;
@@ -288,7 +293,7 @@ public class PaymentSession {
                                 getSelectedPaymentMethodId(userSelectedPaymentMethodId))
                         .setShouldRequirePostalCode(shouldRequirePostalCode)
                         .setIsPaymentSessionActive(true)
-                        .setPaymentConfiguration(PaymentConfiguration.getInstance())
+                        .setPaymentConfiguration(PaymentConfiguration.getInstance(mContext))
                         .build()
         );
     }

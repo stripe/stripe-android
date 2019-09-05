@@ -4,13 +4,11 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.support.design.widget.FloatingActionButton
-import android.support.v7.app.AlertDialog
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
 import com.stripe.samplestore.service.SampleStoreEphemeralKeyProvider
@@ -40,15 +38,15 @@ class StoreActivity : AppCompatActivity(), StoreAdapter.TotalItemsChangedListene
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_store)
 
-        PaymentConfiguration.init(Settings.PUBLISHABLE_KEY)
+        PaymentConfiguration.init(this, Settings.PUBLISHABLE_KEY)
         goToCartButton = findViewById(R.id.fab_checkout)
         storeAdapter = StoreAdapter(this, priceMultiplier)
 
         goToCartButton.hide()
         setSupportActionBar(findViewById(R.id.my_toolbar))
 
-        val recyclerView = findViewById<RecyclerView>(R.id.rv_store_items)
-        recyclerView.layoutManager = LinearLayoutManager(this)
+        val recyclerView = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.rv_store_items)
+        recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
         recyclerView.addItemDecoration(ItemDivider(this, R.drawable.item_divider))
         recyclerView.adapter = storeAdapter
 

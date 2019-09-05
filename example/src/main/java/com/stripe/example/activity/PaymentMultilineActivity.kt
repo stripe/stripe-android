@@ -1,9 +1,9 @@
 package com.stripe.example.activity
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.widget.ListView
 import android.widget.SimpleAdapter
+import androidx.appcompat.app.AppCompatActivity
 import com.jakewharton.rxbinding2.view.RxView
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
@@ -53,8 +53,10 @@ class PaymentMultilineActivity : AppCompatActivity() {
     private fun saveCard() {
         val card = cardMultilineWidget.card ?: return
 
-        val stripe = Stripe(applicationContext,
-            PaymentConfiguration.getInstance().publishableKey)
+        val stripe = Stripe(
+            applicationContext,
+            PaymentConfiguration.getInstance(applicationContext).publishableKey
+        )
         val cardSourceParams = PaymentMethodCreateParams.create(card.toPaymentMethodParamsCard(), null)
         // Note: using this style of Observable creation results in us having a method that
         // will not be called until we subscribe to it.

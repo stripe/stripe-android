@@ -3,10 +3,10 @@ package com.stripe.example.activity
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.wallet.AutoResolveHelper
 import com.google.android.gms.wallet.IsReadyToPayRequest
@@ -36,7 +36,7 @@ class PayWithGoogleActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pay_with_google)
 
-        stripe = Stripe(this, PaymentConfiguration.getInstance().publishableKey)
+        stripe = Stripe(this, PaymentConfiguration.getInstance(this).publishableKey)
 
         paymentsClient = Wallet.getPaymentsClient(this,
             Wallet.WalletOptions.Builder()
@@ -195,7 +195,8 @@ class PayWithGoogleActivity : AppCompatActivity() {
             .put(
                 "parameters", cardPaymentMethodParams
             )
-            .put("tokenizationSpecification", GooglePayConfig().tokenizationSpecification)
+            .put("tokenizationSpecification",
+                GooglePayConfig(this).tokenizationSpecification)
 
         val paymentDataRequest = JSONObject()
             .put("apiVersion", 2)

@@ -1,6 +1,8 @@
 package com.stripe.android;
 
-import android.support.annotation.NonNull;
+import android.content.Context;
+
+import androidx.annotation.NonNull;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,8 +16,8 @@ public final class GooglePayConfig {
      * Instantiate with {@link PaymentConfiguration}. {@link PaymentConfiguration} must be
      * initialized.
      */
-    public GooglePayConfig() {
-        this(PaymentConfiguration.getInstance().getPublishableKey());
+    public GooglePayConfig(@NonNull Context context) {
+        this(PaymentConfiguration.getInstance(context).getPublishableKey());
     }
 
     public GooglePayConfig(@NonNull String publishableKey) {

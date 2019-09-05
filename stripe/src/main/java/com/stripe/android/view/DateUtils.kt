@@ -1,8 +1,8 @@
 package com.stripe.android.view
 
-import android.support.annotation.IntRange
-import android.support.annotation.Size
-import android.support.annotation.VisibleForTesting
+import androidx.annotation.IntRange
+import androidx.annotation.Size
+import androidx.annotation.VisibleForTesting
 import java.util.Calendar
 
 internal object DateUtils {
