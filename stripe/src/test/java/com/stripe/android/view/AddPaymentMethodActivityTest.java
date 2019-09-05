@@ -1,5 +1,6 @@
 package com.stripe.android.view;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -7,6 +8,7 @@ import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.ApiKeyFixtures;
 import com.stripe.android.ApiResultCallback;
@@ -22,6 +24,8 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures;
 import com.stripe.android.model.PaymentMethodFixtures;
 import com.stripe.android.model.PaymentMethodTest;
 
+import java.util.Calendar;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,8 +38,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.shadows.ShadowActivity;
-
-import java.util.Calendar;
 
 import static android.app.Activity.RESULT_OK;
 import static com.stripe.android.CustomerSession.ACTION_API_EXCEPTION;
@@ -60,6 +62,7 @@ import static org.robolectric.Shadows.shadowOf;
 @RunWith(RobolectricTestRunner.class)
 public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodActivity> {
 
+    private Context mContext;
     private CardMultilineWidget mCardMultilineWidget;
     private CardMultilineWidgetTest.WidgetControlGroup mWidgetControlGroup;
     private ProgressBar mProgressBar;
@@ -88,8 +91,11 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
     public void setup() {
         // The input in this test class will be invalid after 2050. Please update the test.
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050);
-        PaymentConfiguration.init(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
+
         MockitoAnnotations.initMocks(this);
+        mContext = ApplicationProvider.getApplicationContext();
+
+        PaymentConfiguration.init(mContext, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
         CustomerSessionTestHelper.setInstance(mCustomerSession);
     }
 
@@ -117,7 +123,7 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
                 .setIsPaymentSessionActive(true)
                 .setShouldInitCustomerSessionTokens(false)
                 .setPaymentMethodType(paymentMethodType)
-                .setPaymentConfiguration(PaymentConfiguration.getInstance())
+                .setPaymentConfiguration(PaymentConfiguration.getInstance(mContext))
                 .build());
 
         mProgressBar = mActivity.findViewById(R.id.progress_bar_as);

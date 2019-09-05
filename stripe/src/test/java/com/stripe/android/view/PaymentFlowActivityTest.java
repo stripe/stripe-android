@@ -78,7 +78,8 @@ public class PaymentFlowActivityTest extends BaseViewTest<PaymentFlowActivity> {
                 .getInstance(ApplicationProvider.getApplicationContext());
         mLocalBroadcastManager.registerReceiver(mBroadcastReceiver,
                 new IntentFilter(PaymentFlowExtras.EVENT_SHIPPING_INFO_SUBMITTED));
-        PaymentConfiguration.init(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
+        PaymentConfiguration.init(ApplicationProvider.getApplicationContext(),
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
         CustomerSession.initCustomerSession(ApplicationProvider.getApplicationContext(),
                 mEphemeralKeyProvider);
     }

@@ -62,7 +62,7 @@ class SetupIntentActivity : AppCompatActivity() {
         errorDialogHandler = ErrorDialogHandler(this)
 
         stripe = Stripe(this,
-            PaymentConfiguration.getInstance().publishableKey)
+            PaymentConfiguration.getInstance(this).publishableKey)
         val retrofit = RetrofitFactory.instance
         backendApi = retrofit.create(BackendApi::class.java)
 

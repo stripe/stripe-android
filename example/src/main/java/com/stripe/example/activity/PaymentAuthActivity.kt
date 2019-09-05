@@ -64,10 +64,11 @@ class PaymentAuthActivity : AppCompatActivity() {
         }
 
         backendApi = RetrofitFactory.instance.create(BackendApi::class.java)
+        val publishableKey = PaymentConfiguration.getInstance(this).publishableKey
         stripe = if (stripeAccountId != null) {
-            Stripe(this, PaymentConfiguration.getInstance().publishableKey, stripeAccountId)
+            Stripe(this, publishableKey, stripeAccountId)
         } else {
-            Stripe(this, PaymentConfiguration.getInstance().publishableKey)
+            Stripe(this, publishableKey)
         }
 
         buyButton = findViewById(R.id.buy_button)

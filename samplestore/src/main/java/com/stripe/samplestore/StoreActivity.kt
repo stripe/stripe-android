@@ -38,7 +38,7 @@ class StoreActivity : AppCompatActivity(), StoreAdapter.TotalItemsChangedListene
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_store)
 
-        PaymentConfiguration.init(Settings.PUBLISHABLE_KEY)
+        PaymentConfiguration.init(this, Settings.PUBLISHABLE_KEY)
         goToCartButton = findViewById(R.id.fab_checkout)
         storeAdapter = StoreAdapter(this, priceMultiplier)
 

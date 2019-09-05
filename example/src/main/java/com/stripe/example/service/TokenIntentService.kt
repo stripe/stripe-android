@@ -27,7 +27,7 @@ class TokenIntentService : IntentService("TokenIntentService") {
             val card = Card.create(cardNumber, month, year, cvc)
 
             val stripe = Stripe(applicationContext,
-                PaymentConfiguration.getInstance().publishableKey)
+                PaymentConfiguration.getInstance(this).publishableKey)
             try {
                 token = stripe.createTokenSynchronous(card)
             } catch (stripeEx: StripeException) {

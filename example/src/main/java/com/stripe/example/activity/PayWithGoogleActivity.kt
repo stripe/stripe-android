@@ -36,7 +36,7 @@ class PayWithGoogleActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pay_with_google)
 
-        stripe = Stripe(this, PaymentConfiguration.getInstance().publishableKey)
+        stripe = Stripe(this, PaymentConfiguration.getInstance(this).publishableKey)
 
         paymentsClient = Wallet.getPaymentsClient(this,
             Wallet.WalletOptions.Builder()
@@ -195,7 +195,8 @@ class PayWithGoogleActivity : AppCompatActivity() {
             .put(
                 "parameters", cardPaymentMethodParams
             )
-            .put("tokenizationSpecification", GooglePayConfig().tokenizationSpecification)
+            .put("tokenizationSpecification",
+                GooglePayConfig(this).tokenizationSpecification)
 
         val paymentDataRequest = JSONObject()
             .put("apiVersion", 2)

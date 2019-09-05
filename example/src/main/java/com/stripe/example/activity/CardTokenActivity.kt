@@ -18,7 +18,7 @@ class CardTokenActivity : AppCompatActivity() {
             this,
             findViewById(R.id.card_input_widget),
             findViewById(R.id.listview),
-            PaymentConfiguration.getInstance().publishableKey
+            PaymentConfiguration.getInstance(this).publishableKey
         )
 
         dependencyHandler.attachAsyncTaskTokenController(findViewById(R.id.save))

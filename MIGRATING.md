@@ -1,7 +1,22 @@
 ## Migration Guides
 
 ### Migrating from versions < 11.0.0
-- Version `11.0.0` will require [AndroidX](https://developer.android.com/jetpack/androidx). Please read the [Migrating to AndroidX](https://developer.android.com/jetpack/androidx/migrate) guide for more information.
+- [AndroidX](https://developer.android.com/jetpack/androidx) is required. Please read the [Migrating to AndroidX](https://developer.android.com/jetpack/androidx/migrate) guide for more information. See [#1478](https://github.com/stripe/stripe-android/pull/1478).
+- The signatures of `PaymentConfiguration.init()` and `PaymentConfiguration.getInstance()` have been changed. They now both take a `Context` instance as the first argument. See [#1479](https://github.com/stripe/stripe-android/pull/1479).
+    ```kotlin
+    // before
+    PaymentConfiguration.init("publishable_key")
+    PaymentConfiguration.getInstance()
+
+    // after
+    PaymentConfiguration.init(context, "publishable_key")
+    PaymentConfiguration.getInstance(context)
+    ```
+- `Source` is immutable. All setter methods have been removed. See [#1480](https://github.com/stripe/stripe-android/pull/1480).
+- `TokenCallback` and `SourceCallback` have been removed. Use `ApiResultCallback<Token>` and `ApiResultCallback<Source>` instead. See [#1481](https://github.com/stripe/stripe-android/pull/1481).
+- `StripeIntent#getStatus()` has been removed. Use `StripeIntent#getOutcome()` instead.
+- `PaymentIntent#getSource()` has been removed. Use `PaymentIntent#getPaymentMethodId()` instead.
+- `SetupIntent#getCustomerId()` has been removed. This method was unintentionally added and always returned `null`. 
 
 ### Migration from versions < 10.1.0
 - You must call `PaymentConfiguration.init()` before calling `CustomerSession.initCustomerSession()`.

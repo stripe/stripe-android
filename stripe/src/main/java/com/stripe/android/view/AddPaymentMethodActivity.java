@@ -56,7 +56,7 @@ public class AddPaymentMethodActivity extends StripeActivity {
         if (args.paymentConfiguration != null) {
             paymentConfiguration = args.paymentConfiguration;
         } else {
-            paymentConfiguration = PaymentConfiguration.getInstance();
+            paymentConfiguration = PaymentConfiguration.getInstance(this);
         }
         mStripe = new Stripe(getApplicationContext(), paymentConfiguration.getPublishableKey());
         mPaymentMethodType = args.paymentMethodType;
