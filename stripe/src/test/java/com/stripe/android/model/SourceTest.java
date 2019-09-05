@@ -194,7 +194,11 @@ public class SourceTest {
         assertEquals(Source.SourceType.UNKNOWN, customSource.getType());
         assertEquals(DOGE_COIN, customSource.getTypeRaw());
         assertNull(customSource.getSourceTypeModel());
-        assertNotNull("Failed to find custom api params", customSource.getSourceTypeData());
+        assertNotNull("Failed to find custom api params",
+                customSource.getSourceTypeData());
+
+        assertNotNull(customSource.getReceiver());
+        assertNotNull(customSource.getCodeVerification());
     }
 
     @Test
@@ -220,6 +224,9 @@ public class SourceTest {
     public void fromJsonString_withWeChatSourceJson() {
         final Source source = Source.fromString(SOURCE_WECHAT_JSON);
         assertNotNull(source);
+
+        assertEquals(Source.USD, source.getCurrency());
+        assertTrue(source.isLiveMode());
 
         final WeChat weChat = source.getWeChat();
         assertNotNull(weChat);
