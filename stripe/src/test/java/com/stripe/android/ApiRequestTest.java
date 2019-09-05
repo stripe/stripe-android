@@ -1,7 +1,8 @@
 package com.stripe.android;
 
 import android.os.Build;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.model.CardFixtures;

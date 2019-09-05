@@ -1,7 +1,6 @@
 package com.stripe.android.view
 
 import android.content.Context
-import android.support.v4.view.PagerAdapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,7 +13,7 @@ import java.util.ArrayList
 internal class PaymentFlowPagerAdapter(
     private val context: Context,
     private val paymentSessionConfig: PaymentSessionConfig
-) : PagerAdapter() {
+) : androidx.viewpager.widget.PagerAdapter() {
     private val pages: MutableList<PaymentFlowPagerEnum>
 
     private var shippingInfoSaved: Boolean = false

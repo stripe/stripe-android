@@ -1,6 +1,6 @@
 package com.stripe.android.model;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 /**
  * Represents an object that has an ID field that can be used to create payments with Stripe.

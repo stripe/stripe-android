@@ -1,7 +1,7 @@
 package com.stripe.android
 
 import android.os.Bundle
-import android.support.annotation.IntDef
+import androidx.annotation.IntDef
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.AuthActivityStarter
 import com.stripe.android.view.PaymentRelayActivity

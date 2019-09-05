@@ -1,10 +1,11 @@
 package com.stripe.android;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import com.stripe.android.exception.APIConnectionException;
 import com.stripe.android.exception.APIException;
@@ -12,11 +13,11 @@ import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.CardException;
 import com.stripe.android.exception.InvalidRequestException;
 
-import org.json.JSONException;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import org.json.JSONException;
 
 /**
  * Methods for retrieval / update of a Stripe Issuing card

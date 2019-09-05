@@ -1,6 +1,6 @@
 package com.stripe.android;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 public class CustomerSessionTestHelper {
     private CustomerSessionTestHelper() {

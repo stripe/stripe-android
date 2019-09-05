@@ -3,7 +3,6 @@ package com.stripe.android.view
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import java.lang.ref.WeakReference
 
 internal interface AuthActivityStarter<StartDataType> {
@@ -12,9 +11,9 @@ internal interface AuthActivityStarter<StartDataType> {
     /**
      * A representation of an object (i.e. Activity or Fragment) that can start an activity.
      */
-    class Host private constructor(activity: Activity, fragment: Fragment?) {
+    class Host private constructor(activity: Activity, fragment: androidx.fragment.app.Fragment?) {
         private val activityRef: WeakReference<Activity> = WeakReference(activity)
-        private val fragmentRef: WeakReference<Fragment>? =
+        private val fragmentRef: WeakReference<androidx.fragment.app.Fragment>? =
             if (fragment != null) WeakReference(fragment) else null
 
         val activity: Activity?
@@ -35,7 +34,7 @@ internal interface AuthActivityStarter<StartDataType> {
 
         companion object {
             @JvmStatic
-            fun create(fragment: Fragment): Host {
+            fun create(fragment: androidx.fragment.app.Fragment): Host {
                 return Host(fragment.requireActivity(), fragment)
             }
 

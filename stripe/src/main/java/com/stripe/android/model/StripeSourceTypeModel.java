@@ -1,18 +1,18 @@
 package com.stripe.android.model;
 
-import android.support.annotation.CallSuper;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.CallSuper;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.stripe.android.utils.ObjectUtils;
-
-import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import org.json.JSONObject;
 
 public abstract class StripeSourceTypeModel extends StripeModel {
     @NonNull private final Map<String, Object> mAdditionalFields;

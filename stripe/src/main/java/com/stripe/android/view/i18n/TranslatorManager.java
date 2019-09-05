@@ -1,8 +1,9 @@
 package com.stripe.android.view.i18n;
 
 import android.app.Application;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * A class that provides a {@link ErrorMessageTranslator} for translating server-provided error

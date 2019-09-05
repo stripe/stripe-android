@@ -3,8 +3,6 @@ package com.stripe.example.service
 import android.app.Activity
 import android.app.IntentService
 import android.content.Intent
-import android.support.v4.content.LocalBroadcastManager
-
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.exception.StripeException
@@ -48,7 +46,7 @@ class TokenIntentService : IntentService("TokenIntentService") {
         }
 
         // Broadcasts the Intent to receivers in this app.
-        LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent)
+        androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent)
     }
 
     companion object {

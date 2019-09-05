@@ -1,18 +1,15 @@
 package com.stripe.example.controller
 
 import android.content.res.Resources
-import android.support.annotation.StringRes
-import android.support.v4.app.FragmentManager
-
+import androidx.annotation.StringRes
 import com.stripe.example.dialog.ProgressDialogFragment
-
 import java.lang.ref.WeakReference
 
 /**
  * Class used to show and hide the progress spinner.
  */
 class ProgressDialogController(
-    private val fragmentManager: FragmentManager,
+    private val fragmentManager: androidx.fragment.app.FragmentManager,
     private val res: Resources
 ) {
     private var progressFragmentRef: WeakReference<ProgressDialogFragment>? = null

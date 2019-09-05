@@ -2,11 +2,11 @@ package com.stripe.android.view;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.ApiKeyFixtures;
@@ -16,6 +16,10 @@ import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.R;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodTest;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 import org.junit.After;
 import org.junit.Before;
@@ -28,10 +32,6 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.Shadows;
 import org.robolectric.shadows.ShadowActivity;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 
 import static android.app.Activity.RESULT_OK;
 import static com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE;

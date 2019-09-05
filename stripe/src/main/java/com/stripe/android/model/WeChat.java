@@ -1,14 +1,14 @@
 package com.stripe.android.model;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.stripe.android.ObjectBuilder;
 import com.stripe.android.utils.ObjectUtils;
 
-import org.json.JSONObject;
-
 import java.util.Objects;
+
+import org.json.JSONObject;
 
 /**
  * <a href="https://stripe.com/docs/sources/wechat-pay">WeChat Pay Payments with Sources</a>

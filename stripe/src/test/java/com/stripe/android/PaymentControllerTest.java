@@ -2,8 +2,8 @@ package com.stripe.android;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.annotation.NonNull;
 
+import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.model.ConfirmPaymentIntentParams;

@@ -14,18 +14,18 @@ configurations {
 }
 
 dependencies {
-    implementation "com.android.support:support-annotations:28.0.0"
-    implementation "com.android.support:appcompat-v7:28.0.0"
-    implementation "com.android.support:recyclerview-v7:28.0.0"
+    implementation 'androidx.annotation:annotation:1.1.0'
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
     // Api for this import because we use reflection to alter TextInputLayout
-    api "com.android.support:design:28.0.0"
+    api 'com.google.android.material:material:1.0.0'
 
     implementation "com.stripe:stripe-3ds2-android:1.2.2"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
 
-    javadocDeps "com.android.support:support-annotations:28.0.0"
-    javadocDeps "com.android.support:appcompat-v7:28.0.0"
-    javadocDeps "com.android.support:design:28.0.0"
+    javadocDeps 'androidx.annotation:annotation:1.1.0'
+    javadocDeps 'androidx.appcompat:appcompat:1.0.2'
+    javadocDeps 'com.google.android.material:material:1.0.0'
     compileOnly "javax.annotation:jsr250-api:${rootProject.ext.javaAnnotationVersion}"
 
     testImplementation 'junit:junit:4.13-beta-3'
@@ -34,8 +34,8 @@ dependencies {
     testImplementation 'androidx.test:core:1.2.0'
     testImplementation 'org.json:json:20190722'
 
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    androidTestImplementation 'com.android.support.test:rules:1.0.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    androidTestImplementation 'androidx.test:rules:1.2.0'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestUtil 'androidx.test:orchestrator:1.2.0'
 

@@ -3,8 +3,8 @@ package com.stripe.android
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import android.support.annotation.StringDef
-import android.support.annotation.VisibleForTesting
+import androidx.annotation.StringDef
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
 import com.stripe.android.stripe3ds2.transaction.ProtocolErrorEvent

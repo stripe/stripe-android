@@ -4,14 +4,12 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.os.Parcel
 import android.os.Parcelable
-import android.support.v4.widget.ImageViewCompat
-import android.support.v7.widget.AppCompatImageView
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.appcompat.widget.AppCompatImageView
+import androidx.core.widget.ImageViewCompat
 import com.stripe.android.R
 import com.stripe.android.model.PaymentMethodCreateParams
 
@@ -37,10 +35,10 @@ internal class AddPaymentMethodFpxView private constructor(
         // an id is required for state to be saved
         id = R.id.payment_methods_add_fpx
 
-        val recyclerView = findViewById<RecyclerView>(R.id.fpx_list)
+        val recyclerView = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.fpx_list)
         recyclerView.adapter = adapter
         recyclerView.setHasFixedSize(true)
-        recyclerView.layoutManager = LinearLayoutManager(context)
+        recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
         recyclerView.itemAnimator = null
     }
 
@@ -59,7 +57,7 @@ internal class AddPaymentMethodFpxView private constructor(
 
     private class Adapter constructor(
         private val themeConfig: ThemeConfig
-    ) : RecyclerView.Adapter<Adapter.ViewHolder>() {
+    ) : androidx.recyclerview.widget.RecyclerView.Adapter<Adapter.ViewHolder>() {
         var selectedPosition = -1
 
         internal val selectedBank: FpxBank?
@@ -110,7 +108,7 @@ internal class AddPaymentMethodFpxView private constructor(
         private class ViewHolder constructor(
             itemView: View,
             private val themeConfig: ThemeConfig
-        ) : RecyclerView.ViewHolder(itemView) {
+        ) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
 
             private val name: TextView = itemView.findViewById(R.id.name)
             private val icon: AppCompatImageView = itemView.findViewById(R.id.icon)

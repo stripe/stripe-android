@@ -1,8 +1,8 @@
 package com.stripe.android
 
 import android.content.Context
-import android.support.annotation.VisibleForTesting
 import android.util.Pair
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.AuthenticationException
@@ -34,7 +34,7 @@ import org.json.JSONObject
 /**
  * An implementation of [StripeRepository] that makes network requests to the Stripe API.
  */
-internal class StripeApiRepository @VisibleForTesting @JvmOverloads constructor(
+internal class StripeApiRepository @JvmOverloads constructor(
     context: Context,
     private val appInfo: AppInfo? = null,
     private val stripeApiRequestExecutor: ApiRequestExecutor = StripeApiRequestExecutor(),

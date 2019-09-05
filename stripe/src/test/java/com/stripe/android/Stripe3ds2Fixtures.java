@@ -1,6 +1,6 @@
 package com.stripe.android;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.stripe.android.stripe3ds2.transaction.AuthenticationRequestParameters;
 

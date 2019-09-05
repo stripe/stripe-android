@@ -3,11 +3,11 @@ package com.stripe.android.view;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.widget.ProgressBar;
 
+import androidx.annotation.NonNull;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.ApiKeyFixtures;
@@ -24,6 +24,8 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures;
 import com.stripe.android.model.PaymentMethodFixtures;
 import com.stripe.android.model.PaymentMethodTest;
 
+import java.util.Calendar;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,8 +38,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.shadows.ShadowActivity;
-
-import java.util.Calendar;
 
 import static android.app.Activity.RESULT_OK;
 import static com.stripe.android.CustomerSession.ACTION_API_EXCEPTION;
