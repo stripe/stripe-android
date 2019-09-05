@@ -51,6 +51,8 @@ The app is comprised of two Activity classes:
 <img width="700" height="793" src="https://raw.githubusercontent.com/stripe/stripe-android/master/samplestore/assets/heroku.png" />
 
 ### Configure the samplestore app
+
+#### Required
 1. Set [Settings.PUBLISHABLE_KEY](example/src/main/java/com/stripe/example/Settings.kt)
    to your [test publishable key](https://dashboard.stripe.com/test/apikeys). 
 
@@ -67,6 +69,25 @@ The app is comprised of two Activity classes:
    const val BASE_URL = "https://my-example-app.herokuapp.com"
    ```
 
+#### Optional
+1. Set [Settings.CURRENCY](samplestore/src/main/java/com/stripe/samplestore/Settings.kt)
+   to the currency that the app should use. The default is `usd`.
+
+   For example,
+   ```
+   const val CURRENCY = "usd"
+   ```
+   
+2. Set [Settings.ALLOWED_PAYMENT_METHOD_TYPES](samplestore/src/main/java/com/stripe/samplestore/Settings.kt)
+   to the [payment method types](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-payment_method_types)
+   that the customer can use for payment. The default is `card`.
+
+   For example,
+   ```
+   val ALLOWED_PAYMENT_METHOD_TYPES = listOf(
+       PaymentMethod.Type.Card
+   )
+   ```
 
 ## Demo
 
