@@ -13,13 +13,13 @@ import java.util.ArrayList
  * A simple [RecyclerView] implementation to hold our data.
  */
 // Provide a suitable constructor (depends on the kind of dataset)
-class RedirectAdapter : androidx.recyclerview.widget.RecyclerView.Adapter<RedirectAdapter.ViewHolder>() {
+class RedirectAdapter : RecyclerView.Adapter<RedirectAdapter.ViewHolder>() {
     private val data = ArrayList<ViewModel>()
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    class ViewHolder(pollingLayout: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(pollingLayout) {
+    class ViewHolder(pollingLayout: View) : RecyclerView.ViewHolder(pollingLayout) {
         // each data item is just a string in this case
         private val finalStatusView: TextView = pollingLayout.findViewById(R.id.tv_ending_status)
         private val redirectStatusView: TextView = pollingLayout.findViewById(R.id.tv_redirect_status)

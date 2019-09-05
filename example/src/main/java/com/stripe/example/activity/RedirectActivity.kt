@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.model.Card
@@ -56,7 +57,7 @@ class RedirectActivity : AppCompatActivity() {
         threeDSyncButton.setOnClickListener { beginSequence() }
 
         val recyclerView = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recycler_view)
-        val linearLayoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
+        val linearLayoutManager = LinearLayoutManager(this)
         recyclerView.setHasFixedSize(true)
         recyclerView.layoutManager = linearLayoutManager
         mRedirectAdapter = RedirectAdapter()
