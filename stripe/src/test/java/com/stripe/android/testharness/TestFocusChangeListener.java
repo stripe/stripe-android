@@ -1,8 +1,9 @@
 package com.stripe.android.testharness;
 
-import android.support.annotation.IdRes;
 import android.view.View;
 import android.view.ViewTreeObserver;
+
+import androidx.annotation.IdRes;
 
 /**
  * Test class that listens for global focus changes and stores the transition.

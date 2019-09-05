@@ -2,17 +2,18 @@ package com.stripe.android;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.stripe.android.model.StripeModel;
 import com.stripe.android.utils.ObjectUtils;
 
+import java.util.Objects;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.Objects;
 
 /**
  * Represents an Ephemeral Key that can be used temporarily for API operations that typically

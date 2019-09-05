@@ -1,18 +1,19 @@
 package com.stripe.android;
 
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.utils.ObjectUtils;
-
-import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+
+import org.json.JSONObject;
 
 /**
  * A class representing a Stripe API or Analytics request.

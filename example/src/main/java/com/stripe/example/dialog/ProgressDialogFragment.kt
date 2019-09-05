@@ -3,9 +3,8 @@ package com.stripe.example.dialog
 import android.app.Dialog
 import android.app.ProgressDialog
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
 
-class ProgressDialogFragment : DialogFragment() {
+class ProgressDialogFragment : androidx.fragment.app.DialogFragment() {
 
     private val message: String?
         get() = if (arguments != null) arguments!!.getString("message") else null

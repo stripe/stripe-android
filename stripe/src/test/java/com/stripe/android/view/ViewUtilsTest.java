@@ -1,7 +1,8 @@
 package com.stripe.android.view;
 
 import android.graphics.Color;
-import android.support.annotation.ColorInt;
+
+import androidx.annotation.ColorInt;
 
 import com.stripe.android.model.Card;
 

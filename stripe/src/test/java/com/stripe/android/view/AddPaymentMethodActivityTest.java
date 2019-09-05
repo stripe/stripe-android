@@ -2,10 +2,11 @@ package com.stripe.android.view;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.widget.ProgressBar;
+
+import androidx.annotation.NonNull;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.stripe.android.ApiKeyFixtures;
 import com.stripe.android.ApiResultCallback;

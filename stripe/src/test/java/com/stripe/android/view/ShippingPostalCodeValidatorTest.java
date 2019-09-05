@@ -1,6 +1,6 @@
 package com.stripe.android.view;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.junit.Test;
 

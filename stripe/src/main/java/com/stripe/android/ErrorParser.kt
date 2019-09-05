@@ -1,6 +1,6 @@
 package com.stripe.android
 
-import android.support.annotation.VisibleForTesting
+import androidx.annotation.VisibleForTesting
 import org.json.JSONException
 import org.json.JSONObject
 

@@ -1,7 +1,7 @@
 package com.stripe.android.view
 
-import android.support.annotation.LayoutRes
-import android.support.annotation.StringRes
+import androidx.annotation.LayoutRes
+import androidx.annotation.StringRes
 import com.stripe.android.R
 
 internal enum class PaymentFlowPagerEnum(

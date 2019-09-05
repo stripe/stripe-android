@@ -5,12 +5,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import android.support.v4.content.LocalBroadcastManager
-import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.CustomerSession
 import com.stripe.android.PayWithGoogleUtils.getPriceString
 import com.stripe.android.PaymentSession
@@ -67,7 +66,7 @@ class PaymentSessionActivity : AppCompatActivity() {
         val customerSession = createCustomerSession()
         paymentSession = createPaymentSession(customerSession)
 
-        val localBroadcastManager = LocalBroadcastManager.getInstance(this)
+        val localBroadcastManager = androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this)
         broadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 val shippingInformation = intent
@@ -177,7 +176,7 @@ class PaymentSessionActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         paymentSession.onDestroy()
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver)
+        androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver)
     }
 
     private fun onPaymentSessionDataChanged(

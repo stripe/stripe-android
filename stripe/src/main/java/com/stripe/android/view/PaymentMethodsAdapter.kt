@@ -1,10 +1,10 @@
 package com.stripe.android.view
 
-import android.support.annotation.LayoutRes
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.LayoutRes
+import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
 import java.util.ArrayList
@@ -13,7 +13,7 @@ import java.util.ArrayList
  * A [RecyclerView.Adapter] that holds a set of [MaskedCardView] items for a given set
  * of [PaymentMethod] objects.
  */
-internal class PaymentMethodsAdapter : RecyclerView.Adapter<PaymentMethodsAdapter.ViewHolder>() {
+internal class PaymentMethodsAdapter : androidx.recyclerview.widget.RecyclerView.Adapter<PaymentMethodsAdapter.ViewHolder>() {
     private val paymentMethods = ArrayList<PaymentMethod>()
     private var selectedIndex = NO_SELECTION
 
@@ -121,7 +121,7 @@ internal class PaymentMethodsAdapter : RecyclerView.Adapter<PaymentMethodsAdapte
         this.selectedIndex = selectedIndex
     }
 
-    internal class ViewHolder constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    internal class ViewHolder constructor(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
         private val cardView: MaskedCardView = itemView.findViewById(R.id.masked_card_item)
 
         fun setPaymentMethod(paymentMethod: PaymentMethod) {

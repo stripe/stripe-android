@@ -6,15 +6,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import android.support.annotation.Size
-import android.support.v4.content.LocalBroadcastManager
-import android.support.v7.app.AlertDialog
-import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.annotation.Size
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import com.jakewharton.rxbinding2.view.RxView
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.CustomerSession
@@ -147,7 +146,7 @@ class PaymentActivity : AppCompatActivity() {
                 customerSession.retrieveCurrentCustomer(
                     SetupIntentCustomerRetrievalListener(this@PaymentActivity))
             })
-        val localBroadcastManager = LocalBroadcastManager.getInstance(this)
+        val localBroadcastManager = androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this)
 
         broadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
@@ -181,7 +180,7 @@ class PaymentActivity : AppCompatActivity() {
      */
     override fun onDestroy() {
         compositeDisposable.dispose()
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver)
+        androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver)
         paymentSession.onDestroy()
         super.onDestroy()
     }

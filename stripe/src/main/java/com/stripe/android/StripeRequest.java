@@ -1,7 +1,7 @@
 package com.stripe.android;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.utils.ObjectUtils;

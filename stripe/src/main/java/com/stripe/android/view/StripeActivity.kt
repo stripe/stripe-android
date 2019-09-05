@@ -5,15 +5,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import android.support.v4.content.LocalBroadcastManager
-import android.support.v7.app.AlertDialog
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewStub
 import android.widget.ProgressBar
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import com.stripe.android.CustomerSession
 import com.stripe.android.R
 import com.stripe.android.exception.StripeException
@@ -51,12 +50,12 @@ internal abstract class StripeActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(alertBroadcastReceiver)
+        androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).unregisterReceiver(alertBroadcastReceiver)
     }
 
     override fun onResume() {
         super.onResume()
-        LocalBroadcastManager.getInstance(this)
+        androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this)
             .registerReceiver(
                 alertBroadcastReceiver,
                 IntentFilter(CustomerSession.ACTION_API_EXCEPTION)

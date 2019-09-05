@@ -1,19 +1,19 @@
 package com.stripe.android.model;
 
-import android.support.annotation.IntRange;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.Size;
+import androidx.annotation.IntRange;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.Size;
 
 import com.stripe.android.ObjectBuilder;
 import com.stripe.android.utils.ObjectUtils;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import static com.stripe.android.model.Source.SourceType;
 

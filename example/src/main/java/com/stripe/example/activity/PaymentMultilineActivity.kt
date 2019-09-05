@@ -1,9 +1,9 @@
 package com.stripe.example.activity
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.widget.ListView
 import android.widget.SimpleAdapter
+import androidx.appcompat.app.AppCompatActivity
 import com.jakewharton.rxbinding2.view.RxView
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe

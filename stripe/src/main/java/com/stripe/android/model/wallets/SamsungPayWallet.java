@@ -2,7 +2,8 @@ package com.stripe.android.model.wallets;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 public final class SamsungPayWallet extends Wallet {
     private SamsungPayWallet(@NonNull Builder builder) {

@@ -1,9 +1,9 @@
 package com.stripe.example.module
 
 import android.content.Context
-import android.support.v7.app.AppCompatActivity
 import android.widget.Button
 import android.widget.ListView
+import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.view.CardInputWidget
 import com.stripe.example.controller.AsyncTaskTokenController
 import com.stripe.example.controller.ErrorDialogHandler
