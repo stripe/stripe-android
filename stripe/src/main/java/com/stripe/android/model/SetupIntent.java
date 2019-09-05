@@ -106,15 +106,6 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
     }
 
     /**
-     * @deprecated this field is only available with a secret key
-     */
-    @Deprecated
-    @Nullable
-    public String getCustomerId() {
-        return null;
-    }
-
-    /**
      * @return An arbitrary string attached to the object. Often useful for displaying to users.
      */
     @Nullable
