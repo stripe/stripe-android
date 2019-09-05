@@ -37,6 +37,6 @@ internal object Settings {
      * (e.g. card) that this PaymentIntent is allowed to use.
      */
     val ALLOWED_PAYMENT_METHOD_TYPES = listOf(
-        PaymentMethod.Type.Card.code
+        PaymentMethod.Type.Card
     )
 }
