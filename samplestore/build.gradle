@@ -78,7 +78,7 @@ dependencies {
     // Used to debug your Retrofit connections
     // Do not upgrade as it will require increasing minSdkVersion to 21
     //noinspection GradleDependency
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.1.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.12.3'
 
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.3'
     releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.3'
