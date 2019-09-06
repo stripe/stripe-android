@@ -16,7 +16,8 @@
 - `TokenCallback` and `SourceCallback` have been removed. Use `ApiResultCallback<Token>` and `ApiResultCallback<Source>` instead. See [#1481](https://github.com/stripe/stripe-android/pull/1481).
 - `StripeIntent#getStatus()` has been removed. Use `StripeIntent#getOutcome()` instead.
 - `PaymentIntent#getSource()` has been removed. Use `PaymentIntent#getPaymentMethodId()` instead.
-- `SetupIntent#getCustomerId()` has been removed. This method was unintentionally added and always returned `null`. 
+- `SetupIntent#getCustomerId()` has been removed. This method was unintentionally added and always returned `null`.
+- The `samplestore` app has moved to [stripe-samples/sample-store-android](https://github.com/stripe-samples/sample-store-android).
 
 ### Migration from versions < 10.1.0
 - You must call `PaymentConfiguration.init()` before calling `CustomerSession.initCustomerSession()`.
