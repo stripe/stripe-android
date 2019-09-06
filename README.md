@@ -171,7 +171,6 @@ stripe.createToken(
 );
 ```
 
-
 ### Creating Card Tokens synchronously
 
 [Stripe#createTokenSynchronous()](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#createTokenSynchronous-com.stripe.android.model.Card-) allows you to handle threading on your own, using any IO framework you choose.
@@ -204,38 +203,8 @@ The [Card](https://stripe.dev/stripe-android/com/stripe/android/model/Card.html)
 - [Card#validateCVC()](https://stripe.dev/stripe-android/com/stripe/android/model/Card.html#validateCVC--) - Checks whether or not the supplied number could be a valid verification code.
 - [Card#validateCard()](https://stripe.dev/stripe-android/com/stripe/android/model/Card.html#validateCard--) - Convenience method to validate card number, expiry date and CVC.
 
-## Example apps
 
-There are 2 example apps included in the repository:
-- [Example project](https://github.com/stripe/stripe-android/tree/master/example) is a simple example of different ways to connect our components, including how to make tokens and sources, how to connect the synchronous and asynchronous methods, and how to use the CardInputWidget.
-- [Samplestore project](https://github.com/stripe/stripe-android/tree/master/samplestore) is a full walk-through of building a shop activity, including connecting to a back end.
+## Apps
 
-To build and run the example apps, clone the repository and open the project. Running "example" will run the Example application, and running "samplestore" will run the shop activity.
-
-### Getting started with the Android example apps
-
-Note: Both example apps require an [Android SDK](https://developer.android.com/studio/index.html) and [Gradle](https://gradle.org/) to build and run.
-
-### Building the example project
-
-1. Clone the git repository.
-2. Be sure you've installed the Android SDK with API Level 19 and _android-support-v4_. This is only a requirement for development.
-3. Import the project in Android Studio
-    * Choose _Import Project..._ from the "Welcome to Android Studio" screen.
-    * Select `build.gradle` at the top of the `stripe-android` repository.
-4. Set your publishable key in [Settings.PUBLISHABLE_KEY](example/src/main/java/com/stripe/example/Settings.kt).
-5. Build and run the project on your device or in the Android emulator.
-
-Two different ways of creating tokens are shown, with all the Stripe-specific logic needed for each separated into the three controllers,
-[AsyncTaskTokenController](example/src/main/java/com/stripe/example/controller/AsyncTaskTokenController.java) and [RxTokenController](example/src/main/java/com/stripe/example/controller/RxTokenController.java).
-
-### Configuring the samplestore app
-
-Before you can run the SampleStore application or use the CustomerSessionActivity in the example application, you need to provide it with your Stripe publishable key and a sample backend.
-
-1. If you haven't already, sign up for a [Stripe account](https://dashboard.stripe.com/register) (it takes seconds). Then go to the Stripe Dashboard's [API keys](https://dashboard.stripe.com/test/apikeys).
-2. Replace the `PUBLISHABLE_KEY` constant in [Settings.kt](samplestore/src/main/java/com/stripe/samplestore/Settings.kt) (where it says "put your publishable key here") with your Test Publishable Key.
-3. Navigate to the [example mobile backend repo](https://github.com/stripe/example-ios-backend) and click "Deploy to Heroku" (you may have to sign up for a Heroku account as part of this process). Provide your Stripe test secret key for the `STRIPE_TEST_SECRET_KEY` field under 'Env'. Click "Deploy for Free".
-4. Replace the `BASE_URL` variable (where it says "Put your backend URL here") in [Settings.kt](samplestore/src/main/java/com/stripe/samplestore/Settings.kt) with the app URL Heroku provides you with (e.g. `"https://my-example-app.herokuapp.com"`)
-
-After this is done, you can make test payments through the app and see them in your Stripe dashboard. Head to [https://stripe.com/docs/testing#cards](https://stripe.com/docs/testing#cards) for a list of test card numbers.
+- The [stripe-samples/sample-store-android](https://github.com/stripe-samples/sample-store-android) repo demonstrates a complete integration with the Stripe Android SDK.
+- The [example project](https://github.com/stripe/stripe-android/tree/master/example) demonstrates using our API bindings and UI components, including how to create Tokens, Sources, and Payment Methods; how to use the Stripe class's synchronous and asynchronous methods; and how to use the CardInputWidget.

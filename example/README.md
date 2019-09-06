@@ -34,7 +34,7 @@
    const val PUBLISHABLE_KEY = "pk_test_12345"
    ```
 
-2. Set [Settings.BASE_URL](samplestore/src/main/java/com/stripe/samplestore/Settings.kt)
+2. Set [Settings.BASE_URL](example/src/main/java/com/stripe/example/Settings.kt)
    to the URL of the [example backend deployed to Heroku](#deploy-example-backend-to-heroku).
 
    For example,
