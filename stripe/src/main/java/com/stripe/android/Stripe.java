@@ -57,27 +57,8 @@ public class Stripe {
     @NonNull private final StripeNetworkUtils mStripeNetworkUtils;
     @NonNull private final PaymentController mPaymentController;
     @NonNull private final TokenCreator mTokenCreator;
-    @NonNull private final ApiKeyValidator mApiKeyValidator;
-    private String mDefaultPublishableKey;
-    @Nullable private String mStripeAccountId;
-
-    /**
-     * Constructor that requires the key to be set with {@link #setDefaultPublishableKey(String)}.
-     *
-     * @param context Activity or application context
-     *
-     * @deprecated use {@link Stripe#Stripe(Context, String)}
-     */
-    @Deprecated
-    public Stripe(@NonNull Context context) {
-        this(
-                context.getApplicationContext(),
-                new StripeApiRepository(context.getApplicationContext(), sAppInfo),
-                new StripeNetworkUtils(context.getApplicationContext()),
-                null,
-                null
-        );
-    }
+    @NonNull private final String mDefaultPublishableKey;
+    @Nullable private final String mStripeAccountId;
 
     /**
      * Constructor with publishable key.
@@ -115,11 +96,11 @@ public class Stripe {
         );
     }
 
-    Stripe(@NonNull Context context,
-           @NonNull final StripeRepository stripeRepository,
-           @NonNull StripeNetworkUtils stripeNetworkUtils,
-           @Nullable String publishableKey,
-           @Nullable String stripeAccountId) {
+    private Stripe(@NonNull Context context,
+                   @NonNull final StripeRepository stripeRepository,
+                   @NonNull StripeNetworkUtils stripeNetworkUtils,
+                   @NonNull String publishableKey,
+                   @Nullable String stripeAccountId) {
         this(
                 stripeRepository,
                 stripeNetworkUtils,
@@ -132,7 +113,7 @@ public class Stripe {
     Stripe(@NonNull final StripeRepository stripeRepository,
            @NonNull StripeNetworkUtils stripeNetworkUtils,
            @NonNull PaymentController paymentController,
-           @Nullable String publishableKey,
+           @NonNull String publishableKey,
            @Nullable String stripeAccountId) {
         this(
                 stripeRepository,
@@ -160,17 +141,15 @@ public class Stripe {
     Stripe(@NonNull StripeRepository stripeRepository,
            @NonNull StripeNetworkUtils stripeNetworkUtils,
            @NonNull PaymentController paymentController,
-           @Nullable String publishableKey,
+           @NonNull String publishableKey,
            @Nullable String stripeAccountId,
            @NonNull TokenCreator tokenCreator) {
-        mApiKeyValidator = new ApiKeyValidator();
         mStripeRepository = stripeRepository;
         mStripeNetworkUtils = stripeNetworkUtils;
         mPaymentController = paymentController;
         mTokenCreator = tokenCreator;
         mStripeAccountId = stripeAccountId;
-        mDefaultPublishableKey = publishableKey != null ?
-                mApiKeyValidator.requireValid(publishableKey) : null;
+        mDefaultPublishableKey = new ApiKeyValidator().requireValid(publishableKey);
     }
 
     /**
@@ -192,24 +171,6 @@ public class Stripe {
      * Confirm and, if necessary, authenticate a {@link SetupIntent}.
      *
      * @param activity the <code>Activity</code> that is launching the payment authentication flow
-     *
-     * @deprecated use {@link #confirmSetupIntent(Activity, ConfirmSetupIntentParams)}
-     */
-    @Deprecated
-    public void confirmSetupIntent(@NonNull Activity activity,
-                                   @NonNull ConfirmSetupIntentParams confirmSetupIntentParams,
-                                   @NonNull String publishableKey) {
-        mPaymentController.startConfirmAndAuth(
-                AuthActivityStarter.Host.create(activity),
-                confirmSetupIntentParams,
-                ApiRequest.Options.create(publishableKey, mStripeAccountId)
-        );
-    }
-
-    /**
-     * Confirm and, if necessary, authenticate a {@link SetupIntent}.
-     *
-     * @param activity the <code>Activity</code> that is launching the payment authentication flow
      */
     public void confirmSetupIntent(@NonNull Activity activity,
                                    @NonNull ConfirmSetupIntentParams confirmSetupIntentParams) {
@@ -224,24 +185,6 @@ public class Stripe {
      * Confirm and, if necessary, authenticate a {@link SetupIntent}.
      *
      * @param fragment the <code>Fragment</code> that is launching the payment authentication flow
-     *
-     * @deprecated use {@link #confirmSetupIntent(Fragment, ConfirmSetupIntentParams)} }
-     */
-    @Deprecated
-    public void confirmSetupIntent(@NonNull Fragment fragment,
-                                   @NonNull ConfirmSetupIntentParams confirmSetupIntentParams,
-                                   @NonNull String publishableKey) {
-        mPaymentController.startConfirmAndAuth(
-                AuthActivityStarter.Host.create(fragment),
-                confirmSetupIntentParams,
-                ApiRequest.Options.create(publishableKey, mStripeAccountId)
-        );
-    }
-
-    /**
-     * Confirm and, if necessary, authenticate a {@link SetupIntent}.
-     *
-     * @param fragment the <code>Fragment</code> that is launching the payment authentication flow
      */
     public void confirmSetupIntent(@NonNull Fragment fragment,
                                    @NonNull ConfirmSetupIntentParams confirmSetupIntentParams) {
@@ -249,28 +192,6 @@ public class Stripe {
                 AuthActivityStarter.Host.create(fragment),
                 confirmSetupIntentParams,
                 ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId)
-        );
-    }
-
-    /**
-     * Confirm and, if necessary, authenticate a {@link PaymentIntent}. Used for <a href=
-     * "https://stripe.com/docs/payments/payment-intents/quickstart#automatic-confirmation-flow">
-     * automatic confirmation</a> flow.
-     *
-     * @param activity the <code>Activity</code> that is launching the payment authentication flow
-     * @param confirmPaymentIntentParams {@link ConfirmPaymentIntentParams} used to confirm the
-     *                                   {@link PaymentIntent}
-     *
-     * @deprecated use {@link #confirmPayment(Activity, ConfirmPaymentIntentParams)}
-     */
-    @Deprecated
-    public void confirmPayment(@NonNull Activity activity,
-                               @NonNull ConfirmPaymentIntentParams confirmPaymentIntentParams,
-                               @NonNull String publishableKey) {
-        mPaymentController.startConfirmAndAuth(
-                AuthActivityStarter.Host.create(activity),
-                confirmPaymentIntentParams,
-                ApiRequest.Options.create(publishableKey, mStripeAccountId)
         );
     }
 
@@ -300,28 +221,6 @@ public class Stripe {
      * @param fragment the <code>Fragment</code> that is launching the payment authentication flow
      * @param confirmPaymentIntentParams {@link ConfirmPaymentIntentParams} used to confirm the
      *                                   {@link PaymentIntent}
-     *
-     * @deprecated use {@link #confirmPayment(Fragment, ConfirmPaymentIntentParams)}
-     */
-    @Deprecated
-    public void confirmPayment(@NonNull Fragment fragment,
-                               @NonNull ConfirmPaymentIntentParams confirmPaymentIntentParams,
-                               @NonNull String publishableKey) {
-        mPaymentController.startConfirmAndAuth(
-                AuthActivityStarter.Host.create(fragment),
-                confirmPaymentIntentParams,
-                ApiRequest.Options.create(publishableKey, mStripeAccountId)
-        );
-    }
-
-    /**
-     * Confirm and, if necessary, authenticate a {@link PaymentIntent}. Used for <a href=
-     * "https://stripe.com/docs/payments/payment-intents/quickstart#automatic-confirmation-flow">
-     * automatic confirmation</a> flow.
-     *
-     * @param fragment the <code>Fragment</code> that is launching the payment authentication flow
-     * @param confirmPaymentIntentParams {@link ConfirmPaymentIntentParams} used to confirm the
-     *                                   {@link PaymentIntent}
      */
     public void confirmPayment(@NonNull Fragment fragment,
                                @NonNull ConfirmPaymentIntentParams confirmPaymentIntentParams) {
@@ -340,28 +239,6 @@ public class Stripe {
      * @param activity the <code>Activity</code> that is launching the payment authentication flow
      * @param clientSecret the <a href="https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret">client_secret</a>
      *                     property of a confirmed {@link PaymentIntent} object
-     *
-     * @deprecated use {@link #authenticatePayment(Activity, String)}
-     */
-    @Deprecated
-    public void authenticatePayment(@NonNull Activity activity,
-                                    @NonNull String clientSecret,
-                                    @NonNull String publishableKey) {
-        mPaymentController.startAuth(
-                AuthActivityStarter.Host.create(activity),
-                clientSecret,
-                ApiRequest.Options.create(publishableKey, mStripeAccountId)
-        );
-    }
-
-    /**
-     * Authenticate a {@link PaymentIntent}. Used for <a href=
-     * "https://stripe.com/docs/payments/payment-intents/quickstart#manual-confirmation-flow">
-     * manual confirmation</a> flow.
-     *
-     * @param activity the <code>Activity</code> that is launching the payment authentication flow
-     * @param clientSecret the <a href="https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret">client_secret</a>
-     *                     property of a confirmed {@link PaymentIntent} object
      */
     public void authenticatePayment(@NonNull Activity activity,
                                     @NonNull String clientSecret) {
@@ -369,28 +246,6 @@ public class Stripe {
                 AuthActivityStarter.Host.create(activity),
                 clientSecret,
                 ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId)
-        );
-    }
-
-    /**
-     * Authenticate a {@link PaymentIntent}. Used for <a href=
-     * "https://stripe.com/docs/payments/payment-intents/quickstart#manual-confirmation-flow">
-     * manual confirmation</a> flow.
-     *
-     * @param fragment the <code>Fragment</code> that is launching the payment authentication flow
-     * @param clientSecret the <a href="https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret">client_secret</a>
-     *                     property of a confirmed {@link PaymentIntent} object
-     *
-     * @deprecated use {@link #authenticatePayment(Fragment, String)}
-     */
-    @Deprecated
-    public void authenticatePayment(@NonNull Fragment fragment,
-                                    @NonNull String clientSecret,
-                                    @NonNull String publishableKey) {
-        mPaymentController.startAuth(
-                AuthActivityStarter.Host.create(fragment),
-                clientSecret,
-                ApiRequest.Options.create(publishableKey, mStripeAccountId)
         );
     }
 
@@ -419,27 +274,6 @@ public class Stripe {
      *                     flow
      * @param clientSecret the <a href="https://stripe.com/docs/api/setup_intents/object#setup_intent_object-client_secret">client_secret</a>
      *                     property of a confirmed {@link SetupIntent} object
-     *
-     * @deprecated use {@link #authenticateSetup(Activity, String)}
-     */
-    @Deprecated
-    public void authenticateSetup(@NonNull Activity activity,
-                                  @NonNull String clientSecret,
-                                  @NonNull String publishableKey) {
-        mPaymentController.startAuth(
-                AuthActivityStarter.Host.create(activity),
-                clientSecret,
-                ApiRequest.Options.create(publishableKey, mStripeAccountId)
-        );
-    }
-
-    /**
-     * Authenticate a {@link SetupIntent}. Used for manual confirmation flow.
-     *
-     * @param activity     the <code>Activity</code> that is launching the payment authentication
-     *                     flow
-     * @param clientSecret the <a href="https://stripe.com/docs/api/setup_intents/object#setup_intent_object-client_secret">client_secret</a>
-     *                     property of a confirmed {@link SetupIntent} object
      */
     public void authenticateSetup(@NonNull Activity activity,
                                   @NonNull String clientSecret) {
@@ -447,26 +281,6 @@ public class Stripe {
                 AuthActivityStarter.Host.create(activity),
                 clientSecret,
                 ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId)
-        );
-    }
-
-    /**
-     * Authenticate a {@link SetupIntent}. Used for manual confirmation flow.
-     *
-     * @param fragment     the <code>Fragment</code> launching the payment authentication flow
-     * @param clientSecret the <a href="https://stripe.com/docs/api/setup_intents/object#setup_intent_object-client_secret">client_secret</a>
-     *                     property of a confirmed {@link SetupIntent} object
-     *
-     * @deprecated use {@link #authenticateSetup(Fragment, String)}
-     */
-    @Deprecated
-    public void authenticateSetup(@NonNull Fragment fragment,
-                                  @NonNull String clientSecret,
-                                  @NonNull String publishableKey) {
-        mPaymentController.startAuth(
-                AuthActivityStarter.Host.create(fragment),
-                clientSecret,
-                ApiRequest.Options.create(publishableKey, mStripeAccountId)
         );
     }
 
@@ -484,32 +298,13 @@ public class Stripe {
                 clientSecret,
                 ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId)
         );
-    }
-
-    /**
-     * @deprecated use {@link #onPaymentResult(int, Intent, ApiResultCallback)} }
-     */
-    @Deprecated
-    public boolean onPaymentResult(int requestCode, @Nullable Intent data,
-                                   @NonNull String publishableKey,
-                                   @NonNull ApiResultCallback<PaymentIntentResult> callback) {
-        if (data != null &&
-                mPaymentController.shouldHandlePaymentResult(requestCode, data)) {
-            mPaymentController.handlePaymentResult(
-                    data,
-                    ApiRequest.Options.create(publishableKey, mStripeAccountId),
-                    callback);
-            return true;
-        }
-
-        return false;
     }
 
     /**
      * Should be called via <code>Activity#onActivityResult(int, int, Intent)}}</code> to handle the
      * result of a PaymentIntent automatic confirmation
-     * (see {@link #confirmPayment(Activity, ConfirmPaymentIntentParams, String)}) or manual
-     * confirmation (see {@link #authenticatePayment(Activity, String, String)}})
+     * (see {@link #confirmPayment(Activity, ConfirmPaymentIntentParams)}) or manual
+     * confirmation (see {@link #authenticatePayment(Activity, String)}})
      */
     public boolean onPaymentResult(int requestCode, @Nullable Intent data,
                                    @NonNull ApiResultCallback<PaymentIntentResult> callback) {
@@ -519,26 +314,6 @@ public class Stripe {
                     data,
                     ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId),
                     callback);
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * @deprecated use {@link #onSetupResult(int, Intent, ApiResultCallback)}
-     */
-    @Deprecated
-    public boolean onSetupResult(int requestCode, @Nullable Intent data,
-                                 @NonNull String publishableKey,
-                                 @NonNull ApiResultCallback<SetupIntentResult> callback) {
-        if (data != null &&
-                mPaymentController.shouldHandleSetupResult(requestCode, data)) {
-            mPaymentController.handleSetupResult(
-                    data,
-                    ApiRequest.Options.create(publishableKey, mStripeAccountId),
-                    callback
-            );
             return true;
         }
 
@@ -586,26 +361,6 @@ public class Stripe {
     }
 
     /**
-     * @deprecated use {@link #createBankAccountToken(BankAccount, ApiResultCallback)}
-     */
-    @Deprecated
-    public void createBankAccountToken(
-            @NonNull final BankAccount bankAccount,
-            @NonNull @Size(min = 1) final String publishableKey,
-            @Nullable final Executor executor,
-            @NonNull final ApiResultCallback<Token> callback) {
-        final Map<String, Object> params = bankAccount.toParamMap();
-        params.putAll(mStripeNetworkUtils.createUidParams());
-        createTokenFromParams(
-                params,
-                publishableKey,
-                Token.TokenType.BANK_ACCOUNT,
-                executor,
-                callback
-        );
-    }
-
-    /**
      * Create a PII token asynchronously.
      *
      * @param personalId the personal id used to create this token
@@ -619,23 +374,6 @@ public class Stripe {
                 mDefaultPublishableKey,
                 Token.TokenType.PII,
                 null,
-                callback);
-    }
-
-    /**
-     * @deprecated use {@link #createPiiToken(String, ApiResultCallback)}
-     */
-    @Deprecated
-    public void createPiiToken(
-            @NonNull final String personalId,
-            @NonNull @Size(min = 1) final String publishableKey,
-            @Nullable final Executor executor,
-            @NonNull final ApiResultCallback<Token> callback) {
-        createTokenFromParams(
-                new PiiTokenParams(personalId).toParamMap(),
-                publishableKey,
-                Token.TokenType.PII,
-                executor,
                 callback);
     }
 
@@ -672,27 +410,6 @@ public class Stripe {
     }
 
     /**
-     * @deprecated use {@link #createBankAccountTokenSynchronous(BankAccount)}
-     */
-    @Deprecated
-    @Nullable
-    public Token createBankAccountTokenSynchronous(@NonNull final BankAccount bankAccount,
-                                                   @NonNull String publishableKey)
-            throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            CardException,
-            APIException {
-        final Map<String, Object> params = bankAccount.toParamMap();
-        params.putAll(mStripeNetworkUtils.createUidParams());
-        return mStripeRepository.createToken(
-                params,
-                ApiRequest.Options.create(publishableKey, mStripeAccountId),
-                Token.TokenType.BANK_ACCOUNT
-        );
-    }
-
-    /**
      * Create a CVC update token asynchronously.
      *
      * @param cvc the CVC used to create this token
@@ -711,23 +428,6 @@ public class Stripe {
     }
 
     /**
-     * @deprecated use {@link #createCvcUpdateToken(String, ApiResultCallback)}
-     */
-    @Deprecated
-    public void createCvcUpdateToken(
-            @NonNull @Size(min = 3, max = 4) final String cvc,
-            @NonNull @Size(min = 1) final String publishableKey,
-            @Nullable final Executor executor,
-            @NonNull final ApiResultCallback<Token> callback) {
-        createTokenFromParams(
-                new CvcTokenParams(cvc).toParamMap(),
-                publishableKey,
-                Token.TokenType.CVC_UPDATE,
-                executor,
-                callback);
-    }
-
-    /**
      * Create a {@link Source} asynchronously.
      *
      * @param sourceParams the {@link SourceParams} to be used
@@ -738,20 +438,6 @@ public class Stripe {
         new CreateSourceTask(
                 mStripeRepository, sourceParams, mDefaultPublishableKey, mStripeAccountId, callback
         ).execute();
-    }
-
-    /**
-     * @deprecated use {@link #createSource(SourceParams, ApiResultCallback)}
-     */
-    @Deprecated
-    public void createSource(
-            @NonNull SourceParams sourceParams,
-            @NonNull ApiResultCallback<Source> callback,
-            @NonNull String publishableKey,
-            @Nullable Executor executor) {
-        executeTask(executor,
-                new CreateSourceTask(mStripeRepository, sourceParams, publishableKey,
-                        mStripeAccountId, callback));
     }
 
     /**
@@ -770,25 +456,6 @@ public class Stripe {
     }
 
     /**
-     * Create a {@link PaymentMethod} using an {@link AsyncTask}.
-     *
-     * @param paymentMethodCreateParams the {@link PaymentMethodCreateParams} to be used
-     * @param callback a {@link ApiResultCallback} to receive a result or an error message
-     * @param publishableKey the publishable api key to be used
-     * @param executor an {@link Executor} on which to execute the task,
-     *                 or <code>null</code> for default for default
-     */
-    @Deprecated
-    public void createPaymentMethod(
-            @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
-            @NonNull ApiResultCallback<PaymentMethod> callback,
-            @NonNull String publishableKey,
-            @Nullable Executor executor) {
-        executeTask(executor, new CreatePaymentMethodTask(mStripeRepository,
-                paymentMethodCreateParams, publishableKey, mStripeAccountId, callback));
-    }
-
-    /**
      * Create a Card token asynchronously.
      *
      * @param card the {@link Card} used to create this payment token
@@ -799,23 +466,6 @@ public class Stripe {
         createTokenFromParams(
                 mStripeNetworkUtils.createCardTokenParams(card),
                 mDefaultPublishableKey,
-                Token.TokenType.CARD,
-                null,
-                callback
-        );
-    }
-
-    /**
-     * @deprecated use {@link #createToken(Card, ApiResultCallback)}
-     */
-    @Deprecated
-    public void createToken(
-            @NonNull final Card card,
-            @NonNull final String publishableKey,
-            @NonNull final ApiResultCallback<Token> callback) {
-        createTokenFromParams(
-                mStripeNetworkUtils.createCardTokenParams(card),
-                publishableKey,
                 Token.TokenType.CARD,
                 null,
                 callback
@@ -837,24 +487,6 @@ public class Stripe {
         createTokenFromParams(
                 mStripeNetworkUtils.createCardTokenParams(card),
                 mDefaultPublishableKey,
-                Token.TokenType.CARD,
-                executor,
-                callback
-        );
-    }
-
-    /**
-     * @deprecated use {@link #createToken(Card, ApiResultCallback)}
-     */
-    @Deprecated
-    public void createToken(
-            @NonNull final Card card,
-            @NonNull @Size(min = 1) final String publishableKey,
-            @Nullable final Executor executor,
-            @NonNull final ApiResultCallback<Token> callback) {
-        createTokenFromParams(
-                mStripeNetworkUtils.createCardTokenParams(card),
-                publishableKey,
                 Token.TokenType.CARD,
                 executor,
                 callback
@@ -886,39 +518,6 @@ public class Stripe {
     }
 
     /**
-     * @deprecated use {@link #createSourceSynchronous(SourceParams)}
-     */
-    @Deprecated
-    @Nullable
-    public Source createSourceSynchronous(
-            @NonNull SourceParams params,
-            @NonNull String publishableKey)
-            throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            APIException {
-        return mStripeRepository.createSource(params,
-                ApiRequest.Options.create(publishableKey, mStripeAccountId));
-    }
-
-    /**
-     * @deprecated use {@link #retrievePaymentIntentSynchronous(String)}
-     */
-    @Deprecated
-    @Nullable
-    public PaymentIntent retrievePaymentIntentSynchronous(
-            @NonNull String clientSecret,
-            @NonNull String publishableKey) throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            APIException {
-        return mStripeRepository.retrievePaymentIntent(
-                clientSecret,
-                ApiRequest.Options.create(publishableKey, mStripeAccountId)
-        );
-    }
-
-    /**
      * Blocking method to retrieve a {@link PaymentIntent} object.
      * Do not call this on the UI thread or your app will crash.
      *
@@ -936,23 +535,6 @@ public class Stripe {
     }
 
     /**
-     * @deprecated use {@link #confirmPaymentIntentSynchronous(ConfirmPaymentIntentParams)}
-     */
-    @Deprecated
-    @Nullable
-    public PaymentIntent confirmPaymentIntentSynchronous(
-            @NonNull ConfirmPaymentIntentParams confirmPaymentIntentParams,
-            @NonNull String publishableKey) throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            APIException {
-        return mStripeRepository.confirmPaymentIntent(
-                confirmPaymentIntentParams,
-                ApiRequest.Options.create(publishableKey, mStripeAccountId)
-        );
-    }
-
-    /**
      * @deprecated use {@link #confirmPayment(Activity, ConfirmPaymentIntentParams)}
      */
     @Nullable
@@ -963,23 +545,6 @@ public class Stripe {
         return mStripeRepository.confirmPaymentIntent(
                 confirmPaymentIntentParams,
                 ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId)
-        );
-    }
-
-    /**
-     * @deprecated use {@link #retrieveSetupIntentSynchronous(String)}
-     */
-    @Deprecated
-    @Nullable
-    public SetupIntent retrieveSetupIntentSynchronous(
-            @NonNull String clientSecret,
-            @NonNull String publishableKey) throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            APIException {
-        return mStripeRepository.retrieveSetupIntent(
-                clientSecret,
-                ApiRequest.Options.create(publishableKey, mStripeAccountId)
         );
     }
 
@@ -1018,52 +583,6 @@ public class Stripe {
                 confirmSetupIntentParams,
                 ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId)
         );
-    }
-
-    /**
-     * Blocking method to confirm a {@link SetupIntent} object.
-     * Do not call this on the UI thread or your app will crash.
-     *
-     * @param confirmSetupIntentParams a set of params with which to confirm the Setup Intent
-     * @param publishableKey a publishable API key to use
-     * @return a {@link SetupIntent} or {@code null} if a problem occurred
-     *
-     * @deprecated use {@link #confirmSetupIntentSynchronous(ConfirmSetupIntentParams)}
-     */
-    @Deprecated
-    @Nullable
-    public SetupIntent confirmSetupIntentSynchronous(
-            @NonNull ConfirmSetupIntentParams confirmSetupIntentParams,
-            @NonNull String publishableKey) throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            APIException {
-        return mStripeRepository.confirmSetupIntent(
-                confirmSetupIntentParams,
-                ApiRequest.Options.create(publishableKey, mStripeAccountId)
-        );
-    }
-
-    /**
-     * Blocking method to create a {@link PaymentMethod} object.
-     * Do not call this on the UI thread or your app will crash.
-     *
-     * @param paymentMethodCreateParams params with which to create the PaymentMethod
-     * @param publishableKey a publishable API key to use
-     *
-     * @return a {@link PaymentMethod} or {@code null} if a problem occurred
-     *
-     * @deprecated use {@link #createPaymentMethodSynchronous(PaymentMethodCreateParams)}
-     */
-    @Deprecated
-    @Nullable
-    public PaymentMethod createPaymentMethodSynchronous(
-            @NonNull PaymentMethodCreateParams paymentMethodCreateParams,
-            @NonNull String publishableKey)
-            throws AuthenticationException, InvalidRequestException, APIConnectionException,
-            APIException {
-        return mStripeRepository.createPaymentMethod(paymentMethodCreateParams,
-                ApiRequest.Options.create(publishableKey, mStripeAccountId));
     }
 
     /**
@@ -1111,24 +630,6 @@ public class Stripe {
     }
 
     /**
-     * @deprecated use {@link #createTokenSynchronous(Card)}
-     */
-    @Deprecated
-    @Nullable
-    public Token createTokenSynchronous(@NonNull final Card card, @NonNull String publishableKey)
-            throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            CardException,
-            APIException {
-        return mStripeRepository.createToken(
-                mStripeNetworkUtils.createCardTokenParams(card),
-                ApiRequest.Options.create(publishableKey, mStripeAccountId),
-                Token.TokenType.CARD
-        );
-    }
-
-    /**
      * Blocking method to create a {@link Token} for PII. Do not call this on the UI thread
      * or your app will crash. The method uses the currently set {@link #mDefaultPublishableKey}.
      *
@@ -1155,25 +656,6 @@ public class Stripe {
     }
 
     /**
-     * @deprecated use {@link #createPiiTokenSynchronous(String)}
-     */
-    @Deprecated
-    @Nullable
-    public Token createPiiTokenSynchronous(@NonNull String personalId,
-                                           @NonNull String publishableKey)
-            throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            CardException,
-            APIException {
-        return mStripeRepository.createToken(
-                new PiiTokenParams(personalId).toParamMap(),
-                ApiRequest.Options.create(publishableKey, mStripeAccountId),
-                Token.TokenType.PII
-        );
-    }
-
-    /**
      * Blocking method to create a {@link Token} for CVC updating. Do not call this on the UI thread
      * or your app will crash. The method uses the currently set {@link #mDefaultPublishableKey}.
      *
@@ -1195,25 +677,6 @@ public class Stripe {
         return mStripeRepository.createToken(
                 new CvcTokenParams(cvc).toParamMap(),
                 ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId),
-                Token.TokenType.CVC_UPDATE
-        );
-    }
-
-    /**
-     * @deprecated use {@link #createCvcUpdateTokenSynchronous(String)}
-     */
-    @Deprecated
-    @Nullable
-    public Token createCvcUpdateTokenSynchronous(@NonNull String cvc,
-                                                 @NonNull String publishableKey)
-            throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            CardException,
-            APIException {
-        return mStripeRepository.createToken(
-                new CvcTokenParams(cvc).toParamMap(),
-                ApiRequest.Options.create(publishableKey, mStripeAccountId),
                 Token.TokenType.CVC_UPDATE
         );
     }
@@ -1250,30 +713,6 @@ public class Stripe {
     }
 
     /**
-     * @deprecated use {@link #createAccountTokenSynchronous(AccountParams)}
-     */
-    @Deprecated
-    @Nullable
-    public Token createAccountTokenSynchronous(
-            @NonNull final AccountParams accountParams,
-            @NonNull String publishableKey)
-            throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            APIException {
-        try {
-            return mStripeRepository.createToken(
-                    accountParams.toParamMap(),
-                    ApiRequest.Options.create(publishableKey, mStripeAccountId),
-                    Token.TokenType.ACCOUNT
-            );
-        } catch (CardException exception) {
-            // Should never occur. CardException is only for card related requests.
-        }
-        return null;
-    }
-
-    /**
      * Retrieve an existing {@link Source} from the Stripe API. Note that this is a
      * synchronous method, and cannot be called on the main thread. Doing so will cause your app
      * to crash. This method uses the default publishable key for this {@link Stripe} instance.
@@ -1300,49 +739,6 @@ public class Stripe {
                 ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId));
     }
 
-    /**
-     * @deprecated use {@link #retrieveSourceSynchronous(String, String)}}
-     */
-    @Deprecated
-    @Nullable
-    public Source retrieveSourceSynchronous(
-            @NonNull @Size(min = 1) String sourceId,
-            @NonNull @Size(min = 1) String clientSecret,
-            @NonNull String publishableKey)
-            throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            APIException {
-        return mStripeRepository.retrieveSource(sourceId, clientSecret,
-                ApiRequest.Options.create(publishableKey, mStripeAccountId));
-    }
-
-    /**
-     * Set the default publishable key to use with this {@link Stripe} instance.
-     *
-     * @param publishableKey the key to be set
-     *
-     * @deprecated use {@link #Stripe(Context, String)}
-     */
-    @Deprecated
-    public void setDefaultPublishableKey(@NonNull @Size(min = 1) String publishableKey) {
-        mDefaultPublishableKey = mApiKeyValidator.requireValid(publishableKey);
-    }
-
-    /**
-     * Set the Stripe Connect account to use with this Stripe instance.
-     *
-     * @param stripeAccountId the account ID to be set
-     * @see <a href="https://stripe.com/docs/connect/authentication#authentication-via-the-stripe-account-header">
-     *         Authentication via the stripe account header</a>
-     *
-     * @deprecated use {@link Stripe#Stripe(Context, String, String)}
-     */
-    @Deprecated
-    public void setStripeAccount(@NonNull @Size(min = 1) String stripeAccountId) {
-        mStripeAccountId = stripeAccountId;
-    }
-
     private void createTokenFromParams(
             @NonNull final Map<String, Object> tokenParams,
             @NonNull @Size(min = 1) final String publishableKey,
@@ -1360,7 +756,7 @@ public class Stripe {
     }
 
     private static void executeTask(@Nullable Executor executor,
-                             @NonNull AsyncTask<Void, Void, ?> task) {
+                                    @NonNull AsyncTask<Void, Void, ?> task) {
         if (executor != null) {
             task.executeOnExecutor(executor);
         } else {
