@@ -24,6 +24,13 @@ import com.stripe.android.model.Token;
 import com.stripe.android.testharness.JsonTestUtils;
 import com.stripe.android.view.CardInputTestActivity;
 
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.Executor;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
@@ -33,13 +40,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.Executor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -138,92 +138,6 @@ public class StripeTest {
                 new Stripe(mContext, DEFAULT_SECRET_KEY);
             }
         });
-    }
-
-    @Test
-    public void setDefaultPublishableKeyShouldFailWhenNull() {
-        assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
-            @Override
-            public void run() {
-                new Stripe(mContext)
-                        .setDefaultPublishableKey(null);
-            }
-        });
-    }
-
-    @Test
-    public void setDefaultPublishableKeyShouldFailWhenEmpty() {
-        assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
-            @Override
-            public void run() {
-                new Stripe(mContext)
-                        .setDefaultPublishableKey("");
-            }
-        });
-    }
-
-    @Test
-    public void setDefaultPublishableKeyShouldFailWithSecretKey() {
-        assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
-            @Override
-            public void run() {
-                new Stripe(mContext)
-                        .setDefaultPublishableKey(DEFAULT_SECRET_KEY);
-            }
-        });
-    }
-
-    @Test
-    public void createTokenShouldFailWithNull() {
-        assertThrows(RuntimeException.class, new ThrowingRunnable() {
-            @Override
-            public void run() {
-                new Stripe(mContext)
-                        .createToken(null, null);
-            }
-        });
-    }
-
-    @Test
-    public void createTokenShouldFailWithNullCard() {
-        assertThrows(RuntimeException.class, new ThrowingRunnable() {
-            @Override
-            public void run() {
-                new Stripe(mContext)
-                        .createToken(null, DEFAULT_TOKEN_CALLBACK);
-            }
-        });
-    }
-
-    @Test
-    public void createTokenShouldFailWithNullTokenCallback() {
-        assertThrows(RuntimeException.class, new ThrowingRunnable() {
-            @Override
-            public void run() {
-                new Stripe(mContext)
-                        .createToken(CARD, null);
-            }
-        });
-    }
-
-    @Test
-    public void createTokenShouldFailWithNullPublishableKey() {
-        final Stripe stripe = new Stripe(mContext);
-        assertThrows(IllegalArgumentException.class,
-                new ThrowingRunnable() {
-                    @Override
-                    public void run() {
-                        stripe.createToken(CARD, new ApiResultCallback<Token>() {
-                            @Override
-                            public void onError(@NonNull Exception error) {
-                            }
-
-                            @Override
-                            public void onSuccess(@NonNull Token token) {
-                            }
-                        });
-                    }
-                });
     }
 
     @Test
@@ -1129,18 +1043,6 @@ public class StripeTest {
         );
         assertEquals("Invalid API Key provided: " + ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 authenticationException.getMessage());
-    }
-
-    @Test
-    public void createTokenSynchronous_withoutKey_shouldThrowException() {
-        final Stripe stripe = new Stripe(mContext);
-        assertThrows(IllegalArgumentException.class,
-                new ThrowingRunnable() {
-                    @Override
-                    public void run() throws Throwable {
-                        stripe.createTokenSynchronous(CARD);
-                    }
-                });
     }
 
     @Test
