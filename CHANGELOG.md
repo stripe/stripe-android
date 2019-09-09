@@ -4,14 +4,17 @@
 * [#1474](https://github.com/stripe/stripe-android/pull/1474) Fix darkmode issue with "Add an Address" form's Country selection dropdown
 * [#1475](https://github.com/stripe/stripe-android/pull/1475) Hide keyboard after submitting "Add an Address" form in standard integration
 * [#1478](https://github.com/stripe/stripe-android/pull/1478) Migrate to AndroidX
-* [#1479](https://github.com/stripe/stripe-android/pull/1479) Persist `PaymentConfiguration` to SharedPreferences
+* [#1479](https://github.com/stripe/stripe-android/pull/1479) Persist `PaymentConfiguration` to `SharedPreferences`
 * [#1480](https://github.com/stripe/stripe-android/pull/1480) Make `Source` immutable
 * [#1481](https://github.com/stripe/stripe-android/pull/1481) Remove `@Deprecated` methods from `StripeIntent` models
     * Remove `PaymentIntent#getSource()`; use `PaymentIntent#getPaymentMethodId()`
     * Remove `SetupIntent#getCustomerId()`
     * Remove `SourceCallback`; use `ApiResultCallback<Source>`
     * Remove `TokenCallback`; use `ApiResultCallback<Token>`
-* [#1485](https://github.com/stripe/stripe-android/pull/1485) Update 3DS2 SDK to 2.0.0
+* [#1485](https://github.com/stripe/stripe-android/pull/1485) Update 3DS2 SDK to 2.0.1
+* [#1494](https://github.com/stripe/stripe-android/pull/1494) Update `PaymentMethodsActivity` UX
+* [#1495](https://github.com/stripe/stripe-android/pull/1495) Remove `@Deprecated` fields and methods from `PaymentMethodsActivity`
+* [#1497](https://github.com/stripe/stripe-android/pull/1497) Remove `Stripe` methods that accept a publishable key
 
 ## 10.4.3 - 2019-09-04
 * [#1471](https://github.com/stripe/stripe-android/pull/1471) Fix issue with `CardUtils` visibility
@@ -25,7 +28,7 @@
 
 ## 10.4.0 - 2019-08-29
 * [#1421](https://github.com/stripe/stripe-android/pull/1421) Create `PaymentMethodsActivityStarter.Result` to retrieve result of `PaymentMethodsActivity`
-* [#1427](https://github.com/stripe/stripe-android/pull/1427) Mark Stripe methods that accept a publishable key as deprecated
+* [#1427](https://github.com/stripe/stripe-android/pull/1427) Mark `Stripe` methods that accept a publishable key as deprecated
     ```
     // Example
 

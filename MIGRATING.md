@@ -12,12 +12,26 @@
     PaymentConfiguration.init(context, "publishable_key")
     PaymentConfiguration.getInstance(context)
     ```
+- Remove `Stripe` methods that accept a publishable key. Pass publishable key in the `Stripe` constructor.
+    ```
+    // Example
+
+    // before
+    val stripe = Stripe(context)
+    stripe.createPaymentMethodSynchronous(params, "pk_test_demo123")
+
+    // after
+    val stripe = Stripe(context, "pk_test_demo123")
+    stripe.createPaymentMethodSynchronous(params)
+    ```
 - `Source` is immutable. All setter methods have been removed. See [#1480](https://github.com/stripe/stripe-android/pull/1480).
 - `TokenCallback` and `SourceCallback` have been removed. Use `ApiResultCallback<Token>` and `ApiResultCallback<Source>` instead. See [#1481](https://github.com/stripe/stripe-android/pull/1481).
 - `StripeIntent#getStatus()` has been removed. Use `StripeIntent#getOutcome()` instead.
 - `PaymentIntent#getSource()` has been removed. Use `PaymentIntent#getPaymentMethodId()` instead.
 - `SetupIntent#getCustomerId()` has been removed. This method was unintentionally added and always returned `null`.
 - The `samplestore` app has moved to [stripe-samples/sample-store-android](https://github.com/stripe-samples/sample-store-android).
+- Remove `PaymentMethodsActivity.newIntent()`. Use `PaymentMethodsActivityStarter#startForResult()` to start `PaymentMethodsActivity`.
+- Remove `PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT`. Use `PaymentMethodsActivityStarter.Result#fromIntent(intent)` to obtain the result of `PaymentMethodsActivity`.
 
 ### Migration from versions < 10.1.0
 - You must call `PaymentConfiguration.init()` before calling `CustomerSession.initCustomerSession()`.
