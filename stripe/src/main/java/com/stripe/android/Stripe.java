@@ -343,6 +343,8 @@ public class Stripe {
     /**
      * Create a {@link BankAccount} token asynchronously.
      *
+     * <p>See <a href="https://stripe.com/docs/api/tokens/create_bank_account">Create a bank account token</a>.</p>
+     *
      * @param bankAccount the {@link BankAccount} used to create this token
      * @param callback a {@link ApiResultCallback} to receive either the token or an error
      */
@@ -363,6 +365,8 @@ public class Stripe {
     /**
      * Create a PII token asynchronously.
      *
+     * <p>See <a href="https://stripe.com/docs/api/tokens/create_pii">Create a PII account token</a>.</p>
+     *
      * @param personalId the personal id used to create this token
      * @param callback a {@link ApiResultCallback} to receive either the token or an error
      */
@@ -381,7 +385,7 @@ public class Stripe {
      * Blocking method to create a {@link Token} for a {@link BankAccount}. Do not call this on
      * the UI thread or your app will crash.
      *
-     * This method uses the default publishable key for this {@link Stripe} instance.
+     * <p>See <a href="https://stripe.com/docs/api/tokens/create_bank_account">Create a bank account token</a>.</p>
      *
      * @param bankAccount the {@link Card} to use for this token
      * @return a {@link Token} that can be used for this {@link BankAccount}
@@ -430,6 +434,8 @@ public class Stripe {
     /**
      * Create a {@link Source} asynchronously.
      *
+     * <p>See <a href="https://stripe.com/docs/api/sources/create">Create a source</a>.</p>
+     *
      * @param sourceParams the {@link SourceParams} to be used
      * @param callback a {@link ApiResultCallback} to receive a result or an error message
      */
@@ -442,6 +448,8 @@ public class Stripe {
 
     /**
      * Create a {@link PaymentMethod} asynchronously.
+     *
+     * <p>See <a href="https://stripe.com/docs/api/payment_methods/create">Create a PaymentMethod</a>.</p>
      *
      * @param paymentMethodCreateParams the {@link PaymentMethodCreateParams} to be used
      * @param callback a {@link ApiResultCallback} to receive a result or an error
@@ -457,6 +465,8 @@ public class Stripe {
 
     /**
      * Create a Card token asynchronously.
+     *
+     * <p>See <a href="https://stripe.com/docs/api/tokens/create_card">Create a card token</a>.</p>
      *
      * @param card the {@link Card} used to create this payment token
      * @param callback a {@link ApiResultCallback} to receive either the token or an error
@@ -474,6 +484,8 @@ public class Stripe {
 
     /**
      * Call to create a {@link Token} on a specific {@link Executor}.
+     *
+     * <p>See <a href="https://stripe.com/docs/api/tokens/create_card">Create a card token</a>.</p>
      *
      * @param card the {@link Card} to use for this token creation
      * @param executor An {@link Executor} on which to run this operation. If you don't wish to
@@ -494,10 +506,10 @@ public class Stripe {
     }
 
     /**
-     * Blocking method to create a {@link Source} object using this object's
-     * {@link Stripe#mDefaultPublishableKey key}.
-     *
+     * Blocking method to create a {@link Source} object.
      * Do not call this on the UI thread or your app will crash.
+     *
+     * <p>See <a href="https://stripe.com/docs/api/sources/create">Create a source</a>.</p>
      *
      * @param params a set of {@link SourceParams} with which to create the source
      * @return a {@link Source}, or {@code null} if a problem occurred
@@ -521,6 +533,8 @@ public class Stripe {
      * Blocking method to retrieve a {@link PaymentIntent} object.
      * Do not call this on the UI thread or your app will crash.
      *
+     * <p>See <a href="https://stripe.com/docs/api/payment_intents/retrieve">Retrieve a PaymentIntent</a>.</p>
+     *
      * @param clientSecret the client_secret with which to retrieve the PaymentIntent
      * @return a {@link PaymentIntent} or {@code null} if a problem occurred
      */
@@ -535,6 +549,14 @@ public class Stripe {
     }
 
     /**
+     * Blocking method to confirm a {@link PaymentIntent} object.
+     * Do not call this on the UI thread or your app will crash.
+     *
+     * <p>See <a href="https://stripe.com/docs/api/payment_intents/confirm">Confirm a PaymentIntent</a>.</p>
+     *
+     * @param confirmPaymentIntentParams a set of params with which to confirm the PaymentIntent
+     * @return a {@link PaymentIntent} or {@code null} if a problem occurred
+     *
      * @deprecated use {@link #confirmPayment(Activity, ConfirmPaymentIntentParams)}
      */
     @Nullable
@@ -551,6 +573,8 @@ public class Stripe {
     /**
      * Blocking method to retrieve a {@link SetupIntent} object.
      * Do not call this on the UI thread or your app will crash.
+     *
+     * <p>See <a href="https://stripe.com/docs/api/setup_intents/retrieve">Retrieve a SetupIntent</a>.</p>
      *
      * @param clientSecret client_secret of the SetupIntent to retrieve
      * @return a {@link SetupIntent} or {@code null} if a problem occurred
@@ -569,8 +593,12 @@ public class Stripe {
      * Blocking method to confirm a {@link SetupIntent} object.
      * Do not call this on the UI thread or your app will crash.
      *
+     * <p>See <a href="https://stripe.com/docs/api/setup_intents/confirm">Confirm a SetupIntent</a>.</p>
+     *
      * @param confirmSetupIntentParams a set of params with which to confirm the Setup Intent
      * @return a {@link SetupIntent} or {@code null} if a problem occurred
+     *
+     * @deprecated use {@link #confirmSetupIntent(Activity, ConfirmSetupIntentParams)}
      */
     @Nullable
     public SetupIntent confirmSetupIntentSynchronous(
@@ -589,6 +617,8 @@ public class Stripe {
      * Blocking method to create a {@link PaymentMethod} object.
      * Do not call this on the UI thread or your app will crash.
      *
+     * <p>See <a href="https://stripe.com/docs/api/payment_methods/create">Create a PaymentMethod</a>.</p>
+     *
      * @param paymentMethodCreateParams params with which to create the PaymentMethod
      *
      * @return a {@link PaymentMethod} or {@code null} if a problem occurred
@@ -604,7 +634,9 @@ public class Stripe {
 
     /**
      * Blocking method to create a {@link Token}. Do not call this on the UI thread or your app
-     * will crash. This method uses the default publishable key for this {@link Stripe} instance.
+     * will crash.
+     *
+     * <p>See <a href="https://stripe.com/docs/api/tokens/create_card">Create a card token</a>.</p>
      *
      * @param card the {@link Card} to use for this token
      * @return a {@link Token} that can be used for this card
@@ -631,7 +663,9 @@ public class Stripe {
 
     /**
      * Blocking method to create a {@link Token} for PII. Do not call this on the UI thread
-     * or your app will crash. The method uses the currently set {@link #mDefaultPublishableKey}.
+     * or your app will crash.
+     *
+     * <p>See <a href="https://stripe.com/docs/api/tokens/create_pii">Create a PII account token</a>.</p>
      *
      * @param personalId the personal ID to use for this token
      * @return a {@link Token} that can be used for this card
@@ -657,7 +691,7 @@ public class Stripe {
 
     /**
      * Blocking method to create a {@link Token} for CVC updating. Do not call this on the UI thread
-     * or your app will crash. The method uses the currently set {@link #mDefaultPublishableKey}.
+     * or your app will crash.
      *
      * @param cvc the CVC to use for this token
      * @return a {@link Token} that can be used for this card
@@ -683,8 +717,9 @@ public class Stripe {
 
     /**
      * Blocking method to create a {@link Token} for a Connect Account. Do not call this on the UI
-     * thread or your app will crash. The method uses the currently set
-     * {@link #mDefaultPublishableKey}.
+     * thread or your app will crash.
+     *
+     * <p>See <a href="https://stripe.com/docs/api/tokens/create_account">Create an account token</a>.</p>
      *
      * @param accountParams params to use for this token.
      * @return a {@link Token} that can be used for this account.
@@ -715,7 +750,9 @@ public class Stripe {
     /**
      * Retrieve an existing {@link Source} from the Stripe API. Note that this is a
      * synchronous method, and cannot be called on the main thread. Doing so will cause your app
-     * to crash. This method uses the default publishable key for this {@link Stripe} instance.
+     * to crash.
+     *
+     * <p>See <a href="https://stripe.com/docs/api/sources/retrieve">Retrieve a source</a>.</p>
      *
      * @param sourceId the {@link Source#getId()} field of the desired Source object
      * @param clientSecret the {@link Source#getClientSecret()} field of the desired Source object
