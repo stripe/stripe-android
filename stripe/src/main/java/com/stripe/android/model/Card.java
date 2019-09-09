@@ -643,7 +643,7 @@ public final class Card extends StripeModel implements StripePaymentSource {
         if (!validateExpMonth()) {
             return false;
         }
-        if (!validateExpYear(now)) {
+        if (expYear == null || !validateExpYear(now)) {
             return false;
         }
         return !ModelUtils.hasMonthPassed(expYear, expMonth, now);
