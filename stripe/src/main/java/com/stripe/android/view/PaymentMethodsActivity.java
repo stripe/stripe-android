@@ -1,6 +1,5 @@
 package com.stripe.android.view;
 
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -32,20 +31,19 @@ import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
 import static com.stripe.android.view.AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD;
 
 /**
- * An activity that allows a user to select from a customer's available payment methods, or
- * to add new ones.
+ * <p>An activity that allows a customer to select from their attach payment methods,
+ * or to add new ones.</p>
+ *
+ * <p>This Activity is typically started through {@link com.stripe.android.PaymentSession}.
+ * To directly start this activity, use {@link PaymentMethodsActivityStarter#startForResult()}.</p>
+ *
+ * <p>Use {@link PaymentMethodsActivityStarter.Result#fromIntent(Intent)}
+ * to retrieve the result of this activity from an intent in onActivityResult().</p>
  */
 public class PaymentMethodsActivity extends AppCompatActivity {
 
     private static final String STATE_SELECTED_PAYMENT_METHOD_ID =
             "state_selected_payment_method_id";
-
-    /**
-     * @deprecated use {@link PaymentMethodsActivityStarter.Result#fromIntent(Intent)}
-     * to retrieve the result of this activity from an intent.
-     */
-    @Deprecated
-    public static final String EXTRA_SELECTED_PAYMENT = "selected_payment";
 
     public static final String TOKEN_PAYMENT_METHODS_ACTIVITY = "PaymentMethodsActivity";
 
@@ -54,15 +52,6 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     private ProgressBar mProgressBar;
     private boolean mStartedFromPaymentSession;
     private CustomerSession mCustomerSession;
-
-    /**
-     * @deprecated use {@link PaymentMethodsActivityStarter#newIntent()}
-     */
-    @Deprecated
-    @NonNull
-    public static Intent newIntent(@NonNull Activity activity) {
-        return new PaymentMethodsActivityStarter(activity).newIntent();
-    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -228,7 +217,6 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
     private void finishWithPaymentMethod(@NonNull PaymentMethod paymentMethod) {
         setResult(RESULT_OK, new Intent()
-                .putExtra(EXTRA_SELECTED_PAYMENT, paymentMethod)
                 .putExtras(new PaymentMethodsActivityStarter.Result(paymentMethod).toBundle())
         );
         finish();
