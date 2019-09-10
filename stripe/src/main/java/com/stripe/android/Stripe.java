@@ -265,7 +265,8 @@ public class Stripe {
             mPaymentController.handlePaymentResult(
                     data,
                     ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId),
-                    callback);
+                    callback
+            );
             return true;
         }
 
@@ -576,7 +577,6 @@ public class Stripe {
         createTokenFromParams(
                 params,
                 Token.TokenType.BANK_ACCOUNT,
-                null,
                 callback
         );
     }
@@ -627,8 +627,8 @@ public class Stripe {
         createTokenFromParams(
                 new PiiTokenParams(personalId).toParamMap(),
                 Token.TokenType.PII,
-                null,
-                callback);
+                callback
+        );
     }
 
     /**
@@ -672,29 +672,6 @@ public class Stripe {
         createTokenFromParams(
                 mStripeNetworkUtils.createCardTokenParams(card),
                 Token.TokenType.CARD,
-                null,
-                callback
-        );
-    }
-
-    /**
-     * Call to create a {@link Token} on a specific {@link Executor}.
-     *
-     * <p>See <a href="https://stripe.com/docs/api/tokens/create_card">Create a card token</a>.</p>
-     *
-     * @param card the {@link Card} to use for this token creation
-     * @param executor An {@link Executor} on which to run this operation. If you don't wish to
-     *         specify an executor, use one of the other createTokenFromParams methods.
-     * @param callback a {@link ApiResultCallback} to receive the result or error
-     */
-    public void createToken(
-            @NonNull final Card card,
-            @NonNull final Executor executor,
-            @NonNull final ApiResultCallback<Token> callback) {
-        createTokenFromParams(
-                mStripeNetworkUtils.createCardTokenParams(card),
-                Token.TokenType.CARD,
-                executor,
                 callback
         );
     }
@@ -740,7 +717,6 @@ public class Stripe {
         createTokenFromParams(
                 new CvcTokenParams(cvc).toParamMap(),
                 Token.TokenType.CVC_UPDATE,
-                null,
                 callback
         );
     }
@@ -806,7 +782,6 @@ public class Stripe {
     private void createTokenFromParams(
             @NonNull final Map<String, Object> tokenParams,
             @NonNull @Token.TokenType final String tokenType,
-            @Nullable final Executor executor,
             @NonNull final ApiResultCallback<Token> callback) {
         Objects.requireNonNull(callback,
                     "Required Parameter: 'callback' is required to use the created " +
@@ -815,7 +790,9 @@ public class Stripe {
                 tokenParams,
                 ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId),
                 tokenType,
-                executor, callback);
+                null,
+                callback
+        );
     }
 
     private static void executeTask(@Nullable Executor executor,
