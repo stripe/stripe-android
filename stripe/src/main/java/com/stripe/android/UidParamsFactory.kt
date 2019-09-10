@@ -8,11 +8,12 @@ internal class UidParamsFactory constructor(
 ) {
     fun createParams(): Map<String, String> {
         val guid = uidSupplier.get().value
-        if (StripeTextUtils.isBlank(guid)) {
-            return emptyMap()
-        }
 
-        return createGuid(guid).plus(createMuid(guid))
+        return if (guid.isNotBlank()) {
+            createGuid(guid).plus(createMuid(guid))
+        } else {
+            emptyMap()
+        }
     }
 
     private fun createGuid(guid: String): Map<String, String> {

@@ -32,11 +32,6 @@ public class StripeTextUtils {
         return value;
     }
 
-    @NonNull
-    public static String emptyIfNull(@Nullable String value) {
-        return value != null ? value : "";
-    }
-
     /**
      * A checker for whether or not the input value is entirely whitespace. This is slightly more
      * aggressive than the android TextUtils#isEmpty method, which only returns true for

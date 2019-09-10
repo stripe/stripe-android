@@ -219,7 +219,7 @@ internal open class PaymentController @VisibleForTesting constructor(
                                 AnalyticsRequest.create(
                                     analyticsDataFactory.createAuthParams(
                                         AnalyticsDataFactory.EventName.AUTH_3DS2_FINGERPRINT,
-                                        StripeTextUtils.emptyIfNull(stripeIntent.id),
+                                        stripeIntent.id.orEmpty(),
                                         requestOptions.apiKey
                                     ),
                                     requestOptions
@@ -245,7 +245,7 @@ internal open class PaymentController @VisibleForTesting constructor(
                         AnalyticsRequest.create(
                             analyticsDataFactory.createAuthParams(
                                 AnalyticsDataFactory.EventName.AUTH_REDIRECT,
-                                StripeTextUtils.emptyIfNull(stripeIntent.id),
+                                stripeIntent.id.orEmpty(),
                                 requestOptions.apiKey),
                             requestOptions
                         )
@@ -313,7 +313,7 @@ internal open class PaymentController @VisibleForTesting constructor(
         )
         stripeRepository.start3ds2Auth(
             authParams,
-            StripeTextUtils.emptyIfNull(stripeIntent.id),
+            stripeIntent.id.orEmpty(),
             requestOptions,
             Stripe3ds2AuthCallback(host, stripeRepository, transaction, timeout,
                 stripeIntent, stripe3ds2Fingerprint.source, requestOptions,
@@ -455,7 +455,7 @@ internal open class PaymentController @VisibleForTesting constructor(
                 AnalyticsRequest.create(
                     analyticsDataFactory.createAuthParams(
                         AnalyticsDataFactory.EventName.AUTH_3DS2_FRICTIONLESS,
-                        StripeTextUtils.emptyIfNull(stripeIntent.id),
+                        stripeIntent.id.orEmpty(),
                         requestOptions.apiKey),
                     requestOptions
                 )
@@ -483,30 +483,30 @@ internal open class PaymentController @VisibleForTesting constructor(
     }
 
     internal class PaymentAuth3ds2ChallengeStatusReceiver(
-        private val mStripeRepository: StripeRepository,
-        private val mStripeIntent: StripeIntent,
-        private val mSourceId: String,
-        private val mRequestOptions: ApiRequest.Options,
-        private val mAnalyticsRequestExecutor: FireAndForgetRequestExecutor,
-        private val mAnalyticsDataFactory: AnalyticsDataFactory,
-        private val mTransaction: Transaction,
-        private val mComplete3ds2AuthCallbackFactory: Complete3ds2AuthCallbackFactory
+        private val stripeRepository: StripeRepository,
+        private val stripeIntent: StripeIntent,
+        private val sourceId: String,
+        private val requestOptions: ApiRequest.Options,
+        private val analyticsRequestExecutor: FireAndForgetRequestExecutor,
+        private val analyticsDataFactory: AnalyticsDataFactory,
+        private val transaction: Transaction,
+        private val complete3ds2AuthCallbackFactory: Complete3ds2AuthCallbackFactory
     ) : StripeChallengeStatusReceiver() {
 
         override fun completed(completionEvent: CompletionEvent, uiTypeCode: String) {
             super.completed(completionEvent, uiTypeCode)
-            mAnalyticsRequestExecutor.executeAsync(
+            analyticsRequestExecutor.executeAsync(
                 AnalyticsRequest.create(
-                    mAnalyticsDataFactory.create3ds2ChallengeParams(
+                    analyticsDataFactory.create3ds2ChallengeParams(
                         AnalyticsDataFactory.EventName.AUTH_3DS2_CHALLENGE_COMPLETED,
-                        StripeTextUtils.emptyIfNull(mStripeIntent.id),
+                        stripeIntent.id.orEmpty(),
                         uiTypeCode,
-                        mRequestOptions.apiKey
+                        requestOptions.apiKey
                     ),
-                    mRequestOptions
+                    requestOptions
                 )
             )
-            notifyCompletion(Stripe3ds2CompletionStarter.StartData(mStripeIntent,
+            notifyCompletion(Stripe3ds2CompletionStarter.StartData(stripeIntent,
                 if (VALUE_YES == completionEvent.transactionStatus)
                     Stripe3ds2CompletionStarter.ChallengeFlowOutcome.COMPLETE_SUCCESSFUL
                 else
@@ -516,86 +516,85 @@ internal open class PaymentController @VisibleForTesting constructor(
 
         override fun cancelled(uiTypeCode: String) {
             super.cancelled(uiTypeCode)
-            mAnalyticsRequestExecutor.executeAsync(
+            analyticsRequestExecutor.executeAsync(
                 AnalyticsRequest.create(
-                    mAnalyticsDataFactory.create3ds2ChallengeParams(
+                    analyticsDataFactory.create3ds2ChallengeParams(
                         AnalyticsDataFactory.EventName.AUTH_3DS2_CHALLENGE_CANCELED,
-                        StripeTextUtils.emptyIfNull(mStripeIntent.id),
+                        stripeIntent.id.orEmpty(),
                         uiTypeCode,
-                        mRequestOptions.apiKey
+                        requestOptions.apiKey
                     ),
-                    mRequestOptions
+                    requestOptions
                 )
             )
-            notifyCompletion(Stripe3ds2CompletionStarter.StartData(mStripeIntent,
+            notifyCompletion(Stripe3ds2CompletionStarter.StartData(stripeIntent,
                 Stripe3ds2CompletionStarter.ChallengeFlowOutcome.CANCEL))
         }
 
         override fun timedout(uiTypeCode: String) {
             super.timedout(uiTypeCode)
-            mAnalyticsRequestExecutor.executeAsync(
+            analyticsRequestExecutor.executeAsync(
                 AnalyticsRequest.create(
-                    mAnalyticsDataFactory.create3ds2ChallengeParams(
+                    analyticsDataFactory.create3ds2ChallengeParams(
                         AnalyticsDataFactory.EventName.AUTH_3DS2_CHALLENGE_TIMEDOUT,
-                        StripeTextUtils.emptyIfNull(mStripeIntent.id),
+                        stripeIntent.id.orEmpty(),
                         uiTypeCode,
-                        mRequestOptions.apiKey
+                        requestOptions.apiKey
                     ),
-                    mRequestOptions
+                    requestOptions
                 )
             )
-            notifyCompletion(Stripe3ds2CompletionStarter.StartData(mStripeIntent,
+            notifyCompletion(Stripe3ds2CompletionStarter.StartData(stripeIntent,
                 Stripe3ds2CompletionStarter.ChallengeFlowOutcome.TIMEOUT))
         }
 
         override fun protocolError(protocolErrorEvent: ProtocolErrorEvent) {
             super.protocolError(protocolErrorEvent)
-            mAnalyticsRequestExecutor.executeAsync(
+            analyticsRequestExecutor.executeAsync(
                 AnalyticsRequest.create(
-                    mAnalyticsDataFactory.create3ds2ChallengeErrorParams(
-                        StripeTextUtils.emptyIfNull(mStripeIntent.id),
+                    analyticsDataFactory.create3ds2ChallengeErrorParams(
+                        stripeIntent.id.orEmpty(),
                         protocolErrorEvent,
-                        mRequestOptions.apiKey
+                        requestOptions.apiKey
                     ),
-                    mRequestOptions
+                    requestOptions
                 )
             )
-            notifyCompletion(Stripe3ds2CompletionStarter.StartData(mStripeIntent,
+            notifyCompletion(Stripe3ds2CompletionStarter.StartData(stripeIntent,
                 Stripe3ds2CompletionStarter.ChallengeFlowOutcome.PROTOCOL_ERROR))
         }
 
         override fun runtimeError(runtimeErrorEvent: RuntimeErrorEvent) {
             super.runtimeError(runtimeErrorEvent)
-            mAnalyticsRequestExecutor.executeAsync(
+            analyticsRequestExecutor.executeAsync(
                 AnalyticsRequest.create(
-                    mAnalyticsDataFactory.create3ds2ChallengeErrorParams(
-                        StripeTextUtils.emptyIfNull(mStripeIntent.id),
+                    analyticsDataFactory.create3ds2ChallengeErrorParams(
+                        stripeIntent.id.orEmpty(),
                         runtimeErrorEvent,
-                        mRequestOptions.apiKey
+                        requestOptions.apiKey
                     ),
-                    mRequestOptions
+                    requestOptions
                 )
             )
-            notifyCompletion(Stripe3ds2CompletionStarter.StartData(mStripeIntent,
+            notifyCompletion(Stripe3ds2CompletionStarter.StartData(stripeIntent,
                 Stripe3ds2CompletionStarter.ChallengeFlowOutcome.RUNTIME_ERROR))
         }
 
         private fun notifyCompletion(startData: Stripe3ds2CompletionStarter.StartData) {
-            mAnalyticsRequestExecutor.executeAsync(
+            analyticsRequestExecutor.executeAsync(
                 AnalyticsRequest.create(
-                    mAnalyticsDataFactory.create3ds2ChallengeParams(
+                    analyticsDataFactory.create3ds2ChallengeParams(
                         AnalyticsDataFactory.EventName.AUTH_3DS2_CHALLENGE_PRESENTED,
-                        StripeTextUtils.emptyIfNull(mStripeIntent.id),
-                        StripeTextUtils.emptyIfNull(
-                            mTransaction.initialChallengeUiType),
-                        mRequestOptions.apiKey
+                        stripeIntent.id.orEmpty(),
+                        transaction.initialChallengeUiType.orEmpty(),
+                        requestOptions.apiKey
                     ),
-                    mRequestOptions
+                    requestOptions
                 )
             )
 
-            mStripeRepository.complete3ds2Auth(mSourceId, mRequestOptions,
-                mComplete3ds2AuthCallbackFactory.create(startData))
+            stripeRepository.complete3ds2Auth(sourceId, requestOptions,
+                complete3ds2AuthCallbackFactory.create(startData))
         }
 
         internal interface Complete3ds2AuthCallbackFactory :

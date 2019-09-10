@@ -333,7 +333,7 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
             nameString = null
         }
 
-        if (StripeTextUtils.isBlank(nameString)) {
+        if (nameString.isNullOrBlank()) {
             paramsObject[FIELD_APP_NAME] = info.packageName
         }
 
