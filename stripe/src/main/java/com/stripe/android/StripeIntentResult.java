@@ -75,13 +75,13 @@ public abstract class StripeIntentResult<T extends StripeIntent> {
     }
 
     private boolean typedEquals(@NonNull StripeIntentResult setupIntentResult) {
-        return ObjectUtils.equals(mStripeIntent, setupIntentResult.mStripeIntent)
-                && ObjectUtils.equals(mOutcome, setupIntentResult.mOutcome);
+        return Objects.equals(mStripeIntent, setupIntentResult.mStripeIntent)
+                && Objects.equals(mOutcome, setupIntentResult.mOutcome);
     }
 
     @Override
     public final int hashCode() {
-        return ObjectUtils.hash(mStripeIntent, mOutcome);
+        return Objects.hash(mStripeIntent, mOutcome);
     }
 
     /**

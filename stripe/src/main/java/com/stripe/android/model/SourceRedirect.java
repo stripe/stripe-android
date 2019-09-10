@@ -5,10 +5,9 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringDef;
 import androidx.annotation.VisibleForTesting;
 
-import com.stripe.android.utils.ObjectUtils;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -110,13 +109,13 @@ public final class SourceRedirect extends StripeModel {
     }
 
     private boolean typedEquals(@NonNull SourceRedirect sourceRedirect) {
-        return ObjectUtils.equals(mReturnUrl, sourceRedirect.mReturnUrl)
-                && ObjectUtils.equals(mStatus, sourceRedirect.mStatus)
-                && ObjectUtils.equals(mUrl, sourceRedirect.mUrl);
+        return Objects.equals(mReturnUrl, sourceRedirect.mReturnUrl)
+                && Objects.equals(mStatus, sourceRedirect.mStatus)
+                && Objects.equals(mUrl, sourceRedirect.mUrl);
     }
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mReturnUrl, mStatus, mUrl);
+        return Objects.hash(mReturnUrl, mStatus, mUrl);
     }
 }

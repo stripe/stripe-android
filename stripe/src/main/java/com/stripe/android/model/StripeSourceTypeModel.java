@@ -4,12 +4,11 @@ import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.stripe.android.utils.ObjectUtils;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.json.JSONObject;
@@ -67,12 +66,12 @@ public abstract class StripeSourceTypeModel extends StripeModel {
 
     @CallSuper
     boolean typedEquals(@NonNull StripeSourceTypeModel model) {
-        return ObjectUtils.equals(mAdditionalFields, model.mAdditionalFields);
+        return Objects.equals(mAdditionalFields, model.mAdditionalFields);
     }
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mAdditionalFields);
+        return Objects.hash(mAdditionalFields);
     }
 
     abstract static class BaseBuilder {

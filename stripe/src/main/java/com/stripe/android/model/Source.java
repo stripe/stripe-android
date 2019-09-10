@@ -5,8 +5,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.Size;
 import androidx.annotation.StringDef;
 
-import com.stripe.android.utils.ObjectUtils;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
@@ -538,30 +536,30 @@ public final class Source extends StripeModel implements StripePaymentSource {
     }
 
     private boolean typedEquals(@NonNull Source source) {
-        return ObjectUtils.equals(mId, source.mId)
-                && ObjectUtils.equals(mAmount, source.mAmount)
-                && ObjectUtils.equals(mClientSecret, source.mClientSecret)
-                && ObjectUtils.equals(mCodeVerification, source.mCodeVerification)
-                && ObjectUtils.equals(mCreated, source.mCreated)
-                && ObjectUtils.equals(mCurrency, source.mCurrency)
-                && ObjectUtils.equals(mTypeRaw, source.mTypeRaw)
-                && ObjectUtils.equals(mFlow, source.mFlow)
-                && ObjectUtils.equals(mLiveMode, source.mLiveMode)
-                && ObjectUtils.equals(mMetaData, source.mMetaData)
-                && ObjectUtils.equals(mOwner, source.mOwner)
-                && ObjectUtils.equals(mReceiver, source.mReceiver)
-                && ObjectUtils.equals(mRedirect, source.mRedirect)
-                && ObjectUtils.equals(mStatus, source.mStatus)
-                && ObjectUtils.equals(mSourceTypeData, source.mSourceTypeData)
-                && ObjectUtils.equals(mSourceTypeModel, source.mSourceTypeModel)
-                && ObjectUtils.equals(mType, source.mType)
-                && ObjectUtils.equals(mUsage, source.mUsage)
-                && ObjectUtils.equals(mWeChat, source.mWeChat);
+        return Objects.equals(mId, source.mId)
+                && Objects.equals(mAmount, source.mAmount)
+                && Objects.equals(mClientSecret, source.mClientSecret)
+                && Objects.equals(mCodeVerification, source.mCodeVerification)
+                && Objects.equals(mCreated, source.mCreated)
+                && Objects.equals(mCurrency, source.mCurrency)
+                && Objects.equals(mTypeRaw, source.mTypeRaw)
+                && Objects.equals(mFlow, source.mFlow)
+                && Objects.equals(mLiveMode, source.mLiveMode)
+                && Objects.equals(mMetaData, source.mMetaData)
+                && Objects.equals(mOwner, source.mOwner)
+                && Objects.equals(mReceiver, source.mReceiver)
+                && Objects.equals(mRedirect, source.mRedirect)
+                && Objects.equals(mStatus, source.mStatus)
+                && Objects.equals(mSourceTypeData, source.mSourceTypeData)
+                && Objects.equals(mSourceTypeModel, source.mSourceTypeModel)
+                && Objects.equals(mType, source.mType)
+                && Objects.equals(mUsage, source.mUsage)
+                && Objects.equals(mWeChat, source.mWeChat);
     }
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mId, mAmount, mClientSecret, mCodeVerification, mCreated, mCurrency,
+        return Objects.hash(mId, mAmount, mClientSecret, mCodeVerification, mCreated, mCurrency,
                 mTypeRaw, mFlow, mLiveMode, mMetaData, mOwner, mReceiver, mRedirect, mStatus,
                 mSourceTypeData, mSourceTypeModel, mType, mUsage);
     }

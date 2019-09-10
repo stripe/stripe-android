@@ -6,7 +6,7 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.stripe.android.utils.ObjectUtils;
+import java.util.Objects;
 
 import org.json.JSONObject;
 
@@ -42,7 +42,7 @@ public final class VisaCheckoutWallet extends Wallet {
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(billingAddress, email, name, shippingAddress);
+        return Objects.hash(billingAddress, email, name, shippingAddress);
     }
 
     @Override
@@ -52,10 +52,10 @@ public final class VisaCheckoutWallet extends Wallet {
     }
 
     private boolean typedEquals(@NonNull VisaCheckoutWallet wallet) {
-        return ObjectUtils.equals(billingAddress, wallet.billingAddress)
-                && ObjectUtils.equals(email, wallet.email)
-                && ObjectUtils.equals(name, wallet.name)
-                && ObjectUtils.equals(shippingAddress, wallet.shippingAddress);
+        return Objects.equals(billingAddress, wallet.billingAddress)
+                && Objects.equals(email, wallet.email)
+                && Objects.equals(name, wallet.name)
+                && Objects.equals(shippingAddress, wallet.shippingAddress);
     }
 
     public static final class Builder extends Wallet.Builder<VisaCheckoutWallet> {

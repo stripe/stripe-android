@@ -6,10 +6,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.stripe.android.ObjectBuilder;
-import com.stripe.android.utils.ObjectUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -422,31 +422,31 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
     }
 
     private boolean typedEquals(@NonNull PaymentIntent paymentIntent) {
-        return ObjectUtils.equals(mId, paymentIntent.mId)
-                && ObjectUtils.equals(mObjectType, paymentIntent.mObjectType)
-                && ObjectUtils.equals(mAmount, paymentIntent.mAmount)
-                && ObjectUtils.equals(mCanceledAt, paymentIntent.mCanceledAt)
-                && ObjectUtils.equals(mCancellationReason, paymentIntent.mCancellationReason)
-                && ObjectUtils.equals(mCaptureMethod, paymentIntent.mCaptureMethod)
-                && ObjectUtils.equals(mClientSecret, paymentIntent.mClientSecret)
-                && ObjectUtils.equals(mConfirmationMethod, paymentIntent.mConfirmationMethod)
-                && ObjectUtils.equals(mCreated, paymentIntent.mCreated)
-                && ObjectUtils.equals(mCurrency, paymentIntent.mCurrency)
-                && ObjectUtils.equals(mDescription, paymentIntent.mDescription)
-                && ObjectUtils.equals(mLiveMode, paymentIntent.mLiveMode)
-                && ObjectUtils.equals(mPaymentMethodId, paymentIntent.mPaymentMethodId)
-                && ObjectUtils.equals(mReceiptEmail, paymentIntent.mReceiptEmail)
-                && ObjectUtils.equals(mStatus, paymentIntent.mStatus)
-                && ObjectUtils.equals(mSetupFutureUsage, paymentIntent.mSetupFutureUsage)
-                && ObjectUtils.equals(mPaymentMethodTypes, paymentIntent.mPaymentMethodTypes)
-                && ObjectUtils.equals(mNextAction, paymentIntent.mNextAction)
-                && ObjectUtils.equals(mNextActionType, paymentIntent.mNextActionType)
-                && ObjectUtils.equals(mLastPaymentError, paymentIntent.mLastPaymentError);
+        return Objects.equals(mId, paymentIntent.mId)
+                && Objects.equals(mObjectType, paymentIntent.mObjectType)
+                && Objects.equals(mAmount, paymentIntent.mAmount)
+                && Objects.equals(mCanceledAt, paymentIntent.mCanceledAt)
+                && Objects.equals(mCancellationReason, paymentIntent.mCancellationReason)
+                && Objects.equals(mCaptureMethod, paymentIntent.mCaptureMethod)
+                && Objects.equals(mClientSecret, paymentIntent.mClientSecret)
+                && Objects.equals(mConfirmationMethod, paymentIntent.mConfirmationMethod)
+                && Objects.equals(mCreated, paymentIntent.mCreated)
+                && Objects.equals(mCurrency, paymentIntent.mCurrency)
+                && Objects.equals(mDescription, paymentIntent.mDescription)
+                && Objects.equals(mLiveMode, paymentIntent.mLiveMode)
+                && Objects.equals(mPaymentMethodId, paymentIntent.mPaymentMethodId)
+                && Objects.equals(mReceiptEmail, paymentIntent.mReceiptEmail)
+                && Objects.equals(mStatus, paymentIntent.mStatus)
+                && Objects.equals(mSetupFutureUsage, paymentIntent.mSetupFutureUsage)
+                && Objects.equals(mPaymentMethodTypes, paymentIntent.mPaymentMethodTypes)
+                && Objects.equals(mNextAction, paymentIntent.mNextAction)
+                && Objects.equals(mNextActionType, paymentIntent.mNextActionType)
+                && Objects.equals(mLastPaymentError, paymentIntent.mLastPaymentError);
     }
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mId, mObjectType, mAmount, mCanceledAt, mCancellationReason,
+        return Objects.hash(mId, mObjectType, mAmount, mCanceledAt, mCancellationReason,
                 mCaptureMethod, mClientSecret, mConfirmationMethod, mCreated, mCurrency,
                 mDescription, mLiveMode, mReceiptEmail, mStatus, mPaymentMethodTypes,
                 mNextAction, mNextActionType, mPaymentMethodId, mSetupFutureUsage,
@@ -547,7 +547,7 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(charge, code, declineCode, docUrl, message, param,
+            return Objects.hash(charge, code, declineCode, docUrl, message, param,
                     paymentMethod, type);
         }
 
@@ -557,14 +557,14 @@ public final class PaymentIntent extends StripeModel implements StripeIntent {
         }
 
         private boolean typedEquals(@NonNull Error error) {
-            return ObjectUtils.equals(charge, error.charge) &&
-                    ObjectUtils.equals(code, error.code) &&
-                    ObjectUtils.equals(declineCode, error.declineCode) &&
-                    ObjectUtils.equals(docUrl, error.docUrl) &&
-                    ObjectUtils.equals(message, error.message) &&
-                    ObjectUtils.equals(param, error.param) &&
-                    ObjectUtils.equals(paymentMethod, error.paymentMethod) &&
-                    ObjectUtils.equals(type, error.type);
+            return Objects.equals(charge, error.charge) &&
+                    Objects.equals(code, error.code) &&
+                    Objects.equals(declineCode, error.declineCode) &&
+                    Objects.equals(docUrl, error.docUrl) &&
+                    Objects.equals(message, error.message) &&
+                    Objects.equals(param, error.param) &&
+                    Objects.equals(paymentMethod, error.paymentMethod) &&
+                    Objects.equals(type, error.type);
         }
 
         private static final class Builder implements ObjectBuilder<Error> {

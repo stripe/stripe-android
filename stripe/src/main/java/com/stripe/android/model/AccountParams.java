@@ -3,10 +3,9 @@ package com.stripe.android.model;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.stripe.android.utils.ObjectUtils;
-
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Represents a grouping of parameters needed to create a Token for a Connect account on the server.
@@ -76,7 +75,7 @@ public final class AccountParams implements StripeParamsModel {
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mTosShownAndAccepted, mBusinessType, mBusinessData);
+        return Objects.hash(mTosShownAndAccepted, mBusinessType, mBusinessData);
     }
 
     @Override
@@ -85,9 +84,9 @@ public final class AccountParams implements StripeParamsModel {
     }
 
     private boolean typedEquals(@NonNull AccountParams accountParams) {
-        return ObjectUtils.equals(mTosShownAndAccepted, accountParams.mTosShownAndAccepted)
-                && ObjectUtils.equals(mBusinessType, accountParams.mBusinessType)
-                && ObjectUtils.equals(mBusinessData, accountParams.mBusinessData);
+        return Objects.equals(mTosShownAndAccepted, accountParams.mTosShownAndAccepted)
+                && Objects.equals(mBusinessType, accountParams.mBusinessType)
+                && Objects.equals(mBusinessData, accountParams.mBusinessData);
     }
 
     /**

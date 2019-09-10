@@ -8,13 +8,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.stripe.android.ObjectBuilder;
-import com.stripe.android.utils.ObjectUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -169,17 +169,17 @@ public final class Address extends StripeModel implements StripeParamsModel, Par
     }
 
     private boolean typedEquals(@NonNull Address address) {
-        return ObjectUtils.equals(mCity, address.mCity)
-                && ObjectUtils.equals(mCountry, address.mCountry)
-                && ObjectUtils.equals(mLine1, address.mLine1)
-                && ObjectUtils.equals(mLine2, address.mLine2)
-                && ObjectUtils.equals(mPostalCode, address.mPostalCode)
-                && ObjectUtils.equals(mState, address.mState);
+        return Objects.equals(mCity, address.mCity)
+                && Objects.equals(mCountry, address.mCountry)
+                && Objects.equals(mLine1, address.mLine1)
+                && Objects.equals(mLine2, address.mLine2)
+                && Objects.equals(mPostalCode, address.mPostalCode)
+                && Objects.equals(mState, address.mState);
     }
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mCity, mCountry, mLine1, mLine2, mPostalCode, mState);
+        return Objects.hash(mCity, mCountry, mLine1, mLine2, mPostalCode, mState);
     }
 
     /************** Parcelable *********************/

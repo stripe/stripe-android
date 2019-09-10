@@ -4,12 +4,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.stripe.android.exception.InvalidRequestException;
-import com.stripe.android.utils.ObjectUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -57,7 +57,7 @@ final class FingerprintRequest extends StripeRequest {
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(getBaseHashCode(), guid);
+        return Objects.hash(getBaseHashCode(), guid);
     }
 
     @Override
@@ -67,7 +67,7 @@ final class FingerprintRequest extends StripeRequest {
     }
 
     private boolean typedEquals(@NonNull FingerprintRequest obj) {
-        return super.typedEquals(obj) && ObjectUtils.equals(guid, obj.guid);
+        return super.typedEquals(obj) && Objects.equals(guid, obj.guid);
     }
 
     /**

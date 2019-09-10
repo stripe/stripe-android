@@ -3,7 +3,7 @@ package com.stripe.android.model;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.stripe.android.utils.ObjectUtils;
+import java.util.Objects;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -150,19 +150,19 @@ public final class SourceOwner extends StripeModel {
     }
 
     private boolean typedEquals(@NonNull SourceOwner sourceOwner) {
-        return ObjectUtils.equals(mAddress, sourceOwner.mAddress)
-                && ObjectUtils.equals(mEmail, sourceOwner.mEmail)
-                && ObjectUtils.equals(mName, sourceOwner.mName)
-                && ObjectUtils.equals(mPhone, sourceOwner.mPhone)
-                && ObjectUtils.equals(mVerifiedAddress, sourceOwner.mVerifiedAddress)
-                && ObjectUtils.equals(mVerifiedEmail, sourceOwner.mVerifiedEmail)
-                && ObjectUtils.equals(mVerifiedName, sourceOwner.mVerifiedName)
-                && ObjectUtils.equals(mVerifiedPhone, sourceOwner.mVerifiedPhone);
+        return Objects.equals(mAddress, sourceOwner.mAddress)
+                && Objects.equals(mEmail, sourceOwner.mEmail)
+                && Objects.equals(mName, sourceOwner.mName)
+                && Objects.equals(mPhone, sourceOwner.mPhone)
+                && Objects.equals(mVerifiedAddress, sourceOwner.mVerifiedAddress)
+                && Objects.equals(mVerifiedEmail, sourceOwner.mVerifiedEmail)
+                && Objects.equals(mVerifiedName, sourceOwner.mVerifiedName)
+                && Objects.equals(mVerifiedPhone, sourceOwner.mVerifiedPhone);
     }
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mAddress, mEmail, mName, mPhone, mVerifiedAddress, mVerifiedEmail,
+        return Objects.hash(mAddress, mEmail, mName, mPhone, mVerifiedAddress, mVerifiedEmail,
                 mVerifiedName, mVerifiedPhone);
     }
 }

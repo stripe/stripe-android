@@ -5,11 +5,11 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringDef;
 
 import com.stripe.android.StripeTextUtils;
-import com.stripe.android.utils.ObjectUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Date;
+import java.util.Objects;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -167,7 +167,7 @@ public final class Token implements StripePaymentSource {
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mId, mType, mCreated, mLivemode, mUsed, mBankAccount, mCard);
+        return Objects.hash(mId, mType, mCreated, mLivemode, mUsed, mBankAccount, mCard);
     }
 
     @Override
@@ -176,13 +176,13 @@ public final class Token implements StripePaymentSource {
     }
 
     private boolean typedEquals(@NonNull Token token) {
-        return ObjectUtils.equals(mId, token.mId)
-                && ObjectUtils.equals(mType, token.mType)
-                && ObjectUtils.equals(mCreated, token.mCreated)
+        return Objects.equals(mId, token.mId)
+                && Objects.equals(mType, token.mType)
+                && Objects.equals(mCreated, token.mCreated)
                 && mLivemode == token.mLivemode
                 && mUsed == token.mUsed
-                && ObjectUtils.equals(mBankAccount, token.mBankAccount)
-                && ObjectUtils.equals(mCard, token.mCard);
+                && Objects.equals(mBankAccount, token.mBankAccount)
+                && Objects.equals(mCard, token.mCard);
     }
 
     @Nullable

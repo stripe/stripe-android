@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.stripe.android.ObjectBuilder;
-import com.stripe.android.utils.ObjectUtils;
 
 import java.util.Objects;
 
@@ -48,7 +47,7 @@ public final class WeChat extends StripeModel {
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(statementDescriptor, appId, nonce, packageValue, partnerId,
+        return Objects.hash(statementDescriptor, appId, nonce, packageValue, partnerId,
                 prepayId, sign, timestamp);
     }
 

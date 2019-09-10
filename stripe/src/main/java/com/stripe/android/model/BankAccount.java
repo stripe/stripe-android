@@ -6,13 +6,13 @@ import androidx.annotation.Size;
 import androidx.annotation.StringDef;
 
 import com.stripe.android.StripeTextUtils;
-import com.stripe.android.utils.ObjectUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -235,7 +235,7 @@ public final class BankAccount implements StripeParamsModel {
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mAccountHolderName, mAccountHolderType, mAccountNumber,
+        return Objects.hash(mAccountHolderName, mAccountHolderType, mAccountNumber,
                 mBankName, mCountryCode, mCurrency, mFingerprint, mLast4, mRoutingNumber);
     }
 
@@ -245,14 +245,14 @@ public final class BankAccount implements StripeParamsModel {
     }
 
     private boolean typedEquals(@NonNull BankAccount bankAccount) {
-        return ObjectUtils.equals(mAccountHolderName, bankAccount.mAccountHolderName)
-                && ObjectUtils.equals(mAccountHolderType, bankAccount.mAccountHolderType)
-                && ObjectUtils.equals(mAccountNumber, bankAccount.mAccountNumber)
-                && ObjectUtils.equals(mBankName, bankAccount.mBankName)
-                && ObjectUtils.equals(mCountryCode, bankAccount.mCountryCode)
-                && ObjectUtils.equals(mCurrency, bankAccount.mCurrency)
-                && ObjectUtils.equals(mFingerprint, bankAccount.mFingerprint)
-                && ObjectUtils.equals(mLast4, bankAccount.mLast4)
-                && ObjectUtils.equals(mRoutingNumber, bankAccount.mRoutingNumber);
+        return Objects.equals(mAccountHolderName, bankAccount.mAccountHolderName)
+                && Objects.equals(mAccountHolderType, bankAccount.mAccountHolderType)
+                && Objects.equals(mAccountNumber, bankAccount.mAccountNumber)
+                && Objects.equals(mBankName, bankAccount.mBankName)
+                && Objects.equals(mCountryCode, bankAccount.mCountryCode)
+                && Objects.equals(mCurrency, bankAccount.mCurrency)
+                && Objects.equals(mFingerprint, bankAccount.mFingerprint)
+                && Objects.equals(mLast4, bankAccount.mLast4)
+                && Objects.equals(mRoutingNumber, bankAccount.mRoutingNumber);
     }
 }

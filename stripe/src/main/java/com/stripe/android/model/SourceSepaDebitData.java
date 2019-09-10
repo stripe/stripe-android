@@ -4,11 +4,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
-import com.stripe.android.utils.ObjectUtils;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.json.JSONException;
@@ -133,18 +132,18 @@ public final class SourceSepaDebitData extends StripeSourceTypeModel {
 
     private boolean typedEquals(@NonNull SourceSepaDebitData obj) {
         return super.typedEquals(obj)
-                && ObjectUtils.equals(mBankCode, obj.mBankCode)
-                && ObjectUtils.equals(mBranchCode, obj.mBranchCode)
-                && ObjectUtils.equals(mCountry, obj.mCountry)
-                && ObjectUtils.equals(mFingerPrint, obj.mFingerPrint)
-                && ObjectUtils.equals(mLast4, obj.mLast4)
-                && ObjectUtils.equals(mMandateReference, obj.mMandateReference)
-                && ObjectUtils.equals(mMandateUrl, obj.mMandateUrl);
+                && Objects.equals(mBankCode, obj.mBankCode)
+                && Objects.equals(mBranchCode, obj.mBranchCode)
+                && Objects.equals(mCountry, obj.mCountry)
+                && Objects.equals(mFingerPrint, obj.mFingerPrint)
+                && Objects.equals(mLast4, obj.mLast4)
+                && Objects.equals(mMandateReference, obj.mMandateReference)
+                && Objects.equals(mMandateUrl, obj.mMandateUrl);
     }
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(super.hashCode(), mBankCode, mBranchCode, mCountry, mFingerPrint,
+        return Objects.hash(super.hashCode(), mBankCode, mBranchCode, mCountry, mFingerPrint,
                 mLast4, mMandateReference, mMandateUrl);
     }
 

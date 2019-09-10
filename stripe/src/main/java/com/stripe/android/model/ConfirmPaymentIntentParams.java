@@ -5,7 +5,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.stripe.android.ObjectBuilder;
-import com.stripe.android.utils.ObjectUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -536,20 +535,20 @@ public final class ConfirmPaymentIntentParams implements ConfirmStripeIntentPara
     }
 
     private boolean typedEquals(@NonNull ConfirmPaymentIntentParams params) {
-        return ObjectUtils.equals(mReturnUrl, params.mReturnUrl)
-                && ObjectUtils.equals(mClientSecret, params.mClientSecret)
-                && ObjectUtils.equals(mPaymentMethodId, params.mPaymentMethodId)
-                && ObjectUtils.equals(mPaymentMethodCreateParams, params.mPaymentMethodCreateParams)
-                && ObjectUtils.equals(mSourceId, params.mSourceId)
-                && ObjectUtils.equals(mSourceParams, params.mSourceParams)
-                && ObjectUtils.equals(mExtraParams, params.mExtraParams)
-                && ObjectUtils.equals(mSavePaymentMethod, params.mSavePaymentMethod)
-                && ObjectUtils.equals(mUseStripeSdk, params.mUseStripeSdk);
+        return Objects.equals(mReturnUrl, params.mReturnUrl)
+                && Objects.equals(mClientSecret, params.mClientSecret)
+                && Objects.equals(mPaymentMethodId, params.mPaymentMethodId)
+                && Objects.equals(mPaymentMethodCreateParams, params.mPaymentMethodCreateParams)
+                && Objects.equals(mSourceId, params.mSourceId)
+                && Objects.equals(mSourceParams, params.mSourceParams)
+                && Objects.equals(mExtraParams, params.mExtraParams)
+                && Objects.equals(mSavePaymentMethod, params.mSavePaymentMethod)
+                && Objects.equals(mUseStripeSdk, params.mUseStripeSdk);
     }
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mReturnUrl, mClientSecret, mPaymentMethodId,
+        return Objects.hash(mReturnUrl, mClientSecret, mPaymentMethodId,
                 mPaymentMethodCreateParams, mSourceId, mSourceParams, mExtraParams,
                 mSavePaymentMethod, mUseStripeSdk);
     }

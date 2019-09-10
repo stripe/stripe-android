@@ -3,10 +3,9 @@ package com.stripe.android.model;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.stripe.android.utils.ObjectUtils;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -160,18 +159,18 @@ public final class Customer extends StripeModel {
     }
     
     private boolean typedEquals(@NonNull Customer customer) {
-        return ObjectUtils.equals(mId, customer.mId)
-                && ObjectUtils.equals(mDefaultSource, customer.mDefaultSource)
-                && ObjectUtils.equals(mShippingInformation, customer.mShippingInformation)
-                && ObjectUtils.equals(mSources, customer.mSources)
-                && ObjectUtils.equals(mHasMore, customer.mHasMore)
-                && ObjectUtils.equals(mTotalCount, customer.mTotalCount)
-                && ObjectUtils.equals(mUrl, customer.mUrl);
+        return Objects.equals(mId, customer.mId)
+                && Objects.equals(mDefaultSource, customer.mDefaultSource)
+                && Objects.equals(mShippingInformation, customer.mShippingInformation)
+                && Objects.equals(mSources, customer.mSources)
+                && Objects.equals(mHasMore, customer.mHasMore)
+                && Objects.equals(mTotalCount, customer.mTotalCount)
+                && Objects.equals(mUrl, customer.mUrl);
     }
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mId, mDefaultSource, mShippingInformation, mSources, mHasMore,
+        return Objects.hash(mId, mDefaultSource, mShippingInformation, mSources, mHasMore,
                 mTotalCount, mUrl);
     }
 }

@@ -3,7 +3,7 @@ package com.stripe.android.model;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.stripe.android.utils.ObjectUtils;
+import java.util.Objects;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -81,7 +81,7 @@ public final class SourceReceiver extends StripeModel {
     }
 
     private boolean typedEquals(@NonNull SourceReceiver sourceReceiver) {
-        return ObjectUtils.equals(mAddress, sourceReceiver.mAddress)
+        return Objects.equals(mAddress, sourceReceiver.mAddress)
                 && mAmountCharged == sourceReceiver.mAmountCharged
                 && mAmountReceived == sourceReceiver.mAmountReceived
                 && mAmountReturned == sourceReceiver.mAmountReturned;
@@ -89,6 +89,6 @@ public final class SourceReceiver extends StripeModel {
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mAddress, mAmountCharged, mAmountReceived, mAmountReturned);
+        return Objects.hash(mAddress, mAmountCharged, mAmountReceived, mAmountReturned);
     }
 }
