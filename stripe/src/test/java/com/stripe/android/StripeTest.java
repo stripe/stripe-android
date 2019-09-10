@@ -159,29 +159,6 @@ public class StripeTest {
     }
 
     @Test
-    public void createTokenShouldUseExecutor() {
-        final Executor expectedExecutor = new Executor() {
-            @Override
-            public void execute(@NonNull Runnable command) {
-            }
-        };
-        final Stripe stripe = createStripe(
-                new Stripe.TokenCreator() {
-                    @Override
-                    public void create(@NonNull Map<String, Object> tokenParams,
-                                       @NonNull ApiRequest.Options requestOptions,
-                                       @NonNull @Token.TokenType String tokenType,
-                                       @Nullable Executor executor,
-                                       @NonNull ApiResultCallback<Token> callback) {
-                        assertEquals(expectedExecutor, executor);
-                        assertEquals(NON_LOGGING_PK, requestOptions.apiKey);
-                        assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
-                    }
-                });
-        stripe.createToken(CARD, expectedExecutor, DEFAULT_TOKEN_CALLBACK);
-    }
-
-    @Test
     public void createTokenShouldUseProvidedKey() {
         final Stripe stripe = createStripe(
                 new Stripe.TokenCreator() {
@@ -339,16 +316,16 @@ public class StripeTest {
     @Test
     public void createBankAccountTokenSynchronous_withValidBankAccount_returnsToken()
             throws StripeException {
-        Stripe stripe = createStripe();
+        final Stripe stripe = createStripe();
 
-        Token token = stripe.createBankAccountTokenSynchronous(BANK_ACCOUNT);
+        final Token token = stripe.createBankAccountTokenSynchronous(BANK_ACCOUNT);
         assertNotNull(token);
         assertEquals(Token.TokenType.BANK_ACCOUNT, token.getType());
         assertNull(token.getCard());
 
-        BankAccount returnedBankAccount = token.getBankAccount();
+        final BankAccount returnedBankAccount = token.getBankAccount();
         assertNotNull(returnedBankAccount);
-        String expectedLast4 = TEST_BANK_ACCOUNT_NUMBER
+        final String expectedLast4 = TEST_BANK_ACCOUNT_NUMBER
                 .substring(TEST_BANK_ACCOUNT_NUMBER.length() - 4);
         assertEquals(expectedLast4, returnedBankAccount.getLast4());
         assertEquals(BANK_ACCOUNT.getCountryCode(), returnedBankAccount.getCountryCode());
@@ -359,7 +336,7 @@ public class StripeTest {
     @Test
     public void createSourceSynchronous_withAlipayReusableParams_passesIntegrationTest()
             throws StripeException {
-        Stripe stripe = createStripe();
+        final Stripe stripe = createStripe();
         SourceParams alipayParams = SourceParams.createAlipayReusableParams(
                 "usd",
                 "Example Payer",
@@ -658,7 +635,7 @@ public class StripeTest {
     @Test
     public void createSourceSynchronous_withNoEmail_passesIntegrationTest()
             throws StripeException {
-        Stripe stripe = createStripe();
+        final Stripe stripe = createStripe();
         String validIban = "DE89370400440532013000";
         SourceParams params = SourceParams.createSepaDebitParams(
                 "Sepa Account Holder",
@@ -695,7 +672,7 @@ public class StripeTest {
 
     @Test
     public void createSepaDebitSource_withNoAddress_passesIntegrationTest() throws StripeException {
-        Stripe stripe = createStripe();
+        final Stripe stripe = createStripe();
         String validIban = "DE89370400440532013000";
         SourceParams params = SourceParams.createSepaDebitParams(
                 "Sepa Account Holder",
@@ -989,7 +966,7 @@ public class StripeTest {
             put("last_name", "Sun");
         }};
 
-        Stripe stripe = createStripe();
+        final Stripe stripe = createStripe();
         Token token = stripe.createAccountTokenSynchronous(
                 AccountParams.createAccountParams(false,
                         AccountParams.BusinessType.Individual, businessData));
