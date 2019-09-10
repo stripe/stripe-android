@@ -21,7 +21,7 @@ internal class TelemetryClientUtil @VisibleForTesting constructor(
 
     private val versionName: String?
         get() {
-            if (!StripeTextUtils.isBlank(packageName)) {
+            if (packageName.isNotBlank()) {
                 try {
                     val packageInfo = packageManager.getPackageInfo(packageName, 0)
                     if (packageInfo?.versionName != null) {
@@ -45,7 +45,7 @@ internal class TelemetryClientUtil @VisibleForTesting constructor(
     val hashedUid: String
         get() {
             val uid = uidSupplier.get().value
-            return if (StripeTextUtils.isBlank(uid)) {
+            return if (uid.isBlank()) {
                 ""
             } else {
                 StripeTextUtils.shaHashInput(uid) ?: ""
