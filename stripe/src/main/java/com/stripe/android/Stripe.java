@@ -39,10 +39,18 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
- * Entry-point to the Stripe SDK that handles
- * - {@link Token} creation from charges, {@link Card}, and accounts
- * - {@link PaymentMethod} creation
- * - {@link PaymentIntent} retrieval and confirmation
+ * Entry-point to the Stripe SDK.
+ *
+ * <p>Supports asynchronous and synchronous methods to access the following Stripe APIs.</p>
+ *
+ * <ul>
+ * <li>{@link PaymentIntent Payment Intent API} - confirm and retrieve</li>
+ * <li>{@link SetupIntent Setup Intents API} - confirm and retrieve</li>
+ * <li>{@link PaymentMethod Payment Methods API} - create</li>
+ * <li>{@link Source Sources API} - create and retrieve</li>
+ * <li>{@link Token Tokens API} - create tokens for {@link Card}, {@link BankAccount},
+ * {@link PiiTokenParams}, and {@link AccountParams}</li>
+ * </ul>
  */
 @SuppressWarnings("WeakerAccess")
 public class Stripe {
@@ -167,33 +175,10 @@ public class Stripe {
         return sAppInfo;
     }
 
-    /**
-     * Confirm and, if necessary, authenticate a {@link SetupIntent}.
-     *
-     * @param activity the <code>Activity</code> that is launching the payment authentication flow
-     */
-    public void confirmSetupIntent(@NonNull Activity activity,
-                                   @NonNull ConfirmSetupIntentParams confirmSetupIntentParams) {
-        mPaymentController.startConfirmAndAuth(
-                AuthActivityStarter.Host.create(activity),
-                confirmSetupIntentParams,
-                ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId)
-        );
-    }
 
-    /**
-     * Confirm and, if necessary, authenticate a {@link SetupIntent}.
-     *
-     * @param fragment the <code>Fragment</code> that is launching the payment authentication flow
-     */
-    public void confirmSetupIntent(@NonNull Fragment fragment,
-                                   @NonNull ConfirmSetupIntentParams confirmSetupIntentParams) {
-        mPaymentController.startConfirmAndAuth(
-                AuthActivityStarter.Host.create(fragment),
-                confirmSetupIntentParams,
-                ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId)
-        );
-    }
+    //
+    // Payment Intents API - https://stripe.com/docs/api/payment_intents
+    //
 
     /**
      * Confirm and, if necessary, authenticate a {@link PaymentIntent}. Used for <a href=
@@ -268,39 +253,6 @@ public class Stripe {
     }
 
     /**
-     * Authenticate a {@link SetupIntent}. Used for manual confirmation flow.
-     *
-     * @param activity     the <code>Activity</code> that is launching the payment authentication
-     *                     flow
-     * @param clientSecret the <a href="https://stripe.com/docs/api/setup_intents/object#setup_intent_object-client_secret">client_secret</a>
-     *                     property of a confirmed {@link SetupIntent} object
-     */
-    public void authenticateSetup(@NonNull Activity activity,
-                                  @NonNull String clientSecret) {
-        mPaymentController.startAuth(
-                AuthActivityStarter.Host.create(activity),
-                clientSecret,
-                ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId)
-        );
-    }
-
-    /**
-     * Authenticate a {@link SetupIntent}. Used for manual confirmation flow.
-     *
-     * @param fragment     the <code>Fragment</code> launching the payment authentication flow
-     * @param clientSecret the <a href="https://stripe.com/docs/api/setup_intents/object#setup_intent_object-client_secret">client_secret</a>
-     *                     property of a confirmed {@link SetupIntent} object
-     */
-    public void authenticateSetup(@NonNull Fragment fragment,
-                                  @NonNull String clientSecret) {
-        mPaymentController.startAuth(
-                AuthActivityStarter.Host.create(fragment),
-                clientSecret,
-                ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId)
-        );
-    }
-
-    /**
      * Should be called via <code>Activity#onActivityResult(int, int, Intent)}}</code> to handle the
      * result of a PaymentIntent automatic confirmation
      * (see {@link #confirmPayment(Activity, ConfirmPaymentIntentParams)}) or manual
@@ -318,215 +270,6 @@ public class Stripe {
         }
 
         return false;
-    }
-
-    /**
-     * Should be called via <code>Activity#onActivityResult(int, int, Intent)}}</code> to handle the
-     * result of a SetupIntent confirmation
-     * (see {@link #confirmSetupIntent(Activity, ConfirmSetupIntentParams)})
-     */
-    public boolean onSetupResult(int requestCode, @Nullable Intent data,
-                                 @NonNull ApiResultCallback<SetupIntentResult> callback) {
-        if (data != null &&
-                mPaymentController.shouldHandleSetupResult(requestCode, data)) {
-            mPaymentController.handleSetupResult(
-                    data,
-                    ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId),
-                    callback
-            );
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Create a {@link BankAccount} token asynchronously.
-     *
-     * <p>See <a href="https://stripe.com/docs/api/tokens/create_bank_account">Create a bank account token</a>.</p>
-     *
-     * @param bankAccount the {@link BankAccount} used to create this token
-     * @param callback a {@link ApiResultCallback} to receive either the token or an error
-     */
-    public void createBankAccountToken(
-            @NonNull final BankAccount bankAccount,
-            @NonNull final ApiResultCallback<Token> callback) {
-        final Map<String, Object> params = bankAccount.toParamMap();
-        params.putAll(mStripeNetworkUtils.createUidParams());
-        createTokenFromParams(
-                params,
-                mDefaultPublishableKey,
-                Token.TokenType.BANK_ACCOUNT,
-                null,
-                callback
-        );
-    }
-
-    /**
-     * Create a PII token asynchronously.
-     *
-     * <p>See <a href="https://stripe.com/docs/api/tokens/create_pii">Create a PII account token</a>.</p>
-     *
-     * @param personalId the personal id used to create this token
-     * @param callback a {@link ApiResultCallback} to receive either the token or an error
-     */
-    public void createPiiToken(
-            @NonNull final String personalId,
-            @NonNull final ApiResultCallback<Token> callback) {
-        createTokenFromParams(
-                new PiiTokenParams(personalId).toParamMap(),
-                mDefaultPublishableKey,
-                Token.TokenType.PII,
-                null,
-                callback);
-    }
-
-    /**
-     * Blocking method to create a {@link Token} for a {@link BankAccount}. Do not call this on
-     * the UI thread or your app will crash.
-     *
-     * <p>See <a href="https://stripe.com/docs/api/tokens/create_bank_account">Create a bank account token</a>.</p>
-     *
-     * @param bankAccount the {@link Card} to use for this token
-     * @return a {@link Token} that can be used for this {@link BankAccount}
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws CardException should not be thrown with this type of token, but is theoretically
-     *         possible given the underlying methods called
-     * @throws APIException any other type of problem (for instance, a temporary issue with
-     *         Stripe's servers
-     */
-    @Nullable
-    public Token createBankAccountTokenSynchronous(@NonNull final BankAccount bankAccount)
-            throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            CardException,
-            APIException {
-        final Map<String, Object> params = bankAccount.toParamMap();
-        params.putAll(mStripeNetworkUtils.createUidParams());
-        return mStripeRepository.createToken(
-                params,
-                ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId),
-                Token.TokenType.BANK_ACCOUNT
-        );
-    }
-
-    /**
-     * Create a CVC update token asynchronously.
-     *
-     * @param cvc the CVC used to create this token
-     * @param callback a {@link ApiResultCallback} to receive either the token or an error
-     */
-    public void createCvcUpdateToken(
-            @NonNull @Size(min = 3, max = 4) final String cvc,
-            @NonNull final ApiResultCallback<Token> callback) {
-        createTokenFromParams(
-                new CvcTokenParams(cvc).toParamMap(),
-                mDefaultPublishableKey,
-                Token.TokenType.CVC_UPDATE,
-                null,
-                callback
-        );
-    }
-
-    /**
-     * Create a {@link Source} asynchronously.
-     *
-     * <p>See <a href="https://stripe.com/docs/api/sources/create">Create a source</a>.</p>
-     *
-     * @param sourceParams the {@link SourceParams} to be used
-     * @param callback a {@link ApiResultCallback} to receive a result or an error message
-     */
-    public void createSource(@NonNull SourceParams sourceParams,
-                             @NonNull ApiResultCallback<Source> callback) {
-        new CreateSourceTask(
-                mStripeRepository, sourceParams, mDefaultPublishableKey, mStripeAccountId, callback
-        ).execute();
-    }
-
-    /**
-     * Create a {@link PaymentMethod} asynchronously.
-     *
-     * <p>See <a href="https://stripe.com/docs/api/payment_methods/create">Create a PaymentMethod</a>.</p>
-     *
-     * @param paymentMethodCreateParams the {@link PaymentMethodCreateParams} to be used
-     * @param callback a {@link ApiResultCallback} to receive a result or an error
-     *         message
-     */
-    public void createPaymentMethod(@NonNull PaymentMethodCreateParams paymentMethodCreateParams,
-                                    @NonNull ApiResultCallback<PaymentMethod> callback) {
-        new CreatePaymentMethodTask(
-                mStripeRepository, paymentMethodCreateParams, mDefaultPublishableKey,
-                mStripeAccountId, callback
-        ).execute();
-    }
-
-    /**
-     * Create a Card token asynchronously.
-     *
-     * <p>See <a href="https://stripe.com/docs/api/tokens/create_card">Create a card token</a>.</p>
-     *
-     * @param card the {@link Card} used to create this payment token
-     * @param callback a {@link ApiResultCallback} to receive either the token or an error
-     */
-    public void createToken(@NonNull final Card card,
-                            @NonNull final ApiResultCallback<Token> callback) {
-        createTokenFromParams(
-                mStripeNetworkUtils.createCardTokenParams(card),
-                mDefaultPublishableKey,
-                Token.TokenType.CARD,
-                null,
-                callback
-        );
-    }
-
-    /**
-     * Call to create a {@link Token} on a specific {@link Executor}.
-     *
-     * <p>See <a href="https://stripe.com/docs/api/tokens/create_card">Create a card token</a>.</p>
-     *
-     * @param card the {@link Card} to use for this token creation
-     * @param executor An {@link Executor} on which to run this operation. If you don't wish to
-     *         specify an executor, use one of the other createTokenFromParams methods.
-     * @param callback a {@link ApiResultCallback} to receive the result of this operation
-     */
-    public void createToken(
-            @NonNull final Card card,
-            @NonNull final Executor executor,
-            @NonNull final ApiResultCallback<Token> callback) {
-        createTokenFromParams(
-                mStripeNetworkUtils.createCardTokenParams(card),
-                mDefaultPublishableKey,
-                Token.TokenType.CARD,
-                executor,
-                callback
-        );
-    }
-
-    /**
-     * Blocking method to create a {@link Source} object.
-     * Do not call this on the UI thread or your app will crash.
-     *
-     * <p>See <a href="https://stripe.com/docs/api/sources/create">Create a source</a>.</p>
-     *
-     * @param params a set of {@link SourceParams} with which to create the source
-     * @return a {@link Source}, or {@code null} if a problem occurred
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with
-     *         Stripe's servers
-     */
-    @Nullable
-    public Source createSourceSynchronous(@NonNull SourceParams params)
-            throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            APIException {
-        return mStripeRepository.createSource(params,
-                ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId));
     }
 
     /**
@@ -568,6 +311,92 @@ public class Stripe {
                 confirmPaymentIntentParams,
                 ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId)
         );
+    }
+
+
+    //
+    // Setup Intents API - https://stripe.com/docs/api/setup_intents
+    //
+
+    /**
+     * Confirm and, if necessary, authenticate a {@link SetupIntent}.
+     *
+     * @param activity the <code>Activity</code> that is launching the payment authentication flow
+     */
+    public void confirmSetupIntent(@NonNull Activity activity,
+                                   @NonNull ConfirmSetupIntentParams confirmSetupIntentParams) {
+        mPaymentController.startConfirmAndAuth(
+                AuthActivityStarter.Host.create(activity),
+                confirmSetupIntentParams,
+                ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId)
+        );
+    }
+
+    /**
+     * Confirm and, if necessary, authenticate a {@link SetupIntent}.
+     *
+     * @param fragment the <code>Fragment</code> that is launching the payment authentication flow
+     */
+    public void confirmSetupIntent(@NonNull Fragment fragment,
+                                   @NonNull ConfirmSetupIntentParams confirmSetupIntentParams) {
+        mPaymentController.startConfirmAndAuth(
+                AuthActivityStarter.Host.create(fragment),
+                confirmSetupIntentParams,
+                ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId)
+        );
+    }
+
+    /**
+     * Authenticate a {@link SetupIntent}. Used for manual confirmation flow.
+     *
+     * @param activity     the <code>Activity</code> that is launching the payment authentication
+     *                     flow
+     * @param clientSecret the <a href="https://stripe.com/docs/api/setup_intents/object#setup_intent_object-client_secret">client_secret</a>
+     *                     property of a confirmed {@link SetupIntent} object
+     */
+    public void authenticateSetup(@NonNull Activity activity,
+                                  @NonNull String clientSecret) {
+        mPaymentController.startAuth(
+                AuthActivityStarter.Host.create(activity),
+                clientSecret,
+                ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId)
+        );
+    }
+
+    /**
+     * Authenticate a {@link SetupIntent}. Used for manual confirmation flow.
+     *
+     * @param fragment     the <code>Fragment</code> launching the payment authentication flow
+     * @param clientSecret the <a href="https://stripe.com/docs/api/setup_intents/object#setup_intent_object-client_secret">client_secret</a>
+     *                     property of a confirmed {@link SetupIntent} object
+     */
+    public void authenticateSetup(@NonNull Fragment fragment,
+                                  @NonNull String clientSecret) {
+        mPaymentController.startAuth(
+                AuthActivityStarter.Host.create(fragment),
+                clientSecret,
+                ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId)
+        );
+    }
+
+    /**
+     * Should be called via <code>Activity#onActivityResult(int, int, Intent)}}</code> to handle the
+     * result of a SetupIntent confirmation
+     * (see {@link #confirmSetupIntent(Activity, ConfirmSetupIntentParams)})
+     */
+    public boolean onSetupResult(int requestCode, @Nullable Intent data,
+                                 @NonNull ApiResultCallback<SetupIntentResult> callback) {
+        if (data != null &&
+                mPaymentController.shouldHandleSetupResult(requestCode, data)) {
+            mPaymentController.handleSetupResult(
+                    data,
+                    ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId),
+                    callback
+            );
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -613,6 +442,27 @@ public class Stripe {
         );
     }
 
+
+    //
+    // Payment Methods API - https://stripe.com/docs/api/payment_methods
+    //
+
+    /**
+     * Create a {@link PaymentMethod} asynchronously.
+     *
+     * <p>See <a href="https://stripe.com/docs/api/payment_methods/create">Create a PaymentMethod</a>.</p>
+     *
+     * @param paymentMethodCreateParams the {@link PaymentMethodCreateParams} to be used
+     * @param callback a {@link ApiResultCallback} to receive the result or error
+     */
+    public void createPaymentMethod(@NonNull PaymentMethodCreateParams paymentMethodCreateParams,
+                                    @NonNull ApiResultCallback<PaymentMethod> callback) {
+        new CreatePaymentMethodTask(
+                mStripeRepository, paymentMethodCreateParams, mDefaultPublishableKey,
+                mStripeAccountId, callback
+        ).execute();
+    }
+
     /**
      * Blocking method to create a {@link PaymentMethod} object.
      * Do not call this on the UI thread or your app will crash.
@@ -630,6 +480,223 @@ public class Stripe {
             APIConnectionException {
         return mStripeRepository.createPaymentMethod(paymentMethodCreateParams,
                 ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId));
+    }
+
+
+    //
+    // Sources API - https://stripe.com/docs/api/sources
+    //
+
+    /**
+     * Create a {@link Source} asynchronously.
+     *
+     * <p>See <a href="https://stripe.com/docs/api/sources/create">Create a source</a>.</p>
+     *
+     * @param sourceParams the {@link SourceParams} to be used
+     * @param callback a {@link ApiResultCallback} to receive the result or error
+     */
+    public void createSource(@NonNull SourceParams sourceParams,
+                             @NonNull ApiResultCallback<Source> callback) {
+        new CreateSourceTask(
+                mStripeRepository, sourceParams, mDefaultPublishableKey, mStripeAccountId, callback
+        ).execute();
+    }
+
+    /**
+     * Blocking method to create a {@link Source} object.
+     * Do not call this on the UI thread or your app will crash.
+     *
+     * <p>See <a href="https://stripe.com/docs/api/sources/create">Create a source</a>.</p>
+     *
+     * @param params a set of {@link SourceParams} with which to create the source
+     * @return a {@link Source}, or {@code null} if a problem occurred
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     *         Stripe's servers
+     */
+    @Nullable
+    public Source createSourceSynchronous(@NonNull SourceParams params)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        return mStripeRepository.createSource(params,
+                ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId));
+    }
+
+    /**
+     * Retrieve an existing {@link Source} from the Stripe API. Note that this is a
+     * synchronous method, and cannot be called on the main thread. Doing so will cause your app
+     * to crash.
+     *
+     * <p>See <a href="https://stripe.com/docs/api/sources/retrieve">Retrieve a source</a>.</p>
+     *
+     * @param sourceId the {@link Source#getId()} field of the desired Source object
+     * @param clientSecret the {@link Source#getClientSecret()} field of the desired Source object
+     * @return a {@link Source} if one could be found based on the input params, or {@code null} if
+     *         no such Source could be found.
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     *         Stripe's servers)
+     */
+    @Nullable
+    public Source retrieveSourceSynchronous(
+            @NonNull @Size(min = 1) String sourceId,
+            @NonNull @Size(min = 1) String clientSecret)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            APIException {
+        return mStripeRepository.retrieveSource(sourceId, clientSecret,
+                ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId));
+    }
+
+
+    //
+    // Tokens API - https://stripe.com/docs/api/tokens
+    //
+
+    /**
+     * Create a {@link BankAccount} token asynchronously.
+     *
+     * <p>See <a href="https://stripe.com/docs/api/tokens/create_bank_account">Create a bank account token</a>.</p>
+     *
+     * @param bankAccount the {@link BankAccount} used to create this token
+     * @param callback a {@link ApiResultCallback} to receive the result or error
+     */
+    public void createBankAccountToken(
+            @NonNull final BankAccount bankAccount,
+            @NonNull final ApiResultCallback<Token> callback) {
+        final Map<String, Object> params = bankAccount.toParamMap();
+        params.putAll(mStripeNetworkUtils.createUidParams());
+        createTokenFromParams(
+                params,
+                Token.TokenType.BANK_ACCOUNT,
+                null,
+                callback
+        );
+    }
+
+    /**
+     * Blocking method to create a {@link Token} for a {@link BankAccount}. Do not call this on
+     * the UI thread or your app will crash.
+     *
+     * <p>See <a href="https://stripe.com/docs/api/tokens/create_bank_account">Create a bank account token</a>.</p>
+     *
+     * @param bankAccount the {@link Card} to use for this token
+     * @return a {@link Token} that can be used for this {@link BankAccount}
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws CardException should not be thrown with this type of token, but is theoretically
+     *         possible given the underlying methods called
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     *         Stripe's servers
+     */
+    @Nullable
+    public Token createBankAccountTokenSynchronous(@NonNull final BankAccount bankAccount)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            CardException,
+            APIException {
+        final Map<String, Object> params = bankAccount.toParamMap();
+        params.putAll(mStripeNetworkUtils.createUidParams());
+        return mStripeRepository.createToken(
+                params,
+                ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId),
+                Token.TokenType.BANK_ACCOUNT
+        );
+    }
+
+    /**
+     * Create a PII token asynchronously.
+     *
+     * <p>See <a href="https://stripe.com/docs/api/tokens/create_pii">Create a PII account token</a>.</p>
+     *
+     * @param personalId the personal id used to create this token
+     * @param callback a {@link ApiResultCallback} to receive the result or error
+     */
+    public void createPiiToken(
+            @NonNull final String personalId,
+            @NonNull final ApiResultCallback<Token> callback) {
+        createTokenFromParams(
+                new PiiTokenParams(personalId).toParamMap(),
+                Token.TokenType.PII,
+                null,
+                callback);
+    }
+
+    /**
+     * Blocking method to create a {@link Token} for PII. Do not call this on the UI thread
+     * or your app will crash.
+     *
+     * <p>See <a href="https://stripe.com/docs/api/tokens/create_pii">Create a PII account token</a>.</p>
+     *
+     * @param personalId the personal ID to use for this token
+     * @return a {@link Token} that can be used for this card
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     *         Stripe's servers)
+     */
+    @Nullable
+    public Token createPiiTokenSynchronous(@NonNull String personalId)
+            throws AuthenticationException,
+            InvalidRequestException,
+            APIConnectionException,
+            CardException,
+            APIException {
+        return mStripeRepository.createToken(
+                new PiiTokenParams(personalId).toParamMap(),
+                ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId),
+                Token.TokenType.PII
+        );
+    }
+
+    /**
+     * Create a Card token asynchronously.
+     *
+     * <p>See <a href="https://stripe.com/docs/api/tokens/create_card">Create a card token</a>.</p>
+     *
+     * @param card the {@link Card} used to create this payment token
+     * @param callback a {@link ApiResultCallback} to receive the result or error
+     */
+    public void createToken(@NonNull final Card card,
+                            @NonNull final ApiResultCallback<Token> callback) {
+        createTokenFromParams(
+                mStripeNetworkUtils.createCardTokenParams(card),
+                Token.TokenType.CARD,
+                null,
+                callback
+        );
+    }
+
+    /**
+     * Call to create a {@link Token} on a specific {@link Executor}.
+     *
+     * <p>See <a href="https://stripe.com/docs/api/tokens/create_card">Create a card token</a>.</p>
+     *
+     * @param card the {@link Card} to use for this token creation
+     * @param executor An {@link Executor} on which to run this operation. If you don't wish to
+     *         specify an executor, use one of the other createTokenFromParams methods.
+     * @param callback a {@link ApiResultCallback} to receive the result or error
+     */
+    public void createToken(
+            @NonNull final Card card,
+            @NonNull final Executor executor,
+            @NonNull final ApiResultCallback<Token> callback) {
+        createTokenFromParams(
+                mStripeNetworkUtils.createCardTokenParams(card),
+                Token.TokenType.CARD,
+                executor,
+                callback
+        );
     }
 
     /**
@@ -662,30 +729,19 @@ public class Stripe {
     }
 
     /**
-     * Blocking method to create a {@link Token} for PII. Do not call this on the UI thread
-     * or your app will crash.
+     * Create a CVC update token asynchronously.
      *
-     * <p>See <a href="https://stripe.com/docs/api/tokens/create_pii">Create a PII account token</a>.</p>
-     *
-     * @param personalId the personal ID to use for this token
-     * @return a {@link Token} that can be used for this card
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with
-     *         Stripe's servers)
+     * @param cvc the CVC used to create this token
+     * @param callback a {@link ApiResultCallback} to receive the result or error
      */
-    @Nullable
-    public Token createPiiTokenSynchronous(@NonNull String personalId)
-            throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            CardException,
-            APIException {
-        return mStripeRepository.createToken(
-                new PiiTokenParams(personalId).toParamMap(),
-                ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId),
-                Token.TokenType.PII
+    public void createCvcUpdateToken(
+            @NonNull @Size(min = 3, max = 4) final String cvc,
+            @NonNull final ApiResultCallback<Token> callback) {
+        createTokenFromParams(
+                new CvcTokenParams(cvc).toParamMap(),
+                Token.TokenType.CVC_UPDATE,
+                null,
+                callback
         );
     }
 
@@ -747,38 +803,8 @@ public class Stripe {
         return null;
     }
 
-    /**
-     * Retrieve an existing {@link Source} from the Stripe API. Note that this is a
-     * synchronous method, and cannot be called on the main thread. Doing so will cause your app
-     * to crash.
-     *
-     * <p>See <a href="https://stripe.com/docs/api/sources/retrieve">Retrieve a source</a>.</p>
-     *
-     * @param sourceId the {@link Source#getId()} field of the desired Source object
-     * @param clientSecret the {@link Source#getClientSecret()} field of the desired Source object
-     * @return a {@link Source} if one could be found based on the input params, or {@code null} if
-     *         no such Source could be found.
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with
-     *         Stripe's servers)
-     */
-    @Nullable
-    public Source retrieveSourceSynchronous(
-            @NonNull @Size(min = 1) String sourceId,
-            @NonNull @Size(min = 1) String clientSecret)
-            throws AuthenticationException,
-            InvalidRequestException,
-            APIConnectionException,
-            APIException {
-        return mStripeRepository.retrieveSource(sourceId, clientSecret,
-                ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId));
-    }
-
     private void createTokenFromParams(
             @NonNull final Map<String, Object> tokenParams,
-            @NonNull @Size(min = 1) final String publishableKey,
             @NonNull @Token.TokenType final String tokenType,
             @Nullable final Executor executor,
             @NonNull final ApiResultCallback<Token> callback) {
@@ -787,7 +813,7 @@ public class Stripe {
                             "token and handle errors");
         mTokenCreator.create(
                 tokenParams,
-                ApiRequest.Options.create(publishableKey, mStripeAccountId),
+                ApiRequest.Options.create(mDefaultPublishableKey, mStripeAccountId),
                 tokenType,
                 executor, callback);
     }
