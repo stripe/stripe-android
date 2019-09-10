@@ -1,17 +1,15 @@
 package com.stripe.android
 
 import android.content.Context
-import java.util.HashMap
 
 internal class UidParamsFactory constructor(
     private val packageName: String,
     private val uidSupplier: Supplier<StripeUid>
 ) {
-
-    fun create(): Map<String, String> {
+    fun createParams(): Map<String, String> {
         val guid = uidSupplier.get().value
         if (StripeTextUtils.isBlank(guid)) {
-            return HashMap()
+            return emptyMap()
         }
 
         return createGuid(guid).plus(createMuid(guid))
@@ -39,10 +37,7 @@ internal class UidParamsFactory constructor(
     companion object {
         @JvmStatic
         fun create(context: Context): UidParamsFactory {
-            return UidParamsFactory(
-                context.packageName,
-                UidSupplier(context)
-            )
+            return UidParamsFactory(context.packageName, UidSupplier(context))
         }
 
         private const val FIELD_MUID = "muid"
