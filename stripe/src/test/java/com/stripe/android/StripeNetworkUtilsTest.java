@@ -8,14 +8,14 @@ import com.stripe.android.model.CardFixtures;
 import com.stripe.android.model.ConfirmPaymentIntentParams;
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -38,8 +38,11 @@ public class StripeNetworkUtilsTest {
     private static final String CARD_STATE = "CA";
     private static final String CARD_ZIP = "94107";
 
-    @NonNull private final StripeNetworkUtils mNetworkUtils =
-            new StripeNetworkUtils("com.example.app", new FakeUidSupplier());
+    @NonNull
+    private final StripeNetworkUtils mNetworkUtils =
+            new StripeNetworkUtils(
+                    new UidParamsFactory("com.example.app", new FakeUidSupplier())
+            );
 
     @Before
     public void setup() {
@@ -77,14 +80,6 @@ public class StripeNetworkUtilsTest {
         assertEquals(CARD_CVC, cardMap.get("cvc"));
         assertEquals(8, cardMap.get("exp_month"));
         assertEquals(2019, cardMap.get("exp_year"));
-    }
-
-    @Test
-    public void addUidParams_addsParams() {
-        final Map<String, String> uidParams = mNetworkUtils.createUidParams();
-        assertEquals(2, uidParams.size());
-        assertTrue(uidParams.containsKey("muid"));
-        assertTrue(uidParams.containsKey("guid"));
     }
 
     @Test

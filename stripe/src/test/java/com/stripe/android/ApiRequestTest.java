@@ -7,6 +7,11 @@ import androidx.annotation.NonNull;
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.model.CardFixtures;
 
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -14,11 +19,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -31,8 +31,10 @@ public class ApiRequestTest {
 
     @NonNull
     private final StripeNetworkUtils mNetworkUtils = new StripeNetworkUtils(
-            "com.example.app",
-            new FakeUidSupplier("abc123")
+            new UidParamsFactory(
+                    "com.example.app",
+                    new FakeUidSupplier("abc123")
+            )
     );
 
     @Before

@@ -46,6 +46,7 @@ internal class StripeApiRepository @JvmOverloads constructor(
 
     private val analyticsDataFactory: AnalyticsDataFactory = AnalyticsDataFactory.create(context)
     private val networkUtils: StripeNetworkUtils = StripeNetworkUtils(context)
+    private val uidParamsFactory: UidParamsFactory = UidParamsFactory.create(context)
 
     /**
      * Confirm a [PaymentIntent] using the provided [ConfirmPaymentIntentParams]
@@ -211,9 +212,6 @@ internal class StripeApiRepository @JvmOverloads constructor(
         sourceParams: SourceParams,
         options: ApiRequest.Options
     ): Source? {
-        val requestParams = sourceParams.toParamMap()
-        requestParams.putAll(networkUtils.createUidParams())
-
         try {
             fireFingerprintRequest()
             fireAnalyticsRequest(
@@ -221,7 +219,14 @@ internal class StripeApiRepository @JvmOverloads constructor(
                     sourceParams.type),
                 options.apiKey)
             val response = makeApiRequest(
-                ApiRequest.createPost(sourcesUrl, requestParams, options, appInfo))
+                ApiRequest.createPost(
+                    sourcesUrl,
+                    sourceParams.toParamMap()
+                        .plus(uidParamsFactory.create()),
+                    options,
+                    appInfo
+                )
+            )
             return Source.fromString(response.responseBody)
         } catch (unexpected: CardException) {
             // This particular kind of exception should not be possible from a Source API endpoint.
@@ -280,7 +285,7 @@ internal class StripeApiRepository @JvmOverloads constructor(
                 ApiRequest.createPost(
                     paymentMethodsUrl,
                     paymentMethodCreateParams.toParamMap()
-                        .plus(networkUtils.createUidParams()),
+                        .plus(uidParamsFactory.create()),
                     options,
                     appInfo
                 )
