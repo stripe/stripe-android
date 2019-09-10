@@ -8,28 +8,25 @@ import androidx.annotation.VisibleForTesting;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.ConfirmPaymentIntentParams;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Utility class for static functions useful for networking and data transfer.
  */
 final class StripeNetworkUtils {
-
-    private static final String FIELD_MUID = "muid";
-    private static final String FIELD_GUID = "guid";
-
-    @NonNull private final String mPackageName;
-    @NonNull private final Supplier<StripeUid> mUidSupplier;
+    @NonNull private final UidParamsFactory mUidParamsFactory;
 
     StripeNetworkUtils(@NonNull Context context) {
-        this(context.getPackageName(), new UidSupplier(context));
+        this(
+                UidParamsFactory.create(context)
+        );
     }
 
     @VisibleForTesting
-    StripeNetworkUtils(@NonNull String packageName, @NonNull Supplier<StripeUid> uidSupplier) {
-        mPackageName = packageName;
-        mUidSupplier = uidSupplier;
+    StripeNetworkUtils(
+            @NonNull UidParamsFactory uidParamsFactory
+    ) {
+        mUidParamsFactory = uidParamsFactory;
     }
 
     /**
@@ -46,7 +43,7 @@ final class StripeNetworkUtils {
         // We store the logging items in this field, which is extracted from the parameters
         // sent to the API.
         tokenParams.put(AnalyticsDataFactory.FIELD_PRODUCT_USAGE, card.getLoggingTokens());
-        tokenParams.putAll(createUidParams());
+        tokenParams.putAll(mUidParamsFactory.create());
 
         return tokenParams;
     }
@@ -57,36 +54,19 @@ final class StripeNetworkUtils {
                 confirmPaymentIntentParams.get(ConfirmPaymentIntentParams.API_PARAM_SOURCE_DATA);
         if (sourceData instanceof Map) {
             //noinspection unchecked
-            ((Map<String, Object>) sourceData).putAll(createUidParams());
+            ((Map<String, Object>) sourceData).putAll(mUidParamsFactory.create());
         } else {
             final Object paymentMethodData = confirmPaymentIntentParams
                     .get(ConfirmPaymentIntentParams.API_PARAM_PAYMENT_METHOD_DATA);
             if (paymentMethodData instanceof Map) {
                 //noinspection unchecked
-                ((Map) paymentMethodData).putAll(createUidParams());
+                ((Map) paymentMethodData).putAll(mUidParamsFactory.create());
             }
         }
     }
 
     @NonNull
     Map<String, String> createUidParams() {
-        final String guid = mUidSupplier.get().getValue();
-        if (StripeTextUtils.isBlank(guid)) {
-            return new HashMap<>();
-        }
-
-        final Map<String, String> uidParams = new HashMap<>(2);
-        final String hashGuid = StripeTextUtils.shaHashInput(guid);
-        if (!StripeTextUtils.isBlank(hashGuid)) {
-            uidParams.put(FIELD_GUID, hashGuid);
-        }
-
-        final String muid = mPackageName + guid;
-        final String hashMuid = StripeTextUtils.shaHashInput(muid);
-        if (!StripeTextUtils.isBlank(hashMuid)) {
-            uidParams.put(FIELD_MUID, hashMuid);
-        }
-
-        return uidParams;
+        return mUidParamsFactory.create();
     }
 }
