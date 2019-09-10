@@ -209,12 +209,12 @@ public final class PaymentAuthConfig {
         }
 
         private boolean typedEquals(@NonNull Stripe3ds2ButtonCustomization uiCustomization) {
-            return ObjectUtils.equals(mButtonCustomization, uiCustomization.mButtonCustomization);
+            return Objects.equals(mButtonCustomization, uiCustomization.mButtonCustomization);
         }
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(mButtonCustomization);
+            return Objects.hash(mButtonCustomization);
         }
     }
 
@@ -329,12 +329,12 @@ public final class PaymentAuthConfig {
         }
 
         private boolean typedEquals(@NonNull Stripe3ds2LabelCustomization uiCustomization) {
-            return ObjectUtils.equals(mLabelCustomization, uiCustomization.mLabelCustomization);
+            return Objects.equals(mLabelCustomization, uiCustomization.mLabelCustomization);
         }
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(mLabelCustomization);
+            return Objects.hash(mLabelCustomization);
         }
     }
 
@@ -446,12 +446,12 @@ public final class PaymentAuthConfig {
         }
 
         private boolean typedEquals(@NonNull Stripe3ds2TextBoxCustomization uiCustomization) {
-            return ObjectUtils.equals(mTextBoxCustomization, uiCustomization.mTextBoxCustomization);
+            return Objects.equals(mTextBoxCustomization, uiCustomization.mTextBoxCustomization);
         }
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(mTextBoxCustomization);
+            return Objects.hash(mTextBoxCustomization);
         }
     }
 
@@ -578,12 +578,12 @@ public final class PaymentAuthConfig {
         }
 
         private boolean typedEquals(@NonNull Stripe3ds2ToolbarCustomization uiCustomization) {
-            return ObjectUtils.equals(mToolbarCustomization, uiCustomization.mToolbarCustomization);
+            return Objects.equals(mToolbarCustomization, uiCustomization.mToolbarCustomization);
         }
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(mToolbarCustomization);
+            return Objects.hash(mToolbarCustomization);
         }
     }
 
@@ -751,12 +751,12 @@ public final class PaymentAuthConfig {
         }
 
         private boolean typedEquals(@NonNull Stripe3ds2UiCustomization uiCustomization) {
-            return ObjectUtils.equals(mUiCustomization, uiCustomization.mUiCustomization);
+            return Objects.equals(mUiCustomization, uiCustomization.mUiCustomization);
         }
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(mUiCustomization);
+            return Objects.hash(mUiCustomization);
         }
     }
 }

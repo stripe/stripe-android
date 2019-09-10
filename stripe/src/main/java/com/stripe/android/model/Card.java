@@ -11,7 +11,6 @@ import com.stripe.android.CardUtils;
 import com.stripe.android.ObjectBuilder;
 import com.stripe.android.R;
 import com.stripe.android.StripeTextUtils;
-import com.stripe.android.utils.ObjectUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -20,6 +19,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -698,36 +698,36 @@ public final class Card extends StripeModel implements StripePaymentSource {
     }
     
     private boolean typedEquals(@NonNull Card card) {
-        return ObjectUtils.equals(number, card.number)
-                && ObjectUtils.equals(cvc, card.cvc)
-                && ObjectUtils.equals(expMonth, card.expMonth)
-                && ObjectUtils.equals(expYear, card.expYear)
-                && ObjectUtils.equals(name, card.name)
-                && ObjectUtils.equals(addressLine1, card.addressLine1)
-                && ObjectUtils.equals(addressLine1Check, card.addressLine1Check)
-                && ObjectUtils.equals(addressLine2, card.addressLine2)
-                && ObjectUtils.equals(addressCity, card.addressCity)
-                && ObjectUtils.equals(addressState, card.addressState)
-                && ObjectUtils.equals(addressZip, card.addressZip)
-                && ObjectUtils.equals(addressZipCheck, card.addressZipCheck)
-                && ObjectUtils.equals(addressCountry, card.addressCountry)
-                && ObjectUtils.equals(last4, card.last4)
-                && ObjectUtils.equals(brand, card.brand)
-                && ObjectUtils.equals(funding, card.funding)
-                && ObjectUtils.equals(fingerprint, card.fingerprint)
-                && ObjectUtils.equals(country, card.country)
-                && ObjectUtils.equals(currency, card.currency)
-                && ObjectUtils.equals(customerId, card.customerId)
-                && ObjectUtils.equals(cvcCheck, card.cvcCheck)
-                && ObjectUtils.equals(id, card.id)
-                && ObjectUtils.equals(loggingTokens, card.loggingTokens)
-                && ObjectUtils.equals(tokenizationMethod, card.tokenizationMethod)
-                && ObjectUtils.equals(metadata, card.metadata);
+        return Objects.equals(number, card.number)
+                && Objects.equals(cvc, card.cvc)
+                && Objects.equals(expMonth, card.expMonth)
+                && Objects.equals(expYear, card.expYear)
+                && Objects.equals(name, card.name)
+                && Objects.equals(addressLine1, card.addressLine1)
+                && Objects.equals(addressLine1Check, card.addressLine1Check)
+                && Objects.equals(addressLine2, card.addressLine2)
+                && Objects.equals(addressCity, card.addressCity)
+                && Objects.equals(addressState, card.addressState)
+                && Objects.equals(addressZip, card.addressZip)
+                && Objects.equals(addressZipCheck, card.addressZipCheck)
+                && Objects.equals(addressCountry, card.addressCountry)
+                && Objects.equals(last4, card.last4)
+                && Objects.equals(brand, card.brand)
+                && Objects.equals(funding, card.funding)
+                && Objects.equals(fingerprint, card.fingerprint)
+                && Objects.equals(country, card.country)
+                && Objects.equals(currency, card.currency)
+                && Objects.equals(customerId, card.customerId)
+                && Objects.equals(cvcCheck, card.cvcCheck)
+                && Objects.equals(id, card.id)
+                && Objects.equals(loggingTokens, card.loggingTokens)
+                && Objects.equals(tokenizationMethod, card.tokenizationMethod)
+                && Objects.equals(metadata, card.metadata);
     }
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(number, cvc, expMonth, expYear, name, addressLine1,
+        return Objects.hash(number, cvc, expMonth, expYear, name, addressLine1,
                 addressLine1Check, addressLine2, addressCity, addressState, addressZip,
                 addressZipCheck, addressCountry, last4, brand, funding, fingerprint,
                 country, currency, customerId, cvcCheck, id, loggingTokens, tokenizationMethod,

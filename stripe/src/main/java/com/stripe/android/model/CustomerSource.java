@@ -3,7 +3,7 @@ package com.stripe.android.model;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.stripe.android.utils.ObjectUtils;
+import java.util.Objects;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -113,11 +113,11 @@ public final class CustomerSource extends StripeModel implements StripePaymentSo
     }
 
     private boolean typedEquals(@NonNull CustomerSource customerSource) {
-        return ObjectUtils.equals(mStripePaymentSource, customerSource.mStripePaymentSource);
+        return Objects.equals(mStripePaymentSource, customerSource.mStripePaymentSource);
     }
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mStripePaymentSource);
+        return Objects.hash(mStripePaymentSource);
     }
 }

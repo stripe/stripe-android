@@ -8,7 +8,6 @@ import androidx.annotation.Nullable;
 
 import com.stripe.android.ObjectBuilder;
 import com.stripe.android.model.StripeModel;
-import com.stripe.android.utils.ObjectUtils;
 
 import java.util.Objects;
 
@@ -46,7 +45,7 @@ public abstract class Wallet extends StripeModel implements Parcelable {
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(dynamicLast4, walletType);
+        return Objects.hash(dynamicLast4, walletType);
     }
 
     @Override
@@ -55,8 +54,8 @@ public abstract class Wallet extends StripeModel implements Parcelable {
     }
 
     private boolean typedEquals(@NonNull Wallet wallet) {
-        return ObjectUtils.equals(dynamicLast4, wallet.dynamicLast4)
-                && ObjectUtils.equals(walletType, wallet.walletType);
+        return Objects.equals(dynamicLast4, wallet.dynamicLast4)
+                && Objects.equals(walletType, wallet.walletType);
     }
 
     abstract static class Builder<W extends Wallet> {
@@ -177,7 +176,7 @@ public abstract class Wallet extends StripeModel implements Parcelable {
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(city, country, line1, line2, postalCode, state);
+            return Objects.hash(city, country, line1, line2, postalCode, state);
         }
 
         @Override
@@ -186,12 +185,12 @@ public abstract class Wallet extends StripeModel implements Parcelable {
         }
 
         private boolean typedEquals(@NonNull Address address) {
-            return ObjectUtils.equals(city, address.city)
-                    && ObjectUtils.equals(country, address.country)
-                    && ObjectUtils.equals(line1, address.line1)
-                    && ObjectUtils.equals(line2, address.line2)
-                    && ObjectUtils.equals(postalCode, address.postalCode)
-                    && ObjectUtils.equals(state, address.state);
+            return Objects.equals(city, address.city)
+                    && Objects.equals(country, address.country)
+                    && Objects.equals(line1, address.line1)
+                    && Objects.equals(line2, address.line2)
+                    && Objects.equals(postalCode, address.postalCode)
+                    && Objects.equals(state, address.state);
         }
 
         static final class Builder implements ObjectBuilder<Address> {

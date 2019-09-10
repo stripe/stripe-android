@@ -5,13 +5,12 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringDef;
 import androidx.annotation.VisibleForTesting;
 
-import com.stripe.android.utils.ObjectUtils;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.json.JSONException;
@@ -230,23 +229,23 @@ public final class SourceCardData extends StripeSourceTypeModel {
 
     boolean typedEquals(@NonNull SourceCardData sourceCardData) {
         return super.typedEquals(sourceCardData)
-                && ObjectUtils.equals(mAddressLine1Check, sourceCardData.mAddressLine1Check)
-                && ObjectUtils.equals(mAddressZipCheck, sourceCardData.mAddressZipCheck)
-                && ObjectUtils.equals(mBrand, sourceCardData.mBrand)
-                && ObjectUtils.equals(mCountry, sourceCardData.mCountry)
-                && ObjectUtils.equals(mCvcCheck, sourceCardData.mCvcCheck)
-                && ObjectUtils.equals(mDynamicLast4, sourceCardData.mDynamicLast4)
-                && ObjectUtils.equals(mExpiryMonth, sourceCardData.mExpiryMonth)
-                && ObjectUtils.equals(mExpiryYear, sourceCardData.mExpiryYear)
-                && ObjectUtils.equals(mFunding, sourceCardData.mFunding)
-                && ObjectUtils.equals(mLast4, sourceCardData.mLast4)
-                && ObjectUtils.equals(mThreeDSecureStatus, sourceCardData.mThreeDSecureStatus)
-                && ObjectUtils.equals(mTokenizationMethod, sourceCardData.mTokenizationMethod);
+                && Objects.equals(mAddressLine1Check, sourceCardData.mAddressLine1Check)
+                && Objects.equals(mAddressZipCheck, sourceCardData.mAddressZipCheck)
+                && Objects.equals(mBrand, sourceCardData.mBrand)
+                && Objects.equals(mCountry, sourceCardData.mCountry)
+                && Objects.equals(mCvcCheck, sourceCardData.mCvcCheck)
+                && Objects.equals(mDynamicLast4, sourceCardData.mDynamicLast4)
+                && Objects.equals(mExpiryMonth, sourceCardData.mExpiryMonth)
+                && Objects.equals(mExpiryYear, sourceCardData.mExpiryYear)
+                && Objects.equals(mFunding, sourceCardData.mFunding)
+                && Objects.equals(mLast4, sourceCardData.mLast4)
+                && Objects.equals(mThreeDSecureStatus, sourceCardData.mThreeDSecureStatus)
+                && Objects.equals(mTokenizationMethod, sourceCardData.mTokenizationMethod);
     }
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mAddressLine1Check, mAddressZipCheck, mBrand, mCountry, mCvcCheck,
+        return Objects.hash(mAddressLine1Check, mAddressZipCheck, mBrand, mCountry, mCvcCheck,
                 mDynamicLast4, mExpiryMonth, mExpiryYear, mFunding, mLast4, mThreeDSecureStatus,
                 mTokenizationMethod);
     }

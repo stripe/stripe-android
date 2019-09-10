@@ -5,7 +5,6 @@ import androidx.annotation.Nullable;
 
 import com.stripe.android.ObjectBuilder;
 import com.stripe.android.Stripe;
-import com.stripe.android.utils.ObjectUtils;
 
 import java.util.AbstractMap;
 import java.util.HashMap;
@@ -216,7 +215,7 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(type, card, fpx, ideal, billingDetails, metadata);
+        return Objects.hash(type, card, fpx, ideal, billingDetails, metadata);
     }
 
     @Override
@@ -227,12 +226,12 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
     }
 
     private boolean typedEquals(@NonNull PaymentMethodCreateParams params) {
-        return ObjectUtils.equals(type, params.type)
-                && ObjectUtils.equals(card, params.card)
-                && ObjectUtils.equals(fpx, params.fpx)
-                && ObjectUtils.equals(ideal, params.ideal)
-                && ObjectUtils.equals(billingDetails, params.billingDetails)
-                && ObjectUtils.equals(metadata, params.metadata);
+        return Objects.equals(type, params.type)
+                && Objects.equals(card, params.card)
+                && Objects.equals(fpx, params.fpx)
+                && Objects.equals(ideal, params.ideal)
+                && Objects.equals(billingDetails, params.billingDetails)
+                && Objects.equals(metadata, params.metadata);
     }
 
     enum Type {
@@ -283,7 +282,7 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(mNumber, mExpiryMonth, mExpiryYear, mCvc, mToken);
+            return Objects.hash(mNumber, mExpiryMonth, mExpiryYear, mCvc, mToken);
         }
 
         @Override
@@ -292,11 +291,11 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
         }
 
         private boolean typedEquals(@NonNull Card card) {
-            return ObjectUtils.equals(mNumber, card.mNumber)
-                    && ObjectUtils.equals(mCvc, card.mCvc)
-                    && ObjectUtils.equals(mExpiryMonth, card.mExpiryMonth)
-                    && ObjectUtils.equals(mExpiryYear, card.mExpiryYear)
-                    && ObjectUtils.equals(mToken, card.mToken);
+            return Objects.equals(mNumber, card.mNumber)
+                    && Objects.equals(mCvc, card.mCvc)
+                    && Objects.equals(mExpiryMonth, card.mExpiryMonth)
+                    && Objects.equals(mExpiryYear, card.mExpiryYear)
+                    && Objects.equals(mToken, card.mToken);
         }
 
         @NonNull
@@ -388,7 +387,7 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(mBank);
+            return Objects.hash(mBank);
         }
 
         @Override
@@ -397,7 +396,7 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
         }
 
         private boolean typedEquals(@NonNull Ideal ideal) {
-            return ObjectUtils.equals(mBank, ideal.mBank);
+            return Objects.equals(mBank, ideal.mBank);
         }
 
         public static final class Builder implements ObjectBuilder<Ideal> {
@@ -435,7 +434,7 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(mBank);
+            return Objects.hash(mBank);
         }
 
         @Override
@@ -444,7 +443,7 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
         }
 
         private boolean typedEquals(@NonNull Fpx fpx) {
-            return ObjectUtils.equals(mBank, fpx.mBank);
+            return Objects.equals(mBank, fpx.mBank);
         }
 
         public static final class Builder implements ObjectBuilder<Fpx> {

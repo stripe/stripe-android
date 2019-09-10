@@ -120,11 +120,11 @@ public class PaymentSessionConfig implements Parcelable {
     }
 
     private boolean typedEquals(@NonNull PaymentSessionConfig obj) {
-        return ObjectUtils.equals(mHiddenShippingInfoFields, obj.mHiddenShippingInfoFields) &&
-                ObjectUtils.equals(mOptionalShippingInfoFields, obj.mOptionalShippingInfoFields) &&
-                ObjectUtils.equals(mShippingInformation, obj.mShippingInformation) &&
-                ObjectUtils.equals(mShippingInfoRequired, obj.mShippingInfoRequired) &&
-                ObjectUtils.equals(mShippingMethodRequired, obj.mShippingMethodRequired);
+        return Objects.equals(mHiddenShippingInfoFields, obj.mHiddenShippingInfoFields) &&
+                Objects.equals(mOptionalShippingInfoFields, obj.mOptionalShippingInfoFields) &&
+                Objects.equals(mShippingInformation, obj.mShippingInformation) &&
+                Objects.equals(mShippingInfoRequired, obj.mShippingInfoRequired) &&
+                Objects.equals(mShippingMethodRequired, obj.mShippingMethodRequired);
     }
 
     @Override

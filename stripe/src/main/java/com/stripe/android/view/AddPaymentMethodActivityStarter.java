@@ -85,7 +85,7 @@ public final class AddPaymentMethodActivityStarter
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(shouldAttachToCustomer, shouldRequirePostalCode,
+            return Objects.hash(shouldAttachToCustomer, shouldRequirePostalCode,
                     isPaymentSessionActive, shouldInitCustomerSessionTokens, paymentMethodType,
                     paymentConfiguration);
         }
@@ -96,13 +96,13 @@ public final class AddPaymentMethodActivityStarter
         }
 
         private boolean typedEquals(@NonNull Args args) {
-            return ObjectUtils.equals(shouldAttachToCustomer, args.shouldAttachToCustomer) &&
-                    ObjectUtils.equals(shouldRequirePostalCode, args.shouldRequirePostalCode) &&
-                    ObjectUtils.equals(isPaymentSessionActive, args.isPaymentSessionActive) &&
-                    ObjectUtils.equals(shouldInitCustomerSessionTokens,
+            return Objects.equals(shouldAttachToCustomer, args.shouldAttachToCustomer) &&
+                    Objects.equals(shouldRequirePostalCode, args.shouldRequirePostalCode) &&
+                    Objects.equals(isPaymentSessionActive, args.isPaymentSessionActive) &&
+                    Objects.equals(shouldInitCustomerSessionTokens,
                             args.shouldInitCustomerSessionTokens) &&
-                    ObjectUtils.equals(paymentMethodType, args.paymentMethodType) &&
-                    ObjectUtils.equals(paymentConfiguration, args.paymentConfiguration);
+                    Objects.equals(paymentMethodType, args.paymentMethodType) &&
+                    Objects.equals(paymentConfiguration, args.paymentConfiguration);
 
         }
 

@@ -101,7 +101,7 @@ public final class PaymentMethodsActivityStarter
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(initialPaymentMethodId, shouldRequirePostalCode,
+            return Objects.hash(initialPaymentMethodId, shouldRequirePostalCode,
                     isPaymentSessionActive, paymentMethodTypes, paymentConfiguration);
         }
 
@@ -111,11 +111,11 @@ public final class PaymentMethodsActivityStarter
         }
 
         private boolean typedEquals(@NonNull Args args) {
-            return ObjectUtils.equals(initialPaymentMethodId, args.initialPaymentMethodId) &&
-                    ObjectUtils.equals(shouldRequirePostalCode, args.shouldRequirePostalCode) &&
-                    ObjectUtils.equals(isPaymentSessionActive, args.isPaymentSessionActive) &&
-                    ObjectUtils.equals(paymentMethodTypes, args.paymentMethodTypes) &&
-                    ObjectUtils.equals(paymentConfiguration, args.paymentConfiguration);
+            return Objects.equals(initialPaymentMethodId, args.initialPaymentMethodId) &&
+                    Objects.equals(shouldRequirePostalCode, args.shouldRequirePostalCode) &&
+                    Objects.equals(isPaymentSessionActive, args.isPaymentSessionActive) &&
+                    Objects.equals(paymentMethodTypes, args.paymentMethodTypes) &&
+                    Objects.equals(paymentConfiguration, args.paymentConfiguration);
         }
 
         public static final Parcelable.Creator<Args> CREATOR = new Parcelable.Creator<Args>() {
@@ -226,7 +226,7 @@ public final class PaymentMethodsActivityStarter
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(paymentMethod);
+            return Objects.hash(paymentMethod);
         }
 
         @Override
@@ -235,7 +235,7 @@ public final class PaymentMethodsActivityStarter
         }
 
         private boolean typedEquals(@NonNull Result other) {
-            return ObjectUtils.equals(paymentMethod, other.paymentMethod);
+            return Objects.equals(paymentMethod, other.paymentMethod);
         }
 
         public static final Creator<Result> CREATOR = new Creator<Result>() {

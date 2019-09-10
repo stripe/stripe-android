@@ -5,7 +5,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.stripe.android.ObjectBuilder;
-import com.stripe.android.utils.ObjectUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -160,16 +159,16 @@ public final class ConfirmSetupIntentParams implements ConfirmStripeIntentParams
     }
 
     private boolean typedEquals(@NonNull ConfirmSetupIntentParams params) {
-        return ObjectUtils.equals(mReturnUrl, params.mReturnUrl)
-                && ObjectUtils.equals(mClientSecret, params.mClientSecret)
-                && ObjectUtils.equals(mPaymentMethodId, params.mPaymentMethodId)
-                && ObjectUtils.equals(mPaymentMethodCreateParams, params.mPaymentMethodCreateParams)
-                && ObjectUtils.equals(mUseStripeSdk, params.mUseStripeSdk);
+        return Objects.equals(mReturnUrl, params.mReturnUrl)
+                && Objects.equals(mClientSecret, params.mClientSecret)
+                && Objects.equals(mPaymentMethodId, params.mPaymentMethodId)
+                && Objects.equals(mPaymentMethodCreateParams, params.mPaymentMethodCreateParams)
+                && Objects.equals(mUseStripeSdk, params.mUseStripeSdk);
     }
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mReturnUrl, mClientSecret, mPaymentMethodId, mUseStripeSdk);
+        return Objects.hash(mReturnUrl, mClientSecret, mPaymentMethodId, mUseStripeSdk);
     }
 
 

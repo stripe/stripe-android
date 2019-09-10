@@ -90,7 +90,7 @@ public final class PaymentConfiguration implements Parcelable {
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mPublishableKey);
+        return Objects.hash(mPublishableKey);
     }
 
     @Override
@@ -100,7 +100,7 @@ public final class PaymentConfiguration implements Parcelable {
     }
 
     private boolean typedEquals(@NonNull PaymentConfiguration obj) {
-        return ObjectUtils.equals(mPublishableKey, obj.mPublishableKey);
+        return Objects.equals(mPublishableKey, obj.mPublishableKey);
     }
 
     /**

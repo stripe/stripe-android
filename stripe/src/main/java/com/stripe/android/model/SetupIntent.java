@@ -6,7 +6,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.stripe.android.ObjectBuilder;
-import com.stripe.android.utils.ObjectUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -296,25 +295,25 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
     }
 
     private boolean typedEquals(@NonNull SetupIntent setupIntent) {
-        return ObjectUtils.equals(mId, setupIntent.mId)
-                && ObjectUtils.equals(mObjectType, setupIntent.mObjectType)
-                && ObjectUtils.equals(mClientSecret, setupIntent.mClientSecret)
-                && ObjectUtils.equals(mCreated, setupIntent.mCreated)
-                && ObjectUtils.equals(mCancellationReason, setupIntent.mCancellationReason)
-                && ObjectUtils.equals(mDescription, setupIntent.mDescription)
-                && ObjectUtils.equals(mLastSetupError, setupIntent.mLastSetupError)
-                && ObjectUtils.equals(mLiveMode, setupIntent.mLiveMode)
-                && ObjectUtils.equals(mStatus, setupIntent.mStatus)
-                && ObjectUtils.equals(mUsage, setupIntent.mUsage)
-                && ObjectUtils.equals(mPaymentMethodId, setupIntent.mPaymentMethodId)
-                && ObjectUtils.equals(mPaymentMethodTypes, setupIntent.mPaymentMethodTypes)
-                && ObjectUtils.equals(mNextAction, setupIntent.mNextAction)
-                && ObjectUtils.equals(mNextActionType, setupIntent.mNextActionType);
+        return Objects.equals(mId, setupIntent.mId)
+                && Objects.equals(mObjectType, setupIntent.mObjectType)
+                && Objects.equals(mClientSecret, setupIntent.mClientSecret)
+                && Objects.equals(mCreated, setupIntent.mCreated)
+                && Objects.equals(mCancellationReason, setupIntent.mCancellationReason)
+                && Objects.equals(mDescription, setupIntent.mDescription)
+                && Objects.equals(mLastSetupError, setupIntent.mLastSetupError)
+                && Objects.equals(mLiveMode, setupIntent.mLiveMode)
+                && Objects.equals(mStatus, setupIntent.mStatus)
+                && Objects.equals(mUsage, setupIntent.mUsage)
+                && Objects.equals(mPaymentMethodId, setupIntent.mPaymentMethodId)
+                && Objects.equals(mPaymentMethodTypes, setupIntent.mPaymentMethodTypes)
+                && Objects.equals(mNextAction, setupIntent.mNextAction)
+                && Objects.equals(mNextActionType, setupIntent.mNextActionType);
     }
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mId, mObjectType, mCancellationReason, mClientSecret, mCreated,
+        return Objects.hash(mId, mObjectType, mCancellationReason, mClientSecret, mCreated,
                 mDescription, mLastSetupError, mLiveMode, mStatus, mPaymentMethodId,
                 mPaymentMethodTypes, mNextAction, mNextActionType, mUsage);
     }
@@ -504,7 +503,7 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(code, declineCode, docUrl, message, param, paymentMethod, type);
+            return Objects.hash(code, declineCode, docUrl, message, param, paymentMethod, type);
         }
 
         @Override
@@ -513,13 +512,13 @@ public final class SetupIntent extends StripeModel implements StripeIntent {
         }
 
         private boolean typedEquals(@NonNull Error error) {
-            return ObjectUtils.equals(code, error.code) &&
-                    ObjectUtils.equals(declineCode, error.declineCode) &&
-                    ObjectUtils.equals(docUrl, error.docUrl) &&
-                    ObjectUtils.equals(message, error.message) &&
-                    ObjectUtils.equals(param, error.param) &&
-                    ObjectUtils.equals(paymentMethod, error.paymentMethod) &&
-                    ObjectUtils.equals(type, error.type);
+            return Objects.equals(code, error.code) &&
+                    Objects.equals(declineCode, error.declineCode) &&
+                    Objects.equals(docUrl, error.docUrl) &&
+                    Objects.equals(message, error.message) &&
+                    Objects.equals(param, error.param) &&
+                    Objects.equals(paymentMethod, error.paymentMethod) &&
+                    Objects.equals(type, error.type);
         }
 
         private static final class Builder implements ObjectBuilder<Error> {

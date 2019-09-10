@@ -7,8 +7,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.Size;
 
-import com.stripe.android.utils.ObjectUtils;
-
 import java.util.Currency;
 import java.util.Objects;
 
@@ -125,14 +123,14 @@ public final class ShippingMethod extends StripeModel implements Parcelable {
 
     private boolean typedEquals(@NonNull ShippingMethod shippingMethod) {
         return mAmount == shippingMethod.mAmount
-                && ObjectUtils.equals(mCurrencyCode, shippingMethod.mCurrencyCode)
-                && ObjectUtils.equals(mDetail, shippingMethod.mDetail)
-                && ObjectUtils.equals(mIdentifier, shippingMethod.mIdentifier)
-                && ObjectUtils.equals(mLabel, shippingMethod.mLabel);
+                && Objects.equals(mCurrencyCode, shippingMethod.mCurrencyCode)
+                && Objects.equals(mDetail, shippingMethod.mDetail)
+                && Objects.equals(mIdentifier, shippingMethod.mIdentifier)
+                && Objects.equals(mLabel, shippingMethod.mLabel);
     }
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mAmount, mCurrencyCode, mDetail, mIdentifier, mLabel);
+        return Objects.hash(mAmount, mCurrencyCode, mDetail, mIdentifier, mLabel);
     }
 }

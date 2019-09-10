@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.stripe.android.exception.InvalidRequestException;
-import com.stripe.android.utils.ObjectUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -14,6 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A class representing a request to a Stripe-owned service.
@@ -239,13 +239,13 @@ abstract class StripeRequest {
     }
 
     int getBaseHashCode() {
-        return ObjectUtils.hash(method, mUrl, params);
+        return Objects.hash(method, mUrl, params);
     }
 
     boolean typedEquals(@NonNull StripeRequest request) {
-        return ObjectUtils.equals(method, request.method) &&
-                ObjectUtils.equals(mUrl, request.mUrl) &&
-                ObjectUtils.equals(params, request.params);
+        return Objects.equals(method, request.method) &&
+                Objects.equals(mUrl, request.mUrl) &&
+                Objects.equals(params, request.params);
     }
 
     enum Method {

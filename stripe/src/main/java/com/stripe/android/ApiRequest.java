@@ -6,12 +6,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.stripe.android.exception.InvalidRequestException;
-import com.stripe.android.utils.ObjectUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import org.json.JSONObject;
 
@@ -130,7 +130,7 @@ final class ApiRequest extends StripeRequest {
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(getBaseHashCode(), options, mAppInfo);
+        return Objects.hash(getBaseHashCode(), options, mAppInfo);
     }
 
     @Override
@@ -141,8 +141,8 @@ final class ApiRequest extends StripeRequest {
 
     private boolean typedEquals(@NonNull ApiRequest obj) {
         return super.typedEquals(obj) &&
-                ObjectUtils.equals(options, obj.options) &&
-                ObjectUtils.equals(mAppInfo, obj.mAppInfo);
+                Objects.equals(options, obj.options) &&
+                Objects.equals(mAppInfo, obj.mAppInfo);
     }
 
     /**
@@ -171,7 +171,7 @@ final class ApiRequest extends StripeRequest {
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(apiKey, stripeAccount);
+            return Objects.hash(apiKey, stripeAccount);
         }
 
         @Override
@@ -180,8 +180,8 @@ final class ApiRequest extends StripeRequest {
         }
 
         private boolean typedEquals(@NonNull Options obj) {
-            return ObjectUtils.equals(apiKey, obj.apiKey) &&
-                    ObjectUtils.equals(stripeAccount, obj.stripeAccount);
+            return Objects.equals(apiKey, obj.apiKey) &&
+                    Objects.equals(stripeAccount, obj.stripeAccount);
         }
     }
 }

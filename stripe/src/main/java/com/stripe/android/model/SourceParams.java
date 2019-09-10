@@ -6,7 +6,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.Size;
 
 import com.stripe.android.ObjectBuilder;
-import com.stripe.android.utils.ObjectUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -925,7 +924,7 @@ public final class SourceParams implements StripeParamsModel {
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mAmount, mApiParameterMap, mCurrency, mTypeRaw, mOwner, mMetaData,
+        return Objects.hash(mAmount, mApiParameterMap, mCurrency, mTypeRaw, mOwner, mMetaData,
                 mRedirect, mExtraParams, mToken, mUsage, mType);
     }
 
@@ -935,17 +934,17 @@ public final class SourceParams implements StripeParamsModel {
     }
 
     private boolean typedEquals(@NonNull SourceParams params) {
-        return ObjectUtils.equals(mAmount, params.mAmount) &&
-                ObjectUtils.equals(mApiParameterMap, params.mApiParameterMap) &&
-                ObjectUtils.equals(mCurrency, params.mCurrency) &&
-                ObjectUtils.equals(mTypeRaw, params.mTypeRaw) &&
-                ObjectUtils.equals(mOwner, params.mOwner) &&
-                ObjectUtils.equals(mMetaData, params.mMetaData) &&
-                ObjectUtils.equals(mRedirect, params.mRedirect) &&
-                ObjectUtils.equals(mExtraParams, params.mExtraParams) &&
-                ObjectUtils.equals(mToken, params.mToken) &&
-                ObjectUtils.equals(mUsage, params.mUsage) &&
-                ObjectUtils.equals(mType, params.mType);
+        return Objects.equals(mAmount, params.mAmount) &&
+                Objects.equals(mApiParameterMap, params.mApiParameterMap) &&
+                Objects.equals(mCurrency, params.mCurrency) &&
+                Objects.equals(mTypeRaw, params.mTypeRaw) &&
+                Objects.equals(mOwner, params.mOwner) &&
+                Objects.equals(mMetaData, params.mMetaData) &&
+                Objects.equals(mRedirect, params.mRedirect) &&
+                Objects.equals(mExtraParams, params.mExtraParams) &&
+                Objects.equals(mToken, params.mToken) &&
+                Objects.equals(mUsage, params.mUsage) &&
+                Objects.equals(mType, params.mType);
     }
 
     static final class WeChatParams implements StripeParamsModel {

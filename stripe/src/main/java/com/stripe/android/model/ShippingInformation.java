@@ -6,10 +6,9 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.stripe.android.utils.ObjectUtils;
-
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import org.json.JSONObject;
 
@@ -117,13 +116,13 @@ public final class ShippingInformation
     }
 
     private boolean typedEquals(@NonNull ShippingInformation shippingInformation) {
-        return ObjectUtils.equals(mAddress, shippingInformation.mAddress)
-                && ObjectUtils.equals(mName, shippingInformation.mName)
-                && ObjectUtils.equals(mPhone, shippingInformation.mPhone);
+        return Objects.equals(mAddress, shippingInformation.mAddress)
+                && Objects.equals(mName, shippingInformation.mName)
+                && Objects.equals(mPhone, shippingInformation.mPhone);
     }
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mAddress, mName, mPhone);
+        return Objects.hash(mAddress, mName, mPhone);
     }
 }

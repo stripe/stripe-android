@@ -4,10 +4,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringDef;
 
-import com.stripe.android.utils.ObjectUtils;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -101,11 +100,11 @@ public final class SourceCodeVerification extends StripeModel {
 
     private boolean typedEquals(@NonNull SourceCodeVerification sourceCodeVerification) {
         return mAttemptsRemaining == sourceCodeVerification.mAttemptsRemaining
-                && ObjectUtils.equals(mStatus, sourceCodeVerification.mStatus);
+                && Objects.equals(mStatus, sourceCodeVerification.mStatus);
     }
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mAttemptsRemaining, mStatus);
+        return Objects.hash(mAttemptsRemaining, mStatus);
     }
 }

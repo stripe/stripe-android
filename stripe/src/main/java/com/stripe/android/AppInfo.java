@@ -91,14 +91,14 @@ public final class AppInfo {
     }
 
     private boolean typedEquals(@NonNull AppInfo appInfo) {
-        return ObjectUtils.equals(mName, appInfo.mName) &&
-                ObjectUtils.equals(mVersion, appInfo.mVersion) &&
-                ObjectUtils.equals(mUrl, appInfo.mUrl) &&
-                ObjectUtils.equals(mPartnerId, appInfo.mPartnerId);
+        return Objects.equals(mName, appInfo.mName) &&
+                Objects.equals(mVersion, appInfo.mVersion) &&
+                Objects.equals(mUrl, appInfo.mUrl) &&
+                Objects.equals(mPartnerId, appInfo.mPartnerId);
     }
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mName, mVersion, mUrl, mPartnerId);
+        return Objects.hash(mName, mVersion, mUrl, mPartnerId);
     }
 }

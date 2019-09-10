@@ -9,7 +9,8 @@ import androidx.annotation.Nullable;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
-import com.stripe.android.utils.ObjectUtils;
+
+import java.util.Objects;
 
 /**
  * A data class representing the state of the associated {@link PaymentSession}.
@@ -149,17 +150,17 @@ public class PaymentSessionData implements Parcelable {
     }
 
     private boolean typedEquals(@NonNull PaymentSessionData data) {
-        return ObjectUtils.equals(mCartTotal, data.mCartTotal)
-                && ObjectUtils.equals(mIsPaymentReadyToCharge, data.mIsPaymentReadyToCharge)
-                && ObjectUtils.equals(mShippingTotal, data.mShippingTotal)
-                && ObjectUtils.equals(mShippingInformation, data.mShippingInformation)
-                && ObjectUtils.equals(mShippingMethod, data.mShippingMethod)
-                && ObjectUtils.equals(mPaymentMethod, data.mPaymentMethod);
+        return Objects.equals(mCartTotal, data.mCartTotal)
+                && Objects.equals(mIsPaymentReadyToCharge, data.mIsPaymentReadyToCharge)
+                && Objects.equals(mShippingTotal, data.mShippingTotal)
+                && Objects.equals(mShippingInformation, data.mShippingInformation)
+                && Objects.equals(mShippingMethod, data.mShippingMethod)
+                && Objects.equals(mPaymentMethod, data.mPaymentMethod);
     }
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(mCartTotal, mIsPaymentReadyToCharge, mPaymentMethod,
+        return Objects.hash(mCartTotal, mIsPaymentReadyToCharge, mPaymentMethod,
                 mShippingTotal, mShippingInformation, mShippingMethod);
     }
 

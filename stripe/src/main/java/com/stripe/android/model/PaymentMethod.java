@@ -10,12 +10,12 @@ import androidx.annotation.StringDef;
 import com.stripe.android.ObjectBuilder;
 import com.stripe.android.model.wallets.Wallet;
 import com.stripe.android.model.wallets.WalletFactory;
-import com.stripe.android.utils.ObjectUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -170,21 +170,21 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
     }
 
     private boolean typedEquals(@NonNull PaymentMethod paymentMethod) {
-        return ObjectUtils.equals(id, paymentMethod.id)
-                && ObjectUtils.equals(created, paymentMethod.created)
+        return Objects.equals(id, paymentMethod.id)
+                && Objects.equals(created, paymentMethod.created)
                 && liveMode == paymentMethod.liveMode
-                && ObjectUtils.equals(type, paymentMethod.type)
-                && ObjectUtils.equals(billingDetails, paymentMethod.billingDetails)
-                && ObjectUtils.equals(card, paymentMethod.card)
-                && ObjectUtils.equals(cardPresent, paymentMethod.cardPresent)
-                && ObjectUtils.equals(fpx, paymentMethod.fpx)
-                && ObjectUtils.equals(ideal, paymentMethod.ideal)
-                && ObjectUtils.equals(customerId, paymentMethod.customerId);
+                && Objects.equals(type, paymentMethod.type)
+                && Objects.equals(billingDetails, paymentMethod.billingDetails)
+                && Objects.equals(card, paymentMethod.card)
+                && Objects.equals(cardPresent, paymentMethod.cardPresent)
+                && Objects.equals(fpx, paymentMethod.fpx)
+                && Objects.equals(ideal, paymentMethod.ideal)
+                && Objects.equals(customerId, paymentMethod.customerId);
     }
 
     @Override
     public int hashCode() {
-        return ObjectUtils.hash(id, created, liveMode, type, billingDetails, card, cardPresent,
+        return Objects.hash(id, created, liveMode, type, billingDetails, card, cardPresent,
                 fpx, ideal, customerId);
     }
 
@@ -435,7 +435,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(address, email, name, phone);
+            return Objects.hash(address, email, name, phone);
         }
 
         @Override
@@ -445,10 +445,10 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         }
 
         private boolean typedEquals(@NonNull BillingDetails obj) {
-            return ObjectUtils.equals(address, obj.address)
-                    && ObjectUtils.equals(email, obj.email)
-                    && ObjectUtils.equals(name, obj.name)
-                    && ObjectUtils.equals(phone, obj.phone);
+            return Objects.equals(address, obj.address)
+                    && Objects.equals(email, obj.email)
+                    && Objects.equals(name, obj.name)
+                    && Objects.equals(phone, obj.phone);
         }
 
         public static final class Builder implements ObjectBuilder<BillingDetails> {
@@ -624,20 +624,20 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         }
 
         private boolean typedEquals(@NonNull Card card) {
-            return ObjectUtils.equals(brand, card.brand)
-                    && ObjectUtils.equals(checks, card.checks)
-                    && ObjectUtils.equals(country, card.country)
-                    && ObjectUtils.equals(expiryMonth, card.expiryMonth)
-                    && ObjectUtils.equals(expiryYear, card.expiryYear)
-                    && ObjectUtils.equals(funding, card.funding)
-                    && ObjectUtils.equals(last4, card.last4)
-                    && ObjectUtils.equals(threeDSecureUsage, card.threeDSecureUsage)
-                    && ObjectUtils.equals(wallet, card.wallet);
+            return Objects.equals(brand, card.brand)
+                    && Objects.equals(checks, card.checks)
+                    && Objects.equals(country, card.country)
+                    && Objects.equals(expiryMonth, card.expiryMonth)
+                    && Objects.equals(expiryYear, card.expiryYear)
+                    && Objects.equals(funding, card.funding)
+                    && Objects.equals(last4, card.last4)
+                    && Objects.equals(threeDSecureUsage, card.threeDSecureUsage)
+                    && Objects.equals(wallet, card.wallet);
         }
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(brand, checks, country, expiryMonth, expiryYear, funding,
+            return Objects.hash(brand, checks, country, expiryMonth, expiryYear, funding,
                     last4, threeDSecureUsage, wallet);
         }
 
@@ -779,14 +779,14 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
             }
 
             private boolean typedEquals(@NonNull Checks checks) {
-                return ObjectUtils.equals(addressLine1Check, checks.addressLine1Check)
-                        && ObjectUtils.equals(addressPostalCodeCheck, checks.addressPostalCodeCheck)
-                        && ObjectUtils.equals(cvcCheck, checks.cvcCheck);
+                return Objects.equals(addressLine1Check, checks.addressLine1Check)
+                        && Objects.equals(addressPostalCodeCheck, checks.addressPostalCodeCheck)
+                        && Objects.equals(cvcCheck, checks.cvcCheck);
             }
 
             @Override
             public int hashCode() {
-                return ObjectUtils.hash(addressLine1Check, addressPostalCodeCheck, cvcCheck);
+                return Objects.hash(addressLine1Check, addressPostalCodeCheck, cvcCheck);
             }
 
             public static final class Builder implements ObjectBuilder<Checks> {
@@ -869,7 +869,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
 
             @Override
             public int hashCode() {
-                return ObjectUtils.hash(isSupported);
+                return Objects.hash(isSupported);
             }
 
             @Override
@@ -925,7 +925,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(type);
+            return Objects.hash(type);
         }
 
         @Override
@@ -934,7 +934,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         }
 
         private boolean typedEquals(@NonNull CardPresent obj) {
-            return ObjectUtils.equals(type, obj.type);
+            return Objects.equals(type, obj.type);
         }
     }
 
@@ -990,7 +990,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(bank, bankIdentifierCode);
+            return Objects.hash(bank, bankIdentifierCode);
         }
 
         @Override
@@ -999,8 +999,8 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         }
 
         private boolean typedEquals(@NonNull Ideal obj) {
-            return ObjectUtils.equals(bank, obj.bank)
-                    && ObjectUtils.equals(bankIdentifierCode, obj.bankIdentifierCode);
+            return Objects.equals(bank, obj.bank)
+                    && Objects.equals(bankIdentifierCode, obj.bankIdentifierCode);
         }
 
         public static final class Builder implements ObjectBuilder<Ideal> {
@@ -1078,7 +1078,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
 
         @Override
         public int hashCode() {
-            return ObjectUtils.hash(bank, accountHolderType);
+            return Objects.hash(bank, accountHolderType);
         }
 
         @Override
@@ -1087,8 +1087,8 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         }
 
         private boolean typedEquals(@NonNull Fpx obj) {
-            return ObjectUtils.equals(bank, obj.bank)
-                    && ObjectUtils.equals(accountHolderType, obj.accountHolderType);
+            return Objects.equals(bank, obj.bank)
+                    && Objects.equals(accountHolderType, obj.accountHolderType);
         }
 
         public static final class Builder implements ObjectBuilder<Fpx> {
