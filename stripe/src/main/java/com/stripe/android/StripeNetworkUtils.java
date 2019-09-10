@@ -7,17 +7,14 @@ import androidx.annotation.VisibleForTesting;
 
 import com.stripe.android.model.Card;
 import com.stripe.android.model.ConfirmPaymentIntentParams;
-import com.stripe.android.model.Token;
 
-import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Utility class for static functions useful for networking and data transfer. You probably will
- * not need to call functions from this class in your code.
+ * Utility class for static functions useful for networking and data transfer.
  */
-public class StripeNetworkUtils {
+final class StripeNetworkUtils {
 
     private static final String FIELD_MUID = "muid";
     private static final String FIELD_GUID = "guid";
@@ -44,27 +41,11 @@ public class StripeNetworkUtils {
      */
     @NonNull
     Map<String, Object> createCardTokenParams(@NonNull Card card) {
-        final Map<String, Object> tokenParams = new HashMap<>();
-
-        final AbstractMap<String, Object> cardParams = new HashMap<>();
-        cardParams.put("number", StripeTextUtils.nullIfBlank(card.getNumber()));
-        cardParams.put("cvc", StripeTextUtils.nullIfBlank(card.getCVC()));
-        cardParams.put("exp_month", card.getExpMonth());
-        cardParams.put("exp_year", card.getExpYear());
-        cardParams.put("name", StripeTextUtils.nullIfBlank(card.getName()));
-        cardParams.put("currency", StripeTextUtils.nullIfBlank(card.getCurrency()));
-        cardParams.put("address_line1", StripeTextUtils.nullIfBlank(card.getAddressLine1()));
-        cardParams.put("address_line2", StripeTextUtils.nullIfBlank(card.getAddressLine2()));
-        cardParams.put("address_city", StripeTextUtils.nullIfBlank(card.getAddressCity()));
-        cardParams.put("address_zip", StripeTextUtils.nullIfBlank(card.getAddressZip()));
-        cardParams.put("address_state", StripeTextUtils.nullIfBlank(card.getAddressState()));
-        cardParams.put("address_country", StripeTextUtils.nullIfBlank(card.getAddressCountry()));
+        final Map<String, Object> tokenParams = card.toParamMap();
 
         // We store the logging items in this field, which is extracted from the parameters
         // sent to the API.
         tokenParams.put(AnalyticsDataFactory.FIELD_PRODUCT_USAGE, card.getLoggingTokens());
-
-        tokenParams.put(Token.TokenType.CARD, cardParams);
         tokenParams.putAll(createUidParams());
 
         return tokenParams;
