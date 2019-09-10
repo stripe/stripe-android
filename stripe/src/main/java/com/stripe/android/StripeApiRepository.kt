@@ -222,7 +222,7 @@ internal class StripeApiRepository @JvmOverloads constructor(
                 ApiRequest.createPost(
                     sourcesUrl,
                     sourceParams.toParamMap()
-                        .plus(uidParamsFactory.create()),
+                        .plus(uidParamsFactory.createParams()),
                     options,
                     appInfo
                 )
@@ -285,7 +285,7 @@ internal class StripeApiRepository @JvmOverloads constructor(
                 ApiRequest.createPost(
                     paymentMethodsUrl,
                     paymentMethodCreateParams.toParamMap()
-                        .plus(uidParamsFactory.create()),
+                        .plus(uidParamsFactory.createParams()),
                     options,
                     appInfo
                 )

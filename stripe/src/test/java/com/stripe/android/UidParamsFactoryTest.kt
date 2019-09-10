@@ -9,7 +9,7 @@ class UidParamsFactoryTest {
     @Test
     fun testCreate() {
         val uidParams = UidParamsFactory("com.app", FakeUidSupplier())
-            .create()
+            .createParams()
         assertEquals(2, uidParams.size.toLong())
         assertTrue(uidParams.containsKey("muid"))
         assertTrue(uidParams.containsKey("guid"))
