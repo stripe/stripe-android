@@ -159,29 +159,6 @@ public class StripeTest {
     }
 
     @Test
-    public void createTokenShouldUseExecutor() {
-        final Executor expectedExecutor = new Executor() {
-            @Override
-            public void execute(@NonNull Runnable command) {
-            }
-        };
-        final Stripe stripe = createStripe(
-                new Stripe.TokenCreator() {
-                    @Override
-                    public void create(@NonNull Map<String, Object> tokenParams,
-                                       @NonNull ApiRequest.Options requestOptions,
-                                       @NonNull @Token.TokenType String tokenType,
-                                       @Nullable Executor executor,
-                                       @NonNull ApiResultCallback<Token> callback) {
-                        assertEquals(expectedExecutor, executor);
-                        assertEquals(NON_LOGGING_PK, requestOptions.apiKey);
-                        assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
-                    }
-                });
-        stripe.createToken(CARD, expectedExecutor, DEFAULT_TOKEN_CALLBACK);
-    }
-
-    @Test
     public void createTokenShouldUseProvidedKey() {
         final Stripe stripe = createStripe(
                 new Stripe.TokenCreator() {
