@@ -15,6 +15,7 @@ import com.stripe.android.utils.ObjectUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -33,7 +34,7 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
 /**
  * A model object representing a Card in the Android SDK.
  */
-public final class Card extends StripeModel implements StripePaymentSource {
+public final class Card extends StripeModel implements StripePaymentSource, StripeParamsModel {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
@@ -732,6 +733,32 @@ public final class Card extends StripeModel implements StripePaymentSource {
                 addressZipCheck, addressCountry, last4, brand, funding, fingerprint,
                 country, currency, customerId, cvcCheck, id, loggingTokens, tokenizationMethod,
                 metadata);
+    }
+
+    @NonNull
+    @Override
+    public Map<String, Object> toParamMap() {
+        final Map<String, Object> params = new HashMap<>();
+        params.put(Token.TokenType.CARD, createCardParams());
+        return params;
+    }
+
+    @NonNull
+    private Map<String, Object> createCardParams() {
+        final AbstractMap<String, Object> cardParams = new HashMap<>();
+        cardParams.put("number", StripeTextUtils.nullIfBlank(number));
+        cardParams.put("cvc", StripeTextUtils.nullIfBlank(cvc));
+        cardParams.put("exp_month", expMonth);
+        cardParams.put("exp_year", expYear);
+        cardParams.put("name", StripeTextUtils.nullIfBlank(name));
+        cardParams.put("currency", StripeTextUtils.nullIfBlank(currency));
+        cardParams.put("address_line1", StripeTextUtils.nullIfBlank(addressLine1));
+        cardParams.put("address_line2", StripeTextUtils.nullIfBlank(addressLine2));
+        cardParams.put("address_city", StripeTextUtils.nullIfBlank(addressCity));
+        cardParams.put("address_zip", StripeTextUtils.nullIfBlank(addressZip));
+        cardParams.put("address_state", StripeTextUtils.nullIfBlank(addressState));
+        cardParams.put("address_country", StripeTextUtils.nullIfBlank(addressCountry));
+        return cardParams;
     }
 
     /**
