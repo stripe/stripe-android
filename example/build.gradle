@@ -41,10 +41,7 @@ dependencies {
     //noinspection GradleDependency
     implementation 'com.squareup.okhttp3:logging-interceptor:3.12.3'
 
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.3'
-    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.3'
-    // Optional, if you use support library fragments:
-    debugImplementation 'com.squareup.leakcanary:leakcanary-support-fragment:1.6.3'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.0-beta-3'
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutineVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutineVersion"
