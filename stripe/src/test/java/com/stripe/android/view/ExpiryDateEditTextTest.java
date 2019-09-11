@@ -105,7 +105,7 @@ public class ExpiryDateEditTextTest {
 
         mExpiryDateEditText.append("9");
         assertTrue(mExpiryDateEditText.isDateValid());
-        verify(mExpiryDateEditListener, times(1)).onExpiryDateComplete();
+        verify(mExpiryDateEditListener).onExpiryDateComplete();
     }
 
     @Test
@@ -117,7 +117,7 @@ public class ExpiryDateEditTextTest {
         assertTrue(mExpiryDateEditText.isDateValid());
 
         ViewTestUtils.sendDeleteKeyEvent(mExpiryDateEditText);
-        verify(mExpiryDateEditListener, times(1)).onExpiryDateComplete();
+        verify(mExpiryDateEditListener).onExpiryDateComplete();
         assertFalse(mExpiryDateEditText.isDateValid());
     }
 

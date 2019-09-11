@@ -13,6 +13,9 @@ import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.testharness.ViewTestUtils;
 
+import java.util.Calendar;
+import java.util.Objects;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,9 +23,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-
-import java.util.Calendar;
-import java.util.Objects;
 
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CARD;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CVC;
@@ -497,13 +497,13 @@ public class CardMultilineWidgetTest extends BaseViewTest<CardInputTestActivity>
         mNoZipCardMultilineWidget.setCardInputListener(mNoZipCardListener);
 
         mFullGroup.cardNumberEditText.setText(VALID_VISA_WITH_SPACES);
-        verify(mFullCardListener, times(1)).onCardComplete();
-        verify(mFullCardListener, times(1)).onFocusChange(FOCUS_EXPIRY);
+        verify(mFullCardListener).onCardComplete();
+        verify(mFullCardListener).onFocusChange(FOCUS_EXPIRY);
         assertTrue(mFullGroup.expiryDateEditText.hasFocus());
 
         mNoZipGroup.cardNumberEditText.setText(VALID_AMEX_WITH_SPACES);
-        verify(mNoZipCardListener, times(1)).onCardComplete();
-        verify(mNoZipCardListener, times(1)).onFocusChange(FOCUS_EXPIRY);
+        verify(mNoZipCardListener).onCardComplete();
+        verify(mNoZipCardListener).onFocusChange(FOCUS_EXPIRY);
         assertTrue(mNoZipGroup.expiryDateEditText.hasFocus());
     }
 
@@ -514,14 +514,14 @@ public class CardMultilineWidgetTest extends BaseViewTest<CardInputTestActivity>
 
         mFullGroup.expiryDateEditText.append("12");
         mFullGroup.expiryDateEditText.append("50");
-        verify(mFullCardListener, times(1)).onExpirationComplete();
-        verify(mFullCardListener, times(1)).onFocusChange(FOCUS_CVC);
+        verify(mFullCardListener).onExpirationComplete();
+        verify(mFullCardListener).onFocusChange(FOCUS_CVC);
         assertTrue(mFullGroup.cvcEditText.hasFocus());
 
         mNoZipGroup.expiryDateEditText.append("12");
         mNoZipGroup.expiryDateEditText.append("50");
-        verify(mNoZipCardListener, times(1)).onExpirationComplete();
-        verify(mNoZipCardListener, times(1)).onFocusChange(FOCUS_CVC);
+        verify(mNoZipCardListener).onExpirationComplete();
+        verify(mNoZipCardListener).onFocusChange(FOCUS_CVC);
         assertTrue(mNoZipGroup.cvcEditText.hasFocus());
     }
 
@@ -534,15 +534,15 @@ public class CardMultilineWidgetTest extends BaseViewTest<CardInputTestActivity>
         mFullGroup.expiryDateEditText.append("12");
         mFullGroup.expiryDateEditText.append("50");
         mFullGroup.cvcEditText.append("123");
-        verify(mFullCardListener, times(1)).onCvcComplete();
-        verify(mFullCardListener, times(1)).onFocusChange(FOCUS_POSTAL);
+        verify(mFullCardListener).onCvcComplete();
+        verify(mFullCardListener).onFocusChange(FOCUS_POSTAL);
         assertTrue(mFullGroup.postalCodeEditText.hasFocus());
 
         mNoZipGroup.cardNumberEditText.setText(VALID_VISA_WITH_SPACES);
         mNoZipGroup.expiryDateEditText.append("12");
         mNoZipGroup.expiryDateEditText.append("50");
         mNoZipGroup.cvcEditText.append("123");
-        verify(mNoZipCardListener, times(1)).onCvcComplete();
+        verify(mNoZipCardListener).onCvcComplete();
         verify(mNoZipCardListener, times(0)).onFocusChange(FOCUS_POSTAL);
         assertTrue(mNoZipGroup.cvcEditText.hasFocus());
     }
@@ -560,7 +560,7 @@ public class CardMultilineWidgetTest extends BaseViewTest<CardInputTestActivity>
         assertTrue(mFullGroup.expiryDateEditText.hasFocus());
         ViewTestUtils.sendDeleteKeyEvent(mFullGroup.expiryDateEditText);
 
-        verify(mFullCardListener, times(1)).onFocusChange(FOCUS_CARD);
+        verify(mFullCardListener).onFocusChange(FOCUS_CARD);
         assertTrue(mFullGroup.cardNumberEditText.hasFocus());
         assertEquals(deleteOneCharacterString, mFullGroup.cardNumberEditText.getText().toString());
 
@@ -570,7 +570,7 @@ public class CardMultilineWidgetTest extends BaseViewTest<CardInputTestActivity>
         assertTrue(mNoZipGroup.expiryDateEditText.hasFocus());
         ViewTestUtils.sendDeleteKeyEvent(mNoZipGroup.expiryDateEditText);
 
-        verify(mNoZipCardListener, times(1)).onFocusChange(FOCUS_CARD);
+        verify(mNoZipCardListener).onFocusChange(FOCUS_CARD);
         assertTrue(mNoZipGroup.cardNumberEditText.hasFocus());
         assertEquals(deleteOneCharacterString, mNoZipGroup.cardNumberEditText.getText().toString());
     }
@@ -587,7 +587,7 @@ public class CardMultilineWidgetTest extends BaseViewTest<CardInputTestActivity>
         assertTrue(mFullGroup.cvcEditText.hasFocus());
         ViewTestUtils.sendDeleteKeyEvent(mFullGroup.cvcEditText);
 
-        verify(mFullCardListener, times(1)).onFocusChange(FOCUS_EXPIRY);
+        verify(mFullCardListener).onFocusChange(FOCUS_EXPIRY);
         assertTrue(mFullGroup.expiryDateEditText.hasFocus());
         assertEquals("12/5", mFullGroup.expiryDateEditText.getText().toString());
 
@@ -598,7 +598,7 @@ public class CardMultilineWidgetTest extends BaseViewTest<CardInputTestActivity>
         assertTrue(mNoZipGroup.cvcEditText.hasFocus());
         ViewTestUtils.sendDeleteKeyEvent(mNoZipGroup.cvcEditText);
 
-        verify(mNoZipCardListener, times(1)).onFocusChange(FOCUS_EXPIRY);
+        verify(mNoZipCardListener).onFocusChange(FOCUS_EXPIRY);
         assertTrue(mNoZipGroup.expiryDateEditText.hasFocus());
         assertEquals("12/5", mNoZipGroup.expiryDateEditText.getText().toString());
     }
@@ -615,7 +615,7 @@ public class CardMultilineWidgetTest extends BaseViewTest<CardInputTestActivity>
         reset(mFullCardListener);
         ViewTestUtils.sendDeleteKeyEvent(mFullGroup.postalCodeEditText);
 
-        verify(mFullCardListener, times(1)).onFocusChange(FOCUS_CVC);
+        verify(mFullCardListener).onFocusChange(FOCUS_CVC);
         assertEquals("12", mFullGroup.cvcEditText.getText().toString());
     }
 
