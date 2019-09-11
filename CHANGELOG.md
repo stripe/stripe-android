@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 11.0.1 - 2019-09-11
+* [#1518](https://github.com/stripe/stripe-android/pull/1518) Fix crash when payment authentication is started from Fragment and user taps back twice
+* [#1523](https://github.com/stripe/stripe-android/pull/1523) Correctly handle deep-links in the in-app payment authentication WebView
+* [#1524](https://github.com/stripe/stripe-android/pull/1524) Update 3DS2 SDK to 2.0.2
+    * Fix issue with 3DS2 encryption and older BouncyCastle versions
+
 ## 11.0.0 - 2019-09-10
 * [#1474](https://github.com/stripe/stripe-android/pull/1474) Fix darkmode issue with "Add an Address" form's Country selection dropdown
 * [#1475](https://github.com/stripe/stripe-android/pull/1475) Hide keyboard after submitting "Add an Address" form in standard integration
