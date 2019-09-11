@@ -26,7 +26,9 @@ internal interface AuthActivityStarter<StartDataType> {
 
             if (fragmentRef != null) {
                 val fragment = fragmentRef.get()
-                fragment?.startActivityForResult(intent, requestCode)
+                if (fragment?.isAdded == true) {
+                    fragment.startActivityForResult(intent, requestCode)
+                }
             } else {
                 activity.startActivityForResult(intent, requestCode)
             }
