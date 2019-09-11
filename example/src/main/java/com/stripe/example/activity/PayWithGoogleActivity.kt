@@ -96,6 +96,7 @@ class PayWithGoogleActivity : AppCompatActivity() {
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == LOAD_PAYMENT_DATA_REQUEST_CODE) {
             when (resultCode) {
                 Activity.RESULT_OK -> {
