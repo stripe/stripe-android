@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 11.0.0 - upcoming
+## 11.0.0 - 2019-09-10
 * [#1474](https://github.com/stripe/stripe-android/pull/1474) Fix darkmode issue with "Add an Address" form's Country selection dropdown
 * [#1475](https://github.com/stripe/stripe-android/pull/1475) Hide keyboard after submitting "Add an Address" form in standard integration
 * [#1478](https://github.com/stripe/stripe-android/pull/1478) Migrate to AndroidX
