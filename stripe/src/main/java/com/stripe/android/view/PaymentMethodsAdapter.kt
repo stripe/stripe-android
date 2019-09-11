@@ -1,5 +1,7 @@
 package com.stripe.android.view
 
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,16 +15,20 @@ import java.util.ArrayList
  * A [RecyclerView.Adapter] that holds a set of [MaskedCardView] items for a given set
  * of [PaymentMethod] objects.
  */
-internal class PaymentMethodsAdapter : androidx.recyclerview.widget.RecyclerView.Adapter<PaymentMethodsAdapter.ViewHolder>() {
+internal class PaymentMethodsAdapter constructor(
+    private val initiallySelectedPaymentMethodId: String?
+) : RecyclerView.Adapter<PaymentMethodsAdapter.ViewHolder>() {
     private val paymentMethods = ArrayList<PaymentMethod>()
     private var selectedIndex = NO_SELECTION
+    var listener: Listener? = null
+    private val handler = Handler(Looper.getMainLooper())
 
     private val newestPaymentMethodIndex: Int
         get() {
             var index = NO_SELECTION
             var created = 0L
-            for (i in paymentMethods.indices) {
-                val paymentMethod = paymentMethods[i]
+
+            paymentMethods.forEachIndexed { i, paymentMethod ->
                 if (paymentMethod.created != null && paymentMethod.created > created) {
                     created = paymentMethod.created
                     index = i
@@ -42,17 +48,12 @@ internal class PaymentMethodsAdapter : androidx.recyclerview.widget.RecyclerView
     }
 
     fun setPaymentMethods(paymentMethods: List<PaymentMethod>) {
-        val selectedPaymentMethod = selectedPaymentMethod
-        val selectedPaymentMethodId = selectedPaymentMethod?.id
-
         this.paymentMethods.clear()
         this.paymentMethods.addAll(paymentMethods)
 
         // if there were no selected payment methods, or the previously selected payment method
         // was not found and set selected, select the newest payment method
-        if (selectedPaymentMethodId == null || !setSelectedPaymentMethod(selectedPaymentMethodId)) {
-            setSelectedIndex(newestPaymentMethodIndex)
-        }
+        setSelectedPaymentMethod(initiallySelectedPaymentMethodId)
 
         notifyDataSetChanged()
     }
@@ -78,14 +79,20 @@ internal class PaymentMethodsAdapter : androidx.recyclerview.widget.RecyclerView
         holder.setPaymentMethod(paymentMethods[position])
         holder.setSelected(position == selectedIndex)
         holder.itemView.setOnClickListener {
-            val currentPosition = holder.adapterPosition
-            if (currentPosition != selectedIndex) {
-                val prevSelectedIndex = selectedIndex
-                setSelectedIndex(currentPosition)
+            onPositionClicked(holder.adapterPosition)
+        }
+    }
 
-                notifyItemChanged(prevSelectedIndex)
-                notifyItemChanged(currentPosition)
-            }
+    private fun onPositionClicked(position: Int) {
+        if (selectedIndex != position) {
+            // selected a Payment Method that wasn't previously selected
+            notifyItemChanged(position)
+            notifyItemChanged(selectedIndex)
+            setSelectedIndex(position)
+        }
+
+        handler.post {
+            listener?.onClick(paymentMethods[position])
         }
     }
 
@@ -102,19 +109,22 @@ internal class PaymentMethodsAdapter : androidx.recyclerview.widget.RecyclerView
     }
 
     /**
-     * Sets the selected payment method based on ID.
+     * Sets the selected payment method based on ID, or most recently created
      *
      * @param paymentMethodId the ID of the [PaymentMethod] to select
-     * @return `true` if the value was found, `false` if not
      */
-    fun setSelectedPaymentMethod(paymentMethodId: String): Boolean {
-        for (i in paymentMethods.indices) {
-            if (paymentMethodId == paymentMethods[i].id) {
-                setSelectedIndex(i)
-                return true
+    private fun setSelectedPaymentMethod(paymentMethodId: String?) {
+        val indexToSelect = paymentMethodId?.let {
+            paymentMethods.indexOfFirst { paymentMethodId == it.id }
+        } ?: NO_SELECTION
+
+        setSelectedIndex(
+            if (indexToSelect >= 0) {
+                indexToSelect
+            } else {
+                newestPaymentMethodIndex
             }
-        }
-        return false
+        )
     }
 
     fun setSelectedIndex(selectedIndex: Int) {
@@ -131,6 +141,10 @@ internal class PaymentMethodsAdapter : androidx.recyclerview.widget.RecyclerView
         fun setSelected(selected: Boolean) {
             cardView.isSelected = selected
         }
+    }
+
+    interface Listener {
+        fun onClick(paymentMethod: PaymentMethod)
     }
 
     companion object {
