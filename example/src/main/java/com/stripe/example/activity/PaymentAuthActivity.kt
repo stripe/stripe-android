@@ -15,6 +15,7 @@ import com.stripe.android.SetupIntentResult
 import com.stripe.android.Stripe
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.example.R
 import com.stripe.example.Settings
 import com.stripe.example.module.RetrofitFactory
@@ -82,11 +83,10 @@ class PaymentAuthActivity : AppCompatActivity() {
 
     private fun confirmPaymentIntent(paymentIntentClientSecret: String) {
         statusTextView.append("\n\nStarting payment authentication")
-        stripe.confirmPayment(this,
-            ConfirmPaymentIntentParams.createWithPaymentMethodId(
-                PAYMENT_METHOD_3DS2_REQUIRED,
-                paymentIntentClientSecret,
-                RETURN_URL))
+        stripe.confirmPayment(
+            this,
+            create3ds2ConfirmParams(paymentIntentClientSecret)
+        )
     }
 
     private fun confirmSetupIntent(setupIntentClientSecret: String) {
@@ -189,7 +189,7 @@ class PaymentAuthActivity : AppCompatActivity() {
     }
 
     private fun createPaymentIntentParams(stripeAccountId: String?): HashMap<String, Any> {
-        val params = hashMapOf<String, Any>(
+        val params = hashMapOf(
             "payment_method_types[]" to "card",
             "amount" to 1000,
             "currency" to "usd"
@@ -247,9 +247,35 @@ class PaymentAuthActivity : AppCompatActivity() {
         /**
          * See https://stripe.com/docs/payments/3d-secure#three-ds-cards for more options.
          */
-        private const val PAYMENT_METHOD_3DS2_REQUIRED = "pm_card_threeDSecure2Required"
-        private const val PAYMENT_METHOD_3DS_REQUIRED = "pm_card_threeDSecureRequired"
-        private const val PAYMENT_METHOD_AUTH_REQUIRED_ON_SETUP = "pm_card_authenticationRequiredOnSetup"
+        private const val PAYMENT_METHOD_AUTH_REQUIRED_ON_SETUP =
+            "pm_card_authenticationRequiredOnSetup"
+
+        private fun create3ds2ConfirmParams(
+            paymentIntentClientSecret: String
+        ): ConfirmPaymentIntentParams {
+            return ConfirmPaymentIntentParams.createWithPaymentMethodId(
+                "pm_card_threeDSecure2Required",
+                paymentIntentClientSecret,
+                RETURN_URL
+            )
+        }
+
+        private fun create3ds1ConfirmParams(
+            paymentIntentClientSecret: String
+        ): ConfirmPaymentIntentParams {
+            return ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                PaymentMethodCreateParams.create(
+                    PaymentMethodCreateParams.Card.Builder()
+                        .setNumber("4000000000003063")
+                        .setExpiryMonth(1)
+                        .setExpiryYear(2025)
+                        .setCvc("123")
+                        .build()
+                ),
+                paymentIntentClientSecret,
+                RETURN_URL
+            )
+        }
 
         private const val RETURN_URL = "stripe://payment_auth"
 

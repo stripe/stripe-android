@@ -4,10 +4,12 @@ import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.util.AttributeSet
 import android.view.View
+import android.webkit.URLUtil
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -78,12 +80,29 @@ internal class PaymentAuthWebView : WebView {
 
         override fun shouldOverrideUrlLoading(view: WebView, urlString: String): Boolean {
             val uri = Uri.parse(urlString)
-            if (isReturnUrl(uri)) {
+            return if (isReturnUrl(uri)) {
                 onAuthCompleted()
-                return true
+                true
+            } else if (!URLUtil.isNetworkUrl(urlString)) {
+                openNonNetworkUrlDeeplink(uri)
+                true
+            } else {
+                super.shouldOverrideUrlLoading(view, urlString)
             }
+        }
 
-            return super.shouldOverrideUrlLoading(view, urlString)
+        /**
+         * Non-network URLs are likely deep-links into banking apps. If the deep-link can be opened
+         * via an Intent, start it. Otherwise, stop the authentication attempt.
+         */
+        private fun openNonNetworkUrlDeeplink(uri: Uri) {
+            val intent = Intent(Intent.ACTION_VIEW, uri)
+            if (intent.resolveActivity(activity.packageManager) != null) {
+                activity.startActivity(intent)
+            } else {
+                // complete auth if the deep-link can't be opened
+                onAuthCompleted()
+            }
         }
 
         @TargetApi(Build.VERSION_CODES.LOLLIPOP)

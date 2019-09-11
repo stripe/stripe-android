@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.webkit.WebView;
 import android.widget.ProgressBar;
 
+import androidx.test.core.app.ApplicationProvider;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,6 +15,7 @@ import org.robolectric.RobolectricTestRunner;
 
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 public class PaymentAuthWebViewTest {
@@ -24,6 +27,8 @@ public class PaymentAuthWebViewTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        when(mActivity.getPackageManager())
+                .thenReturn(ApplicationProvider.getApplicationContext().getPackageManager());
     }
 
     @Test
@@ -121,5 +126,15 @@ public class PaymentAuthWebViewTest {
                 new PaymentAuthWebView.PaymentAuthWebViewClient(mActivity, mProgressBar,
                         "pi_123_secret_456", null);
         paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, deepLink);
+    }
+
+    @Test
+    public void shouldOverrideUrlLoading_withUnsupportedDeeplink_shouldFinish() {
+        final String deepLink = "deep://link";
+        final PaymentAuthWebView.PaymentAuthWebViewClient paymentAuthWebViewClient =
+                new PaymentAuthWebView.PaymentAuthWebViewClient(mActivity, mProgressBar,
+                        "pi_123_secret_456", null);
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, deepLink);
+        verify(mActivity).finish();
     }
 }
