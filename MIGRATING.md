@@ -32,6 +32,7 @@
 - The `samplestore` app has moved to [stripe-samples/sample-store-android](https://github.com/stripe-samples/sample-store-android).
 - Remove `PaymentMethodsActivity.newIntent()`. Use `PaymentMethodsActivityStarter#startForResult()` to start `PaymentMethodsActivity`.
 - Remove `PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT`. Use `PaymentMethodsActivityStarter.Result#fromIntent(intent)` to obtain the result of `PaymentMethodsActivity`.
+- Remove `Stripe#createToken()` with `Executor` argument. Use [Stripe#createToken(Card, ApiResultCallback)](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#createToken-com.stripe.android.model.Card-com.stripe.android.ApiResultCallback-) instead.
 
 ### Migration from versions < 10.1.0
 - You must call `PaymentConfiguration.init()` before calling `CustomerSession.initCustomerSession()`.

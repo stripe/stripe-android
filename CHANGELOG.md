@@ -15,6 +15,8 @@
 * [#1494](https://github.com/stripe/stripe-android/pull/1494) Update `PaymentMethodsActivity` UX
 * [#1495](https://github.com/stripe/stripe-android/pull/1495) Remove `@Deprecated` fields and methods from `PaymentMethodsActivity`
 * [#1497](https://github.com/stripe/stripe-android/pull/1497) Remove `Stripe` methods that accept a publishable key
+* [#1506](https://github.com/stripe/stripe-android/pull/1506) Remove `Stripe#createToken()` with `Executor` argument
+* [#1514](https://github.com/stripe/stripe-android/pull/1514) Bump API version to `2019-09-09`
 
 ## 10.4.3 - 2019-09-04
 * [#1471](https://github.com/stripe/stripe-android/pull/1471) Fix issue with `CardUtils` visibility
