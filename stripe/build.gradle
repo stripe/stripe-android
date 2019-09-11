@@ -20,7 +20,7 @@ dependencies {
     // Api for this import because we use reflection to alter TextInputLayout
     api 'com.google.android.material:material:1.0.0'
 
-    implementation "com.stripe:stripe-3ds2-android:2.0.1"
+    implementation "com.stripe:stripe-3ds2-android:2.0.2"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
 
     javadocDeps 'androidx.annotation:annotation:1.1.0'
