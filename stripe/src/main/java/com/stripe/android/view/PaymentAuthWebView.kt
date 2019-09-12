@@ -20,6 +20,7 @@ import android.widget.ProgressBar
  * A `WebView` used for authenticating payment details
  */
 internal class PaymentAuthWebView : WebView {
+    private var webViewClient: PaymentAuthWebViewClient? = null
 
     @JvmOverloads
     constructor(context: Context, attrs: AttributeSet? = null) : super(context, attrs) {
@@ -42,6 +43,11 @@ internal class PaymentAuthWebView : WebView {
     ) {
         webViewClient = PaymentAuthWebViewClient(activity, activity.packageManager, progressBar,
             clientSecret, returnUrl)
+        setWebViewClient(webViewClient)
+    }
+
+    fun hasOpenedApp(): Boolean {
+        return webViewClient?.hasOpenedApp == true
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -58,6 +64,9 @@ internal class PaymentAuthWebView : WebView {
         returnUrl: String?
     ) : WebViewClient() {
         private val returnUri: Uri? = if (returnUrl != null) Uri.parse(returnUrl) else null
+
+        var hasOpenedApp: Boolean = false
+            private set
 
         override fun onPageCommitVisible(view: WebView, url: String) {
             super.onPageCommitVisible(view, url)
@@ -109,6 +118,7 @@ internal class PaymentAuthWebView : WebView {
 
         private fun openIntent(intent: Intent) {
             if (intent.resolveActivity(packageManager) != null) {
+                hasOpenedApp = true
                 activity.startActivity(intent)
             } else {
                 // complete auth if the deep-link can't be opened
