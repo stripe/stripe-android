@@ -92,7 +92,7 @@ public class PaymentAuthWebViewTest {
     }
 
     @Test
-    public void shouldOverrideUclientSecretrlLoading_witKnownReturnUrl_shouldFinish() {
+    public void shouldOverrideUrlLoading_withKnownReturnUrl_shouldFinish() {
         final PaymentAuthWebView.PaymentAuthWebViewClient paymentAuthWebViewClient =
                 createWebViewClient("pi_123_secret_456");
         paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView,
@@ -137,7 +137,7 @@ public class PaymentAuthWebViewTest {
     }
 
     @Test
-    public void shouldOverrideUlLoading_withIntentUri_shouldParseUri() {
+    public void shouldOverrideUrlLoading_withIntentUri_shouldParseUri() {
         final String deepLink =
                 "intent://example.com/#Intent;scheme=https;action=android.intent.action.VIEW;end";
         final PaymentAuthWebView.PaymentAuthWebViewClient paymentAuthWebViewClient =
