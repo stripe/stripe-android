@@ -5,6 +5,7 @@ import android.annotation.TargetApi
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.util.AttributeSet
@@ -39,7 +40,8 @@ internal class PaymentAuthWebView : WebView {
         clientSecret: String,
         returnUrl: String?
     ) {
-        webViewClient = PaymentAuthWebViewClient(activity, progressBar, clientSecret, returnUrl)
+        webViewClient = PaymentAuthWebViewClient(activity, activity.packageManager, progressBar,
+            clientSecret, returnUrl)
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -50,11 +52,12 @@ internal class PaymentAuthWebView : WebView {
 
     internal class PaymentAuthWebViewClient(
         private val activity: Activity,
+        private val packageManager: PackageManager,
         private val progressBar: ProgressBar,
         private val clientSecret: String,
         returnUrl: String?
     ) : WebViewClient() {
-        private val returnUrl: Uri? = if (returnUrl != null) Uri.parse(returnUrl) else null
+        private val returnUri: Uri? = if (returnUrl != null) Uri.parse(returnUrl) else null
 
         override fun onPageCommitVisible(view: WebView, url: String) {
             super.onPageCommitVisible(view, url)
@@ -83,21 +86,29 @@ internal class PaymentAuthWebView : WebView {
             return if (isReturnUrl(uri)) {
                 onAuthCompleted()
                 true
-            } else if (!URLUtil.isNetworkUrl(urlString)) {
-                openNonNetworkUrlDeeplink(uri)
+            } else if ("intent".equals(uri.scheme, ignoreCase = true)) {
+                openIntentScheme(uri)
+                true
+            } else if (!URLUtil.isNetworkUrl(uri.toString())) {
+                // Non-network URLs are likely deep-links into banking apps. If the deep-link can be
+                // opened via an Intent, start it. Otherwise, stop the authentication attempt.
+                openIntent(Intent(Intent.ACTION_VIEW, uri))
                 true
             } else {
                 super.shouldOverrideUrlLoading(view, urlString)
             }
         }
 
-        /**
-         * Non-network URLs are likely deep-links into banking apps. If the deep-link can be opened
-         * via an Intent, start it. Otherwise, stop the authentication attempt.
-         */
-        private fun openNonNetworkUrlDeeplink(uri: Uri) {
-            val intent = Intent(Intent.ACTION_VIEW, uri)
-            if (intent.resolveActivity(activity.packageManager) != null) {
+        private fun openIntentScheme(uri: Uri) {
+            try {
+                openIntent(Intent.parseUri(uri.toString(), Intent.URI_INTENT_SCHEME))
+            } catch (e: Exception) {
+                onAuthCompleted()
+            }
+        }
+
+        private fun openIntent(intent: Intent) {
+            if (intent.resolveActivity(packageManager) != null) {
                 activity.startActivity(intent)
             } else {
                 // complete auth if the deep-link can't be opened
@@ -117,19 +128,19 @@ internal class PaymentAuthWebView : WebView {
             when {
                 isPredefinedReturnUrl(uri) -> return true
 
-                // If the `returnUrl` is known, look for URIs that match it.
-                returnUrl != null ->
-                    return returnUrl.scheme != null &&
-                        returnUrl.scheme == uri.scheme &&
-                        returnUrl.host != null &&
-                        returnUrl.host == uri.host
+                // If the `returnUri` is known, look for URIs that match it.
+                returnUri != null ->
+                    return returnUri.scheme != null &&
+                        returnUri.scheme == uri.scheme &&
+                        returnUri.host != null &&
+                        returnUri.host == uri.host
                 else -> {
                     // Skip opaque (i.e. non-hierarchical) URIs
                     if (uri.isOpaque) {
                         return false
                     }
 
-                    // If the `returnUrl` is unknown, look for URIs that contain a
+                    // If the `returnUri` is unknown, look for URIs that contain a
                     // `payment_intent_client_secret` or `setup_intent_client_secret`
                     // query parameter, and check if its values matches the given `clientSecret`
                     // as a query parameter.
