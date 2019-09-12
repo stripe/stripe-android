@@ -2,6 +2,7 @@ package com.stripe.android.view
 
 import android.app.Activity
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.annotation.IdRes
 import androidx.annotation.LayoutRes
@@ -16,5 +17,6 @@ internal abstract class AddPaymentMethodRowView(
         View.inflate(activity, layoutId, this)
         id = idRes
         setOnClickListener { AddPaymentMethodActivityStarter(activity).startForResult(args) }
+        layoutParams = ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
     }
 }
