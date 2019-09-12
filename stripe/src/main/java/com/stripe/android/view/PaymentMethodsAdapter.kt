@@ -21,7 +21,7 @@ internal class PaymentMethodsAdapter @JvmOverloads constructor(
     private val addableTypes: List<PaymentMethod.Type> = listOf(PaymentMethod.Type.Card)
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private val paymentMethods = ArrayList<PaymentMethod>()
+    val paymentMethods = ArrayList<PaymentMethod>()
 
     private var selectedIndex = NO_SELECTION
     var listener: Listener? = null

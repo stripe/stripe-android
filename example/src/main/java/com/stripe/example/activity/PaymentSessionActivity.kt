@@ -86,8 +86,8 @@ class PaymentSessionActivity : AppCompatActivity() {
                 localBroadcastManager.sendBroadcast(shippingInfoProcessedIntent)
             }
 
-            private fun isValidShippingInfo(shippingInfo: ShippingInformation): Boolean {
-                return shippingInfo.address != null && Locale.US.country == shippingInfo.address!!.country
+            private fun isValidShippingInfo(shippingInfo: ShippingInformation?): Boolean {
+                return shippingInfo?.address?.country == Locale.US.country
             }
         }
         localBroadcastManager.registerReceiver(broadcastReceiver,
