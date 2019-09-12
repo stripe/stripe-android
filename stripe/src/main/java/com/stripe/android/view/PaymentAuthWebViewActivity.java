@@ -27,6 +27,7 @@ public class PaymentAuthWebViewActivity
         extends AppCompatActivity {
 
     @Nullable private ToolbarCustomization mToolbarCustomization;
+    private PaymentAuthWebView mWebView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -54,6 +55,19 @@ public class PaymentAuthWebViewActivity
         final ProgressBar progressBar = findViewById(R.id.auth_web_view_progress_bar);
         webView.init(this, progressBar, clientSecret, returnUrl);
         webView.loadUrl(getIntent().getStringExtra(PaymentAuthWebViewStarter.EXTRA_AUTH_URL));
+
+        mWebView = webView;
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+
+        if (mWebView != null && mWebView.hasOpenedApp()) {
+            // If another app was opened, assume it was a bank app where payment authentication
+            // was completed. Upon foregrounding this screen, finish the Activity.
+            finish();
+        }
     }
 
     @Override
