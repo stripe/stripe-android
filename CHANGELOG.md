@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 11.0.2 - 2019-09-12
+* [#1527](https://github.com/stripe/stripe-android/pull/1527) Support `"intent://"` URIs in payment auth WebView
+
 ## 11.0.1 - 2019-09-11
 * [#1518](https://github.com/stripe/stripe-android/pull/1518) Fix crash when payment authentication is started from Fragment and user taps back twice
 * [#1523](https://github.com/stripe/stripe-android/pull/1523) Correctly handle deep-links in the in-app payment authentication WebView
