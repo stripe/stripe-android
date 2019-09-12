@@ -19,6 +19,7 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -40,45 +41,44 @@ public class PaymentAuthWebViewTest {
 
     @Test
     public void shouldOverrideUrlLoading_withPaymentIntent_shouldSetResult() {
-        final String deepLink = "stripe://payment_intent_return?payment_intent=pi_123&" +
+        final String url = "stripe://payment_intent_return?payment_intent=pi_123&" +
                 "payment_intent_client_secret=pi_123_secret_456&source_type=card";
         final PaymentAuthWebView.PaymentAuthWebViewClient paymentAuthWebViewClient =
                 createWebViewClient(
                         "pi_123_secret_456",
                         "stripe://payment_intent_return"
                 );
-        paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, deepLink);
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, url);
         verify(mActivity).finish();
     }
 
     @Test
     public void shouldOverrideUrlLoading_withSetupIntent_shouldSetResult() {
-        final String deepLink = "stripe://payment_auth?setup_intent=seti_1234" +
+        final String url = "stripe://payment_auth?setup_intent=seti_1234" +
                 "&setup_intent_client_secret=seti_1234_secret_5678&source_type=card";
-
         final PaymentAuthWebView.PaymentAuthWebViewClient paymentAuthWebViewClient =
                 createWebViewClient("seti_1234_secret_5678", "stripe://payment_auth");
-        paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, deepLink);
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, url);
         verify(mActivity).finish();
     }
 
     @Test
     public void shouldOverrideUrlLoading_withoutReturnUrl_onPaymentIntentImplicitReturnUrl_shouldSetResult() {
-        final String deepLink = "stripe://payment_intent_return?payment_intent=pi_123&" +
+        final String url = "stripe://payment_intent_return?payment_intent=pi_123&" +
                 "payment_intent_client_secret=pi_123_secret_456&source_type=card";
         final PaymentAuthWebView.PaymentAuthWebViewClient paymentAuthWebViewClient =
                 createWebViewClient("pi_123_secret_456");
-        paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, deepLink);
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, url);
         verify(mActivity).finish();
     }
 
     @Test
     public void shouldOverrideUrlLoading_withoutReturnUrl_onSetupIntentImplicitReturnUrl_shouldSetResult() {
-        final String deepLink = "stripe://payment_auth?setup_intent=seti_1234" +
+        final String url = "stripe://payment_auth?setup_intent=seti_1234" +
                 "&setup_intent_client_secret=seti_1234_secret_5678&source_type=card";
         final PaymentAuthWebView.PaymentAuthWebViewClient paymentAuthWebViewClient =
                 createWebViewClient("seti_1234_secret_5678");
-        paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, deepLink);
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, url);
         verify(mActivity).finish();
     }
 
@@ -120,19 +120,19 @@ public class PaymentAuthWebViewTest {
 
     @Test
     public void shouldOverrideUrlLoading_withOpaqueUri_shouldNotCrash() {
-        final String deepLink = "mailto:patrick@example.com?payment_intent=pi_123&" +
+        final String url = "mailto:patrick@example.com?payment_intent=pi_123&" +
                 "payment_intent_client_secret=pi_123_secret_456&source_type=card";
         final PaymentAuthWebView.PaymentAuthWebViewClient paymentAuthWebViewClient =
                 createWebViewClient("pi_123_secret_456");
-        paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, deepLink);
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, url);
     }
 
     @Test
     public void shouldOverrideUrlLoading_withUnsupportedDeeplink_shouldFinish() {
-        final String deepLink = "deep://link";
+        final String url = "deep://link";
         final PaymentAuthWebView.PaymentAuthWebViewClient paymentAuthWebViewClient =
                 createWebViewClient("pi_123_secret_456");
-        paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, deepLink);
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, url);
         verify(mActivity).finish();
     }
 
@@ -150,6 +150,29 @@ public class PaymentAuthWebViewTest {
         final Intent intent = mIntentArgumentCaptor.getValue();
         assertEquals("https://example.com/", intent.getDataString());
         verify(mActivity).finish();
+    }
+
+    @Test
+    public void shouldOverrideUrlLoading_withAuthenticationUrlWithReturnUrlParam_shouldPopulateCompletionUrl() {
+        final String url =
+                "https://hooks.stripe.com/three_d_secure/authenticate?amount=1250&client_secret=src_client_secret_abc123&return_url=https%3A%2F%2Fhooks.stripe.com%2Fredirect%2Fcomplete%2Fsrc_X9Y8Z7%3Fclient_secret%3Dsrc_client_secret_abc123&source=src_X9Y8Z7&usage=single_use";
+        final PaymentAuthWebView.PaymentAuthWebViewClient paymentAuthWebViewClient =
+                createWebViewClient("pi_123_secret_456");
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, url);
+        assertEquals(
+                "https://hooks.stripe.com/redirect/complete/src_X9Y8Z7?client_secret=src_client_secret_abc123",
+                paymentAuthWebViewClient.getCompletionUrlParam()
+        );
+    }
+
+    @Test
+    public void shouldOverrideUrlLoading_withAuthenticationUrlWithoutReturnUrlParam_shouldNotPopulateCompletionUrl() {
+        final String url =
+                "https://hooks.stripe.com/three_d_secure/authenticate?amount=1250&client_secret=src_client_secret_abc123&return_url=&source=src_X9Y8Z7&usage=single_use";
+        final PaymentAuthWebView.PaymentAuthWebViewClient paymentAuthWebViewClient =
+                createWebViewClient("pi_123_secret_456");
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(mWebView, url);
+        assertNull(paymentAuthWebViewClient.getCompletionUrlParam());
     }
 
     @NonNull
