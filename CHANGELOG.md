@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 11.0.3 - 2019-09-12
+* [#1530](https://github.com/stripe/stripe-android/pull/1530) Finish `PaymentAuthWebViewActivity` after returning from bank app
+
 ## 11.0.2 - 2019-09-12
 * [#1527](https://github.com/stripe/stripe-android/pull/1527) Support `"intent://"` URIs in payment auth WebView
 
