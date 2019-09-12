@@ -47,4 +47,4 @@ jobs:
       script:
         - ./gradlew clean ktlint
         - ./gradlew checkstyle lintRelease
-        - ./gradlew testRelease
+        - ./gradlew testRelease -i
