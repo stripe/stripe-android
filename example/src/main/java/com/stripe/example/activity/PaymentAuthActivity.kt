@@ -3,8 +3,6 @@ package com.stripe.example.activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.ApiResultCallback
@@ -23,6 +21,7 @@ import com.stripe.example.service.BackendApi
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.activity_payment_auth.*
 import okhttp3.ResponseBody
 import org.json.JSONException
 import org.json.JSONObject
@@ -40,9 +39,6 @@ class PaymentAuthActivity : AppCompatActivity() {
     private lateinit var stripe: Stripe
     private lateinit var backendApi: BackendApi
     private lateinit var statusTextView: TextView
-    private lateinit var buyButton: Button
-    private lateinit var setupButton: Button
-    private lateinit var progressBar: ProgressBar
 
     private val stripeAccountId: String? = Settings.STRIPE_ACCOUNT_ID
 
@@ -72,20 +68,27 @@ class PaymentAuthActivity : AppCompatActivity() {
             Stripe(this, publishableKey)
         }
 
-        buyButton = findViewById(R.id.buy_button)
-        buyButton.setOnClickListener { createPaymentIntent(stripeAccountId) }
+        buy_3ds1_button.setOnClickListener {
+            createPaymentIntent(stripeAccountId, AuthType.`3DS1`)
+        }
+        buy_3ds2_button.setOnClickListener {
+            createPaymentIntent(stripeAccountId, AuthType.`3DS2`)
+        }
 
-        setupButton = findViewById(R.id.setup_button)
-        setupButton.setOnClickListener { createSetupIntent() }
-
-        progressBar = findViewById(R.id.progress_bar)
+        setup_button.setOnClickListener { createSetupIntent() }
     }
 
-    private fun confirmPaymentIntent(paymentIntentClientSecret: String) {
+    private fun confirmPaymentIntent(
+        paymentIntentClientSecret: String,
+        authType: AuthType
+    ) {
         statusTextView.append("\n\nStarting payment authentication")
         stripe.confirmPayment(
             this,
-            create3ds2ConfirmParams(paymentIntentClientSecret)
+            when (authType) {
+                AuthType.`3DS1` -> create3ds1ConfirmParams(paymentIntentClientSecret)
+                AuthType.`3DS2` -> create3ds2ConfirmParams(paymentIntentClientSecret)
+            }
         )
     }
 
@@ -101,7 +104,7 @@ class PaymentAuthActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        progressBar.visibility = View.VISIBLE
+        progress_bar.visibility = View.VISIBLE
         statusTextView.append("\n\nPayment authentication completed, getting result")
 
         val isPaymentResult = stripe.onPaymentResult(requestCode, data, AuthResultListener(this))
@@ -112,7 +115,7 @@ class PaymentAuthActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
-        progressBar.visibility = View.INVISIBLE
+        progress_bar.visibility = View.INVISIBLE
         super.onPause()
     }
 
@@ -126,18 +129,22 @@ class PaymentAuthActivity : AppCompatActivity() {
         bundle.putString(STATE_STATUS, statusTextView.text.toString())
     }
 
-    private fun createPaymentIntent(stripeAccountId: String?) {
+    private fun createPaymentIntent(
+        stripeAccountId: String?,
+        authType: AuthType
+    ) {
         compositeSubscription.add(
             backendApi.createPaymentIntent(createPaymentIntentParams(stripeAccountId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe {
-                    progressBar.visibility = View.VISIBLE
-                    buyButton.isEnabled = false
-                    setupButton.isEnabled = false
+                    progress_bar.visibility = View.VISIBLE
+                    buy_3ds2_button.isEnabled = false
+                    buy_3ds1_button.isEnabled = false
+                    setup_button.isEnabled = false
                     statusTextView.setText(R.string.creating_payment_intent)
                 }
-                .subscribe { handleCreatePaymentIntentResponse(it) })
+                .subscribe { handleCreatePaymentIntentResponse(it, authType) })
     }
 
     private fun createSetupIntent() {
@@ -146,21 +153,25 @@ class PaymentAuthActivity : AppCompatActivity() {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe {
-                    progressBar.visibility = View.VISIBLE
-                    buyButton.isEnabled = false
-                    setupButton.isEnabled = false
+                    progress_bar.visibility = View.VISIBLE
+                    buy_3ds2_button.isEnabled = false
+                    buy_3ds1_button.isEnabled = false
+                    setup_button.isEnabled = false
                     statusTextView.setText(R.string.creating_setup_intent)
                 }
                 .subscribe { handleCreateSetupIntentResponse(it) })
     }
 
-    private fun handleCreatePaymentIntentResponse(responseBody: ResponseBody) {
+    private fun handleCreatePaymentIntentResponse(
+        responseBody: ResponseBody,
+        authType: AuthType
+    ) {
         try {
             val responseData = JSONObject(responseBody.string())
             statusTextView.append("\n\n" + getString(R.string.payment_intent_status,
                 responseData.getString("status")))
             val secret = responseData.getString("secret")
-            confirmPaymentIntent(secret)
+            confirmPaymentIntent(secret, authType)
         } catch (e: IOException) {
             e.printStackTrace()
         } catch (e: JSONException) {
@@ -183,9 +194,10 @@ class PaymentAuthActivity : AppCompatActivity() {
     }
 
     private fun onAuthComplete() {
-        buyButton.isEnabled = true
-        setupButton.isEnabled = true
-        progressBar.visibility = View.INVISIBLE
+        buy_3ds2_button.isEnabled = true
+        buy_3ds1_button.isEnabled = true
+        setup_button.isEnabled = true
+        progress_bar.visibility = View.INVISIBLE
     }
 
     private fun createPaymentIntentParams(stripeAccountId: String?): HashMap<String, Any> {
@@ -280,5 +292,10 @@ class PaymentAuthActivity : AppCompatActivity() {
         private const val RETURN_URL = "stripe://payment_auth"
 
         private const val STATE_STATUS = "status"
+
+        enum class AuthType {
+            `3DS1`,
+            `3DS2`
+        }
     }
 }
