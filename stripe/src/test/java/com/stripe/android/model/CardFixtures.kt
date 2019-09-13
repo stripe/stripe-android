@@ -1,5 +1,7 @@
 package com.stripe.android.model
 
+import org.json.JSONObject
+
 internal object CardFixtures {
     @JvmField
     val MINIMUM_CARD = Card.create("4242424242424242", 1, 2050, "123")
@@ -26,4 +28,70 @@ internal object CardFixtures {
         .currency(CARD_CURRENCY)
         .name(CARD_NAME)
         .build()
+
+    @JvmField
+    val CARD_USD = Card.fromJson(JSONObject(
+        """
+        {
+            "id": "card_189fi32eZvKYlo2CHK8NPRME",
+            "object": "card",
+            "address_city": "Des Moines",
+            "address_country": "US",
+            "address_line1": "123 Any Street",
+            "address_line1_check": "unavailable",
+            "address_line2": "456",
+            "address_state": "IA",
+            "address_zip": "50305",
+            "address_zip_check": "unavailable",
+            "brand": "Visa",
+            "country": "US",
+            "currency": "usd",
+            "customer": "customer77",
+            "cvc_check": "unavailable",
+            "exp_month": 8,
+            "exp_year": 2017,
+            "funding": "credit",
+            "fingerprint": "abc123",
+            "last4": "4242",
+            "name": "John Cardholder",
+            "metadata": {
+                "color": "blue",
+                "animal": "dog"
+            }
+        }
+        """.trimIndent()
+    ))!!
+
+    @JvmField
+    val CARD_EUR = Card.fromJson(JSONObject(
+        """
+        {
+            "id": "card_189fi32eZvKYlo2CHK8NPRME",
+            "object": "card",
+            "address_city": "Des Moines",
+            "address_country": "US",
+            "address_line1": "123 Any Street",
+            "address_line1_check": "unavailable",
+            "address_line2": "456",
+            "address_state": "IA",
+            "address_zip": "50305",
+            "address_zip_check": "unavailable",
+            "brand": "Visa",
+            "country": "US",
+            "currency": "eur",
+            "customer": "customer77",
+            "cvc_check": "unavailable",
+            "exp_month": 8,
+            "exp_year": 2017,
+            "funding": "credit",
+            "fingerprint": "abc123",
+            "last4": "4242",
+            "name": "John Cardholder",
+            "metadata": {
+                "color": "blue",
+                "animal": "dog"
+            }
+        }
+        """.trimIndent()
+    ))!!
 }

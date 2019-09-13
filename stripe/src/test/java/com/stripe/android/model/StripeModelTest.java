@@ -49,8 +49,8 @@ public class StripeModelTest {
     public void hashCode_whenNotEquals_returnsDifferentValues() {
         assertTrue(StripeModel.class.isAssignableFrom(Card.class));
 
-        Card usdCard = Card.fromString(CardTest.JSON_CARD_USD);
-        Card eurCard = Card.fromString(CardTest.JSON_CARD_EUR);
+        Card usdCard = CardFixtures.CARD_USD;
+        Card eurCard = CardFixtures.CARD_EUR;
 
         assertNotNull(usdCard);
         assertNotNull(eurCard);

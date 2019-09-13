@@ -16,40 +16,6 @@ import static org.junit.Assert.assertTrue;
  */
 public class SourceTest {
 
-    static final String EXAMPLE_ALIPAY_SOURCE = "{\n" +
-                    "  \"id\": \"src_1AtlSXBZqEXluyI4JgBYTq5W\",\n" +
-                    "  \"object\": \"source\",\n" +
-                    "  \"amount\": 1000,\n" +
-                    "  \"client_secret\": \"src_client_secret_BGI2mBjd810BJEbvWRd83jac\",\n" +
-                    "  \"created\": 1503443217,\n" +
-                    "  \"currency\": \"usd\",\n" +
-                    "  \"flow\": \"receiver\",\n" +
-                    "  \"livemode\": false,\n" +
-                    "  \"metadata\": {\n" +
-                    "  },\n" +
-                    "  \"owner\": {\n" +
-                    "    \"address\": null,\n" +
-                    "    \"email\": \"jenny.rosen@example.com\",\n" +
-                    "    \"name\": null,\n" +
-                    "    \"phone\": null,\n" +
-                    "    \"verified_address\": null,\n" +
-                    "    \"verified_email\": null,\n" +
-                    "    \"verified_name\": null,\n" +
-                    "    \"verified_phone\": null\n" +
-                    "  },\n" +
-                    "  \"receiver\": {\n" +
-                    "    \"address\": \"test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N\",\n" +
-                    "    \"amount_charged\": 0,\n" +
-                    "    \"amount_received\": 0,\n" +
-                    "    \"amount_returned\": 0,\n" +
-                    "    \"refund_attributes_method\": \"email\",\n" +
-                    "    \"refund_attributes_status\": \"missing\"\n" +
-                    "  },\n" +
-                    "  \"statement_descriptor\": null,\n" +
-                    "  \"status\": \"pending\",\n" +
-                    "  \"type\": \"alipay\",\n" +
-                    "  \"usage\": \"single_use\"\n" +
-                    "}";
 
     static final String EXAMPLE_JSON_SOURCE_WITHOUT_NULLS = "{\n"+
             "\"id\": \"src_19t3xKBZqEXluyI4uz2dxAfQ\",\n"+
@@ -118,69 +84,7 @@ public class SourceTest {
             "  \"deleted\": true\n" +
             "}";
 
-    private static final String CREATED_CARD_JSON = "{\n" +
-            "  \"id\": \"card_1ELxrOCRMbs6FrXfdxOGjnaD\",\n" +
-            "  \"object\": \"card\",\n" +
-            "  \"address_city\": null,\n" +
-            "  \"address_country\": null,\n" +
-            "  \"address_line1\": null,\n" +
-            "  \"address_line1_check\": null,\n" +
-            "  \"address_line2\": null,\n" +
-            "  \"address_state\": null,\n" +
-            "  \"address_zip\": null,\n" +
-            "  \"address_zip_check\": null,\n" +
-            "  \"brand\": \"Visa\",\n" +
-            "  \"country\": \"US\",\n" +
-            "  \"customer\": \"cus_Epd7N0VR3cdjsr\",\n" +
-            "  \"cvc_check\": null,\n" +
-            "  \"dynamic_last4\": null,\n" +
-            "  \"exp_month\": 4,\n" +
-            "  \"exp_year\": 2020,\n" +
-            "  \"funding\": \"credit\",\n" +
-            "  \"last4\": \"4242\",\n" +
-            "  \"metadata\": {\n" +
-            "  },\n" +
-            "  \"name\": null,\n" +
-            "  \"tokenization_method\": null\n" +
-            "}\n";
 
-    private static final String SOURCE_WECHAT_JSON = "{\n" +
-            "\t\"id\": \"src_1F4ZSkBNJ02\",\n" +
-            "\t\"object\": \"source\",\n" +
-            "\t\"amount\": 100,\n" +
-            "\t\"client_secret\": \"src_client_secret_FZiuAs6g3ri\",\n" +
-            "\t\"created\": 1565124054,\n" +
-            "\t\"currency\": \"usd\",\n" +
-            "\t\"flow\": \"none\",\n" +
-            "\t\"livemode\": true,\n" +
-            "\t\"metadata\": {},\n" +
-            "\t\"owner\": {\n" +
-            "\t\t\"address\": null,\n" +
-            "\t\t\"email\": null,\n" +
-            "\t\t\"name\": null,\n" +
-            "\t\t\"phone\": null,\n" +
-            "\t\t\"verified_address\": null,\n" +
-            "\t\t\"verified_email\": null,\n" +
-            "\t\t\"verified_name\": null,\n" +
-            "\t\t\"verified_phone\": null\n" +
-            "\t},\n" +
-            "\t\"statement_descriptor\": null,\n" +
-            "\t\"status\": \"pending\",\n" +
-            "\t\"type\": \"wechat\",\n" +
-            "\t\"usage\": \"single_use\",\n" +
-            "\t\"wechat\": {\n" +
-            "\t\t\"statement_descriptor\": \"ORDER AT11990\",\n" +
-            "\t\t\"android_appId\": \"wxa0df8has9d78ce\",\n" +
-            "\t\t\"android_nonceStr\": \"yFNjg8d9hsfaEPYID\",\n" +
-            "\t\t\"android_package\": \"Sign=WXPay\",\n" +
-            "\t\t\"android_partnerId\": \"268716457\",\n" +
-            "\t\t\"android_prepayId\": \"wx070440550af89hAh8941913701900\",\n" +
-            "\t\t\"android_sign\": \"1A98A09EA74DCF006598h89433DED3FF6BCED1C062C63B43AE773D8\",\n" +
-            "\t\t\"android_timeStamp\": \"1565124055\",\n" +
-            "\t\t\"ios_native_url\": \"weixin://app/wxa0df8has9d78ce/pay/\",\n" +
-            "\t\t\"qr_code_url\": null\n" +
-            "\t}\n" +
-            "}";
 
     @Test
     public void fromJsonStringWithoutNulls_isNotNull() {
@@ -210,7 +114,7 @@ public class SourceTest {
 
     @Test
     public void fromJsonString_withCreatedCardJson_shouldReturnSourceWithCardId() {
-        final Source source = Source.fromString(CREATED_CARD_JSON);
+        final Source source = SourceFixtures.CARD;
         assertNotNull(source);
         assertEquals("card_1ELxrOCRMbs6FrXfdxOGjnaD", source.getId());
         assertEquals(Source.SourceType.CARD, source.getType());
@@ -222,7 +126,7 @@ public class SourceTest {
 
     @Test
     public void fromJsonString_withWeChatSourceJson() {
-        final Source source = Source.fromString(SOURCE_WECHAT_JSON);
+        final Source source = SourceFixtures.WECHAT;
         assertNotNull(source);
 
         assertEquals(Source.USD, source.getCurrency());

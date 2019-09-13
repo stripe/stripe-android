@@ -5,7 +5,6 @@ import org.json.JSONObject;
 import org.junit.Test;
 
 import static com.stripe.android.model.CardTest.JSON_CARD_USD;
-import static com.stripe.android.model.SourceTest.EXAMPLE_ALIPAY_SOURCE;
 import static com.stripe.android.model.SourceTest.EXAMPLE_JSON_SOURCE_WITHOUT_NULLS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -15,31 +14,6 @@ import static org.junit.Assert.assertNull;
  * Test class for {@link CustomerSource} model class.
  */
 public class CustomerSourceTest {
-
-    static final String JSON_APPLE_PAY_CARD = "{\n" +
-            "    \"id\": \"card_189fi32eZvKYlo2CHK8NPRME\",\n" +
-            "    \"object\": \"card\",\n" +
-            "    \"address_city\": \"Des Moines\",\n" +
-            "    \"address_country\": \"US\",\n" +
-            "    \"address_line1\": \"123 Any Street\",\n" +
-            "    \"address_line1_check\": \"unavailable\",\n" +
-            "    \"address_line2\": \"456\",\n" +
-            "    \"address_state\": \"IA\",\n" +
-            "    \"address_zip\": \"50305\",\n" +
-            "    \"address_zip_check\": \"unavailable\",\n" +
-            "    \"brand\": \"Visa\",\n" +
-            "    \"country\": \"US\",\n" +
-            "    \"currency\": \"usd\",\n" +
-            "    \"customer\": \"customer77\",\n" +
-            "    \"cvc_check\": \"unavailable\",\n" +
-            "    \"exp_month\": 8,\n" +
-            "    \"exp_year\": 2017,\n" +
-            "    \"funding\": \"credit\",\n" +
-            "    \"fingerprint\": \"abc123\",\n" +
-            "    \"last4\": \"4242\",\n" +
-            "    \"name\": \"John Cardholder\",\n" +
-            "    \"tokenization_method\": \"apple_pay\"\n" +
-            "  }";
 
     @Test
     public void fromJson_whenCard_createsCustomerSourceData() throws JSONException {
@@ -54,7 +28,7 @@ public class CustomerSourceTest {
     @Test
     public void fromJson_whenCardWithTokenization_createsSourceDataWithTokenization()
             throws JSONException {
-        final JSONObject jsonCard = new JSONObject(JSON_APPLE_PAY_CARD);
+        final JSONObject jsonCard = SourceFixtures.APPLE_PAY;
         final CustomerSource sourceData = CustomerSource.fromJson(jsonCard);
         assertNotNull(sourceData);
         assertNotNull(sourceData.asCard());
@@ -85,7 +59,7 @@ public class CustomerSourceTest {
 
     @Test
     public void getSourceType_whenSourceThatIsNotCard_returnsSourceType() {
-        final CustomerSource alipaySource = CustomerSource.fromString(EXAMPLE_ALIPAY_SOURCE);
+        final CustomerSource alipaySource = CustomerSource.fromJson(SourceFixtures.ALIPAY_JSON);
         assertNotNull(alipaySource);
         assertEquals(Source.SourceType.ALIPAY, alipaySource.getSourceType());
     }
