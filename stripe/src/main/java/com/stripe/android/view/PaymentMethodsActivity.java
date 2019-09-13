@@ -4,7 +4,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
@@ -71,7 +70,11 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             initiallySelectedPaymentMethodId = args.initialPaymentMethodId;
         }
         final RecyclerView recyclerView = findViewById(R.id.payment_methods_recycler);
-        mAdapter = new PaymentMethodsAdapter(initiallySelectedPaymentMethodId);
+        mAdapter = new PaymentMethodsAdapter(
+                initiallySelectedPaymentMethodId,
+                args,
+                args.paymentMethodTypes
+        );
         mAdapter.setListener(new PaymentMethodsAdapter.Listener() {
             @Override
             public void onClick(@NonNull PaymentMethod paymentMethod) {
@@ -99,14 +102,6 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         mCustomerSession = CustomerSession.getInstance();
         mStartedFromPaymentSession = args.isPaymentSessionActive;
 
-        final ViewGroup addPaymentMethodsContainer = findViewById(R.id.add_payment_methods);
-
-        final View addCardView = new AddPaymentMethodCardRowView(this, args);
-        addPaymentMethodsContainer.addView(addCardView);
-        if (args.paymentMethodTypes.contains(PaymentMethod.Type.Fpx)) {
-            addPaymentMethodsContainer.addView(new AddPaymentMethodFpxRowView(this, args));
-        }
-
         final Toolbar toolbar = findViewById(R.id.payment_methods_toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -117,7 +112,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         fetchCustomerPaymentMethods();
 
         // This prevents the first click from being eaten by the focus.
-        addCardView.requestFocusFromTouch();
+        recyclerView.requestFocusFromTouch();
     }
 
     @Override
@@ -226,7 +221,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         final PaymentMethod paymentMethod = mAdapter.getSelectedPaymentMethod();
         if (paymentMethod != null) {

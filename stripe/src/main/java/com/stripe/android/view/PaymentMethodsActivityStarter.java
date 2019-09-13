@@ -15,10 +15,10 @@ import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.utils.ObjectUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * A class to start {@link PaymentMethodsActivity}. Arguments for the activity can be specified
@@ -46,7 +46,7 @@ public final class PaymentMethodsActivityStarter
         @Nullable final String initialPaymentMethodId;
         public final boolean shouldRequirePostalCode;
         final boolean isPaymentSessionActive;
-        @NonNull final Set<PaymentMethod.Type> paymentMethodTypes;
+        @NonNull final List<PaymentMethod.Type> paymentMethodTypes;
         @Nullable final PaymentConfiguration paymentConfiguration;
 
         @NonNull
@@ -61,7 +61,7 @@ public final class PaymentMethodsActivityStarter
             isPaymentSessionActive = builder.mIsPaymentSessionActive;
             paymentMethodTypes = ObjectUtils.getOrEmpty(
                     builder.mPaymentMethodTypes,
-                    Collections.singleton(PaymentMethod.Type.Card)
+                    Collections.singletonList(PaymentMethod.Type.Card)
             );
             paymentConfiguration = builder.mPaymentConfiguration;
         }
@@ -72,7 +72,7 @@ public final class PaymentMethodsActivityStarter
             isPaymentSessionActive = in.readInt() == 1;
 
             final int paymentMethodTypesSize = in.readInt();
-            paymentMethodTypes = new HashSet<>(paymentMethodTypesSize);
+            paymentMethodTypes = new ArrayList<>(paymentMethodTypesSize);
             for (int i = 0; i < paymentMethodTypesSize; i++) {
                 paymentMethodTypes.add(PaymentMethod.Type.valueOf(in.readString()));
             }
@@ -135,7 +135,7 @@ public final class PaymentMethodsActivityStarter
             @Nullable private String mInitialPaymentMethodId = null;
             private boolean mShouldRequirePostalCode = false;
             private boolean mIsPaymentSessionActive = false;
-            @Nullable private Set<PaymentMethod.Type> mPaymentMethodTypes;
+            @Nullable private List<PaymentMethod.Type> mPaymentMethodTypes;
             @Nullable private PaymentConfiguration mPaymentConfiguration;
 
             @NonNull
@@ -164,7 +164,7 @@ public final class PaymentMethodsActivityStarter
             }
 
             @NonNull
-            Builder setPaymentMethodTypes(@NonNull Set<PaymentMethod.Type> paymentMethodTypes) {
+            Builder setPaymentMethodTypes(@NonNull List<PaymentMethod.Type> paymentMethodTypes) {
                 mPaymentMethodTypes = paymentMethodTypes;
                 return this;
             }

@@ -10,8 +10,7 @@ import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.utils.ParcelUtils;
 
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,9 +28,8 @@ public class PaymentMethodsActivityStarterTest {
         final Context context = ApplicationProvider.getApplicationContext();
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY);
 
-        final Set<PaymentMethod.Type> paymentMethodTypes = new HashSet<>(
-                Arrays.asList(PaymentMethod.Type.Card, PaymentMethod.Type.Fpx)
-        );
+        final List<PaymentMethod.Type> paymentMethodTypes =
+                Arrays.asList(PaymentMethod.Type.Card, PaymentMethod.Type.Fpx);
         final PaymentMethodsActivityStarter.Args args =
                 new PaymentMethodsActivityStarter.Args.Builder()
                         .setInitialPaymentMethodId("pm_12345")
@@ -49,7 +47,7 @@ public class PaymentMethodsActivityStarterTest {
     @Test
     public void testDefaultPaymentMethodTypes_isCard() {
         assertEquals(
-                Collections.singleton(PaymentMethod.Type.Card),
+                Collections.singletonList(PaymentMethod.Type.Card),
                 new PaymentMethodsActivityStarter.Args.Builder()
                         .build()
                         .paymentMethodTypes

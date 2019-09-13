@@ -33,11 +33,4 @@
         android:layout_below="@id/payment_methods_toolbar"
         android:layout_marginTop="@dimen/list_top_margin"
         />
-
-    <LinearLayout
-        android:id="@+id/add_payment_methods"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/payment_methods_recycler" />
 </RelativeLayout>

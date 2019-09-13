@@ -192,7 +192,7 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
         listener.onPaymentMethodsRetrieved(PaymentMethodFixtures.CARD_PAYMENT_METHODS);
         assertEquals(View.GONE, mProgressBar.getVisibility());
         assertNotNull(mRecyclerView.getAdapter());
-        assertEquals(3, mRecyclerView.getAdapter().getItemCount());
+        assertEquals(4, mRecyclerView.getAdapter().getItemCount());
 
         final PaymentMethodsAdapter paymentMethodsAdapter =
                 (PaymentMethodsAdapter) mRecyclerView.getAdapter();
