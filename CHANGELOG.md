@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 11.0.5 - 2019-09-13
+* [#1538](https://github.com/stripe/stripe-android/pull/1538) Update `PaymentAuthWebView` to fix issues
+
 ## 11.0.4 - 2019-09-13
 * [#1533](https://github.com/stripe/stripe-android/pull/1533) Update 3DS2 SDK to 2.0.3
 * [#1534](https://github.com/stripe/stripe-android/pull/1534) Add ability to select checked item in `PaymentMethodsActivity`
