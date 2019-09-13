@@ -65,8 +65,11 @@ public class PaymentAuthWebViewActivity
 
         if (mWebView != null && mWebView.hasOpenedApp()) {
             // If another app was opened, assume it was a bank app where payment authentication
-            // was completed. Upon foregrounding this screen, finish the Activity.
-            finish();
+            // was completed. Upon foregrounding this screen, load the completion URL.
+            final String completionUrl = mWebView.getCompletionUrl();
+            if (completionUrl != null) {
+                mWebView.loadUrl(completionUrl);
+            }
         }
     }
 
