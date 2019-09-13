@@ -55,7 +55,7 @@ public class StripeEditTextTest {
     @Test
     public void deleteText_whenZeroLength_callsDeleteListener() {
         ViewTestUtils.sendDeleteKeyEvent(mEditText);
-        verify(mDeleteEmptyListener, times(1)).onDeleteEmpty();
+        verify(mDeleteEmptyListener).onDeleteEmpty();
         verifyZeroInteractions(mAfterTextChangedListener);
     }
 
@@ -63,7 +63,7 @@ public class StripeEditTextTest {
     public void addText_callsAppropriateListeners() {
         mEditText.append("1");
         verifyZeroInteractions(mDeleteEmptyListener);
-        verify(mAfterTextChangedListener, times(1)).onTextChanged("1");
+        verify(mAfterTextChangedListener).onTextChanged("1");
     }
 
     @Test
@@ -73,7 +73,7 @@ public class StripeEditTextTest {
 
         ViewTestUtils.sendDeleteKeyEvent(mEditText);
         verifyZeroInteractions(mDeleteEmptyListener);
-        verify(mAfterTextChangedListener, times(1)).onTextChanged("");
+        verify(mAfterTextChangedListener).onTextChanged("");
     }
 
     @Test
@@ -94,7 +94,7 @@ public class StripeEditTextTest {
             ViewTestUtils.sendDeleteKeyEvent(mEditText);
         }
 
-        verify(mDeleteEmptyListener, times(1)).onDeleteEmpty();
+        verify(mDeleteEmptyListener).onDeleteEmpty();
     }
 
     @Test

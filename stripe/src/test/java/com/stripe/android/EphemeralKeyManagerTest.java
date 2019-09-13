@@ -5,6 +5,12 @@ import androidx.annotation.Nullable;
 
 import com.stripe.android.testharness.TestEphemeralKeyProvider;
 
+import java.net.HttpURLConnection;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -16,12 +22,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-
-import java.net.HttpURLConnection;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -266,13 +266,12 @@ public class EphemeralKeyManagerTest {
     }
 
     @Test
-    public void triggerCorrectErrorOnNullKey() {
+    public void triggerCorrectErrorOnEmptyKey() {
         final String operationId = "12345";
         final OperationIdFactory operationIdFactory = mock(OperationIdFactory.class);
         when(operationIdFactory.create()).thenReturn(operationId);
 
-        //noinspection ConstantConditions
-        mTestEphemeralKeyProvider.setNextRawEphemeralKey(null);
+        mTestEphemeralKeyProvider.setNextRawEphemeralKey("");
         createEphemeralKeyManager(operationIdFactory, null);
 
         verify(mKeyManagerListener, never()).onKeyUpdate(
@@ -280,9 +279,11 @@ public class EphemeralKeyManagerTest {
                 ArgumentMatchers.<String>isNull(),
                 ArgumentMatchers.<String>isNull(),
                 ArgumentMatchers.<Map<String, Object>>isNull());
-        verify(mKeyManagerListener).onKeyError(operationId,
-                HttpURLConnection.HTTP_INTERNAL_ERROR,
-                "EphemeralKeyUpdateListener.onKeyUpdate was called with a null value");
+        verify(mKeyManagerListener).onKeyError(
+                eq(operationId),
+                eq(HttpURLConnection.HTTP_INTERNAL_ERROR),
+                anyString()
+        );
     }
 
     @Test

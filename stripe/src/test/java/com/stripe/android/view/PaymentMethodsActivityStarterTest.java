@@ -9,13 +9,13 @@ import com.stripe.android.PaymentConfiguration;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.utils.ParcelUtils;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 
