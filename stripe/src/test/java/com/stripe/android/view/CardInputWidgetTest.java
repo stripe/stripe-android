@@ -13,6 +13,8 @@ import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.testharness.TestFocusChangeListener;
 import com.stripe.android.testharness.ViewTestUtils;
 
+import java.util.Calendar;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,8 +23,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-
-import java.util.Calendar;
 
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CARD;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CVC;
@@ -349,8 +349,8 @@ public class CardInputWidgetTest extends BaseViewTest<CardInputTestActivity> {
 
         mCardNumberEditText.setText(VALID_VISA_WITH_SPACES);
 
-        verify(mCardInputListener, times(1)).onCardComplete();
-        verify(mCardInputListener, times(1)).onFocusChange(FOCUS_EXPIRY);
+        verify(mCardInputListener).onCardComplete();
+        verify(mCardInputListener).onFocusChange(FOCUS_EXPIRY);
         assertEquals(R.id.et_card_number, mOnGlobalFocusChangeListener.getOldFocusId());
         assertEquals(R.id.et_expiry_date, mOnGlobalFocusChangeListener.getNewFocusId());
     }
@@ -365,7 +365,7 @@ public class CardInputWidgetTest extends BaseViewTest<CardInputTestActivity> {
         reset(mCardInputListener);
 
         ViewTestUtils.sendDeleteKeyEvent(mExpiryEditText);
-        verify(mCardInputListener, times(1)).onFocusChange(FOCUS_CARD);
+        verify(mCardInputListener).onFocusChange(FOCUS_CARD);
         assertEquals(R.id.et_expiry_date, mOnGlobalFocusChangeListener.getOldFocusId());
         assertEquals(R.id.et_card_number, mOnGlobalFocusChangeListener.getNewFocusId());
 
