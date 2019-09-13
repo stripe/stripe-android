@@ -8,8 +8,6 @@ import org.json.JSONObject;
 import org.junit.Test;
 
 import static com.stripe.android.model.CardTest.JSON_CARD_USD;
-import static com.stripe.android.model.CustomerSourceTest.JSON_APPLE_PAY_CARD;
-import static com.stripe.android.model.SourceTest.EXAMPLE_ALIPAY_SOURCE;
 import static com.stripe.android.model.SourceTest.EXAMPLE_JSON_SOURCE_WITHOUT_NULLS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -80,7 +78,7 @@ public class CustomerTest {
         final JSONArray sourcesArray = sourcesObject.getJSONArray("data");
 
         sourcesObject.put("total_count", 5);
-        sourcesArray.put(new JSONObject(JSON_APPLE_PAY_CARD));
+        sourcesArray.put(SourceFixtures.APPLE_PAY);
 
         final JSONObject manipulatedCard = new JSONObject(JSON_CARD_USD);
         manipulatedCard.put("id", "card_id55555");
@@ -89,7 +87,7 @@ public class CustomerTest {
         // Note that we don't yet explicitly support bitcoin sources, but this data is
         // convenient for the test because it is not an apple pay source.
         sourcesArray.put(new JSONObject(EXAMPLE_JSON_SOURCE_WITHOUT_NULLS));
-        sourcesArray.put(new JSONObject(EXAMPLE_ALIPAY_SOURCE));
+        sourcesArray.put(SourceFixtures.ALIPAY_JSON);
         sourcesArray.put(new JSONObject(JSON_CARD_USD));
         sourcesArray.put(manipulatedCard);
         sourcesObject.put("data", sourcesArray);
