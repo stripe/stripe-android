@@ -107,10 +107,13 @@ internal class PaymentMethodsAdapter @JvmOverloads constructor(
     private fun onPositionClicked(position: Int) {
         if (selectedIndex != position) {
             // selected a Payment Method that wasn't previously selected
-            notifyItemChanged(position)
             notifyItemChanged(selectedIndex)
             setSelectedIndex(position)
         }
+
+        // Notify the current position even if it's the currently selected position so that the
+        // ItemAnimator defined in PaymentMethodActivity is triggered.
+        notifyItemChanged(position)
 
         handler.post {
             listener?.onClick(paymentMethods[position])
