@@ -132,16 +132,19 @@ public final class Customer extends StripeModel {
             url = optString(sourcesJson, FIELD_URL);
 
             final JSONArray dataArray = sourcesJson.optJSONArray(FIELD_DATA);
-            for (int i = 0; i < dataArray.length(); i++) {
-                try {
-                    JSONObject customerSourceObject = dataArray.getJSONObject(i);
-                    CustomerSource sourceData = CustomerSource.fromJson(customerSourceObject);
-                    if (sourceData == null ||
-                            VALUE_APPLE_PAY.equals(sourceData.getTokenizationMethod())) {
-                        continue;
+            if (dataArray != null) {
+                for (int i = 0; i < dataArray.length(); i++) {
+                    try {
+                        JSONObject customerSourceObject = dataArray.getJSONObject(i);
+                        CustomerSource sourceData = CustomerSource.fromJson(customerSourceObject);
+                        if (sourceData == null ||
+                                VALUE_APPLE_PAY.equals(sourceData.getTokenizationMethod())) {
+                            continue;
+                        }
+                        sources.add(sourceData);
+                    } catch (JSONException ignored) {
                     }
-                    sources.add(sourceData);
-                } catch (JSONException ignored) { }
+                }
             }
         } else {
             hasMore = null;

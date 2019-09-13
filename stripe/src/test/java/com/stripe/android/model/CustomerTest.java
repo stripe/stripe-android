@@ -29,22 +29,6 @@ public class CustomerTest {
                     "    \"url\": \"http://google.com\"\n" +
                     "}";
 
-    private static final String TEST_CUSTOMER_OBJECT =
-            "{\n" +
-            "  \"id\": \"cus_AQsHpvKfKwJDrF\",\n" +
-            "  \"object\": \"customer\",\n" +
-            "  \"default_source\": \"abc123\",\n" +
-            "  \"sources\": {\n" +
-            "    \"object\": \"list\",\n" +
-            "    \"data\": [\n" +
-            "\n" +
-            "    ],\n" +
-            "    \"has_more\": false,\n" +
-            "    \"total_count\": 0,\n" +
-            "    \"url\": \"/v1/customers/cus_AQsHpvKfKwJDrF/sources\"\n" +
-            "  }\n" +
-            "}";
-
     @Test
     public void fromString_whenStringIsNull_returnsNull() {
         assertNull(Customer.fromString(null));
@@ -57,7 +41,7 @@ public class CustomerTest {
 
     @Test
     public void fromJson_whenCustomer_returnsExpectedCustomer() {
-        final Customer customer = Customer.fromString(TEST_CUSTOMER_OBJECT);
+        final Customer customer = CustomerFixtures.CUSTOMER;
         assertNotNull(customer);
         assertEquals("cus_AQsHpvKfKwJDrF", customer.getId());
         assertEquals("abc123", customer.getDefaultSource());
@@ -81,15 +65,17 @@ public class CustomerTest {
 
     @Test
     public void fromJson_createsSameObject() {
-        Customer customer = Customer.fromString(TEST_CUSTOMER_OBJECT);
-        assertNotNull(customer);
-        assertEquals(Customer.fromString(TEST_CUSTOMER_OBJECT),
-                Customer.fromString(TEST_CUSTOMER_OBJECT));
+        final Customer expectedCustomer = Customer.fromJson(CustomerFixtures.CUSTOMER_JSON);
+        assertNotNull(expectedCustomer);
+        assertEquals(
+                expectedCustomer,
+                Customer.fromJson(CustomerFixtures.CUSTOMER_JSON)
+        );
     }
 
     @NonNull
     private String createTestCustomerObjectWithApplePaySource() throws JSONException {
-        final JSONObject rawJsonCustomer = new JSONObject(TEST_CUSTOMER_OBJECT);
+        final JSONObject rawJsonCustomer = CustomerFixtures.CUSTOMER_JSON;
         final JSONObject sourcesObject = rawJsonCustomer.getJSONObject("sources");
         final JSONArray sourcesArray = sourcesObject.getJSONArray("data");
 

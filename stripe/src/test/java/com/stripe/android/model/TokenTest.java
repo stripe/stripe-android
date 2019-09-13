@@ -1,9 +1,9 @@
 package com.stripe.android.model;
 
-import org.junit.Test;
-
 import java.util.Date;
 import java.util.HashMap;
+
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -22,39 +22,6 @@ public class TokenTest {
             .metadata(new HashMap<String, String>())
             .build();
 
-    private static final String RAW_TOKEN = "{\n" +
-            "  \"id\": \"tok_189fi32eZvKYlo2Ct0KZvU5Y\",\n" +
-            "  \"object\": \"token\",\n" +
-            "  \"card\": {\n" +
-            "    \"id\": \"card_189fi32eZvKYlo2CHK8NPRME\",\n" +
-            "    \"object\": \"card\",\n" +
-            "    \"address_city\": null,\n" +
-            "    \"address_country\": null,\n" +
-            "    \"address_line1\": null,\n" +
-            "    \"address_line1_check\": null,\n" +
-            "    \"address_line2\": null,\n" +
-            "    \"address_state\": null,\n" +
-            "    \"address_zip\": null,\n" +
-            "    \"address_zip_check\": null,\n" +
-            "    \"brand\": \"Visa\",\n" +
-            "    \"country\": \"US\",\n" +
-            "    \"cvc_check\": null,\n" +
-            "    \"dynamic_last4\": null,\n" +
-            "    \"exp_month\": 8,\n" +
-            "    \"exp_year\": 2017,\n" +
-            "    \"funding\": \"credit\",\n" +
-            "    \"last4\": \"4242\",\n" +
-            "    \"metadata\": {\n" +
-            "    },\n" +
-            "    \"name\": null,\n" +
-            "    \"tokenization_method\": null\n" +
-            "  },\n" +
-            "  \"client_ip\": null,\n" +
-            "  \"created\": 1462905355,\n" +
-            "  \"livemode\": false,\n" +
-            "  \"type\": \"card\",\n" +
-            "  \"used\": false\n" +
-            "}";
 
     private static final String RAW_TOKEN_NO_ID = "{\n" +
             "  \"object\": \"token\",\n" +
@@ -89,29 +56,6 @@ public class TokenTest {
             "  \"used\": false\n" +
             "}";
 
-    private static final String RAW_BANK_TOKEN = "{\n" +
-            "  \"id\": \"btok_9xJAbronBnS9bH\",\n" +
-            "  \"object\": \"token\",\n" +
-            "  \"bank_account\": {\n" +
-            "    \"id\": \"ba_19dOY72eZvKYlo2CVNPhmtv3\",\n" +
-            "    \"object\": \"bank_account\",\n" +
-            "    \"account_holder_name\": \"Jane Austen\",\n" +
-            "    \"account_holder_type\": \"individual\",\n" +
-            "    \"bank_name\": \"STRIPE TEST BANK\",\n" +
-            "    \"country\": \"US\",\n" +
-            "    \"currency\": \"usd\",\n" +
-            "    \"fingerprint\": \"1JWtPxqbdX5Gamtc\",\n" +
-            "    \"last4\": \"6789\",\n" +
-            "    \"routing_number\": \"110000000\",\n" +
-            "    \"status\": \"new\"\n" +
-            "  },\n" +
-            "  \"client_ip\": null,\n" +
-            "  \"created\": 1484765567,\n" +
-            "  \"livemode\": false,\n" +
-            "  \"type\": \"bank_account\",\n" +
-            "  \"used\": false\n" +
-            "}";
-
     private static final String RAW_BANK_TOKEN_NO_TYPE = "{\n" +
             "  \"id\": \"btok_9xJAbronBnS9bH\",\n" +
             "  \"object\": \"token\",\n" +
@@ -142,8 +86,7 @@ public class TokenTest {
                 new Date(1462905355L * 1000L),
                 false,
                 CARD);
-        final Token actualToken = Token.fromString(RAW_TOKEN);
-        assertEquals(expectedToken, actualToken);
+        assertEquals(expectedToken, TokenFixtures.CARD_TOKEN);
     }
 
 
@@ -161,7 +104,7 @@ public class TokenTest {
                 createdDate,
                 false,
                 new BankAccount("11", "US", "usd", "22"));
-        Token answerToken = Token.fromString(RAW_BANK_TOKEN);
+        final Token answerToken = TokenFixtures.BANK_TOKEN;
         assertNotNull(answerToken);
         assertEquals(expectedToken.getId(), answerToken.getId());
         assertEquals(expectedToken.getLivemode(), answerToken.getLivemode());
