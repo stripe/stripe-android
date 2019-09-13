@@ -19,23 +19,24 @@ import com.stripe.android.R;
  */
 public class ExpiryDateEditText extends StripeEditText {
 
-    static final int INVALID_INPUT = -1;
+    private static final int INVALID_INPUT = -1;
     private static final int MAX_INPUT_LENGTH = 5;
 
-    private ExpiryDateEditListener mExpiryDateEditListener;
+    @Nullable private ExpiryDateEditListener mExpiryDateEditListener;
     private boolean mIsDateValid;
 
-    public ExpiryDateEditText(Context context) {
+    public ExpiryDateEditText(@NonNull Context context) {
         super(context);
         listenForTextChanges();
     }
 
-    public ExpiryDateEditText(Context context, AttributeSet attrs) {
+    public ExpiryDateEditText(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         listenForTextChanges();
     }
 
-    public ExpiryDateEditText(Context context, AttributeSet attrs, int defStyleAttr) {
+    public ExpiryDateEditText(@NonNull Context context, @Nullable AttributeSet attrs,
+                              int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         listenForTextChanges();
     }
@@ -94,7 +95,7 @@ public class ExpiryDateEditText extends StripeEditText {
         return monthYearPair;
     }
 
-    public void setExpiryDateEditListener(ExpiryDateEditListener expiryDateEditListener) {
+    public void setExpiryDateEditListener(@Nullable ExpiryDateEditListener expiryDateEditListener) {
         mExpiryDateEditListener = expiryDateEditListener;
     }
 

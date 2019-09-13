@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.google.android.material.textfield.TextInputLayout;
@@ -36,15 +38,16 @@ public class IconTextInputLayout extends TextInputLayout {
     @VisibleForTesting private final Rect mBounds;
     @VisibleForTesting private final Method mRecalculateMethod;
 
-    public IconTextInputLayout(Context context) {
+    public IconTextInputLayout(@NonNull Context context) {
         this(context, null);
     }
 
-    public IconTextInputLayout(Context context, AttributeSet attrs) {
+    public IconTextInputLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public IconTextInputLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+    public IconTextInputLayout(@NonNull Context context, @Nullable AttributeSet attrs,
+                               int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
         /*

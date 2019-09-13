@@ -194,7 +194,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(id);
         if (created == null) {
             dest.writeByte((byte) (0x00));
@@ -563,7 +563,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         }
 
         @Override
-        public void writeToParcel(Parcel dest, int flags) {
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
             super.writeToParcel(dest, flags);
             dest.writeString(brand);
             dest.writeParcelable(checks, flags);
@@ -740,7 +740,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
             }
 
             @Override
-            public void writeToParcel(Parcel dest, int flags) {
+            public void writeToParcel(@NonNull Parcel dest, int flags) {
                 dest.writeString(addressLine1Check);
                 dest.writeString(addressPostalCodeCheck);
                 dest.writeString(cvcCheck);
@@ -838,7 +838,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
             }
 
             @Override
-            public void writeToParcel(Parcel dest, int flags) {
+            public void writeToParcel(@NonNull Parcel dest, int flags) {
                 dest.writeByte((byte) (isSupported ? 0x01 : 0x00));
             }
 
@@ -958,7 +958,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         }
 
         @Override
-        public void writeToParcel(Parcel dest, int flags) {
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
             super.writeToParcel(dest, flags);
             dest.writeString(bank);
             dest.writeString(bankIdentifierCode);
@@ -1046,7 +1046,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         }
 
         @Override
-        public void writeToParcel(Parcel dest, int flags) {
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
             super.writeToParcel(dest, flags);
             dest.writeString(bank);
             dest.writeString(accountHolderType);
@@ -1132,7 +1132,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         }
 
         @Override
-        public void writeToParcel(Parcel dest, int flags) {
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeString(type.name());
         }
     }

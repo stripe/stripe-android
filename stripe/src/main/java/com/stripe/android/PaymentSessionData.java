@@ -171,7 +171,7 @@ public class PaymentSessionData implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel parcel, int i) {
+    public void writeToParcel(@NonNull Parcel parcel, int i) {
         parcel.writeLong(mCartTotal);
         parcel.writeInt(mIsPaymentReadyToCharge ? 1 : 0);
         parcel.writeParcelable(mPaymentMethod, i);

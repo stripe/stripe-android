@@ -108,7 +108,7 @@ public final class ShippingMethod extends StripeModel implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel parcel, int i) {
+    public void writeToParcel(@NonNull Parcel parcel, int i) {
         parcel.writeLong(mAmount);
         parcel.writeString(mCurrencyCode);
         parcel.writeString(mDetail);

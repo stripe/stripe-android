@@ -86,13 +86,14 @@ public class StripeEditText extends AppCompatEditText {
         return mDefaultErrorColor;
     }
 
+    @Nullable
     @Override
-    public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
-        InputConnection inputConnection = super.onCreateInputConnection(outAttrs);
+    public InputConnection onCreateInputConnection(@NonNull EditorInfo outAttrs) {
+        final InputConnection inputConnection = super.onCreateInputConnection(outAttrs);
         if (inputConnection == null) {
             return null;
         }
-        return new SoftDeleteInputConnection(super.onCreateInputConnection(outAttrs), true);
+        return new SoftDeleteInputConnection(inputConnection, true);
     }
 
     /**
@@ -130,11 +131,6 @@ public class StripeEditText extends AppCompatEditText {
      */
     public void setErrorColor(@ColorInt int errorColor) {
         mErrorColor = errorColor;
-    }
-
-    @ColorInt
-    private int getErrorColor() {
-        return mErrorColor != null ? mErrorColor : mDefaultErrorColor;
     }
 
     /**
@@ -177,7 +173,7 @@ public class StripeEditText extends AppCompatEditText {
         } else {
             mShouldShowError = shouldShowError;
             if (mShouldShowError) {
-                setTextColor(getErrorColor());
+                setTextColor(mErrorColor != null ? mErrorColor : mDefaultErrorColor);
             } else {
                 setTextColor(mCachedColorStateList);
             }

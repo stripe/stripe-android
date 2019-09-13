@@ -57,7 +57,7 @@ public final class SourceSepaDebitData extends StripeSourceTypeModel {
     }
 
     @Nullable
-    public static SourceSepaDebitData fromJson(JSONObject jsonObject) {
+    public static SourceSepaDebitData fromJson(@Nullable JSONObject jsonObject) {
         if (jsonObject == null) {
             return null;
         }

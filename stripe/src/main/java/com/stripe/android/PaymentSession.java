@@ -352,6 +352,7 @@ public class PaymentSession {
     /**
      * @return the data associated with the instance of this class.
      */
+    @Nullable
     public PaymentSessionData getPaymentSessionData() {
         return mPaymentSessionData;
     }

@@ -215,10 +215,12 @@ public final class Source extends StripeModel implements StripePaymentSource {
         return mCreated;
     }
 
+    @Nullable
     public String getCurrency() {
         return mCurrency;
     }
 
+    @Nullable
     @SourceFlow
     public String getFlow() {
         return mFlow;
@@ -250,6 +252,7 @@ public final class Source extends StripeModel implements StripePaymentSource {
     }
 
     @SourceStatus
+    @Nullable
     public String getStatus() {
         return mStatus;
     }

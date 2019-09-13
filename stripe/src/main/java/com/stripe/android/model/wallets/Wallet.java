@@ -136,7 +136,7 @@ public abstract class Wallet extends StripeModel implements Parcelable {
         }
 
         @Override
-        public void writeToParcel(Parcel dest, int flags) {
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeString(city);
             dest.writeString(country);
             dest.writeString(line1);

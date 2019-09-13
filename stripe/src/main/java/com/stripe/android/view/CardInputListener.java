@@ -1,5 +1,6 @@
 package com.stripe.android.view;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.StringDef;
 
 import java.lang.annotation.Retention;
@@ -31,7 +32,7 @@ public interface CardInputListener {
      *
      * @param focusField a {@link FocusField} to which the focus has just changed.
      */
-    void onFocusChange(@FocusField String focusField);
+    void onFocusChange(@FocusField @NonNull String focusField);
 
     /**
      * Called when a potentially valid card number has been completed in the

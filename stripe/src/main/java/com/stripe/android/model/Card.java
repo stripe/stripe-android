@@ -293,10 +293,10 @@ public final class Card extends StripeModel implements StripePaymentSource, Stri
      */
     @NonNull
     public static Card create(
-            String number,
-            Integer expMonth,
-            Integer expYear,
-            String cvc) {
+            @Nullable String number,
+            @Nullable Integer expMonth,
+            @Nullable Integer expYear,
+            @Nullable String cvc) {
         return new Builder(number, expMonth, expYear, cvc)
                 .build();
     }
