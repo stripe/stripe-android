@@ -46,16 +46,21 @@ internal class PaymentAuthWebView : WebView {
         setWebViewClient(webViewClient)
     }
 
-    fun hasOpenedApp(): Boolean {
-        return webViewClient?.hasOpenedApp == true
+    fun onForegrounded() {
+        if (webViewClient?.hasOpenedApp == true) {
+            // If another app was opened, assume it was a bank app where payment authentication
+            // was completed. Upon foregrounding this screen, load the completion URL.
+            webViewClient?.completionUrlParam?.let {
+                loadUrl(it)
+            }
+        }
     }
-
-    fun getCompletionUrl(): String? = webViewClient?.completionUrlParam
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun configureSettings() {
         settings.javaScriptEnabled = true
         settings.allowContentAccess = false
+        settings.domStorageEnabled = true
     }
 
     internal class PaymentAuthWebViewClient(

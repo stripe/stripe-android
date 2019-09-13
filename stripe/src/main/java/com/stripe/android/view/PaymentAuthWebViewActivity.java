@@ -60,20 +60,6 @@ public class PaymentAuthWebViewActivity
     }
 
     @Override
-    protected void onPostResume() {
-        super.onPostResume();
-
-        if (mWebView != null && mWebView.hasOpenedApp()) {
-            // If another app was opened, assume it was a bank app where payment authentication
-            // was completed. Upon foregrounding this screen, load the completion URL.
-            final String completionUrl = mWebView.getCompletionUrl();
-            if (completionUrl != null) {
-                mWebView.loadUrl(completionUrl);
-            }
-        }
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.payment_auth_web_view_menu, menu);
 
