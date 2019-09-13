@@ -13,6 +13,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -43,6 +44,9 @@ public class PaymentMethodsActivity extends AppCompatActivity {
             "state_selected_payment_method_id";
 
     public static final String TOKEN_PAYMENT_METHODS_ACTIVITY = "PaymentMethodsActivity";
+
+    // TODO(mshafrir-stripe): enable when ready
+    private static final boolean SHOULD_ENABLE_PAYMENT_METHOD_SWIPING = false;
 
     private PaymentMethodsAdapter mAdapter;
     private ProgressBar mProgressBar;
@@ -98,6 +102,14 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                 }
             }
         });
+
+        final ItemTouchHelper itemTouchHelper = new ItemTouchHelper(
+                new PaymentMethodSwipeCallback(this, mAdapter,
+                        new SwipeToDeleteCallbackListener())
+        );
+        if (SHOULD_ENABLE_PAYMENT_METHOD_SWIPING) {
+            itemTouchHelper.attachToRecyclerView(recyclerView);
+        }
 
         mCustomerSession = CustomerSession.getInstance();
         mStartedFromPaymentSession = args.isPaymentSessionActive;
@@ -263,6 +275,18 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                     .translate(errorCode, errorMessage, stripeError);
             activity.showError(displayedError);
             activity.setCommunicatingProgress(false);
+        }
+    }
+
+    private static final class SwipeToDeleteCallbackListener
+            implements PaymentMethodSwipeCallback.Listener {
+
+        private SwipeToDeleteCallbackListener() {
+        }
+
+        @Override
+        public void onSwiped(@NonNull PaymentMethod paymentMethod) {
+            // TODO(mshafrir-stripe): implement swipe handling
         }
     }
 }
