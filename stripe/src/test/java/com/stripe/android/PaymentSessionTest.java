@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.model.Customer;
+import com.stripe.android.model.CustomerFixtures;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.model.PaymentMethodFixtures;
@@ -18,6 +19,11 @@ import com.stripe.android.view.PaymentFlowActivity;
 import com.stripe.android.view.PaymentFlowActivityStarter;
 import com.stripe.android.view.PaymentMethodsActivity;
 import com.stripe.android.view.PaymentMethodsActivityStarter;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,15 +37,8 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.ThreadPoolExecutor;
-
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
-import static com.stripe.android.CustomerSessionTest.FIRST_SAMPLE_KEY_RAW;
-import static com.stripe.android.CustomerSessionTest.FIRST_TEST_CUSTOMER_OBJECT;
 import static com.stripe.android.CustomerSessionTest.SECOND_TEST_CUSTOMER_OBJECT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -61,8 +60,7 @@ import static org.mockito.Mockito.when;
 @RunWith(RobolectricTestRunner.class)
 public class PaymentSessionTest {
 
-    @NonNull private static final Customer FIRST_CUSTOMER =
-            Objects.requireNonNull(Customer.fromString(FIRST_TEST_CUSTOMER_OBJECT));
+    @NonNull private static final Customer FIRST_CUSTOMER = CustomerFixtures.CUSTOMER;
     @NonNull private static final Customer SECOND_CUSTOMER =
             Objects.requireNonNull(Customer.fromString(SECOND_TEST_CUSTOMER_OBJECT));
 
@@ -115,7 +113,8 @@ public class PaymentSessionTest {
 
     @Test
     public void init_whenEphemeralKeyProviderContinues_fetchesCustomerAndNotifiesListener() {
-        mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        mEphemeralKeyProvider
+                .setNextRawEphemeralKey(CustomerFixtures.EPHEMERAL_KEY_FIRST.toString());
         CustomerSession.setInstance(createCustomerSession());
 
         final PaymentSession paymentSession = new PaymentSession(mActivity);
@@ -127,7 +126,8 @@ public class PaymentSessionTest {
 
     @Test
     public void setCartTotal_setsExpectedValueAndNotifiesListener() {
-        mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        mEphemeralKeyProvider
+                .setNextRawEphemeralKey(CustomerFixtures.EPHEMERAL_KEY_FIRST.toString());
         CustomerSession.setInstance(createCustomerSession());
 
         final PaymentSession paymentSession = new PaymentSession(mActivity);
@@ -295,7 +295,8 @@ public class PaymentSessionTest {
 
     @Test
     public void init_withSavedState_setsPaymentSessionData() {
-        mEphemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW);
+        mEphemeralKeyProvider
+                .setNextRawEphemeralKey(CustomerFixtures.EPHEMERAL_KEY_FIRST.toString());
         CustomerSession.setInstance(createCustomerSession());
 
         PaymentSession paymentSession = new PaymentSession(mActivity);

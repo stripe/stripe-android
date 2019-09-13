@@ -17,7 +17,9 @@ import com.stripe.android.exception.CardException;
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.Customer;
+import com.stripe.android.model.CustomerFixtures;
 import com.stripe.android.model.PaymentMethod;
+import com.stripe.android.model.PaymentMethodFixtures;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.Source;
 import com.stripe.android.testharness.JsonTestUtils;
@@ -28,6 +30,14 @@ import com.stripe.android.view.CardInputTestActivity;
 import com.stripe.android.view.PaymentFlowActivity;
 import com.stripe.android.view.PaymentFlowActivityStarter;
 import com.stripe.android.view.PaymentMethodsActivity;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,14 +54,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -73,47 +75,10 @@ import static org.mockito.Mockito.when;
 @RunWith(RobolectricTestRunner.class)
 public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
 
-    static final String FIRST_SAMPLE_KEY_RAW = "{\n" +
-            "  \"id\": \"ephkey_123\",\n" +
-            "  \"object\": \"ephemeral_key\",\n" +
-            "  \"secret\": \"ek_test_123\",\n" +
-            "  \"created\": 1501179335,\n" +
-            "  \"livemode\": false,\n" +
-            "  \"expires\": 1501199335,\n" +
-            "  \"associated_objects\": [{\n" +
-            "            \"type\": \"customer\",\n" +
-            "            \"id\": \"cus_AQsHpvKfKwJDrF\"\n" +
-            "            }]\n" +
-            "}";
-
-    private static final String SECOND_SAMPLE_KEY_RAW = "{\n" +
-            "  \"id\": \"ephkey_ABC\",\n" +
-            "  \"object\": \"ephemeral_key\",\n" +
-            "  \"secret\": \"ek_test_456\",\n" +
-            "  \"created\": 1601189335,\n" +
-            "  \"livemode\": false,\n" +
-            "  \"expires\": 1601199335,\n" +
-            "  \"associated_objects\": [{\n" +
-            "            \"type\": \"customer\",\n" +
-            "            \"id\": \"cus_abc123\"\n" +
-            "            }]\n" +
-            "}";
-
-    static final String FIRST_TEST_CUSTOMER_OBJECT =
-            "{\n" +
-                    "  \"id\": \"cus_AQsHpvKfKwJDrF\",\n" +
-                    "  \"object\": \"customer\",\n" +
-                    "  \"default_source\": \"abc123\",\n" +
-                    "  \"sources\": {\n" +
-                    "    \"object\": \"list\",\n" +
-                    "    \"data\": [\n" +
-                    "\n" +
-                    "    ],\n" +
-                    "    \"has_more\": false,\n" +
-                    "    \"total_count\": 0,\n" +
-                    "    \"url\": \"/v1/customers/cus_AQsHpvKfKwJDrF/sources\"\n" +
-                    "  }\n" +
-                    "}";
+    private static final String FIRST_SAMPLE_KEY_RAW =
+            CustomerFixtures.EPHEMERAL_KEY_FIRST.toString();
+    private static final String SECOND_SAMPLE_KEY_RAW =
+            CustomerFixtures.EPHEMERAL_KEY_SECOND.toString();
 
     private static final String FIRST_TEST_CUSTOMER_OBJECT_WITH_SHIPPING_INFO =
             "{\n" +
@@ -158,18 +123,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                     "  }\n" +
                     "}";
 
-    private static final String PAYMENT_METHOD_OBJECT = "{\n" +
-            "  \"id\": \"pm_abc123\",\n" +
-            "  \"object\": \"payment_method\",\n" +
-            "  \"created\": 1556220472,\n" +
-            "  \"customer\": \"cus_AQsHpvKfKwJDrF\",\n" +
-            "  \"livemode\": false,\n" +
-            "  \"metadata\": {},\n" +
-            "  \"type\": \"card\"\n" +
-            "}";
-
-    private static final Customer FIRST_CUSTOMER =
-            Customer.fromString(FIRST_TEST_CUSTOMER_OBJECT);
+    private static final Customer FIRST_CUSTOMER = CustomerFixtures.CUSTOMER;
     private static final Customer SECOND_CUSTOMER =
             Customer.fromString(SECOND_TEST_CUSTOMER_OBJECT);
 
@@ -219,7 +173,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         mAddedSource = Source.fromString(CardInputTestActivity.EXAMPLE_JSON_CARD_SOURCE);
         assertNotNull(mAddedSource);
 
-        mPaymentMethod = PaymentMethod.fromString(PAYMENT_METHOD_OBJECT);
+        mPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD;
         assertNotNull(mPaymentMethod);
 
         when(mStripeRepository.retrieveCustomer(anyString(), ArgumentMatchers.<ApiRequest.Options>any()))
