@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 10.4.4 - 2019-09-13
+* Apply hot-fixes from 11.x
+
 ## 10.4.3 - 2019-09-04
 * [#1471](https://github.com/stripe/stripe-android/pull/1471) Fix issue with `CardUtils` visibility
 

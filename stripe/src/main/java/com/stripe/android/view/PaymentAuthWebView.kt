@@ -44,6 +44,7 @@ internal class PaymentAuthWebView : WebView {
     private fun configureSettings() {
         settings.javaScriptEnabled = true
         settings.allowContentAccess = false
+        settings.domStorageEnabled = true
     }
 
     internal class PaymentAuthWebViewClient(

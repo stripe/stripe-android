@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.stripe.android"
           android:versionCode="62"
-          android:versionName="10.4.3"
+          android:versionName="10.4.4"
     >
 
     <application>
