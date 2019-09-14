@@ -3,9 +3,6 @@ package com.stripe.android.model;
 import org.junit.Test;
 
 import static com.stripe.android.model.SourceCardDataTest.EXAMPLE_JSON_SOURCE_CARD_DATA_WITH_APPLE_PAY;
-import static com.stripe.android.model.SourceCodeVerificationTest.EXAMPLE_JSON_CODE_VERIFICATION;
-import static com.stripe.android.model.SourceOwnerTest.EXAMPLE_JSON_OWNER_WITHOUT_NULLS;
-import static com.stripe.android.model.SourceRedirectTest.EXAMPLE_JSON_REDIRECT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -22,15 +19,15 @@ public class SourceTest {
             "\"object\": \"source\",\n"+
             "\"amount\": 1000,\n"+
             "\"client_secret\": \"src_client_secret_of43INi1HteJwXVe3djAUosN\",\n"+
-            "\"code_verification\": " + EXAMPLE_JSON_CODE_VERIFICATION + ",\n"+
+            "\"code_verification\": " + SourceFixtures.SOURCE_CODE_VERIFICATION_JSON.toString() + ",\n"+
             "\"created\": 1488499654,\n"+
             "\"currency\": \"usd\",\n"+
             "\"flow\": \"receiver\",\n"+
             "\"livemode\": false,\n"+
             "\"metadata\": {\n"+
             "},\n"+
-            "\"owner\": " + EXAMPLE_JSON_OWNER_WITHOUT_NULLS +",\n"+
-            "\"redirect\": " + EXAMPLE_JSON_REDIRECT + ",\n"+
+            "\"owner\": " + SourceFixtures.SOURCE_OWNER_WITHOUT_NULLS.toString() +",\n"+
+            "\"redirect\": " + SourceFixtures.SOURCE_REDIRECT_JSON.toString() + ",\n"+
             "\"receiver\": {\n"+
             "\"address\": \"test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N\",\n"+
             "\"amount_charged\": 0,\n"+
@@ -50,15 +47,15 @@ public class SourceTest {
             "\"object\": \"source\",\n"+
             "\"amount\": 1000,\n"+
             "\"client_secret\": \"src_client_secret_of43INi1HteJwXVe3djAUosN\",\n"+
-            "\"code_verification\": " + EXAMPLE_JSON_CODE_VERIFICATION + ",\n"+
+            "\"code_verification\": " + SourceFixtures.SOURCE_CODE_VERIFICATION_JSON.toString() + ",\n"+
             "\"created\": 1488499654,\n"+
             "\"currency\": \"usd\",\n"+
             "\"flow\": \"receiver\",\n"+
             "\"livemode\": false,\n"+
             "\"metadata\": {\n"+
             "},\n"+
-            "\"owner\": " + EXAMPLE_JSON_OWNER_WITHOUT_NULLS +",\n"+
-            "\"redirect\": " + EXAMPLE_JSON_REDIRECT + ",\n"+
+            "\"owner\": " + SourceFixtures.SOURCE_OWNER_WITHOUT_NULLS.toString() +",\n"+
+            "\"redirect\": " + SourceFixtures.SOURCE_REDIRECT_JSON.toString() + ",\n"+
             "\"receiver\": {\n"+
             "\"address\": \"test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N\",\n"+
             "\"amount_charged\": 0,\n"+
