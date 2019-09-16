@@ -145,4 +145,94 @@ internal object SourceFixtures {
         }
         """.trimIndent()
     )
+
+    @JvmField
+    val SOURCE_REDIRECT_JSON = JSONObject(
+        """
+        {
+            "return_url": "https://google.com",
+            "status": "succeeded",
+            "url": "examplecompany://redirect-link"
+        }
+        """.trimIndent()
+    )
+
+    @JvmField
+    val SOURCE_REDIRECT = SourceRedirect.fromJson(SOURCE_REDIRECT_JSON)!!
+
+    @JvmField
+    val SOURCE_CODE_VERIFICATION_JSON = JSONObject(
+        """
+        {
+            "attempts_remaining": 3,
+            "status": "pending"
+        }
+        """.trimIndent()
+    )
+
+    @JvmField
+    val SOURCE_CODE_VERIFICATION = SourceCodeVerification.fromJson(
+        SOURCE_CODE_VERIFICATION_JSON
+    )!!
+
+    @JvmField
+    val SOURCE_RECEIVER_JSON = JSONObject(
+        """
+        {
+            "address": "test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N",
+            "amount_charged": 10,
+            "amount_received": 20,
+            "amount_returned": 30
+        }
+        """.trimIndent()
+    )
+
+    @JvmField
+    val SOURCE_RECEIVER = SourceReceiver.fromJson(SOURCE_RECEIVER_JSON)!!
+
+    @JvmField
+    val SOURCE_OWNER_WITH_NULLS = JSONObject(
+        """
+        {
+            "address": null,
+            "email": "jenny.rosen@example.com",
+            "name": "Jenny Rosen",
+            "phone": "4158675309",
+            "verified_address": null,
+            "verified_email": null,
+            "verified_name": null,
+            "verified_phone": null
+        }
+        """.trimIndent()
+    )
+
+    @JvmField
+    val SOURCE_OWNER_WITHOUT_NULLS = JSONObject(
+        """
+        {
+            "address": {
+                "country": "US",
+                "city": "San Francisco",
+                "state": "CA",
+                "postal_code": "94107",
+                "line2": "#345",
+                "line1": "123 Market St"
+            },
+            "email": "jenny.rosen@example.com",
+            "name": "Jenny Rosen",
+            "phone": "4158675309",
+            "verified_address": {
+                "country": "US",
+                "city": "San Francisco",
+                "state": "CA",
+                "postal_code": "94107",
+                "line2": "#345",
+                "line1": "123 Market St"
+            },
+            "verified_email": "jenny.rosen@example.com",
+            "verified_name": "Jenny Rosen",
+            "verified_phone": "4158675309"
+        }
+        """.trimIndent()
+    )
 }
