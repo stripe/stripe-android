@@ -1,9 +1,5 @@
 package com.stripe.android.view;
 
-import android.graphics.Color;
-
-import androidx.annotation.ColorInt;
-
 import com.stripe.android.model.Card;
 
 import org.junit.After;
@@ -35,39 +31,6 @@ public class ViewUtilsTest extends BaseViewTest<CardInputTestActivity> {
     @Override
     public void tearDown() {
         super.tearDown();
-    }
-
-    @Test
-    public void getThemeAccentColor_whenOnPostLollipopConfig_getsNonzeroColor() {
-        @ColorInt int color = ViewUtils.getThemeAccentColor(createActivity()).data;
-        assertTrue(Color.alpha(color) > 0);
-    }
-
-    @Test
-    public void getThemeColorControlNormal_whenOnPostLollipopConfig_getsNonzeroColor() {
-        @ColorInt int color = ViewUtils.getThemeColorControlNormal(createActivity()).data;
-        assertTrue(Color.alpha(color) > 0);
-    }
-
-    @Test
-    public void isColorTransparent_whenColorIsZero_returnsTrue() {
-        assertTrue(ViewUtils.isColorTransparent(0));
-    }
-
-    @Test
-    public void isColorTransparent_whenColorIsNonzeroButHasLowAlpha_returnsTrue() {
-        @ColorInt int invisibleBlue = 0x050000ff;
-        @ColorInt int invisibleRed = 0x0bff0000;
-        assertTrue(ViewUtils.isColorTransparent(invisibleBlue));
-        assertTrue(ViewUtils.isColorTransparent(invisibleRed));
-    }
-
-    @Test
-    public void isColorTransparent_whenColorIsNotCloseToTransparent_returnsFalse() {
-        @ColorInt int brightWhite = 0xffffffff;
-        @ColorInt int completelyBlack = 0xff000000;
-        assertFalse(ViewUtils.isColorTransparent(brightWhite));
-        assertFalse(ViewUtils.isColorTransparent(completelyBlack));
     }
 
     @Test
@@ -225,36 +188,6 @@ public class ViewUtilsTest extends BaseViewTest<CardInputTestActivity> {
     @Test
     public void isCvcMaximalLength_whenNull_returnsFalse() {
         assertFalse(ViewUtils.isCvcMaximalLength(Card.CardBrand.AMERICAN_EXPRESS, null));
-    }
-
-    @Test
-    public void isColorDark_forExampleLightColors_returnsFalse() {
-        @ColorInt int middleGray = 0x888888;
-        @ColorInt int offWhite = 0xfaebd7;
-        @ColorInt int lightCyan = 0x8feffb;
-        @ColorInt int lightYellow = 0xfcf4b2;
-        @ColorInt int lightBlue = 0x9cdbff;
-
-        assertFalse(ViewUtils.isColorDark(middleGray));
-        assertFalse(ViewUtils.isColorDark(offWhite));
-        assertFalse(ViewUtils.isColorDark(lightCyan));
-        assertFalse(ViewUtils.isColorDark(lightYellow));
-        assertFalse(ViewUtils.isColorDark(lightBlue));
-        assertFalse(ViewUtils.isColorDark(Color.WHITE));
-    }
-
-    @Test
-    public void isColorDark_forExampleDarkColors_returnsTrue() {
-        @ColorInt int logoBlue = 0x6772e5;
-        @ColorInt int slate = 0x525f7f;
-        @ColorInt int darkPurple = 0x6b3791;
-        @ColorInt int darkishRed = 0x9e2146;
-
-        assertTrue(ViewUtils.isColorDark(logoBlue));
-        assertTrue(ViewUtils.isColorDark(slate));
-        assertTrue(ViewUtils.isColorDark(darkPurple));
-        assertTrue(ViewUtils.isColorDark(darkishRed));
-        assertTrue(ViewUtils.isColorDark(Color.BLACK));
     }
 
     @Test

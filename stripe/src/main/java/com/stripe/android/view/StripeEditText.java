@@ -19,11 +19,10 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.ColorUtils;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.stripe.android.R;
-
-import static com.stripe.android.view.ViewUtils.isColorDark;
 
 /**
  * Extension of {@link TextInputEditText} that listens for users pressing the delete key when
@@ -205,7 +204,7 @@ public class StripeEditText extends AppCompatEditText {
         final int color = mCachedColorStateList.getDefaultColor();
 
         @ColorRes final int defaultErrorColorResId;
-        if (isColorDark(color)) {
+        if (StripeColorUtils.isColorDark(color)) {
             // Note: if the _text_ color is dark, then this is a
             // light theme, and vice-versa.
             defaultErrorColorResId = R.color.error_text_light_theme;
