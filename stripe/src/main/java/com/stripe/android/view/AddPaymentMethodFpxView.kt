@@ -128,24 +128,24 @@ internal class AddPaymentMethodFpxView private constructor(
     }
 
     private enum class FpxBank(val code: String, val displayName: String, val brandIconResId: Int = R.drawable.ic_bank_generic) {
-        AffinBank("affin_bank", "Affin Bank"),
-        AllianceBankBusiness("alliance_bank", "Alliance Bank (Business)"),
-        AmBank("ambank", "AmBank"),
-        BankIslam("bank_islam", "Bank Islam"),
-        BankMuamalat("bank_muamalat", "Bank Muamalat"),
-        BankRakyat("bank_rakyat", "Bank Rakyat"),
-        Bsn("bsn", "BSN"),
-        Cimb("cimb", "CIMB Clicks"),
-        HongLeongBank("hong_leong_bank", "Hong Leong Bank"),
-        Hsbc("hsbc", "HSBC BANK"),
-        Kfh("kfh", "KFH"),
-        Maybank2E("maybank2e", "Maybank2E"),
-        Maybank2U("maybank2u", "Maybank2U"),
-        Ocbc("ocbc", "OCBC Bank"),
-        PublicBank("public_bank", "Public Bank"),
-        Rhb("rhb", "RHB Bank"),
-        StandardChartered("standard_chartered", "Standard Chartered"),
-        UobBank("uob", "UOB Bank")
+        AffinBank("affin_bank", "Affin Bank", R.drawable.ic_bank_affin),
+        AllianceBankBusiness("alliance_bank", "Alliance Bank (Business)", R.drawable.ic_bank_alliance),
+        AmBank("ambank", "AmBank", R.drawable.ic_bank_ambank),
+        BankIslam("bank_islam", "Bank Islam", R.drawable.ic_bank_islam),
+        BankMuamalat("bank_muamalat", "Bank Muamalat", R.drawable.ic_bank_muamalat),
+        BankRakyat("bank_rakyat", "Bank Rakyat", R.drawable.ic_bank_raykat),
+        Bsn("bsn", "BSN", R.drawable.ic_bank_bsn),
+        Cimb("cimb", "CIMB Clicks", R.drawable.ic_bank_cimb),
+        HongLeongBank("hong_leong_bank", "Hong Leong Bank", R.drawable.ic_bank_hong_leong),
+        Hsbc("hsbc", "HSBC BANK", R.drawable.ic_bank_hsbc),
+        Kfh("kfh", "KFH", R.drawable.ic_bank_kfh),
+        Maybank2E("maybank2e", "Maybank2E", R.drawable.ic_bank_maybank),
+        Maybank2U("maybank2u", "Maybank2U", R.drawable.ic_bank_maybank),
+        Ocbc("ocbc", "OCBC Bank", R.drawable.ic_bank_ocbc),
+        PublicBank("public_bank", "Public Bank", R.drawable.ic_bank_public),
+        Rhb("rhb", "RHB Bank", R.drawable.ic_bank_rhb),
+        StandardChartered("standard_chartered", "Standard Chartered", R.drawable.ic_bank_standard_chartered),
+        UobBank("uob", "UOB Bank", R.drawable.ic_bank_uob)
     }
 
     private class SavedState : BaseSavedState {
