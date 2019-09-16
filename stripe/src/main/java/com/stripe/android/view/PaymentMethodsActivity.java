@@ -47,9 +47,6 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
     public static final String TOKEN_PAYMENT_METHODS_ACTIVITY = "PaymentMethodsActivity";
 
-    // TODO(mshafrir-stripe): enable when ready
-    private static final boolean SHOULD_ENABLE_PAYMENT_METHOD_SWIPING = false;
-
     private PaymentMethodsAdapter mAdapter;
     private ProgressBar mProgressBar;
     private boolean mStartedFromPaymentSession;
@@ -110,9 +107,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                 new PaymentMethodSwipeCallback(this, mAdapter,
                         new SwipeToDeleteCallbackListener(this))
         );
-        if (SHOULD_ENABLE_PAYMENT_METHOD_SWIPING) {
-            itemTouchHelper.attachToRecyclerView(recyclerView);
-        }
+        itemTouchHelper.attachToRecyclerView(recyclerView);
 
         mCustomerSession = CustomerSession.getInstance();
         mStartedFromPaymentSession = args.isPaymentSessionActive;

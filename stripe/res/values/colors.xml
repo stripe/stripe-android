@@ -13,4 +13,7 @@
 
     <color name="title_text_color">@android:color/white</color>
     <color name="text_color_secondary">@android:color/secondary_text_light</color>
+
+    <color name="swipe_start_payment_method">#DFDEDF</color>
+    <color name="swipe_threshold_payment_method">#D5473F</color>
 </resources>
