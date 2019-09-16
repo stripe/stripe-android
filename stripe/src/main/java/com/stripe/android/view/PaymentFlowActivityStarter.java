@@ -63,7 +63,7 @@ public final class PaymentFlowActivityStarter
         }
 
         @Override
-        public void writeToParcel(Parcel dest, int flags) {
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeParcelable(paymentSessionConfig, 0);
             dest.writeParcelable(paymentSessionData, 0);
             dest.writeInt(isPaymentSessionActive ? 1 : 0);

@@ -57,14 +57,17 @@ public final class Customer extends StripeModel {
         mUrl = url;
     }
 
+    @Nullable
     public String getId() {
         return mId;
     }
 
+    @Nullable
     public String getDefaultSource() {
         return mDefaultSource;
     }
 
+    @Nullable
     public ShippingInformation getShippingInformation() {
         return mShippingInformation;
     }
@@ -79,10 +82,12 @@ public final class Customer extends StripeModel {
         return mHasMore;
     }
 
+    @Nullable
     public Integer getTotalCount() {
         return mTotalCount;
     }
 
+    @Nullable
     public String getUrl() {
         return mUrl;
     }
@@ -112,7 +117,7 @@ public final class Customer extends StripeModel {
 
     @Nullable
     public static Customer fromJson(@NonNull JSONObject jsonObject) {
-        String objectType = optString(jsonObject, FIELD_OBJECT);
+        final String objectType = optString(jsonObject, FIELD_OBJECT);
         if (!VALUE_CUSTOMER.equals(objectType)) {
             return null;
         }

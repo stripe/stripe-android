@@ -405,28 +405,28 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
     /**
      * Expose a text watcher to receive updates when the card number is changed.
      */
-    public void setCardNumberTextWatcher(TextWatcher cardNumberTextWatcher) {
+    public void setCardNumberTextWatcher(@Nullable TextWatcher cardNumberTextWatcher) {
         mCardNumberEditText.addTextChangedListener(cardNumberTextWatcher);
     }
 
     /**
      * Expose a text watcher to receive updates when the expiry date is changed.
      */
-    public void setExpiryDateTextWatcher(TextWatcher expiryDateTextWatcher) {
+    public void setExpiryDateTextWatcher(@Nullable TextWatcher expiryDateTextWatcher) {
         mExpiryDateEditText.addTextChangedListener(expiryDateTextWatcher);
     }
 
     /**
      * Expose a text watcher to receive updates when the cvc number is changed.
      */
-    public void setCvcNumberTextWatcher(TextWatcher cvcNumberTextWatcher) {
+    public void setCvcNumberTextWatcher(@Nullable TextWatcher cvcNumberTextWatcher) {
         mCvcEditText.addTextChangedListener(cvcNumberTextWatcher);
     }
 
     /**
      * Expose a text watcher to receive updates when the cvc number is changed.
      */
-    public void setPostalCodeTextWatcher(TextWatcher postalCodeTextWatcher) {
+    public void setPostalCodeTextWatcher(@Nullable TextWatcher postalCodeTextWatcher) {
         mPostalCodeEditText.addTextChangedListener(postalCodeTextWatcher);
     }
 
@@ -638,17 +638,17 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
         final int maxLength = Card.CardBrand.AMERICAN_EXPRESS.equals(mCardBrand) ?
                 Card.CVC_LENGTH_AMERICAN_EXPRESS : Card.CVC_LENGTH_COMMON;
         mCvcEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(maxLength)});
-        mCvcTextInputLayout.setHint(getCvcLabel());
+        mCvcTextInputLayout.setHint(generateCvcLabel());
     }
 
     @NonNull
-    private String getCvcLabel() {
+    private String generateCvcLabel() {
         if (mCustomCvcLabel != null) {
             return mCustomCvcLabel;
+        } else {
+            return getResources().getString(Card.CardBrand.AMERICAN_EXPRESS.equals(mCardBrand) ?
+                    R.string.cvc_amex_hint : R.string.cvc_number_hint);
         }
-
-        return getResources().getString(Card.CardBrand.AMERICAN_EXPRESS.equals(mCardBrand) ?
-                R.string.cvc_amex_hint : R.string.cvc_number_hint);
     }
 
     private void updateDrawable(@DrawableRes int iconResourceId, boolean needsTint) {

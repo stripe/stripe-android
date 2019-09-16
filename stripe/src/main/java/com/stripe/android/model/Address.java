@@ -198,7 +198,7 @@ public final class Address extends StripeModel implements StripeParamsModel, Par
     };
 
     @Override
-    public void writeToParcel(Parcel out, int flags) {
+    public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeString(mCity);
         out.writeString(mCountry);
         out.writeString(mLine1);

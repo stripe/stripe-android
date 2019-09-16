@@ -751,7 +751,7 @@ public final class SourceParams implements StripeParamsModel {
      * @return {@code this}, for chaining purposes
      */
     @NonNull
-    public SourceParams setAmount(long amount) {
+    public SourceParams setAmount(@Nullable @IntRange(from = 0) Long amount) {
         mAmount = amount;
         return this;
     }
@@ -772,7 +772,7 @@ public final class SourceParams implements StripeParamsModel {
      * @return {@code this}, for chaining purposes
      */
     @NonNull
-    public SourceParams setCurrency(String currency) {
+    public SourceParams setCurrency(@NonNull String currency) {
         mCurrency = currency;
         return this;
     }
@@ -795,7 +795,7 @@ public final class SourceParams implements StripeParamsModel {
      * @return {@code this}, for chaining purposes
      */
     @NonNull
-    public SourceParams setRedirect(Map<String, Object> redirect) {
+    public SourceParams setRedirect(@NonNull Map<String, Object> redirect) {
         mRedirect = redirect;
         return this;
     }
@@ -807,7 +807,7 @@ public final class SourceParams implements StripeParamsModel {
      * @return {@code this}, for chaining purposes
      */
     @NonNull
-    public SourceParams setExtraParams(final Map<String, Object> extraParams) {
+    public SourceParams setExtraParams(@NonNull final Map<String, Object> extraParams) {
         mExtraParams = extraParams;
         return this;
     }

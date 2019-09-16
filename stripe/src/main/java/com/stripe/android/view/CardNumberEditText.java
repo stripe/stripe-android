@@ -47,17 +47,18 @@ public class CardNumberEditText extends StripeEditText {
     private boolean mIgnoreChanges = false;
     private boolean mIsCardNumberValid = false;
 
-    public CardNumberEditText(Context context) {
+    public CardNumberEditText(@NonNull Context context) {
         super(context);
         listenForTextChanges();
     }
 
-    public CardNumberEditText(Context context, AttributeSet attrs) {
+    public CardNumberEditText(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         listenForTextChanges();
     }
 
-    public CardNumberEditText(Context context, AttributeSet attrs, int defStyleAttr) {
+    public CardNumberEditText(@NonNull Context context, @Nullable AttributeSet attrs,
+                              int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         listenForTextChanges();
     }
@@ -135,7 +136,7 @@ public class CardNumberEditText extends StripeEditText {
             int editActionStart,
             int editActionAddition) {
         int newPosition, gapsJumped = 0;
-        Set<Integer> gapSet = Card.CardBrand.AMERICAN_EXPRESS.equals(mCardBrand)
+        final Set<Integer> gapSet = Card.CardBrand.AMERICAN_EXPRESS.equals(mCardBrand)
                 ? SPACE_SET_AMEX
                 : SPACE_SET_COMMON;
         boolean skipBack = false;
@@ -187,14 +188,14 @@ public class CardNumberEditText extends StripeEditText {
                     return;
                 }
 
-                String spacelessNumber = StripeTextUtils.removeSpacesAndHyphens(s.toString());
+                final String spacelessNumber = StripeTextUtils.removeSpacesAndHyphens(s.toString());
                 if (spacelessNumber == null) {
                     return;
                 }
 
-                String[] cardParts = ViewUtils.separateCardNumberGroups(
+                final String[] cardParts = ViewUtils.separateCardNumberGroups(
                         spacelessNumber, mCardBrand);
-                StringBuilder formattedNumberBuilder = new StringBuilder();
+                final StringBuilder formattedNumberBuilder = new StringBuilder();
                 for (int i = 0; i < cardParts.length; i++) {
                     if (cardParts[i] == null) {
                         break;
@@ -206,8 +207,8 @@ public class CardNumberEditText extends StripeEditText {
                     formattedNumberBuilder.append(cardParts[i]);
                 }
 
-                String formattedNumber = formattedNumberBuilder.toString();
-                int cursorPosition = updateSelectionIndex(
+                final String formattedNumber = formattedNumberBuilder.toString();
+                final int cursorPosition = updateSelectionIndex(
                         formattedNumber.length(),
                         latestChangeStart,
                         latestInsertionSize);

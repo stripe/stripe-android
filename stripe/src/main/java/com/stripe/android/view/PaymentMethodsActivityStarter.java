@@ -86,7 +86,7 @@ public final class PaymentMethodsActivityStarter
         }
 
         @Override
-        public void writeToParcel(Parcel dest, int flags) {
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeString(initialPaymentMethodId);
             dest.writeInt(shouldRequirePostalCode ? 1 : 0);
             dest.writeInt(isPaymentSessionActive ? 1 : 0);

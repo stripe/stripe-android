@@ -74,7 +74,7 @@ public final class AddPaymentMethodActivityStarter
         }
 
         @Override
-        public void writeToParcel(Parcel dest, int flags) {
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeInt(shouldAttachToCustomer ? 1 : 0);
             dest.writeInt(shouldRequirePostalCode ? 1 : 0);
             dest.writeInt(isPaymentSessionActive ? 1 : 0);

@@ -285,21 +285,21 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
     /**
      * Expose a text watcher to receive updates when the card number is changed.
      */
-    public void setCardNumberTextWatcher(TextWatcher cardNumberTextWatcher) {
+    public void setCardNumberTextWatcher(@Nullable TextWatcher cardNumberTextWatcher) {
         mCardNumberEditText.addTextChangedListener(cardNumberTextWatcher);
     }
 
     /**
      * Expose a text watcher to receive updates when the expiry date is changed.
      */
-    public void setExpiryDateTextWatcher(TextWatcher expiryDateTextWatcher) {
+    public void setExpiryDateTextWatcher(@Nullable TextWatcher expiryDateTextWatcher) {
         mExpiryDateEditText.addTextChangedListener(expiryDateTextWatcher);
     }
 
     /**
      * Expose a text watcher to receive updates when the cvc number is changed.
      */
-    public void setCvcNumberTextWatcher(TextWatcher cvcNumberTextWatcher) {
+    public void setCvcNumberTextWatcher(@Nullable TextWatcher cvcNumberTextWatcher) {
         mCvcNumberEditText.addTextChangedListener(cvcNumberTextWatcher);
     }
 
@@ -318,7 +318,7 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
     }
 
     @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
+    public boolean onInterceptTouchEvent(@NonNull MotionEvent ev) {
         if (ev.getAction() != MotionEvent.ACTION_DOWN) {
             return super.onInterceptTouchEvent(ev);
         }
@@ -331,16 +331,17 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
         return super.onInterceptTouchEvent(ev);
     }
 
+    @NonNull
     @Override
     protected Parcelable onSaveInstanceState() {
-        Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle();
         bundle.putParcelable(EXTRA_SUPER_STATE, super.onSaveInstanceState());
         bundle.putBoolean(EXTRA_CARD_VIEWED, mCardNumberIsViewed);
         return bundle;
     }
 
     @Override
-    protected void onRestoreInstanceState(Parcelable state) {
+    protected void onRestoreInstanceState(@NonNull Parcelable state) {
         if (state instanceof Bundle) {
             Bundle bundleState = (Bundle) state;
             mCardNumberIsViewed = bundleState.getBoolean(EXTRA_CARD_VIEWED, true);

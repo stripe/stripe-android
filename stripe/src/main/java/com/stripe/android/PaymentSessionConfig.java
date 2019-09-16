@@ -39,7 +39,7 @@ public class PaymentSessionConfig implements Parcelable {
          */
         @NonNull
         public Builder setHiddenShippingInfoFields(
-                @CustomizableShippingField String ... hiddenShippingInfoFields) {
+                @CustomizableShippingField @NonNull String ... hiddenShippingInfoFields) {
             mHiddenShippingInfoFields = Arrays.asList(hiddenShippingInfoFields);
             return this;
         }
@@ -50,7 +50,7 @@ public class PaymentSessionConfig implements Parcelable {
          */
         @NonNull
         public Builder setOptionalShippingInfoFields(
-                @CustomizableShippingField String ... optionalShippingInfoFields) {
+                @CustomizableShippingField @NonNull String ... optionalShippingInfoFields) {
             mOptionalShippingInfoFields = Arrays.asList(optionalShippingInfoFields);
             return this;
         }
@@ -59,7 +59,7 @@ public class PaymentSessionConfig implements Parcelable {
          * @param shippingInfo that should be prepopulated into the {@link ShippingInfoWidget}
          */
         @NonNull
-        public Builder setPrepopulatedShippingInfo(ShippingInformation shippingInfo) {
+        public Builder setPrepopulatedShippingInfo(@Nullable ShippingInformation shippingInfo) {
             mShippingInformation = shippingInfo;
             return this;
         }
@@ -139,7 +139,7 @@ public class PaymentSessionConfig implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel parcel, int flags) {
+    public void writeToParcel(@NonNull Parcel parcel, int flags) {
         parcel.writeList(mHiddenShippingInfoFields);
         parcel.writeList(mOptionalShippingInfoFields);
         parcel.writeParcelable(mShippingInformation, flags);

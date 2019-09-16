@@ -7,7 +7,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.stripe.android.model.StripeModel;
-import com.stripe.android.utils.ObjectUtils;
 
 import java.util.Objects;
 
@@ -94,7 +93,7 @@ abstract class EphemeralKey extends StripeModel implements Parcelable {
      * @param flags any flags (unused) for writing this object
      */
     @Override
-    public void writeToParcel(Parcel out, int flags) {
+    public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeLong(mCreated);
         out.writeString(objectId);
         out.writeLong(mExpires);

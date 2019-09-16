@@ -78,6 +78,10 @@ android {
         outputFormat = 'javadoc'
         outputDirectory = "$buildDir/docs/javadoc"
     }
+
+    lintOptions {
+        enable "Interoperability"
+    }
 }
 
 task ktlint(type: JavaExec, group: "verification") {
