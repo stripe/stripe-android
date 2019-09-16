@@ -134,6 +134,21 @@ internal class PaymentMethodsAdapter @JvmOverloads constructor(
         return PaymentMethodViewHolder(itemView)
     }
 
+    fun deletePaymentMethod(paymentMethod: PaymentMethod) {
+        val indexToDelete = paymentMethods.indexOfFirst { it.id == paymentMethod.id }
+        if (indexToDelete >= 0) {
+            paymentMethods.removeAt(indexToDelete)
+            notifyItemRemoved(indexToDelete)
+        }
+    }
+
+    fun resetPaymentMethod(paymentMethod: PaymentMethod) {
+        val indexToReset = paymentMethods.indexOfFirst { it.id == paymentMethod.id }
+        if (indexToReset >= 0) {
+            notifyItemChanged(indexToReset)
+        }
+    }
+
     private fun getAddableTypesPosition(position: Int) = position - paymentMethods.size
 
     internal class PaymentMethodViewHolder constructor(

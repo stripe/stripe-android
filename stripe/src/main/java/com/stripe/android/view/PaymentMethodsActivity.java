@@ -108,7 +108,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
         final ItemTouchHelper itemTouchHelper = new ItemTouchHelper(
                 new PaymentMethodSwipeCallback(this, mAdapter,
-                        new SwipeToDeleteCallbackListener())
+                        new SwipeToDeleteCallbackListener(this))
         );
         if (SHOULD_ENABLE_PAYMENT_METHOD_SWIPING) {
             itemTouchHelper.attachToRecyclerView(recyclerView);
@@ -173,6 +173,19 @@ public class PaymentMethodsActivity extends AppCompatActivity {
                 showSnackbar(paymentMethod, R.string.added);
             }
         }
+    }
+
+    private void onDeletedPaymentMethod(@NonNull PaymentMethod paymentMethod) {
+        mAdapter.deletePaymentMethod(paymentMethod);
+
+        if (paymentMethod.id != null) {
+            mCustomerSession.detachPaymentMethod(
+                    paymentMethod.id,
+                    new PaymentMethodDeleteListener()
+            );
+        }
+
+        showSnackbar(paymentMethod, R.string.removed);
     }
 
     private void showSnackbar(@NonNull PaymentMethod paymentMethod, @StringRes int stringRes) {
@@ -267,6 +280,38 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         }
     }
 
+    private void confirmDeletePaymentMethod(@NonNull final PaymentMethod paymentMethod) {
+        final String message = paymentMethod.card != null ?
+                mCardDisplayTextFactory.createUnstyled(paymentMethod.card) : null;
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.delete_payment_method)
+                .setMessage(message)
+                .setPositiveButton(
+                        android.R.string.yes,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                onDeletedPaymentMethod(paymentMethod);
+                            }
+                        })
+                .setNegativeButton(
+                        android.R.string.no,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                mAdapter.resetPaymentMethod(paymentMethod);
+                            }
+                        })
+                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialogInterface) {
+                        mAdapter.resetPaymentMethod(paymentMethod);
+                    }
+                })
+                .create()
+                .show();
+    }
+
     private static final class PaymentMethodsRetrievalListener extends
             CustomerSession.ActivityPaymentMethodsRetrievalListener<PaymentMethodsActivity> {
 
@@ -304,15 +349,32 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         }
     }
 
+    private static final class PaymentMethodDeleteListener
+            implements CustomerSession.PaymentMethodRetrievalListener {
+
+        @Override
+        public void onPaymentMethodRetrieved(@NonNull PaymentMethod paymentMethod) {
+
+        }
+
+        @Override
+        public void onError(int errorCode, @NonNull String errorMessage,
+                            @Nullable StripeError stripeError) {
+        }
+    }
+
     private static final class SwipeToDeleteCallbackListener
             implements PaymentMethodSwipeCallback.Listener {
 
-        private SwipeToDeleteCallbackListener() {
+        private final PaymentMethodsActivity mActivity;
+
+        private SwipeToDeleteCallbackListener(@NonNull PaymentMethodsActivity activity) {
+            mActivity = activity;
         }
 
         @Override
         public void onSwiped(@NonNull PaymentMethod paymentMethod) {
-            // TODO(mshafrir-stripe): implement swipe handling
+            mActivity.confirmDeletePaymentMethod(paymentMethod);
         }
     }
 }
