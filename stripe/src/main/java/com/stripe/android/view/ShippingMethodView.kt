@@ -12,9 +12,6 @@ import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import com.stripe.android.R
 import com.stripe.android.model.ShippingMethod
-import com.stripe.android.view.ViewUtils.getThemeAccentColor
-import com.stripe.android.view.ViewUtils.getThemeTextColorPrimary
-import com.stripe.android.view.ViewUtils.getThemeTextColorSecondary
 
 /**
  * Renders the information related to a shipping method.
@@ -28,6 +25,7 @@ internal class ShippingMethodView @JvmOverloads constructor(
     private val detail: TextView
     private val amount: TextView
     private val checkmark: ImageView
+    private val colorUtils = StripeColorUtils(context)
 
     @ColorInt
     private val selectedColorInt: Int
@@ -43,26 +41,26 @@ internal class ShippingMethodView @JvmOverloads constructor(
         amount = findViewById(R.id.tv_amount_smv)
         checkmark = findViewById(R.id.iv_selected_icon)
 
-        val rawSelectedColorInt = getThemeAccentColor(context).data
-        val rawUnselectedTextColorPrimaryInt = getThemeTextColorPrimary(context).data
-        val rawUnselectedTextColorSecondaryInt = getThemeTextColorSecondary(context).data
+        val rawSelectedColorInt = colorUtils.getThemeAccentColor().data
+        val rawUnselectedTextColorPrimaryInt = colorUtils.getThemeTextColorPrimary().data
+        val rawUnselectedTextColorSecondaryInt = colorUtils.getThemeTextColorSecondary().data
 
         selectedColorInt =
-            if (ViewUtils.isColorTransparent(rawSelectedColorInt)) {
+            if (StripeColorUtils.isColorTransparent(rawSelectedColorInt)) {
                 ContextCompat.getColor(context, R.color.accent_color_default)
             } else {
                 rawSelectedColorInt
             }
 
         unselectedTextColorPrimaryInt =
-            if (ViewUtils.isColorTransparent(rawUnselectedTextColorPrimaryInt)) {
+            if (StripeColorUtils.isColorTransparent(rawUnselectedTextColorPrimaryInt)) {
                 ContextCompat.getColor(context, R.color.color_text_unselected_primary_default)
             } else {
                 rawUnselectedTextColorPrimaryInt
             }
 
         unselectedTextColorSecondaryInt =
-            if (ViewUtils.isColorTransparent(rawUnselectedTextColorSecondaryInt)) {
+            if (StripeColorUtils.isColorTransparent(rawUnselectedTextColorSecondaryInt)) {
                 ContextCompat.getColor(context, R.color.color_text_unselected_secondary_default)
             } else {
                 rawUnselectedTextColorSecondaryInt

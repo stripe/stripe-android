@@ -84,8 +84,7 @@ internal abstract class StripeActivity : AppCompatActivity() {
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         val saveItem = menu.findItem(R.id.action_save)
-        val tintedIcon = ViewUtils.getTintedIconWithAttribute(
-            this,
+        val tintedIcon = StripeColorUtils(this).getTintedIconWithAttribute(
             theme,
             R.attr.titleTextColor,
             R.drawable.ic_checkmark)
