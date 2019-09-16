@@ -6,29 +6,28 @@ import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import com.stripe.android.R
-import com.stripe.android.view.ViewUtils.getThemeAccentColor
-import com.stripe.android.view.ViewUtils.getThemeColorControlNormal
-import com.stripe.android.view.ViewUtils.getThemeTextColorSecondary
 
 internal class ThemeConfig(context: Context) {
+    private val colorUtils = StripeColorUtils(context)
+
     @ColorInt
     private val selectedColorInt = determineColor(
         context,
-        getThemeAccentColor(context).data,
+        colorUtils.getThemeAccentColor().data,
         R.color.accent_color_default
     )
 
     @ColorInt
     private val unselectedColorInt = determineColor(
         context,
-        getThemeColorControlNormal(context).data,
+        colorUtils.getThemeColorControlNormal().data,
         R.color.control_normal_color_default
     )
 
     @ColorInt
     private val unselectedTextColorInt = determineColor(
         context,
-        getThemeTextColorSecondary(context).data,
+        colorUtils.getThemeTextColorSecondary().data,
         R.color.color_text_secondary_default
     )
 
@@ -72,7 +71,7 @@ internal class ThemeConfig(context: Context) {
         @ColorInt defaultColor: Int,
         @ColorRes colorIfTransparent: Int
     ): Int {
-        return if (ViewUtils.isColorTransparent(defaultColor))
+        return if (StripeColorUtils.isColorTransparent(defaultColor))
             ContextCompat.getColor(context, colorIfTransparent)
         else
             defaultColor
