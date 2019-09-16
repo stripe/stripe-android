@@ -16,36 +16,24 @@ import java.util.ArrayList
  * of [PaymentMethod] objects.
  */
 internal class PaymentMethodsAdapter @JvmOverloads constructor(
-    private val initiallySelectedPaymentMethodId: String?,
+    initiallySelectedPaymentMethodId: String?,
     private val intentArgs: PaymentMethodsActivityStarter.Args,
     private val addableTypes: List<PaymentMethod.Type> = listOf(PaymentMethod.Type.Card)
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     val paymentMethods = ArrayList<PaymentMethod>()
-
-    private var selectedIndex = NO_SELECTION
-    var listener: Listener? = null
-    private val handler = Handler(Looper.getMainLooper())
-
-    private val newestPaymentMethodIndex: Int
+    var selectedPaymentMethodId: String? = initiallySelectedPaymentMethodId
+    val selectedPaymentMethod: PaymentMethod?
         get() {
-            var index = NO_SELECTION
-            var created = 0L
-
-            paymentMethods.forEachIndexed { i, paymentMethod ->
-                if (paymentMethod.created != null && paymentMethod.created > created) {
-                    created = paymentMethod.created
-                    index = i
-                }
-            }
-
-            return index
+            // return the selected Payment Method, if it exists;
+            // otherwise, return the most recently created Payment Method
+            return selectedPaymentMethodId?.let { selectedPaymentMethodId ->
+                paymentMethods.firstOrNull { it.id == selectedPaymentMethodId }
+            } ?: (paymentMethods.maxBy { it.created ?: 0 })
         }
 
-    val selectedPaymentMethod: PaymentMethod?
-        get() = if (selectedIndex == NO_SELECTION) {
-            null
-        } else paymentMethods[selectedIndex]
+    var listener: Listener? = null
+    private val handler = Handler(Looper.getMainLooper())
 
     init {
         setHasStableIds(true)
@@ -54,11 +42,6 @@ internal class PaymentMethodsAdapter @JvmOverloads constructor(
     fun setPaymentMethods(paymentMethods: List<PaymentMethod>) {
         this.paymentMethods.clear()
         this.paymentMethods.addAll(paymentMethods)
-
-        // if there were no selected payment methods, or the previously selected payment method
-        // was not found and set selected, select the newest payment method
-        setSelectedPaymentMethod(initiallySelectedPaymentMethodId)
-
         notifyDataSetChanged()
     }
 
@@ -96,8 +79,9 @@ internal class PaymentMethodsAdapter @JvmOverloads constructor(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is PaymentMethodViewHolder) {
-            holder.setPaymentMethod(paymentMethods[position])
-            holder.setSelected(position == selectedIndex)
+            val paymentMethod = paymentMethods[position]
+            holder.setPaymentMethod(paymentMethod)
+            holder.setSelected(paymentMethod.id == selectedPaymentMethodId)
             holder.itemView.setOnClickListener {
                 onPositionClicked(holder.adapterPosition)
             }
@@ -105,10 +89,13 @@ internal class PaymentMethodsAdapter @JvmOverloads constructor(
     }
 
     private fun onPositionClicked(position: Int) {
-        if (selectedIndex != position) {
-            // selected a Payment Method that wasn't previously selected
-            notifyItemChanged(selectedIndex)
-            setSelectedIndex(position)
+        val currentlySelectedPosition = paymentMethods.indexOfFirst {
+            it.id == selectedPaymentMethodId
+        }
+        if (currentlySelectedPosition != position) {
+            // selected a new Payment Method
+            notifyItemChanged(currentlySelectedPosition)
+            selectedPaymentMethodId = paymentMethods.getOrNull(position)?.id
         }
 
         // Notify the current position even if it's the currently selected position so that the
@@ -147,29 +134,6 @@ internal class PaymentMethodsAdapter @JvmOverloads constructor(
         return PaymentMethodViewHolder(itemView)
     }
 
-    /**
-     * Sets the selected payment method based on ID, or most recently created
-     *
-     * @param paymentMethodId the ID of the [PaymentMethod] to select
-     */
-    private fun setSelectedPaymentMethod(paymentMethodId: String?) {
-        val indexToSelect = paymentMethodId?.let {
-            paymentMethods.indexOfFirst { paymentMethodId == it.id }
-        } ?: NO_SELECTION
-
-        setSelectedIndex(
-            if (indexToSelect >= 0) {
-                indexToSelect
-            } else {
-                newestPaymentMethodIndex
-            }
-        )
-    }
-
-    fun setSelectedIndex(selectedIndex: Int) {
-        this.selectedIndex = selectedIndex
-    }
-
     private fun getAddableTypesPosition(position: Int) = position - paymentMethods.size
 
     internal class PaymentMethodViewHolder constructor(
@@ -197,8 +161,6 @@ internal class PaymentMethodsAdapter @JvmOverloads constructor(
     }
 
     companion object {
-        private const val NO_SELECTION = -1
-
         private const val TYPE_CARD = 1
         private const val TYPE_ADD_CARD = 2
         private const val TYPE_ADD_FPX = 3

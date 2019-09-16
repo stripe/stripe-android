@@ -218,7 +218,8 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
         final PaymentMethodsAdapter paymentMethodsAdapter =
                 (PaymentMethodsAdapter) mRecyclerView.getAdapter();
         assertNotNull(paymentMethodsAdapter);
-        paymentMethodsAdapter.setSelectedIndex(0);
+        paymentMethodsAdapter.setSelectedPaymentMethodId(
+                PaymentMethodFixtures.CARD_PAYMENT_METHODS.get(0).id);
 
         mPaymentMethodsActivity.setSelectionAndFinish(
                 PaymentMethodFixtures.CARD_PAYMENT_METHODS.get(0)

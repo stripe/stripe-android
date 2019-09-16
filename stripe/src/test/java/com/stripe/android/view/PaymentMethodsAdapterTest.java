@@ -48,7 +48,8 @@ public class PaymentMethodsAdapterTest {
         assertEquals(PaymentMethodFixtures.CARD_PAYMENT_METHODS.get(2).id,
                 Objects.requireNonNull(mPaymentMethodsAdapter.getSelectedPaymentMethod()).id);
 
-        mPaymentMethodsAdapter.setSelectedIndex(1);
+        mPaymentMethodsAdapter.setSelectedPaymentMethodId(
+                PaymentMethodFixtures.CARD_PAYMENT_METHODS.get(1).id);
         assertEquals(PaymentMethodFixtures.CARD_PAYMENT_METHODS.get(1).id,
                 mPaymentMethodsAdapter.getSelectedPaymentMethod().id);
     }
@@ -76,7 +77,8 @@ public class PaymentMethodsAdapterTest {
     public void updatePaymentMethods_withSelection_updatesPaymentMethodsAndSelectionMaintained() {
         mPaymentMethodsAdapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS);
         assertEquals(4, mPaymentMethodsAdapter.getItemCount());
-        mPaymentMethodsAdapter.setSelectedIndex(0);
+        mPaymentMethodsAdapter.setSelectedPaymentMethodId(
+                PaymentMethodFixtures.CARD_PAYMENT_METHODS.get(2).id);
         assertNotNull(mPaymentMethodsAdapter.getSelectedPaymentMethod());
 
         mPaymentMethodsAdapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS);
