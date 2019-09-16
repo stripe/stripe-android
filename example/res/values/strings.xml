@@ -69,7 +69,8 @@
     <string name="payment_auth_example">Payment Auth Example</string>
     <string name="auth_payment_intent">Authenticate PaymentIntent</string>
     <string name="auth_setup_intent">Authenticate SetupIntent</string>
-    <string name="buy">Buy!</string>
+    <string name="buy_with_3ds2">Buy with 3DS2</string>
+    <string name="buy_with_3ds1">Buy with 3DS1</string>
     <string name="setup">Buy in the Future!</string>
     <string name="payment_intent_status">PaymentIntent status: %s</string>
     <string name="setup_intent_status">SetupIntent status: %s</string>

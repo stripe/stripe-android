@@ -11,11 +11,18 @@
         android:text="@string/payment_auth_intro" />
 
     <Button
-        android:id="@+id/buy_button"
+        android:id="@+id/buy_3ds2_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:text="@string/buy_with_3ds2" />
+
+    <Button
+        android:id="@+id/buy_3ds1_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="40dp"
-        android:text="@string/buy" />
+        android:text="@string/buy_with_3ds1" />
 
     <TextView
         android:layout_width="match_parent"

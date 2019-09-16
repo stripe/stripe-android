@@ -4,10 +4,13 @@ import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.util.AttributeSet
 import android.view.View
+import android.webkit.URLUtil
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -37,7 +40,8 @@ internal class PaymentAuthWebView : WebView {
         clientSecret: String,
         returnUrl: String?
     ) {
-        webViewClient = PaymentAuthWebViewClient(activity, progressBar, clientSecret, returnUrl)
+        webViewClient = PaymentAuthWebViewClient(activity, activity.packageManager, progressBar,
+            clientSecret, returnUrl)
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -49,11 +53,20 @@ internal class PaymentAuthWebView : WebView {
 
     internal class PaymentAuthWebViewClient(
         private val activity: Activity,
+        private val packageManager: PackageManager,
         private val progressBar: ProgressBar,
         private val clientSecret: String,
         returnUrl: String?
     ) : WebViewClient() {
-        private val returnUrl: Uri? = if (returnUrl != null) Uri.parse(returnUrl) else null
+        // user-specified return URL
+        private val userReturnUri: Uri? = if (returnUrl != null) Uri.parse(returnUrl) else null
+
+        var completionUrlParam: String? = null
+            private set
+
+        // true if another app was opened from this WebView
+        var hasOpenedApp: Boolean = false
+            private set
 
         override fun onPageCommitVisible(view: WebView, url: String) {
             super.onPageCommitVisible(view, url)
@@ -67,8 +80,12 @@ internal class PaymentAuthWebView : WebView {
             }
         }
 
-        private fun isCompletionUrl(url: String): Boolean {
-            for (completionUrl in COMPLETION_URLS) {
+        private fun isAuthenticateUrl(url: String) = isWhiteListedUrl(url, AUTHENTICATE_URLS)
+
+        private fun isCompletionUrl(url: String) = isWhiteListedUrl(url, COMPLETION_URLS)
+
+        private fun isWhiteListedUrl(url: String, whitelistedUrls: Set<String>): Boolean {
+            for (completionUrl in whitelistedUrls) {
                 if (url.startsWith(completionUrl)) {
                     return true
                 }
@@ -79,12 +96,52 @@ internal class PaymentAuthWebView : WebView {
 
         override fun shouldOverrideUrlLoading(view: WebView, urlString: String): Boolean {
             val uri = Uri.parse(urlString)
-            if (isReturnUrl(uri)) {
+            updateCompletionUrl(uri)
+
+            return if (isReturnUrl(uri)) {
                 onAuthCompleted()
-                return true
+                true
+            } else if ("intent".equals(uri.scheme, ignoreCase = true)) {
+                openIntentScheme(uri)
+                true
+            } else if (!URLUtil.isNetworkUrl(uri.toString())) {
+                // Non-network URLs are likely deep-links into banking apps. If the deep-link can be
+                // opened via an Intent, start it. Otherwise, stop the authentication attempt.
+                openIntent(Intent(Intent.ACTION_VIEW, uri))
+                true
+            } else {
+                super.shouldOverrideUrlLoading(view, urlString)
+            }
+        }
+
+        private fun openIntentScheme(uri: Uri) {
+            try {
+                openIntent(Intent.parseUri(uri.toString(), Intent.URI_INTENT_SCHEME))
+            } catch (e: Exception) {
+                onAuthCompleted()
+            }
+        }
+
+        private fun openIntent(intent: Intent) {
+            if (intent.resolveActivity(packageManager) != null) {
+                hasOpenedApp = true
+                activity.startActivity(intent)
+            } else {
+                // complete auth if the deep-link can't be opened
+                onAuthCompleted()
+            }
+        }
+
+        private fun updateCompletionUrl(uri: Uri) {
+            val returnUrlParam = if (isAuthenticateUrl(uri.toString())) {
+                uri.getQueryParameter(PARAM_RETURN_URL)
+            } else {
+                null
             }
 
-            return super.shouldOverrideUrlLoading(view, urlString)
+            if (!returnUrlParam.isNullOrBlank()) {
+                completionUrlParam = returnUrlParam
+            }
         }
 
         @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -99,19 +156,19 @@ internal class PaymentAuthWebView : WebView {
             when {
                 isPredefinedReturnUrl(uri) -> return true
 
-                // If the `returnUrl` is known, look for URIs that match it.
-                returnUrl != null ->
-                    return returnUrl.scheme != null &&
-                        returnUrl.scheme == uri.scheme &&
-                        returnUrl.host != null &&
-                        returnUrl.host == uri.host
+                // If the `userReturnUri` is known, look for URIs that match it.
+                userReturnUri != null ->
+                    return userReturnUri.scheme != null &&
+                        userReturnUri.scheme == uri.scheme &&
+                        userReturnUri.host != null &&
+                        userReturnUri.host == uri.host
                 else -> {
                     // Skip opaque (i.e. non-hierarchical) URIs
                     if (uri.isOpaque) {
                         return false
                     }
 
-                    // If the `returnUrl` is unknown, look for URIs that contain a
+                    // If the `userReturnUri` is unknown, look for URIs that contain a
                     // `payment_intent_client_secret` or `setup_intent_client_secret`
                     // query parameter, and check if its values matches the given `clientSecret`
                     // as a query parameter.
@@ -141,10 +198,16 @@ internal class PaymentAuthWebView : WebView {
             const val PARAM_PAYMENT_CLIENT_SECRET = "payment_intent_client_secret"
             const val PARAM_SETUP_CLIENT_SECRET = "setup_intent_client_secret"
 
+            private val AUTHENTICATE_URLS = setOf(
+                "https://hooks.stripe.com/three_d_secure/authenticate"
+            )
+
             private val COMPLETION_URLS = setOf(
                 "https://hooks.stripe.com/redirect/complete/src_",
                 "https://hooks.stripe.com/3d_secure/complete/tdsrc_"
             )
+
+            private const val PARAM_RETURN_URL = "return_url"
         }
     }
 }
