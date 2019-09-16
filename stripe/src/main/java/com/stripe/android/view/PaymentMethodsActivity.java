@@ -8,6 +8,7 @@ import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +18,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.stripe.android.CustomerSession;
 import com.stripe.android.R;
 import com.stripe.android.StripeError;
@@ -52,6 +54,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     private ProgressBar mProgressBar;
     private boolean mStartedFromPaymentSession;
     private CustomerSession mCustomerSession;
+    private CardDisplayTextFactory mCardDisplayTextFactory;
 
     @Nullable private PaymentMethod mTappedPaymentMethod = null;
 
@@ -62,7 +65,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
 
         final PaymentMethodsActivityStarter.Args args =
                 PaymentMethodsActivityStarter.Args.create(getIntent());
-
+        mCardDisplayTextFactory = CardDisplayTextFactory.create(this);
         mProgressBar = findViewById(R.id.payment_methods_progress_bar);
 
         final String initiallySelectedPaymentMethodId;
@@ -148,20 +151,47 @@ public class PaymentMethodsActivity extends AppCompatActivity {
         if (data != null && data.hasExtra(EXTRA_NEW_PAYMENT_METHOD)) {
             final PaymentMethod paymentMethod =
                     data.getParcelableExtra(EXTRA_NEW_PAYMENT_METHOD);
-
-            final PaymentMethod.Type type = paymentMethod != null ?
-                    PaymentMethod.Type.lookup(paymentMethod.type) : null;
-            if (type != null && !type.isReusable) {
-                // If the added Payment Method is not reusable, it also can't be attached to a
-                // customer, so immediately return to the launching host with the new
-                // Payment Method.
-                finishWithPaymentMethod(paymentMethod);
-            } else {
-                // Refresh the list of Payment Methods with the new Payment Method.
-                fetchCustomerPaymentMethods();
-            }
+            onAddedPaymentMethod(paymentMethod);
         } else {
             fetchCustomerPaymentMethods();
+        }
+    }
+
+    private void onAddedPaymentMethod(@Nullable PaymentMethod paymentMethod) {
+        final PaymentMethod.Type type = paymentMethod != null ?
+                PaymentMethod.Type.lookup(paymentMethod.type) : null;
+        if (type != null && !type.isReusable) {
+            // If the added Payment Method is not reusable, it also can't be attached to a
+            // customer, so immediately return to the launching host with the new
+            // Payment Method.
+            finishWithPaymentMethod(paymentMethod);
+        } else {
+            // Refresh the list of Payment Methods with the new Payment Method.
+            fetchCustomerPaymentMethods();
+
+            if (paymentMethod != null) {
+                showSnackbar(paymentMethod, R.string.added);
+            }
+        }
+    }
+
+    private void showSnackbar(@NonNull PaymentMethod paymentMethod, @StringRes int stringRes) {
+        final String snackbarText;
+        if (paymentMethod.card != null) {
+            snackbarText = getString(
+                    stringRes,
+                    mCardDisplayTextFactory.createUnstyled(paymentMethod.card)
+            );
+        } else {
+            snackbarText = null;
+        }
+
+        if (snackbarText != null) {
+            Snackbar.make(
+                    findViewById(R.id.payment_methods_coordinator),
+                    snackbarText,
+                    Snackbar.LENGTH_SHORT
+            ).show();
         }
     }
 
@@ -193,11 +223,7 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     }
 
     private void setCommunicatingProgress(boolean communicating) {
-        if (communicating) {
-            mProgressBar.setVisibility(View.VISIBLE);
-        } else {
-            mProgressBar.setVisibility(View.GONE);
-        }
+        mProgressBar.setVisibility(communicating ? View.VISIBLE : View.GONE);
         supportInvalidateOptionsMenu();
     }
 

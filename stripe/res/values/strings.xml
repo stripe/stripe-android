@@ -122,4 +122,7 @@
     <string name="invalid_shipping_information">Invalid Shipping Address</string>
     <string name="secure_checkout">Secure Checkout</string>
     <string name="close">Close</string>
+
+    <!-- TODO(mshafrir-stripe): translate string - ANDROID-413 -->
+    <string name="added" tools:ignore="MissingTranslation">Added %s</string>
 </resources>
