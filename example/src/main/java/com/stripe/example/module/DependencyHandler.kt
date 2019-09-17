@@ -65,7 +65,6 @@ class DependencyHandler(
                 button,
                 cardInputWidget,
                 context,
-                errorDialogHandler,
                 listViewController,
                 progressDialogController,
                 publishableKey)
