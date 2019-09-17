@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 11.1.0 - upcoming
+* [#1545](https://github.com/stripe/stripe-android/pull/1545) Add Connect Account Id support to `GooglePayConfig`
+* [#1560](https://github.com/stripe/stripe-android/pull/1560) Add swipe-to-delete gesture on `PaymentMethodsActivity`
+
 ## 11.0.5 - 2019-09-13
 * [#1538](https://github.com/stripe/stripe-android/pull/1538) Update `PaymentAuthWebView` to fix issues
 
