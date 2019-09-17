@@ -2,16 +2,13 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.Gravity
 import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.RelativeLayout
-import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import com.stripe.android.R
 import com.stripe.android.model.ShippingMethod
+import kotlinx.android.synthetic.main.shipping_method_view.view.*
 
 /**
  * Renders the information related to a shipping method.
@@ -21,10 +18,6 @@ internal class ShippingMethodView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : RelativeLayout(context, attrs, defStyleAttr) {
-    private val label: TextView
-    private val detail: TextView
-    private val amount: TextView
-    private val checkmark: ImageView
     private val colorUtils = StripeColorUtils(context)
 
     @ColorInt
@@ -36,10 +29,6 @@ internal class ShippingMethodView @JvmOverloads constructor(
 
     init {
         View.inflate(context, R.layout.shipping_method_view, this)
-        label = findViewById(R.id.tv_label_smv)
-        detail = findViewById(R.id.tv_detail_smv)
-        amount = findViewById(R.id.tv_amount_smv)
-        checkmark = findViewById(R.id.iv_selected_icon)
 
         val rawSelectedColorInt = colorUtils.getThemeAccentColor().data
         val rawUnselectedTextColorPrimaryInt = colorUtils.getThemeTextColorPrimary().data
@@ -65,34 +54,26 @@ internal class ShippingMethodView @JvmOverloads constructor(
             } else {
                 rawUnselectedTextColorSecondaryInt
             }
-
-        val params = LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        params.addRule(Gravity.CENTER_VERTICAL)
-        params.height = ViewUtils.getPxFromDp(
-            context,
-            resources.getDimensionPixelSize(R.dimen.shipping_method_view_height)
-        )
-        layoutParams = params
     }
 
     override fun setSelected(selected: Boolean) {
         if (selected) {
-            label.setTextColor(selectedColorInt)
-            detail.setTextColor(selectedColorInt)
-            amount.setTextColor(selectedColorInt)
-            checkmark.visibility = View.VISIBLE
+            shipping_method_name.setTextColor(selectedColorInt)
+            shipping_method_description.setTextColor(selectedColorInt)
+            shipping_method_price.setTextColor(selectedColorInt)
+            selected_icon.visibility = View.VISIBLE
         } else {
-            label.setTextColor(unselectedTextColorPrimaryInt)
-            detail.setTextColor(unselectedTextColorSecondaryInt)
-            amount.setTextColor(unselectedTextColorPrimaryInt)
-            checkmark.visibility = View.INVISIBLE
+            shipping_method_name.setTextColor(unselectedTextColorPrimaryInt)
+            shipping_method_description.setTextColor(unselectedTextColorSecondaryInt)
+            shipping_method_price.setTextColor(unselectedTextColorPrimaryInt)
+            selected_icon.visibility = View.INVISIBLE
         }
     }
 
     fun setShippingMethod(shippingMethod: ShippingMethod) {
-        label.text = shippingMethod.label
-        detail.text = shippingMethod.detail
-        amount.text = PaymentUtils.formatPriceStringUsingFree(
+        shipping_method_name.text = shippingMethod.label
+        shipping_method_description.text = shippingMethod.detail
+        shipping_method_price.text = PaymentUtils.formatPriceStringUsingFree(
             shippingMethod.amount,
             shippingMethod.currency,
             context.getString(R.string.price_free)
