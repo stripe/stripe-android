@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 11.1.0 - upcoming
+## 11.1.0 - 2019-09-17
 * [#1545](https://github.com/stripe/stripe-android/pull/1545) Add Connect Account Id support to `GooglePayConfig`
 * [#1560](https://github.com/stripe/stripe-android/pull/1560) Add swipe-to-delete gesture on added Payment Methods in `PaymentMethodsActivity`
 * [#1560](https://github.com/stripe/stripe-android/pull/1560) Fix `HandlerThread` leak in `PaymentController.ChallengeFlowStarterImpl`
