@@ -4,6 +4,7 @@
 * [#1545](https://github.com/stripe/stripe-android/pull/1545) Add Connect Account Id support to `GooglePayConfig`
 * [#1560](https://github.com/stripe/stripe-android/pull/1560) Add swipe-to-delete gesture on added Payment Methods in `PaymentMethodsActivity`
 * [#1560](https://github.com/stripe/stripe-android/pull/1560) Fix `HandlerThread` leak in `PaymentController.ChallengeFlowStarterImpl`
+* [#1561](https://github.com/stripe/stripe-android/pull/1561) Move `CardMultilineWidget` focus to first error field on error
 * [#1572](https://github.com/stripe/stripe-android/pull/1572) Update 3DS2 SDK to 2.0.4
 * [#1574](https://github.com/stripe/stripe-android/pull/1574) Fix `HandlerThread` leak in `StripeFireAndForgetRequestExecutor`
 * [#1577](https://github.com/stripe/stripe-android/pull/1577) Fix `ShippingMethodView` height
