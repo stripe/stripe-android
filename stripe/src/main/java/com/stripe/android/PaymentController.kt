@@ -653,14 +653,14 @@ internal open class PaymentController @VisibleForTesting constructor(
     }
 
     private class ChallengeFlowStarterImpl : ChallengeFlowStarter {
-        private val handlerThread = HandlerThread(Stripe3ds2AuthCallback::class.java.simpleName)
-        // create Handler to notifyCompletion challenge flow on background thread
-        private val handler: Handler = createHandler(handlerThread)
-
         override fun start(runnable: Runnable) {
+            val handlerThread = HandlerThread(Stripe3ds2AuthCallback::class.java.simpleName)
+            // create Handler to notifyCompletion challenge flow on background thread
+            val handler: Handler = createHandler(handlerThread)
+
             handler.postDelayed({
                 runnable.run()
-                handlerThread.quit()
+                handlerThread.quitSafely()
             }, TimeUnit.SECONDS.toMillis(DELAY_SECONDS))
         }
 
