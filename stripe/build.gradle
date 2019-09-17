@@ -4,10 +4,8 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'checkstyle'
 // make sure this line comes *after* you apply the Android plugin
 apply plugin: 'com.getkeepsafe.dexcount'
-apply plugin: 'org.jetbrains.dokka-android'
 
 assemble.dependsOn('lint')
-assemble.dependsOn('dokka')
 check.dependsOn('checkstyle')
 
 configurations {
@@ -72,11 +70,6 @@ android {
         }
     }
     productFlavors {
-    }
-
-    dokka {
-        outputFormat = 'javadoc'
-        outputDirectory = "$buildDir/docs/javadoc"
     }
 
     lintOptions {
