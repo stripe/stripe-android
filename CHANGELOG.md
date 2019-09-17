@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 11.1.1 - 2019-09-17
+* [#1578](https://github.com/stripe/stripe-android/pull/1578) Disable dokka in `:stripe` to fix release process
+
 ## 11.1.0 - 2019-09-17
 * [#1545](https://github.com/stripe/stripe-android/pull/1545) Add Connect Account Id support to `GooglePayConfig`
 * [#1560](https://github.com/stripe/stripe-android/pull/1560) Add swipe-to-delete gesture on added Payment Methods in `PaymentMethodsActivity`
