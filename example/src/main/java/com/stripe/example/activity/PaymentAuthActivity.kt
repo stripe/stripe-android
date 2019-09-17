@@ -69,10 +69,10 @@ class PaymentAuthActivity : AppCompatActivity() {
         }
 
         buy_3ds1_button.setOnClickListener {
-            createPaymentIntent(stripeAccountId, AuthType.`3DS1`)
+            createPaymentIntent(stripeAccountId, AuthType.ThreeDS1)
         }
         buy_3ds2_button.setOnClickListener {
-            createPaymentIntent(stripeAccountId, AuthType.`3DS2`)
+            createPaymentIntent(stripeAccountId, AuthType.ThreeDS2)
         }
 
         setup_button.setOnClickListener { createSetupIntent() }
@@ -86,8 +86,8 @@ class PaymentAuthActivity : AppCompatActivity() {
         stripe.confirmPayment(
             this,
             when (authType) {
-                AuthType.`3DS1` -> create3ds1ConfirmParams(paymentIntentClientSecret)
-                AuthType.`3DS2` -> create3ds2ConfirmParams(paymentIntentClientSecret)
+                AuthType.ThreeDS1 -> create3ds1ConfirmParams(paymentIntentClientSecret)
+                AuthType.ThreeDS2 -> create3ds2ConfirmParams(paymentIntentClientSecret)
             }
         )
     }
@@ -265,8 +265,15 @@ class PaymentAuthActivity : AppCompatActivity() {
         private fun create3ds2ConfirmParams(
             paymentIntentClientSecret: String
         ): ConfirmPaymentIntentParams {
-            return ConfirmPaymentIntentParams.createWithPaymentMethodId(
-                "pm_card_threeDSecure2Required",
+            return ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                PaymentMethodCreateParams.create(
+                    PaymentMethodCreateParams.Card.Builder()
+                        .setNumber("4000000000003238")
+                        .setExpiryMonth(1)
+                        .setExpiryYear(2025)
+                        .setCvc("123")
+                        .build()
+                ),
                 paymentIntentClientSecret,
                 RETURN_URL
             )
@@ -294,8 +301,8 @@ class PaymentAuthActivity : AppCompatActivity() {
         private const val STATE_STATUS = "status"
 
         enum class AuthType {
-            `3DS1`,
-            `3DS2`
+            ThreeDS1,
+            ThreeDS2
         }
     }
 }
