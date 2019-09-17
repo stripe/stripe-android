@@ -9,6 +9,7 @@ import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
 
 /**
@@ -23,12 +24,14 @@ internal class PaymentMethodSwipeCallback(
     0, ItemTouchHelper.RIGHT
 ) {
     private val trashIcon =
-        ContextCompat.getDrawable(context, com.stripe.android.R.drawable.ic_trash)!!
+        ContextCompat.getDrawable(context, R.drawable.ic_trash)!!
     private val swipeStartColor =
-        ContextCompat.getColor(context, com.stripe.android.R.color.swipe_start_payment_method)
+        ContextCompat.getColor(context, R.color.swipe_start_payment_method)
     private val swipeThresholdColor =
-        ContextCompat.getColor(context, com.stripe.android.R.color.swipe_threshold_payment_method)
+        ContextCompat.getColor(context, R.color.swipe_threshold_payment_method)
     private val background = ColorDrawable(swipeStartColor)
+    private val itemViewStartPadding = trashIcon.intrinsicWidth / 2
+    private val iconStartOffset = context.resources.getDimensionPixelSize(R.dimen.list_row_start_padding)
 
     override fun onMove(
         recyclerView: RecyclerView,
@@ -101,16 +104,13 @@ internal class PaymentMethodSwipeCallback(
         transitionFraction: Float,
         canvas: Canvas
     ) {
-        val backgroundCornerOffset = trashIcon.intrinsicWidth / 2
-
-        val iconMargin = (itemView.height - trashIcon.intrinsicHeight) / 2
         val iconTop = itemView.top + (itemView.height - trashIcon.intrinsicHeight) / 2
         val iconBottom = iconTop + trashIcon.intrinsicHeight
 
         when {
             // swipe right
             dX > 0 -> {
-                val iconLeft = itemView.left + iconMargin
+                val iconLeft = itemView.left + iconStartOffset
                 val iconRight = iconLeft + trashIcon.intrinsicWidth
 
                 // hide the icon until the swipe distance is enough that it won't clash
@@ -122,7 +122,7 @@ internal class PaymentMethodSwipeCallback(
                 }
 
                 background.setBounds(itemView.left, itemView.top,
-                    itemView.left + dX + backgroundCornerOffset,
+                    itemView.left + dX + itemViewStartPadding,
                     itemView.bottom)
                 background.color = when {
                     transitionFraction <= 0.0F ->
