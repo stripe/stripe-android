@@ -12,7 +12,6 @@ import java.net.HttpURLConnection
 internal class StripeFireAndForgetRequestExecutor : FireAndForgetRequestExecutor {
 
     private val connectionFactory: ConnectionFactory = ConnectionFactory()
-    private val handler: Handler = createHandler()
 
     /**
      * Make the request and ignore the response
@@ -54,21 +53,17 @@ internal class StripeFireAndForgetRequestExecutor : FireAndForgetRequestExecutor
     }
 
     override fun executeAsync(request: StripeRequest) {
+        val handlerThread = HandlerThread(
+            StripeFireAndForgetRequestExecutor::class.java.simpleName
+        )
+        handlerThread.start()
+        val handler = Handler(handlerThread.looper)
         handler.post {
             try {
                 execute(request)
+                handlerThread.quitSafely()
             } catch (ignore: Exception) {
             }
-        }
-    }
-
-    companion object {
-        private fun createHandler(): Handler {
-            val handlerThread = HandlerThread(
-                StripeFireAndForgetRequestExecutor::class.java.simpleName
-            )
-            handlerThread.start()
-            return Handler(handlerThread.looper)
         }
     }
 }
