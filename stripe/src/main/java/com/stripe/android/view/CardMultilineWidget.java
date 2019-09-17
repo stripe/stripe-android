@@ -35,7 +35,9 @@ import com.stripe.android.model.PaymentMethodCreateParams;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CARD;
@@ -342,6 +344,16 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
             mPostalCodeEditText.setShouldShowError(!postalCodeIsValidOrGone);
         } else {
             postalCodeIsValidOrGone = true;
+        }
+
+        final List<StripeEditText> fields = Arrays.asList(
+                mCardNumberEditText, mExpiryDateEditText, mCvcEditText, mPostalCodeEditText
+        );
+        for (StripeEditText field : fields) {
+            if (field.getShouldShowError()) {
+                field.requestFocus();
+                break;
+            }
         }
 
         return cardNumberIsValid

@@ -2,6 +2,7 @@ package com.stripe.example.controller
 
 import android.content.Context
 import android.widget.Button
+import android.widget.Toast
 import com.jakewharton.rxbinding2.view.RxView
 import com.stripe.android.Stripe
 import com.stripe.android.view.CardInputWidget
@@ -17,11 +18,10 @@ import io.reactivex.schedulers.Schedulers
  */
 class RxTokenController(
     button: Button,
-    private var mCardInputWidget: CardInputWidget?,
-    context: Context,
-    private val mErrorDialogHandler: ErrorDialogHandler,
-    private val mOutputListController: ListViewController,
-    private val mProgressDialogController: ProgressDialogController,
+    private var cardInputWidget: CardInputWidget?,
+    private val context: Context,
+    private val outputListController: ListViewController,
+    private val progressDialogController: ProgressDialogController,
     publishableKey: String
 ) {
 
@@ -41,13 +41,14 @@ class RxTokenController(
      */
     fun detach() {
         mCompositeDisposable.dispose()
-        mCardInputWidget = null
+        cardInputWidget = null
     }
 
     private fun saveCard() {
-        val cardToSave = mCardInputWidget!!.card
+        val cardToSave = cardInputWidget!!.card
         if (cardToSave == null) {
-            mErrorDialogHandler.show("Invalid Card Data")
+            Toast.makeText(context, "Invalid Card Data", Toast.LENGTH_SHORT)
+                .show()
             return
         }
 
@@ -60,11 +61,14 @@ class RxTokenController(
         mCompositeDisposable.add(tokenObservable
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe { mProgressDialogController.show(R.string.progressMessage) }
-            .doOnComplete { mProgressDialogController.dismiss() }
+            .doOnSubscribe { progressDialogController.show(R.string.progressMessage) }
+            .doOnComplete { progressDialogController.dismiss() }
             .subscribe(
-                { mOutputListController.addToList(it) },
-                { throwable -> mErrorDialogHandler.show(throwable.localizedMessage) }
+                { outputListController.addToList(it) },
+                {
+                    Toast.makeText(context, it.localizedMessage, Toast.LENGTH_SHORT)
+                        .show()
+                }
             )
         )
     }
