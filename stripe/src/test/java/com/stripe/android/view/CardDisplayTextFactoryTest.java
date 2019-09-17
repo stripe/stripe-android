@@ -45,4 +45,21 @@ public class CardDisplayTextFactoryTest {
                 )
         );
     }
+
+    @Test
+    public void createStyled_withVisaWithoutLast4() {
+        final Context context = ApplicationProvider.getApplicationContext();
+        final CardDisplayTextFactory cardDisplayTextFactory = new CardDisplayTextFactory(
+                context.getResources(),
+                new ThemeConfig(context)
+        );
+        assertEquals(
+                "Visa",
+                cardDisplayTextFactory.createStyled(
+                        PaymentMethod.Card.Brand.VISA,
+                        null,
+                        false
+                ).toString()
+        );
+    }
 }

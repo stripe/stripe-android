@@ -2,9 +2,9 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.content.res.Resources
+import android.text.ParcelableSpan
 import android.text.Spannable
 import android.text.SpannableString
-import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.text.style.TypefaceSpan
 import androidx.annotation.ColorInt
@@ -17,10 +17,21 @@ internal class CardDisplayTextFactory(
 ) {
     fun createStyled(brand: String?, last4: String?, isSelected: Boolean): SpannableString {
         val brandText: String = resources.getString(BRAND_RESOURCE_MAP[brand] ?: R.string.unknown)
+        val brandLength = brandText.length
+        if (last4 == null) {
+            val displayString = SpannableString(brandText)
+            setSpan(
+                displayString,
+                TypefaceSpan("sans-serif-medium"),
+                0,
+                brandLength
+            )
+            return displayString
+        }
+
         val cardEndingIn = resources.getString(R.string.ending_in, brandText, last4)
         val totalLength = cardEndingIn.length
-        val brandLength = brandText.length
-        val last4length = last4!!.length
+        val last4length = last4.length
         val last4Start = totalLength - last4length
         @ColorInt val textColor = themeConfig.getTextColor(isSelected)
         @ColorInt val lightTextColor = themeConfig.getTextAlphaColor(isSelected)
@@ -28,39 +39,39 @@ internal class CardDisplayTextFactory(
         val displayString = SpannableString(cardEndingIn)
 
         // style brand
-        displayString.setSpan(
+        setSpan(
+            displayString,
             TypefaceSpan("sans-serif-medium"),
             0,
-            brandLength,
-            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            brandLength
         )
-        displayString.setSpan(
+        setSpan(
+            displayString,
             ForegroundColorSpan(textColor),
             0,
-            brandLength,
-            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            brandLength
         )
 
         // style "ending in"
-        displayString.setSpan(
+        setSpan(
+            displayString,
             ForegroundColorSpan(lightTextColor),
             brandLength,
-            last4Start,
-            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            last4Start
         )
 
         // style last 4
-        displayString.setSpan(
+        setSpan(
+            displayString,
             TypefaceSpan("sans-serif-medium"),
             last4Start,
-            totalLength,
-            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            totalLength
         )
-        displayString.setSpan(
+        setSpan(
+            displayString,
             ForegroundColorSpan(textColor),
             last4Start,
-            totalLength,
-            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            totalLength
         )
 
         return displayString
@@ -71,6 +82,20 @@ internal class CardDisplayTextFactory(
             R.string.ending_in,
             resources.getString(BRAND_RESOURCE_MAP[card.brand] ?: R.string.unknown),
             card.last4
+        )
+    }
+
+    private fun setSpan(
+        displayString: SpannableString,
+        span: ParcelableSpan,
+        start: Int,
+        end: Int
+    ) {
+        displayString.setSpan(
+            span,
+            start,
+            end,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
         )
     }
 
