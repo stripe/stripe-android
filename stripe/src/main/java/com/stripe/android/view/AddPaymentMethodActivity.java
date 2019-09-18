@@ -37,6 +37,10 @@ public class AddPaymentMethodActivity extends StripeActivity {
 
     public static final String TOKEN_ADD_PAYMENT_METHOD_ACTIVITY = "AddPaymentMethodActivity";
 
+    /**
+     * @deprecated use {@link AddPaymentMethodActivityStarter.Result}
+     */
+    @Deprecated
     public static final String EXTRA_NEW_PAYMENT_METHOD = "new_payment_method";
 
     @Nullable private AddPaymentMethodView mAddPaymentMethodView;
@@ -152,7 +156,9 @@ public class AddPaymentMethodActivity extends StripeActivity {
 
     private void finishWithPaymentMethod(@NonNull PaymentMethod paymentMethod) {
         setCommunicatingProgress(false);
-        setResult(RESULT_OK, new Intent().putExtra(EXTRA_NEW_PAYMENT_METHOD, paymentMethod));
+        setResult(RESULT_OK, new Intent()
+                .putExtra(EXTRA_NEW_PAYMENT_METHOD, paymentMethod)
+                .putExtras(new AddPaymentMethodActivityStarter.Result(paymentMethod).toBundle()));
         finish();
     }
 

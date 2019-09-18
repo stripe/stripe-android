@@ -2,6 +2,7 @@ package com.stripe.android.view;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -180,5 +181,76 @@ public final class AddPaymentMethodActivityStarter
                 return new AddPaymentMethodActivityStarter.Args(this);
             }
         }
+    }
+
+    /**
+     * The result of a {@link AddPaymentMethodActivity}.
+     *
+     * <p>Retrieve in <code>#onActivityResult()</code> using {@link #fromIntent(Intent)}.
+     */
+    public static final class Result implements ActivityStarter.Result {
+        @NonNull public final PaymentMethod paymentMethod;
+
+        /**
+         * @return the {@link Result} object from the given <code>Intent</code>
+         */
+        @Nullable
+        static Result fromIntent(@NonNull Intent intent) {
+            return intent.getParcelableExtra(EXTRA);
+        }
+
+        Result(@NonNull PaymentMethod paymentMethod) {
+            this.paymentMethod = paymentMethod;
+        }
+
+        private Result(@NonNull Parcel parcel) {
+            this.paymentMethod = Objects.requireNonNull(
+                    parcel.<PaymentMethod>readParcelable(PaymentMethod.class.getClassLoader())
+            );
+        }
+
+        @NonNull
+        @Override
+        public Bundle toBundle() {
+            final Bundle bundle = new Bundle();
+            bundle.putParcelable(EXTRA, this);
+            return bundle;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            dest.writeParcelable(paymentMethod, flags);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(paymentMethod);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            return super.equals(obj) || (obj instanceof Result && typedEquals((Result) obj));
+        }
+
+        private boolean typedEquals(@NonNull Result other) {
+            return Objects.equals(paymentMethod, other.paymentMethod);
+        }
+
+        public static final Creator<Result> CREATOR = new Creator<Result>() {
+            @Override
+            public Result createFromParcel(Parcel in) {
+                return new Result(in);
+            }
+
+            @Override
+            public Result[] newArray(int size) {
+                return new Result[size];
+            }
+        };
     }
 }

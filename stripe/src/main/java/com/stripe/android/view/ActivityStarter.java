@@ -2,6 +2,7 @@ package com.stripe.android.view;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
@@ -66,5 +67,8 @@ public abstract class ActivityStarter
 
     public interface Result extends Parcelable {
         String EXTRA = "extra_activity_result";
+
+        @NonNull
+        Bundle toBundle();
     }
 }

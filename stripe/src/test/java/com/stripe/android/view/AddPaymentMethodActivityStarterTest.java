@@ -1,7 +1,13 @@
 package com.stripe.android.view;
 
+import android.content.Intent;
+import android.os.Bundle;
+
 import com.stripe.android.model.PaymentMethod;
+import com.stripe.android.model.PaymentMethodFixtures;
 import com.stripe.android.utils.ParcelUtils;
+
+import java.util.Objects;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,5 +30,20 @@ public class AddPaymentMethodActivityStarterTest {
         final AddPaymentMethodActivityStarter.Args createdArgs =
                 ParcelUtils.create(args, AddPaymentMethodActivityStarter.Args.CREATOR);
         assertEquals(args, createdArgs);
+    }
+
+    @Test
+    public void testResultParceling() {
+        final Bundle bundle =
+                new AddPaymentMethodActivityStarter
+                        .Result(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                        .toBundle();
+        final Intent intent = new Intent().putExtras(bundle);
+        final AddPaymentMethodActivityStarter.Result result =
+                Objects.requireNonNull(AddPaymentMethodActivityStarter.Result.fromIntent(intent));
+        assertEquals(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                result.paymentMethod
+        );
     }
 }

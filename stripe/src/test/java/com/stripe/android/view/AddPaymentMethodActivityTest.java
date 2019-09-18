@@ -202,10 +202,8 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         final Intent intent = mShadowActivity.getResultIntent();
 
         assertTrue(mActivity.isFinishing());
-        assertTrue(intent.hasExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD));
-        final PaymentMethod paymentMethod =
-                intent.getParcelableExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD);
-        assertNotNull(paymentMethod);
+
+        final PaymentMethod paymentMethod = getPaymentMethodFromIntent(intent);
         assertEquals(expectedPaymentMethod, paymentMethod);
     }
 
@@ -250,10 +248,8 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         final Intent intent = mShadowActivity.getResultIntent();
 
         assertTrue(mActivity.isFinishing());
-        assertTrue(intent.hasExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD));
-        final PaymentMethod paymentMethod =
-                intent.getParcelableExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD);
-        assertNotNull(paymentMethod);
+
+        final PaymentMethod paymentMethod = getPaymentMethodFromIntent(intent);
         assertEquals(expectedPaymentMethod, paymentMethod);
     }
 
@@ -366,10 +362,18 @@ public class AddPaymentMethodActivityTest extends BaseViewTest<AddPaymentMethodA
         final Intent intent = mShadowActivity.getResultIntent();
 
         assertTrue(mActivity.isFinishing());
-        assertTrue(intent.hasExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD));
-        final PaymentMethod newPaymentMethod =
-                intent.getParcelableExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD);
-        assertNotNull(newPaymentMethod);
-        assertEquals(expectedPaymentMethod, newPaymentMethod);
+
+        final PaymentMethod paymentMethod = getPaymentMethodFromIntent(intent);
+        assertEquals(expectedPaymentMethod, paymentMethod);
+    }
+
+    @NonNull
+    private static PaymentMethod getPaymentMethodFromIntent(@NonNull Intent intent) {
+        final AddPaymentMethodActivityStarter.Result result =
+                AddPaymentMethodActivityStarter.Result.fromIntent(intent);
+        assertNotNull(result);
+        final PaymentMethod paymentMethod = result.paymentMethod;
+        assertNotNull(paymentMethod);
+        return paymentMethod;
     }
 }
