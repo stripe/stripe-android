@@ -1,13 +1,13 @@
 package com.stripe.android
 
-import android.os.Handler
-import android.os.HandlerThread
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.InvalidRequestException
 import java.io.Closeable
 import java.io.IOException
 import java.net.HttpURLConnection
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 internal class StripeFireAndForgetRequestExecutor : FireAndForgetRequestExecutor {
 
@@ -53,17 +53,8 @@ internal class StripeFireAndForgetRequestExecutor : FireAndForgetRequestExecutor
     }
 
     override fun executeAsync(request: StripeRequest) {
-        val handlerThread = HandlerThread(
-            StripeFireAndForgetRequestExecutor::class.java.simpleName
-        )
-        handlerThread.start()
-        val handler = Handler(handlerThread.looper)
-        handler.post {
-            try {
-                execute(request)
-                handlerThread.quitSafely()
-            } catch (ignore: Exception) {
-            }
+        GlobalScope.launch {
+            execute(request)
         }
     }
 }
