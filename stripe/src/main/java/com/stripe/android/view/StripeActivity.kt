@@ -20,7 +20,7 @@ import com.stripe.android.exception.StripeException
 /**
  * Provides a toolbar, save button, and loading states for the save button.
  */
-internal abstract class StripeActivity : AppCompatActivity() {
+abstract class StripeActivity : AppCompatActivity() {
 
     lateinit var progressBar: ProgressBar
     lateinit var viewStub: ViewStub
@@ -43,7 +43,10 @@ internal abstract class StripeActivity : AppCompatActivity() {
             override fun onReceive(context: Context, intent: Intent) {
                 val exception =
                     intent.getSerializableExtra(CustomerSession.EXTRA_EXCEPTION) as StripeException
-                showError(exception.localizedMessage)
+                val errorMessage = exception.localizedMessage
+                if (errorMessage != null) {
+                    showError(errorMessage)
+                }
             }
         }
     }
@@ -121,7 +124,7 @@ internal abstract class StripeActivity : AppCompatActivity() {
             .show()
     }
 
-    internal interface AlertMessageListener {
+    interface AlertMessageListener {
         fun onAlertMessageDisplayed(message: String)
     }
 }
