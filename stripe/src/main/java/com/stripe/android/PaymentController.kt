@@ -233,9 +233,24 @@ internal open class PaymentController @VisibleForTesting constructor(
                                 handleError(host, getRequestCode(stripeIntent), e)
                             }
                         }
-                        sdkData?.is3ds1 == true -> beginWebAuth(host, getRequestCode(stripeIntent),
-                            stripeIntent.clientSecret ?: "",
-                            Stripe3dsRedirect.create(sdkData).url, null)
+                        sdkData?.is3ds1 == true -> {
+                            analyticsRequestExecutor.executeAsync(
+                                AnalyticsRequest.create(
+                                    analyticsDataFactory.createAuthParams(
+                                        AnalyticsDataFactory.EventName.AUTH_3DS1_SDK,
+                                        stripeIntent.id.orEmpty(),
+                                        requestOptions.apiKey
+                                    ),
+                                    requestOptions
+                                )
+                            )
+                            beginWebAuth(
+                                host,
+                                getRequestCode(stripeIntent),
+                                stripeIntent.clientSecret ?: "",
+                                Stripe3dsRedirect.create(sdkData).url
+                            )
+                        }
                         else -> // authentication type is not supported
                             bypassAuth(host, stripeIntent)
                     }
@@ -252,10 +267,13 @@ internal open class PaymentController @VisibleForTesting constructor(
                     )
 
                     val redirectData = stripeIntent.redirectData
-                    beginWebAuth(host, getRequestCode(stripeIntent),
+                    beginWebAuth(
+                        host,
+                        getRequestCode(stripeIntent),
                         stripeIntent.clientSecret ?: "",
                         redirectData?.url.toString(),
-                        redirectData?.returnUrl)
+                        redirectData?.returnUrl
+                    )
                 }
                 else -> // next action type is not supported, so bypass authentication
                     bypassAuth(host, stripeIntent)
@@ -426,9 +444,22 @@ internal open class PaymentController @VisibleForTesting constructor(
                     startFrictionlessFlow()
                 }
             } else if (result.fallbackRedirectUrl != null) {
-                beginWebAuth(host, getRequestCode(stripeIntent),
+                analyticsRequestExecutor.executeAsync(
+                    AnalyticsRequest.create(
+                        analyticsDataFactory.createAuthParams(
+                            AnalyticsDataFactory.EventName.AUTH_3DS2_FALLBACK,
+                            stripeIntent.id.orEmpty(),
+                            requestOptions.apiKey
+                        ),
+                        requestOptions
+                    )
+                )
+                beginWebAuth(
+                    host,
+                    getRequestCode(stripeIntent),
                     stripeIntent.clientSecret ?: "",
-                    result.fallbackRedirectUrl, null)
+                    result.fallbackRedirectUrl
+                )
             } else {
                 val error = result.error
                 val errorMessage: String
@@ -718,7 +749,7 @@ internal open class PaymentController @VisibleForTesting constructor(
             requestCode: Int,
             clientSecret: String,
             authUrl: String,
-            returnUrl: String?
+            returnUrl: String? = null
         ) {
             PaymentAuthWebViewStarter(host, requestCode).start(
                 PaymentAuthWebViewStarter.Data(clientSecret, authUrl, returnUrl))

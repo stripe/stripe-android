@@ -26,6 +26,13 @@ import com.stripe.android.stripe3ds2.views.ChallengeProgressDialogActivity;
 import com.stripe.android.view.AuthActivityStarter;
 import com.stripe.android.view.StripeIntentResultExtras;
 
+import java.security.PublicKey;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,13 +42,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-
-import java.security.PublicKey;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -206,6 +206,12 @@ public class PaymentControllerTest {
                 intent.getStringExtra(PaymentAuthWebViewStarter.EXTRA_AUTH_URL)
         );
         assertNull(intent.getStringExtra(PaymentAuthWebViewStarter.EXTRA_RETURN_URL));
+
+        verify(mFireAndForgetRequestExecutor).executeAsync(mApiRequestArgumentCaptor.capture());
+        final StripeRequest analyticsRequest = mApiRequestArgumentCaptor.getValue();
+        final Map<String, ?> analyticsParams = Objects.requireNonNull(analyticsRequest.params);
+        assertEquals("stripe_android.3ds1_sdk",
+                analyticsParams.get(AnalyticsDataFactory.FIELD_EVENT));
     }
 
     @Test
@@ -584,6 +590,12 @@ public class PaymentControllerTest {
                 intent.getStringExtra(PaymentAuthWebViewStarter.EXTRA_AUTH_URL)
         );
         assertNull(intent.getStringExtra(PaymentAuthWebViewStarter.EXTRA_RETURN_URL));
+
+        verify(mFireAndForgetRequestExecutor).executeAsync(mApiRequestArgumentCaptor.capture());
+        final StripeRequest analyticsRequest = mApiRequestArgumentCaptor.getValue();
+        final Map<String, ?> analyticsParams = Objects.requireNonNull(analyticsRequest.params);
+        assertEquals("stripe_android.3ds2_fallback",
+                analyticsParams.get(AnalyticsDataFactory.FIELD_EVENT));
     }
 
     @Test
