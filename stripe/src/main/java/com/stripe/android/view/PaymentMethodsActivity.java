@@ -28,7 +28,6 @@ import com.stripe.android.view.i18n.TranslatorManager;
 import java.util.List;
 
 import static com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION;
-import static com.stripe.android.view.AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD;
 
 /**
  * <p>An activity that allows a customer to select from their attach payment methods,
@@ -143,9 +142,11 @@ public class PaymentMethodsActivity extends AppCompatActivity {
     private void onPaymentMethodCreated(@Nullable Intent data) {
         initLoggingTokens();
 
-        if (data != null && data.hasExtra(EXTRA_NEW_PAYMENT_METHOD)) {
-            final PaymentMethod paymentMethod =
-                    data.getParcelableExtra(EXTRA_NEW_PAYMENT_METHOD);
+        if (data != null) {
+            final AddPaymentMethodActivityStarter.Result result =
+                    AddPaymentMethodActivityStarter.Result.fromIntent(data);
+            final PaymentMethod paymentMethod = result != null ?
+                    result.paymentMethod : null;
             onAddedPaymentMethod(paymentMethod);
         } else {
             fetchCustomerPaymentMethods();

@@ -176,8 +176,7 @@ public class PaymentMethodsActivityTest extends BaseViewTest<PaymentMethodsActiv
         assertNotNull(paymentMethod);
 
         final Intent resultIntent = new Intent()
-                .putExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD, paymentMethod);
-
+                .putExtras(new AddPaymentMethodActivityStarter.Result(paymentMethod).toBundle());
         mPaymentMethodsActivity.onActivityResult(
                 AddPaymentMethodActivityStarter.REQUEST_CODE, RESULT_OK, resultIntent
         );
