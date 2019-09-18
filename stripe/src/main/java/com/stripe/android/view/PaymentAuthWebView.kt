@@ -6,6 +6,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.util.AttributeSet
@@ -19,19 +20,14 @@ import android.widget.ProgressBar
 /**
  * A `WebView` used for authenticating payment details
  */
-internal class PaymentAuthWebView : WebView {
+internal class PaymentAuthWebView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : WebView(createContext(context), attrs, defStyleAttr) {
     private var webViewClient: PaymentAuthWebViewClient? = null
 
-    @JvmOverloads
-    constructor(context: Context, attrs: AttributeSet? = null) : super(context, attrs) {
-        configureSettings()
-    }
-
-    constructor(
-        context: Context,
-        attrs: AttributeSet?,
-        defStyleAttr: Int
-    ) : super(context, attrs, defStyleAttr) {
+    init {
         configureSettings()
     }
 
@@ -63,6 +59,22 @@ internal class PaymentAuthWebView : WebView {
         settings.domStorageEnabled = true
     }
 
+    companion object {
+        /**
+         * Fix for crash in API 21 and 22
+         *
+         * See <a href="https://stackoverflow.com/q/41025200/">https://stackoverflow.com/q/41025200/</a>
+         * for more context.
+         */
+        fun createContext(context: Context): Context {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                context.createConfigurationContext(Configuration())
+            } else {
+                context
+            }
+        }
+    }
+
     internal class PaymentAuthWebViewClient(
         private val activity: Activity,
         private val packageManager: PackageManager,
@@ -82,14 +94,23 @@ internal class PaymentAuthWebView : WebView {
 
         override fun onPageCommitVisible(view: WebView, url: String) {
             super.onPageCommitVisible(view, url)
-            progressBar.visibility = View.GONE
+            hideProgressBar()
         }
 
         override fun onPageFinished(view: WebView, url: String?) {
             super.onPageFinished(view, url)
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                // hide the progress bar here because `onPageCommitVisible()`
+                // is not called in API 22 and below
+                hideProgressBar()
+            }
             if (url != null && isCompletionUrl(url)) {
                 onAuthCompleted()
             }
+        }
+
+        private fun hideProgressBar() {
+            progressBar.visibility = View.GONE
         }
 
         private fun isAuthenticateUrl(url: String) = isWhiteListedUrl(url, AUTHENTICATE_URLS)
