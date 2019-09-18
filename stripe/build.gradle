@@ -22,6 +22,8 @@ dependencies {
 
     implementation "com.stripe:stripe-3ds2-android:2.0.5"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutineVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutineVersion"
 
     javadocDeps 'androidx.annotation:annotation:1.1.0'
     javadocDeps 'androidx.appcompat:appcompat:1.1.0'
