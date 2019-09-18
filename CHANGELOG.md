@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 11.1.2 - 2019-09-18
+* [#1581](https://github.com/stripe/stripe-android/pull/1581) Fix WebView issues in API 21 and 22
+
 ## 11.1.1 - 2019-09-17
 * [#1578](https://github.com/stripe/stripe-android/pull/1578) Disable dokka in `:stripe` to fix release process
 
