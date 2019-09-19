@@ -3,14 +3,11 @@ package com.stripe.android.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.stripe.android.ObjectBuilder;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -26,20 +23,6 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
  * object in the Source api.
  */
 public final class Address extends StripeModel implements StripeParamsModel, Parcelable {
-
-    @IntDef({
-            RequiredBillingAddressFields.NONE,
-            RequiredBillingAddressFields.ZIP,
-            RequiredBillingAddressFields.FULL,
-            RequiredBillingAddressFields.NAME})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface RequiredBillingAddressFields {
-        int NONE = 0;
-        int ZIP = 1;
-        int FULL = 2;
-        int NAME = 3;
-    }
-
     private static final String FIELD_CITY = "city";
     /* 2 Character Country Code */
     private static final String FIELD_COUNTRY = "country";
