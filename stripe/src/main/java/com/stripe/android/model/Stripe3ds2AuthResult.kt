@@ -2,7 +2,6 @@ package com.stripe.android.model
 
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.StripeJsonUtils.optString
-import java.util.HashMap
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -91,9 +90,10 @@ internal data class Stripe3ds2AuthResult constructor(
         private val messageExtension: List<MessageExtension>?,
         private val messageType: String?,
         private val messageVersion: String?,
-        private val sdkTransId: String?
+        private val sdkTransId: String?,
+        private val transStatus: String?
     ) {
-        fun shouldChallenge() = VALUE_YES == acsChallengeMandated
+        val isChallenge = VALUE_CHALLENGE == transStatus
 
         internal class Builder : ObjectBuilder<Ares> {
             private var threeDSServerTransId: String? = null
@@ -107,6 +107,7 @@ internal data class Stripe3ds2AuthResult constructor(
             private var messageType: String? = null
             private var messageVersion: String? = null
             private var sdkTransId: String? = null
+            private var transStatus: String? = null
 
             fun setThreeDSServerTransId(threeDSServerTransId: String?): Builder {
                 this.threeDSServerTransId = threeDSServerTransId
@@ -163,11 +164,17 @@ internal data class Stripe3ds2AuthResult constructor(
                 return this
             }
 
+            fun setTransStatus(transStatus: String?): Builder {
+                this.transStatus = transStatus
+                return this
+            }
+
             override fun build(): Ares {
-                return Ares(threeDSServerTransId, acsChallengeMandated,
-                    acsSignedContent, acsTransId, acsUrl, authenticationType,
-                    cardholderInfo, messageExtension, messageType, messageVersion,
-                    sdkTransId)
+                return Ares(
+                    threeDSServerTransId, acsChallengeMandated, acsSignedContent, acsTransId,
+                    acsUrl, authenticationType, cardholderInfo, messageExtension, messageType,
+                    messageVersion, sdkTransId, transStatus
+                )
             }
         }
 
@@ -182,9 +189,10 @@ internal data class Stripe3ds2AuthResult constructor(
             private const val FIELD_MESSAGE_TYPE = "messageType"
             private const val FIELD_MESSAGE_VERSION = "messageVersion"
             private const val FIELD_SDK_TRANS_ID = "sdkTransID"
+            private const val FIELD_TRANS_STATUS = "transStatus"
             private const val FIELD_THREE_DS_SERVER_TRANS_ID = "threeDSServerTransID"
 
-            internal const val VALUE_YES = "Y"
+            internal const val VALUE_CHALLENGE = "C"
 
             @JvmStatic
             @Throws(JSONException::class)
@@ -202,6 +210,7 @@ internal data class Stripe3ds2AuthResult constructor(
                     .setMessageType(aresJson.getString(FIELD_MESSAGE_TYPE))
                     .setMessageVersion(aresJson.getString(FIELD_MESSAGE_VERSION))
                     .setSdkTransId(optString(aresJson, FIELD_SDK_TRANS_ID))
+                    .setTransStatus(optString(aresJson, FIELD_TRANS_STATUS))
                     .setMessageExtension(MessageExtension.fromJson(
                         aresJson.optJSONArray(FIELD_MESSAGE_EXTENSION)))
                     .build()
@@ -277,14 +286,15 @@ internal data class Stripe3ds2AuthResult constructor(
 
             @Throws(JSONException::class)
             private fun fromJson(json: JSONObject): MessageExtension {
-                val data = HashMap<String, String>()
                 val dataJson = json.optJSONObject(FIELD_DATA)
-                if (dataJson != null) {
-                    val keys = dataJson.keys()
-                    while (keys.hasNext()) {
-                        val key = keys.next()
-                        data[key] = dataJson.getString(key)
-                    }
+                val data = if (dataJson != null) {
+                    val keys = dataJson.names() ?: JSONArray()
+                    (0 until keys.length())
+                        .map { idx -> keys.getString(idx) }
+                        .map { key -> mapOf(key to dataJson.getString(key)) }
+                        .reduce { acc, map -> acc.plus(map) }
+                } else {
+                    emptyMap()
                 }
 
                 return MessageExtension(
