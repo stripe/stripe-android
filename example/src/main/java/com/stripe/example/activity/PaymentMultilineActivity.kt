@@ -81,7 +81,7 @@ class PaymentMultilineActivity : AppCompatActivity() {
 
         val paymentMethodCard = paymentMethod.card
         val endingIn = getString(R.string.endingIn)
-        val map = hashMapOf(
+        val map = mapOf(
             "last4" to endingIn + " " + paymentMethodCard!!.last4,
             "tokenId" to paymentMethod.id!!
         )

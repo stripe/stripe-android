@@ -32,8 +32,8 @@ class ListViewController(listView: ListView) {
         addToList(token.card!!.last4!!, token.id)
     }
 
-    internal fun addToList(last4: String, tokenId: String) {
-        val map = hashMapOf(
+    private fun addToList(last4: String, tokenId: String) {
+        val map = mapOf(
             "last4" to resources.getString(R.string.endingIn) + " " + last4,
             "tokenId" to tokenId
         )

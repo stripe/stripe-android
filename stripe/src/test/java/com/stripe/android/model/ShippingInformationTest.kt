@@ -10,6 +10,14 @@ class ShippingInformationTest {
         assertEquals(createShippingInformation(), createShippingInformation())
     }
 
+    @Test
+    fun testToParamMapStripsNulls() {
+        assertEquals(
+            mapOf("name" to "home"),
+            ShippingInformation(null, "home", null).toParamMap()
+        )
+    }
+
     private fun createShippingInformation(): ShippingInformation {
         return ShippingInformation(Address.fromJson(AddressFixtures.ADDRESS_JSON),
             "home", "555-123-4567")
