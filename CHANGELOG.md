@@ -1,5 +1,22 @@
 # CHANGELOG
 
+## 11.1.3 - 2019-09-18
+* [#1582](https://github.com/stripe/stripe-android/pull/1582) Update 3DS2 SDK to 2.0.5
+    * Add translations for `ko`, `nn`, `ru`, and `tr`
+* [#1583](https://github.com/stripe/stripe-android/pull/1583) Create `AddPaymentMethodActivityStarter.Result`
+    * Mark `AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD` as `@Deprecated`. Use `AddPaymentMethodActivityStarter.Result` instead.
+    ```kotlin
+    // Example
+
+    // before
+    val paymentMethod: PaymentMethod? = data.getParcelableExtra(EXTRA_NEW_PAYMENT_METHOD)
+
+    // after
+    val result = AddPaymentMethodActivityStarter.Result.fromIntent(data)
+    val paymentMethod: PaymentMethod? = result?.paymentMethod
+    ```    
+* [#1587](https://github.com/stripe/stripe-android/pull/1587) Fix logic for entering 3DS2 challenge flow
+
 ## 11.1.2 - 2019-09-18
 * [#1581](https://github.com/stripe/stripe-android/pull/1581) Fix WebView issues in API 21 and 22
 
