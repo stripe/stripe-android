@@ -44,27 +44,29 @@ internal object TokenFixtures {
 
     @JvmField
     val BANK_TOKEN = Token.fromJson(JSONObject(
-        "{\n" +
-            "  \"id\": \"btok_9xJAbronBnS9bH\",\n" +
-            "  \"object\": \"token\",\n" +
-            "  \"bank_account\": {\n" +
-            "    \"id\": \"ba_19dOY72eZvKYlo2CVNPhmtv3\",\n" +
-            "    \"object\": \"bank_account\",\n" +
-            "    \"account_holder_name\": \"Jane Austen\",\n" +
-            "    \"account_holder_type\": \"individual\",\n" +
-            "    \"bank_name\": \"STRIPE TEST BANK\",\n" +
-            "    \"country\": \"US\",\n" +
-            "    \"currency\": \"usd\",\n" +
-            "    \"fingerprint\": \"1JWtPxqbdX5Gamtc\",\n" +
-            "    \"last4\": \"6789\",\n" +
-            "    \"routing_number\": \"110000000\",\n" +
-            "    \"status\": \"new\"\n" +
-            "  },\n" +
-            "  \"client_ip\": null,\n" +
-            "  \"created\": 1484765567,\n" +
-            "  \"livemode\": false,\n" +
-            "  \"type\": \"bank_account\",\n" +
-            "  \"used\": false\n" +
-            "}"
+        """
+        {
+            "id": "btok_9xJAbronBnS9bH",
+            "object": "token",
+            "bank_account": {
+                "id": "ba_19dOY72eZvKYlo2CVNPhmtv3",
+                "object": "bank_account",
+                "account_holder_name": "Jane Austen",
+                "account_holder_type": "individual",
+                "bank_name": "STRIPE TEST BANK",
+                "country": "US",
+                "currency": "usd",
+                "fingerprint": "1JWtPxqbdX5Gamtc",
+                "last4": "6789",
+                "routing_number": "110000000",
+                "status": "new"
+            },
+            "client_ip": null,
+            "created": 1484765567,
+            "livemode": false,
+            "type": "bank_account",
+            "used": false
+        }
+        """.trimIndent()
     ))!!
 }
