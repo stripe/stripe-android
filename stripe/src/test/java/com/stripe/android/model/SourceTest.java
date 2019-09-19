@@ -2,7 +2,6 @@ package com.stripe.android.model;
 
 import org.junit.Test;
 
-import static com.stripe.android.model.SourceCardDataTest.EXAMPLE_JSON_SOURCE_CARD_DATA_WITH_APPLE_PAY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -37,7 +36,7 @@ public class SourceTest {
             "\"status\": \"pending\",\n"+
             "\"type\": \"card\",\n"+
             "\"usage\": \"single_use\",\n"+
-            "\"card\": " + EXAMPLE_JSON_SOURCE_CARD_DATA_WITH_APPLE_PAY + "\n"+
+            "\"card\": " + SourceCardDataTest.SOURCE_CARD_DATA_WITH_APPLE_PAY.toString() + "\n"+
             "}";
 
     private static final String DOGE_COIN = "dogecoin";

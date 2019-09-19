@@ -9,7 +9,7 @@ abstract class StripeModel {
 
     abstract override fun hashCode(): Int
 
-    abstract override fun equals(obj: Any?): Boolean
+    abstract override fun equals(other: Any?): Boolean
 
     companion object {
         @JvmStatic

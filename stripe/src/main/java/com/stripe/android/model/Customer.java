@@ -124,7 +124,7 @@ public final class Customer extends StripeModel {
         final String id = optString(jsonObject, FIELD_ID);
         final String defaultSource = optString(jsonObject, FIELD_DEFAULT_SOURCE);
         final ShippingInformation shippingInformation =
-                ShippingInformation.fromJson(jsonObject.optJSONObject(FIELD_SHIPPING));
+                ShippingInformation.Companion.fromJson(jsonObject.optJSONObject(FIELD_SHIPPING));
         final JSONObject sourcesJson = jsonObject.optJSONObject(FIELD_SOURCES);
         
         final Boolean hasMore;

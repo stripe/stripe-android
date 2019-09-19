@@ -24,6 +24,9 @@ import com.stripe.android.model.Address;
 import com.stripe.android.model.ShippingInformation;
 import com.stripe.android.model.ShippingMethod;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,9 +37,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.shadows.ShadowActivity;
-
-import java.util.ArrayList;
-import java.util.Collections;
 
 import static com.stripe.android.CustomerSession.ACTION_API_EXCEPTION;
 import static com.stripe.android.CustomerSession.EVENT_SHIPPING_INFO_SAVED;
@@ -223,7 +223,7 @@ public class PaymentFlowActivityTest extends BaseViewTest<PaymentFlowActivity> {
         onShippingInfoProcessedValid.putExtra(EXTRA_IS_SHIPPING_INFO_VALID, true);
 
         final ArrayList<ShippingMethod> shippingMethods = new ArrayList<>(Collections.singletonList(
-                new ShippingMethod("label", "id", 0, "USD")));
+                new ShippingMethod("label", "id", null, 0, "USD")));
         onShippingInfoProcessedValid.putExtra(EXTRA_VALID_SHIPPING_METHODS, shippingMethods);
         LocalBroadcastManager.getInstance(ApplicationProvider.getApplicationContext())
                 .sendBroadcast(onShippingInfoProcessedValid);

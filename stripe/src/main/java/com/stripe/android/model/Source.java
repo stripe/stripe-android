@@ -337,7 +337,7 @@ public final class Source extends StripeModel implements StripePaymentSource {
     @NonNull
     private static Source fromCardJson(@NonNull JSONObject jsonObject) {
         final String id = optString(jsonObject, FIELD_ID);
-        final SourceCardData sourceTypeModel = SourceCardData.fromJson(jsonObject);
+        final SourceCardData sourceTypeModel = SourceCardData.Companion.fromJson(jsonObject);
 
         return new Source(id, null, null, null, null,
                 null, null, null, null, null, null,
@@ -427,7 +427,7 @@ public final class Source extends StripeModel implements StripePaymentSource {
 
         switch (key) {
             case FIELD_CODE_VERIFICATION: {
-                return type.cast(SourceCodeVerification.fromJson(
+                return type.cast(SourceCodeVerification.Companion.fromJson(
                         jsonObject.optJSONObject(FIELD_CODE_VERIFICATION)));
             }
             case FIELD_OWNER: {
@@ -447,7 +447,7 @@ public final class Source extends StripeModel implements StripePaymentSource {
                         SourceCardData.fromJson(jsonObject.optJSONObject(SourceType.CARD)));
             }
             case SourceType.SEPA_DEBIT: {
-                return type.cast(SourceSepaDebitData.fromJson(
+                return type.cast(SourceSepaDebitData.Companion.fromJson(
                         jsonObject.optJSONObject(SourceType.SEPA_DEBIT)));
             }
             default: {

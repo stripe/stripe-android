@@ -24,26 +24,25 @@ internal class StripeNetworkUtils @VisibleForTesting constructor(
      * @return a [Map] containing the appropriate values read from the card
      */
     fun createCardTokenParams(card: Card): Map<String, Any> {
-        val tokenParams = card.toParamMap()
-
-        // We store the logging items in this field, which is extracted from the parameters
-        // sent to the API.
-        tokenParams[AnalyticsDataFactory.FIELD_PRODUCT_USAGE] = card.loggingTokens
-        tokenParams.putAll(uidParamsFactory.createParams())
-
-        return tokenParams
+        return card.toParamMap()
+            // We store the logging items in this field, which is extracted from the parameters
+            // sent to the API.
+            .plus(AnalyticsDataFactory.FIELD_PRODUCT_USAGE to card.loggingTokens)
+            .plus(uidParamsFactory.createParams())
     }
 
     fun addUidToConfirmPaymentIntentParams(confirmPaymentIntentParams: Map<String, *>) {
         val sourceData =
             confirmPaymentIntentParams[ConfirmPaymentIntentParams.API_PARAM_SOURCE_DATA]
         if (sourceData is MutableMap<*, *>) {
-            (sourceData as MutableMap<String, Any>).putAll(uidParamsFactory.createParams())
+            (sourceData as MutableMap<String, Any>)
+                .putAll(uidParamsFactory.createParams())
         } else {
             val paymentMethodData =
                 confirmPaymentIntentParams[ConfirmPaymentIntentParams.API_PARAM_PAYMENT_METHOD_DATA]
             if (paymentMethodData is MutableMap<*, *>) {
-                (paymentMethodData as MutableMap<String, Any>).putAll(uidParamsFactory.createParams())
+                (paymentMethodData as MutableMap<String, Any>)
+                    .putAll(uidParamsFactory.createParams())
             }
         }
     }
