@@ -1,7 +1,6 @@
 package com.stripe.android.model.wallets
 
 import com.stripe.android.model.StripeJsonUtils.optString
-import com.stripe.android.model.wallets.Wallet.FIELD_DYNAMIC_LAST4
 import org.json.JSONObject
 
 internal class WalletFactory {
@@ -43,7 +42,7 @@ internal class WalletFactory {
         }
 
         return walletBuilder
-            .setDynamicLast4(optString(walletJson, FIELD_DYNAMIC_LAST4))
+            .setDynamicLast4(optString(walletJson, Wallet.FIELD_DYNAMIC_LAST4))
             .build()
     }
 }
