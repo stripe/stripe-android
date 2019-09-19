@@ -9,10 +9,11 @@ internal object Stripe3ds2AuthResultFixtures {
     @JvmField
     val ARES_CHALLENGE_FLOW = Stripe3ds2AuthResult.Builder()
         .setAres(Stripe3ds2AuthResult.Ares.Builder()
-            .setAcsChallengeMandated(Stripe3ds2AuthResult.Ares.VALUE_YES)
+            .setAcsChallengeMandated("Y")
             .setAcsTransId(UUID.randomUUID().toString())
             .setSdkTransId(UUID.randomUUID().toString())
             .setThreeDSServerTransId(UUID.randomUUID().toString())
+            .setTransStatus(Stripe3ds2AuthResult.Ares.VALUE_CHALLENGE)
             .setMessageVersion("2.1.0")
             .setMessageType("ARes")
             .build())

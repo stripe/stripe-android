@@ -196,7 +196,7 @@ internal open class PaymentController @VisibleForTesting constructor(
 
     @VisibleForTesting
     fun getClientSecret(data: Intent): String {
-        return data.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET)
+        return requireNotNull(data.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET))
     }
 
     /**
@@ -438,7 +438,7 @@ internal open class PaymentController @VisibleForTesting constructor(
         override fun onSuccess(result: Stripe3ds2AuthResult) {
             val ares = result.ares
             if (ares != null) {
-                if (ares.shouldChallenge()) {
+                if (ares.isChallenge) {
                     startChallengeFlow(ares)
                 } else {
                     startFrictionlessFlow()
