@@ -292,7 +292,7 @@ internal data class Stripe3ds2AuthResult constructor(
                     (0 until keys.length())
                         .map { idx -> keys.getString(idx) }
                         .map { key -> mapOf(key to dataJson.getString(key)) }
-                        .reduce { acc, map -> acc.plus(map) }
+                        .fold(emptyMap<String, String>()) { acc, map -> acc.plus(map) }
                 } else {
                     emptyMap()
                 }
