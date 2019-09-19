@@ -1,16 +1,22 @@
 package com.stripe.android.view
 
 import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.model.ShippingMethod
 import java.util.ArrayList
 
 /**
  * Adapter that populates a list with shipping methods
  */
-internal class ShippingMethodAdapter : androidx.recyclerview.widget.RecyclerView.Adapter<ShippingMethodAdapter.ViewHolder>() {
+internal class ShippingMethodAdapter :
+    RecyclerView.Adapter<ShippingMethodAdapter.ShippingMethodViewHolder>() {
 
     private var shippingMethods: List<ShippingMethod> = ArrayList()
     private var selectedIndex = 0
+
+    init {
+        setHasStableIds(true)
+    }
 
     val selectedShippingMethod: ShippingMethod?
         get() = shippingMethods[selectedIndex]
@@ -19,11 +25,15 @@ internal class ShippingMethodAdapter : androidx.recyclerview.widget.RecyclerView
         return shippingMethods.size
     }
 
-    override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): ViewHolder {
-        return ViewHolder(ShippingMethodView(viewGroup.context), this)
+    override fun getItemId(position: Int): Long {
+        return shippingMethods[position].hashCode().toLong()
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, i: Int) {
+    override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): ShippingMethodViewHolder {
+        return ShippingMethodViewHolder(ShippingMethodView(viewGroup.context), this)
+    }
+
+    override fun onBindViewHolder(holder: ShippingMethodViewHolder, i: Int) {
         holder.setShippingMethod(shippingMethods[i])
         holder.setSelected(i == selectedIndex)
     }
@@ -32,9 +42,7 @@ internal class ShippingMethodAdapter : androidx.recyclerview.widget.RecyclerView
         shippingMethods: List<ShippingMethod>?,
         defaultShippingMethod: ShippingMethod?
     ) {
-        if (shippingMethods != null) {
-            this.shippingMethods = shippingMethods
-        }
+        this.shippingMethods = shippingMethods ?: emptyList()
         selectedIndex = if (defaultShippingMethod == null) {
             0
         } else {
@@ -44,14 +52,17 @@ internal class ShippingMethodAdapter : androidx.recyclerview.widget.RecyclerView
     }
 
     fun onShippingMethodSelected(selectedIndex: Int) {
+        val previousSelectedIndex = this.selectedIndex
         this.selectedIndex = selectedIndex
-        notifyDataSetChanged()
+
+        notifyItemChanged(previousSelectedIndex)
+        notifyItemChanged(selectedIndex)
     }
 
-    internal class ViewHolder constructor(
+    internal class ShippingMethodViewHolder constructor(
         private val shippingMethodView: ShippingMethodView,
         adapter: ShippingMethodAdapter
-    ) : androidx.recyclerview.widget.RecyclerView.ViewHolder(shippingMethodView) {
+    ) : RecyclerView.ViewHolder(shippingMethodView) {
 
         init {
             shippingMethodView.setOnClickListener {
