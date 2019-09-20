@@ -51,7 +51,7 @@ new Stripe(context, "pk_test_yourkey");
 
 ### Using CardInputWidget
 
-<img width="360" height="740" src="https://raw.githubusercontent.com/stripe/stripe-android/master/assets/card_input.gif"/>
+<img width="270" height="555" src="https://raw.githubusercontent.com/stripe/stripe-android/master/assets/card_input.gif"/>
 
 You can add a single-line widget to your apps that easily handles the UI states for collecting card data.
 
@@ -80,7 +80,7 @@ if (cardToSave == null) {
 
 ### Using CardMultilineWidget
 
-<img width="360" height="740" src="https://raw.githubusercontent.com/stripe/stripe-android/master/assets/card_multiline.gif"/>
+<img width="270" height="555" src="https://raw.githubusercontent.com/stripe/stripe-android/master/assets/card_multiline.gif"/>
 
 You can add a Material-style multiline widget to your apps that handles card data collection as well. This can be added in a layout similar to the `CardInputWidget`.
 
