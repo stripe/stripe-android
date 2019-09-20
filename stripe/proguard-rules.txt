@@ -2,4 +2,5 @@
 -keep class android.support.design.widget.CollapsingTextHelper { *; }
 -keep class org.bouncycastle.** { *; }
 
+-keep class com.stripe.android.** { *; }
 -dontwarn com.stripe.android.view.**

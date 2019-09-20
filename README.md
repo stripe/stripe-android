@@ -15,7 +15,7 @@ The Stripe Android SDK makes it quick and easy to build an excellent payment exp
 ### Requirements
 
 * Android 4.4 (API level 19) and above
-* [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin) 3.4.1+
+* [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin) 3.5.0
 * [Gradle](https://gradle.org/releases/) 5.1.1+
 * [AndroidX](https://developer.android.com/jetpack/androidx/) (as of v11.0.0)
 
@@ -35,11 +35,7 @@ dependencies {
 
 ### Proguard
 
-If enabling minification in your `build.gradle` file, you must also add this line to the `proguard-rules.pro`:
-
-```
--keep class com.stripe.android.** { *; }
-```
+The Stripe Android SDK will configure your app's Proguard rules using [proguard-rules.txt](stripe/proguard-rules.txt).
 
 ## Usage
 
