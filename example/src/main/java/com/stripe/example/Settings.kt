@@ -10,12 +10,12 @@ internal object Settings {
      * [example-ios-backend](https://github.com/stripe/example-ios-backend),
      * the URL will be something like `https://hidden-beach-12345.herokuapp.com/`.
      */
-    const val BASE_URL = "https://mshafrir-mobile-backend.herokuapp.com/"
+    const val BASE_URL = "put your base url here"
 
     /**
      * Set to publishable key from https://dashboard.stripe.com/test/apikeys
      */
-    const val PUBLISHABLE_KEY = "pk_test_brpLutVVvqMRjOedg8SUJr9O"
+    const val PUBLISHABLE_KEY = "pk_test_your_key_goes_here"
 
     /**
      * Optionally, set to a Connect Account id to use for API requests to test Connect
