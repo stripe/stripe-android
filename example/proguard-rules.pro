@@ -35,10 +35,6 @@
 -keepattributes Exceptions
 
 
-# Stripe SDK rules
--keep class com.stripe.android.** { *; }
-
-
 # OkHttp rules
 
 # JSR 305 annotations are for embedding nullability information.
