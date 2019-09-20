@@ -39,6 +39,16 @@ The Stripe Android SDK will configure your app's Proguard rules using [proguard-
 
 ## Usage
 
+### Getting Started
+
+The `Stripe` class is the entry-point to the Stripe SDK. It must be instantiated with a [Stripe publishable key](https://stripe.com/docs/keys).
+
+When testing, you can use a test publishable key. Remember to replace the test key with your live key in production. You can view your API keys in the [Stripe Dashboard](https://dashboard.stripe.com/apikeys).
+
+```java
+new Stripe(context, "pk_test_yourkey");
+```
+
 ### Using CardInputWidget
 
 You can add a single-line widget to your apps that easily handles the UI states for collecting card data.
@@ -58,7 +68,7 @@ Note: The minimum width for this widget is 320dp. The widget also requires an ID
 If the customer's input is valid, [CardInputWidget#getCard()](https://stripe.dev/stripe-android/com/stripe/android/view/CardInputWidget.html#getCard--) will return a [Card](https://stripe.dev/stripe-android/com/stripe/android/model/Card.html) instance; otherwise, it will return `null`. 
 
 ```java
-final Card cardToSave = mCardInputWidget.getCard();
+final Card cardToSave = cardInputWidget.getCard();
 
 if (cardToSave == null) {
     mErrorDialogHandler.showError("Invalid Card Data");
@@ -67,6 +77,8 @@ if (cardToSave == null) {
 ```
 
 ### Using CardMultilineWidget
+
+<img width="540" height="1110" src="https://raw.githubusercontent.com/stripe/stripe-android/master/assets/card_multiline.gif"/>
 
 You can add a Material-style multiline widget to your apps that handles card data collection as well. This can be added in a layout similar to the `CardInputWidget`.
 
@@ -92,7 +104,7 @@ xmlns:app="http://schemas.android.com/apk/res-auto"
 If the customer's input is valid, [CardMultilineWidget#getCard()](https://stripe.dev/stripe-android/com/stripe/android/view/CardMultilineWidget.html#getCard--) will return a [Card](https://stripe.dev/stripe-android/com/stripe/android/model/Card.html) instance; otherwise, it will return `null`. 
 
 ```java
-final Card cardToSave = mCardMultilineWidget.getCard();
+final Card cardToSave = cardMultilineWidget.getCard();
 
 if (cardToSave == null) {
     mErrorDialogHandler.showError("Invalid Card Data");
@@ -103,17 +115,6 @@ if (cardToSave == null) {
 If the returned `Card` is `null`, error states will show on the fields that need to be fixed.
 
 Once you have a non-null `Card` object from either widget, you can call [Stripe#createToken()](#using-createtoken).
-
-### Setting your Publishable Key
-
-A [publishable key](https://stripe.com/docs/keys) is required to identify your app when communicating with Stripe. Remember to replace the test key with your live key in production.
-
-You can view your API keys in the [Stripe Dashboard](https://dashboard.stripe.com/apikeys).
-The [Android Integration doc](https://stripe.com/docs/mobile/android) explains this flow in more detail.
-
-```java
-new Stripe(context, "YOUR_PUBLISHABLE_KEY");
-```
 
 ### Creating Card Tokens
 
