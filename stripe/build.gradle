@@ -4,9 +4,11 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'checkstyle'
 // make sure this line comes *after* you apply the Android plugin
 apply plugin: 'com.getkeepsafe.dexcount'
+apply plugin: 'org.jetbrains.dokka-android'
 
 assemble.dependsOn('lint')
 check.dependsOn('checkstyle')
+assemble.dependsOn('dokka')
 
 configurations {
     javadocDeps
@@ -76,6 +78,11 @@ android {
 
     lintOptions {
         enable "Interoperability"
+    }
+
+    dokka {
+        outputFormat = 'javadoc'
+        outputDirectory = "$buildDir/docs/javadoc"
     }
 }
 
