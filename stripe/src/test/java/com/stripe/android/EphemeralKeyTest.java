@@ -42,7 +42,7 @@ public class EphemeralKeyTest {
         CustomerEphemeralKey ephemeralKey = getCustomerEphemeralKey();
         assertNotNull(ephemeralKey);
         assertEquals("ephkey_123", ephemeralKey.getId());
-        assertEquals("ephemeral_key", ephemeralKey.getObject());
+        assertEquals("ephemeral_key", ephemeralKey.getObjectType());
         assertEquals("ek_test_123", ephemeralKey.getSecret());
         assertFalse(ephemeralKey.isLiveMode());
         assertEquals(1483575790L, ephemeralKey.getCreated());
@@ -75,6 +75,6 @@ public class EphemeralKeyTest {
         assertEquals(ephemeralKey.getType(), createdKey.getType());
         assertEquals(ephemeralKey.getSecret(), createdKey.getSecret());
         assertEquals(ephemeralKey.isLiveMode(), createdKey.isLiveMode());
-        assertEquals(ephemeralKey.getObject(), createdKey.getObject());
+        assertEquals(ephemeralKey.getObjectType(), createdKey.getObjectType());
     }
 }

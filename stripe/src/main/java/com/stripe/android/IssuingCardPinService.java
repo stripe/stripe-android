@@ -141,7 +141,7 @@ public class IssuingCardPinService
     public void onKeyUpdate(@NonNull IssuingCardEphemeralKey ephemeralKey,
                             @Nullable String operationId,
                             @Nullable String action,
-                            @Nullable Map<String, Object> arguments) {
+                            @Nullable Map<String, ?> arguments) {
 
         if (PIN_RETRIEVE.equals(action)) {
             IssuingCardPinRetrievalListener listener = mRetrievalListeners.remove(operationId);

@@ -6,7 +6,6 @@ import org.json.JSONException
 import org.json.JSONObject
 
 internal class CustomerEphemeralKey : EphemeralKey {
-
     val customerId: String
         get() = objectId
 
@@ -24,7 +23,7 @@ internal class CustomerEphemeralKey : EphemeralKey {
     ) : super(created, customerId, expires, id, liveMode, objectType, secret, type)
 
     internal class Factory : EphemeralKey.Factory<CustomerEphemeralKey>() {
-        internal override fun create(
+        override fun create(
             created: Long,
             objectId: String,
             expires: Long,
