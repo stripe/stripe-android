@@ -23,7 +23,6 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.Token
-import com.stripe.android.utils.ObjectUtils
 import java.net.HttpURLConnection
 import java.security.Security
 import java.util.Locale
@@ -353,14 +352,14 @@ internal class StripeApiRepository @JvmOverloads constructor(
     override fun addCustomerSource(
         customerId: String,
         publishableKey: String,
-        productUsageTokens: List<String>,
+        productUsageTokens: Set<String>,
         sourceId: String,
         @Source.SourceType sourceType: String,
         requestOptions: ApiRequest.Options
     ): Source? {
         fireAnalyticsRequest(
             analyticsDataFactory
-                .getAddSourceParams(productUsageTokens, publishableKey, sourceType),
+                .getAddSourceParams(productUsageTokens.toList(), publishableKey, sourceType),
             // We use the public key to log, so we need different Options.
             publishableKey
         )
@@ -383,12 +382,12 @@ internal class StripeApiRepository @JvmOverloads constructor(
     override fun deleteCustomerSource(
         customerId: String,
         publishableKey: String,
-        productUsageTokens: List<String>,
+        productUsageTokens: Set<String>,
         sourceId: String,
         requestOptions: ApiRequest.Options
     ): Source? {
         fireAnalyticsRequest(
-            analyticsDataFactory.getDeleteSourceParams(productUsageTokens, publishableKey),
+            analyticsDataFactory.getDeleteSourceParams(productUsageTokens.toList(), publishableKey),
             // We use the public key to log, so we need different Options.
             publishableKey
         )
@@ -409,13 +408,13 @@ internal class StripeApiRepository @JvmOverloads constructor(
     override fun attachPaymentMethod(
         customerId: String,
         publishableKey: String,
-        productUsageTokens: List<String>,
+        productUsageTokens: Set<String>,
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
     ): PaymentMethod? {
         fireAnalyticsRequest(
             analyticsDataFactory
-                .getAttachPaymentMethodParams(productUsageTokens, publishableKey),
+                .getAttachPaymentMethodParams(productUsageTokens.toList(), publishableKey),
             // We use the public key to log, so we need different Options.
             publishableKey
         )
@@ -436,13 +435,13 @@ internal class StripeApiRepository @JvmOverloads constructor(
         AuthenticationException::class, CardException::class)
     override fun detachPaymentMethod(
         publishableKey: String,
-        productUsageTokens: List<String>,
+        productUsageTokens: Set<String>,
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
     ): PaymentMethod? {
         fireAnalyticsRequest(
             analyticsDataFactory
-                .getDetachPaymentMethodParams(productUsageTokens, publishableKey),
+                .getDetachPaymentMethodParams(productUsageTokens.toList(), publishableKey),
             // We use the public key to log, so we need different Options.
             publishableKey
         )
@@ -466,7 +465,7 @@ internal class StripeApiRepository @JvmOverloads constructor(
         customerId: String,
         paymentMethodType: String,
         publishableKey: String,
-        productUsageTokens: List<String>,
+        productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
     ): List<PaymentMethod> {
         val queryParams = mapOf(
@@ -476,7 +475,7 @@ internal class StripeApiRepository @JvmOverloads constructor(
 
         fireAnalyticsRequest(
             analyticsDataFactory
-                .getDetachPaymentMethodParams(productUsageTokens, publishableKey),
+                .getDetachPaymentMethodParams(productUsageTokens.toList(), publishableKey),
             // We use the public key to log, so we need different Options.
             publishableKey
         )
@@ -507,7 +506,7 @@ internal class StripeApiRepository @JvmOverloads constructor(
     override fun setDefaultCustomerSource(
         customerId: String,
         publishableKey: String,
-        productUsageTokens: List<String>,
+        productUsageTokens: Set<String>,
         sourceId: String,
         @Source.SourceType sourceType: String,
         requestOptions: ApiRequest.Options
@@ -516,7 +515,7 @@ internal class StripeApiRepository @JvmOverloads constructor(
             analyticsDataFactory.getEventLoggingParams(
                 eventName = AnalyticsDataFactory.EventName.DEFAULT_SOURCE,
                 publishableKey = publishableKey,
-                productUsageTokens = productUsageTokens,
+                productUsageTokens = productUsageTokens.toList(),
                 sourceType = sourceType
             ),
             publishableKey
@@ -541,7 +540,7 @@ internal class StripeApiRepository @JvmOverloads constructor(
     override fun setCustomerShippingInfo(
         customerId: String,
         publishableKey: String,
-        productUsageTokens: List<String>,
+        productUsageTokens: Set<String>,
         shippingInformation: ShippingInformation,
         requestOptions: ApiRequest.Options
     ): Customer? {
@@ -549,7 +548,7 @@ internal class StripeApiRepository @JvmOverloads constructor(
             analyticsDataFactory.getEventLoggingParams(
                 AnalyticsDataFactory.EventName.SET_SHIPPING_INFO,
                 publishableKey,
-                productUsageTokens = productUsageTokens
+                productUsageTokens = productUsageTokens.toList()
             ),
             publishableKey
         )
@@ -863,7 +862,7 @@ internal class StripeApiRepository @JvmOverloads constructor(
             // value unspecified by implementation
             // DNS_CACHE_TTL_PROPERTY_NAME of -1 = cache forever
             Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME,
-                ObjectUtils.getOrDefault(dnsCacheData.second, "-1"))
+                dnsCacheData.second ?: "-1")
         }
     }
 

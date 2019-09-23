@@ -87,7 +87,7 @@ internal interface StripeRepository {
     fun addCustomerSource(
         customerId: String,
         publishableKey: String,
-        productUsageTokens: List<String>,
+        productUsageTokens: Set<String>,
         sourceId: String,
         @Source.SourceType sourceType: String,
         requestOptions: ApiRequest.Options
@@ -98,7 +98,7 @@ internal interface StripeRepository {
     fun deleteCustomerSource(
         customerId: String,
         publishableKey: String,
-        productUsageTokens: List<String>,
+        productUsageTokens: Set<String>,
         sourceId: String,
         requestOptions: ApiRequest.Options
     ): Source?
@@ -108,7 +108,7 @@ internal interface StripeRepository {
     fun attachPaymentMethod(
         customerId: String,
         publishableKey: String,
-        productUsageTokens: List<String>,
+        productUsageTokens: Set<String>,
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
     ): PaymentMethod?
@@ -117,7 +117,7 @@ internal interface StripeRepository {
         APIConnectionException::class, APIException::class, CardException::class)
     fun detachPaymentMethod(
         publishableKey: String,
-        productUsageTokens: List<String>,
+        productUsageTokens: Set<String>,
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
     ): PaymentMethod?
@@ -128,7 +128,7 @@ internal interface StripeRepository {
         customerId: String,
         paymentMethodType: String,
         publishableKey: String,
-        productUsageTokens: List<String>,
+        productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
     ): List<PaymentMethod>
 
@@ -137,7 +137,7 @@ internal interface StripeRepository {
     fun setDefaultCustomerSource(
         customerId: String,
         publishableKey: String,
-        productUsageTokens: List<String>,
+        productUsageTokens: Set<String>,
         sourceId: String,
         @Source.SourceType sourceType: String,
         requestOptions: ApiRequest.Options
@@ -148,7 +148,7 @@ internal interface StripeRepository {
     fun setCustomerShippingInfo(
         customerId: String,
         publishableKey: String,
-        productUsageTokens: List<String>,
+        productUsageTokens: Set<String>,
         shippingInformation: ShippingInformation,
         requestOptions: ApiRequest.Options
     ): Customer?

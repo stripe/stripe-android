@@ -20,7 +20,6 @@ import com.stripe.android.view.PaymentFlowActivityStarter;
 import com.stripe.android.view.PaymentMethodsActivity;
 import com.stripe.android.view.PaymentMethodsActivityStarter;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -39,7 +38,6 @@ import org.robolectric.RobolectricTestRunner;
 
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
-import static com.stripe.android.CustomerSessionTest.SECOND_TEST_CUSTOMER_OBJECT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -61,8 +59,7 @@ import static org.mockito.Mockito.when;
 public class PaymentSessionTest {
 
     @NonNull private static final Customer FIRST_CUSTOMER = CustomerFixtures.CUSTOMER;
-    @NonNull private static final Customer SECOND_CUSTOMER =
-            Objects.requireNonNull(Customer.fromString(SECOND_TEST_CUSTOMER_OBJECT));
+    @NonNull private static final Customer SECOND_CUSTOMER = CustomerFixtures.OTHER_CUSTOMER;
 
     @NonNull private final TestEphemeralKeyProvider mEphemeralKeyProvider =
             new TestEphemeralKeyProvider();
@@ -372,7 +369,7 @@ public class PaymentSessionTest {
         public Customer setDefaultCustomerSource(
                 @NonNull String customerId,
                 @NonNull String publishableKey,
-                @NonNull List<String> productUsageTokens,
+                @NonNull Set<String> productUsageTokens,
                 @NonNull String sourceId,
                 @NonNull String sourceType,
                 @NonNull ApiRequest.Options requestOptions) {

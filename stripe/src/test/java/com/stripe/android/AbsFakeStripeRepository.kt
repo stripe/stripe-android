@@ -78,7 +78,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
     override fun addCustomerSource(
         customerId: String,
         publishableKey: String,
-        productUsageTokens: List<String>,
+        productUsageTokens: Set<String>,
         sourceId: String,
         sourceType: String,
         requestOptions: ApiRequest.Options
@@ -90,7 +90,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
     override fun deleteCustomerSource(
         customerId: String,
         publishableKey: String,
-        productUsageTokens: List<String>,
+        productUsageTokens: Set<String>,
         sourceId: String,
         requestOptions: ApiRequest.Options
     ): Source? {
@@ -101,7 +101,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
     override fun attachPaymentMethod(
         customerId: String,
         publishableKey: String,
-        productUsageTokens: List<String>,
+        productUsageTokens: Set<String>,
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
     ): PaymentMethod? {
@@ -111,7 +111,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
     @Throws(APIException::class)
     override fun detachPaymentMethod(
         publishableKey: String,
-        productUsageTokens: List<String>,
+        productUsageTokens: Set<String>,
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
     ): PaymentMethod? {
@@ -123,7 +123,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         customerId: String,
         paymentMethodType: String,
         publishableKey: String,
-        productUsageTokens: List<String>,
+        productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
     ): List<PaymentMethod> {
         return emptyList()
@@ -133,7 +133,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
     override fun setDefaultCustomerSource(
         customerId: String,
         publishableKey: String,
-        productUsageTokens: List<String>,
+        productUsageTokens: Set<String>,
         sourceId: String,
         sourceType: String,
         requestOptions: ApiRequest.Options
@@ -144,7 +144,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
     override fun setCustomerShippingInfo(
         customerId: String,
         publishableKey: String,
-        productUsageTokens: List<String>,
+        productUsageTokens: Set<String>,
         shippingInformation: ShippingInformation,
         requestOptions: ApiRequest.Options
     ): Customer? {

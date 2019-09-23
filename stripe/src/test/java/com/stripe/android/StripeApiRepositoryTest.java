@@ -16,6 +16,15 @@ import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
+
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -24,15 +33,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -501,7 +501,7 @@ public class StripeApiRepositoryTest {
         final StripeRepository stripeApiRepository = create();
         final List<PaymentMethod> paymentMethods = stripeApiRepository
                 .getPaymentMethods("cus_123", PaymentMethod.Type.Card.code,
-                        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, new ArrayList<String>(),
+                        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, Collections.<String>emptySet(),
                         ApiRequest.Options.create(ApiKeyFixtures.FAKE_EPHEMERAL_KEY));
         assertEquals(3, paymentMethods.size());
         assertEquals("pm_1EVNYJCRMbs6FrXfG8n52JaK", paymentMethods.get(0).id);
@@ -545,7 +545,7 @@ public class StripeApiRepositoryTest {
         final StripeApiRepository stripeApiRepository = create();
         final List<PaymentMethod> paymentMethods = stripeApiRepository
                 .getPaymentMethods("cus_123", PaymentMethod.Type.Card.code,
-                        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, new ArrayList<String>(),
+                        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, Collections.<String>emptySet(),
                         ApiRequest.Options.create(ApiKeyFixtures.FAKE_EPHEMERAL_KEY));
         assertTrue(paymentMethods.isEmpty());
     }
