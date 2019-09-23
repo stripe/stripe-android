@@ -22,7 +22,7 @@ internal class IssuingCardEphemeralKey : EphemeralKey {
     ) : super(created, customerId, expires, id, liveMode, objectType, secret, type)
 
     internal class Factory : EphemeralKey.Factory<IssuingCardEphemeralKey>() {
-        internal override fun create(
+        override fun create(
             created: Long,
             objectId: String,
             expires: Long,
