@@ -247,7 +247,7 @@ public class StripeTest {
         createStripe()
                 .createBankAccountToken(new BankAccount(
                         "Jane Austen",
-                        BankAccount.BankAccountType.INDIVIDUAL,
+                                BankAccount.BankAccountType.INDIVIDUAL,
                         "STRIPE TEST BANK",
                         "US",
                         "usd",
@@ -399,7 +399,7 @@ public class StripeTest {
         final Source weChatPaySource = stripe.createSourceSynchronous(weChatPaySourceParams);
         assertNotNull(weChatPaySource);
         assertEquals("WIDGET STORE",
-                weChatPaySource.getWeChat().statementDescriptor);
+                weChatPaySource.getWeChat().getStatementDescriptor());
     }
 
     @Test

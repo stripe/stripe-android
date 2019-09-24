@@ -27,6 +27,15 @@ class AddressTest {
         assertEquals(address, ADDRESS)
     }
 
+    @Test
+    fun toParamMap_shouldRejectEmptyValues() {
+        val addressParams = Address.Builder()
+            .setCountry("US")
+            .build()
+            .toParamMap()
+        assertEquals(mapOf("country" to "US"), addressParams)
+    }
+
     companion object {
         private val MAP_ADDRESS = mapOf(
             "city" to "San Francisco",

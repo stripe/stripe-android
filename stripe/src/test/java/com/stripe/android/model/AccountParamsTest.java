@@ -1,9 +1,9 @@
 package com.stripe.android.model;
 
-import org.junit.Test;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -24,10 +24,10 @@ public class AccountParamsTest {
         assertNotNull(accountData);
         assertEquals(3, accountData.size());
         assertEquals(Boolean.TRUE, accountData.get(AccountParams.API_TOS_SHOWN_AND_ACCEPTED));
-        assertEquals(AccountParams.BusinessType.Company.code,
+        assertEquals(AccountParams.BusinessType.Company.getCode(),
                 accountData.get(AccountParams.API_BUSINESS_TYPE));
         assertEquals(businessData,
-                accountData.get(AccountParams.BusinessType.Company.code));
+                accountData.get(AccountParams.BusinessType.Company.getCode()));
     }
 
     @Test

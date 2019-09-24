@@ -83,6 +83,6 @@ class BankAccountTest {
                 "status": "new"
             }
             """.trimIndent()
-        ))!!
+        ))
     }
 }

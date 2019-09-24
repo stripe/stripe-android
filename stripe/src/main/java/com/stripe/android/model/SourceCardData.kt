@@ -258,7 +258,7 @@ class SourceCardData private constructor(builder: Builder) : StripeSourceTypeMod
             }
 
             return when {
-                ThreeDSecureStatus.REQUIRED.equals(threeDSecureStatus!!, ignoreCase = true) ->
+                ThreeDSecureStatus.REQUIRED.equals(threeDSecureStatus, ignoreCase = true) ->
                     ThreeDSecureStatus.REQUIRED
                 ThreeDSecureStatus.OPTIONAL.equals(threeDSecureStatus, ignoreCase = true) ->
                     ThreeDSecureStatus.OPTIONAL

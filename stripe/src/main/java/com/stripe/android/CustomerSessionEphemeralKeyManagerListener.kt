@@ -12,15 +12,15 @@ internal class CustomerSessionEphemeralKeyManagerListener(
     override fun onKeyUpdate(
         ephemeralKey: CustomerEphemeralKey,
         operationId: String,
-        actionString: String?,
+        action: String?,
         arguments: Map<String, Any>?
     ) {
         val runnable =
-            runnableFactory.create(ephemeralKey, operationId, actionString, arguments)
+            runnableFactory.create(ephemeralKey, operationId, action, arguments)
         runnable?.let {
             executor.execute(it)
 
-            if (actionString != null) {
+            if (action != null) {
                 productUsage.reset()
             }
         }
@@ -28,9 +28,9 @@ internal class CustomerSessionEphemeralKeyManagerListener(
 
     override fun onKeyError(
         operationId: String,
-        httpCode: Int,
+        errorCode: Int,
         errorMessage: String
     ) {
-        listeners.remove(operationId)?.onError(httpCode, errorMessage, null)
+        listeners.remove(operationId)?.onError(errorCode, errorMessage, null)
     }
 }
