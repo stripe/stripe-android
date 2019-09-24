@@ -57,6 +57,7 @@ data class ShippingInformation constructor(
         private const val FIELD_NAME = "name"
         private const val FIELD_PHONE = "phone"
 
+        @JvmStatic
         fun fromJson(jsonObject: JSONObject?): ShippingInformation? {
             return if (jsonObject == null) {
                 null

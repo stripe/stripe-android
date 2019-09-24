@@ -123,6 +123,7 @@ class SourceSepaDebitData private constructor(builder: Builder) : StripeSourceTy
             FIELD_MANDATE_URL
         )
 
+        @JvmStatic
         fun fromJson(jsonObject: JSONObject?): SourceSepaDebitData? {
             if (jsonObject == null) {
                 return null

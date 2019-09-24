@@ -26,8 +26,7 @@ public class CustomerSourceTest {
     }
 
     @Test
-    public void fromJson_whenCardWithTokenization_createsSourceDataWithTokenization()
-            throws JSONException {
+    public void fromJson_whenCardWithTokenization_createsSourceDataWithTokenization() {
         final JSONObject jsonCard = SourceFixtures.APPLE_PAY;
         final CustomerSource sourceData = CustomerSource.fromJson(jsonCard);
         assertNotNull(sourceData);
@@ -39,7 +38,7 @@ public class CustomerSourceTest {
     @Test
     public void fromJson_whenSource_createsCustomerSourceData() {
         final CustomerSource sourceData =
-                CustomerSource.fromString(EXAMPLE_JSON_SOURCE_WITHOUT_NULLS);
+                CustomerSource.fromJson(SourceTest.EXAMPLE_JSON_SOURCE_WITHOUT_NULLS);
         assertNotNull(sourceData);
         assertNotNull(sourceData.asSource());
         assertEquals("src_19t3xKBZqEXluyI4uz2dxAfQ", sourceData.getId());
@@ -47,7 +46,7 @@ public class CustomerSourceTest {
 
     @Test
     public void fromExampleJsonSource_toJson_createsSameObject() {
-        assertNotNull(CustomerSource.fromString(EXAMPLE_JSON_SOURCE_WITHOUT_NULLS));
+        assertNotNull(CustomerSource.fromJson(EXAMPLE_JSON_SOURCE_WITHOUT_NULLS));
     }
 
     @Test

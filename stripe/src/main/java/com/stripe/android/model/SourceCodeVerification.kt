@@ -2,7 +2,6 @@ package com.stripe.android.model
 
 import androidx.annotation.StringDef
 import com.stripe.android.model.StripeJsonUtils.optString
-import org.json.JSONException
 import org.json.JSONObject
 
 /**
@@ -33,18 +32,7 @@ data class SourceCodeVerification constructor(
         private const val FIELD_STATUS = "status"
         private const val INVALID_ATTEMPTS_REMAINING = -1
 
-        fun fromString(jsonString: String?): SourceCodeVerification? {
-            if (jsonString == null) {
-                return null
-            }
-
-            return try {
-                fromJson(JSONObject(jsonString))
-            } catch (ignored: JSONException) {
-                null
-            }
-        }
-
+        @JvmStatic
         fun fromJson(jsonObject: JSONObject?): SourceCodeVerification? {
             return if (jsonObject == null) {
                 null

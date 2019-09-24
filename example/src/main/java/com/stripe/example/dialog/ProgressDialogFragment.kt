@@ -7,7 +7,7 @@ import android.os.Bundle
 class ProgressDialogFragment : androidx.fragment.app.DialogFragment() {
 
     private val message: String?
-        get() = if (arguments != null) arguments!!.getString("message") else null
+        get() = arguments?.getString("message")
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = ProgressDialog(activity)
