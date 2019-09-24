@@ -12,30 +12,14 @@ import org.json.JSONObject
  * Model for an owner [address](https://stripe.com/docs/api#source_object-owner-address)
  * object in the Source api.
  */
-class Address : StripeModel, StripeParamsModel, Parcelable {
-    val city: String?
-    val country: String?
-    val line1: String?
-    val line2: String?
-    val postalCode: String?
+class Address private constructor(
+    val city: String?,
+    val country: String?,
+    val line1: String?,
+    val line2: String?,
+    val postalCode: String?,
     val state: String?
-
-    private constructor(
-        city: String?,
-        country: String?,
-        line1: String?,
-        line2: String?,
-        postalCode: String?,
-        state: String?
-    ) {
-        this.city = city
-        this.country = country
-        this.line1 = line1
-        this.line2 = line2
-        this.postalCode = postalCode
-        this.state = state
-    }
-
+) : StripeModel(), StripeParamsModel, Parcelable {
     private constructor(addressBuilder: Builder) : this(
         addressBuilder.city,
         addressBuilder.country,
@@ -45,14 +29,14 @@ class Address : StripeModel, StripeParamsModel, Parcelable {
         addressBuilder.state
     )
 
-    private constructor(parcel: Parcel) {
-        city = parcel.readString()
-        country = parcel.readString()
-        line1 = parcel.readString()
-        line2 = parcel.readString()
-        postalCode = parcel.readString()
+    private constructor(parcel: Parcel) : this(
+        city = parcel.readString(),
+        country = parcel.readString(),
+        line1 = parcel.readString(),
+        line2 = parcel.readString(),
+        postalCode = parcel.readString(),
         state = parcel.readString()
-    }
+    )
 
     override fun toParamMap(): Map<String, Any> {
         return mapOf(

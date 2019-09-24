@@ -139,13 +139,11 @@ class BankAccount(
          */
         @BankAccountType
         fun asBankAccountType(possibleAccountType: String?): String? {
-            if (BankAccountType.COMPANY == possibleAccountType) {
-                return BankAccountType.COMPANY
-            } else if (BankAccountType.INDIVIDUAL == possibleAccountType) {
-                return BankAccountType.INDIVIDUAL
+            return when (possibleAccountType) {
+                BankAccountType.COMPANY -> BankAccountType.COMPANY
+                BankAccountType.INDIVIDUAL -> BankAccountType.INDIVIDUAL
+                else -> null
             }
-
-            return null
         }
 
         fun fromJson(jsonObject: JSONObject): BankAccount {
