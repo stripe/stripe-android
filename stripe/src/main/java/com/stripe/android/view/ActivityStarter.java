@@ -9,8 +9,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import java.util.Objects;
-
 public abstract class ActivityStarter
         <TargetActivityType extends Activity, ArgsType extends ActivityStarter.Args> {
     @NonNull private final Activity mActivity;
@@ -46,19 +44,14 @@ public abstract class ActivityStarter
     }
 
     public final void startForResult(@NonNull ArgsType args) {
-        final Intent intent = newIntent()
+        final Intent intent = new Intent(mActivity, mTargetClass)
                 .putExtra(Args.EXTRA, args);
 
         if (mFragment != null) {
-            Objects.requireNonNull(mFragment).startActivityForResult(intent, mRequestCode);
+            mFragment.startActivityForResult(intent, mRequestCode);
         } else {
             mActivity.startActivityForResult(intent, mRequestCode);
         }
-    }
-
-    @NonNull
-    final Intent newIntent() {
-        return new Intent(mActivity, mTargetClass);
     }
 
     public interface Args extends Parcelable {
