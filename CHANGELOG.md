@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 11.1.4 - 2019-09-24
+* [#1603](https://github.com/stripe/stripe-android/pull/1603) Update ProGuard rules for BouncyCastle
+* [#1608](https://github.com/stripe/stripe-android/pull/1608) Update ProGuard rules for Material Components
+
 ## 11.1.3 - 2019-09-18
 * [#1582](https://github.com/stripe/stripe-android/pull/1582) Update 3DS2 SDK to 2.0.5
     * Add translations for `ko`, `nn`, `ru`, and `tr`
