@@ -1,5 +1,8 @@
--keep class android.support.design.widget.TextInputLayout { *; }
--keep class android.support.design.widget.CollapsingTextHelper { *; }
+# Rules for IconTextInputLayout
+-keep class com.google.android.material.textfield.TextInputLayout { *; }
+-keep class com.google.android.material.internal.CollapsingTextHelper { *; }
+
+# Rules for BouncyCastle
 -keep class org.bouncycastle.jcajce.provider.** { *; }
 -keep class org.bouncycastle.jce.provider.** { *; }
 
