@@ -24,4 +24,6 @@
         <item name="android:textColor">#999999</item>
         <item name="android:textSize">@dimen/notification_text_size</item>
     </style>
+
+    <style name="StripeDefault3DS2Theme" parent="BaseStripe3DS2Theme" />
 </resources>
