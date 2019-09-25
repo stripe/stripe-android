@@ -195,7 +195,7 @@ public final class AddPaymentMethodActivityStarter
          * @return the {@link Result} object from the given <code>Intent</code>
          */
         @Nullable
-        static Result fromIntent(@NonNull Intent intent) {
+        public static Result fromIntent(@NonNull Intent intent) {
             return intent.getParcelableExtra(EXTRA);
         }
 
