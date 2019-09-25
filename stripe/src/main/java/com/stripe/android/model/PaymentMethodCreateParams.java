@@ -29,6 +29,7 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
     private static final String FIELD_CARD = "card";
     private static final String FIELD_FPX = "fpx";
     private static final String FIELD_IDEAL = "ideal";
+    private static final String FIELD_SEPA_DEBIT = "sepa_debit";
 
     private static final String FIELD_BILLING_DETAILS = "billing_details";
     private static final String FIELD_METADATA = "metadata";
@@ -37,6 +38,7 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
     @Nullable private final PaymentMethodCreateParams.Card card;
     @Nullable private final PaymentMethodCreateParams.Ideal ideal;
     @Nullable private final PaymentMethodCreateParams.Fpx fpx;
+    @Nullable private final PaymentMethodCreateParams.SepaDebit sepaDebit;
     @Nullable private final PaymentMethod.BillingDetails billingDetails;
     @Nullable private final Map<String, String> metadata;
 
@@ -102,6 +104,30 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
         return new PaymentMethodCreateParams(fpx, billingDetails, metadata);
     }
 
+    // TODO(mshafrir-stripe): make public
+    @NonNull
+    static PaymentMethodCreateParams create(
+            @NonNull PaymentMethodCreateParams.SepaDebit sepaDebit) {
+        return create(sepaDebit, null);
+    }
+
+    // TODO(mshafrir-stripe): make public
+    @NonNull
+    private static PaymentMethodCreateParams create(
+            @NonNull PaymentMethodCreateParams.SepaDebit sepaDebit,
+            @Nullable PaymentMethod.BillingDetails billingDetails) {
+        return create(sepaDebit, billingDetails, null);
+    }
+
+    // TODO(mshafrir-stripe): make public
+    @NonNull
+    private static PaymentMethodCreateParams create(
+            @NonNull PaymentMethodCreateParams.SepaDebit sepaDebit,
+            @Nullable PaymentMethod.BillingDetails billingDetails,
+            @Nullable Map<String, String> metadata) {
+        return new PaymentMethodCreateParams(sepaDebit, billingDetails, metadata);
+    }
+
     /**
      * @param googlePayPaymentData a {@link JSONObject} derived from Google Pay's
      *                             <a href="https://developers.google.com/pay/api/android/reference/client#tojson">PaymentData#toJson()</a>
@@ -157,6 +183,7 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
         this.card = card;
         this.ideal = null;
         this.fpx = null;
+        this.sepaDebit = null;
         this.billingDetails = billingDetails;
         this.metadata = metadata;
     }
@@ -168,6 +195,7 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
         this.card = null;
         this.ideal = ideal;
         this.fpx = null;
+        this.sepaDebit = null;
         this.billingDetails = billingDetails;
         this.metadata = metadata;
     }
@@ -179,6 +207,19 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
         this.card = null;
         this.ideal = null;
         this.fpx = fpx;
+        this.sepaDebit = null;
+        this.billingDetails = billingDetails;
+        this.metadata = metadata;
+    }
+
+    private PaymentMethodCreateParams(@NonNull PaymentMethodCreateParams.SepaDebit sepaDebit,
+                                      @Nullable PaymentMethod.BillingDetails billingDetails,
+                                      @Nullable Map<String, String> metadata) {
+        this.type = Type.SepaDebit;
+        this.card = null;
+        this.ideal = null;
+        this.fpx = null;
+        this.sepaDebit = sepaDebit;
         this.billingDetails = billingDetails;
         this.metadata = metadata;
     }
@@ -195,6 +236,8 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
             params.put(FIELD_IDEAL, ideal.toParamMap());
         } else if (type == Type.Fpx && fpx != null) {
             params.put(FIELD_FPX, fpx.toParamMap());
+        } else if (type == Type.SepaDebit && sepaDebit != null) {
+            params.put(FIELD_SEPA_DEBIT, sepaDebit.toParamMap());
         }
 
         if (billingDetails != null) {
@@ -237,7 +280,8 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
     enum Type {
         Card("card"),
         Ideal("ideal"),
-        Fpx("fpx");
+        Fpx("fpx"),
+        SepaDebit("sepa_debit");
 
         @NonNull private final String mCode;
 
@@ -458,6 +502,54 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
             @NonNull
             public Fpx build() {
                 return new Fpx(this);
+            }
+        }
+    }
+
+    // TODO(mshafrir-stripe): make public
+    static final class SepaDebit implements StripeParamsModel {
+        private static final String FIELD_IBAN = "iban";
+
+        @Nullable private final String iban;
+
+        private SepaDebit(@NonNull SepaDebit.Builder builder) {
+            this.iban = builder.iban;
+        }
+
+        @NonNull
+        @Override
+        public Map<String, Object> toParamMap() {
+            final AbstractMap<String, Object> map = new HashMap<>();
+            map.put(FIELD_IBAN, iban);
+            return map;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(iban);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            return this == obj || (obj instanceof SepaDebit && typedEquals((SepaDebit) obj));
+        }
+
+        private boolean typedEquals(@NonNull SepaDebit sepaDebit) {
+            return Objects.equals(iban, sepaDebit.iban);
+        }
+
+        public static final class Builder implements ObjectBuilder<SepaDebit> {
+            @Nullable private String iban;
+
+            @NonNull
+            public Builder setIban(@Nullable String iban) {
+                this.iban = iban;
+                return this;
+            }
+
+            @NonNull
+            public SepaDebit build() {
+                return new SepaDebit(this);
             }
         }
     }

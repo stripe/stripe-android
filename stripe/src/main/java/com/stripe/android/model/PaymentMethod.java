@@ -67,7 +67,8 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         Card("card"),
         CardPresent("card_present"),
         Fpx("fpx", false),
-        Ideal("ideal");
+        Ideal("ideal"),
+        SepaDebit("sepa_debit");
 
         @NonNull public final String code;
         public final boolean isReusable;
