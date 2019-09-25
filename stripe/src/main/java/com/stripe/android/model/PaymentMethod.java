@@ -387,6 +387,15 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
             dest.writeString(phone);
         }
 
+        @NonNull
+        public Builder toBuilder() {
+            return new Builder()
+                    .setAddress(address)
+                    .setEmail(email)
+                    .setName(name)
+                    .setPhone(phone);
+        }
+
         public static final Parcelable.Creator<BillingDetails> CREATOR =
                 new Parcelable.Creator<BillingDetails>() {
                     @Override
