@@ -34,7 +34,7 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
     private static final String FIELD_BILLING_DETAILS = "billing_details";
     private static final String FIELD_METADATA = "metadata";
 
-    @NonNull private final Type type;
+    @NonNull final Type type;
     @Nullable private final PaymentMethodCreateParams.Card card;
     @Nullable private final PaymentMethodCreateParams.Ideal ideal;
     @Nullable private final PaymentMethodCreateParams.Fpx fpx;
@@ -224,11 +224,15 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
         this.metadata = metadata;
     }
 
+    boolean shouldAddMandate() {
+        return type == Type.SepaDebit;
+    }
+
     @NonNull
     @Override
     public Map<String, Object> toParamMap() {
         final Map<String, Object> params = new HashMap<>();
-        params.put(FIELD_TYPE, type.mCode);
+        params.put(FIELD_TYPE, type.code);
 
         if (type == Type.Card && card != null) {
             params.put(FIELD_CARD, card.toParamMap());
@@ -253,7 +257,7 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
 
     @NonNull
     public String getTypeCode() {
-        return type.mCode;
+        return type.code;
     }
 
     @Override
@@ -281,12 +285,18 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
         Card("card"),
         Ideal("ideal"),
         Fpx("fpx"),
-        SepaDebit("sepa_debit");
+        SepaDebit("sepa_debit", true);
 
-        @NonNull private final String mCode;
+        @NonNull private final String code;
+        final boolean hasMandate;
 
         Type(@NonNull String code) {
-            mCode = code;
+            this(code, false);
+        }
+
+        Type(@NonNull String code, boolean hasMandate) {
+            this.code = code;
+            this.hasMandate = hasMandate;
         }
     }
 
