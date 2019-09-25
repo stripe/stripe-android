@@ -19,11 +19,8 @@ internal interface CardWidget {
     val paymentMethodCard: PaymentMethodCreateParams.Card?
 
     /**
-     * Gets a [PaymentMethodCreateParams] object from the user input, if all fields are
-     * valid. If not, returns `null`.
-     *
-     * @return a valid [PaymentMethodCreateParams] object based on user input, or
-     * `null` if any field is invalid
+     * @return a valid [PaymentMethodCreateParams] object based on user input, or `null` if any
+     * field is invalid. The object will include any billing details that the user entered.
      */
     val paymentMethodCreateParams: PaymentMethodCreateParams?
 
