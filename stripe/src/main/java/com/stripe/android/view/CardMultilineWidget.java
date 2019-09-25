@@ -262,6 +262,10 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
         return null;
     }
 
+    /**
+     * @return a valid {@link PaymentMethodCreateParams} object based on user input, or `null` if
+     * any field is invalid. The object will include any billing details that the user entered.
+     */
     @Nullable
     @Override
     public PaymentMethodCreateParams getPaymentMethodCreateParams() {
