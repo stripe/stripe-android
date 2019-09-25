@@ -35,6 +35,13 @@ internal object PaymentMethodCreateParamsFixtures {
             .build()
     )
 
+    @JvmField
+    val DEFAULT_SEPA_DEBIT = PaymentMethodCreateParams.create(
+        PaymentMethodCreateParams.SepaDebit.Builder()
+            .setIban("my_iban")
+            .build()
+    )
+
     @JvmStatic
     fun createWith(metadata: Map<String, String>): PaymentMethodCreateParams {
         return PaymentMethodCreateParams.create(
