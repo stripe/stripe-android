@@ -2,14 +2,14 @@ package com.stripe.android.model;
 
 import android.os.Parcel;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -198,5 +198,14 @@ public class PaymentMethodTest {
         final PaymentMethod parcelPaymentMethod = PaymentMethod.CREATOR.createFromParcel(parcel);
 
         assertEquals(paymentMethod, parcelPaymentMethod);
+    }
+
+    @Test
+    public void testBillingDetailsToBuilder() {
+        assertEquals(
+                PaymentMethodFixtures.BILLING_DETAILS,
+                PaymentMethodFixtures.BILLING_DETAILS.toBuilder()
+                        .build()
+        );
     }
 }

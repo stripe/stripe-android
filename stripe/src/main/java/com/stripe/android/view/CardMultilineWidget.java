@@ -274,23 +274,32 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
     }
 
     /**
-     * Gets a {@link PaymentMethod.BillingDetails} object from the user input, if all fields are
-     * valid. If not returns {@code null}.
-     *
      * @return a valid {@link PaymentMethod.BillingDetails} object based on user input, or
      * {@code null} if any field is invalid
      */
     @Nullable
     public PaymentMethod.BillingDetails getPaymentMethodBillingDetails() {
-        if (mShouldShowPostalCode && validateAllFields()) {
-            return new PaymentMethod.BillingDetails.Builder().setAddress(
-                    new Address.Builder().setPostalCode(mPostalCodeEditText.getText().toString())
-                            .build()).build();
-        }
-
-        return null;
+        final PaymentMethod.BillingDetails.Builder builder =
+                getPaymentMethodBillingDetailsBuilder();
+        return builder != null ? builder.build() : null;
     }
 
+    /**
+     * @return a valid {@link PaymentMethod.BillingDetails.Builder} object based on user input, or
+     * {@code null} if any field is invalid
+     */
+    @Nullable
+    public PaymentMethod.BillingDetails.Builder getPaymentMethodBillingDetailsBuilder() {
+        if (mShouldShowPostalCode && validateAllFields()) {
+            return new PaymentMethod.BillingDetails.Builder()
+                    .setAddress(new Address.Builder()
+                            .setPostalCode(mPostalCodeEditText.getText().toString())
+                            .build()
+                    );
+        } else {
+            return null;
+        }
+    }
 
     /**
      * Gets a {@link Card} object from the user input, if all fields are valid. If not, returns
