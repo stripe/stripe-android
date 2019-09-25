@@ -1,10 +1,10 @@
 package com.stripe.android.model;
 
 
-import org.junit.Test;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import org.junit.Test;
 
 import static com.stripe.android.view.CardInputTestActivity.VALID_VISA_NO_SPACES;
 import static org.junit.Assert.assertEquals;
@@ -226,5 +226,18 @@ public class ConfirmPaymentIntentParamsTest {
                 );
 
         assertEquals(params, params.toBuilder().build());
+    }
+
+    @Test
+    public void create_withMandatePaymentMethodType_addsMandateDataToParams() {
+        final Map<String, Object> params =
+                ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                        PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT,
+                        CLIENT_SECRET,
+                        RETURN_URL
+                ).toParamMap();
+        assertTrue(
+                params.containsKey(MandateData.API_PARAM_MANDATE_DATA)
+        );
     }
 }

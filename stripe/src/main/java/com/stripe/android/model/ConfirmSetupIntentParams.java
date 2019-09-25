@@ -116,25 +116,27 @@ public final class ConfirmSetupIntentParams implements ConfirmStripeIntentParams
     @NonNull
     @Override
     public Map<String, Object> toParamMap() {
-        final Map<String, Object> networkReadyMap = new HashMap<>();
+        final Map<String, Object> params = new HashMap<>();
 
         if (mPaymentMethodCreateParams != null) {
-            networkReadyMap.put(API_PARAM_PAYMENT_METHOD_DATA,
-                    mPaymentMethodCreateParams.toParamMap());
+            params.put(API_PARAM_PAYMENT_METHOD_DATA, mPaymentMethodCreateParams.toParamMap());
+            if (mPaymentMethodCreateParams.type.hasMandate) {
+                params.put(MandateData.API_PARAM_MANDATE_DATA, new MandateData().toParamMap());
+            }
         } else if (mPaymentMethodId != null) {
-            networkReadyMap.put(API_PARAM_PAYMENT_METHOD_ID, mPaymentMethodId);
+            params.put(API_PARAM_PAYMENT_METHOD_ID, mPaymentMethodId);
         }
 
-        networkReadyMap.put(API_PARAM_CLIENT_SECRET, mClientSecret);
+        params.put(API_PARAM_CLIENT_SECRET, mClientSecret);
         if (mReturnUrl != null) {
-            networkReadyMap.put(API_PARAM_RETURN_URL, mReturnUrl);
+            params.put(API_PARAM_RETURN_URL, mReturnUrl);
         }
 
         if (mUseStripeSdk) {
-            networkReadyMap.put(API_PARAM_USE_STRIPE_SDK, true);
+            params.put(API_PARAM_USE_STRIPE_SDK, true);
         }
 
-        return networkReadyMap;
+        return params;
     }
 
     @Nullable

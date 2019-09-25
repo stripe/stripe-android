@@ -369,36 +369,39 @@ public final class ConfirmPaymentIntentParams implements ConfirmStripeIntentPara
     @NonNull
     @Override
     public Map<String, Object> toParamMap() {
-        final Map<String, Object> networkReadyMap = new HashMap<>();
+        final Map<String, Object> params = new HashMap<>();
 
         if (mPaymentMethodCreateParams != null) {
-            networkReadyMap.put(API_PARAM_PAYMENT_METHOD_DATA,
+            params.put(API_PARAM_PAYMENT_METHOD_DATA,
                     mPaymentMethodCreateParams.toParamMap());
+            if (mPaymentMethodCreateParams.type.hasMandate) {
+                params.put(MandateData.API_PARAM_MANDATE_DATA, new MandateData().toParamMap());
+            }
         } else if (mPaymentMethodId != null) {
-            networkReadyMap.put(API_PARAM_PAYMENT_METHOD_ID, mPaymentMethodId);
+            params.put(API_PARAM_PAYMENT_METHOD_ID, mPaymentMethodId);
         } else if (mSourceParams != null) {
-            networkReadyMap.put(API_PARAM_SOURCE_DATA, mSourceParams.toParamMap());
+            params.put(API_PARAM_SOURCE_DATA, mSourceParams.toParamMap());
         } else if (mSourceId != null) {
-            networkReadyMap.put(API_PARAM_SOURCE_ID, mSourceId);
+            params.put(API_PARAM_SOURCE_ID, mSourceId);
         }
 
         if (mReturnUrl != null) {
-            networkReadyMap.put(API_PARAM_RETURN_URL, mReturnUrl);
+            params.put(API_PARAM_RETURN_URL, mReturnUrl);
         }
-        networkReadyMap.put(API_PARAM_CLIENT_SECRET, mClientSecret);
+        params.put(API_PARAM_CLIENT_SECRET, mClientSecret);
         if (mExtraParams != null) {
-            networkReadyMap.putAll(mExtraParams);
+            params.putAll(mExtraParams);
         }
 
         if (mSavePaymentMethod) {
-            networkReadyMap.put(API_PARAM_SAVE_PAYMENT_METHOD, true);
+            params.put(API_PARAM_SAVE_PAYMENT_METHOD, true);
         }
 
         if (mUseStripeSdk) {
-            networkReadyMap.put(API_PARAM_USE_STRIPE_SDK, true);
+            params.put(API_PARAM_USE_STRIPE_SDK, true);
         }
 
-        return networkReadyMap;
+        return params;
     }
 
     @NonNull
