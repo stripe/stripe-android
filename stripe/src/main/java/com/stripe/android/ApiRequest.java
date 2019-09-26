@@ -18,7 +18,8 @@ import org.json.JSONObject;
 /**
  * A class representing a Stripe API or Analytics request.
  */
-final class ApiRequest extends StripeRequest {
+// TODO(mshafrir-stripe): make `internal` after converting to Kotlin
+public final class ApiRequest extends StripeRequest {
     static final String MIME_TYPE = "application/x-www-form-urlencoded";
 
     static final String API_HOST = "https://api.stripe.com";
@@ -148,7 +149,8 @@ final class ApiRequest extends StripeRequest {
     /**
      * Data class representing options for a Stripe API request.
      */
-    static final class Options {
+    // TODO(mshafrir-stripe): make `internal` after converting to Kotlin
+    public static final class Options {
         @NonNull final String apiKey;
         @Nullable final String stripeAccount;
 
