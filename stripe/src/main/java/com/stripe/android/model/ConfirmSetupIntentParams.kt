@@ -2,8 +2,8 @@ package com.stripe.android.model
 
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.ObjectBuilder
-import com.stripe.android.model.ConfirmPaymentIntentParams.API_PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_CLIENT_SECRET
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_PAYMENT_METHOD_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_RETURN_URL
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_USE_STRIPE_SDK
