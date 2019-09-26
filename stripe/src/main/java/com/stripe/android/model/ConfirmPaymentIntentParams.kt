@@ -2,7 +2,8 @@ package com.stripe.android.model
 
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.ObjectBuilder
-import java.util.HashMap
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_CLIENT_SECRET
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_USE_STRIPE_SDK
 import java.util.Objects
 
 class ConfirmPaymentIntentParams private constructor(builder: Builder) : ConfirmStripeIntentParams {
@@ -52,17 +53,21 @@ class ConfirmPaymentIntentParams private constructor(builder: Builder) : Confirm
      * Create a Map representing this object that is prepared for the Stripe API.
      */
     override fun toParamMap(): Map<String, Any> {
-        val params = HashMap<String, Any>()
+        val params: MutableMap<String, Any> = mutableMapOf(
+            API_PARAM_CLIENT_SECRET to clientSecret,
+            API_PARAM_SAVE_PAYMENT_METHOD to savePaymentMethod,
+            API_PARAM_USE_STRIPE_SDK to useStripeSdk
+        )
 
         if (paymentMethodCreateParams != null) {
-            params[API_PARAM_PAYMENT_METHOD_DATA] = paymentMethodCreateParams.toParamMap()
+            params[API_PARAM_PAYMENT_METHOD_DATA] = paymentMethodCreateParams.toParamMap().toMap()
             if (paymentMethodCreateParams.type.hasMandate) {
                 params[MandateData.API_PARAM_MANDATE_DATA] = MandateData().toParamMap()
             }
         } else if (paymentMethodId != null) {
             params[ConfirmStripeIntentParams.API_PARAM_PAYMENT_METHOD_ID] = paymentMethodId
         } else if (sourceParams != null) {
-            params[API_PARAM_SOURCE_DATA] = sourceParams.toParamMap()
+            params[API_PARAM_SOURCE_DATA] = sourceParams.toParamMap().toMap()
         } else if (sourceId != null) {
             params[API_PARAM_SOURCE_ID] = sourceId
         }
@@ -70,20 +75,11 @@ class ConfirmPaymentIntentParams private constructor(builder: Builder) : Confirm
         if (returnUrl != null) {
             params[ConfirmStripeIntentParams.API_PARAM_RETURN_URL] = returnUrl
         }
-        params[ConfirmStripeIntentParams.API_PARAM_CLIENT_SECRET] = clientSecret
         if (extraParams != null) {
             params.putAll(extraParams)
         }
 
-        if (savePaymentMethod) {
-            params[API_PARAM_SAVE_PAYMENT_METHOD] = true
-        }
-
-        if (useStripeSdk) {
-            params[ConfirmStripeIntentParams.API_PARAM_USE_STRIPE_SDK] = true
-        }
-
-        return params
+        return params.toMap()
     }
 
     @VisibleForTesting

@@ -11,7 +11,6 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 internal class StripeNetworkUtils @VisibleForTesting constructor(
     private val uidParamsFactory: UidParamsFactory
 ) {
-
     constructor(context: Context) : this(
         UidParamsFactory.create(context)
     )
@@ -31,19 +30,30 @@ internal class StripeNetworkUtils @VisibleForTesting constructor(
             .plus(uidParamsFactory.createParams())
     }
 
-    fun addUidToConfirmPaymentIntentParams(confirmPaymentIntentParams: Map<String, *>) {
-        val sourceData =
-            confirmPaymentIntentParams[ConfirmPaymentIntentParams.API_PARAM_SOURCE_DATA]
-        if (sourceData is MutableMap<*, *>) {
-            (sourceData as MutableMap<String, Any>)
-                .putAll(uidParamsFactory.createParams())
+    internal fun paramsWithUid(intentParams: Map<String, *>): Map<String, *> {
+        return when {
+            intentParams.containsKey(ConfirmPaymentIntentParams.API_PARAM_SOURCE_DATA) ->
+                paramsWithUid(
+                    intentParams,
+                    ConfirmPaymentIntentParams.API_PARAM_SOURCE_DATA
+                )
+            intentParams.containsKey(ConfirmPaymentIntentParams.API_PARAM_PAYMENT_METHOD_DATA) ->
+                paramsWithUid(
+                    intentParams,
+                    ConfirmPaymentIntentParams.API_PARAM_PAYMENT_METHOD_DATA
+                )
+            else -> intentParams
+        }
+    }
+
+    private fun paramsWithUid(stripeIntentParams: Map<String, *>, key: String): Map<String, *> {
+        val data = stripeIntentParams[key]
+        return if (data is Map<*, *>) {
+            val mutableParams = stripeIntentParams.toMutableMap()
+            mutableParams[key] = data.plus(uidParamsFactory.createParams())
+            mutableParams.toMap()
         } else {
-            val paymentMethodData =
-                confirmPaymentIntentParams[ConfirmPaymentIntentParams.API_PARAM_PAYMENT_METHOD_DATA]
-            if (paymentMethodData is MutableMap<*, *>) {
-                (paymentMethodData as MutableMap<String, Any>)
-                    .putAll(uidParamsFactory.createParams())
-            }
+            stripeIntentParams
         }
     }
 

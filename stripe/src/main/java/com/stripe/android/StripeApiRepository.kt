@@ -40,13 +40,11 @@ internal class StripeApiRepository @JvmOverloads constructor(
     private val fireAndForgetRequestExecutor: FireAndForgetRequestExecutor =
         StripeFireAndForgetRequestExecutor(),
     private val fingerprintRequestFactory: FingerprintRequestFactory =
-        FingerprintRequestFactory(context)
-) : StripeRepository {
-
-    private val analyticsDataFactory: AnalyticsDataFactory = AnalyticsDataFactory.create(context)
+        FingerprintRequestFactory(context),
+    private val uidParamsFactory: UidParamsFactory = UidParamsFactory.create(context),
+    private val analyticsDataFactory: AnalyticsDataFactory = AnalyticsDataFactory.create(context),
     private val networkUtils: StripeNetworkUtils = StripeNetworkUtils(context)
-    private val uidParamsFactory: UidParamsFactory = UidParamsFactory.create(context)
-
+) : StripeRepository {
     /**
      * Confirm a [PaymentIntent] using the provided [ConfirmPaymentIntentParams]
      *
@@ -60,23 +58,27 @@ internal class StripeApiRepository @JvmOverloads constructor(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         options: ApiRequest.Options
     ): PaymentIntent? {
-        val paramMap = confirmPaymentIntentParams.toParamMap()
-        networkUtils.addUidToConfirmPaymentIntentParams(paramMap)
+        val params = networkUtils.paramsWithUid(confirmPaymentIntentParams.toParamMap())
 
         try {
             fireFingerprintRequest()
-            val sourceParams = confirmPaymentIntentParams.sourceParams
-            val sourceType = sourceParams?.type
+
+            val paymentMethodType =
+                confirmPaymentIntentParams.paymentMethodCreateParams?.typeCode
+                    ?: confirmPaymentIntentParams.sourceParams?.type
 
             fireAnalyticsRequest(
-                analyticsDataFactory.getPaymentIntentConfirmationParams(null,
-                    options.apiKey, sourceType),
+                analyticsDataFactory.getPaymentIntentConfirmationParams(
+                    null,
+                    options.apiKey,
+                    paymentMethodType
+                ),
                 options.apiKey
             )
             val paymentIntentId = PaymentIntent.parseIdFromClientSecret(
                 confirmPaymentIntentParams.clientSecret)
             val response = makeApiRequest(ApiRequest.createPost(
-                getConfirmPaymentIntentUrl(paymentIntentId), paramMap, options, appInfo))
+                getConfirmPaymentIntentUrl(paymentIntentId), params, options, appInfo))
             return PaymentIntent.fromString(response.responseBody)
         } catch (unexpected: CardException) {
             // This particular kind of exception should not be possible from a PaymentI API endpoint
@@ -128,8 +130,7 @@ internal class StripeApiRepository @JvmOverloads constructor(
         confirmSetupIntentParams: ConfirmSetupIntentParams,
         options: ApiRequest.Options
     ): SetupIntent? {
-        val paramMap = confirmSetupIntentParams.toParamMap()
-        networkUtils.addUidToConfirmPaymentIntentParams(paramMap)
+        val params = networkUtils.paramsWithUid(confirmSetupIntentParams.toParamMap())
 
         try {
             fireFingerprintRequest()
@@ -138,7 +139,7 @@ internal class StripeApiRepository @JvmOverloads constructor(
             val response = makeApiRequest(
                 ApiRequest.createPost(
                     getConfirmSetupIntentUrl(setupIntentId),
-                    paramMap,
+                    params,
                     options,
                     appInfo
                 )

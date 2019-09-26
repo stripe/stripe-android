@@ -224,10 +224,6 @@ public final class PaymentMethodCreateParams implements StripeParamsModel {
         this.metadata = metadata;
     }
 
-    boolean shouldAddMandate() {
-        return type == Type.SepaDebit;
-    }
-
     @NonNull
     @Override
     public Map<String, Object> toParamMap() {

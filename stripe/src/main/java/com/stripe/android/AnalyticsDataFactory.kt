@@ -230,13 +230,13 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
     fun getPaymentIntentConfirmationParams(
         productUsageTokens: List<String>?,
         publishableKey: String,
-        @Source.SourceType sourceType: String?
+        paymentMethodType: String?
     ): Map<String, Any> {
         return getEventLoggingParams(
             EventName.CONFIRM_PAYMENT_INTENT,
             publishableKey,
             productUsageTokens = productUsageTokens,
-            sourceType = sourceType
+            sourceType = paymentMethodType
         )
     }
 
