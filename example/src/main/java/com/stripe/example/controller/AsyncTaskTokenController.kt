@@ -59,7 +59,7 @@ class AsyncTaskTokenController(
         }
 
         override fun onError(error: Exception) {
-            errorDialogHandler.show(error.localizedMessage)
+            errorDialogHandler.show(error.localizedMessage.orEmpty())
             progressDialogController.dismiss()
         }
     }

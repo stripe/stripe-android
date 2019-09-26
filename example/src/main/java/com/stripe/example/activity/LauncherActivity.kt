@@ -33,10 +33,6 @@ class LauncherActivity : AppCompatActivity() {
         private val activity: Activity
     ) : androidx.recyclerview.widget.RecyclerView.Adapter<ExamplesAdapter.ExamplesViewHolder>() {
         private val items = listOf(
-            Item(activity.getString(R.string.launch_payment_intent_example),
-                PaymentIntentActivity::class.java),
-            Item(activity.getString(R.string.launch_setup_intent_example),
-                SetupIntentActivity::class.java),
             Item(activity.getString(R.string.payment_auth_example),
                 PaymentAuthActivity::class.java),
             Item(activity.getString(R.string.create_card_tokens),

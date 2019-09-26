@@ -94,11 +94,7 @@ class PaymentAuthActivity : AppCompatActivity() {
 
     private fun confirmSetupIntent(setupIntentClientSecret: String) {
         statusTextView.append("\n\nStarting setup intent authentication")
-        stripe.confirmSetupIntent(this,
-            ConfirmSetupIntentParams.create(
-                PAYMENT_METHOD_AUTH_REQUIRED_ON_SETUP,
-                setupIntentClientSecret,
-                RETURN_URL))
+        stripe.confirmSetupIntent(this, create3ds2SetupIntentParams(setupIntentClientSecret))
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -259,8 +255,6 @@ class PaymentAuthActivity : AppCompatActivity() {
         /**
          * See https://stripe.com/docs/payments/3d-secure#three-ds-cards for more options.
          */
-        private const val PAYMENT_METHOD_AUTH_REQUIRED_ON_SETUP =
-            "pm_card_authenticationRequiredOnSetup"
 
         private fun create3ds2ConfirmParams(
             paymentIntentClientSecret: String
@@ -292,6 +286,23 @@ class PaymentAuthActivity : AppCompatActivity() {
                         .build()
                 ),
                 paymentIntentClientSecret,
+                RETURN_URL
+            )
+        }
+
+        private fun create3ds2SetupIntentParams(
+            setupIntentClientSecret: String
+        ): ConfirmSetupIntentParams {
+            return ConfirmSetupIntentParams.create(
+                PaymentMethodCreateParams.create(
+                    PaymentMethodCreateParams.Card.Builder()
+                        .setNumber("4000000000003238")
+                        .setExpiryMonth(1)
+                        .setExpiryYear(2025)
+                        .setCvc("123")
+                        .build()
+                ),
+                setupIntentClientSecret,
                 RETURN_URL
             )
         }

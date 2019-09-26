@@ -27,12 +27,6 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".activity.PaymentIntentActivity" />
-
-        <activity
-            android:name=".activity.SetupIntentActivity" />
-
         <service
             android:name=".service.TokenIntentService"
             android:exported="false"/>
