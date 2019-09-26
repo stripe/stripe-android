@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 11.1.4 - 2019-09-24
+## 11.1.4 - upcoming
 * [#1603](https://github.com/stripe/stripe-android/pull/1603) Update ProGuard rules for BouncyCastle
 * [#1608](https://github.com/stripe/stripe-android/pull/1608) Update ProGuard rules for Material Components
 * [#1619](https://github.com/stripe/stripe-android/pull/1619) Add `CardMultilineWidget#getPaymentMethodBillingDetailsBuilder()`
