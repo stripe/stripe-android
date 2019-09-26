@@ -107,7 +107,7 @@ class ConfirmPaymentIntentParamsTest {
         assertEquals(paramMap[API_PARAM_SOURCE_ID], SOURCE_ID)
         assertEquals(paramMap[API_PARAM_CLIENT_SECRET], CLIENT_SECRET)
         assertEquals(paramMap[API_PARAM_RETURN_URL], RETURN_URL)
-        assertFalse(paramMap.containsKey(API_PARAM_SAVE_PAYMENT_METHOD))
+        assertEquals(false, paramMap[API_PARAM_SAVE_PAYMENT_METHOD])
     }
 
     @Test
@@ -120,7 +120,7 @@ class ConfirmPaymentIntentParamsTest {
         assertEquals(paramMap[API_PARAM_PAYMENT_METHOD_ID], PM_ID)
         assertEquals(paramMap[API_PARAM_CLIENT_SECRET], CLIENT_SECRET)
         assertFalse(paramMap.containsKey(API_PARAM_RETURN_URL))
-        assertFalse(paramMap.containsKey(API_PARAM_SAVE_PAYMENT_METHOD))
+        assertEquals(false, paramMap[API_PARAM_SAVE_PAYMENT_METHOD])
     }
 
     @Test
@@ -133,7 +133,7 @@ class ConfirmPaymentIntentParamsTest {
         assertEquals(paramMap[API_PARAM_PAYMENT_METHOD_ID], PM_ID)
         assertEquals(paramMap[API_PARAM_CLIENT_SECRET], CLIENT_SECRET)
         assertEquals(paramMap[API_PARAM_RETURN_URL], RETURN_URL)
-        assertFalse(paramMap.containsKey(API_PARAM_SAVE_PAYMENT_METHOD))
+        assertEquals(false, paramMap[API_PARAM_SAVE_PAYMENT_METHOD])
     }
 
     @Test
@@ -156,7 +156,7 @@ class ConfirmPaymentIntentParamsTest {
         assertEquals(paramMap[API_PARAM_CLIENT_SECRET], CLIENT_SECRET)
         assertEquals(paramMap[extraParamKey1], extraParamValue1)
         assertEquals(paramMap[extraParamKey2], extraParamValue2)
-        assertFalse(paramMap.containsKey(API_PARAM_SAVE_PAYMENT_METHOD))
+        assertEquals(false, paramMap[API_PARAM_SAVE_PAYMENT_METHOD])
     }
 
     @Test

@@ -7,7 +7,7 @@ internal object PaymentIntentFixtures {
     const val KEY_ID = "7c4debe3f4af7f9d1569a2ffea4343c2566826ee"
 
     @JvmField
-    val PI_REQUIRES_MASTERCARD_3DS2 = PaymentIntent.fromJson(JSONObject(
+    val PI_REQUIRES_MASTERCARD_3DS2_JSON = JSONObject(
         """
         {
             "id": "pi_1ExkUeAWhjPjYwPiXph9ouXa",
@@ -89,7 +89,10 @@ internal object PaymentIntentFixtures {
             "transfer_group": null
         }
         """.trimIndent()
-    ))!!
+    )
+
+    @JvmField
+    val PI_REQUIRES_MASTERCARD_3DS2 = PaymentIntent.fromJson(PI_REQUIRES_MASTERCARD_3DS2_JSON)!!
 
     @JvmField
     val PI_REQUIRES_AMEX_3DS2 = PaymentIntent.fromJson(JSONObject("{\n" +
