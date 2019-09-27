@@ -54,30 +54,17 @@ class Stripe internal constructor(
     private val publishableKey: String = ApiKeyValidator().requireValid(publishableKey)
 
     /**
-     * Constructor with publishable key.
-     *
-     * @param context Activity or application context
-     * @param publishableKey the client's publishable key
-     */
-    constructor(context: Context, publishableKey: String) : this(
-        context.applicationContext,
-        StripeApiRepository(context.applicationContext, appInfo),
-        StripeNetworkUtils(context.applicationContext),
-        ApiKeyValidator.get().requireValid(publishableKey), null
-    )
-
-    /**
      * Constructor with publishable key and Stripe Connect account id.
      *
      * @param context Activity or application context
      * @param publishableKey the client's publishable key
-     * @param stripeAccountId the Stripe Connect account id to attach to
-     * [Stripe API requests](https://stripe.com/docs/connect/authentication#authentication-via-the-stripe-account-header)
+     * @param stripeAccountId optional, the Stripe Connect account id to attach to [Stripe API requests](https://stripe.com/docs/connect/authentication#authentication-via-the-stripe-account-header)
      */
+    @JvmOverloads
     constructor(
         context: Context,
         publishableKey: String,
-        stripeAccountId: String
+        stripeAccountId: String? = null
     ) : this(
         context.applicationContext,
         StripeApiRepository(context.applicationContext, appInfo),
