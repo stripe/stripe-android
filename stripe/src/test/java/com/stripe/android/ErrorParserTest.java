@@ -44,27 +44,27 @@ public class ErrorParserTest {
                 ErrorParser.parseError(RAW_INVALID_REQUEST_ERROR);
         String errorMessage = "The Stripe API is only accessible over HTTPS.  " +
                 "Please see <https://stripe.com/docs> for more information.";
-        assertEquals(errorMessage, parsedStripeError.message);
-        assertEquals("invalid_request_error", parsedStripeError.type);
-        assertEquals("", parsedStripeError.param);
+        assertEquals(errorMessage, parsedStripeError.getMessage());
+        assertEquals("invalid_request_error", parsedStripeError.getType());
+        assertEquals("", parsedStripeError.getParam());
     }
 
     @Test
     public void parseError_withNoErrorMessage_addsInvalidResponseMessage() {
         final StripeError badStripeError =
                 ErrorParser.parseError(RAW_INCORRECT_FORMAT_ERROR);
-        assertEquals(ErrorParser.MALFORMED_RESPONSE_MESSAGE, badStripeError.message);
-        assertNull(badStripeError.type);
+        assertEquals(ErrorParser.MALFORMED_RESPONSE_MESSAGE, badStripeError.getMessage());
+        assertNull(badStripeError.getType());
     }
 
     @Test
     public void parseError_withAllFields_parsesAllFields() {
         final StripeError error = ErrorParser.parseError(RAW_ERROR_WITH_ALL_FIELDS);
-        assertEquals("code_value", error.code);
-        assertEquals("param_value", error.param);
-        assertEquals("charge_value", error.charge);
-        assertEquals("Your card was declined.", error.message);
-        assertEquals("card_declined", error.declineCode);
-        assertEquals("invalid_request_error", error.type);
+        assertEquals("code_value", error.getCode());
+        assertEquals("param_value", error.getParam());
+        assertEquals("charge_value", error.getCharge());
+        assertEquals("Your card was declined.", error.getMessage());
+        assertEquals("card_declined", error.getDeclineCode());
+        assertEquals("invalid_request_error", error.getType());
     }
 }
