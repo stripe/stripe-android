@@ -146,7 +146,7 @@ public class StripeTest {
         final Stripe stripe = createStripe(
                 new Stripe.TokenCreator() {
                     @Override
-                    public void create(@NonNull Map<String, Object> tokenParams,
+                    public void create(@NonNull Map<String, ?> tokenParams,
                                        @NonNull ApiRequest.Options requestOptions,
                                        @NonNull @Token.TokenType String tokenType,
                                        @Nullable Executor executor,
@@ -163,7 +163,7 @@ public class StripeTest {
         final Stripe stripe = createStripe(
                 new Stripe.TokenCreator() {
                     @Override
-                    public void create(@NonNull Map<String, Object> tokenParams,
+                    public void create(@NonNull Map<String, ?> tokenParams,
                                        @NonNull ApiRequest.Options requestOptions,
                                        @NonNull @Token.TokenType String tokenType,
                                        @Nullable Executor executor,
