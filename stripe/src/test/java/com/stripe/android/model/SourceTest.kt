@@ -1,11 +1,11 @@
 package com.stripe.android.model
 
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import org.json.JSONObject
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Test
 
 /**
  * Test class for [Source] model.
@@ -18,13 +18,11 @@ class SourceTest {
 
     @Test
     fun fromJsonString_withCustomType_createsSourceWithCustomType() {
-        val customSource = Source.fromJson(EXAMPLE_JSON_SOURCE_CUSTOM_TYPE)
-        assertNotNull("Parsing failure", customSource)
-        assertEquals(Source.SourceType.UNKNOWN, customSource!!.type)
+        val customSource = Source.fromJson(EXAMPLE_JSON_SOURCE_CUSTOM_TYPE)!!
+        assertEquals(Source.SourceType.UNKNOWN, customSource.type)
         assertEquals(DOGE_COIN, customSource.typeRaw)
         assertNull(customSource.sourceTypeModel)
-        assertNotNull("Failed to find custom api params",
-            customSource.sourceTypeData)
+        requireNotNull(customSource.sourceTypeData)
 
         assertNotNull(customSource.receiver)
         assertNotNull(customSource.codeVerification)

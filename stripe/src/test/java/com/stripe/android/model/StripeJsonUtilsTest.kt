@@ -1,12 +1,11 @@
 package com.stripe.android.model
 
 import com.stripe.android.testharness.JsonTestUtils
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import org.json.JSONArray
-import org.json.JSONException
 import org.json.JSONObject
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Test
 
 /**
  * Test class for [StripeJsonUtils].
@@ -30,7 +29,6 @@ class StripeJsonUtilsTest {
     }
 
     @Test
-    @Throws(JSONException::class)
     fun optString_whenFieldPresent_findsAndReturnsField() {
         val jsonObject = JSONObject()
             .put("key", "value")
@@ -38,7 +36,6 @@ class StripeJsonUtilsTest {
     }
 
     @Test
-    @Throws(JSONException::class)
     fun optString_whenFieldContainsRawNull_returnsNull() {
         val jsonObject = JSONObject()
             .put("key", "null")
@@ -46,7 +43,6 @@ class StripeJsonUtilsTest {
     }
 
     @Test
-    @Throws(JSONException::class)
     fun optString_whenFieldNotPresent_returnsNull() {
         val jsonObject = JSONObject()
             .put("key", "value")
@@ -65,7 +61,6 @@ class StripeJsonUtilsTest {
     }
 
     @Test
-    @Throws(JSONException::class)
     fun jsonObjectToMap_forSimpleObjects_returnsExpectedMap() {
         val expectedMap = mapOf(
             "akey" to "avalue",
@@ -79,7 +74,6 @@ class StripeJsonUtilsTest {
     }
 
     @Test
-    @Throws(JSONException::class)
     fun jsonObjectToStringMap_forSimpleObjects_returnsExpectedMap() {
         val expectedMap = mapOf(
             "akey" to "avalue",
@@ -93,7 +87,6 @@ class StripeJsonUtilsTest {
     }
 
     @Test
-    @Throws(JSONException::class)
     fun jsonObjectToMap_forNestedObjects_returnsExpectedMap() {
         val expectedMap = mapOf(
             "top_key" to mapOf(
@@ -110,7 +103,6 @@ class StripeJsonUtilsTest {
     }
 
     @Test
-    @Throws(JSONException::class)
     fun jsonObjectToStringMap_forNestedObjects_returnsExpectedFlatMap() {
         val expectedMap = mapOf(
             "top_key" to
@@ -125,7 +117,6 @@ class StripeJsonUtilsTest {
     }
 
     @Test
-    @Throws(JSONException::class)
     fun jsonObjectToMap_withNestedObjectAndArrays_returnsExpectedMap() {
         val items = listOf(
             mapOf("id" to 123),
@@ -149,7 +140,6 @@ class StripeJsonUtilsTest {
     }
 
     @Test
-    @Throws(JSONException::class)
     fun jsonArrayToList_forSimpleList_returnsExpectedList() {
         val expectedList = listOf(1, 2, 3, "a", true, "cde")
         val convertedJsonArray = StripeJsonUtils.jsonArrayToList(SIMPLE_JSON_TEST_ARRAY)

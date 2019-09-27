@@ -235,4 +235,24 @@ internal object SourceFixtures {
         }
         """.trimIndent()
     )
+
+    @JvmField
+    internal val SOURCE_CARD_DATA_WITH_APPLE_PAY_JSON = JSONObject(
+        """
+            {
+                "exp_month": 12,
+                "exp_year": 2050,
+                "address_line1_check": "unchecked",
+                "address_zip_check": "unchecked",
+                "brand": "Visa",
+                "country": "US",
+                "cvc_check": "unchecked",
+                "funding": "credit",
+                "last4": "4242",
+                "three_d_secure": "optional",
+                "tokenization_method": "apple_pay",
+                "dynamic_last4": "4242"
+            }
+            """.trimIndent()
+    )
 }

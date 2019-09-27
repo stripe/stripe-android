@@ -4,14 +4,14 @@ import android.widget.AutoCompleteTextView;
 
 import com.stripe.android.R;
 
+import java.util.Locale;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-
-import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

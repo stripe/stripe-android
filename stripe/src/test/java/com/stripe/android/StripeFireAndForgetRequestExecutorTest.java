@@ -5,11 +5,11 @@ import androidx.test.core.app.ApplicationProvider;
 import com.stripe.android.exception.APIConnectionException;
 import com.stripe.android.exception.InvalidRequestException;
 
+import java.util.UUID;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-
-import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 

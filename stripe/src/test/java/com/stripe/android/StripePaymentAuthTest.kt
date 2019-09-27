@@ -12,9 +12,9 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.view.AuthActivityStarter
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 import kotlin.test.assertEquals
-import org.junit.Before
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
@@ -38,7 +38,7 @@ class StripePaymentAuthTest {
 
     private lateinit var hostArgumentCaptor: KArgumentCaptor<AuthActivityStarter.Host>
 
-    @Before
+    @BeforeTest
     fun setup() {
         MockitoAnnotations.initMocks(this)
         context = ApplicationProvider.getApplicationContext()

@@ -1,8 +1,8 @@
 package com.stripe.android.model
 
 import com.stripe.android.testharness.JsonTestUtils.assertMapEquals
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Test class for [Address].

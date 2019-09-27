@@ -1,7 +1,7 @@
 package com.stripe.android.model
 
-import org.junit.Assert.assertNotNull
-import org.junit.Test
+import kotlin.test.Test
+import kotlin.test.assertNotNull
 
 /**
  * Test class for [SourceOwner] model.

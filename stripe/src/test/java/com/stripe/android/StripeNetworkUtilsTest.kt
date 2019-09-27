@@ -4,10 +4,10 @@ import com.stripe.android.model.Card
 import com.stripe.android.model.CardFixtures
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
@@ -22,7 +22,7 @@ class StripeNetworkUtilsTest {
         UidParamsFactory("com.example.app", FakeUidSupplier())
     )
 
-    @Before
+    @BeforeTest
     fun setup() {
         MockitoAnnotations.initMocks(this)
     }

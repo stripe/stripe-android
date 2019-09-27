@@ -4,9 +4,9 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.model.ShippingMethod
 import java.util.Locale
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -18,7 +18,7 @@ class SelectShippingMethodWidgetTest {
 
     private lateinit var shippingMethodAdapter: ShippingMethodAdapter
 
-    @Before
+    @BeforeTest
     fun setup() {
         Locale.setDefault(Locale.US)
         val selectShippingMethodWidget =

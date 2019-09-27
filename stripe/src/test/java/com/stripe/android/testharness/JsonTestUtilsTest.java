@@ -1,8 +1,5 @@
 package com.stripe.android.testharness;
 
-import org.junit.Test;
-import org.junit.function.ThrowingRunnable;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,6 +7,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
+import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 
 import static org.junit.Assert.assertThrows;
 

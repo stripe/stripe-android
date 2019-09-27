@@ -1,12 +1,11 @@
 package com.stripe.android.model.wallets
 
 import android.os.Parcel
-import org.json.JSONException
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 import org.json.JSONObject
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -14,49 +13,42 @@ import org.robolectric.RobolectricTestRunner
 class WalletFactoryTest {
 
     @Test
-    @Throws(JSONException::class)
     fun testCreateVisaCheckoutWallet() {
         val wallet = WalletFactory().create(VISA_WALLET_JSON)
         assertTrue(wallet is VisaCheckoutWallet)
     }
 
     @Test
-    @Throws(JSONException::class)
     fun testCreateMasterpassWallet() {
         val wallet = WalletFactory().create(MASTERPASS_WALLET_JSON)
         assertTrue(wallet is MasterpassWallet)
     }
 
     @Test
-    @Throws(JSONException::class)
     fun testCreateAmexExpressCheckoutWallet() {
         val wallet = WalletFactory().create(AMEX_EXPRESS_CHECKOUT_WALLET_JSON)
         assertTrue(wallet is AmexExpressCheckoutWallet)
     }
 
     @Test
-    @Throws(JSONException::class)
     fun testCreateApplePayWallet() {
         val wallet = WalletFactory().create(APPLE_PAY_WALLET_JSON)
         assertTrue(wallet is ApplePayWallet)
     }
 
     @Test
-    @Throws(JSONException::class)
     fun testCreateGooglePayWallet() {
         val wallet = WalletFactory().create(GOOGLE_PAY_WALLET_JSON)
         assertTrue(wallet is GooglePayWallet)
     }
 
     @Test
-    @Throws(JSONException::class)
     fun testCreateSamsungPayWallet() {
         val wallet = WalletFactory().create(SAMSUNG_PAY_WALLET_JSON)
         assertTrue(wallet is SamsungPayWallet)
     }
 
     @Test
-    @Throws(JSONException::class)
     fun testParcelable_shouldBeEqualAfterParcel() {
         val walletFactory = WalletFactory()
 

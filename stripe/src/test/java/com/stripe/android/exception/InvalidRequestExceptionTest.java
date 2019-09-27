@@ -2,9 +2,9 @@ package com.stripe.android.exception;
 
 import com.stripe.android.StripeErrorFixtures;
 
-import org.junit.Test;
-
 import java.net.HttpURLConnection;
+
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 

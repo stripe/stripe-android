@@ -4,14 +4,14 @@ import androidx.annotation.NonNull;
 
 import com.stripe.android.exception.InvalidRequestException;
 
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.Assert.assertThrows;
 

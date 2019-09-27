@@ -1,12 +1,11 @@
 package com.stripe.android.model
 
 import com.stripe.android.model.StripeSourceTypeModel.Companion.jsonObjectToMapWithoutKeys
-import org.json.JSONException
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import org.json.JSONObject
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
-import org.junit.Test
 
 /**
  * Test class for [StripeSourceTypeModel].
@@ -14,7 +13,6 @@ import org.junit.Test
 class StripeSourceTypeModelTest {
 
     @Test
-    @Throws(JSONException::class)
     fun jsonObjectToMapWithoutKeys_whenHasKeyInput_returnsMapOmittingKeys() {
         val jsonObject = JSONObject()
             .put("a_key", "a_value")
@@ -33,7 +31,6 @@ class StripeSourceTypeModelTest {
     }
 
     @Test
-    @Throws(JSONException::class)
     fun jsonObjectToMapWithoutKeys_whenAllKeysGiven_returnsNull() {
         val jsonObject = JSONObject()
             .put("a_key", "a_value")
@@ -45,7 +42,6 @@ class StripeSourceTypeModelTest {
     }
 
     @Test
-    @Throws(JSONException::class)
     fun jsonObjectToMapWithoutKeys_whenOtherKeysGiven_returnsFullMap() {
         val jsonObject = JSONObject()
             .put("a_key", "a_value")

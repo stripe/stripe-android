@@ -3,13 +3,13 @@ package com.stripe.android;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import org.junit.Test;
-
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

@@ -6,6 +6,7 @@ import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.ActivityTestRule
+import androidx.test.runner.AndroidJUnit4
 import com.stripe.android.view.AddPaymentMethodActivity
 import org.junit.Rule
 import org.junit.Test

@@ -1,10 +1,10 @@
 package com.stripe.android;
 
-import org.junit.After;
-import org.junit.Test;
-
 import java.util.Currency;
 import java.util.Locale;
+
+import org.junit.After;
+import org.junit.Test;
 
 import static com.stripe.android.PayWithGoogleUtils.getPriceString;
 import static org.junit.Assert.assertEquals;

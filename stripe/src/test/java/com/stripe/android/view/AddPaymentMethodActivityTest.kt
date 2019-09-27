@@ -11,6 +11,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.AbsFakeStripeRepository
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.ApiRequest
@@ -37,19 +38,16 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodTest
 import com.stripe.android.view.AddPaymentMethodActivity.Companion.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY
 import java.util.Calendar
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -83,7 +81,7 @@ class AddPaymentMethodActivityTest :
     @Mock
     private lateinit var customerSession: CustomerSession
 
-    @Before
+    @BeforeTest
     fun setup() {
         // The input in this test class will be invalid after 2050. Please update the test.
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
@@ -99,7 +97,7 @@ class AddPaymentMethodActivityTest :
         CustomerSessionTestHelper.setInstance(customerSession)
     }
 
-    @After
+    @AfterTest
     override fun tearDown() {
         super.tearDown()
     }
@@ -187,8 +185,7 @@ class AddPaymentMethodActivityTest :
         verify<CustomerSession>(customerSession)
             .addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION)
         verify<CustomerSession>(customerSession, never()).attachPaymentMethod(
-            anyString(),
-            ArgumentMatchers.any()
+            any(), any()
         )
 
         assertEquals(RESULT_OK, shadowActivity.resultCode)
@@ -249,8 +246,7 @@ class AddPaymentMethodActivityTest :
         })
         setUpForLocalTest()
 
-        val alertMessageListener =
-            mock(StripeActivity.AlertMessageListener::class.java)
+        val alertMessageListener: StripeActivity.AlertMessageListener = mock()
         activity.setAlertMessageListener(alertMessageListener)
 
         assertEquals(View.GONE, progressBar.visibility)
@@ -266,8 +262,7 @@ class AddPaymentMethodActivityTest :
     fun addCardData_whenPaymentMethodCreateWorksButAddToCustomerFails_showErrorNotFinish() {
         stripe = createStripe(createFakeRepository(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
         setUpForProxySessionTest(PaymentMethod.Type.Card)
-        val alertMessageListener =
-            mock(StripeActivity.AlertMessageListener::class.java)
+        val alertMessageListener: StripeActivity.AlertMessageListener = mock()
         activity.setAlertMessageListener(alertMessageListener)
 
         assertEquals(View.GONE, progressBar.visibility)
@@ -292,7 +287,7 @@ class AddPaymentMethodActivityTest :
 
         assertEquals(expectedPaymentMethod.id, paymentMethodIdCaptor.firstValue)
 
-        val error = mock(StripeException::class.java)
+        val error: StripeException = mock()
         val errorMessage = "Oh no! An Error!"
         `when`(error.localizedMessage).thenReturn(errorMessage)
         listenerArgumentCaptor.firstValue.onError(400, errorMessage, null)

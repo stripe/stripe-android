@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.core.content.ContextCompat
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.R
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import kotlin.test.Test
+import kotlin.test.assertEquals
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 

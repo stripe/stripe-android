@@ -7,16 +7,16 @@ import com.stripe.android.R;
 import com.stripe.android.model.Address;
 import com.stripe.android.model.ShippingInformation;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
