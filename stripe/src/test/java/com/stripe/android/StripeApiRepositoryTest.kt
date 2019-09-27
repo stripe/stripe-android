@@ -206,8 +206,8 @@ class StripeApiRepositoryTest {
                     ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
             })
 
-        assertEquals("source", invalidRequestException.getParam())
-        assertEquals("resource_missing", invalidRequestException.getErrorCode())
+        assertEquals("source", invalidRequestException.param)
+        assertEquals("resource_missing", invalidRequestException.errorCode)
     }
 
     @Test
@@ -218,9 +218,9 @@ class StripeApiRepositoryTest {
                 stripeApiRepository.complete3ds2Auth("src_123",
                     ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
             })
-        assertEquals(HttpURLConnection.HTTP_NOT_FOUND.toLong(), invalidRequestException.getStatusCode().toLong())
-        assertEquals("source", invalidRequestException.getParam())
-        assertEquals("resource_missing", invalidRequestException.getErrorCode())
+        assertEquals(HttpURLConnection.HTTP_NOT_FOUND, invalidRequestException.statusCode)
+        assertEquals("source", invalidRequestException.param)
+        assertEquals("resource_missing", invalidRequestException.errorCode)
     }
 
     @Test
@@ -234,7 +234,8 @@ class StripeApiRepositoryTest {
     }
 
     @Test
-    @Throws(CardException::class, APIException::class, AuthenticationException::class, InvalidRequestException::class, APIConnectionException::class)
+    @Throws(CardException::class, APIException::class, AuthenticationException::class,
+        InvalidRequestException::class, APIConnectionException::class)
     fun requestData_withConnectAccount_shouldReturnCorrectResponseHeaders() {
         val connectAccountId = "acct_1Acj2PBUgO3KuWzz"
         val response = stripeApiRepository.makeApiRequest(
