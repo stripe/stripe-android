@@ -9,7 +9,7 @@ import java.net.HttpURLConnection
  * @param responseBody the body of the response
  * @param responseHeaders any headers associated with the response
  */
-internal class StripeResponse(
+internal data class StripeResponse(
     /**
      * @return the [response code][.mResponseCode].
      */
@@ -31,5 +31,9 @@ internal class StripeResponse(
 
     fun hasErrorCode(): Boolean {
         return responseCode < 200 || responseCode >= 300
+    }
+
+    override fun toString(): String {
+        return "Request-Id: $requestId, Status Code: $responseCode"
     }
 }

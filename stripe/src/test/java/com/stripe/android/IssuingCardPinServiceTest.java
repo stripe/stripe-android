@@ -53,6 +53,7 @@ public class IssuingCardPinServiceTest {
         final StripeRepository stripeRepository = new StripeApiRepository(
                 ApplicationProvider.getApplicationContext(),
                 null,
+                new FakeLogger(),
                 mStripeApiRequestExecutor,
                 new FakeFireAndForgetRequestExecutor()
         );

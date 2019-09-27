@@ -36,7 +36,8 @@ import org.json.JSONObject
 internal class StripeApiRepository @JvmOverloads constructor(
     context: Context,
     private val appInfo: AppInfo? = null,
-    private val stripeApiRequestExecutor: ApiRequestExecutor = StripeApiRequestExecutor(),
+    private val logger: Logger = Logger.noop(),
+    private val stripeApiRequestExecutor: ApiRequestExecutor = StripeApiRequestExecutor(logger),
     private val fireAndForgetRequestExecutor: FireAndForgetRequestExecutor =
         StripeFireAndForgetRequestExecutor(),
     private val fingerprintRequestFactory: FingerprintRequestFactory =

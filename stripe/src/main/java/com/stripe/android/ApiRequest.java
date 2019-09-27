@@ -128,6 +128,16 @@ final class ApiRequest extends StripeRequest {
         return createQuery().getBytes(CHARSET);
     }
 
+    @NonNull
+    @Override
+    public String toString() {
+        return String.format(Locale.ROOT,
+                "%s %s",
+                method.code,
+                getBaseUrl()
+        );
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(getBaseHashCode(), options, mAppInfo);
