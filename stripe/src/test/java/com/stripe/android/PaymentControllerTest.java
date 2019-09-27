@@ -159,7 +159,7 @@ public class PaymentControllerTest {
 
         verify(mFireAndForgetRequestExecutor).executeAsync(mApiRequestArgumentCaptor.capture());
         final StripeRequest analyticsRequest = mApiRequestArgumentCaptor.getValue();
-        final Map<String, ?> analyticsParams = Objects.requireNonNull(analyticsRequest.params);
+        final Map<String, ?> analyticsParams = Objects.requireNonNull(analyticsRequest.getParams());
         assertEquals("stripe_android.3ds2_fingerprint",
                 analyticsParams.get(AnalyticsDataFactory.FIELD_EVENT));
         assertEquals(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.getId(),
@@ -209,7 +209,7 @@ public class PaymentControllerTest {
 
         verify(mFireAndForgetRequestExecutor).executeAsync(mApiRequestArgumentCaptor.capture());
         final StripeRequest analyticsRequest = mApiRequestArgumentCaptor.getValue();
-        final Map<String, ?> analyticsParams = Objects.requireNonNull(analyticsRequest.params);
+        final Map<String, ?> analyticsParams = Objects.requireNonNull(analyticsRequest.getParams());
         assertEquals("stripe_android.3ds1_sdk",
                 analyticsParams.get(AnalyticsDataFactory.FIELD_EVENT));
     }
@@ -231,7 +231,7 @@ public class PaymentControllerTest {
 
         verify(mFireAndForgetRequestExecutor).executeAsync(mApiRequestArgumentCaptor.capture());
         final StripeRequest analyticsRequest = mApiRequestArgumentCaptor.getValue();
-        final Map<String, ?> analyticsParams = Objects.requireNonNull(analyticsRequest.params);
+        final Map<String, ?> analyticsParams = Objects.requireNonNull(analyticsRequest.getParams());
         assertEquals("stripe_android.url_redirect_next_action",
                 analyticsParams.get(AnalyticsDataFactory.FIELD_EVENT));
         assertEquals("pi_1EZlvVCRMbs6FrXfKpq2xMmy",
@@ -295,12 +295,12 @@ public class PaymentControllerTest {
         final List<StripeRequest> analyticsRequests = mApiRequestArgumentCaptor.getAllValues();
 
         final Map<String, ?> analyticsParamsFirst =
-                Objects.requireNonNull(analyticsRequests.get(0).params);
+                Objects.requireNonNull(analyticsRequests.get(0).getParams());
         assertEquals("stripe_android.3ds2_challenge_flow_completed",
                 analyticsParamsFirst.get(AnalyticsDataFactory.FIELD_EVENT));
 
         final Map<String, ?> analyticsParamsSecond =
-                Objects.requireNonNull(analyticsRequests.get(1).params);
+                Objects.requireNonNull(analyticsRequests.get(1).getParams());
         assertEquals("stripe_android.3ds2_challenge_flow_presented",
                 analyticsParamsSecond.get(AnalyticsDataFactory.FIELD_EVENT));
         assertEquals("oob",
@@ -320,12 +320,12 @@ public class PaymentControllerTest {
         final List<StripeRequest> analyticsRequests = mApiRequestArgumentCaptor.getAllValues();
 
         final Map<String, ?> analyticsParamsFirst =
-                Objects.requireNonNull(analyticsRequests.get(0).params);
+                Objects.requireNonNull(analyticsRequests.get(0).getParams());
         assertEquals("stripe_android.3ds2_challenge_flow_timed_out",
                 analyticsParamsFirst.get(AnalyticsDataFactory.FIELD_EVENT));
 
         final Map<String, ?> analyticsParamsSecond =
-                Objects.requireNonNull(analyticsRequests.get(1).params);
+                Objects.requireNonNull(analyticsRequests.get(1).getParams());
         assertEquals("stripe_android.3ds2_challenge_flow_presented",
                 analyticsParamsSecond.get(AnalyticsDataFactory.FIELD_EVENT));
     }
@@ -344,12 +344,12 @@ public class PaymentControllerTest {
         final List<StripeRequest> analyticsRequests = mApiRequestArgumentCaptor.getAllValues();
 
         final Map<String, ?> analyticsParamsFirst =
-                Objects.requireNonNull(analyticsRequests.get(0).params);
+                Objects.requireNonNull(analyticsRequests.get(0).getParams());
         assertEquals("stripe_android.3ds2_challenge_flow_canceled",
                 analyticsParamsFirst.get(AnalyticsDataFactory.FIELD_EVENT));
 
         final Map<String, ?> analyticsParamsSecond =
-                Objects.requireNonNull(analyticsRequests.get(1).params);
+                Objects.requireNonNull(analyticsRequests.get(1).getParams());
         assertEquals("stripe_android.3ds2_challenge_flow_presented",
                 analyticsParamsSecond.get(AnalyticsDataFactory.FIELD_EVENT));
     }
@@ -383,7 +383,7 @@ public class PaymentControllerTest {
         final List<StripeRequest> analyticsRequests = mApiRequestArgumentCaptor.getAllValues();
 
         final Map<String, ?> analyticsParamsFirst =
-                Objects.requireNonNull(analyticsRequests.get(0).params);
+                Objects.requireNonNull(analyticsRequests.get(0).getParams());
         assertEquals("stripe_android.3ds2_challenge_flow_errored",
                 analyticsParamsFirst.get(AnalyticsDataFactory.FIELD_EVENT));
 
@@ -396,7 +396,7 @@ public class PaymentControllerTest {
         assertEquals("Resource not found", errorData.get("error_message"));
 
         final Map<String, ?> analyticsParamsSecond =
-                Objects.requireNonNull(analyticsRequests.get(1).params);
+                Objects.requireNonNull(analyticsRequests.get(1).getParams());
         assertEquals("stripe_android.3ds2_challenge_flow_presented",
                 analyticsParamsSecond.get(AnalyticsDataFactory.FIELD_EVENT));
     }
@@ -448,7 +448,7 @@ public class PaymentControllerTest {
         final List<StripeRequest> analyticsRequests = mApiRequestArgumentCaptor.getAllValues();
 
         final Map<String, ?> analyticsParamsFirst =
-                Objects.requireNonNull(analyticsRequests.get(0).params);
+                Objects.requireNonNull(analyticsRequests.get(0).getParams());
         assertEquals("stripe_android.3ds2_challenge_flow_errored",
                 analyticsParamsFirst.get(AnalyticsDataFactory.FIELD_EVENT));
 
@@ -460,7 +460,7 @@ public class PaymentControllerTest {
         assertEquals("201", errorData.get("error_code"));
 
         final Map<String, ?> analyticsParamsSecond =
-                Objects.requireNonNull(analyticsRequests.get(1).params);
+                Objects.requireNonNull(analyticsRequests.get(1).getParams());
         assertEquals("stripe_android.3ds2_challenge_flow_presented",
                 analyticsParamsSecond.get(AnalyticsDataFactory.FIELD_EVENT));
     }
@@ -565,7 +565,7 @@ public class PaymentControllerTest {
 
         verify(mFireAndForgetRequestExecutor).executeAsync(mApiRequestArgumentCaptor.capture());
         final StripeRequest analyticsRequest = mApiRequestArgumentCaptor.getValue();
-        final Map<String, ?> analyticsParams = Objects.requireNonNull(analyticsRequest.params);
+        final Map<String, ?> analyticsParams = Objects.requireNonNull(analyticsRequest.getParams());
         assertEquals("stripe_android.3ds2_frictionless_flow",
                 analyticsParams.get(AnalyticsDataFactory.FIELD_EVENT));
         assertEquals("pi_1ExkUeAWhjPjYwPiXph9ouXa",
@@ -593,7 +593,7 @@ public class PaymentControllerTest {
 
         verify(mFireAndForgetRequestExecutor).executeAsync(mApiRequestArgumentCaptor.capture());
         final StripeRequest analyticsRequest = mApiRequestArgumentCaptor.getValue();
-        final Map<String, ?> analyticsParams = Objects.requireNonNull(analyticsRequest.params);
+        final Map<String, ?> analyticsParams = Objects.requireNonNull(analyticsRequest.getParams());
         assertEquals("stripe_android.3ds2_fallback",
                 analyticsParams.get(AnalyticsDataFactory.FIELD_EVENT));
     }

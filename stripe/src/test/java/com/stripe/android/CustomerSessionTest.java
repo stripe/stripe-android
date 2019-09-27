@@ -246,7 +246,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         verify(mStripeRepository).retrieveCustomer(eq(firstKey.getCustomerId()),
                 mRequestOptionsArgumentCaptor.capture());
         assertEquals(firstKey.getSecret(),
-                mRequestOptionsArgumentCaptor.getValue().apiKey);
+                mRequestOptionsArgumentCaptor.getValue().getApiKey());
         assertNotNull(customerSession.getCustomer());
         assertNotNull(FIRST_CUSTOMER);
         assertEquals(FIRST_CUSTOMER.getId(), customerSession.getCustomer().getId());
@@ -276,7 +276,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 eq(shippingInformation),
                 mRequestOptionsArgumentCaptor.capture());
         assertEquals(firstKey.getSecret(),
-                mRequestOptionsArgumentCaptor.getValue().apiKey);
+                mRequestOptionsArgumentCaptor.getValue().getApiKey());
         assertTrue(mProductUsageArgumentCaptor.getValue().contains(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY));
     }
 
@@ -330,11 +330,11 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         verify(mStripeRepository).retrieveCustomer(eq(firstKey.getCustomerId()),
                 mRequestOptionsArgumentCaptor.capture());
         assertEquals(firstKey.getSecret(),
-                mRequestOptionsArgumentCaptor.getValue().apiKey);
+                mRequestOptionsArgumentCaptor.getValue().getApiKey());
         verify(mStripeRepository).retrieveCustomer(eq(secondKey.getCustomerId()),
                 mRequestOptionsArgumentCaptor.capture());
         assertEquals(secondKey.getSecret(),
-                mRequestOptionsArgumentCaptor.getValue().apiKey);
+                mRequestOptionsArgumentCaptor.getValue().getApiKey());
     }
 
     @Test
@@ -364,7 +364,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         verify(mStripeRepository).retrieveCustomer(eq(firstKey.getCustomerId()),
                 mRequestOptionsArgumentCaptor.capture());
         assertEquals(firstKey.getSecret(),
-                mRequestOptionsArgumentCaptor.getValue().apiKey);
+                mRequestOptionsArgumentCaptor.getValue().getApiKey());
 
         long firstCustomerCacheTime = customerSession.getCustomerCacheTime();
         long shortIntervalInMilliseconds = 10L;
@@ -436,7 +436,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 eq(Source.SourceType.CARD),
                 mRequestOptionsArgumentCaptor.capture());
         assertEquals(firstKey.getSecret(),
-                mRequestOptionsArgumentCaptor.getValue().apiKey);
+                mRequestOptionsArgumentCaptor.getValue().getApiKey());
 
         final Set<String> productUsage = mProductUsageArgumentCaptor.getValue();
         assertEquals(2, productUsage.size());
@@ -542,7 +542,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 eq("abc123"),
                 mRequestOptionsArgumentCaptor.capture());
         assertEquals(firstKey.getSecret(),
-                mRequestOptionsArgumentCaptor.getValue().apiKey);
+                mRequestOptionsArgumentCaptor.getValue().getApiKey());
 
         final Set<String> productUsage = mProductUsageArgumentCaptor.getValue();
         assertEquals(2, productUsage.size());
@@ -647,7 +647,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 mRequestOptionsArgumentCaptor.capture()
         );
         assertEquals(firstKey.getSecret(),
-                mRequestOptionsArgumentCaptor.getValue().apiKey);
+                mRequestOptionsArgumentCaptor.getValue().getApiKey());
 
         final Set<String> productUsage = mProductUsageArgumentCaptor.getValue();
         assertEquals(1, productUsage.size());
@@ -778,7 +778,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 mRequestOptionsArgumentCaptor.capture()
         );
         assertEquals(firstKey.getSecret(),
-                mRequestOptionsArgumentCaptor.getValue().apiKey);
+                mRequestOptionsArgumentCaptor.getValue().getApiKey());
 
         final Set<String> productUsage = mProductUsageArgumentCaptor.getValue();
         assertEquals(2, productUsage.size());
@@ -882,7 +882,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 mRequestOptionsArgumentCaptor.capture()
         );
         assertEquals(firstKey.getSecret(),
-                mRequestOptionsArgumentCaptor.getValue().apiKey);
+                mRequestOptionsArgumentCaptor.getValue().getApiKey());
 
         final Set<String> productUsage = mProductUsageArgumentCaptor.getValue();
         assertEquals(2, productUsage.size());
@@ -983,7 +983,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
                 mRequestOptionsArgumentCaptor.capture()
         );
         assertEquals(firstKey.getSecret(),
-                mRequestOptionsArgumentCaptor.getValue().apiKey);
+                mRequestOptionsArgumentCaptor.getValue().getApiKey());
 
         final Set<String> productUsage = mProductUsageArgumentCaptor.getValue();
         assertEquals(2, productUsage.size());

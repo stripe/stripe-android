@@ -168,7 +168,7 @@ public class StripeTest {
                                        @NonNull @Token.TokenType String tokenType,
                                        @Nullable Executor executor,
                                        @NonNull ApiResultCallback<Token> callback) {
-                        assertEquals(NON_LOGGING_PK, requestOptions.apiKey);
+                        assertEquals(NON_LOGGING_PK, requestOptions.getApiKey());
                         assertNull(executor);
                         assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
                     }
@@ -1155,7 +1155,7 @@ public class StripeTest {
         final StripeRequest analyticsRequest = fireAndForgetRequests.get(1);
         assertEquals(AnalyticsRequest.HOST, analyticsRequest.getBaseUrl());
         assertEquals(createdPaymentMethod.id,
-                analyticsRequest.params.get(AnalyticsDataFactory.FIELD_PAYMENT_METHOD_ID));
+                analyticsRequest.getParams().get(AnalyticsDataFactory.FIELD_PAYMENT_METHOD_ID));
     }
 
     @Test
@@ -1199,7 +1199,7 @@ public class StripeTest {
         final StripeRequest analyticsRequest = fireAndForgetRequests.get(1);
         assertEquals(AnalyticsRequest.HOST, analyticsRequest.getBaseUrl());
         assertEquals(createdPaymentMethod.id,
-                analyticsRequest.params.get(AnalyticsDataFactory.FIELD_PAYMENT_METHOD_ID));
+                analyticsRequest.getParams().get(AnalyticsDataFactory.FIELD_PAYMENT_METHOD_ID));
     }
 
     @Test
@@ -1246,7 +1246,7 @@ public class StripeTest {
         final StripeRequest analyticsRequest = fireAndForgetRequests.get(1);
         assertEquals(AnalyticsRequest.HOST, analyticsRequest.getBaseUrl());
         assertEquals(createdPaymentMethod.id,
-                analyticsRequest.params.get(AnalyticsDataFactory.FIELD_PAYMENT_METHOD_ID));
+                analyticsRequest.getParams().get(AnalyticsDataFactory.FIELD_PAYMENT_METHOD_ID));
     }
 
     @Test

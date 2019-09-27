@@ -40,7 +40,7 @@ internal class ConnectionFactory {
     @Throws(InvalidRequestException::class)
     fun getRequestOutputBytes(request: StripeRequest): ByteArray {
         try {
-            return request.outputBytes
+            return request.getOutputBytes()
         } catch (e: UnsupportedEncodingException) {
             throw InvalidRequestException(
                 "Unable to encode parameters to ${StandardCharsets.UTF_8.name()}. " +
