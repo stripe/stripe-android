@@ -11,7 +11,9 @@ import java.util.Scanner
 /**
  * Used by [StripeApiRepository] to make HTTP requests
  */
-internal class StripeApiRequestExecutor : ApiRequestExecutor {
+internal class StripeApiRequestExecutor internal constructor(
+    private val logger: Logger = Logger.noop()
+) : ApiRequestExecutor {
     private val connectionFactory: ConnectionFactory = ConnectionFactory()
 
     /**
@@ -19,6 +21,7 @@ internal class StripeApiRequestExecutor : ApiRequestExecutor {
      */
     @Throws(APIConnectionException::class, InvalidRequestException::class)
     override fun execute(request: ApiRequest): StripeResponse {
+        logger.info(request.toString())
         // HttpURLConnection verifies SSL cert by default
         var conn: HttpURLConnection? = null
         try {
@@ -30,8 +33,11 @@ internal class StripeApiRequestExecutor : ApiRequestExecutor {
             } else {
                 getResponseBody(conn.errorStream)
             }
-            return StripeResponse(responseCode, responseBody, conn.headerFields)
+            val stripeResponse = StripeResponse(responseCode, responseBody, conn.headerFields)
+            logger.info(stripeResponse.toString())
+            return stripeResponse
         } catch (e: IOException) {
+            logger.error("Exception while making Stripe API request.", e)
             throw APIConnectionException.create(request.baseUrl, e)
         } finally {
             conn?.disconnect()

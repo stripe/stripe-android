@@ -1308,6 +1308,7 @@ public class StripeTest {
         return new StripeApiRepository(
                 mContext,
                 null,
+                new FakeLogger(),
                 new StripeApiRequestExecutor(),
                 fireAndForgetRequestExecutor,
                 new FingerprintRequestFactory(
