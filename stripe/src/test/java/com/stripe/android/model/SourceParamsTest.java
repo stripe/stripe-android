@@ -4,12 +4,12 @@ import androidx.annotation.NonNull;
 
 import com.stripe.android.testharness.JsonTestUtils;
 
-import org.json.JSONException;
-import org.junit.Test;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import org.json.JSONException;
+import org.junit.Test;
 
 import static com.stripe.android.view.CardInputTestActivity.VALID_VISA_NO_SPACES;
 import static org.junit.Assert.assertEquals;

@@ -1,12 +1,10 @@
 package com.stripe.android.model
 
-import org.json.JSONException
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import org.json.JSONObject
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -14,7 +12,6 @@ import org.robolectric.RobolectricTestRunner
 class Stripe3ds2AuthResultTest {
 
     @Test
-    @Throws(JSONException::class)
     fun fromJSON_validData_createsObject() {
         val result = Stripe3ds2AuthResult.fromJson(AUTH_RESULT_JSON)
         assertTrue(result.ares?.isChallenge == true)
@@ -43,7 +40,6 @@ class Stripe3ds2AuthResultTest {
     }
 
     @Test
-    @Throws(JSONException::class)
     fun fromJSON_dataWithMessageExtensions_createsObject() {
         val jsonResult = Stripe3ds2AuthResult.fromJson(AUTH_RESULT_WITH_EXTENSIONS_JSON)
 
@@ -95,7 +91,6 @@ class Stripe3ds2AuthResultTest {
     }
 
     @Test
-    @Throws(JSONException::class)
     fun fromJSON_errorData_createsObjectWithError() {
         val jsonResult = Stripe3ds2AuthResult.fromJson(AUTH_RESULT_ERROR_JSON)
 
@@ -135,21 +130,18 @@ class Stripe3ds2AuthResultTest {
     }
 
     @Test
-    @Throws(JSONException::class)
     fun fromJson_invalidElementFormatJson_shouldPopulateErrorField() {
         val result = Stripe3ds2AuthResult.fromJson(AUTH_RESULT_ERROR_INVALID_ELEMENT_FORMAT_JSON)
         assertNull(result.ares)
         assertNull(result.fallbackRedirectUrl)
-        val error = result.error
-        assertNotNull(error)
-        assertEquals("sdkMaxTimeout", error?.errorDetail)
+        val error = result.error!!
+        assertEquals("sdkMaxTimeout", error.errorDetail)
         assertEquals(
             "Format or value of one or more Data Elements is Invalid according to the Specification",
-            error?.errorDescription)
+            error.errorDescription)
     }
 
     @Test
-    @Throws(JSONException::class)
     fun fromJson_fallbackRedirectUrl_shouldReturnValidRedirectData() {
         val result = Stripe3ds2AuthResult.fromJson(AUTH_RESULT_FALLBACK_REDIRECT_URL_JSON)
         assertNull(result.ares)

@@ -1,10 +1,10 @@
 package com.stripe.android.model;
 
+import java.util.Objects;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-
-import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 

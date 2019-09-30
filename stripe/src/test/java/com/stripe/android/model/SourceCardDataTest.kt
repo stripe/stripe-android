@@ -1,10 +1,10 @@
 package com.stripe.android.model
 
-import org.json.JSONObject
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
-import org.junit.Test
+import com.stripe.android.model.SourceFixtures.SOURCE_CARD_DATA_WITH_APPLE_PAY_JSON
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 /**
  * Test class for [SourceCardData].
@@ -28,15 +28,15 @@ class SourceCardDataTest {
     @Test
     fun testEquals() {
         assertEquals(CARD_DATA,
-            SourceCardData.fromJson(SOURCE_CARD_DATA_WITH_APPLE_PAY))
+            SourceCardData.fromJson(SOURCE_CARD_DATA_WITH_APPLE_PAY_JSON))
     }
 
     @Test
     fun testHashCode() {
         assertNotNull(CARD_DATA)
         assertEquals(
-            CARD_DATA.hashCode().toLong(),
-            SourceCardData.fromJson(SOURCE_CARD_DATA_WITH_APPLE_PAY)!!.hashCode().toLong()
+            CARD_DATA.hashCode(),
+            SourceCardData.fromJson(SOURCE_CARD_DATA_WITH_APPLE_PAY_JSON)!!.hashCode()
         )
     }
 
@@ -56,27 +56,7 @@ class SourceCardDataTest {
     }
 
     companion object {
-
-        @JvmField
-        internal val SOURCE_CARD_DATA_WITH_APPLE_PAY = JSONObject(
-            """
-            {
-                "exp_month": 12,
-                "exp_year": 2050,
-                "address_line1_check": "unchecked",
-                "address_zip_check": "unchecked",
-                "brand": "Visa",
-                "country": "US",
-                "cvc_check": "unchecked",
-                "funding": "credit",
-                "last4": "4242",
-                "three_d_secure": "optional",
-                "tokenization_method": "apple_pay",
-                "dynamic_last4": "4242"
-            }
-            """.trimIndent()
-        )
-
-        private val CARD_DATA = SourceCardData.fromJson(SOURCE_CARD_DATA_WITH_APPLE_PAY)!!
+        private val CARD_DATA =
+            SourceCardData.fromJson(SOURCE_CARD_DATA_WITH_APPLE_PAY_JSON)!!
     }
 }

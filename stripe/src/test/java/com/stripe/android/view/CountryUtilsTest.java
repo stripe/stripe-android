@@ -1,8 +1,8 @@
 package com.stripe.android.view;
 
-import org.junit.Test;
-
 import java.util.Locale;
+
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

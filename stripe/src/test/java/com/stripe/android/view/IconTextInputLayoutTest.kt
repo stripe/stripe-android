@@ -2,9 +2,9 @@ package com.stripe.android.view
 
 import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
-import org.junit.After
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import kotlin.test.AfterTest
+import kotlin.test.Test
+import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -17,7 +17,7 @@ import org.robolectric.RobolectricTestRunner
 class IconTextInputLayoutTest :
     BaseViewTest<CardInputTestActivity>(CardInputTestActivity::class.java) {
 
-    @After
+    @AfterTest
     override fun tearDown() {
         super.tearDown()
     }

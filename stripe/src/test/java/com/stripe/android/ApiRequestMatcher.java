@@ -5,10 +5,10 @@ import androidx.annotation.Nullable;
 
 import com.stripe.android.exception.InvalidRequestException;
 
-import org.mockito.ArgumentMatcher;
-
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
+
+import org.mockito.ArgumentMatcher;
 
 class ApiRequestMatcher implements ArgumentMatcher<ApiRequest> {
     @NonNull private final StripeRequest.Method mMethod;

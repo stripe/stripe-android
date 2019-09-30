@@ -2,26 +2,24 @@ package com.stripe.android
 
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.model.CustomerFixtures
 import com.stripe.android.testharness.TestEphemeralKeyProvider
 import java.net.HttpURLConnection
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
-import org.json.JSONException
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
@@ -47,8 +45,7 @@ class EphemeralKeyManagerTest {
     private lateinit var customerEphemeralKey: CustomerEphemeralKey
     private lateinit var testEphemeralKeyProvider: TestEphemeralKeyProvider
 
-    @Before
-    @Throws(JSONException::class)
+    @BeforeTest
     fun setup() {
         MockitoAnnotations.initMocks(this)
         argCaptor = argumentCaptor()
@@ -134,9 +131,9 @@ class EphemeralKeyManagerTest {
 
         verify<EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey>>(keyManagerListener).onKeyUpdate(
             ephemeralKeyArgumentCaptor.capture(),
-            anyString(),
-            ArgumentMatchers.isNull<String>(),
-            ArgumentMatchers.isNull<Map<String, Any>>()
+            any(),
+            anyOrNull(),
+            anyOrNull()
         )
         val ephemeralKey = ephemeralKeyArgumentCaptor.firstValue
         assertNotNull(ephemeralKey)
@@ -185,11 +182,13 @@ class EphemeralKeyManagerTest {
         val keyManager = createEphemeralKeyManager(operationIdFactory, proxyCalendar)
 
         // Make sure we're in a good state
-        verify<EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey>>(keyManagerListener).onKeyUpdate(
-            ephemeralKeyArgumentCaptor.capture(),
-            anyString(),
-            ArgumentMatchers.isNull<String>(),
-            ArgumentMatchers.isNull<Map<String, Any>>())
+        verify<EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey>>(keyManagerListener)
+            .onKeyUpdate(
+                ephemeralKeyArgumentCaptor.capture(),
+                any(),
+                anyOrNull(),
+                anyOrNull()
+            )
         assertNotNull(ephemeralKeyArgumentCaptor.firstValue)
 
         // Set up the error
@@ -207,7 +206,7 @@ class EphemeralKeyManagerTest {
     @Test
     fun triggerCorrectErrorOnInvalidRawKey() {
         val operationId = "12345"
-        val operationIdFactory = mock(OperationIdFactory::class.java)
+        val operationIdFactory: OperationIdFactory = mock()
         `when`(operationIdFactory.create()).thenReturn(operationId)
 
         testEphemeralKeyProvider.setNextRawEphemeralKey("Not_a_JSON")
@@ -231,7 +230,7 @@ class EphemeralKeyManagerTest {
     @Test
     fun triggerCorrectErrorOnInvalidJsonKey() {
         val operationId = "12345"
-        val operationIdFactory = mock(OperationIdFactory::class.java)
+        val operationIdFactory: OperationIdFactory = mock()
         `when`(operationIdFactory.create()).thenReturn(operationId)
 
         testEphemeralKeyProvider.setNextRawEphemeralKey("{}")
@@ -255,7 +254,7 @@ class EphemeralKeyManagerTest {
     @Test
     fun triggerCorrectErrorOnEmptyKey() {
         val operationId = "12345"
-        val operationIdFactory = mock(OperationIdFactory::class.java)
+        val operationIdFactory: OperationIdFactory = mock()
         `when`(operationIdFactory.create()).thenReturn(operationId)
 
         testEphemeralKeyProvider.setNextRawEphemeralKey("")
@@ -271,13 +270,13 @@ class EphemeralKeyManagerTest {
         verify<EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey>>(keyManagerListener).onKeyError(
             eq(operationId),
             eq(HttpURLConnection.HTTP_INTERNAL_ERROR),
-            anyString()
+            any()
         )
     }
 
     @Test
     fun init_whenShouldPrefetchEphemeralKeyIsFalse_shouldNotFetch() {
-        val operationIdFactory = mock(OperationIdFactory::class.java)
+        val operationIdFactory: OperationIdFactory = mock()
         EphemeralKeyManager(
             testEphemeralKeyProvider,
             keyManagerListener,

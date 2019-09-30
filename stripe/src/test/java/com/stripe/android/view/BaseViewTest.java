@@ -7,14 +7,14 @@ import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.After;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
 public abstract class BaseViewTest<T extends Activity> {

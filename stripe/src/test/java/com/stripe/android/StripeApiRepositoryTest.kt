@@ -22,14 +22,13 @@ import java.io.UnsupportedEncodingException
 import java.net.HttpURLConnection
 import java.util.Locale
 import java.util.UUID
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertThrows
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Ignore
-import org.junit.Test
-import org.junit.function.ThrowingRunnable
+import kotlin.test.BeforeTest
+import kotlin.test.Ignore
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
@@ -55,7 +54,7 @@ class StripeApiRepositoryTest {
     private lateinit var apiRequestArgumentCaptor: KArgumentCaptor<ApiRequest>
     private lateinit var stripeRequestArgumentCaptor: KArgumentCaptor<StripeRequest>
 
-    @Before
+    @BeforeTest
     fun before() {
         MockitoAnnotations.initMocks(this)
         apiRequestArgumentCaptor = argumentCaptor()
@@ -199,12 +198,10 @@ class StripeApiRepositoryTest {
             "stripe://payment-auth-return"
         )
 
-        val invalidRequestException = assertThrows<InvalidRequestException>(
-            InvalidRequestException::class.java,
-            ThrowingRunnable {
-                stripeApiRepository.start3ds2Auth(authParams, "pi_12345",
-                    ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
-            })
+        val invalidRequestException = assertFailsWith<InvalidRequestException> {
+            stripeApiRepository.start3ds2Auth(authParams, "pi_12345",
+                ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
+        }
 
         assertEquals("source", invalidRequestException.param)
         assertEquals("resource_missing", invalidRequestException.errorCode)
@@ -212,12 +209,11 @@ class StripeApiRepositoryTest {
 
     @Test
     fun complete3ds2Auth_withInvalidSource_shouldThrowInvalidRequestException() {
-        val invalidRequestException = assertThrows<InvalidRequestException>(
-            InvalidRequestException::class.java,
-            ThrowingRunnable {
+        val invalidRequestException =
+            assertFailsWith<InvalidRequestException> {
                 stripeApiRepository.complete3ds2Auth("src_123",
                     ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
-            })
+            }
         assertEquals(HttpURLConnection.HTTP_NOT_FOUND, invalidRequestException.statusCode)
         assertEquals("source", invalidRequestException.param)
         assertEquals("resource_missing", invalidRequestException.errorCode)
@@ -263,9 +259,9 @@ class StripeApiRepositoryTest {
             else -> null
         }
 
-        assertNotNull("Stripe API response should contain 'Stripe-Account' header", accounts)
-        assertEquals(1, accounts?.size ?: 0)
-        assertEquals(connectAccountId, accounts?.get(0))
+        requireNotNull(accounts, { "Stripe API response should contain 'Stripe-Account' header" })
+        assertEquals(1, accounts.size)
+        assertEquals(connectAccountId, accounts[0])
     }
 
     @Test

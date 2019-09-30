@@ -2,17 +2,17 @@ package com.stripe.android.model;
 
 import androidx.annotation.NonNull;
 
-import org.junit.Test;
-import org.junit.function.ThrowingRunnable;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-
 import java.io.ByteArrayInputStream;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Objects;
+
+import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

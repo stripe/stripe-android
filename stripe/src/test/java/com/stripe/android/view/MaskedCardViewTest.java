@@ -10,12 +10,12 @@ import com.stripe.android.R;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodTest;
 
+import java.util.Calendar;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-
-import java.util.Calendar;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

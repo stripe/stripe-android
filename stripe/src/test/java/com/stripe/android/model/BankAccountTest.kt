@@ -1,10 +1,8 @@
 package com.stripe.android.model
 
 import java.util.UUID
-import org.json.JSONException
-import org.json.JSONObject
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Test class for [BankAccount].
@@ -12,7 +10,6 @@ import org.junit.Test
 class BankAccountTest {
 
     @Test
-    @Throws(JSONException::class)
     fun parseSampleAccount_returnsExpectedValue() {
         val expectedAccount = BankAccount(
             "Jane Austen",
@@ -24,7 +21,7 @@ class BankAccountTest {
             "6789",
             "110000000"
         )
-        assertEquals(expectedAccount, BANK_ACCOUNT)
+        assertEquals(expectedAccount, BankAccountFixtures.BANK_ACCOUNT)
     }
 
     @Test
@@ -66,23 +63,5 @@ class BankAccountTest {
             "guid" to UUID.randomUUID().toString(),
             "muid" to UUID.randomUUID().toString()
         )
-
-        private val BANK_ACCOUNT = BankAccount.fromJson(JSONObject(
-            """
-            {
-                "id": "ba_19d8Fh2eZvKYlo2C9qw8RwpV",
-                "object": "bank_account",
-                "account_holder_name": "Jane Austen",
-                "account_holder_type": "individual",
-                "bank_name": "STRIPE TEST BANK",
-                "country": "US",
-                "currency": "usd",
-                "fingerprint": "1JWtPxqbdX5Gamtc",
-                "last4": "6789",
-                "routing_number": "110000000",
-                "status": "new"
-            }
-            """.trimIndent()
-        ))
     }
 }

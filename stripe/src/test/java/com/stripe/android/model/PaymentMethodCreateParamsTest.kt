@@ -1,8 +1,7 @@
 package com.stripe.android.model
 
-import org.json.JSONException
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class PaymentMethodCreateParamsTest {
 
@@ -18,7 +17,6 @@ class PaymentMethodCreateParamsTest {
     }
 
     @Test
-    @Throws(JSONException::class)
     fun createFromGooglePay_withNoBillingAddress() {
         val createdParams = PaymentMethodCreateParams.createFromGooglePay(
             GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS)
@@ -33,7 +31,6 @@ class PaymentMethodCreateParamsTest {
     }
 
     @Test
-    @Throws(JSONException::class)
     fun createFromGooglePay_withFullBillingAddress() {
         val createdParams = PaymentMethodCreateParams.createFromGooglePay(
             GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS)
