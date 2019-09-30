@@ -4,31 +4,24 @@ import android.os.Build
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.CardFixtures
 import java.io.UnsupportedEncodingException
-import java.util.HashMap
 import java.util.Locale
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.json.JSONException
 import org.json.JSONObject
-import org.junit.Before
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class ApiRequestTest {
+internal class ApiRequestTest {
 
-    private val mNetworkUtils = StripeNetworkUtils(
-        UidParamsFactory(
-            "com.example.app",
-            FakeUidSupplier("abc123")
-        )
-    )
-
-    @Before
+    @BeforeTest
     fun setup() {
         MockitoAnnotations.initMocks(this)
     }
@@ -36,17 +29,18 @@ class ApiRequestTest {
     @Test
     fun getHeaders_withAllRequestOptions_properlyMapsRequestOptions() {
         val stripeAccount = "acct_123abc"
-        val headerMap = ApiRequest.createGet(StripeApiRepository.sourcesUrl,
+        val headers = ApiRequest.createGet(StripeApiRepository.sourcesUrl,
             ApiRequest.Options.create(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 stripeAccount), null)
             .headers
 
         assertEquals(
             "Bearer ${ApiKeyFixtures.FAKE_PUBLISHABLE_KEY}",
-            headerMap["Authorization"]
+            headers["Authorization"]
         )
-        assertEquals(ApiVersion.get().code, headerMap["Stripe-Version"])
-        assertEquals(stripeAccount, headerMap["Stripe-Account"])
+        assertEquals(ApiVersion.get().code, headers["Stripe-Version"])
+        assertEquals(stripeAccount, headers["Stripe-Account"])
+        assertFalse(headers.contains("Accept-Language"))
     }
 
     @Test
@@ -93,7 +87,7 @@ class ApiRequestTest {
     @Test
     @Throws(UnsupportedEncodingException::class, InvalidRequestException::class)
     fun createQuery_withCardData_createsProperQueryString() {
-        val cardMap = mNetworkUtils.createCardTokenParams(CardFixtures.MINIMUM_CARD)
+        val cardMap = NETWORK_UTILS.createCardTokenParams(CardFixtures.MINIMUM_CARD)
         val query = ApiRequest.createGet(StripeApiRepository.sourcesUrl, cardMap,
             ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
             .createQuery()
@@ -122,8 +116,7 @@ class ApiRequestTest {
     @Test
     @Throws(UnsupportedEncodingException::class, InvalidRequestException::class)
     fun getOutputBytes_withNonEmptyBody_shouldHaveNonZeroLength() {
-        val params = HashMap<String, String>()
-        params["customer"] = "cus_123"
+        val params = mapOf("customer" to "cus_123")
 
         val output = ApiRequest.createPost(StripeApiRepository.paymentMethodsUrl,
             params,
@@ -134,8 +127,7 @@ class ApiRequestTest {
 
     @Test
     fun testEquals() {
-        val params = HashMap<String, String>()
-        params["customer"] = "cus_123"
+        val params = mapOf("customer" to "cus_123")
         assertEquals(
             ApiRequest.createPost(StripeApiRepository.paymentMethodsUrl,
                 params,
@@ -185,6 +177,34 @@ class ApiRequestTest {
                 """.trimIndent()
             ).toString(),
             JSONObject(userAgentData.getString("application")).toString()
+        )
+    }
+
+    @Test
+    fun testGetLanguageTag() {
+        Locale.setDefault(Locale.JAPAN)
+        assertEquals("ja-JP", createGetRequest().languageTag)
+
+        Locale.setDefault(Locale.ENGLISH)
+        assertEquals("en", createGetRequest().languageTag)
+
+        Locale.setDefault(Locale.ROOT)
+        assertNull(createGetRequest().languageTag)
+    }
+
+    companion object {
+        private fun createGetRequest(): ApiRequest {
+            return ApiRequest.createGet(
+                StripeApiRepository.paymentMethodsUrl,
+                ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+            )
+        }
+
+        private val NETWORK_UTILS = StripeNetworkUtils(
+            UidParamsFactory(
+                "com.example.app",
+                FakeUidSupplier("abc123")
+            )
         )
     }
 }

@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import android.os.Build
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.exception.InvalidRequestException
 import java.io.UnsupportedEncodingException
 import java.util.Locale
@@ -19,6 +20,13 @@ internal class ApiRequest internal constructor(
 ) : StripeRequest(method, url, params, MIME_TYPE) {
     private val apiVersion: String = ApiVersion.get().code
 
+    @VisibleForTesting
+    internal val languageTag: String?
+        get() {
+            return Locale.getDefault().toString().replace("_", "-")
+                .takeIf { it.isNotBlank() }
+        }
+
     override fun createHeaders(): Map<String, String> {
         return mapOf(
             "Accept-Charset" to CHARSET,
@@ -29,6 +37,10 @@ internal class ApiRequest internal constructor(
         ).plus(
             options.stripeAccount?.let {
                 mapOf("Stripe-Account" to it)
+            } ?: emptyMap()
+        ).plus(
+            (languageTag.takeIf { SHOULD_INCLUDE_ACCEPT_LANGUAGE_HEADER })?.let {
+                mapOf("Accept-Language" to it)
             } ?: emptyMap()
         )
     }
@@ -128,11 +140,14 @@ internal class ApiRequest internal constructor(
         internal const val MIME_TYPE = "application/x-www-form-urlencoded"
         internal const val API_HOST = "https://api.stripe.com"
 
+        // TODO(mshafrir-stripe) - enable in next major version
+        private const val SHOULD_INCLUDE_ACCEPT_LANGUAGE_HEADER = false
+
         @JvmStatic
         fun createGet(
             url: String,
             options: Options,
-            appInfo: AppInfo?
+            appInfo: AppInfo? = null
         ): ApiRequest {
             return ApiRequest(Method.GET, url, null, options, appInfo)
         }
@@ -142,7 +157,7 @@ internal class ApiRequest internal constructor(
             url: String,
             params: Map<String, *>,
             options: Options,
-            appInfo: AppInfo?
+            appInfo: AppInfo? = null
         ): ApiRequest {
             return ApiRequest(Method.GET, url, params, options, appInfo)
         }
@@ -151,7 +166,7 @@ internal class ApiRequest internal constructor(
         fun createPost(
             url: String,
             options: Options,
-            appInfo: AppInfo?
+            appInfo: AppInfo? = null
         ): ApiRequest {
             return ApiRequest(Method.POST, url, null, options, appInfo)
         }
@@ -161,7 +176,7 @@ internal class ApiRequest internal constructor(
             url: String,
             params: Map<String, *>,
             options: Options,
-            appInfo: AppInfo?
+            appInfo: AppInfo? = null
         ): ApiRequest {
             return ApiRequest(Method.POST, url, params, options, appInfo)
         }
@@ -170,7 +185,7 @@ internal class ApiRequest internal constructor(
         fun createDelete(
             url: String,
             options: Options,
-            appInfo: AppInfo?
+            appInfo: AppInfo? = null
         ): ApiRequest {
             return ApiRequest(Method.DELETE, url, null, options, appInfo)
         }
