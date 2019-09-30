@@ -21,7 +21,7 @@ internal data class StripeResponse(
     /**
      * @return the [response headers][.mResponseHeaders].
      */
-    val responseHeaders: Map<String, List<String>>?
+    val responseHeaders: Map<String, List<String>>? = null
 ) {
     val isOk: Boolean
         get() = responseCode == HttpURLConnection.HTTP_OK
