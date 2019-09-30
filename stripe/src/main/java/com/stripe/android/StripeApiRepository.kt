@@ -239,7 +239,7 @@ internal class StripeApiRepository @JvmOverloads constructor(
     /**
      * Retrieve an existing [Source] object from the server.
      *
-     * @param sourceId the [Source.getId] field for the Source to query
+     * @param sourceId the [Source.id] field for the Source to query
      * @param clientSecret the [Source.getClientSecret] field for the Source to query
      * @return a [Source] if one could be retrieved for the input params, or `null` if
      * no such Source could be found.

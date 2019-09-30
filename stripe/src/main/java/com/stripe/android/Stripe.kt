@@ -64,10 +64,15 @@ class Stripe internal constructor(
     constructor(
         context: Context,
         publishableKey: String,
-        stripeAccountId: String? = null
+        stripeAccountId: String? = null,
+        enableLogging: Boolean = false
     ) : this(
         context.applicationContext,
-        StripeApiRepository(context.applicationContext, appInfo),
+        StripeApiRepository(
+            context.applicationContext,
+            appInfo,
+            Logger.getInstance(enableLogging)
+        ),
         StripeNetworkUtils(context.applicationContext),
         ApiKeyValidator.get().requireValid(publishableKey),
         stripeAccountId

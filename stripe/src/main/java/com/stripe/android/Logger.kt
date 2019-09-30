@@ -8,6 +8,14 @@ internal interface Logger {
     fun info(msg: String)
 
     companion object {
+        internal fun getInstance(enableLogging: Boolean): Logger {
+            return if (enableLogging) {
+                real()
+            } else {
+                noop()
+            }
+        }
+
         private const val TAG = "StripeSdk"
 
         private val REAL_LOGGER = object : Logger {
