@@ -8,7 +8,7 @@ internal interface Logger {
     fun info(msg: String)
 
     companion object {
-        internal fun get(enableLogging: Boolean): Logger {
+        internal fun getInstance(enableLogging: Boolean): Logger {
             return if (enableLogging) {
                 real()
             } else {

@@ -71,7 +71,7 @@ class Stripe internal constructor(
         StripeApiRepository(
             context.applicationContext,
             appInfo,
-            Logger.get(enableLogging)
+            Logger.getInstance(enableLogging)
         ),
         StripeNetworkUtils(context.applicationContext),
         ApiKeyValidator.get().requireValid(publishableKey),
