@@ -1,0 +1,182 @@
+package com.stripe.android
+
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import com.nhaarman.mockitokotlin2.argThat
+import com.stripe.android.exception.APIConnectionException
+import com.stripe.android.exception.InvalidRequestException
+import com.stripe.android.testharness.TestEphemeralKeyProvider
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import org.json.JSONObject
+import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.Mockito.`when`
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
+import org.mockito.MockitoAnnotations
+import org.robolectric.RobolectricTestRunner
+
+/**
+ * Test class for [IssuingCardPinService].
+ */
+@RunWith(RobolectricTestRunner::class)
+class IssuingCardPinServiceTest {
+
+    @Mock
+    private lateinit var stripeApiRequestExecutor: ApiRequestExecutor
+    @Mock
+    private lateinit var retrievalListener: IssuingCardPinService.IssuingCardPinRetrievalListener
+    @Mock
+    private lateinit var updateListener: IssuingCardPinService.IssuingCardPinUpdateListener
+
+    private lateinit var service: IssuingCardPinService
+
+    @BeforeTest
+    fun before() {
+        MockitoAnnotations.initMocks(this)
+
+        val ephemeralKeyProvider = TestEphemeralKeyProvider()
+        ephemeralKeyProvider.setNextRawEphemeralKey(EPHEMERAL_KEY.toString())
+
+        val stripeRepository = StripeApiRepository(
+            ApplicationProvider.getApplicationContext<Context>(),
+            null,
+            FakeLogger(),
+            stripeApiRequestExecutor,
+            FakeFireAndForgetRequestExecutor()
+        )
+
+        service = IssuingCardPinService(ephemeralKeyProvider, stripeRepository,
+            OperationIdFactory())
+    }
+
+    @Test
+    @Throws(InvalidRequestException::class, APIConnectionException::class)
+    fun testRetrieval() {
+
+        val response = StripeResponse(
+            200,
+            """
+            {
+                "card": "ic_abcdef",
+                "pin": "1234"
+            }
+            """.trimIndent()
+        )
+
+        `when`(stripeApiRequestExecutor.execute(
+            argThat(ApiRequestMatcher(
+                StripeRequest.Method.GET,
+                "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin?verification%5Bone_time_code%5D=123-456&verification%5Bid%5D=iv_abcd",
+                ApiRequest.Options.create("ek_test_123")
+            ))))
+            .thenReturn(response)
+
+        retrievalListener = mock(IssuingCardPinService.IssuingCardPinRetrievalListener::class.java)
+
+        service.retrievePin(
+            "ic_abcdef",
+            "iv_abcd",
+            "123-456",
+            retrievalListener)
+
+        verify<IssuingCardPinService.IssuingCardPinRetrievalListener>(retrievalListener)
+            .onIssuingCardPinRetrieved("1234")
+    }
+
+    @Test
+    @Throws(InvalidRequestException::class, APIConnectionException::class)
+    fun testUpdate() {
+
+        val response = StripeResponse(
+            200,
+            """
+            {
+                "card": "ic_abcdef",
+                "pin": ""
+            }
+            """.trimIndent()
+        )
+
+        `when`(stripeApiRequestExecutor.execute(
+            argThat(ApiRequestMatcher(
+                StripeRequest.Method.POST,
+                "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin",
+                ApiRequest.Options.create("ek_test_123")
+            ))))
+            .thenReturn(response)
+
+        updateListener = mock(IssuingCardPinService.IssuingCardPinUpdateListener::class.java)
+
+        service.updatePin(
+            "ic_abcdef",
+            "1234",
+            "iv_abcd",
+            "123-456",
+            updateListener
+        )
+
+        verify<IssuingCardPinService.IssuingCardPinUpdateListener>(updateListener)
+            .onIssuingCardPinUpdated()
+    }
+
+    @Test
+    @Throws(InvalidRequestException::class, APIConnectionException::class)
+    fun testRetrievalFailsWithReason() {
+        val response = StripeResponse(
+            400,
+            """
+            {
+                "error": {
+                    "code": "incorrect_code",
+                    "message": "Verification failed",
+                    "type": "invalid_request_error"
+                }
+            }
+            """.trimIndent()
+        )
+
+        `when`(stripeApiRequestExecutor.execute(
+            argThat(ApiRequestMatcher(
+                StripeRequest.Method.GET,
+                "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin?verification%5Bone_time_code%5D=123-456&verification%5Bid%5D=iv_abcd",
+                ApiRequest.Options.create("ek_test_123")
+            ))))
+            .thenReturn(response)
+
+        retrievalListener = mock(IssuingCardPinService.IssuingCardPinRetrievalListener::class.java)
+
+        service.retrievePin(
+            "ic_abcdef",
+            "iv_abcd",
+            "123-456",
+            retrievalListener
+        )
+
+        verify<IssuingCardPinService.IssuingCardPinRetrievalListener>(retrievalListener).onError(
+            IssuingCardPinService.CardPinActionError.ONE_TIME_CODE_INCORRECT,
+            "The one-time code was incorrect", null
+        )
+    }
+
+    companion object {
+
+        private val EPHEMERAL_KEY = JSONObject(
+            """
+            {
+                "id": "ephkey_123",
+                "object": "ephemeral_key",
+                "secret": "ek_test_123",
+                "created": 1501179335,
+                "livemode": false,
+                "expires": 1501199335,
+                "associated_objects": [{
+                    "type": "issuing.card",
+                    "id": "ic_abcd"
+                }]
+            }
+            """.trimIndent()
+        )
+    }
+}
