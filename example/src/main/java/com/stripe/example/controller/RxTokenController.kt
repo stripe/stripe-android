@@ -18,34 +18,30 @@ import io.reactivex.schedulers.Schedulers
  */
 class RxTokenController(
     button: Button,
-    private var cardInputWidget: CardInputWidget?,
+    private val cardInputWidget: CardInputWidget,
     private val context: Context,
     private val outputListController: ListViewController,
     private val progressDialogController: ProgressDialogController,
     publishableKey: String
 ) {
-
-    private val mStripe: Stripe
-    private val mCompositeDisposable: CompositeDisposable = CompositeDisposable()
+    private val stripe: Stripe = Stripe(context, publishableKey)
+    private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 
     init {
-        mCompositeDisposable.add(
+        compositeDisposable.add(
             RxView.clicks(button).subscribe { saveCard() }
         )
-
-        mStripe = Stripe(context, publishableKey)
     }
 
     /**
      * Release subscriptions to prevent memory leaks.
      */
     fun detach() {
-        mCompositeDisposable.dispose()
-        cardInputWidget = null
+        compositeDisposable.dispose()
     }
 
     private fun saveCard() {
-        val cardToSave = cardInputWidget!!.card
+        val cardToSave = cardInputWidget.card
         if (cardToSave == null) {
             Toast.makeText(context, "Invalid Card Data", Toast.LENGTH_SHORT)
                 .show()
@@ -55,10 +51,10 @@ class RxTokenController(
         // Note: using this style of Observable creation results in us having a method that
         // will not be called until we subscribe to it.
         val tokenObservable = Observable.fromCallable {
-            mStripe.createTokenSynchronous(cardToSave)!!
+            stripe.createCardTokenSynchronous(cardToSave)!!
         }
 
-        mCompositeDisposable.add(tokenObservable
+        compositeDisposable.add(tokenObservable
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnSubscribe { progressDialogController.show(R.string.progressMessage) }

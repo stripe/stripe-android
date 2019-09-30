@@ -501,6 +501,56 @@ class Stripe internal constructor(
     //
 
     /**
+     * Create a [Token] asynchronously.
+     *
+     * See [Create an account token](https://stripe.com/docs/api/tokens/create_account).
+     *
+     * @param accountParams the [AccountParams] used to create this token
+     * @param callback a [ApiResultCallback] to receive the result or error
+     */
+    fun createAccountToken(
+        accountParams: AccountParams,
+        callback: ApiResultCallback<Token>
+    ) {
+        val params = accountParams.toParamMap()
+            .plus(stripeNetworkUtils.createUidParams())
+        createTokenFromParams(
+            params,
+            Token.TokenType.ACCOUNT,
+            callback
+        )
+    }
+
+    /**
+     * Blocking method to create a [Token] for a Connect Account. Do not call this on the UI
+     * thread or your app will crash.
+     *
+     * See [Create an account token](https://stripe.com/docs/api/tokens/create_account).
+     *
+     * @param accountParams params to use for this token.
+     * @return a [Token] that can be used for this account.
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     * Stripe's servers)
+     */
+    @Throws(AuthenticationException::class, InvalidRequestException::class,
+        APIConnectionException::class, APIException::class)
+    fun createAccountTokenSynchronous(accountParams: AccountParams): Token? {
+        return try {
+            stripeRepository.createToken(
+                accountParams.toParamMap(),
+                ApiRequest.Options.create(publishableKey, stripeAccountId),
+                Token.TokenType.ACCOUNT
+            )
+        } catch (exception: CardException) {
+            // Should never occur. CardException is only for card related requests.
+            null
+        }
+    }
+
+    /**
      * Create a [BankAccount] token asynchronously.
      *
      * See [Create a bank account token](https://stripe.com/docs/api/tokens/create_bank_account).
@@ -626,6 +676,34 @@ class Stripe internal constructor(
      */
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, CardException::class, APIException::class)
+    fun createCardTokenSynchronous(card: Card): Token? {
+        return stripeRepository.createToken(
+            stripeNetworkUtils.createCardTokenParams(card),
+            ApiRequest.Options.create(publishableKey, stripeAccountId),
+            Token.TokenType.CARD
+        )
+    }
+
+    /**
+     * Blocking method to create a [Token]. Do not call this on the UI thread or your app
+     * will crash.
+     *
+     * See [Create a card token](https://stripe.com/docs/api/tokens/create_card).
+     *
+     * @param card the [Card] to use for this token
+     * @return a [Token] that can be used for this card
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws CardException the card cannot be charged for some reason
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     * Stripe's servers
+     *
+     * @deprecated use [createCardTokenSynchronous]
+     */
+    @Deprecated("Use createCardTokenSynchronous()")
+    @Throws(AuthenticationException::class, InvalidRequestException::class,
+        APIConnectionException::class, CardException::class, APIException::class)
     fun createTokenSynchronous(card: Card): Token? {
         return stripeRepository.createToken(
             stripeNetworkUtils.createCardTokenParams(card),
@@ -671,35 +749,6 @@ class Stripe internal constructor(
             ApiRequest.Options.create(publishableKey, stripeAccountId),
             Token.TokenType.CVC_UPDATE
         )
-    }
-
-    /**
-     * Blocking method to create a [Token] for a Connect Account. Do not call this on the UI
-     * thread or your app will crash.
-     *
-     * See [Create an account token](https://stripe.com/docs/api/tokens/create_account).
-     *
-     * @param accountParams params to use for this token.
-     * @return a [Token] that can be used for this account.
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws APIException any other type of problem (for instance, a temporary issue with
-     * Stripe's servers)
-     */
-    @Throws(AuthenticationException::class, InvalidRequestException::class,
-        APIConnectionException::class, APIException::class)
-    fun createAccountTokenSynchronous(accountParams: AccountParams): Token? {
-        return try {
-            stripeRepository.createToken(
-                accountParams.toParamMap(),
-                ApiRequest.Options.create(publishableKey, stripeAccountId),
-                Token.TokenType.ACCOUNT
-            )
-        } catch (exception: CardException) {
-            // Should never occur. CardException is only for card related requests.
-            null
-        }
     }
 
     private fun createTokenFromParams(
