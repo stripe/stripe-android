@@ -52,6 +52,7 @@ class PaymentAuthActivity : AppCompatActivity() {
             .set3ds2Config(PaymentAuthConfig.Stripe3ds2Config.Builder()
                 .setTimeout(6)
                 .setUiCustomization(uiCustomization)
+                .setEnableLogging(true)
                 .build())
             .build())
 

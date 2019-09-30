@@ -2,6 +2,21 @@
 
 ## 11.1.5 - upcoming
 * [#1619](https://github.com/stripe/stripe-android/pull/1619) Add `CardMultilineWidget#getPaymentMethodBillingDetailsBuilder()`
+* [#1639](https://github.com/stripe/stripe-android/pull/1639) Update 3DS2 SDK to 2.1.0
+* [#1641](https://github.com/stripe/stripe-android/pull/1641) Add `PaymentAuthConfig.Stripe3ds2Config.enableLogging`
+    ```kotlin
+    // Example
+    PaymentAuthConfig.init(PaymentAuthConfig.Builder()
+        .set3ds2Config(PaymentAuthConfig.Stripe3ds2Config.Builder()
+            .setEnableLogging(true)
+            .build())
+        .build())
+    val stripe = Stripe(this, "pk_test_demo")
+    stripe.confirmPayment(this, confirmPaymentIntentParams)
+    
+    // View logs using
+    // $ adb logcat -s Stripe3ds2`
+    ```    
 
 ## 11.1.4 - 2019-09-24
 * [#1603](https://github.com/stripe/stripe-android/pull/1603) Update ProGuard rules for BouncyCastle
