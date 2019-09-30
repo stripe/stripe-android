@@ -47,13 +47,14 @@ class DependencyHandler(
                 errorDialogHandler,
                 listViewController,
                 progressDialogController,
-                publishableKey)
+                publishableKey
+            )
         }
     }
 
     /**
      * Attach a listener that creates a token using a [rx.Subscription] and the
-     * synchronous [com.stripe.android.Stripe.createTokenSynchronous] method.
+     * synchronous [com.stripe.android.Stripe.createCardTokenSynchronous] method.
      *
      * Only gets attached once, unless you call [.clearReferences].
      *
@@ -67,7 +68,8 @@ class DependencyHandler(
                 context,
                 listViewController,
                 progressDialogController,
-                publishableKey)
+                publishableKey
+            )
         }
     }
 
@@ -75,14 +77,8 @@ class DependencyHandler(
      * Clear all the references so that we can start over again.
      */
     fun clearReferences() {
-
-        if (asyncTaskController != null) {
-            asyncTaskController!!.detach()
-        }
-
-        if (rxTokenController != null) {
-            rxTokenController!!.detach()
-        }
+        asyncTaskController?.detach()
+        rxTokenController?.detach()
 
         asyncTaskController = null
         rxTokenController = null

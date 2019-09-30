@@ -233,10 +233,10 @@ class PaymentAuthActivity : AppCompatActivity() {
     }
 
     private class SetupAuthResultListener constructor(activity: PaymentAuthActivity) : ApiResultCallback<SetupIntentResult> {
-        private val mActivityRef: WeakReference<PaymentAuthActivity> = WeakReference(activity)
+        private val activityRef: WeakReference<PaymentAuthActivity> = WeakReference(activity)
 
         override fun onSuccess(setupIntentResult: SetupIntentResult) {
-            val activity = mActivityRef.get() ?: return
+            val activity = activityRef.get() ?: return
 
             val setupIntent = setupIntentResult.intent
             activity.statusTextView.append("\n\n" + activity.getString(R.string.setup_intent_status, setupIntent.status))
@@ -244,7 +244,7 @@ class PaymentAuthActivity : AppCompatActivity() {
         }
 
         override fun onError(e: Exception) {
-            val activity = mActivityRef.get() ?: return
+            val activity = activityRef.get() ?: return
 
             activity.statusTextView.append("\n\nException: " + e.message)
             activity.onAuthComplete()

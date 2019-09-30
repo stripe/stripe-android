@@ -29,7 +29,7 @@ class TokenIntentService : IntentService("TokenIntentService") {
             val stripe = Stripe(applicationContext,
                 PaymentConfiguration.getInstance(this).publishableKey)
             try {
-                token = stripe.createTokenSynchronous(card)
+                token = stripe.createCardTokenSynchronous(card)
             } catch (stripeEx: StripeException) {
                 errorMessage = stripeEx.localizedMessage
             }

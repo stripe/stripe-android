@@ -180,7 +180,7 @@ public class StripeTest {
     public void createCardTokenSynchronous_withValidData_returnsToken()
             throws StripeException {
         final Stripe stripe = createStripe();
-        final Token token = stripe.createTokenSynchronous(CARD);
+        final Token token = stripe.createCardTokenSynchronous(CARD);
 
         assertNotNull(token);
         Card returnedCard = token.getCard();
@@ -203,7 +203,7 @@ public class StripeTest {
                 "acct_1Acj2PBUgO3KuWzz"
         );
 
-        final Token token = stripe.createTokenSynchronous(CARD);
+        final Token token = stripe.createCardTokenSynchronous(CARD);
 
         assertNotNull(token);
         Card returnedCard = token.getCard();
@@ -221,7 +221,7 @@ public class StripeTest {
     public void createToken_createSource_returnsSource()
             throws StripeException {
         final Stripe stripe = createStripe();
-        final Token token = stripe.createTokenSynchronous(CARD);
+        final Token token = stripe.createCardTokenSynchronous(CARD);
         assertNotNull(token);
 
         final SourceParams sourceParams = SourceParams.createSourceFromTokenParams(token.getId());
@@ -233,7 +233,7 @@ public class StripeTest {
     public void createToken_createSourceWithTokenToSourceParams_returnsSource()
             throws StripeException {
         final Stripe stripe = createStripe();
-        final Token token = stripe.createTokenSynchronous(CARD);
+        final Token token = stripe.createCardTokenSynchronous(CARD);
         assertNotNull(token);
 
         final SourceParams sourceParams = SourceParams.createSourceFromTokenParams(token.getId());
@@ -1014,7 +1014,7 @@ public class StripeTest {
                 new ThrowingRunnable() {
                     @Override
                     public void run() throws Throwable {
-                        stripe.createTokenSynchronous(CARD);
+                        stripe.createCardTokenSynchronous(CARD);
                     }
                 }
         );
@@ -1032,7 +1032,7 @@ public class StripeTest {
                 new ThrowingRunnable() {
                     @Override
                     public void run() throws Throwable {
-                        stripe.createTokenSynchronous(card);
+                        stripe.createCardTokenSynchronous(card);
                     }
                 }
         );
@@ -1049,7 +1049,7 @@ public class StripeTest {
                 new ThrowingRunnable() {
                     @Override
                     public void run() throws Throwable {
-                        stripe.createTokenSynchronous(card);
+                        stripe.createCardTokenSynchronous(card);
                     }
                 }
         );
@@ -1090,7 +1090,7 @@ public class StripeTest {
     public void createPaymentMethod_withCardToken()
             throws StripeException {
         final Stripe stripe = createStripe();
-        final Token token = stripe.createTokenSynchronous(CARD);
+        final Token token = stripe.createCardTokenSynchronous(CARD);
 
         final PaymentMethodCreateParams paymentMethodCreateParams =
                 PaymentMethodCreateParams.create(
