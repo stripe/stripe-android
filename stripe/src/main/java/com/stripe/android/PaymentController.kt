@@ -39,12 +39,13 @@ import java.util.concurrent.TimeUnit
 internal open class PaymentController @VisibleForTesting constructor(
     context: Context,
     private val stripeRepository: StripeRepository,
-    private val threeDs2Service: StripeThreeDs2Service =
-        StripeThreeDs2ServiceImpl(context, StripeSSLSocketFactory()),
     private val messageVersionRegistry: MessageVersionRegistry =
         MessageVersionRegistry(),
     private val config: PaymentAuthConfig =
         PaymentAuthConfig.get(),
+    private val threeDs2Service: StripeThreeDs2Service =
+        StripeThreeDs2ServiceImpl(context, StripeSSLSocketFactory(),
+            config.stripe3ds2Config.enableLogging),
     private val analyticsRequestExecutor: FireAndForgetRequestExecutor =
         StripeFireAndForgetRequestExecutor(),
     private val analyticsDataFactory: AnalyticsDataFactory =
