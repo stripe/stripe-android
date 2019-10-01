@@ -431,7 +431,7 @@ public class StripeTest {
         assertNotNull(bancontactSource.getRedirect());
         assertEquals("John Doe", bancontactSource.getOwner().getName());
         assertEquals("example://path", bancontactSource.getRedirect().getReturnUrl());
-        JsonTestUtils.INSTANCE.assertMapEquals(metamap, bancontactSource.getMetaData());
+        JsonTestUtils.assertMapEquals(metamap, bancontactSource.getMetaData());
     }
 
     @Test
@@ -470,7 +470,7 @@ public class StripeTest {
         assertEquals("#456", cardSource.getOwner().getAddress().getLine2());
         assertEquals("US", cardSource.getOwner().getAddress().getCountry());
         assertEquals("Winnie Hoop", cardSource.getOwner().getName());
-        JsonTestUtils.INSTANCE.assertMapEquals(metamap, cardSource.getMetaData());
+        JsonTestUtils.assertMapEquals(metamap, cardSource.getMetaData());
     }
 
     @Test
@@ -504,7 +504,7 @@ public class StripeTest {
         assertNull(threeDSource.getSourceTypeModel());
         assertEquals(Source.SourceType.THREE_D_SECURE, threeDSource.getType());
         assertNotNull(threeDSource.getSourceTypeData());
-        JsonTestUtils.INSTANCE.assertMapEquals(metadata, threeDSource.getMetaData());
+        JsonTestUtils.assertMapEquals(metadata, threeDSource.getMetaData());
     }
 
     @Test
@@ -536,7 +536,7 @@ public class StripeTest {
         assertNotNull(giropaySource.getRedirect());
         assertEquals("Mr. X", giropaySource.getOwner().getName());
         assertEquals("example://redirect", giropaySource.getRedirect().getReturnUrl());
-        JsonTestUtils.INSTANCE.assertMapEquals(metamap, giropaySource.getMetaData());
+        JsonTestUtils.assertMapEquals(metamap, giropaySource.getMetaData());
     }
 
     @Test
@@ -601,7 +601,7 @@ public class StripeTest {
         assertEquals("123 Main St", sepaDebitSource.getOwner().getAddress().getLine1());
         assertEquals("EI", sepaDebitSource.getOwner().getAddress().getCountry());
         assertEquals("Sepa Account Holder", sepaDebitSource.getOwner().getName());
-        JsonTestUtils.INSTANCE.assertMapEquals(metamap ,sepaDebitSource.getMetaData());
+        JsonTestUtils.assertMapEquals(metamap ,sepaDebitSource.getMetaData());
     }
 
 
@@ -629,7 +629,7 @@ public class StripeTest {
         assertNotNull(sepaDebitSource.getClientSecret());
         assertNotNull(sepaDebitSource.getId());
         assertEquals(Source.SourceType.SEPA_DEBIT, sepaDebitSource.getType());
-        JsonTestUtils.INSTANCE.assertMapEquals(metamap ,sepaDebitSource.getMetaData());
+        JsonTestUtils.assertMapEquals(metamap ,sepaDebitSource.getMetaData());
     }
 
     @Test
@@ -667,7 +667,7 @@ public class StripeTest {
         assertEquals("123 Main St", sepaDebitSource.getOwner().getAddress().getLine1());
         assertEquals("EI", sepaDebitSource.getOwner().getAddress().getCountry());
         assertEquals("Sepa Account Holder", sepaDebitSource.getOwner().getName());
-        JsonTestUtils.INSTANCE.assertMapEquals(metamap ,sepaDebitSource.getMetaData());
+        JsonTestUtils.assertMapEquals(metamap ,sepaDebitSource.getMetaData());
     }
 
     @Test
@@ -731,7 +731,7 @@ public class StripeTest {
         assertEquals("Bond", idealSource.getOwner().getName());
         assertNotNull(idealSource.getRedirect());
         assertEquals("example://return", idealSource.getRedirect().getReturnUrl());
-        JsonTestUtils.INSTANCE.assertMapEquals(metamap, idealSource.getMetaData());
+        JsonTestUtils.assertMapEquals(metamap, idealSource.getMetaData());
     }
 
     @Test
@@ -767,7 +767,7 @@ public class StripeTest {
         assertNotNull(idealSource.getRedirect());
         assertEquals(bankName, idealSource.getSourceTypeData().get("bank"));
         assertEquals("example://return", idealSource.getRedirect().getReturnUrl());
-        JsonTestUtils.INSTANCE.assertMapEquals(metamap, idealSource.getMetaData());
+        JsonTestUtils.assertMapEquals(metamap, idealSource.getMetaData());
     }
 
     @Test
@@ -803,7 +803,7 @@ public class StripeTest {
         assertEquals(bankName, idealSource.getSourceTypeData().get("bank"));
         assertNull(idealSource.getOwner().getName());
         assertEquals("example://return", idealSource.getRedirect().getReturnUrl());
-        JsonTestUtils.INSTANCE.assertMapEquals(metamap, idealSource.getMetaData());
+        JsonTestUtils.assertMapEquals(metamap, idealSource.getMetaData());
     }
 
 
@@ -834,7 +834,7 @@ public class StripeTest {
         assertEquals(70000L, sofortSource.getAmount().longValue());
         assertNotNull(sofortSource.getRedirect());
         assertEquals("example://return", sofortSource.getRedirect().getReturnUrl());
-        JsonTestUtils.INSTANCE.assertMapEquals(metamap, sofortSource.getMetaData());
+        JsonTestUtils.assertMapEquals(metamap, sofortSource.getMetaData());
     }
 
     @Test

@@ -1,7 +1,7 @@
 package com.stripe.android.testharness
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * Utility class for testing with JSON objects and maps that are created from or for JSON.
@@ -13,13 +13,14 @@ object JsonTestUtils {
      * @param first the first map
      * @param second the second map
      */
+    @JvmStatic
     fun assertMapEquals(first: Map<String, *>?, second: Map<String, *>?) {
         assertSameNullity(first, second)
         if (first == null || second == null) {
             return
         }
 
-        assertEquals(first.size.toLong(), second.size.toLong())
+        assertEquals(first.size, second.size)
         for (key in first.keys) {
             assertTrue(second.containsKey(key))
             val firstObject = first[key]
@@ -29,18 +30,19 @@ object JsonTestUtils {
     }
 
     /**
-     * Assert two [Lists][List] that are from JSON-style maps are equal.
+     * Assert two [List]s that are from JSON-style maps are equal.
      *
      * @param first the first list
      * @param second the second list
      */
+    @JvmStatic
     fun assertListEquals(first: List<*>?, second: List<*>?) {
         assertSameNullity(first, second)
         if (first == null || second == null) {
             return
         }
 
-        assertEquals(first.size.toLong(), second.size.toLong())
+        assertEquals(first.size, second.size)
         for (i in first.indices) {
             val firstObject = first[i]
             val secondObject = second[i]
@@ -52,15 +54,16 @@ object JsonTestUtils {
         firstObject: Any?,
         secondObject: Any?
     ) {
-        if (firstObject is Map<*, *>) {
-            assertTrue(secondObject is Map<*, *>)
-
-            assertMapEquals(firstObject as Map<String, Any>?, secondObject as Map<String, Any>?)
-        } else if (firstObject is List<*>) {
-            assertTrue(secondObject is List<*>)
-            assertListEquals(firstObject as List<*>?, secondObject as List<*>?)
-        } else {
-            assertEquals(firstObject, secondObject)
+        when (firstObject) {
+            is Map<*, *> -> {
+                assertTrue(secondObject is Map<*, *>)
+                assertMapEquals(firstObject as Map<String, Any>?, secondObject as Map<String, Any>?)
+            }
+            is List<*> -> {
+                assertTrue(secondObject is List<*>)
+                assertListEquals(firstObject as List<*>?, secondObject as List<*>?)
+            }
+            else -> assertEquals(firstObject, secondObject)
         }
     }
 
