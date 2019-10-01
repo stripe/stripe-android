@@ -87,6 +87,54 @@ internal object SourceFixtures {
     ))!!
 
     @JvmField
+    val SOURCE_CARD = Source.fromJson(JSONObject(
+        """
+        {
+            "id": "src_19t3xKBZqEXluyI4uz2dxAfQ",
+            "object": "source",
+            "amount": 1000,
+            "client_secret": "src_client_secret_of43INi1HteJwXVe3djAUosN",
+            "created": 1488499654,
+            "currency": "usd",
+            "flow": "receiver",
+            "livemode": false,
+            "metadata": {},
+            "owner": {
+                "address": null,
+                "email": "jenny.rosen@example.com",
+                "name": "Jenny Rosen",
+                "phone": "4158675309",
+                "verified_address": null,
+                "verified_email": null,
+                "verified_name": null,
+                "verified_phone": null
+            },
+            "receiver": {
+                "address": "test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N",
+                "amount_charged": 0,
+                "amount_received": 0,
+                "amount_returned": 0
+            },
+            "status": "pending",
+            "type": "card",
+            "usage": "single_use",
+            "card": {
+                "exp_month": 12,
+                "exp_year": 2050,
+                "address_line1_check": "unchecked",
+                "address_zip_check": "unchecked",
+                "brand": "Visa",
+                "country": "US",
+                "cvc_check": "unchecked",
+                "funding": "credit",
+                "last4": "4242",
+                "three_d_secure": "optional"
+            }
+        }
+        """.trimIndent()
+    ))!!
+
+    @JvmField
     val CARD = Source.fromJson(JSONObject(
         """
         {

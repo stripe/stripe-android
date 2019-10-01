@@ -376,10 +376,10 @@ internal class CardMultilineWidgetTest : BaseViewTest<CardInputTestActivity>(
 
     @Test
     fun initView_whenZipRequired_secondRowContainsThreeVisibleElements() {
-        assertEquals(View.VISIBLE.toLong(), fullGroup.expiryDateEditText.visibility.toLong())
-        assertEquals(View.VISIBLE.toLong(), fullGroup.cvcEditText.visibility.toLong())
-        assertEquals(View.VISIBLE.toLong(), fullGroup.postalCodeEditText.visibility.toLong())
-        assertEquals(View.VISIBLE.toLong(), fullGroup.postalCodeInputLayout.visibility.toLong())
+        assertEquals(View.VISIBLE, fullGroup.expiryDateEditText.visibility)
+        assertEquals(View.VISIBLE, fullGroup.cvcEditText.visibility)
+        assertEquals(View.VISIBLE, fullGroup.postalCodeEditText.visibility)
+        assertEquals(View.VISIBLE, fullGroup.postalCodeInputLayout.visibility)
     }
 
     @Test
@@ -441,33 +441,33 @@ internal class CardMultilineWidgetTest : BaseViewTest<CardInputTestActivity>(
 
     @Test
     fun initView_whenZipRequiredThenSetToHidden_secondRowLosesPostalCodeAndAdjustsMargin() {
-        assertEquals(View.VISIBLE.toLong(), fullGroup.postalCodeInputLayout.visibility.toLong())
+        assertEquals(View.VISIBLE, fullGroup.postalCodeInputLayout.visibility)
         cardMultilineWidget.setShouldShowPostalCode(false)
-        assertEquals(View.GONE.toLong(), fullGroup.postalCodeInputLayout.visibility.toLong())
+        assertEquals(View.GONE, fullGroup.postalCodeInputLayout.visibility)
         val params = fullGroup.cvcInputLayout.layoutParams as LinearLayout.LayoutParams
-        assertEquals(0, params.rightMargin.toLong())
-        assertEquals(0, params.marginEnd.toLong())
+        assertEquals(0, params.rightMargin)
+        assertEquals(0, params.marginEnd)
     }
 
     @Test
     fun initView_whenNoZipRequired_secondRowContainsTwoVisibleElements() {
-        assertEquals(View.VISIBLE.toLong(), noZipGroup.expiryDateEditText.visibility.toLong())
-        assertEquals(View.VISIBLE.toLong(), noZipGroup.cvcEditText.visibility.toLong())
-        assertEquals(View.GONE.toLong(), noZipGroup.postalCodeInputLayout.visibility.toLong())
+        assertEquals(View.VISIBLE, noZipGroup.expiryDateEditText.visibility)
+        assertEquals(View.VISIBLE, noZipGroup.cvcEditText.visibility)
+        assertEquals(View.GONE, noZipGroup.postalCodeInputLayout.visibility)
     }
 
     @Test
     fun initView_whenZipHiddenThenSetToRequired_secondRowAddsPostalCodeAndAdjustsMargin() {
-        assertEquals(View.GONE.toLong(), noZipGroup.postalCodeInputLayout.visibility.toLong())
+        assertEquals(View.GONE, noZipGroup.postalCodeInputLayout.visibility)
         noZipCardMultilineWidget.setShouldShowPostalCode(true)
-        assertEquals(View.VISIBLE.toLong(), noZipGroup.postalCodeInputLayout.visibility.toLong())
+        assertEquals(View.VISIBLE, noZipGroup.postalCodeInputLayout.visibility)
 
         val expectedMargin = noZipCardMultilineWidget.resources
             .getDimensionPixelSize(R.dimen.add_card_expiry_middle_margin)
 
         val params = noZipGroup.cvcInputLayout.layoutParams as LinearLayout.LayoutParams
-        assertEquals(expectedMargin.toLong(), params.rightMargin.toLong())
-        assertEquals(expectedMargin.toLong(), params.marginEnd.toLong())
+        assertEquals(expectedMargin, params.rightMargin)
+        assertEquals(expectedMargin, params.marginEnd)
     }
 
     @Test

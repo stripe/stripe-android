@@ -36,7 +36,7 @@ class Stripe3ds2FingerprintTest {
         assertNotNull(directoryServerEncryption.directoryServerPublicKey)
         assertEquals("7c4debe3f4af7f9d1569a2ffea4343c2566826ee",
             directoryServerEncryption.keyId)
-        assertEquals(1, directoryServerEncryption.rootCerts.size.toLong())
+        assertEquals(1, directoryServerEncryption.rootCerts.size)
     }
 
     @Test
