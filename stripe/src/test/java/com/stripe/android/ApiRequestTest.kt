@@ -66,8 +66,8 @@ internal class ApiRequestTest {
         assertEquals("Java", userAgentData.getString("lang"))
         assertEquals("Stripe", userAgentData.getString("publisher"))
         assertEquals("android", userAgentData.getString("os.name"))
-        assertEquals(Build.VERSION.SDK_INT.toLong(),
-            Integer.parseInt(userAgentData.getString("os.version")).toLong())
+        assertEquals(Build.VERSION.SDK_INT,
+            Integer.parseInt(userAgentData.getString("os.version")))
         assertTrue(userAgentData.getString("java.version").startsWith("1.8.0"))
     }
 
@@ -110,7 +110,7 @@ internal class ApiRequestTest {
         val output = ApiRequest.createPost(StripeApiRepository.paymentMethodsUrl,
             ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
             .getOutputBytes()
-        assertEquals(0, output.size.toLong())
+        assertEquals(0, output.size)
     }
 
     @Test
@@ -122,7 +122,7 @@ internal class ApiRequestTest {
             params,
             ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
             .getOutputBytes()
-        assertEquals(16, output.size.toLong())
+        assertEquals(16, output.size)
     }
 
     @Test

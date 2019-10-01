@@ -298,6 +298,6 @@ class PaymentMethodsActivity : AppCompatActivity() {
 
     companion object {
         private const val STATE_SELECTED_PAYMENT_METHOD_ID = "state_selected_payment_method_id"
-        const val TOKEN_PAYMENT_METHODS_ACTIVITY = "PaymentMethodsActivity"
+        const val TOKEN_PAYMENT_METHODS_ACTIVITY: String = "PaymentMethodsActivity"
     }
 }

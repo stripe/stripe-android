@@ -11,7 +11,7 @@ import java.util.Objects;
 import org.json.JSONException;
 import org.junit.Test;
 
-import static com.stripe.android.view.CardInputTestActivity.VALID_VISA_NO_SPACES;
+import static com.stripe.android.CardNumberFixtures.VALID_VISA_NO_SPACES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;

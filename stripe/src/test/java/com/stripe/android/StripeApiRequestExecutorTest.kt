@@ -2,9 +2,8 @@ package com.stripe.android
 
 import com.stripe.android.exception.InvalidRequestException
 import java.io.UnsupportedEncodingException
-import org.junit.Assert.assertThrows
-import org.junit.Test
-import org.junit.function.ThrowingRunnable
+import kotlin.test.Test
+import kotlin.test.assertFailsWith
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -34,7 +33,8 @@ class StripeApiRequestExecutorTest {
         }
 
         val connectionFactory = ConnectionFactory()
-        assertThrows<InvalidRequestException>(InvalidRequestException::class.java,
-            ThrowingRunnable { connectionFactory.getRequestOutputBytes(stripeRequest) })
+        assertFailsWith<InvalidRequestException> {
+            connectionFactory.getRequestOutputBytes(stripeRequest)
+        }
     }
 }

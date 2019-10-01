@@ -161,7 +161,7 @@ class EphemeralKeyManagerTest {
         val capturedMap = argCaptor.firstValue
         assertNotNull(capturedMap)
         assertNotNull(ephemeralKeyArgumentCaptor.firstValue)
-        assertEquals(1, capturedMap.size.toLong())
+        assertEquals(1, capturedMap.size)
         assertEquals("value", capturedMap["key"])
         assertEquals(actionString, actionArgumentCaptor.firstValue)
     }

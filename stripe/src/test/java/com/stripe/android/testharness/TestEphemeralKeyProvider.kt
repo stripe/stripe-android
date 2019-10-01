@@ -16,11 +16,12 @@ internal class TestEphemeralKeyProvider : EphemeralKeyProvider {
         @Size(min = 4) apiVersion: String,
         keyUpdateListener: EphemeralKeyUpdateListener
     ) {
+        val rawEphemeralKey = this.rawEphemeralKey
         when {
             rawEphemeralKey != null ->
-                keyUpdateListener.onKeyUpdate(rawEphemeralKey!!)
+                keyUpdateListener.onKeyUpdate(rawEphemeralKey)
             errorCode != INVALID_ERROR_CODE ->
-                keyUpdateListener.onKeyUpdateFailure(errorCode, errorMessage!!)
+                keyUpdateListener.onKeyUpdateFailure(errorCode, errorMessage.orEmpty())
             else -> // Useful to test edge cases
                 keyUpdateListener.onKeyUpdate("")
         }

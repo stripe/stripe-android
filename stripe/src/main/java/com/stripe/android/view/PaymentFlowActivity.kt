@@ -210,8 +210,8 @@ class PaymentFlowActivity : StripeActivity() {
     }
 
     companion object {
-        const val TOKEN_PAYMENT_FLOW_ACTIVITY = "PaymentFlowActivity"
-        const val TOKEN_SHIPPING_INFO_SCREEN = "ShippingInfoScreen"
-        const val TOKEN_SHIPPING_METHOD_SCREEN = "ShippingMethodScreen"
+        const val TOKEN_PAYMENT_FLOW_ACTIVITY: String = "PaymentFlowActivity"
+        const val TOKEN_SHIPPING_INFO_SCREEN: String = "ShippingInfoScreen"
+        const val TOKEN_SHIPPING_METHOD_SCREEN: String = "ShippingMethodScreen"
     }
 }

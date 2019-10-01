@@ -246,7 +246,7 @@ class StripeApiRepositoryTest {
         )
         assertNotNull(response)
 
-        val responseHeaders = response.responseHeaders!!
+        val responseHeaders = response.responseHeaders.orEmpty()
 
         // the Stripe API response will either have a 'Stripe-Account' or 'stripe-account' header,
         // so we need to check both
@@ -265,7 +265,8 @@ class StripeApiRepositoryTest {
     }
 
     @Test
-    @Throws(APIException::class, AuthenticationException::class, InvalidRequestException::class, APIConnectionException::class)
+    @Throws(APIException::class, AuthenticationException::class, InvalidRequestException::class,
+        APIConnectionException::class)
     fun confirmPaymentIntent_withSourceData_canSuccessfulConfirm() {
         val clientSecret = "temporarily put a private key here simulate the backend"
 
@@ -277,11 +278,12 @@ class StripeApiRepositoryTest {
                 )
             )
 
-        val confirmPaymentIntentParams = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-            clientSecret,
-            "yourapp://post-authentication-return-url"
-        )
+        val confirmPaymentIntentParams =
+            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                clientSecret,
+                "yourapp://post-authentication-return-url"
+            )
         val paymentIntent = create().confirmPaymentIntent(
             confirmPaymentIntentParams,
             ApiRequest.Options.create(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
@@ -291,7 +293,8 @@ class StripeApiRepositoryTest {
 
         verify(stripeApiRequestExecutor).execute(apiRequestArgumentCaptor.capture())
         val apiRequest = apiRequestArgumentCaptor.firstValue
-        val paymentMethodDataParams = apiRequest.params?.get("payment_method_data") as Map<String, *>
+        val paymentMethodDataParams =
+            apiRequest.params?.get("payment_method_data") as Map<String, *>
         assertTrue(paymentMethodDataParams["muid"] is String)
         assertTrue(paymentMethodDataParams["guid"] is String)
         assertEquals("card", paymentMethodDataParams["type"])
@@ -304,7 +307,8 @@ class StripeApiRepositoryTest {
     }
 
     @Ignore("requires a secret key")
-    @Throws(APIException::class, AuthenticationException::class, InvalidRequestException::class, APIConnectionException::class)
+    @Throws(APIException::class, AuthenticationException::class, InvalidRequestException::class,
+        APIConnectionException::class)
     fun disabled_confirmPaymentIntent_withSourceId_canSuccessfulConfirm() {
         val clientSecret = "temporarily put a private key here simulate the backend"
         val publishableKey = "put a public key that matches the private key here"
@@ -516,7 +520,7 @@ class StripeApiRepositoryTest {
             .getPaymentMethods("cus_123", PaymentMethod.Type.Card.code,
                 ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, emptySet(),
                 ApiRequest.Options.create(ApiKeyFixtures.FAKE_EPHEMERAL_KEY))
-        assertEquals(3, paymentMethods.size.toLong())
+        assertEquals(3, paymentMethods.size)
         assertEquals("pm_1EVNYJCRMbs6FrXfG8n52JaK", paymentMethods[0].id)
         assertEquals("pm_1EVNXtCRMbs6FrXfTlZGIdGq", paymentMethods[1].id)
         assertEquals("src_1EVO8DCRMbs6FrXf2Dspj49a", paymentMethods[2].id)

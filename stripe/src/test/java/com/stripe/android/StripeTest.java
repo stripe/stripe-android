@@ -22,7 +22,6 @@ import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.SourceSepaDebitData;
 import com.stripe.android.model.Token;
 import com.stripe.android.testharness.JsonTestUtils;
-import com.stripe.android.view.CardInputTestActivity;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -41,6 +40,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
+import static com.stripe.android.CardNumberFixtures.VALID_VISA_NO_SPACES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -437,7 +437,7 @@ public class StripeTest {
     @Test
     public void createSourceSynchronous_withCardParams_passesIntegrationTest()
             throws StripeException {
-        final Card card = new Card.Builder(CardInputTestActivity.VALID_VISA_NO_SPACES, 12, 2050, "123")
+        final Card card = new Card.Builder(VALID_VISA_NO_SPACES, 12, 2050, "123")
                 .addressCity("Sheboygan")
                 .addressCountry("US")
                 .addressLine1("123 Main St")
@@ -477,7 +477,7 @@ public class StripeTest {
     public void createSourceSynchronous_with3DSParams_passesIntegrationTest()
             throws StripeException {
         final Stripe stripe = createStripe();
-        final Card card = Card.create(CardInputTestActivity.VALID_VISA_NO_SPACES, 12, 2050, "123");
+        final Card card = Card.create(VALID_VISA_NO_SPACES, 12, 2050, "123");
         final SourceParams params = SourceParams.createCardParams(card);
 
         final Source cardSource = stripe.createSourceSynchronous(params);
@@ -841,7 +841,7 @@ public class StripeTest {
     public void retrieveSourceSynchronous_withValidData_passesIntegrationTest()
             throws StripeException {
         final Stripe stripe = createStripe();
-        Card card = Card.create(CardInputTestActivity.VALID_VISA_NO_SPACES, 12, 2050, "123");
+        Card card = Card.create(VALID_VISA_NO_SPACES, 12, 2050, "123");
         SourceParams params = SourceParams.createCardParams(card);
 
         final Source cardSource = stripe.createSourceSynchronous(params);

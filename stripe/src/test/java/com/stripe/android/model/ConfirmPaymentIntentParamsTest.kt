@@ -1,11 +1,11 @@
 package com.stripe.android.model
 
+import com.stripe.android.CardNumberFixtures.VALID_VISA_NO_SPACES
 import com.stripe.android.model.ConfirmPaymentIntentParams.Companion.API_PARAM_SAVE_PAYMENT_METHOD
 import com.stripe.android.model.ConfirmPaymentIntentParams.Companion.API_PARAM_SOURCE_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_PAYMENT_METHOD_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_RETURN_URL
-import com.stripe.android.view.CardInputTestActivity.VALID_VISA_NO_SPACES
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

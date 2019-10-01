@@ -22,6 +22,6 @@ class StripeFireAndForgetRequestExecutorTest {
         val responseCode = StripeFireAndForgetRequestExecutor().execute(
             FingerprintRequest(telemetryClientUtil.createTelemetryMap(),
                 UUID.randomUUID().toString()))
-        assertEquals(200, responseCode.toLong())
+        assertEquals(200, responseCode)
     }
 }

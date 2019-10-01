@@ -33,8 +33,8 @@ class SourceSepaDebitDataTest {
     @Test
     fun testHashCode() {
         assertEquals(
-            SourceSepaDebitData.fromJson(EXAMPLE_SEPA_JSON_DATA)!!.hashCode().toLong(),
-            SourceSepaDebitData.fromJson(EXAMPLE_SEPA_JSON_DATA)!!.hashCode().toLong()
+            SourceSepaDebitData.fromJson(EXAMPLE_SEPA_JSON_DATA)!!.hashCode(),
+            SourceSepaDebitData.fromJson(EXAMPLE_SEPA_JSON_DATA)!!.hashCode()
         )
     }
 
