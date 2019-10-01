@@ -17,7 +17,7 @@ import org.robolectric.RobolectricTestRunner
 class CountryAdapterTest {
 
     private lateinit var countryAdapter: CountryAdapter
-    private lateinit var mOrderedCountries: List<String>
+    private lateinit var orderedCountries: List<String>
 
     private val suggestions: List<String>
         get() {
@@ -31,10 +31,10 @@ class CountryAdapterTest {
         MockitoAnnotations.initMocks(this)
         Locale.setDefault(Locale.US)
 
-        mOrderedCountries = CountryUtils.getOrderedCountries(Locale.getDefault())
+        orderedCountries = CountryUtils.getOrderedCountries(Locale.getDefault())
         countryAdapter = CountryAdapter(
             ApplicationProvider.getApplicationContext<Context>(),
-            mOrderedCountries
+            orderedCountries
         )
     }
 
@@ -42,7 +42,7 @@ class CountryAdapterTest {
     fun filter_whenEmptyConstraint_showsAllResults() {
         countryAdapter.filter.filter("")
         assertEquals(
-            mOrderedCountries,
+            orderedCountries,
             suggestions
         )
     }
@@ -51,7 +51,7 @@ class CountryAdapterTest {
     fun filter_whenCountryInputNoMatch_showsAllResults() {
         countryAdapter.filter.filter("NONEXISTENT COUNTRY")
         assertEquals(
-            mOrderedCountries,
+            orderedCountries,
             suggestions
         )
     }
@@ -74,7 +74,7 @@ class CountryAdapterTest {
     fun filter_whenCountryInputMatchesExactly_showsAllResults() {
         countryAdapter.filter.filter("Uganda")
         assertEquals(
-            mOrderedCountries,
+            orderedCountries,
             suggestions
         )
     }

@@ -34,8 +34,8 @@ class PaymentAuthConfigTest : BaseViewTest<Fake3ds2ChallengeActivity>(
     @Test
     fun get_whenNotInited_returnsDefault() {
         val paymentAuthConfig = PaymentAuthConfig.get()
-        assertEquals(PaymentAuthConfig.Stripe3ds2Config.DEFAULT_TIMEOUT.toLong(),
-            paymentAuthConfig.stripe3ds2Config.timeout.toLong())
+        assertEquals(PaymentAuthConfig.Stripe3ds2Config.DEFAULT_TIMEOUT,
+            paymentAuthConfig.stripe3ds2Config.timeout)
         assertNotNull(paymentAuthConfig.stripe3ds2Config.uiCustomization)
     }
 
@@ -46,7 +46,7 @@ class PaymentAuthConfigTest : BaseViewTest<Fake3ds2ChallengeActivity>(
                 .setTimeout(20)
                 .build())
             .build())
-        assertEquals(20, PaymentAuthConfig.get().stripe3ds2Config.timeout.toLong())
+        assertEquals(20, PaymentAuthConfig.get().stripe3ds2Config.timeout)
     }
 
     @Test

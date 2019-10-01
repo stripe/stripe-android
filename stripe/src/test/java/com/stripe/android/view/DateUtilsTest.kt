@@ -18,21 +18,21 @@ class DateUtilsTest {
     fun convertTwoDigitYearToFour_whenCurrentYearIsLessThanEighty_addsNormalBase() {
         val earlyCenturyCalendar = Calendar.getInstance()
         earlyCenturyCalendar.set(Calendar.YEAR, 2017)
-        assertEquals(DateUtils.convertTwoDigitYearToFour(19, earlyCenturyCalendar).toLong(), 2019)
+        assertEquals(DateUtils.convertTwoDigitYearToFour(19, earlyCenturyCalendar), 2019)
     }
 
     @Test
     fun convertTwoDigitYearToFour_whenDateIsNearCenturyButYearIsSmall_addsIncreasedBase() {
         val lateCenturyCalendar = Calendar.getInstance()
         lateCenturyCalendar.set(Calendar.YEAR, 2081)
-        assertEquals(DateUtils.convertTwoDigitYearToFour(8, lateCenturyCalendar).toLong(), 2108)
+        assertEquals(DateUtils.convertTwoDigitYearToFour(8, lateCenturyCalendar), 2108)
     }
 
     @Test
     fun convertTwoDigitYearToFour_whenDateIsNearCenturyAndYearIsLarge_addsNormalBase() {
         val lateCenturyCalendar = Calendar.getInstance()
         lateCenturyCalendar.set(Calendar.YEAR, 2088)
-        assertEquals(DateUtils.convertTwoDigitYearToFour(95, lateCenturyCalendar).toLong(), 2095)
+        assertEquals(DateUtils.convertTwoDigitYearToFour(95, lateCenturyCalendar), 2095)
     }
 
     @Test
@@ -40,18 +40,18 @@ class DateUtilsTest {
         val earlyCenturyCalendar = Calendar.getInstance()
         earlyCenturyCalendar.set(Calendar.YEAR, 2502)
         // In the year 2502, when you say "95", you probably mean 2495.
-        assertEquals(DateUtils.convertTwoDigitYearToFour(95, earlyCenturyCalendar).toLong(), 2495)
+        assertEquals(DateUtils.convertTwoDigitYearToFour(95, earlyCenturyCalendar), 2495)
 
         // A more practical test
         earlyCenturyCalendar.set(Calendar.YEAR, 2017)
-        assertEquals(DateUtils.convertTwoDigitYearToFour(99, earlyCenturyCalendar).toLong(), 1999)
+        assertEquals(DateUtils.convertTwoDigitYearToFour(99, earlyCenturyCalendar), 1999)
     }
 
     @Test
     fun convertTwoDigitYearToFour_whenDateIsMidCenturyAndYearIsLarge_addsNormalBase() {
         val midCenturyCalendar = Calendar.getInstance()
         midCenturyCalendar.set(Calendar.YEAR, 3535)
-        assertEquals(DateUtils.convertTwoDigitYearToFour(99, midCenturyCalendar).toLong(), 3599)
+        assertEquals(DateUtils.convertTwoDigitYearToFour(99, midCenturyCalendar), 3599)
     }
 
     @Test

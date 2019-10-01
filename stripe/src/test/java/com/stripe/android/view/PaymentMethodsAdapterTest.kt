@@ -37,7 +37,7 @@ class PaymentMethodsAdapterTest {
     @Test
     fun setSelection_changesSelection() {
         paymentMethodsAdapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
-        assertEquals(4, paymentMethodsAdapter.itemCount.toLong())
+        assertEquals(4, paymentMethodsAdapter.itemCount)
         verify<RecyclerView.AdapterDataObserver>(adapterDataObserver).onChanged()
 
         assertEquals(PaymentMethodFixtures.CARD_PAYMENT_METHODS[2].id,
@@ -55,7 +55,7 @@ class PaymentMethodsAdapterTest {
         val singlePaymentMethod = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHODS[0])
 
         paymentMethodsAdapter.setPaymentMethods(singlePaymentMethod)
-        assertEquals(2, paymentMethodsAdapter.itemCount.toLong())
+        assertEquals(2, paymentMethodsAdapter.itemCount)
         assertNotNull(paymentMethodsAdapter.selectedPaymentMethod)
 
         assertEquals(
@@ -64,7 +64,7 @@ class PaymentMethodsAdapterTest {
         )
 
         paymentMethodsAdapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
-        assertEquals(4, paymentMethodsAdapter.itemCount.toLong())
+        assertEquals(4, paymentMethodsAdapter.itemCount)
         assertEquals(
             PaymentMethodFixtures.CARD_PAYMENT_METHODS[2].id,
             paymentMethodsAdapter.selectedPaymentMethod?.id
@@ -76,12 +76,12 @@ class PaymentMethodsAdapterTest {
     @Test
     fun updatePaymentMethods_withSelection_updatesPaymentMethodsAndSelectionMaintained() {
         paymentMethodsAdapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
-        assertEquals(4, paymentMethodsAdapter.itemCount.toLong())
+        assertEquals(4, paymentMethodsAdapter.itemCount)
         paymentMethodsAdapter.selectedPaymentMethodId = PaymentMethodFixtures.CARD_PAYMENT_METHODS[2].id
         assertNotNull(paymentMethodsAdapter.selectedPaymentMethod)
 
         paymentMethodsAdapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
-        assertEquals(4, paymentMethodsAdapter.itemCount.toLong())
+        assertEquals(4, paymentMethodsAdapter.itemCount)
         assertEquals(
             PaymentMethodFixtures.CARD_PAYMENT_METHODS[2].id,
             paymentMethodsAdapter.selectedPaymentMethod?.id
