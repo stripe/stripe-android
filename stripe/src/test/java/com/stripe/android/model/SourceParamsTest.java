@@ -11,7 +11,7 @@ import java.util.Objects;
 import org.json.JSONException;
 import org.junit.Test;
 
-import static com.stripe.android.view.CardInputTestActivity.VALID_VISA_NO_SPACES;
+import static com.stripe.android.CardNumberFixtures.VALID_VISA_NO_SPACES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -168,7 +168,7 @@ public class SourceParamsTest {
                     put("preferred_language", "en");
         }});
 
-        JsonTestUtils.assertMapEquals(expectedMap, params.toParamMap());
+        JsonTestUtils.INSTANCE.assertMapEquals(expectedMap, params.toParamMap());
     }
 
     @Test
@@ -274,7 +274,7 @@ public class SourceParamsTest {
         metadata.put("animal", "dog");
         totalExpectedMap.put("metadata", metadata);
 
-        JsonTestUtils.assertMapEquals(totalExpectedMap, params.toParamMap());
+        JsonTestUtils.INSTANCE.assertMapEquals(totalExpectedMap, params.toParamMap());
     }
 
     @Test
@@ -353,7 +353,7 @@ public class SourceParamsTest {
                     put("statement_descriptor", "stripe descriptor");
                 }});
 
-        JsonTestUtils.assertMapEquals(expectedMap, params.toParamMap());
+        JsonTestUtils.INSTANCE.assertMapEquals(expectedMap, params.toParamMap());
     }
 
     @Test
@@ -372,7 +372,7 @@ public class SourceParamsTest {
         expectedMap.put("redirect",
                 new HashMap<String, Object>() {{ put("return_url", "stripe://return"); }});
 
-        JsonTestUtils.assertMapEquals(expectedMap, params.toParamMap());
+        JsonTestUtils.INSTANCE.assertMapEquals(expectedMap, params.toParamMap());
     }
 
     @Test
@@ -416,7 +416,7 @@ public class SourceParamsTest {
                     put("statement_descriptor", "stripe descriptor");
                 }});
 
-        JsonTestUtils.assertMapEquals(expectedMap, params.toParamMap());
+        JsonTestUtils.INSTANCE.assertMapEquals(expectedMap, params.toParamMap());
     }
 
     @Test
@@ -484,7 +484,7 @@ public class SourceParamsTest {
                     put("bank", "SVB");
                 }});
 
-        JsonTestUtils.assertMapEquals(expectedMap, params.toParamMap());
+        JsonTestUtils.INSTANCE.assertMapEquals(expectedMap, params.toParamMap());
     }
 
     @Test
@@ -559,7 +559,7 @@ public class SourceParamsTest {
         expectedMap.put("redirect",
                 new HashMap<String, Object>() {{ put("return_url", "stripe://testactivity"); }});
 
-        JsonTestUtils.assertMapEquals(expectedMap, params.toParamMap());
+        JsonTestUtils.INSTANCE.assertMapEquals(expectedMap, params.toParamMap());
     }
 
     @Test
@@ -620,7 +620,7 @@ public class SourceParamsTest {
                 assertEquals(Source.SourceType.SEPA_DEBIT, params.getType());
 
         Map<String, Object> actualMap = params.toParamMap();
-        JsonTestUtils.assertMapEquals(expectedMap, actualMap);
+        JsonTestUtils.INSTANCE.assertMapEquals(expectedMap, actualMap);
     }
 
     @Test
@@ -664,7 +664,7 @@ public class SourceParamsTest {
                     put("statement_descriptor", "a thing you bought");
                 }});
 
-        JsonTestUtils.assertMapEquals(expectedMap, params.toParamMap());
+        JsonTestUtils.INSTANCE.assertMapEquals(expectedMap, params.toParamMap());
     }
 
     @Test
@@ -706,7 +706,7 @@ public class SourceParamsTest {
         expectedMap.put(Source.SourceType.THREE_D_SECURE,
                 new HashMap<String, Object>() {{ put("card", "card_id_123"); }});
 
-        JsonTestUtils.assertMapEquals(expectedMap, params.toParamMap());
+        JsonTestUtils.INSTANCE.assertMapEquals(expectedMap, params.toParamMap());
     }
 
     @Test
@@ -740,7 +740,7 @@ public class SourceParamsTest {
                     put("statement_descriptor", "stripe descriptor");
                 }});
 
-        JsonTestUtils.assertMapEquals(expectedMap, params.toParamMap());
+        JsonTestUtils.INSTANCE.assertMapEquals(expectedMap, params.toParamMap());
     }
 
     @Test

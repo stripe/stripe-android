@@ -29,7 +29,7 @@ class StripeNetworkUtilsTest {
 
     @Test
     fun hashMapFromCard_mapsCorrectFields() {
-        val cardMap = getCardTokenParamData(CardFixtures.CARD)!!
+        val cardMap = requireNotNull(getCardTokenParamData(CardFixtures.CARD))
         assertEquals(CARD_NUMBER, cardMap["number"])
         assertEquals(CARD_CVC, cardMap["cvc"])
         assertEquals(8, cardMap["exp_month"])
@@ -49,7 +49,7 @@ class StripeNetworkUtilsTest {
         val card = Card.Builder(CARD_NUMBER, 8, 2019, CARD_CVC)
             .build()
 
-        val cardMap = getCardTokenParamData(card)!!
+        val cardMap = requireNotNull(getCardTokenParamData(card))
         assertEquals(CARD_NUMBER, cardMap["number"])
         assertEquals(CARD_CVC, cardMap["cvc"])
         assertEquals(8, cardMap["exp_month"])

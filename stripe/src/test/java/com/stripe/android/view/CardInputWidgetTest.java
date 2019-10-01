@@ -24,15 +24,15 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import static com.stripe.android.CardNumberFixtures.VALID_AMEX_NO_SPACES;
+import static com.stripe.android.CardNumberFixtures.VALID_AMEX_WITH_SPACES;
+import static com.stripe.android.CardNumberFixtures.VALID_DINERS_CLUB_NO_SPACES;
+import static com.stripe.android.CardNumberFixtures.VALID_DINERS_CLUB_WITH_SPACES;
+import static com.stripe.android.CardNumberFixtures.VALID_VISA_NO_SPACES;
+import static com.stripe.android.CardNumberFixtures.VALID_VISA_WITH_SPACES;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CARD;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_CVC;
 import static com.stripe.android.view.CardInputListener.FocusField.FOCUS_EXPIRY;
-import static com.stripe.android.view.CardInputTestActivity.VALID_AMEX_NO_SPACES;
-import static com.stripe.android.view.CardInputTestActivity.VALID_AMEX_WITH_SPACES;
-import static com.stripe.android.view.CardInputTestActivity.VALID_DINERS_CLUB_NO_SPACES;
-import static com.stripe.android.view.CardInputTestActivity.VALID_DINERS_CLUB_WITH_SPACES;
-import static com.stripe.android.view.CardInputTestActivity.VALID_VISA_NO_SPACES;
-import static com.stripe.android.view.CardInputTestActivity.VALID_VISA_WITH_SPACES;
 import static com.stripe.android.view.CardInputWidget.LOGGING_TOKEN;
 import static com.stripe.android.view.CardInputWidget.shouldIconShowBrand;
 import static org.junit.Assert.assertArrayEquals;
@@ -173,8 +173,12 @@ public class CardInputWidgetTest extends BaseViewTest<CardInputTestActivity> {
                 mCardInputWidget.getPaymentMethodCard();
         assertNotNull(paymentMethodCard);
         final PaymentMethodCreateParams.Card expectedPaymentMethodCard =
-                new PaymentMethodCreateParams.Card.Builder().setNumber(VALID_AMEX_NO_SPACES)
-                        .setCvc("1234").setExpiryYear(2050).setExpiryMonth(12).build();
+                new PaymentMethodCreateParams.Card.Builder()
+                        .setNumber(VALID_AMEX_NO_SPACES)
+                        .setCvc("1234")
+                        .setExpiryYear(2050)
+                        .setExpiryMonth(12)
+                        .build();
         assertEquals(expectedPaymentMethodCard, paymentMethodCard);
     }
 
@@ -203,8 +207,12 @@ public class CardInputWidgetTest extends BaseViewTest<CardInputTestActivity> {
                 mCardInputWidget.getPaymentMethodCard();
         assertNotNull(paymentMethodCard);
         final PaymentMethodCreateParams.Card expectedPaymentMethodCard =
-                new PaymentMethodCreateParams.Card.Builder().setNumber(VALID_DINERS_CLUB_NO_SPACES)
-                        .setCvc("123").setExpiryYear(2050).setExpiryMonth(12).build();
+                new PaymentMethodCreateParams.Card.Builder()
+                        .setNumber(VALID_DINERS_CLUB_NO_SPACES)
+                        .setCvc("123")
+                        .setExpiryYear(2050)
+                        .setExpiryMonth(12)
+                        .build();
         assertEquals(expectedPaymentMethodCard, paymentMethodCard);
     }
 
@@ -723,7 +731,7 @@ public class CardInputWidgetTest extends BaseViewTest<CardInputTestActivity> {
     public void setAllCardFields_whenValidValues_allowsGetCardWithExpectedValues() {
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) <= 2079);
 
-        mCardInputWidget.setCardNumber(VALID_AMEX_NO_SPACES);
+        mCardInputWidget.setCardNumber(VALID_AMEX_WITH_SPACES);
         mCardInputWidget.setExpiryDate(12, 2079);
         mCardInputWidget.setCvcCode("1234");
         Card card = mCardInputWidget.getCard();
@@ -740,14 +748,18 @@ public class CardInputWidgetTest extends BaseViewTest<CardInputTestActivity> {
                 mCardInputWidget.getPaymentMethodCard();
         assertNotNull(paymentMethodCard);
         final PaymentMethodCreateParams.Card expectedPaymentMethodCard =
-                new PaymentMethodCreateParams.Card.Builder().setNumber(VALID_AMEX_NO_SPACES)
-                        .setCvc("1234").setExpiryYear(2079).setExpiryMonth(12).build();
+                new PaymentMethodCreateParams.Card.Builder()
+                        .setNumber(VALID_AMEX_NO_SPACES)
+                        .setCvc("1234")
+                        .setExpiryYear(2079)
+                        .setExpiryMonth(12)
+                        .build();
         assertEquals(expectedPaymentMethodCard, paymentMethodCard);
     }
 
     @Test
     public void addValues_thenClear_leavesAllTextFieldsEmpty() {
-        mCardInputWidget.setCardNumber(VALID_AMEX_NO_SPACES);
+        mCardInputWidget.setCardNumber(VALID_VISA_NO_SPACES);
         mCardInputWidget.setExpiryDate(12, 2079);
         mCardInputWidget.setCvcCode("1234");
         mCardInputWidget.clear();

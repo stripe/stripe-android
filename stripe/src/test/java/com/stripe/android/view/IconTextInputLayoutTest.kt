@@ -14,7 +14,7 @@ import org.robolectric.RobolectricTestRunner
  * is no need to otherwise test the behavior.
  */
 @RunWith(RobolectricTestRunner::class)
-class IconTextInputLayoutTest :
+internal class IconTextInputLayoutTest :
     BaseViewTest<CardInputTestActivity>(CardInputTestActivity::class.java) {
 
     @AfterTest

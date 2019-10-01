@@ -80,7 +80,8 @@ class StripePaymentAuthTest {
     @Test
     fun authenticatePayment_shouldAuth() {
         val stripe = createStripe()
-        val clientSecret = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.clientSecret!!
+        val clientSecret =
+            requireNotNull(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.clientSecret)
         stripe.authenticatePayment(activity, clientSecret)
         verify<PaymentController>(paymentController).startAuth(
             hostArgumentCaptor.capture(),
@@ -93,7 +94,8 @@ class StripePaymentAuthTest {
     @Test
     fun authenticateSetup_shouldAuth() {
         val stripe = createStripe()
-        val clientSecret = SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.clientSecret!!
+        val clientSecret =
+            requireNotNull(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.clientSecret)
         stripe.authenticateSetup(activity, clientSecret)
         verify<PaymentController>(paymentController).startAuth(
             hostArgumentCaptor.capture(),
@@ -124,7 +126,7 @@ class StripePaymentAuthTest {
             PaymentController.SETUP_REQUEST_CODE, data))
             .thenReturn(true)
         val stripe = createStripe()
-        stripe.onSetupResult(PaymentController.SETUP_REQUEST_CODE, data, setupCallback!!)
+        stripe.onSetupResult(PaymentController.SETUP_REQUEST_CODE, data, setupCallback)
 
         verify(paymentController).handleSetupResult(data,
             ApiRequest.Options.create(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),

@@ -1,8 +1,8 @@
 package com.stripe.android
 
+import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.junit.Test
 
 class StripeRequestCompactParamsTest {
     @Test

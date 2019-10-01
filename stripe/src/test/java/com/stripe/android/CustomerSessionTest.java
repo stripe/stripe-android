@@ -215,13 +215,13 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
         final List<String> expectedTokens = new ArrayList<>();
         expectedTokens.add(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY);
 
-        JsonTestUtils.assertListEquals(expectedTokens,
+        JsonTestUtils.INSTANCE.assertListEquals(expectedTokens,
                 new ArrayList<>(customerSession.getProductUsageTokens()));
 
         customerSession.addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY);
         expectedTokens.add(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY);
 
-        JsonTestUtils.assertListEquals(expectedTokens,
+        JsonTestUtils.INSTANCE.assertListEquals(expectedTokens,
                 new ArrayList<>(customerSession.getProductUsageTokens()));
     }
 
@@ -229,7 +229,7 @@ public class CustomerSessionTest extends BaseViewTest<PaymentFlowActivity> {
     public void addProductUsageTokenIfValid_whenNotValid_addsNoTokens() {
         final CustomerSession customerSession = createCustomerSession(null);
         customerSession.addProductUsageTokenIfValid("SomeUnknownActivity");
-        JsonTestUtils.assertListEquals(Collections.EMPTY_LIST,
+        JsonTestUtils.INSTANCE.assertListEquals(Collections.EMPTY_LIST,
                 new ArrayList<>(customerSession.getProductUsageTokens()));
     }
 

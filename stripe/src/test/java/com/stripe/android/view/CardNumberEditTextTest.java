@@ -12,12 +12,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
-import static com.stripe.android.view.CardInputTestActivity.VALID_AMEX_NO_SPACES;
-import static com.stripe.android.view.CardInputTestActivity.VALID_AMEX_WITH_SPACES;
-import static com.stripe.android.view.CardInputTestActivity.VALID_DINERS_CLUB_NO_SPACES;
-import static com.stripe.android.view.CardInputTestActivity.VALID_DINERS_CLUB_WITH_SPACES;
-import static com.stripe.android.view.CardInputTestActivity.VALID_VISA_NO_SPACES;
-import static com.stripe.android.view.CardInputTestActivity.VALID_VISA_WITH_SPACES;
+import static com.stripe.android.CardNumberFixtures.VALID_AMEX_NO_SPACES;
+import static com.stripe.android.CardNumberFixtures.VALID_AMEX_WITH_SPACES;
+import static com.stripe.android.CardNumberFixtures.VALID_DINERS_CLUB_NO_SPACES;
+import static com.stripe.android.CardNumberFixtures.VALID_DINERS_CLUB_WITH_SPACES;
+import static com.stripe.android.CardNumberFixtures.VALID_VISA_NO_SPACES;
+import static com.stripe.android.CardNumberFixtures.VALID_VISA_WITH_SPACES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;

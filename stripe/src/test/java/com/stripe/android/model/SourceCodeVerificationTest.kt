@@ -11,7 +11,7 @@ class SourceCodeVerificationTest {
     @Test
     fun fromJsonString_createsObject() {
         val codeVerification = SourceFixtures.SOURCE_CODE_VERIFICATION
-        assertEquals(3, codeVerification.attemptsRemaining.toLong())
+        assertEquals(3, codeVerification.attemptsRemaining)
         assertEquals(SourceCodeVerification.Status.PENDING, codeVerification.status)
     }
 }

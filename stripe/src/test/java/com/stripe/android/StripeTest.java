@@ -22,7 +22,6 @@ import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.SourceSepaDebitData;
 import com.stripe.android.model.Token;
 import com.stripe.android.testharness.JsonTestUtils;
-import com.stripe.android.view.CardInputTestActivity;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -41,6 +40,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
+import static com.stripe.android.CardNumberFixtures.VALID_VISA_NO_SPACES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -431,13 +431,13 @@ public class StripeTest {
         assertNotNull(bancontactSource.getRedirect());
         assertEquals("John Doe", bancontactSource.getOwner().getName());
         assertEquals("example://path", bancontactSource.getRedirect().getReturnUrl());
-        JsonTestUtils.assertMapEquals(metamap, bancontactSource.getMetaData());
+        JsonTestUtils.INSTANCE.assertMapEquals(metamap, bancontactSource.getMetaData());
     }
 
     @Test
     public void createSourceSynchronous_withCardParams_passesIntegrationTest()
             throws StripeException {
-        final Card card = new Card.Builder(CardInputTestActivity.VALID_VISA_NO_SPACES, 12, 2050, "123")
+        final Card card = new Card.Builder(VALID_VISA_NO_SPACES, 12, 2050, "123")
                 .addressCity("Sheboygan")
                 .addressCountry("US")
                 .addressLine1("123 Main St")
@@ -470,14 +470,14 @@ public class StripeTest {
         assertEquals("#456", cardSource.getOwner().getAddress().getLine2());
         assertEquals("US", cardSource.getOwner().getAddress().getCountry());
         assertEquals("Winnie Hoop", cardSource.getOwner().getName());
-        JsonTestUtils.assertMapEquals(metamap, cardSource.getMetaData());
+        JsonTestUtils.INSTANCE.assertMapEquals(metamap, cardSource.getMetaData());
     }
 
     @Test
     public void createSourceSynchronous_with3DSParams_passesIntegrationTest()
             throws StripeException {
         final Stripe stripe = createStripe();
-        final Card card = Card.create(CardInputTestActivity.VALID_VISA_NO_SPACES, 12, 2050, "123");
+        final Card card = Card.create(VALID_VISA_NO_SPACES, 12, 2050, "123");
         final SourceParams params = SourceParams.createCardParams(card);
 
         final Source cardSource = stripe.createSourceSynchronous(params);
@@ -504,7 +504,7 @@ public class StripeTest {
         assertNull(threeDSource.getSourceTypeModel());
         assertEquals(Source.SourceType.THREE_D_SECURE, threeDSource.getType());
         assertNotNull(threeDSource.getSourceTypeData());
-        JsonTestUtils.assertMapEquals(metadata, threeDSource.getMetaData());
+        JsonTestUtils.INSTANCE.assertMapEquals(metadata, threeDSource.getMetaData());
     }
 
     @Test
@@ -536,7 +536,7 @@ public class StripeTest {
         assertNotNull(giropaySource.getRedirect());
         assertEquals("Mr. X", giropaySource.getOwner().getName());
         assertEquals("example://redirect", giropaySource.getRedirect().getReturnUrl());
-        JsonTestUtils.assertMapEquals(metamap, giropaySource.getMetaData());
+        JsonTestUtils.INSTANCE.assertMapEquals(metamap, giropaySource.getMetaData());
     }
 
     @Test
@@ -601,7 +601,7 @@ public class StripeTest {
         assertEquals("123 Main St", sepaDebitSource.getOwner().getAddress().getLine1());
         assertEquals("EI", sepaDebitSource.getOwner().getAddress().getCountry());
         assertEquals("Sepa Account Holder", sepaDebitSource.getOwner().getName());
-        JsonTestUtils.assertMapEquals(metamap ,sepaDebitSource.getMetaData());
+        JsonTestUtils.INSTANCE.assertMapEquals(metamap ,sepaDebitSource.getMetaData());
     }
 
 
@@ -629,7 +629,7 @@ public class StripeTest {
         assertNotNull(sepaDebitSource.getClientSecret());
         assertNotNull(sepaDebitSource.getId());
         assertEquals(Source.SourceType.SEPA_DEBIT, sepaDebitSource.getType());
-        JsonTestUtils.assertMapEquals(metamap ,sepaDebitSource.getMetaData());
+        JsonTestUtils.INSTANCE.assertMapEquals(metamap ,sepaDebitSource.getMetaData());
     }
 
     @Test
@@ -667,7 +667,7 @@ public class StripeTest {
         assertEquals("123 Main St", sepaDebitSource.getOwner().getAddress().getLine1());
         assertEquals("EI", sepaDebitSource.getOwner().getAddress().getCountry());
         assertEquals("Sepa Account Holder", sepaDebitSource.getOwner().getName());
-        JsonTestUtils.assertMapEquals(metamap ,sepaDebitSource.getMetaData());
+        JsonTestUtils.INSTANCE.assertMapEquals(metamap ,sepaDebitSource.getMetaData());
     }
 
     @Test
@@ -731,7 +731,7 @@ public class StripeTest {
         assertEquals("Bond", idealSource.getOwner().getName());
         assertNotNull(idealSource.getRedirect());
         assertEquals("example://return", idealSource.getRedirect().getReturnUrl());
-        JsonTestUtils.assertMapEquals(metamap, idealSource.getMetaData());
+        JsonTestUtils.INSTANCE.assertMapEquals(metamap, idealSource.getMetaData());
     }
 
     @Test
@@ -767,7 +767,7 @@ public class StripeTest {
         assertNotNull(idealSource.getRedirect());
         assertEquals(bankName, idealSource.getSourceTypeData().get("bank"));
         assertEquals("example://return", idealSource.getRedirect().getReturnUrl());
-        JsonTestUtils.assertMapEquals(metamap, idealSource.getMetaData());
+        JsonTestUtils.INSTANCE.assertMapEquals(metamap, idealSource.getMetaData());
     }
 
     @Test
@@ -803,7 +803,7 @@ public class StripeTest {
         assertEquals(bankName, idealSource.getSourceTypeData().get("bank"));
         assertNull(idealSource.getOwner().getName());
         assertEquals("example://return", idealSource.getRedirect().getReturnUrl());
-        JsonTestUtils.assertMapEquals(metamap, idealSource.getMetaData());
+        JsonTestUtils.INSTANCE.assertMapEquals(metamap, idealSource.getMetaData());
     }
 
 
@@ -834,14 +834,14 @@ public class StripeTest {
         assertEquals(70000L, sofortSource.getAmount().longValue());
         assertNotNull(sofortSource.getRedirect());
         assertEquals("example://return", sofortSource.getRedirect().getReturnUrl());
-        JsonTestUtils.assertMapEquals(metamap, sofortSource.getMetaData());
+        JsonTestUtils.INSTANCE.assertMapEquals(metamap, sofortSource.getMetaData());
     }
 
     @Test
     public void retrieveSourceSynchronous_withValidData_passesIntegrationTest()
             throws StripeException {
         final Stripe stripe = createStripe();
-        Card card = Card.create(CardInputTestActivity.VALID_VISA_NO_SPACES, 12, 2050, "123");
+        Card card = Card.create(VALID_VISA_NO_SPACES, 12, 2050, "123");
         SourceParams params = SourceParams.createCardParams(card);
 
         final Source cardSource = stripe.createSourceSynchronous(params);

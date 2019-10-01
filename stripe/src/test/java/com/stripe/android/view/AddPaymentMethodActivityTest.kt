@@ -210,7 +210,7 @@ class AddPaymentMethodActivityTest :
         assertFalse(cardMultilineWidget.isEnabled)
 
         val expectedPaymentMethod =
-            PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON)!!
+            requireNotNull(PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON))
 
         verify<CustomerSession>(customerSession)
             .addProductUsageTokenIfValid(TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
@@ -274,7 +274,7 @@ class AddPaymentMethodActivityTest :
         assertFalse(cardMultilineWidget.isEnabled)
 
         val expectedPaymentMethod =
-            PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON)!!
+            PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON)
 
         verify<CustomerSession>(customerSession)
             .addProductUsageTokenIfValid(TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
@@ -285,7 +285,7 @@ class AddPaymentMethodActivityTest :
             listenerArgumentCaptor.capture()
         )
 
-        assertEquals(expectedPaymentMethod.id, paymentMethodIdCaptor.firstValue)
+        assertEquals(expectedPaymentMethod?.id, paymentMethodIdCaptor.firstValue)
 
         val error: StripeException = mock()
         val errorMessage = "Oh no! An Error!"
@@ -309,7 +309,7 @@ class AddPaymentMethodActivityTest :
 
     private fun verifyFinishesWithIntent() {
         val expectedPaymentMethod =
-            PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON)!!
+            PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON)
         assertEquals(RESULT_OK, shadowActivity.resultCode)
         val intent = shadowActivity.resultIntent
 
