@@ -30,9 +30,7 @@ import com.stripe.android.view.BaseViewTest
 import com.stripe.android.view.PaymentFlowActivity
 import com.stripe.android.view.PaymentFlowActivityStarter
 import com.stripe.android.view.PaymentMethodsActivity
-import java.util.ArrayList
 import java.util.Calendar
-import java.util.Collections
 import java.util.Objects
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
@@ -183,26 +181,27 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
 
         val expectedTokens = listOf(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
 
-        JsonTestUtils.assertListEquals(expectedTokens,
-            ArrayList(customerSession.productUsageTokens))
+        JsonTestUtils.assertListEquals(expectedTokens, customerSession.productUsageTokens.toList())
 
         customerSession.addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY)
 
         JsonTestUtils.assertListEquals(
             expectedTokens.plus(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY),
-            ArrayList(customerSession.productUsageTokens))
+            customerSession.productUsageTokens.toList()
+        )
     }
 
     @Test
     fun addProductUsageTokenIfValid_whenNotValid_addsNoTokens() {
         val customerSession = createCustomerSession(null)
         customerSession.addProductUsageTokenIfValid("SomeUnknownActivity")
-        JsonTestUtils.assertListEquals(Collections.EMPTY_LIST,
-            ArrayList(customerSession.productUsageTokens))
+        JsonTestUtils.assertListEquals(emptyList<String>(),
+            customerSession.productUsageTokens.toList())
     }
 
     @Test
-    @Throws(CardException::class, APIException::class, InvalidRequestException::class, AuthenticationException::class, APIConnectionException::class, JSONException::class)
+    @Throws(CardException::class, APIException::class, InvalidRequestException::class,
+        AuthenticationException::class, APIConnectionException::class, JSONException::class)
     fun create_withoutInvokingFunctions_fetchesKeyAndCustomer() {
         val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
 
@@ -218,7 +217,8 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
     }
 
     @Test
-    @Throws(CardException::class, APIException::class, InvalidRequestException::class, AuthenticationException::class, APIConnectionException::class, JSONException::class)
+    @Throws(CardException::class, APIException::class, InvalidRequestException::class,
+        AuthenticationException::class, APIConnectionException::class, JSONException::class)
     fun setCustomerShippingInfo_withValidInfo_callsWithExpectedArgs() {
         val firstKey = Objects.requireNonNull(
             getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW))
@@ -640,8 +640,7 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
             .setPaymentSessionData(PaymentSessionData())
             .build())
 
-        val actualTokens = ArrayList(customerSession.productUsageTokens)
-        assertTrue(actualTokens.contains("ShippingInfoScreen"))
+        assertTrue(customerSession.productUsageTokens.contains("ShippingInfoScreen"))
     }
 
     @Test
@@ -656,8 +655,7 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
             .setPaymentSessionData(PaymentSessionData())
             .build())
 
-        assertTrue(ArrayList(customerSession.productUsageTokens)
-            .contains("ShippingMethodScreen"))
+        assertTrue(customerSession.productUsageTokens.contains("ShippingMethodScreen"))
     }
 
     @Test

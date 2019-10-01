@@ -5,7 +5,6 @@ import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
 import com.stripe.android.model.Address
 import com.stripe.android.model.ShippingInformation
-import java.util.ArrayList
 import java.util.Locale
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -182,15 +181,17 @@ class ShippingInfoWidgetTest : BaseViewTest<ShippingInfoTestActivity>(
     fun shippingInfoWidget_whenFieldsOptional_markedAsOptional() {
         assertEquals(postalCodeTextInputLayout.hint.toString(), shippingInfoWidget.resources.getString(R.string.address_label_zip_code))
         assertEquals(nameTextInputLayout.hint.toString(), shippingInfoWidget.resources.getString(R.string.address_label_name))
-        val optionalFields = ArrayList<String>()
-        optionalFields.add(ShippingInfoWidget.CustomizableShippingField.POSTAL_CODE_FIELD)
-        shippingInfoWidget.setOptionalFields(optionalFields)
+        shippingInfoWidget.setOptionalFields(
+            listOf(ShippingInfoWidget.CustomizableShippingField.POSTAL_CODE_FIELD)
+        )
         assertEquals(postalCodeTextInputLayout.hint.toString(), shippingInfoWidget.resources.getString(R.string.address_label_zip_code_optional))
         assertEquals(nameTextInputLayout.hint.toString(), shippingInfoWidget.resources.getString(R.string.address_label_name))
         countryAutoCompleteTextView.updateUiForCountryEntered(Locale.CANADA.displayCountry)
         assertEquals(stateTextInputLayout.hint.toString(), shippingInfoWidget.resources.getString(R.string.address_label_province))
-        optionalFields.add(ShippingInfoWidget.CustomizableShippingField.STATE_FIELD)
-        shippingInfoWidget.setOptionalFields(optionalFields)
+        shippingInfoWidget.setOptionalFields(listOf(
+            ShippingInfoWidget.CustomizableShippingField.POSTAL_CODE_FIELD,
+            ShippingInfoWidget.CustomizableShippingField.STATE_FIELD
+        ))
         assertEquals(
             stateTextInputLayout.hint.toString(),
             shippingInfoWidget.resources.getString(R.string.address_label_province_optional)
@@ -201,9 +202,8 @@ class ShippingInfoWidgetTest : BaseViewTest<ShippingInfoTestActivity>(
     fun shippingInfoWidget_whenFieldsHidden_renderedHidden() {
         assertEquals(nameTextInputLayout.visibility, View.VISIBLE)
         assertEquals(postalCodeTextInputLayout.visibility, View.VISIBLE)
-        val hiddenFields = ArrayList<String>()
-        hiddenFields.add(ShippingInfoWidget.CustomizableShippingField.POSTAL_CODE_FIELD)
-        shippingInfoWidget.setHiddenFields(hiddenFields)
+        shippingInfoWidget
+            .setHiddenFields(listOf(ShippingInfoWidget.CustomizableShippingField.POSTAL_CODE_FIELD))
         assertEquals(postalCodeTextInputLayout.visibility, View.GONE)
         countryAutoCompleteTextView.updateUiForCountryEntered(Locale.CANADA.displayCountry)
         assertEquals(postalCodeTextInputLayout.visibility, View.GONE)

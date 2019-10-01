@@ -16,7 +16,7 @@ class Customer private constructor(
     val defaultSource: String?,
     val shippingInformation: ShippingInformation?,
     val sources: List<CustomerSource>,
-    val hasMore: Boolean?,
+    val hasMore: Boolean,
     val totalCount: Int?,
     val url: String?
 ) : StripeModel() {
@@ -87,12 +87,12 @@ class Customer private constructor(
                 ShippingInformation.fromJson(jsonObject.optJSONObject(FIELD_SHIPPING))
             val sourcesJson = jsonObject.optJSONObject(FIELD_SOURCES)
 
-            val hasMore: Boolean?
+            val hasMore: Boolean
             val totalCount: Int?
             val url: String?
             val sources: List<CustomerSource>?
             if (sourcesJson != null && VALUE_LIST == optString(sourcesJson, FIELD_OBJECT)) {
-                hasMore = optBoolean(sourcesJson, FIELD_HAS_MORE)
+                hasMore = optBoolean(sourcesJson, FIELD_HAS_MORE) == true
                 totalCount = optInteger(sourcesJson, FIELD_TOTAL_COUNT)
                 url = optString(sourcesJson, FIELD_URL)
 
@@ -103,7 +103,7 @@ class Customer private constructor(
                         .mapNotNull { json -> CustomerSource.fromJson(json) }
                         .filterNot { source -> VALUE_APPLE_PAY == source.tokenizationMethod }
             } else {
-                hasMore = null
+                hasMore = false
                 totalCount = null
                 url = null
                 sources = emptyList()

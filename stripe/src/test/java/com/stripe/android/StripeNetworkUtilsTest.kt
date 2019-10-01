@@ -28,7 +28,7 @@ class StripeNetworkUtilsTest {
     }
 
     @Test
-    fun hashMapFromCard_mapsCorrectFields() {
+    fun paramsFromCard_mapsCorrectFields() {
         val cardMap = requireNotNull(getCardTokenParamData(CardFixtures.CARD))
         assertEquals(CARD_NUMBER, cardMap["number"])
         assertEquals(CARD_CVC, cardMap["cvc"])

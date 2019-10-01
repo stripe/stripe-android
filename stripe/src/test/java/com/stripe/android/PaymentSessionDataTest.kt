@@ -92,6 +92,6 @@ class PaymentSessionDataTest {
 
     companion object {
 
-        private val PAYMENT_METHOD = PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON)
+        private val PAYMENT_METHOD = PaymentMethod.fromJson(PaymentMethodTest.PM_CARD_JSON)
     }
 }
