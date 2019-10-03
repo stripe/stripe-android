@@ -114,6 +114,7 @@ class PaymentSessionActivity : AppCompatActivity() {
         val paymentSessionInitialized = paymentSession.init(
             PaymentSessionListenerImpl(this, customerSession),
             PaymentSessionConfig.Builder()
+                .setAddPaymentMethodFooter(R.layout.add_payment_method_footer)
                 .setPrepopulatedShippingInfo(EXAMPLE_SHIPPING_INFO)
                 .setHiddenShippingInfoFields(
                     ShippingInfoWidget.CustomizableShippingField.PHONE_FIELD,
