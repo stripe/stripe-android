@@ -58,8 +58,6 @@ class PaymentControllerTest {
     @Mock
     private lateinit var transaction: Transaction
     @Mock
-    private lateinit var messageVersionRegistry: MessageVersionRegistry
-    @Mock
     private lateinit var paymentAuthResultCallback: ApiResultCallback<PaymentIntentResult>
     @Mock
     private lateinit var setupAuthResultCallback: ApiResultCallback<SetupIntentResult>
@@ -100,13 +98,12 @@ class PaymentControllerTest {
             AnalyticsDataFactory.create(ApplicationProvider.getApplicationContext<Context>())
         `when`<AuthenticationRequestParameters>(transaction.authenticationRequestParameters)
             .thenReturn(Stripe3ds2Fixtures.AREQ_PARAMS)
-        `when`(messageVersionRegistry.current).thenReturn(MESSAGE_VERSION)
         `when`<Context>(activity.applicationContext)
             .thenReturn(ApplicationProvider.getApplicationContext<Context>())
         controller = PaymentController(
             ApplicationProvider.getApplicationContext<Context>(),
             FakeStripeRepository(),
-            messageVersionRegistry,
+            MessageVersionRegistry(),
             CONFIG,
             threeDs2Service,
             fireAndForgetRequestExecutor,
@@ -261,13 +258,9 @@ class PaymentControllerTest {
     @Test
     fun test3ds2Receiver_whenCompleted_shouldFireAnalyticsRequest() {
         val completionEvent = object : CompletionEvent {
-            override fun getSDKTransactionID(): String {
-                return "8dd3413f-0b45-4234-bc45-6cc40fb1b0f1"
-            }
+            override val sdkTransactionId: String = "8dd3413f-0b45-4234-bc45-6cc40fb1b0f1"
 
-            override fun getTransactionStatus(): String {
-                return "C"
-            }
+            override val transactionStatus: String = "C"
         }
 
         `when`<String>(transaction.initialChallengeUiType).thenReturn("04")
@@ -334,13 +327,8 @@ class PaymentControllerTest {
     @Test
     fun test3ds2Receiver_whenRuntimeErrorError_shouldFireAnalyticsRequest() {
         val runtimeErrorEvent = object : RuntimeErrorEvent {
-            override fun getErrorCode(): String {
-                return "404"
-            }
-
-            override fun getErrorMessage(): String {
-                return "Resource not found"
-            }
+            override val errorCode: String = "404"
+            override val errorMessage: String = "Resource not found"
         }
 
         PaymentController.PaymentAuth3ds2ChallengeStatusReceiver(FakeStripeRepository(),
@@ -371,28 +359,13 @@ class PaymentControllerTest {
     @Test
     fun test3ds2Receiver_whenProtocolError_shouldFireAnalyticsRequest() {
         val protocolErrorEvent = object : ProtocolErrorEvent {
-            override fun getSDKTransactionID(): String {
-                return "8dd3413f-0b45-4234-bc45-6cc40fb1b0f1"
-            }
+            override val sdkTransactionId: String = "8dd3413f-0b45-4234-bc45-6cc40fb1b0f1"
 
-            override fun getErrorMessage(): ErrorMessage {
-                return object : ErrorMessage {
-                    override fun getTransactionID(): String {
-                        return "047f76a6-d1d4-48a2-aa65-786abb6f7f46"
-                    }
-
-                    override fun getErrorCode(): String {
-                        return "201"
-                    }
-
-                    override fun getErrorDescription(): String {
-                        return "Required element missing"
-                    }
-
-                    override fun getErrorDetails(): String {
-                        return "eci"
-                    }
-                }
+            override val errorMessage: ErrorMessage = object : ErrorMessage {
+                override val errorCode: String = "201"
+                override val errorDescription: String = "Required element missing"
+                override val errorDetails: String = "eci"
+                override val transactionId: String = "047f76a6-d1d4-48a2-aa65-786abb6f7f46"
             }
         }
 

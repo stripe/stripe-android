@@ -22,7 +22,7 @@ dependencies {
     // Api for this import because we use reflection to alter TextInputLayout
     api 'com.google.android.material:material:1.0.0'
 
-    implementation "com.stripe:stripe-3ds2-android:2.1.0"
+    implementation "com.stripe:stripe-3ds2-android:2.1.1"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutineVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutineVersion"
@@ -33,7 +33,7 @@ dependencies {
     compileOnly "javax.annotation:jsr250-api:${rootProject.ext.javaAnnotationVersion}"
 
     testImplementation 'junit:junit:4.13-beta-3'
-    testImplementation "org.mockito:mockito-core:3.0.0"
+    testImplementation "org.mockito:mockito-core:3.1.0"
     testImplementation 'org.robolectric:robolectric:4.3'
     testImplementation 'androidx.test:core:1.2.0'
     testImplementation 'org.json:json:20190722'
