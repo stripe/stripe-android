@@ -75,7 +75,8 @@ open class AddPaymentMethodActivity : StripeActivity() {
 
     private fun configureView(args: AddPaymentMethodActivityStarter.Args) {
         viewStub.layoutResource = R.layout.add_payment_method_layout
-        val contentRoot = viewStub.inflate() as ViewGroup
+        val scrollView = viewStub.inflate() as ViewGroup
+        val contentRoot = scrollView.getChildAt(0) as ViewGroup
 
         addPaymentMethodView = createPaymentMethodView(args)
         contentRoot.addView(addPaymentMethodView)
