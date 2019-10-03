@@ -361,7 +361,7 @@ class PaymentSessionTest {
             paymentMethodCreateParams: PaymentMethodCreateParams,
             options: ApiRequest.Options
         ): PaymentMethod {
-            return PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON)!!
+            return PaymentMethod.fromJson(PaymentMethodTest.PM_CARD_JSON)!!
         }
 
         override fun setDefaultCustomerSource(

@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import java.util.Date
-import java.util.HashMap
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -71,7 +70,7 @@ class TokenTest {
             .country("US")
             .last4("4242")
             .funding(Card.FundingType.CREDIT)
-            .metadata(HashMap())
+            .metadata(emptyMap())
             .build()
 
         private val RAW_TOKEN_NO_ID = JSONObject(

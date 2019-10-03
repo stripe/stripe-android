@@ -36,7 +36,7 @@ class BankAccountTest {
     }
 
     @Test
-    fun hashMapFromBankAccount_mapsCorrectFields() {
+    fun paramsFromBankAccount_mapsCorrectFields() {
         val bankAccount = BankAccount(BANK_ACCOUNT_NUMBER,
             BANK_ACCOUNT_HOLDER_NAME, BankAccount.BankAccountType.INDIVIDUAL, null, "US",
             "usd", null, null, BANK_ROUTING_NUMBER)

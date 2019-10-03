@@ -1,0 +1,223 @@
+package com.stripe.android.model
+
+import android.os.Parcel
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import org.json.JSONException
+import org.json.JSONObject
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+
+@RunWith(RobolectricTestRunner::class)
+class PaymentMethodTest {
+
+    @Test
+    @Throws(JSONException::class)
+    fun toJson_withIdeal_shouldCreateExpectedObject() {
+        val paymentMethod = PaymentMethod.Builder()
+            .setId("pm_123456789")
+            .setCreated(1550757934255L)
+            .setLiveMode(true)
+            .setType("ideal")
+            .setCustomerId("cus_AQsHpvKfKwJDrF")
+            .setBillingDetails(PaymentMethodFixtures.BILLING_DETAILS)
+            .setIdeal(PaymentMethod.Ideal.Builder()
+                .setBank("my bank")
+                .setBankIdentifierCode("bank id")
+                .build())
+            .build()
+
+        assertEquals(paymentMethod, PaymentMethod.fromJson(PM_IDEAL_JSON))
+    }
+
+    @Test
+    @Throws(JSONException::class)
+    fun toJson_withFpx_shouldCreateExpectedObject() {
+        assertEquals(PaymentMethodFixtures.FPX_PAYMENT_METHOD,
+            PaymentMethod.fromJson(PM_FPX_JSON))
+    }
+
+    @Test
+    fun equals_withEqualPaymentMethods_shouldReturnTrue() {
+        assertEquals(PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            PaymentMethod.Builder()
+                .setId("pm_123456789")
+                .setCreated(1550757934255L)
+                .setLiveMode(true)
+                .setType("card")
+                .setCustomerId("cus_AQsHpvKfKwJDrF")
+                .setBillingDetails(PaymentMethodFixtures.BILLING_DETAILS)
+                .setCard(PaymentMethodFixtures.CARD)
+                .build())
+    }
+
+    @Test
+    @Throws(JSONException::class)
+    fun fromString_shouldReturnExpectedPaymentMethod() {
+        assertEquals(PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            PaymentMethod.fromJson(PM_CARD_JSON))
+    }
+
+    @Test
+    @Throws(JSONException::class)
+    fun fromString_withIdeal_returnsExpectedObject() {
+        val paymentMethod = PaymentMethod.fromJson(PM_IDEAL_JSON)
+        assertEquals("ideal", paymentMethod?.type)
+    }
+
+    @Test
+    fun billingDetails_toParamMap_removesNullValues() {
+        val billingDetails = PaymentMethod.BillingDetails.Builder()
+            .setName("name")
+            .build()
+            .toParamMap()
+        assertEquals(1, billingDetails.size)
+        assertFalse(billingDetails.containsKey(PaymentMethod.BillingDetails.FIELD_ADDRESS))
+        assertTrue(billingDetails.containsKey(PaymentMethod.BillingDetails.FIELD_NAME))
+    }
+
+    @Test
+    fun testParcelable_shouldBeEqualAfterParcel() {
+        val metadata = mapOf(
+            "meta" to "data",
+            "meta2" to "data2"
+        )
+        val paymentMethod = PaymentMethod.Builder()
+            .setBillingDetails(PaymentMethodFixtures.BILLING_DETAILS)
+            .setCard(PaymentMethodFixtures.CARD)
+            .setCardPresent(PaymentMethod.CardPresent.EMPTY)
+            .setCreated(1550757934255L)
+            .setCustomerId("cus_AQsHpvKfKwJDrF")
+            .setId("pm_123456789")
+            .setType("card")
+            .setLiveMode(true)
+            .setMetadata(metadata)
+            .setIdeal(PaymentMethod.Ideal.Builder()
+                .setBank("my bank")
+                .setBankIdentifierCode("bank id")
+                .build())
+            .build()
+
+        val parcel = Parcel.obtain()
+        paymentMethod.writeToParcel(parcel, paymentMethod.describeContents())
+        parcel.setDataPosition(0)
+
+        val parcelPaymentMethod = PaymentMethod.CREATOR.createFromParcel(parcel)
+
+        assertEquals(paymentMethod, parcelPaymentMethod)
+    }
+
+    @Test
+    fun testBillingDetailsToBuilder() {
+        assertEquals(
+            PaymentMethodFixtures.BILLING_DETAILS,
+            PaymentMethodFixtures.BILLING_DETAILS.toBuilder()
+                .build()
+        )
+    }
+
+    companion object {
+        val PM_CARD_JSON: JSONObject = JSONObject(
+            """
+            {
+                "id": "pm_123456789",
+                "created": 1550757934255,
+                "customer": "cus_AQsHpvKfKwJDrF",
+                "livemode": true,
+                "metadata": {
+                    "order_id": "123456789"
+                },
+                "type": "card",
+                "billing_details": {
+                    "address": {
+                        "city": "San Francisco",
+                        "country": "USA",
+                        "line1": "510 Townsend St",
+                        "postal_code": "94103",
+                        "state": "CA"
+                    },
+                    "email": "patrick@example.com",
+                    "name": "Patrick",
+                    "phone": "123-456-7890"
+                },
+                "card": {
+                    "brand": "visa",
+                    "checks": {
+                        "address_line1_check": "unchecked",
+                        "cvc_check": "unchecked"
+                    },
+                    "country": "US",
+                    "exp_month": 8,
+                    "exp_year": 2022,
+                    "funding": "credit",
+                    "last4": "4242",
+                    "three_d_secure_usage": {
+                        "supported": true
+                    }
+                }
+            }
+            """.trimIndent()
+        )
+
+        private val PM_IDEAL_JSON = JSONObject(
+            """
+            {
+                "id": "pm_123456789",
+                "created": 1550757934255,
+                "customer": "cus_AQsHpvKfKwJDrF",
+                "livemode": true,
+                "type": "ideal",
+                "billing_details": {
+                    "address": {
+                        "city": "San Francisco",
+                        "country": "USA",
+                        "line1": "510 Townsend St",
+                        "postal_code": "94103",
+                        "state": "CA"
+                    },
+                    "email": "patrick@example.com",
+                    "name": "Patrick",
+                    "phone": "123-456-7890"
+                },
+                "ideal": {
+                    "bank": "my bank",
+                    "bic": "bank id"
+                }
+            }
+            """.trimIndent()
+        )
+
+        private val PM_FPX_JSON = JSONObject(
+            """
+            {
+                "id": "pm_1F5GlnH8dsfnfKo3gtixzcq0",
+                "object": "payment_method",
+                "billing_details": {
+                    "address": {
+                        "city": "San Francisco",
+                        "country": "USA",
+                        "line1": "510 Townsend St",
+                        "line2": null,
+                        "postal_code": "94103",
+                        "state": "CA"
+                    },
+                    "email": "patrick@example.com",
+                    "name": "Patrick",
+                    "phone": "123-456-7890"
+                },
+                "created": 1565290527,
+                "customer": null,
+                "fpx": {
+                    "account_holder_type": "individual",
+                    "bank": "hsbc"
+                },
+                "livemode": true,
+                "metadata": {},
+                "type": "fpx"
+            }
+            """.trimIndent()
+        )
+    }
+}

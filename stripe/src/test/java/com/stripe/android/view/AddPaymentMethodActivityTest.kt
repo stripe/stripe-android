@@ -210,7 +210,7 @@ class AddPaymentMethodActivityTest :
         assertFalse(cardMultilineWidget.isEnabled)
 
         val expectedPaymentMethod =
-            requireNotNull(PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON))
+            requireNotNull(PaymentMethod.fromJson(PaymentMethodTest.PM_CARD_JSON))
 
         verify<CustomerSession>(customerSession)
             .addProductUsageTokenIfValid(TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
@@ -273,8 +273,7 @@ class AddPaymentMethodActivityTest :
         assertEquals(View.VISIBLE, progressBar.visibility)
         assertFalse(cardMultilineWidget.isEnabled)
 
-        val expectedPaymentMethod =
-            PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON)
+        val expectedPaymentMethod = PaymentMethod.fromJson(PaymentMethodTest.PM_CARD_JSON)
 
         verify<CustomerSession>(customerSession)
             .addProductUsageTokenIfValid(TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
@@ -308,8 +307,7 @@ class AddPaymentMethodActivityTest :
     }
 
     private fun verifyFinishesWithIntent() {
-        val expectedPaymentMethod =
-            PaymentMethod.fromString(PaymentMethodTest.PM_CARD_JSON)
+        val expectedPaymentMethod = PaymentMethod.fromJson(PaymentMethodTest.PM_CARD_JSON)
         assertEquals(RESULT_OK, shadowActivity.resultCode)
         val intent = shadowActivity.resultIntent
 

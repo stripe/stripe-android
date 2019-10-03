@@ -1,6 +1,5 @@
 package com.stripe.android.testharness
 
-import java.util.ArrayList
 import java.util.HashMap
 import java.util.LinkedList
 import java.util.TreeMap
@@ -23,9 +22,8 @@ class JsonTestUtilsTest {
 
     @Test
     fun assertMapEquals_forEmptyMapsOfDifferentTypes_passes() {
-        val emptyHashMap = HashMap<String, Any>()
         val emptyTreeMap = TreeMap<String, Any>()
-        JsonTestUtils.assertMapEquals(emptyHashMap, emptyTreeMap)
+        JsonTestUtils.assertMapEquals(hashMapOf<String, Any>(), emptyTreeMap)
     }
 
     @Test
@@ -159,11 +157,12 @@ class JsonTestUtilsTest {
         val firstMap = HashMap<String, Any>()
         val secondMap = HashMap<String, Any>()
 
-        val genericList = ArrayList<Any>()
-        genericList.add(intList)
-        genericList.add(HashMap<String, Any>())
-        genericList.add("string entry")
-        genericList.add(11)
+        val genericList = listOf(
+            intList,
+            emptyMap<String, Any>(),
+            "string entry",
+            11
+        )
 
         val secondGenericList = LinkedList<Any>()
         secondGenericList.add(secondIntList)

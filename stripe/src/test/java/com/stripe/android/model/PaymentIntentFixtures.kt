@@ -95,63 +95,66 @@ internal object PaymentIntentFixtures {
     val PI_REQUIRES_MASTERCARD_3DS2 = PaymentIntent.fromJson(PI_REQUIRES_MASTERCARD_3DS2_JSON)!!
 
     @JvmField
-    val PI_REQUIRES_AMEX_3DS2 = PaymentIntent.fromJson(JSONObject("{\n" +
-            "    \"id\": \"pi_1EceMnCRMbs6FrXfCXdF8dnx\",\n" +
-            "    \"object\": \"payment_intent\",\n" +
-            "    \"amount\": 1000,\n" +
-            "    \"amount_capturable\": 0,\n" +
-            "    \"amount_received\": 0,\n" +
-            "    \"application\": null,\n" +
-            "    \"application_fee_amount\": null,\n" +
-            "    \"canceled_at\": null,\n" +
-            "    \"cancellation_reason\": null,\n" +
-            "    \"capture_method\": \"automatic\",\n" +
-            "    \"charges\": {\n" +
-            "        \"object\": \"list\",\n" +
-            "        \"data\": [],\n" +
-            "        \"has_more\": false,\n" +
-            "        \"total_count\": 0,\n" +
-            "        \"url\": \"/v1/charges?payment_intent=pi_1EceMnCRMbs6FrXfCXdF8dnx\"\n" +
-            "    },\n" +
-            "    \"client_secret\": \"pi_1EceMnCRMbs6FrXfCXdF8dnx_secret_vew0L3IGaO0x9o0eyRMGzKr0k\",\n" +
-            "    \"confirmation_method\": \"automatic\",\n" +
-            "    \"created\": 1558469721,\n" +
-            "    \"currency\": \"usd\",\n" +
-            "    \"customer\": null,\n" +
-            "    \"description\": null,\n" +
-            "    \"invoice\": null,\n" +
-            "    \"last_payment_error\": null,\n" +
-            "    \"livemode\": false,\n" +
-            "    \"metadata\": {},\n" +
-            "    \"next_action\": {\n" +
-            "        \"type\": \"use_stripe_sdk\",\n" +
-            "        \"use_stripe_sdk\": {\n" +
-            "            \"type\": \"stripe_3ds2_fingerprint\",\n" +
-            "            \"three_d_secure_2_source\": \"src_1EceOlCRMbs6FrXf2hqrI1g5\",\n" +
-            "            \"directory_server_name\": \"american_express\",\n" +
-            "            \"server_transaction_id\": \"e64bb72f-60ac-4845-b8b6-47cfdb0f73aa\",\n" +
-            "            \"three_ds_method_url\": \"\",\n" +
-            "            \"directory_server_encryption\": {\n" +
-            "               \"directory_server_id\": \"A000000025\",\n" +
-            "               \"certificate\": " + JSONObject.quote(Stripe3ds2FingerprintTest.DS_CERT_DATA_RSA) + ",\n" +
-            "               \"key_id\": \"" + KEY_ID + "\"\n" +
-            "            }\n" +
-            "        }\n" +
-            "    },\n" +
-            "    \"on_behalf_of\": null,\n" +
-            "    \"payment_method\": \"pm_1EceOkCRMbs6FrXft9sFxCTG\",\n" +
-            "    \"payment_method_types\": [\n" +
-            "        \"card\"\n" +
-            "    ],\n" +
-            "    \"receipt_email\": null,\n" +
-            "    \"review\": null,\n" +
-            "    \"shipping\": null,\n" +
-            "    \"source\": null,\n" +
-            "    \"statement_descriptor\": null,\n" +
-            "    \"status\": \"requires_action\",\n" +
-            "    \"transfer_data\": null,\n" +
-            "    \"transfer_group\": null\n" +
-            "}"
+    val PI_REQUIRES_AMEX_3DS2 = PaymentIntent.fromJson(JSONObject(
+        """
+        {
+            "id": "pi_1EceMnCRMbs6FrXfCXdF8dnx",
+            "object": "payment_intent",
+            "amount": 1000,
+            "amount_capturable": 0,
+            "amount_received": 0,
+            "application": null,
+            "application_fee_amount": null,
+            "canceled_at": null,
+            "cancellation_reason": null,
+            "capture_method": "automatic",
+            "charges": {
+                "object": "list",
+                "data": [],
+                "has_more": false,
+                "total_count": 0,
+                "url": "/v1/charges?payment_intent=pi_1EceMnCRMbs6FrXfCXdF8dnx"
+            },
+            "client_secret": "pi_1EceMnCRMbs6FrXfCXdF8dnx_secret_vew0L3IGaO0x9o0eyRMGzKr0k",
+            "confirmation_method": "automatic",
+            "created": 1558469721,
+            "currency": "usd",
+            "customer": null,
+            "description": null,
+            "invoice": null,
+            "last_payment_error": null,
+            "livemode": false,
+            "metadata": {},
+            "next_action": {
+                "type": "use_stripe_sdk",
+                "use_stripe_sdk": {
+                    "type": "stripe_3ds2_fingerprint",
+                    "three_d_secure_2_source": "src_1EceOlCRMbs6FrXf2hqrI1g5",
+                    "directory_server_name": "american_express",
+                    "server_transaction_id": "e64bb72f-60ac-4845-b8b6-47cfdb0f73aa",
+                    "three_ds_method_url": "",
+                    "directory_server_encryption": {
+                        "directory_server_id": "A000000025",
+                        "certificate": "-----BEGIN CERTIFICATE-----\nMIIE0TCCA7mgAwIBAgIUXbeqM1duFcHk4dDBwT8o7Ln5wX8wDQYJKoZIhvcNAQEL\nBQAwXjELMAkGA1UEBhMCVVMxITAfBgNVBAoTGEFtZXJpY2FuIEV4cHJlc3MgQ29t\ncGFueTEsMCoGA1UEAxMjQW1lcmljYW4gRXhwcmVzcyBTYWZla2V5IElzc3Vpbmcg\nQ0EwHhcNMTgwMjIxMjM0OTMxWhcNMjAwMjIxMjM0OTMwWjCB0DELMAkGA1UEBhMC\nVVMxETAPBgNVBAgTCE5ldyBZb3JrMREwDwYDVQQHEwhOZXcgWW9yazE\/MD0GA1UE\nChM2QW1lcmljYW4gRXhwcmVzcyBUcmF2ZWwgUmVsYXRlZCBTZXJ2aWNlcyBDb21w\nYW55LCBJbmMuMTkwNwYDVQQLEzBHbG9iYWwgTmV0d29yayBUZWNobm9sb2d5IC0g\nTmV0d29yayBBUEkgUGxhdGZvcm0xHzAdBgNVBAMTFlNESy5TYWZlS2V5LkVuY3J5\ncHRLZXkwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDSFF9kTYbwRrxX\nC6WcJJYio5TZDM62+CnjQRfggV3GMI+xIDtMIN8LL\/jbWBTycu97vrNjNNv+UPhI\nWzhFDdUqyRfrY337A39uE8k1xhdDI3dNeZz6xgq8r9hn2NBou78YPBKidpN5oiHn\nTxcFq1zudut2fmaldaa9a4ZKgIQo+02heiJfJ8XNWkoWJ17GcjJ59UU8C1KF\/y1G\nymYO5ha2QRsVZYI17+ZFsqnpcXwK4Mr6RQKV6UimmO0nr5++CgvXfekcWAlLV6Xq\njuACWi3kw0haepaX\/9qHRu1OSyjzWNcSVZ0On6plB5Lq6Y9ylgmxDrv+zltz3MrT\nK7txIAFFAgMBAAGjggESMIIBDjAMBgNVHRMBAf8EAjAAMCEGA1UdEQQaMBiCFlNE\nSy5TYWZlS2V5LkVuY3J5cHRLZXkwRQYJKwYBBAGCNxQCBDgeNgBBAE0ARQBYAF8A\nUwBBAEYARQBLAEUAWQAyAF8ARABTAF8ARQBOAEMAUgBZAFAAVABJAE8ATjAOBgNV\nHQ8BAf8EBAMCBJAwHwYDVR0jBBgwFoAU7k\/rXuVMhTBxB1zSftPgmLFuDIgwRAYD\nVR0fBD0wOzA5oDegNYYzaHR0cDovL2FtZXhzay5jcmwuY29tLXN0cm9uZy1pZC5u\nZXQvYW1leHNhZmVrZXkuY3JsMB0GA1UdDgQWBBQHclVTo5nwZGH8labJ2F2P45xi\nfDANBgkqhkiG9w0BAQsFAAOCAQEAWY6b77VBoGLs3k5vOqSU7QRqT+4v6y77T8LA\nBKrSZ58DiVZWVyDSxyftQUiRRgFHt2gTN0yfJTP50Fyp84nCEWC0tugZ4iIhgPss\nHzL+4\/u4eG\/MTzK2ESxvPgr6YHajyuU+GXA89u8+bsFrFmojOjhTgFKli7YUeV\/0\nxoiYZf2utlns800ofJrcrfiFoqE6PvK4Od0jpeMgfSKv71nK5ihA1+wTk76ge1fs\nPxL23hEdRpWW11ofaLfJGkLFXMM3\/LHSXWy7HhsBgDELdzLSHU4VkSv8yTOZxsRO\nByxdC5v3tXGcK56iQdtKVPhFGOOEBugw7AcuRzv3f1GhvzAQZg==\n-----END CERTIFICATE-----",
+                        "key_id": "7c4debe3f4af7f9d1569a2ffea4343c2566826ee"
+                    }
+                }
+            },
+            "on_behalf_of": null,
+            "payment_method": "pm_1EceOkCRMbs6FrXft9sFxCTG",
+            "payment_method_types": [
+                "card"
+            ],
+            "receipt_email": null,
+            "review": null,
+            "shipping": null,
+            "source": null,
+            "statement_descriptor": null,
+            "status": "requires_action",
+            "transfer_data": null,
+            "transfer_group": null
+        }
+        """.trimIndent()
     ))!!
 
     @JvmField

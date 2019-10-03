@@ -1,5 +1,7 @@
 package com.stripe.android.model
 
+import org.json.JSONObject
+
 internal object SetupIntentFixtures {
 
     @JvmField
@@ -31,7 +33,7 @@ internal object SetupIntentFixtures {
         """.trimIndent()
 
     @JvmField
-    internal val SI_WITH_LAST_PAYMENT_ERROR = SetupIntent.fromString(
+    internal val SI_WITH_LAST_PAYMENT_ERROR = SetupIntent.fromJson(JSONObject(
         """
         {
             "id": "seti_1EqTSZGMT9dGPIDGVzCUs6dV",
@@ -102,7 +104,7 @@ internal object SetupIntentFixtures {
             "usage": "off_session"
         }
         """.trimIndent()
-        )!!
+    ))!!
 
     @JvmField
     internal val CANCELLED = SetupIntent.fromString(
