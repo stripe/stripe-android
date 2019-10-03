@@ -4,9 +4,13 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.os.IBinder
+import android.text.method.LinkMovementMethod
+import android.text.util.Linkify
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.TextView
 import androidx.annotation.StringRes
+import androidx.core.text.util.LinkifyCompat
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
@@ -80,6 +84,15 @@ open class AddPaymentMethodActivity : StripeActivity() {
 
         addPaymentMethodView = createPaymentMethodView(args)
         contentRoot.addView(addPaymentMethodView)
+
+        if (args.addPaymentMethodFooter  > 0) {
+            val footerView = layoutInflater.inflate(args.addPaymentMethodFooter, contentRoot, false)
+            if (footerView is TextView) {
+                LinkifyCompat.addLinks(footerView, Linkify.ALL)
+                footerView.movementMethod = LinkMovementMethod.getInstance()
+            }
+            contentRoot.addView(footerView)
+        }
 
         setTitle(titleStringRes)
 
