@@ -14,28 +14,11 @@ internal object Stripe3ds2Fixtures {
 
     @JvmField
     val AREQ_PARAMS: AuthenticationRequestParameters = object : AuthenticationRequestParameters {
-        override fun getDeviceData(): String {
-            return DEVICE_DATA
-        }
-
-        override fun getSDKTransactionID(): String {
-            return SDK_TRANSACTION_ID
-        }
-
-        override fun getSDKAppID(): String {
-            return SDK_APP_ID
-        }
-
-        override fun getSDKReferenceNumber(): String {
-            return SDK_REFERENCE_NUMBER
-        }
-
-        override fun getSDKEphemeralPublicKey(): String {
-            return SDK_EPHEMERAL_PUBLIC_KEY
-        }
-
-        override fun getMessageVersion(): String {
-            return MESSAGE_VERSION
-        }
+        override val deviceData: String = DEVICE_DATA
+        override val messageVersion: String = MESSAGE_VERSION
+        override val sdkAppId: String = SDK_APP_ID
+        override val sdkEphemeralPublicKey: String = SDK_EPHEMERAL_PUBLIC_KEY
+        override val sdkReferenceNumber: String = SDK_REFERENCE_NUMBER
+        override val sdkTransactionId: String = SDK_TRANSACTION_ID
     }
 }

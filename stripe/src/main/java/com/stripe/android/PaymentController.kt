@@ -321,9 +321,9 @@ internal open class PaymentController @VisibleForTesting constructor(
         val timeout = config.stripe3ds2Config.timeout
         val authParams = Stripe3ds2AuthParams(
             stripe3ds2Fingerprint.source,
-            areqParams.sdkAppID,
+            areqParams.sdkAppId,
             areqParams.sdkReferenceNumber,
-            areqParams.sdkTransactionID,
+            areqParams.sdkTransactionId,
             areqParams.deviceData,
             areqParams.sdkEphemeralPublicKey,
             areqParams.messageVersion,
@@ -498,8 +498,8 @@ internal open class PaymentController @VisibleForTesting constructor(
         private fun startChallengeFlow(ares: Stripe3ds2AuthResult.Ares) {
             val challengeParameters = StripeChallengeParameters()
             challengeParameters.acsSignedContent = ares.acsSignedContent
-            challengeParameters.set3DSServerTransactionID(ares.threeDSServerTransId)
-            challengeParameters.acsTransactionID = ares.acsTransId
+            challengeParameters.threeDsServerTransactionId = ares.threeDSServerTransId
+            challengeParameters.acsTransactionId = ares.acsTransId
 
             challengeFlowStarter.start(Runnable {
                 val activity = host.activity ?: return@Runnable
