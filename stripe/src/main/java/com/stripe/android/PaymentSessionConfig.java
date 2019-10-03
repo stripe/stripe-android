@@ -3,6 +3,7 @@ package com.stripe.android;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -26,6 +27,7 @@ public class PaymentSessionConfig implements Parcelable {
     @Nullable private final ShippingInformation mShippingInformation;
     private final boolean mShippingInfoRequired;
     private final boolean mShippingMethodRequired;
+    @LayoutRes private final int mAddPaymentMethodFooter;
 
      public static class Builder implements ObjectBuilder<PaymentSessionConfig> {
         private boolean mShippingInfoRequired = true;
@@ -33,6 +35,7 @@ public class PaymentSessionConfig implements Parcelable {
         @Nullable private List<String> mHiddenShippingInfoFields;
         @Nullable private List<String> mOptionalShippingInfoFields;
         @Nullable private ShippingInformation mShippingInformation;
+        @LayoutRes private int mAddPaymentMethodFooter;
 
         /**
          * @param hiddenShippingInfoFields that should be hidden in the {@link ShippingInfoWidget}.
@@ -88,6 +91,12 @@ public class PaymentSessionConfig implements Parcelable {
         }
 
         @NonNull
+        public Builder setAddPaymentMethodFooter(@LayoutRes int addPaymentMethodFooterLayoutId) {
+            mAddPaymentMethodFooter = addPaymentMethodFooterLayoutId;
+            return this;
+        }
+
+        @NonNull
         public PaymentSessionConfig build() {
             return new PaymentSessionConfig(this);
         }
@@ -101,6 +110,7 @@ public class PaymentSessionConfig implements Parcelable {
         mShippingInformation = builder.mShippingInformation;
         mShippingInfoRequired = builder.mShippingInfoRequired;
         mShippingMethodRequired = builder.mShippingMethodsRequired;
+        mAddPaymentMethodFooter = builder.mAddPaymentMethodFooter;
     }
 
     private PaymentSessionConfig(@NonNull Parcel in) {
@@ -111,6 +121,7 @@ public class PaymentSessionConfig implements Parcelable {
         mShippingInformation = in.readParcelable(ShippingInformation.class.getClassLoader());
         mShippingInfoRequired = in.readInt() == 1;
         mShippingMethodRequired = in.readInt() == 1;
+        mAddPaymentMethodFooter = in.readInt();
     }
 
     @Override
@@ -124,13 +135,15 @@ public class PaymentSessionConfig implements Parcelable {
                 Objects.equals(mOptionalShippingInfoFields, obj.mOptionalShippingInfoFields) &&
                 Objects.equals(mShippingInformation, obj.mShippingInformation) &&
                 Objects.equals(mShippingInfoRequired, obj.mShippingInfoRequired) &&
-                Objects.equals(mShippingMethodRequired, obj.mShippingMethodRequired);
+                Objects.equals(mShippingMethodRequired, obj.mShippingMethodRequired) &&
+                Objects.equals(mAddPaymentMethodFooter, obj.mAddPaymentMethodFooter);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mHiddenShippingInfoFields, mOptionalShippingInfoFields,
-                mShippingInformation, mShippingInfoRequired, mShippingMethodRequired);
+                mShippingInformation, mShippingInfoRequired, mShippingMethodRequired,
+                mAddPaymentMethodFooter);
     }
 
     @Override
@@ -145,6 +158,7 @@ public class PaymentSessionConfig implements Parcelable {
         parcel.writeParcelable(mShippingInformation, flags);
         parcel.writeInt(mShippingInfoRequired ? 1 : 0);
         parcel.writeInt(mShippingMethodRequired ? 1 : 0);
+        parcel.writeInt(mAddPaymentMethodFooter);
     }
 
     @NonNull
@@ -168,6 +182,11 @@ public class PaymentSessionConfig implements Parcelable {
 
     public boolean isShippingMethodRequired() {
         return mShippingMethodRequired;
+    }
+
+    @LayoutRes
+    public int getAddPaymentMethodFooter() {
+         return mAddPaymentMethodFooter;
     }
 
     public static final Parcelable.Creator<PaymentSessionConfig> CREATOR = new Parcelable

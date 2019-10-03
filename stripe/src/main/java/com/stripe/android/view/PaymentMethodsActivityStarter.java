@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -45,6 +46,7 @@ public final class PaymentMethodsActivityStarter
 
         @Nullable final String initialPaymentMethodId;
         public final boolean shouldRequirePostalCode;
+        @LayoutRes public final int addPaymentMethodFooter;
         final boolean isPaymentSessionActive;
         @NonNull final List<PaymentMethod.Type> paymentMethodTypes;
         @Nullable final PaymentConfiguration paymentConfiguration;
@@ -64,6 +66,7 @@ public final class PaymentMethodsActivityStarter
                     Collections.singletonList(PaymentMethod.Type.Card)
             );
             paymentConfiguration = builder.mPaymentConfiguration;
+            addPaymentMethodFooter = builder.mAddPaymentMethodFooter;
         }
 
         private Args(@NonNull Parcel in) {
@@ -78,6 +81,8 @@ public final class PaymentMethodsActivityStarter
             }
 
             paymentConfiguration = in.readParcelable(PaymentConfiguration.class.getClassLoader());
+
+            addPaymentMethodFooter = in.readInt();
         }
 
         @Override
@@ -97,12 +102,15 @@ public final class PaymentMethodsActivityStarter
             }
 
             dest.writeParcelable(paymentConfiguration, 0);
+
+            dest.writeInt(addPaymentMethodFooter);
         }
 
         @Override
         public int hashCode() {
             return Objects.hash(initialPaymentMethodId, shouldRequirePostalCode,
-                    isPaymentSessionActive, paymentMethodTypes, paymentConfiguration);
+                    isPaymentSessionActive, paymentMethodTypes, paymentConfiguration,
+                    addPaymentMethodFooter);
         }
 
         @Override
@@ -115,6 +123,7 @@ public final class PaymentMethodsActivityStarter
                     Objects.equals(shouldRequirePostalCode, args.shouldRequirePostalCode) &&
                     Objects.equals(isPaymentSessionActive, args.isPaymentSessionActive) &&
                     Objects.equals(paymentMethodTypes, args.paymentMethodTypes) &&
+                    Objects.equals(addPaymentMethodFooter, args.addPaymentMethodFooter) &&
                     Objects.equals(paymentConfiguration, args.paymentConfiguration);
         }
 
@@ -137,6 +146,7 @@ public final class PaymentMethodsActivityStarter
             private boolean mIsPaymentSessionActive = false;
             @Nullable private List<PaymentMethod.Type> mPaymentMethodTypes;
             @Nullable private PaymentConfiguration mPaymentConfiguration;
+            @LayoutRes private int mAddPaymentMethodFooter;
 
             @NonNull
             public Builder setInitialPaymentMethodId(@Nullable String initialPaymentMethodId) {
@@ -166,6 +176,12 @@ public final class PaymentMethodsActivityStarter
             @NonNull
             Builder setPaymentMethodTypes(@NonNull List<PaymentMethod.Type> paymentMethodTypes) {
                 mPaymentMethodTypes = paymentMethodTypes;
+                return this;
+            }
+
+            @NonNull
+            public Builder setAddPaymentMethodFooter(@LayoutRes int addPaymentMethodFooter) {
+                mAddPaymentMethodFooter = addPaymentMethodFooter;
                 return this;
             }
 
