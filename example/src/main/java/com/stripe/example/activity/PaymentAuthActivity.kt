@@ -46,8 +46,7 @@ class PaymentAuthActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment_auth)
 
-        val uiCustomization = PaymentAuthConfig.Stripe3ds2UiCustomization.Builder.createWithAppTheme(this)
-            .build()
+        val uiCustomization = PaymentAuthConfig.Stripe3ds2UiCustomization.Builder().build()
         PaymentAuthConfig.init(PaymentAuthConfig.Builder()
             .set3ds2Config(PaymentAuthConfig.Stripe3ds2Config.Builder()
                 .setTimeout(6)

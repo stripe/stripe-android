@@ -9,4 +9,66 @@
         <item name="android:textColorPrimary">@color/textPrimary</item>
         <item name="android:textColor">@color/text</item>
     </style>
+
+    <style name="Stripe3DS2Theme" parent="StripeDefault3DS2Theme">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primaryDark</item>
+        <item name="android:textColorPrimary">@color/title</item>
+        <item name="android:textColor">@color/textPrimary</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:textColorHint">@color/textPrimary</item>
+        <item name="textInputStyle">@style/Stripe3DS2TextInput</item>
+        <item name="android:editTextColor">@color/textPrimary</item>
+        <item name="editTextColor">@color/textPrimary</item>
+    </style>
+
+    <!-- styles for text input -->
+    <style name="Stripe3DS2TextInput" parent="Widget.MaterialComponents.TextInputLayout.FilledBox.Dense">
+        <item name="boxBackgroundColor">@android:color/transparent</item> <!-- edit text background color -->
+        <item name="hintTextAppearance">@style/Stripe3DS2TextInputHintTextAppearance</item>
+    </style>
+
+    <style name="Stripe3DS2EditTextTheme" parent="Stripe3DS2Theme">
+        <item name="colorControlActivated">@color/accent</item> <!-- edit text underline color when active, cursor color -->
+        <item name="colorControlNormal">@color/accent</item> <!-- edit text underline color when inactive -->
+    </style>
+
+    <style name="Stripe3DS2TextInputHintTextAppearance" parent="TextAppearance.Design.Hint">
+        <!-- Inactive and Active label color, pointing to a selector-->
+        <item name="android:textColor">@color/textPrimary</item>
+    </style>
+
+    <style name="Stripe3DS2ActionBarButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">@color/title</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:minWidth">0dp</item>
+    </style>
+
+    <style name="Stripe3DS2Button" parent="Widget.MaterialComponents.Button">
+        <item name="android:textAllCaps">false</item>
+        <item name="cornerRadius">5dp</item>
+        <item name="android:textSize">19sp</item>
+        <item name="backgroundTint">@color/accent</item>
+    </style>
+
+    <style name="Stripe3DS2TextButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">19sp</item>
+        <item name="android:textColor">@color/accent</item>
+    </style>
+    
+    <style name="Stripe3DS2Divider">
+        <item name="android:visibility">gone</item>
+    </style>
+
+    <style name="Stripe3DS2FooterHeader">
+        <item name="android:textColor">@color/threeds2_footer_header</item>
+    </style>
+
+    <style name="Stripe3DS2FooterText"/>
+
+    <style name="Stripe3DS2FooterChevron">
+        <item name="tint">@color/threeds2_footer_header</item>
+    </style>
+
 </resources>
