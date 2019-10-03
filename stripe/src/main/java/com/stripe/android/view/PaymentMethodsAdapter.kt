@@ -89,6 +89,13 @@ internal class PaymentMethodsAdapter @JvmOverloads constructor(
     }
 
     private fun onPositionClicked(position: Int) {
+        updateSelectedPaymentMethod(position)
+        handler.post {
+            listener?.onClick(paymentMethods[position])
+        }
+    }
+
+    private fun updateSelectedPaymentMethod(position: Int) {
         val currentlySelectedPosition = paymentMethods.indexOfFirst {
             it.id == selectedPaymentMethodId
         }
@@ -101,10 +108,6 @@ internal class PaymentMethodsAdapter @JvmOverloads constructor(
         // Notify the current position even if it's the currently selected position so that the
         // ItemAnimator defined in PaymentMethodActivity is triggered.
         notifyItemChanged(position)
-
-        handler.post {
-            listener?.onClick(paymentMethods[position])
-        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -137,8 +140,16 @@ internal class PaymentMethodsAdapter @JvmOverloads constructor(
     fun deletePaymentMethod(paymentMethod: PaymentMethod) {
         val indexToDelete = paymentMethods.indexOfFirst { it.id == paymentMethod.id }
         if (indexToDelete >= 0) {
+            val wasSelectedPaymentMethod =
+                selectedPaymentMethodId?.let { it == paymentMethod.id } == true
             paymentMethods.removeAt(indexToDelete)
             notifyItemRemoved(indexToDelete)
+
+            // customer has deleted their selected Payment Method,
+            // so automatically select the most recently added Payment Method
+            if (wasSelectedPaymentMethod && paymentMethods.isNotEmpty()) {
+                updateSelectedPaymentMethod(0)
+            }
         }
     }
 
