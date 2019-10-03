@@ -2,7 +2,8 @@
 
 ## 11.1.5 - upcoming
 * [#1619](https://github.com/stripe/stripe-android/pull/1619) Add `CardMultilineWidget#getPaymentMethodBillingDetailsBuilder()`
-* [#1639](https://github.com/stripe/stripe-android/pull/1639) Update 3DS2 SDK to 2.1.0
+* [#1639](https://github.com/stripe/stripe-android/pull/1639) Update 3DS2 SDK to 2.1.1
+    * Prevent challenge screen's cancel button from being clicked more than once
 * [#1641](https://github.com/stripe/stripe-android/pull/1641) Add `PaymentAuthConfig.Stripe3ds2Config.enableLogging`
     ```kotlin
     // Example
@@ -16,7 +17,8 @@
     
     // View logs using
     // $ adb logcat -s Stripe3ds2`
-    ```    
+    ```
+* [#1652](https://github.com/stripe/stripe-android/pull/1652) In `PaymentMethodsActivity`, select a new Payment Method if the previously selected one was deleted
 
 ## 11.1.4 - 2019-09-24
 * [#1603](https://github.com/stripe/stripe-android/pull/1603) Update ProGuard rules for BouncyCastle
