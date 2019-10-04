@@ -14,6 +14,13 @@ class ShippingPostalCodeValidatorTest {
     }
 
     @Test
+    fun testCountryCodeOptional() {
+        assertTrue(VALIDATOR.isValid("94107", "",
+            listOf(ShippingInfoWidget.CustomizableShippingField.POSTAL_CODE_FIELD),
+            emptyList()))
+    }
+
+    @Test
     fun usZipCodeTest() {
         assertTrue(isValid("94107", "US"))
         assertTrue(isValid("94107-1234", "US"))
