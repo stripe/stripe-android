@@ -1,5 +1,6 @@
 package com.stripe.example.service
 
+import android.util.Log
 import androidx.annotation.Size
 import com.stripe.android.EphemeralKeyProvider
 import com.stripe.android.EphemeralKeyUpdateListener
@@ -17,7 +18,7 @@ class ExampleEphemeralKeyProvider : EphemeralKeyProvider {
 
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
     private val backendApi: BackendApi =
-            RetrofitFactory.instance.create(BackendApi::class.java)
+        RetrofitFactory.instance.create(BackendApi::class.java)
 
     override fun createEphemeralKey(
         @Size(min = 4) apiVersion: String,
@@ -27,7 +28,7 @@ class ExampleEphemeralKeyProvider : EphemeralKeyProvider {
             backendApi.createEphemeralKey(hashMapOf("api_version" to apiVersion))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { responseBody ->
+                .subscribe({ responseBody ->
                     try {
                         val ephemeralKeyJson = responseBody.string()
                         keyUpdateListener.onKeyUpdate(ephemeralKeyJson)
@@ -35,6 +36,9 @@ class ExampleEphemeralKeyProvider : EphemeralKeyProvider {
                         keyUpdateListener
                             .onKeyUpdateFailure(0, e.message ?: "")
                     }
+                }, {
+                    Log.e("StripeExample", "Exception in ExampleEphemeralKeyProvider", it)
                 })
+        )
     }
 }

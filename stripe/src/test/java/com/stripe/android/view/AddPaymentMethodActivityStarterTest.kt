@@ -21,7 +21,7 @@ class AddPaymentMethodActivityStarterTest {
             .build()
 
         val createdArgs =
-            ParcelUtils.create<AddPaymentMethodActivityStarter.Args>(
+            ParcelUtils.create(
                 args,
                 AddPaymentMethodActivityStarter.Args.CREATOR
             )
