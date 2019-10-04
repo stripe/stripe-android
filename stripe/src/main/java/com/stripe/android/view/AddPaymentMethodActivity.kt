@@ -80,7 +80,7 @@ open class AddPaymentMethodActivity : StripeActivity() {
     private fun configureView(args: AddPaymentMethodActivityStarter.Args) {
         viewStub.layoutResource = R.layout.add_payment_method_layout
         val scrollView = viewStub.inflate() as ViewGroup
-        val contentRoot = scrollView.getChildAt(0) as ViewGroup
+        val contentRoot = scrollView.findViewById<ViewGroup>(R.id.stripe_add_payment_method_content_root)
 
         addPaymentMethodView = createPaymentMethodView(args)
         contentRoot.addView(addPaymentMethodView)
@@ -92,7 +92,7 @@ open class AddPaymentMethodActivity : StripeActivity() {
                 footerView.movementMethod = LinkMovementMethod.getInstance()
             }
             contentRoot.addView(footerView)
-        }
+        }   
 
         setTitle(titleStringRes)
 
