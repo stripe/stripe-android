@@ -3,6 +3,7 @@ package com.stripe.android
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.annotation.LayoutRes
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.view.ShippingInfoWidget
 import com.stripe.android.view.ShippingInfoWidget.CustomizableShippingField
@@ -20,7 +21,9 @@ class PaymentSessionConfig private constructor(
 
     @LayoutRes
     @get:LayoutRes
-    val addPaymentMethodFooter: Int
+    val addPaymentMethodFooter: Int,
+
+    val paymentMethodTypes: List<PaymentMethod.Type>
 ) : Parcelable {
     class Builder : ObjectBuilder<PaymentSessionConfig> {
         private var shippingInfoRequired = true
@@ -28,6 +31,8 @@ class PaymentSessionConfig private constructor(
         private var hiddenShippingInfoFields: List<String>? = null
         private var optionalShippingInfoFields: List<String>? = null
         private var shippingInformation: ShippingInformation? = null
+        private var paymentMethodTypes: List<PaymentMethod.Type> = listOf(PaymentMethod.Type.Card)
+
         @LayoutRes
         private var addPaymentMethodFooter: Int = 0
 
@@ -79,7 +84,18 @@ class PaymentSessionConfig private constructor(
         }
 
         fun setAddPaymentMethodFooter(@LayoutRes addPaymentMethodFooterLayoutId: Int): Builder {
-            addPaymentMethodFooter = addPaymentMethodFooterLayoutId
+            this.addPaymentMethodFooter = addPaymentMethodFooterLayoutId
+            return this
+        }
+
+        // TODO(mshafrir-stripe): make public
+        /**
+         * @param paymentMethodTypes a list of [PaymentMethod.Type] that indicates the types of
+         * Payment Methods that the customer can select or add via the Stripe UI components.
+         * If not specified or empty, [PaymentMethod.Type.Card] will be used.
+         */
+        internal fun setPaymentMethodTypes(paymentMethodTypes: List<PaymentMethod.Type>): Builder {
+            this.paymentMethodTypes = paymentMethodTypes
             return this
         }
 
@@ -90,18 +106,20 @@ class PaymentSessionConfig private constructor(
                 prepopulatedShippingInfo = shippingInformation,
                 isShippingInfoRequired = shippingInfoRequired,
                 isShippingMethodRequired = shippingMethodsRequired,
-                addPaymentMethodFooter = addPaymentMethodFooter
+                addPaymentMethodFooter = addPaymentMethodFooter,
+                paymentMethodTypes = paymentMethodTypes
             )
         }
     }
 
     private constructor(parcel: Parcel) : this(
-        hiddenShippingInfoFields = readList(parcel),
-        optionalShippingInfoFields = readList(parcel),
+        hiddenShippingInfoFields = readStringList(parcel),
+        optionalShippingInfoFields = readStringList(parcel),
         prepopulatedShippingInfo = parcel.readParcelable(ShippingInformation::class.java.classLoader),
         isShippingInfoRequired = parcel.readInt() == 1,
         isShippingMethodRequired = parcel.readInt() == 1,
-        addPaymentMethodFooter = parcel.readInt()
+        addPaymentMethodFooter = parcel.readInt(),
+        paymentMethodTypes = readList(parcel, PaymentMethod.Type::class.java.classLoader)
     )
 
     override fun equals(other: Any?): Boolean {
@@ -138,12 +156,17 @@ class PaymentSessionConfig private constructor(
         parcel.writeInt(if (isShippingInfoRequired) 1 else 0)
         parcel.writeInt(if (isShippingMethodRequired) 1 else 0)
         parcel.writeInt(addPaymentMethodFooter)
+        parcel.writeList(paymentMethodTypes)
     }
 
     companion object {
-        private fun readList(parcel: Parcel): List<String> {
-            val inList: List<String> = mutableListOf()
-            parcel.readList(inList, String::class.java.classLoader)
+        private fun readStringList(parcel: Parcel): List<String> {
+            return readList(parcel, String::class.java.classLoader)
+        }
+
+        private fun <T> readList(parcel: Parcel, classLoader: ClassLoader?): List<T> {
+            val inList: List<T> = mutableListOf()
+            parcel.readList(inList, classLoader)
             return inList.toList()
         }
 

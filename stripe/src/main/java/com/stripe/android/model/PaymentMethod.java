@@ -63,7 +63,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
     @Nullable public final Fpx fpx;
     @Nullable public final Ideal ideal;
 
-    public enum Type {
+    public enum Type implements Parcelable {
         Card("card"),
         CardPresent("card_present"),
         Fpx("fpx", false),
@@ -98,6 +98,28 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
 
             return null;
         }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel parcel, int i) {
+            parcel.writeInt(ordinal());
+        }
+
+        public static final Creator<Type> CREATOR = new Creator<Type>() {
+            @Override
+            public Type createFromParcel(@NonNull Parcel in) {
+                return values()[in.readInt()];
+            }
+
+            @Override
+            public Type[] newArray(int size) {
+                return new Type[size];
+            }
+        };
     }
 
     private PaymentMethod(@NonNull Builder builder) {
