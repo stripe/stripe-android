@@ -55,6 +55,20 @@ class PaymentMethodCreateParamsTest {
     }
 
     @Test
+    fun createCardParams() {
+        val expectedParams = mapOf(
+            "number" to "4242424242424242",
+            "exp_month" to 1,
+            "exp_year" to 2024,
+            "cvc" to "111"
+        )
+        assertEquals(
+            expectedParams,
+            PaymentMethodCreateParamsFixtures.CARD.toParamMap()
+        )
+    }
+
+    @Test
     fun createSepaDebit() {
         val expectedParams = mapOf(
             "type" to "sepa_debit",
