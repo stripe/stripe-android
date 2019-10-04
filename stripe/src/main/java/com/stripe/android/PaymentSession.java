@@ -292,6 +292,8 @@ public class PaymentSession {
                         .setInitialPaymentMethodId(
                                 getSelectedPaymentMethodId(userSelectedPaymentMethodId))
                         .setShouldRequirePostalCode(shouldRequirePostalCode)
+                        .setAddPaymentMethodFooter(
+                                mPaymentSessionConfig.getAddPaymentMethodFooter())
                         .setIsPaymentSessionActive(true)
                         .setPaymentConfiguration(PaymentConfiguration.getInstance(mContext))
                         .build()

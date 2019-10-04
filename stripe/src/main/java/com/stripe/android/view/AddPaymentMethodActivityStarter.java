@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -39,6 +40,7 @@ public final class AddPaymentMethodActivityStarter
         final boolean shouldInitCustomerSessionTokens;
         @NonNull final PaymentMethod.Type paymentMethodType;
         @Nullable final PaymentConfiguration paymentConfiguration;
+        @LayoutRes final int addPaymentMethodFooter;
 
         @NonNull
         public static AddPaymentMethodActivityStarter.Args create(@NonNull Intent intent) {
@@ -57,6 +59,7 @@ public final class AddPaymentMethodActivityStarter
                     PaymentMethod.Type.Card
             );
             this.paymentConfiguration = builder.mPaymentConfiguration;
+            this.addPaymentMethodFooter = builder.mAddPaymentMethodFooter;
         }
 
         private Args(@NonNull Parcel in) {
@@ -67,6 +70,7 @@ public final class AddPaymentMethodActivityStarter
             this.paymentMethodType = PaymentMethod.Type.valueOf(in.readString());
             this.paymentConfiguration =
                     in.readParcelable(PaymentConfiguration.class.getClassLoader());
+            this.addPaymentMethodFooter = in.readInt();
         }
 
         @Override
@@ -82,13 +86,14 @@ public final class AddPaymentMethodActivityStarter
             dest.writeInt(shouldInitCustomerSessionTokens ? 1 : 0);
             dest.writeString(paymentMethodType.name());
             dest.writeParcelable(paymentConfiguration, 0);
+            dest.writeInt(addPaymentMethodFooter);
         }
 
         @Override
         public int hashCode() {
             return Objects.hash(shouldAttachToCustomer, shouldRequirePostalCode,
                     isPaymentSessionActive, shouldInitCustomerSessionTokens, paymentMethodType,
-                    paymentConfiguration);
+                    paymentConfiguration, addPaymentMethodFooter);
         }
 
         @Override
@@ -103,6 +108,7 @@ public final class AddPaymentMethodActivityStarter
                     Objects.equals(shouldInitCustomerSessionTokens,
                             args.shouldInitCustomerSessionTokens) &&
                     Objects.equals(paymentMethodType, args.paymentMethodType) &&
+                    Objects.equals(addPaymentMethodFooter, args.addPaymentMethodFooter) &&
                     Objects.equals(paymentConfiguration, args.paymentConfiguration);
 
         }
@@ -130,6 +136,7 @@ public final class AddPaymentMethodActivityStarter
             private boolean mShouldInitCustomerSessionTokens = true;
             @Nullable private PaymentMethod.Type mPaymentMethodType;
             @Nullable private PaymentConfiguration mPaymentConfiguration;
+            @LayoutRes private int mAddPaymentMethodFooter;
 
             /**
              * If true, the created Payment Method will be attached to the current Customer
@@ -172,6 +179,12 @@ public final class AddPaymentMethodActivityStarter
             @NonNull
             Builder setPaymentConfiguration(@Nullable PaymentConfiguration paymentConfiguration) {
                 this.mPaymentConfiguration = paymentConfiguration;
+                return this;
+            }
+
+            @NonNull
+            public Builder setAddPaymentMethodFooter(@LayoutRes int addPaymentMethodFooter) {
+                this.mAddPaymentMethodFooter = addPaymentMethodFooter;
                 return this;
             }
 
