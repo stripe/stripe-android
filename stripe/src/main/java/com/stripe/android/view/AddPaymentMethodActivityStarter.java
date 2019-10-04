@@ -183,7 +183,7 @@ public final class AddPaymentMethodActivityStarter
             }
 
             @NonNull
-            Builder setAddPaymentMethodFooter(@LayoutRes int addPaymentMethodFooter) {
+            public Builder setAddPaymentMethodFooter(@LayoutRes int addPaymentMethodFooter) {
                 this.mAddPaymentMethodFooter = addPaymentMethodFooter;
                 return this;
             }
