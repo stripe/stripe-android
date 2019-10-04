@@ -2,6 +2,7 @@ package com.stripe.android
 
 import android.os.Parcel
 import com.stripe.android.model.Address
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -20,6 +21,7 @@ class PaymentSessionConfigTest {
                 Address.Builder().build(), null, null))
             .setShippingInfoRequired(true)
             .setShippingMethodsRequired(true)
+            .setPaymentMethodTypes(listOf(PaymentMethod.Type.Card, PaymentMethod.Type.Fpx))
             .build()
 
         val parcel = Parcel.obtain()
