@@ -159,9 +159,9 @@ internal open class StripeEditText @JvmOverloads constructor(
             if (StripeColorUtils.isColorDark(textColors.defaultColor)) {
                 // Note: if the _text_ color is dark, then this is a
                 // light theme, and vice-versa.
-                R.color.error_text_light_theme
+                R.color.stripe_error_text_light_theme
             } else {
-                R.color.error_text_dark_theme
+                R.color.stripe_error_text_dark_theme
             }
         )
     }

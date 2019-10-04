@@ -95,7 +95,7 @@ class StripeEditTextTest {
             .getColor(android.R.color.primary_text_dark))
         @ColorInt val colorInt = editText.defaultErrorColorInt
         @ColorInt val expectedErrorInt = ContextCompat.getColor(context,
-            R.color.error_text_dark_theme)
+            R.color.stripe_error_text_dark_theme)
         assertEquals(expectedErrorInt, colorInt)
     }
 
@@ -105,7 +105,7 @@ class StripeEditTextTest {
             .getColor(android.R.color.primary_text_light))
         @ColorInt val colorInt = editText.defaultErrorColorInt
         @ColorInt val expectedErrorInt = ContextCompat.getColor(context,
-            R.color.error_text_light_theme)
+            R.color.stripe_error_text_light_theme)
         assertEquals(expectedErrorInt, colorInt)
     }
 
@@ -127,7 +127,7 @@ class StripeEditTextTest {
     @Test
     fun setShouldShowError_whenErrorColorNotSet_shouldUseDefaultErrorColor() {
         editText.shouldShowError = true
-        assertEquals(ContextCompat.getColor(context, R.color.error_text_light_theme),
+        assertEquals(ContextCompat.getColor(context, R.color.stripe_error_text_light_theme),
             editText.textColors.defaultColor)
     }
 }

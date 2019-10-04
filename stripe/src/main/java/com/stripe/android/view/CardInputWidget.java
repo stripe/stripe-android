@@ -71,7 +71,7 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
 
     // This value is used to ensure that onSaveInstanceState is called
     // in the event that the user doesn't give this control an ID.
-    private static final @IdRes int DEFAULT_READER_ID = R.id.default_reader_id;
+    @IdRes private static final int DEFAULT_READER_ID = R.id.stripe_default_reader_id;
 
     private static final long ANIMATION_LENGTH = 150L;
 
@@ -114,7 +114,7 @@ public class CardInputWidget extends LinearLayout implements CardWidget {
         }
 
         setOrientation(LinearLayout.HORIZONTAL);
-        setMinimumWidth(getResources().getDimensionPixelSize(R.dimen.card_widget_min_width));
+        setMinimumWidth(getResources().getDimensionPixelSize(R.dimen.stripe_card_widget_min_width));
 
         mPlacementParameters = new PlacementParameters();
         mCardIconImageView = findViewById(R.id.iv_card_icon);

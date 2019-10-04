@@ -6,9 +6,9 @@
         android:id="@+id/iv_card_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/card_icon_padding"
-        android:layout_marginBottom="@dimen/card_icon_padding"
-        android:layout_marginEnd="@dimen/card_icon_padding"
+        android:layout_marginTop="@dimen/stripe_card_icon_padding"
+        android:layout_marginBottom="@dimen/stripe_card_icon_padding"
+        android:layout_marginEnd="@dimen/stripe_card_icon_padding"
         android:src="@drawable/ic_unknown"
         android:contentDescription="@null" />
 
@@ -95,7 +95,7 @@
             android:visibility="visible"
             android:focusable="true"
             android:focusableInTouchMode="true"
-            android:layout_marginStart="@dimen/card_expiry_initial_margin"
+            android:layout_marginStart="@dimen/stripe_card_expiry_initial_margin"
             android:layout_gravity="start"
             />
 
@@ -115,7 +115,7 @@
             android:maxLength="4"
             android:focusable="true"
             android:focusableInTouchMode="true"
-            android:layout_marginStart="@dimen/card_cvc_initial_margin"
+            android:layout_marginStart="@dimen/stripe_card_cvc_initial_margin"
             android:layout_gravity="start"
             />
 

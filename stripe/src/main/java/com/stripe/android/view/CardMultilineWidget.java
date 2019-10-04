@@ -492,7 +492,7 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
                 EditorInfo.IME_ACTION_DONE : EditorInfo.IME_ACTION_NEXT);
 
         final int marginPixels = mShouldShowPostalCode
-                ? getResources().getDimensionPixelSize(R.dimen.add_card_expiry_middle_margin)
+                ? getResources().getDimensionPixelSize(R.dimen.stripe_add_card_expiry_middle_margin)
                 : 0;
         final LinearLayout.LayoutParams linearParams =
                 (LinearLayout.LayoutParams) mCvcTextInputLayout.getLayoutParams();
@@ -553,7 +553,7 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
 
     private int getDynamicBufferInPixels() {
         final float pixelsToAdjust = getResources()
-                .getDimension(R.dimen.card_icon_multiline_padding_bottom);
+                .getDimension(R.dimen.stripe_card_icon_multiline_padding_bottom);
         return new BigDecimal(pixelsToAdjust)
                 .setScale(0, RoundingMode.HALF_DOWN)
                 .intValue();

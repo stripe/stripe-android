@@ -71,7 +71,7 @@ class PaymentMethodsActivityTest : BaseViewTest<PaymentMethodsActivity>(PaymentM
         progressBar = paymentMethodsActivity.findViewById(R.id.payment_methods_progress_bar)
         recyclerView = paymentMethodsActivity.findViewById(R.id.payment_methods_recycler)
         addCardView = paymentMethodsActivity
-            .findViewById(R.id.payment_methods_add_card)
+            .findViewById(R.id.stripe_payment_methods_add_card)
     }
 
     @AfterTest
@@ -142,7 +142,7 @@ class PaymentMethodsActivityTest : BaseViewTest<PaymentMethodsActivity>(PaymentM
             .setIsPaymentSessionActive(true)
             .build())
         shadowActivity = Shadows.shadowOf(paymentMethodsActivity)
-        addCardView = paymentMethodsActivity.findViewById(R.id.payment_methods_add_card)
+        addCardView = paymentMethodsActivity.findViewById(R.id.stripe_payment_methods_add_card)
         addCardView.performClick()
         val intentForResult = shadowActivity.nextStartedActivityForResult
         val component = intentForResult.intent.component

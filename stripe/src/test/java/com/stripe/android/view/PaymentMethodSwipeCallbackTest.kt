@@ -17,8 +17,8 @@ class PaymentMethodSwipeCallbackTest {
         val context: Context = ApplicationProvider.getApplicationContext()
         val calculatedColor = PaymentMethodSwipeCallback.calculateTransitionColor(
             0.25F,
-            ContextCompat.getColor(context, R.color.swipe_start_payment_method),
-            ContextCompat.getColor(context, R.color.swipe_threshold_payment_method)
+            ContextCompat.getColor(context, R.color.stripe_swipe_start_payment_method),
+            ContextCompat.getColor(context, R.color.stripe_swipe_threshold_payment_method)
         )
         assertEquals(-2312009, calculatedColor)
     }

@@ -3,13 +3,13 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingEnd="@dimen/list_row_end_padding"
-    android:paddingStart="@dimen/list_row_start_padding"
+    android:paddingEnd="@dimen/stripe_list_row_end_padding"
+    android:paddingStart="@dimen/stripe_list_row_start_padding"
     >
 
     <com.stripe.android.view.MaskedCardView
         android:id="@+id/masked_card_item"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/list_row_height"/>
+        android:layout_height="@dimen/stripe_list_row_height"/>
 
 </FrameLayout>

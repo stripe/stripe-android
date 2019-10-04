@@ -463,7 +463,7 @@ internal class CardMultilineWidgetTest : BaseViewTest<CardInputTestActivity>(
         assertEquals(View.VISIBLE, noZipGroup.postalCodeInputLayout.visibility)
 
         val expectedMargin = noZipCardMultilineWidget.resources
-            .getDimensionPixelSize(R.dimen.add_card_expiry_middle_margin)
+            .getDimensionPixelSize(R.dimen.stripe_add_card_expiry_middle_margin)
 
         val params = noZipGroup.cvcInputLayout.layoutParams as LinearLayout.LayoutParams
         assertEquals(expectedMargin, params.rightMargin)
