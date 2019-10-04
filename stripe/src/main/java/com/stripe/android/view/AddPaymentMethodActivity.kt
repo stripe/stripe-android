@@ -92,7 +92,7 @@ open class AddPaymentMethodActivity : StripeActivity() {
                 footerView.movementMethod = LinkMovementMethod.getInstance()
             }
             contentRoot.addView(footerView)
-        }   
+        }
 
         setTitle(titleStringRes)
 
