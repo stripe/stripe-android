@@ -170,9 +170,9 @@ internal class ApiRequestTest {
                 """
                 {
                     "name": "MyAwesomePlugin",
-                    "partner_id": "pp_partner_1234",
                     "version": "1.2.34",
-                    "url": "https:\/\/myawesomeplugin.info"
+                    "url": "https:\/\/myawesomeplugin.info",
+                    "partner_id": "pp_partner_1234"
                 }
                 """.trimIndent()
             ).toString(),

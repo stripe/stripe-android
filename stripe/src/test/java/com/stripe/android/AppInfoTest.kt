@@ -20,6 +20,31 @@ class AppInfoTest {
     }
 
     @Test
+    fun createClientHeaders_withoutVersion() {
+        val appInfo = AppInfo.create(
+            "MyAwesomePlugin",
+            url = "https://myawesomeplugin.info"
+        )
+
+        assertEquals(
+            "MyAwesomePlugin (https://myawesomeplugin.info)",
+            appInfo.toUserAgent()
+        )
+    }
+
+    @Test
+    fun createClientHeaders_withoutVersionOrUrl() {
+        val appInfo = AppInfo.create(
+            "MyAwesomePlugin"
+        )
+
+        assertEquals(
+            "MyAwesomePlugin",
+            appInfo.toUserAgent()
+        )
+    }
+
+    @Test
     fun equals() {
         assertEquals(APP_INFO,
             AppInfo.create(
