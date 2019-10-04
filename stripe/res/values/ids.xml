@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-    <item type="id" name="default_reader_id" />
-    <item type="id" name="payment_methods_add_card" />
-    <item type="id" name="payment_methods_add_fpx" />
+    <item type="id" name="stripe_default_reader_id" />
+    <item type="id" name="stripe_payment_methods_add_card" />
+    <item type="id" name="stripe_payment_methods_add_fpx" />
 </resources>

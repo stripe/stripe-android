@@ -12,7 +12,7 @@
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
             android:layout_toStartOf="@+id/shipping_method_price"
-            android:paddingTop="@dimen/shipping_widget_vertical_margin"
+            android:paddingTop="@dimen/stripe_shipping_widget_vertical_margin"
             android:textAppearance="@style/TextAppearance.AppCompat.Menu" />
 
         <TextView
@@ -21,9 +21,9 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_below="@+id/shipping_method_name"
-            android:layout_marginTop="@dimen/shipping_widget_vertical_margin"
+            android:layout_marginTop="@dimen/stripe_shipping_widget_vertical_margin"
             android:layout_toStartOf="@+id/shipping_method_price"
-            android:paddingBottom="@dimen/shipping_widget_vertical_margin"
+            android:paddingBottom="@dimen/stripe_shipping_widget_vertical_margin"
             android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small" />
 
         <TextView
@@ -31,13 +31,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="@dimen/shipping_widget_horizontal_margin"
+            android:layout_marginEnd="@dimen/stripe_shipping_widget_horizontal_margin"
             android:layout_toStartOf="@+id/selected_icon"
             android:textAppearance="@android:style/TextAppearance.DeviceDefault.Small" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/selected_icon"
-            android:layout_width="@dimen/shipping_check_icon_width"
+            android:layout_width="@dimen/stripe_shipping_check_icon_width"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"

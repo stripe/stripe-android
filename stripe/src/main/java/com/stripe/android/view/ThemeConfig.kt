@@ -14,33 +14,33 @@ internal class ThemeConfig(context: Context) {
     private val selectedColorInt = determineColor(
         context,
         colorUtils.getThemeAccentColor().data,
-        R.color.accent_color_default
+        R.color.stripe_accent_color_default
     )
 
     @ColorInt
     private val unselectedColorInt = determineColor(
         context,
         colorUtils.getThemeColorControlNormal().data,
-        R.color.control_normal_color_default
+        R.color.stripe_control_normal_color_default
     )
 
     @ColorInt
     private val unselectedTextColorInt = determineColor(
         context,
         colorUtils.getThemeTextColorSecondary().data,
-        R.color.color_text_secondary_default
+        R.color.stripe_color_text_secondary_default
     )
 
     @ColorInt
     private val selectedTextAlphaColorInt = ColorUtils.setAlphaComponent(
         selectedColorInt,
-        context.resources.getInteger(R.integer.light_text_alpha_hex)
+        context.resources.getInteger(R.integer.stripe_light_text_alpha_hex)
     )
 
     @ColorInt
     private val unselectedTextAlphaColorInt = ColorUtils.setAlphaComponent(
         unselectedTextColorInt,
-        context.resources.getInteger(R.integer.light_text_alpha_hex)
+        context.resources.getInteger(R.integer.stripe_light_text_alpha_hex)
     )
 
     val textColorValues = intArrayOf(

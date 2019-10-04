@@ -26,12 +26,12 @@ internal class PaymentMethodSwipeCallback(
     private val trashIcon =
         ContextCompat.getDrawable(context, R.drawable.ic_trash)!!
     private val swipeStartColor =
-        ContextCompat.getColor(context, R.color.swipe_start_payment_method)
+        ContextCompat.getColor(context, R.color.stripe_swipe_start_payment_method)
     private val swipeThresholdColor =
-        ContextCompat.getColor(context, R.color.swipe_threshold_payment_method)
+        ContextCompat.getColor(context, R.color.stripe_swipe_threshold_payment_method)
     private val background = ColorDrawable(swipeStartColor)
     private val itemViewStartPadding = trashIcon.intrinsicWidth / 2
-    private val iconStartOffset = context.resources.getDimensionPixelSize(R.dimen.list_row_start_padding)
+    private val iconStartOffset = context.resources.getDimensionPixelSize(R.dimen.stripe_list_row_start_padding)
 
     override fun onMove(
         recyclerView: RecyclerView,

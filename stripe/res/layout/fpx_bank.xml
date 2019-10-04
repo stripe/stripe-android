@@ -2,14 +2,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="@dimen/list_row_height"
+    android:minHeight="@dimen/stripe_list_row_height"
     android:orientation="horizontal"
     android:paddingStart="16dp"
     android:paddingEnd="12dp">
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/icon"
-        android:layout_width="@dimen/masked_card_icon_width"
+        android:layout_width="@dimen/stripe_masked_card_icon_width"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|start"
         android:src="@drawable/ic_bank_generic" />
@@ -25,7 +25,7 @@
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/check_icon"
-        android:layout_width="@dimen/masked_card_icon_width"
+        android:layout_width="@dimen/stripe_masked_card_icon_width"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:src="@drawable/ic_checkmark" />

@@ -33,7 +33,7 @@ internal class AddPaymentMethodFpxView private constructor(
         View.inflate(getContext(), R.layout.add_payment_method_fpx_layout, this)
 
         // an id is required for state to be saved
-        id = R.id.payment_methods_add_fpx
+        id = R.id.stripe_payment_methods_add_fpx
 
         val recyclerView = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.fpx_list)
         recyclerView.adapter = adapter

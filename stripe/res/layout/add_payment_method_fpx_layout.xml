@@ -8,6 +8,6 @@
         android:id="@+id/fpx_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/list_top_margin" />
+        android:layout_marginTop="@dimen/stripe_list_top_margin" />
 
 </LinearLayout>

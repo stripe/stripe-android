@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
-        android:elevation="@dimen/toolbar_elevation"
+        android:elevation="@dimen/stripe_toolbar_elevation"
         android:theme="@style/StripeToolBarStyle"
         app:title="@string/secure_checkout" />
 

@@ -36,21 +36,21 @@ internal class ShippingMethodView @JvmOverloads constructor(
 
         selectedColorInt =
             if (StripeColorUtils.isColorTransparent(rawSelectedColorInt)) {
-                ContextCompat.getColor(context, R.color.accent_color_default)
+                ContextCompat.getColor(context, R.color.stripe_accent_color_default)
             } else {
                 rawSelectedColorInt
             }
 
         unselectedTextColorPrimaryInt =
             if (StripeColorUtils.isColorTransparent(rawUnselectedTextColorPrimaryInt)) {
-                ContextCompat.getColor(context, R.color.color_text_unselected_primary_default)
+                ContextCompat.getColor(context, R.color.stripe_color_text_unselected_primary_default)
             } else {
                 rawUnselectedTextColorPrimaryInt
             }
 
         unselectedTextColorSecondaryInt =
             if (StripeColorUtils.isColorTransparent(rawUnselectedTextColorSecondaryInt)) {
-                ContextCompat.getColor(context, R.color.color_text_unselected_secondary_default)
+                ContextCompat.getColor(context, R.color.stripe_color_text_unselected_secondary_default)
             } else {
                 rawUnselectedTextColorSecondaryInt
             }

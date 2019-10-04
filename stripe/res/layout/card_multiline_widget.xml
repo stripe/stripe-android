@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/acc_label_card_number"
-        android:layout_marginTop="@dimen/add_card_element_vertical_margin"
+        android:layout_marginTop="@dimen/stripe_add_card_element_vertical_margin"
         >
 
         <com.stripe.android.view.CardNumberEditText
@@ -16,7 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:digits="@string/valid_digits"
-            android:drawablePadding="@dimen/card_icon_multiline_padding"
+            android:drawablePadding="@dimen/stripe_card_icon_multiline_padding"
             android:drawableStart="@drawable/ic_unknown"
             android:imeOptions="actionNext"
             android:inputType="number"
@@ -30,7 +30,7 @@
         android:id="@+id/second_row_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/add_card_element_vertical_margin"
+        android:layout_marginTop="@dimen/stripe_add_card_element_vertical_margin"
         android:baselineAligned="false"
         android:orientation="horizontal"
         >
@@ -39,7 +39,7 @@
             android:id="@+id/tl_add_source_expiry_ml"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/add_card_expiry_middle_margin"
+            android:layout_marginEnd="@dimen/stripe_add_card_expiry_middle_margin"
             android:layout_weight="1"
             android:hint="@string/acc_label_expiry_date"
             >
@@ -50,7 +50,7 @@
                 android:layout_height="wrap_content"
                 android:imeOptions="actionNext"
                 android:inputType="date"
-                android:maxLength="@integer/date_length"
+                android:maxLength="@integer/stripe_date_length"
                 android:nextFocusDown="@+id/et_add_source_cvc_ml"
                 android:nextFocusForward="@+id/et_add_source_cvc_ml"
                 />
@@ -61,7 +61,7 @@
             android:id="@+id/tl_add_source_cvc_ml"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/add_card_expiry_middle_margin"
+            android:layout_marginEnd="@dimen/stripe_add_card_expiry_middle_margin"
             android:layout_weight="1"
             >
 

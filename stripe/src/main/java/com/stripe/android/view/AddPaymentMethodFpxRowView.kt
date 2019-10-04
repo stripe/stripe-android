@@ -12,7 +12,7 @@ internal class AddPaymentMethodFpxRowView internal constructor(
 ) : AddPaymentMethodRowView(
     activity,
     R.layout.add_payment_method_fpx_row,
-    R.id.payment_methods_add_fpx,
+    R.id.stripe_payment_methods_add_fpx,
     AddPaymentMethodActivityStarter.Args.Builder()
         .setIsPaymentSessionActive(args.isPaymentSessionActive)
         .setPaymentMethodType(PaymentMethod.Type.Fpx)

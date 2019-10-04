@@ -12,7 +12,7 @@ internal class AddPaymentMethodCardRowView internal constructor(
 ) : AddPaymentMethodRowView(
     activity,
     R.layout.add_payment_method_card_row,
-    R.id.payment_methods_add_card,
+    R.id.stripe_payment_methods_add_card,
     AddPaymentMethodActivityStarter.Args.Builder()
         .setShouldAttachToCustomer(true)
         .setShouldRequirePostalCode(args.shouldRequirePostalCode)
