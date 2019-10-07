@@ -12,7 +12,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CustomerSession
 import com.stripe.android.CustomerSessionTestHelper
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.PaymentSession.EXTRA_PAYMENT_SESSION_ACTIVE
+import com.stripe.android.PaymentSession.Companion.EXTRA_PAYMENT_SESSION_ACTIVE
 import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures

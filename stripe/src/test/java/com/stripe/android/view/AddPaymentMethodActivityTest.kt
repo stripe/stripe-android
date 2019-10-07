@@ -21,7 +21,7 @@ import com.stripe.android.CustomerSession.EXTRA_EXCEPTION
 import com.stripe.android.CustomerSessionTestHelper
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
-import com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION
+import com.stripe.android.PaymentSession.Companion.TOKEN_PAYMENT_SESSION
 import com.stripe.android.R
 import com.stripe.android.Stripe
 import com.stripe.android.StripeNetworkUtils
