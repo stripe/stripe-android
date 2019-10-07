@@ -1,24 +1,35 @@
 # CHANGELOG
 
-## 11.1.5 - upcoming
+## 11.2.0 - upcoming
+* [#1616](https://github.com/stripe/stripe-android/pull/1616) Make `AddPaymentMethodActivityStarter.Result.fromIntent()` public
 * [#1619](https://github.com/stripe/stripe-android/pull/1619) Add `CardMultilineWidget#getPaymentMethodBillingDetailsBuilder()`
-* [#1639](https://github.com/stripe/stripe-android/pull/1639) Update 3DS2 SDK to 2.1.1
-    * Prevent challenge screen's cancel button from being clicked more than once
-* [#1641](https://github.com/stripe/stripe-android/pull/1641) Add `PaymentAuthConfig.Stripe3ds2Config.enableLogging`
+* [#1643](https://github.com/stripe/stripe-android/pull/1643) Create `Stripe.createCardTokenSynchronous()`
+* [#1647](https://github.com/stripe/stripe-android/pull/1647) Add `StripeDefault3DS2Theme` for 3DS2 customization via themes
+* [#1652](https://github.com/stripe/stripe-android/pull/1652) In `PaymentMethodsActivity`, select a new Payment Method if the previously selected one was deleted
+* [#1658](https://github.com/stripe/stripe-android/pull/1658) Add `stripe_` prefix to Stripe resources
+* [#1664](https://github.com/stripe/stripe-android/pull/1664) Upgrade AGP to 3.5.1
+* [#1666](https://github.com/stripe/stripe-android/pull/1666) Add logging support
     ```kotlin
     // Example
-    PaymentAuthConfig.init(PaymentAuthConfig.Builder()
-        .set3ds2Config(PaymentAuthConfig.Stripe3ds2Config.Builder()
-            .setEnableLogging(true)
-            .build())
-        .build())
-    val stripe = Stripe(this, "pk_test_demo")
+    val enableLogging: Boolean = true
+    val stripe: Stripe = Stripe(this, "pk_test_demo", enableLogging = enableLogging)
     stripe.confirmPayment(this, confirmPaymentIntentParams)
     
     // View logs using
-    // $ adb logcat -s Stripe3ds2`
+    // $ adb logcat -s StripeSdk
     ```
-* [#1652](https://github.com/stripe/stripe-android/pull/1652) In `PaymentMethodsActivity`, select a new Payment Method if the previously selected one was deleted
+* [#1667](https://github.com/stripe/stripe-android/pull/1667) Add support for SEPA Debit Payment Methods
+    ```kotlin
+    // Example
+    PaymentMethodCreateParams.create(
+        PaymentMethodCreateParams.SepaDebit.Builder()
+            .setIban("__iban__")
+            .build()
+    )
+    ```
+* [#1668](https://github.com/stripe/stripe-android/pull/1668) Update Google Pay integration example in example app
+* [#1669](https://github.com/stripe/stripe-android/pull/1669) Update 3DS2 SDK to 2.1.3
+    * Prevent challenge screen's cancel button from being clicked more than once
 
 ## 11.1.4 - 2019-09-24
 * [#1603](https://github.com/stripe/stripe-android/pull/1603) Update ProGuard rules for BouncyCastle
@@ -36,7 +47,8 @@
     val paymentMethod: PaymentMethod? = data.getParcelableExtra(EXTRA_NEW_PAYMENT_METHOD)
 
     // after
-    val result = AddPaymentMethodActivityStarter.Result.fromIntent(data)
+    val result: AddPaymentMethodActivityStarter.Result =
+        AddPaymentMethodActivityStarter.Result.fromIntent(data)
     val paymentMethod: PaymentMethod? = result?.paymentMethod
     ```    
 * [#1587](https://github.com/stripe/stripe-android/pull/1587) Fix logic for entering 3DS2 challenge flow
