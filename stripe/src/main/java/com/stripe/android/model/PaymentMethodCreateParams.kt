@@ -304,8 +304,7 @@ class PaymentMethodCreateParams private constructor(
         }
     }
 
-    // TODO(mshafrir-stripe): make public
-    internal class SepaDebit private constructor(private val iban: String?) : StripeParamsModel {
+    class SepaDebit private constructor(private val iban: String?) : StripeParamsModel {
         override fun toParamMap(): Map<String, Any> {
             return iban?.let {
                 mapOf(FIELD_IBAN to it)
@@ -386,10 +385,9 @@ class PaymentMethodCreateParams private constructor(
             return PaymentMethodCreateParams(fpx, billingDetails, metadata)
         }
 
-        // TODO(mshafrir-stripe): make public
         @JvmStatic
         @JvmOverloads
-        internal fun create(
+        fun create(
             sepaDebit: SepaDebit,
             billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null
