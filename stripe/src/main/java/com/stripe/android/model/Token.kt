@@ -55,11 +55,11 @@ class Token : StripePaymentSource {
         TokenType.CVC_UPDATE)
     annotation class TokenType {
         companion object {
-            const val CARD = "card"
-            const val BANK_ACCOUNT = "bank_account"
-            const val PII = "pii"
-            const val ACCOUNT = "account"
-            const val CVC_UPDATE = "cvc_update"
+            const val CARD: String = "card"
+            const val BANK_ACCOUNT: String = "bank_account"
+            const val PII: String = "pii"
+            const val ACCOUNT: String = "account"
+            const val CVC_UPDATE: String = "cvc_update"
         }
     }
 

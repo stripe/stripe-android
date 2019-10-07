@@ -9,8 +9,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
-import com.stripe.android.utils.ObjectUtils;
-
 import java.util.Objects;
 
 public final class PaymentConfiguration implements Parcelable {

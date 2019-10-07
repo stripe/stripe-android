@@ -120,7 +120,7 @@ object CardUtils {
 
     @CardBrand
     private fun getPossibleCardType(cardNumber: String?, shouldNormalize: Boolean): String {
-        if (StripeTextUtils.isBlank(cardNumber)) {
+        if (cardNumber.isNullOrBlank()) {
             return CardBrand.UNKNOWN
         }
 
