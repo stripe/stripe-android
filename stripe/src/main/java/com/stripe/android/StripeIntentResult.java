@@ -8,7 +8,6 @@ import androidx.annotation.Nullable;
 
 import com.stripe.android.model.ConfirmPaymentIntentParams;
 import com.stripe.android.model.StripeIntent;
-import com.stripe.android.utils.ObjectUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

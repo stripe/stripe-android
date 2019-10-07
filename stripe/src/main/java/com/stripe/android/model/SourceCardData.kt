@@ -43,11 +43,11 @@ class SourceCardData private constructor(builder: Builder) : StripeSourceTypeMod
         ThreeDSecureStatus.UNKNOWN)
     annotation class ThreeDSecureStatus {
         companion object {
-            const val REQUIRED = "required"
-            const val OPTIONAL = "optional"
-            const val NOT_SUPPORTED = "not_supported"
-            const val RECOMMENDED = "recommended"
-            const val UNKNOWN = "unknown"
+            const val REQUIRED: String = "required"
+            const val OPTIONAL: String = "optional"
+            const val NOT_SUPPORTED: String = "not_supported"
+            const val RECOMMENDED: String = "recommended"
+            const val UNKNOWN: String = "unknown"
         }
     }
 

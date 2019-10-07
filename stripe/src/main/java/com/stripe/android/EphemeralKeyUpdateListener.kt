@@ -1,18 +1,16 @@
-package com.stripe.android;
-
-import androidx.annotation.NonNull;
+package com.stripe.android
 
 /**
  * Represents a listener for Ephemeral Key Update events.
  */
-public interface EphemeralKeyUpdateListener {
+interface EphemeralKeyUpdateListener {
 
     /**
      * Called when a key update request from your server comes back successfully.
      *
      * @param stripeResponseJson the raw JSON String returned from Stripe's servers
      */
-    void onKeyUpdate(@NonNull String stripeResponseJson);
+    fun onKeyUpdate(stripeResponseJson: String)
 
     /**
      * Called when a key update request from your server comes back with an error.
@@ -20,6 +18,5 @@ public interface EphemeralKeyUpdateListener {
      * @param responseCode the error code returned from Stripe's servers
      * @param message the error message returned from Stripe's servers
      */
-    void onKeyUpdateFailure(int responseCode, @NonNull String message);
-
+    fun onKeyUpdateFailure(responseCode: Int, message: String)
 }

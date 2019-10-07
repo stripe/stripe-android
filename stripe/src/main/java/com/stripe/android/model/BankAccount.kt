@@ -2,7 +2,6 @@ package com.stripe.android.model
 
 import androidx.annotation.Size
 import androidx.annotation.StringDef
-import com.stripe.android.StripeTextUtils
 import java.util.Objects
 import org.json.JSONObject
 
@@ -31,8 +30,8 @@ class BankAccount(
     @StringDef(BankAccountType.COMPANY, BankAccountType.INDIVIDUAL)
     annotation class BankAccountType {
         companion object {
-            const val COMPANY = "company"
-            const val INDIVIDUAL = "individual"
+            const val COMPANY: String = "company"
+            const val INDIVIDUAL: String = "individual"
         }
     }
 
@@ -86,9 +85,9 @@ class BankAccount(
             "country" to countryCode,
             "currency" to currency,
             "account_number" to accountNumber,
-            "routing_number" to StripeTextUtils.nullIfBlank(routingNumber),
-            "account_holder_name" to StripeTextUtils.nullIfBlank(accountHolderName),
-            "account_holder_type" to StripeTextUtils.nullIfBlank(accountHolderType)
+            "routing_number" to routingNumber.takeUnless { it.isNullOrBlank() },
+            "account_holder_name" to accountHolderName.takeUnless { it.isNullOrBlank() },
+            "account_holder_type" to accountHolderType.takeUnless { it.isNullOrBlank() }
         )
 
         return mapOf(Token.TokenType.BANK_ACCOUNT to accountParams)
