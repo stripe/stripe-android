@@ -19,7 +19,7 @@ import com.stripe.android.CustomerSession.EVENT_SHIPPING_INFO_SAVED
 import com.stripe.android.CustomerSession.EXTRA_EXCEPTION
 import com.stripe.android.EphemeralKeyProvider
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.PaymentSession.PAYMENT_SESSION_DATA_KEY
+import com.stripe.android.PaymentSession.Companion.STATE_PAYMENT_SESSION_DATA
 import com.stripe.android.PaymentSessionConfig
 import com.stripe.android.PaymentSessionData
 import com.stripe.android.R
@@ -257,7 +257,7 @@ class PaymentFlowActivityTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowAct
 
         val extras = shadowActivity.resultIntent.extras
         val resultSessionData =
-            extras?.getParcelable<PaymentSessionData>(PAYMENT_SESSION_DATA_KEY)
+            extras?.getParcelable<PaymentSessionData>(STATE_PAYMENT_SESSION_DATA)
         assertEquals(resultSessionData?.shippingInformation, SHIPPING_INFO)
     }
 

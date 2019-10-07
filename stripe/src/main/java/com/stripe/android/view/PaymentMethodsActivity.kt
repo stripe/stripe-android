@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.CustomerSession
-import com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION
+import com.stripe.android.PaymentSession.Companion.TOKEN_PAYMENT_SESSION
 import com.stripe.android.R
 import com.stripe.android.StripeError
 import com.stripe.android.model.PaymentMethod

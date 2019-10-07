@@ -14,7 +14,7 @@ import androidx.core.text.util.LinkifyCompat
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION
+import com.stripe.android.PaymentSession.Companion.TOKEN_PAYMENT_SESSION
 import com.stripe.android.R
 import com.stripe.android.Stripe
 import com.stripe.android.StripeError

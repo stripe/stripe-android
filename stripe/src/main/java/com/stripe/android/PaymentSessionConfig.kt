@@ -13,17 +13,17 @@ import java.util.Objects
  * Class that tells [PaymentSession] what functionality it is supporting.
  */
 class PaymentSessionConfig private constructor(
-    val hiddenShippingInfoFields: List<String>,
-    val optionalShippingInfoFields: List<String>,
-    val prepopulatedShippingInfo: ShippingInformation?,
-    val isShippingInfoRequired: Boolean,
-    val isShippingMethodRequired: Boolean,
+    val hiddenShippingInfoFields: List<String> = emptyList(),
+    val optionalShippingInfoFields: List<String> = emptyList(),
+    val prepopulatedShippingInfo: ShippingInformation? = null,
+    val isShippingInfoRequired: Boolean = false,
+    val isShippingMethodRequired: Boolean = false,
 
     @LayoutRes
     @get:LayoutRes
-    val addPaymentMethodFooter: Int,
+    val addPaymentMethodFooter: Int = 0,
 
-    val paymentMethodTypes: List<PaymentMethod.Type>
+    val paymentMethodTypes: List<PaymentMethod.Type> = listOf(PaymentMethod.Type.Card)
 ) : Parcelable {
     class Builder : ObjectBuilder<PaymentSessionConfig> {
         private var shippingInfoRequired = true
@@ -160,6 +160,8 @@ class PaymentSessionConfig private constructor(
     }
 
     companion object {
+        internal val EMPTY = PaymentSessionConfig()
+
         private fun readStringList(parcel: Parcel): List<String> {
             return readList(parcel, String::class.java.classLoader)
         }

@@ -11,8 +11,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.viewpager.widget.ViewPager
 import com.stripe.android.CustomerSession
 import com.stripe.android.CustomerSession.EVENT_SHIPPING_INFO_SAVED
-import com.stripe.android.PaymentSession.PAYMENT_SESSION_DATA_KEY
-import com.stripe.android.PaymentSession.TOKEN_PAYMENT_SESSION
+import com.stripe.android.PaymentSession.Companion.STATE_PAYMENT_SESSION_DATA
+import com.stripe.android.PaymentSession.Companion.TOKEN_PAYMENT_SESSION
 import com.stripe.android.PaymentSessionData
 import com.stripe.android.R
 import com.stripe.android.model.ShippingInformation
@@ -147,7 +147,7 @@ class PaymentFlowActivity : StripeActivity() {
         } else {
             paymentSessionData.shippingInformation = shippingInformationSubmitted
             setResult(Activity.RESULT_OK,
-                Intent().putExtra(PAYMENT_SESSION_DATA_KEY, paymentSessionData))
+                Intent().putExtra(STATE_PAYMENT_SESSION_DATA, paymentSessionData))
             finish()
         }
     }
@@ -197,7 +197,7 @@ class PaymentFlowActivity : StripeActivity() {
             .selectedShippingMethod
         paymentSessionData.shippingMethod = shippingMethod
         setResult(Activity.RESULT_OK,
-            Intent().putExtra(PAYMENT_SESSION_DATA_KEY, paymentSessionData))
+            Intent().putExtra(STATE_PAYMENT_SESSION_DATA, paymentSessionData))
         finish()
     }
 
