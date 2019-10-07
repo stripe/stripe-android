@@ -15,8 +15,8 @@ The Stripe Android SDK makes it quick and easy to build an excellent payment exp
 ### Requirements
 
 * Android 4.4 (API level 19) and above
-* [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin) 3.5.0
-* [Gradle](https://gradle.org/releases/) 5.1.1+
+* [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin) 3.5.1
+* [Gradle](https://gradle.org/releases/) 5.4.1+
 * [AndroidX](https://developer.android.com/jetpack/androidx/) (as of v11.0.0)
 
 ### Configuration
