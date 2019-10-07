@@ -39,13 +39,13 @@ import java.util.concurrent.TimeUnit
 internal open class PaymentController @VisibleForTesting constructor(
     context: Context,
     private val stripeRepository: StripeRepository,
+    enableLogging: Boolean = false,
     private val messageVersionRegistry: MessageVersionRegistry =
         MessageVersionRegistry(),
     private val config: PaymentAuthConfig =
         PaymentAuthConfig.get(),
     private val threeDs2Service: StripeThreeDs2Service =
-        StripeThreeDs2ServiceImpl(context, StripeSSLSocketFactory(),
-            config.stripe3ds2Config.enableLogging),
+        StripeThreeDs2ServiceImpl(context, StripeSSLSocketFactory(), enableLogging),
     private val analyticsRequestExecutor: FireAndForgetRequestExecutor =
         StripeFireAndForgetRequestExecutor(),
     private val analyticsDataFactory: AnalyticsDataFactory =
@@ -765,9 +765,14 @@ internal open class PaymentController @VisibleForTesting constructor(
                 .start(PaymentRelayStarter.Data.create(exception))
         }
 
+        @JvmOverloads
         @JvmStatic
-        fun create(context: Context, stripeRepository: StripeRepository): PaymentController {
-            return PaymentController(context.applicationContext, stripeRepository)
+        fun create(
+            context: Context,
+            stripeRepository: StripeRepository,
+            enableLogging: Boolean = false
+        ): PaymentController {
+            return PaymentController(context.applicationContext, stripeRepository, enableLogging)
         }
     }
 }

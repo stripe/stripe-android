@@ -73,12 +73,10 @@ public final class PaymentAuthConfig {
 
         final int timeout;
         @NonNull final Stripe3ds2UiCustomization uiCustomization;
-        final boolean enableLogging;
 
         private Stripe3ds2Config(@NonNull Builder builder) {
             timeout = checkValidTimeout(builder.mTimeout);
             uiCustomization = Objects.requireNonNull(builder.mUiCustomization);
-            enableLogging = builder.mEnableLogging;
         }
 
         private int checkValidTimeout(int timeout) {
@@ -93,7 +91,6 @@ public final class PaymentAuthConfig {
             private int mTimeout = DEFAULT_TIMEOUT;
             private Stripe3ds2UiCustomization mUiCustomization =
                     new Stripe3ds2UiCustomization.Builder().build();
-            private boolean mEnableLogging = false;
 
             @NonNull
             public Builder setTimeout(@IntRange(from = 5, to = 99) int timeout) {
@@ -104,19 +101,6 @@ public final class PaymentAuthConfig {
             @NonNull
             public Builder setUiCustomization(@NonNull Stripe3ds2UiCustomization uiCustomization) {
                 this.mUiCustomization = uiCustomization;
-                return this;
-            }
-
-            /**
-             * Enable logging in the Stripe 3DS2 SDK; disabled by default.
-             * It is recommended to disable logging in production.
-             *
-             * <p>Logs can be accessed from the command line using
-             * <code>adb logcat -s Stripe3ds2</code>.</p>
-             */
-            @NonNull
-            public Builder setEnableLogging(boolean enableLogging) {
-                this.mEnableLogging = enableLogging;
                 return this;
             }
 

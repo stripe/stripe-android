@@ -17,7 +17,7 @@ interface BackendApi {
 
     @FormUrlEncoded
     @POST("create_intent")
-    fun createPaymentIntent(@FieldMap params: HashMap<String, Any>): Observable<ResponseBody>
+    fun createPaymentIntent(@FieldMap params: MutableMap<String, Any>): Observable<ResponseBody>
 
     @FormUrlEncoded
     @POST("create_setup_intent")

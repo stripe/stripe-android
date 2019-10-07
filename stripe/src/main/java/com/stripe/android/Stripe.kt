@@ -59,6 +59,9 @@ class Stripe internal constructor(
      * @param context Activity or application context
      * @param publishableKey the client's publishable key
      * @param stripeAccountId optional, the Stripe Connect account id to attach to [Stripe API requests](https://stripe.com/docs/connect/authentication#authentication-via-the-stripe-account-header)
+     * @param enableLogging enable logging in the Stripe and Stripe 3DS2 SDKs; disabled by default.
+     * It is recommended to disable logging in production. Logs can be accessed from the command line using
+     * `adb logcat -s StripeSdk`
      */
     @JvmOverloads
     constructor(
@@ -75,7 +78,8 @@ class Stripe internal constructor(
         ),
         StripeNetworkUtils(context.applicationContext),
         ApiKeyValidator.get().requireValid(publishableKey),
-        stripeAccountId
+        stripeAccountId,
+        enableLogging
     )
 
     private constructor(
@@ -83,11 +87,12 @@ class Stripe internal constructor(
         stripeRepository: StripeRepository,
         stripeNetworkUtils: StripeNetworkUtils,
         publishableKey: String,
-        stripeAccountId: String?
+        stripeAccountId: String?,
+        enableLogging: Boolean
     ) : this(
         stripeRepository,
         stripeNetworkUtils,
-        PaymentController.create(context.applicationContext, stripeRepository),
+        PaymentController.create(context.applicationContext, stripeRepository, enableLogging),
         publishableKey,
         stripeAccountId
     )

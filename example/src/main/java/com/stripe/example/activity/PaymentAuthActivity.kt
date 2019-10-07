@@ -46,12 +46,12 @@ class PaymentAuthActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment_auth)
 
-        val uiCustomization = PaymentAuthConfig.Stripe3ds2UiCustomization.Builder().build()
+        val uiCustomization =
+            PaymentAuthConfig.Stripe3ds2UiCustomization.Builder().build()
         PaymentAuthConfig.init(PaymentAuthConfig.Builder()
             .set3ds2Config(PaymentAuthConfig.Stripe3ds2Config.Builder()
                 .setTimeout(6)
                 .setUiCustomization(uiCustomization)
-                .setEnableLogging(true)
                 .build())
             .build())
 
@@ -62,11 +62,10 @@ class PaymentAuthActivity : AppCompatActivity() {
 
         backendApi = RetrofitFactory.instance.create(BackendApi::class.java)
         val publishableKey = PaymentConfiguration.getInstance(this).publishableKey
-        stripe = if (stripeAccountId != null) {
-            Stripe(this, publishableKey, stripeAccountId)
-        } else {
-            Stripe(this, publishableKey)
-        }
+        stripe = Stripe(this, publishableKey,
+            stripeAccountId = stripeAccountId,
+            enableLogging = true
+        )
 
         buy_3ds1_button.setOnClickListener {
             createPaymentIntent(stripeAccountId, AuthType.ThreeDS1)
@@ -103,10 +102,10 @@ class PaymentAuthActivity : AppCompatActivity() {
         progress_bar.visibility = View.VISIBLE
         statusTextView.append("\n\nPayment authentication completed, getting result")
 
-        val isPaymentResult = stripe.onPaymentResult(requestCode, data, AuthResultListener(this))
-
+        val isPaymentResult =
+            stripe.onPaymentResult(requestCode, data, AuthResultListener(this))
         if (!isPaymentResult) {
-            val isSetupResult = stripe.onSetupResult(requestCode, data, SetupAuthResultListener(this))
+            stripe.onSetupResult(requestCode, data, SetupAuthResultListener(this))
         }
     }
 
@@ -130,7 +129,9 @@ class PaymentAuthActivity : AppCompatActivity() {
         authType: AuthType
     ) {
         compositeSubscription.add(
-            backendApi.createPaymentIntent(createPaymentIntentParams(stripeAccountId))
+            backendApi.createPaymentIntent(
+                createPaymentIntentParams(stripeAccountId).toMutableMap()
+            )
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe {
@@ -196,16 +197,17 @@ class PaymentAuthActivity : AppCompatActivity() {
         progress_bar.visibility = View.INVISIBLE
     }
 
-    private fun createPaymentIntentParams(stripeAccountId: String?): HashMap<String, Any> {
-        val params = hashMapOf(
+    private fun createPaymentIntentParams(stripeAccountId: String?): Map<String, Any> {
+        return mapOf(
             "payment_method_types[]" to "card",
             "amount" to 1000,
             "currency" to "usd"
         )
-        if (stripeAccountId != null) {
-            params["stripe_account"] = stripeAccountId
-        }
-        return params
+            .plus(
+                stripeAccountId?.let {
+                    mapOf("stripe_account" to it)
+                }.orEmpty()
+            )
     }
 
     private class AuthResultListener constructor(
