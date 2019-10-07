@@ -8,7 +8,6 @@ apply plugin: 'org.jetbrains.dokka-android'
 
 assemble.dependsOn('lint')
 check.dependsOn('checkstyle')
-assemble.dependsOn('dokka')
 
 configurations {
     javadocDeps
