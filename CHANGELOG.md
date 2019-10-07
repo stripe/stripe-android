@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 11.2.0 - upcoming
+## 11.2.0 - 2019-10-07
 * [#1616](https://github.com/stripe/stripe-android/pull/1616) Make `AddPaymentMethodActivityStarter.Result.fromIntent()` public
 * [#1619](https://github.com/stripe/stripe-android/pull/1619) Add `CardMultilineWidget#getPaymentMethodBillingDetailsBuilder()`
 * [#1643](https://github.com/stripe/stripe-android/pull/1643) Create `Stripe.createCardTokenSynchronous()`
