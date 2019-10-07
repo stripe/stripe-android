@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.PaymentConfiguration
 import com.stripe.example.R
 import com.stripe.example.Settings
+import kotlinx.android.synthetic.main.activity_launcher.*
 
 class LauncherActivity : AppCompatActivity() {
 
@@ -21,12 +22,14 @@ class LauncherActivity : AppCompatActivity() {
 
         PaymentConfiguration.init(this, Settings.PUBLISHABLE_KEY)
 
-        val examples = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.examples)
-        val linearLayoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
-        linearLayoutManager.orientation = androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
-        examples.setHasFixedSize(true)
-        examples.layoutManager = linearLayoutManager
-        examples.adapter = ExamplesAdapter(this)
+        val linearLayoutManager = LinearLayoutManager(this)
+        linearLayoutManager.orientation = LinearLayoutManager.VERTICAL
+
+        examples.run {
+            setHasFixedSize(true)
+            layoutManager = linearLayoutManager
+            adapter = ExamplesAdapter(this@LauncherActivity)
+        }
     }
 
     private class ExamplesAdapter constructor(

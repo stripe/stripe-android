@@ -56,17 +56,16 @@ class PayWithGoogleActivity : AppCompatActivity() {
      */
     private fun isReadyToPay() {
         progressBar.visibility = View.VISIBLE
-        val request = IsReadyToPayRequest.newBuilder()
-            .addAllowedPaymentMethod(WalletConstants.PAYMENT_METHOD_CARD)
-            .addAllowedPaymentMethod(WalletConstants.PAYMENT_METHOD_TOKENIZED_CARD)
-            .build()
+        val request = IsReadyToPayRequest.fromJson(
+            createBaseCardPaymentMethodParams().toString()
+        )
+
         paymentsClient.isReadyToPay(request)
             .addOnCompleteListener { task ->
                 progressBar.visibility = View.INVISIBLE
 
                 try {
-                    val result = task.getResult(ApiException::class.java)!!
-                    if (result) {
+                    if (task.isSuccessful) {
                         Toast.makeText(this@PayWithGoogleActivity,
                             "Google Pay is ready",
                             Toast.LENGTH_SHORT).show()
@@ -110,9 +109,9 @@ class PayWithGoogleActivity : AppCompatActivity() {
                 }
                 AutoResolveHelper.RESULT_ERROR -> {
                     val status = AutoResolveHelper.getStatusFromIntent(data)
-                    val statusMessage = if (status != null) status.statusMessage else ""
+                    val statusMessage = status?.statusMessage ?: "unknown"
                     Toast.makeText(this@PayWithGoogleActivity,
-                        "Got error " + statusMessage!!,
+                        "Got error: $statusMessage",
                         Toast.LENGTH_SHORT).show()
                 }
 
@@ -161,6 +160,33 @@ class PayWithGoogleActivity : AppCompatActivity() {
         isPhoneNumberRequired: Boolean = true,
         isEmailRequired: Boolean = true
     ): PaymentDataRequest {
+        return PaymentDataRequest.fromJson(
+            createBaseRequest()
+                .put("allowedPaymentMethods", JSONArray().put(
+                    createCardPaymentMethod(isBillingAddressRequired, isPhoneNumberRequired)
+                ))
+                .put("transactionInfo", JSONObject()
+                    .put("totalPrice", "10.00")
+                    .put("totalPriceStatus", "FINAL")
+                    .put("currencyCode", "USD")
+                )
+                .put("merchantInfo", JSONObject()
+                    .put("merchantName", "Example Merchant"))
+                .put("emailRequired", isEmailRequired)
+                .toString()
+        )
+    }
+
+    private fun createBaseRequest(): JSONObject {
+        return JSONObject()
+            .put("apiVersion", 2)
+            .put("apiVersionMinor", 0)
+    }
+
+    private fun createCardPaymentMethod(
+        isBillingAddressRequired: Boolean = true,
+        isPhoneNumberRequired: Boolean = true
+    ): JSONObject {
         /**
          * Billing address format required to complete the transaction.
          *
@@ -177,43 +203,33 @@ class PayWithGoogleActivity : AppCompatActivity() {
             .put("phoneNumberRequired", isPhoneNumberRequired)
             .put("format", billingAddressFormat)
 
-        val cardPaymentMethodParams = JSONObject()
-            .put("allowedAuthMethods", JSONArray()
-                .put("PAN_ONLY")
-                .put("CRYPTOGRAM_3DS"))
-            .put("allowedCardNetworks",
-                JSONArray()
-                    .put("AMEX")
-                    .put("DISCOVER")
-                    .put("JCB")
-                    .put("MASTERCARD")
-                    .put("VISA"))
+        val cardPaymentMethodParams = createBaseCardPaymentMethodParams()
             .put("billingAddressRequired", isBillingAddressRequired)
             .put("billingAddressParameters", billingAddressParams)
 
-        val cardPaymentMethod = JSONObject()
+        return JSONObject()
             .put("type", "CARD")
             .put(
                 "parameters", cardPaymentMethodParams
             )
             .put("tokenizationSpecification",
                 GooglePayConfig(this).tokenizationSpecification)
+    }
 
-        val paymentDataRequest = JSONObject()
-            .put("apiVersion", 2)
-            .put("apiVersionMinor", 0)
-            .put("allowedPaymentMethods", JSONArray().put(cardPaymentMethod))
-            .put("transactionInfo", JSONObject()
-                .put("totalPrice", "10.00")
-                .put("totalPriceStatus", "FINAL")
-                .put("currencyCode", "USD")
+    private fun createBaseCardPaymentMethodParams(): JSONObject {
+        return JSONObject()
+            .put("allowedAuthMethods", JSONArray()
+                .put("PAN_ONLY")
+                .put("CRYPTOGRAM_3DS")
             )
-            .put("merchantInfo", JSONObject()
-                .put("merchantName", "Example Merchant"))
-            .put("emailRequired", isEmailRequired)
-            .toString()
-
-        return PaymentDataRequest.fromJson(paymentDataRequest)
+            .put("allowedCardNetworks",
+                JSONArray()
+                    .put("AMEX")
+                    .put("DISCOVER")
+                    .put("JCB")
+                    .put("MASTERCARD")
+                    .put("VISA")
+            )
     }
 
     companion object {

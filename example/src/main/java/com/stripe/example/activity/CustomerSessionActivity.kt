@@ -60,8 +60,8 @@ class CustomerSessionActivity : AppCompatActivity() {
             resultCode == Activity.RESULT_OK && data != null) {
             val paymentMethod =
                 PaymentMethodsActivityStarter.Result.fromIntent(data)?.paymentMethod
-            if (paymentMethod?.card != null) {
-                selectedSourceTextView.text = buildCardString(paymentMethod.card!!)
+            paymentMethod?.card?.let { card ->
+                selectedSourceTextView.text = buildCardString(card)
             }
         }
     }
