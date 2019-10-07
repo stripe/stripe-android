@@ -202,7 +202,7 @@ class PaymentSession @VisibleForTesting internal constructor(
      * The initial selected Payment Method ID uses the following logic.
      *
      *  1. If {@param userSelectedPaymentMethodId} is specified, use that
-     *  2. If the instance's [PaymentSessionData.getPaymentMethod] is non-null, use that
+     *  2. If the instance's [PaymentSessionData.paymentMethod] is non-null, use that
      *  3. If the instance's [PaymentSessionPrefs.getSelectedPaymentMethodId] is non-null, use that
      *  4. Otherwise, choose the most recently added Payment Method
      *
