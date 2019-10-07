@@ -103,6 +103,7 @@ class PaymentControllerTest {
         controller = PaymentController(
             ApplicationProvider.getApplicationContext<Context>(),
             FakeStripeRepository(),
+            false,
             MessageVersionRegistry(),
             CONFIG,
             threeDs2Service,
@@ -116,7 +117,9 @@ class PaymentControllerTest {
     @Throws(CertificateException::class)
     fun handleNextAction_withMastercardAnd3ds2_shouldStart3ds2ChallengeFlow() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
-        val dsPublicKey = Stripe3ds2Fingerprint.create(paymentIntent.stripeSdkData!!)
+        val dsPublicKey = Stripe3ds2Fingerprint.create(
+            requireNotNull(paymentIntent.stripeSdkData)
+        )
             .directoryServerEncryption
             .directoryServerPublicKey
         `when`(threeDs2Service.createTransaction(
@@ -145,7 +148,7 @@ class PaymentControllerTest {
 
         verify<FireAndForgetRequestExecutor>(fireAndForgetRequestExecutor)
             .executeAsync(apiRequestArgumentCaptor.capture())
-        val analyticsParams = apiRequestArgumentCaptor.firstValue.params!!
+        val analyticsParams = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
         assertEquals("stripe_android.3ds2_fingerprint",
             analyticsParams[AnalyticsDataFactory.FIELD_EVENT])
         assertEquals(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.id,
@@ -196,7 +199,7 @@ class PaymentControllerTest {
         verify<FireAndForgetRequestExecutor>(fireAndForgetRequestExecutor)
             .executeAsync(apiRequestArgumentCaptor.capture())
         assertEquals("stripe_android.3ds1_sdk",
-            apiRequestArgumentCaptor.firstValue.params!![AnalyticsDataFactory.FIELD_EVENT])
+            requireNotNull(apiRequestArgumentCaptor.firstValue.params)[AnalyticsDataFactory.FIELD_EVENT])
     }
 
     @Test
@@ -216,7 +219,7 @@ class PaymentControllerTest {
 
         verify<FireAndForgetRequestExecutor>(fireAndForgetRequestExecutor)
             .executeAsync(apiRequestArgumentCaptor.capture())
-        val analyticsParams = apiRequestArgumentCaptor.firstValue.params!!
+        val analyticsParams = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
         assertEquals("stripe_android.url_redirect_next_action",
             analyticsParams[AnalyticsDataFactory.FIELD_EVENT])
         assertEquals("pi_1EZlvVCRMbs6FrXfKpq2xMmy",
@@ -276,9 +279,9 @@ class PaymentControllerTest {
         val analyticsRequests = apiRequestArgumentCaptor.allValues
 
         assertEquals("stripe_android.3ds2_challenge_flow_completed",
-            analyticsRequests[0].params!![AnalyticsDataFactory.FIELD_EVENT])
+            requireNotNull(analyticsRequests[0].params)[AnalyticsDataFactory.FIELD_EVENT])
 
-        val analyticsParamsSecond = analyticsRequests[1].params!!
+        val analyticsParamsSecond = requireNotNull(analyticsRequests[1].params)
         assertEquals("stripe_android.3ds2_challenge_flow_presented",
             analyticsParamsSecond[AnalyticsDataFactory.FIELD_EVENT])
         assertEquals("oob",
@@ -298,10 +301,10 @@ class PaymentControllerTest {
         val analyticsRequests = apiRequestArgumentCaptor.allValues
 
         assertEquals("stripe_android.3ds2_challenge_flow_timed_out",
-            analyticsRequests[0].params!![AnalyticsDataFactory.FIELD_EVENT])
+            requireNotNull(analyticsRequests[0].params)[AnalyticsDataFactory.FIELD_EVENT])
 
         assertEquals("stripe_android.3ds2_challenge_flow_presented",
-            analyticsRequests[1].params!![AnalyticsDataFactory.FIELD_EVENT])
+            requireNotNull(analyticsRequests[1].params)[AnalyticsDataFactory.FIELD_EVENT])
     }
 
     @Test
@@ -318,10 +321,10 @@ class PaymentControllerTest {
         val analyticsRequests = apiRequestArgumentCaptor.allValues
 
         assertEquals("stripe_android.3ds2_challenge_flow_canceled",
-            analyticsRequests[0].params!![AnalyticsDataFactory.FIELD_EVENT])
+            requireNotNull(analyticsRequests[0].params)[AnalyticsDataFactory.FIELD_EVENT])
 
         assertEquals("stripe_android.3ds2_challenge_flow_presented",
-            analyticsRequests[1].params!![AnalyticsDataFactory.FIELD_EVENT])
+            requireNotNull(analyticsRequests[1].params)[AnalyticsDataFactory.FIELD_EVENT])
     }
 
     @Test
@@ -342,7 +345,7 @@ class PaymentControllerTest {
             .executeAsync(apiRequestArgumentCaptor.capture())
         val analyticsRequests = apiRequestArgumentCaptor.allValues
 
-        val analyticsParamsFirst = analyticsRequests[0].params!!
+        val analyticsParamsFirst = requireNotNull(analyticsRequests[0].params)
         assertEquals("stripe_android.3ds2_challenge_flow_errored",
             analyticsParamsFirst[AnalyticsDataFactory.FIELD_EVENT])
 
@@ -353,7 +356,7 @@ class PaymentControllerTest {
         assertEquals("Resource not found", errorData["error_message"])
 
         assertEquals("stripe_android.3ds2_challenge_flow_presented",
-            analyticsRequests[1].params!![AnalyticsDataFactory.FIELD_EVENT])
+            requireNotNull(analyticsRequests[1].params)[AnalyticsDataFactory.FIELD_EVENT])
     }
 
     @Test
@@ -380,7 +383,7 @@ class PaymentControllerTest {
             .executeAsync(apiRequestArgumentCaptor.capture())
         val analyticsRequests = apiRequestArgumentCaptor.allValues
 
-        val analyticsParamsFirst = analyticsRequests[0].params!!
+        val analyticsParamsFirst = requireNotNull(analyticsRequests[0].params)
         assertEquals("stripe_android.3ds2_challenge_flow_errored",
             analyticsParamsFirst[AnalyticsDataFactory.FIELD_EVENT])
 
@@ -390,7 +393,7 @@ class PaymentControllerTest {
         assertEquals("201", errorData["error_code"])
 
         assertEquals("stripe_android.3ds2_challenge_flow_presented",
-            analyticsRequests[1].params!![AnalyticsDataFactory.FIELD_EVENT])
+            requireNotNull(analyticsRequests[1].params)[AnalyticsDataFactory.FIELD_EVENT])
     }
 
     @Test
@@ -488,7 +491,7 @@ class PaymentControllerTest {
 
         verify(fireAndForgetRequestExecutor).executeAsync(apiRequestArgumentCaptor.capture())
         val analyticsRequest = apiRequestArgumentCaptor.firstValue
-        val analyticsParams = analyticsRequest.params!!
+        val analyticsParams = requireNotNull(analyticsRequest.params)
         assertEquals("stripe_android.3ds2_frictionless_flow",
             analyticsParams[AnalyticsDataFactory.FIELD_EVENT])
         assertEquals("pi_1ExkUeAWhjPjYwPiXph9ouXa",
@@ -516,7 +519,7 @@ class PaymentControllerTest {
         verify(fireAndForgetRequestExecutor).executeAsync(apiRequestArgumentCaptor.capture())
         val analyticsRequest = apiRequestArgumentCaptor.firstValue
         assertEquals("stripe_android.3ds2_fallback",
-            analyticsRequest.params!![AnalyticsDataFactory.FIELD_EVENT])
+            requireNotNull(analyticsRequest.params)[AnalyticsDataFactory.FIELD_EVENT])
     }
 
     @Test
@@ -529,12 +532,11 @@ class PaymentControllerTest {
         )
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.ERROR)
         verify(paymentRelayStarter).start(relayStarterDataArgumentCaptor.capture())
-        val exception = relayStarterDataArgumentCaptor.firstValue.exception!!
         assertEquals("Error encountered during 3DS2 authentication request. " +
             "Code: 302, Detail: null, " +
             "Description: Data could not be decrypted by the receiving system due to " +
             "technical or other reason., Component: D",
-            exception.message)
+            relayStarterDataArgumentCaptor.firstValue.exception?.message)
     }
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {
