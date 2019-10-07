@@ -10,17 +10,20 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.widget.ImageViewCompat
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.R
 import com.stripe.android.model.PaymentMethodCreateParams
+import kotlinx.android.synthetic.main.add_payment_method_fpx_layout.view.*
 
 internal class AddPaymentMethodFpxView private constructor(
     context: Context
 ) : AddPaymentMethodView(context) {
-    private val adapter = Adapter(ThemeConfig(context))
+    private val fpxAdapter = Adapter(ThemeConfig(context))
 
     override val createParams: PaymentMethodCreateParams?
         get() {
-            val fpxBank = adapter.selectedBank ?: return null
+            val fpxBank = fpxAdapter.selectedBank ?: return null
 
             return PaymentMethodCreateParams.create(
                 PaymentMethodCreateParams.Fpx.Builder()
@@ -35,21 +38,22 @@ internal class AddPaymentMethodFpxView private constructor(
         // an id is required for state to be saved
         id = R.id.stripe_payment_methods_add_fpx
 
-        val recyclerView = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.fpx_list)
-        recyclerView.adapter = adapter
-        recyclerView.setHasFixedSize(true)
-        recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
-        recyclerView.itemAnimator = null
+        fpx_list.run {
+            adapter = fpxAdapter
+            setHasFixedSize(true)
+            layoutManager = LinearLayoutManager(context)
+            itemAnimator = DefaultItemAnimator()
+        }
     }
 
     override fun onSaveInstanceState(): Parcelable? {
-        return SavedState(super.onSaveInstanceState(), adapter.selectedPosition)
+        return SavedState(super.onSaveInstanceState(), fpxAdapter.selectedPosition)
     }
 
     override fun onRestoreInstanceState(state: Parcelable) {
         if (state is SavedState) {
             super.onRestoreInstanceState(state.superState)
-            adapter.updateSelected(state.selectedPosition)
+            fpxAdapter.updateSelected(state.selectedPosition)
         } else {
             super.onRestoreInstanceState(state)
         }
@@ -85,7 +89,6 @@ internal class AddPaymentMethodFpxView private constructor(
                 if (currentPosition != selectedPosition) {
                     val prevSelectedPosition = selectedPosition
                     selectedPosition = currentPosition
-                    viewHolder.setSelected(true)
                     notifyItemChanged(prevSelectedPosition)
                     notifyItemChanged(currentPosition)
                 }
@@ -121,13 +124,20 @@ internal class AddPaymentMethodFpxView private constructor(
 
             internal fun setSelected(isSelected: Boolean) {
                 name.setTextColor(themeConfig.getTextColor(isSelected))
-                ImageViewCompat.setImageTintList(checkMark, ColorStateList.valueOf(themeConfig.getTintColor(isSelected)))
+                ImageViewCompat.setImageTintList(
+                    checkMark,
+                    ColorStateList.valueOf(themeConfig.getTintColor(isSelected))
+                )
                 checkMark.visibility = if (isSelected) View.VISIBLE else View.GONE
             }
         }
     }
 
-    private enum class FpxBank(val code: String, val displayName: String, val brandIconResId: Int = R.drawable.ic_bank_generic) {
+    private enum class FpxBank(
+        val code: String,
+        val displayName: String,
+        val brandIconResId: Int = R.drawable.ic_bank_generic
+    ) {
         AffinBank("affin_bank", "Affin Bank", R.drawable.ic_bank_affin),
         AllianceBankBusiness("alliance_bank", "Alliance Bank (Business)", R.drawable.ic_bank_alliance),
         AmBank("ambank", "AmBank", R.drawable.ic_bank_ambank),
@@ -155,8 +165,8 @@ internal class AddPaymentMethodFpxView private constructor(
             this.selectedPosition = selectedPosition
         }
 
-        private constructor(`in`: Parcel) : super(`in`) {
-            this.selectedPosition = `in`.readInt()
+        private constructor(parcel: Parcel) : super(parcel) {
+            this.selectedPosition = parcel.readInt()
         }
 
         override fun writeToParcel(out: Parcel, flags: Int) {
@@ -167,8 +177,8 @@ internal class AddPaymentMethodFpxView private constructor(
         companion object {
             @JvmField
             val CREATOR: Parcelable.Creator<SavedState> = object : Parcelable.Creator<SavedState> {
-                override fun createFromParcel(`in`: Parcel): SavedState {
-                    return SavedState(`in`)
+                override fun createFromParcel(parcel: Parcel): SavedState {
+                    return SavedState(parcel)
                 }
 
                 override fun newArray(size: Int): Array<SavedState?> {
