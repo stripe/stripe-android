@@ -29,7 +29,7 @@ class RedirectActivity : AppCompatActivity() {
     private val compositeDisposable = CompositeDisposable()
 
     private lateinit var cardInputWidget: CardInputWidget
-    private lateinit var mRedirectAdapter: RedirectAdapter
+    private lateinit var redirectAdapter: RedirectAdapter
     private lateinit var errorDialogHandler: ErrorDialogHandler
     private lateinit var redirectDialogController: RedirectDialogController
     private lateinit var progressDialogController: ProgressDialogController
@@ -60,25 +60,27 @@ class RedirectActivity : AppCompatActivity() {
         val linearLayoutManager = LinearLayoutManager(this)
         recyclerView.setHasFixedSize(true)
         recyclerView.layoutManager = linearLayoutManager
-        mRedirectAdapter = RedirectAdapter()
-        recyclerView.adapter = mRedirectAdapter
+        redirectAdapter = RedirectAdapter()
+        recyclerView.adapter = redirectAdapter
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        if (intent.data != null && intent.data!!.query != null) {
-            // The client secret and source ID found here is identical to
-            // that of the source used to get the redirect URL.
-            val clientSecret = intent.data!!.getQueryParameter(QUERY_CLIENT_SECRET)
-            val sourceId = intent.data!!.getQueryParameter(QUERY_SOURCE_ID)
-            if (clientSecret != null &&
-                sourceId != null &&
-                clientSecret == redirectSource!!.clientSecret &&
-                sourceId == redirectSource!!.id) {
-                updateSourceList(redirectSource)
-                redirectSource = null
+
+        intent.data?.let { data ->
+            if (data.query != null) {
+                // The client secret and source ID found here is identical to
+                // that of the source used to get the redirect URL.
+                val clientSecret = data.getQueryParameter(QUERY_CLIENT_SECRET)
+                val sourceId = data.getQueryParameter(QUERY_SOURCE_ID)
+                if (clientSecret != null && sourceId != null &&
+                    clientSecret == redirectSource?.clientSecret &&
+                    sourceId == redirectSource?.id) {
+                    updateSourceList(redirectSource)
+                    redirectSource = null
+                }
+                redirectDialogController.dismissDialog()
             }
-            redirectDialogController.dismissDialog()
         }
     }
 
@@ -116,7 +118,7 @@ class RedirectActivity : AppCompatActivity() {
                     val threeDSecureStatus = sourceCardData?.threeDSecureStatus
 
                     // Making a note of the Card Source in our list.
-                    mRedirectAdapter.addItem(
+                    redirectAdapter.addItem(
                         source.status,
                         threeDSecureStatus,
                         source.id,
@@ -139,7 +141,7 @@ class RedirectActivity : AppCompatActivity() {
      * to verify the third-party approval. The only information from the Card source
      * that is used is the ID field.
      *
-     * @param sourceId the [Source.getId] from the [Card]-created [Source].
+     * @param sourceId the [Source.id] from the [Card]-created [Source].
      */
     private fun createThreeDSecureSource(sourceId: String) {
         // This represents a request for a 3DS purchase of 10.00 euro.
@@ -175,13 +177,13 @@ class RedirectActivity : AppCompatActivity() {
         val sourceRedirect = source.redirect
         val redirectUrl = sourceRedirect?.url
         if (redirectUrl != null) {
-            redirectDialogController.showDialog(redirectUrl, source.sourceTypeData!!)
+            redirectDialogController.showDialog(redirectUrl, source.sourceTypeData.orEmpty())
         }
     }
 
     private fun updateSourceList(source: Source?) {
         if (source == null) {
-            mRedirectAdapter.addItem(
+            redirectAdapter.addItem(
                 "No source found",
                 "Stopped",
                 "Error",
@@ -189,7 +191,7 @@ class RedirectActivity : AppCompatActivity() {
             return
         }
 
-        mRedirectAdapter.addItem(
+        redirectAdapter.addItem(
             source.status,
             "complete",
             source.id,

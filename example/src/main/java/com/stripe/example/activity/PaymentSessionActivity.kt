@@ -172,7 +172,7 @@ class PaymentSessionActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        paymentSession.handlePaymentData(requestCode, resultCode, data!!)
+        paymentSession.handlePaymentData(requestCode, resultCode, data ?: Intent())
     }
 
     override fun onDestroy() {
@@ -224,9 +224,9 @@ class PaymentSessionActivity : AppCompatActivity() {
             activity.selectPaymentButton.isEnabled = true
             activity.selectShippingButton.isEnabled = true
 
-            if (activity.paymentSessionData != null) {
+            activity.paymentSessionData?.let { paymentSessionData ->
                 activity.resultTitleTextView.visibility = View.VISIBLE
-                activity.resultTextView.text = activity.formatStringResults(activity.paymentSessionData!!)
+                activity.resultTextView.text = activity.formatStringResults(paymentSessionData)
             }
         }
 
