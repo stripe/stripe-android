@@ -35,7 +35,7 @@ class PaymentSession @VisibleForTesting internal constructor(
     var paymentSessionData: PaymentSessionData = PaymentSessionData()
         private set
     private var paymentSessionListener: PaymentSessionListener? = null
-    private var paymentSessionConfig: PaymentSessionConfig = PaymentSessionConfig.EMPTY
+    private var config: PaymentSessionConfig = PaymentSessionConfig.EMPTY
 
     /**
      * Create a PaymentSession attached to the given host Activity.
@@ -102,7 +102,7 @@ class PaymentSession @VisibleForTesting internal constructor(
                     result?.paymentMethod?.run {
                         persistPaymentMethod(this)
                         paymentSessionData.paymentMethod = this
-                        paymentSessionData.updateIsPaymentReadyToCharge(paymentSessionConfig)
+                        paymentSessionData.updateIsPaymentReadyToCharge(config)
                         paymentSessionListener?.onPaymentSessionDataChanged(paymentSessionData)
                         paymentSessionListener?.onCommunicatingStateChanged(false)
                     }
@@ -111,7 +111,7 @@ class PaymentSession @VisibleForTesting internal constructor(
                 PaymentFlowActivityStarter.REQUEST_CODE -> {
                     val paymentSessionData =
                         data.getParcelableExtra(STATE_PAYMENT_SESSION_DATA) ?: PaymentSessionData()
-                    paymentSessionData.updateIsPaymentReadyToCharge(paymentSessionConfig)
+                    paymentSessionData.updateIsPaymentReadyToCharge(config)
                     this.paymentSessionData = paymentSessionData
                     paymentSessionListener?.onPaymentSessionDataChanged(paymentSessionData)
                     return true
@@ -179,7 +179,7 @@ class PaymentSession @VisibleForTesting internal constructor(
                 paymentSessionData = data
             }
         }
-        this.paymentSessionConfig = paymentSessionConfig
+        this.config = paymentSessionConfig
 
         if (shouldPrefetchCustomer) {
             fetchCustomer()
@@ -222,9 +222,10 @@ class PaymentSession @VisibleForTesting internal constructor(
                 .setInitialPaymentMethodId(
                     getSelectedPaymentMethodId(userSelectedPaymentMethodId))
                 .setShouldRequirePostalCode(shouldRequirePostalCode)
-                .setAddPaymentMethodFooter(paymentSessionConfig.addPaymentMethodFooter)
+                .setAddPaymentMethodFooter(config.addPaymentMethodFooter)
                 .setIsPaymentSessionActive(true)
                 .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
+                .setPaymentMethodTypes(config.paymentMethodTypes)
                 .build()
         )
     }
@@ -267,7 +268,7 @@ class PaymentSession @VisibleForTesting internal constructor(
     fun presentShippingFlow() {
         paymentFlowActivityStarter.startForResult(
             PaymentFlowActivityStarter.Args.Builder()
-                .setPaymentSessionConfig(paymentSessionConfig)
+                .setPaymentSessionConfig(config)
                 .setPaymentSessionData(paymentSessionData)
                 .setIsPaymentSessionActive(true)
                 .build()
@@ -287,7 +288,7 @@ class PaymentSession @VisibleForTesting internal constructor(
         customerSession.retrieveCurrentCustomer(
             object : CustomerSession.CustomerRetrievalListener {
                 override fun onCustomerRetrieved(customer: Customer) {
-                    paymentSessionData.updateIsPaymentReadyToCharge(paymentSessionConfig)
+                    paymentSessionData.updateIsPaymentReadyToCharge(config)
                     paymentSessionListener?.onPaymentSessionDataChanged(paymentSessionData)
                     paymentSessionListener?.onCommunicatingStateChanged(false)
                 }
