@@ -911,7 +911,7 @@ internal class StripeApiRepository @JvmOverloads constructor(
         callback: ApiResultCallback<Stripe3ds2AuthResult>
     ) : ApiOperation<Stripe3ds2AuthResult>(callback) {
         @Throws(StripeException::class, JSONException::class)
-        internal override fun getResult(): Stripe3ds2AuthResult {
+        override fun getResult(): Stripe3ds2AuthResult {
             return mStripeApiRepository.start3ds2Auth(mParams, mStripeIntentId, mRequestOptions)
         }
     }
@@ -923,7 +923,7 @@ internal class StripeApiRepository @JvmOverloads constructor(
         callback: ApiResultCallback<Boolean>
     ) : ApiOperation<Boolean>(callback) {
         @Throws(StripeException::class)
-        internal override fun getResult(): Boolean {
+        override fun getResult(): Boolean {
             return mStripeApiRepository.complete3ds2Auth(mSourceId, mRequestOptions)
         }
     }
