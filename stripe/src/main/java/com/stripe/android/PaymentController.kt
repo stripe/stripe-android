@@ -39,7 +39,7 @@ import java.util.concurrent.TimeUnit
 internal open class PaymentController @VisibleForTesting constructor(
     context: Context,
     private val stripeRepository: StripeRepository,
-    enableLogging: Boolean = false,
+    private val enableLogging: Boolean = false,
     private val messageVersionRegistry: MessageVersionRegistry =
         MessageVersionRegistry(),
     private val config: PaymentAuthConfig =
@@ -249,7 +249,8 @@ internal open class PaymentController @VisibleForTesting constructor(
                                 host,
                                 getRequestCode(stripeIntent),
                                 stripeIntent.clientSecret ?: "",
-                                Stripe3dsRedirect.create(sdkData).url
+                                Stripe3dsRedirect.create(sdkData).url,
+                                enableLogging = enableLogging
                             )
                         }
                         else -> // authentication type is not supported
@@ -273,7 +274,8 @@ internal open class PaymentController @VisibleForTesting constructor(
                         getRequestCode(stripeIntent),
                         stripeIntent.clientSecret ?: "",
                         redirectData?.url.toString(),
-                        redirectData?.returnUrl
+                        redirectData?.returnUrl,
+                        enableLogging = enableLogging
                     )
                 }
                 else -> // next action type is not supported, so bypass authentication
@@ -337,7 +339,7 @@ internal open class PaymentController @VisibleForTesting constructor(
             Stripe3ds2AuthCallback(host, stripeRepository, transaction, timeout,
                 stripeIntent, stripe3ds2Fingerprint.source, requestOptions,
                 analyticsRequestExecutor, analyticsDataFactory,
-                challengeFlowStarter)
+                challengeFlowStarter, enableLogging)
         )
     }
 
@@ -412,7 +414,8 @@ internal open class PaymentController @VisibleForTesting constructor(
         private val paymentRelayStarter: PaymentRelayStarter,
         private val analyticsRequestExecutor: FireAndForgetRequestExecutor,
         private val analyticsDataFactory: AnalyticsDataFactory,
-        private val challengeFlowStarter: ChallengeFlowStarter
+        private val challengeFlowStarter: ChallengeFlowStarter,
+        private val enableLogging: Boolean = false
     ) : ApiResultCallback<Stripe3ds2AuthResult> {
 
         constructor(
@@ -425,7 +428,8 @@ internal open class PaymentController @VisibleForTesting constructor(
             requestOptions: ApiRequest.Options,
             analyticsRequestExecutor: FireAndForgetRequestExecutor,
             analyticsDataFactory: AnalyticsDataFactory,
-            challengeFlowStarter: ChallengeFlowStarter
+            challengeFlowStarter: ChallengeFlowStarter,
+            enableLogging: Boolean
         ) :
             this(
                 host, stripeRepository, transaction, maxTimeout, stripeIntent,
@@ -433,7 +437,8 @@ internal open class PaymentController @VisibleForTesting constructor(
                 PaymentRelayStarter(host, getRequestCode(stripeIntent)),
                 analyticsRequestExecutor,
                 analyticsDataFactory,
-                challengeFlowStarter
+                challengeFlowStarter,
+                enableLogging
             )
 
         override fun onSuccess(result: Stripe3ds2AuthResult) {
@@ -459,7 +464,8 @@ internal open class PaymentController @VisibleForTesting constructor(
                     host,
                     getRequestCode(stripeIntent),
                     stripeIntent.clientSecret ?: "",
-                    result.fallbackRedirectUrl
+                    result.fallbackRedirectUrl,
+                    enableLogging = enableLogging
                 )
             } else {
                 val error = result.error
@@ -750,9 +756,10 @@ internal open class PaymentController @VisibleForTesting constructor(
             requestCode: Int,
             clientSecret: String,
             authUrl: String,
-            returnUrl: String? = null
+            returnUrl: String? = null,
+            enableLogging: Boolean = false
         ) {
-            PaymentAuthWebViewStarter(host, requestCode).start(
+            PaymentAuthWebViewStarter(host, requestCode, enableLogging = enableLogging).start(
                 PaymentAuthWebViewStarter.Data(clientSecret, authUrl, returnUrl))
         }
 

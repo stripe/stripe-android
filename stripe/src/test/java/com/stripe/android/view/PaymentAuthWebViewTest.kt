@@ -7,6 +7,7 @@ import android.webkit.WebView
 import android.widget.ProgressBar
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.stripe.android.FakeLogger
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -161,6 +162,7 @@ class PaymentAuthWebViewTest {
         return PaymentAuthWebView.PaymentAuthWebViewClient(
             activity,
             packageManager,
+            FakeLogger(),
             progressBar,
             clientSecret,
             returnUrl

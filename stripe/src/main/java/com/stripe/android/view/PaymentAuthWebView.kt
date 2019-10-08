@@ -16,6 +16,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.ProgressBar
+import com.stripe.android.Logger
 
 /**
  * A `WebView` used for authenticating payment details
@@ -33,23 +34,14 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
 
     fun init(
         activity: Activity,
+        logger: Logger,
         progressBar: ProgressBar,
         clientSecret: String,
-        returnUrl: String?
+        returnUrl: String? = null
     ) {
-        webViewClient = PaymentAuthWebViewClient(activity, activity.packageManager, progressBar,
-            clientSecret, returnUrl)
+        webViewClient = PaymentAuthWebViewClient(activity, activity.packageManager, logger,
+            progressBar, clientSecret, returnUrl)
         setWebViewClient(webViewClient)
-    }
-
-    fun onForegrounded() {
-        if (webViewClient?.hasOpenedApp == true) {
-            // If another app was opened, assume it was a bank app where payment authentication
-            // was completed. Upon foregrounding this screen, load the completion URL.
-            webViewClient?.completionUrlParam?.let {
-                loadUrl(it)
-            }
-        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -78,6 +70,7 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
     internal class PaymentAuthWebViewClient(
         private val activity: Activity,
         private val packageManager: PackageManager,
+        private val logger: Logger,
         private val progressBar: ProgressBar,
         private val clientSecret: String,
         returnUrl: String?
@@ -93,11 +86,13 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
             private set
 
         override fun onPageCommitVisible(view: WebView, url: String) {
+            logger.debug("PaymentAuthWebViewClient#onPageCommitVisible() - $url")
             super.onPageCommitVisible(view, url)
             hideProgressBar()
         }
 
         override fun onPageFinished(view: WebView, url: String?) {
+            logger.debug("PaymentAuthWebViewClient#onPageFinished() - $url")
             super.onPageFinished(view, url)
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP_MR1) {
                 // hide the progress bar here because `onPageCommitVisible()`
@@ -110,6 +105,7 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
         }
 
         private fun hideProgressBar() {
+            logger.debug("PaymentAuthWebViewClient#hideProgressBar()")
             progressBar.visibility = View.GONE
         }
 
@@ -128,10 +124,12 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
         }
 
         override fun shouldOverrideUrlLoading(view: WebView, urlString: String): Boolean {
+            logger.debug("PaymentAuthWebViewClient#shouldOverrideUrlLoading() - $urlString")
             val uri = Uri.parse(urlString)
             updateCompletionUrl(uri)
 
             return if (isReturnUrl(uri)) {
+                logger.debug("PaymentAuthWebViewClient#shouldOverrideUrlLoading() - handle return URL")
                 onAuthCompleted()
                 true
             } else if ("intent".equals(uri.scheme, ignoreCase = true)) {
@@ -148,6 +146,7 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
         }
 
         private fun openIntentScheme(uri: Uri) {
+            logger.debug("PaymentAuthWebViewClient#openIntentScheme()")
             try {
                 openIntent(Intent.parseUri(uri.toString(), Intent.URI_INTENT_SCHEME))
             } catch (e: Exception) {
@@ -156,6 +155,7 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
         }
 
         private fun openIntent(intent: Intent) {
+            logger.debug("PaymentAuthWebViewClient#openIntent()")
             if (intent.resolveActivity(packageManager) != null) {
                 hasOpenedApp = true
                 activity.startActivity(intent)
@@ -166,6 +166,7 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
         }
 
         private fun updateCompletionUrl(uri: Uri) {
+            logger.debug("PaymentAuthWebViewClient#updateCompletionUrl()")
             val returnUrlParam = if (isAuthenticateUrl(uri.toString())) {
                 uri.getQueryParameter(PARAM_RETURN_URL)
             } else {
@@ -182,10 +183,12 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
             view: WebView,
             request: WebResourceRequest
         ): Boolean {
+            logger.debug("PaymentAuthWebViewClient#shouldOverrideUrlLoading(WebResourceRequest)")
             return shouldOverrideUrlLoading(view, request.url.toString())
         }
 
         private fun isReturnUrl(uri: Uri): Boolean {
+            logger.debug("PaymentAuthWebViewClient#isReturnUrl()")
             when {
                 isPredefinedReturnUrl(uri) -> return true
 
@@ -224,6 +227,7 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
         }
 
         private fun onAuthCompleted() {
+            logger.debug("PaymentAuthWebViewClient#onAuthCompleted()")
             activity.finish()
         }
 
