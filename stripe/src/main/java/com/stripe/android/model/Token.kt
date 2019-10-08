@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import androidx.annotation.StringDef
-import com.stripe.android.StripeTextUtils
 import java.util.Date
 import java.util.Objects
 import org.json.JSONException
@@ -208,7 +207,7 @@ class Token : StripePaymentSource {
          */
         @TokenType
         private fun asTokenType(possibleTokenType: String?): String? {
-            if (possibleTokenType == null || StripeTextUtils.isEmpty(possibleTokenType.trim { it <= ' ' })) {
+            if (possibleTokenType.isNullOrBlank()) {
                 return null
             }
 

@@ -11,40 +11,6 @@ import java.util.Locale
 object StripeTextUtils {
 
     /**
-     * Swap `null` for blank text values.
-     *
-     * @param value an input string that may or may not be entirely whitespace
-     * @return `null` if the string is entirely whitespace, otherwise the input value
-     */
-    @JvmStatic
-    fun nullIfBlank(value: String?): String? {
-        return value.takeUnless { it.isNullOrBlank() }
-    }
-
-    /**
-     * A checker for whether or not the input value is entirely whitespace. This is slightly more
-     * aggressive than the android TextUtils#isEmpty method, which only returns true for
-     * `null` or `""`.
-     *
-     * @param value a possibly blank input string value
-     * @return `true` if and only if the value is all whitespace, `null`, or empty
-     */
-    @JvmStatic
-    fun isBlank(value: String?): Boolean {
-        return value.isNullOrBlank()
-    }
-
-    /**
-     * Returns true if the string is null or 0-length.
-     * @param str the string to be examined
-     * @return true if str is null or zero length
-     */
-    @JvmStatic
-    fun isEmpty(str: CharSequence?): Boolean {
-        return str.isNullOrEmpty()
-    }
-
-    /**
      * Converts a card number that may have spaces between the numbers into one without any spaces.
      * Note: method does not check that all characters are digits or spaces.
      *

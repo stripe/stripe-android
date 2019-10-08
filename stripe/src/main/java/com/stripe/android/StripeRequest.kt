@@ -179,7 +179,7 @@ internal abstract class StripeRequest(
 
                 if (compactParams[key] is CharSequence) {
                     val sequence = compactParams[key] as CharSequence?
-                    if (StripeTextUtils.isEmpty(sequence)) {
+                    if (sequence.isNullOrEmpty()) {
                         compactParams.remove(key)
                     }
                 }
