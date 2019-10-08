@@ -43,9 +43,9 @@ class PaymentAuthWebViewStarterTest {
             requestCodeCaptor.capture())
 
         val intent = intentArgumentCaptor.firstValue
-        val extras = intent.extras!!
+        val extras = requireNotNull(intent.extras)
         assertNull(extras.getParcelable(PaymentAuthWebViewStarter.EXTRA_UI_CUSTOMIZATION))
-        assertEquals(4, extras.size())
+        assertEquals(5, extras.size())
         assertEquals(CLIENT_SECRET,
             extras.getString(PaymentAuthWebViewStarter.EXTRA_CLIENT_SECRET))
     }
@@ -58,13 +58,13 @@ class PaymentAuthWebViewStarterTest {
             requestCodeCaptor.capture())
 
         val intent = intentArgumentCaptor.firstValue
-        val extras = intent.extras!!
+        val extras = requireNotNull(intent.extras)
         assertNotNull(
             extras.getParcelable<StripeToolbarCustomization>(
                 PaymentAuthWebViewStarter.EXTRA_UI_CUSTOMIZATION
             )
         )
-        assertEquals(4, extras.size())
+        assertEquals(5, extras.size())
         assertEquals(CLIENT_SECRET,
             extras.getString(PaymentAuthWebViewStarter.EXTRA_CLIENT_SECRET))
     }

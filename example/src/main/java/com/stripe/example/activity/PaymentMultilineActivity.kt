@@ -69,7 +69,7 @@ class PaymentMultilineActivity : AppCompatActivity() {
             .doOnComplete { progressDialogController.dismiss() }
             .subscribe(
                 { addToList(it) },
-                { throwable -> errorDialogHandler.show(throwable.localizedMessage) }
+                { throwable -> errorDialogHandler.show(throwable.localizedMessage.orEmpty()) }
             )
         )
     }
