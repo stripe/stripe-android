@@ -11,10 +11,9 @@ class PaymentIntentResultTest {
 
     @Test
     fun testBuilder() {
-        assertEquals(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-            PaymentIntentResult.Builder()
-                .setPaymentIntent(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2)
-                .build()
-                .intent)
+        assertEquals(
+            PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
+            PaymentIntentResult(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2).intent
+        )
     }
 }
