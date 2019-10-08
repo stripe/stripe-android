@@ -1,7 +1,7 @@
 package com.stripe.android.model
 
-import com.stripe.android.model.Card.asCardBrand
-import com.stripe.android.model.Card.asFundingType
+import com.stripe.android.model.Card.Companion.asCardBrand
+import com.stripe.android.model.Card.Companion.asFundingType
 import java.util.Calendar
 import java.util.Objects
 import kotlin.test.BeforeTest

@@ -2,8 +2,8 @@ package com.stripe.android.view
 
 import android.content.Context
 import com.stripe.android.model.Card
-import com.stripe.android.model.Card.CVC_LENGTH_AMERICAN_EXPRESS
-import com.stripe.android.model.Card.CVC_LENGTH_COMMON
+import com.stripe.android.model.Card.Companion.CVC_LENGTH_AMERICAN_EXPRESS
+import com.stripe.android.model.Card.Companion.CVC_LENGTH_COMMON
 
 /**
  * Static utility functions needed for View classes.
