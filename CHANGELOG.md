@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 11.2.1 - 2019-10-08
+* [#1677](https://github.com/stripe/stripe-android/pull/1677) Add logging to PaymentAuthWebViewActivity
+
 ## 11.2.0 - 2019-10-07
 * [#1616](https://github.com/stripe/stripe-android/pull/1616) Make `AddPaymentMethodActivityStarter.Result.fromIntent()` public
 * [#1619](https://github.com/stripe/stripe-android/pull/1619) Add `CardMultilineWidget#getPaymentMethodBillingDetailsBuilder()`
