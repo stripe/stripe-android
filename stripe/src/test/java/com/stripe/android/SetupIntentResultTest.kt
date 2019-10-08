@@ -8,10 +8,9 @@ class SetupIntentResultTest {
 
     @Test
     fun testBuilder() {
-        assertEquals(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT,
-            SetupIntentResult.Builder()
-                .setSetupIntent(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT)
-                .build()
-                .intent)
+        assertEquals(
+            SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT,
+            SetupIntentResult(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT).intent
+        )
     }
 }

@@ -139,10 +139,9 @@ internal open class PaymentController @VisibleForTesting constructor(
             object : ApiResultCallback<StripeIntent> {
                 override fun onSuccess(stripeIntent: StripeIntent) {
                     if (stripeIntent is PaymentIntent) {
-                        callback.onSuccess(PaymentIntentResult.Builder()
-                            .setPaymentIntent(stripeIntent)
-                            .setOutcome(flowOutcome)
-                            .build())
+                        callback.onSuccess(
+                            PaymentIntentResult(stripeIntent, flowOutcome)
+                        )
                     }
                 }
 
@@ -181,10 +180,9 @@ internal open class PaymentController @VisibleForTesting constructor(
             object : ApiResultCallback<StripeIntent> {
                 override fun onSuccess(stripeIntent: StripeIntent) {
                     if (stripeIntent is SetupIntent) {
-                        callback.onSuccess(SetupIntentResult.Builder()
-                            .setSetupIntent(stripeIntent)
-                            .setOutcome(flowOutcome)
-                            .build())
+                        callback.onSuccess(
+                            SetupIntentResult(stripeIntent, flowOutcome)
+                        )
                     }
                 }
 
