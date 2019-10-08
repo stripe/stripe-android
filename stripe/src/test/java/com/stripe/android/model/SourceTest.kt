@@ -18,7 +18,7 @@ class SourceTest {
 
     @Test
     fun fromJsonString_withCustomType_createsSourceWithCustomType() {
-        val customSource = Source.fromJson(EXAMPLE_JSON_SOURCE_CUSTOM_TYPE)!!
+        val customSource = requireNotNull(Source.fromJson(EXAMPLE_JSON_SOURCE_CUSTOM_TYPE))
         assertEquals(Source.SourceType.UNKNOWN, customSource.type)
         assertEquals(DOGE_COIN, customSource.typeRaw)
         assertNull(customSource.sourceTypeModel)
@@ -30,19 +30,19 @@ class SourceTest {
 
     @Test
     fun fromJsonString_withDeletedCardJson_shouldReturnSourceWithCardId() {
-        val source = Source.fromJson(DELETED_CARD_JSON)!!
-        assertEquals("card_1ELdAlCRMbs6FrXfNbmZEOb7", source.id)
+        val source = Source.fromJson(DELETED_CARD_JSON)
+        assertEquals("card_1ELdAlCRMbs6FrXfNbmZEOb7", source?.id)
     }
 
     @Test
     fun fromJsonString_withCreatedCardJson_shouldReturnSourceWithCardId() {
-        val source = SourceFixtures.CARD!!
+        val source = SourceFixtures.CARD
         assertEquals("card_1ELxrOCRMbs6FrXfdxOGjnaD", source.id)
         assertEquals(Source.SourceType.CARD, source.type)
         assertTrue(source.sourceTypeModel is SourceCardData)
 
         val sourceCardData = source.sourceTypeModel as SourceCardData?
-        assertEquals(Card.CardBrand.VISA, sourceCardData!!.brand)
+        assertEquals(Card.CardBrand.VISA, sourceCardData?.brand)
     }
 
     @Test
