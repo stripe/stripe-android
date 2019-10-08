@@ -351,13 +351,14 @@ internal open class PaymentController @VisibleForTesting constructor(
     ) : ApiOperation<StripeIntent>(callback) {
 
         @Throws(StripeException::class)
-        internal override fun getResult(): StripeIntent? {
-            if (clientSecret.startsWith("pi_")) {
-                return stripeRepository.retrievePaymentIntent(clientSecret, requestOptions)
-            } else if (clientSecret.startsWith("seti_")) {
-                return stripeRepository.retrieveSetupIntent(clientSecret, requestOptions)
+        override fun getResult(): StripeIntent? {
+            return when {
+                clientSecret.startsWith("pi_") ->
+                    stripeRepository.retrievePaymentIntent(clientSecret, requestOptions)
+                clientSecret.startsWith("seti_") ->
+                    stripeRepository.retrieveSetupIntent(clientSecret, requestOptions)
+                else -> null
             }
-            return null
         }
     }
 
@@ -371,19 +372,14 @@ internal open class PaymentController @VisibleForTesting constructor(
         private val params: ConfirmStripeIntentParams = params.withShouldUseStripeSdk(true)
 
         @Throws(StripeException::class)
-        internal override fun getResult(): StripeIntent? {
-            if (params is ConfirmPaymentIntentParams) {
-                return stripeRepository.confirmPaymentIntent(
-                    params,
-                    requestOptions
-                )
-            } else if (params is ConfirmSetupIntentParams) {
-                return stripeRepository.confirmSetupIntent(
-                    params,
-                    requestOptions
-                )
+        override fun getResult(): StripeIntent? {
+            return when (params) {
+                is ConfirmPaymentIntentParams ->
+                    stripeRepository.confirmPaymentIntent(params, requestOptions)
+                is ConfirmSetupIntentParams ->
+                    stripeRepository.confirmSetupIntent(params, requestOptions)
+                else -> null
             }
-            return null
         }
     }
 

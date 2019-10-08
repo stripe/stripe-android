@@ -28,7 +28,6 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Token
 import com.stripe.android.view.AuthActivityStarter
-import java.util.Locale
 import java.util.concurrent.Executor
 
 /**
@@ -482,7 +481,7 @@ class Stripe internal constructor(
      *
      * See [Retrieve a source](https://stripe.com/docs/api/sources/retrieve).
      *
-     * @param sourceId the [Source.getId] field of the desired Source object
+     * @param sourceId the [Source.id] field of the desired Source object
      * @param clientSecret the [Source.getClientSecret] field of the desired Source object
      * @return a [Source] if one could be found based on the input params, or `null` if
      * no such Source could be found.
@@ -791,7 +790,7 @@ class Stripe internal constructor(
             ApiRequest.Options.create(publishableKey, stripeAccount)
 
         @Throws(StripeException::class)
-        internal override fun getResult(): Source? {
+        override fun getResult(): Source? {
             return stripeRepository.createSource(sourceParams, options)
         }
     }
@@ -807,7 +806,7 @@ class Stripe internal constructor(
             ApiRequest.Options.create(publishableKey, stripeAccount)
 
         @Throws(StripeException::class)
-        internal override fun getResult(): PaymentMethod? {
+        override fun getResult(): PaymentMethod? {
             return stripeRepository.createPaymentMethod(paymentMethodCreateParams, options)
         }
     }
@@ -821,18 +820,16 @@ class Stripe internal constructor(
     ) : ApiOperation<Token>(callback) {
 
         @Throws(StripeException::class)
-        internal override fun getResult(): Token? {
+        override fun getResult(): Token? {
             return stripeRepository.createToken(tokenParams, options, tokenType)
         }
     }
 
     companion object {
         @JvmField
-        val API_VERSION = ApiVersion.get().code
+        val API_VERSION: String = ApiVersion.get().code
 
-        @JvmField
-        val VERSION =
-            String.format(Locale.ROOT, "AndroidBindings/%s", BuildConfig.VERSION_NAME)
+        const val VERSION: String = "AndroidBindings/${BuildConfig.VERSION_NAME}"
 
         /**
          * Setter for identifying your plug-in or library.
