@@ -14,9 +14,10 @@ import org.json.JSONObject
 internal class ApiRequest internal constructor(
     method: Method,
     url: String,
-    params: Map<String, *>?,
+    params: Map<String, *>? = null,
     internal val options: Options,
-    private val appInfo: AppInfo?
+    private val appInfo: AppInfo? = null,
+    private val systemPropertySupplier: SystemPropertySupplier = StripeSystemPropertySupplier()
 ) : StripeRequest(method, url, params, MIME_TYPE) {
     private val apiVersion: String = ApiVersion.get().code
 
@@ -31,39 +32,34 @@ internal class ApiRequest internal constructor(
         return mapOf(
             "Accept-Charset" to CHARSET,
             "Accept" to "application/json",
-            "X-Stripe-Client-User-Agent" to createStripeClientUserAgent(),
+            HEADER_STRIPE_CLIENT_USER_AGENT to createStripeClientUserAgent(),
             "Stripe-Version" to apiVersion,
             "Authorization" to String.format(Locale.ENGLISH, "Bearer %s", options.apiKey)
         ).plus(
             options.stripeAccount?.let {
                 mapOf("Stripe-Account" to it)
-            } ?: emptyMap()
+            }.orEmpty()
         ).plus(
             (languageTag.takeIf { SHOULD_INCLUDE_ACCEPT_LANGUAGE_HEADER })?.let {
                 mapOf("Accept-Language" to it)
-            } ?: emptyMap()
+            }.orEmpty()
         )
     }
 
     private fun createStripeClientUserAgent(): String {
-        val javaVersion = System.getProperty("java.version")
-        val propertyMap = mapOf(
-            "os.name" to "android",
-            "os.version" to Build.VERSION.SDK_INT.toString(),
-            "bindings.version" to BuildConfig.VERSION_NAME,
-            "lang" to "Java",
-            "publisher" to "Stripe"
-        ).plus(
-            appInfo?.createClientHeaders() ?: emptyMap()
-        ).plus(
-            if (javaVersion != null) {
-                mapOf("java.version" to javaVersion)
-            } else {
-                emptyMap()
-            }
-        )
-
-        return JSONObject(propertyMap).toString()
+        return JSONObject(
+            mapOf(
+                "os.name" to "android",
+                "os.version" to Build.VERSION.SDK_INT.toString(),
+                "bindings.version" to BuildConfig.VERSION_NAME,
+                "lang" to "Java",
+                "publisher" to "Stripe",
+                "java.version" to systemPropertySupplier.get("java.version"),
+                "http.agent" to systemPropertySupplier.get(PROP_USER_AGENT)
+            ).plus(
+                appInfo?.createClientHeaders().orEmpty()
+            )
+        ).toString()
     }
 
     override fun getUserAgent(): String {
@@ -139,6 +135,11 @@ internal class ApiRequest internal constructor(
     companion object {
         internal const val MIME_TYPE = "application/x-www-form-urlencoded"
         internal const val API_HOST = "https://api.stripe.com"
+
+        internal const val HEADER_STRIPE_CLIENT_USER_AGENT = "X-Stripe-Client-User-Agent"
+
+        // this is the default user agent set by the system
+        private const val PROP_USER_AGENT = "http.agent"
 
         // TODO(mshafrir-stripe) - enable in next major version
         private const val SHOULD_INCLUDE_ACCEPT_LANGUAGE_HEADER = false

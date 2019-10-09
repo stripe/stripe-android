@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import android.os.Build
+import com.stripe.android.ApiRequest.Companion.HEADER_STRIPE_CLIENT_USER_AGENT
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.CardFixtures
 import java.io.UnsupportedEncodingException
@@ -57,18 +58,23 @@ internal class ApiRequestTest {
     @Test
     @Throws(JSONException::class)
     fun getHeaders_containsPropertyMapValues() {
-        val headers = ApiRequest.createGet(StripeApiRepository.sourcesUrl,
-            ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
-            .headers
+        val headers = ApiRequest(
+            StripeRequest.Method.GET,
+            StripeApiRepository.sourcesUrl,
+            params = null,
+            options = ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+            systemPropertySupplier = FakeSystemPropertySupplier()
+        ).headers
 
-        val userAgentData = JSONObject(headers["X-Stripe-Client-User-Agent"]!!)
+        val userAgentData = JSONObject(requireNotNull(headers[HEADER_STRIPE_CLIENT_USER_AGENT]))
         assertEquals(BuildConfig.VERSION_NAME, userAgentData.getString("bindings.version"))
         assertEquals("Java", userAgentData.getString("lang"))
         assertEquals("Stripe", userAgentData.getString("publisher"))
         assertEquals("android", userAgentData.getString("os.name"))
         assertEquals(Build.VERSION.SDK_INT,
             Integer.parseInt(userAgentData.getString("os.version")))
-        assertTrue(userAgentData.getString("java.version").startsWith("1.8.0"))
+        assertTrue(userAgentData.getString("java.version").isNotBlank())
+        assertTrue(userAgentData.getString("http.agent").isNotBlank())
     }
 
     @Test
@@ -161,10 +167,9 @@ internal class ApiRequestTest {
             headers[StripeRequest.HEADER_USER_AGENT]
         )
 
-        val userAgentData = JSONObject(
-            headers["X-Stripe-Client-User-Agent"]
-                ?: error("Invalid JSON in `X-Stripe-Client-User-Agent`")
-        )
+        val stripeClientUserAgent = headers[HEADER_STRIPE_CLIENT_USER_AGENT]
+            ?: error("Invalid JSON in `$HEADER_STRIPE_CLIENT_USER_AGENT`")
+        val stripeClientUserAgentData = JSONObject(stripeClientUserAgent)
         assertEquals(
             JSONObject(
                 """
@@ -176,7 +181,7 @@ internal class ApiRequestTest {
                 }
                 """.trimIndent()
             ).toString(),
-            JSONObject(userAgentData.getString("application")).toString()
+            JSONObject(stripeClientUserAgentData.getString("application")).toString()
         )
     }
 

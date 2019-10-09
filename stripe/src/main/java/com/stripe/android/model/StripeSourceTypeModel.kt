@@ -6,17 +6,14 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 abstract class StripeSourceTypeModel internal constructor(builder: BaseBuilder) : StripeModel() {
-    private val additionalFields =
-        builder.additionalFields?.let { it } ?: emptyMap()
+    private val additionalFields: Map<String, Any> = builder.additionalFields?.let { it }.orEmpty()
 
     override fun equals(other: Any?): Boolean {
-        if (this === other) {
-            return true
+        return when {
+            this === other -> true
+            other is StripeSourceTypeModel -> typedEquals(other)
+            else -> false
         }
-
-        return if (other is StripeSourceTypeModel) {
-            typedEquals(other)
-        } else false
     }
 
     @CallSuper
