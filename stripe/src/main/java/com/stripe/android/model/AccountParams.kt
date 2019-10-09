@@ -26,7 +26,7 @@ class AccountParams private constructor(
                     .plus(
                         businessData?.let {
                             mapOf(businessType.code to businessData)
-                        } ?: emptyMap()
+                        }.orEmpty()
                     )
             } else {
                 emptyMap()
