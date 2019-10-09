@@ -58,7 +58,7 @@ object StripeTextUtils {
 
     private fun bytesToHex(bytes: ByteArray): String {
         return bytes
-            .joinToString("") { String.format("%02x", it) }
+            .joinToString("") { String.format(Locale.ROOT, "%02x", it) }
             .toUpperCase(Locale.ROOT)
     }
 }

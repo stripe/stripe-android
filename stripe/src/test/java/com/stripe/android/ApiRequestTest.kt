@@ -83,8 +83,7 @@ internal class ApiRequestTest {
             ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
             .headers
 
-        val expectedUserAgent = String.format(Locale.ROOT, "Stripe/v1 AndroidBindings/%s",
-            BuildConfig.VERSION_NAME)
+        val expectedUserAgent = "Stripe/v1 AndroidBindings/${BuildConfig.VERSION_NAME}"
         assertEquals(expectedUserAgent, headerMap[StripeRequest.HEADER_USER_AGENT])
         assertEquals("application/json", headerMap["Accept"])
         assertEquals("UTF-8", headerMap["Accept-Charset"])

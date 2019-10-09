@@ -5,7 +5,6 @@ import java.io.UnsupportedEncodingException
 import java.net.URLEncoder
 import java.util.HashMap
 import java.util.HashSet
-import java.util.Locale
 import java.util.Objects
 
 /**
@@ -28,7 +27,7 @@ internal abstract class StripeRequest(
         get() = if (Method.GET == method) urlWithQuery() else baseUrl
 
     val contentType: String
-        get() = String.format(Locale.ROOT, "%s; charset=%s", mimeType, CHARSET)
+        get() = "$mimeType; charset=$CHARSET"
 
     val headers: Map<String, String>
         get() {
@@ -61,8 +60,9 @@ internal abstract class StripeRequest(
         } else {
             // In some cases, URL can already contain a question mark
             // (eg, upcoming invoice lines)
-            val separator = if (baseUrl.contains("?")) "&" else "?"
-            String.format(Locale.ROOT, "%s%s%s", baseUrl, separator, query)
+            listOf(baseUrl, query).joinToString(
+                separator = if (baseUrl.contains("?")) "&" else "?"
+            )
         }
     }
 
@@ -83,7 +83,7 @@ internal abstract class StripeRequest(
         return if (params.isEmpty()) {
             listOf(Parameter(keyPrefix, ""))
         } else {
-            val newPrefix = String.format(Locale.ROOT, "%s[]", keyPrefix)
+            val newPrefix = "$keyPrefix[]"
             params.flatMap {
                 flattenParamsValue(it, newPrefix)
             }
@@ -96,9 +96,7 @@ internal abstract class StripeRequest(
         keyPrefix: String?
     ): List<Parameter> {
         return params?.flatMap { (key, value) ->
-            val newPrefix = keyPrefix?.let {
-                String.format(Locale.ROOT, "%s[%s]", it, key)
-            } ?: key
+            val newPrefix = keyPrefix?.let { "$it[$key]" } ?: key
             flattenParamsValue(value, newPrefix)
         }
             ?: emptyList()
@@ -127,14 +125,16 @@ internal abstract class StripeRequest(
 
     @Throws(UnsupportedEncodingException::class)
     private fun urlEncodePair(k: String, v: String): String {
-        return String.format(Locale.ROOT, "%s=%s", urlEncode(k), urlEncode(v))
+        val encodedKey = urlEncode(k)
+        val encodedValue = urlEncode(v)
+        return "$encodedKey=$encodedValue"
     }
 
     @Throws(UnsupportedEncodingException::class)
-    private fun urlEncode(str: String?): String? {
+    private fun urlEncode(str: String): String {
         // Preserve original behavior that passing null for an object id will lead
         // to us actually making a request to /v1/foo/null
-        return str?.let { URLEncoder.encode(it, CHARSET) }
+        return URLEncoder.encode(str, CHARSET)
     }
 
     fun typedEquals(request: StripeRequest): Boolean {
@@ -158,9 +158,7 @@ internal abstract class StripeRequest(
         const val HEADER_USER_AGENT = "User-Agent"
         const val CHARSET = "UTF-8"
 
-        @JvmField
-        val DEFAULT_USER_AGENT =
-            String.format(Locale.ROOT, "Stripe/v1 %s", Stripe.VERSION)
+        const val DEFAULT_USER_AGENT = "Stripe/v1 ${Stripe.VERSION}"
 
         /**
          * Copy the {@param params} map and recursively remove null and empty values. The Stripe API
