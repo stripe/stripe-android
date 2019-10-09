@@ -26,13 +26,13 @@ dependencies {
     implementation 'com.jakewharton.rxbinding2:rxbinding:2.2.0'
 
     /* Used for server calls */
-    implementation 'com.squareup.okio:okio:2.4.0'
+    implementation 'com.squareup.okio:okio:2.4.1'
     implementation 'com.squareup.retrofit2:retrofit:2.6.2'
     implementation 'com.facebook.stetho:stetho:1.5.1'
     implementation 'com.facebook.stetho:stetho-okhttp3:1.5.1'
 
     /* Used to make Retrofit easier and GSON & Rx-compatible*/
-    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.6.2'
     implementation 'com.squareup.retrofit2:converter-gson:2.6.2'
 
