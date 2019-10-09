@@ -81,24 +81,13 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
         var completionUrlParam: String? = null
             private set
 
-        // true if another app was opened from this WebView
-        var hasOpenedApp: Boolean = false
-            private set
-
-        override fun onPageCommitVisible(view: WebView, url: String) {
-            logger.debug("PaymentAuthWebViewClient#onPageCommitVisible() - $url")
-            super.onPageCommitVisible(view, url)
-            hideProgressBar()
-        }
-
         override fun onPageFinished(view: WebView, url: String?) {
             logger.debug("PaymentAuthWebViewClient#onPageFinished() - $url")
             super.onPageFinished(view, url)
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP_MR1) {
-                // hide the progress bar here because `onPageCommitVisible()`
-                // is not called in API 22 and below
-                hideProgressBar()
-            }
+            // hide the progress bar here because doing it in `onPageCommitVisible()` potentially
+            // causes a crash
+            hideProgressBar()
+
             if (url != null && isCompletionUrl(url)) {
                 onAuthCompleted()
             }
@@ -157,7 +146,6 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
         private fun openIntent(intent: Intent) {
             logger.debug("PaymentAuthWebViewClient#openIntent()")
             if (intent.resolveActivity(packageManager) != null) {
-                hasOpenedApp = true
                 activity.startActivity(intent)
             } else {
                 // complete auth if the deep-link can't be opened
