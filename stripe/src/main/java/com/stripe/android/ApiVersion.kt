@@ -16,7 +16,7 @@ internal data class ApiVersion constructor(val code: String) {
     }
 
     companion object {
-        private const val API_VERSION_CODE = "2019-09-09"
+        private const val API_VERSION_CODE = "2019-10-08"
 
         private val INSTANCE = ApiVersion(API_VERSION_CODE)
 
