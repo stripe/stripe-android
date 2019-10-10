@@ -1069,7 +1069,7 @@ internal class StripeApiRepository @JvmOverloads constructor(
         }
 
         private fun getApiUrl(path: String): String {
-            return String.format(Locale.ENGLISH, "%s/v1/%s", ApiRequest.API_HOST, path)
+            return "${ApiRequest.API_HOST}/v1/$path"
         }
     }
 }

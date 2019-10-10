@@ -2,7 +2,6 @@ package com.stripe.android
 
 import android.content.Context
 import android.content.SharedPreferences
-import java.util.Locale
 
 internal open class PaymentSessionPrefs private constructor(
     private val prefs: SharedPreferences?
@@ -23,7 +22,7 @@ internal open class PaymentSessionPrefs private constructor(
         private const val PREF_FILE = "PaymentSessionPrefs"
 
         private fun getPaymentMethodKey(customerId: String): String {
-            return String.format(Locale.US, "customer[%s].payment_method", customerId)
+            return "customer[$customerId].payment_method"
         }
     }
 }

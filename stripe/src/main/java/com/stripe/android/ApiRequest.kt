@@ -34,7 +34,7 @@ internal class ApiRequest internal constructor(
             "Accept" to "application/json",
             HEADER_STRIPE_CLIENT_USER_AGENT to createStripeClientUserAgent(),
             "Stripe-Version" to apiVersion,
-            "Authorization" to String.format(Locale.ENGLISH, "Bearer %s", options.apiKey)
+            "Authorization" to "Bearer ${options.apiKey}"
         ).plus(
             options.stripeAccount?.let {
                 mapOf("Stripe-Account" to it)
@@ -73,11 +73,7 @@ internal class ApiRequest internal constructor(
     }
 
     override fun toString(): String {
-        return String.format(Locale.ROOT,
-            "%s %s",
-            method.code,
-            baseUrl
-        )
+        return "${method.code} $baseUrl"
     }
 
     override fun hashCode(): Int {

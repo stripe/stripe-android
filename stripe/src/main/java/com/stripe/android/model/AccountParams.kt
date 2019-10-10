@@ -17,22 +17,17 @@ class AccountParams private constructor(
      * @return a String-keyed map
      */
     override fun toParamMap(): Map<String, Any> {
-        val accountData =
+        return mapOf("account" to
             mapOf(API_TOS_SHOWN_AND_ACCEPTED to tosShownAndAccepted)
-
-        val businessData =
-            if (businessType != null) {
-                mapOf(API_BUSINESS_TYPE to businessType.code)
-                    .plus(
-                        businessData?.let {
-                            mapOf(businessType.code to businessData)
-                        }.orEmpty()
-                    )
-            } else {
-                emptyMap()
-            }
-
-        return mapOf("account" to accountData.plus(businessData))
+                .plus(
+                    businessType?.code?.let { code ->
+                        mapOf(API_BUSINESS_TYPE to code)
+                            .plus(
+                                businessData?.let { mapOf(code to it) }.orEmpty()
+                            )
+                    }.orEmpty()
+                )
+        )
     }
 
     override fun hashCode(): Int {
