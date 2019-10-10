@@ -10,7 +10,7 @@
         <item name="android:textColor">@color/text</item>
     </style>
 
-    <style name="StripeDefaultTheme" parent="BaseStripeTheme">
+    <style name="StripeDefaultTheme" parent="StripeBaseTheme">
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primaryDark</item>
         <item name="android:textColorPrimary">@color/title</item>

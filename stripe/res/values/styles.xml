@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="BaseStripeTheme" parent="@style/Theme.AppCompat.DayNight.NoActionBar">
+    <style name="StripeBaseTheme" parent="@style/Theme.AppCompat.DayNight.NoActionBar">
         <item name="colorAccent">@color/stripe_accent_color_default</item>
         <item name="colorControlNormal">@color/stripe_control_normal_color_default</item>
         <item name="colorPrimary">@color/stripe_toolbar_color_default</item>
@@ -25,6 +25,6 @@
         <item name="android:textSize">@dimen/stripe_notification_text_size</item>
     </style>
 
-    <style name="StripeDefaultTheme" parent="BaseStripeTheme"/>
+    <style name="StripeDefaultTheme" parent="StripeBaseTheme"/>
     <style name="StripeDefault3DS2Theme" parent="BaseStripe3DS2Theme" />
 </resources>
