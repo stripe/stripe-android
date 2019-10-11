@@ -49,6 +49,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
     private static final String FIELD_CARD_PRESENT = "card_present";
     private static final String FIELD_FPX = "fpx";
     private static final String FIELD_IDEAL = "ideal";
+    private static final String FIELD_SEPA_DEBIT = "sepa_debit";
 
     @Nullable public final String id;
     @Nullable public final Long created;
@@ -62,6 +63,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
     @Nullable public final CardPresent cardPresent;
     @Nullable public final Fpx fpx;
     @Nullable public final Ideal ideal;
+    @Nullable public final SepaDebit sepaDebit;
 
     public enum Type implements Parcelable {
         Card("card"),
@@ -135,6 +137,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         cardPresent = builder.mCardPresent;
         fpx = builder.mFpx;
         ideal = builder.mIdeal;
+        sepaDebit = builder.mSepaDebit;
     }
 
     /**
@@ -182,6 +185,8 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
             builder.setIdeal(Ideal.fromJson(paymentMethod.optJSONObject(FIELD_IDEAL)));
         } else if (FIELD_FPX.equals(type)) {
             builder.setFpx(Fpx.fromJson(paymentMethod.optJSONObject(FIELD_FPX)));
+        } else if (FIELD_SEPA_DEBIT.equals(type)) {
+            builder.setSepaDebit(SepaDebit.fromJson(paymentMethod.optJSONObject(FIELD_SEPA_DEBIT)));
         }
 
         return builder.build();
@@ -202,6 +207,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
                 && Objects.equals(cardPresent, paymentMethod.cardPresent)
                 && Objects.equals(fpx, paymentMethod.fpx)
                 && Objects.equals(ideal, paymentMethod.ideal)
+                && Objects.equals(sepaDebit, paymentMethod.sepaDebit)
                 && Objects.equals(customerId, paymentMethod.customerId);
     }
 
@@ -232,6 +238,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         dest.writeParcelable(cardPresent, flags);
         dest.writeParcelable(fpx, flags);
         dest.writeParcelable(ideal, flags);
+        dest.writeParcelable(sepaDebit, flags);
         dest.writeString(customerId);
         dest.writeInt(metadata == null ? -1 : metadata.size());
         if (metadata != null) {
@@ -252,6 +259,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         cardPresent = in.readParcelable(CardPresent.class.getClassLoader());
         fpx = in.readParcelable(Fpx.class.getClassLoader());
         ideal = in.readParcelable(Ideal.class.getClassLoader());
+        sepaDebit = in.readParcelable(SepaDebit.class.getClassLoader());
         customerId = in.readString();
         final int mapSize = in.readInt();
         if (mapSize >= 0) {
@@ -292,11 +300,11 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         private BillingDetails mBillingDetails;
         private Map<String, String> mMetadata;
         private String mCustomerId;
-
         private Card mCard;
         private CardPresent mCardPresent;
         private Ideal mIdeal;
         private Fpx mFpx;
+        private SepaDebit mSepaDebit;
 
         @NonNull
         public Builder setId(@Nullable String id) {
@@ -361,6 +369,12 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         @NonNull
         public Builder setFpx(@Nullable Fpx fpx) {
             this.mFpx = fpx;
+            return this;
+        }
+
+        @NonNull
+        public Builder setSepaDebit(@Nullable SepaDebit sepaDebit) {
+            this.mSepaDebit = sepaDebit;
             return this;
         }
 
@@ -1143,6 +1157,97 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
             public Fpx build() {
                 return new Fpx(this);
             }
+        }
+    }
+
+    public static final class SepaDebit extends PaymentMethodTypeImpl {
+        private static final String FIELD_BANK_CODE = "bank_code";
+        private static final String FIELD_BRANCH_CODE = "branch_code";
+        private static final String FIELD_COUNTRY = "country";
+        private static final String FIELD_FINGERPRINT = "fingerprint";
+        private static final String FIELD_LAST4 = "last4";
+
+        @Nullable public final String bankCode;
+        @Nullable public final String branchCode;
+        @Nullable public final String country;
+        @Nullable public final String fingerprint;
+        @Nullable public final String last4;
+
+        SepaDebit(
+                @Nullable String bankCode,
+                @Nullable String branchCode,
+                @Nullable String country,
+                @Nullable String fingerprint,
+                @Nullable String last4
+        ) {
+            super(Type.SepaDebit);
+            this.bankCode = bankCode;
+            this.branchCode = branchCode;
+            this.country = country;
+            this.fingerprint = fingerprint;
+            this.last4 = last4;
+        }
+
+        private SepaDebit(@NonNull Parcel parcel) {
+            this(
+                    parcel.readString(),
+                    parcel.readString(),
+                    parcel.readString(),
+                    parcel.readString(),
+                    parcel.readString()
+            );
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(bankCode, branchCode, country, fingerprint, last4);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            if (this == other) {
+                return true;
+            } else if (other instanceof SepaDebit) {
+                return typedEquals((SepaDebit) other);
+            } else {
+                return false;
+            }
+        }
+
+        private boolean typedEquals(@NonNull SepaDebit other) {
+            return Objects.equals(bankCode, other.bankCode) &&
+                    Objects.equals(branchCode, other.branchCode) &&
+                    Objects.equals(country, other.country) &&
+                    Objects.equals(fingerprint, other.fingerprint) &&
+                    Objects.equals(last4, other.last4);
+        }
+
+        protected static final Parcelable.Creator<SepaDebit> CREATOR =
+                new Parcelable.Creator<SepaDebit>() {
+                    @Override
+                    public SepaDebit createFromParcel(@NonNull Parcel parcel) {
+                        return new SepaDebit(parcel);
+                    }
+
+                    @Override
+                    public SepaDebit[] newArray(int size) {
+                        return new SepaDebit[size];
+                    }
+                };
+
+        @Nullable
+        static SepaDebit fromJson(@Nullable JSONObject sepaDebit) {
+            if (sepaDebit == null) {
+                return null;
+            }
+
+            return new SepaDebit(
+                    optString(sepaDebit, FIELD_BANK_CODE),
+                    optString(sepaDebit, FIELD_BRANCH_CODE),
+                    optString(sepaDebit, FIELD_COUNTRY),
+                    optString(sepaDebit, FIELD_FINGERPRINT),
+                    optString(sepaDebit, FIELD_LAST4)
+            );
         }
     }
 

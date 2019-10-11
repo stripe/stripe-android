@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
+import org.json.JSONObject
 
 internal object PaymentMethodFixtures {
     @JvmField
@@ -61,6 +62,41 @@ internal object PaymentMethodFixtures {
             .setAccountHolderType("individual")
             .build())
         .build()
+
+    @JvmField
+    val SEPA_DEBIT_PAYMENT_METHOD = PaymentMethod.fromJson(JSONObject(
+        """
+        {
+          "id": "pm_1FSQaJCR",
+          "object": "payment_method",
+          "billing_details": {
+            "address": {
+              "city": null,
+              "country": null,
+              "line1": null,
+              "line2": null,
+              "postal_code": null,
+              "state": null
+            },
+            "email": "jrosen@example.com",
+            "name": "Jenny Rosen",
+            "phone": null
+          },
+          "created": 1570809799,
+          "customer": null,
+          "livemode": false,
+          "metadata": {},
+          "sepa_debit": {
+            "bank_code": "3704",
+            "branch_code": "",
+            "country": "DE",
+            "fingerprint": "vIZc7Ywn0",
+            "last4": "3000"
+          },
+          "type": "sepa_debit"
+        }
+        """.trimIndent()
+    ))!!
 
     @JvmField
     val CARD_PAYMENT_METHODS = listOf(
