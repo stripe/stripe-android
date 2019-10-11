@@ -113,8 +113,8 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
 
         public static final Creator<Type> CREATOR = new Creator<Type>() {
             @Override
-            public Type createFromParcel(@NonNull Parcel in) {
-                return values()[in.readInt()];
+            public Type createFromParcel(@NonNull Parcel parcel) {
+                return values()[parcel.readInt()];
             }
 
             @Override
@@ -124,20 +124,49 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         };
     }
 
-    private PaymentMethod(@NonNull Builder builder) {
-        id = builder.mId;
-        liveMode = builder.mLiveMode;
-        type = builder.mType;
-        created = builder.mCreated;
-        billingDetails = builder.mBillingDetails;
-        customerId = builder.mCustomerId;
-        metadata = builder.mMetadata;
+    private PaymentMethod(
+            @Nullable String id,
+            @Nullable Long created,
+            boolean liveMode,
+            @Nullable String type,
+            @Nullable BillingDetails billingDetails,
+            @Nullable String customerId,
+            @Nullable Map<String, String> metadata,
+            @Nullable Card card,
+            @Nullable CardPresent cardPresent,
+            @Nullable Fpx fpx,
+            @Nullable Ideal ideal,
+            @Nullable SepaDebit sepaDebit
+    ) {
+        this.id = id;
+        this.created = created;
+        this.liveMode = liveMode;
+        this.type = type;
+        this.billingDetails = billingDetails;
+        this.customerId = customerId;
+        this.metadata = metadata;
+        this.card = card;
+        this.cardPresent = cardPresent;
+        this.fpx = fpx;
+        this.ideal = ideal;
+        this.sepaDebit = sepaDebit;
+    }
 
-        card = builder.mCard;
-        cardPresent = builder.mCardPresent;
-        fpx = builder.mFpx;
-        ideal = builder.mIdeal;
-        sepaDebit = builder.mSepaDebit;
+    private PaymentMethod(@NonNull Parcel parcel) {
+        this(
+                parcel.readString(),
+                parcel.readInt() == 0 ? null : parcel.readLong(),
+                parcel.readInt() != 0,
+                parcel.readString(),
+                parcel.<BillingDetails>readParcelable(BillingDetails.class.getClassLoader()),
+                parcel.readString(),
+                readMetadata(parcel),
+                parcel.<Card>readParcelable(Card.class.getClassLoader()),
+                parcel.<CardPresent>readParcelable(CardPresent.class.getClassLoader()),
+                parcel.<Fpx>readParcelable(Fpx.class.getClassLoader()),
+                parcel.<Ideal>readParcelable(Ideal.class.getClassLoader()),
+                parcel.<SepaDebit>readParcelable(SepaDebit.class.getClassLoader())
+        );
     }
 
     /**
@@ -226,19 +255,14 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(id);
         if (created == null) {
-            dest.writeByte((byte) (0x00));
+            dest.writeInt(0);
         } else {
-            dest.writeByte((byte) (0x01));
+            dest.writeInt(1);
             dest.writeLong(created);
         }
-        dest.writeByte((byte) (liveMode ? 0x01 : 0x00));
+        dest.writeInt(liveMode ? 1 : 0);
         dest.writeString(type);
         dest.writeParcelable(billingDetails, flags);
-        dest.writeParcelable(card, flags);
-        dest.writeParcelable(cardPresent, flags);
-        dest.writeParcelable(fpx, flags);
-        dest.writeParcelable(ideal, flags);
-        dest.writeParcelable(sepaDebit, flags);
         dest.writeString(customerId);
         dest.writeInt(metadata == null ? -1 : metadata.size());
         if (metadata != null) {
@@ -247,33 +271,29 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
                 dest.writeString(entry.getValue());
             }
         }
+
+        dest.writeParcelable(card, flags);
+        dest.writeParcelable(cardPresent, flags);
+        dest.writeParcelable(fpx, flags);
+        dest.writeParcelable(ideal, flags);
+        dest.writeParcelable(sepaDebit, flags);
     }
 
-    private PaymentMethod(@NonNull Parcel in) {
-        id = in.readString();
-        created = in.readByte() == 0x00 ? null : in.readLong();
-        liveMode = in.readByte() != 0x00;
-        type = in.readString();
-        billingDetails = in.readParcelable(BillingDetails.class.getClassLoader());
-        card = in.readParcelable(Card.class.getClassLoader());
-        cardPresent = in.readParcelable(CardPresent.class.getClassLoader());
-        fpx = in.readParcelable(Fpx.class.getClassLoader());
-        ideal = in.readParcelable(Ideal.class.getClassLoader());
-        sepaDebit = in.readParcelable(SepaDebit.class.getClassLoader());
-        customerId = in.readString();
-        final int mapSize = in.readInt();
+    @Nullable
+    private static Map<String, String> readMetadata(@NonNull Parcel parcel) {
+        final int mapSize = parcel.readInt();
         if (mapSize >= 0) {
             final Map<String, String> metadata = new HashMap<>(mapSize);
             for (int i = 0; i < mapSize; i++) {
-                final String key = in.readString();
-                final String value = in.readString();
+                final String key = parcel.readString();
+                final String value = parcel.readString();
                 if (key != null && value != null) {
                     metadata.put(key, value);
                 }
             }
-            this.metadata = metadata;
+            return metadata;
         } else {
-            this.metadata = null;
+            return null;
         }
     }
 
@@ -281,8 +301,8 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
             new Parcelable.Creator<PaymentMethod>() {
                 @NonNull
                 @Override
-                public PaymentMethod createFromParcel(@NonNull Parcel in) {
-                    return new PaymentMethod(in);
+                public PaymentMethod createFromParcel(@NonNull Parcel parcel) {
+                    return new PaymentMethod(parcel);
                 }
 
                 @Override
@@ -380,7 +400,20 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
 
         @NonNull
         public PaymentMethod build() {
-            return new PaymentMethod(this);
+            return new PaymentMethod(
+                    mId,
+                    mCreated,
+                    mLiveMode,
+                    mType,
+                    mBillingDetails,
+                    mCustomerId,
+                    mMetadata,
+                    mCard,
+                    mCardPresent,
+                    mFpx,
+                    mIdeal,
+                    mSepaDebit
+            );
         }
     }
 
@@ -393,22 +426,29 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         static final String FIELD_PHONE = "phone";
 
         @Nullable public final Address address;
-        public final String email;
-        public final String name;
-        public final String phone;
+        @Nullable public final String email;
+        @Nullable public final String name;
+        @Nullable public final String phone;
 
-        private BillingDetails(@NonNull Builder builder) {
-            address = builder.mAddress;
-            email = builder.mEmail;
-            name = builder.mName;
-            phone = builder.mPhone;
+        private BillingDetails(
+                @Nullable Address address,
+                @Nullable String email,
+                @Nullable String name,
+                @Nullable String phone
+        ) {
+            this.address = address;
+            this.email = email;
+            this.name = name;
+            this.phone = phone;
         }
 
-        private BillingDetails(@NonNull Parcel in) {
-            address = in.readParcelable(Address.class.getClassLoader());
-            email = in.readString();
-            name = in.readString();
-            phone = in.readString();
+        private BillingDetails(@NonNull Parcel parcel) {
+            this(
+                    parcel.<Address>readParcelable(Address.class.getClassLoader()),
+                    parcel.readString(),
+                    parcel.readString(),
+                    parcel.readString()
+            );
         }
 
         @Override
@@ -436,8 +476,8 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         public static final Parcelable.Creator<BillingDetails> CREATOR =
                 new Parcelable.Creator<BillingDetails>() {
                     @Override
-                    public BillingDetails createFromParcel(@NonNull Parcel in) {
-                        return new BillingDetails(in);
+                    public BillingDetails createFromParcel(@NonNull Parcel parcel) {
+                        return new BillingDetails(parcel);
                     }
 
                     @Override
@@ -529,12 +569,12 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
 
             @NonNull
             public BillingDetails build() {
-                return new BillingDetails(this);
+                return new BillingDetails(mAddress, mEmail, mName, mPhone);
             }
         }
     }
 
-    public static final class Card extends PaymentMethodTypeImpl {
+    public static final class Card extends PaymentMethodTypeData {
         private static final String FIELD_BRAND = "brand";
         private static final String FIELD_CHECKS = "checks";
         private static final String FIELD_COUNTRY = "country";
@@ -577,30 +617,42 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         @Nullable public final ThreeDSecureUsage threeDSecureUsage;
         @Nullable public final Wallet wallet;
 
-        private Card(@NonNull Builder builder) {
-            super(Type.Card);
-            brand = builder.mBrand;
-            checks = builder.checks;
-            country = builder.mCountry;
-            expiryMonth = builder.mExpiryMonth;
-            expiryYear = builder.mExpiryYear;
-            funding = builder.mFunding;
-            last4 = builder.mLast4;
-            threeDSecureUsage = builder.mThreeDSecureUsage;
-            wallet = builder.mWallet;
+        private Card(
+                @Nullable String brand,
+                @Nullable Checks checks,
+                @Nullable String country,
+                @Nullable Integer expiryMonth,
+                @Nullable Integer expiryYear,
+                @Nullable String funding,
+                @Nullable String last4,
+                @Nullable ThreeDSecureUsage threeDSecureUsage,
+                @Nullable Wallet wallet
+        ) {
+            this.brand = brand;
+            this.checks = checks;
+            this.country = country;
+            this.expiryMonth = expiryMonth;
+            this.expiryYear = expiryYear;
+            this.funding = funding;
+            this.last4 = last4;
+            this.threeDSecureUsage = threeDSecureUsage;
+            this.wallet = wallet;
         }
 
-        private Card(@NonNull Parcel in) {
-            super(in);
-            brand = in.readString();
-            checks = in.readParcelable(Checks.class.getClassLoader());
-            country = in.readString();
-            expiryMonth = in.readByte() == 0x00 ? null : in.readInt();
-            expiryYear = in.readByte() == 0x00 ? null : in.readInt();
-            funding = in.readString();
-            last4 = in.readString();
-            threeDSecureUsage = in.readParcelable(ThreeDSecureUsage.class.getClassLoader());
-            wallet = in.readParcelable(Wallet.class.getClassLoader());
+        private Card(@NonNull Parcel parcel) {
+            this(
+                    parcel.readString(),
+                    parcel.<Checks>readParcelable(Checks.class.getClassLoader()),
+                    parcel.readString(),
+                    parcel.readInt() == 0 ? null : parcel.readInt(),
+                    parcel.readInt() == 0 ? null : parcel.readInt(),
+                    parcel.readString(),
+                    parcel.readString(),
+                    parcel.<ThreeDSecureUsage>readParcelable(
+                            ThreeDSecureUsage.class.getClassLoader()
+                    ),
+                    parcel.<Wallet>readParcelable(Wallet.class.getClassLoader())
+            );
         }
 
         @Override
@@ -610,20 +662,19 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
 
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
-            super.writeToParcel(dest, flags);
             dest.writeString(brand);
             dest.writeParcelable(checks, flags);
             dest.writeString(country);
             if (expiryMonth == null) {
-                dest.writeByte((byte) (0x00));
+                dest.writeInt(0);
             } else {
-                dest.writeByte((byte) (0x01));
+                dest.writeInt(1);
                 dest.writeInt(expiryMonth);
             }
             if (expiryYear == null) {
-                dest.writeByte((byte) (0x00));
+                dest.writeInt(0);
             } else {
-                dest.writeByte((byte) (0x01));
+                dest.writeInt(1);
                 dest.writeInt(expiryYear);
             }
             dest.writeString(funding);
@@ -634,8 +685,8 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
 
         public static final Parcelable.Creator<Card> CREATOR = new Parcelable.Creator<Card>() {
             @Override
-            public Card createFromParcel(@NonNull Parcel in) {
-                return new Card(in);
+            public Card createFromParcel(@NonNull Parcel parcel) {
+                return new Card(parcel);
             }
 
             @Override
@@ -754,7 +805,8 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
 
             @NonNull
             public Card build() {
-                return new Card(this);
+                return new Card(mBrand, checks, mCountry, mExpiryMonth, mExpiryYear, mFunding,
+                        mLast4, mThreeDSecureUsage, mWallet);
             }
         }
 
@@ -768,16 +820,21 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
             @Nullable public final String addressPostalCodeCheck;
             @Nullable public final String cvcCheck;
 
-            private Checks(@NonNull Builder builder) {
-                this.addressLine1Check = builder.addressLine1Check;
-                this.addressPostalCodeCheck = builder.addressPostalCodeCheck;
-                this.cvcCheck = builder.cvcCheck;
+            private Checks(
+                    @Nullable String addressLine1Check,
+                    @Nullable String addressPostalCodeCheck,
+                    @Nullable String cvcCheck) {
+                this.addressLine1Check = addressLine1Check;
+                this.addressPostalCodeCheck = addressPostalCodeCheck;
+                this.cvcCheck = cvcCheck;
             }
 
-            private Checks(@NonNull Parcel in) {
-                addressLine1Check = in.readString();
-                addressPostalCodeCheck = in.readString();
-                cvcCheck = in.readString();
+            private Checks(@NonNull Parcel parcel) {
+                this(
+                        parcel.readString(),
+                        parcel.readString(),
+                        parcel.readString()
+                );
             }
 
             @Override
@@ -795,8 +852,8 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
             public static final Parcelable.Creator<Checks> CREATOR =
                     new Parcelable.Creator<Checks>() {
                         @Override
-                        public Checks createFromParcel(@NonNull Parcel in) {
-                            return new Checks(in);
+                        public Checks createFromParcel(@NonNull Parcel parcel) {
+                            return new Checks(parcel);
                         }
 
                         @Override
@@ -860,7 +917,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
 
                 @NonNull
                 public Checks build() {
-                    return new Checks(this);
+                    return new Checks(addressLine1Check, addressPostalCodeCheck, cvcCheck);
                 }
             }
         }
@@ -870,12 +927,12 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
 
             public final boolean isSupported;
 
-            private ThreeDSecureUsage(@NonNull Builder builder) {
-                isSupported = builder.mIsSupported;
+            private ThreeDSecureUsage(boolean isSupported) {
+                this.isSupported = isSupported;
             }
 
-            private ThreeDSecureUsage(@NonNull Parcel in) {
-                isSupported = in.readByte() != 0x00;
+            private ThreeDSecureUsage(@NonNull Parcel parcel) {
+                this(parcel.readInt() != 0);
             }
 
             @Override
@@ -885,14 +942,14 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
 
             @Override
             public void writeToParcel(@NonNull Parcel dest, int flags) {
-                dest.writeByte((byte) (isSupported ? 0x01 : 0x00));
+                dest.writeInt(isSupported ? 1 : 0);
             }
 
             public static final Parcelable.Creator<ThreeDSecureUsage> CREATOR =
                     new Parcelable.Creator<ThreeDSecureUsage>() {
                         @Override
-                        public ThreeDSecureUsage createFromParcel(@NonNull Parcel in) {
-                            return new ThreeDSecureUsage(in);
+                        public ThreeDSecureUsage createFromParcel(@NonNull Parcel parcel) {
+                            return new ThreeDSecureUsage(parcel);
                         }
 
                         @Override
@@ -939,28 +996,23 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
 
                 @NonNull
                 public ThreeDSecureUsage build() {
-                    return new ThreeDSecureUsage(this);
+                    return new ThreeDSecureUsage(mIsSupported);
                 }
             }
         }
     }
 
-    public static final class CardPresent extends PaymentMethodTypeImpl {
+    public static final class CardPresent extends PaymentMethodTypeData {
         public static final CardPresent EMPTY = new CardPresent();
 
         private CardPresent() {
-            super(Type.CardPresent);
-        }
-
-        private CardPresent(@NonNull Parcel in) {
-            super(in);
         }
 
         public static final Parcelable.Creator<CardPresent> CREATOR =
                 new Parcelable.Creator<CardPresent>() {
                     @Override
-                    public CardPresent createFromParcel(@NonNull Parcel in) {
-                        return new CardPresent(in);
+                    public CardPresent createFromParcel(@NonNull Parcel parcel) {
+                        return new CardPresent();
                     }
 
                     @Override
@@ -971,49 +1023,48 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
 
         @Override
         public int hashCode() {
-            return Objects.hash(type);
+            return 0;
         }
 
         @Override
         public boolean equals(@Nullable Object obj) {
-            return this == obj || obj instanceof CardPresent && typedEquals((CardPresent) obj);
+            return this == obj || obj instanceof CardPresent;
         }
 
-        private boolean typedEquals(@NonNull CardPresent obj) {
-            return Objects.equals(type, obj.type);
+        @Override
+        public void writeToParcel(Parcel parcel, int i) {
         }
     }
 
-    public static final class Ideal extends PaymentMethodTypeImpl {
+    public static final class Ideal extends PaymentMethodTypeData {
         private static final String FIELD_BANK = "bank";
         private static final String FIELD_BIC = "bic";
 
         @Nullable public final String bank;
         @Nullable public final String bankIdentifierCode;
 
-        private Ideal(@NonNull Builder builder) {
-            super(Type.Ideal);
-            bank = builder.mBank;
-            bankIdentifierCode = builder.mBankIdentifierCode;
+        private Ideal(@Nullable String bank, @Nullable String bankIdentifierCode) {
+            this.bank = bank;
+            this.bankIdentifierCode = bankIdentifierCode;
         }
 
-        private Ideal(@NonNull Parcel in) {
-            super(in);
-            bank = in.readString();
-            bankIdentifierCode = in.readString();
+        private Ideal(@NonNull Parcel parcel) {
+            this(
+                    parcel.readString(),
+                    parcel.readString()
+            );
         }
 
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
-            super.writeToParcel(dest, flags);
             dest.writeString(bank);
             dest.writeString(bankIdentifierCode);
         }
 
         public static final Parcelable.Creator<Ideal> CREATOR = new Parcelable.Creator<Ideal>() {
             @Override
-            public Ideal createFromParcel(@NonNull Parcel in) {
-                return new Ideal(in);
+            public Ideal createFromParcel(@NonNull Parcel parcel) {
+                return new Ideal(parcel);
             }
 
             @Override
@@ -1067,41 +1118,40 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
 
             @NonNull
             public Ideal build() {
-                return new Ideal(this);
+                return new Ideal(mBank, mBankIdentifierCode);
             }
         }
     }
 
-    public static final class Fpx extends PaymentMethodTypeImpl {
+    public static final class Fpx extends PaymentMethodTypeData {
         private static final String FIELD_ACCOUNT_HOLDER_TYPE = "account_holder_type";
         private static final String FIELD_BANK = "bank";
 
         @Nullable public final String bank;
         @Nullable public final String accountHolderType;
 
-        private Fpx(@NonNull Builder builder) {
-            super(Type.Fpx);
-            bank = builder.mBank;
-            accountHolderType = builder.mAccountHolderType;
+        private Fpx(@Nullable String bank, @Nullable String accountHolderType) {
+            this.bank = bank;
+            this.accountHolderType = accountHolderType;
         }
 
-        private Fpx(@NonNull Parcel in) {
-            super(in);
-            bank = in.readString();
-            accountHolderType = in.readString();
+        private Fpx(@NonNull Parcel parcel) {
+            this(
+                    parcel.readString(),
+                    parcel.readString()
+            );
         }
 
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
-            super.writeToParcel(dest, flags);
             dest.writeString(bank);
             dest.writeString(accountHolderType);
         }
 
         public static final Parcelable.Creator<Fpx> CREATOR = new Parcelable.Creator<Fpx>() {
             @Override
-            public Fpx createFromParcel(@NonNull Parcel in) {
-                return new Fpx(in);
+            public Fpx createFromParcel(@NonNull Parcel parcel) {
+                return new Fpx(parcel);
             }
 
             @Override
@@ -1155,12 +1205,12 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
 
             @NonNull
             public Fpx build() {
-                return new Fpx(this);
+                return new Fpx(mBank, mAccountHolderType);
             }
         }
     }
 
-    public static final class SepaDebit extends PaymentMethodTypeImpl {
+    public static final class SepaDebit extends PaymentMethodTypeData {
         private static final String FIELD_BANK_CODE = "bank_code";
         private static final String FIELD_BRANCH_CODE = "branch_code";
         private static final String FIELD_COUNTRY = "country";
@@ -1180,7 +1230,6 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
                 @Nullable String fingerprint,
                 @Nullable String last4
         ) {
-            super(Type.SepaDebit);
             this.bankCode = bankCode;
             this.branchCode = branchCode;
             this.country = country;
@@ -1222,7 +1271,16 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
                     Objects.equals(last4, other.last4);
         }
 
-        protected static final Parcelable.Creator<SepaDebit> CREATOR =
+        @Override
+        public void writeToParcel(@NonNull Parcel parcel, int i) {
+            parcel.writeString(bankCode);
+            parcel.writeString(branchCode);
+            parcel.writeString(country);
+            parcel.writeString(fingerprint);
+            parcel.writeString(last4);
+        }
+
+        public static final Parcelable.Creator<SepaDebit> CREATOR =
                 new Parcelable.Creator<SepaDebit>() {
                     @Override
                     public SepaDebit createFromParcel(@NonNull Parcel parcel) {
@@ -1251,28 +1309,12 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         }
     }
 
-    private abstract static class PaymentMethodTypeImpl extends StripeModel
+    private abstract static class PaymentMethodTypeData extends StripeModel
             implements Parcelable {
-        @NonNull public final Type type;
-
-        private PaymentMethodTypeImpl(@NonNull Type type) {
-            this.type = type;
-        }
-
-        private PaymentMethodTypeImpl(@NonNull Parcel in) {
-            type = Type.valueOf(in.readString());
-        }
-
         @Override
         public int describeContents() {
             return 0;
         }
-
-        @Override
-        public void writeToParcel(@NonNull Parcel dest, int flags) {
-            dest.writeString(type.name());
-        }
     }
-
 
 }
