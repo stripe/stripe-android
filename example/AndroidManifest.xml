@@ -91,6 +91,9 @@
 
         <activity
             android:name=".activity.FragmentExamplesActivity" />
+
+        <activity
+            android:name=".activity.CreateSepaDebitActivity" />
     </application>
 
 </manifest>
