@@ -1,8 +1,9 @@
 # CHANGELOG
 
-## 11.2.2 - unreleased
+## 11.2.2 - 2019-10-11
 * [#1686](https://github.com/stripe/stripe-android/pull/1686) Fix native crash on some devices in 3DS1 payment authentication WebView
 * [#1690](https://github.com/stripe/stripe-android/pull/1690) Bump API version to `2019-10-08`
+* [#1693](https://github.com/stripe/stripe-android/pull/1693) Add support for SEPA Debit in PaymentMethod
 
 ## 11.2.1 - 2019-10-11
 * [#1677](https://github.com/stripe/stripe-android/pull/1677) Add logging to PaymentAuthWebViewActivity
