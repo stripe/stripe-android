@@ -40,6 +40,34 @@ class PaymentMethodTest {
     }
 
     @Test
+    fun toJson_withSepaDebit_shouldCreateExpectedObject() {
+        assertEquals(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+            PaymentMethod.Builder()
+                .setType(PaymentMethod.Type.SepaDebit.code)
+                .setId("pm_1FSQaJCR")
+                .setLiveMode(false)
+                .setCreated(1570809799L)
+                .setSepaDebit(
+                    PaymentMethod.SepaDebit(
+                        "3704",
+                        "",
+                        "DE",
+                        "vIZc7Ywn0",
+                        "3000"
+                    )
+                )
+                .setBillingDetails(
+                    PaymentMethod.BillingDetails.Builder()
+                        .setName("Jenny Rosen")
+                        .setEmail("jrosen@example.com")
+                        .setAddress(Address.Builder().build())
+                        .build()
+                )
+                .build()
+        )
+    }
+
+    @Test
     fun equals_withEqualPaymentMethods_shouldReturnTrue() {
         assertEquals(PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             PaymentMethod.Builder()
