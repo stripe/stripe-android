@@ -51,7 +51,9 @@ class LauncherActivity : AppCompatActivity() {
             Item(activity.getString(R.string.launch_payment_session_from_fragment),
                 FragmentExamplesActivity::class.java),
             Item(activity.getString(R.string.launch_pay_with_google),
-                PayWithGoogleActivity::class.java)
+                PayWithGoogleActivity::class.java),
+            Item(activity.getString(R.string.launch_create_pm_sepa_debit),
+                CreateSepaDebitActivity::class.java)
         )
 
         override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): ExamplesViewHolder {

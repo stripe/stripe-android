@@ -22,6 +22,8 @@
     <string name="launch_payment_session_from_fragment">Fragment Examples</string>
     <string name="create_asynctask">Create Token with AsyncTask</string>
     <string name="create_rxjava">Create Token with RxJava</string>
+    <string name="launch_create_pm_sepa_debit">Create SEPA Debit Payment Method</string>
+
     <string name="select_add_card">Select or add card</string>
     <string name="selected_card">Selected card:</string>
     <string name="updatedSources">Source results</string>
