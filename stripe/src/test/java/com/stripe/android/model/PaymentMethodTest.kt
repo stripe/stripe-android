@@ -50,7 +50,7 @@ class PaymentMethodTest {
                 .setSepaDebit(
                     PaymentMethod.SepaDebit(
                         "3704",
-                        "",
+                        null,
                         "DE",
                         "vIZc7Ywn0",
                         "3000"

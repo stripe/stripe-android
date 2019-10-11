@@ -1167,11 +1167,11 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
         private static final String FIELD_FINGERPRINT = "fingerprint";
         private static final String FIELD_LAST4 = "last4";
 
-        @NonNull public final String bankCode;
-        @NonNull public final String branchCode;
-        @NonNull public final String country;
-        @NonNull public final String fingerprint;
-        @NonNull public final String last4;
+        @Nullable public final String bankCode;
+        @Nullable public final String branchCode;
+        @Nullable public final String country;
+        @Nullable public final String fingerprint;
+        @Nullable public final String last4;
 
         SepaDebit(
                 @Nullable String bankCode,
@@ -1181,11 +1181,11 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
                 @Nullable String last4
         ) {
             super(Type.SepaDebit);
-            this.bankCode = bankCode != null ? bankCode : "";
-            this.branchCode = branchCode != null ? branchCode : "";
-            this.country = country != null ? country : "";
-            this.fingerprint = fingerprint != null ? fingerprint : "";
-            this.last4 = last4 != null ? last4 : "";
+            this.bankCode = bankCode;
+            this.branchCode = branchCode;
+            this.country = country;
+            this.fingerprint = fingerprint;
+            this.last4 = last4;
         }
 
         private SepaDebit(@NonNull Parcel parcel) {
@@ -1200,7 +1200,7 @@ public final class PaymentMethod extends StripeModel implements Parcelable {
 
         @Override
         public int hashCode() {
-            return 0;
+            return Objects.hash(bankCode, branchCode, country, fingerprint, last4);
         }
 
         @Override
