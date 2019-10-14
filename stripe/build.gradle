@@ -45,7 +45,7 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestUtil 'androidx.test:orchestrator:1.2.0'
 
-    ktlint 'com.pinterest:ktlint:0.34.2'
+    ktlint 'com.pinterest:ktlint:0.35.0'
 }
 
 android {
