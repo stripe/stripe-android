@@ -164,9 +164,9 @@ class PaymentSessionActivity : AppCompatActivity() {
     private fun createSampleShippingMethods(): ArrayList<ShippingMethod> {
         val shippingMethods = ArrayList<ShippingMethod>()
         shippingMethods.add(ShippingMethod("UPS Ground", "ups-ground",
-            "Arrives in 3-5 days", 0, "USD"))
+            0, "USD", "Arrives in 3-5 days"))
         shippingMethods.add(ShippingMethod("FedEx", "fedex",
-            "Arrives tomorrow", 599, "USD"))
+            599, "USD", "Arrives tomorrow"))
         return shippingMethods
     }
 

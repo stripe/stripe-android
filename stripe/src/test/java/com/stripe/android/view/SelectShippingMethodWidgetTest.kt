@@ -38,16 +38,16 @@ class SelectShippingMethodWidgetTest {
         private val UPS = ShippingMethod(
             "UPS Ground",
             "ups-ground",
-            "Arrives in 3-5 days",
             0,
-            "USD"
+            "USD",
+            "Arrives in 3-5 days"
         )
         private val FEDEX = ShippingMethod(
             "FedEx",
             "fedex",
-            "Arrives tomorrow",
             599,
-            "USD"
+            "USD",
+            "Arrives tomorrow"
         )
     }
 }

@@ -150,7 +150,6 @@ open class AddPaymentMethodActivity : StripeActivity() {
     private fun finishWithPaymentMethod(paymentMethod: PaymentMethod) {
         setCommunicatingProgress(false)
         setResult(Activity.RESULT_OK, Intent()
-            .putExtra(EXTRA_NEW_PAYMENT_METHOD, paymentMethod)
             .putExtras(AddPaymentMethodActivityStarter.Result(paymentMethod).toBundle()))
         finish()
     }
@@ -216,9 +215,6 @@ open class AddPaymentMethodActivity : StripeActivity() {
     }
 
     companion object {
-        const val TOKEN_ADD_PAYMENT_METHOD_ACTIVITY = "AddPaymentMethodActivity"
-
-        @Deprecated("use {@link AddPaymentMethodActivityStarter.Result}")
-        const val EXTRA_NEW_PAYMENT_METHOD = "new_payment_method"
+        const val TOKEN_ADD_PAYMENT_METHOD_ACTIVITY: String = "AddPaymentMethodActivity"
     }
 }

@@ -1,9 +1,9 @@
 package com.stripe.android
 
-import android.os.Parcel
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
+import com.stripe.android.utils.ParcelUtils
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.junit.runner.RunWith
@@ -24,10 +24,9 @@ class PaymentSessionConfigTest {
             .setPaymentMethodTypes(listOf(PaymentMethod.Type.Card, PaymentMethod.Type.Fpx))
             .build()
 
-        val parcel = Parcel.obtain()
-        paymentSessionConfig.writeToParcel(parcel, paymentSessionConfig.describeContents())
-        parcel.setDataPosition(0)
-
-        assertEquals(paymentSessionConfig, PaymentSessionConfig.CREATOR.createFromParcel(parcel))
+        assertEquals(
+            paymentSessionConfig,
+            ParcelUtils.create(paymentSessionConfig, PaymentSessionConfig.CREATOR)
+        )
     }
 }

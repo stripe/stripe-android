@@ -689,34 +689,6 @@ class Stripe internal constructor(
     }
 
     /**
-     * Blocking method to create a [Token]. Do not call this on the UI thread or your app
-     * will crash.
-     *
-     * See [Create a card token](https://stripe.com/docs/api/tokens/create_card).
-     *
-     * @param card the [Card] to use for this token
-     * @return a [Token] that can be used for this card
-     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
-     * @throws InvalidRequestException your request has invalid parameters
-     * @throws APIConnectionException failure to connect to Stripe's API
-     * @throws CardException the card cannot be charged for some reason
-     * @throws APIException any other type of problem (for instance, a temporary issue with
-     * Stripe's servers
-     *
-     * @deprecated use [createCardTokenSynchronous]
-     */
-    @Deprecated("Use createCardTokenSynchronous()")
-    @Throws(AuthenticationException::class, InvalidRequestException::class,
-        APIConnectionException::class, CardException::class, APIException::class)
-    fun createTokenSynchronous(card: Card): Token? {
-        return stripeRepository.createToken(
-            stripeNetworkUtils.createCardTokenParams(card),
-            ApiRequest.Options.create(publishableKey, stripeAccountId),
-            Token.TokenType.CARD
-        )
-    }
-
-    /**
      * Create a CVC update token asynchronously.
      *
      * @param cvc the CVC used to create this token

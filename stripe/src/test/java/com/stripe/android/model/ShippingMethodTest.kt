@@ -1,11 +1,15 @@
 package com.stripe.android.model
 
+import com.stripe.android.utils.ParcelUtils
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 /**
  * Test class for [ShippingMethod]
  */
+@RunWith(RobolectricTestRunner::class)
 class ShippingMethodTest {
 
     @Test
@@ -14,15 +18,15 @@ class ShippingMethodTest {
     }
 
     @Test
-    fun testHashcode() {
-        assertEquals(SHIPPING_METHOD.hashCode(), createShippingMethod().hashCode())
+    fun testParcel() {
+        assertEquals(SHIPPING_METHOD, ParcelUtils.create(SHIPPING_METHOD, ShippingMethod.CREATOR))
     }
 
     companion object {
         private val SHIPPING_METHOD = createShippingMethod()
 
         private fun createShippingMethod(): ShippingMethod {
-            return ShippingMethod("FedEx", "fedex", "Arrives tomorrow", 599, "USD")
+            return ShippingMethod("FedEx", "fedex", 599, "USD", "Arrives tomorrow")
         }
     }
 }

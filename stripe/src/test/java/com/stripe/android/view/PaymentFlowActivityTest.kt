@@ -215,7 +215,7 @@ class PaymentFlowActivityTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowAct
         onShippingInfoProcessedValid.putExtra(EXTRA_IS_SHIPPING_INFO_VALID, true)
 
         val shippingMethods = arrayListOf(
-            ShippingMethod("label", "id", null, 0, "USD")
+            ShippingMethod("label", "id", 0, "USD")
         )
         onShippingInfoProcessedValid.putExtra(EXTRA_VALID_SHIPPING_METHODS, shippingMethods)
         LocalBroadcastManager.getInstance(ApplicationProvider.getApplicationContext())
