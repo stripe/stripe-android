@@ -29,6 +29,8 @@ internal class ApiRequestTest {
 
     @Test
     fun getHeaders_withAllRequestOptions_properlyMapsRequestOptions() {
+        Locale.setDefault(Locale.US)
+
         val stripeAccount = "acct_123abc"
         val headers = ApiRequest.createGet(StripeApiRepository.sourcesUrl,
             ApiRequest.Options.create(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
@@ -41,7 +43,7 @@ internal class ApiRequestTest {
         )
         assertEquals(ApiVersion.get().code, headers["Stripe-Version"])
         assertEquals(stripeAccount, headers["Stripe-Account"])
-        assertFalse(headers.contains("Accept-Language"))
+        assertEquals("en-US", headers["Accept-Language"])
     }
 
     @Test

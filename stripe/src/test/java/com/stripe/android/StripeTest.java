@@ -8,6 +8,7 @@ import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.CardException;
+import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.AccountParams;
 import com.stripe.android.model.Address;
@@ -31,6 +32,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
@@ -1037,6 +1039,23 @@ public class StripeTest {
                 }
         );
         assertEquals("Your card number is incorrect.", cardException.getMessage());
+    }
+
+    @Ignore("enable after bumping version to v12.0.0")
+    public void retrievePaymentIntent_withInvalidClientSecretInGermanyLocale_shouldReturnLocalizedMessage() {
+        Locale.setDefault(Locale.GERMANY);
+
+        // This card is missing quite a few numbers.
+        final Stripe stripe = createStripe();
+        final InvalidRequestException exception = assertThrows(
+                InvalidRequestException.class,
+                new ThrowingRunnable() {
+                    @Override
+                    public void run() throws Throwable {
+                        stripe.retrievePaymentIntentSynchronous("invalid");
+                    }
+                });
+        assertEquals("Keine solche payment_intent: invalid", exception.getStripeError().getMessage());
     }
 
     @Test
