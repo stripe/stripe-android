@@ -1,10 +1,10 @@
 package com.stripe.android
 
-import android.os.Parcel
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodTest
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
+import com.stripe.android.utils.ParcelUtils
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -58,36 +58,30 @@ class PaymentSessionDataTest {
     @Test
     fun writeToParcel_withNulls_readsFromParcelCorrectly() {
         val data = PaymentSessionData()
-
         data.cartTotal = 100L
         data.shippingTotal = 150L
         data.isPaymentReadyToCharge = false
 
-        val parcel = Parcel.obtain()
-        data.writeToParcel(parcel, 0)
-        parcel.setDataPosition(0)
-
-        val parceledData = PaymentSessionData.CREATOR.createFromParcel(parcel)
-        assertEquals(data, parceledData)
+        assertEquals(
+            data,
+            ParcelUtils.create(data, PaymentSessionData.CREATOR)
+        )
     }
 
     @Test
     fun writeToParcel_withoutNulls_readsFromParcelCorrectly() {
         val data = PaymentSessionData()
-
         data.cartTotal = 100L
         data.shippingTotal = 150L
         data.paymentMethod = PAYMENT_METHOD
         data.isPaymentReadyToCharge = false
         data.shippingInformation = ShippingInformation(null, null, null)
-        data.shippingMethod = ShippingMethod("UPS", "SuperFast", 10000L, "usd")
+        data.shippingMethod = ShippingMethod("UPS", "SuperFast", 10000L, "USD")
 
-        val parcel = Parcel.obtain()
-        data.writeToParcel(parcel, 0)
-        parcel.setDataPosition(0)
-
-        val parceledData = PaymentSessionData.CREATOR.createFromParcel(parcel)
-        assertEquals(data, parceledData)
+        assertEquals(
+            data,
+            ParcelUtils.create(data, PaymentSessionData.CREATOR)
+        )
     }
 
     companion object {

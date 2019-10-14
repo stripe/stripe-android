@@ -1,6 +1,6 @@
 package com.stripe.android.model
 
-import android.os.Parcel
+import com.stripe.android.utils.ParcelUtils
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -130,13 +130,10 @@ class PaymentMethodTest {
             .setSepaDebit(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD.sepaDebit)
             .build()
 
-        val parcel = Parcel.obtain()
-        paymentMethod.writeToParcel(parcel, paymentMethod.describeContents())
-        parcel.setDataPosition(0)
-
-        val parcelPaymentMethod = PaymentMethod.CREATOR.createFromParcel(parcel)
-
-        assertEquals(paymentMethod, parcelPaymentMethod)
+        assertEquals(
+            paymentMethod,
+            ParcelUtils.create(paymentMethod, PaymentMethod.CREATOR)
+        )
     }
 
     @Test

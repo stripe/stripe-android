@@ -1,9 +1,8 @@
 package com.stripe.android.model.wallets
 
-import android.os.Parcel
+import com.stripe.android.utils.ParcelUtils
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.json.JSONObject
 import org.junit.runner.RunWith
@@ -53,24 +52,18 @@ class WalletFactoryTest {
         val walletFactory = WalletFactory()
 
         val samsungPayWallet =
-            walletFactory.create(SAMSUNG_PAY_WALLET_JSON) as SamsungPayWallet?
-        assertNotNull(samsungPayWallet)
-        val samsungWalletParcel = Parcel.obtain()
-        samsungPayWallet!!.writeToParcel(samsungWalletParcel, samsungPayWallet.describeContents())
-        samsungWalletParcel.setDataPosition(0)
-        val parcelSamsungWallet =
-            SamsungPayWallet.CREATOR.createFromParcel(samsungWalletParcel)
-        assertEquals(samsungPayWallet, parcelSamsungWallet)
+            walletFactory.create(SAMSUNG_PAY_WALLET_JSON) as SamsungPayWallet
+        assertEquals(
+            samsungPayWallet,
+            ParcelUtils.create(samsungPayWallet, SamsungPayWallet.CREATOR)
+        )
 
         val visaWallet =
-            walletFactory.create(VISA_WALLET_JSON) as VisaCheckoutWallet?
-        assertNotNull(visaWallet)
-        val visaParcel = Parcel.obtain()
-        visaWallet!!.writeToParcel(visaParcel, visaWallet.describeContents())
-        visaParcel.setDataPosition(0)
-        val parcelVisaWallet =
-            VisaCheckoutWallet.CREATOR.createFromParcel(visaParcel)
-        assertEquals(visaWallet, parcelVisaWallet)
+            walletFactory.create(VISA_WALLET_JSON) as VisaCheckoutWallet
+        assertEquals(
+            visaWallet,
+            ParcelUtils.create(visaWallet, VisaCheckoutWallet.CREATOR)
+        )
     }
 
     companion object {

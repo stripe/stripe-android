@@ -1,6 +1,6 @@
 package com.stripe.android
 
-import android.os.Parcel
+import com.stripe.android.utils.ParcelUtils
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -28,23 +28,10 @@ class EphemeralKeyTest {
     @Test
     @Throws(JSONException::class)
     fun toParcel_fromParcel_createsExpectedObject() {
-        val ephemeralKey = EPHEMERAL_KEY
-        val parcel = Parcel.obtain()
-        ephemeralKey.writeToParcel(parcel, 0)
-        // We need to reset the data position of the parcel or else we'll continue reading
-        // null values off the end.
-        parcel.setDataPosition(0)
-
-        val createdKey = CustomerEphemeralKey.CREATOR.createFromParcel(parcel)
-
-        assertEquals(ephemeralKey.id, createdKey.id)
-        assertEquals(ephemeralKey.created, createdKey.created)
-        assertEquals(ephemeralKey.expires, createdKey.expires)
-        assertEquals(ephemeralKey.customerId, createdKey.customerId)
-        assertEquals(ephemeralKey.type, createdKey.type)
-        assertEquals(ephemeralKey.secret, createdKey.secret)
-        assertEquals(ephemeralKey.isLiveMode, createdKey.isLiveMode)
-        assertEquals(ephemeralKey.objectType, createdKey.objectType)
+        assertEquals(
+            EPHEMERAL_KEY,
+            ParcelUtils.create(EPHEMERAL_KEY, CustomerEphemeralKey.CREATOR)
+        )
     }
 
     companion object {
