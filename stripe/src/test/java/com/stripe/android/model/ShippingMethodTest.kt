@@ -19,7 +19,7 @@ class ShippingMethodTest {
 
     @Test
     fun testParcel() {
-        assertEquals(SHIPPING_METHOD, ParcelUtils.create(SHIPPING_METHOD, ShippingMethod.CREATOR))
+        assertEquals(SHIPPING_METHOD, ParcelUtils.create(SHIPPING_METHOD))
     }
 
     companion object {

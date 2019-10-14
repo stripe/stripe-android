@@ -1,12 +1,16 @@
 package com.stripe.android.model
 
 import com.stripe.android.testharness.JsonTestUtils.assertMapEquals
+import com.stripe.android.utils.ParcelUtils
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 /**
  * Test class for [Address].
  */
+@RunWith(RobolectricTestRunner::class)
 class AddressTest {
 
     @Test
@@ -34,6 +38,11 @@ class AddressTest {
             .build()
             .toParamMap()
         assertEquals(mapOf("country" to "US"), addressParams)
+    }
+
+    @Test
+    fun testParcelize() {
+        assertEquals(ADDRESS, ParcelUtils.create(ADDRESS))
     }
 
     companion object {

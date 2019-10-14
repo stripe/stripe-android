@@ -24,9 +24,6 @@ class PaymentSessionConfigTest {
             .setPaymentMethodTypes(listOf(PaymentMethod.Type.Card, PaymentMethod.Type.Fpx))
             .build()
 
-        assertEquals(
-            paymentSessionConfig,
-            ParcelUtils.create(paymentSessionConfig, PaymentSessionConfig.CREATOR)
-        )
+        assertEquals(paymentSessionConfig, ParcelUtils.create(paymentSessionConfig))
     }
 }

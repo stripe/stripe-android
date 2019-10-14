@@ -30,9 +30,7 @@ class PaymentMethodsActivityStarterTest {
             .setAddPaymentMethodFooter(R.layout.activity_payment_methods)
             .build()
 
-        val createdArgs =
-            ParcelUtils.create(args, PaymentMethodsActivityStarter.Args.CREATOR)
-        assertEquals(args, createdArgs)
+        assertEquals(args, ParcelUtils.create(args))
     }
 
     @Test
