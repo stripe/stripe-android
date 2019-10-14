@@ -64,17 +64,13 @@ internal class PaymentAuthWebView : WebView {
         var completionUrlParam: String? = null
             private set
 
-        // true if another app was opened from this WebView
-        var hasOpenedApp: Boolean = false
-            private set
-
-        override fun onPageCommitVisible(view: WebView, url: String) {
-            super.onPageCommitVisible(view, url)
-            progressBar.visibility = View.GONE
-        }
-
         override fun onPageFinished(view: WebView, url: String?) {
             super.onPageFinished(view, url)
+
+            // hide the progress bar here because doing it in `onPageCommitVisible()` potentially
+            // causes a crash
+            progressBar.visibility = View.GONE
+
             if (url != null && isCompletionUrl(url)) {
                 onAuthCompleted()
             }
@@ -124,7 +120,6 @@ internal class PaymentAuthWebView : WebView {
 
         private fun openIntent(intent: Intent) {
             if (intent.resolveActivity(packageManager) != null) {
-                hasOpenedApp = true
                 activity.startActivity(intent)
             } else {
                 // complete auth if the deep-link can't be opened
