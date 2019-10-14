@@ -114,6 +114,18 @@
 * [#1506](https://github.com/stripe/stripe-android/pull/1506) Remove `Stripe#createToken()` with `Executor` argument
 * [#1514](https://github.com/stripe/stripe-android/pull/1514) Bump API version to `2019-09-09`
 
+## 10.4.6 - 2019-10-14
+* Apply hot-fixes from 11.x
+    * Update BouncyCastle Proguard rules.
+      Keep only the BouncyCastle provider classes.
+    * Hide progress bar in `onPageFinished()` instead of
+      `onPageCommitVisible()` to avoid potential crash
+      on some devices.
+
+## 10.4.5 - 2019-09-16
+* Apply hot-fixes from 11.x
+    * Enable DOM storage in `PaymentAuthWebView` to fix crash
+
 ## 10.4.4 - 2019-09-13
 * Apply hot-fixes from 11.x
 
