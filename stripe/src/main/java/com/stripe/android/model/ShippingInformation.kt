@@ -26,7 +26,7 @@ data class ShippingInformation constructor(
             FIELD_PHONE to phone,
             FIELD_ADDRESS to address?.toParamMap()
         )
-            .mapNotNull { pair -> pair.second?.let { Pair(pair.first, it) } }
+            .mapNotNull { (first, second) -> second?.let { Pair(first, it) } }
             .toMap()
     }
 

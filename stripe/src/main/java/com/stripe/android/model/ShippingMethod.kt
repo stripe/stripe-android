@@ -8,7 +8,7 @@ import java.util.Currency
 /**
  * Model representing a shipping method in the Android SDK.
  */
-data class ShippingMethod constructor(
+data class ShippingMethod @JvmOverloads constructor(
     /**
      * Human friendly label specifying the shipping method that can be shown in the UI.
      */
@@ -20,41 +20,39 @@ data class ShippingMethod constructor(
     val identifier: String,
 
     /**
-     * Human friendly information such as estimated shipping times that can be shown in
-     * the UI
-     */
-    val detail: String?,
-
-    /**
      * The cost in minor unit based on [currency]
      */
     val amount: Long,
 
-    @Size(min = 0, max = 3) val currencyCode: String
-) : StripeModel(), Parcelable {
     /**
      * The currency that the specified amount will be rendered in.
      */
-    val currency: Currency
-        get() = Currency.getInstance(currencyCode)
+    val currency: Currency,
 
     /**
-     * @deprecated use primary constructor
+     * Human friendly information such as estimated shipping times that can be shown in
+     * the UI
      */
-    @Deprecated("Use other constructor")
+    val detail: String? = null
+) : StripeModel(), Parcelable {
+
+    @JvmOverloads
     constructor(
         label: String,
         identifier: String,
         amount: Long,
-        @Size(min = 0, max = 3) currencyCode: String
-    ) : this(label, identifier, null, amount, currencyCode)
+        @Size(min = 0, max = 3) currencyCode: String,
+        detail: String? = null
+    ) : this(
+        label, identifier, amount, Currency.getInstance(currencyCode), detail
+    )
 
     private constructor(parcel: Parcel) : this(
         requireNotNull(parcel.readString()),
         requireNotNull(parcel.readString()),
-        parcel.readString(),
         parcel.readLong(),
-        requireNotNull(parcel.readString())
+        Currency.getInstance(requireNotNull(parcel.readString())),
+        parcel.readString()
     )
 
     override fun describeContents(): Int {
@@ -64,9 +62,9 @@ data class ShippingMethod constructor(
     override fun writeToParcel(parcel: Parcel, i: Int) {
         parcel.writeString(label)
         parcel.writeString(identifier)
-        parcel.writeString(detail)
         parcel.writeLong(amount)
-        parcel.writeString(currencyCode)
+        parcel.writeString(currency.currencyCode)
+        parcel.writeString(detail)
     }
 
     companion object {

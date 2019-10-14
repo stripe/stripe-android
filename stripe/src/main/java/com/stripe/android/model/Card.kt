@@ -182,11 +182,6 @@ class Card private constructor(
         }
     }
 
-    @Deprecated("getCVC() is deprecated", ReplaceWith("Use getCvc()"))
-    fun getCVC(): String? {
-        return cvc
-    }
-
     fun toPaymentMethodParamsCard(): PaymentMethodCreateParams.Card {
         return PaymentMethodCreateParams.Card.Builder()
             .setNumber(number)

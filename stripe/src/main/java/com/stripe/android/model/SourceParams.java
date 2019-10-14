@@ -274,7 +274,7 @@ public final class SourceParams implements StripeParamsModel {
         basicInfoMap.put(FIELD_NUMBER, card.getNumber());
         basicInfoMap.put(FIELD_EXP_MONTH, card.getExpMonth());
         basicInfoMap.put(FIELD_EXP_YEAR, card.getExpYear());
-        basicInfoMap.put(FIELD_CVC, card.getCVC());
+        basicInfoMap.put(FIELD_CVC, card.getCvc());
 
         params.setApiParameterMap(basicInfoMap);
 

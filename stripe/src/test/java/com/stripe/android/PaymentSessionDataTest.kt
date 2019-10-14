@@ -50,7 +50,7 @@ class PaymentSessionDataTest {
         assertFalse(data.updateIsPaymentReadyToCharge(config))
         assertFalse(data.isPaymentReadyToCharge)
 
-        data.shippingMethod = ShippingMethod("label", "id", null, 0, "USD")
+        data.shippingMethod = ShippingMethod("label", "id", 0, "USD")
         assertTrue(data.updateIsPaymentReadyToCharge(config))
         assertTrue(data.isPaymentReadyToCharge)
     }
@@ -80,7 +80,7 @@ class PaymentSessionDataTest {
         data.paymentMethod = PAYMENT_METHOD
         data.isPaymentReadyToCharge = false
         data.shippingInformation = ShippingInformation(null, null, null)
-        data.shippingMethod = ShippingMethod("UPS", "SuperFast", null, 10000L, "usd")
+        data.shippingMethod = ShippingMethod("UPS", "SuperFast", 10000L, "usd")
 
         val parcel = Parcel.obtain()
         data.writeToParcel(parcel, 0)
