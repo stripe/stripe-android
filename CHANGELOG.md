@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 12.0.0 - unreleased
+* [#1699](https://github.com/stripe/stripe-android/pull/1699) Remove deprecated methods
+    * Replace `Stripe#createTokenSynchronous(Card)` with `Stripe#createCardTokenSynchronous(Card)`
+    * Replace `Card#getCVC()` with `Card#getCvc()`
+    * Remove `AddPaymentMethodActivity#EXTRA_NEW_PAYMENT_METHOD`, use `AddPaymentMethodActivityStarter.Result.fromIntent()` instead
+    * Create overloaded `ShippingMethod` constructor with optional `detail` argument
+
 ## 11.2.2 - 2019-10-11
 * [#1686](https://github.com/stripe/stripe-android/pull/1686) Fix native crash on some devices in 3DS1 payment authentication WebView
 * [#1690](https://github.com/stripe/stripe-android/pull/1690) Bump API version to `2019-10-08`
