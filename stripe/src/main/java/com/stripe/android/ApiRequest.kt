@@ -40,9 +40,7 @@ internal class ApiRequest internal constructor(
                 mapOf("Stripe-Account" to it)
             }.orEmpty()
         ).plus(
-            (languageTag.takeIf { SHOULD_INCLUDE_ACCEPT_LANGUAGE_HEADER })?.let {
-                mapOf("Accept-Language" to it)
-            }.orEmpty()
+            languageTag?.let { mapOf("Accept-Language" to it) }.orEmpty()
         )
     }
 
@@ -136,9 +134,6 @@ internal class ApiRequest internal constructor(
 
         // this is the default user agent set by the system
         private const val PROP_USER_AGENT = "http.agent"
-
-        // TODO(mshafrir-stripe) - enable in next major version
-        private const val SHOULD_INCLUDE_ACCEPT_LANGUAGE_HEADER = false
 
         @JvmStatic
         fun createGet(
