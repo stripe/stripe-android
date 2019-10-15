@@ -3,7 +3,6 @@ package com.stripe.android.model
 import com.stripe.android.model.StripeJsonUtils.optBoolean
 import com.stripe.android.model.StripeJsonUtils.optInteger
 import com.stripe.android.model.StripeJsonUtils.optString
-import java.util.Objects
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -11,7 +10,7 @@ import org.json.JSONObject
 /**
  * Model for a Stripe Customer object
  */
-class Customer private constructor(
+data class Customer internal constructor(
     val id: String?,
     val defaultSource: String?,
     val shippingInformation: ShippingInformation?,
@@ -23,26 +22,6 @@ class Customer private constructor(
 
     fun getSourceById(sourceId: String): CustomerSource? {
         return sources.firstOrNull { it.id == sourceId }
-    }
-
-    override fun equals(other: Any?): Boolean {
-        return when {
-            this === other -> true
-            other is Customer -> typedEquals(other)
-            else -> false
-        }
-    }
-
-    private fun typedEquals(customer: Customer): Boolean {
-        return id == customer.id && defaultSource == customer.defaultSource &&
-            shippingInformation == customer.shippingInformation && sources == customer.sources &&
-            hasMore == customer.hasMore && totalCount == customer.totalCount && url == customer.url
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(
-            id, defaultSource, shippingInformation, sources, hasMore, totalCount, url
-        )
     }
 
     companion object {

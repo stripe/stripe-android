@@ -1,11 +1,9 @@
 package com.stripe.android.model
 
-import java.util.Objects
-
 /**
  * Represents a grouping of parameters needed to create a Token for a Connect account on the server.
  */
-class AccountParams private constructor(
+data class AccountParams internal constructor(
     private val businessType: BusinessType?,
     private val businessData: Map<String, Any>?,
     private val tosShownAndAccepted: Boolean
@@ -28,24 +26,6 @@ class AccountParams private constructor(
                     }.orEmpty()
                 )
         )
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(tosShownAndAccepted, businessType, businessData)
-    }
-
-    override fun equals(other: Any?): Boolean {
-        return when {
-            this === other -> true
-            other is AccountParams -> typedEquals(other)
-            else -> false
-        }
-    }
-
-    private fun typedEquals(accountParams: AccountParams): Boolean {
-        return tosShownAndAccepted == accountParams.tosShownAndAccepted &&
-            businessType == accountParams.businessType &&
-            businessData == accountParams.businessData
     }
 
     /**

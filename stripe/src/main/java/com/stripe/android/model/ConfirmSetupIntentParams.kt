@@ -7,23 +7,14 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_PA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_PAYMENT_METHOD_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_RETURN_URL
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_USE_STRIPE_SDK
-import java.util.Objects
 
-class ConfirmSetupIntentParams private constructor(builder: Builder) : ConfirmStripeIntentParams {
-
-    override val clientSecret: String
-    private val paymentMethodId: String?
-    val paymentMethodCreateParams: PaymentMethodCreateParams?
-    private val returnUrl: String?
+data class ConfirmSetupIntentParams internal constructor(
+    override val clientSecret: String,
+    private val paymentMethodId: String?,
+    val paymentMethodCreateParams: PaymentMethodCreateParams?,
+    private val returnUrl: String?,
     private val useStripeSdk: Boolean
-
-    init {
-        this.clientSecret = builder.clientSecret
-        this.returnUrl = builder.returnUrl
-        this.paymentMethodId = builder.paymentMethodId
-        this.paymentMethodCreateParams = builder.paymentMethodCreateParams
-        this.useStripeSdk = builder.useStripeSdk
-    }
+) : ConfirmStripeIntentParams {
 
     override fun shouldUseStripeSdk(): Boolean {
         return useStripeSdk
@@ -75,33 +66,14 @@ class ConfirmSetupIntentParams private constructor(builder: Builder) : ConfirmSt
         return builder
     }
 
-    override fun equals(other: Any?): Boolean {
-        return when {
-            this === other -> true
-            other is ConfirmSetupIntentParams -> typedEquals(other)
-            else -> false
-        }
-    }
-
-    private fun typedEquals(params: ConfirmSetupIntentParams): Boolean {
-        return returnUrl == params.returnUrl && clientSecret == params.clientSecret &&
-            paymentMethodId == params.paymentMethodId &&
-            paymentMethodCreateParams == params.paymentMethodCreateParams &&
-            useStripeSdk == params.useStripeSdk
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(returnUrl, clientSecret, paymentMethodId, useStripeSdk)
-    }
-
     @VisibleForTesting
     internal class Builder internal constructor(
-        internal val clientSecret: String
+        private val clientSecret: String
     ) : ObjectBuilder<ConfirmSetupIntentParams> {
-        internal var paymentMethodId: String? = null
-        internal var paymentMethodCreateParams: PaymentMethodCreateParams? = null
-        internal var returnUrl: String? = null
-        internal var useStripeSdk: Boolean = false
+        private var paymentMethodId: String? = null
+        private var paymentMethodCreateParams: PaymentMethodCreateParams? = null
+        private var returnUrl: String? = null
+        private var useStripeSdk: Boolean = false
 
         internal fun setPaymentMethodId(paymentMethodId: String): Builder {
             this.paymentMethodId = paymentMethodId
@@ -126,7 +98,13 @@ class ConfirmSetupIntentParams private constructor(builder: Builder) : ConfirmSt
         }
 
         override fun build(): ConfirmSetupIntentParams {
-            return ConfirmSetupIntentParams(this)
+            return ConfirmSetupIntentParams(
+                clientSecret = clientSecret,
+                returnUrl = returnUrl,
+                paymentMethodId = paymentMethodId,
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                useStripeSdk = useStripeSdk
+            )
         }
     }
 

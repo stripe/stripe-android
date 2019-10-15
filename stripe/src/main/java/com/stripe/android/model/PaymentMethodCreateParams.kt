@@ -2,7 +2,6 @@ package com.stripe.android.model
 
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.Stripe
-import java.util.Objects
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -15,7 +14,7 @@ import org.json.JSONObject
  *
  * See [PaymentMethod] for API object.
  */
-class PaymentMethodCreateParams private constructor(
+data class PaymentMethodCreateParams internal constructor(
     internal val type: Type,
     private val card: Card? = null,
     private val ideal: Ideal? = null,
@@ -101,27 +100,6 @@ class PaymentMethodCreateParams private constructor(
         )
     }
 
-    override fun hashCode(): Int {
-        return Objects.hash(type, card, fpx, ideal, billingDetails, metadata)
-    }
-
-    override fun equals(other: Any?): Boolean {
-        return when {
-            this === other -> true
-            other is PaymentMethodCreateParams -> typedEquals(other)
-            else -> false
-        }
-    }
-
-    private fun typedEquals(params: PaymentMethodCreateParams): Boolean {
-        return (type == params.type &&
-            card == params.card &&
-            fpx == params.fpx &&
-            ideal == params.ideal &&
-            billingDetails == params.billingDetails &&
-            metadata == params.metadata)
-    }
-
     internal enum class Type(internal val code: String, val hasMandate: Boolean = false) {
         Card("card"),
         Ideal("ideal"),
@@ -129,33 +107,13 @@ class PaymentMethodCreateParams private constructor(
         SepaDebit("sepa_debit", true)
     }
 
-    class Card private constructor(
+    data class Card internal constructor(
         private val number: String? = null,
         private val expiryMonth: Int? = null,
         private val expiryYear: Int? = null,
         private val cvc: String? = null,
         private val token: String? = null
     ) : StripeParamsModel {
-        override fun hashCode(): Int {
-            return Objects.hash(number, expiryMonth, expiryYear, cvc, token)
-        }
-
-        override fun equals(other: Any?): Boolean {
-            return when {
-                this === other -> true
-                other is Card -> typedEquals(other)
-                else -> false
-            }
-        }
-
-        private fun typedEquals(card: Card): Boolean {
-            return number == card.number &&
-                cvc == card.cvc &&
-                expiryMonth == card.expiryMonth &&
-                expiryYear == card.expiryYear &&
-                token == card.token
-        }
-
         override fun toParamMap(): Map<String, Any> {
             return listOf(
                 FIELD_NUMBER to number,
@@ -224,25 +182,9 @@ class PaymentMethodCreateParams private constructor(
         }
     }
 
-    class Ideal private constructor(private val bank: String?) : StripeParamsModel {
+    data class Ideal internal constructor(private val bank: String?) : StripeParamsModel {
         override fun toParamMap(): Map<String, Any> {
             return bank?.let { mapOf(FIELD_BANK to it) }.orEmpty()
-        }
-
-        override fun hashCode(): Int {
-            return Objects.hash(bank)
-        }
-
-        override fun equals(other: Any?): Boolean {
-            return when {
-                this === other -> true
-                other is Ideal -> typedEquals(other)
-                else -> false
-            }
-        }
-
-        private fun typedEquals(ideal: Ideal): Boolean {
-            return bank == ideal.bank
         }
 
         class Builder : ObjectBuilder<Ideal> {
@@ -263,27 +205,11 @@ class PaymentMethodCreateParams private constructor(
         }
     }
 
-    class Fpx private constructor(private val bank: String?) : StripeParamsModel {
+    data class Fpx internal constructor(private val bank: String?) : StripeParamsModel {
         override fun toParamMap(): Map<String, Any> {
             return bank?.let {
                 mapOf(FIELD_BANK to it)
             }.orEmpty()
-        }
-
-        override fun hashCode(): Int {
-            return Objects.hash(bank)
-        }
-
-        override fun equals(other: Any?): Boolean {
-            return when {
-                this === other -> true
-                other is Fpx -> typedEquals(other)
-                else -> false
-            }
-        }
-
-        private fun typedEquals(fpx: Fpx): Boolean {
-            return bank == fpx.bank
         }
 
         class Builder : ObjectBuilder<Fpx> {
@@ -304,27 +230,11 @@ class PaymentMethodCreateParams private constructor(
         }
     }
 
-    class SepaDebit private constructor(private val iban: String?) : StripeParamsModel {
+    data class SepaDebit internal constructor(private val iban: String?) : StripeParamsModel {
         override fun toParamMap(): Map<String, Any> {
             return iban?.let {
                 mapOf(FIELD_IBAN to it)
             }.orEmpty()
-        }
-
-        override fun hashCode(): Int {
-            return Objects.hash(iban)
-        }
-
-        override fun equals(other: Any?): Boolean {
-            return when {
-                this === other -> true
-                other is SepaDebit -> typedEquals(other)
-                else -> false
-            }
-        }
-
-        private fun typedEquals(sepaDebit: SepaDebit): Boolean {
-            return iban == sepaDebit.iban
         }
 
         class Builder : ObjectBuilder<SepaDebit> {

@@ -4,36 +4,21 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_USE_STRIPE_SDK
-import java.util.Objects
 
-class ConfirmPaymentIntentParams private constructor(builder: Builder) : ConfirmStripeIntentParams {
+data class ConfirmPaymentIntentParams internal constructor(
+    val paymentMethodCreateParams: PaymentMethodCreateParams?,
+    val paymentMethodId: String?,
+    val sourceParams: SourceParams?,
+    val sourceId: String?,
 
-    val paymentMethodCreateParams: PaymentMethodCreateParams?
-    val paymentMethodId: String?
-    val sourceParams: SourceParams?
-    val sourceId: String?
+    val extraParams: Map<String, Any>?,
+    override val clientSecret: String,
+    val returnUrl: String?,
 
-    val extraParams: Map<String, Any>?
-    override val clientSecret: String
-    val returnUrl: String?
-
-    private val savePaymentMethod: Boolean
+    private val savePaymentMethod: Boolean,
     private val useStripeSdk: Boolean
 
-    init {
-        clientSecret = builder.clientSecret
-        returnUrl = builder.returnUrl
-
-        paymentMethodId = builder.paymentMethodId
-        paymentMethodCreateParams = builder.paymentMethodCreateParams
-        sourceId = builder.sourceId
-        sourceParams = builder.sourceParams
-
-        savePaymentMethod = builder.savePaymentMethod
-
-        extraParams = builder.extraParams
-        useStripeSdk = builder.shouldUseSdk
-    }
+) : ConfirmStripeIntentParams {
 
     fun shouldSavePaymentMethod(): Boolean {
         return savePaymentMethod
@@ -194,37 +179,23 @@ class ConfirmPaymentIntentParams private constructor(builder: Builder) : Confirm
         }
 
         override fun build(): ConfirmPaymentIntentParams {
-            return ConfirmPaymentIntentParams(this)
+            return ConfirmPaymentIntentParams(
+                clientSecret = clientSecret,
+                returnUrl = returnUrl,
+                paymentMethodId = paymentMethodId,
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                sourceId = sourceId,
+                sourceParams = sourceParams,
+                savePaymentMethod = savePaymentMethod,
+                extraParams = extraParams,
+                useStripeSdk = shouldUseSdk
+            )
         }
-    }
-
-    override fun equals(other: Any?): Boolean {
-        return when {
-            this === other -> true
-            other is ConfirmPaymentIntentParams -> typedEquals(other)
-            else -> false
-        }
-    }
-
-    private fun typedEquals(params: ConfirmPaymentIntentParams): Boolean {
-        return returnUrl == params.returnUrl && clientSecret == params.clientSecret &&
-            paymentMethodId == params.paymentMethodId &&
-            paymentMethodCreateParams == params.paymentMethodCreateParams &&
-            sourceId == params.sourceId && sourceParams == params.sourceParams &&
-            extraParams == params.extraParams && savePaymentMethod == params.savePaymentMethod &&
-            useStripeSdk == params.useStripeSdk
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(returnUrl, clientSecret, paymentMethodId,
-            paymentMethodCreateParams, sourceId, sourceParams, extraParams,
-            savePaymentMethod, useStripeSdk)
     }
 
     companion object {
-
-        const val API_PARAM_SOURCE_DATA = "source_data"
-        const val API_PARAM_PAYMENT_METHOD_DATA = "payment_method_data"
+        const val API_PARAM_SOURCE_DATA: String = "source_data"
+        const val API_PARAM_PAYMENT_METHOD_DATA: String = "payment_method_data"
 
         internal const val API_PARAM_SOURCE_ID = "source"
         internal const val API_PARAM_SAVE_PAYMENT_METHOD = "save_payment_method"

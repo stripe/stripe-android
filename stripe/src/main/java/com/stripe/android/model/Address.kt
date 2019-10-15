@@ -4,7 +4,6 @@ import android.os.Parcelable
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.StripeJsonUtils.optString
 import java.util.Locale
-import java.util.Objects
 import kotlinx.android.parcel.Parcelize
 import org.json.JSONObject
 
@@ -13,7 +12,7 @@ import org.json.JSONObject
  * object in the Source api.
  */
 @Parcelize
-class Address private constructor(
+data class Address internal constructor(
     val city: String?,
     val country: String?,
     val line1: String?,
@@ -21,14 +20,6 @@ class Address private constructor(
     val postalCode: String?,
     val state: String?
 ) : StripeModel(), StripeParamsModel, Parcelable {
-    private constructor(addressBuilder: Builder) : this(
-        addressBuilder.city,
-        addressBuilder.country,
-        addressBuilder.line1,
-        addressBuilder.line2,
-        addressBuilder.postalCode,
-        addressBuilder.state
-    )
 
     override fun toParamMap(): Map<String, Any> {
         return mapOf(
@@ -41,30 +32,13 @@ class Address private constructor(
         ).filterValues { it.isNotEmpty() }
     }
 
-    override fun equals(other: Any?): Boolean {
-        return when {
-            this === other -> true
-            other is Address -> typedEquals(other)
-            else -> false
-        }
-    }
-
-    private fun typedEquals(address: Address): Boolean {
-        return city == address.city && country == address.country && line1 == address.line1 &&
-            line2 == address.line2 && postalCode == address.postalCode && state == address.state
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(city, country, line1, line2, postalCode, state)
-    }
-
     class Builder : ObjectBuilder<Address> {
-        internal var city: String? = null
-        internal var country: String? = null
-        internal var line1: String? = null
-        internal var line2: String? = null
-        internal var postalCode: String? = null
-        internal var state: String? = null
+        private var city: String? = null
+        private var country: String? = null
+        private var line1: String? = null
+        private var line2: String? = null
+        private var postalCode: String? = null
+        private var state: String? = null
 
         fun setCity(city: String?): Builder {
             this.city = city
@@ -97,7 +71,14 @@ class Address private constructor(
         }
 
         override fun build(): Address {
-            return Address(this)
+            return Address(
+                city = city,
+                country = country,
+                line1 = line1,
+                line2 = line2,
+                postalCode = postalCode,
+                state = state
+            )
         }
     }
 

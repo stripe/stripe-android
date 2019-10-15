@@ -16,11 +16,7 @@ abstract class StripeIntentResult<T : StripeIntent> internal constructor(
 ) {
     @Outcome
     @get:Outcome
-    val outcome: Int
-
-    init {
-        this.outcome = determineOutcome(intent.status, outcome)
-    }
+    val outcome: Int = determineOutcome(intent.status, outcome)
 
     @StripeIntentResult.Outcome
     private fun determineOutcome(
