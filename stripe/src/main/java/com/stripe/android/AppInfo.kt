@@ -1,6 +1,5 @@
 package com.stripe.android
 
-import java.util.Objects
 import org.json.JSONObject
 
 /**
@@ -14,7 +13,7 @@ import org.json.JSONObject
  * @param url Website for your application (e.g. "https://myawesomeapp.info")
  * @param partnerId Your Stripe Partner ID (e.g. "pp_partner_1234")
  */
-class AppInfo private constructor(
+data class AppInfo internal constructor(
     private val name: String,
     private val version: String?,
     private val url: String?,
@@ -38,25 +37,6 @@ class AppInfo private constructor(
         )
 
         return mapOf("application" to JSONObject(appInfo).toString())
-    }
-
-    override fun equals(other: Any?): Boolean {
-        return when {
-            this === other -> true
-            other is AppInfo -> typedEquals(other)
-            else -> false
-        }
-    }
-
-    private fun typedEquals(appInfo: AppInfo): Boolean {
-        return name == appInfo.name &&
-            version == appInfo.version &&
-            url == appInfo.url &&
-            partnerId == appInfo.partnerId
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(name, version, url, partnerId)
     }
 
     companion object {

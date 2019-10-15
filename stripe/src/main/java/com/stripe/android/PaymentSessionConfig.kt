@@ -1,20 +1,18 @@
 package com.stripe.android
 
-import android.os.Parcel
 import android.os.Parcelable
 import androidx.annotation.LayoutRes
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.view.ShippingInfoWidget
 import com.stripe.android.view.ShippingInfoWidget.CustomizableShippingField
-import java.util.Objects
 import kotlinx.android.parcel.Parcelize
 
 /**
- * Class that tells [PaymentSession] what functionality it is supporting.
+ * Configuration for [PaymentSession].
  */
 @Parcelize
-class PaymentSessionConfig private constructor(
+data class PaymentSessionConfig internal constructor(
     val hiddenShippingInfoFields: List<String> = emptyList(),
     val optionalShippingInfoFields: List<String> = emptyList(),
     val prepopulatedShippingInfo: ShippingInformation? = null,
@@ -114,40 +112,7 @@ class PaymentSessionConfig private constructor(
         }
     }
 
-    override fun equals(other: Any?): Boolean {
-        return when {
-            this === other -> true
-            other is PaymentSessionConfig -> typedEquals(other)
-            else -> false
-        }
-    }
-
-    private fun typedEquals(obj: PaymentSessionConfig): Boolean {
-        return hiddenShippingInfoFields == obj.hiddenShippingInfoFields &&
-            optionalShippingInfoFields == obj.optionalShippingInfoFields &&
-            prepopulatedShippingInfo == obj.prepopulatedShippingInfo &&
-            isShippingInfoRequired == obj.isShippingInfoRequired &&
-            isShippingMethodRequired == obj.isShippingMethodRequired &&
-            addPaymentMethodFooter == obj.addPaymentMethodFooter
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(hiddenShippingInfoFields, optionalShippingInfoFields,
-            prepopulatedShippingInfo, isShippingInfoRequired, isShippingMethodRequired,
-            addPaymentMethodFooter)
-    }
-
     companion object {
         internal val EMPTY = PaymentSessionConfig()
-
-        private fun readStringList(parcel: Parcel): List<String> {
-            return readList(parcel, String::class.java.classLoader)
-        }
-
-        private fun <T> readList(parcel: Parcel, classLoader: ClassLoader?): List<T> {
-            val inList: List<T> = mutableListOf()
-            parcel.readList(inList, classLoader)
-            return inList.toList()
-        }
     }
 }

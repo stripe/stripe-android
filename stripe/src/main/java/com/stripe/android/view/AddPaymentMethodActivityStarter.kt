@@ -12,7 +12,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.view.AddPaymentMethodActivityStarter.Args
 import com.stripe.android.view.AddPaymentMethodActivityStarter.Companion.REQUEST_CODE
 import com.stripe.android.view.AddPaymentMethodActivityStarter.Result.Companion.fromIntent
-import java.util.Objects
 
 /**
  * A class to start [AddPaymentMethodActivity]. Arguments for the activity can be
@@ -28,7 +27,7 @@ class AddPaymentMethodActivityStarter internal constructor(
     Args.DEFAULT,
     REQUEST_CODE
 ) {
-    class Args private constructor(
+    data class Args internal constructor(
         internal val shouldAttachToCustomer: Boolean,
         internal val shouldRequirePostalCode: Boolean,
         internal val isPaymentSessionActive: Boolean,
@@ -62,30 +61,6 @@ class AddPaymentMethodActivityStarter internal constructor(
             dest.writeString(paymentMethodType.name)
             dest.writeParcelable(paymentConfiguration, 0)
             dest.writeInt(addPaymentMethodFooter)
-        }
-
-        override fun hashCode(): Int {
-            return Objects.hash(shouldAttachToCustomer, shouldRequirePostalCode,
-                isPaymentSessionActive, shouldInitCustomerSessionTokens, paymentMethodType,
-                paymentConfiguration, addPaymentMethodFooter)
-        }
-
-        override fun equals(other: Any?): Boolean {
-            return when {
-                this === other -> true
-                other is Args -> typedEquals(other)
-                else -> false
-            }
-        }
-
-        private fun typedEquals(args: Args): Boolean {
-            return shouldAttachToCustomer == args.shouldAttachToCustomer &&
-                shouldRequirePostalCode == args.shouldRequirePostalCode &&
-                isPaymentSessionActive == args.isPaymentSessionActive &&
-                shouldInitCustomerSessionTokens == args.shouldInitCustomerSessionTokens &&
-                paymentMethodType == args.paymentMethodType &&
-                addPaymentMethodFooter == args.addPaymentMethodFooter &&
-                paymentConfiguration == args.paymentConfiguration
         }
 
         class Builder : ObjectBuilder<Args> {
@@ -183,7 +158,7 @@ class AddPaymentMethodActivityStarter internal constructor(
      *
      * Retrieve in `#onActivityResult()` using [fromIntent].
      */
-    class Result internal constructor(
+    data class Result internal constructor(
         val paymentMethod: PaymentMethod
     ) : ActivityStarter.Result {
         private constructor(parcel: Parcel) : this(
@@ -204,22 +179,6 @@ class AddPaymentMethodActivityStarter internal constructor(
 
         override fun writeToParcel(dest: Parcel, flags: Int) {
             dest.writeParcelable(paymentMethod, flags)
-        }
-
-        override fun hashCode(): Int {
-            return Objects.hash(paymentMethod)
-        }
-
-        override fun equals(other: Any?): Boolean {
-            return when {
-                this === other -> true
-                other is Result -> typedEquals(other)
-                else -> false
-            }
-        }
-
-        private fun typedEquals(other: Result): Boolean {
-            return paymentMethod == other.paymentMethod
         }
 
         companion object {

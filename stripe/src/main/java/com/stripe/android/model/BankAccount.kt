@@ -2,7 +2,6 @@ package com.stripe.android.model
 
 import androidx.annotation.Size
 import androidx.annotation.StringDef
-import java.util.Objects
 import org.json.JSONObject
 
 /**
@@ -11,7 +10,7 @@ import org.json.JSONObject
  * [the Stripe
  * documentation.](https://stripe.com/docs/api/java#create_bank_account_token)
  */
-class BankAccount(
+data class BankAccount internal constructor(
     val accountNumber: String?,
     val accountHolderName: String?,
     @param:BankAccountType @field:BankAccountType @get:BankAccountType
@@ -93,33 +92,7 @@ class BankAccount(
         return mapOf(Token.TokenType.BANK_ACCOUNT to accountParams)
     }
 
-    override fun hashCode(): Int {
-        return Objects.hash(accountHolderName, accountHolderType, accountNumber,
-            bankName, countryCode, currency, fingerprint, last4, routingNumber)
-    }
-
-    override fun equals(other: Any?): Boolean {
-        return when {
-            this === other -> true
-            other is BankAccount -> typedEquals(other)
-            else -> false
-        }
-    }
-
-    private fun typedEquals(bankAccount: BankAccount): Boolean {
-        return (accountHolderName == bankAccount.accountHolderName &&
-            accountHolderType == bankAccount.accountHolderType &&
-            accountNumber == bankAccount.accountNumber &&
-            bankName == bankAccount.bankName &&
-            countryCode == bankAccount.countryCode &&
-            currency == bankAccount.currency &&
-            fingerprint == bankAccount.fingerprint &&
-            last4 == bankAccount.last4 &&
-            routingNumber == bankAccount.routingNumber)
-    }
-
     companion object {
-
         private const val FIELD_ACCOUNT_HOLDER_NAME = "account_holder_name"
         private const val FIELD_ACCOUNT_HOLDER_TYPE = "account_holder_type"
         private const val FIELD_BANK_NAME = "bank_name"
