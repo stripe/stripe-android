@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.webkit.URLUtil
 import android.webkit.WebResourceRequest
@@ -40,6 +41,7 @@ internal class PaymentAuthWebView : WebView {
         clientSecret: String,
         returnUrl: String?
     ) {
+        Log.d(TAG, "PaymentAuthWebView#init()")
         webViewClient = PaymentAuthWebViewClient(activity, activity.packageManager, progressBar,
             clientSecret, returnUrl)
     }
@@ -65,11 +67,14 @@ internal class PaymentAuthWebView : WebView {
             private set
 
         override fun onPageFinished(view: WebView, url: String?) {
+            Log.d(TAG, "PaymentAuthWebViewClient#onPageFinished() - $url")
             super.onPageFinished(view, url)
 
             // hide the progress bar here because doing it in `onPageCommitVisible()` potentially
             // causes a crash
             progressBar.visibility = View.GONE
+
+            Log.d(TAG, "PaymentAuthWebViewClient#onPageFinished() - hide progress bar")
 
             if (url != null && isCompletionUrl(url)) {
                 onAuthCompleted()
@@ -91,10 +96,12 @@ internal class PaymentAuthWebView : WebView {
         }
 
         override fun shouldOverrideUrlLoading(view: WebView, urlString: String): Boolean {
+            Log.d(TAG, "PaymentAuthWebViewClient#shouldOverrideUrlLoading() - $urlString")
             val uri = Uri.parse(urlString)
             updateCompletionUrl(uri)
 
             return if (isReturnUrl(uri)) {
+                Log.d(TAG, "PaymentAuthWebViewClient#shouldOverrideUrlLoading() - handle return URL")
                 onAuthCompleted()
                 true
             } else if ("intent".equals(uri.scheme, ignoreCase = true)) {
@@ -111,6 +118,7 @@ internal class PaymentAuthWebView : WebView {
         }
 
         private fun openIntentScheme(uri: Uri) {
+            Log.d(TAG, "PaymentAuthWebViewClient#openIntentScheme() - $uri")
             try {
                 openIntent(Intent.parseUri(uri.toString(), Intent.URI_INTENT_SCHEME))
             } catch (e: Exception) {
@@ -119,6 +127,7 @@ internal class PaymentAuthWebView : WebView {
         }
 
         private fun openIntent(intent: Intent) {
+            Log.d(TAG, "PaymentAuthWebViewClient#openIntent() - $intent")
             if (intent.resolveActivity(packageManager) != null) {
                 activity.startActivity(intent)
             } else {
@@ -128,6 +137,7 @@ internal class PaymentAuthWebView : WebView {
         }
 
         private fun updateCompletionUrl(uri: Uri) {
+            Log.d(TAG, "PaymentAuthWebViewClient#updateCompletionUrl() - $uri")
             val returnUrlParam = if (isAuthenticateUrl(uri.toString())) {
                 uri.getQueryParameter(PARAM_RETURN_URL)
             } else {
@@ -148,16 +158,20 @@ internal class PaymentAuthWebView : WebView {
         }
 
         private fun isReturnUrl(uri: Uri): Boolean {
+            Log.d(TAG, "PaymentAuthWebViewClient#isReturnUrl() - $uri")
             when {
                 isPredefinedReturnUrl(uri) -> return true
 
                 // If the `userReturnUri` is known, look for URIs that match it.
-                userReturnUri != null ->
+                userReturnUri != null -> {
+                    Log.d(TAG, "PaymentAuthWebViewClient#isReturnUrl() - userReturnUri is known")
                     return userReturnUri.scheme != null &&
                         userReturnUri.scheme == uri.scheme &&
                         userReturnUri.host != null &&
                         userReturnUri.host == uri.host
+                }
                 else -> {
+                    Log.d(TAG, "PaymentAuthWebViewClient#isReturnUrl() - userReturnUri is unknown")
                     // Skip opaque (i.e. non-hierarchical) URIs
                     if (uri.isOpaque) {
                         return false
@@ -167,7 +181,7 @@ internal class PaymentAuthWebView : WebView {
                     // `payment_intent_client_secret` or `setup_intent_client_secret`
                     // query parameter, and check if its values matches the given `clientSecret`
                     // as a query parameter.
-                    val paramNames = uri.queryParameterNames
+                    val paramNames = uri.queryParameterNames.toSet()
                     val clientSecret = when {
                         paramNames.contains(PARAM_PAYMENT_CLIENT_SECRET) ->
                             uri.getQueryParameter(PARAM_PAYMENT_CLIENT_SECRET)
@@ -186,6 +200,7 @@ internal class PaymentAuthWebView : WebView {
         }
 
         private fun onAuthCompleted() {
+            Log.d(TAG, "PaymentAuthWebViewClient#onAuthCompleted()")
             activity.finish()
         }
 
@@ -204,5 +219,9 @@ internal class PaymentAuthWebView : WebView {
 
             private const val PARAM_RETURN_URL = "return_url"
         }
+    }
+
+    companion object {
+        internal const val TAG: String = "StripeSdk"
     }
 }

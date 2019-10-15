@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ProgressBar;
@@ -30,6 +31,9 @@ public class PaymentAuthWebViewActivity
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Log.d(PaymentAuthWebView.TAG, "PaymentAuthWebViewActivity#onCreate");
+
         LocalBroadcastManager.getInstance(this)
                 .sendBroadcast(new Intent().setAction(UL_HANDLE_CHALLENGE_ACTION));
 
@@ -43,6 +47,10 @@ public class PaymentAuthWebViewActivity
 
         final String clientSecret = getIntent()
                 .getStringExtra(PaymentAuthWebViewStarter.EXTRA_CLIENT_SECRET);
+
+        Log.d(PaymentAuthWebView.TAG,
+                "PaymentAuthWebViewActivity#onCreate - clientSecret: " + clientSecret);
+
         final String returnUrl = getIntent()
                 .getStringExtra(PaymentAuthWebViewStarter.EXTRA_RETURN_URL);
 
@@ -52,7 +60,10 @@ public class PaymentAuthWebViewActivity
         final PaymentAuthWebView webView = findViewById(R.id.auth_web_view);
         final ProgressBar progressBar = findViewById(R.id.auth_web_view_progress_bar);
         webView.init(this, progressBar, clientSecret, returnUrl);
-        webView.loadUrl(getIntent().getStringExtra(PaymentAuthWebViewStarter.EXTRA_AUTH_URL));
+
+        final String authUrl = getIntent().getStringExtra(PaymentAuthWebViewStarter.EXTRA_AUTH_URL);
+        Log.d(PaymentAuthWebView.TAG, "Calling PaymentAuthWebView#init: " + authUrl);
+        webView.loadUrl(authUrl);
     }
 
     @Override
