@@ -36,12 +36,12 @@ class SetupIntentTest {
 
         val redirectData = setupIntent.redirectData
         assertNotNull(redirectData)
-        assertNotNull(redirectData!!.returnUrl)
+        assertNotNull(redirectData?.returnUrl)
         assertNotNull(setupIntent.redirectUrl)
         assertEquals("stripe://setup_intent_return", redirectData.returnUrl)
         assertEquals("https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B" + "?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02", redirectData.url.toString())
         assertEquals("https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B" + "?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02",
-            setupIntent.redirectUrl!!.toString())
+            setupIntent.redirectUrl?.toString())
     }
 
     @Test

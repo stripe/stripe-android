@@ -76,10 +76,10 @@ internal object StripeJsonUtils {
      */
     @JvmStatic
     fun optString(
-        jsonObject: JSONObject,
+        jsonObject: JSONObject?,
         @Size(min = 1) fieldName: String
     ): String? {
-        return nullIfNullOrEmpty(jsonObject.optString(fieldName))
+        return nullIfNullOrEmpty(jsonObject?.optString(fieldName))
     }
 
     /**
