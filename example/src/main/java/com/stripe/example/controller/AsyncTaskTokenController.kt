@@ -21,7 +21,7 @@ class AsyncTaskTokenController(
     private val progressDialogController: ProgressDialogController,
     publishableKey: String
 ) {
-    private val stripe: Stripe = Stripe(context, publishableKey)
+    private val stripe: Stripe = Stripe(context, publishableKey, enableLogging = true)
 
     init {
         button.setOnClickListener {

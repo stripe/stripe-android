@@ -47,7 +47,7 @@ internal open class PaymentController @VisibleForTesting constructor(
     private val threeDs2Service: StripeThreeDs2Service =
         StripeThreeDs2ServiceImpl(context, StripeSSLSocketFactory(), enableLogging),
     private val analyticsRequestExecutor: FireAndForgetRequestExecutor =
-        StripeFireAndForgetRequestExecutor(),
+        StripeFireAndForgetRequestExecutor(Logger.getInstance(enableLogging)),
     private val analyticsDataFactory: AnalyticsDataFactory =
         AnalyticsDataFactory.create(context.applicationContext),
     private val challengeFlowStarter: ChallengeFlowStarter =
