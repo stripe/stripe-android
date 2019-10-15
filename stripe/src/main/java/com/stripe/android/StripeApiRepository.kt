@@ -39,7 +39,7 @@ internal class StripeApiRepository @JvmOverloads constructor(
     private val logger: Logger = Logger.noop(),
     private val stripeApiRequestExecutor: ApiRequestExecutor = StripeApiRequestExecutor(logger),
     private val fireAndForgetRequestExecutor: FireAndForgetRequestExecutor =
-        StripeFireAndForgetRequestExecutor(),
+        StripeFireAndForgetRequestExecutor(logger),
     private val fingerprintRequestFactory: FingerprintRequestFactory =
         FingerprintRequestFactory(context),
     private val uidParamsFactory: UidParamsFactory = UidParamsFactory.create(context),

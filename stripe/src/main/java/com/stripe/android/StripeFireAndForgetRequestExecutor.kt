@@ -6,12 +6,19 @@ import com.stripe.android.exception.InvalidRequestException
 import java.io.Closeable
 import java.io.IOException
 import java.net.HttpURLConnection
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
-internal class StripeFireAndForgetRequestExecutor : FireAndForgetRequestExecutor {
+internal class StripeFireAndForgetRequestExecutor(
+    private val logger: Logger = Logger.noop()
+) : FireAndForgetRequestExecutor {
 
     private val connectionFactory: ConnectionFactory = ConnectionFactory()
+    private val job = SupervisorJob()
+    private val scope = CoroutineScope(Dispatchers.Default + job)
 
     /**
      * Make the request and ignore the response
@@ -20,22 +27,24 @@ internal class StripeFireAndForgetRequestExecutor : FireAndForgetRequestExecutor
      */
     @VisibleForTesting
     @Throws(APIConnectionException::class, InvalidRequestException::class)
-    fun execute(request: StripeRequest): Int {
+    internal fun execute(request: StripeRequest): Int {
         // HttpURLConnection verifies SSL cert by default
         var conn: HttpURLConnection? = null
+        val responseCode: Int
         try {
             conn = connectionFactory.create(request)
 
             // required to trigger the request
-            val responseCode = conn.responseCode
+            responseCode = conn.responseCode
 
             closeConnection(conn, responseCode)
-            return responseCode
         } catch (e: IOException) {
             throw APIConnectionException.create(request.baseUrl, e)
         } finally {
             conn?.disconnect()
         }
+
+        return responseCode
     }
 
     @Throws(IOException::class)
@@ -53,8 +62,14 @@ internal class StripeFireAndForgetRequestExecutor : FireAndForgetRequestExecutor
     }
 
     override fun executeAsync(request: StripeRequest) {
-        GlobalScope.launch {
-            execute(request)
+        scope.launch {
+            try {
+                coroutineScope {
+                    execute(request)
+                }
+            } catch (e: Exception) {
+                logger.error("Exception while making fire-and-forget request", e)
+            }
         }
     }
 }
