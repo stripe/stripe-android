@@ -610,7 +610,7 @@ class CardTest {
 
     @Test
     fun fromString_whenStringIsValidJson_returnsExpectedCard() {
-        val expectedCard = createUsdCard()
+        val expectedCard = CARD_USD
         val actualCard = Card.fromJson(JSON_CARD_USD)
         assertEquals(expectedCard, actualCard)
     }
@@ -639,6 +639,29 @@ class CardTest {
             .loggingTokens(listOf("hello"))
 
         assertEquals(card, card.toBuilder().build())
+    }
+
+    @Test
+    fun toPaymentMethodsParams() {
+        val actual = CARD_USD.toPaymentMethodsParams()
+        val expected = PaymentMethodCreateParams.create(
+            PaymentMethodCreateParams.Card.Builder()
+                .setExpiryMonth(8)
+                .setExpiryYear(2017)
+                .build(),
+            PaymentMethod.BillingDetails.Builder()
+                .setName("John Cardholder")
+                .setAddress(Address.Builder()
+                    .setLine1("123 Any Street")
+                    .setLine2("456")
+                    .setCity("Des Moines")
+                    .setState("IA")
+                    .setPostalCode("50305")
+                    .setCountry("US")
+                    .build())
+                .build()
+        )
+        assertEquals(expected, actual)
     }
 
     companion object {
@@ -678,33 +701,29 @@ class CardTest {
 
         private const val BAD_JSON: String = "{ \"id\": "
 
-        private fun createUsdCard(): Card {
-            val metadata = mapOf(
+        internal val CARD_USD = Card.Builder(null, 8, 2017, null)
+            .brand(Card.CardBrand.VISA)
+            .funding(Card.FundingType.CREDIT)
+            .last4("4242")
+            .id("card_189fi32eZvKYlo2CHK8NPRME")
+            .country("US")
+            .currency("usd")
+            .addressCountry("US")
+            .addressCity("Des Moines")
+            .addressState("IA")
+            .addressZip("50305")
+            .addressZipCheck("unavailable")
+            .addressLine1("123 Any Street")
+            .addressLine1Check("unavailable")
+            .addressLine2("456")
+            .name("John Cardholder")
+            .cvcCheck("unavailable")
+            .customer("customer77")
+            .fingerprint("abc123")
+            .metadata(mapOf(
                 "color" to "blue",
                 "animal" to "dog"
-            )
-
-            return Card.Builder(null, 8, 2017, null)
-                .brand(Card.CardBrand.VISA)
-                .funding(Card.FundingType.CREDIT)
-                .last4("4242")
-                .id("card_189fi32eZvKYlo2CHK8NPRME")
-                .country("US")
-                .currency("usd")
-                .addressCountry("US")
-                .addressCity("Des Moines")
-                .addressState("IA")
-                .addressZip("50305")
-                .addressZipCheck("unavailable")
-                .addressLine1("123 Any Street")
-                .addressLine1Check("unavailable")
-                .addressLine2("456")
-                .name("John Cardholder")
-                .cvcCheck("unavailable")
-                .customer("customer77")
-                .fingerprint("abc123")
-                .metadata(metadata)
-                .build()
-        }
+            ))
+            .build()
     }
 }

@@ -182,6 +182,28 @@ class Card private constructor(
         }
     }
 
+    fun toPaymentMethodsParams(): PaymentMethodCreateParams {
+        return PaymentMethodCreateParams.create(
+            toPaymentMethodParamsCard(),
+            PaymentMethod.BillingDetails.Builder()
+                .setName(name)
+                .setAddress(
+                    Address.Builder()
+                        .setLine1(addressLine1)
+                        .setLine2(addressLine2)
+                        .setCity(addressCity)
+                        .setState(addressState)
+                        .setCountry(addressCountry)
+                        .setPostalCode(addressZip)
+                        .build()
+                )
+                .build()
+        )
+    }
+
+    /**
+     * Use [toPaymentMethodsParams] to include Billing Details
+     */
     fun toPaymentMethodParamsCard(): PaymentMethodCreateParams.Card {
         return PaymentMethodCreateParams.Card.Builder()
             .setNumber(number)
