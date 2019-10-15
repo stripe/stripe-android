@@ -8,10 +8,12 @@ import com.stripe.android.model.ShippingInformation
 import com.stripe.android.view.ShippingInfoWidget
 import com.stripe.android.view.ShippingInfoWidget.CustomizableShippingField
 import java.util.Objects
+import kotlinx.android.parcel.Parcelize
 
 /**
  * Class that tells [PaymentSession] what functionality it is supporting.
  */
+@Parcelize
 class PaymentSessionConfig private constructor(
     val hiddenShippingInfoFields: List<String> = emptyList(),
     val optionalShippingInfoFields: List<String> = emptyList(),
@@ -112,16 +114,6 @@ class PaymentSessionConfig private constructor(
         }
     }
 
-    private constructor(parcel: Parcel) : this(
-        hiddenShippingInfoFields = readStringList(parcel),
-        optionalShippingInfoFields = readStringList(parcel),
-        prepopulatedShippingInfo = parcel.readParcelable(ShippingInformation::class.java.classLoader),
-        isShippingInfoRequired = parcel.readInt() == 1,
-        isShippingMethodRequired = parcel.readInt() == 1,
-        addPaymentMethodFooter = parcel.readInt(),
-        paymentMethodTypes = readList(parcel, PaymentMethod.Type::class.java.classLoader)
-    )
-
     override fun equals(other: Any?): Boolean {
         return when {
             this === other -> true
@@ -145,20 +137,6 @@ class PaymentSessionConfig private constructor(
             addPaymentMethodFooter)
     }
 
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeList(hiddenShippingInfoFields)
-        parcel.writeList(optionalShippingInfoFields)
-        parcel.writeParcelable(prepopulatedShippingInfo, flags)
-        parcel.writeInt(if (isShippingInfoRequired) 1 else 0)
-        parcel.writeInt(if (isShippingMethodRequired) 1 else 0)
-        parcel.writeInt(addPaymentMethodFooter)
-        parcel.writeList(paymentMethodTypes)
-    }
-
     companion object {
         internal val EMPTY = PaymentSessionConfig()
 
@@ -171,17 +149,5 @@ class PaymentSessionConfig private constructor(
             parcel.readList(inList, classLoader)
             return inList.toList()
         }
-
-        @JvmField
-        val CREATOR: Parcelable.Creator<PaymentSessionConfig> =
-            object : Parcelable.Creator<PaymentSessionConfig> {
-                override fun createFromParcel(parcel: Parcel): PaymentSessionConfig {
-                    return PaymentSessionConfig(parcel)
-                }
-
-                override fun newArray(size: Int): Array<PaymentSessionConfig?> {
-                    return arrayOfNulls(size)
-                }
-            }
     }
 }

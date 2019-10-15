@@ -1,17 +1,18 @@
 package com.stripe.android.model
 
-import android.os.Parcel
 import android.os.Parcelable
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.StripeJsonUtils.optString
 import java.util.Locale
 import java.util.Objects
+import kotlinx.android.parcel.Parcelize
 import org.json.JSONObject
 
 /**
  * Model for an owner [address](https://stripe.com/docs/api#source_object-owner-address)
  * object in the Source api.
  */
+@Parcelize
 class Address private constructor(
     val city: String?,
     val country: String?,
@@ -27,15 +28,6 @@ class Address private constructor(
         addressBuilder.line2,
         addressBuilder.postalCode,
         addressBuilder.state
-    )
-
-    private constructor(parcel: Parcel) : this(
-        city = parcel.readString(),
-        country = parcel.readString(),
-        line1 = parcel.readString(),
-        line2 = parcel.readString(),
-        postalCode = parcel.readString(),
-        state = parcel.readString()
     )
 
     override fun toParamMap(): Map<String, Any> {
@@ -64,19 +56,6 @@ class Address private constructor(
 
     override fun hashCode(): Int {
         return Objects.hash(city, country, line1, line2, postalCode, state)
-    }
-
-    override fun writeToParcel(out: Parcel, flags: Int) {
-        out.writeString(city)
-        out.writeString(country)
-        out.writeString(line1)
-        out.writeString(line2)
-        out.writeString(postalCode)
-        out.writeString(state)
-    }
-
-    override fun describeContents(): Int {
-        return 0
     }
 
     class Builder : ObjectBuilder<Address> {
@@ -144,17 +123,6 @@ class Address private constructor(
             val postalCode = optString(jsonObject, FIELD_POSTAL_CODE)
             val state = optString(jsonObject, FIELD_STATE)
             return Address(city, country, line1, line2, postalCode, state)
-        }
-
-        @JvmField
-        val CREATOR: Parcelable.Creator<Address> = object : Parcelable.Creator<Address> {
-            override fun createFromParcel(parcel: Parcel): Address {
-                return Address(parcel)
-            }
-
-            override fun newArray(size: Int): Array<Address?> {
-                return arrayOfNulls(size)
-            }
         }
     }
 }

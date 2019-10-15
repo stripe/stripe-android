@@ -62,10 +62,7 @@ class PaymentSessionDataTest {
         data.shippingTotal = 150L
         data.isPaymentReadyToCharge = false
 
-        assertEquals(
-            data,
-            ParcelUtils.create(data, PaymentSessionData.CREATOR)
-        )
+        assertEquals(data, ParcelUtils.create(data))
     }
 
     @Test
@@ -78,10 +75,7 @@ class PaymentSessionDataTest {
         data.shippingInformation = ShippingInformation(null, null, null)
         data.shippingMethod = ShippingMethod("UPS", "SuperFast", 10000L, "USD")
 
-        assertEquals(
-            data,
-            ParcelUtils.create(data, PaymentSessionData.CREATOR)
-        )
+        assertEquals(data, ParcelUtils.create(data))
     }
 
     companion object {

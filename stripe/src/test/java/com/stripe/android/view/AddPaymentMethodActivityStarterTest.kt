@@ -20,12 +20,7 @@ class AddPaymentMethodActivityStarterTest {
             .setShouldRequirePostalCode(true)
             .build()
 
-        val createdArgs =
-            ParcelUtils.create(
-                args,
-                AddPaymentMethodActivityStarter.Args.CREATOR
-            )
-        assertEquals(args, createdArgs)
+        assertEquals(args, ParcelUtils.create(args))
     }
 
     @Test

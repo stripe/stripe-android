@@ -53,17 +53,11 @@ class WalletFactoryTest {
 
         val samsungPayWallet =
             walletFactory.create(SAMSUNG_PAY_WALLET_JSON) as SamsungPayWallet
-        assertEquals(
-            samsungPayWallet,
-            ParcelUtils.create(samsungPayWallet, SamsungPayWallet.CREATOR)
-        )
+        assertEquals(samsungPayWallet, ParcelUtils.create(samsungPayWallet))
 
         val visaWallet =
             walletFactory.create(VISA_WALLET_JSON) as VisaCheckoutWallet
-        assertEquals(
-            visaWallet,
-            ParcelUtils.create(visaWallet, VisaCheckoutWallet.CREATOR)
-        )
+        assertEquals(visaWallet, ParcelUtils.create(visaWallet))
     }
 
     companion object {

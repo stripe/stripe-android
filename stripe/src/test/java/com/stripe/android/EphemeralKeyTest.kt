@@ -28,10 +28,7 @@ class EphemeralKeyTest {
     @Test
     @Throws(JSONException::class)
     fun toParcel_fromParcel_createsExpectedObject() {
-        assertEquals(
-            EPHEMERAL_KEY,
-            ParcelUtils.create(EPHEMERAL_KEY, CustomerEphemeralKey.CREATOR)
-        )
+        assertEquals(EPHEMERAL_KEY, ParcelUtils.create(EPHEMERAL_KEY))
     }
 
     companion object {

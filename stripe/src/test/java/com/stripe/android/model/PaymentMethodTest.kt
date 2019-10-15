@@ -130,10 +130,7 @@ class PaymentMethodTest {
             .setSepaDebit(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD.sepaDebit)
             .build()
 
-        assertEquals(
-            paymentMethod,
-            ParcelUtils.create(paymentMethod, PaymentMethod.CREATOR)
-        )
+        assertEquals(paymentMethod, ParcelUtils.create(paymentMethod))
     }
 
     @Test
