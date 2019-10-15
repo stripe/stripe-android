@@ -2,105 +2,76 @@ package com.stripe.android.model
 
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.StripeJsonUtils.optString
-import java.util.Objects
 import org.json.JSONException
 import org.json.JSONObject
 
 /**
  * Model for the SourceTypeData contained in a SEPA Debit Source object.
  */
-class SourceSepaDebitData private constructor(builder: Builder) : StripeSourceTypeModel(builder) {
-
-    val bankCode: String?
-    val branchCode: String?
-    val country: String?
-    val fingerPrint: String?
-    val last4: String?
-    val mandateReference: String?
+data class SourceSepaDebitData internal constructor(
+    val bankCode: String?,
+    val branchCode: String?,
+    val country: String?,
+    val fingerPrint: String?,
+    val last4: String?,
+    val mandateReference: String?,
     val mandateUrl: String?
-
-    init {
-        bankCode = builder.mBankCode
-        branchCode = builder.mBranchCode
-        country = builder.mCountry
-        fingerPrint = builder.mFingerPrint
-        last4 = builder.mLast4
-        mandateReference = builder.mMandateReference
-        mandateUrl = builder.mMandateUrl
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) {
-            return true
-        }
-
-        return if (other is SourceSepaDebitData) {
-            typedEquals(other)
-        } else false
-    }
-
-    private fun typedEquals(obj: SourceSepaDebitData): Boolean {
-        return super.typedEquals(obj) &&
-            bankCode == obj.bankCode &&
-            branchCode == obj.branchCode &&
-            country == obj.country &&
-            fingerPrint == obj.fingerPrint &&
-            last4 == obj.last4 &&
-            mandateReference == obj.mandateReference &&
-            mandateUrl == obj.mandateUrl
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(super.hashCode(), bankCode, branchCode, country, fingerPrint,
-            last4, mandateReference, mandateUrl)
-    }
+) : StripeSourceTypeModel() {
 
     private class Builder : StripeSourceTypeModel.BaseBuilder() {
-        var mBankCode: String? = null
-        var mBranchCode: String? = null
-        var mCountry: String? = null
-        var mFingerPrint: String? = null
-        var mLast4: String? = null
-        var mMandateReference: String? = null
-        var mMandateUrl: String? = null
+        var bankCode: String? = null
+        var branchCode: String? = null
+        var country: String? = null
+        var fingerPrint: String? = null
+        var last4: String? = null
+        var mandateReference: String? = null
+        var mandateUrl: String? = null
 
         internal fun setBankCode(bankCode: String?): Builder {
-            mBankCode = bankCode
+            this.bankCode = bankCode
             return this
         }
 
         internal fun setBranchCode(branchCode: String?): Builder {
-            mBranchCode = branchCode
+            this.branchCode = branchCode
             return this
         }
 
         internal fun setCountry(country: String?): Builder {
-            mCountry = country
+            this.country = country
             return this
         }
 
         internal fun setFingerPrint(fingerPrint: String?): Builder {
-            mFingerPrint = fingerPrint
+            this.fingerPrint = fingerPrint
             return this
         }
 
         internal fun setLast4(last4: String?): Builder {
-            mLast4 = last4
+            this.last4 = last4
             return this
         }
 
         internal fun setMandateReference(mandateReference: String?): Builder {
-            mMandateReference = mandateReference
+            this.mandateReference = mandateReference
             return this
         }
 
         internal fun setMandateUrl(mandateUrl: String?): Builder {
-            mMandateUrl = mandateUrl
+            this.mandateUrl = mandateUrl
             return this
         }
 
         fun build(): SourceSepaDebitData {
-            return SourceSepaDebitData(this)
+            return SourceSepaDebitData(
+                bankCode = bankCode,
+                branchCode = branchCode,
+                country = country,
+                fingerPrint = fingerPrint,
+                last4 = last4,
+                mandateReference = mandateReference,
+                mandateUrl = mandateUrl
+            )
         }
     }
 

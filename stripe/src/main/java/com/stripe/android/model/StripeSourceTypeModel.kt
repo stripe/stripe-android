@@ -1,30 +1,9 @@
 package com.stripe.android.model
 
-import androidx.annotation.CallSuper
-import java.util.Objects
 import org.json.JSONArray
 import org.json.JSONObject
 
-abstract class StripeSourceTypeModel internal constructor(builder: BaseBuilder) : StripeModel() {
-    private val additionalFields: Map<String, Any> = builder.additionalFields?.let { it }.orEmpty()
-
-    override fun equals(other: Any?): Boolean {
-        return when {
-            this === other -> true
-            other is StripeSourceTypeModel -> typedEquals(other)
-            else -> false
-        }
-    }
-
-    @CallSuper
-    internal fun typedEquals(model: StripeSourceTypeModel): Boolean {
-        return additionalFields == model.additionalFields
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(additionalFields)
-    }
-
+abstract class StripeSourceTypeModel : StripeModel() {
     abstract class BaseBuilder {
         var additionalFields: Map<String, Any>? = null
 
@@ -35,8 +14,6 @@ abstract class StripeSourceTypeModel internal constructor(builder: BaseBuilder) 
     }
 
     companion object {
-        private const val NULL = "null"
-
         /**
          * Convert a [JSONObject] to a flat, string-keyed map.
          *
@@ -56,23 +33,18 @@ abstract class StripeSourceTypeModel internal constructor(builder: BaseBuilder) 
 
             val keysToOmit = omitKeys ?: emptySet()
             val keys = jsonObject.names() ?: JSONArray()
-            val map = (0 until keys.length())
+            return (0 until keys.length())
                 .map { keys.getString(it) }
                 .filterNot { keysToOmit.contains(it) }
                 .mapNotNull { key ->
-                    val value = jsonObject.opt(key)
-                    if (NULL == value || value == null) {
-                        return null
+                    if (jsonObject.isNull(key)) {
+                        null
+                    } else {
+                        key to jsonObject.opt(key)
                     }
-                    key to value
                 }
                 .toMap()
-
-            return if (map.isEmpty()) {
-                return null
-            } else {
-                map
-            }
+                .takeIf { it.isNotEmpty() }
         }
     }
 }

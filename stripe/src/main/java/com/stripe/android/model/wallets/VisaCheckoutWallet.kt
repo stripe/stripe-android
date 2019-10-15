@@ -1,92 +1,53 @@
 package com.stripe.android.model.wallets
 
-import android.os.Parcel
-import android.os.Parcelable
 import com.stripe.android.model.StripeJsonUtils.optString
-import java.util.Objects
+import kotlinx.android.parcel.Parcelize
 import org.json.JSONObject
 
-class VisaCheckoutWallet : Wallet {
-
-    val billingAddress: Address?
-    val email: String?
-    val name: String?
-    val shippingAddress: Address?
-
-    private constructor(builder: Builder) : super(Type.VisaCheckout, builder) {
-        billingAddress = builder.mBillingAddress
-        email = builder.mEmail
-        name = builder.mName
-        shippingAddress = builder.mShippingAddress
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(billingAddress, email, name, shippingAddress)
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) {
-            return true
-        }
-
-        return if (other is VisaCheckoutWallet) {
-            typedEquals(other)
-        } else {
-            false
-        }
-    }
-
-    private fun typedEquals(wallet: VisaCheckoutWallet): Boolean {
-        return (billingAddress == wallet.billingAddress &&
-            email == wallet.email &&
-            name == wallet.name &&
-            shippingAddress == wallet.shippingAddress)
-    }
+@Parcelize
+data class VisaCheckoutWallet internal constructor(
+    val billingAddress: Address?,
+    val email: String?,
+    val name: String?,
+    val shippingAddress: Address?,
+    val dynamicLast4: String?
+) : Wallet(Type.VisaCheckout) {
 
     internal class Builder : Wallet.Builder<VisaCheckoutWallet>() {
-        var mBillingAddress: Address? = null
-        var mEmail: String? = null
-        var mName: String? = null
-        var mShippingAddress: Address? = null
+        private var billingAddress: Address? = null
+        private var email: String? = null
+        private var name: String? = null
+        private var shippingAddress: Address? = null
 
         fun setBillingAddress(billingAddress: Address?): Builder {
-            this.mBillingAddress = billingAddress
+            this.billingAddress = billingAddress
             return this
         }
 
         fun setEmail(email: String?): Builder {
-            this.mEmail = email
+            this.email = email
             return this
         }
 
         fun setName(name: String?): Builder {
-            this.mName = name
+            this.name = name
             return this
         }
 
         fun setShippingAddress(shippingAddress: Address?): Builder {
-            this.mShippingAddress = shippingAddress
+            this.shippingAddress = shippingAddress
             return this
         }
 
         public override fun build(): VisaCheckoutWallet {
-            return VisaCheckoutWallet(this)
+            return VisaCheckoutWallet(
+                billingAddress = billingAddress,
+                email = email,
+                name = name,
+                shippingAddress = shippingAddress,
+                dynamicLast4 = dynamicLast4
+            )
         }
-    }
-
-    private constructor(parcel: Parcel) : super(parcel) {
-        billingAddress = parcel.readParcelable(Address::class.java.classLoader)
-        email = parcel.readString()
-        name = parcel.readString()
-        shippingAddress = parcel.readParcelable(Address::class.java.classLoader)
-    }
-
-    override fun writeToParcel(dest: Parcel, flags: Int) {
-        super.writeToParcel(dest, flags)
-        dest.writeParcelable(billingAddress, flags)
-        dest.writeString(email)
-        dest.writeString(name)
-        dest.writeParcelable(shippingAddress, flags)
     }
 
     companion object {
@@ -102,17 +63,5 @@ class VisaCheckoutWallet : Wallet {
                 .setName(optString(wallet, FIELD_NAME))
                 .setShippingAddress(Address.fromJson(wallet.optJSONObject(FIELD_SHIPPING_ADDRESS)))
         }
-
-        @JvmField
-        val CREATOR: Parcelable.Creator<VisaCheckoutWallet> =
-            object : Parcelable.Creator<VisaCheckoutWallet> {
-                override fun createFromParcel(parcel: Parcel): VisaCheckoutWallet {
-                    return VisaCheckoutWallet(parcel)
-                }
-
-                override fun newArray(size: Int): Array<VisaCheckoutWallet?> {
-                    return arrayOfNulls(size)
-                }
-            }
     }
 }

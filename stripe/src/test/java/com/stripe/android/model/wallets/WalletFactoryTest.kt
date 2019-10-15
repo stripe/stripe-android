@@ -53,6 +53,7 @@ class WalletFactoryTest {
 
         val samsungPayWallet =
             walletFactory.create(SAMSUNG_PAY_WALLET_JSON) as SamsungPayWallet
+        assertEquals(Wallet.Type.SamsungPay, samsungPayWallet.walletType)
         assertEquals(samsungPayWallet, ParcelUtils.create(samsungPayWallet))
 
         val visaWallet =

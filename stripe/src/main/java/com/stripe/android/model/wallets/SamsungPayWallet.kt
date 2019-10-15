@@ -1,16 +1,14 @@
 package com.stripe.android.model.wallets
 
-import android.os.Parcel
-import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 
-class SamsungPayWallet : Wallet {
-    private constructor(builder: Builder) : super(Type.SamsungPay, builder)
-
-    private constructor(parcel: Parcel) : super(parcel)
-
+@Parcelize
+data class SamsungPayWallet internal constructor(
+    val dynamicLast4: String?
+) : Wallet(Type.SamsungPay) {
     internal class Builder : Wallet.Builder<SamsungPayWallet>() {
         override fun build(): SamsungPayWallet {
-            return SamsungPayWallet(this)
+            return SamsungPayWallet(dynamicLast4)
         }
     }
 
@@ -18,17 +16,5 @@ class SamsungPayWallet : Wallet {
         internal fun fromJson(): Builder {
             return Builder()
         }
-
-        @JvmField
-        val CREATOR: Parcelable.Creator<SamsungPayWallet> =
-            object : Parcelable.Creator<SamsungPayWallet> {
-                override fun createFromParcel(parcel: Parcel): SamsungPayWallet {
-                    return SamsungPayWallet(parcel)
-                }
-
-                override fun newArray(size: Int): Array<SamsungPayWallet?> {
-                    return arrayOfNulls(size)
-                }
-            }
     }
 }
