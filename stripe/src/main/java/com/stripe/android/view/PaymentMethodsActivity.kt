@@ -114,6 +114,9 @@ class PaymentMethodsActivity : AppCompatActivity() {
     private fun onPaymentMethodCreated(data: Intent?) {
         initLoggingTokens()
 
+        val paymentMethod =
+            data?.getParcelableExtra<PaymentMethod>(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
+
         if (data != null) {
             val result =
                 AddPaymentMethodActivityStarter.Result.fromIntent(data)
