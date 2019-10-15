@@ -1,5 +1,155 @@
 ## Migration Guides
 
+### Migrating from versions < 12.0.0
+- Replace `Stripe#createTokenSynchronous(Card)` with `Stripe#createCardTokenSynchronous(Card)`
+    ```java
+    // Java
+
+    // before
+    stripe.createTokenSynchronous(card);
+
+    // after
+    stripe.createCardTokenSynchronous(card);
+    ```
+
+    ```kotlin
+    // Kotlin
+
+    // before
+    stripe.createTokenSynchronous(card)
+
+    // after
+    stripe.createCardTokenSynchronous(card)
+    ```
+
+- Replace `Card#getCVC()` with `Card#getCvc()`
+    ```java
+    // Java
+
+    // before
+    card.getCVC();
+
+    // after
+    card.getCvc();
+    ```
+
+    ```kotlin
+    // Kotlin
+
+    // before
+    card.getCVC()
+
+    // after
+    card.cvc
+    ```
+
+- Remove `AddPaymentMethodActivity#EXTRA_NEW_PAYMENT_METHOD`, use `AddPaymentMethodActivityStarter.Result.fromIntent()` instead
+    ```java
+    // Java
+
+    // before
+    private PaymentMethod getPaymentMethodFromIntent(@NonNull Intent intent) {
+        return intent.getParcelableExtra<PaymentMethod>(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD);
+    }
+
+    // after
+    private PaymentMethod getPaymentMethodFromIntent(@NonNull Intent intent) {
+        final AddPaymentMethodActivityStarter.Result result =
+            AddPaymentMethodActivityStarter.Result.fromIntent(intent)
+        return result != null ? result.paymentMethod : null;
+    }
+    ```
+
+    ```kotlin
+    // Kotlin
+
+    // before
+    private fun getPaymentMethodFromIntent(intent: Intent): PaymentMethod? {
+        return intent.getParcelableExtra(AddPaymentMethodActivity.EXTRA_NEW_PAYMENT_METHOD)
+    }
+
+    // after
+    private fun getPaymentMethodFromIntent(intent: Intent): PaymentMethod? {
+        val result: AddPaymentMethodActivityStarter.Result? =
+            AddPaymentMethodActivityStarter.Result.fromIntent(intent)
+        return result?.paymentMethod
+    }
+    ```
+
+- Create overloaded `ShippingMethod` constructor with optional `detail` argument
+    ```java
+    // Java
+
+    // before
+    ShippingMethod("FedEx", "fedex", null, 599, "USD");
+    ShippingMethod("FedEx", "fedex", "Arrives tomorrow", 599, "USD");
+
+    // after
+    ShippingMethod("FedEx", "fedex", 599, "USD");
+    ShippingMethod("FedEx", "fedex", 599, "USD", "Arrives tomorrow");
+    ```
+
+    ```kotlin
+    // Kotlin
+
+    // before
+    ShippingMethod("FedEx", "fedex", null, 599, "USD")
+    ShippingMethod("FedEx", "fedex", "Arrives tomorrow", 599, "USD")
+
+    // after
+    ShippingMethod("FedEx", "fedex", 599, "USD")
+    ShippingMethod("FedEx", "fedex", 599, "USD", "Arrives tomorrow")
+    ```
+    
+- Payment Intent requests (i.e. requests to `/v1/payment_intents`) now return localized error messages
+    ```java
+    // Java
+
+    // before
+    @Test
+    public void testErrorMessage() {
+        Locale.setDefault(Locale.GERMANY);
+
+        final Stripe stripe = createStripe();
+        final InvalidRequestException exception = assertThrows(
+                InvalidRequestException.class,
+                new ThrowingRunnable() {
+                    @Override
+                    public void run() throws Throwable {
+                        stripe.retrievePaymentIntentSynchronous("invalid");
+                    }
+                });
+        
+        // Locale is Germany, error message is in English
+        assertEquals(
+                "No such payment_intent: invalid",
+                exception.getStripeError().getMessage()
+        );
+    }
+
+    // after
+    @Test
+    public void testErrorMessage() {
+        Locale.setDefault(Locale.GERMANY);
+
+        final Stripe stripe = createStripe();
+        final InvalidRequestException exception = assertThrows(
+                InvalidRequestException.class,
+                new ThrowingRunnable() {
+                    @Override
+                    public void run() throws Throwable {
+                        stripe.retrievePaymentIntentSynchronous("invalid");
+                    }
+                });
+
+        // Locale is Germany, error message is in Germany
+        assertEquals(
+                "Keine solche payment_intent: invalid",
+                exception.getStripeError().getMessage()
+        );
+    }
+    ```
+
 ### Migrating from versions < 11.0.0
 - [AndroidX](https://developer.android.com/jetpack/androidx) is required. Please read the [Migrating to AndroidX](https://developer.android.com/jetpack/androidx/migrate) guide for more information. See [#1478](https://github.com/stripe/stripe-android/pull/1478).
 - The signatures of `PaymentConfiguration.init()` and `PaymentConfiguration.getInstance()` have been changed. They now both take a `Context` instance as the first argument. See [#1479](https://github.com/stripe/stripe-android/pull/1479).
