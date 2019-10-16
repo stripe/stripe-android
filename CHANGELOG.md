@@ -7,6 +7,7 @@
     * Remove `AddPaymentMethodActivity#EXTRA_NEW_PAYMENT_METHOD`, use `AddPaymentMethodActivityStarter.Result.fromIntent()` instead
     * Create overloaded `ShippingMethod` constructor with optional `detail` argument
 * [#1701](https://github.com/stripe/stripe-android/pull/1701) Payment Intent API requests (i.e. requests to `/v1/payment_intents`) now return localized error messages
+* [#1706](https://github.com/stripe/stripe-android/pull/1706) Add `Card#toPaymentMethodsParams()` to create a `PaymentMethodCreateParams` instance that includes both card and billing details
 
 ## 11.2.2 - 2019-10-11
 * [#1686](https://github.com/stripe/stripe-android/pull/1686) Fix native crash on some devices in 3DS1 payment authentication WebView
