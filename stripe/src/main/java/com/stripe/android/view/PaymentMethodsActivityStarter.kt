@@ -14,6 +14,7 @@ import com.stripe.android.view.PaymentMethodsActivityStarter.Args
 import com.stripe.android.view.PaymentMethodsActivityStarter.Companion.REQUEST_CODE
 import com.stripe.android.view.PaymentMethodsActivityStarter.Result
 import com.stripe.android.view.PaymentMethodsActivityStarter.Result.Companion.fromIntent
+import kotlinx.android.parcel.Parcelize
 
 /**
  * A class to start [PaymentMethodsActivity]. Arguments for the activity can be specified
@@ -38,6 +39,7 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
         REQUEST_CODE
     )
 
+    @Parcelize
     data class Args internal constructor(
         internal val initialPaymentMethodId: String?,
         val shouldRequirePostalCode: Boolean,
@@ -46,33 +48,6 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
         internal val paymentMethodTypes: List<PaymentMethod.Type>,
         internal val paymentConfiguration: PaymentConfiguration?
     ) : ActivityStarter.Args {
-        private constructor(parcel: Parcel) : this(
-            initialPaymentMethodId = parcel.readString(),
-            shouldRequirePostalCode = parcel.readInt() == 1,
-            addPaymentMethodFooter = parcel.readInt(),
-            isPaymentSessionActive = parcel.readInt() == 1,
-            paymentMethodTypes = ((0 until parcel.readInt()).mapNotNull {
-                PaymentMethod.Type.valueOf(requireNotNull(parcel.readString()))
-            }),
-            paymentConfiguration = parcel.readParcelable(
-                PaymentConfiguration::class.java.classLoader
-            )
-        )
-
-        override fun describeContents(): Int {
-            return 0
-        }
-
-        override fun writeToParcel(dest: Parcel, flags: Int) {
-            dest.writeString(initialPaymentMethodId)
-            dest.writeInt(if (shouldRequirePostalCode) 1 else 0)
-            dest.writeInt(addPaymentMethodFooter)
-            dest.writeInt(if (isPaymentSessionActive) 1 else 0)
-            dest.writeInt(paymentMethodTypes.size)
-            paymentMethodTypes.forEach { dest.writeString(it.name) }
-            dest.writeParcelable(paymentConfiguration, 0)
-        }
-
         class Builder : ObjectBuilder<Args> {
             private var initialPaymentMethodId: String? = null
             private var shouldRequirePostalCode = false
@@ -134,17 +109,6 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
             @JvmStatic
             fun create(intent: Intent): Args {
                 return requireNotNull(intent.getParcelableExtra(ActivityStarter.Args.EXTRA))
-            }
-
-            @JvmField
-            val CREATOR: Parcelable.Creator<Args> = object : Parcelable.Creator<Args> {
-                override fun createFromParcel(parcel: Parcel): Args {
-                    return Args(parcel)
-                }
-
-                override fun newArray(size: Int): Array<Args?> {
-                    return arrayOfNulls(size)
-                }
             }
         }
     }

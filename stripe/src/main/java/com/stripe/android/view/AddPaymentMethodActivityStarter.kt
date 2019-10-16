@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcel
-import android.os.Parcelable
 import androidx.annotation.LayoutRes
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.PaymentConfiguration
@@ -12,6 +11,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.view.AddPaymentMethodActivityStarter.Args
 import com.stripe.android.view.AddPaymentMethodActivityStarter.Companion.REQUEST_CODE
 import com.stripe.android.view.AddPaymentMethodActivityStarter.Result.Companion.fromIntent
+import kotlinx.android.parcel.Parcelize
 
 /**
  * A class to start [AddPaymentMethodActivity]. Arguments for the activity can be
@@ -27,6 +27,7 @@ class AddPaymentMethodActivityStarter internal constructor(
     Args.DEFAULT,
     REQUEST_CODE
 ) {
+    @Parcelize
     data class Args internal constructor(
         internal val shouldAttachToCustomer: Boolean,
         internal val shouldRequirePostalCode: Boolean,
@@ -48,20 +49,6 @@ class AddPaymentMethodActivityStarter internal constructor(
             ),
             addPaymentMethodFooter = parcel.readInt()
         )
-
-        override fun describeContents(): Int {
-            return 0
-        }
-
-        override fun writeToParcel(dest: Parcel, flags: Int) {
-            dest.writeInt(if (shouldAttachToCustomer) 1 else 0)
-            dest.writeInt(if (shouldRequirePostalCode) 1 else 0)
-            dest.writeInt(if (isPaymentSessionActive) 1 else 0)
-            dest.writeInt(if (shouldInitCustomerSessionTokens) 1 else 0)
-            dest.writeString(paymentMethodType.name)
-            dest.writeParcelable(paymentConfiguration, 0)
-            dest.writeInt(addPaymentMethodFooter)
-        }
 
         class Builder : ObjectBuilder<Args> {
             private var shouldAttachToCustomer: Boolean = false
@@ -139,17 +126,6 @@ class AddPaymentMethodActivityStarter internal constructor(
             fun create(intent: Intent): Args {
                 return requireNotNull(intent.getParcelableExtra(ActivityStarter.Args.EXTRA))
             }
-
-            @JvmField
-            val CREATOR: Parcelable.Creator<Args> = object : Parcelable.Creator<Args> {
-                override fun createFromParcel(parcel: Parcel): Args {
-                    return Args(parcel)
-                }
-
-                override fun newArray(size: Int): Array<Args?> {
-                    return arrayOfNulls(size)
-                }
-            }
         }
     }
 
@@ -158,27 +134,14 @@ class AddPaymentMethodActivityStarter internal constructor(
      *
      * Retrieve in `#onActivityResult()` using [fromIntent].
      */
+    @Parcelize
     data class Result internal constructor(
         val paymentMethod: PaymentMethod
     ) : ActivityStarter.Result {
-        private constructor(parcel: Parcel) : this(
-            paymentMethod = requireNotNull(
-                parcel.readParcelable(PaymentMethod::class.java.classLoader)
-            )
-        )
-
         override fun toBundle(): Bundle {
             val bundle = Bundle()
             bundle.putParcelable(ActivityStarter.Result.EXTRA, this)
             return bundle
-        }
-
-        override fun describeContents(): Int {
-            return 0
-        }
-
-        override fun writeToParcel(dest: Parcel, flags: Int) {
-            dest.writeParcelable(paymentMethod, flags)
         }
 
         companion object {
@@ -187,17 +150,6 @@ class AddPaymentMethodActivityStarter internal constructor(
              */
             fun fromIntent(intent: Intent): Result? {
                 return intent.getParcelableExtra(ActivityStarter.Result.EXTRA)
-            }
-
-            @JvmField
-            val CREATOR: Parcelable.Creator<Result> = object : Parcelable.Creator<Result> {
-                override fun createFromParcel(parcel: Parcel): Result {
-                    return Result(parcel)
-                }
-
-                override fun newArray(size: Int): Array<Result?> {
-                    return arrayOfNulls(size)
-                }
             }
         }
     }
