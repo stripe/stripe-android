@@ -3,38 +3,38 @@ package com.stripe.android
 import com.stripe.android.exception.InvalidRequestException
 import java.io.IOException
 import java.io.UnsupportedEncodingException
-import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
+import java.util.concurrent.TimeUnit
 import javax.net.ssl.HttpsURLConnection
 
 internal class ConnectionFactory {
-
     @Throws(IOException::class, InvalidRequestException::class)
-    fun create(request: StripeRequest): HttpURLConnection {
-        val stripeURL = URL(request.url)
-        val conn = stripeURL.openConnection() as HttpURLConnection
-        conn.connectTimeout = 30 * 1000
-        conn.readTimeout = 80 * 1000
-        conn.useCaches = false
+    fun create(request: StripeRequest): StripeConnection {
+        // HttpURLConnection verifies SSL cert by default
+        val conn = openConnection(request.url).apply {
+            connectTimeout = CONNECT_TIMEOUT
+            readTimeout = READ_TIMEOUT
+            useCaches = false
+            sslSocketFactory = SSL_SOCKET_FACTORY
+            requestMethod = request.method.code
 
-        for ((key, value) in request.headers) {
-            conn.setRequestProperty(key, value)
+            for ((key, value) in request.headers) {
+                setRequestProperty(key, value)
+            }
+
+            if (StripeRequest.Method.POST == request.method) {
+                doOutput = true
+                setRequestProperty("Content-Type", request.contentType)
+                outputStream.use { output -> output.write(getRequestOutputBytes(request)) }
+            }
         }
 
-        if (conn is HttpsURLConnection) {
-            conn.sslSocketFactory = SSL_SOCKET_FACTORY
-        }
+        return StripeConnection(conn)
+    }
 
-        conn.requestMethod = request.method.code
-
-        if (StripeRequest.Method.POST == request.method) {
-            conn.doOutput = true
-            conn.setRequestProperty("Content-Type", request.contentType)
-            conn.outputStream.use { output -> output.write(getRequestOutputBytes(request)) }
-        }
-
-        return conn
+    private fun openConnection(requestUrl: String): HttpsURLConnection {
+        return URL(requestUrl).openConnection() as HttpsURLConnection
     }
 
     @Throws(InvalidRequestException::class)
@@ -52,5 +52,7 @@ internal class ConnectionFactory {
 
     companion object {
         private val SSL_SOCKET_FACTORY = StripeSSLSocketFactory()
+        private val CONNECT_TIMEOUT = TimeUnit.SECONDS.toMillis(30).toInt()
+        private val READ_TIMEOUT = TimeUnit.SECONDS.toMillis(80).toInt()
     }
 }
