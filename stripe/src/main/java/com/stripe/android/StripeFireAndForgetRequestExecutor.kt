@@ -3,9 +3,7 @@ package com.stripe.android
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.InvalidRequestException
-import java.io.Closeable
 import java.io.IOException
-import java.net.HttpURLConnection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -28,37 +26,14 @@ internal class StripeFireAndForgetRequestExecutor(
     @VisibleForTesting
     @Throws(APIConnectionException::class, InvalidRequestException::class)
     internal fun execute(request: StripeRequest): Int {
-        // HttpURLConnection verifies SSL cert by default
-        var conn: HttpURLConnection? = null
-        val responseCode: Int
-        try {
-            conn = connectionFactory.create(request)
-
-            // required to trigger the request
-            responseCode = conn.responseCode
-
-            closeConnection(conn, responseCode)
-        } catch (e: IOException) {
-            throw APIConnectionException.create(request.baseUrl, e)
-        } finally {
-            conn?.disconnect()
+        connectionFactory.create(request).use {
+            try {
+                // required to trigger the request
+                return it.responseCode
+            } catch (e: IOException) {
+                throw APIConnectionException.create(request.baseUrl, e)
+            }
         }
-
-        return responseCode
-    }
-
-    @Throws(IOException::class)
-    private fun closeConnection(conn: HttpURLConnection, responseCode: Int) {
-        if (responseCode in 200..299) {
-            closeStream(conn.inputStream)
-        } else {
-            closeStream(conn.errorStream)
-        }
-    }
-
-    @Throws(IOException::class)
-    private fun closeStream(stream: Closeable?) {
-        stream?.close()
     }
 
     override fun executeAsync(request: StripeRequest) {
