@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
@@ -1041,7 +1040,7 @@ public class StripeTest {
         assertEquals("Your card number is incorrect.", cardException.getMessage());
     }
 
-    @Ignore("enable after bumping version to v12.0.0")
+    @Test
     public void retrievePaymentIntent_withInvalidClientSecretInGermanyLocale_shouldReturnLocalizedMessage() {
         Locale.setDefault(Locale.GERMANY);
 
