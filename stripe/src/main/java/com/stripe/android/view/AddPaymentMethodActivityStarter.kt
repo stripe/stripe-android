@@ -3,7 +3,6 @@ package com.stripe.android.view
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.os.Parcel
 import androidx.annotation.LayoutRes
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.PaymentConfiguration
@@ -37,18 +36,6 @@ class AddPaymentMethodActivityStarter internal constructor(
         internal val paymentConfiguration: PaymentConfiguration?,
         @LayoutRes internal val addPaymentMethodFooter: Int
     ) : ActivityStarter.Args {
-
-        private constructor(parcel: Parcel) : this(
-            shouldAttachToCustomer = parcel.readInt() == 1,
-            shouldRequirePostalCode = parcel.readInt() == 1,
-            isPaymentSessionActive = parcel.readInt() == 1,
-            shouldInitCustomerSessionTokens = parcel.readInt() == 1,
-            paymentMethodType = PaymentMethod.Type.valueOf(requireNotNull(parcel.readString())),
-            paymentConfiguration = parcel.readParcelable(
-                PaymentConfiguration::class.java.classLoader
-            ),
-            addPaymentMethodFooter = parcel.readInt()
-        )
 
         class Builder : ObjectBuilder<Args> {
             private var shouldAttachToCustomer: Boolean = false

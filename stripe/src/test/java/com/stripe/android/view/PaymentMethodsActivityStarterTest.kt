@@ -6,6 +6,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.utils.ParcelUtils
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -17,7 +18,7 @@ import org.robolectric.RobolectricTestRunner
 class PaymentMethodsActivityStarterTest {
 
     @Test
-    fun testParceling() {
+    fun testArgsParceling() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
@@ -31,6 +32,15 @@ class PaymentMethodsActivityStarterTest {
             .build()
 
         assertEquals(args, ParcelUtils.create(args))
+    }
+
+    @Test
+    fun testResultParceling() {
+        val result = PaymentMethodsActivityStarter.Result(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            true
+        )
+        assertEquals(result, ParcelUtils.create(result))
     }
 
     @Test

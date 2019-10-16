@@ -3,8 +3,6 @@ package com.stripe.android.view
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.os.Parcel
-import android.os.Parcelable
 import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
 import com.stripe.android.ObjectBuilder
@@ -118,30 +116,15 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
      *
      * Retrieve in `#onActivityResult()` using [fromIntent].
      */
+    @Parcelize
     data class Result internal constructor(
         @JvmField val paymentMethod: PaymentMethod,
         private val useGooglePay: Boolean = false
     ) : ActivityStarter.Result {
-        private constructor(parcel: Parcel) : this(
-            paymentMethod = requireNotNull(
-                parcel.readParcelable(PaymentMethod::class.java.classLoader)
-            ),
-            useGooglePay = parcel.readInt() == 1
-        )
-
         override fun toBundle(): Bundle {
             val bundle = Bundle()
             bundle.putParcelable(ActivityStarter.Result.EXTRA, this)
             return bundle
-        }
-
-        override fun describeContents(): Int {
-            return 0
-        }
-
-        override fun writeToParcel(dest: Parcel, flags: Int) {
-            dest.writeParcelable(paymentMethod, flags)
-            dest.writeInt(if (useGooglePay) 1 else 0)
         }
 
         companion object {
@@ -151,17 +134,6 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
             @JvmStatic
             fun fromIntent(intent: Intent): Result? {
                 return intent.getParcelableExtra(ActivityStarter.Result.EXTRA)
-            }
-
-            @JvmField
-            val CREATOR: Parcelable.Creator<Result> = object : Parcelable.Creator<Result> {
-                override fun createFromParcel(parcel: Parcel): Result {
-                    return Result(parcel)
-                }
-
-                override fun newArray(size: Int): Array<Result?> {
-                    return arrayOfNulls(size)
-                }
             }
         }
     }
