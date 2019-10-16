@@ -141,7 +141,11 @@ class PaymentAuthActivity : AppCompatActivity() {
                     setup_button.isEnabled = false
                     statusTextView.setText(R.string.creating_payment_intent)
                 }
-                .subscribe { handleCreatePaymentIntentResponse(it, authType) })
+                .subscribe(
+                    { handleCreatePaymentIntentResponse(it, authType) },
+                    { handleError(it) }
+                )
+        )
     }
 
     private fun createSetupIntent() {
@@ -156,7 +160,17 @@ class PaymentAuthActivity : AppCompatActivity() {
                     setup_button.isEnabled = false
                     statusTextView.setText(R.string.creating_setup_intent)
                 }
-                .subscribe { handleCreateSetupIntentResponse(it) })
+                .subscribe(
+                    { handleCreateSetupIntentResponse(it) },
+                    { handleError(it) }
+                )
+        )
+    }
+
+    private fun handleError(err: Throwable) {
+        progress_bar.visibility = View.INVISIBLE
+        err.printStackTrace()
+        statusTextView.append("\n\n" + err.message)
     }
 
     private fun handleCreatePaymentIntentResponse(
