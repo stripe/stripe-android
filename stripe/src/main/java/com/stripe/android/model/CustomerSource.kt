@@ -1,13 +1,12 @@
 package com.stripe.android.model
 
 import com.stripe.android.model.StripeJsonUtils.optString
-import java.util.Objects
 import org.json.JSONObject
 
 /**
  * Model of the "data" object inside a [Customer] "source" object.
  */
-class CustomerSource private constructor(
+data class CustomerSource internal constructor(
     private val stripePaymentSource: StripePaymentSource
 ) : StripeModel(), StripePaymentSource {
 
@@ -42,26 +41,6 @@ class CustomerSource private constructor(
         return if (stripePaymentSource is Card) {
             stripePaymentSource
         } else null
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) {
-            return true
-        }
-
-        return if (other is CustomerSource) {
-            typedEquals(other)
-        } else {
-            false
-        }
-    }
-
-    private fun typedEquals(customerSource: CustomerSource): Boolean {
-        return stripePaymentSource == customerSource.stripePaymentSource
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(stripePaymentSource)
     }
 
     companion object {

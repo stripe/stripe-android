@@ -1,8 +1,8 @@
 package com.stripe.android.model
 
 import androidx.annotation.StringDef
+import com.stripe.android.model.Token.TokenType
 import java.util.Date
-import java.util.Objects
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -11,44 +11,45 @@ import org.json.JSONObject
  * account details or personally identifiable information (PII), directly from your customers in a
  * secure manner. A Token representing this information is returned to you to use.
  */
-class Token : StripePaymentSource {
+data class Token internal constructor(
 
     /**
      * @return the Token id
      */
-    override val id: String
+    override val id: String,
 
     /**
      * @return Get the [TokenType] of this token.
      */
     @get:TokenType
-    val type: String
+    val type: String,
 
     /***
      * @return the [Date] this token was created
      */
-    val created: Date
+    val created: Date,
+
     /**
      * @return `true` if this token is valid for a real payment, `false` if
      * it is only usable for testing
      */
-    val livemode: Boolean
+    val livemode: Boolean,
 
     /**
      * @return `true` if this token has been used, `false` otherwise
      */
-    val used: Boolean
+    val used: Boolean,
 
     /**
      * @return the [BankAccount] for this token
      */
-    val bankAccount: BankAccount?
+    val bankAccount: BankAccount? = null,
 
     /**
      * @return the [Card] for this token
      */
-    val card: Card?
-
+    val card: Card? = null
+) : StripePaymentSource {
     @Retention(AnnotationRetention.SOURCE)
     @StringDef(TokenType.CARD, TokenType.BANK_ACCOUNT, TokenType.PII, TokenType.ACCOUNT,
         TokenType.CVC_UPDATE)
@@ -72,15 +73,14 @@ class Token : StripePaymentSource {
         created: Date,
         used: Boolean?,
         card: Card?
-    ) {
-        this.id = id
-        type = TokenType.CARD
-        this.created = created
-        this.livemode = livemode
-        this.card = card
-        this.used = java.lang.Boolean.TRUE == used
-        bankAccount = null
-    }
+    ) : this(
+        id = id,
+        type = TokenType.CARD,
+        created = created,
+        livemode = livemode,
+        card = card,
+        used = java.lang.Boolean.TRUE == used
+    )
 
     /**
      * Constructor that should not be invoked in your code.  This is used by Stripe to
@@ -92,15 +92,14 @@ class Token : StripePaymentSource {
         created: Date,
         used: Boolean?,
         bankAccount: BankAccount
-    ) {
-        this.id = id
-        type = TokenType.BANK_ACCOUNT
-        this.created = created
-        this.livemode = livemode
-        card = null
-        this.used = java.lang.Boolean.TRUE == used
-        this.bankAccount = bankAccount
-    }
+    ) : this(
+        id = id,
+        type = TokenType.BANK_ACCOUNT,
+        created = created,
+        livemode = livemode,
+        used = java.lang.Boolean.TRUE == used,
+        bankAccount = bankAccount
+    )
 
     /**
      * Constructor that should not be invoked in your code.  This is used by Stripe to
@@ -112,33 +111,13 @@ class Token : StripePaymentSource {
         livemode: Boolean,
         created: Date,
         used: Boolean?
-    ) {
-        this.id = id
-        this.type = type
-        this.created = created
-        card = null
-        bankAccount = null
-        this.used = java.lang.Boolean.TRUE == used
-        this.livemode = livemode
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(id, type, created, livemode, used, bankAccount, card)
-    }
-
-    override fun equals(other: Any?): Boolean {
-        return when {
-            this === other -> true
-            other is Token -> typedEquals(other)
-            else -> false
-        }
-    }
-
-    private fun typedEquals(token: Token): Boolean {
-        return (id == token.id && type == token.type && created == token.created &&
-            livemode == token.livemode && used == token.used &&
-            bankAccount == token.bankAccount && card == token.card)
-    }
+    ) : this(
+        id = id,
+        type = type,
+        created = created,
+        used = java.lang.Boolean.TRUE == used,
+        livemode = livemode
+    )
 
     companion object {
         // The key for these object fields is identical to their retrieved values
@@ -207,10 +186,6 @@ class Token : StripePaymentSource {
          */
         @TokenType
         private fun asTokenType(possibleTokenType: String?): String? {
-            if (possibleTokenType.isNullOrBlank()) {
-                return null
-            }
-
             return when (possibleTokenType) {
                 TokenType.CARD -> TokenType.CARD
                 TokenType.BANK_ACCOUNT -> TokenType.BANK_ACCOUNT

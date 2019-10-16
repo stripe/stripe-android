@@ -13,91 +13,87 @@ import com.stripe.android.model.StripeJsonUtils.optHash
 import com.stripe.android.model.StripeJsonUtils.optInteger
 import com.stripe.android.model.StripeJsonUtils.optString
 import java.util.Calendar
-import java.util.HashMap
-import java.util.Objects
 import org.json.JSONException
 import org.json.JSONObject
 
 /**
  * A model object representing a Card in the Android SDK.
  */
-class Card private constructor(
-    builder: Builder
-) : StripeModel(), StripePaymentSource, StripeParamsModel {
+data class Card internal constructor(
 
     /**
      * @return the [number] of this card
      */
-    val number: String?
+    val number: String?,
 
     /**
      * @return the [cvc] for this card
      */
-    val cvc: String?
+    val cvc: String?,
 
     /**
      * @return the [expMonth] for this card
      */
     @get:IntRange(from = 1, to = 12)
-    val expMonth: Int?
+    val expMonth: Int?,
 
     /**
      * @return the [expYear] for this card
      */
-    val expYear: Int?
+    val expYear: Int?,
 
     /**
      * @return the cardholder [name] for this card
      */
-    val name: String?
+    val name: String?,
 
     /**
      * @return the [addressLine1] of this card
      */
-    val addressLine1: String?
+    val addressLine1: String?,
 
     /**
      * @return If address_line1 was provided, results of the check:
      * pass, fail, unavailable, or unchecked.
      */
-    val addressLine1Check: String?
+    val addressLine1Check: String?,
 
     /**
      * @return the [addressLine2] of this card
      */
-    val addressLine2: String?
+    val addressLine2: String?,
 
     /**
      * @return the [addressCity] for this card
      */
-    val addressCity: String?
+    val addressCity: String?,
 
     /**
      * @return the [addressState] of this card
      */
-    val addressState: String?
+    val addressState: String?,
 
     /**
      * @return the [addressZip] of this card
      */
-    val addressZip: String?
+    val addressZip: String?,
 
     /**
      * @return If address_zip was provided, results of the check:
      * pass, fail, unavailable, or unchecked.
      */
-    val addressZipCheck: String?
+    val addressZipCheck: String?,
 
     /**
      * @return the [addressCountry] of this card
      */
-    val addressCountry: String?
+    val addressCountry: String?,
 
     /**
      * @return the [last4] digits of this card.
      */
     @Size(4)
-    val last4: String?
+    val last4: String?,
 
     /**
      * Gets the [brand] of this card. Updates the value if none has yet been set, or
@@ -107,52 +103,53 @@ class Card private constructor(
      */
     @CardBrand
     @get:CardBrand
-    val brand: String?
+    val brand: String?,
 
     /**
      * @return the [funding] type of this card
      */
     @FundingType
     @get:FundingType
-    val funding: String?
+    val funding: String?,
 
     /**
      * @return the [fingerprint] of this card
      */
-    val fingerprint: String?
+    val fingerprint: String?,
 
     /**
      * @return the [country] of this card
      */
-    val country: String?
+    val country: String?,
 
     /**
      * @return the [currency] of this card. Only supported for Managed accounts.
      */
-    val currency: String?
+    val currency: String?,
 
     /**
      * @return The ID of the customer that this card belongs to.
      */
-    val customerId: String?
+    val customerId: String?,
 
     /**
      * @return If a CVC was provided, results of the check:
      * pass, fail, unavailable, or unchecked.
      */
-    val cvcCheck: String?
+    val cvcCheck: String?,
 
     /**
      * @return the [id] of this card
      */
-    override val id: String?
-    internal val loggingTokens: MutableList<String> = mutableListOf()
-    internal val tokenizationMethod: String?
+    override val id: String?,
+    internal val loggingTokens: MutableList<String> = mutableListOf(),
+    internal val tokenizationMethod: String?,
 
     /**
      * @return the [metadata] of this card
      */
     val metadata: Map<String, String>?
+) : StripeModel(), StripePaymentSource, StripeParamsModel {
 
     @Retention(AnnotationRetention.SOURCE)
     @StringDef(CardBrand.AMERICAN_EXPRESS, CardBrand.DISCOVER, CardBrand.JCB,
@@ -306,24 +303,6 @@ class Card private constructor(
         return expYear?.let { !ModelUtils.hasYearPassed(it, now) } == true
     }
 
-    private fun calculateLast4(number: String?, last4: String?): String? {
-        return if (!last4.isNullOrBlank()) {
-            last4
-        } else if (number != null && number.length > 4) {
-            number.substring(number.length - 4)
-        } else {
-            null
-        }
-    }
-
-    private fun calculateBrand(brand: String?): String? {
-        return if (brand.isNullOrBlank() && !number.isNullOrBlank()) {
-            CardUtils.getPossibleCardType(number)
-        } else {
-            brand
-        }
-    }
-
     internal fun validateCard(now: Calendar): Boolean {
         return if (cvc == null) {
             validateNumber() && validateExpiryDate(now)
@@ -343,96 +322,6 @@ class Card private constructor(
         } else {
             !ModelUtils.hasMonthPassed(expYear, expMonth, now)
         }
-    }
-
-    init {
-        this.number = normalizeCardNumber(builder.number).takeUnless { it.isNullOrBlank() }
-        this.expMonth = builder.expMonth
-        this.expYear = builder.expYear
-        this.cvc = builder.cvc.takeUnless { it.isNullOrBlank() }
-        this.name = builder.name.takeUnless { it.isNullOrBlank() }
-        this.addressLine1 = builder.addressLine1.takeUnless { it.isNullOrBlank() }
-        this.addressLine1Check = builder.addressLine1Check.takeUnless { it.isNullOrBlank() }
-        this.addressLine2 = builder.addressLine2.takeUnless { it.isNullOrBlank() }
-        this.addressCity = builder.addressCity.takeUnless { it.isNullOrBlank() }
-        this.addressState = builder.addressState.takeUnless { it.isNullOrBlank() }
-        this.addressZip = builder.addressZip.takeUnless { it.isNullOrBlank() }
-        this.addressZipCheck = builder.addressZipCheck.takeUnless { it.isNullOrBlank() }
-        this.addressCountry = builder.addressCountry.takeUnless { it.isNullOrBlank() }
-
-        this.last4 = if (builder.last4.isNullOrBlank()) {
-            calculateLast4(number, builder.last4)
-        } else {
-            builder.last4
-        }
-
-        this.brand = if (asCardBrand(builder.brand) == null) {
-            calculateBrand(builder.brand)
-        } else {
-            builder.brand
-        }
-
-        this.fingerprint = builder.fingerprint.takeUnless { it.isNullOrBlank() }
-        this.funding = asFundingType(builder.funding).takeUnless { it.isNullOrBlank() }
-        this.country = builder.country.takeUnless { it.isNullOrBlank() }
-        this.currency = builder.currency.takeUnless { it.isNullOrBlank() }
-        this.customerId = builder.customerId.takeUnless { it.isNullOrBlank() }
-        this.cvcCheck = builder.cvcCheck.takeUnless { it.isNullOrBlank() }
-        this.id = builder.id.takeUnless { it.isNullOrBlank() }
-        this.tokenizationMethod = builder.tokenizationMethod.takeUnless { it.isNullOrBlank() }
-        this.metadata = builder.metadata
-
-        builder.loggingTokens?.let { loggingTokens ->
-            this.loggingTokens.addAll(loggingTokens)
-        }
-    }
-
-    private fun normalizeCardNumber(number: String?): String? {
-        return number?.trim()?.replace("\\s+|-".toRegex(), "")
-    }
-
-    override fun equals(other: Any?): Boolean {
-        return when {
-            this === other -> true
-            other is Card -> typedEquals(other)
-            else -> false
-        }
-    }
-
-    private fun typedEquals(card: Card): Boolean {
-        return number == card.number &&
-            cvc == card.cvc &&
-            expMonth == card.expMonth &&
-            expYear == card.expYear &&
-            name == card.name &&
-            addressLine1 == card.addressLine1 &&
-            addressLine1Check == card.addressLine1Check &&
-            addressLine2 == card.addressLine2 &&
-            addressCity == card.addressCity &&
-            addressState == card.addressState &&
-            addressZip == card.addressZip &&
-            addressZipCheck == card.addressZipCheck &&
-            addressCountry == card.addressCountry &&
-            last4 == card.last4 &&
-            brand == card.brand &&
-            funding == card.funding &&
-            fingerprint == card.fingerprint &&
-            country == card.country &&
-            currency == card.currency &&
-            customerId == card.customerId &&
-            cvcCheck == card.cvcCheck &&
-            id == card.id &&
-            loggingTokens == card.loggingTokens &&
-            tokenizationMethod == card.tokenizationMethod &&
-            metadata == card.metadata
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(number, cvc, expMonth, expYear, name, addressLine1,
-            addressLine1Check, addressLine2, addressCity, addressState, addressZip,
-            addressZipCheck, addressCountry, last4, brand, funding, fingerprint,
-            country, currency, customerId, cvcCheck, id, loggingTokens, tokenizationMethod,
-            metadata)
     }
 
     override fun toParamMap(): Map<String, Any> {
@@ -472,30 +361,30 @@ class Card private constructor(
         @param:IntRange(from = 0) internal val expYear: Int?,
         internal val cvc: String?
     ) : ObjectBuilder<Card> {
-        internal var name: String? = null
-        internal var addressLine1: String? = null
-        internal var addressLine1Check: String? = null
-        internal var addressLine2: String? = null
-        internal var addressCity: String? = null
-        internal var addressState: String? = null
-        internal var addressZip: String? = null
-        internal var addressZipCheck: String? = null
-        internal var addressCountry: String? = null
+        private var name: String? = null
+        private var addressLine1: String? = null
+        private var addressLine1Check: String? = null
+        private var addressLine2: String? = null
+        private var addressCity: String? = null
+        private var addressState: String? = null
+        private var addressZip: String? = null
+        private var addressZipCheck: String? = null
+        private var addressCountry: String? = null
         @CardBrand
-        internal var brand: String? = null
+        private var brand: String? = null
         @FundingType
-        internal var funding: String? = null
+        private var funding: String? = null
         @Size(4)
-        internal var last4: String? = null
-        internal var fingerprint: String? = null
-        internal var country: String? = null
-        internal var currency: String? = null
-        internal var customerId: String? = null
-        internal var cvcCheck: String? = null
-        internal var id: String? = null
-        internal var tokenizationMethod: String? = null
-        internal var metadata: Map<String, String>? = null
-        internal var loggingTokens: List<String>? = null
+        private var last4: String? = null
+        private var fingerprint: String? = null
+        private var country: String? = null
+        private var currency: String? = null
+        private var customerId: String? = null
+        private var cvcCheck: String? = null
+        private var id: String? = null
+        private var tokenizationMethod: String? = null
+        private var metadata: Map<String, String>? = null
+        private var loggingTokens: List<String>? = null
 
         fun name(name: String?): Builder {
             this.name = name
@@ -608,7 +497,59 @@ class Card private constructor(
          * @return the newly created [Card] object
          */
         override fun build(): Card {
-            return Card(this)
+            val number = normalizeCardNumber(number).takeUnless { it.isNullOrBlank() }
+            val last4 = last4.takeUnless { it.isNullOrBlank() } ?: calculateLast4(number)
+            return Card(
+                number = number,
+                expMonth = expMonth,
+                expYear = expYear,
+                cvc = cvc.takeUnless { it.isNullOrBlank() },
+                name = name.takeUnless { it.isNullOrBlank() },
+                addressLine1 = addressLine1.takeUnless { it.isNullOrBlank() },
+                addressLine1Check = addressLine1Check.takeUnless { it.isNullOrBlank() },
+                addressLine2 = addressLine2.takeUnless { it.isNullOrBlank() },
+                addressCity = addressCity.takeUnless { it.isNullOrBlank() },
+                addressState = addressState.takeUnless { it.isNullOrBlank() },
+                addressZip = addressZip.takeUnless { it.isNullOrBlank() },
+                addressZipCheck = addressZipCheck.takeUnless { it.isNullOrBlank() },
+                addressCountry = addressCountry.takeUnless { it.isNullOrBlank() },
+                last4 = last4,
+                brand = if (asCardBrand(brand) == null) {
+                    calculateBrand(brand)
+                } else {
+                    brand
+                },
+                fingerprint = fingerprint.takeUnless { it.isNullOrBlank() },
+                funding = asFundingType(funding).takeUnless { it.isNullOrBlank() },
+                country = country.takeUnless { it.isNullOrBlank() },
+                currency = currency.takeUnless { it.isNullOrBlank() },
+                customerId = customerId.takeUnless { it.isNullOrBlank() },
+                cvcCheck = cvcCheck.takeUnless { it.isNullOrBlank() },
+                id = id.takeUnless { it.isNullOrBlank() },
+                tokenizationMethod = tokenizationMethod.takeUnless { it.isNullOrBlank() },
+                metadata = metadata,
+                loggingTokens = loggingTokens.orEmpty().toMutableList()
+            )
+        }
+
+        private fun normalizeCardNumber(number: String?): String? {
+            return number?.trim()?.replace("\\s+|-".toRegex(), "")
+        }
+
+        private fun calculateLast4(number: String?): String? {
+            return if (number != null && number.length > 4) {
+                number.substring(number.length - 4)
+            } else {
+                null
+            }
+        }
+
+        private fun calculateBrand(brand: String?): String? {
+            return if (brand.isNullOrBlank() && !number.isNullOrBlank()) {
+                CardUtils.getPossibleCardType(number)
+            } else {
+                brand
+            }
         }
     }
 
@@ -663,18 +604,16 @@ class Card private constructor(
         private const val FIELD_ID = "id"
         private const val FIELD_TOKENIZATION_METHOD = "tokenization_method"
 
-        private val BRAND_RESOURCE_MAP = object : HashMap<String, Int>() {
-            init {
-                put(CardBrand.AMERICAN_EXPRESS, R.drawable.ic_amex)
-                put(CardBrand.DINERS_CLUB, R.drawable.ic_diners)
-                put(CardBrand.DISCOVER, R.drawable.ic_discover)
-                put(CardBrand.JCB, R.drawable.ic_jcb)
-                put(CardBrand.MASTERCARD, R.drawable.ic_mastercard)
-                put(CardBrand.VISA, R.drawable.ic_visa)
-                put(CardBrand.UNIONPAY, R.drawable.ic_unionpay)
-                put(CardBrand.UNKNOWN, R.drawable.ic_unknown)
-            }
-        }
+        private val BRAND_RESOURCE_MAP = mapOf(
+            CardBrand.AMERICAN_EXPRESS to R.drawable.ic_amex,
+            CardBrand.DINERS_CLUB to R.drawable.ic_diners,
+            CardBrand.DISCOVER to R.drawable.ic_discover,
+            CardBrand.JCB to R.drawable.ic_jcb,
+            CardBrand.MASTERCARD to R.drawable.ic_mastercard,
+            CardBrand.VISA to R.drawable.ic_visa,
+            CardBrand.UNIONPAY to R.drawable.ic_unionpay,
+            CardBrand.UNKNOWN to R.drawable.ic_unknown
+        )
 
         /**
          * Converts an unchecked String value to a [CardBrand] or `null`.

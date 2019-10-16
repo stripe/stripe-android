@@ -18,8 +18,8 @@ class SourceCardDataTest {
         assertEquals("4242", CARD_DATA.last4)
         assertNotNull(CARD_DATA.expiryMonth)
         assertNotNull(CARD_DATA.expiryYear)
-        assertEquals(12, CARD_DATA.expiryMonth!!.toInt())
-        assertEquals(2050, CARD_DATA.expiryYear!!.toInt())
+        assertEquals(12, CARD_DATA.expiryMonth)
+        assertEquals(2050, CARD_DATA.expiryYear)
         assertEquals("US", CARD_DATA.country)
         assertEquals("optional", CARD_DATA.threeDSecureStatus)
         assertEquals("apple_pay", CARD_DATA.tokenizationMethod)
@@ -36,7 +36,7 @@ class SourceCardDataTest {
         assertNotNull(CARD_DATA)
         assertEquals(
             CARD_DATA.hashCode(),
-            SourceCardData.fromJson(SOURCE_CARD_DATA_WITH_APPLE_PAY_JSON)!!.hashCode()
+            SourceCardData.fromJson(SOURCE_CARD_DATA_WITH_APPLE_PAY_JSON).hashCode()
         )
     }
 

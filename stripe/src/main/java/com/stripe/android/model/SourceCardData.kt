@@ -4,7 +4,6 @@ import androidx.annotation.StringDef
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.StripeJsonUtils.optInteger
 import com.stripe.android.model.StripeJsonUtils.optString
-import java.util.Objects
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -12,31 +11,31 @@ import org.json.JSONObject
  * Model for data contained in the SourceTypeData of a Card Source.
  */
 @Suppress("MemberVisibilityCanBePrivate")
-class SourceCardData private constructor(builder: Builder) : StripeSourceTypeModel(builder) {
-    val addressLine1Check: String?
-    val addressZipCheck: String?
+data class SourceCardData internal constructor(
+    val addressLine1Check: String?,
+    val addressZipCheck: String?,
 
     @Card.CardBrand
     @get:Card.CardBrand
-    val brand: String?
+    val brand: String?,
 
-    val country: String?
-    val cvcCheck: String?
-    val dynamicLast4: String?
-    val expiryMonth: Int?
-    val expiryYear: Int?
+    val country: String?,
+    val cvcCheck: String?,
+    val dynamicLast4: String?,
+    val expiryMonth: Int?,
+    val expiryYear: Int?,
 
     @Card.FundingType
     @get:Card.FundingType
-    val funding: String?
+    val funding: String?,
 
-    val last4: String?
+    val last4: String?,
     @ThreeDSecureStatus
     @get:ThreeDSecureStatus
-    val threeDSecureStatus: String?
+    val threeDSecureStatus: String?,
 
     val tokenizationMethod: String?
-
+) : StripeSourceTypeModel() {
     @Retention(AnnotationRetention.SOURCE)
     @StringDef(ThreeDSecureStatus.REQUIRED, ThreeDSecureStatus.OPTIONAL,
         ThreeDSecureStatus.NOT_SUPPORTED, ThreeDSecureStatus.RECOMMENDED,
@@ -51,132 +50,98 @@ class SourceCardData private constructor(builder: Builder) : StripeSourceTypeMod
         }
     }
 
-    init {
-        addressLine1Check = builder.mAddressLine1Check
-        addressZipCheck = builder.mAddressZipCheck
-        brand = builder.mBrand
-        country = builder.mCountry
-        cvcCheck = builder.mCvcCheck
-        dynamicLast4 = builder.mDynamicLast4
-        expiryMonth = builder.mExpiryMonth
-        expiryYear = builder.mExpiryYear
-        funding = builder.mFunding
-        last4 = builder.mLast4
-        threeDSecureStatus = builder.mThreeDSecureStatus
-        tokenizationMethod = builder.mTokenizationMethod
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) {
-            return true
-        }
-
-        return if (other is SourceCardData) {
-            typedEquals(other)
-        } else false
-    }
-
-    internal fun typedEquals(sourceCardData: SourceCardData): Boolean {
-        return super.typedEquals(sourceCardData) &&
-            addressLine1Check == sourceCardData.addressLine1Check &&
-            addressZipCheck == sourceCardData.addressZipCheck &&
-            brand == sourceCardData.brand &&
-            country == sourceCardData.country &&
-            cvcCheck == sourceCardData.cvcCheck &&
-            dynamicLast4 == sourceCardData.dynamicLast4 &&
-            expiryMonth == sourceCardData.expiryMonth &&
-            expiryYear == sourceCardData.expiryYear &&
-            funding == sourceCardData.funding &&
-            last4 == sourceCardData.last4 &&
-            threeDSecureStatus == sourceCardData.threeDSecureStatus &&
-            tokenizationMethod == sourceCardData.tokenizationMethod
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(addressLine1Check, addressZipCheck, brand, country, cvcCheck,
-            dynamicLast4, expiryMonth, expiryYear, funding, last4, threeDSecureStatus,
-            tokenizationMethod)
-    }
-
     private class Builder : StripeSourceTypeModel.BaseBuilder() {
-        var mAddressLine1Check: String? = null
-        var mAddressZipCheck: String? = null
+        var addressLine1Check: String? = null
+        var addressZipCheck: String? = null
         @Card.CardBrand
-        var mBrand: String? = null
-        var mCountry: String? = null
-        var mCvcCheck: String? = null
-        var mDynamicLast4: String? = null
-        var mExpiryMonth: Int? = null
-        var mExpiryYear: Int? = null
+        var brand: String? = null
+        var country: String? = null
+        var cvcCheck: String? = null
+        var dynamicLast4: String? = null
+        var expiryMonth: Int? = null
+        var expiryYear: Int? = null
         @Card.FundingType
-        var mFunding: String? = null
-        var mLast4: String? = null
+        var funding: String? = null
+        var last4: String? = null
         @ThreeDSecureStatus
-        var mThreeDSecureStatus: String? = null
-        var mTokenizationMethod: String? = null
+        var threeDSecureStatus: String? = null
+        var tokenizationMethod: String? = null
 
         fun setAddressLine1Check(addressLine1Check: String?): Builder {
-            mAddressLine1Check = addressLine1Check
+            this.addressLine1Check = addressLine1Check
             return this
         }
 
         fun setAddressZipCheck(addressZipCheck: String?): Builder {
-            mAddressZipCheck = addressZipCheck
+            this.addressZipCheck = addressZipCheck
             return this
         }
 
         fun setBrand(brand: String?): Builder {
-            mBrand = brand
+            this.brand = brand
             return this
         }
 
         fun setCountry(country: String?): Builder {
-            mCountry = country
+            this.country = country
             return this
         }
 
         fun setCvcCheck(cvcCheck: String?): Builder {
-            mCvcCheck = cvcCheck
+            this.cvcCheck = cvcCheck
             return this
         }
 
         fun setDynamicLast4(dynamicLast4: String?): Builder {
-            mDynamicLast4 = dynamicLast4
+            this.dynamicLast4 = dynamicLast4
             return this
         }
 
         fun setExpiryMonth(expiryMonth: Int?): Builder {
-            mExpiryMonth = expiryMonth
+            this.expiryMonth = expiryMonth
             return this
         }
 
         fun setExpiryYear(expiryYear: Int?): Builder {
-            mExpiryYear = expiryYear
+            this.expiryYear = expiryYear
             return this
         }
 
         fun setFunding(funding: String?): Builder {
-            mFunding = funding
+            this.funding = funding
             return this
         }
 
         fun setLast4(last4: String?): Builder {
-            mLast4 = last4
+            this.last4 = last4
             return this
         }
 
         fun setThreeDSecureStatus(threeDSecureStatus: String?): Builder {
-            mThreeDSecureStatus = threeDSecureStatus
+            this.threeDSecureStatus = threeDSecureStatus
             return this
         }
 
         fun setTokenizationMethod(tokenizationMethod: String?): Builder {
-            mTokenizationMethod = tokenizationMethod
+            this.tokenizationMethod = tokenizationMethod
             return this
         }
 
         fun build(): SourceCardData {
-            return SourceCardData(this)
+            return SourceCardData(
+                addressLine1Check = addressLine1Check,
+                addressZipCheck = addressZipCheck,
+                brand = brand,
+                country = country,
+                cvcCheck = cvcCheck,
+                dynamicLast4 = dynamicLast4,
+                expiryMonth = expiryMonth,
+                expiryYear = expiryYear,
+                funding = funding,
+                last4 = last4,
+                threeDSecureStatus = threeDSecureStatus,
+                tokenizationMethod = tokenizationMethod
+            )
         }
     }
 
@@ -231,9 +196,8 @@ class SourceCardData private constructor(builder: Builder) : StripeSourceTypeMod
                     FIELD_THREE_D_SECURE)))
                 .setTokenizationMethod(optString(jsonObject, FIELD_TOKENIZATION_METHOD))
 
-            val nonStandardFields = jsonObjectToMapWithoutKeys(jsonObject, STANDARD_FIELDS)
-            if (nonStandardFields != null) {
-                cardData.setAdditionalFields(nonStandardFields)
+            jsonObjectToMapWithoutKeys(jsonObject, STANDARD_FIELDS)?.let { additionalFields ->
+                cardData.setAdditionalFields(additionalFields)
             }
 
             return cardData.build()

@@ -1,16 +1,15 @@
 package com.stripe.android.model.wallets
 
-import android.os.Parcel
-import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 
-class ApplePayWallet : Wallet {
-    private constructor(builder: Builder) : super(Type.ApplePay, builder)
-
-    private constructor(parcel: Parcel) : super(parcel)
+@Parcelize
+data class ApplePayWallet internal constructor(
+    val dynamicLast4: String?
+) : Wallet(Type.ApplePay) {
 
     internal class Builder : Wallet.Builder<ApplePayWallet>() {
         override fun build(): ApplePayWallet {
-            return ApplePayWallet(this)
+            return ApplePayWallet(dynamicLast4)
         }
     }
 
@@ -18,17 +17,5 @@ class ApplePayWallet : Wallet {
         internal fun fromJson(): Builder {
             return Builder()
         }
-
-        @JvmField
-        val CREATOR: Parcelable.Creator<ApplePayWallet> =
-            object : Parcelable.Creator<ApplePayWallet> {
-                override fun createFromParcel(parcel: Parcel): ApplePayWallet {
-                    return ApplePayWallet(parcel)
-                }
-
-                override fun newArray(size: Int): Array<ApplePayWallet?> {
-                    return arrayOfNulls(size)
-                }
-            }
     }
 }

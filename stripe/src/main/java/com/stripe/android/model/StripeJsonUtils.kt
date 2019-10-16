@@ -8,8 +8,8 @@ import org.json.JSONObject
  * A set of JSON parsing utility functions.
  */
 internal object StripeJsonUtils {
+    internal const val NULL = "null"
     private const val EMPTY = ""
-    private const val NULL = "null"
 
     /**
      * Calls through to [JSONObject.optInt] only in the case that the
