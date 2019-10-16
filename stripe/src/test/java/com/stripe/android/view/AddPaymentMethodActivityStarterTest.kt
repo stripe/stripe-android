@@ -1,6 +1,5 @@
 package com.stripe.android.view
 
-import android.content.Intent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.utils.ParcelUtils
@@ -13,7 +12,7 @@ import org.robolectric.RobolectricTestRunner
 class AddPaymentMethodActivityStarterTest {
 
     @Test
-    fun testParceling() {
+    fun testArgsParceling() {
         val args = AddPaymentMethodActivityStarter.Args.Builder()
             .setPaymentMethodType(PaymentMethod.Type.Fpx)
             .setIsPaymentSessionActive(true)
@@ -25,14 +24,8 @@ class AddPaymentMethodActivityStarterTest {
 
     @Test
     fun testResultParceling() {
-        val bundle =
-            AddPaymentMethodActivityStarter.Result(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-                .toBundle()
         val result =
-            AddPaymentMethodActivityStarter.Result.fromIntent(Intent().putExtras(bundle))
-        assertEquals(
-            PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-            result?.paymentMethod
-        )
+            AddPaymentMethodActivityStarter.Result(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        assertEquals(result, ParcelUtils.create(result))
     }
 }
