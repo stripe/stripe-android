@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 12.0.0 - unreleased
+## 12.0.0 - 2019-10-16
 * [#1699](https://github.com/stripe/stripe-android/pull/1699) Remove deprecated methods
     * Replace `Stripe#createTokenSynchronous(Card)` with `Stripe#createCardTokenSynchronous(Card)`
     * Replace `Card#getCVC()` with `Card#getCvc()`
