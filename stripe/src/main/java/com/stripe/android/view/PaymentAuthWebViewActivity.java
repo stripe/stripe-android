@@ -13,6 +13,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.ProgressBar;
 
 import com.stripe.android.PaymentAuthWebViewStarter;
@@ -27,6 +29,9 @@ public class PaymentAuthWebViewActivity
         extends AppCompatActivity {
 
     @Nullable private ToolbarCustomization mToolbarCustomization;
+
+    @Nullable private WebView mWebView;
+    @Nullable private ViewGroup mWebViewContainer;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -64,6 +69,20 @@ public class PaymentAuthWebViewActivity
         final String authUrl = getIntent().getStringExtra(PaymentAuthWebViewStarter.EXTRA_AUTH_URL);
         Log.d(PaymentAuthWebView.TAG, "Calling PaymentAuthWebView#init: " + authUrl);
         webView.loadUrl(authUrl);
+
+        mWebView = webView;
+        mWebViewContainer = findViewById(R.id.auth_web_view_container);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mWebViewContainer != null) {
+            mWebViewContainer.removeAllViews();
+        }
+        if (mWebView != null) {
+            mWebView.destroy();
+        }
+        super.onDestroy();
     }
 
     @Override

@@ -6,6 +6,8 @@ import android.support.annotation.Nullable;
 
 import com.stripe.android.exception.StripeException;
 
+import java.io.IOException;
+
 import org.json.JSONException;
 
 abstract class ApiOperation<ResultType>
@@ -20,7 +22,7 @@ abstract class ApiOperation<ResultType>
     protected final ResultWrapper<ResultType> doInBackground(Void... voids) {
         try {
             return ResultWrapper.create(getResult());
-        } catch (StripeException | JSONException e) {
+        } catch (StripeException | JSONException | IOException e) {
             return ResultWrapper.create(e);
         }
     }
@@ -39,5 +41,5 @@ abstract class ApiOperation<ResultType>
     }
 
     @Nullable
-    abstract ResultType getResult() throws StripeException, JSONException;
+    abstract ResultType getResult() throws StripeException, JSONException, IOException;
 }

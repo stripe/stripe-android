@@ -144,7 +144,11 @@ class PaymentAuthActivity : AppCompatActivity() {
                     setup_button.isEnabled = false
                     statusTextView.setText(R.string.creating_payment_intent)
                 }
-                .subscribe { handleCreatePaymentIntentResponse(it, authType) })
+                .subscribe(
+                    { handleCreatePaymentIntentResponse(it, authType) },
+                    { handleError(it) }
+                )
+        )
     }
 
     private fun createSetupIntent() {
@@ -159,7 +163,17 @@ class PaymentAuthActivity : AppCompatActivity() {
                     setup_button.isEnabled = false
                     statusTextView.setText(R.string.creating_setup_intent)
                 }
-                .subscribe { handleCreateSetupIntentResponse(it) })
+                .subscribe(
+                    { handleCreateSetupIntentResponse(it) },
+                    { handleError(it) }
+                )
+        )
+    }
+
+    private fun handleError(err: Throwable) {
+        resetViews()
+        err.printStackTrace()
+        statusTextView.append("\n\n" + err.message)
     }
 
     private fun handleCreatePaymentIntentResponse(
@@ -193,7 +207,7 @@ class PaymentAuthActivity : AppCompatActivity() {
         }
     }
 
-    private fun onAuthComplete() {
+    private fun resetViews() {
         buy_3ds2_button.isEnabled = true
         buy_3ds1_button.isEnabled = true
         setup_button.isEnabled = true
@@ -224,14 +238,14 @@ class PaymentAuthActivity : AppCompatActivity() {
             activity.statusTextView.append("\n\n" +
                 "Auth outcome: " + paymentIntentResult.outcome + "\n\n" +
                 activity.getString(R.string.payment_intent_status, paymentIntent.status))
-            activity.onAuthComplete()
+            activity.resetViews()
         }
 
         override fun onError(e: Exception) {
             val activity = activityRef.get() ?: return
 
             activity.statusTextView.append("\n\nException: " + e.message)
-            activity.onAuthComplete()
+            activity.resetViews()
         }
     }
 
@@ -243,14 +257,14 @@ class PaymentAuthActivity : AppCompatActivity() {
 
             val setupIntent = setupIntentResult.intent
             activity.statusTextView.append("\n\n" + activity.getString(R.string.setup_intent_status, setupIntent.status))
-            activity.onAuthComplete()
+            activity.resetViews()
         }
 
         override fun onError(e: Exception) {
             val activity = mActivityRef.get() ?: return
 
             activity.statusTextView.append("\n\nException: " + e.message)
-            activity.onAuthComplete()
+            activity.resetViews()
         }
     }
 

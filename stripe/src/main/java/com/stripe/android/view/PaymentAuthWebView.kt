@@ -53,6 +53,20 @@ internal class PaymentAuthWebView : WebView {
         settings.domStorageEnabled = true
     }
 
+    override fun destroy() {
+        cleanup()
+        super.destroy()
+    }
+
+    // inspired by https://stackoverflow.com/a/17458577/11103900
+    private fun cleanup() {
+        clearHistory()
+        loadUrl("about:blank")
+        onPause()
+        removeAllViews()
+        destroyDrawingCache()
+    }
+
     internal class PaymentAuthWebViewClient(
         private val activity: Activity,
         private val packageManager: PackageManager,
