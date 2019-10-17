@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.ProgressBar
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -18,6 +17,7 @@ import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 import com.stripe.android.stripe3ds2.init.ui.ToolbarCustomization
 import com.stripe.android.stripe3ds2.utils.CustomizeUtils
 import com.ults.listeners.SdkChallengeInterface.UL_HANDLE_CHALLENGE_ACTION
+import kotlinx.android.synthetic.main.payment_auth_web_view_layout.*
 
 class PaymentAuthWebViewActivity : AppCompatActivity() {
 
@@ -58,12 +58,15 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
             return
         }
 
-        val webView = findViewById<PaymentAuthWebView>(R.id.auth_web_view)
-        val progressBar = findViewById<ProgressBar>(R.id.auth_web_view_progress_bar)
-
         logger.debug("PaymentAuthWebViewActivity#onCreate() - PaymentAuthWebView init and loadUrl")
-        webView.init(this, logger, progressBar, clientSecret, returnUrl)
-        webView.loadUrl(intent.getStringExtra(PaymentAuthWebViewStarter.EXTRA_AUTH_URL))
+        auth_web_view.init(this, logger, auth_web_view_progress_bar, clientSecret, returnUrl)
+        auth_web_view.loadUrl(intent.getStringExtra(PaymentAuthWebViewStarter.EXTRA_AUTH_URL))
+    }
+
+    override fun onDestroy() {
+        auth_web_view_container.removeAllViews()
+        auth_web_view.destroy()
+        super.onDestroy()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

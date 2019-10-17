@@ -44,6 +44,20 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
         setWebViewClient(webViewClient)
     }
 
+    override fun destroy() {
+        cleanup()
+        super.destroy()
+    }
+
+    // inspired by https://stackoverflow.com/a/17458577/11103900
+    private fun cleanup() {
+        clearHistory()
+        loadUrl("about:blank")
+        onPause()
+        removeAllViews()
+        destroyDrawingCache()
+    }
+
     @SuppressLint("SetJavaScriptEnabled")
     private fun configureSettings() {
         settings.javaScriptEnabled = true
