@@ -808,17 +808,8 @@ class Stripe internal constructor(
          *
          * See [Building Stripe Plug-ins and Libraries - Setting the API version](https://stripe.com/docs/building-plugins#setappinfo).
          */
-        private var appInfo: AppInfo? = null
-
         @JvmStatic
-        fun setAppInfo(appInfo: AppInfo) {
-            this.appInfo = appInfo
-        }
-
-        @JvmStatic
-        fun getAppInfo(): AppInfo? {
-            return this.appInfo
-        }
+        var appInfo: AppInfo? = null
 
         private fun executeTask(
             executor: Executor?,

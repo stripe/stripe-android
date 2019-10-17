@@ -194,7 +194,7 @@ internal data class Stripe3ds2AuthResult private constructor(
 
             internal const val VALUE_CHALLENGE = "C"
 
-            @JvmStatic
+            @JvmSynthetic
             @Throws(JSONException::class)
             internal fun fromJson(aresJson: JSONObject?): Ares? {
                 return if (aresJson == null) {
@@ -272,7 +272,7 @@ internal data class Stripe3ds2AuthResult private constructor(
             private const val FIELD_CRITICALITY_INDICATOR = "criticalityIndicator"
             private const val FIELD_DATA = "data"
 
-            @JvmStatic
+            @JvmSynthetic
             @Throws(JSONException::class)
             internal fun fromJson(messageExtensionsJson: JSONArray?): List<MessageExtension>? {
                 if (messageExtensionsJson == null) {

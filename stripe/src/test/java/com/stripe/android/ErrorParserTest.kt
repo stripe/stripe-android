@@ -2,7 +2,6 @@ package com.stripe.android
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 /**
  * Test class for [ErrorParser].
@@ -20,9 +19,7 @@ class ErrorParserTest {
 
     @Test
     fun parseError_withNoErrorMessage_addsInvalidResponseMessage() {
-        val (type, message) = ErrorParser.parseError(RAW_INCORRECT_FORMAT_ERROR)
-        assertEquals(ErrorParser.MALFORMED_RESPONSE_MESSAGE, message)
-        assertNull(type)
+        assertEquals(ErrorParser.MALFORMED, ErrorParser.parseError(RAW_INCORRECT_FORMAT_ERROR))
     }
 
     @Test

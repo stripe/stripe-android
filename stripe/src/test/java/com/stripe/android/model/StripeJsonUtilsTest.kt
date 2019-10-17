@@ -13,13 +13,23 @@ import org.json.JSONObject
 class StripeJsonUtilsTest {
 
     @Test
-    fun nullIfNullOrEmpty_returnsNullForNull() {
+    fun nullIfNullOrEmpty_returnsNullForNullString() {
         assertNull(StripeJsonUtils.nullIfNullOrEmpty("null"))
     }
 
     @Test
     fun nullIfNullOrEmpty_returnsNullForEmpty() {
         assertNull(StripeJsonUtils.nullIfNullOrEmpty(""))
+    }
+
+    @Test
+    fun nullIfNullOrEmpty_returnsNullForNull() {
+        assertNull(StripeJsonUtils.nullIfNullOrEmpty(null))
+    }
+
+    @Test
+    fun nullIfNullOrEmpty_returnsValueForNonEmpty() {
+        assertEquals("value", StripeJsonUtils.nullIfNullOrEmpty("value"))
     }
 
     @Test
