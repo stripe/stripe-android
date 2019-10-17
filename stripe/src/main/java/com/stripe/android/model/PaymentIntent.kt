@@ -359,7 +359,7 @@ data class PaymentIntent private constructor(
             val created = jsonObject.optLong(FIELD_CREATED)
             val currency = optCurrency(jsonObject, FIELD_CURRENCY)
             val description = optString(jsonObject, FIELD_DESCRIPTION)
-            val livemode = java.lang.Boolean.TRUE == optBoolean(jsonObject, FIELD_LIVEMODE)
+            val livemode = optBoolean(jsonObject, FIELD_LIVEMODE)
             val paymentMethodId = optString(jsonObject, FIELD_PAYMENT_METHOD_ID)
             val receiptEmail = optString(jsonObject, FIELD_RECEIPT_EMAIL)
             val status = StripeIntent.Status.fromCode(

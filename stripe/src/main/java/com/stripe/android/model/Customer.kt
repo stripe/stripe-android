@@ -71,7 +71,7 @@ data class Customer private constructor(
             val url: String?
             val sources: List<CustomerSource>?
             if (sourcesJson != null && VALUE_LIST == optString(sourcesJson, FIELD_OBJECT)) {
-                hasMore = optBoolean(sourcesJson, FIELD_HAS_MORE) == true
+                hasMore = optBoolean(sourcesJson, FIELD_HAS_MORE)
                 totalCount = optInteger(sourcesJson, FIELD_TOTAL_COUNT)
                 url = optString(sourcesJson, FIELD_URL)
 

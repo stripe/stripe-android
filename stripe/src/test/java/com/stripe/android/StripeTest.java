@@ -1078,21 +1078,6 @@ public class StripeTest {
     @Test
     public void createPaymentMethodSynchronous_withCard()
             throws StripeException {
-        final PaymentMethod.Card expectedCard = new PaymentMethod.Card.Builder()
-                .setBrand("visa")
-                .setChecks(new PaymentMethod.Card.Checks.Builder()
-                        .build())
-                .setCountry("US")
-                .setExpiryMonth(1)
-                .setExpiryYear(2024)
-                .setFunding("credit")
-                .setLast4("4242")
-                .setThreeDSecureUsage(new PaymentMethod.Card.ThreeDSecureUsage.Builder()
-                        .setSupported(true)
-                        .build())
-                .setWallet(null)
-                .build();
-
         final PaymentMethodCreateParams paymentMethodCreateParams =
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD;
         final Stripe stripe = createStripe();
@@ -1101,7 +1086,8 @@ public class StripeTest {
         assertNotNull(createdPaymentMethod);
         assertEquals(PaymentMethodCreateParamsFixtures.BILLING_DETAILS,
                 createdPaymentMethod.billingDetails);
-        assertEquals(expectedCard, createdPaymentMethod.card);
+        assertNotNull(createdPaymentMethod.card);
+        assertEquals("4242", createdPaymentMethod.card.last4);
     }
 
     @Test
@@ -1117,21 +1103,9 @@ public class StripeTest {
         final PaymentMethod createdPaymentMethod = stripe.createPaymentMethodSynchronous(
                 paymentMethodCreateParams);
         assertNotNull(createdPaymentMethod);
-
-        final PaymentMethod.Card expectedPaymentMethodCard = new PaymentMethod.Card.Builder()
-                .setBrand("visa")
-                .setCountry("US")
-                .setExpiryMonth(12)
-                .setExpiryYear(2020)
-                .setFunding("credit")
-                .setLast4("4242")
-                .setChecks(new PaymentMethod.Card.Checks.Builder()
-                        .build())
-                .setThreeDSecureUsage(new PaymentMethod.Card.ThreeDSecureUsage.Builder()
-                        .setSupported(true)
-                        .build())
-                .build();
-        assertEquals(expectedPaymentMethodCard, createdPaymentMethod.card);
+        assertNotNull(createdPaymentMethod.card);
+        assertEquals("visa", createdPaymentMethod.card.brand);
+        assertEquals("4242", createdPaymentMethod.card.last4);
     }
 
     @Test
@@ -1139,16 +1113,11 @@ public class StripeTest {
             throws StripeException {
         final PaymentMethod.Card expectedCard = new PaymentMethod.Card.Builder()
                 .setBrand("visa")
-                .setChecks(new PaymentMethod.Card.Checks.Builder()
-                        .build())
                 .setCountry("US")
                 .setExpiryMonth(1)
                 .setExpiryYear(2024)
                 .setFunding("credit")
                 .setLast4("4242")
-                .setThreeDSecureUsage(new PaymentMethod.Card.ThreeDSecureUsage.Builder()
-                        .setSupported(true)
-                        .build())
                 .setWallet(null)
                 .build();
 
@@ -1163,7 +1132,8 @@ public class StripeTest {
         assertNotNull(createdPaymentMethod);
         assertEquals(PaymentMethodCreateParamsFixtures.BILLING_DETAILS,
                 createdPaymentMethod.billingDetails);
-        assertEquals(expectedCard, createdPaymentMethod.card);
+        assertNotNull(createdPaymentMethod.card);
+        assertEquals("4242", createdPaymentMethod.card.last4);
         assertEquals(metadata, createdPaymentMethod.metadata);
 
         verify(mFireAndForgetRequestExecutor, times(2))
@@ -1204,11 +1174,7 @@ public class StripeTest {
         assertNotNull(createdPaymentMethod);
         assertEquals(expectedBillingDetails, createdPaymentMethod.billingDetails);
         assertNull(createdPaymentMethod.card);
-        assertEquals(new PaymentMethod.Ideal.Builder()
-                        .setBank("ing")
-                        .setBankIdentifierCode("INGBNL2A")
-                        .build(),
-                createdPaymentMethod.ideal);
+        assertEquals("INGBNL2A", createdPaymentMethod.ideal.bankIdentifierCode);
 
         verify(mFireAndForgetRequestExecutor, times(2))
                 .executeAsync(mStripeRequestArgumentCaptor.capture());
@@ -1251,11 +1217,7 @@ public class StripeTest {
         assertNotNull(createdPaymentMethod);
         assertEquals(expectedBillingDetails, createdPaymentMethod.billingDetails);
         assertNull(createdPaymentMethod.card);
-        assertEquals(new PaymentMethod.Fpx.Builder()
-                        .setBank("hsbc")
-                        .setAccountHolderType("individual")
-                        .build(),
-                createdPaymentMethod.fpx);
+        assertEquals("hsbc", createdPaymentMethod.fpx.bank);
 
         verify(fireAndForgetRequestExecutor, times(2))
                 .executeAsync(mStripeRequestArgumentCaptor.capture());

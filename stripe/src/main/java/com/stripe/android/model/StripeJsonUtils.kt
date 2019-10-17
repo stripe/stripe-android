@@ -23,10 +23,12 @@ internal object StripeJsonUtils {
     fun optBoolean(
         jsonObject: JSONObject,
         @Size(min = 1) fieldName: String
-    ): Boolean? {
+    ): Boolean {
         return if (!jsonObject.has(fieldName)) {
-            null
-        } else jsonObject.optBoolean(fieldName)
+            false
+        } else {
+            jsonObject.optBoolean(fieldName)
+        }
     }
 
     /**
