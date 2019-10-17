@@ -10,7 +10,8 @@ import javax.net.ssl.HttpsURLConnection
 
 internal class ConnectionFactory {
     @Throws(IOException::class, InvalidRequestException::class)
-    fun create(request: StripeRequest): StripeConnection {
+    @JvmSynthetic
+    internal fun create(request: StripeRequest): StripeConnection {
         // HttpURLConnection verifies SSL cert by default
         val conn = openConnection(request.url).apply {
             connectTimeout = CONNECT_TIMEOUT
@@ -38,7 +39,8 @@ internal class ConnectionFactory {
     }
 
     @Throws(InvalidRequestException::class)
-    fun getRequestOutputBytes(request: StripeRequest): ByteArray {
+    @JvmSynthetic
+    internal fun getRequestOutputBytes(request: StripeRequest): ByteArray {
         try {
             return request.getOutputBytes()
         } catch (e: UnsupportedEncodingException) {

@@ -11,14 +11,13 @@ import java.util.Locale
 import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 
-internal class TelemetryClientUtil @VisibleForTesting constructor(
+internal class TelemetryClientUtil @VisibleForTesting internal constructor(
     private val uidSupplier: Supplier<StripeUid>,
     private val displayMetrics: DisplayMetrics,
     private val packageName: String,
     private val packageManager: PackageManager,
     private val timeZone: String
 ) {
-
     private val versionName: String?
         get() {
             if (packageName.isNotBlank()) {
@@ -42,7 +41,7 @@ internal class TelemetryClientUtil @VisibleForTesting constructor(
         get() =
             "Android ${Build.VERSION.RELEASE} ${Build.VERSION.CODENAME} ${Build.VERSION.SDK_INT}"
 
-    val hashedUid: String
+    internal val hashedUid: String
         get() {
             val uid = uidSupplier.get().value
             return if (uid.isBlank()) {
@@ -55,9 +54,12 @@ internal class TelemetryClientUtil @VisibleForTesting constructor(
     private val hashedMuid: String
         get() = StripeTextUtils.shaHashInput(packageName + hashedUid) ?: ""
 
-    constructor(context: Context) : this(context.applicationContext, UidSupplier(context))
+    internal constructor(context: Context) : this(context.applicationContext, UidSupplier(context))
 
-    constructor(context: Context, uidSupplier: Supplier<StripeUid> = UidSupplier(context)) : this(
+    internal constructor(
+        context: Context,
+        uidSupplier: Supplier<StripeUid> = UidSupplier(context)
+    ) : this(
         uidSupplier,
         context.resources.displayMetrics,
         context.packageName ?: "",
@@ -65,7 +67,7 @@ internal class TelemetryClientUtil @VisibleForTesting constructor(
         createTimezone()
     )
 
-    fun createTelemetryMap(): Map<String, Any> {
+    internal fun createTelemetryMap(): Map<String, Any> {
         return mapOf(
             "v2" to 1,
             "tag" to BuildConfig.VERSION_NAME,

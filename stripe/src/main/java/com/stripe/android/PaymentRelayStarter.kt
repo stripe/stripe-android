@@ -28,13 +28,13 @@ internal open class PaymentRelayStarter(
         val exception: Exception? = null
     ) {
         companion object {
-            @JvmStatic
-            fun create(stripeIntent: StripeIntent): Data {
+            @JvmSynthetic
+            internal fun create(stripeIntent: StripeIntent): Data {
                 return Data(stripeIntent = stripeIntent)
             }
 
-            @JvmStatic
-            fun create(exception: Exception): Data {
+            @JvmSynthetic
+            internal fun create(exception: Exception): Data {
                 return Data(exception = exception)
             }
         }

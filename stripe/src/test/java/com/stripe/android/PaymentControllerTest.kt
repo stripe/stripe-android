@@ -467,8 +467,9 @@ class PaymentControllerTest {
         val authCallback = PaymentController.Stripe3ds2AuthCallback(
             host, FakeStripeRepository(), transaction, MAX_TIMEOUT,
             PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2, SOURCE_ID,
-            REQUEST_OPTIONS, paymentRelayStarter, fireAndForgetRequestExecutor,
-            analyticsDataFactory, challengeFlowStarter
+            REQUEST_OPTIONS, fireAndForgetRequestExecutor, analyticsDataFactory,
+            challengeFlowStarter,
+            paymentRelayStarter = paymentRelayStarter
         )
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.ARES_CHALLENGE_FLOW)
         verify(paymentRelayStarter, never())
@@ -480,8 +481,9 @@ class PaymentControllerTest {
         val authCallback = PaymentController.Stripe3ds2AuthCallback(
             host, FakeStripeRepository(), transaction, MAX_TIMEOUT,
             PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2, SOURCE_ID,
-            REQUEST_OPTIONS, paymentRelayStarter, fireAndForgetRequestExecutor,
-            analyticsDataFactory, challengeFlowStarter
+            REQUEST_OPTIONS, fireAndForgetRequestExecutor, analyticsDataFactory,
+            challengeFlowStarter,
+            paymentRelayStarter = paymentRelayStarter
         )
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.ARES_FRICTIONLESS_FLOW)
         verify(paymentRelayStarter)
@@ -503,8 +505,9 @@ class PaymentControllerTest {
         val authCallback = PaymentController.Stripe3ds2AuthCallback(
             host, FakeStripeRepository(), transaction, MAX_TIMEOUT,
             PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2, SOURCE_ID,
-            REQUEST_OPTIONS, paymentRelayStarter, fireAndForgetRequestExecutor,
-            analyticsDataFactory, challengeFlowStarter
+            REQUEST_OPTIONS, fireAndForgetRequestExecutor, analyticsDataFactory,
+            challengeFlowStarter,
+            paymentRelayStarter = paymentRelayStarter
         )
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.FALLBACK_REDIRECT_URL)
         verify<Activity>(activity).startActivityForResult(intentArgumentCaptor.capture(),
@@ -527,8 +530,9 @@ class PaymentControllerTest {
         val authCallback = PaymentController.Stripe3ds2AuthCallback(
             host, FakeStripeRepository(), transaction, MAX_TIMEOUT,
             PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2, SOURCE_ID,
-            REQUEST_OPTIONS, paymentRelayStarter, fireAndForgetRequestExecutor,
-            analyticsDataFactory, challengeFlowStarter
+            REQUEST_OPTIONS, fireAndForgetRequestExecutor, analyticsDataFactory,
+            challengeFlowStarter,
+            paymentRelayStarter = paymentRelayStarter
         )
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.ERROR)
         verify(paymentRelayStarter).start(relayStarterDataArgumentCaptor.capture())

@@ -15,7 +15,7 @@ import java.util.HashMap
  * Util class to create logging items, which are fed as [Map][java.util.Map] objects in
  * query parameters to our server.
  */
-internal class AnalyticsDataFactory @VisibleForTesting constructor(
+internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     private val packageManager: PackageManager?,
     private val packageName: String?
 ) {
@@ -78,7 +78,7 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
         }
     }
 
-    fun createAuthParams(
+    internal fun createAuthParams(
         @EventName eventName: String,
         intentId: String,
         publishableKey: String
@@ -87,7 +87,7 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
             .plus(FIELD_INTENT_ID to intentId)
     }
 
-    fun create3ds2ChallengeParams(
+    internal fun create3ds2ChallengeParams(
         @EventName eventName: String,
         intentId: String,
         uiTypeCode: String,
@@ -98,7 +98,7 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
             .plus(FIELD_3DS2_UI_TYPE to get3ds2UiType(uiTypeCode))
     }
 
-    fun create3ds2ChallengeErrorParams(
+    internal fun create3ds2ChallengeErrorParams(
         intentId: String,
         runtimeErrorEvent: RuntimeErrorEvent,
         publishableKey: String
@@ -116,7 +116,7 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
                 ))
     }
 
-    fun create3ds2ChallengeErrorParams(
+    internal fun create3ds2ChallengeErrorParams(
         intentId: String,
         protocolErrorEvent: ProtocolErrorEvent,
         publishableKey: String
@@ -139,7 +139,7 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
             .plus(FIELD_ERROR_DATA to errorData)
     }
 
-    fun getTokenCreationParams(
+    internal fun getTokenCreationParams(
         productUsageTokens: List<String>?,
         publishableKey: String,
         tokenType: String?
@@ -152,7 +152,7 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
         )
     }
 
-    fun createPaymentMethodCreationParams(
+    internal fun createPaymentMethodCreationParams(
         publishableKey: String,
         paymentMethodId: String?
     ): Map<String, Any> {
@@ -168,7 +168,7 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
         }
     }
 
-    fun getSourceCreationParams(
+    internal fun getSourceCreationParams(
         productUsageTokens: List<String>?,
         publishableKey: String,
         @Source.SourceType sourceType: String
@@ -181,7 +181,7 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
         )
     }
 
-    fun getAddSourceParams(
+    internal fun getAddSourceParams(
         productUsageTokens: List<String>?,
         publishableKey: String,
         @Source.SourceType sourceType: String
@@ -194,7 +194,7 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
         )
     }
 
-    fun getDeleteSourceParams(
+    internal fun getDeleteSourceParams(
         productUsageTokens: List<String>?,
         publishableKey: String
     ): Map<String, Any> {
@@ -205,7 +205,7 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
         )
     }
 
-    fun getAttachPaymentMethodParams(
+    internal fun getAttachPaymentMethodParams(
         productUsageTokens: List<String>?,
         publishableKey: String
     ): Map<String, Any> {
@@ -216,7 +216,7 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
         )
     }
 
-    fun getDetachPaymentMethodParams(
+    internal fun getDetachPaymentMethodParams(
         productUsageTokens: List<String>?,
         publishableKey: String
     ): Map<String, Any> {
@@ -227,7 +227,7 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
         )
     }
 
-    fun getPaymentIntentConfirmationParams(
+    internal fun getPaymentIntentConfirmationParams(
         productUsageTokens: List<String>?,
         publishableKey: String,
         paymentMethodType: String?
@@ -240,7 +240,7 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
         )
     }
 
-    fun getPaymentIntentRetrieveParams(
+    internal fun getPaymentIntentRetrieveParams(
         productUsageTokens: List<String>?,
         publishableKey: String
     ): Map<String, Any> {
@@ -251,7 +251,7 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
         )
     }
 
-    fun getSetupIntentConfirmationParams(
+    internal fun getSetupIntentConfirmationParams(
         publishableKey: String,
         paymentMethodType: String?
     ): Map<String, Any> {
@@ -264,11 +264,11 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
         }
     }
 
-    fun getSetupIntentRetrieveParams(publishableKey: String): Map<String, Any> {
+    internal fun getSetupIntentRetrieveParams(publishableKey: String): Map<String, Any> {
         return getEventLoggingParams(EventName.RETRIEVE_SETUP_INTENT, publishableKey)
     }
 
-    fun getEventLoggingParams(
+    internal fun getEventLoggingParams(
         @EventName eventName: String,
         publishableKey: String,
         productUsageTokens: List<String>? = null,
@@ -307,7 +307,7 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
         return paramsObject
     }
 
-    fun createNameAndVersionParams(): Map<String, Any> {
+    internal fun createNameAndVersionParams(): Map<String, Any> {
         return if (packageManager != null) {
             try {
                 createNameAndVersionParams(packageManager)
@@ -347,30 +347,30 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
     }
 
     companion object {
-        const val UNKNOWN = "unknown"
-        const val NO_CONTEXT = "no_context"
+        internal const val UNKNOWN = "unknown"
+        internal const val NO_CONTEXT = "no_context"
 
-        const val FIELD_PRODUCT_USAGE = "product_usage"
-        const val FIELD_ANALYTICS_UA = "analytics_ua"
-        const val FIELD_APP_NAME = "app_name"
-        const val FIELD_APP_VERSION = "app_version"
-        const val FIELD_BINDINGS_VERSION = "bindings_version"
-        const val FIELD_DEVICE_TYPE = "device_type"
-        const val FIELD_EVENT = "event"
-        const val FIELD_ERROR_DATA = "error"
-        const val FIELD_INTENT_ID = "intent_id"
-        const val FIELD_OS_NAME = "os_name"
-        const val FIELD_OS_RELEASE = "os_release"
-        const val FIELD_OS_VERSION = "os_version"
-        const val FIELD_PAYMENT_METHOD_ID = "payment_method_id"
-        const val FIELD_PAYMENT_METHOD_TYPE = "payment_method_type"
-        const val FIELD_PUBLISHABLE_KEY = "publishable_key"
-        const val FIELD_SOURCE_TYPE = "source_type"
-        const val FIELD_3DS2_UI_TYPE = "3ds2_ui_type"
-        const val FIELD_TOKEN_TYPE = "token_type"
+        internal const val FIELD_PRODUCT_USAGE = "product_usage"
+        internal const val FIELD_ANALYTICS_UA = "analytics_ua"
+        internal const val FIELD_APP_NAME = "app_name"
+        internal const val FIELD_APP_VERSION = "app_version"
+        internal const val FIELD_BINDINGS_VERSION = "bindings_version"
+        internal const val FIELD_DEVICE_TYPE = "device_type"
+        internal const val FIELD_EVENT = "event"
+        internal const val FIELD_ERROR_DATA = "error"
+        internal const val FIELD_INTENT_ID = "intent_id"
+        internal const val FIELD_OS_NAME = "os_name"
+        internal const val FIELD_OS_RELEASE = "os_release"
+        internal const val FIELD_OS_VERSION = "os_version"
+        internal const val FIELD_PAYMENT_METHOD_ID = "payment_method_id"
+        internal const val FIELD_PAYMENT_METHOD_TYPE = "payment_method_type"
+        internal const val FIELD_PUBLISHABLE_KEY = "publishable_key"
+        internal const val FIELD_SOURCE_TYPE = "source_type"
+        internal const val FIELD_3DS2_UI_TYPE = "3ds2_ui_type"
+        internal const val FIELD_TOKEN_TYPE = "token_type"
 
-        @JvmField
-        val VALID_PARAM_FIELDS: Set<String> = setOf(
+        @JvmSynthetic
+        internal val VALID_PARAM_FIELDS: Set<String> = setOf(
             FIELD_ANALYTICS_UA, FIELD_APP_NAME, FIELD_APP_VERSION, FIELD_BINDINGS_VERSION,
             FIELD_DEVICE_TYPE, FIELD_EVENT, FIELD_OS_VERSION, FIELD_OS_NAME, FIELD_OS_RELEASE,
             FIELD_PRODUCT_USAGE, FIELD_PUBLISHABLE_KEY, FIELD_SOURCE_TYPE, FIELD_TOKEN_TYPE
@@ -383,12 +383,12 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
         private val deviceLoggingString: String
             get() = Build.MANUFACTURER + '_'.toString() + Build.BRAND + '_'.toString() + Build.MODEL
 
-        @JvmStatic
-        val analyticsUa: String
+        internal val analyticsUa: String
+            @JvmSynthetic
             get() = "$ANALYTICS_PREFIX.$ANALYTICS_NAME-$ANALYTICS_VERSION"
 
-        @JvmStatic
-        fun getEventParamName(@EventName eventName: String): String {
+        @JvmSynthetic
+        internal fun getEventParamName(@EventName eventName: String): String {
             return "$ANALYTICS_NAME.$eventName"
         }
 
@@ -404,8 +404,8 @@ internal class AnalyticsDataFactory @VisibleForTesting constructor(
             }
         }
 
-        @JvmStatic
-        fun create(context: Context): AnalyticsDataFactory {
+        @JvmSynthetic
+        internal fun create(context: Context): AnalyticsDataFactory {
             return AnalyticsDataFactory(
                 context.applicationContext.packageManager,
                 context.applicationContext.packageName

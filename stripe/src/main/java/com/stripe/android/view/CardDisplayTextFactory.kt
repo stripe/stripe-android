@@ -11,11 +11,16 @@ import androidx.annotation.ColorInt
 import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
 
-internal class CardDisplayTextFactory(
+internal class CardDisplayTextFactory internal constructor(
     private val resources: Resources,
     private val themeConfig: ThemeConfig
 ) {
-    fun createStyled(brand: String?, last4: String?, isSelected: Boolean): SpannableString {
+    @JvmSynthetic
+    internal fun createStyled(
+        brand: String?,
+        last4: String?,
+        isSelected: Boolean
+    ): SpannableString {
         val brandText: String = resources.getString(BRAND_RESOURCE_MAP[brand] ?: R.string.unknown)
         val brandLength = brandText.length
         if (last4 == null) {
@@ -77,7 +82,8 @@ internal class CardDisplayTextFactory(
         return displayString
     }
 
-    fun createUnstyled(card: PaymentMethod.Card): String {
+    @JvmSynthetic
+    internal fun createUnstyled(card: PaymentMethod.Card): String {
         return resources.getString(
             R.string.ending_in,
             resources.getString(BRAND_RESOURCE_MAP[card.brand] ?: R.string.unknown),
@@ -111,8 +117,8 @@ internal class CardDisplayTextFactory(
             PaymentMethod.Card.Brand.UNKNOWN to R.string.unknown
         )
 
-        @JvmStatic
-        fun create(context: Context) =
+        @JvmSynthetic
+        internal fun create(context: Context) =
             CardDisplayTextFactory(context.resources, ThemeConfig(context))
     }
 }

@@ -33,7 +33,7 @@ import org.json.JSONObject
 /**
  * An implementation of [StripeRepository] that makes network requests to the Stripe API.
  */
-internal class StripeApiRepository @JvmOverloads constructor(
+internal class StripeApiRepository @JvmOverloads internal constructor(
     context: Context,
     private val appInfo: AppInfo? = null,
     private val logger: Logger = Logger.noop(),

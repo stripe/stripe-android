@@ -20,8 +20,8 @@ internal data class ApiVersion private constructor(val code: String) {
 
         private val INSTANCE = ApiVersion(API_VERSION_CODE)
 
-        @JvmStatic
-        fun get(): ApiVersion {
+        @JvmSynthetic
+        internal fun get(): ApiVersion {
             return INSTANCE
         }
     }

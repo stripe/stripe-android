@@ -9,27 +9,27 @@ import java.net.HttpURLConnection
  * @param responseBody the body of the response
  * @param responseHeaders any headers associated with the response
  */
-internal data class StripeResponse(
+internal data class StripeResponse internal constructor(
     /**
-     * @return the [response code][.mResponseCode].
+     * @return the response code
      */
-    val responseCode: Int,
+    internal val responseCode: Int,
     /**
-     * @return the [response body][.mResponseBody].
+     * @return the response body
      */
-    val responseBody: String?,
+    internal val responseBody: String?,
     /**
-     * @return the [response headers][.mResponseHeaders].
+     * @return the response headers
      */
-    val responseHeaders: Map<String, List<String>>? = null
+    internal val responseHeaders: Map<String, List<String>>? = null
 ) {
-    val isOk: Boolean
+    internal val isOk: Boolean
         get() = responseCode == HttpURLConnection.HTTP_OK
 
-    val requestId: String?
+    internal val requestId: String?
         get() = responseHeaders?.get("Request-Id")?.firstOrNull()
 
-    fun hasErrorCode(): Boolean {
+    internal fun hasErrorCode(): Boolean {
         return responseCode < 200 || responseCode >= 300
     }
 
