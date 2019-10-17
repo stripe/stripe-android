@@ -26,7 +26,7 @@ internal class StripeApiRequestExecutor internal constructor(
                 return stripeResponse
             } catch (e: IOException) {
                 logger.error("Exception while making Stripe API request", e)
-                throw APIConnectionException.create(request.baseUrl, e)
+                throw APIConnectionException.create(e, request.baseUrl)
             }
         }
     }

@@ -31,7 +31,7 @@ internal class StripeFireAndForgetRequestExecutor(
                 // required to trigger the request
                 return it.responseCode
             } catch (e: IOException) {
-                throw APIConnectionException.create(request.baseUrl, e)
+                throw APIConnectionException.create(e, request.baseUrl)
             }
         }
     }
