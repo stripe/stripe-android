@@ -6,7 +6,7 @@ import org.json.JSONObject
 /**
  * Model of the "data" object inside a [Customer] "source" object.
  */
-data class CustomerSource internal constructor(
+data class CustomerSource private constructor(
     private val stripePaymentSource: StripePaymentSource
 ) : StripeModel(), StripePaymentSource {
 

@@ -11,7 +11,7 @@ import org.json.JSONObject
  * Model for data contained in the SourceTypeData of a Card Source.
  */
 @Suppress("MemberVisibilityCanBePrivate")
-data class SourceCardData internal constructor(
+data class SourceCardData private constructor(
     val addressLine1Check: String?,
     val addressZipCheck: String?,
 

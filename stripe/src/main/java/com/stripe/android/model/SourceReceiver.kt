@@ -8,7 +8,7 @@ import org.json.JSONObject
  * [receiver](https://stripe.com/docs/api/sources/object#source_object-receiver) object
  * in the Sources API. Present if the [Source] is a receiver.
  */
-data class SourceReceiver constructor(
+data class SourceReceiver private constructor(
     val address: String?,
     val amountCharged: Long,
     val amountReceived: Long,

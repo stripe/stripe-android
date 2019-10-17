@@ -8,7 +8,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_PA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_RETURN_URL
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_USE_STRIPE_SDK
 
-data class ConfirmSetupIntentParams internal constructor(
+data class ConfirmSetupIntentParams private constructor(
     override val clientSecret: String,
     private val paymentMethodId: String?,
     val paymentMethodCreateParams: PaymentMethodCreateParams?,

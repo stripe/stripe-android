@@ -11,7 +11,7 @@ import org.json.JSONObject
  * account details or personally identifiable information (PII), directly from your customers in a
  * secure manner. A Token representing this information is returned to you to use.
  */
-data class Token internal constructor(
+data class Token private constructor(
 
     /**
      * @return the Token id

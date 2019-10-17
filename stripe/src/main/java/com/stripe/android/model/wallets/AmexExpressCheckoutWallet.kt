@@ -3,7 +3,7 @@ package com.stripe.android.model.wallets
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class AmexExpressCheckoutWallet internal constructor(
+data class AmexExpressCheckoutWallet private constructor(
     val dynamicLast4: String?
 ) : Wallet(Type.AmexExpressCheckout) {
 

@@ -13,7 +13,7 @@ import org.json.JSONObject
  * @param url Website for your application (e.g. "https://myawesomeapp.info")
  * @param partnerId Your Stripe Partner ID (e.g. "pp_partner_1234")
  */
-data class AppInfo internal constructor(
+data class AppInfo private constructor(
     private val name: String,
     private val version: String?,
     private val url: String?,

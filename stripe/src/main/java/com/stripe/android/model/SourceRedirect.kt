@@ -10,7 +10,7 @@ import org.json.JSONObject
  * Model for a [redirect](https://stripe.com/docs/api/sources/object#source_object-redirect) object
  * in the Sources API.
  */
-data class SourceRedirect constructor(
+data class SourceRedirect private constructor(
     val returnUrl: String?,
     @param:Status @field:Status @get:Status val status: String?,
     val url: String?

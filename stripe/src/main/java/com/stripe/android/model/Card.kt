@@ -19,7 +19,7 @@ import org.json.JSONObject
 /**
  * A model object representing a Card in the Android SDK.
  */
-data class Card internal constructor(
+data class Card private constructor(
 
     /**
      * @return the [number] of this card

@@ -8,7 +8,7 @@ import org.json.JSONObject
  * Model for a [owner](https://stripe.com/docs/api#source_object-owner) object
  * in the Source api.
  */
-data class SourceOwner constructor(
+data class SourceOwner private constructor(
     val address: Address?,
     val email: String?,
     val name: String?,

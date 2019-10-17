@@ -1,6 +1,6 @@
 package com.stripe.android
 
-internal data class ResultWrapper<ResultType> constructor(
+internal data class ResultWrapper<ResultType> private constructor(
     val result: ResultType? = null,
     val error: Exception? = null
 ) {

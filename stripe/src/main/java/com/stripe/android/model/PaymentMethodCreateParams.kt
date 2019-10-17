@@ -14,7 +14,7 @@ import org.json.JSONObject
  *
  * See [PaymentMethod] for API object.
  */
-data class PaymentMethodCreateParams internal constructor(
+data class PaymentMethodCreateParams private constructor(
     internal val type: Type,
     private val card: Card? = null,
     private val ideal: Ideal? = null,
@@ -107,7 +107,7 @@ data class PaymentMethodCreateParams internal constructor(
         SepaDebit("sepa_debit", true)
     }
 
-    data class Card internal constructor(
+    data class Card private constructor(
         private val number: String? = null,
         private val expiryMonth: Int? = null,
         private val expiryYear: Int? = null,
@@ -182,7 +182,7 @@ data class PaymentMethodCreateParams internal constructor(
         }
     }
 
-    data class Ideal internal constructor(private val bank: String?) : StripeParamsModel {
+    data class Ideal private constructor(private val bank: String?) : StripeParamsModel {
         override fun toParamMap(): Map<String, Any> {
             return bank?.let { mapOf(FIELD_BANK to it) }.orEmpty()
         }
@@ -205,7 +205,7 @@ data class PaymentMethodCreateParams internal constructor(
         }
     }
 
-    data class Fpx internal constructor(private val bank: String?) : StripeParamsModel {
+    data class Fpx private constructor(private val bank: String?) : StripeParamsModel {
         override fun toParamMap(): Map<String, Any> {
             return bank?.let {
                 mapOf(FIELD_BANK to it)
@@ -230,7 +230,7 @@ data class PaymentMethodCreateParams internal constructor(
         }
     }
 
-    data class SepaDebit internal constructor(private val iban: String?) : StripeParamsModel {
+    data class SepaDebit private constructor(private val iban: String?) : StripeParamsModel {
         override fun toParamMap(): Map<String, Any> {
             return iban?.let {
                 mapOf(FIELD_IBAN to it)

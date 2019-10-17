@@ -8,7 +8,7 @@ import org.json.JSONObject
 /**
  * Model for the SourceTypeData contained in a SEPA Debit Source object.
  */
-data class SourceSepaDebitData internal constructor(
+data class SourceSepaDebitData private constructor(
     val bankCode: String?,
     val branchCode: String?,
     val country: String?,

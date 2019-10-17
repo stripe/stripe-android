@@ -10,7 +10,7 @@ import org.json.JSONObject
 /**
  * Model for a Stripe Customer object
  */
-data class Customer internal constructor(
+data class Customer private constructor(
     val id: String?,
     val defaultSource: String?,
     val shippingInformation: ShippingInformation?,

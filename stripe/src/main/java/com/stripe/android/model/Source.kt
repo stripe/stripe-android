@@ -13,7 +13,7 @@ import org.json.JSONObject
  *
  * See [Sources API Reference](https://stripe.com/docs/api/sources/object).
  */
-data class Source internal constructor(
+data class Source private constructor(
     override val id: String?,
     val amount: Long?,
     val clientSecret: String?,

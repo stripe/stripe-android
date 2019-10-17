@@ -10,7 +10,7 @@ import org.json.JSONObject
  *
  * *Not* source code verification.
  */
-data class SourceCodeVerification constructor(
+data class SourceCodeVerification private constructor(
     val attemptsRemaining: Int,
     @param:Status @field:Status @get:Status val status: String?
 ) : StripeModel() {
