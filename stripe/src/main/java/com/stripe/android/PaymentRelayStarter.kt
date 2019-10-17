@@ -23,7 +23,7 @@ internal open class PaymentRelayStarter(
         host.startActivityForResult(PaymentRelayActivity::class.java, extras, requestCode)
     }
 
-    internal data class Data constructor(
+    internal data class Data private constructor(
         val stripeIntent: StripeIntent? = null,
         val exception: Exception? = null
     ) {

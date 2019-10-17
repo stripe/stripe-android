@@ -12,7 +12,7 @@ import org.json.JSONObject
  * object in the Source api.
  */
 @Parcelize
-data class Address internal constructor(
+data class Address private constructor(
     val city: String?,
     val country: String?,
     val line1: String?,

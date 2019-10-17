@@ -9,7 +9,7 @@ package com.stripe.android
  * See [https://stripe.com/docs/upgrades](https://stripe.com/docs/upgrades) for latest
  * API changes.
  */
-internal data class ApiVersion constructor(val code: String) {
+internal data class ApiVersion private constructor(val code: String) {
 
     override fun toString(): String {
         return code

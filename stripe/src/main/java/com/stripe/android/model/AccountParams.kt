@@ -3,7 +3,7 @@ package com.stripe.android.model
 /**
  * Represents a grouping of parameters needed to create a Token for a Connect account on the server.
  */
-data class AccountParams internal constructor(
+data class AccountParams private constructor(
     private val businessType: BusinessType?,
     private val businessData: Map<String, Any>?,
     private val tosShownAndAccepted: Boolean

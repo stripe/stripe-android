@@ -3,7 +3,7 @@ package com.stripe.android.model.wallets
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class ApplePayWallet internal constructor(
+data class ApplePayWallet private constructor(
     val dynamicLast4: String?
 ) : Wallet(Type.ApplePay) {
 

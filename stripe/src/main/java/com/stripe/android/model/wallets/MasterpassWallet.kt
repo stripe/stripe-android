@@ -5,7 +5,7 @@ import kotlinx.android.parcel.Parcelize
 import org.json.JSONObject
 
 @Parcelize
-data class MasterpassWallet internal constructor(
+data class MasterpassWallet private constructor(
     val billingAddress: Address?,
     val email: String?,
     val name: String?,

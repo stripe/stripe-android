@@ -5,7 +5,7 @@ import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_USE_STRIPE_SDK
 
-data class ConfirmPaymentIntentParams internal constructor(
+data class ConfirmPaymentIntentParams private constructor(
     val paymentMethodCreateParams: PaymentMethodCreateParams?,
     val paymentMethodId: String?,
     val sourceParams: SourceParams?,
@@ -81,25 +81,24 @@ data class ConfirmPaymentIntentParams internal constructor(
             }
     }
 
-    @VisibleForTesting
-    internal class Builder
     /**
      * Sets the client secret that is used to authenticate actions on this PaymentIntent
      * @param clientSecret client secret associated with this PaymentIntent
      */
-    internal constructor(
+    @VisibleForTesting
+    internal class Builder internal constructor(
         internal val clientSecret: String
     ) : ObjectBuilder<ConfirmPaymentIntentParams> {
-        internal var paymentMethodCreateParams: PaymentMethodCreateParams? = null
-        internal var paymentMethodId: String? = null
-        internal var sourceParams: SourceParams? = null
-        internal var sourceId: String? = null
+        private var paymentMethodCreateParams: PaymentMethodCreateParams? = null
+        private var paymentMethodId: String? = null
+        private var sourceParams: SourceParams? = null
+        private var sourceId: String? = null
 
-        internal var extraParams: Map<String, Any>? = null
-        internal var returnUrl: String? = null
+        private var extraParams: Map<String, Any>? = null
+        private var returnUrl: String? = null
 
-        internal var savePaymentMethod: Boolean = false
-        internal var shouldUseSdk: Boolean = false
+        private var savePaymentMethod: Boolean = false
+        private var shouldUseSdk: Boolean = false
 
         /**
          * Sets the PaymentMethod data that will be included with this PaymentIntent

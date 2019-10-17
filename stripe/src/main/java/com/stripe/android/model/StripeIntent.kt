@@ -114,7 +114,7 @@ interface StripeIntent {
         }
     }
 
-    data class RedirectData internal constructor(
+    data class RedirectData private constructor(
         /**
          * See [PaymentIntent.next_action.redirect_to_url.url](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-next_action-redirect_to_url-url)
          */

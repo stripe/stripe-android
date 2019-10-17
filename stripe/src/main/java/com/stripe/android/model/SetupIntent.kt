@@ -10,7 +10,7 @@ import org.json.JSONObject
  * A SetupIntent guides you through the process of setting up a customer's payment credentials for
  * future payments.
  */
-data class SetupIntent internal constructor(
+data class SetupIntent private constructor(
 
     /**
      * @return Unique identifier for the object.
@@ -137,7 +137,7 @@ data class SetupIntent internal constructor(
      *
      * See [last_setup_error](https://stripe.com/docs/api/setup_intents/object#setup_intent_object-last_setup_error).
      */
-    data class Error internal constructor(
+    data class Error private constructor(
 
         /**
          * For some errors that could be handled programmatically, a short string indicating the

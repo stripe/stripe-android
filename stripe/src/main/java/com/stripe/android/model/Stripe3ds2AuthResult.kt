@@ -6,7 +6,7 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
-internal data class Stripe3ds2AuthResult constructor(
+internal data class Stripe3ds2AuthResult private constructor(
     val id: String?,
     private val objectType: String?,
     val ares: Ares?,
@@ -79,7 +79,7 @@ internal data class Stripe3ds2AuthResult constructor(
         }
     }
 
-    data class Ares constructor(
+    data class Ares private constructor(
         val threeDSServerTransId: String?,
         private val acsChallengeMandated: String?,
         val acsSignedContent: String?,
@@ -218,7 +218,7 @@ internal data class Stripe3ds2AuthResult constructor(
         }
     }
 
-    data class MessageExtension constructor(
+    data class MessageExtension private constructor(
         // The name of the extension data set as defined by the extension owner.
         val name: String?,
 
@@ -307,7 +307,7 @@ internal data class Stripe3ds2AuthResult constructor(
         }
     }
 
-    data class ThreeDS2Error constructor(
+    data class ThreeDS2Error private constructor(
         val threeDSServerTransId: String?,
         val acsTransId: String?,
         val dsTransId: String?,
@@ -457,10 +457,11 @@ internal data class Stripe3ds2AuthResult constructor(
                         Ares.fromJson(authResultJson.optJSONObject(FIELD_ARES))
                 )
                 .setError(
-                    if (authResultJson.isNull(FIELD_ERROR))
+                    if (authResultJson.isNull(FIELD_ERROR)) {
                         null
-                    else
+                    } else {
                         ThreeDS2Error.fromJson(authResultJson.optJSONObject(FIELD_ERROR))
+                    }
                 )
                 .setFallbackRedirectUrl(
                     if (authResultJson.isNull(FIELD_FALLBACK_REDIRECT_URL))

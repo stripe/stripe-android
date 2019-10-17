@@ -15,7 +15,7 @@ import org.json.JSONObject
  * - [Payment Intents Overview](https://stripe.com/docs/payments/payment-intents)
  * - [PaymentIntents API](https://stripe.com/docs/api/payment_intents)
  */
-data class PaymentIntent internal constructor(
+data class PaymentIntent private constructor(
     /**
      * @return Unique identifier for the object.
      */
@@ -141,7 +141,9 @@ data class PaymentIntent internal constructor(
         get() = if (nextAction == null || StripeIntent.NextActionType.UseStripeSdk !== nextActionType) {
             null
         } else {
-            StripeIntent.SdkData(nextAction[StripeIntent.NextActionType.UseStripeSdk.code] as Map<String, *>)
+            StripeIntent.SdkData(
+                nextAction[StripeIntent.NextActionType.UseStripeSdk.code] as Map<String, *>
+            )
         }
 
     override val redirectData: StripeIntent.RedirectData?
@@ -184,7 +186,7 @@ data class PaymentIntent internal constructor(
      *
      * See [last_payment_error](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-last_payment_error).
      */
-    data class Error internal constructor(
+    data class Error private constructor(
 
         /**
          * For card errors, the ID of the failed charge.
