@@ -151,16 +151,14 @@ data class Token private constructor(
             }
             val tokenId = StripeJsonUtils.optString(jsonObject, FIELD_ID)
             val createdTimeStamp = StripeJsonUtils.optLong(jsonObject, FIELD_CREATED)
-            val liveModeOpt = StripeJsonUtils.optBoolean(jsonObject, FIELD_LIVEMODE)
             @TokenType val tokenType =
                 asTokenType(StripeJsonUtils.optString(jsonObject, FIELD_TYPE))
-            val usedOpt = StripeJsonUtils.optBoolean(jsonObject, FIELD_USED)
-            if (tokenId == null || createdTimeStamp == null || liveModeOpt == null) {
+            if (tokenId == null || createdTimeStamp == null) {
                 return null
             }
 
-            val used = java.lang.Boolean.TRUE == usedOpt
-            val liveMode = java.lang.Boolean.TRUE == liveModeOpt
+            val used = StripeJsonUtils.optBoolean(jsonObject, FIELD_USED)
+            val liveMode = StripeJsonUtils.optBoolean(jsonObject, FIELD_LIVEMODE)
             val date = Date(createdTimeStamp * 1000)
 
             return if (TokenType.BANK_ACCOUNT == tokenType) {

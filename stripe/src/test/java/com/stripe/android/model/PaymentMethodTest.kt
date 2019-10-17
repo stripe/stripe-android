@@ -23,10 +23,7 @@ class PaymentMethodTest {
             .setType("ideal")
             .setCustomerId("cus_AQsHpvKfKwJDrF")
             .setBillingDetails(PaymentMethodFixtures.BILLING_DETAILS)
-            .setIdeal(PaymentMethod.Ideal.Builder()
-                .setBank("my bank")
-                .setBankIdentifierCode("bank id")
-                .build())
+            .setIdeal(PaymentMethod.Ideal.create("my bank", "bank id"))
             .build()
 
         assertEquals(paymentMethod, PaymentMethod.fromJson(PM_IDEAL_JSON))
@@ -48,7 +45,7 @@ class PaymentMethodTest {
                 .setLiveMode(false)
                 .setCreated(1570809799L)
                 .setSepaDebit(
-                    PaymentMethod.SepaDebit(
+                    PaymentMethod.SepaDebit.create(
                         "3704",
                         null,
                         "DE",
@@ -78,6 +75,7 @@ class PaymentMethodTest {
                 .setCustomerId("cus_AQsHpvKfKwJDrF")
                 .setBillingDetails(PaymentMethodFixtures.BILLING_DETAILS)
                 .setCard(PaymentMethodFixtures.CARD)
+                .setMetadata(mapOf("order_id" to "123456789"))
                 .build())
     }
 
@@ -123,10 +121,7 @@ class PaymentMethodTest {
             .setCard(PaymentMethodFixtures.CARD)
             .setCardPresent(PaymentMethod.CardPresent.EMPTY)
             .setFpx(PaymentMethodFixtures.FPX_PAYMENT_METHOD.fpx)
-            .setIdeal(PaymentMethod.Ideal.Builder()
-                .setBank("my bank")
-                .setBankIdentifierCode("bank id")
-                .build())
+            .setIdeal(PaymentMethod.Ideal.create("my bank", "bank id"))
             .setSepaDebit(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD.sepaDebit)
             .build()
 
@@ -238,7 +233,7 @@ class PaymentMethodTest {
                     "bank": "hsbc"
                 },
                 "livemode": true,
-                "metadata": {},
+                "metadata": null,
                 "type": "fpx"
             }
             """.trimIndent()

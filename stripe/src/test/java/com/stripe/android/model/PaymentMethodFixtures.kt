@@ -8,19 +8,19 @@ internal object PaymentMethodFixtures {
     @JvmField
     val CARD = PaymentMethod.Card.Builder()
         .setBrand(PaymentMethod.Card.Brand.VISA)
-        .setChecks(PaymentMethod.Card.Checks.Builder()
-            .setAddressLine1Check("unchecked")
-            .setAddressPostalCodeCheck(null)
-            .setCvcCheck("unchecked")
-            .build())
+        .setChecks(PaymentMethod.Card.Checks.create(
+            addressLine1Check = "unchecked",
+            addressPostalCodeCheck = null,
+            cvcCheck = "unchecked"
+        ))
         .setCountry("US")
         .setExpiryMonth(8)
         .setExpiryYear(2022)
         .setFunding("credit")
         .setLast4("4242")
-        .setThreeDSecureUsage(PaymentMethod.Card.ThreeDSecureUsage.Builder()
-            .setSupported(true)
-            .build())
+        .setThreeDSecureUsage(PaymentMethod.Card.ThreeDSecureUsage.create(
+            isSupported = true
+        ))
         .setWallet(null)
         .build()
 
@@ -57,10 +57,10 @@ internal object PaymentMethodFixtures {
         .setLiveMode(true)
         .setType("fpx")
         .setBillingDetails(BILLING_DETAILS)
-        .setFpx(PaymentMethod.Fpx.Builder()
-            .setBank("hsbc")
-            .setAccountHolderType("individual")
-            .build())
+        .setFpx(PaymentMethod.Fpx.create(
+            "hsbc",
+            "individual"
+        ))
         .build()
 
     @JvmField
@@ -85,7 +85,7 @@ internal object PaymentMethodFixtures {
           "created": 1570809799,
           "customer": null,
           "livemode": false,
-          "metadata": {},
+          "metadata": null,
           "sepa_debit": {
             "bank_code": "3704",
             "branch_code": "",
