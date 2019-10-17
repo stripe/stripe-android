@@ -1,7 +1,9 @@
 package com.stripe.android
 
 import android.os.AsyncTask
+import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.StripeException
+import java.io.IOException
 import org.json.JSONException
 
 internal abstract class ApiOperation<ResultType>(
@@ -17,6 +19,8 @@ internal abstract class ApiOperation<ResultType>(
             ResultWrapper.create(e)
         } catch (e: JSONException) {
             ResultWrapper.create(e)
+        } catch (e: IOException) {
+            ResultWrapper.create(APIConnectionException.create(e))
         }
     }
 
