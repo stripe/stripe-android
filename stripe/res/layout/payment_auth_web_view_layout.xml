@@ -13,13 +13,18 @@
         android:theme="@style/StripeToolBarStyle"
         app:title="@string/secure_checkout" />
 
-    <com.stripe.android.view.PaymentAuthWebView
-        android:id="@+id/auth_web_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+    <FrameLayout
+        android:id="@+id/auth_web_view_container"
         android:layout_below="@id/payment_auth_web_view_toolbar"
-        android:focusable="true"
-        android:focusableInTouchMode="true" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <com.stripe.android.view.PaymentAuthWebView
+            android:id="@+id/auth_web_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:focusable="true"
+            android:focusableInTouchMode="true" />
+    </FrameLayout>
 
     <ProgressBar
         android:id="@+id/auth_web_view_progress_bar"
