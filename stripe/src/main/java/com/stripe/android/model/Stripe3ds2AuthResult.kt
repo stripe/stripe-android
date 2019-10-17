@@ -409,7 +409,7 @@ internal data class Stripe3ds2AuthResult private constructor(
             private const val FIELD_MESSAGE_VERSION = "messageVersion"
             private const val FIELD_SDK_TRANS_ID = "sdkTransID"
 
-            @JvmStatic
+            @JvmSynthetic
             @Throws(JSONException::class)
             internal fun fromJson(errorJson: JSONObject): ThreeDS2Error {
                 return Builder()
@@ -440,9 +440,9 @@ internal data class Stripe3ds2AuthResult private constructor(
         private const val FIELD_SOURCE = "source"
         private const val FIELD_STATE = "state"
 
-        @JvmStatic
+        @JvmSynthetic
         @Throws(JSONException::class)
-        fun fromJson(authResultJson: JSONObject): Stripe3ds2AuthResult {
+        internal fun fromJson(authResultJson: JSONObject): Stripe3ds2AuthResult {
             return Builder()
                 .setId(authResultJson.getString(FIELD_ID))
                 .setObjectType(authResultJson.getString(FIELD_OBJECT))

@@ -14,29 +14,24 @@ import javax.net.ssl.SSLSocketFactory
  * Most of the code is taken from stripe-java.
  */
 internal class StripeSSLSocketFactory constructor(
-    private val under: SSLSocketFactory,
     private val tlsv11Supported: Boolean,
     private val tlsv12Supported: Boolean
 ) : SSLSocketFactory() {
-    constructor() : this(getSupportedProtocols())
+    private val internalFactory: SSLSocketFactory = HttpsURLConnection.getDefaultSSLSocketFactory()
 
-    constructor(supportedProtocols: Array<String>) : this(
+    internal constructor() : this(getSupportedProtocols())
+
+    private constructor(supportedProtocols: Array<String>) : this(
         tlsv11Supported = supportedProtocols.any { it == TLS_V11_PROTO },
         tlsv12Supported = supportedProtocols.any { it == TLS_V12_PROTO }
     )
 
-    constructor(tlsv11Supported: Boolean, tlsv12Supported: Boolean) : this(
-        under = HttpsURLConnection.getDefaultSSLSocketFactory(),
-        tlsv11Supported = tlsv11Supported,
-        tlsv12Supported = tlsv12Supported
-    )
-
     override fun getDefaultCipherSuites(): Array<String> {
-        return this.under.defaultCipherSuites
+        return internalFactory.defaultCipherSuites
     }
 
     override fun getSupportedCipherSuites(): Array<String> {
-        return this.under.supportedCipherSuites
+        return internalFactory.supportedCipherSuites
     }
 
     @Throws(IOException::class)
@@ -46,12 +41,12 @@ internal class StripeSSLSocketFactory constructor(
         port: Int,
         autoClose: Boolean
     ): Socket? {
-        return fixupSocket(this.under.createSocket(s, host, port, autoClose))
+        return fixupSocket(internalFactory.createSocket(s, host, port, autoClose))
     }
 
     @Throws(IOException::class)
     override fun createSocket(host: String, port: Int): Socket? {
-        return fixupSocket(this.under.createSocket(host, port))
+        return fixupSocket(internalFactory.createSocket(host, port))
     }
 
     @Throws(IOException::class)
@@ -61,12 +56,12 @@ internal class StripeSSLSocketFactory constructor(
         localHost: InetAddress,
         localPort: Int
     ): Socket? {
-        return fixupSocket(this.under.createSocket(host, port, localHost, localPort))
+        return fixupSocket(internalFactory.createSocket(host, port, localHost, localPort))
     }
 
     @Throws(IOException::class)
     override fun createSocket(host: InetAddress, port: Int): Socket? {
-        return fixupSocket(this.under.createSocket(host, port))
+        return fixupSocket(internalFactory.createSocket(host, port))
     }
 
     @Throws(IOException::class)
@@ -77,7 +72,7 @@ internal class StripeSSLSocketFactory constructor(
         localPort: Int
     ): Socket? {
         return fixupSocket(
-            this.under.createSocket(address, port, localAddress, localPort))
+            internalFactory.createSocket(address, port, localAddress, localPort))
     }
 
     private fun fixupSocket(sock: Socket): Socket {

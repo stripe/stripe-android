@@ -12,16 +12,18 @@ import javax.net.ssl.HttpsURLConnection
  * A wrapper for accessing a [HttpURLConnection]. Implements [Closeable] to simplify closing related
  * resources.
  */
-internal class StripeConnection(
+internal class StripeConnection internal constructor(
     private val conn: HttpsURLConnection
 ) : Closeable {
     internal val responseCode: Int
+        @JvmSynthetic
         get() {
             return conn.responseCode
         }
 
     internal val response: StripeResponse
         @Throws(IOException::class)
+        @JvmSynthetic
         get() {
             // trigger the request
             val responseCode = this.responseCode

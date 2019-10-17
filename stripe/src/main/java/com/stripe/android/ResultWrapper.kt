@@ -5,13 +5,13 @@ internal data class ResultWrapper<ResultType> private constructor(
     val error: Exception? = null
 ) {
     companion object {
-        @JvmStatic
-        fun <ResultType> create(result: ResultType?): ResultWrapper<ResultType> {
+        @JvmSynthetic
+        internal fun <ResultType> create(result: ResultType?): ResultWrapper<ResultType> {
             return ResultWrapper(result = result)
         }
 
-        @JvmStatic
-        fun <ResultType> create(error: Exception): ResultWrapper<ResultType> {
+        @JvmSynthetic
+        internal fun <ResultType> create(error: Exception): ResultWrapper<ResultType> {
             return ResultWrapper(error = error)
         }
     }

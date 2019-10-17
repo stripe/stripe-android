@@ -43,7 +43,7 @@ internal class ThemeConfig(context: Context) {
         context.resources.getInteger(R.integer.stripe_light_text_alpha_hex)
     )
 
-    val textColorValues = intArrayOf(
+    internal val textColorValues = intArrayOf(
         selectedColorInt,
         selectedTextAlphaColorInt,
         unselectedTextColorInt,
@@ -51,17 +51,17 @@ internal class ThemeConfig(context: Context) {
     )
 
     @ColorInt
-    fun getTintColor(isSelected: Boolean): Int {
+    internal fun getTintColor(isSelected: Boolean): Int {
         return if (isSelected) selectedColorInt else unselectedColorInt
     }
 
     @ColorInt
-    fun getTextColor(isSelected: Boolean): Int {
+    internal fun getTextColor(isSelected: Boolean): Int {
         return if (isSelected) selectedColorInt else unselectedTextColorInt
     }
 
     @ColorInt
-    fun getTextAlphaColor(isSelected: Boolean): Int {
+    internal fun getTextAlphaColor(isSelected: Boolean): Int {
         return if (isSelected) selectedTextAlphaColorInt else unselectedTextAlphaColorInt
     }
 

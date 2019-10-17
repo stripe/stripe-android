@@ -397,7 +397,7 @@ internal open class PaymentController @VisibleForTesting constructor(
         }
     }
 
-    internal class Stripe3ds2AuthCallback @VisibleForTesting constructor(
+    internal class Stripe3ds2AuthCallback @VisibleForTesting internal constructor(
         private val host: AuthActivityStarter.Host,
         private val stripeRepository1: StripeRepository,
         private val transaction: Transaction,
@@ -405,35 +405,12 @@ internal open class PaymentController @VisibleForTesting constructor(
         private val stripeIntent: StripeIntent,
         private val sourceId: String,
         private val requestOptions: ApiRequest.Options,
-        private val paymentRelayStarter: PaymentRelayStarter,
         private val analyticsRequestExecutor: FireAndForgetRequestExecutor,
         private val analyticsDataFactory: AnalyticsDataFactory,
         private val challengeFlowStarter: ChallengeFlowStarter,
-        private val enableLogging: Boolean = false
+        private val enableLogging: Boolean = false,
+        private val paymentRelayStarter: PaymentRelayStarter = PaymentRelayStarter(host, getRequestCode(stripeIntent))
     ) : ApiResultCallback<Stripe3ds2AuthResult> {
-
-        constructor(
-            host: AuthActivityStarter.Host,
-            stripeRepository: StripeRepository,
-            transaction: Transaction,
-            maxTimeout: Int,
-            stripeIntent: StripeIntent,
-            sourceId: String,
-            requestOptions: ApiRequest.Options,
-            analyticsRequestExecutor: FireAndForgetRequestExecutor,
-            analyticsDataFactory: AnalyticsDataFactory,
-            challengeFlowStarter: ChallengeFlowStarter,
-            enableLogging: Boolean
-        ) :
-            this(
-                host, stripeRepository, transaction, maxTimeout, stripeIntent,
-                sourceId, requestOptions,
-                PaymentRelayStarter(host, getRequestCode(stripeIntent)),
-                analyticsRequestExecutor,
-                analyticsDataFactory,
-                challengeFlowStarter,
-                enableLogging
-            )
 
         override fun onSuccess(result: Stripe3ds2AuthResult) {
             val ares = result.ares
@@ -514,7 +491,7 @@ internal open class PaymentController @VisibleForTesting constructor(
         }
     }
 
-    internal class PaymentAuth3ds2ChallengeStatusReceiver(
+    internal class PaymentAuth3ds2ChallengeStatusReceiver internal constructor(
         private val stripeRepository: StripeRepository,
         private val stripeIntent: StripeIntent,
         private val sourceId: String,

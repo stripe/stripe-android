@@ -35,13 +35,14 @@ internal class Stripe3ds2CompletionStarter(
         }
     }
 
-    internal data class StartData(
+    internal data class StartData internal constructor(
         val stripeIntent: StripeIntent,
         @param:ChallengeFlowOutcome @field:ChallengeFlowOutcome
         private val challengeFlowOutcome: Int
     ) {
-        val outcome: Int
+        internal val outcome: Int
             @StripeIntentResult.Outcome
+            @JvmSynthetic
             get() = when (challengeFlowOutcome) {
                 ChallengeFlowOutcome.COMPLETE_SUCCESSFUL -> StripeIntentResult.Outcome.SUCCEEDED
                 ChallengeFlowOutcome.COMPLETE_UNSUCCESSFUL -> StripeIntentResult.Outcome.FAILED
