@@ -6,18 +6,17 @@ import java.util.concurrent.TimeUnit
 import org.json.JSONException
 import org.json.JSONObject
 
-internal class EphemeralKeyManager<TEphemeralKey : EphemeralKey>(
+internal class EphemeralKeyManager(
     private val ephemeralKeyProvider: EphemeralKeyProvider,
-    private val listener: KeyManagerListener<TEphemeralKey>,
+    private val listener: KeyManagerListener,
     private val timeBufferInSeconds: Long,
     private val overrideCalendar: Calendar?,
     operationIdFactory: OperationIdFactory,
-    private val factory: EphemeralKey.Factory<TEphemeralKey>,
     shouldPrefetchEphemeralKey: Boolean
 ) {
     private val apiVersion: String = ApiVersion.get().code
 
-    private var ephemeralKey: TEphemeralKey? = null
+    private var ephemeralKey: EphemeralKey? = null
 
     init {
         if (shouldPrefetchEphemeralKey) {
@@ -55,7 +54,7 @@ internal class EphemeralKeyManager<TEphemeralKey : EphemeralKey>(
             return
         }
         try {
-            val ephemeralKey = EphemeralKey.fromJson(JSONObject(key), factory)
+            val ephemeralKey = EphemeralKey.fromJson(JSONObject(key))
             this.ephemeralKey = ephemeralKey
             listener.onKeyUpdate(ephemeralKey, operationId, actionString, arguments)
         } catch (e: JSONException) {
@@ -78,9 +77,9 @@ internal class EphemeralKeyManager<TEphemeralKey : EphemeralKey>(
         listener.onKeyError(operationId, errorCode, errorMessage)
     }
 
-    internal interface KeyManagerListener<TEphemeralKey : EphemeralKey> {
+    internal interface KeyManagerListener {
         fun onKeyUpdate(
-            ephemeralKey: TEphemeralKey,
+            ephemeralKey: EphemeralKey,
             operationId: String,
             action: String?,
             arguments: Map<String, Any>?
@@ -90,13 +89,13 @@ internal class EphemeralKeyManager<TEphemeralKey : EphemeralKey>(
     }
 
     private class ClientKeyUpdateListener internal constructor(
-        private val ephemeralKeyManager: EphemeralKeyManager<*>,
+        private val ephemeralKeyManager: EphemeralKeyManager,
         private val operationId: String,
         private val actionString: String?,
         private val arguments: Map<String, Any>?
     ) : EphemeralKeyUpdateListener {
-        override fun onKeyUpdate(rawKey: String) {
-            ephemeralKeyManager.updateKey(operationId, rawKey, actionString, arguments)
+        override fun onKeyUpdate(stripeResponseJson: String) {
+            ephemeralKeyManager.updateKey(operationId, stripeResponseJson, actionString, arguments)
         }
 
         override fun onKeyUpdateFailure(responseCode: Int, message: String) {

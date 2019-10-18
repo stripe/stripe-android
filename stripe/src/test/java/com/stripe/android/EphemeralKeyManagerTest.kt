@@ -33,16 +33,14 @@ import org.robolectric.RobolectricTestRunner
 class EphemeralKeyManagerTest {
 
     @Mock
-    private lateinit var keyManagerListener:
-        EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey>
+    private lateinit var keyManagerListener: EphemeralKeyManager.KeyManagerListener
 
     private val operationIdFactory = OperationIdFactory()
-    private val ephemeralKeyFactory = CustomerEphemeralKey.Factory()
 
     private lateinit var argCaptor: KArgumentCaptor<Map<String, Any>>
     private lateinit var actionArgumentCaptor: KArgumentCaptor<String>
-    private lateinit var ephemeralKeyArgumentCaptor: KArgumentCaptor<CustomerEphemeralKey>
-    private lateinit var customerEphemeralKey: CustomerEphemeralKey
+    private lateinit var ephemeralKeyArgumentCaptor: KArgumentCaptor<EphemeralKey>
+    private lateinit var customerEphemeralKey: EphemeralKey
     private lateinit var testEphemeralKeyProvider: TestEphemeralKeyProvider
 
     @BeforeTest
@@ -51,7 +49,7 @@ class EphemeralKeyManagerTest {
         argCaptor = argumentCaptor()
         actionArgumentCaptor = argumentCaptor()
         ephemeralKeyArgumentCaptor = argumentCaptor()
-        customerEphemeralKey = CustomerEphemeralKey.fromJson(CustomerFixtures.EPHEMERAL_KEY_FIRST)
+        customerEphemeralKey = EphemeralKey.fromJson(CustomerFixtures.EPHEMERAL_KEY_FIRST)
         testEphemeralKeyProvider = TestEphemeralKeyProvider()
     }
 
@@ -129,7 +127,7 @@ class EphemeralKeyManagerTest {
             .setNextRawEphemeralKey(CustomerFixtures.EPHEMERAL_KEY_FIRST.toString())
         createEphemeralKeyManager(operationIdFactory, null)
 
-        verify<EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey>>(keyManagerListener).onKeyUpdate(
+        verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener).onKeyUpdate(
             ephemeralKeyArgumentCaptor.capture(),
             any(),
             anyOrNull(),
@@ -152,7 +150,7 @@ class EphemeralKeyManagerTest {
         val actionString = "action"
         keyManager.retrieveEphemeralKey(operationId, actionString, mapOf("key" to "value"))
 
-        verify<EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey>>(keyManagerListener).onKeyUpdate(
+        verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener).onKeyUpdate(
             ephemeralKeyArgumentCaptor.capture(),
             eq(operationId),
             actionArgumentCaptor.capture(),
@@ -179,10 +177,11 @@ class EphemeralKeyManagerTest {
 
         testEphemeralKeyProvider
             .setNextRawEphemeralKey(CustomerFixtures.EPHEMERAL_KEY_FIRST.toString())
-        val keyManager = createEphemeralKeyManager(operationIdFactory, proxyCalendar)
+        val keyManager =
+            createEphemeralKeyManager(operationIdFactory, proxyCalendar)
 
         // Make sure we're in a good state
-        verify<EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey>>(keyManagerListener)
+        verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener)
             .onKeyUpdate(
                 ephemeralKeyArgumentCaptor.capture(),
                 any(),
@@ -199,7 +198,8 @@ class EphemeralKeyManagerTest {
         val operationId = operationIdFactory.create()
         keyManager.retrieveEphemeralKey(operationId, null, null)
 
-        verify<EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey>>(keyManagerListener).onKeyError(operationId, 404, errorMessage)
+        verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener)
+            .onKeyError(operationId, 404, errorMessage)
         verifyNoMoreInteractions(keyManagerListener)
     }
 
@@ -212,19 +212,20 @@ class EphemeralKeyManagerTest {
         testEphemeralKeyProvider.setNextRawEphemeralKey("Not_a_JSON")
         createEphemeralKeyManager(operationIdFactory, null)
 
-        verify<EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey>>(keyManagerListener, never())
+        verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener, never())
             .onKeyUpdate(
                 any(),
                 any(),
                 any(),
                 any()
             )
-        verify<EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey>>(keyManagerListener).onKeyError(operationId,
-            HttpURLConnection.HTTP_INTERNAL_ERROR,
-            "EphemeralKeyUpdateListener.onKeyUpdate was passed a value that " +
-                "could not be JSON parsed: [Value Not_a_JSON of type java.lang.String " +
-                "cannot be converted to JSONObject]. The raw body from Stripe's " +
-                "response should be passed.")
+        verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener)
+            .onKeyError(operationId,
+                HttpURLConnection.HTTP_INTERNAL_ERROR,
+                "EphemeralKeyUpdateListener.onKeyUpdate was passed a value that " +
+                    "could not be JSON parsed: [Value Not_a_JSON of type java.lang.String " +
+                    "cannot be converted to JSONObject]. The raw body from Stripe's " +
+                    "response should be passed.")
     }
 
     @Test
@@ -236,19 +237,20 @@ class EphemeralKeyManagerTest {
         testEphemeralKeyProvider.setNextRawEphemeralKey("{}")
         createEphemeralKeyManager(operationIdFactory, null)
 
-        verify<EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey>>(keyManagerListener, never())
+        verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener, never())
             .onKeyUpdate(
                 any(),
                 any(),
                 any(),
                 any()
             )
-        verify<EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey>>(keyManagerListener).onKeyError(operationId,
-            HttpURLConnection.HTTP_INTERNAL_ERROR,
-            "EphemeralKeyUpdateListener.onKeyUpdate was passed a value that " +
-                "could not be JSON parsed: [No value for created]. The raw body from " +
-                "Stripe's response should be passed."
-        )
+        verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener)
+            .onKeyError(operationId,
+                HttpURLConnection.HTTP_INTERNAL_ERROR,
+                "EphemeralKeyUpdateListener.onKeyUpdate was passed a value that " +
+                    "could not be JSON parsed: [No value for created]. The raw body from " +
+                    "Stripe's response should be passed."
+            )
     }
 
     @Test
@@ -260,18 +262,19 @@ class EphemeralKeyManagerTest {
         testEphemeralKeyProvider.setNextRawEphemeralKey("")
         createEphemeralKeyManager(operationIdFactory, null)
 
-        verify<EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey>>(keyManagerListener, never())
+        verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener, never())
             .onKeyUpdate(
                 any(),
                 any(),
                 any(),
                 any()
             )
-        verify<EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey>>(keyManagerListener).onKeyError(
-            eq(operationId),
-            eq(HttpURLConnection.HTTP_INTERNAL_ERROR),
-            any()
-        )
+        verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener)
+            .onKeyError(
+                eq(operationId),
+                eq(HttpURLConnection.HTTP_INTERNAL_ERROR),
+                any()
+            )
     }
 
     @Test
@@ -282,7 +285,6 @@ class EphemeralKeyManagerTest {
             keyManagerListener,
             TEST_SECONDS_BUFFER, null,
             operationIdFactory,
-            ephemeralKeyFactory,
             false
         )
         verify(operationIdFactory, never()).create()
@@ -291,20 +293,19 @@ class EphemeralKeyManagerTest {
     private fun createEphemeralKeyManager(
         operationIdFactory: OperationIdFactory,
         calendar: Calendar?
-    ): EphemeralKeyManager<CustomerEphemeralKey> {
+    ): EphemeralKeyManager {
         return EphemeralKeyManager(
             testEphemeralKeyProvider,
             keyManagerListener,
             TEST_SECONDS_BUFFER,
             calendar,
             operationIdFactory,
-            ephemeralKeyFactory,
             true
         )
     }
 
-    private fun createEphemeralKey(expires: Long): CustomerEphemeralKey {
-        return ephemeralKeyFactory.create(1501199335L, "cus_AQsHpvKfKwJDrF",
+    private fun createEphemeralKey(expires: Long): EphemeralKey {
+        return EphemeralKey.create("cus_AQsHpvKfKwJDrF", 1501199335L,
             expires, "ephkey_123", false, "customer", "", "")
     }
 

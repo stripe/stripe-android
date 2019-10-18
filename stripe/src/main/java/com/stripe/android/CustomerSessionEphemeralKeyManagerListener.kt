@@ -8,9 +8,9 @@ internal class CustomerSessionEphemeralKeyManagerListener(
     private val executor: ThreadPoolExecutor,
     private val listeners: HashMap<String, CustomerSession.RetrievalListener>,
     private val productUsage: CustomerSessionProductUsage
-) : EphemeralKeyManager.KeyManagerListener<CustomerEphemeralKey> {
+) : EphemeralKeyManager.KeyManagerListener {
     override fun onKeyUpdate(
-        ephemeralKey: CustomerEphemeralKey,
+        ephemeralKey: EphemeralKey,
         operationId: String,
         action: String?,
         arguments: Map<String, Any>?

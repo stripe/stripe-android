@@ -1,9 +1,8 @@
 package com.stripe.android
 
-import android.os.Parcel
 import android.os.Parcelable
 import com.stripe.android.model.StripeModel
-import java.util.Objects
+import kotlinx.android.parcel.Parcelize
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -11,120 +10,24 @@ import org.json.JSONObject
  * Represents an Ephemeral Key that can be used temporarily for API operations that typically
  * require a secret key.
  *
- * See [
- * Using Android Standard UI Components - Prepare your API](https://stripe.com/docs/mobile/android/standard#prepare-your-api) for more details on ephemeral keys.
+ * See [Using Android Standard UI Components - Prepare your API](https://stripe.com/docs/mobile/android/standard#prepare-your-api)
+ * for more details on ephemeral keys.
  */
-internal abstract class EphemeralKey : StripeModel, Parcelable {
-    val objectId: String
-    val created: Long
-    val expires: Long
-    val id: String
-    val isLiveMode: Boolean
-    val objectType: String
-    val secret: String
-    val type: String
-
+@Parcelize
+internal data class EphemeralKey private constructor(
     /**
-     * Parcel constructor for this [Parcelable] class.
-     * Note that if you change the order of these read values,
-     * you must change the order in which they are written in
-     * [.writeToParcel] below.
-     *
-     * @param `in` the [Parcel] in which this Ephemeral Key has been stored.
+     * Represents a customer id or issuing card id, depending on the context
      */
-    constructor(parcel: Parcel) {
-        created = parcel.readLong()
-        objectId = Objects.requireNonNull<String>(parcel.readString())
-        expires = parcel.readLong()
-        id = Objects.requireNonNull<String>(parcel.readString())
-        isLiveMode = parcel.readInt() == 1
-        objectType = Objects.requireNonNull<String>(parcel.readString())
-        secret = Objects.requireNonNull<String>(parcel.readString())
-        type = Objects.requireNonNull<String>(parcel.readString())
-    }
+    internal val objectId: String,
 
-    constructor(
-        created: Long,
-        objectId: String,
-        expires: Long,
-        id: String,
-        liveMode: Boolean,
-        objectType: String,
-        secret: String,
-        type: String
-    ) {
-        this.created = created
-        this.objectId = objectId
-        this.expires = expires
-        this.id = id
-        isLiveMode = liveMode
-        this.objectType = objectType
-        this.secret = secret
-        this.type = type
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    /**
-     * Write the object into a [Parcel]. Note that if the order of these write operations is
-     * changed, an identical change must be made to [EphemeralKey] constructor above.
-     *
-     * @param out a [Parcel] into which to write this object
-     * @param flags any flags (unused) for writing this object
-     */
-    override fun writeToParcel(out: Parcel, flags: Int) {
-        out.writeLong(created)
-        out.writeString(objectId)
-        out.writeLong(expires)
-        out.writeString(id)
-        // There is no writeBoolean
-        out.writeInt(if (isLiveMode) 1 else 0)
-        out.writeString(objectType)
-        out.writeString(secret)
-        out.writeString(type)
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) {
-            return true
-        }
-
-        return if (other is EphemeralKey) {
-            typedEquals(other)
-        } else {
-            false
-        }
-    }
-
-    private fun typedEquals(ephemeralKey: EphemeralKey): Boolean {
-        return (objectId == ephemeralKey.objectId &&
-            created == ephemeralKey.created &&
-            expires == ephemeralKey.expires &&
-            id == ephemeralKey.id &&
-            isLiveMode == ephemeralKey.isLiveMode &&
-            objectType == ephemeralKey.objectType &&
-            secret == ephemeralKey.secret &&
-            type == ephemeralKey.type)
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(objectId, created, expires, id, isLiveMode, objectType, secret, type)
-    }
-
-    internal abstract class Factory<TEphemeralKey : EphemeralKey> {
-        internal abstract fun create(
-            created: Long,
-            objectId: String,
-            expires: Long,
-            id: String,
-            liveMode: Boolean,
-            objectType: String,
-            secret: String,
-            type: String
-        ): TEphemeralKey
-    }
+    internal val created: Long,
+    internal val expires: Long,
+    internal val id: String,
+    internal val isLiveMode: Boolean,
+    internal val objectType: String,
+    val secret: String,
+    internal val type: String
+) : StripeModel(), Parcelable {
 
     companion object {
         private const val FIELD_CREATED = "created"
@@ -137,11 +40,8 @@ internal abstract class EphemeralKey : StripeModel, Parcelable {
         private const val FIELD_TYPE = "type"
 
         @Throws(JSONException::class)
-        @JvmStatic
-        fun <TEphemeralKey : EphemeralKey> fromJson(
-            jsonObject: JSONObject,
-            factory: Factory<TEphemeralKey>
-        ): TEphemeralKey {
+        @JvmSynthetic
+        internal fun fromJson(jsonObject: JSONObject): EphemeralKey {
             val created = jsonObject.getLong(FIELD_CREATED)
             val expires = jsonObject.getLong(FIELD_EXPIRES)
             val id = jsonObject.getString(FIELD_ID)
@@ -155,7 +55,32 @@ internal abstract class EphemeralKey : StripeModel, Parcelable {
             val type = typeObject.getString(FIELD_TYPE)
             val objectId = typeObject.getString(FIELD_ID)
 
-            return factory.create(created, objectId, expires, id, liveMode, objectType, secret, type)
+            return EphemeralKey(
+                objectId = objectId,
+                created = created,
+                expires = expires,
+                id = id,
+                isLiveMode = liveMode,
+                objectType = objectType,
+                secret = secret,
+                type = type
+            )
+        }
+
+        @JvmSynthetic
+        internal fun create(
+            objectId: String,
+            created: Long,
+            expires: Long,
+            id: String,
+            isLiveMode: Boolean,
+            objectType: String,
+            secret: String,
+            type: String
+        ): EphemeralKey {
+            return EphemeralKey(
+                objectId, created, expires, id, isLiveMode, objectType, secret, type
+            )
         }
     }
 }

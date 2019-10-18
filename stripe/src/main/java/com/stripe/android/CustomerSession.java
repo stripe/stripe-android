@@ -69,7 +69,7 @@ public class CustomerSession {
     private long mCustomerCacheTime;
     @NonNull private final LocalBroadcastManager mLocalBroadcastManager;
     @NonNull private final OperationIdFactory mOperationIdFactory;
-    @NonNull private final EphemeralKeyManager<CustomerEphemeralKey> mEphemeralKeyManager;
+    @NonNull private final EphemeralKeyManager mEphemeralKeyManager;
     @Nullable private final Calendar mProxyNowCalendar;
     @NonNull private final ThreadPoolExecutor mThreadPoolExecutor;
     @NonNull private final CustomerSessionProductUsage mProductUsage;
@@ -83,7 +83,7 @@ public class CustomerSession {
      *
      * @param context The application context
      * @param ephemeralKeyProvider An {@link EphemeralKeyProvider} used to retrieve
-     *                             {@link CustomerEphemeralKey} ephemeral keys
+     *                             {@link EphemeralKey} ephemeral keys
      * @param stripeAccountId An optional Stripe Connect account to associate with Customer-related
      *                        Stripe API Requests.
      *                        See {@link Stripe#Stripe(Context, String, String)}.
@@ -215,13 +215,12 @@ public class CustomerSession {
                                 mProductUsage
                         ),
                         threadPoolExecutor, listeners, mProductUsage);
-        mEphemeralKeyManager = new EphemeralKeyManager<>(
+        mEphemeralKeyManager = new EphemeralKeyManager(
                 keyProvider,
                 keyManagerListener,
                 KEY_REFRESH_BUFFER_IN_SECONDS,
                 proxyNowCalendar,
                 mOperationIdFactory,
-                new CustomerEphemeralKey.Factory(),
                 shouldPrefetchEphemeralKey
         );
     }
@@ -480,9 +479,10 @@ public class CustomerSession {
                                       @NonNull StripeException exception) {
         final RetrievalListener listener = listeners.remove(operationId);
         if (listener != null) {
+            final String message = exception.getLocalizedMessage();
             listener.onError(
                     exception.getStatusCode(),
-                    exception.getLocalizedMessage(),
+                    message != null ? message : "",
                     exception.getStripeError()
             );
         }

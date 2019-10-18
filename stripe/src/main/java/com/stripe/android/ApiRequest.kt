@@ -114,13 +114,13 @@ internal class ApiRequest internal constructor(
         }
 
         companion object {
-            @JvmStatic
-            fun create(apiKey: String): Options {
+            @JvmSynthetic
+            internal fun create(apiKey: String): Options {
                 return Options(apiKey, null)
             }
 
-            @JvmStatic
-            fun create(apiKey: String, stripeAccount: String?): Options {
+            @JvmSynthetic
+            internal fun create(apiKey: String, stripeAccount: String?): Options {
                 return Options(apiKey, stripeAccount)
             }
         }
@@ -135,8 +135,8 @@ internal class ApiRequest internal constructor(
         // this is the default user agent set by the system
         private const val PROP_USER_AGENT = "http.agent"
 
-        @JvmStatic
-        fun createGet(
+        @JvmSynthetic
+        internal fun createGet(
             url: String,
             options: Options,
             appInfo: AppInfo? = null
@@ -144,8 +144,8 @@ internal class ApiRequest internal constructor(
             return ApiRequest(Method.GET, url, null, options, appInfo)
         }
 
-        @JvmStatic
-        fun createGet(
+        @JvmSynthetic
+        internal fun createGet(
             url: String,
             params: Map<String, *>,
             options: Options,
@@ -154,8 +154,8 @@ internal class ApiRequest internal constructor(
             return ApiRequest(Method.GET, url, params, options, appInfo)
         }
 
-        @JvmStatic
-        fun createPost(
+        @JvmSynthetic
+        internal fun createPost(
             url: String,
             options: Options,
             appInfo: AppInfo? = null
@@ -163,8 +163,8 @@ internal class ApiRequest internal constructor(
             return ApiRequest(Method.POST, url, null, options, appInfo)
         }
 
-        @JvmStatic
-        fun createPost(
+        @JvmSynthetic
+        internal fun createPost(
             url: String,
             params: Map<String, *>,
             options: Options,
@@ -173,8 +173,8 @@ internal class ApiRequest internal constructor(
             return ApiRequest(Method.POST, url, params, options, appInfo)
         }
 
-        @JvmStatic
-        fun createDelete(
+        @JvmSynthetic
+        internal fun createDelete(
             url: String,
             options: Options,
             appInfo: AppInfo? = null

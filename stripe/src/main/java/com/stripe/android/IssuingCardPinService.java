@@ -24,7 +24,7 @@ import org.json.JSONException;
  */
 @SuppressWarnings("WeakerAccess")
 public class IssuingCardPinService
-        implements EphemeralKeyManager.KeyManagerListener<IssuingCardEphemeralKey> {
+        implements EphemeralKeyManager.KeyManagerListener {
 
     private static final String TAG = IssuingCardPinService.class.getName();
     private static final long KEY_REFRESH_BUFFER_IN_SECONDS = 30L;
@@ -36,7 +36,7 @@ public class IssuingCardPinService
     private static final String ARGUMENT_NEW_PIN = "newPin";
 
     @NonNull
-    private final EphemeralKeyManager<IssuingCardEphemeralKey> mEphemeralKeyManager;
+    private final EphemeralKeyManager mEphemeralKeyManager;
     @NonNull
     private final StripeRepository mStripeRepository;
     @NonNull
@@ -51,8 +51,7 @@ public class IssuingCardPinService
     /**
      * Create a IssuingCardPinService with the provided {@link EphemeralKeyProvider}.
      *
-     * @param keyProvider an {@link EphemeralKeyProvider} used to get
-     *                    {@link IssuingCardEphemeralKey EphemeralKeys} as needed
+     * @param keyProvider an {@link EphemeralKeyProvider} used to obtain an {@link EphemeralKey}
      */
     @NonNull
     public static IssuingCardPinService create(
@@ -75,13 +74,12 @@ public class IssuingCardPinService
             @NonNull OperationIdFactory operationIdFactory) {
         mOperationIdFactory = operationIdFactory;
         mStripeRepository = stripeRepository;
-        mEphemeralKeyManager = new EphemeralKeyManager<>(
+        mEphemeralKeyManager = new EphemeralKeyManager(
                 keyProvider,
                 this,
                 KEY_REFRESH_BUFFER_IN_SECONDS,
                 null,
                 operationIdFactory,
-                new IssuingCardEphemeralKey.Factory(),
                 true
         );
     }
@@ -138,7 +136,7 @@ public class IssuingCardPinService
     }
 
     @Override
-    public void onKeyUpdate(@NonNull IssuingCardEphemeralKey ephemeralKey,
+    public void onKeyUpdate(@NonNull EphemeralKey ephemeralKey,
                             @Nullable String operationId,
                             @Nullable String action,
                             @Nullable Map<String, ?> arguments) {

@@ -39,7 +39,7 @@ internal class CustomerSessionRunnableFactory constructor(
     }
 
     internal fun create(
-        ephemeralKey: CustomerEphemeralKey,
+        ephemeralKey: EphemeralKey,
         operationId: String,
         actionString: String?,
         arguments: Map<String, Any>?
@@ -107,7 +107,7 @@ internal class CustomerSessionRunnableFactory constructor(
     }
 
     private fun createAddCustomerSourceRunnable(
-        key: CustomerEphemeralKey,
+        key: EphemeralKey,
         sourceId: String,
         sourceType: String,
         operationId: String
@@ -117,7 +117,7 @@ internal class CustomerSessionRunnableFactory constructor(
             @Throws(StripeException::class)
             public override fun createMessageObject(): Source? {
                 return stripeRepository.addCustomerSource(
-                    key.customerId,
+                    key.objectId,
                     publishableKey,
                     productUsage.get(),
                     sourceId,
@@ -129,7 +129,7 @@ internal class CustomerSessionRunnableFactory constructor(
     }
 
     private fun createDeleteCustomerSourceRunnable(
-        key: CustomerEphemeralKey,
+        key: EphemeralKey,
         sourceId: String,
         operationId: String
     ): Runnable {
@@ -138,7 +138,7 @@ internal class CustomerSessionRunnableFactory constructor(
             @Throws(StripeException::class)
             public override fun createMessageObject(): Source? {
                 return stripeRepository.deleteCustomerSource(
-                    key.customerId,
+                    key.objectId,
                     publishableKey,
                     productUsage.get(),
                     sourceId,
@@ -149,7 +149,7 @@ internal class CustomerSessionRunnableFactory constructor(
     }
 
     private fun createAttachPaymentMethodRunnable(
-        key: CustomerEphemeralKey,
+        key: EphemeralKey,
         paymentMethodId: String,
         operationId: String
     ): Runnable {
@@ -158,7 +158,7 @@ internal class CustomerSessionRunnableFactory constructor(
             @Throws(StripeException::class)
             public override fun createMessageObject(): PaymentMethod? {
                 return stripeRepository.attachPaymentMethod(
-                    key.customerId,
+                    key.objectId,
                     publishableKey,
                     productUsage.get(),
                     paymentMethodId,
@@ -169,7 +169,7 @@ internal class CustomerSessionRunnableFactory constructor(
     }
 
     private fun createDetachPaymentMethodRunnable(
-        key: CustomerEphemeralKey,
+        key: EphemeralKey,
         paymentMethodId: String,
         operationId: String
     ): Runnable {
@@ -188,7 +188,7 @@ internal class CustomerSessionRunnableFactory constructor(
     }
 
     private fun createGetPaymentMethodsRunnable(
-        key: CustomerEphemeralKey,
+        key: EphemeralKey,
         paymentMethodType: String,
         operationId: String
     ): Runnable {
@@ -197,7 +197,7 @@ internal class CustomerSessionRunnableFactory constructor(
             @Throws(StripeException::class)
             public override fun createMessageObject(): List<PaymentMethod> {
                 return stripeRepository.getPaymentMethods(
-                    key.customerId,
+                    key.objectId,
                     paymentMethodType,
                     publishableKey,
                     productUsage.get(),
@@ -208,7 +208,7 @@ internal class CustomerSessionRunnableFactory constructor(
     }
 
     private fun createSetCustomerSourceDefaultRunnable(
-        key: CustomerEphemeralKey,
+        key: EphemeralKey,
         sourceId: String,
         sourceType: String,
         operationId: String
@@ -218,7 +218,7 @@ internal class CustomerSessionRunnableFactory constructor(
             @Throws(StripeException::class)
             public override fun createMessageObject(): Customer? {
                 return stripeRepository.setDefaultCustomerSource(
-                    key.customerId,
+                    key.objectId,
                     publishableKey,
                     productUsage.get(),
                     sourceId,
@@ -230,7 +230,7 @@ internal class CustomerSessionRunnableFactory constructor(
     }
 
     private fun createSetCustomerShippingInformationRunnable(
-        key: CustomerEphemeralKey,
+        key: EphemeralKey,
         shippingInformation: ShippingInformation,
         operationId: String
     ): Runnable {
@@ -239,7 +239,7 @@ internal class CustomerSessionRunnableFactory constructor(
             @Throws(StripeException::class)
             public override fun createMessageObject(): Customer? {
                 return stripeRepository.setCustomerShippingInfo(
-                    key.customerId,
+                    key.objectId,
                     publishableKey,
                     productUsage.get(),
                     shippingInformation,
@@ -250,7 +250,7 @@ internal class CustomerSessionRunnableFactory constructor(
     }
 
     private fun createUpdateCustomerRunnable(
-        key: CustomerEphemeralKey,
+        key: EphemeralKey,
         operationId: String
     ): Runnable {
         return object : CustomerSessionRunnable<Customer>(handler, localBroadcastManager,
@@ -266,13 +266,13 @@ internal class CustomerSessionRunnableFactory constructor(
      * Fetch a [Customer]. If the provided key is expired, this method **does not** update the key.
      * Use [createUpdateCustomerRunnable] to validate the key before refreshing the customer.
      *
-     * @param key the [CustomerEphemeralKey] used for this access
+     * @param key the [EphemeralKey] used for this access
      * @return a [Customer] if one can be found with this key, or `null` if one cannot.
      */
     @Throws(StripeException::class)
-    private fun retrieveCustomerWithKey(key: CustomerEphemeralKey): Customer? {
+    private fun retrieveCustomerWithKey(key: EphemeralKey): Customer? {
         return stripeRepository.retrieveCustomer(
-            key.customerId,
+            key.objectId,
             ApiRequest.Options.create(key.secret, stripeAccountId)
         )
     }
