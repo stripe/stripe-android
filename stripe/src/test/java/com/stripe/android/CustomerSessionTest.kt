@@ -84,8 +84,8 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
     }
 
     @Throws(JSONException::class)
-    private fun getCustomerEphemeralKey(key: String): CustomerEphemeralKey {
-        return CustomerEphemeralKey.fromJson(JSONObject(key))
+    private fun getCustomerEphemeralKey(key: String): EphemeralKey {
+        return EphemeralKey.fromJson(JSONObject(key))
     }
 
     @BeforeTest
@@ -208,7 +208,7 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
         ephemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW)
         val customerSession = createCustomerSession(null)
 
-        verify<StripeRepository>(stripeRepository).retrieveCustomer(eq(firstKey.customerId),
+        verify<StripeRepository>(stripeRepository).retrieveCustomer(eq(firstKey.objectId),
             requestOptionsArgumentCaptor.capture())
         assertEquals(firstKey.secret,
             requestOptionsArgumentCaptor.firstValue.apiKey)
@@ -258,7 +258,7 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
 
         ephemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW)
         val customerSession = createCustomerSession(proxyCalendar)
-        assertEquals(firstKey.customerId, FIRST_CUSTOMER.id)
+        assertEquals(firstKey.objectId, FIRST_CUSTOMER.id)
 
         val firstCustomerCacheTime = customerSession.customerCacheTime
         assertEquals(firstExpiryTimeInMillis - 100L, firstCustomerCacheTime)
@@ -284,11 +284,11 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
         //  Make sure the value is cached.
         assertEquals(SECOND_CUSTOMER.id, customerId)
 
-        verify<StripeRepository>(stripeRepository).retrieveCustomer(eq(firstKey.customerId),
+        verify<StripeRepository>(stripeRepository).retrieveCustomer(eq(firstKey.objectId),
             requestOptionsArgumentCaptor.capture())
         assertEquals(firstKey.secret,
             requestOptionsArgumentCaptor.firstValue.apiKey)
-        verify<StripeRepository>(stripeRepository).retrieveCustomer(eq(secondKey.customerId),
+        verify<StripeRepository>(stripeRepository).retrieveCustomer(eq(secondKey.objectId),
             requestOptionsArgumentCaptor.capture())
         assertEquals(secondKey.secret,
             requestOptionsArgumentCaptor.allValues[1].apiKey)
@@ -311,10 +311,10 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
         val customerSession = createCustomerSession(proxyCalendar)
 
         // Make sure we're in a good state and that we have the expected customer
-        assertEquals(firstKey.customerId, FIRST_CUSTOMER.id)
-        assertEquals(firstKey.customerId, customerSession.customer?.id)
+        assertEquals(firstKey.objectId, FIRST_CUSTOMER.id)
+        assertEquals(firstKey.objectId, customerSession.customer?.id)
 
-        verify<StripeRepository>(stripeRepository).retrieveCustomer(eq(firstKey.customerId),
+        verify<StripeRepository>(stripeRepository).retrieveCustomer(eq(firstKey.objectId),
             requestOptionsArgumentCaptor.capture())
         assertEquals(firstKey.secret,
             requestOptionsArgumentCaptor.firstValue.apiKey)

@@ -22,7 +22,7 @@ class EphemeralKeyTest {
         assertEquals(1483575790L, EPHEMERAL_KEY.created)
         assertEquals(1483579790L, EPHEMERAL_KEY.expires)
         assertEquals("customer", EPHEMERAL_KEY.type)
-        assertEquals("cus_123", EPHEMERAL_KEY.customerId)
+        assertEquals("cus_123", EPHEMERAL_KEY.objectId)
     }
 
     @Test
@@ -32,7 +32,7 @@ class EphemeralKeyTest {
     }
 
     companion object {
-        private val EPHEMERAL_KEY = CustomerEphemeralKey.fromJson(JSONObject(
+        private val EPHEMERAL_KEY = EphemeralKey.fromJson(JSONObject(
             """
             {
                 "id": "ephkey_123",
