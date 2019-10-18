@@ -25,7 +25,7 @@ import org.json.JSONObject
  */
 @Suppress("DataClassPrivateConstructor")
 @Parcelize
-data class PaymentMethod private constructor(
+data class PaymentMethod internal constructor(
     @JvmField val id: String?,
     @JvmField val created: Long?,
     @JvmField val liveMode: Boolean,
@@ -156,7 +156,7 @@ data class PaymentMethod private constructor(
     }
 
     @Parcelize
-    data class BillingDetails private constructor(
+    data class BillingDetails internal constructor(
         @JvmField val address: Address?,
         @JvmField val email: String?,
         @JvmField val name: String?,
@@ -241,7 +241,7 @@ data class PaymentMethod private constructor(
     }
 
     @Parcelize
-    data class Card private constructor(
+    data class Card internal constructor(
         @field:Brand @JvmField val brand: String?,
         @JvmField val checks: Checks?,
         @JvmField val country: String?,
@@ -332,7 +332,7 @@ data class PaymentMethod private constructor(
         }
 
         @Parcelize
-        data class Checks private constructor(
+        data class Checks internal constructor(
             @JvmField val addressLine1Check: String?,
             @JvmField val addressPostalCodeCheck: String?,
             @JvmField val cvcCheck: String?
@@ -370,7 +370,7 @@ data class PaymentMethod private constructor(
         }
 
         @Parcelize
-        data class ThreeDSecureUsage private constructor(
+        data class ThreeDSecureUsage internal constructor(
             @JvmField val isSupported: Boolean
         ) : StripeModel(), Parcelable {
 
@@ -429,7 +429,7 @@ data class PaymentMethod private constructor(
     }
 
     @Parcelize
-    data class CardPresent private constructor(
+    data class CardPresent internal constructor(
         private val ignore: Boolean = true
     ) : Parcelable {
         companion object {
@@ -439,7 +439,7 @@ data class PaymentMethod private constructor(
     }
 
     @Parcelize
-    data class Ideal private constructor(
+    data class Ideal internal constructor(
         @JvmField val bank: String?,
         @JvmField val bankIdentifierCode: String?
     ) : Parcelable {
@@ -471,7 +471,7 @@ data class PaymentMethod private constructor(
     }
 
     @Parcelize
-    data class Fpx private constructor(
+    data class Fpx internal constructor(
         @JvmField val bank: String?,
         @JvmField val accountHolderType: String?
     ) : Parcelable {
@@ -502,7 +502,7 @@ data class PaymentMethod private constructor(
     }
 
     @Parcelize
-    data class SepaDebit private constructor(
+    data class SepaDebit internal constructor(
         @JvmField val bankCode: String?,
         @JvmField val branchCode: String?,
         @JvmField val country: String?,

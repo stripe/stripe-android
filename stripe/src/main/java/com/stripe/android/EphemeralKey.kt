@@ -14,7 +14,7 @@ import org.json.JSONObject
  * for more details on ephemeral keys.
  */
 @Parcelize
-internal data class EphemeralKey private constructor(
+internal data class EphemeralKey internal constructor(
     /**
      * Represents a customer id or issuing card id, depending on the context
      */

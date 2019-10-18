@@ -5,7 +5,7 @@ import kotlinx.android.parcel.Parcelize
 import org.json.JSONObject
 
 @Parcelize
-data class VisaCheckoutWallet private constructor(
+data class VisaCheckoutWallet internal constructor(
     val billingAddress: Address?,
     val email: String?,
     val name: String?,

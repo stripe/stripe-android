@@ -38,7 +38,7 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
     )
 
     @Parcelize
-    data class Args private constructor(
+    data class Args internal constructor(
         internal val initialPaymentMethodId: String?,
         val shouldRequirePostalCode: Boolean,
         @LayoutRes val addPaymentMethodFooter: Int,

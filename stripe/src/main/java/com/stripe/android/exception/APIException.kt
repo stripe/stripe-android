@@ -7,8 +7,8 @@ import com.stripe.android.StripeError
  */
 class APIException(
     message: String?,
-    requestId: String?,
+    requestId: String? = null,
     statusCode: Int,
     stripeError: StripeError?,
-    e: Throwable?
+    e: Throwable? = null
 ) : StripeException(stripeError, message, requestId, statusCode, e)

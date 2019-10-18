@@ -4,7 +4,7 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class GooglePayWallet private constructor(
+data class GooglePayWallet internal constructor(
     val dynamicLast4: String?
 ) : Wallet(Type.GooglePay), Parcelable {
     internal class Builder : Wallet.Builder<GooglePayWallet>() {
