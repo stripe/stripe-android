@@ -7,6 +7,8 @@ import android.view.View
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,6 +18,7 @@ import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession.Companion.TOKEN_PAYMENT_SESSION
 import com.stripe.android.R
 import com.stripe.android.StripeError
+import com.stripe.android.exception.StripeException
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.view.i18n.TranslatorManager
 import kotlinx.android.synthetic.main.activity_payment_methods.*
@@ -41,9 +44,13 @@ class PaymentMethodsActivity : AppCompatActivity() {
     private lateinit var cardDisplayTextFactory: CardDisplayTextFactory
     private var tappedPaymentMethod: PaymentMethod? = null
 
+    private lateinit var viewModel: PaymentMethodsViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment_methods)
+
+        viewModel = ViewModelProviders.of(this).get(PaymentMethodsViewModel::class.java)
 
         val args = PaymentMethodsActivityStarter.Args.create(intent)
         startedFromPaymentSession = args.isPaymentSessionActive
@@ -75,6 +82,22 @@ class PaymentMethodsActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
 
+        viewModel.paymentMethods.observe(this, Observer {
+            when (it.status) {
+                PaymentMethodsViewModel.Result.Status.SUCCESS -> {
+                    val paymentMethods = it.data as List<PaymentMethod>
+                    updatePaymentMethods(paymentMethods)
+                }
+                PaymentMethodsViewModel.Result.Status.ERROR -> {
+                    val exception = it.data as StripeException
+                    val displayedError = TranslatorManager.getErrorMessageTranslator()
+                        .translate(exception.statusCode, exception.message, exception.stripeError)
+                    showError(displayedError)
+                }
+            }
+            setCommunicatingProgress(false)
+        })
+
         fetchCustomerPaymentMethods()
 
         // This prevents the first click from being eaten by the focus.
@@ -90,10 +113,8 @@ class PaymentMethodsActivity : AppCompatActivity() {
                 super.onAnimationFinished(viewHolder)
 
                 // wait until post-tap animations are completed before finishing activity
-                if (tappedPaymentMethod != null) {
-                    setSelectionAndFinish(tappedPaymentMethod)
-                    tappedPaymentMethod = null
-                }
+                tappedPaymentMethod?.let { setSelectionAndFinish(it) }
+                tappedPaymentMethod = null
             }
         }
     }
@@ -114,16 +135,10 @@ class PaymentMethodsActivity : AppCompatActivity() {
     private fun onPaymentMethodCreated(data: Intent?) {
         initLoggingTokens()
 
-        val paymentMethod =
-            data?.getParcelableExtra<PaymentMethod>(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
-
-        if (data != null) {
-            val result =
-                AddPaymentMethodActivityStarter.Result.fromIntent(data)
+        data?.let {
+            val result = AddPaymentMethodActivityStarter.Result.fromIntent(data)
             result?.paymentMethod?.let { onAddedPaymentMethod(it) }
-        } else {
-            fetchCustomerPaymentMethods()
-        }
+        } ?: fetchCustomerPaymentMethods()
     }
 
     private fun onAddedPaymentMethod(paymentMethod: PaymentMethod) {
@@ -143,21 +158,16 @@ class PaymentMethodsActivity : AppCompatActivity() {
     private fun onDeletedPaymentMethod(paymentMethod: PaymentMethod) {
         adapter.deletePaymentMethod(paymentMethod)
 
-        if (paymentMethod.id != null) {
-            customerSession.detachPaymentMethod(
-                paymentMethod.id,
-                PaymentMethodDeleteListener()
-            )
+        paymentMethod.id?.let { paymentMethodId ->
+            customerSession.detachPaymentMethod(paymentMethodId, PaymentMethodDeleteListener())
         }
 
         showSnackbar(paymentMethod, R.string.removed)
     }
 
     private fun showSnackbar(paymentMethod: PaymentMethod, @StringRes stringRes: Int) {
-        val snackbarText = if (paymentMethod.card != null) {
-            getString(stringRes, cardDisplayTextFactory.createUnstyled(paymentMethod.card))
-        } else {
-            null
+        val snackbarText = paymentMethod.card?.let { paymentMethodId ->
+            getString(stringRes, cardDisplayTextFactory.createUnstyled(paymentMethodId))
         }
 
         if (snackbarText != null) {
@@ -175,8 +185,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
 
     private fun fetchCustomerPaymentMethods() {
         setCommunicatingProgress(true)
-        customerSession.getPaymentMethods(PaymentMethod.Type.Card,
-            PaymentMethodsRetrievalListener(this))
+        viewModel.loadPaymentMethods()
     }
 
     private fun updatePaymentMethods(paymentMethods: List<PaymentMethod>) {
@@ -233,10 +242,9 @@ class PaymentMethodsActivity : AppCompatActivity() {
     }
 
     private fun confirmDeletePaymentMethod(paymentMethod: PaymentMethod) {
-        val message = if (paymentMethod.card != null)
-            cardDisplayTextFactory.createUnstyled(paymentMethod.card)
-        else
-            null
+        val message = paymentMethod.card?.let {
+            cardDisplayTextFactory.createUnstyled(it)
+        }
         AlertDialog.Builder(this)
             .setTitle(R.string.delete_payment_method)
             .setMessage(message)
@@ -251,35 +259,6 @@ class PaymentMethodsActivity : AppCompatActivity() {
             }
             .create()
             .show()
-    }
-
-    private class PaymentMethodsRetrievalListener constructor(
-        activity: PaymentMethodsActivity
-    ) : CustomerSession.ActivityPaymentMethodsRetrievalListener<PaymentMethodsActivity>(activity) {
-
-        override fun onPaymentMethodsRetrieved(paymentMethods: List<PaymentMethod>) {
-            val activity = activity ?: return
-
-            activity.updatePaymentMethods(paymentMethods)
-            activity.setCommunicatingProgress(false)
-        }
-
-        override fun onError(
-            errorCode: Int,
-            errorMessage: String,
-            stripeError: StripeError?
-        ) {
-            val activity = activity ?: return
-
-            // Note: if this Activity is changed to subclass StripeActivity,
-            // this code will make the error message show twice, since StripeActivity
-            // will listen to the broadcast version of the error
-            // coming from CustomerSession
-            val displayedError = TranslatorManager.getErrorMessageTranslator()
-                .translate(errorCode, errorMessage, stripeError)
-            activity.showError(displayedError)
-            activity.setCommunicatingProgress(false)
-        }
     }
 
     private class PaymentMethodDeleteListener : CustomerSession.PaymentMethodRetrievalListener {

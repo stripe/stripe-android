@@ -18,6 +18,9 @@ dependencies {
     implementation 'androidx.annotation:annotation:1.1.0'
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation "androidx.lifecycle:lifecycle-viewmodel:2.1.0"
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0'
+
     // Api for this import because we use reflection to alter TextInputLayout
     api 'com.google.android.material:material:1.0.0'
 
