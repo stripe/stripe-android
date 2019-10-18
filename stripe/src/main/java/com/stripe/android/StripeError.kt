@@ -12,20 +12,20 @@ data class StripeError internal constructor(
      * [Stripe API Errors](https://stripe.com/docs/api/errors)
      * (e.g. "invalid_request_error")
      */
-    val type: String?,
+    val type: String? = null,
 
-    val message: String?,
+    val message: String? = null,
     /**
      * [Stripe API Error Codes](https://stripe.com/docs/error-codes)
      * (e.g. "payment_method_unactivated")
      */
-    val code: String?,
+    val code: String? = null,
 
-    val param: String?,
+    val param: String? = null,
     /**
      * [Stripe API Decline Codes](https://stripe.com/docs/declines/codes)
      */
-    val declineCode: String?,
+    val declineCode: String? = null,
 
-    val charge: String?
+    val charge: String? = null
 ) : Serializable

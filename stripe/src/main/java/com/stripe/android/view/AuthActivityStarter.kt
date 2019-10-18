@@ -3,6 +3,7 @@ package com.stripe.android.view
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import androidx.fragment.app.Fragment
 import java.lang.ref.WeakReference
 
 internal interface AuthActivityStarter<StartDataType> {
@@ -11,15 +12,15 @@ internal interface AuthActivityStarter<StartDataType> {
     /**
      * A representation of an object (i.e. Activity or Fragment) that can start an activity.
      */
-    class Host private constructor(activity: Activity, fragment: androidx.fragment.app.Fragment?) {
+    class Host private constructor(activity: Activity, fragment: Fragment?) {
         private val activityRef: WeakReference<Activity> = WeakReference(activity)
-        private val fragmentRef: WeakReference<androidx.fragment.app.Fragment>? =
+        private val fragmentRef: WeakReference<Fragment>? =
             if (fragment != null) WeakReference(fragment) else null
 
-        val activity: Activity?
+        internal val activity: Activity?
             get() = activityRef.get()
 
-        fun startActivityForResult(target: Class<*>, extras: Bundle, requestCode: Int) {
+        internal fun startActivityForResult(target: Class<*>, extras: Bundle, requestCode: Int) {
             val activity = activityRef.get() ?: return
 
             val intent = Intent(activity, target).putExtras(extras)
@@ -35,13 +36,13 @@ internal interface AuthActivityStarter<StartDataType> {
         }
 
         companion object {
-            @JvmStatic
-            fun create(fragment: androidx.fragment.app.Fragment): Host {
+            @JvmSynthetic
+            internal fun create(fragment: Fragment): Host {
                 return Host(fragment.requireActivity(), fragment)
             }
 
-            @JvmStatic
-            fun create(activity: Activity): Host {
+            @JvmSynthetic
+            internal fun create(activity: Activity): Host {
                 return Host(activity, null)
             }
         }

@@ -27,8 +27,8 @@ data class WeChat internal constructor(
         private const val FIELD_STATEMENT_DESCRIPTOR = "statement_descriptor"
         private const val FIELD_QR_CODE_URL = "qr_code_url"
 
-        @JvmStatic
-        fun fromJson(json: JSONObject): WeChat {
+        @JvmSynthetic
+        internal fun fromJson(json: JSONObject): WeChat {
             return WeChat(
                 appId = StripeJsonUtils.optString(json, FIELD_APPID),
                 statementDescriptor = StripeJsonUtils.optString(json, FIELD_STATEMENT_DESCRIPTOR),

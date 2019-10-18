@@ -1111,16 +1111,6 @@ public class StripeTest {
     @Test
     public void createPaymentMethodSynchronous_withCardAndMetadata()
             throws StripeException {
-        final PaymentMethod.Card expectedCard = new PaymentMethod.Card.Builder()
-                .setBrand("visa")
-                .setCountry("US")
-                .setExpiryMonth(1)
-                .setExpiryYear(2024)
-                .setFunding("credit")
-                .setLast4("4242")
-                .setWallet(null)
-                .build();
-
         final Map<String, String> metadata = new HashMap<>();
         metadata.put("order_id", "123456789");
 

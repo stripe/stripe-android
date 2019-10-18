@@ -20,27 +20,25 @@ internal object ErrorParser {
     private const val FIELD_PARAM = "param"
     private const val FIELD_TYPE = "type"
 
-    @JvmStatic
-    fun parseError(rawError: String?): StripeError {
-        var charge: String? = null
-        var code: String? = null
-        var declineCode: String? = null
-        var message: String
-        var param: String? = null
-        var type: String? = null
-        try {
-            val jsonError = JSONObject(rawError)
-            val errorObject = jsonError.getJSONObject(FIELD_ERROR)
-            charge = errorObject.optString(FIELD_CHARGE)
-            code = errorObject.optString(FIELD_CODE)
-            declineCode = errorObject.optString(FIELD_DECLINE_CODE)
-            message = errorObject.optString(FIELD_MESSAGE)
-            param = errorObject.optString(FIELD_PARAM)
-            type = errorObject.optString(FIELD_TYPE)
+    @JvmSynthetic
+    internal fun parseError(errorResponse: String?): StripeError {
+        return try {
+            errorResponse?.let {
+                val errorObject = JSONObject(it).getJSONObject(FIELD_ERROR)
+                StripeError(
+                    charge = errorObject.optString(FIELD_CHARGE),
+                    code = errorObject.optString(FIELD_CODE),
+                    declineCode = errorObject.optString(FIELD_DECLINE_CODE),
+                    message = errorObject.optString(FIELD_MESSAGE),
+                    param = errorObject.optString(FIELD_PARAM),
+                    type = errorObject.optString(FIELD_TYPE)
+                )
+            } ?: MALFORMED
         } catch (jsonException: JSONException) {
-            message = MALFORMED_RESPONSE_MESSAGE
+            MALFORMED
         }
-
-        return StripeError(type, message, code, param, declineCode, charge)
     }
+
+    @JvmSynthetic
+    internal val MALFORMED = StripeError(message = MALFORMED_RESPONSE_MESSAGE)
 }

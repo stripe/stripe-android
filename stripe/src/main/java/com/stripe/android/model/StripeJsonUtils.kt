@@ -8,8 +8,7 @@ import org.json.JSONObject
  * A set of JSON parsing utility functions.
  */
 internal object StripeJsonUtils {
-    internal const val NULL = "null"
-    private const val EMPTY = ""
+    private const val NULL = "null"
 
     /**
      * Calls through to [JSONObject.optInt] only in the case that the
@@ -19,16 +18,12 @@ internal object StripeJsonUtils {
      * @param fieldName the required field name
      * @return the value stored in the requested field, or `null` if the key is not present
      */
-    @JvmStatic
-    fun optBoolean(
+    @JvmSynthetic
+    internal fun optBoolean(
         jsonObject: JSONObject,
         @Size(min = 1) fieldName: String
     ): Boolean {
-        return if (!jsonObject.has(fieldName)) {
-            false
-        } else {
-            jsonObject.optBoolean(fieldName)
-        }
+        return jsonObject.has(fieldName) && jsonObject.optBoolean(fieldName, false)
     }
 
     /**
@@ -39,14 +34,16 @@ internal object StripeJsonUtils {
      * @param fieldName the required field name
      * @return the value stored in the requested field, or `null` if the key is not present
      */
-    @JvmStatic
-    fun optInteger(
+    @JvmSynthetic
+    internal fun optInteger(
         jsonObject: JSONObject,
         @Size(min = 1) fieldName: String
     ): Int? {
         return if (!jsonObject.has(fieldName)) {
             null
-        } else jsonObject.optInt(fieldName)
+        } else {
+            jsonObject.optInt(fieldName)
+        }
     }
 
     /**
@@ -57,14 +54,16 @@ internal object StripeJsonUtils {
      * @param fieldName the required field name
      * @return the value stored in the requested field, or `null` if the key is not present
      */
-    @JvmStatic
-    fun optLong(
+    @JvmSynthetic
+    internal fun optLong(
         jsonObject: JSONObject,
         @Size(min = 1) fieldName: String
     ): Long? {
         return if (!jsonObject.has(fieldName)) {
             null
-        } else jsonObject.optLong(fieldName)
+        } else {
+            jsonObject.optLong(fieldName)
+        }
     }
 
     /**
@@ -92,9 +91,9 @@ internal object StripeJsonUtils {
      * @param fieldName the name of the field in which the country code is stored
      * @return a two-letter country code if one is found, or `null`
      */
-    @JvmStatic
+    @JvmSynthetic
     @Size(2)
-    fun optCountryCode(
+    internal fun optCountryCode(
         jsonObject: JSONObject,
         @Size(min = 1) fieldName: String
     ): String? {
@@ -112,7 +111,7 @@ internal object StripeJsonUtils {
      */
     @JvmStatic
     @Size(3)
-    fun optCurrency(
+    internal fun optCurrency(
         jsonObject: JSONObject,
         @Size(min = 1) fieldName: String
     ): String? {
@@ -128,13 +127,14 @@ internal object StripeJsonUtils {
      * @param fieldName the required field name
      * @return the value stored in the requested field, or `null` if the key is not present
      */
-    @JvmStatic
-    fun optMap(
+    @JvmSynthetic
+    internal fun optMap(
         jsonObject: JSONObject,
         @Size(min = 1) fieldName: String
     ): Map<String, Any?>? {
-        val foundObject = jsonObject.optJSONObject(fieldName) ?: return null
-        return jsonObjectToMap(foundObject)
+        return jsonObject.optJSONObject(fieldName)?.let {
+            jsonObjectToMap(it)
+        }
     }
 
     /**
@@ -145,13 +145,14 @@ internal object StripeJsonUtils {
      * @param fieldName the required field name
      * @return the value stored in the requested field, or `null` if the key is not present
      */
-    @JvmStatic
-    fun optHash(
+    @JvmSynthetic
+    internal fun optHash(
         jsonObject: JSONObject,
         @Size(min = 1) fieldName: String
     ): Map<String, String>? {
-        val foundObject = jsonObject.optJSONObject(fieldName) ?: return null
-        return jsonObjectToStringMap(foundObject)
+        return jsonObject.optJSONObject(fieldName)?.let {
+            jsonObjectToStringMap(it)
+        }
     }
 
     /**
@@ -160,8 +161,8 @@ internal object StripeJsonUtils {
      * @param jsonObject a [JSONObject] to be converted
      * @return a [Map] representing the input, or `null` if the input is `null`
      */
-    @JvmStatic
-    fun jsonObjectToMap(jsonObject: JSONObject?): Map<String, Any?>? {
+    @JvmSynthetic
+    internal fun jsonObjectToMap(jsonObject: JSONObject?): Map<String, Any?>? {
         if (jsonObject == null) {
             return null
         }
@@ -170,18 +171,19 @@ internal object StripeJsonUtils {
         return (0 until keys.length())
             .map { idx -> keys.getString(idx) }
             .mapNotNull { key ->
-                val value = jsonObject.opt(key)
-                if (value != null && value != NULL) {
-                    mapOf(
-                        key to
-                            when (value) {
-                                is JSONObject -> jsonObjectToMap(value)
-                                is JSONArray -> jsonArrayToList(value)
-                                else -> value
-                            }
-                    )
-                } else {
-                    null
+                jsonObject.opt(key)?.let { value ->
+                    if (value != NULL) {
+                        mapOf(
+                            key to
+                                when (value) {
+                                    is JSONObject -> jsonObjectToMap(value)
+                                    is JSONArray -> jsonArrayToList(value)
+                                    else -> value
+                                }
+                        )
+                    } else {
+                        null
+                    }
                 }
             }
             .fold(emptyMap()) { acc, map -> acc.plus(map) }
@@ -194,8 +196,8 @@ internal object StripeJsonUtils {
      * @param jsonObject the input [JSONObject] to be converted
      * @return a [Map] representing the input, or `null` if the input is `null`
      */
-    @JvmStatic
-    fun jsonObjectToStringMap(jsonObject: JSONObject?): Map<String, String>? {
+    @JvmSynthetic
+    internal fun jsonObjectToStringMap(jsonObject: JSONObject?): Map<String, String>? {
         if (jsonObject == null) {
             return null
         }
@@ -220,7 +222,7 @@ internal object StripeJsonUtils {
      * @param jsonArray a [JSONArray] to be converted
      * @return a [List] representing the input, or `null` if said input is `null`
      */
-    @JvmStatic
+    @JvmSynthetic
     internal fun jsonArrayToList(jsonArray: JSONArray?): List<Any>? {
         if (jsonArray == null) {
             return null
@@ -243,8 +245,10 @@ internal object StripeJsonUtils {
             }
     }
 
-    @JvmStatic
+    @JvmSynthetic
     internal fun nullIfNullOrEmpty(possibleNull: String?): String? {
-        return possibleNull.takeUnless { NULL == it || EMPTY == it }
+        return possibleNull?.let { s ->
+            s.takeUnless { NULL == it || it.isEmpty() }
+        }
     }
 }

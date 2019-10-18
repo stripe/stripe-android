@@ -697,12 +697,12 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     @Throws(InvalidRequestException::class, APIException::class, AuthenticationException::class,
         CardException::class)
     private fun convertErrorsToExceptionsAndThrowIfNecessary(response: StripeResponse) {
-        val rCode = response.responseCode
-        val rBody = response.responseBody
+        val responseCode = response.responseCode
+        val responseBody = response.responseBody
         val requestId = response.responseHeaders?.get("Request-Id")?.firstOrNull()
 
-        if (rCode < 200 || rCode >= 300) {
-            handleAPIError(rBody, rCode, requestId)
+        if (responseCode < 200 || responseCode >= 300) {
+            handleApiError(responseBody, responseCode, requestId)
         }
     }
 
@@ -783,7 +783,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
     @Throws(InvalidRequestException::class, AuthenticationException::class, CardException::class,
         APIException::class)
-    private fun handleAPIError(responseBody: String?, responseCode: Int, requestId: String?) {
+    private fun handleApiError(responseBody: String?, responseCode: Int, requestId: String?) {
         val stripeError = ErrorParser.parseError(responseBody)
         when (responseCode) {
             HttpURLConnection.HTTP_BAD_REQUEST, HttpURLConnection.HTTP_NOT_FOUND -> {
@@ -831,7 +831,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
         val response = fireStripeApiRequest(request)
         if (response.hasErrorCode()) {
-            handleAPIError(response.responseBody, response.responseCode,
+            handleApiError(response.responseBody, response.responseCode,
                 response.requestId)
         }
 
