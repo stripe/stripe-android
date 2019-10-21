@@ -9,9 +9,9 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_RE
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_USE_STRIPE_SDK
 
 data class ConfirmSetupIntentParams internal constructor(
-    override val clientSecret: String,
-    internal val paymentMethodId: String? = null,
-    val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
+    @get:JvmSynthetic override val clientSecret: String,
+    @get:JvmSynthetic internal val paymentMethodId: String? = null,
+    @get:JvmSynthetic internal val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
     private val returnUrl: String? = null,
     private val useStripeSdk: Boolean
 ) : ConfirmStripeIntentParams {
