@@ -9,10 +9,10 @@ interface ConfirmStripeIntentParams : StripeParamsModel {
     fun withShouldUseStripeSdk(shouldUseStripeSdk: Boolean): ConfirmStripeIntentParams
 
     companion object {
-        const val API_PARAM_CLIENT_SECRET = "client_secret"
-        const val API_PARAM_RETURN_URL = "return_url"
-        const val API_PARAM_PAYMENT_METHOD_ID = "payment_method"
-        const val API_PARAM_PAYMENT_METHOD_DATA = "payment_method_data"
-        const val API_PARAM_USE_STRIPE_SDK = "use_stripe_sdk"
+        internal const val API_PARAM_CLIENT_SECRET: String = "client_secret"
+        internal const val API_PARAM_RETURN_URL: String = "return_url"
+        internal const val API_PARAM_PAYMENT_METHOD_ID: String = "payment_method"
+        internal const val API_PARAM_PAYMENT_METHOD_DATA: String = "payment_method_data"
+        internal const val API_PARAM_USE_STRIPE_SDK: String = "use_stripe_sdk"
     }
 }
