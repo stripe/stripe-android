@@ -99,13 +99,12 @@ class PaymentSession @VisibleForTesting internal constructor(
                 PaymentMethodsActivityStarter.REQUEST_CODE -> {
                     val result =
                         PaymentMethodsActivityStarter.Result.fromIntent(data)
-                    result?.paymentMethod?.run {
-                        persistPaymentMethod(this)
-                        paymentSessionData.paymentMethod = this
-                        paymentSessionData.updateIsPaymentReadyToCharge(config)
-                        paymentSessionListener?.onPaymentSessionDataChanged(paymentSessionData)
-                        paymentSessionListener?.onCommunicatingStateChanged(false)
-                    }
+                    val paymentMethod = result?.paymentMethod
+                    persistPaymentMethod(paymentMethod)
+                    paymentSessionData.paymentMethod = paymentMethod
+                    paymentSessionData.updateIsPaymentReadyToCharge(config)
+                    paymentSessionListener?.onPaymentSessionDataChanged(paymentSessionData)
+                    paymentSessionListener?.onCommunicatingStateChanged(false)
                     return true
                 }
                 PaymentFlowActivityStarter.REQUEST_CODE -> {
@@ -124,12 +123,9 @@ class PaymentSession @VisibleForTesting internal constructor(
         }
     }
 
-    private fun persistPaymentMethod(paymentMethod: PaymentMethod) {
-        val customer = customerSession.cachedCustomer
-        val customerId = customer?.id
-        if (customerId != null && paymentMethod.id != null) {
-            paymentSessionPrefs
-                .saveSelectedPaymentMethodId(customerId, paymentMethod.id)
+    private fun persistPaymentMethod(paymentMethod: PaymentMethod?) {
+        customerSession.cachedCustomer?.id?.let { customerId ->
+            paymentSessionPrefs.saveSelectedPaymentMethodId(customerId, paymentMethod?.id)
         }
     }
 

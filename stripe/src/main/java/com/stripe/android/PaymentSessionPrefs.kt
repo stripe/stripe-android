@@ -13,7 +13,7 @@ internal open class PaymentSessionPrefs private constructor(
         return prefs?.getString(getPaymentMethodKey(customerId), null)
     }
 
-    open fun saveSelectedPaymentMethodId(customerId: String, paymentMethodId: String) {
+    open fun saveSelectedPaymentMethodId(customerId: String, paymentMethodId: String?) {
         prefs?.edit()?.putString(getPaymentMethodKey(customerId), paymentMethodId)
             ?.apply()
     }
