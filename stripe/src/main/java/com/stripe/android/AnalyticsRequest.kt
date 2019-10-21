@@ -3,9 +3,9 @@ package com.stripe.android
 internal object AnalyticsRequest {
     const val HOST = "https://q.stripe.com"
 
-    @JvmStatic
+    @JvmSynthetic
     @JvmOverloads
-    fun create(
+    internal fun create(
         params: Map<String, *>,
         requestOptions: ApiRequest.Options,
         appInfo: AppInfo? = null

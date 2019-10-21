@@ -688,8 +688,8 @@ internal open class PaymentController @VisibleForTesting constructor(
     }
 
     companion object {
-        const val PAYMENT_REQUEST_CODE = 50000
-        const val SETUP_REQUEST_CODE = 50001
+        internal const val PAYMENT_REQUEST_CODE = 50000
+        internal const val SETUP_REQUEST_CODE = 50001
 
         /**
          * Get the appropriate request code for the given stripe intent type
@@ -697,11 +697,13 @@ internal open class PaymentController @VisibleForTesting constructor(
          * @param intent the [StripeIntent] to get the request code for
          * @return PAYMENT_REQUEST_CODE or SETUP_REQUEST_CODE
          */
-        @JvmStatic
-        fun getRequestCode(intent: StripeIntent): Int {
+        @JvmSynthetic
+        internal fun getRequestCode(intent: StripeIntent): Int {
             return if (intent is PaymentIntent) {
                 PAYMENT_REQUEST_CODE
-            } else SETUP_REQUEST_CODE
+            } else {
+                SETUP_REQUEST_CODE
+            }
         }
 
         /**
@@ -710,11 +712,13 @@ internal open class PaymentController @VisibleForTesting constructor(
          * @param params the [ConfirmStripeIntentParams] to get the request code for
          * @return PAYMENT_REQUEST_CODE or SETUP_REQUEST_CODE
          */
-        @JvmStatic
-        fun getRequestCode(params: ConfirmStripeIntentParams): Int {
+        @JvmSynthetic
+        internal fun getRequestCode(params: ConfirmStripeIntentParams): Int {
             return if (params is ConfirmPaymentIntentParams) {
                 PAYMENT_REQUEST_CODE
-            } else SETUP_REQUEST_CODE
+            } else {
+                SETUP_REQUEST_CODE
+            }
         }
 
         /**
@@ -743,8 +747,8 @@ internal open class PaymentController @VisibleForTesting constructor(
                 .start(PaymentRelayStarter.Data.create(exception))
         }
 
-        @JvmOverloads
         @JvmStatic
+        @JvmOverloads
         fun create(
             context: Context,
             stripeRepository: StripeRepository,

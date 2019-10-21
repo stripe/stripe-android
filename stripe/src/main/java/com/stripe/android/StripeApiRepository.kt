@@ -945,32 +945,30 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         /**
          * @return `https://api.stripe.com/v1/tokens`
          */
-        @JvmStatic
-        val tokensUrl: String
+        internal val tokensUrl: String
+            @JvmSynthetic
             get() = getApiUrl("tokens")
 
         /**
          * @return `https://api.stripe.com/v1/sources`
          */
-        @JvmStatic
-        val sourcesUrl: String
-            @VisibleForTesting
+        internal val sourcesUrl: String
+            @JvmSynthetic
             get() = getApiUrl("sources")
 
         /**
          * @return `https://api.stripe.com/v1/payment_methods`
          */
-        @JvmStatic
-        val paymentMethodsUrl: String
-            @VisibleForTesting
+        internal val paymentMethodsUrl: String
+            @JvmSynthetic
             get() = getApiUrl("payment_methods")
 
         /**
          * @return `https://api.stripe.com/v1/payment_intents/:id`
          */
         @VisibleForTesting
-        @JvmStatic
-        fun getRetrievePaymentIntentUrl(paymentIntentId: String): String {
+        @JvmSynthetic
+        internal fun getRetrievePaymentIntentUrl(paymentIntentId: String): String {
             return getApiUrl("payment_intents/%s", paymentIntentId)
         }
 
@@ -978,8 +976,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
          * @return `https://api.stripe.com/v1/payment_intents/:id/confirm`
          */
         @VisibleForTesting
-        @JvmStatic
-        fun getConfirmPaymentIntentUrl(paymentIntentId: String): String {
+        @JvmSynthetic
+        internal fun getConfirmPaymentIntentUrl(paymentIntentId: String): String {
             return getApiUrl("payment_intents/%s/confirm", paymentIntentId)
         }
 
@@ -987,8 +985,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
          * @return `https://api.stripe.com/v1/payment_intents/:id`
          */
         @VisibleForTesting
-        @JvmStatic
-        fun getRetrieveSetupIntentUrl(setupIntentId: String): String {
+        @JvmSynthetic
+        internal fun getRetrieveSetupIntentUrl(setupIntentId: String): String {
             return getApiUrl("setup_intents/%s", setupIntentId)
         }
 
@@ -996,8 +994,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
          * @return `https://api.stripe.com/v1/payment_intents/:id/confirm`
          */
         @VisibleForTesting
-        @JvmStatic
-        fun getConfirmSetupIntentUrl(setupIntentId: String): String {
+        @JvmSynthetic
+        internal fun getConfirmSetupIntentUrl(setupIntentId: String): String {
             return getApiUrl("setup_intents/%s/confirm", setupIntentId)
         }
 
@@ -1005,8 +1003,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
          * @return `https://api.stripe.com/v1/customers/:customer_id/sources`
          */
         @VisibleForTesting
-        @JvmStatic
-        fun getAddCustomerSourceUrl(customerId: String): String {
+        @JvmSynthetic
+        internal fun getAddCustomerSourceUrl(customerId: String): String {
             return getApiUrl("customers/%s/sources", customerId)
         }
 
@@ -1014,8 +1012,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
          * @return `https://api.stripe.com/v1/customers/:customer_id/sources/:source_id`
          */
         @VisibleForTesting
-        @JvmStatic
-        fun getDeleteCustomerSourceUrl(customerId: String, sourceId: String): String {
+        @JvmSynthetic
+        internal fun getDeleteCustomerSourceUrl(customerId: String, sourceId: String): String {
             return getApiUrl("customers/%s/sources/%s", customerId, sourceId)
         }
 
@@ -1023,8 +1021,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
          * @return `https://api.stripe.com/v1/payment_methods/:id/attach`
          */
         @VisibleForTesting
-        @JvmStatic
-        fun getAttachPaymentMethodUrl(paymentMethodId: String): String {
+        @JvmSynthetic
+        internal fun getAttachPaymentMethodUrl(paymentMethodId: String): String {
             return getApiUrl("payment_methods/%s/attach", paymentMethodId)
         }
 
@@ -1032,8 +1030,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
          * @return `https://api.stripe.com/v1/customers/:id`
          */
         @VisibleForTesting
-        @JvmStatic
-        fun getRetrieveCustomerUrl(customerId: String): String {
+        @JvmSynthetic
+        internal fun getRetrieveCustomerUrl(customerId: String): String {
             return getApiUrl("customers/%s", customerId)
         }
 
@@ -1041,8 +1039,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
          * @return `https://api.stripe.com/v1/sources/:id`
          */
         @VisibleForTesting
-        @JvmStatic
-        fun getRetrieveSourceApiUrl(sourceId: String): String {
+        @JvmSynthetic
+        internal fun getRetrieveSourceApiUrl(sourceId: String): String {
             return getApiUrl("sources/%s", sourceId)
         }
 
@@ -1050,8 +1048,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
          * @return `https://api.stripe.com/v1/tokens/:id`
          */
         @VisibleForTesting
-        @JvmStatic
-        fun getRetrieveTokenApiUrl(tokenId: String): String {
+        @JvmSynthetic
+        internal fun getRetrieveTokenApiUrl(tokenId: String): String {
             return getApiUrl("tokens/%s", tokenId)
         }
 
@@ -1059,8 +1057,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
          * @return `https://api.stripe.com/v1/issuing/cards/:id/pin`
          */
         @VisibleForTesting
-        @JvmStatic
-        fun getIssuingCardPinUrl(cardId: String): String {
+        @JvmSynthetic
+        internal fun getIssuingCardPinUrl(cardId: String): String {
             return getApiUrl("issuing/cards/%s/pin", cardId)
         }
 

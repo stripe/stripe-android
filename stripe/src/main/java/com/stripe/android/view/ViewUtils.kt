@@ -1,6 +1,5 @@
 package com.stripe.android.view
 
-import android.content.Context
 import com.stripe.android.model.Card
 import com.stripe.android.model.Card.Companion.CVC_LENGTH_AMERICAN_EXPRESS
 import com.stripe.android.model.Card.Companion.CVC_LENGTH_COMMON
@@ -85,10 +84,5 @@ internal object ViewUtils {
         }
 
         return numberGroups
-    }
-
-    @JvmStatic
-    fun getPxFromDp(context: Context, dp: Int): Int {
-        return (dp * context.resources.displayMetrics.density).toInt()
     }
 }

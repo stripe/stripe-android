@@ -14,13 +14,13 @@ internal object CountryUtils {
                 .associateBy { Locale("", it).displayCountry }
         }
 
-    @JvmStatic
-    fun getCountryCode(countryName: String?): String? {
+    @JvmSynthetic
+    internal fun getCountryCode(countryName: String?): String? {
         return COUNTRY_NAMES_TO_CODES[countryName]
     }
 
-    @JvmStatic
-    fun getOrderedCountries(currentLocale: Locale): List<String> {
+    @JvmSynthetic
+    internal fun getOrderedCountries(currentLocale: Locale): List<String> {
         // Show user's current locale first, followed by countries alphabetized by display name
         return listOf(currentLocale.displayCountry)
             .plus(
@@ -30,8 +30,8 @@ internal object CountryUtils {
             )
     }
 
-    @JvmStatic
-    fun doesCountryUsePostalCode(countryCode: String): Boolean {
+    @JvmSynthetic
+    internal fun doesCountryUsePostalCode(countryCode: String): Boolean {
         return !NO_POSTAL_CODE_COUNTRIES_SET.contains(countryCode)
     }
 }

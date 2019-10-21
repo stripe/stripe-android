@@ -1,5 +1,6 @@
 package com.stripe.android.view
 
+import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.util.Currency
 import java.util.Locale
@@ -11,14 +12,18 @@ internal object PaymentUtils {
      * Formats a monetary amount into a human friendly string where zero is returned
      * as free.
      */
-    @JvmStatic
-    fun formatPriceStringUsingFree(amount: Long, currency: Currency, free: String): String {
+    @JvmSynthetic
+    internal fun formatPriceStringUsingFree(
+        amount: Long,
+        currency: Currency,
+        free: String
+    ): String {
         if (amount == 0L) {
             return free
         }
 
         val currencyFormat = NumberFormat.getCurrencyInstance()
-        val decimalFormatSymbols = (currencyFormat as java.text.DecimalFormat)
+        val decimalFormatSymbols = (currencyFormat as DecimalFormat)
             .decimalFormatSymbols
         decimalFormatSymbols.currencySymbol = currency.getSymbol(Locale.getDefault())
         currencyFormat.decimalFormatSymbols = decimalFormatSymbols
@@ -29,12 +34,12 @@ internal object PaymentUtils {
     /**
      * Formats a monetary amount into a human friendly string.
      */
-    @JvmStatic
-    fun formatPriceString(amount: Double, currency: Currency): String {
+    @JvmSynthetic
+    internal fun formatPriceString(amount: Double, currency: Currency): String {
         val majorUnitAmount = amount / 10.0.pow(currency.defaultFractionDigits.toDouble())
         val currencyFormat = NumberFormat.getCurrencyInstance()
         return try {
-            val decimalFormatSymbols = (currencyFormat as java.text.DecimalFormat)
+            val decimalFormatSymbols = (currencyFormat as DecimalFormat)
                 .decimalFormatSymbols
             decimalFormatSymbols.currencySymbol = currency.getSymbol(Locale.getDefault())
             currencyFormat.decimalFormatSymbols = decimalFormatSymbols
