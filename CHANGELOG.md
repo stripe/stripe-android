@@ -3,6 +3,7 @@
 ## 12.0.1 - unreleased
 * [#1721](https://github.com/stripe/stripe-android/pull/1721) Properly cleanup and destroy `PaymentAuthWebView`
 * [#1722](https://github.com/stripe/stripe-android/pull/1722) Fix crash in 3DS2 challenge screen when airplane mode is enabled
+* [#1731](https://github.com/stripe/stripe-android/pull/1731) Create `ConfirmSetupIntentParams.createWithoutPaymentMethod()`
 
 ## 12.0.0 - 2019-10-16
 * [#1699](https://github.com/stripe/stripe-android/pull/1699) Remove deprecated methods
