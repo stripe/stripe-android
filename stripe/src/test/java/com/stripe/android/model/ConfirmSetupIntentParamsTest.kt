@@ -24,7 +24,7 @@ class ConfirmSetupIntentParamsTest {
     @Test
     fun shouldUseStripeSdk_withPaymentMethodCreateParams() {
         val confirmSetupIntentParams = ConfirmSetupIntentParams.create(
-            PM_CREATE_PARAMS,
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             "client_secret",
             "return_url"
         )
@@ -46,7 +46,8 @@ class ConfirmSetupIntentParamsTest {
     @Test
     fun toBuilder_withPaymentMethodCreateParams_shouldCreateEqualObject() {
         val confirmSetupIntentParams = ConfirmSetupIntentParams.create(
-            PM_CREATE_PARAMS, "client_secret", "return_url")
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            "client_secret", "return_url")
         assertEquals(confirmSetupIntentParams,
             confirmSetupIntentParams.toBuilder().build())
     }
@@ -67,7 +68,7 @@ class ConfirmSetupIntentParamsTest {
     @Test
     fun create_withPaymentMethodCreateParams_shouldPopulateParamMapCorrectly() {
         val confirmSetupIntentParams = ConfirmSetupIntentParams.create(
-            PM_CREATE_PARAMS,
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             "client_secret", null
         )
         val params = confirmSetupIntentParams.toParamMap()
@@ -78,15 +79,10 @@ class ConfirmSetupIntentParamsTest {
         assertNotNull(paymentMethodData["card"])
     }
 
-    companion object {
-
-        private val PM_CREATE_PARAMS = PaymentMethodCreateParams.create(
-            PaymentMethodCreateParams.Card.Builder()
-                .setNumber("4242424242424242")
-                .setExpiryMonth(1)
-                .setExpiryYear(2024)
-                .setCvc("111")
-                .build(), null
-        )
+    @Test
+    fun create_withoutPaymentMethod() {
+        val params = ConfirmSetupIntentParams.createWithoutPaymentMethod("client_secret")
+        assertNull(params.paymentMethodCreateParams)
+        assertNull(params.paymentMethodId)
     }
 }
