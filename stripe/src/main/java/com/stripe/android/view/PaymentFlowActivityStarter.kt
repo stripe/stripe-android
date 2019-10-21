@@ -20,7 +20,7 @@ class PaymentFlowActivityStarter :
     )
 
     @Parcelize
-    data class Args private constructor(
+    data class Args internal constructor(
         internal val paymentSessionConfig: PaymentSessionConfig,
         internal val paymentSessionData: PaymentSessionData?,
         internal val isPaymentSessionActive: Boolean

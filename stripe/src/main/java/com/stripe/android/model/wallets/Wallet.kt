@@ -37,7 +37,7 @@ abstract class Wallet internal constructor(
     }
 
     @Parcelize
-    data class Address private constructor(
+    data class Address internal constructor(
         val city: String?,
         val country: String?,
         val line1: String?,

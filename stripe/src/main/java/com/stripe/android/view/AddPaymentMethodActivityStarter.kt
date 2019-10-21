@@ -27,7 +27,7 @@ class AddPaymentMethodActivityStarter internal constructor(
     REQUEST_CODE
 ) {
     @Parcelize
-    data class Args private constructor(
+    data class Args internal constructor(
         internal val shouldAttachToCustomer: Boolean,
         internal val shouldRequirePostalCode: Boolean,
         internal val isPaymentSessionActive: Boolean,

@@ -12,7 +12,7 @@ import kotlinx.android.parcel.Parcelize
  * Configuration for [PaymentSession].
  */
 @Parcelize
-data class PaymentSessionConfig private constructor(
+data class PaymentSessionConfig internal constructor(
     val hiddenShippingInfoFields: List<String> = emptyList(),
     val optionalShippingInfoFields: List<String> = emptyList(),
     val prepopulatedShippingInfo: ShippingInformation? = null,
