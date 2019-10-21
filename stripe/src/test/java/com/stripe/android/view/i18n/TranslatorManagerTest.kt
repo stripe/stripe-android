@@ -1,5 +1,6 @@
 package com.stripe.android.view.i18n
 
+import com.stripe.android.StripeError
 import com.stripe.android.StripeErrorFixtures
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -21,9 +22,20 @@ class TranslatorManagerTest {
 
     @Test
     fun testCustomErrorMessageTranslator() {
-        TranslatorManager.setErrorMessageTranslator { _, _, _ -> "custom message" }
-        assertEquals("custom message", TranslatorManager.getErrorMessageTranslator()
-            .translate(0, "original message", STRIPE_ERROR))
+        TranslatorManager.setErrorMessageTranslator(
+            object : ErrorMessageTranslator {
+                override fun translate(
+                    httpCode: Int,
+                    errorMessage: String?,
+                    stripeError: StripeError?
+                ): String {
+                    return "custom message"
+                }
+            }
+        )
+        assertEquals("custom message",
+            TranslatorManager.getErrorMessageTranslator()
+                .translate(0, "original message", STRIPE_ERROR))
     }
 
     companion object {
