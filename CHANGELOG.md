@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 12.0.1 - 2019-10-21
+## 12.0.1 - unreleased
 * [#1721](https://github.com/stripe/stripe-android/pull/1721) Properly cleanup and destroy `PaymentAuthWebView`
 * [#1722](https://github.com/stripe/stripe-android/pull/1722) Fix crash in 3DS2 challenge screen when airplane mode is enabled
 
