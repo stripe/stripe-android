@@ -2,6 +2,7 @@ package com.stripe.android
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.stripe.android.utils.ParcelUtils
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -43,5 +44,13 @@ class PaymentConfigurationTest {
                 .getInstance(ApplicationProvider.getApplicationContext<Context>())
                 .publishableKey
         )
+    }
+
+    @Test
+    fun testParcel() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        val paymentConfig = PaymentConfiguration.getInstance(context)
+        assertEquals(paymentConfig, ParcelUtils.create(paymentConfig))
     }
 }
