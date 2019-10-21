@@ -42,7 +42,7 @@ internal class Stripe3ds2Fingerprint private constructor(
             private const val FIELD_KEY_ID = "key_id"
             private const val FIELD_ROOT_CAS = "root_certificate_authorities"
 
-            @JvmStatic
+            @JvmSynthetic
             @Throws(CertificateException::class)
             internal fun create(data: Map<String, *>): DirectoryServerEncryption {
                 val rootCertData: List<String> = if (data.containsKey(FIELD_ROOT_CAS)) {
@@ -60,12 +60,13 @@ internal class Stripe3ds2Fingerprint private constructor(
         }
     }
 
-    enum class DirectoryServer constructor(val networkName: String, val id: String) {
+    internal enum class DirectoryServer constructor(val networkName: String, val id: String) {
         Visa("visa", "A000000003"),
         Mastercard("mastercard", "A000000004"),
         Amex("american_express", "A000000025");
 
         companion object {
+            @JvmSynthetic
             internal fun lookup(networkName: String): DirectoryServer {
                 return values().find { it.networkName == networkName }
                     ?: error("Invalid directory server networkName: '$networkName'")
@@ -79,9 +80,9 @@ internal class Stripe3ds2Fingerprint private constructor(
         private const val FIELD_SERVER_TRANSACTION_ID = "server_transaction_id"
         private const val FIELD_DIRECTORY_SERVER_ENCRYPTION = "directory_server_encryption"
 
-        @JvmStatic
+        @JvmSynthetic
         @Throws(CertificateException::class)
-        fun create(sdkData: StripeIntent.SdkData): Stripe3ds2Fingerprint {
+        internal fun create(sdkData: StripeIntent.SdkData): Stripe3ds2Fingerprint {
             require(sdkData.is3ds2) { "Expected SdkData with type='stripe_3ds2_fingerprint'." }
 
             return Stripe3ds2Fingerprint(

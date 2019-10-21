@@ -14,8 +14,8 @@ internal object ModelUtils {
      * @param value the input string to test
      * @return `true` if the input value consists entirely of integers
      */
-    @JvmStatic
-    fun isWholePositiveNumber(value: String?): Boolean {
+    @JvmSynthetic
+    internal fun isWholePositiveNumber(value: String?): Boolean {
         return value != null && isDigitsOnly(value)
     }
 
@@ -43,8 +43,8 @@ internal object ModelUtils {
      * @return `true` if the input time has passed the specified current time,
      * `false` otherwise.
      */
-    @JvmStatic
-    fun hasMonthPassed(year: Int, month: Int, now: Calendar): Boolean {
+    @JvmSynthetic
+    internal fun hasMonthPassed(year: Int, month: Int, now: Calendar): Boolean {
         return if (hasYearPassed(year, now)) {
             true
         } else {
@@ -62,13 +62,13 @@ internal object ModelUtils {
      * @return `true` if the input year has passed the year of the specified current time
      * `false` otherwise.
      */
-    @JvmStatic
-    fun hasYearPassed(year: Int, now: Calendar): Boolean {
+    @JvmSynthetic
+    internal fun hasYearPassed(year: Int, now: Calendar): Boolean {
         return normalizeYear(year, now) < now.get(Calendar.YEAR)
     }
 
-    @JvmStatic
-    fun normalizeYear(year: Int, now: Calendar): Int {
+    @JvmSynthetic
+    internal fun normalizeYear(year: Int, now: Calendar): Int {
         return if (year in 0..99) {
             val currentYear = now.get(Calendar.YEAR).toString()
             val prefix = currentYear.substring(0, currentYear.length - 2)
