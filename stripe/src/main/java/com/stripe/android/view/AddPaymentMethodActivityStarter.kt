@@ -18,7 +18,7 @@ import kotlinx.android.parcel.Parcelize
  *
  * The result will be returned with request code [REQUEST_CODE].
  */
-class AddPaymentMethodActivityStarter internal constructor(
+class AddPaymentMethodActivityStarter constructor(
     activity: Activity
 ) : ActivityStarter<AddPaymentMethodActivity, Args>(
     activity,
@@ -76,11 +76,13 @@ class AddPaymentMethodActivityStarter internal constructor(
                 return this
             }
 
+            @JvmSynthetic
             internal fun setIsPaymentSessionActive(isPaymentSessionActive: Boolean): Builder {
                 this.isPaymentSessionActive = isPaymentSessionActive
                 return this
             }
 
+            @JvmSynthetic
             internal fun setShouldInitCustomerSessionTokens(
                 shouldInitCustomerSessionTokens: Boolean
             ): Builder {
@@ -88,6 +90,7 @@ class AddPaymentMethodActivityStarter internal constructor(
                 return this
             }
 
+            @JvmSynthetic
             internal fun setPaymentConfiguration(
                 paymentConfiguration: PaymentConfiguration?
             ): Builder {
@@ -116,7 +119,8 @@ class AddPaymentMethodActivityStarter internal constructor(
         companion object {
             internal val DEFAULT = Builder().build()
 
-            fun create(intent: Intent): Args {
+            @JvmSynthetic
+            internal fun create(intent: Intent): Args {
                 return requireNotNull(intent.getParcelableExtra(ActivityStarter.Args.EXTRA))
             }
         }

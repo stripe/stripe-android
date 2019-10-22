@@ -115,8 +115,8 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
         companion object {
             internal val DEFAULT = Builder().build()
 
-            @JvmStatic
-            fun create(intent: Intent): Args {
+            @JvmSynthetic
+            internal fun create(intent: Intent): Args {
                 return requireNotNull(intent.getParcelableExtra(ActivityStarter.Args.EXTRA))
             }
         }
