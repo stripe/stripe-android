@@ -39,7 +39,7 @@ data class Source private constructor(
     /**
      * Gets the [SourceType] of this Source, as one of the enumerated values.
      * If a custom source type has been created, this returns [SourceType.UNKNOWN]. To get
-     * the raw value of an [SourceType.UNKNOWN] type, use [.getTypeRaw].
+     * the raw value of an [SourceType.UNKNOWN] type, use [typeRaw].
      *
      * @return the [SourceType] of this Source
      */
@@ -48,7 +48,7 @@ data class Source private constructor(
 
     /**
      * Gets the type of this source as a String. If it is a known type, this will return
-     * a string equal to the [SourceType] returned from [.getType]. This
+     * a string equal to the [SourceType] returned from [type]. This
      * method is not restricted to known types
      *
      * @return the type of this Source as a string

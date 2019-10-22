@@ -34,7 +34,7 @@ class DependencyHandler(
 
     /**
      * Attach a listener that creates a token using the [android.os.AsyncTask]-based method.
-     * Only gets attached once, unless you call [.clearReferences].
+     * Only gets attached once, unless you call [clearReferences].
      *
      * @param button a button that, when clicked, gets a token.
      */
@@ -56,7 +56,7 @@ class DependencyHandler(
      * Attach a listener that creates a token using a [rx.Subscription] and the
      * synchronous [com.stripe.android.Stripe.createCardTokenSynchronous] method.
      *
-     * Only gets attached once, unless you call [.clearReferences].
+     * Only gets attached once, unless you call [clearReferences].
      *
      * @param button a button that, when clicked, gets a token.
      */

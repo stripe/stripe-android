@@ -138,8 +138,7 @@ class PaymentSession @VisibleForTesting internal constructor(
      * @param paymentSessionConfig a [PaymentSessionConfig] used to decide which items are
      * necessary in the PaymentSession.
      * @param savedInstanceState a `Bundle` containing the saved state of a
-     * PaymentSession that was stored in
-     * [.savePaymentSessionInstanceState]
+     * PaymentSession that was stored in [savePaymentSessionInstanceState]
      * @param shouldPrefetchCustomer If true, will immediately fetch the [Customer] associated
      * with this session. Otherwise, will only fetch when needed.
      *
