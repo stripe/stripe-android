@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 12.1.0 - unreleased
+## 12.1.0 - 2019-10-22
 * [#1738](https://github.com/stripe/stripe-android/pull/1738) Enable specifying Payment Method type to use in UI components
 
 ## 12.0.1 - 2019-10-21
