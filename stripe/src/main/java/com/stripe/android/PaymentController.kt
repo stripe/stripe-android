@@ -97,16 +97,14 @@ internal open class PaymentController @VisibleForTesting constructor(
     }
 
     /**
-     * Decide whether [.handlePaymentResult]
-     * should be called.
+     * Decide whether [handlePaymentResult] should be called.
      */
     open fun shouldHandlePaymentResult(requestCode: Int, data: Intent?): Boolean {
         return requestCode == PAYMENT_REQUEST_CODE && data != null
     }
 
     /**
-     * Decide whether [.handleSetupResult]
-     * should be called.
+     * Decide whether [handleSetupResult] should be called.
      */
     open fun shouldHandleSetupResult(requestCode: Int, data: Intent?): Boolean {
         return requestCode == SETUP_REQUEST_CODE && data != null

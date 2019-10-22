@@ -60,8 +60,7 @@ internal object DateUtils {
      * @param expiryYear An integer representing the full year (2017, not 17). Only positive values
      * are valid, but this is called by user input, so we have to check outside
      * for otherwise nonsensical dates. This code cannot validate years greater
-     * than [9980][.MAX_VALID_YEAR] because of how we parse years in
-     * [.convertTwoDigitYearToFour].
+     * than [9980][MAX_VALID_YEAR] because of how we parse years in [convertTwoDigitYearToFour].
      * @return `true` if the current month and year is the same as or later than the input
      * month and year, `false` otherwise. Note that some cards expire on the first of the
      * month, but we don't validate that here.

@@ -43,8 +43,7 @@ abstract class BaseViewTest<T : Activity> protected constructor(private val mCla
     }
 
     /**
-     * Call resume() and visible() on an Activity that was created with
-     * [.createStartedActivity].
+     * Call resume() and visible() on an Activity that was created with [createStartedActivity].
      */
     protected fun resumeStartedActivity(activity: T) {
         val activityController = mActivityControllers[activity.hashCode()]

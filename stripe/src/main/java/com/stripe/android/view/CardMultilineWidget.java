@@ -174,7 +174,7 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
         mCvcEditText.setAfterTextChangedListener(
                 new StripeEditText.AfterTextChangedListener() {
                     @Override
-                    public void onTextChanged(String text) {
+                    public void onTextChanged(@NonNull String text) {
                         if (ViewUtils.isCvcMaximalLength(mCardBrand, text)) {
                             updateBrand(mCardBrand);
                             if (mShouldShowPostalCode) {
@@ -195,7 +195,7 @@ public class CardMultilineWidget extends LinearLayout implements CardWidget {
         mPostalCodeEditText.setAfterTextChangedListener(
                 new StripeEditText.AfterTextChangedListener() {
                     @Override
-                    public void onTextChanged(String text) {
+                    public void onTextChanged(@NonNull String text) {
                         if (isPostalCodeMaximalLength(true, text)
                                 && mCardInputListener != null) {
                             mCardInputListener.onPostalCodeComplete();

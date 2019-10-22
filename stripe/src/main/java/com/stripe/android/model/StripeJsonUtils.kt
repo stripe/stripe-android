@@ -120,8 +120,7 @@ internal object StripeJsonUtils {
     }
 
     /**
-     * Calls through to [JSONObject.optJSONObject] and then
-     * uses [.jsonObjectToMap] on the result.
+     * Calls through to [JSONObject.optJSONObject] and then uses [jsonObjectToMap] on the result.
      *
      * @param jsonObject the input object
      * @param fieldName the required field name
@@ -138,8 +137,7 @@ internal object StripeJsonUtils {
     }
 
     /**
-     * Calls through to [JSONObject.optJSONObject] and then
-     * uses [.jsonObjectToStringMap] on the result.
+     * Calls through to [JSONObject.optJSONObject] and then uses [jsonObjectToStringMap] on the result.
      *
      * @param jsonObject the input object
      * @param fieldName the required field name

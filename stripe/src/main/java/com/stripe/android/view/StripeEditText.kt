@@ -24,7 +24,7 @@ import com.stripe.android.R
  * but we listen here for hardware key presses, older Android soft keyboard delete presses,
  * and modern Google Keyboard delete key presses.
  */
-internal open class StripeEditText @JvmOverloads constructor(
+open class StripeEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle
@@ -34,6 +34,7 @@ internal open class StripeEditText @JvmOverloads constructor(
     private var deleteEmptyListener: DeleteEmptyListener? = null
     var cachedColorStateList: ColorStateList? = null
         private set
+
     /**
      * Gets whether or not the text should be displayed in error mode.
      *
@@ -83,10 +84,9 @@ internal open class StripeEditText @JvmOverloads constructor(
 
     override fun onCreateInputConnection(outAttrs: EditorInfo): InputConnection? {
         val inputConnection = super.onCreateInputConnection(outAttrs)
-        return if (inputConnection != null)
-            SoftDeleteInputConnection(inputConnection, true, deleteEmptyListener)
-        else
-            null
+        return inputConnection?.let {
+            SoftDeleteInputConnection(it, true, deleteEmptyListener)
+        }
     }
 
     /**

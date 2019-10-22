@@ -856,7 +856,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
-     * @param dnsCacheData first object - flag to reset [.DNS_CACHE_TTL_PROPERTY_NAME]
+     * @param dnsCacheData first object - flag to reset [DNS_CACHE_TTL_PROPERTY_NAME]
      * second object - the original DNS cache TTL value
      */
     private fun resetDnsCacheTtl(dnsCacheData: Pair<Boolean, String>) {
