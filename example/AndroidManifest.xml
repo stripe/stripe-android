@@ -94,6 +94,9 @@
 
         <activity
             android:name=".activity.CreateSepaDebitActivity" />
+
+        <activity
+            android:name=".activity.FpxPaymentActivity" />
     </application>
 
 </manifest>
