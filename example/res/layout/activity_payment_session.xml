@@ -6,7 +6,7 @@
     >
 
     <ProgressBar
-        android:id="@+id/customer_progress_bar"
+        android:id="@+id/progress_bar"
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -14,7 +14,7 @@
         />
 
     <Button
-        android:id="@+id/btn_select_payment_method_aps"
+        android:id="@+id/btn_select_payment_method"
         android:enabled="false"
         android:layout_width="200dp"
         android:layout_height="wrap_content"

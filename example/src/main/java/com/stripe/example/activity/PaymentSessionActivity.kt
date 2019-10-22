@@ -6,9 +6,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.stripe.android.CustomerSession
@@ -19,6 +16,7 @@ import com.stripe.android.PaymentSessionData
 import com.stripe.android.StripeError
 import com.stripe.android.model.Address
 import com.stripe.android.model.Customer
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
 import com.stripe.android.view.PaymentFlowExtras.EVENT_SHIPPING_INFO_PROCESSED
@@ -31,6 +29,7 @@ import com.stripe.android.view.ShippingInfoWidget
 import com.stripe.example.R
 import com.stripe.example.controller.ErrorDialogHandler
 import com.stripe.example.service.ExampleEphemeralKeyProvider
+import kotlinx.android.synthetic.main.activity_payment_session.*
 import java.util.ArrayList
 import java.util.Currency
 import java.util.Locale
@@ -44,24 +43,15 @@ class PaymentSessionActivity : AppCompatActivity() {
     private lateinit var broadcastReceiver: BroadcastReceiver
     private lateinit var errorDialogHandler: ErrorDialogHandler
     private lateinit var paymentSession: PaymentSession
-    private lateinit var progressBar: ProgressBar
-    private lateinit var resultTextView: TextView
-    private lateinit var resultTitleTextView: TextView
-    private lateinit var selectPaymentButton: Button
-    private lateinit var selectShippingButton: Button
 
     private var paymentSessionData: PaymentSessionData? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment_session)
-        progressBar = findViewById(R.id.customer_progress_bar)
-        progressBar.visibility = View.VISIBLE
-        selectPaymentButton = findViewById(R.id.btn_select_payment_method_aps)
-        selectShippingButton = findViewById(R.id.btn_start_payment_flow)
+
+        progress_bar.visibility = View.VISIBLE
         errorDialogHandler = ErrorDialogHandler(this)
-        resultTitleTextView = findViewById(R.id.tv_payment_session_data_title)
-        resultTextView = findViewById(R.id.tv_payment_session_data)
 
         // CustomerSession only needs to be initialized once per app.
         val customerSession = createCustomerSession()
@@ -77,11 +67,10 @@ class PaymentSessionActivity : AppCompatActivity() {
                     shippingInfoProcessedIntent.putExtra(EXTRA_IS_SHIPPING_INFO_VALID, false)
                 } else {
                     val shippingMethods = createSampleShippingMethods()
-                    shippingInfoProcessedIntent.putExtra(EXTRA_IS_SHIPPING_INFO_VALID, true)
-                    shippingInfoProcessedIntent.putParcelableArrayListExtra(
-                        EXTRA_VALID_SHIPPING_METHODS, shippingMethods)
-                    shippingInfoProcessedIntent.putExtra(EXTRA_DEFAULT_SHIPPING_METHOD,
-                        shippingMethods[1])
+                    shippingInfoProcessedIntent
+                        .putExtra(EXTRA_IS_SHIPPING_INFO_VALID, true)
+                        .putParcelableArrayListExtra(EXTRA_VALID_SHIPPING_METHODS, shippingMethods)
+                        .putExtra(EXTRA_DEFAULT_SHIPPING_METHOD, shippingMethods.last())
                 }
                 localBroadcastManager.sendBroadcast(shippingInfoProcessedIntent)
             }
@@ -92,10 +81,10 @@ class PaymentSessionActivity : AppCompatActivity() {
         }
         localBroadcastManager.registerReceiver(broadcastReceiver,
             IntentFilter(EVENT_SHIPPING_INFO_SUBMITTED))
-        selectPaymentButton.setOnClickListener {
+        btn_select_payment_method.setOnClickListener {
             paymentSession.presentPaymentMethodSelection(true)
         }
-        selectShippingButton.setOnClickListener {
+        btn_start_payment_flow.setOnClickListener {
             paymentSession.presentShippingFlow()
         }
     }
@@ -120,6 +109,10 @@ class PaymentSessionActivity : AppCompatActivity() {
                     ShippingInfoWidget.CustomizableShippingField.PHONE_FIELD,
                     ShippingInfoWidget.CustomizableShippingField.CITY_FIELD
                 )
+
+                // Optionally specify the `PaymentMethod.Type` values to use.
+                // Defaults to `PaymentMethod.Type.Card`
+                .setPaymentMethodTypes(listOf(PaymentMethod.Type.Card))
                 .build())
         if (paymentSessionInitialized) {
             paymentSession.setCartTotal(2000L)
@@ -132,26 +125,17 @@ class PaymentSessionActivity : AppCompatActivity() {
         val currency = Currency.getInstance("USD")
         val stringBuilder = StringBuilder()
 
-        if (data.paymentMethod != null) {
-            val paymentMethod = data.paymentMethod
-            val card = paymentMethod!!.card
-
-            if (card != null) {
-                stringBuilder.append("Payment Info:\n").append(card.brand)
-                    .append(" ending in ")
-                    .append(card.last4)
-                    .append(if (data.isPaymentReadyToCharge) " IS " else " IS NOT ")
-                    .append("ready to charge.\n\n")
-            }
+        data.paymentMethod?.card?.let { card ->
+            stringBuilder
+                .append("Payment Info:\n${card.brand} ending in ${card.last4}")
+                .append(if (data.isPaymentReadyToCharge) " IS " else " IS NOT ready to charge.\n\n")
         }
-        if (data.shippingInformation != null) {
-            stringBuilder.append("Shipping Info: \n")
-            stringBuilder.append(data.shippingInformation)
-            stringBuilder.append("\n\n")
+        data.shippingInformation?.let { shippingInformation ->
+            stringBuilder
+                .append("Shipping Info: \n${shippingInformation}\n\n")
         }
-        if (data.shippingMethod != null) {
-            stringBuilder.append("Shipping Method: \n")
-            stringBuilder.append(data.shippingMethod).append('\n')
+        data.shippingMethod?.let { shippingMethod ->
+            stringBuilder.append("Shipping Method: \n${shippingMethod}\n")
             if (data.shippingTotal > 0) {
                 stringBuilder.append("Shipping total: ")
                     .append(getPriceString(data.shippingTotal, currency))
@@ -162,12 +146,12 @@ class PaymentSessionActivity : AppCompatActivity() {
     }
 
     private fun createSampleShippingMethods(): ArrayList<ShippingMethod> {
-        val shippingMethods = ArrayList<ShippingMethod>()
-        shippingMethods.add(ShippingMethod("UPS Ground", "ups-ground",
-            0, "USD", "Arrives in 3-5 days"))
-        shippingMethods.add(ShippingMethod("FedEx", "fedex",
-            599, "USD", "Arrives tomorrow"))
-        return shippingMethods
+        return arrayListOf(
+            ShippingMethod("UPS Ground", "ups-ground",
+                0, "USD", "Arrives in 3-5 days"),
+            ShippingMethod("FedEx", "fedex",
+                599, "USD", "Arrives tomorrow")
+        )
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -186,9 +170,21 @@ class PaymentSessionActivity : AppCompatActivity() {
         data: PaymentSessionData
     ) {
         paymentSessionData = data
-        progressBar.visibility = View.VISIBLE
+        progress_bar.visibility = View.VISIBLE
         customerSession.retrieveCurrentCustomer(
-            PaymentSessionChangeCustomerRetrievalListener(this))
+            PaymentSessionChangeCustomerRetrievalListener(this)
+        )
+    }
+
+    private fun onCustomerRetrieved() {
+        progress_bar.visibility = View.INVISIBLE
+        btn_select_payment_method.isEnabled = true
+        btn_start_payment_flow.isEnabled = true
+
+        paymentSessionData?.let { paymentSessionData ->
+            tv_payment_session_data_title.visibility = View.VISIBLE
+            tv_payment_session_data.text = formatStringResults(paymentSessionData)
+        }
     }
 
     private class PaymentSessionListenerImpl internal constructor(
@@ -197,19 +193,19 @@ class PaymentSessionActivity : AppCompatActivity() {
     ) : PaymentSession.ActivityPaymentSessionListener<PaymentSessionActivity>(activity) {
 
         override fun onCommunicatingStateChanged(isCommunicating: Boolean) {
-            val activity = listenerActivity ?: return
-            activity.progressBar.visibility = if (isCommunicating) View.VISIBLE else View.INVISIBLE
+            listenerActivity?.progress_bar?.visibility = if (isCommunicating) {
+                View.VISIBLE
+            } else {
+                View.INVISIBLE
+            }
         }
 
         override fun onError(errorCode: Int, errorMessage: String) {
-            val activity = listenerActivity ?: return
-            activity.errorDialogHandler.show(errorMessage)
+            listenerActivity?.errorDialogHandler?.show(errorMessage)
         }
 
         override fun onPaymentSessionDataChanged(data: PaymentSessionData) {
-            val activity = listenerActivity ?: return
-
-            activity.onPaymentSessionDataChanged(customerSession, data)
+            listenerActivity?.onPaymentSessionDataChanged(customerSession, data)
         }
     }
 
@@ -218,21 +214,11 @@ class PaymentSessionActivity : AppCompatActivity() {
     ) : CustomerSession.ActivityCustomerRetrievalListener<PaymentSessionActivity>(activity) {
 
         override fun onCustomerRetrieved(customer: Customer) {
-            val activity = activity ?: return
-
-            activity.progressBar.visibility = View.INVISIBLE
-            activity.selectPaymentButton.isEnabled = true
-            activity.selectShippingButton.isEnabled = true
-
-            activity.paymentSessionData?.let { paymentSessionData ->
-                activity.resultTitleTextView.visibility = View.VISIBLE
-                activity.resultTextView.text = activity.formatStringResults(paymentSessionData)
-            }
+            activity?.onCustomerRetrieved()
         }
 
         override fun onError(httpCode: Int, errorMessage: String, stripeError: StripeError?) {
-            val activity = activity ?: return
-            activity.progressBar.visibility = View.INVISIBLE
+            activity?.progress_bar?.visibility = View.INVISIBLE
         }
     }
 
