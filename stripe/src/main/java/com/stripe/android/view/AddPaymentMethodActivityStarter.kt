@@ -42,7 +42,7 @@ class AddPaymentMethodActivityStarter internal constructor(
             private var shouldRequirePostalCode: Boolean = false
             private var isPaymentSessionActive = false
             private var shouldInitCustomerSessionTokens = true
-            private var paymentMethodType: PaymentMethod.Type? = null
+            private var paymentMethodType: PaymentMethod.Type? = PaymentMethod.Type.Card
             private var paymentConfiguration: PaymentConfiguration? = null
             @LayoutRes
             private var addPaymentMethodFooter: Int = 0
@@ -65,6 +65,17 @@ class AddPaymentMethodActivityStarter internal constructor(
                 return this
             }
 
+            /**
+             * Optional: specify the [PaymentMethod.Type] of the payment method to create based on
+             * the customer's input (i.e. the form that will be presented to the customer).
+             * If unspecified, defaults to [PaymentMethod.Type.Card].
+             * Currently only [PaymentMethod.Type.Card] and [PaymentMethod.Type.Fpx] are supported.
+             */
+            fun setPaymentMethodType(paymentMethodType: PaymentMethod.Type): Builder {
+                this.paymentMethodType = paymentMethodType
+                return this
+            }
+
             internal fun setIsPaymentSessionActive(isPaymentSessionActive: Boolean): Builder {
                 this.isPaymentSessionActive = isPaymentSessionActive
                 return this
@@ -74,11 +85,6 @@ class AddPaymentMethodActivityStarter internal constructor(
                 shouldInitCustomerSessionTokens: Boolean
             ): Builder {
                 this.shouldInitCustomerSessionTokens = shouldInitCustomerSessionTokens
-                return this
-            }
-
-            internal fun setPaymentMethodType(paymentMethodType: PaymentMethod.Type): Builder {
-                this.paymentMethodType = paymentMethodType
                 return this
             }
 
