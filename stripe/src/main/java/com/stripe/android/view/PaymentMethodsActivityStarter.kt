@@ -77,7 +77,18 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
                 return this
             }
 
-            internal fun setPaymentMethodTypes(
+            /**
+             * @param paymentMethodTypes a list of [PaymentMethod.Type] that indicates the types of
+             * Payment Methods that the customer can select or add via Stripe UI components.
+             *
+             * The order of the [PaymentMethod.Type] values in the list will be used to
+             * arrange the add buttons in the Stripe UI components. They will be arranged vertically
+             * from first to last.
+             *
+             * Currently only [PaymentMethod.Type.Card] and [PaymentMethod.Type.Fpx] are supported.
+             * If not specified or empty, [PaymentMethod.Type.Card] will be used.
+             */
+            fun setPaymentMethodTypes(
                 paymentMethodTypes: List<PaymentMethod.Type>
             ): Builder {
                 this.paymentMethodTypes = paymentMethodTypes
