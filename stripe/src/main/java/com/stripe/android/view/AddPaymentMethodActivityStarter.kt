@@ -135,8 +135,9 @@ class AddPaymentMethodActivityStarter internal constructor(
             /**
              * @return the [Result] object from the given `Intent`
              */
-            fun fromIntent(intent: Intent): Result? {
-                return intent.getParcelableExtra(ActivityStarter.Result.EXTRA)
+            @JvmStatic
+            fun fromIntent(intent: Intent?): Result? {
+                return intent?.getParcelableExtra(ActivityStarter.Result.EXTRA)
             }
         }
     }
