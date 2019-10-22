@@ -132,8 +132,8 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
              * @return the [Result] object from the given `Intent`
              */
             @JvmStatic
-            fun fromIntent(intent: Intent): Result? {
-                return intent.getParcelableExtra(ActivityStarter.Result.EXTRA)
+            fun fromIntent(intent: Intent?): Result? {
+                return intent?.getParcelableExtra(ActivityStarter.Result.EXTRA)
             }
         }
     }
