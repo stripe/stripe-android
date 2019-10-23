@@ -3,7 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="20dp">
 
     <Button
         android:id="@+id/btn_select_payment_method"
@@ -18,6 +19,14 @@
         android:id="@+id/payment_method_result"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:typeface="monospace"
-        android:padding="20dp"/>
+        android:paddingTop="20dp"
+        android:typeface="monospace" />
+
+    <TextView
+        android:id="@+id/fpx_bank_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:paddingTop="20dp"
+        android:visibility="gone" />
 </LinearLayout>
