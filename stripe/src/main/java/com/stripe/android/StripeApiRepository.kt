@@ -14,6 +14,7 @@ import com.stripe.android.exception.StripeException
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.Customer
+import com.stripe.android.model.FpxBankStatuses
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -622,6 +623,21 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         )
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response)
+    }
+
+    @Throws(AuthenticationException::class, InvalidRequestException::class,
+        APIConnectionException::class, APIException::class, CardException::class)
+    override fun getFpxBankStatus(options: ApiRequest.Options): FpxBankStatuses {
+        val response = fireStripeApiRequest(
+            ApiRequest.createGet(
+                getApiUrl("fpx/bank_statuses"),
+                mapOf("account_holder_type" to "individual"),
+                options,
+                appInfo
+            )
+        )
+        convertErrorsToExceptionsAndThrowIfNecessary(response)
+        return FpxBankStatuses.fromJson(response.responseBody?.let { JSONObject(it) })
     }
 
     @VisibleForTesting

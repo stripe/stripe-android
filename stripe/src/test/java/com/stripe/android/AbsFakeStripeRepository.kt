@@ -4,6 +4,7 @@ import com.stripe.android.exception.APIException
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.Customer
+import com.stripe.android.model.FpxBankStatuses
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -174,6 +175,10 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         userOneTimeCode: String,
         ephemeralKeySecret: String
     ) {
+    }
+
+    override fun getFpxBankStatus(options: ApiRequest.Options): FpxBankStatuses {
+        return FpxBankStatuses.EMPTY
     }
 
     override fun start3ds2Auth(

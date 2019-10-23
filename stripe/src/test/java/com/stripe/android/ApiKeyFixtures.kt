@@ -6,4 +6,5 @@ internal object ApiKeyFixtures {
     const val CONNECTED_ACCOUNT_PUBLISHABLE_KEY = "pk_test_fdjfCYpGSwAX24KUEiuaAAWX"
     const val FAKE_EPHEMERAL_KEY = "ek_test_123"
     const val FAKE_SECRET_KEY = "sk_test_123"
+    const val FPX_PUBLISHABLE_KEY = "pk_test_gQDRnExb8Jjs2Dk6RiQ09RSg007c7pKhDT"
 }
