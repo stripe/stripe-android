@@ -5,9 +5,12 @@ import org.json.JSONObject
 internal class FpxBankStatuses private constructor(
     private val statuses: Map<String, Boolean>? = null
 ) {
+    /**
+     * Defaults to `true` if statuses aren't available.
+     */
     @JvmSynthetic
     internal fun isOnline(bankId: String): Boolean {
-        return statuses?.get(bankId) ?: false
+        return statuses?.get(bankId) ?: true
     }
 
     companion object {

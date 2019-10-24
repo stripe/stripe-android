@@ -2,6 +2,8 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.content.res.Resources
+import android.os.AsyncTask
 import android.os.Parcel
 import android.os.Parcelable
 import android.view.LayoutInflater
@@ -12,8 +14,15 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.widget.ImageViewCompat
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.stripe.android.ApiRequest
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
+import com.stripe.android.StripeApiRepository
+import com.stripe.android.StripeRepository
+import com.stripe.android.model.FpxBankStatuses
 import com.stripe.android.model.PaymentMethodCreateParams
+import java.lang.ref.WeakReference
 import kotlinx.android.synthetic.main.add_payment_method_fpx_layout.view.*
 
 internal class AddPaymentMethodFpxView private constructor(
@@ -44,6 +53,8 @@ internal class AddPaymentMethodFpxView private constructor(
             layoutManager = LinearLayoutManager(context)
             itemAnimator = DefaultItemAnimator()
         }
+
+        FpxBankStatusesTask(context.applicationContext, this).execute()
     }
 
     override fun onSaveInstanceState(): Parcelable? {
@@ -59,16 +70,23 @@ internal class AddPaymentMethodFpxView private constructor(
         }
     }
 
+    private fun onFpxBankStatusesUpdated(fpxBankStatuses: FpxBankStatuses?) {
+        fpxBankStatuses?.let {
+            fpxAdapter.updateStatuses(it)
+        }
+    }
+
     private class Adapter constructor(
         private val themeConfig: ThemeConfig
-    ) : androidx.recyclerview.widget.RecyclerView.Adapter<Adapter.ViewHolder>() {
+    ) : RecyclerView.Adapter<Adapter.ViewHolder>() {
         var selectedPosition = -1
+        private var fpxBankStatuses: FpxBankStatuses = FpxBankStatuses.EMPTY
 
         internal val selectedBank: FpxBank?
             get() = if (selectedPosition == -1) {
                 null
             } else {
-                FpxBank.values()[selectedPosition]
+                getItem(selectedPosition)
             }
 
         init {
@@ -83,7 +101,9 @@ internal class AddPaymentMethodFpxView private constructor(
 
         override fun onBindViewHolder(viewHolder: ViewHolder, i: Int) {
             viewHolder.setSelected(i == selectedPosition)
-            viewHolder.update(FpxBank.values()[i])
+
+            val fpxBank = getItem(i)
+            viewHolder.update(fpxBank, fpxBankStatuses.isOnline(fpxBank.id))
             viewHolder.itemView.setOnClickListener {
                 val currentPosition = viewHolder.adapterPosition
                 if (currentPosition != selectedPosition) {
@@ -103,22 +123,45 @@ internal class AddPaymentMethodFpxView private constructor(
             return FpxBank.values().size
         }
 
-        fun updateSelected(position: Int) {
+        private fun getItem(position: Int): FpxBank {
+            return FpxBank.values()[position]
+        }
+
+        internal fun updateSelected(position: Int) {
             selectedPosition = position
             notifyItemChanged(position)
+        }
+
+        internal fun updateStatuses(fpxBankStatuses: FpxBankStatuses) {
+            this.fpxBankStatuses = fpxBankStatuses
+
+            FpxBank.values().indices
+                .filterNot { position ->
+                    fpxBankStatuses.isOnline(getItem(position).id)
+                }
+                .forEach { position ->
+                    notifyItemChanged(position)
+                }
         }
 
         private class ViewHolder constructor(
             itemView: View,
             private val themeConfig: ThemeConfig
-        ) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
-
+        ) : RecyclerView.ViewHolder(itemView) {
+            private val resources: Resources = itemView.resources
             private val name: TextView = itemView.findViewById(R.id.name)
             private val icon: AppCompatImageView = itemView.findViewById(R.id.icon)
             private val checkMark: AppCompatImageView = itemView.findViewById(R.id.check_icon)
 
-            internal fun update(fpxBank: FpxBank) {
-                name.text = fpxBank.displayName
+            internal fun update(fpxBank: FpxBank, isOnline: Boolean) {
+                name.text = if (isOnline) {
+                    fpxBank.displayName
+                } else {
+                    resources.getString(
+                        R.string.fpx_bank_offline,
+                        fpxBank.displayName
+                    )
+                }
                 icon.setImageResource(fpxBank.brandIconResId)
             }
 
@@ -130,6 +173,30 @@ internal class AddPaymentMethodFpxView private constructor(
                 )
                 checkMark.visibility = if (isSelected) View.VISIBLE else View.GONE
             }
+        }
+    }
+
+    private class FpxBankStatusesTask internal constructor(
+        context: Context,
+        view: AddPaymentMethodFpxView
+    ) : AsyncTask<Void, Void, FpxBankStatuses?>() {
+        private val stripeRepository: StripeRepository = StripeApiRepository(context)
+        private val paymentConfiguration = PaymentConfiguration.getInstance(context)
+        private val viewRef: WeakReference<AddPaymentMethodFpxView> = WeakReference(view)
+
+        override fun doInBackground(vararg p0: Void?): FpxBankStatuses? {
+            return try {
+                stripeRepository.getFpxBankStatus(
+                    ApiRequest.Options.create(paymentConfiguration.publishableKey)
+                )
+            } catch (e: Exception) {
+                null
+            }
+        }
+
+        override fun onPostExecute(fpxBankStatuses: FpxBankStatuses?) {
+            super.onPostExecute(fpxBankStatuses)
+            viewRef.get()?.onFpxBankStatusesUpdated(fpxBankStatuses)
         }
     }
 
