@@ -8,6 +8,7 @@ import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.Customer
+import com.stripe.android.model.FpxBankStatuses
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -176,6 +177,10 @@ internal interface StripeRepository {
         userOneTimeCode: String,
         ephemeralKeySecret: String
     )
+
+    @Throws(AuthenticationException::class, InvalidRequestException::class,
+        APIConnectionException::class, APIException::class, CardException::class)
+    fun getFpxBankStatus(options: ApiRequest.Options): FpxBankStatuses
 
     fun start3ds2Auth(
         authParams: Stripe3ds2AuthParams,

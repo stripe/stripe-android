@@ -18,6 +18,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.SourceParams
+import com.stripe.android.view.FpxBank
 import java.io.UnsupportedEncodingException
 import java.net.HttpURLConnection
 import java.util.Locale
@@ -563,6 +564,14 @@ class StripeApiRepositoryTest {
                 ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, emptySet(),
                 ApiRequest.Options.create(ApiKeyFixtures.FAKE_EPHEMERAL_KEY))
         assertTrue(paymentMethods.isEmpty())
+    }
+
+    @Test
+    fun getFpxBankStatus_withFpxKey() {
+        val fpxBankStatuses = stripeApiRepository.getFpxBankStatus(
+            ApiRequest.Options.create(ApiKeyFixtures.FPX_PUBLISHABLE_KEY)
+        )
+        assertTrue(fpxBankStatuses.isOnline(FpxBank.Hsbc.id))
     }
 
     private fun create(): StripeApiRepository {

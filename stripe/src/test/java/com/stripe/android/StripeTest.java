@@ -61,7 +61,6 @@ public class StripeTest {
     // publishable keys
     private static final String NON_LOGGING_PK = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY;
     private static final String DEFAULT_SECRET_KEY = "sk_default";
-    private static final String FPX_PK = "pk_test_gQDRnExb8Jjs2Dk6RiQ09RSg007c7pKhDT";
 
     private static final ApiResultCallback<Token> DEFAULT_TOKEN_CALLBACK =
             new ApiResultCallback<Token>() {
@@ -1201,7 +1200,10 @@ public class StripeTest {
                                 .setBank("hsbc")
                                 .build(),
                         expectedBillingDetails);
-        final Stripe stripe = createStripe(FPX_PK, fireAndForgetRequestExecutor);
+        final Stripe stripe = createStripe(
+                ApiKeyFixtures.FPX_PUBLISHABLE_KEY,
+                fireAndForgetRequestExecutor
+        );
         final PaymentMethod createdPaymentMethod = stripe.createPaymentMethodSynchronous(
                 paymentMethodCreateParams);
         assertNotNull(createdPaymentMethod);
