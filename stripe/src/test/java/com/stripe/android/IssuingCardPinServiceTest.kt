@@ -48,7 +48,7 @@ class IssuingCardPinServiceTest {
         )
 
         service = IssuingCardPinService(ephemeralKeyProvider, stripeRepository,
-            OperationIdFactory())
+            OperationIdFactory.get())
     }
 
     @Test

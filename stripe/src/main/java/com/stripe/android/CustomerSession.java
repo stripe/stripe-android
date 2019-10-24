@@ -195,7 +195,7 @@ public class CustomerSession {
             @NonNull String publishableKey,
             @Nullable String stripeAccountId,
             boolean shouldPrefetchEphemeralKey) {
-        mOperationIdFactory = new OperationIdFactory();
+        mOperationIdFactory = new StripeOperationIdFactory();
         mThreadPoolExecutor = threadPoolExecutor;
         mProxyNowCalendar = proxyNowCalendar;
         mProductUsage = new CustomerSessionProductUsage();
