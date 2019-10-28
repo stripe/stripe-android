@@ -1,34 +1,34 @@
 package com.stripe.android.view
 
-import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.Resources
-import android.os.AsyncTask
 import android.os.Parcel
 import android.os.Parcelable
+import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.widget.ImageViewCompat
+import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.stripe.android.ApiRequest
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
-import com.stripe.android.StripeApiRepository
-import com.stripe.android.StripeRepository
 import com.stripe.android.model.FpxBankStatuses
 import com.stripe.android.model.PaymentMethodCreateParams
-import java.lang.ref.WeakReference
 import kotlinx.android.synthetic.main.add_payment_method_fpx_layout.view.*
 
-internal class AddPaymentMethodFpxView private constructor(
-    context: Context
-) : AddPaymentMethodView(context) {
-    private val fpxAdapter = Adapter(ThemeConfig(context))
+internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
+    activity: FragmentActivity,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : AddPaymentMethodView(activity, attrs, defStyleAttr) {
+    private val fpxAdapter = Adapter(ThemeConfig(activity))
+    private val viewModel: FpxViewModel
 
     override val createParams: PaymentMethodCreateParams?
         get() {
@@ -42,7 +42,7 @@ internal class AddPaymentMethodFpxView private constructor(
         }
 
     init {
-        View.inflate(getContext(), R.layout.add_payment_method_fpx_layout, this)
+        View.inflate(context, R.layout.add_payment_method_fpx_layout, this)
 
         // an id is required for state to be saved
         id = R.id.stripe_payment_methods_add_fpx
@@ -50,11 +50,15 @@ internal class AddPaymentMethodFpxView private constructor(
         fpx_list.run {
             adapter = fpxAdapter
             setHasFixedSize(true)
-            layoutManager = LinearLayoutManager(context)
+            layoutManager = LinearLayoutManager(activity)
             itemAnimator = DefaultItemAnimator()
         }
 
-        FpxBankStatusesTask(context.applicationContext, this).execute()
+        viewModel = ViewModelProviders.of(activity).get(FpxViewModel::class.java)
+        viewModel.fpxBankStatuses.observe(activity, Observer {
+            onFpxBankStatusesUpdated(it)
+        })
+        viewModel.loadFpxBankStatues()
     }
 
     override fun onSaveInstanceState(): Parcelable? {
@@ -176,30 +180,6 @@ internal class AddPaymentMethodFpxView private constructor(
         }
     }
 
-    private class FpxBankStatusesTask internal constructor(
-        context: Context,
-        view: AddPaymentMethodFpxView
-    ) : AsyncTask<Void, Void, FpxBankStatuses?>() {
-        private val stripeRepository: StripeRepository = StripeApiRepository(context)
-        private val paymentConfiguration = PaymentConfiguration.getInstance(context)
-        private val viewRef: WeakReference<AddPaymentMethodFpxView> = WeakReference(view)
-
-        override fun doInBackground(vararg p0: Void?): FpxBankStatuses? {
-            return try {
-                stripeRepository.getFpxBankStatus(
-                    ApiRequest.Options.create(paymentConfiguration.publishableKey)
-                )
-            } catch (e: Exception) {
-                null
-            }
-        }
-
-        override fun onPostExecute(fpxBankStatuses: FpxBankStatuses?) {
-            super.onPostExecute(fpxBankStatuses)
-            viewRef.get()?.onFpxBankStatusesUpdated(fpxBankStatuses)
-        }
-    }
-
     private class SavedState : BaseSavedState {
         internal val selectedPosition: Int
 
@@ -231,9 +211,9 @@ internal class AddPaymentMethodFpxView private constructor(
     }
 
     companion object {
-        @JvmStatic
-        fun create(context: Context): AddPaymentMethodFpxView {
-            return AddPaymentMethodFpxView(context)
+        @JvmSynthetic
+        internal fun create(activity: FragmentActivity): AddPaymentMethodFpxView {
+            return AddPaymentMethodFpxView(activity)
         }
     }
 }
