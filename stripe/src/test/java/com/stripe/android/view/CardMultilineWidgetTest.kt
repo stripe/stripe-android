@@ -1,8 +1,11 @@
 package com.stripe.android.view
 
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.widget.LinearLayout
 import com.google.android.material.textfield.TextInputLayout
+import com.nhaarman.mockitokotlin2.never
 import com.stripe.android.CardNumberFixtures.VALID_AMEX_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VALID_AMEX_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.VALID_DINERS_CLUB_WITH_SPACES
@@ -17,7 +20,7 @@ import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_CARD
 import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_CVC
 import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_EXPIRY
 import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_POSTAL
-import com.stripe.android.view.CardMultilineWidget.CARD_MULTILINE_TOKEN
+import com.stripe.android.view.CardMultilineWidget.Companion.CARD_MULTILINE_TOKEN
 import java.util.Calendar
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -30,7 +33,6 @@ import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.reset
-import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
@@ -65,6 +67,48 @@ internal class CardMultilineWidgetTest : BaseViewTest<CardInputTestActivity>(
         noZipGroup = WidgetControlGroup(noZipCardMultilineWidget)
 
         fullGroup.cardNumberEditText.setText("")
+
+        cardMultilineWidget.setCardNumberTextWatcher(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {
+            }
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+        })
+        cardMultilineWidget.setExpiryDateTextWatcher(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {
+            }
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+        })
+        cardMultilineWidget.setCvcNumberTextWatcher(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {
+            }
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+        })
+        cardMultilineWidget.setPostalCodeTextWatcher(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {
+            }
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+        })
+        cardMultilineWidget.paymentMethodBillingDetailsBuilder
     }
 
     @AfterTest
@@ -522,7 +566,7 @@ internal class CardMultilineWidgetTest : BaseViewTest<CardInputTestActivity>(
         noZipGroup.expiryDateEditText.append("50")
         noZipGroup.cvcEditText.append("123")
         verify<CardInputListener>(noZipCardListener).onCvcComplete()
-        verify<CardInputListener>(noZipCardListener, times(0)).onFocusChange(FOCUS_POSTAL)
+        verify<CardInputListener>(noZipCardListener, never()).onFocusChange(FOCUS_POSTAL)
         assertTrue(noZipGroup.cvcEditText.hasFocus())
     }
 
