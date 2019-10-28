@@ -5,7 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.os.AsyncTask
 import androidx.annotation.Size
+import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
+import androidx.annotation.WorkerThread
 import androidx.fragment.app.Fragment
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
@@ -135,6 +137,7 @@ class Stripe internal constructor(
      * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
      * [PaymentIntent]
      */
+    @UiThread
     fun confirmPayment(
         activity: Activity,
         confirmPaymentIntentParams: ConfirmPaymentIntentParams
@@ -153,6 +156,7 @@ class Stripe internal constructor(
      * @param fragment the `Fragment` that is launching the payment authentication flow
      * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the [PaymentIntent]
      */
+    @UiThread
     fun confirmPayment(
         fragment: Fragment,
         confirmPaymentIntentParams: ConfirmPaymentIntentParams
@@ -172,6 +176,7 @@ class Stripe internal constructor(
      * @param clientSecret the [client_secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret)
      * property of a confirmed [PaymentIntent] object
      */
+    @UiThread
     fun authenticatePayment(activity: Activity, clientSecret: String) {
         paymentController.startAuth(
             AuthActivityStarter.Host.create(activity),
@@ -188,6 +193,7 @@ class Stripe internal constructor(
      * @param clientSecret the [client_secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret)
      * property of a confirmed [PaymentIntent] object
      */
+    @UiThread
     fun authenticatePayment(fragment: Fragment, clientSecret: String) {
         paymentController.startAuth(
             AuthActivityStarter.Host.create(fragment),
@@ -201,6 +207,7 @@ class Stripe internal constructor(
      * result of a PaymentIntent automatic confirmation (see [confirmPayment]) or
      * manual confirmation (see [authenticatePayment]})
      */
+    @UiThread
     fun onPaymentResult(
         requestCode: Int,
         data: Intent?,
@@ -222,7 +229,6 @@ class Stripe internal constructor(
      * Blocking method to retrieve a [PaymentIntent] object.
      * Do not call this on the UI thread or your app will crash.
      *
-     *
      * See [Retrieve a PaymentIntent](https://stripe.com/docs/api/payment_intents/retrieve).
      *
      * @param clientSecret the client_secret with which to retrieve the PaymentIntent
@@ -230,6 +236,7 @@ class Stripe internal constructor(
      */
     @Throws(APIException::class, AuthenticationException::class,
         InvalidRequestException::class, APIConnectionException::class)
+    @WorkerThread
     fun retrievePaymentIntentSynchronous(clientSecret: String): PaymentIntent? {
         return stripeRepository.retrievePaymentIntent(
             clientSecret,
@@ -250,6 +257,7 @@ class Stripe internal constructor(
     @Deprecated("use {@link #confirmPayment(Activity, ConfirmPaymentIntentParams)}")
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, APIException::class)
+    @WorkerThread
     fun confirmPaymentIntentSynchronous(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams
     ): PaymentIntent? {
@@ -268,6 +276,7 @@ class Stripe internal constructor(
      *
      * @param activity the `Activity` that is launching the payment authentication flow
      */
+    @UiThread
     fun confirmSetupIntent(
         activity: Activity,
         confirmSetupIntentParams: ConfirmSetupIntentParams
@@ -284,6 +293,7 @@ class Stripe internal constructor(
      *
      * @param fragment the `Fragment` that is launching the payment authentication flow
      */
+    @UiThread
     fun confirmSetupIntent(
         fragment: Fragment,
         confirmSetupIntentParams: ConfirmSetupIntentParams
@@ -302,6 +312,7 @@ class Stripe internal constructor(
      * @param clientSecret the [client_secret](https://stripe.com/docs/api/setup_intents/object#setup_intent_object-client_secret)
      * property of a confirmed [SetupIntent] object
      */
+    @UiThread
     fun authenticateSetup(activity: Activity, clientSecret: String) {
         paymentController.startAuth(
             AuthActivityStarter.Host.create(activity),
@@ -317,6 +328,7 @@ class Stripe internal constructor(
      * @param clientSecret the [client_secret](https://stripe.com/docs/api/setup_intents/object#setup_intent_object-client_secret)
      * property of a confirmed [SetupIntent] object
      */
+    @UiThread
     fun authenticateSetup(fragment: Fragment, clientSecret: String) {
         paymentController.startAuth(
             AuthActivityStarter.Host.create(fragment),
@@ -329,6 +341,7 @@ class Stripe internal constructor(
      * Should be called via `Activity#onActivityResult(int, int, Intent)}}` to handle the
      * result of a SetupIntent confirmation (see [confirmSetupIntent]).
      */
+    @UiThread
     fun onSetupResult(
         requestCode: Int,
         data: Intent?,
@@ -358,6 +371,7 @@ class Stripe internal constructor(
      */
     @Throws(APIException::class, AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class)
+    @WorkerThread
     fun retrieveSetupIntentSynchronous(clientSecret: String): SetupIntent? {
         return stripeRepository.retrieveSetupIntent(
             clientSecret,
@@ -379,6 +393,7 @@ class Stripe internal constructor(
     @Deprecated("use {@link #confirmSetupIntent(Activity, ConfirmSetupIntentParams)}")
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, APIException::class)
+    @WorkerThread
     fun confirmSetupIntentSynchronous(
         confirmSetupIntentParams: ConfirmSetupIntentParams
     ): SetupIntent? {
@@ -400,6 +415,7 @@ class Stripe internal constructor(
      * @param paymentMethodCreateParams the [PaymentMethodCreateParams] to be used
      * @param callback a [ApiResultCallback] to receive the result or error
      */
+    @UiThread
     fun createPaymentMethod(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         callback: ApiResultCallback<PaymentMethod>
@@ -422,6 +438,7 @@ class Stripe internal constructor(
      */
     @Throws(APIException::class, AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class)
+    @WorkerThread
     fun createPaymentMethodSynchronous(
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): PaymentMethod? {
@@ -443,6 +460,7 @@ class Stripe internal constructor(
      * @param sourceParams the [SourceParams] to be used
      * @param callback a [ApiResultCallback] to receive the result or error
      */
+    @UiThread
     fun createSource(
         sourceParams: SourceParams,
         callback: ApiResultCallback<Source>
@@ -469,6 +487,7 @@ class Stripe internal constructor(
      */
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, APIException::class)
+    @WorkerThread
     fun createSourceSynchronous(params: SourceParams): Source? {
         return stripeRepository.createSource(params,
             ApiRequest.Options.create(publishableKey, stripeAccountId))
@@ -492,6 +511,7 @@ class Stripe internal constructor(
      */
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, APIException::class)
+    @WorkerThread
     fun retrieveSourceSynchronous(
         @Size(min = 1) sourceId: String,
         @Size(min = 1) clientSecret: String
@@ -512,6 +532,7 @@ class Stripe internal constructor(
      * @param accountParams the [AccountParams] used to create this token
      * @param callback a [ApiResultCallback] to receive the result or error
      */
+    @UiThread
     fun createAccountToken(
         accountParams: AccountParams,
         callback: ApiResultCallback<Token>
@@ -541,6 +562,7 @@ class Stripe internal constructor(
      */
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, APIException::class)
+    @WorkerThread
     fun createAccountTokenSynchronous(accountParams: AccountParams): Token? {
         return try {
             stripeRepository.createToken(
@@ -562,6 +584,7 @@ class Stripe internal constructor(
      * @param bankAccount the [BankAccount] used to create this token
      * @param callback a [ApiResultCallback] to receive the result or error
      */
+    @UiThread
     fun createBankAccountToken(
         bankAccount: BankAccount,
         callback: ApiResultCallback<Token>
@@ -593,6 +616,7 @@ class Stripe internal constructor(
      */
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, CardException::class, APIException::class)
+    @WorkerThread
     fun createBankAccountTokenSynchronous(bankAccount: BankAccount): Token? {
         val params = bankAccount.toParamMap()
             .plus(stripeNetworkUtils.createUidParams())
@@ -612,6 +636,7 @@ class Stripe internal constructor(
      * @param personalId the personal id used to create this token
      * @param callback a [ApiResultCallback] to receive the result or error
      */
+    @UiThread
     fun createPiiToken(
         personalId: String,
         callback: ApiResultCallback<Token>
@@ -639,6 +664,7 @@ class Stripe internal constructor(
      */
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, CardException::class, APIException::class)
+    @WorkerThread
     fun createPiiTokenSynchronous(personalId: String): Token? {
         return stripeRepository.createToken(
             PiiTokenParams(personalId).toParamMap(),
@@ -655,6 +681,7 @@ class Stripe internal constructor(
      * @param card the [Card] used to create this payment token
      * @param callback a [ApiResultCallback] to receive the result or error
      */
+    @UiThread
     fun createToken(card: Card, callback: ApiResultCallback<Token>) {
         createTokenFromParams(
             stripeNetworkUtils.createCardTokenParams(card),
@@ -680,6 +707,7 @@ class Stripe internal constructor(
      */
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, CardException::class, APIException::class)
+    @WorkerThread
     fun createCardTokenSynchronous(card: Card): Token? {
         return stripeRepository.createToken(
             stripeNetworkUtils.createCardTokenParams(card),
@@ -694,6 +722,7 @@ class Stripe internal constructor(
      * @param cvc the CVC used to create this token
      * @param callback a [ApiResultCallback] to receive the result or error
      */
+    @UiThread
     fun createCvcUpdateToken(
         @Size(min = 3, max = 4) cvc: String,
         callback: ApiResultCallback<Token>
@@ -719,6 +748,7 @@ class Stripe internal constructor(
      */
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, CardException::class, APIException::class)
+    @WorkerThread
     fun createCvcUpdateTokenSynchronous(cvc: String): Token? {
         return stripeRepository.createToken(
             CvcTokenParams(cvc).toParamMap(),
