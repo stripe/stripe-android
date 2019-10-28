@@ -23,7 +23,6 @@ import com.stripe.android.view.PaymentFlowActivity
 import com.stripe.android.view.PaymentFlowActivityStarter
 import com.stripe.android.view.PaymentMethodsActivity
 import com.stripe.android.view.PaymentMethodsActivityStarter
-import java.util.Objects
 import java.util.concurrent.ThreadPoolExecutor
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -210,8 +209,9 @@ class PaymentSessionTest {
 
     @Test
     fun getSelectedPaymentMethodId_whenHasPrefsSet_returnsExpectedId() {
-        val customerId = Objects.requireNonNull<String>(FIRST_CUSTOMER.id)
-        `when`<String>(paymentSessionPrefs.getSelectedPaymentMethodId(customerId)).thenReturn("pm_12345")
+        val customerId = requireNotNull(FIRST_CUSTOMER.id)
+        `when`<String>(paymentSessionPrefs.getSelectedPaymentMethodId(customerId))
+            .thenReturn("pm_12345")
 
         `when`<Customer>(customerSession.cachedCustomer).thenReturn(FIRST_CUSTOMER)
         CustomerSession.setInstance(customerSession)

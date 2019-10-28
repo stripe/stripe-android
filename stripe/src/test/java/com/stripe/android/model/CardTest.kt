@@ -3,7 +3,6 @@ package com.stripe.android.model
 import com.stripe.android.model.Card.Companion.asCardBrand
 import com.stripe.android.model.Card.Companion.asFundingType
 import java.util.Calendar
-import java.util.Objects
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -634,7 +633,7 @@ class CardTest {
 
     @Test
     fun toBuilder_withLoggingToken_whenUnchanged_isEquals() {
-        val card = Objects.requireNonNull<Card>(Card.fromJson(JSON_CARD_USD))
+        val card = requireNotNull(Card.fromJson(JSON_CARD_USD))
         card.toBuilder()
             .loggingTokens(listOf("hello"))
 

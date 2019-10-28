@@ -2,7 +2,6 @@ package com.stripe.android;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Handler;
 
 import androidx.annotation.NonNull;
@@ -38,8 +37,6 @@ public class CustomerSession {
     public static final String ACTION_API_EXCEPTION = "action_api_exception";
     public static final String EXTRA_EXCEPTION = "exception";
 
-    public static final String EVENT_SHIPPING_INFO_SAVED = "shipping_info_saved";
-
     static final String ACTION_ADD_SOURCE = "add_source";
     static final String ACTION_DELETE_SOURCE = "delete_source";
     static final String ACTION_ATTACH_PAYMENT_METHOD = "attach_payment_method";
@@ -67,7 +64,6 @@ public class CustomerSession {
 
     @Nullable private Customer mCustomer;
     private long mCustomerCacheTime;
-    @NonNull private final LocalBroadcastManager mLocalBroadcastManager;
     @NonNull private final OperationIdFactory mOperationIdFactory;
     @NonNull private final EphemeralKeyManager mEphemeralKeyManager;
     @Nullable private final Calendar mProxyNowCalendar;
@@ -200,7 +196,6 @@ public class CustomerSession {
             @Nullable String stripeAccountId,
             boolean shouldPrefetchEphemeralKey) {
         mOperationIdFactory = new OperationIdFactory();
-        mLocalBroadcastManager = LocalBroadcastManager.getInstance(context);
         mThreadPoolExecutor = threadPoolExecutor;
         mProxyNowCalendar = proxyNowCalendar;
         mProductUsage = new CustomerSessionProductUsage();
@@ -209,7 +204,7 @@ public class CustomerSession {
                         new CustomerSessionRunnableFactory(
                                 stripeRepository,
                                 createHandler(),
-                                mLocalBroadcastManager,
+                                LocalBroadcastManager.getInstance(context),
                                 publishableKey,
                                 stripeAccountId,
                                 mProductUsage
@@ -234,8 +229,7 @@ public class CustomerSession {
                 mCustomer = customer;
                 mCustomerCacheTime = getCalendarInstance().getTimeInMillis();
 
-                final CustomerRetrievalListener listener =
-                        getListener(operationId);
+                final CustomerRetrievalListener listener = getListener(operationId);
                 if (listener != null && customer != null) {
                     listener.onCustomerRetrieved(customer);
                 }
@@ -253,8 +247,7 @@ public class CustomerSession {
             @Override
             public void onPaymentMethodRetrieved(@Nullable PaymentMethod paymentMethod,
                                                  @NonNull String operationId) {
-                final PaymentMethodRetrievalListener listener =
-                        getListener(operationId);
+                final PaymentMethodRetrievalListener listener = getListener(operationId);
                 if (listener != null && paymentMethod != null) {
                     listener.onPaymentMethodRetrieved(paymentMethod);
                 }
@@ -263,18 +256,20 @@ public class CustomerSession {
             @Override
             public void onPaymentMethodsRetrieved(@NonNull List<PaymentMethod> paymentMethods,
                                                   @NonNull String operationId) {
-                final PaymentMethodsRetrievalListener listener =
-                        getListener(operationId);
+                final PaymentMethodsRetrievalListener listener = getListener(operationId);
                 if (listener != null) {
                     listener.onPaymentMethodsRetrieved(paymentMethods);
                 }
             }
 
             @Override
-            public void onCustomerShippingInfoSaved(@Nullable Customer customer) {
+            public void onCustomerShippingInfoSaved(@Nullable Customer customer,
+                                                    @NonNull String operationId) {
                 mCustomer = customer;
-                mLocalBroadcastManager
-                        .sendBroadcast(new Intent(EVENT_SHIPPING_INFO_SAVED));
+                final CustomerRetrievalListener listener = getListener(operationId);
+                if (listener != null && customer != null) {
+                    listener.onCustomerRetrieved(customer);
+                }
             }
 
             @Override
@@ -418,10 +413,11 @@ public class CustomerSession {
      * @param shippingInformation the data to be set
      */
     public void setCustomerShippingInformation(
-            @NonNull ShippingInformation shippingInformation) {
+            @NonNull ShippingInformation shippingInformation,
+            @NonNull CustomerRetrievalListener listener) {
         final Map<String, Object> arguments = new HashMap<>();
         arguments.put(KEY_SHIPPING_INFO, shippingInformation);
-        startOperation(ACTION_SET_CUSTOMER_SHIPPING_INFO, arguments, null);
+        startOperation(ACTION_SET_CUSTOMER_SHIPPING_INFO, arguments, listener);
     }
 
     /**

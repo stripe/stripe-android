@@ -15,7 +15,6 @@ import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CustomerSession
 import com.stripe.android.CustomerSession.ACTION_API_EXCEPTION
-import com.stripe.android.CustomerSession.EVENT_SHIPPING_INFO_SAVED
 import com.stripe.android.CustomerSession.EXTRA_EXCEPTION
 import com.stripe.android.EphemeralKeyProvider
 import com.stripe.android.PaymentConfiguration
@@ -222,9 +221,7 @@ class PaymentFlowActivityTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowAct
             .sendBroadcast(onShippingInfoProcessedValid)
         assertEquals(View.VISIBLE, paymentFlowActivity.progressBar.visibility)
 
-        val shippingInfoSaved = Intent(EVENT_SHIPPING_INFO_SAVED)
-        LocalBroadcastManager.getInstance(ApplicationProvider.getApplicationContext())
-            .sendBroadcast(shippingInfoSaved)
+        paymentFlowActivity.onShippingInfoSaved(SHIPPING_INFO)
         assertEquals(View.GONE, paymentFlowActivity.progressBar.visibility)
     }
 
@@ -249,9 +246,7 @@ class PaymentFlowActivityTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowAct
         LocalBroadcastManager.getInstance(ApplicationProvider.getApplicationContext())
             .sendBroadcast(onShippingInfoProcessedValid)
 
-        val shippingInfoSaved = Intent(EVENT_SHIPPING_INFO_SAVED)
-        LocalBroadcastManager.getInstance(ApplicationProvider.getApplicationContext())
-            .sendBroadcast(shippingInfoSaved)
+        paymentFlowActivity.onShippingInfoSaved(SHIPPING_INFO)
         assertTrue(paymentFlowActivity.isFinishing)
         assertEquals(shadowActivity.resultCode, Activity.RESULT_OK)
 

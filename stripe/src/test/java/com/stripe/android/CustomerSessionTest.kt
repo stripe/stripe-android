@@ -20,7 +20,6 @@ import com.stripe.android.model.Customer
 import com.stripe.android.model.CustomerFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceFixtures
 import com.stripe.android.testharness.JsonTestUtils
@@ -31,7 +30,6 @@ import com.stripe.android.view.PaymentFlowActivity
 import com.stripe.android.view.PaymentFlowActivityStarter
 import com.stripe.android.view.PaymentMethodsActivity
 import java.util.Calendar
-import java.util.Objects
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import kotlin.test.AfterTest
@@ -220,16 +218,25 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
     @Throws(CardException::class, APIException::class, InvalidRequestException::class,
         AuthenticationException::class, APIConnectionException::class, JSONException::class)
     fun setCustomerShippingInfo_withValidInfo_callsWithExpectedArgs() {
-        val firstKey = Objects.requireNonNull(
-            getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW))
+        val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
         ephemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW)
         val proxyCalendar = Calendar.getInstance()
         val customerSession = createCustomerSession(proxyCalendar)
         customerSession.addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY)
-        val shippingInformation = Objects.requireNonNull<ShippingInformation>(
-            CustomerFixtures.CUSTOMER_WITH_SHIPPING.shippingInformation
-        )
-        customerSession.setCustomerShippingInformation(shippingInformation)
+        val shippingInformation =
+            requireNotNull(CustomerFixtures.CUSTOMER_WITH_SHIPPING.shippingInformation)
+        customerSession.setCustomerShippingInformation(shippingInformation,
+            object : CustomerSession.CustomerRetrievalListener {
+                override fun onCustomerRetrieved(customer: Customer) {
+                }
+
+                override fun onError(
+                    errorCode: Int,
+                    errorMessage: String,
+                    stripeError: StripeError?
+                ) {
+                }
+            })
 
         assertNotNull(FIRST_CUSTOMER.id)
         verify<StripeRepository>(stripeRepository).setCustomerShippingInfo(

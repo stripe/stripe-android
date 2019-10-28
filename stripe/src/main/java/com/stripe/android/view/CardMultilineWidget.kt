@@ -31,7 +31,6 @@ import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_EXPI
 import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_POSTAL
 import java.math.BigDecimal
 import java.math.RoundingMode
-import java.util.Objects
 
 /**
  * A multiline card input widget using the support design library's [TextInputLayout]
@@ -143,7 +142,7 @@ class CardMultilineWidget @JvmOverloads constructor(
             }
 
             val cardNumber = cardNumberEditText.cardNumber
-            val cardDate = Objects.requireNonNull<IntArray>(expiryDateEditText.validDateFields)
+            val cardDate = requireNotNull(expiryDateEditText.validDateFields)
             val cvcValue = cvcEditText.text?.toString()
 
             return Card.Builder(cardNumber, cardDate[0], cardDate[1], cvcValue)
