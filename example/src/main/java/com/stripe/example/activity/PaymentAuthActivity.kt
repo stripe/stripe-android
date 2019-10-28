@@ -27,7 +27,6 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
 import java.lang.ref.WeakReference
-import java.util.HashMap
 
 /**
  * An example of creating a PaymentIntent, then confirming it with [Stripe.confirmPayment]
@@ -150,7 +149,7 @@ class PaymentAuthActivity : AppCompatActivity() {
 
     private fun createSetupIntent() {
         compositeSubscription.add(
-            backendApi.createSetupIntent(HashMap(0))
+            backendApi.createSetupIntent(hashMapOf("country" to "us"))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe {
@@ -215,7 +214,7 @@ class PaymentAuthActivity : AppCompatActivity() {
         return mapOf(
             "payment_method_types[]" to "card",
             "amount" to 1000,
-            "currency" to "usd"
+            "country" to "us"
         )
             .plus(
                 stripeAccountId?.let {
@@ -229,12 +228,12 @@ class PaymentAuthActivity : AppCompatActivity() {
     ) : ApiResultCallback<PaymentIntentResult> {
         private val activityRef: WeakReference<PaymentAuthActivity> = WeakReference(activity)
 
-        override fun onSuccess(paymentIntentResult: PaymentIntentResult) {
+        override fun onSuccess(result: PaymentIntentResult) {
             val activity = activityRef.get() ?: return
 
-            val paymentIntent = paymentIntentResult.intent
+            val paymentIntent = result.intent
             activity.statusTextView.append("\n\n" +
-                "Auth outcome: " + paymentIntentResult.outcome + "\n\n" +
+                "Auth outcome: " + result.outcome + "\n\n" +
                 activity.getString(R.string.payment_intent_status, paymentIntent.status))
             activity.onAuthComplete()
         }
@@ -250,10 +249,10 @@ class PaymentAuthActivity : AppCompatActivity() {
     private class SetupAuthResultListener constructor(activity: PaymentAuthActivity) : ApiResultCallback<SetupIntentResult> {
         private val activityRef: WeakReference<PaymentAuthActivity> = WeakReference(activity)
 
-        override fun onSuccess(setupIntentResult: SetupIntentResult) {
+        override fun onSuccess(result: SetupIntentResult) {
             val activity = activityRef.get() ?: return
 
-            val setupIntent = setupIntentResult.intent
+            val setupIntent = result.intent
             activity.statusTextView.append("\n\n" + activity.getString(R.string.setup_intent_status, setupIntent.status))
             activity.onAuthComplete()
         }

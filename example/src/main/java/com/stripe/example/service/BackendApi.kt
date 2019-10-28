@@ -16,7 +16,7 @@ interface BackendApi {
     fun createEphemeralKey(@FieldMap apiVersionMap: HashMap<String, String>): Observable<ResponseBody>
 
     @FormUrlEncoded
-    @POST("create_intent")
+    @POST("create_payment_intent")
     fun createPaymentIntent(@FieldMap params: MutableMap<String, Any>): Observable<ResponseBody>
 
     @FormUrlEncoded
