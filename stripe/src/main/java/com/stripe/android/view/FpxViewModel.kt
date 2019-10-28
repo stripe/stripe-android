@@ -3,6 +3,7 @@ package com.stripe.android.view
 import android.app.Application
 import android.os.AsyncTask
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.stripe.android.ApiRequest
 import com.stripe.android.PaymentConfiguration
@@ -13,8 +14,13 @@ import com.stripe.android.model.FpxBankStatuses
 internal class FpxViewModel(application: Application) : AndroidViewModel(application) {
     private val context = application.applicationContext
 
-    @JvmSynthetic
-    internal val fpxBankStatuses: MutableLiveData<FpxBankStatuses> = MutableLiveData()
+    private val internalFpxBankStatuses: MutableLiveData<FpxBankStatuses> = MutableLiveData()
+
+    internal val fpxBankStatuses: LiveData<FpxBankStatuses>
+        @JvmSynthetic
+        get() {
+            return internalFpxBankStatuses
+        }
 
     @JvmSynthetic
     internal fun loadFpxBankStatues() {
@@ -28,7 +34,7 @@ internal class FpxViewModel(application: Application) : AndroidViewModel(applica
                 null
             }
 
-            fpxBankStatuses?.let { this.fpxBankStatuses.postValue(it) }
+            fpxBankStatuses?.let { this.internalFpxBankStatuses.postValue(it) }
         }
     }
 }
