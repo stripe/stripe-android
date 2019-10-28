@@ -162,7 +162,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
 
         private fun createSetupIntent() {
             compositeDisposable.add(
-                backendApi.createSetupIntent(HashMap(0))
+                backendApi.createSetupIntent(hashMapOf("country" to "us"))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnSubscribe {
@@ -210,7 +210,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
             return hashMapOf(
                 "payment_method_types[]" to "card",
                 "amount" to 1000,
-                "currency" to "usd"
+                "country" to "us"
             )
         }
 
