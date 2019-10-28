@@ -30,8 +30,8 @@ internal class CardInputTestActivity : AppCompatActivity() {
 
         setTheme(R.style.StripeDefaultTheme)
         cardInputWidget = CardInputWidget(this)
-        cardMultilineWidget = CardMultilineWidget(this, true)
-        noZipCardMulitlineWidget = CardMultilineWidget(this, false)
+        cardMultilineWidget = CardMultilineWidget(this, shouldShowPostalCode = true)
+        noZipCardMulitlineWidget = CardMultilineWidget(this, shouldShowPostalCode = false)
         maskedCardView = MaskedCardView(this)
 
         val linearLayout = LinearLayout(this)
