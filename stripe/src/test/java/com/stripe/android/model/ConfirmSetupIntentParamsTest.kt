@@ -1,6 +1,5 @@
 package com.stripe.android.model
 
-import java.util.Objects
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -73,8 +72,8 @@ class ConfirmSetupIntentParamsTest {
         )
         val params = confirmSetupIntentParams.toParamMap()
         assertNull(params[ConfirmStripeIntentParams.API_PARAM_PAYMENT_METHOD_ID])
-        val paymentMethodData = Objects.requireNonNull<Any>(
-            params[ConfirmStripeIntentParams.API_PARAM_PAYMENT_METHOD_DATA]) as Map<String, Any>
+        val paymentMethodData =
+            params[ConfirmStripeIntentParams.API_PARAM_PAYMENT_METHOD_DATA] as Map<String, Any>
         assertEquals("card", paymentMethodData["type"])
         assertNotNull(paymentMethodData["card"])
     }

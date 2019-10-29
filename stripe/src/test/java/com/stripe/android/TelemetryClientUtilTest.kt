@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import androidx.test.core.app.ApplicationProvider
-import java.util.Objects
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -73,7 +72,7 @@ class TelemetryClientUtilTest {
         )
             .createTelemetryMap()
 
-        val secondMap = Objects.requireNonNull<Map<*, *>>(telemetryMap["b"] as Map<*, *>?)
+        val secondMap = telemetryMap["b"] as Map<*, *>
         assertEquals(9, secondMap.size)
         assertEquals("version_name", secondMap["l"])
     }

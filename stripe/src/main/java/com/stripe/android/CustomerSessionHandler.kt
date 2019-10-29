@@ -31,7 +31,7 @@ internal class CustomerSessionHandler(
                 listener.onPaymentMethodRetrieved(obj as PaymentMethod, operationId)
             }
             CustomerSessionRunnableFactory.MessageCode.CUSTOMER_SHIPPING_INFO_SAVED -> {
-                listener.onCustomerShippingInfoSaved(obj as Customer)
+                listener.onCustomerShippingInfoSaved(obj as Customer, operationId)
             }
             CustomerSessionRunnableFactory.MessageCode.PAYMENT_METHODS_RETRIEVED -> {
                 listener.onPaymentMethodsRetrieved(obj as List<PaymentMethod>, operationId)
@@ -55,7 +55,7 @@ internal class CustomerSessionHandler(
 
         fun onPaymentMethodsRetrieved(paymentMethods: List<PaymentMethod>, operationId: String)
 
-        fun onCustomerShippingInfoSaved(customer: Customer?)
+        fun onCustomerShippingInfoSaved(customer: Customer?, operationId: String)
 
         fun onError(exception: StripeException, operationId: String)
     }

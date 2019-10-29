@@ -1,9 +1,7 @@
 package com.stripe.android.view
 
 import androidx.recyclerview.widget.RecyclerView
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import java.util.Objects
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -40,10 +38,13 @@ class PaymentMethodsAdapterTest {
         assertEquals(4, paymentMethodsAdapter.itemCount)
         verify<RecyclerView.AdapterDataObserver>(adapterDataObserver).onChanged()
 
-        assertEquals(PaymentMethodFixtures.CARD_PAYMENT_METHODS[2].id,
-            Objects.requireNonNull<PaymentMethod>(paymentMethodsAdapter.selectedPaymentMethod).id)
+        assertEquals(
+            PaymentMethodFixtures.CARD_PAYMENT_METHODS[2].id,
+            requireNotNull(paymentMethodsAdapter.selectedPaymentMethod).id
+        )
 
-        paymentMethodsAdapter.selectedPaymentMethodId = PaymentMethodFixtures.CARD_PAYMENT_METHODS[1].id
+        paymentMethodsAdapter.selectedPaymentMethodId =
+            PaymentMethodFixtures.CARD_PAYMENT_METHODS[1].id
         assertEquals(
             PaymentMethodFixtures.CARD_PAYMENT_METHODS[1].id,
             paymentMethodsAdapter.selectedPaymentMethod?.id
@@ -52,7 +53,8 @@ class PaymentMethodsAdapterTest {
 
     @Test
     fun updatePaymentMethods_removesExistingPaymentMethodsAndAddsAllPaymentMethods() {
-        val singlePaymentMethod = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHODS[0])
+        val singlePaymentMethod =
+            listOf(PaymentMethodFixtures.CARD_PAYMENT_METHODS[0])
 
         paymentMethodsAdapter.setPaymentMethods(singlePaymentMethod)
         assertEquals(2, paymentMethodsAdapter.itemCount)

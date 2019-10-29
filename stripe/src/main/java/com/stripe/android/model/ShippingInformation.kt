@@ -10,9 +10,9 @@ import org.json.JSONObject
  */
 @Parcelize
 data class ShippingInformation constructor(
-    val address: Address?,
-    val name: String?,
-    val phone: String?
+    val address: Address? = null,
+    val name: String? = null,
+    val phone: String? = null
 ) : StripeModel(), StripeParamsModel, Parcelable {
 
     override fun toParamMap(): Map<String, Any> {
@@ -34,11 +34,13 @@ data class ShippingInformation constructor(
         fun fromJson(jsonObject: JSONObject?): ShippingInformation? {
             return if (jsonObject == null) {
                 null
-            } else ShippingInformation(
-                Address.fromJson(jsonObject.optJSONObject(FIELD_ADDRESS)),
-                optString(jsonObject, FIELD_NAME),
-                optString(jsonObject, FIELD_PHONE)
-            )
+            } else {
+                ShippingInformation(
+                    Address.fromJson(jsonObject.optJSONObject(FIELD_ADDRESS)),
+                    optString(jsonObject, FIELD_NAME),
+                    optString(jsonObject, FIELD_PHONE)
+                )
+            }
         }
     }
 }

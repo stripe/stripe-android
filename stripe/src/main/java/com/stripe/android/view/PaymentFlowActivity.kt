@@ -10,11 +10,12 @@ import android.view.inputmethod.InputMethodManager
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.viewpager.widget.ViewPager
 import com.stripe.android.CustomerSession
-import com.stripe.android.CustomerSession.EVENT_SHIPPING_INFO_SAVED
 import com.stripe.android.PaymentSession.Companion.STATE_PAYMENT_SESSION_DATA
 import com.stripe.android.PaymentSession.Companion.TOKEN_PAYMENT_SESSION
 import com.stripe.android.PaymentSessionData
 import com.stripe.android.R
+import com.stripe.android.StripeError
+import com.stripe.android.model.Customer
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
 import kotlinx.android.synthetic.main.activity_shipping_flow.*
@@ -25,7 +26,6 @@ import kotlinx.android.synthetic.main.activity_shipping_flow.*
  */
 class PaymentFlowActivity : StripeActivity() {
 
-    private lateinit var shippingInfoSavedBroadcastReceiver: BroadcastReceiver
     private lateinit var shippingInfoSubmittedBroadcastReceiver: BroadcastReceiver
     private lateinit var paymentFlowPagerAdapter: PaymentFlowPagerAdapter
     private lateinit var paymentSessionData: PaymentSessionData
@@ -92,12 +92,7 @@ class PaymentFlowActivity : StripeActivity() {
                 }
             }
         }
-        shippingInfoSavedBroadcastReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                onShippingMethodsReady(validShippingMethods, defaultShippingMethod)
-                paymentSessionData.shippingInformation = shippingInformationSubmitted
-            }
-        }
+
         title = paymentFlowPagerAdapter.getPageTitle(shipping_flow_viewpager.currentItem)
     }
 
@@ -111,27 +106,42 @@ class PaymentFlowActivity : StripeActivity() {
 
     override fun onPause() {
         super.onPause()
-        val localBroadcastManager = LocalBroadcastManager.getInstance(this)
-        localBroadcastManager.unregisterReceiver(shippingInfoSubmittedBroadcastReceiver)
-        localBroadcastManager.unregisterReceiver(shippingInfoSavedBroadcastReceiver)
+        LocalBroadcastManager.getInstance(this)
+            .unregisterReceiver(shippingInfoSubmittedBroadcastReceiver)
     }
 
     override fun onResume() {
         super.onResume()
-        val localBroadcastManager = LocalBroadcastManager.getInstance(this)
-        localBroadcastManager.registerReceiver(
+        LocalBroadcastManager.getInstance(this).registerReceiver(
             shippingInfoSubmittedBroadcastReceiver,
             IntentFilter(PaymentFlowExtras.EVENT_SHIPPING_INFO_PROCESSED)
         )
-        localBroadcastManager.registerReceiver(
-            shippingInfoSavedBroadcastReceiver,
-            IntentFilter(EVENT_SHIPPING_INFO_SAVED)
-        )
+    }
+
+    @JvmSynthetic
+    internal fun onShippingInfoSaved(shippingInformation: ShippingInformation) {
+        onShippingMethodsReady(validShippingMethods, defaultShippingMethod)
+        paymentSessionData.shippingInformation = shippingInformation
     }
 
     private fun onShippingInfoValidated(customerSession: CustomerSession) {
         shippingInformationSubmitted?.let {
-            customerSession.setCustomerShippingInformation(it)
+            customerSession.setCustomerShippingInformation(it,
+                object : CustomerSession.CustomerRetrievalListener {
+                    override fun onCustomerRetrieved(customer: Customer) {
+                        onShippingInfoSaved(
+                            customer.shippingInformation ?: ShippingInformation()
+                        )
+                    }
+
+                    override fun onError(
+                        errorCode: Int,
+                        errorMessage: String,
+                        stripeError: StripeError?
+                    ) {
+                        showError(errorMessage)
+                    }
+                })
         }
     }
 
@@ -155,9 +165,8 @@ class PaymentFlowActivity : StripeActivity() {
     private fun onShippingInfoSubmitted() {
         hideKeyboard()
 
-        val shippingInfoWidget = findViewById<ShippingInfoWidget>(R.id.shipping_info_widget)
-        val shippingInformation = shippingInfoWidget.shippingInformation
-        if (shippingInformation != null) {
+        val shippingInfoWidget: ShippingInfoWidget = findViewById(R.id.shipping_info_widget)
+        shippingInfoWidget.shippingInformation?.let { shippingInformation ->
             shippingInformationSubmitted = shippingInformation
             setCommunicatingProgress(true)
             broadcastShippingInfoSubmitted(shippingInformation)
