@@ -1,6 +1,8 @@
 package com.stripe.android.view
 
 import android.os.Build
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageView
@@ -18,8 +20,8 @@ import com.stripe.android.testharness.ViewTestUtils
 import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_CARD
 import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_CVC
 import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_EXPIRY
-import com.stripe.android.view.CardInputWidget.LOGGING_TOKEN
-import com.stripe.android.view.CardInputWidget.shouldIconShowBrand
+import com.stripe.android.view.CardInputWidget.Companion.LOGGING_TOKEN
+import com.stripe.android.view.CardInputWidget.Companion.shouldIconShowBrand
 import java.util.Calendar
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -62,18 +64,49 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         activity = createStartedActivity()
 
         val dimensionOverrides = object : CardInputWidget.DimensionOverrideSettings {
+            override val frameWidth: Int
+                // That's a pretty small screen, but one that we theoretically support.
+                get() = 500
+
             override fun getPixelWidth(text: String, editText: EditText): Int {
                 // This makes it simple to know what to expect.
                 return text.length * 10
             }
-
-            override fun getFrameWidth(): Int {
-                // That's a pretty small screen, but one that we theoretically support.
-                return 500
-            }
         }
 
         cardInputWidget = activity.cardInputWidget
+
+        cardInputWidget.setCardNumberTextWatcher(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {
+            }
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+        })
+        cardInputWidget.setExpiryDateTextWatcher(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {
+            }
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+        })
+        cardInputWidget.setCvcNumberTextWatcher(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {
+            }
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+        })
+
         cardInputWidget.setDimensionOverrideSettings(dimensionOverrides)
         onGlobalFocusChangeListener = TestFocusChangeListener()
         cardInputWidget.viewTreeObserver

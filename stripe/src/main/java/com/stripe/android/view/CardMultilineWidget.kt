@@ -31,7 +31,6 @@ import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_EXPI
 import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_POSTAL
 import java.math.BigDecimal
 import java.math.RoundingMode
-import java.util.ArrayList
 import java.util.Objects
 
 /**
@@ -51,7 +50,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     private val cardNumberTextInputLayout: TextInputLayout
     private val expiryTextInputLayout: TextInputLayout
     private val cvcTextInputLayout: TextInputLayout
-    private val mPostalInputLayout: TextInputLayout
+    private val postalInputLayout: TextInputLayout
 
     private var cardInputListener: CardInputListener? = null
 
@@ -152,12 +151,12 @@ class CardMultilineWidget @JvmOverloads constructor(
                     postalCodeEditText.text?.toString()
                 else
                     null)
-                .loggingTokens(ArrayList(listOf(CARD_MULTILINE_TOKEN)))
+                .loggingTokens(listOf(CARD_MULTILINE_TOKEN))
         }
 
     private val isCvcLengthValid: Boolean
         get() {
-            val cvcLength = cvcEditText.text?.toString()?.trim { it <= ' ' }?.length
+            val cvcLength = cvcEditText.text?.toString()?.trim()?.length
             return if (TextUtils.equals(Card.CardBrand.AMERICAN_EXPRESS, cardBrand) &&
                 cvcLength == Card.CVC_LENGTH_AMERICAN_EXPRESS) {
                 true
@@ -206,7 +205,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         expiryTextInputLayout = findViewById(R.id.tl_add_source_expiry_ml)
         // We dynamically set the hint of the CVC field, so we need to keep a reference.
         cvcTextInputLayout = findViewById(R.id.tl_add_source_cvc_ml)
-        mPostalInputLayout = findViewById(R.id.tl_add_source_postal_ml)
+        postalInputLayout = findViewById(R.id.tl_add_source_postal_ml)
 
         if (shouldShowPostalCode) {
             // Set the label/hint to the shorter value if we have three things in a row.
@@ -217,7 +216,7 @@ class CardMultilineWidget @JvmOverloads constructor(
             cardNumberTextInputLayout,
             expiryTextInputLayout,
             cvcTextInputLayout,
-            mPostalInputLayout)
+            postalInputLayout)
 
         initErrorMessages()
         initFocusChangeListeners()
@@ -424,7 +423,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         expiryTextInputLayout.isEnabled = enabled
         cardNumberTextInputLayout.isEnabled = enabled
         cvcTextInputLayout.isEnabled = enabled
-        mPostalInputLayout.isEnabled = enabled
+        postalInputLayout.isEnabled = enabled
         isEnabled = enabled
     }
 
@@ -450,7 +449,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         } else {
             View.GONE
         }
-        mPostalInputLayout.visibility = postalCodeVisibility
+        postalInputLayout.visibility = postalCodeVisibility
 
         // If the postal code field is not shown, the CVC field is the last one in the form and the
         // action on the keyboard when the CVC field is focused should be "Done". Otherwise, show
