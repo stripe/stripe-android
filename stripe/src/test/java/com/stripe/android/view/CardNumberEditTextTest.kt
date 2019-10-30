@@ -3,6 +3,7 @@ package com.stripe.android.view
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.never
+import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.stripe.android.CardNumberFixtures.VALID_AMEX_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VALID_AMEX_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.VALID_DINERS_CLUB_NO_SPACES
@@ -22,7 +23,6 @@ import org.mockito.Mock
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
@@ -53,7 +53,7 @@ class CardNumberEditTextTest {
     @Test
     fun updateSelectionIndex_whenVisa_increasesIndexWhenGoingPastTheSpaces() {
         // Directly setting card brand as a testing hack (annotated in source)
-        cardNumberEditText.mCardBrand = Card.CardBrand.VISA
+        cardNumberEditText.cardBrand = Card.CardBrand.VISA
 
         // Adding 1 character, starting at position 4, with a final string length 6
         assertEquals(6, cardNumberEditText.updateSelectionIndex(6, 4, 1))
@@ -64,14 +64,14 @@ class CardNumberEditTextTest {
 
     @Test
     fun updateSelectionIndex_whenAmEx_increasesIndexWhenGoingPastTheSpaces() {
-        cardNumberEditText.mCardBrand = Card.CardBrand.AMERICAN_EXPRESS
+        cardNumberEditText.cardBrand = Card.CardBrand.AMERICAN_EXPRESS
         assertEquals(6, cardNumberEditText.updateSelectionIndex(6, 4, 1))
         assertEquals(13, cardNumberEditText.updateSelectionIndex(13, 11, 1))
     }
 
     @Test
     fun updateSelectionIndex_whenDinersClub_decreasesIndexWhenDeletingPastTheSpaces() {
-        cardNumberEditText.mCardBrand = Card.CardBrand.DINERS_CLUB
+        cardNumberEditText.cardBrand = Card.CardBrand.DINERS_CLUB
         assertEquals(4, cardNumberEditText.updateSelectionIndex(6, 5, 0))
         assertEquals(9, cardNumberEditText.updateSelectionIndex(13, 10, 0))
         assertEquals(14, cardNumberEditText.updateSelectionIndex(17, 15, 0))
@@ -79,38 +79,38 @@ class CardNumberEditTextTest {
 
     @Test
     fun updateSelectionIndex_whenDeletingNotOnGaps_doesNotDecreaseIndex() {
-        cardNumberEditText.mCardBrand = Card.CardBrand.DINERS_CLUB
+        cardNumberEditText.cardBrand = Card.CardBrand.DINERS_CLUB
         assertEquals(7, cardNumberEditText.updateSelectionIndex(12, 7, 0))
     }
 
     @Test
     fun updateSelectionIndex_whenAmEx_decreasesIndexWhenDeletingPastTheSpaces() {
-        cardNumberEditText.mCardBrand = Card.CardBrand.AMERICAN_EXPRESS
+        cardNumberEditText.cardBrand = Card.CardBrand.AMERICAN_EXPRESS
         assertEquals(4, cardNumberEditText.updateSelectionIndex(10, 5, 0))
         assertEquals(11, cardNumberEditText.updateSelectionIndex(13, 12, 0))
     }
 
     @Test
     fun updateSelectionIndex_whenSelectionInTheMiddle_increasesIndexOverASpace() {
-        cardNumberEditText.mCardBrand = Card.CardBrand.VISA
+        cardNumberEditText.cardBrand = Card.CardBrand.VISA
         assertEquals(6, cardNumberEditText.updateSelectionIndex(10, 4, 1))
     }
 
     @Test
     fun updateSelectionIndex_whenPastingIntoAGap_includesTheGapJump() {
-        cardNumberEditText.mCardBrand = Card.CardBrand.UNKNOWN
+        cardNumberEditText.cardBrand = Card.CardBrand.UNKNOWN
         assertEquals(11, cardNumberEditText.updateSelectionIndex(12, 8, 2))
     }
 
     @Test
     fun updateSelectionIndex_whenPastingOverAGap_includesTheGapJump() {
-        cardNumberEditText.mCardBrand = Card.CardBrand.UNKNOWN
+        cardNumberEditText.cardBrand = Card.CardBrand.UNKNOWN
         assertEquals(9, cardNumberEditText.updateSelectionIndex(12, 3, 5))
     }
 
     @Test
     fun updateSelectionIndex_whenIndexWouldGoOutOfBounds_setsToEndOfString() {
-        cardNumberEditText.mCardBrand = Card.CardBrand.VISA
+        cardNumberEditText.cardBrand = Card.CardBrand.VISA
         // This case could happen when you paste over 5 digits with only 2
         assertEquals(3, cardNumberEditText.updateSelectionIndex(3, 3, 2))
     }
@@ -150,7 +150,7 @@ class CardNumberEditTextTest {
         mutable = mutable.substring(0, 18)
         cardNumberEditText.setText(mutable)
         assertFalse(cardNumberEditText.isCardNumberValid)
-        verifyZeroInteractions(cardNumberCompleteListener)
+        verifyNoMoreInteractions(cardNumberCompleteListener)
     }
 
     @Test
@@ -159,7 +159,7 @@ class CardNumberEditTextTest {
         val almostValid = VALID_VISA_WITH_SPACES.substring(0, 18) + "3"
         cardNumberEditText.setText(almostValid)
         assertFalse(cardNumberEditText.isCardNumberValid)
-        verifyZeroInteractions(cardNumberCompleteListener)
+        verifyNoMoreInteractions(cardNumberCompleteListener)
     }
 
     @Test

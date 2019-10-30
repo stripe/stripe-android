@@ -540,16 +540,24 @@ class CardInputWidget @JvmOverloads constructor(
             }
         )
 
-        cardNumberEditText.setCardNumberCompleteListener {
-            scrollRight()
-            cardInputListener?.onCardComplete()
-        }
+        cardNumberEditText.setCardNumberCompleteListener(
+            object : CardNumberEditText.CardNumberCompleteListener {
+                override fun onCardNumberComplete() {
+                    scrollRight()
+                    cardInputListener?.onCardComplete()
+                }
+            }
+        )
 
-        cardNumberEditText.setCardBrandChangeListener { brand ->
-            isAmEx = CardBrand.AMERICAN_EXPRESS == brand
-            updateIcon(brand)
-            updateCvc(brand)
-        }
+        cardNumberEditText.setCardBrandChangeListener(
+            object : CardNumberEditText.CardBrandChangeListener {
+                override fun onCardBrandChanged(brand: String) {
+                    isAmEx = CardBrand.AMERICAN_EXPRESS == brand
+                    updateIcon(brand)
+                    updateCvc(brand)
+                }
+            }
+        )
 
         expiryDateEditText.setExpiryDateEditListener(
             object : ExpiryDateEditText.ExpiryDateEditListener {
