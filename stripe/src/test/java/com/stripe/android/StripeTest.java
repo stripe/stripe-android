@@ -22,6 +22,7 @@ import com.stripe.android.model.SourceCardData;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.SourceSepaDebitData;
 import com.stripe.android.model.Token;
+import com.stripe.android.model.WeChat;
 import com.stripe.android.testharness.JsonTestUtils;
 
 import java.util.Calendar;
@@ -389,17 +390,42 @@ public class StripeTest {
     @Test
     public void createSourceSynchronous_withWeChatPayParams_passesIntegrationTest()
             throws StripeException {
+        final String weChatAppId = "wx65997d6307c3827d";
         final Stripe stripe = createStripe("pk_live_L4KL0pF017Jgv9hBaWzk4xoB");
+        final SourceParams weChatPaySourceParams = SourceParams.createWeChatPayParams(
+                1000L,
+                "USD",
+                weChatAppId,
+                "WIDGET STORE"
+        );
+        final Source weChatPaySource = stripe.createSourceSynchronous(weChatPaySourceParams);
+        assertNotNull(weChatPaySource);
+        final WeChat weChatData = weChatPaySource.getWeChat();
+        assertEquals(weChatAppId, weChatData.getAppId());
+        assertEquals("WIDGET STORE", weChatData.getStatementDescriptor());
+    }
+
+    @Test
+    public void createSourceSynchronous_withWeChatPayParams_onUnactivatedAccount_throwsException() {
+        final Stripe stripe = createStripe("pk_live_8fFXnTeQrVqExmub4gQPOzgG001iJLyZwl");
         final SourceParams weChatPaySourceParams = SourceParams.createWeChatPayParams(
                 1000L,
                 "USD",
                 "wx65997d6307c3827d",
                 "WIDGET STORE"
         );
-        final Source weChatPaySource = stripe.createSourceSynchronous(weChatPaySourceParams);
-        assertNotNull(weChatPaySource);
-        assertEquals("WIDGET STORE",
-                weChatPaySource.getWeChat().getStatementDescriptor());
+        final InvalidRequestException ex = assertThrows(InvalidRequestException.class,
+                new ThrowingRunnable() {
+                    @Override
+                    public void run() throws Throwable {
+                        stripe.createSourceSynchronous(weChatPaySourceParams);
+                    }
+                });
+        assertEquals("payment_method_unactivated", ex.getErrorCode());
+        assertEquals(
+                "This payment method (wechat) is not activated for your account. You can only create testmode wechat sources. You can learn more about this here https://support.stripe.com/questions/i-am-having-trouble-activating-a-payment-method",
+                ex.getMessage()
+        );
     }
 
     @Test
