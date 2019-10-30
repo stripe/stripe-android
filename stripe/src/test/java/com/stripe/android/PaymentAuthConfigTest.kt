@@ -94,7 +94,7 @@ class PaymentAuthConfigTest : BaseViewTest<Fake3ds2ChallengeActivity>(
         expectedButtonCustomization.setTextFontName("Font Name")
         expectedButtonCustomization.textFontSize = 24
 
-        assertEquals(expectedButtonCustomization, buttonCustomization.mButtonCustomization)
+        assertEquals(expectedButtonCustomization, buttonCustomization.buttonCustomization)
     }
 
     @Test
@@ -116,7 +116,7 @@ class PaymentAuthConfigTest : BaseViewTest<Fake3ds2ChallengeActivity>(
         expectedLabelCustomization.setTextFontName("Font Name")
         expectedLabelCustomization.textFontSize = 24
 
-        assertEquals(expectedLabelCustomization, labelCustomization.mLabelCustomization)
+        assertEquals(expectedLabelCustomization, labelCustomization.labelCustomization)
     }
 
     @Test
@@ -138,7 +138,7 @@ class PaymentAuthConfigTest : BaseViewTest<Fake3ds2ChallengeActivity>(
         expectedTextBoxCustomization.setTextFontName("Font Name")
         expectedTextBoxCustomization.textFontSize = 24
 
-        assertEquals(expectedTextBoxCustomization, textBoxCustomization.mTextBoxCustomization)
+        assertEquals(expectedTextBoxCustomization, textBoxCustomization.textBoxCustomization)
     }
 
     @Test
@@ -162,7 +162,7 @@ class PaymentAuthConfigTest : BaseViewTest<Fake3ds2ChallengeActivity>(
         expectedCustomization.setTextFontName("Font Name")
         expectedCustomization.textFontSize = 16
 
-        assertEquals(expectedCustomization, toolbarCustomization.mToolbarCustomization)
+        assertEquals(expectedCustomization, toolbarCustomization.toolbarCustomization)
     }
 
     @Test
