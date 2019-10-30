@@ -18,6 +18,7 @@ import com.stripe.android.StripeError
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
+import java.lang.ref.WeakReference
 import kotlinx.android.synthetic.main.activity_shipping_flow.*
 
 /**
@@ -47,7 +48,9 @@ class PaymentFlowActivity : StripeActivity() {
             "PaymentFlowActivity launched without PaymentSessionData"
         }
 
-        paymentFlowPagerAdapter = PaymentFlowPagerAdapter(this, args.paymentSessionConfig, customerSession)
+        paymentFlowPagerAdapter = PaymentFlowPagerAdapter(
+            this, args.paymentSessionConfig, customerSession
+        )
         shipping_flow_viewpager.adapter = paymentFlowPagerAdapter
         shipping_flow_viewpager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageScrolled(i: Int, v: Float, i1: Int) {}
@@ -72,7 +75,8 @@ class PaymentFlowActivity : StripeActivity() {
 
                     val intentShippingMethods: List<ShippingMethod>? =
                         intent.getParcelableArrayListExtra(
-                            PaymentFlowExtras.EXTRA_VALID_SHIPPING_METHODS)
+                            PaymentFlowExtras.EXTRA_VALID_SHIPPING_METHODS
+                        )
                     if (intentShippingMethods != null) {
                         validShippingMethods.clear()
                         validShippingMethods.addAll(intentShippingMethods)
@@ -97,7 +101,8 @@ class PaymentFlowActivity : StripeActivity() {
     }
 
     public override fun onActionSave() {
-        if (PaymentFlowPagerEnum.SHIPPING_INFO == paymentFlowPagerAdapter.getPageAt(shipping_flow_viewpager.currentItem)) {
+        if (PaymentFlowPagerEnum.SHIPPING_INFO ==
+            paymentFlowPagerAdapter.getPageAt(shipping_flow_viewpager.currentItem)) {
             onShippingInfoSubmitted()
         } else {
             onShippingMethodSave()
@@ -119,7 +124,7 @@ class PaymentFlowActivity : StripeActivity() {
     }
 
     @JvmSynthetic
-    internal fun onShippingInfoSaved(shippingInformation: ShippingInformation) {
+    internal fun onShippingInfoSaved(shippingInformation: ShippingInformation?) {
         onShippingMethodsReady(validShippingMethods, defaultShippingMethod)
         paymentSessionData.shippingInformation = shippingInformation
     }
@@ -127,21 +132,7 @@ class PaymentFlowActivity : StripeActivity() {
     private fun onShippingInfoValidated(customerSession: CustomerSession) {
         shippingInformationSubmitted?.let {
             customerSession.setCustomerShippingInformation(it,
-                object : CustomerSession.CustomerRetrievalListener {
-                    override fun onCustomerRetrieved(customer: Customer) {
-                        onShippingInfoSaved(
-                            customer.shippingInformation ?: ShippingInformation()
-                        )
-                    }
-
-                    override fun onError(
-                        errorCode: Int,
-                        errorMessage: String,
-                        stripeError: StripeError?
-                    ) {
-                        showError(errorMessage)
-                    }
-                })
+                CustomerShippingInfoSavedListener(this))
         }
     }
 
@@ -174,21 +165,19 @@ class PaymentFlowActivity : StripeActivity() {
     }
 
     private fun hideKeyboard() {
-        val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val inputMethodManager: InputMethodManager =
+            getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         if (inputMethodManager.isAcceptingText) {
-            val currentFocus = currentFocus
-            val windowToken = currentFocus?.windowToken
-            inputMethodManager.hideSoftInputFromWindow(windowToken, 0)
+            inputMethodManager.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
         }
     }
 
     private fun broadcastShippingInfoSubmitted(shippingInformation: ShippingInformation) {
-        LocalBroadcastManager
-            .getInstance(this)
+        LocalBroadcastManager.getInstance(this)
             .sendBroadcast(
                 Intent(PaymentFlowExtras.EVENT_SHIPPING_INFO_SUBMITTED)
-                    .putExtra(PaymentFlowExtras.EXTRA_SHIPPING_INFO_DATA,
-                        shippingInformation))
+                    .putExtra(PaymentFlowExtras.EXTRA_SHIPPING_INFO_DATA, shippingInformation)
+            )
     }
 
     private fun hasNextPage(): Boolean {
@@ -201,12 +190,13 @@ class PaymentFlowActivity : StripeActivity() {
     }
 
     private fun onShippingMethodSave() {
-        val selectShippingMethodWidget = findViewById<SelectShippingMethodWidget>(R.id.select_shipping_method_widget)
-        val shippingMethod = selectShippingMethodWidget
-            .selectedShippingMethod
-        paymentSessionData.shippingMethod = shippingMethod
+        val selectShippingMethodWidget: SelectShippingMethodWidget =
+            findViewById(R.id.select_shipping_method_widget)
+        paymentSessionData.shippingMethod = selectShippingMethodWidget.selectedShippingMethod
         setResult(Activity.RESULT_OK,
-            Intent().putExtra(STATE_PAYMENT_SESSION_DATA, paymentSessionData))
+            Intent()
+                .putExtra(STATE_PAYMENT_SESSION_DATA, paymentSessionData)
+        )
         finish()
     }
 
@@ -218,9 +208,23 @@ class PaymentFlowActivity : StripeActivity() {
         super.onBackPressed()
     }
 
+    private class CustomerShippingInfoSavedListener internal constructor(
+        activity: PaymentFlowActivity
+    ) : CustomerSession.CustomerRetrievalListener {
+        private val activityRef: WeakReference<PaymentFlowActivity> = WeakReference(activity)
+
+        override fun onCustomerRetrieved(customer: Customer) {
+            activityRef.get()?.onShippingInfoSaved(customer.shippingInformation)
+        }
+
+        override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
+            activityRef.get()?.showError(errorMessage)
+        }
+    }
+
     companion object {
-        const val TOKEN_PAYMENT_FLOW_ACTIVITY: String = "PaymentFlowActivity"
-        const val TOKEN_SHIPPING_INFO_SCREEN: String = "ShippingInfoScreen"
-        const val TOKEN_SHIPPING_METHOD_SCREEN: String = "ShippingMethodScreen"
+        internal const val TOKEN_PAYMENT_FLOW_ACTIVITY: String = "PaymentFlowActivity"
+        internal const val TOKEN_SHIPPING_INFO_SCREEN: String = "ShippingInfoScreen"
+        internal const val TOKEN_SHIPPING_METHOD_SCREEN: String = "ShippingMethodScreen"
     }
 }
