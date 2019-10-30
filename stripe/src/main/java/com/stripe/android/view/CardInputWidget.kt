@@ -76,14 +76,16 @@ class CardInputWidget @JvmOverloads constructor(
             val cardNumber = cardNumberEditText.cardNumber
             val cardDate = expiryDateEditText.validDateFields
             val cvcValue = cvcNumberEditText.text.toString().trim()
-            return if (cardNumber == null || cardDate == null || cardDate.size != 2 ||
-                !isCvcLengthValid(cvcValue)) {
+            return if (cardNumber == null || cardDate == null || !isCvcLengthValid(cvcValue)) {
                 null
-            } else PaymentMethodCreateParams.Card.Builder()
-                .setNumber(cardNumber)
-                .setCvc(cvcValue)
-                .setExpiryMonth(cardDate[0])
-                .setExpiryYear(cardDate[1]).build()
+            } else {
+                PaymentMethodCreateParams.Card.Builder()
+                    .setNumber(cardNumber)
+                    .setCvc(cvcValue)
+                    .setExpiryMonth(cardDate.first)
+                    .setExpiryYear(cardDate.second)
+                    .build()
+            }
         }
 
     override val paymentMethodCreateParams: PaymentMethodCreateParams?
@@ -111,15 +113,16 @@ class CardInputWidget @JvmOverloads constructor(
         get() {
             val cardNumber = cardNumberEditText.cardNumber
             val cardDate = expiryDateEditText.validDateFields
-            if (cardNumber == null || cardDate == null || cardDate.size != 2) {
-                return null
-            }
-            val cvcValue = cvcNumberEditText.text.toString().trim()
-            return if (!isCvcLengthValid(cvcValue)) {
+            return if (cardNumber == null || cardDate == null) {
                 null
             } else {
-                Card.Builder(cardNumber, cardDate[0], cardDate[1], cvcValue)
-                    .loggingTokens(listOf(LOGGING_TOKEN))
+                val cvcValue = cvcNumberEditText.text.toString().trim()
+                if (!isCvcLengthValid(cvcValue)) {
+                    null
+                } else {
+                    Card.Builder(cardNumber, cardDate.first, cardDate.second, cvcValue)
+                        .loggingTokens(listOf(LOGGING_TOKEN))
+                }
             }
         }
 
@@ -548,10 +551,14 @@ class CardInputWidget @JvmOverloads constructor(
             updateCvc(brand)
         }
 
-        expiryDateEditText.setExpiryDateEditListener {
-            cvcNumberEditText.requestFocus()
-            cardInputListener?.onExpirationComplete()
-        }
+        expiryDateEditText.setExpiryDateEditListener(
+            object : ExpiryDateEditText.ExpiryDateEditListener {
+                override fun onExpiryDateComplete() {
+                    cvcNumberEditText.requestFocus()
+                    cardInputListener?.onExpirationComplete()
+                }
+            }
+        )
 
         cardNumberEditText.requestFocus()
     }

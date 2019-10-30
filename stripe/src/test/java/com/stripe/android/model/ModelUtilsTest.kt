@@ -47,7 +47,7 @@ class ModelUtilsTest {
         val now = Calendar.getInstance()
         val year = 1997
         now.set(Calendar.YEAR, year)
-        assertEquals(ModelUtils.normalizeYear(97, now), year)
+        assertEquals(year, ModelUtils.normalizeYear(97, now))
     }
 
     @Test
@@ -55,6 +55,6 @@ class ModelUtilsTest {
         val now = Calendar.getInstance()
         val year = 1997
         now.set(Calendar.YEAR, year)
-        assertNotEquals(ModelUtils.normalizeYear(97, now), 2097)
+        assertNotEquals(2097, ModelUtils.normalizeYear(97, now))
     }
 }

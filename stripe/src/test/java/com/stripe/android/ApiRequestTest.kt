@@ -73,8 +73,7 @@ internal class ApiRequestTest {
         assertEquals("Java", userAgentData.getString("lang"))
         assertEquals("Stripe", userAgentData.getString("publisher"))
         assertEquals("android", userAgentData.getString("os.name"))
-        assertEquals(Build.VERSION.SDK_INT,
-            Integer.parseInt(userAgentData.getString("os.version")))
+        assertEquals(Build.VERSION.SDK_INT, userAgentData.getString("os.version").toInt())
         assertTrue(userAgentData.getString("java.version").isNotBlank())
         assertTrue(userAgentData.getString("http.agent").isNotBlank())
     }

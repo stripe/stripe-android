@@ -18,13 +18,8 @@ internal object DateUtils {
      */
     @JvmStatic
     fun isValidMonth(monthString: String?): Boolean {
-        if (monthString == null) {
-            return false
-        }
-
         return try {
-            val monthInt = Integer.parseInt(monthString)
-            monthInt in 1..12
+            monthString?.toInt() in 1..12
         } catch (numEx: NumberFormatException) {
             false
         }

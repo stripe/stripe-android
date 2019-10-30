@@ -72,7 +72,7 @@ internal object ModelUtils {
         return if (year in 0..99) {
             val currentYear = now.get(Calendar.YEAR).toString()
             val prefix = currentYear.substring(0, currentYear.length - 2)
-            Integer.parseInt(String.format(Locale.US, "%s%02d", prefix, year))
+            String.format(Locale.US, "%s%02d", prefix, year).toInt()
         } else {
             year
         }

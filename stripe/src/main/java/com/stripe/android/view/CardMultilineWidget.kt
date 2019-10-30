@@ -74,12 +74,13 @@ class CardMultilineWidget @JvmOverloads constructor(
     override val paymentMethodCard: PaymentMethodCreateParams.Card?
         get() {
             return if (validateAllFields()) {
-                expiryDateEditText.validDateFields?.let { cardDate ->
+                expiryDateEditText.validDateFields?.let { (month, year) ->
                     PaymentMethodCreateParams.Card.Builder()
                         .setNumber(cardNumberEditText.cardNumber)
                         .setCvc(cvcEditText.text?.toString())
-                        .setExpiryMonth(cardDate[0])
-                        .setExpiryYear(cardDate[1]).build()
+                        .setExpiryMonth(month)
+                        .setExpiryYear(year)
+                        .build()
                 }
             } else {
                 null
@@ -92,9 +93,9 @@ class CardMultilineWidget @JvmOverloads constructor(
      */
     override val paymentMethodCreateParams: PaymentMethodCreateParams?
         get() {
-            val card = paymentMethodCard ?: return null
-
-            return PaymentMethodCreateParams.create(card, paymentMethodBillingDetails)
+            return paymentMethodCard?.let {
+                PaymentMethodCreateParams.create(it, paymentMethodBillingDetails)
+            }
         }
 
     /**
@@ -145,7 +146,7 @@ class CardMultilineWidget @JvmOverloads constructor(
             val cardDate = requireNotNull(expiryDateEditText.validDateFields)
             val cvcValue = cvcEditText.text?.toString()
 
-            return Card.Builder(cardNumber, cardDate[0], cardDate[1], cvcValue)
+            return Card.Builder(cardNumber, cardDate.first, cardDate.second, cvcValue)
                 .addressZip(if (shouldShowPostalCode)
                     postalCodeEditText.text?.toString()
                 else
@@ -231,10 +232,14 @@ class CardMultilineWidget @JvmOverloads constructor(
             cardInputListener?.onCardComplete()
         }
 
-        expiryDateEditText.setExpiryDateEditListener {
-            cvcEditText.requestFocus()
-            cardInputListener?.onExpirationComplete()
-        }
+        expiryDateEditText.setExpiryDateEditListener(
+            object : ExpiryDateEditText.ExpiryDateEditListener {
+                override fun onExpiryDateComplete() {
+                    cvcEditText.requestFocus()
+                    cardInputListener?.onExpirationComplete()
+                }
+            }
+        )
 
         cvcEditText.setAfterTextChangedListener(
             object : StripeEditText.AfterTextChangedListener {
@@ -307,7 +312,7 @@ class CardMultilineWidget @JvmOverloads constructor(
      */
     fun validateAllFields(): Boolean {
         val cardNumberIsValid = CardUtils.isValidCardNumber(cardNumberEditText.cardNumber)
-        val expiryIsValid = expiryDateEditText.validDateFields != null && expiryDateEditText.isDateValid
+        val expiryIsValid = expiryDateEditText.validDateFields != null
         val cvcIsValid = isCvcLengthValid
         cardNumberEditText.shouldShowError = !cardNumberIsValid
         expiryDateEditText.shouldShowError = !expiryIsValid
