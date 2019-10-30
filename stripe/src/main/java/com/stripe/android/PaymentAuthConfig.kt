@@ -51,6 +51,15 @@ class PaymentAuthConfig private constructor(
             private var uiCustomization =
                 Stripe3ds2UiCustomization.Builder().build()
 
+            /**
+             * The 3DS2 challenge flow timeout, in seconds.
+             *
+             * If the timeout is reached, the challenge screen will close, control will return to
+             * the launching Activity/Fragment, payment authentication will not succeed, and the
+             * outcome will be represented as [StripeIntentResult.Outcome.TIMEDOUT].
+             *
+             * Must be a value between 5 and 99, inclusive.
+             */
             fun setTimeout(@IntRange(from = 5, to = 99) timeout: Int): Builder {
                 this.timeout = timeout
                 return this
@@ -474,25 +483,19 @@ class PaymentAuthConfig private constructor(
 
             @Throws(RuntimeException::class)
             private fun getUiButtonType(buttonType: ButtonType): UiCustomization.ButtonType {
-                when (buttonType) {
-                    ButtonType.SUBMIT -> {
-                        return UiCustomization.ButtonType.SUBMIT
-                    }
-                    ButtonType.CONTINUE -> {
-                        return UiCustomization.ButtonType.CONTINUE
-                    }
-                    ButtonType.NEXT -> {
-                        return UiCustomization.ButtonType.NEXT
-                    }
-                    ButtonType.CANCEL -> {
-                        return UiCustomization.ButtonType.CANCEL
-                    }
-                    ButtonType.RESEND -> {
-                        return UiCustomization.ButtonType.RESEND
-                    }
-                    ButtonType.SELECT -> {
-                        return UiCustomization.ButtonType.SELECT
-                    }
+                return when (buttonType) {
+                    ButtonType.SUBMIT ->
+                        UiCustomization.ButtonType.SUBMIT
+                    ButtonType.CONTINUE ->
+                        UiCustomization.ButtonType.CONTINUE
+                    ButtonType.NEXT ->
+                        UiCustomization.ButtonType.NEXT
+                    ButtonType.CANCEL ->
+                        UiCustomization.ButtonType.CANCEL
+                    ButtonType.RESEND ->
+                        UiCustomization.ButtonType.RESEND
+                    ButtonType.SELECT ->
+                        UiCustomization.ButtonType.SELECT
                 }
             }
 
