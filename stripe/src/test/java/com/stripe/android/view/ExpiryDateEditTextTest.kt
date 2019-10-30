@@ -14,7 +14,7 @@ import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyZeroInteractions
+import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
@@ -98,7 +98,7 @@ class ExpiryDateEditTextTest {
         expiryDateEditText.append("1")
         expiryDateEditText.append("2")
         expiryDateEditText.append("5")
-        verifyZeroInteractions(expiryDateEditListener)
+        verifyNoInteractions(expiryDateEditListener)
 
         expiryDateEditText.append("9")
         assertTrue(expiryDateEditText.isDateValid)
@@ -189,7 +189,7 @@ class ExpiryDateEditTextTest {
         expiryDateEditText.append("1212")
 
         assertTrue(expiryDateEditText.shouldShowError)
-        verifyZeroInteractions(expiryDateEditListener)
+        verifyNoInteractions(expiryDateEditListener)
     }
 
     @Test
@@ -206,7 +206,7 @@ class ExpiryDateEditTextTest {
         assertFalse(expiryDateEditText.shouldShowError)
 
         // The date is no longer "in error", but it still shouldn't have triggered the listener.
-        verifyZeroInteractions(expiryDateEditListener)
+        verifyNoInteractions(expiryDateEditListener)
     }
 
     @Test
@@ -219,8 +219,8 @@ class ExpiryDateEditTextTest {
 
         val retrievedDate = expiryDateEditText.validDateFields
         assertNotNull(retrievedDate)
-        assertEquals(12, retrievedDate[0])
-        assertEquals(2050, retrievedDate[1])
+        assertEquals(12, retrievedDate.first)
+        assertEquals(2050, retrievedDate.second)
     }
 
     @Test
