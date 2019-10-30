@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 12.2.0 - unreleased
+* [#1745](https://github.com/stripe/stripe-android/pull/1745) Make `StripeEditText` public
+* [#1746](https://github.com/stripe/stripe-android/pull/1746) Make `FpxBank` enum public
+* [#1748](https://github.com/stripe/stripe-android/pull/1748) Update FPX bank list with offline status
+* [#1755](https://github.com/stripe/stripe-android/pull/1755) Annotate `Stripe` methods with `@UiThread` or `@WorkerThread`
+* [#1758](https://github.com/stripe/stripe-android/pull/1758) Refactor `CustomerSession.setCustomerShippingInformation()`
+
 ## 12.1.0 - 2019-10-22
 * [#1738](https://github.com/stripe/stripe-android/pull/1738) Enable specifying Payment Method type to use in UI components
 
