@@ -10,20 +10,29 @@ import com.stripe.android.view.StripeIntentResultExtras
  * Starts an instance of [PaymentRelayStarter].
  * Should only be called from [PaymentController].
  */
-internal open class PaymentRelayStarter(
-    private val host: AuthActivityStarter.Host,
-    private val requestCode: Int
-) : AuthActivityStarter<PaymentRelayStarter.Data> {
-
-    override fun start(data: Data) {
-        val extras = Bundle()
-        extras.putString(StripeIntentResultExtras.CLIENT_SECRET,
-            if (data.stripeIntent != null) data.stripeIntent.clientSecret else null)
-        extras.putSerializable(StripeIntentResultExtras.AUTH_EXCEPTION, data.exception)
-        host.startActivityForResult(PaymentRelayActivity::class.java, extras, requestCode)
+internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter.Data> {
+    companion object {
+        @JvmSynthetic
+        internal fun create(
+            host: AuthActivityStarter.Host,
+            requestCode: Int
+        ): PaymentRelayStarter {
+            return object : PaymentRelayStarter {
+                override fun start(data: Data) {
+                    val extras = Bundle()
+                    extras.putString(StripeIntentResultExtras.CLIENT_SECRET,
+                        data.stripeIntent?.clientSecret)
+                    extras.putSerializable(StripeIntentResultExtras.AUTH_EXCEPTION,
+                        data.exception)
+                    host.startActivityForResult(
+                        PaymentRelayActivity::class.java, extras, requestCode
+                    )
+                }
+            }
+        }
     }
 
-    internal data class Data private constructor(
+    data class Data internal constructor(
         val stripeIntent: StripeIntent? = null,
         val exception: Exception? = null
     ) {
