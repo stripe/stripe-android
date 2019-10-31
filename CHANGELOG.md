@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 12.2.0 - unreleased
+## 12.2.0 - 2019-10-31
 * [#1745](https://github.com/stripe/stripe-android/pull/1745) Make `StripeEditText` public
 * [#1746](https://github.com/stripe/stripe-android/pull/1746) Make `FpxBank` enum public
 * [#1748](https://github.com/stripe/stripe-android/pull/1748) Update FPX bank list with offline status
