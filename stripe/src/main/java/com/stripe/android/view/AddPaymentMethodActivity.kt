@@ -164,20 +164,20 @@ open class AddPaymentMethodActivity : StripeActivity() {
         private val updatesCustomer: Boolean
     ) : ActivityPaymentMethodCallback<AddPaymentMethodActivity>(activity) {
 
-        override fun onError(error: Exception) {
+        override fun onError(e: Exception) {
             activity?.let { activity ->
                 activity.setCommunicatingProgress(false)
                 // This error is independent of the CustomerSession, so we have to surface it here.
-                activity.showError(error.localizedMessage.orEmpty())
+                activity.showError(e.localizedMessage.orEmpty())
             }
         }
 
-        override fun onSuccess(paymentMethod: PaymentMethod) {
+        override fun onSuccess(result: PaymentMethod) {
             activity?.let { activity ->
                 if (updatesCustomer) {
-                    activity.attachPaymentMethodToCustomer(paymentMethod)
+                    activity.attachPaymentMethodToCustomer(result)
                 } else {
-                    activity.finishWithPaymentMethod(paymentMethod)
+                    activity.finishWithPaymentMethod(result)
                 }
             }
         }
