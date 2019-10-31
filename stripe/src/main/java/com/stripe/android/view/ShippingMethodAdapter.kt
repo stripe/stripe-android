@@ -59,11 +59,19 @@ internal class ShippingMethodAdapter :
         notifyItemChanged(selectedIndex)
     }
 
+    internal fun setSelected(shippingMethod: ShippingMethod) {
+        val previouslySelectedIndex = selectedIndex
+        selectedIndex = shippingMethods.indexOf(shippingMethod)
+        if (previouslySelectedIndex != selectedIndex) {
+            notifyItemChanged(previouslySelectedIndex)
+            notifyItemChanged(selectedIndex)
+        }
+    }
+
     internal class ShippingMethodViewHolder constructor(
         private val shippingMethodView: ShippingMethodView,
         adapter: ShippingMethodAdapter
     ) : RecyclerView.ViewHolder(shippingMethodView) {
-
         init {
             shippingMethodView.setOnClickListener {
                 adapter.onShippingMethodSelected(adapterPosition)

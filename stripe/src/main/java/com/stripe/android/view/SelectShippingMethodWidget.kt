@@ -43,4 +43,8 @@ internal class SelectShippingMethodWidget @JvmOverloads constructor(
     ) {
         shippingMethodAdapter.setShippingMethods(shippingMethods, defaultShippingMethod)
     }
+
+    fun setSelectedShippingMethod(shippingMethod: ShippingMethod) {
+        shippingMethodAdapter.setSelected(shippingMethod)
+    }
 }

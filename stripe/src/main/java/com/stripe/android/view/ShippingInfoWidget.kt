@@ -42,12 +42,23 @@ class ShippingInfoWidget @JvmOverloads constructor(
     private val stateEditText: StripeEditText
     private val phoneNumberEditText: StripeEditText
 
+    /**
+     * Return [ShippingInformation] based on user input if valid, otherwise null.
+     */
     val shippingInformation: ShippingInformation?
         get() {
-            if (!validateAllFields()) {
-                return null
+            return if (!validateAllFields()) {
+                null
+            } else {
+                rawShippingInformation
             }
+        }
 
+    /**
+     * Return [ShippingInformation] based on user input.
+     */
+    internal val rawShippingInformation: ShippingInformation
+        get() {
             val address = Address.Builder()
                 .setCity(cityEditText.text?.toString())
                 .setCountry(countryAutoCompleteTextView.selectedCountryCode)
@@ -151,11 +162,12 @@ class ShippingInfoWidget @JvmOverloads constructor(
             return
         }
 
-        val address = shippingInformation.address
-        if (address != null) {
+        shippingInformation.address?.let { address ->
             cityEditText.setText(address.city)
-            if (address.country != null && address.country.isNotEmpty()) {
-                countryAutoCompleteTextView.setCountrySelected(address.country)
+            address.country?.let { country ->
+                if (country.isNotEmpty()) {
+                    countryAutoCompleteTextView.setCountrySelected(country)
+                }
             }
             addressEditText.setText(address.line1)
             addressEditText2.setText(address.line2)
