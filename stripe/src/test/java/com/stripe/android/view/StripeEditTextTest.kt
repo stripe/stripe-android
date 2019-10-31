@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import androidx.test.core.app.ApplicationProvider
+import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.stripe.android.R
 import com.stripe.android.testharness.ViewTestUtils
 import kotlin.test.BeforeTest
@@ -14,8 +15,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyNoMoreInteractions
-import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
@@ -48,13 +47,13 @@ class StripeEditTextTest {
     fun deleteText_whenZeroLength_callsDeleteListener() {
         ViewTestUtils.sendDeleteKeyEvent(editText)
         verify<StripeEditText.DeleteEmptyListener>(deleteEmptyListener).onDeleteEmpty()
-        verifyZeroInteractions(afterTextChangedListener)
+        verifyNoMoreInteractions(afterTextChangedListener)
     }
 
     @Test
     fun addText_callsAppropriateListeners() {
         editText.append("1")
-        verifyZeroInteractions(deleteEmptyListener)
+        verifyNoMoreInteractions(deleteEmptyListener)
         verify<StripeEditText.AfterTextChangedListener>(afterTextChangedListener).onTextChanged("1")
     }
 
@@ -64,7 +63,7 @@ class StripeEditTextTest {
         reset<StripeEditText.AfterTextChangedListener>(afterTextChangedListener)
 
         ViewTestUtils.sendDeleteKeyEvent(editText)
-        verifyZeroInteractions(deleteEmptyListener)
+        verifyNoMoreInteractions(deleteEmptyListener)
         verify<StripeEditText.AfterTextChangedListener>(afterTextChangedListener).onTextChanged("")
     }
 
@@ -74,7 +73,7 @@ class StripeEditTextTest {
         verify<StripeEditText.AfterTextChangedListener>(afterTextChangedListener).onTextChanged("12")
         editText.setSelection(0)
         ViewTestUtils.sendDeleteKeyEvent(editText)
-        verifyZeroInteractions(deleteEmptyListener)
+        verifyNoMoreInteractions(deleteEmptyListener)
         verifyNoMoreInteractions(afterTextChangedListener)
     }
 

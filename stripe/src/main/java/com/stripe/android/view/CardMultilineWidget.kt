@@ -222,15 +222,23 @@ class CardMultilineWidget @JvmOverloads constructor(
         initFocusChangeListeners()
         initDeleteEmptyListeners()
 
-        cardNumberEditText.setCardBrandChangeListener { brand ->
-            cardBrand = brand
-            updateBrandUi()
-        }
+        cardNumberEditText.setCardNumberCompleteListener(
+            object : CardNumberEditText.CardNumberCompleteListener {
+                override fun onCardNumberComplete() {
+                    expiryDateEditText.requestFocus()
+                    cardInputListener?.onCardComplete()
+                }
+            }
+        )
 
-        cardNumberEditText.setCardNumberCompleteListener {
-            expiryDateEditText.requestFocus()
-            cardInputListener?.onCardComplete()
-        }
+        cardNumberEditText.setCardBrandChangeListener(
+            object : CardNumberEditText.CardBrandChangeListener {
+                override fun onCardBrandChanged(brand: String) {
+                    cardBrand = brand
+                    updateBrandUi()
+                }
+            }
+        )
 
         expiryDateEditText.setExpiryDateEditListener(
             object : ExpiryDateEditText.ExpiryDateEditListener {
