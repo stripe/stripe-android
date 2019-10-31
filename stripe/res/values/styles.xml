@@ -27,4 +27,6 @@
 
     <style name="StripeDefaultTheme" parent="StripeBaseTheme"/>
     <style name="StripeDefault3DS2Theme" parent="BaseStripe3DS2Theme" />
+
+    <style name="AlertDialogStyle" parent="Theme.AppCompat.DayNight.Dialog" />
 </resources>

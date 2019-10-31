@@ -11,12 +11,17 @@ import android.net.Uri
 import android.os.Build
 import android.util.AttributeSet
 import android.view.View
+import android.webkit.ConsoleMessage
+import android.webkit.JsResult
 import android.webkit.URLUtil
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.ProgressBar
+import androidx.appcompat.app.AlertDialog
 import com.stripe.android.Logger
+import com.stripe.android.R
 
 /**
  * A `WebView` used for authenticating payment details
@@ -42,6 +47,30 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
         webViewClient = PaymentAuthWebViewClient(activity, activity.packageManager, logger,
             progressBar, clientSecret, returnUrl)
         setWebViewClient(webViewClient)
+
+        webChromeClient = object : WebChromeClient() {
+            override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+                consoleMessage?.message()?.let {
+                    logger.debug(it)
+                }
+                return super.onConsoleMessage(consoleMessage)
+            }
+
+            override fun onJsConfirm(
+                view: WebView?,
+                url: String?,
+                message: String?,
+                result: JsResult?
+            ): Boolean {
+                AlertDialog.Builder(activity, R.style.AlertDialogStyle)
+                    .setMessage(message)
+                    .setPositiveButton(android.R.string.ok) { _, _ -> result?.confirm() }
+                    .setNegativeButton(android.R.string.cancel) { _, _ -> result?.cancel() }
+                    .create()
+                    .show()
+                return true
+            }
+        }
     }
 
     override fun destroy() {
