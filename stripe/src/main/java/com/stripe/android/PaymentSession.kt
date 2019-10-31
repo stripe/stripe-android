@@ -51,7 +51,7 @@ class PaymentSession @VisibleForTesting internal constructor(
         PaymentMethodsActivityStarter(activity),
         PaymentFlowActivityStarter(activity),
         PaymentSessionData(),
-        PaymentSessionPrefs(activity)
+        PaymentSessionPrefs.create(activity)
     )
 
     constructor(fragment: Fragment) : this(
@@ -60,7 +60,7 @@ class PaymentSession @VisibleForTesting internal constructor(
         PaymentMethodsActivityStarter(fragment),
         PaymentFlowActivityStarter(fragment),
         PaymentSessionData(),
-        PaymentSessionPrefs(fragment.requireActivity())
+        PaymentSessionPrefs.create(fragment.requireActivity())
     )
 
     init {
