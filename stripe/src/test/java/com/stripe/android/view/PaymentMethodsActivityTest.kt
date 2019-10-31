@@ -7,6 +7,8 @@ import android.view.View
 import android.widget.ProgressBar
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
+import com.nhaarman.mockitokotlin2.KArgumentCaptor
+import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CustomerSession
@@ -24,8 +26,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
-import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
@@ -42,8 +42,8 @@ import org.robolectric.shadows.ShadowActivity
 class PaymentMethodsActivityTest : BaseViewTest<PaymentMethodsActivity>(PaymentMethodsActivity::class.java) {
     @Mock
     private lateinit var customerSession: CustomerSession
-    @Captor
-    private lateinit var listenerArgumentCaptor: ArgumentCaptor<CustomerSession.PaymentMethodsRetrievalListener>
+
+    private lateinit var listenerArgumentCaptor: KArgumentCaptor<CustomerSession.PaymentMethodsRetrievalListener>
 
     private lateinit var context: Context
     private lateinit var paymentMethodsActivity: PaymentMethodsActivity
@@ -55,6 +55,7 @@ class PaymentMethodsActivityTest : BaseViewTest<PaymentMethodsActivity>(PaymentM
     @BeforeTest
     fun setup() {
         MockitoAnnotations.initMocks(this)
+        listenerArgumentCaptor = argumentCaptor()
 
         context = ApplicationProvider.getApplicationContext()
 
@@ -94,10 +95,8 @@ class PaymentMethodsActivityTest : BaseViewTest<PaymentMethodsActivity>(PaymentM
         assertEquals(View.VISIBLE, addCardView.visibility)
         assertEquals(View.VISIBLE, recyclerView.visibility)
 
-        val listener = listenerArgumentCaptor.value
-        assertNotNull(listener)
-
-        listener.onPaymentMethodsRetrieved(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
+        listenerArgumentCaptor.firstValue
+            .onPaymentMethodsRetrieved(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
 
         assertEquals(View.GONE, progressBar.visibility)
     }
@@ -116,10 +115,8 @@ class PaymentMethodsActivityTest : BaseViewTest<PaymentMethodsActivity>(PaymentM
         verify<CustomerSession>(customerSession)
             .getPaymentMethods(eq(PaymentMethod.Type.Card), listenerArgumentCaptor.capture())
 
-        val listener = listenerArgumentCaptor.value
-        assertNotNull(listener)
-
-        listener.onPaymentMethodsRetrieved(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
+        listenerArgumentCaptor.firstValue
+            .onPaymentMethodsRetrieved(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
 
         val paymentMethodsAdapter =
             recyclerView.adapter as PaymentMethodsAdapter
@@ -165,10 +162,8 @@ class PaymentMethodsActivityTest : BaseViewTest<PaymentMethodsActivity>(PaymentM
         verify<CustomerSession>(customerSession, times(2))
             .getPaymentMethods(eq(PaymentMethod.Type.Card), listenerArgumentCaptor.capture())
 
-        val listener = listenerArgumentCaptor.value
-        assertNotNull(listener)
-
-        listener.onPaymentMethodsRetrieved(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
+        listenerArgumentCaptor.firstValue
+            .onPaymentMethodsRetrieved(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
         assertEquals(View.GONE, progressBar.visibility)
         assertEquals(4, recyclerView.adapter?.itemCount)
 
@@ -188,10 +183,8 @@ class PaymentMethodsActivityTest : BaseViewTest<PaymentMethodsActivity>(PaymentM
         assertEquals(View.VISIBLE, addCardView.visibility)
         assertEquals(View.VISIBLE, recyclerView.visibility)
 
-        val listener = listenerArgumentCaptor.value
-        assertNotNull(listener)
-
-        listener.onPaymentMethodsRetrieved(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
+        listenerArgumentCaptor.firstValue
+            .onPaymentMethodsRetrieved(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
         val paymentMethodsAdapter =
             recyclerView.adapter as PaymentMethodsAdapter?
         assertNotNull(paymentMethodsAdapter)

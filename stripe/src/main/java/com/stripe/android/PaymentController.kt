@@ -85,8 +85,8 @@ internal open class PaymentController @VisibleForTesting constructor(
             clientSecret,
             requestOptions,
             object : ApiResultCallback<StripeIntent> {
-                override fun onSuccess(stripeIntent: StripeIntent) {
-                    handleNextAction(host, stripeIntent, requestOptions)
+                override fun onSuccess(result: StripeIntent) {
+                    handleNextAction(host, result, requestOptions)
                 }
 
                 override fun onError(e: Exception) {
@@ -135,10 +135,10 @@ internal open class PaymentController @VisibleForTesting constructor(
             .getIntExtra(StripeIntentResultExtras.FLOW_OUTCOME, StripeIntentResult.Outcome.UNKNOWN)
         RetrieveIntentTask(stripeRepository, getClientSecret(data), requestOptions,
             object : ApiResultCallback<StripeIntent> {
-                override fun onSuccess(stripeIntent: StripeIntent) {
-                    if (stripeIntent is PaymentIntent) {
+                override fun onSuccess(result: StripeIntent) {
+                    if (result is PaymentIntent) {
                         callback.onSuccess(
-                            PaymentIntentResult(stripeIntent, flowOutcome)
+                            PaymentIntentResult(result, flowOutcome)
                         )
                     }
                 }
@@ -176,10 +176,10 @@ internal open class PaymentController @VisibleForTesting constructor(
 
         RetrieveIntentTask(stripeRepository, getClientSecret(data), requestOptions,
             object : ApiResultCallback<StripeIntent> {
-                override fun onSuccess(stripeIntent: StripeIntent) {
-                    if (stripeIntent is SetupIntent) {
+                override fun onSuccess(result: StripeIntent) {
+                    if (result is SetupIntent) {
                         callback.onSuccess(
-                            SetupIntentResult(stripeIntent, flowOutcome)
+                            SetupIntentResult(result, flowOutcome)
                         )
                     }
                 }
@@ -284,7 +284,7 @@ internal open class PaymentController @VisibleForTesting constructor(
     }
 
     private fun bypassAuth(host: AuthActivityStarter.Host, stripeIntent: StripeIntent) {
-        PaymentRelayStarter(host, getRequestCode(stripeIntent))
+        PaymentRelayStarter.create(host, getRequestCode(stripeIntent))
             .start(PaymentRelayStarter.Data.create(stripeIntent))
     }
 
@@ -386,8 +386,8 @@ internal open class PaymentController @VisibleForTesting constructor(
         private val requestCode: Int
     ) : ApiResultCallback<StripeIntent> {
 
-        override fun onSuccess(stripeIntent: StripeIntent) {
-            paymentController.handleNextAction(host, stripeIntent, requestOptions)
+        override fun onSuccess(result: StripeIntent) {
+            paymentController.handleNextAction(host, result, requestOptions)
         }
 
         override fun onError(e: Exception) {
@@ -407,7 +407,8 @@ internal open class PaymentController @VisibleForTesting constructor(
         private val analyticsDataFactory: AnalyticsDataFactory,
         private val challengeFlowStarter: ChallengeFlowStarter,
         private val enableLogging: Boolean = false,
-        private val paymentRelayStarter: PaymentRelayStarter = PaymentRelayStarter(host, getRequestCode(stripeIntent))
+        private val paymentRelayStarter: PaymentRelayStarter =
+            PaymentRelayStarter.create(host, getRequestCode(stripeIntent))
     ) : ApiResultCallback<Stripe3ds2AuthResult> {
 
         override fun onSuccess(result: Stripe3ds2AuthResult) {
@@ -741,7 +742,7 @@ internal open class PaymentController @VisibleForTesting constructor(
             requestCode: Int,
             exception: Exception
         ) {
-            PaymentRelayStarter(host, requestCode)
+            PaymentRelayStarter.create(host, requestCode)
                 .start(PaymentRelayStarter.Data.create(exception))
         }
 

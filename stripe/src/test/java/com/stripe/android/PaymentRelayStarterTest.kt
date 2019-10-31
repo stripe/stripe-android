@@ -32,8 +32,10 @@ class PaymentRelayStarterTest {
     fun setup() {
         MockitoAnnotations.initMocks(this)
         intentArgumentCaptor = argumentCaptor()
-        starter = PaymentRelayStarter(
-            AuthActivityStarter.Host.create(activity), 500)
+        starter = PaymentRelayStarter.create(
+            AuthActivityStarter.Host.create(activity),
+            500
+        )
     }
 
     @Test
