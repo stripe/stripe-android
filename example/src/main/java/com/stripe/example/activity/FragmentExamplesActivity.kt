@@ -78,7 +78,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
             )
             paymentSession = createPaymentSession(createCustomerSession())
 
-            val rootView = view!!
+            val rootView = requireNotNull(view)
             statusTextView = rootView.findViewById(R.id.status)
             progressBar = rootView.findViewById(R.id.progress_bar)
 
@@ -118,7 +118,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
             progressBar.visibility = View.VISIBLE
 
             val isPaymentSessionResult =
-                paymentSession.handlePaymentData(requestCode, resultCode, data!!)
+                data != null && paymentSession.handlePaymentData(requestCode, resultCode, data)
             if (isPaymentSessionResult) {
                 Toast.makeText(
                     requireActivity(),
@@ -255,7 +255,8 @@ class FragmentExamplesActivity : AppCompatActivity() {
                                     errorCode: Int,
                                     errorMessage: String,
                                     stripeError: StripeError?
-                                ) {}
+                                ) {
+                                }
                             })
                     }
                 },
@@ -283,7 +284,8 @@ class FragmentExamplesActivity : AppCompatActivity() {
                         errorCode: Int,
                         errorMessage: String,
                         stripeError: StripeError?
-                    ) {}
+                    ) {
+                    }
                 }
             )
             return customerSession
@@ -294,12 +296,12 @@ class FragmentExamplesActivity : AppCompatActivity() {
         ) : ApiResultCallback<PaymentIntentResult> {
             private val fragmentRef: WeakReference<LauncherFragment> = WeakReference(fragment)
 
-            override fun onSuccess(paymentIntentResult: PaymentIntentResult) {
+            override fun onSuccess(result: PaymentIntentResult) {
                 val fragment = fragmentRef.get() ?: return
 
-                val paymentIntent = paymentIntentResult.intent
+                val paymentIntent = result.intent
                 fragment.statusTextView.append("\n\n" +
-                    "Auth outcome: " + paymentIntentResult.outcome + "\n\n" +
+                    "Auth outcome: " + result.outcome + "\n\n" +
                     fragment.getString(R.string.payment_intent_status,
                         paymentIntent.status))
                 fragment.onAuthComplete()
@@ -318,12 +320,12 @@ class FragmentExamplesActivity : AppCompatActivity() {
         ) : ApiResultCallback<SetupIntentResult> {
             private val fragmentRef: WeakReference<LauncherFragment> = WeakReference(fragment)
 
-            override fun onSuccess(setupIntentResult: SetupIntentResult) {
+            override fun onSuccess(result: SetupIntentResult) {
                 val fragment = fragmentRef.get() ?: return
 
-                val paymentIntent = setupIntentResult.intent
+                val paymentIntent = result.intent
                 fragment.statusTextView.append("\n\n" +
-                    "Outcome: " + setupIntentResult.outcome + "\n\n" +
+                    "Outcome: " + result.outcome + "\n\n" +
                     fragment.getString(R.string.payment_intent_status,
                         paymentIntent.status))
                 fragment.onAuthComplete()

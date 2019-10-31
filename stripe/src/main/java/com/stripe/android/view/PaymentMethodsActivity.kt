@@ -206,7 +206,6 @@ class PaymentMethodsActivity : AppCompatActivity() {
 
     private fun setCommunicatingProgress(communicating: Boolean) {
         payment_methods_progress_bar.visibility = if (communicating) View.VISIBLE else View.GONE
-        supportInvalidateOptionsMenu()
     }
 
     fun setSelectionAndFinish(paymentMethod: PaymentMethod?) {

@@ -99,12 +99,12 @@ abstract class StripeActivity : AppCompatActivity() {
 
     protected open fun setCommunicatingProgress(communicating: Boolean) {
         this.communicating = communicating
-        if (communicating) {
-            progressBar.visibility = View.VISIBLE
+        progressBar.visibility = if (communicating) {
+            View.VISIBLE
         } else {
-            progressBar.visibility = View.GONE
+            View.GONE
         }
-        supportInvalidateOptionsMenu()
+        invalidateOptionsMenu()
     }
 
     fun setAlertMessageListener(listener: AlertMessageListener?) {
@@ -117,8 +117,8 @@ abstract class StripeActivity : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setMessage(error)
             .setCancelable(true)
-            .setPositiveButton(android.R.string.ok) {
-                dialogInterface, _ -> dialogInterface.dismiss()
+            .setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
+                dialogInterface.dismiss()
             }
             .create()
             .show()

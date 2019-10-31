@@ -53,13 +53,13 @@ class AsyncTaskTokenController(
         private val outputListController: ListViewController,
         private val progressDialogController: ProgressDialogController
     ) : ApiResultCallback<Token> {
-        override fun onSuccess(token: Token) {
-            outputListController.addToList(token)
+        override fun onSuccess(result: Token) {
+            outputListController.addToList(result)
             progressDialogController.dismiss()
         }
 
-        override fun onError(error: Exception) {
-            errorDialogHandler.show(error.localizedMessage.orEmpty())
+        override fun onError(e: Exception) {
+            errorDialogHandler.show(e.localizedMessage.orEmpty())
             progressDialogController.dismiss()
         }
     }
