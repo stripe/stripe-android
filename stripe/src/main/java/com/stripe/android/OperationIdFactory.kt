@@ -1,9 +1,10 @@
 package com.stripe.android
 
-import java.util.UUID
+internal interface OperationIdFactory {
+    fun create(): String
 
-internal open class OperationIdFactory {
-    open fun create(): String {
-        return UUID.randomUUID().toString()
+    companion object {
+        @JvmSynthetic
+        internal fun get(): OperationIdFactory = StripeOperationIdFactory()
     }
 }

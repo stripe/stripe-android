@@ -35,7 +35,7 @@ class EphemeralKeyManagerTest {
     @Mock
     private lateinit var keyManagerListener: EphemeralKeyManager.KeyManagerListener
 
-    private val operationIdFactory = OperationIdFactory()
+    private val operationIdFactory = OperationIdFactory.get()
 
     private lateinit var argCaptor: KArgumentCaptor<Map<String, Any>>
     private lateinit var actionArgumentCaptor: KArgumentCaptor<String>
