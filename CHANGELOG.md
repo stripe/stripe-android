@@ -6,6 +6,8 @@
 * [#1748](https://github.com/stripe/stripe-android/pull/1748) Update FPX bank list with offline status
 * [#1755](https://github.com/stripe/stripe-android/pull/1755) Annotate `Stripe` methods with `@UiThread` or `@WorkerThread`
 * [#1758](https://github.com/stripe/stripe-android/pull/1758) Refactor `CustomerSession.setCustomerShippingInformation()`
+* [#1764](https://github.com/stripe/stripe-android/pull/1764) Add support for Javascript confirm dialogs in 3DS1 payment authentication WebView
+* [#1765](https://github.com/stripe/stripe-android/pull/1765) Fix rotation issues with shipping info and shipping method selection screens
 
 ## 12.1.0 - 2019-10-22
 * [#1738](https://github.com/stripe/stripe-android/pull/1738) Enable specifying Payment Method type to use in UI components
