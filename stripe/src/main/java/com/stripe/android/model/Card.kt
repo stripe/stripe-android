@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import androidx.annotation.IntRange
 import androidx.annotation.Size
@@ -13,13 +14,15 @@ import com.stripe.android.model.StripeJsonUtils.optHash
 import com.stripe.android.model.StripeJsonUtils.optInteger
 import com.stripe.android.model.StripeJsonUtils.optString
 import java.util.Calendar
+import kotlinx.android.parcel.Parcelize
 import org.json.JSONException
 import org.json.JSONObject
 
 /**
  * A model object representing a Card in the Android SDK.
  */
-data class Card private constructor(
+@Parcelize
+data class Card internal constructor(
 
     /**
      * @return the [number] of this card
@@ -149,7 +152,7 @@ data class Card private constructor(
      * @return the [metadata] of this card
      */
     val metadata: Map<String, String>?
-) : StripeModel(), StripePaymentSource, StripeParamsModel {
+) : StripeModel(), StripePaymentSource, StripeParamsModel, Parcelable {
 
     @Retention(AnnotationRetention.SOURCE)
     @StringDef(CardBrand.AMERICAN_EXPRESS, CardBrand.DISCOVER, CardBrand.JCB,
