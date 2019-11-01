@@ -230,6 +230,7 @@ class Stripe internal constructor(
      * Do not call this on the UI thread or your app will crash.
      *
      * See [Retrieve a PaymentIntent](https://stripe.com/docs/api/payment_intents/retrieve).
+     * `GET /v1/payment_intents/:id`
      *
      * @param clientSecret the client_secret with which to retrieve the PaymentIntent
      * @return a [PaymentIntent] or `null` if a problem occurred
@@ -249,6 +250,7 @@ class Stripe internal constructor(
      * Do not call this on the UI thread or your app will crash.
      *
      * See [Confirm a PaymentIntent](https://stripe.com/docs/api/payment_intents/confirm).
+     * `POST /v1/payment_intents/:id/confirm`
      *
      * @param confirmPaymentIntentParams a set of params with which to confirm the PaymentIntent
      * @return a [PaymentIntent] or `null` if a problem occurred
@@ -363,8 +365,8 @@ class Stripe internal constructor(
      * Blocking method to retrieve a [SetupIntent] object.
      * Do not call this on the UI thread or your app will crash.
      *
-     *
      * See [Retrieve a SetupIntent](https://stripe.com/docs/api/setup_intents/retrieve).
+     * `GET /v1/setup_intents/:id`
      *
      * @param clientSecret client_secret of the SetupIntent to retrieve
      * @return a [SetupIntent] or `null` if a problem occurred
@@ -383,8 +385,8 @@ class Stripe internal constructor(
      * Blocking method to confirm a [SetupIntent] object.
      * Do not call this on the UI thread or your app will crash.
      *
-     *
      * See [Confirm a SetupIntent](https://stripe.com/docs/api/setup_intents/confirm).
+     * `POST /v1/setup_intents/:id/confirm`
      *
      * @param confirmSetupIntentParams a set of params with which to confirm the Setup Intent
      * @return a [SetupIntent] or `null` if a problem occurred
@@ -411,6 +413,7 @@ class Stripe internal constructor(
      * Create a [PaymentMethod] asynchronously.
      *
      * See [Create a PaymentMethod](https://stripe.com/docs/api/payment_methods/create).
+     * `POST /v1/payment_methods`
      *
      * @param paymentMethodCreateParams the [PaymentMethodCreateParams] to be used
      * @param callback a [ApiResultCallback] to receive the result or error
@@ -431,6 +434,7 @@ class Stripe internal constructor(
      * Do not call this on the UI thread or your app will crash.
      *
      * See [Create a PaymentMethod](https://stripe.com/docs/api/payment_methods/create).
+     * `POST /v1/payment_methods`
      *
      * @param paymentMethodCreateParams params with which to create the PaymentMethod
      *
@@ -456,6 +460,7 @@ class Stripe internal constructor(
      * Create a [Source] asynchronously.
      *
      * See [Create a source](https://stripe.com/docs/api/sources/create).
+     * `POST /v1/sources`
      *
      * @param sourceParams the [SourceParams] to be used
      * @param callback a [ApiResultCallback] to receive the result or error
@@ -474,8 +479,8 @@ class Stripe internal constructor(
      * Blocking method to create a [Source] object.
      * Do not call this on the UI thread or your app will crash.
      *
-     *
      * See [Create a source](https://stripe.com/docs/api/sources/create).
+     * `POST /v1/sources`
      *
      * @param params a set of [SourceParams] with which to create the source
      * @return a [Source], or `null` if a problem occurred
@@ -499,6 +504,7 @@ class Stripe internal constructor(
      * to crash.
      *
      * See [Retrieve a source](https://stripe.com/docs/api/sources/retrieve).
+     * `GET /v1/sources/:id`
      *
      * @param sourceId the [Source.id] field of the desired Source object
      * @param clientSecret the [Source.getClientSecret] field of the desired Source object
@@ -528,6 +534,7 @@ class Stripe internal constructor(
      * Create a [Token] asynchronously.
      *
      * See [Create an account token](https://stripe.com/docs/api/tokens/create_account).
+     * `POST /v1/tokens`
      *
      * @param accountParams the [AccountParams] used to create this token
      * @param callback a [ApiResultCallback] to receive the result or error
@@ -551,6 +558,7 @@ class Stripe internal constructor(
      * thread or your app will crash.
      *
      * See [Create an account token](https://stripe.com/docs/api/tokens/create_account).
+     * `POST /v1/tokens`
      *
      * @param accountParams params to use for this token.
      * @return a [Token] that can be used for this account.
@@ -580,6 +588,7 @@ class Stripe internal constructor(
      * Create a [BankAccount] token asynchronously.
      *
      * See [Create a bank account token](https://stripe.com/docs/api/tokens/create_bank_account).
+     * `POST /v1/tokens`
      *
      * @param bankAccount the [BankAccount] used to create this token
      * @param callback a [ApiResultCallback] to receive the result or error
@@ -603,6 +612,7 @@ class Stripe internal constructor(
      * the UI thread or your app will crash.
      *
      * See [Create a bank account token](https://stripe.com/docs/api/tokens/create_bank_account).
+     * `POST /v1/tokens`
      *
      * @param bankAccount the [Card] to use for this token
      * @return a [Token] that can be used for this [BankAccount]
@@ -632,6 +642,7 @@ class Stripe internal constructor(
      *
      *
      * See [Create a PII account token](https://stripe.com/docs/api/tokens/create_pii).
+     * `POST /v1/tokens`
      *
      * @param personalId the personal id used to create this token
      * @param callback a [ApiResultCallback] to receive the result or error
@@ -653,6 +664,7 @@ class Stripe internal constructor(
      * or your app will crash.
      *
      * See [Create a PII account token](https://stripe.com/docs/api/tokens/create_pii).
+     * `POST /v1/tokens`
      *
      * @param personalId the personal ID to use for this token
      * @return a [Token] that can be used for this card
@@ -677,6 +689,7 @@ class Stripe internal constructor(
      * Create a Card token asynchronously.
      *
      * See [Create a card token](https://stripe.com/docs/api/tokens/create_card).
+     * `POST /v1/tokens`
      *
      * @param card the [Card] used to create this payment token
      * @param callback a [ApiResultCallback] to receive the result or error
@@ -695,6 +708,7 @@ class Stripe internal constructor(
      * will crash.
      *
      * See [Create a card token](https://stripe.com/docs/api/tokens/create_card).
+     * `POST /v1/tokens`
      *
      * @param card the [Card] to use for this token
      * @return a [Token] that can be used for this card
@@ -719,6 +733,8 @@ class Stripe internal constructor(
     /**
      * Create a CVC update token asynchronously.
      *
+     * `POST /v1/tokens`
+     *
      * @param cvc the CVC used to create this token
      * @param callback a [ApiResultCallback] to receive the result or error
      */
@@ -737,6 +753,8 @@ class Stripe internal constructor(
     /**
      * Blocking method to create a [Token] for CVC updating. Do not call this on the UI thread
      * or your app will crash.
+     *
+     * `POST /v1/tokens`
      *
      * @param cvc the CVC to use for this token
      * @return a [Token] that can be used for this card
