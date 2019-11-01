@@ -29,7 +29,7 @@ internal class FpxViewModel(application: Application) : AndroidViewModel(applica
         AsyncTask.execute {
             val fpxBankStatuses = try {
                 stripeRepository.getFpxBankStatus(
-                    ApiRequest.Options.create(paymentConfiguration.publishableKey))
+                    ApiRequest.Options(paymentConfiguration.publishableKey))
             } catch (e: Exception) {
                 null
             }

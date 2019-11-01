@@ -159,7 +159,7 @@ class StripeApiRepositoryTest {
     @Throws(APIException::class, AuthenticationException::class, InvalidRequestException::class, APIConnectionException::class)
     fun createSource_shouldLogSourceCreation_andReturnSource() {
         val source = stripeApiRepository.createSource(SourceParams.createCardParams(CARD),
-            ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
+            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
 
         // Check that we get a token back; we don't care about its fields for this test.
         assertNotNull(source)
@@ -170,7 +170,7 @@ class StripeApiRepositoryTest {
     fun createSource_withConnectAccount_keepsHeaderInAccount() {
         val connectAccountId = "acct_1Acj2PBUgO3KuWzz"
         val source = stripeApiRepository.createSource(SourceParams.createCardParams(CARD),
-            ApiRequest.Options.create(ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY, connectAccountId))
+            ApiRequest.Options(ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY, connectAccountId))
 
         // Check that we get a source back; we don't care about its fields for this test.
         assertNotNull(source)
@@ -201,7 +201,7 @@ class StripeApiRepositoryTest {
 
         val invalidRequestException = assertFailsWith<InvalidRequestException> {
             stripeApiRepository.start3ds2Auth(authParams, "pi_12345",
-                ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
+                ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
         }
 
         assertEquals("source", invalidRequestException.param)
@@ -213,7 +213,7 @@ class StripeApiRepositoryTest {
         val invalidRequestException =
             assertFailsWith<InvalidRequestException> {
                 stripeApiRepository.complete3ds2Auth("src_123",
-                    ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
+                    ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
             }
         assertEquals(HttpURLConnection.HTTP_NOT_FOUND, invalidRequestException.statusCode)
         assertEquals("source", invalidRequestException.param)
@@ -238,7 +238,7 @@ class StripeApiRepositoryTest {
         val response = stripeApiRepository.makeApiRequest(
             ApiRequest.createPost(
                 StripeApiRepository.sourcesUrl,
-                ApiRequest.Options.create(
+                ApiRequest.Options(
                     ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
                     connectAccountId
                 ),
@@ -287,7 +287,7 @@ class StripeApiRepositoryTest {
             )
         val paymentIntent = create().confirmPaymentIntent(
             confirmPaymentIntentParams,
-            ApiRequest.Options.create(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+            ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         )
 
         assertNotNull(paymentIntent)
@@ -321,7 +321,7 @@ class StripeApiRepositoryTest {
             "yourapp://post-authentication-return-url"
         )
         val paymentIntent = stripeApiRepository.confirmPaymentIntent(
-            confirmPaymentIntentParams, ApiRequest.Options.create(publishableKey))
+            confirmPaymentIntentParams, ApiRequest.Options(publishableKey))
         assertNotNull(paymentIntent)
     }
 
@@ -333,7 +333,7 @@ class StripeApiRepositoryTest {
 
         val paymentIntent = stripeApiRepository.retrievePaymentIntent(
             clientSecret,
-            ApiRequest.Options.create(publishableKey)
+            ApiRequest.Options(publishableKey)
         )
         assertNotNull(paymentIntent)
     }
@@ -347,7 +347,7 @@ class StripeApiRepositoryTest {
             fireAndForgetRequestExecutor = FakeFireAndForgetRequestExecutor()
         )
         val source = stripeApiRepository.createSource(SourceParams.createCardParams(CARD),
-            ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
+            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
 
         // Check that we get a token back; we don't care about its fields for this test.
         assertNotNull(source)
@@ -504,8 +504,7 @@ class StripeApiRepositoryTest {
             "type" to PaymentMethod.Type.Card.code
         )
 
-        val options = ApiRequest.Options
-            .create(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
+        val options = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
         val url = ApiRequest.createGet(StripeApiRepository.paymentMethodsUrl,
             options, queryParams, null)
             .url
@@ -520,7 +519,7 @@ class StripeApiRepositoryTest {
         val paymentMethods = stripeApiRepository
             .getPaymentMethods("cus_123", PaymentMethod.Type.Card.code,
                 ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, emptySet(),
-                ApiRequest.Options.create(ApiKeyFixtures.FAKE_EPHEMERAL_KEY))
+                ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY))
         assertEquals(3, paymentMethods.size)
         assertEquals("pm_1EVNYJCRMbs6FrXfG8n52JaK", paymentMethods[0].id)
         assertEquals("pm_1EVNXtCRMbs6FrXfTlZGIdGq", paymentMethods[1].id)
@@ -545,7 +544,7 @@ class StripeApiRepositoryTest {
             "type" to PaymentMethod.Type.Card.code
         )
 
-        val options = ApiRequest.Options.create(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
+        val options = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
         val url = ApiRequest.createGet(
             StripeApiRepository.paymentMethodsUrl,
             options,
@@ -562,14 +561,14 @@ class StripeApiRepositoryTest {
         val paymentMethods = stripeApiRepository
             .getPaymentMethods("cus_123", PaymentMethod.Type.Card.code,
                 ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, emptySet(),
-                ApiRequest.Options.create(ApiKeyFixtures.FAKE_EPHEMERAL_KEY))
+                ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY))
         assertTrue(paymentMethods.isEmpty())
     }
 
     @Test
     fun getFpxBankStatus_withFpxKey() {
         val fpxBankStatuses = stripeApiRepository.getFpxBankStatus(
-            ApiRequest.Options.create(ApiKeyFixtures.FPX_PUBLISHABLE_KEY)
+            ApiRequest.Options(ApiKeyFixtures.FPX_PUBLISHABLE_KEY)
         )
         assertTrue(fpxBankStatuses.isOnline(FpxBank.Hsbc.id))
     }

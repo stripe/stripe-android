@@ -122,7 +122,7 @@ internal class CustomerSessionRunnableFactory constructor(
                     productUsage.get(),
                     sourceId,
                     sourceType,
-                    ApiRequest.Options.create(key.secret, stripeAccountId)
+                    ApiRequest.Options(key.secret, stripeAccountId)
                 )
             }
         }
@@ -142,7 +142,7 @@ internal class CustomerSessionRunnableFactory constructor(
                     publishableKey,
                     productUsage.get(),
                     sourceId,
-                    ApiRequest.Options.create(key.secret, stripeAccountId)
+                    ApiRequest.Options(key.secret, stripeAccountId)
                 )
             }
         }
@@ -162,7 +162,7 @@ internal class CustomerSessionRunnableFactory constructor(
                     publishableKey,
                     productUsage.get(),
                     paymentMethodId,
-                    ApiRequest.Options.create(key.secret, stripeAccountId)
+                    ApiRequest.Options(key.secret, stripeAccountId)
                 )
             }
         }
@@ -181,7 +181,7 @@ internal class CustomerSessionRunnableFactory constructor(
                     publishableKey,
                     productUsage.get(),
                     paymentMethodId,
-                    ApiRequest.Options.create(key.secret, stripeAccountId)
+                    ApiRequest.Options(key.secret, stripeAccountId)
                 )
             }
         }
@@ -201,7 +201,7 @@ internal class CustomerSessionRunnableFactory constructor(
                     paymentMethodType,
                     publishableKey,
                     productUsage.get(),
-                    ApiRequest.Options.create(key.secret, stripeAccountId)
+                    ApiRequest.Options(key.secret, stripeAccountId)
                 )
             }
         }
@@ -223,7 +223,7 @@ internal class CustomerSessionRunnableFactory constructor(
                     productUsage.get(),
                     sourceId,
                     sourceType,
-                    ApiRequest.Options.create(key.secret, stripeAccountId)
+                    ApiRequest.Options(key.secret, stripeAccountId)
                 )
             }
         }
@@ -243,7 +243,7 @@ internal class CustomerSessionRunnableFactory constructor(
                     publishableKey,
                     productUsage.get(),
                     shippingInformation,
-                    ApiRequest.Options.create(key.secret, stripeAccountId)
+                    ApiRequest.Options(key.secret, stripeAccountId)
                 )
             }
         }
@@ -273,7 +273,7 @@ internal class CustomerSessionRunnableFactory constructor(
     private fun retrieveCustomerWithKey(key: EphemeralKey): Customer? {
         return stripeRepository.retrieveCustomer(
             key.objectId,
-            ApiRequest.Options.create(key.secret, stripeAccountId)
+            ApiRequest.Options(key.secret, stripeAccountId)
         )
     }
 
