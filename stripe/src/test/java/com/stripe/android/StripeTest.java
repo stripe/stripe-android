@@ -14,6 +14,7 @@ import com.stripe.android.model.AccountParams;
 import com.stripe.android.model.Address;
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
+import com.stripe.android.model.CardFixtures;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures;
@@ -30,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 
 import org.junit.Before;
@@ -45,6 +47,7 @@ import org.robolectric.RobolectricTestRunner;
 import static com.stripe.android.CardNumberFixtures.VALID_VISA_NO_SPACES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
@@ -1098,6 +1101,27 @@ public class StripeTest {
         );
         assertEquals("Your card's expiration year is invalid.",
                 cardException.getMessage());
+    }
+
+    @Test
+    public void createTokenSynchronousTwice_withIdempotencyKey_returnsSameToken()
+            throws StripeException {
+        final Stripe stripe = createStripe();
+        final String idempotencyKey = UUID.randomUUID().toString();
+        assertEquals(
+                stripe.createCardTokenSynchronous(CardFixtures.MINIMUM_CARD, idempotencyKey),
+                stripe.createCardTokenSynchronous(CardFixtures.MINIMUM_CARD, idempotencyKey)
+        );
+    }
+
+    @Test
+    public void createTokenSynchronousTwice_withoutIdempotencyKey_returnsDifferentToken()
+            throws StripeException {
+        final Stripe stripe = createStripe();
+        assertNotEquals(
+                stripe.createCardTokenSynchronous(CardFixtures.MINIMUM_CARD),
+                stripe.createCardTokenSynchronous(CardFixtures.MINIMUM_CARD)
+        );
     }
 
     @Test

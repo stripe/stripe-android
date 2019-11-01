@@ -501,7 +501,7 @@ class Stripe internal constructor(
      * See [Retrieve a source](https://stripe.com/docs/api/sources/retrieve).
      *
      * @param sourceId the [Source.id] field of the desired Source object
-     * @param clientSecret the [Source.getClientSecret] field of the desired Source object
+     * @param clientSecret the [Source.clientSecret] field of the desired Source object
      * @return a [Source] if one could be found based on the input params, or `null` if
      * no such Source could be found.
      * @throws AuthenticationException failure to properly authenticate yourself (check your key)
@@ -530,11 +530,14 @@ class Stripe internal constructor(
      * See [Create an account token](https://stripe.com/docs/api/tokens/create_account).
      *
      * @param accountParams the [AccountParams] used to create this token
+     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @UiThread
+    @JvmOverloads
     fun createAccountToken(
         accountParams: AccountParams,
+        idempotencyKey: String? = null,
         callback: ApiResultCallback<Token>
     ) {
         val params = accountParams.toParamMap()
@@ -542,6 +545,7 @@ class Stripe internal constructor(
         createTokenFromParams(
             params,
             Token.TokenType.ACCOUNT,
+            idempotencyKey,
             callback
         )
     }
@@ -553,7 +557,10 @@ class Stripe internal constructor(
      * See [Create an account token](https://stripe.com/docs/api/tokens/create_account).
      *
      * @param accountParams params to use for this token.
+     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
+     *
      * @return a [Token] that can be used for this account.
+     *
      * @throws AuthenticationException failure to properly authenticate yourself (check your key)
      * @throws InvalidRequestException your request has invalid parameters
      * @throws APIConnectionException failure to connect to Stripe's API
@@ -563,11 +570,15 @@ class Stripe internal constructor(
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, APIException::class)
     @WorkerThread
-    fun createAccountTokenSynchronous(accountParams: AccountParams): Token? {
+    @JvmOverloads
+    fun createAccountTokenSynchronous(
+        accountParams: AccountParams,
+        idempotencyKey: String? = null
+    ): Token? {
         return try {
             stripeRepository.createToken(
                 accountParams.toParamMap(),
-                ApiRequest.Options(publishableKey, stripeAccountId),
+                ApiRequest.Options(publishableKey, stripeAccountId, idempotencyKey),
                 Token.TokenType.ACCOUNT
             )
         } catch (exception: CardException) {
@@ -582,11 +593,14 @@ class Stripe internal constructor(
      * See [Create a bank account token](https://stripe.com/docs/api/tokens/create_bank_account).
      *
      * @param bankAccount the [BankAccount] used to create this token
+     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @UiThread
+    @JvmOverloads
     fun createBankAccountToken(
         bankAccount: BankAccount,
+        idempotencyKey: String? = null,
         callback: ApiResultCallback<Token>
     ) {
         val params = bankAccount.toParamMap()
@@ -594,6 +608,7 @@ class Stripe internal constructor(
         createTokenFromParams(
             params,
             Token.TokenType.BANK_ACCOUNT,
+            idempotencyKey,
             callback
         )
     }
@@ -605,7 +620,10 @@ class Stripe internal constructor(
      * See [Create a bank account token](https://stripe.com/docs/api/tokens/create_bank_account).
      *
      * @param bankAccount the [Card] to use for this token
+     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
+     *
      * @return a [Token] that can be used for this [BankAccount]
+     *
      * @throws AuthenticationException failure to properly authenticate yourself (check your key)
      * @throws InvalidRequestException your request has invalid parameters
      * @throws APIConnectionException failure to connect to Stripe's API
@@ -617,12 +635,16 @@ class Stripe internal constructor(
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, CardException::class, APIException::class)
     @WorkerThread
-    fun createBankAccountTokenSynchronous(bankAccount: BankAccount): Token? {
+    @JvmOverloads
+    fun createBankAccountTokenSynchronous(
+        bankAccount: BankAccount,
+        idempotencyKey: String? = null
+    ): Token? {
         val params = bankAccount.toParamMap()
             .plus(stripeNetworkUtils.createUidParams())
         return stripeRepository.createToken(
             params,
-            ApiRequest.Options(publishableKey, stripeAccountId),
+            ApiRequest.Options(publishableKey, stripeAccountId, idempotencyKey),
             Token.TokenType.BANK_ACCOUNT
         )
     }
@@ -630,20 +652,23 @@ class Stripe internal constructor(
     /**
      * Create a PII token asynchronously.
      *
-     *
      * See [Create a PII account token](https://stripe.com/docs/api/tokens/create_pii).
      *
      * @param personalId the personal id used to create this token
+     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @UiThread
+    @JvmOverloads
     fun createPiiToken(
         personalId: String,
+        idempotencyKey: String? = null,
         callback: ApiResultCallback<Token>
     ) {
         createTokenFromParams(
             PiiTokenParams(personalId).toParamMap(),
             Token.TokenType.PII,
+            idempotencyKey,
             callback
         )
     }
@@ -655,7 +680,10 @@ class Stripe internal constructor(
      * See [Create a PII account token](https://stripe.com/docs/api/tokens/create_pii).
      *
      * @param personalId the personal ID to use for this token
+     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
+     *
      * @return a [Token] that can be used for this card
+     *
      * @throws AuthenticationException failure to properly authenticate yourself (check your key)
      * @throws InvalidRequestException your request has invalid parameters
      * @throws APIConnectionException failure to connect to Stripe's API
@@ -665,10 +693,14 @@ class Stripe internal constructor(
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, CardException::class, APIException::class)
     @WorkerThread
-    fun createPiiTokenSynchronous(personalId: String): Token? {
+    @JvmOverloads
+    fun createPiiTokenSynchronous(
+        personalId: String,
+        idempotencyKey: String? = null
+    ): Token? {
         return stripeRepository.createToken(
             PiiTokenParams(personalId).toParamMap(),
-            ApiRequest.Options(publishableKey, stripeAccountId),
+            ApiRequest.Options(publishableKey, stripeAccountId, idempotencyKey),
             Token.TokenType.PII
         )
     }
@@ -679,13 +711,20 @@ class Stripe internal constructor(
      * See [Create a card token](https://stripe.com/docs/api/tokens/create_card).
      *
      * @param card the [Card] used to create this payment token
+     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @UiThread
-    fun createToken(card: Card, callback: ApiResultCallback<Token>) {
+    @JvmOverloads
+    fun createToken(
+        card: Card,
+        idempotencyKey: String? = null,
+        callback: ApiResultCallback<Token>
+    ) {
         createTokenFromParams(
             stripeNetworkUtils.createCardTokenParams(card),
             Token.TokenType.CARD,
+            idempotencyKey,
             callback
         )
     }
@@ -697,6 +736,8 @@ class Stripe internal constructor(
      * See [Create a card token](https://stripe.com/docs/api/tokens/create_card).
      *
      * @param card the [Card] to use for this token
+     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
+     *
      * @return a [Token] that can be used for this card
      * @throws AuthenticationException failure to properly authenticate yourself (check your key)
      * @throws InvalidRequestException your request has invalid parameters
@@ -708,10 +749,14 @@ class Stripe internal constructor(
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, CardException::class, APIException::class)
     @WorkerThread
-    fun createCardTokenSynchronous(card: Card): Token? {
+    @JvmOverloads
+    fun createCardTokenSynchronous(
+        card: Card,
+        idempotencyKey: String? = null
+    ): Token? {
         return stripeRepository.createToken(
             stripeNetworkUtils.createCardTokenParams(card),
-            ApiRequest.Options(publishableKey, stripeAccountId),
+            ApiRequest.Options(publishableKey, stripeAccountId, idempotencyKey),
             Token.TokenType.CARD
         )
     }
@@ -720,16 +765,20 @@ class Stripe internal constructor(
      * Create a CVC update token asynchronously.
      *
      * @param cvc the CVC used to create this token
+     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @UiThread
+    @JvmOverloads
     fun createCvcUpdateToken(
         @Size(min = 3, max = 4) cvc: String,
+        idempotencyKey: String? = null,
         callback: ApiResultCallback<Token>
     ) {
         createTokenFromParams(
             CvcTokenParams(cvc).toParamMap(),
             Token.TokenType.CVC_UPDATE,
+            idempotencyKey,
             callback
         )
     }
@@ -739,7 +788,10 @@ class Stripe internal constructor(
      * or your app will crash.
      *
      * @param cvc the CVC to use for this token
+     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
+     *
      * @return a [Token] that can be used for this card
+     *
      * @throws AuthenticationException failure to properly authenticate yourself (check your key)
      * @throws InvalidRequestException your request has invalid parameters
      * @throws APIConnectionException failure to connect to Stripe's API
@@ -749,10 +801,14 @@ class Stripe internal constructor(
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, CardException::class, APIException::class)
     @WorkerThread
-    fun createCvcUpdateTokenSynchronous(cvc: String): Token? {
+    @JvmOverloads
+    fun createCvcUpdateTokenSynchronous(
+        cvc: String,
+        idempotencyKey: String? = null
+    ): Token? {
         return stripeRepository.createToken(
             CvcTokenParams(cvc).toParamMap(),
-            ApiRequest.Options(publishableKey, stripeAccountId),
+            ApiRequest.Options(publishableKey, stripeAccountId, idempotencyKey),
             Token.TokenType.CVC_UPDATE
         )
     }
@@ -760,11 +816,12 @@ class Stripe internal constructor(
     private fun createTokenFromParams(
         tokenParams: Map<String, Any>,
         @Token.TokenType tokenType: String,
+        idempotencyKey: String? = null,
         callback: ApiResultCallback<Token>
     ) {
         tokenCreator.create(
             tokenParams,
-            ApiRequest.Options(publishableKey, stripeAccountId),
+            ApiRequest.Options(publishableKey, stripeAccountId, idempotencyKey),
             tokenType, null,
             callback
         )

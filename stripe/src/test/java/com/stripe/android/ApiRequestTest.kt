@@ -34,7 +34,7 @@ internal class ApiRequestTest {
         val stripeAccount = "acct_123abc"
         val headers = ApiRequest.createGet(StripeApiRepository.sourcesUrl,
             ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                stripeAccount), null)
+                stripeAccount))
             .headers
 
         assertEquals(
@@ -49,7 +49,7 @@ internal class ApiRequestTest {
     @Test
     fun getHeaders_withOnlyRequiredOptions_doesNotAddEmptyOptions() {
         val headerMap = ApiRequest.createGet(StripeApiRepository.sourcesUrl,
-            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
+            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
             .headers
 
         assertTrue(headerMap.containsKey("Stripe-Version"))
@@ -81,7 +81,7 @@ internal class ApiRequestTest {
     @Test
     fun getHeaders_correctlyAddsExpectedAdditionalParameters() {
         val headerMap = ApiRequest.createGet(StripeApiRepository.sourcesUrl,
-            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
+            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
             .headers
 
         val expectedUserAgent = "Stripe/v1 AndroidBindings/${BuildConfig.VERSION_NAME}"
@@ -94,9 +94,11 @@ internal class ApiRequestTest {
     @Throws(UnsupportedEncodingException::class, InvalidRequestException::class)
     fun createQuery_withCardData_createsProperQueryString() {
         val cardMap = NETWORK_UTILS.createCardTokenParams(CardFixtures.MINIMUM_CARD)
-        val query = ApiRequest.createGet(StripeApiRepository.sourcesUrl, ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
-            cardMap, null)
-            .createQuery()
+        val query = ApiRequest.createGet(
+            StripeApiRepository.sourcesUrl,
+            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+            cardMap
+        ).query
 
         val expectedValue = "muid=BF3BF4D775100923AAAFA82884FB759001162E28&product_usage=&guid=6367C48DD193D56EA7B0BAAD25B19455E529F5EE&card%5Bexp_month%5D=1&card%5Bexp_year%5D=2050&card%5Bnumber%5D=4242424242424242&card%5Bcvc%5D=123"
         assertEquals(expectedValue, query)
@@ -105,7 +107,7 @@ internal class ApiRequestTest {
     @Test
     fun getContentType() {
         val contentType = ApiRequest.createGet(StripeApiRepository.sourcesUrl,
-            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
+            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
             .contentType
         assertEquals("application/x-www-form-urlencoded; charset=UTF-8", contentType)
     }
@@ -114,7 +116,7 @@ internal class ApiRequestTest {
     @Throws(UnsupportedEncodingException::class, InvalidRequestException::class)
     fun getOutputBytes_withEmptyBody_shouldHaveZeroLength() {
         val output = ApiRequest.createPost(StripeApiRepository.paymentMethodsUrl,
-            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
+            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
             .getOutputBytes()
         assertEquals(0, output.size)
     }
@@ -124,10 +126,11 @@ internal class ApiRequestTest {
     fun getOutputBytes_withNonEmptyBody_shouldHaveNonZeroLength() {
         val params = mapOf("customer" to "cus_123")
 
-        val output = ApiRequest.createPost(StripeApiRepository.paymentMethodsUrl,
+        val output = ApiRequest.createPost(
+            StripeApiRepository.paymentMethodsUrl,
             ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
-            params, null)
-            .getOutputBytes()
+            params
+        ).getOutputBytes()
         assertEquals(16, output.size)
     }
 
@@ -135,22 +138,29 @@ internal class ApiRequestTest {
     fun testEquals() {
         val params = mapOf("customer" to "cus_123")
         assertEquals(
-            ApiRequest.createPost(StripeApiRepository.paymentMethodsUrl,
+            ApiRequest.createPost(
+                StripeApiRepository.paymentMethodsUrl,
                 ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
-                params, null),
-            ApiRequest.createPost(StripeApiRepository.paymentMethodsUrl,
+                params
+            ),
+            ApiRequest.createPost(
+                StripeApiRepository.paymentMethodsUrl,
                 ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
-                params, null)
+                params
+            )
         )
 
         assertNotEquals(
-            ApiRequest.createPost(StripeApiRepository.paymentMethodsUrl,
+            ApiRequest.createPost(
+                StripeApiRepository.paymentMethodsUrl,
                 ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
-                params, null),
-            ApiRequest.createPost(StripeApiRepository.paymentMethodsUrl,
-                ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
-                    "acct"),
-                params, null)
+                params
+            ),
+            ApiRequest.createPost(
+                StripeApiRepository.paymentMethodsUrl,
+                ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, "acct"),
+                params
+            )
         )
     }
 

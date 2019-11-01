@@ -45,7 +45,7 @@ class AsyncTaskTokenController(
         }
 
         progressDialogController.show(R.string.progressMessage)
-        stripe.createToken(cardToSave, tokenCallback)
+        stripe.createToken(cardToSave, callback = tokenCallback)
     }
 
     private class TokenCallbackImpl constructor(
