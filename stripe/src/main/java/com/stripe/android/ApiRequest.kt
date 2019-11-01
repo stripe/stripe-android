@@ -91,26 +91,12 @@ internal class ApiRequest internal constructor(
     /**
      * Data class representing options for a Stripe API request.
      */
-    internal class Options private constructor(
-        apiKey: String,
+    internal data class Options internal constructor(
+        val apiKey: String,
         val stripeAccount: String?
     ) {
-        val apiKey: String = ApiKeyValidator().requireValid(apiKey)
-
-        override fun hashCode(): Int {
-            return Objects.hash(apiKey, stripeAccount)
-        }
-
-        override fun equals(other: Any?): Boolean {
-            return when {
-                this === other -> true
-                other is Options -> typedEquals(other)
-                else -> false
-            }
-        }
-
-        private fun typedEquals(obj: Options): Boolean {
-            return apiKey == obj.apiKey && stripeAccount == obj.stripeAccount
+        init {
+            ApiKeyValidator().requireValid(apiKey)
         }
 
         companion object {
@@ -139,16 +125,7 @@ internal class ApiRequest internal constructor(
         internal fun createGet(
             url: String,
             options: Options,
-            appInfo: AppInfo? = null
-        ): ApiRequest {
-            return ApiRequest(Method.GET, url, null, options, appInfo)
-        }
-
-        @JvmSynthetic
-        internal fun createGet(
-            url: String,
-            params: Map<String, *>,
-            options: Options,
+            params: Map<String, *>? = null,
             appInfo: AppInfo? = null
         ): ApiRequest {
             return ApiRequest(Method.GET, url, params, options, appInfo)
@@ -158,16 +135,7 @@ internal class ApiRequest internal constructor(
         internal fun createPost(
             url: String,
             options: Options,
-            appInfo: AppInfo? = null
-        ): ApiRequest {
-            return ApiRequest(Method.POST, url, null, options, appInfo)
-        }
-
-        @JvmSynthetic
-        internal fun createPost(
-            url: String,
-            params: Map<String, *>,
-            options: Options,
+            params: Map<String, *>? = null,
             appInfo: AppInfo? = null
         ): ApiRequest {
             return ApiRequest(Method.POST, url, params, options, appInfo)

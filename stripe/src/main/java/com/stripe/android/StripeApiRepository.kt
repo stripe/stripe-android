@@ -80,7 +80,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             val paymentIntentId = PaymentIntent.parseIdFromClientSecret(
                 confirmPaymentIntentParams.clientSecret)
             val response = makeApiRequest(ApiRequest.createPost(
-                getConfirmPaymentIntentUrl(paymentIntentId), params, options, appInfo))
+                getConfirmPaymentIntentUrl(paymentIntentId), options, params, appInfo))
             return PaymentIntent.fromString(response.responseBody)
         } catch (unexpected: CardException) {
             // This particular kind of exception should not be possible from a PaymentI API endpoint
@@ -108,8 +108,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             val paymentIntentId = PaymentIntent.parseIdFromClientSecret(clientSecret)
             val response = makeApiRequest(
                 ApiRequest.createGet(getRetrievePaymentIntentUrl(paymentIntentId),
-                    createClientSecretParam(clientSecret),
                     options,
+                    createClientSecretParam(clientSecret),
                     appInfo))
             return PaymentIntent.fromString(response.responseBody)
         } catch (unexpected: CardException) {
@@ -141,8 +141,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             val response = makeApiRequest(
                 ApiRequest.createPost(
                     getConfirmSetupIntentUrl(setupIntentId),
-                    params,
                     options,
+                    params,
                     appInfo
                 )
             )
@@ -184,8 +184,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             val response = makeApiRequest(
                 ApiRequest.createGet(
                     getRetrieveSetupIntentUrl(setupIntentId),
-                    createClientSecretParam(clientSecret),
                     options,
+                    createClientSecretParam(clientSecret),
                     appInfo
                 )
             )
@@ -223,9 +223,9 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             val response = makeApiRequest(
                 ApiRequest.createPost(
                     sourcesUrl,
+                    options,
                     sourceParams.toParamMap()
                         .plus(uidParamsFactory.createParams()),
-                    options,
                     appInfo
                 )
             )
@@ -261,8 +261,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             val response = makeApiRequest(
                 ApiRequest.createGet(
                     getRetrieveSourceApiUrl(sourceId),
-                    SourceParams.createRetrieveSourceParams(clientSecret),
                     options,
+                    SourceParams.createRetrieveSourceParams(clientSecret),
                     appInfo
                 )
             )
@@ -286,9 +286,9 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             val response = makeApiRequest(
                 ApiRequest.createPost(
                     paymentMethodsUrl,
+                    options,
                     paymentMethodCreateParams.toParamMap()
                         .plus(uidParamsFactory.createParams()),
-                    options,
                     appInfo
                 )
             )
@@ -370,8 +370,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         val response = fireStripeApiRequest(
             ApiRequest.createPost(
                 getAddCustomerSourceUrl(customerId),
-                mapOf("source" to sourceId),
                 requestOptions,
+                mapOf("source" to sourceId),
                 appInfo
             )
         )
@@ -425,8 +425,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         val response = fireStripeApiRequest(
             ApiRequest.createPost(
                 getAttachPaymentMethodUrl(paymentMethodId),
-                mapOf("customer" to customerId),
-                requestOptions, appInfo
+                requestOptions,
+                mapOf("customer" to customerId), appInfo
             )
         )
         // Method throws if errors are found, so no return value occurs.
@@ -452,7 +452,9 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         val response = fireStripeApiRequest(
             ApiRequest.createPost(
                 getDetachPaymentMethodUrl(paymentMethodId),
-                requestOptions, appInfo)
+                requestOptions,
+                appInfo = appInfo
+            )
         )
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response)
@@ -486,8 +488,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         val response = fireStripeApiRequest(
             ApiRequest.createGet(
                 paymentMethodsUrl,
-                queryParams,
-                requestOptions, appInfo)
+                requestOptions,
+                queryParams, appInfo)
         )
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response)
@@ -527,8 +529,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         val response = fireStripeApiRequest(
             ApiRequest.createPost(
                 getRetrieveCustomerUrl(customerId),
-                mapOf("default_source" to sourceId),
                 requestOptions,
+                mapOf("default_source" to sourceId),
                 appInfo
             )
         )
@@ -559,8 +561,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         val response = fireStripeApiRequest(
             ApiRequest.createPost(
                 getRetrieveCustomerUrl(customerId),
-                mapOf("shipping" to shippingInformation.toParamMap()),
-                requestOptions, appInfo)
+                requestOptions,
+                mapOf("shipping" to shippingInformation.toParamMap()), appInfo)
         )
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response)
@@ -574,8 +576,11 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         requestOptions: ApiRequest.Options
     ): Customer? {
         val response = fireStripeApiRequest(
-            ApiRequest.createGet(getRetrieveCustomerUrl(customerId),
-                requestOptions, appInfo)
+            ApiRequest.createGet(
+                getRetrieveCustomerUrl(customerId),
+                requestOptions,
+                appInfo = appInfo
+            )
         )
         convertErrorsToExceptionsAndThrowIfNecessary(response)
         return Customer.fromString(response.responseBody)
@@ -592,8 +597,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         val response = fireStripeApiRequest(
             ApiRequest.createGet(
                 getIssuingCardPinUrl(cardId),
-                mapOf("verification" to createVerificationParam(verificationId, userOneTimeCode)),
                 ApiRequest.Options.create(ephemeralKeySecret),
+                mapOf("verification" to createVerificationParam(verificationId, userOneTimeCode)),
                 appInfo
             )
         )
@@ -615,11 +620,11 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         val response = fireStripeApiRequest(
             ApiRequest.createPost(
                 getIssuingCardPinUrl(cardId),
+                ApiRequest.Options.create(ephemeralKeySecret),
                 mapOf(
                     "verification" to createVerificationParam(verificationId, userOneTimeCode),
                     "pin" to newPin
-                ),
-                ApiRequest.Options.create(ephemeralKeySecret), appInfo)
+                ), appInfo)
         )
         // Method throws if errors are found, so no return value occurs.
         convertErrorsToExceptionsAndThrowIfNecessary(response)
@@ -631,8 +636,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         val response = fireStripeApiRequest(
             ApiRequest.createGet(
                 getApiUrl("fpx/bank_statuses"),
-                mapOf("account_holder_type" to "individual"),
                 options,
+                mapOf("account_holder_type" to "individual"),
                 appInfo
             )
         )
@@ -658,8 +663,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         val response = fireStripeApiRequest(
             ApiRequest.createPost(
                 getApiUrl("3ds2/authenticate"),
-                authParams.toParamMap(),
                 requestOptions,
+                authParams.toParamMap(),
                 appInfo
             )
         )
@@ -684,8 +689,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         val response = fireStripeApiRequest(
             ApiRequest.createPost(
                 getApiUrl("3ds2/challenge_complete"),
-                mapOf("source" to sourceId),
                 requestOptions,
+                mapOf("source" to sourceId),
                 appInfo
             )
         )
@@ -892,7 +897,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options
     ): Token? {
         val response = makeApiRequest(
-            ApiRequest.createPost(url, params, options, appInfo)
+            ApiRequest.createPost(url, options, params, appInfo)
         )
         return Token.fromString(response.responseBody)
     }

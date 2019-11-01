@@ -238,11 +238,11 @@ class StripeApiRepositoryTest {
         val response = stripeApiRepository.makeApiRequest(
             ApiRequest.createPost(
                 StripeApiRepository.sourcesUrl,
-                SourceParams.createCardParams(CARD).toParamMap(),
                 ApiRequest.Options.create(
                     ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
                     connectAccountId
                 ),
+                SourceParams.createCardParams(CARD).toParamMap(),
                 null)
         )
         assertNotNull(response)
@@ -507,7 +507,7 @@ class StripeApiRepositoryTest {
         val options = ApiRequest.Options
             .create(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
         val url = ApiRequest.createGet(StripeApiRepository.paymentMethodsUrl,
-            queryParams, options, null)
+            options, queryParams, null)
             .url
 
         `when`(
@@ -548,8 +548,8 @@ class StripeApiRepositoryTest {
         val options = ApiRequest.Options.create(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
         val url = ApiRequest.createGet(
             StripeApiRepository.paymentMethodsUrl,
-            queryParams,
-            options, null)
+            options,
+            queryParams, null)
             .url
 
         `when`(
