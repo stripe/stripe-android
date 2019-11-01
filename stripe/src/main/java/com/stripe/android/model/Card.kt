@@ -6,7 +6,6 @@ import androidx.annotation.Size
 import androidx.annotation.StringDef
 import com.stripe.android.CardUtils
 import com.stripe.android.ObjectBuilder
-import com.stripe.android.R
 import com.stripe.android.model.parsers.CardJsonParser
 import java.util.Calendar
 import kotlinx.android.parcel.Parcelize
@@ -558,18 +557,25 @@ data class Card internal constructor(
         /**
          * Based on [Issuer identification number table](http://en.wikipedia.org/wiki/Bank_card_number#Issuer_identification_number_.28IIN.29)
          */
+        @Deprecated("Use CardBrand.AmericanExpress.prefixes", ReplaceWith("CardBrand.AmericanExpress.prefixes"))
         val PREFIXES_AMERICAN_EXPRESS: Array<String> = arrayOf("34", "37")
+        @Deprecated("Use CardBrand.Discover.prefixes", ReplaceWith("CardBrand.Discover.prefixes"))
         val PREFIXES_DISCOVER: Array<String> = arrayOf("60", "64", "65")
+        @Deprecated("Use CardBrand.JCB.prefixes", ReplaceWith("CardBrand.JCB.prefixes"))
         val PREFIXES_JCB: Array<String> = arrayOf("35")
+        @Deprecated("Use CardBrand.DinersClub.prefixes", ReplaceWith("CardBrand.DinersClub.prefixes"))
         val PREFIXES_DINERS_CLUB: Array<String> = arrayOf(
             "300", "301", "302", "303", "304", "305", "309", "36", "38", "39"
         )
+        @Deprecated("Use CardBrand.Visa.prefixes", ReplaceWith("CardBrand.Visa.prefixes"))
         val PREFIXES_VISA: Array<String> = arrayOf("4")
+        @Deprecated("Use CardBrand.MasterCard.prefixes", ReplaceWith("CardBrand.MasterCard.prefixes"))
         val PREFIXES_MASTERCARD: Array<String> = arrayOf(
             "2221", "2222", "2223", "2224", "2225", "2226", "2227", "2228", "2229", "223", "224",
             "225", "226", "227", "228", "229", "23", "24", "25", "26", "270", "271", "2720",
             "50", "51", "52", "53", "54", "55", "67"
         )
+        @Deprecated("Use CardBrand.UnionPay.prefixes", ReplaceWith("CardBrand.AmericanExpress.prefixes"))
         val PREFIXES_UNIONPAY: Array<String> = arrayOf("62")
 
         const val MAX_LENGTH_STANDARD: Int = 16
@@ -577,17 +583,6 @@ data class Card internal constructor(
         const val MAX_LENGTH_DINERS_CLUB: Int = 14
 
         internal const val OBJECT_TYPE = "card"
-
-        private val BRAND_RESOURCE_MAP = mapOf(
-            CardBrand.AMERICAN_EXPRESS to R.drawable.stripe_ic_amex,
-            CardBrand.DINERS_CLUB to R.drawable.stripe_ic_diners,
-            CardBrand.DISCOVER to R.drawable.stripe_ic_discover,
-            CardBrand.JCB to R.drawable.stripe_ic_jcb,
-            CardBrand.MASTERCARD to R.drawable.stripe_ic_mastercard,
-            CardBrand.VISA to R.drawable.stripe_ic_visa,
-            CardBrand.UNIONPAY to R.drawable.stripe_ic_unionpay,
-            CardBrand.UNKNOWN to R.drawable.stripe_ic_unknown
-        )
 
         /**
          * Converts an unchecked String value to a [CardBrand] or `null`.
@@ -602,21 +597,18 @@ data class Card internal constructor(
                 return null
             }
 
-            return when {
-                CardBrand.AMERICAN_EXPRESS.equals(possibleCardType, ignoreCase = true) ->
-                    CardBrand.AMERICAN_EXPRESS
-                CardBrand.MASTERCARD.equals(possibleCardType, ignoreCase = true) ->
-                    CardBrand.MASTERCARD
-                CardBrand.DINERS_CLUB.equals(possibleCardType, ignoreCase = true) ->
-                    CardBrand.DINERS_CLUB
-                CardBrand.DISCOVER.equals(possibleCardType, ignoreCase = true) ->
-                    CardBrand.DISCOVER
-                CardBrand.JCB.equals(possibleCardType, ignoreCase = true) ->
-                    CardBrand.JCB
-                CardBrand.VISA.equals(possibleCardType, ignoreCase = true) ->
-                    CardBrand.VISA
-                CardBrand.UNIONPAY.equals(possibleCardType, ignoreCase = true) ->
-                    CardBrand.UNIONPAY
+            val cardBrand = com.stripe.android.model.CardBrand.values().firstOrNull {
+                it.displayName.equals(possibleCardType, ignoreCase = true)
+            } ?: com.stripe.android.model.CardBrand.Unknown
+
+            return when (cardBrand.displayName) {
+                CardBrand.AMERICAN_EXPRESS -> CardBrand.AMERICAN_EXPRESS
+                CardBrand.MASTERCARD -> CardBrand.MASTERCARD
+                CardBrand.DINERS_CLUB -> CardBrand.DINERS_CLUB
+                CardBrand.DISCOVER -> CardBrand.DISCOVER
+                CardBrand.JCB -> CardBrand.JCB
+                CardBrand.VISA -> CardBrand.VISA
+                CardBrand.UNIONPAY -> CardBrand.UNIONPAY
                 else -> CardBrand.UNKNOWN
             }
         }
@@ -648,8 +640,11 @@ data class Card internal constructor(
         @JvmStatic
         @DrawableRes
         fun getBrandIcon(brand: String?): Int {
-            val brandIcon = BRAND_RESOURCE_MAP[brand]
-            return brandIcon ?: R.drawable.stripe_ic_unknown
+            val cardBrand = com.stripe.android.model.CardBrand.values()
+                .firstOrNull {
+                    it.displayName == brand
+                } ?: com.stripe.android.model.CardBrand.Unknown
+            return cardBrand.icon
         }
 
         /**

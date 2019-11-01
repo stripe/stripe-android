@@ -2,6 +2,7 @@ package com.stripe.android
 
 import com.stripe.android.model.Card
 import com.stripe.android.model.Card.CardBrand
+import com.stripe.android.model.CardBrand.Companion.fromCardNumber
 
 /**
  * Utility class for functions to do with cards.
@@ -131,22 +132,6 @@ object CardUtils {
                 cardNumber
             }
 
-        return when {
-            StripeTextUtils.hasAnyPrefix(spacelessCardNumber, *Card.PREFIXES_AMERICAN_EXPRESS) ->
-                CardBrand.AMERICAN_EXPRESS
-            StripeTextUtils.hasAnyPrefix(spacelessCardNumber, *Card.PREFIXES_DISCOVER) ->
-                CardBrand.DISCOVER
-            StripeTextUtils.hasAnyPrefix(spacelessCardNumber, *Card.PREFIXES_JCB) ->
-                CardBrand.JCB
-            StripeTextUtils.hasAnyPrefix(spacelessCardNumber, *Card.PREFIXES_DINERS_CLUB) ->
-                CardBrand.DINERS_CLUB
-            StripeTextUtils.hasAnyPrefix(spacelessCardNumber, *Card.PREFIXES_VISA) ->
-                CardBrand.VISA
-            StripeTextUtils.hasAnyPrefix(spacelessCardNumber, *Card.PREFIXES_MASTERCARD) ->
-                CardBrand.MASTERCARD
-            StripeTextUtils.hasAnyPrefix(spacelessCardNumber, *Card.PREFIXES_UNIONPAY) ->
-                CardBrand.UNIONPAY
-            else -> CardBrand.UNKNOWN
-        }
+        return fromCardNumber(spacelessCardNumber).displayName
     }
 }
