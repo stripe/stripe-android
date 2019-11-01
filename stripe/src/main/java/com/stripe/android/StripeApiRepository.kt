@@ -597,7 +597,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         val response = fireStripeApiRequest(
             ApiRequest.createGet(
                 getIssuingCardPinUrl(cardId),
-                ApiRequest.Options.create(ephemeralKeySecret),
+                ApiRequest.Options(ephemeralKeySecret),
                 mapOf("verification" to createVerificationParam(verificationId, userOneTimeCode)),
                 appInfo
             )
@@ -620,7 +620,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         val response = fireStripeApiRequest(
             ApiRequest.createPost(
                 getIssuingCardPinUrl(cardId),
-                ApiRequest.Options.create(ephemeralKeySecret),
+                ApiRequest.Options(ephemeralKeySecret),
                 mapOf(
                     "verification" to createVerificationParam(verificationId, userOneTimeCode),
                     "pin" to newPin
@@ -914,7 +914,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         makeFireAndForgetRequest(
             AnalyticsRequest.create(
                 loggingMap,
-                ApiRequest.Options.create(publishableKey),
+                ApiRequest.Options(publishableKey),
                 appInfo
             )
         )

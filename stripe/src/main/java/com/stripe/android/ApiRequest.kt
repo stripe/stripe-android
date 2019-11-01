@@ -93,22 +93,10 @@ internal class ApiRequest internal constructor(
      */
     internal data class Options internal constructor(
         val apiKey: String,
-        val stripeAccount: String?
+        val stripeAccount: String? = null
     ) {
         init {
             ApiKeyValidator().requireValid(apiKey)
-        }
-
-        companion object {
-            @JvmSynthetic
-            internal fun create(apiKey: String): Options {
-                return Options(apiKey, null)
-            }
-
-            @JvmSynthetic
-            internal fun create(apiKey: String, stripeAccount: String?): Options {
-                return Options(apiKey, stripeAccount)
-            }
         }
     }
 

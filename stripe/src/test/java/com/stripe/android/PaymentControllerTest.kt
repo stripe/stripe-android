@@ -292,7 +292,7 @@ class PaymentControllerTest {
     fun test3ds2Receiver_whenTimedout_shouldFireAnalyticsRequest() {
         PaymentController.PaymentAuth3ds2ChallengeStatusReceiver(
             FakeStripeRepository(), PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-            "src_123", ApiRequest.Options.create(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+            "src_123", ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             fireAndForgetRequestExecutor, analyticsDataFactory, transaction,
             complete3ds2AuthCallbackFactory)
             .timedout("01")
@@ -311,7 +311,7 @@ class PaymentControllerTest {
     fun test3ds2Receiver_whenCanceled_shouldFireAnalyticsRequest() {
         PaymentController.PaymentAuth3ds2ChallengeStatusReceiver(
             FakeStripeRepository(), PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-            "src_123", ApiRequest.Options.create(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+            "src_123", ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             fireAndForgetRequestExecutor, analyticsDataFactory, transaction,
             complete3ds2AuthCallbackFactory)
             .cancelled("01")
@@ -336,7 +336,7 @@ class PaymentControllerTest {
 
         PaymentController.PaymentAuth3ds2ChallengeStatusReceiver(FakeStripeRepository(),
             PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2, "src_123",
-            ApiRequest.Options.create(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+            ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             fireAndForgetRequestExecutor, analyticsDataFactory, transaction,
             complete3ds2AuthCallbackFactory)
             .runtimeError(runtimeErrorEvent)
@@ -374,7 +374,7 @@ class PaymentControllerTest {
 
         PaymentController.PaymentAuth3ds2ChallengeStatusReceiver(FakeStripeRepository(),
             PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2, "src_123",
-            ApiRequest.Options.create(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+            ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             fireAndForgetRequestExecutor, analyticsDataFactory, transaction,
             complete3ds2AuthCallbackFactory)
             .protocolError(protocolErrorEvent)
@@ -401,7 +401,7 @@ class PaymentControllerTest {
         val receiver = PaymentController.PaymentAuth3ds2ChallengeStatusReceiver(
             FakeStripeRepository(),
             PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2, "src_123",
-            ApiRequest.Options.create(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+            ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             fireAndForgetRequestExecutor, analyticsDataFactory, transaction,
             complete3ds2AuthCallbackFactory
         )
@@ -572,7 +572,7 @@ class PaymentControllerTest {
     companion object {
         private const val MESSAGE_VERSION = Stripe3ds2Fixtures.MESSAGE_VERSION
         private val REQUEST_OPTIONS =
-            ApiRequest.Options.create(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+            ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         private const val MAX_TIMEOUT = 5
         private const val SOURCE_ID = "src_123"
 

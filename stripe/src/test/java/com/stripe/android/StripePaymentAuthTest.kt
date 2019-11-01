@@ -115,7 +115,7 @@ class StripePaymentAuthTest {
         stripe.onPaymentResult(PaymentController.PAYMENT_REQUEST_CODE, data, paymentCallback)
 
         verify(paymentController).handlePaymentResult(data,
-            ApiRequest.Options.create(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+            ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             paymentCallback)
     }
 
@@ -129,7 +129,7 @@ class StripePaymentAuthTest {
         stripe.onSetupResult(PaymentController.SETUP_REQUEST_CODE, data, setupCallback)
 
         verify(paymentController).handleSetupResult(data,
-            ApiRequest.Options.create(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+            ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             setupCallback)
     }
 
@@ -149,6 +149,6 @@ class StripePaymentAuthTest {
 
     companion object {
         private val REQUEST_OPTIONS =
-            ApiRequest.Options.create(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+            ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
     }
 }

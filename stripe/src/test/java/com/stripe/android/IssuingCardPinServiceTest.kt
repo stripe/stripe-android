@@ -69,7 +69,7 @@ class IssuingCardPinServiceTest {
             argThat(ApiRequestMatcher(
                 StripeRequest.Method.GET,
                 "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin?verification%5Bone_time_code%5D=123-456&verification%5Bid%5D=iv_abcd",
-                ApiRequest.Options.create("ek_test_123")
+                ApiRequest.Options("ek_test_123")
             ))))
             .thenReturn(response)
 
@@ -103,7 +103,7 @@ class IssuingCardPinServiceTest {
             argThat(ApiRequestMatcher(
                 StripeRequest.Method.POST,
                 "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin",
-                ApiRequest.Options.create("ek_test_123")
+                ApiRequest.Options("ek_test_123")
             ))))
             .thenReturn(response)
 
@@ -141,7 +141,7 @@ class IssuingCardPinServiceTest {
             argThat(ApiRequestMatcher(
                 StripeRequest.Method.GET,
                 "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin?verification%5Bone_time_code%5D=123-456&verification%5Bid%5D=iv_abcd",
-                ApiRequest.Options.create("ek_test_123")
+                ApiRequest.Options("ek_test_123")
             ))))
             .thenReturn(response)
 

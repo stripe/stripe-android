@@ -8,7 +8,7 @@ class ApiRequestOptionsTest {
 
     @Test
     fun testCreate() {
-        val opts = ApiRequest.Options.create(
+        val opts = ApiRequest.Options(
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "account")
         assertEquals(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, opts.apiKey)
         assertEquals("account", opts.stripeAccount)
@@ -17,7 +17,7 @@ class ApiRequestOptionsTest {
     @Test
     fun testCreate_withSecretKey_throwsException() {
         assertFailsWith<IllegalArgumentException> {
-            ApiRequest.Options.create(ApiKeyFixtures.FAKE_SECRET_KEY)
+            ApiRequest.Options(ApiKeyFixtures.FAKE_SECRET_KEY)
         }
     }
 }

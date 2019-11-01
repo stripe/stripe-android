@@ -145,7 +145,7 @@ class Stripe internal constructor(
         paymentController.startConfirmAndAuth(
             AuthActivityStarter.Host.create(activity),
             confirmPaymentIntentParams,
-            ApiRequest.Options.create(publishableKey, stripeAccountId)
+            ApiRequest.Options(publishableKey, stripeAccountId)
         )
     }
 
@@ -164,7 +164,7 @@ class Stripe internal constructor(
         paymentController.startConfirmAndAuth(
             AuthActivityStarter.Host.create(fragment),
             confirmPaymentIntentParams,
-            ApiRequest.Options.create(publishableKey, stripeAccountId)
+            ApiRequest.Options(publishableKey, stripeAccountId)
         )
     }
 
@@ -181,7 +181,7 @@ class Stripe internal constructor(
         paymentController.startAuth(
             AuthActivityStarter.Host.create(activity),
             clientSecret,
-            ApiRequest.Options.create(publishableKey, stripeAccountId)
+            ApiRequest.Options(publishableKey, stripeAccountId)
         )
     }
 
@@ -198,7 +198,7 @@ class Stripe internal constructor(
         paymentController.startAuth(
             AuthActivityStarter.Host.create(fragment),
             clientSecret,
-            ApiRequest.Options.create(publishableKey, stripeAccountId)
+            ApiRequest.Options(publishableKey, stripeAccountId)
         )
     }
 
@@ -216,7 +216,7 @@ class Stripe internal constructor(
         return if (data != null && paymentController.shouldHandlePaymentResult(requestCode, data)) {
             paymentController.handlePaymentResult(
                 data,
-                ApiRequest.Options.create(publishableKey, stripeAccountId),
+                ApiRequest.Options(publishableKey, stripeAccountId),
                 callback
             )
             true
@@ -240,7 +240,7 @@ class Stripe internal constructor(
     fun retrievePaymentIntentSynchronous(clientSecret: String): PaymentIntent? {
         return stripeRepository.retrievePaymentIntent(
             clientSecret,
-            ApiRequest.Options.create(publishableKey, stripeAccountId)
+            ApiRequest.Options(publishableKey, stripeAccountId)
         )
     }
 
@@ -263,7 +263,7 @@ class Stripe internal constructor(
     ): PaymentIntent? {
         return stripeRepository.confirmPaymentIntent(
             confirmPaymentIntentParams,
-            ApiRequest.Options.create(publishableKey, stripeAccountId)
+            ApiRequest.Options(publishableKey, stripeAccountId)
         )
     }
 
@@ -284,7 +284,7 @@ class Stripe internal constructor(
         paymentController.startConfirmAndAuth(
             AuthActivityStarter.Host.create(activity),
             confirmSetupIntentParams,
-            ApiRequest.Options.create(publishableKey, stripeAccountId)
+            ApiRequest.Options(publishableKey, stripeAccountId)
         )
     }
 
@@ -301,7 +301,7 @@ class Stripe internal constructor(
         paymentController.startConfirmAndAuth(
             AuthActivityStarter.Host.create(fragment),
             confirmSetupIntentParams,
-            ApiRequest.Options.create(publishableKey, stripeAccountId)
+            ApiRequest.Options(publishableKey, stripeAccountId)
         )
     }
 
@@ -317,7 +317,7 @@ class Stripe internal constructor(
         paymentController.startAuth(
             AuthActivityStarter.Host.create(activity),
             clientSecret,
-            ApiRequest.Options.create(publishableKey, stripeAccountId)
+            ApiRequest.Options(publishableKey, stripeAccountId)
         )
     }
 
@@ -333,7 +333,7 @@ class Stripe internal constructor(
         paymentController.startAuth(
             AuthActivityStarter.Host.create(fragment),
             clientSecret,
-            ApiRequest.Options.create(publishableKey, stripeAccountId)
+            ApiRequest.Options(publishableKey, stripeAccountId)
         )
     }
 
@@ -350,7 +350,7 @@ class Stripe internal constructor(
         return if (data != null && paymentController.shouldHandleSetupResult(requestCode, data)) {
             paymentController.handleSetupResult(
                 data,
-                ApiRequest.Options.create(publishableKey, stripeAccountId),
+                ApiRequest.Options(publishableKey, stripeAccountId),
                 callback
             )
             true
@@ -375,7 +375,7 @@ class Stripe internal constructor(
     fun retrieveSetupIntentSynchronous(clientSecret: String): SetupIntent? {
         return stripeRepository.retrieveSetupIntent(
             clientSecret,
-            ApiRequest.Options.create(publishableKey, stripeAccountId)
+            ApiRequest.Options(publishableKey, stripeAccountId)
         )
     }
 
@@ -399,7 +399,7 @@ class Stripe internal constructor(
     ): SetupIntent? {
         return stripeRepository.confirmSetupIntent(
             confirmSetupIntentParams,
-            ApiRequest.Options.create(publishableKey, stripeAccountId)
+            ApiRequest.Options(publishableKey, stripeAccountId)
         )
     }
 
@@ -444,7 +444,7 @@ class Stripe internal constructor(
     ): PaymentMethod? {
         return stripeRepository.createPaymentMethod(
             paymentMethodCreateParams,
-            ApiRequest.Options.create(publishableKey, stripeAccountId)
+            ApiRequest.Options(publishableKey, stripeAccountId)
         )
     }
 
@@ -490,7 +490,7 @@ class Stripe internal constructor(
     @WorkerThread
     fun createSourceSynchronous(params: SourceParams): Source? {
         return stripeRepository.createSource(params,
-            ApiRequest.Options.create(publishableKey, stripeAccountId))
+            ApiRequest.Options(publishableKey, stripeAccountId))
     }
 
     /**
@@ -517,7 +517,7 @@ class Stripe internal constructor(
         @Size(min = 1) clientSecret: String
     ): Source? {
         return stripeRepository.retrieveSource(sourceId, clientSecret,
-            ApiRequest.Options.create(publishableKey, stripeAccountId))
+            ApiRequest.Options(publishableKey, stripeAccountId))
     }
 
     //
@@ -567,7 +567,7 @@ class Stripe internal constructor(
         return try {
             stripeRepository.createToken(
                 accountParams.toParamMap(),
-                ApiRequest.Options.create(publishableKey, stripeAccountId),
+                ApiRequest.Options(publishableKey, stripeAccountId),
                 Token.TokenType.ACCOUNT
             )
         } catch (exception: CardException) {
@@ -622,7 +622,7 @@ class Stripe internal constructor(
             .plus(stripeNetworkUtils.createUidParams())
         return stripeRepository.createToken(
             params,
-            ApiRequest.Options.create(publishableKey, stripeAccountId),
+            ApiRequest.Options(publishableKey, stripeAccountId),
             Token.TokenType.BANK_ACCOUNT
         )
     }
@@ -668,7 +668,7 @@ class Stripe internal constructor(
     fun createPiiTokenSynchronous(personalId: String): Token? {
         return stripeRepository.createToken(
             PiiTokenParams(personalId).toParamMap(),
-            ApiRequest.Options.create(publishableKey, stripeAccountId),
+            ApiRequest.Options(publishableKey, stripeAccountId),
             Token.TokenType.PII
         )
     }
@@ -711,7 +711,7 @@ class Stripe internal constructor(
     fun createCardTokenSynchronous(card: Card): Token? {
         return stripeRepository.createToken(
             stripeNetworkUtils.createCardTokenParams(card),
-            ApiRequest.Options.create(publishableKey, stripeAccountId),
+            ApiRequest.Options(publishableKey, stripeAccountId),
             Token.TokenType.CARD
         )
     }
@@ -752,7 +752,7 @@ class Stripe internal constructor(
     fun createCvcUpdateTokenSynchronous(cvc: String): Token? {
         return stripeRepository.createToken(
             CvcTokenParams(cvc).toParamMap(),
-            ApiRequest.Options.create(publishableKey, stripeAccountId),
+            ApiRequest.Options(publishableKey, stripeAccountId),
             Token.TokenType.CVC_UPDATE
         )
     }
@@ -764,7 +764,7 @@ class Stripe internal constructor(
     ) {
         tokenCreator.create(
             tokenParams,
-            ApiRequest.Options.create(publishableKey, stripeAccountId),
+            ApiRequest.Options(publishableKey, stripeAccountId),
             tokenType, null,
             callback
         )
@@ -789,7 +789,7 @@ class Stripe internal constructor(
         callback: ApiResultCallback<Source>
     ) : ApiOperation<Source>(callback) {
         private val options: ApiRequest.Options =
-            ApiRequest.Options.create(publishableKey, stripeAccount)
+            ApiRequest.Options(publishableKey, stripeAccount)
 
         @Throws(StripeException::class)
         override fun getResult(): Source? {
@@ -805,7 +805,7 @@ class Stripe internal constructor(
         callback: ApiResultCallback<PaymentMethod>
     ) : ApiOperation<PaymentMethod>(callback) {
         private val options: ApiRequest.Options =
-            ApiRequest.Options.create(publishableKey, stripeAccount)
+            ApiRequest.Options(publishableKey, stripeAccount)
 
         @Throws(StripeException::class)
         override fun getResult(): PaymentMethod? {
