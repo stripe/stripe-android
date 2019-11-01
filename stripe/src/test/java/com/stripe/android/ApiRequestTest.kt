@@ -94,8 +94,8 @@ internal class ApiRequestTest {
     @Throws(UnsupportedEncodingException::class, InvalidRequestException::class)
     fun createQuery_withCardData_createsProperQueryString() {
         val cardMap = NETWORK_UTILS.createCardTokenParams(CardFixtures.MINIMUM_CARD)
-        val query = ApiRequest.createGet(StripeApiRepository.sourcesUrl, cardMap,
-            ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
+        val query = ApiRequest.createGet(StripeApiRepository.sourcesUrl, ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+            cardMap, null)
             .createQuery()
 
         val expectedValue = "muid=BF3BF4D775100923AAAFA82884FB759001162E28&product_usage=&guid=6367C48DD193D56EA7B0BAAD25B19455E529F5EE&card%5Bexp_month%5D=1&card%5Bexp_year%5D=2050&card%5Bnumber%5D=4242424242424242&card%5Bcvc%5D=123"
@@ -125,8 +125,8 @@ internal class ApiRequestTest {
         val params = mapOf("customer" to "cus_123")
 
         val output = ApiRequest.createPost(StripeApiRepository.paymentMethodsUrl,
-            params,
-            ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
+            ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+            params, null)
             .getOutputBytes()
         assertEquals(16, output.size)
     }
@@ -136,21 +136,21 @@ internal class ApiRequestTest {
         val params = mapOf("customer" to "cus_123")
         assertEquals(
             ApiRequest.createPost(StripeApiRepository.paymentMethodsUrl,
-                params,
-                ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null),
+                ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+                params, null),
             ApiRequest.createPost(StripeApiRepository.paymentMethodsUrl,
-                params,
-                ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null)
+                ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+                params, null)
         )
 
         assertNotEquals(
             ApiRequest.createPost(StripeApiRepository.paymentMethodsUrl,
-                params,
-                ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY), null),
+                ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+                params, null),
             ApiRequest.createPost(StripeApiRepository.paymentMethodsUrl,
-                params,
                 ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
-                    "acct"), null)
+                    "acct"),
+                params, null)
         )
     }
 
@@ -160,7 +160,8 @@ internal class ApiRequestTest {
         val apiRequest = ApiRequest.createGet(
             StripeApiRepository.paymentMethodsUrl,
             ApiRequest.Options.create(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
-            AppInfoTest.APP_INFO)
+            appInfo = AppInfoTest.APP_INFO
+        )
         val headers = apiRequest.headers
         assertEquals(
             "${StripeRequest.DEFAULT_USER_AGENT} MyAwesomePlugin/1.2.34 (https://myawesomeplugin.info)",
