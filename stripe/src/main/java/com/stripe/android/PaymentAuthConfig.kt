@@ -14,7 +14,7 @@ import com.stripe.android.stripe3ds2.init.ui.ToolbarCustomization
 import com.stripe.android.stripe3ds2.init.ui.UiCustomization
 
 /**
- * Configuration for authentication mechanisms via [PaymentController]
+ * Configuration for authentication mechanisms via [StripePaymentController]
  */
 class PaymentAuthConfig private constructor(
     internal val stripe3ds2Config: Stripe3ds2Config

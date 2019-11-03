@@ -20,11 +20,11 @@ import com.stripe.android.CustomerSession.ACTION_API_EXCEPTION
 import com.stripe.android.CustomerSession.EXTRA_EXCEPTION
 import com.stripe.android.CustomerSessionTestHelper
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.PaymentController
 import com.stripe.android.PaymentSession.Companion.TOKEN_PAYMENT_SESSION
 import com.stripe.android.R
 import com.stripe.android.Stripe
 import com.stripe.android.StripeNetworkUtils
+import com.stripe.android.StripePaymentController
 import com.stripe.android.StripeRepository
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
@@ -327,7 +327,7 @@ class AddPaymentMethodActivityTest :
         return Stripe(
             stripeRepository,
             StripeNetworkUtils(context),
-            PaymentController.create(context, stripeRepository),
+            StripePaymentController.create(context, stripeRepository),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             null
         )

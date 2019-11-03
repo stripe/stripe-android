@@ -8,7 +8,7 @@ import com.stripe.android.view.StripeIntentResultExtras
 
 /**
  * Starts an instance of [PaymentRelayStarter].
- * Should only be called from [PaymentController].
+ * Should only be called from [StripePaymentController].
  */
 internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter.Data> {
     companion object {
