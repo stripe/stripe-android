@@ -40,6 +40,10 @@ internal class ApiRequest internal constructor(
                 mapOf("Stripe-Account" to it)
             }.orEmpty()
         ).plus(
+            options.idempotencyKey?.let {
+                mapOf("Idempotency-Key" to it)
+            }.orEmpty()
+        ).plus(
             languageTag?.let { mapOf("Accept-Language" to it) }.orEmpty()
         )
     }
@@ -67,7 +71,7 @@ internal class ApiRequest internal constructor(
 
     @Throws(UnsupportedEncodingException::class, InvalidRequestException::class)
     override fun getOutputBytes(): ByteArray {
-        return createQuery().toByteArray(charset(CHARSET))
+        return query.toByteArray(charset(CHARSET))
     }
 
     override fun toString(): String {
@@ -93,7 +97,8 @@ internal class ApiRequest internal constructor(
      */
     internal data class Options internal constructor(
         val apiKey: String,
-        val stripeAccount: String? = null
+        internal val stripeAccount: String? = null,
+        internal val idempotencyKey: String? = null
     ) {
         init {
             ApiKeyValidator().requireValid(apiKey)

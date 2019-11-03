@@ -22,14 +22,14 @@ internal abstract class StripeRequest(
      * @return if the HTTP method is [Method.GET], return URL with query string;
      * otherwise, return the URL
      */
-    val url: String
+    internal val url: String
         @Throws(UnsupportedEncodingException::class, InvalidRequestException::class)
         get() = if (Method.GET == method) urlWithQuery() else baseUrl
 
-    val contentType: String
+    internal val contentType: String
         get() = "$mimeType; charset=$CHARSET"
 
-    val headers: Map<String, String>
+    internal val headers: Map<String, String>
         get() {
             return createHeaders()
                 .plus(HEADER_USER_AGENT to getUserAgent())
@@ -40,21 +40,22 @@ internal abstract class StripeRequest(
     @Throws(UnsupportedEncodingException::class, InvalidRequestException::class)
     internal abstract fun getOutputBytes(): ByteArray
 
-    val baseHashCode: Int
+    internal val baseHashCode: Int
         get() = Objects.hash(method, baseUrl, params)
 
     internal abstract fun createHeaders(): Map<String, String>
 
-    @Throws(InvalidRequestException::class, UnsupportedEncodingException::class)
-    fun createQuery(): String {
-        return flattenParams(params).joinToString("&") {
-            urlEncodePair(it.key, it.value)
+    internal val query: String
+        @Throws(InvalidRequestException::class, UnsupportedEncodingException::class)
+        get() {
+            return flattenParams(params).joinToString("&") {
+                urlEncodePair(it.key, it.value)
+            }
         }
-    }
 
     @Throws(InvalidRequestException::class, UnsupportedEncodingException::class)
     private fun urlWithQuery(): String {
-        val query = createQuery()
+        val query = this.query
         return if (query.isEmpty()) {
             baseUrl
         } else {
