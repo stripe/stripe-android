@@ -145,7 +145,7 @@ public class StripeTest {
     }
 
     @Test
-    public void createTokenShouldCallTokenCreator() {
+    public void createCardTokenShouldCallTokenCreator() {
         final boolean[] tokenCreatorCalled = { false };
         final Stripe stripe = createStripe(
                 new Stripe.TokenCreator() {
@@ -158,12 +158,12 @@ public class StripeTest {
                         tokenCreatorCalled[0] = true;
                     }
                 });
-        stripe.createToken(CARD, DEFAULT_TOKEN_CALLBACK);
+        stripe.createCardToken(CARD, DEFAULT_TOKEN_CALLBACK);
         assertTrue(tokenCreatorCalled[0]);
     }
 
     @Test
-    public void createTokenShouldUseProvidedKey() {
+    public void createCardTokenShouldUseProvidedKey() {
         final Stripe stripe = createStripe(
                 new Stripe.TokenCreator() {
                     @Override
@@ -177,7 +177,7 @@ public class StripeTest {
                         assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
                     }
                 });
-        stripe.createToken(CARD, DEFAULT_TOKEN_CALLBACK);
+        stripe.createCardToken(CARD, DEFAULT_TOKEN_CALLBACK);
     }
 
     @Test
