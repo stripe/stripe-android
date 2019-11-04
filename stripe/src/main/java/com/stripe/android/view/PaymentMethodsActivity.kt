@@ -9,29 +9,21 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.DefaultItemAnimator
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession.Companion.TOKEN_PAYMENT_SESSION
 import com.stripe.android.R
-import com.stripe.android.StripeError
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.view.i18n.TranslatorManager
 import kotlinx.android.synthetic.main.activity_payment_methods.*
 
 /**
- *
- * An activity that allows a customer to select from their attach payment methods,
- * or to add new ones.
- *
+ * An activity that allows a customer to select from their attached payment methods,
+ * or add a new one via [AddPaymentMethodActivity].
  *
  * This Activity is typically started through [com.stripe.android.PaymentSession].
  * To directly start this activity, use [PaymentMethodsActivityStarter.startForResult].
- *
  *
  * Use [PaymentMethodsActivityStarter.Result.fromIntent]
  * to retrieve the result of this activity from an intent in onActivityResult().
@@ -42,7 +34,6 @@ class PaymentMethodsActivity : AppCompatActivity() {
     private var startedFromPaymentSession: Boolean = false
     private lateinit var customerSession: CustomerSession
     private lateinit var cardDisplayTextFactory: CardDisplayTextFactory
-    private var tappedPaymentMethod: PaymentMethod? = null
 
     private lateinit var viewModel: PaymentMethodsViewModel
 
@@ -57,26 +48,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
         cardDisplayTextFactory = CardDisplayTextFactory.create(this)
         customerSession = CustomerSession.getInstance()
 
-        val initiallySelectedPaymentMethodId =
-            savedInstanceState?.getString(STATE_SELECTED_PAYMENT_METHOD_ID)
-                ?: args.initialPaymentMethodId
-        adapter = PaymentMethodsAdapter(
-            initiallySelectedPaymentMethodId,
-            args,
-            args.paymentMethodTypes
-        )
-        adapter.listener = object : PaymentMethodsAdapter.Listener {
-            override fun onClick(paymentMethod: PaymentMethod) {
-                tappedPaymentMethod = paymentMethod
-            }
-        }
-        setupRecyclerView()
-
-        val itemTouchHelper = ItemTouchHelper(
-            PaymentMethodSwipeCallback(this, adapter,
-                SwipeToDeleteCallbackListener(this))
-        )
-        itemTouchHelper.attachToRecyclerView(payment_methods_recycler)
+        setupRecyclerView(args, savedInstanceState)
 
         setSupportActionBar(payment_methods_toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -86,7 +58,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
             when (it.status) {
                 PaymentMethodsViewModel.Result.Status.SUCCESS -> {
                     val paymentMethods = it.data as List<PaymentMethod>
-                    updatePaymentMethods(paymentMethods)
+                    adapter.setPaymentMethods(paymentMethods)
                 }
                 PaymentMethodsViewModel.Result.Status.ERROR -> {
                     val exception = it.data as StripeException
@@ -104,19 +76,38 @@ class PaymentMethodsActivity : AppCompatActivity() {
         payment_methods_recycler.requestFocusFromTouch()
     }
 
-    private fun setupRecyclerView() {
-        payment_methods_recycler.setHasFixedSize(false)
-        payment_methods_recycler.layoutManager = LinearLayoutManager(this)
-        payment_methods_recycler.adapter = adapter
-        payment_methods_recycler.itemAnimator = object : DefaultItemAnimator() {
-            override fun onAnimationFinished(viewHolder: RecyclerView.ViewHolder) {
-                super.onAnimationFinished(viewHolder)
+    private fun setupRecyclerView(
+        args: PaymentMethodsActivityStarter.Args,
+        savedInstanceState: Bundle?
+    ) {
+        val initiallySelectedPaymentMethodId =
+            savedInstanceState?.getString(STATE_SELECTED_PAYMENT_METHOD_ID)
+                ?: args.initialPaymentMethodId
 
-                // wait until post-tap animations are completed before finishing activity
-                tappedPaymentMethod?.let { setSelectionAndFinish(it) }
-                tappedPaymentMethod = null
+        adapter = PaymentMethodsAdapter(
+            initiallySelectedPaymentMethodId,
+            args,
+            args.paymentMethodTypes
+        )
+
+        adapter.listener = object : PaymentMethodsAdapter.Listener {
+            override fun onClick(paymentMethod: PaymentMethod) {
+                payment_methods_recycler.tappedPaymentMethod = paymentMethod
             }
         }
+
+        payment_methods_recycler.adapter = adapter
+        payment_methods_recycler.listener = object : PaymentMethodsRecyclerView.Listener {
+            override fun onPaymentMethodSelected(paymentMethod: PaymentMethod) {
+                setSelectionAndFinish(paymentMethod)
+            }
+        }
+
+        payment_methods_recycler.attachItemTouchHelper(
+            PaymentMethodSwipeCallback(this, adapter,
+                SwipeToDeleteCallbackListener(this, adapter, cardDisplayTextFactory,
+                    customerSession))
+        )
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -136,7 +127,8 @@ class PaymentMethodsActivity : AppCompatActivity() {
         initLoggingTokens()
 
         data?.let {
-            val result = AddPaymentMethodActivityStarter.Result.fromIntent(data)
+            val result =
+                AddPaymentMethodActivityStarter.Result.fromIntent(data)
             result?.paymentMethod?.let { onAddedPaymentMethod(it) }
         } ?: fetchCustomerPaymentMethods()
     }
@@ -155,17 +147,8 @@ class PaymentMethodsActivity : AppCompatActivity() {
         }
     }
 
-    private fun onDeletedPaymentMethod(paymentMethod: PaymentMethod) {
-        adapter.deletePaymentMethod(paymentMethod)
-
-        paymentMethod.id?.let { paymentMethodId ->
-            customerSession.detachPaymentMethod(paymentMethodId, PaymentMethodDeleteListener())
-        }
-
-        showSnackbar(paymentMethod, R.string.removed)
-    }
-
-    private fun showSnackbar(paymentMethod: PaymentMethod, @StringRes stringRes: Int) {
+    @JvmSynthetic
+    internal fun showSnackbar(paymentMethod: PaymentMethod, @StringRes stringRes: Int) {
         val snackbarText = paymentMethod.card?.let { paymentMethodId ->
             getString(stringRes, cardDisplayTextFactory.createUnstyled(paymentMethodId))
         }
@@ -188,10 +171,6 @@ class PaymentMethodsActivity : AppCompatActivity() {
         viewModel.loadPaymentMethods()
     }
 
-    private fun updatePaymentMethods(paymentMethods: List<PaymentMethod>) {
-        adapter.setPaymentMethods(paymentMethods)
-    }
-
     private fun initLoggingTokens() {
         if (startedFromPaymentSession) {
             customerSession.addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION)
@@ -205,16 +184,20 @@ class PaymentMethodsActivity : AppCompatActivity() {
     }
 
     private fun setCommunicatingProgress(communicating: Boolean) {
-        payment_methods_progress_bar.visibility = if (communicating) View.VISIBLE else View.GONE
+        payment_methods_progress_bar.visibility = if (communicating) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
     }
 
-    fun setSelectionAndFinish(paymentMethod: PaymentMethod?) {
-        if (paymentMethod?.id == null) {
+    @JvmSynthetic
+    internal fun setSelectionAndFinish(paymentMethod: PaymentMethod?) {
+        if (paymentMethod == null) {
             cancelAndFinish()
-            return
+        } else {
+            finishWithPaymentMethod(paymentMethod)
         }
-
-        finishWithPaymentMethod(paymentMethod)
     }
 
     private fun finishWithPaymentMethod(paymentMethod: PaymentMethod) {
@@ -225,7 +208,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
     }
 
     private fun showError(error: String) {
-        AlertDialog.Builder(this)
+        AlertDialog.Builder(this, R.style.AlertDialogStyle)
             .setMessage(error)
             .setCancelable(true)
             .setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
@@ -240,45 +223,8 @@ class PaymentMethodsActivity : AppCompatActivity() {
         outState.putString(STATE_SELECTED_PAYMENT_METHOD_ID, adapter.selectedPaymentMethod?.id)
     }
 
-    private fun confirmDeletePaymentMethod(paymentMethod: PaymentMethod) {
-        val message = paymentMethod.card?.let {
-            cardDisplayTextFactory.createUnstyled(it)
-        }
-        AlertDialog.Builder(this)
-            .setTitle(R.string.delete_payment_method)
-            .setMessage(message)
-            .setPositiveButton(android.R.string.yes) { _, _ ->
-                onDeletedPaymentMethod(paymentMethod)
-            }
-            .setNegativeButton(android.R.string.no) { _, _ ->
-                adapter.resetPaymentMethod(paymentMethod)
-            }
-            .setOnCancelListener {
-                adapter.resetPaymentMethod(paymentMethod)
-            }
-            .create()
-            .show()
-    }
-
-    private class PaymentMethodDeleteListener : CustomerSession.PaymentMethodRetrievalListener {
-        override fun onPaymentMethodRetrieved(paymentMethod: PaymentMethod) {
-        }
-
-        override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
-        }
-    }
-
-    private class SwipeToDeleteCallbackListener constructor(
-        private val activity: PaymentMethodsActivity
-    ) : PaymentMethodSwipeCallback.Listener {
-
-        override fun onSwiped(paymentMethod: PaymentMethod) {
-            activity.confirmDeletePaymentMethod(paymentMethod)
-        }
-    }
-
     companion object {
         private const val STATE_SELECTED_PAYMENT_METHOD_ID = "state_selected_payment_method_id"
-        const val TOKEN_PAYMENT_METHODS_ACTIVITY: String = "PaymentMethodsActivity"
+        internal const val TOKEN_PAYMENT_METHODS_ACTIVITY: String = "PaymentMethodsActivity"
     }
 }
