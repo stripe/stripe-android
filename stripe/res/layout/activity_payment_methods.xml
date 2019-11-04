@@ -28,7 +28,7 @@
             android:layout_below="@id/payment_methods_toolbar"
             android:visibility="gone" />
 
-        <androidx.recyclerview.widget.RecyclerView
+        <com.stripe.android.view.PaymentMethodsRecyclerView
             android:id="@+id/payment_methods_recycler"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

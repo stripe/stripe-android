@@ -10,6 +10,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CustomerSession
 import com.stripe.android.CustomerSessionTestHelper
@@ -29,7 +30,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
@@ -86,7 +86,7 @@ class PaymentMethodsActivityTest : BaseViewTest<PaymentMethodsActivity>(PaymentM
         assertNotNull(recyclerView)
         assertNotNull(addCardView)
 
-        verify<CustomerSession>(customerSession).getPaymentMethods(
+        verify(customerSession).getPaymentMethods(
             eq(PaymentMethod.Type.Card),
             listenerArgumentCaptor.capture()
         )
@@ -112,7 +112,7 @@ class PaymentMethodsActivityTest : BaseViewTest<PaymentMethodsActivity>(PaymentM
             .build())
         recyclerView = paymentMethodsActivity.findViewById(R.id.payment_methods_recycler)
 
-        verify<CustomerSession>(customerSession)
+        verify(customerSession)
             .getPaymentMethods(eq(PaymentMethod.Type.Card), listenerArgumentCaptor.capture())
 
         listenerArgumentCaptor.firstValue
@@ -159,7 +159,7 @@ class PaymentMethodsActivityTest : BaseViewTest<PaymentMethodsActivity>(PaymentM
             AddPaymentMethodActivityStarter.REQUEST_CODE, RESULT_OK, resultIntent
         )
         assertEquals(View.VISIBLE, progressBar.visibility)
-        verify<CustomerSession>(customerSession, times(2))
+        verify(customerSession, times(2))
             .getPaymentMethods(eq(PaymentMethod.Type.Card), listenerArgumentCaptor.capture())
 
         listenerArgumentCaptor.firstValue
@@ -174,7 +174,7 @@ class PaymentMethodsActivityTest : BaseViewTest<PaymentMethodsActivity>(PaymentM
 
     @Test
     fun setSelectionAndFinish_finishedWithExpectedResult() {
-        verify<CustomerSession>(customerSession).getPaymentMethods(
+        verify(customerSession).getPaymentMethods(
             eq(PaymentMethod.Type.Card),
             listenerArgumentCaptor.capture()
         )
