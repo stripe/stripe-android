@@ -57,6 +57,11 @@ open class StripeEditText @JvmOverloads constructor(
             refreshDrawableState()
         }
 
+    protected val fieldText: String
+        get() {
+            return text?.toString().orEmpty()
+        }
+
     @ColorInt
     private var defaultErrorColor: Int = 0
     @ColorInt
