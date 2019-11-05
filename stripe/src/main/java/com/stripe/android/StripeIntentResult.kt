@@ -6,7 +6,7 @@ import java.util.Objects
 
 /**
  * A model representing the result of a [StripeIntent] confirmation or authentication attempt
- * via [Stripe.confirmPayment] or [Stripe.authenticatePayment]
+ * via [Stripe.confirmPayment] or [Stripe.handleNextActionForPayment]
  *
  * [intent] is a [StripeIntent] retrieved after confirmation/authentication succeeded or failed.
  */

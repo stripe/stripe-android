@@ -170,6 +170,27 @@ class Stripe internal constructor(
 
     /**
      * Authenticate a [PaymentIntent].
+     * Used for [manual confirmation](https://stripe.com/docs/payments/payment-intents/android-manual) flow.
+     *
+     * @param activity the `Activity` that is launching the payment authentication flow
+     * @param clientSecret the [client_secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret)
+     * property of a confirmed [PaymentIntent] object
+     */
+    @Deprecated("Rename to better reflect behavior and match iOS naming.",
+        ReplaceWith("handleNextActionForPayment(activity, clientSecret)"))
+    @UiThread
+    fun authenticatePayment(activity: Activity, clientSecret: String) {
+        paymentController.startAuth(
+            AuthActivityStarter.Host.create(activity),
+            clientSecret,
+            ApiRequest.Options(publishableKey, stripeAccountId)
+        )
+    }
+
+    /**
+     * Handle the [next_action](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-next_action)
+     * for a previously confirmed [PaymentIntent].
+     *
      * Used for [manual confirmation](https://stripe.com/docs/payments/payment-intents/quickstart#manual-confirmation-flow) flow.
      *
      * @param activity the `Activity` that is launching the payment authentication flow
@@ -177,7 +198,7 @@ class Stripe internal constructor(
      * property of a confirmed [PaymentIntent] object
      */
     @UiThread
-    fun authenticatePayment(activity: Activity, clientSecret: String) {
+    fun handleNextActionForPayment(activity: Activity, clientSecret: String) {
         paymentController.startAuth(
             AuthActivityStarter.Host.create(activity),
             clientSecret,
@@ -193,6 +214,8 @@ class Stripe internal constructor(
      * @param clientSecret the [client_secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret)
      * property of a confirmed [PaymentIntent] object
      */
+    @Deprecated("Rename to better reflect behavior and match iOS naming.",
+        ReplaceWith("handleNextActionForPayment(fragment, clientSecret)"))
     @UiThread
     fun authenticatePayment(fragment: Fragment, clientSecret: String) {
         paymentController.startAuth(
@@ -203,9 +226,28 @@ class Stripe internal constructor(
     }
 
     /**
+     * Handle the [next_action](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-next_action)
+     * for a previously confirmed [PaymentIntent].
+     *
+     * Used for [manual confirmation](https://stripe.com/docs/payments/payment-intents/android-manual) flow.
+     *
+     * @param fragment the `Fragment` that is launching the payment authentication flow
+     * @param clientSecret the [client_secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret)
+     * property of a confirmed [PaymentIntent] object
+     */
+    @UiThread
+    fun handleNextActionForPayment(fragment: Fragment, clientSecret: String) {
+        paymentController.startAuth(
+            AuthActivityStarter.Host.create(fragment),
+            clientSecret,
+            ApiRequest.Options(publishableKey, stripeAccountId)
+        )
+    }
+
+    /**
      * Should be called via `Activity#onActivityResult(int, int, Intent)}}` to handle the
      * result of a PaymentIntent automatic confirmation (see [confirmPayment]) or
-     * manual confirmation (see [authenticatePayment]})
+     * manual confirmation (see [handleNextActionForPayment]})
      */
     @UiThread
     fun onPaymentResult(
@@ -314,8 +356,27 @@ class Stripe internal constructor(
      * @param clientSecret the [client_secret](https://stripe.com/docs/api/setup_intents/object#setup_intent_object-client_secret)
      * property of a confirmed [SetupIntent] object
      */
+    @Deprecated("Rename to better reflect behavior and match iOS naming.",
+        ReplaceWith("handleNextActionForSetupIntent(activity, clientSecret)"))
     @UiThread
     fun authenticateSetup(activity: Activity, clientSecret: String) {
+        paymentController.startAuth(
+            AuthActivityStarter.Host.create(activity),
+            clientSecret,
+            ApiRequest.Options(publishableKey, stripeAccountId)
+        )
+    }
+
+    /**
+     * Handle [next_action](https://stripe.com/docs/api/setup_intents/object#setup_intent_object-next_action)
+     * for a previously confirmed [SetupIntent]. Used for manual confirmation flow.
+     *
+     * @param activity the `Activity` that is launching the payment authentication flow
+     * @param clientSecret the [client_secret](https://stripe.com/docs/api/setup_intents/object#setup_intent_object-client_secret)
+     * property of a confirmed [SetupIntent] object
+     */
+    @UiThread
+    fun handleNextActionForSetupIntent(activity: Activity, clientSecret: String) {
         paymentController.startAuth(
             AuthActivityStarter.Host.create(activity),
             clientSecret,
@@ -330,8 +391,27 @@ class Stripe internal constructor(
      * @param clientSecret the [client_secret](https://stripe.com/docs/api/setup_intents/object#setup_intent_object-client_secret)
      * property of a confirmed [SetupIntent] object
      */
+    @Deprecated("Rename to better reflect behavior and match iOS naming.",
+        ReplaceWith("handleNextActionForSetupIntent(fragment, clientSecret)"))
     @UiThread
     fun authenticateSetup(fragment: Fragment, clientSecret: String) {
+        paymentController.startAuth(
+            AuthActivityStarter.Host.create(fragment),
+            clientSecret,
+            ApiRequest.Options(publishableKey, stripeAccountId)
+        )
+    }
+
+    /**
+     * Handle [next_action](https://stripe.com/docs/api/setup_intents/object#setup_intent_object-next_action)
+     * for a previously confirmed [SetupIntent]. Used for manual confirmation flow.
+     *
+     * @param fragment the `Fragment` launching the payment authentication flow
+     * @param clientSecret the [client_secret](https://stripe.com/docs/api/setup_intents/object#setup_intent_object-client_secret)
+     * property of a confirmed [SetupIntent] object
+     */
+    @UiThread
+    fun handleNextActionForSetupIntent(fragment: Fragment, clientSecret: String) {
         paymentController.startAuth(
             AuthActivityStarter.Host.create(fragment),
             clientSecret,
@@ -727,10 +807,10 @@ class Stripe internal constructor(
      * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
      * @param callback a [ApiResultCallback] to receive the result or error
      */
+    @Deprecated("Deprecated, replace with Stripe#createCardToken()",
+        ReplaceWith("createCardToken(card, idempotencyKey, callback)"))
     @UiThread
     @JvmOverloads
-    @Deprecated("Deprecated, replace with Stripe#createCardToken()",
-        ReplaceWith("Stripe#createCardToken()"))
     fun createToken(
         card: Card,
         idempotencyKey: String? = null,
