@@ -3,6 +3,7 @@ package com.stripe.android.view
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.never
+import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.stripe.android.CardNumberFixtures.VALID_AMEX_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VALID_AMEX_WITH_SPACES
@@ -22,7 +23,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.reset
-import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
@@ -120,7 +120,7 @@ class CardNumberEditTextTest {
         cardNumberEditText.setText(VALID_VISA_WITH_SPACES)
 
         assertTrue(cardNumberEditText.isCardNumberValid)
-        verify<CardNumberEditText.CardNumberCompleteListener>(cardNumberCompleteListener).onCardNumberComplete()
+        verify(cardNumberCompleteListener).onCardNumberComplete()
     }
 
     @Test
@@ -128,7 +128,7 @@ class CardNumberEditTextTest {
         cardNumberEditText.setText(VALID_VISA_NO_SPACES)
 
         assertTrue(cardNumberEditText.isCardNumberValid)
-        verify<CardNumberEditText.CardNumberCompleteListener>(cardNumberCompleteListener).onCardNumberComplete()
+        verify(cardNumberCompleteListener).onCardNumberComplete()
     }
 
     @Test
@@ -136,14 +136,14 @@ class CardNumberEditTextTest {
         cardNumberEditText.setText(VALID_AMEX_WITH_SPACES)
 
         assertTrue(cardNumberEditText.isCardNumberValid)
-        verify<CardNumberEditText.CardNumberCompleteListener>(cardNumberCompleteListener).onCardNumberComplete()
+        verify(cardNumberCompleteListener).onCardNumberComplete()
     }
 
     @Test
     fun setText_whenTextChangesFromValidToInvalid_changesCardValidState() {
         cardNumberEditText.setText(VALID_VISA_WITH_SPACES)
         // Simply setting the value interacts with this mock once -- that is tested elsewhere
-        reset<CardNumberEditText.CardNumberCompleteListener>(cardNumberCompleteListener)
+        reset(cardNumberCompleteListener)
 
         var mutable = cardNumberEditText.text.toString()
         // Removing a single character should make this invalid
@@ -167,7 +167,7 @@ class CardNumberEditTextTest {
         // We definitely shouldn't start out in an error state.
         assertFalse(cardNumberEditText.shouldShowError)
 
-        cardNumberEditText.append("123")
+        cardNumberEditText.setText(cardNumberEditText.text?.toString() + "123")
         assertFalse(cardNumberEditText.shouldShowError)
     }
 
@@ -177,7 +177,7 @@ class CardNumberEditTextTest {
         cardNumberEditText.setText(almostThere)
         assertFalse(cardNumberEditText.shouldShowError)
         // We now have the valid 4242 Visa
-        cardNumberEditText.append("2")
+        cardNumberEditText.setText(cardNumberEditText.text?.toString() + "2")
         assertFalse(cardNumberEditText.shouldShowError)
     }
 
@@ -186,7 +186,7 @@ class CardNumberEditTextTest {
         val almostThere = VALID_VISA_WITH_SPACES.substring(0, 18)
         cardNumberEditText.setText(almostThere)
         // This makes the number officially invalid
-        cardNumberEditText.append("3")
+        cardNumberEditText.setText(cardNumberEditText.text?.toString() + "3")
         assertTrue(cardNumberEditText.shouldShowError)
     }
 
@@ -211,7 +211,7 @@ class CardNumberEditTextTest {
         ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
         assertFalse(cardNumberEditText.shouldShowError)
 
-        cardNumberEditText.append("4")
+        cardNumberEditText.setText(cardNumberEditText.text?.toString() + "4")
         assertFalse(cardNumberEditText.shouldShowError)
     }
 
@@ -225,120 +225,120 @@ class CardNumberEditTextTest {
         ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
         assertFalse(cardNumberEditText.shouldShowError)
 
-        cardNumberEditText.append("5")
+        cardNumberEditText.setText(cardNumberEditText.text?.toString() + "5")
         assertFalse(cardNumberEditText.shouldShowError)
     }
 
     @Test
     fun setCardBrandChangeListener_callsSetCardBrand() {
-        verify<CardNumberEditText.CardBrandChangeListener>(cardBrandChangeListener)
+        verify(cardBrandChangeListener)
             .onCardBrandChanged(Card.CardBrand.UNKNOWN)
     }
 
     @Test
     fun addVisaPrefix_callsBrandListener() {
         // We reset because just attaching the listener calls the method once.
-        clearInvocations<CardNumberEditText.CardBrandChangeListener>(cardBrandChangeListener)
+        clearInvocations(cardBrandChangeListener)
         // There is only one Visa Prefix.
-        cardNumberEditText.append(Card.PREFIXES_VISA[0])
-        verify<CardNumberEditText.CardBrandChangeListener>(cardBrandChangeListener)
+        cardNumberEditText.setText(cardNumberEditText.text?.toString() + Card.PREFIXES_VISA[0])
+        verify(cardBrandChangeListener)
             .onCardBrandChanged(Card.CardBrand.VISA)
     }
 
     @Test
     fun addAmExPrefix_callsBrandListener() {
-        for (prefix in Card.PREFIXES_AMERICAN_EXPRESS) {
+        Card.PREFIXES_AMERICAN_EXPRESS.forEach { prefix ->
             // Reset inside the loop so we don't count each prefix
-            clearInvocations<CardNumberEditText.CardBrandChangeListener>(cardBrandChangeListener)
-            cardNumberEditText.append(prefix)
-            verify<CardNumberEditText.CardBrandChangeListener>(cardBrandChangeListener).onCardBrandChanged(Card.CardBrand.AMERICAN_EXPRESS)
+            clearInvocations(cardBrandChangeListener)
+            cardNumberEditText.setText(cardNumberEditText.text?.toString() + prefix)
+            verify(cardBrandChangeListener).onCardBrandChanged(Card.CardBrand.AMERICAN_EXPRESS)
             cardNumberEditText.setText("")
         }
     }
 
     @Test
     fun addDinersClubPrefix_callsBrandListener() {
-        for (prefix in Card.PREFIXES_DINERS_CLUB) {
-            clearInvocations<CardNumberEditText.CardBrandChangeListener>(cardBrandChangeListener)
-            cardNumberEditText.append(prefix)
-            verify<CardNumberEditText.CardBrandChangeListener>(cardBrandChangeListener).onCardBrandChanged(Card.CardBrand.DINERS_CLUB)
+        Card.PREFIXES_DINERS_CLUB.forEach { prefix ->
+            clearInvocations(cardBrandChangeListener)
+            cardNumberEditText.setText(cardNumberEditText.text?.toString() + prefix)
+            verify(cardBrandChangeListener).onCardBrandChanged(Card.CardBrand.DINERS_CLUB)
             cardNumberEditText.setText("")
         }
     }
 
     @Test
     fun addDiscoverPrefix_callsBrandListener() {
-        for (prefix in Card.PREFIXES_DISCOVER) {
-            clearInvocations<CardNumberEditText.CardBrandChangeListener>(cardBrandChangeListener)
-            cardNumberEditText.append(prefix)
-            verify<CardNumberEditText.CardBrandChangeListener>(cardBrandChangeListener).onCardBrandChanged(Card.CardBrand.DISCOVER)
+        Card.PREFIXES_DISCOVER.forEach { prefix ->
+            clearInvocations(cardBrandChangeListener)
+            cardNumberEditText.setText(cardNumberEditText.text?.toString() + prefix)
+            verify(cardBrandChangeListener).onCardBrandChanged(Card.CardBrand.DISCOVER)
             cardNumberEditText.setText("")
         }
     }
 
     @Test
     fun addMasterCardPrefix_callsBrandListener() {
-        for (prefix in Card.PREFIXES_MASTERCARD) {
-            clearInvocations<CardNumberEditText.CardBrandChangeListener>(cardBrandChangeListener)
-            cardNumberEditText.append(prefix)
-            verify<CardNumberEditText.CardBrandChangeListener>(cardBrandChangeListener).onCardBrandChanged(Card.CardBrand.MASTERCARD)
+        Card.PREFIXES_MASTERCARD.forEach { prefix ->
+            clearInvocations(cardBrandChangeListener)
+            cardNumberEditText.setText(cardNumberEditText.text?.toString() + prefix)
+            verify(cardBrandChangeListener).onCardBrandChanged(Card.CardBrand.MASTERCARD)
             cardNumberEditText.setText("")
         }
     }
 
     @Test
     fun addJCBPrefix_callsBrandListener() {
-        for (prefix in Card.PREFIXES_JCB) {
-            clearInvocations<CardNumberEditText.CardBrandChangeListener>(cardBrandChangeListener)
-            cardNumberEditText.append(prefix)
-            verify<CardNumberEditText.CardBrandChangeListener>(cardBrandChangeListener).onCardBrandChanged(Card.CardBrand.JCB)
+        Card.PREFIXES_JCB.forEach { prefix ->
+            clearInvocations(cardBrandChangeListener)
+            cardNumberEditText.setText(cardNumberEditText.text?.toString() + prefix)
+            verify(cardBrandChangeListener).onCardBrandChanged(Card.CardBrand.JCB)
             cardNumberEditText.setText("")
         }
     }
 
     @Test
     fun enterCompleteNumberInParts_onlyCallsBrandListenerOnce() {
-        clearInvocations<CardNumberEditText.CardBrandChangeListener>(cardBrandChangeListener)
+        clearInvocations(cardBrandChangeListener)
         val prefix = VALID_AMEX_WITH_SPACES.substring(0, 2)
         val suffix = VALID_AMEX_WITH_SPACES.substring(2)
-        cardNumberEditText.append(prefix)
-        cardNumberEditText.append(suffix)
-        verify<CardNumberEditText.CardBrandChangeListener>(cardBrandChangeListener).onCardBrandChanged(Card.CardBrand.AMERICAN_EXPRESS)
+        cardNumberEditText.setText(cardNumberEditText.text?.toString() + prefix)
+        cardNumberEditText.setText(cardNumberEditText.text?.toString() + suffix)
+        verify(cardBrandChangeListener).onCardBrandChanged(Card.CardBrand.AMERICAN_EXPRESS)
     }
 
     @Test
     fun enterBrandPrefix_thenDelete_callsUpdateWithUnknown() {
-        clearInvocations<CardNumberEditText.CardBrandChangeListener>(cardBrandChangeListener)
+        clearInvocations(cardBrandChangeListener)
         val dinersPrefix = Card.PREFIXES_DINERS_CLUB[0]
         // All the Diners Club prefixes are longer than one character, but I specifically want
         // to test that a nonempty string still triggers this action, so this test will fail if
         // the Diners Club prefixes are ever changed.
         assertTrue(dinersPrefix.length > 1)
 
-        cardNumberEditText.append(dinersPrefix)
-        verify<CardNumberEditText.CardBrandChangeListener>(cardBrandChangeListener).onCardBrandChanged(Card.CardBrand.DINERS_CLUB)
+        cardNumberEditText.setText(cardNumberEditText.text?.toString() + dinersPrefix)
+        verify(cardBrandChangeListener).onCardBrandChanged(Card.CardBrand.DINERS_CLUB)
 
         ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
-        verify<CardNumberEditText.CardBrandChangeListener>(cardBrandChangeListener).onCardBrandChanged(Card.CardBrand.UNKNOWN)
+        verify(cardBrandChangeListener).onCardBrandChanged(Card.CardBrand.UNKNOWN)
     }
 
     @Test
     fun enterBrandPrefix_thenClearAllText_callsUpdateWithUnknown() {
-        clearInvocations<CardNumberEditText.CardBrandChangeListener>(cardBrandChangeListener)
+        clearInvocations(cardBrandChangeListener)
         val prefixVisa = Card.PREFIXES_VISA[0]
-        cardNumberEditText.append(prefixVisa)
-        verify<CardNumberEditText.CardBrandChangeListener>(cardBrandChangeListener)
+        cardNumberEditText.setText(cardNumberEditText.text?.toString() + prefixVisa)
+        verify(cardBrandChangeListener)
             .onCardBrandChanged(Card.CardBrand.VISA)
 
         // Just adding some other text. Not enough to invalidate the card or complete it.
-        cardNumberEditText.append("123")
-        verify<CardNumberEditText.CardBrandChangeListener>(cardBrandChangeListener, never())
+        cardNumberEditText.setText(cardNumberEditText.text?.toString() + "123")
+        verify(cardBrandChangeListener, never())
             .onCardBrandChanged(Card.CardBrand.UNKNOWN)
 
         // This simulates the user selecting all text and deleting it.
         cardNumberEditText.setText("")
 
-        verify<CardNumberEditText.CardBrandChangeListener>(cardBrandChangeListener).onCardBrandChanged(Card.CardBrand.UNKNOWN)
+        verify(cardBrandChangeListener).onCardBrandChanged(Card.CardBrand.UNKNOWN)
     }
 
     @Test
@@ -375,5 +375,13 @@ class CardNumberEditTextTest {
         ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
 
         assertNull(cardNumberEditText.cardNumber)
+    }
+
+    @Test
+    fun createFormattedNumber_whenCardsPartsHasNull_excludesNullAndAfter() {
+        assertEquals(
+            "4242 4242",
+            CardNumberEditText.createFormattedNumber(arrayOf("4242", "4242", null, "4242"))
+        )
     }
 }
