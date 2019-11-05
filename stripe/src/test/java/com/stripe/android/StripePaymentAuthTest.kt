@@ -7,6 +7,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -18,7 +19,6 @@ import kotlin.test.assertEquals
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
-import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
@@ -53,7 +53,7 @@ class StripePaymentAuthTest {
             "client_secret",
             "yourapp://post-authentication-return-url")
         stripe.confirmPayment(activity, confirmPaymentIntentParams)
-        verify<PaymentController>(paymentController).startConfirmAndAuth(
+        verify(paymentController).startConfirmAndAuth(
             hostArgumentCaptor.capture(),
             eq(confirmPaymentIntentParams),
             eq(REQUEST_OPTIONS)
@@ -69,7 +69,7 @@ class StripePaymentAuthTest {
             "client_secret",
             "yourapp://post-authentication-return-url")
         stripe.confirmSetupIntent(activity, confirmSetupIntentParams)
-        verify<PaymentController>(paymentController).startConfirmAndAuth(
+        verify(paymentController).startConfirmAndAuth(
             hostArgumentCaptor.capture(),
             eq(confirmSetupIntentParams),
             eq(REQUEST_OPTIONS)
@@ -82,8 +82,8 @@ class StripePaymentAuthTest {
         val stripe = createStripe()
         val clientSecret =
             requireNotNull(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.clientSecret)
-        stripe.authenticatePayment(activity, clientSecret)
-        verify<PaymentController>(paymentController).startAuth(
+        stripe.handleNextActionForPayment(activity, clientSecret)
+        verify(paymentController).startAuth(
             hostArgumentCaptor.capture(),
             eq(clientSecret),
             eq(REQUEST_OPTIONS)
@@ -92,12 +92,12 @@ class StripePaymentAuthTest {
     }
 
     @Test
-    fun authenticateSetup_shouldAuth() {
+    fun handleNextActionForSetupIntent_shouldStartAuth() {
         val stripe = createStripe()
         val clientSecret =
             requireNotNull(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.clientSecret)
-        stripe.authenticateSetup(activity, clientSecret)
-        verify<PaymentController>(paymentController).startAuth(
+        stripe.handleNextActionForSetupIntent(activity, clientSecret)
+        verify(paymentController).startAuth(
             hostArgumentCaptor.capture(),
             eq(clientSecret),
             eq(REQUEST_OPTIONS)
