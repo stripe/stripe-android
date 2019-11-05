@@ -132,8 +132,11 @@ class CardNumberEditText @JvmOverloads constructor(
 
     private fun listenForTextChanges() {
         addTextChangedListener(object : TextWatcher {
-            var latestChangeStart: Int = 0
-            var latestInsertionSize: Int = 0
+            private var latestChangeStart: Int = 0
+            private var latestInsertionSize: Int = 0
+
+            private var newCursorPosition: Int? = null
+            private var formattedNumber: String? = null
 
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
                 if (!ignoreChanges) {
@@ -159,34 +162,33 @@ class CardNumberEditText @JvmOverloads constructor(
                 val spacelessNumber = StripeTextUtils.removeSpacesAndHyphens(s.toString())
                     ?: return
 
-                val cardParts = ViewUtils.separateCardNumberGroups(
-                    spacelessNumber, cardBrand)
-                val formattedNumberBuilder = StringBuilder()
-                for (i in cardParts.indices) {
-                    if (cardParts[i] == null) {
-                        break
-                    }
+                val formattedNumber = createFormattedNumber(
+                    ViewUtils.separateCardNumberGroups(spacelessNumber, cardBrand)
+                )
 
-                    if (i != 0) {
-                        formattedNumberBuilder.append(' ')
-                    }
-                    formattedNumberBuilder.append(cardParts[i])
-                }
-
-                val formattedNumber = formattedNumberBuilder.toString()
-                val cursorPosition = updateSelectionIndex(formattedNumber.length,
+                this.newCursorPosition = updateSelectionIndex(formattedNumber.length,
                     latestChangeStart, latestInsertionSize)
-
-                ignoreChanges = true
-                setText(formattedNumber)
-                setSelection(cursorPosition)
-                ignoreChanges = false
+                this.formattedNumber = formattedNumber
             }
 
             override fun afterTextChanged(s: Editable) {
-                if (s.length == lengthMax) {
+                if (ignoreChanges) {
+                    return
+                }
+
+                ignoreChanges = true
+                if (formattedNumber != null) {
+                    setText(formattedNumber)
+                    newCursorPosition?.let {
+                        setSelection(it)
+                    }
+                }
+
+                ignoreChanges = false
+
+                if (formattedNumber?.length == lengthMax) {
                     val before = isCardNumberValid
-                    isCardNumberValid = CardUtils.isValidCardNumber(s.toString())
+                    isCardNumberValid = CardUtils.isValidCardNumber(formattedNumber)
                     shouldShowError = !isCardNumberValid
                     if (!before && isCardNumberValid) {
                         cardNumberCompleteListener?.onCardNumberComplete()
@@ -196,6 +198,9 @@ class CardNumberEditText @JvmOverloads constructor(
                     // Don't show errors if we aren't full-length.
                     shouldShowError = false
                 }
+
+                formattedNumber = null
+                newCursorPosition = null
             }
         })
     }
@@ -245,6 +250,13 @@ class CardNumberEditText @JvmOverloads constructor(
                     MAX_LENGTH_AMEX_DINERS
                 else -> MAX_LENGTH_COMMON
             }
+        }
+
+        @JvmSynthetic
+        internal fun createFormattedNumber(cardParts: Array<String?>): String {
+            return cardParts
+                .takeWhile { it != null }
+                .joinToString(" ")
         }
     }
 }
