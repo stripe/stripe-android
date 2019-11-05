@@ -6,6 +6,8 @@
 * [#1781](https://github.com/stripe/stripe-android/pull/1781) Mark `Stripe#createToken()` as `@Deprecated`; replace with `Stripe#createCardToken()`
 * [#1782](https://github.com/stripe/stripe-android/pull/1782) Mark `Stripe#authenticatePayment()` and `Stripe#authenticateSetup()` as `@Deprecated`; replace with `Stripe#handleNextActionForPayment()` and `Stripe#handleNextActionForSetupIntent()`, respectively
 * [#1784](https://github.com/stripe/stripe-android/pull/1784) Update API version to [2019-10-17](https://stripe.com/docs/upgrades#2019-10-17)
+* [#1787](https://github.com/stripe/stripe-android/pull/1787) Fix `CardNumberEditText` performance
+* [#1788](https://github.com/stripe/stripe-android/pull/1788) Fix `ExpiryDateEditText` performance
 
 ## 12.2.0 - 2019-10-31
 * [#1745](https://github.com/stripe/stripe-android/pull/1745) Make `StripeEditText` public
