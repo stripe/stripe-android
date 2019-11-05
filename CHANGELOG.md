@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 12.3.0 - unreleased
+* [#1775](https://github.com/stripe/stripe-android/pull/1775) Add support for idempotency key on Stripe Token API requests
+* [#1777](https://github.com/stripe/stripe-android/pull/1777) Make `Card` implement `Parcelable`
+* [#1781](https://github.com/stripe/stripe-android/pull/1781) Mark `Stripe#createToken()` as `@Deprecated`; replace with `Stripe#createCardToken()`
+* [#1782](https://github.com/stripe/stripe-android/pull/1782) Mark `Stripe#authenticatePayment()` and `Stripe#authenticateSetup()` as `@Deprecated`; replace with `Stripe#handleNextActionForPayment()` and `Stripe#handleNextActionForSetupIntent()`, respectively
+* [#1784](https://github.com/stripe/stripe-android/pull/1784) Update API version to [2019-10-17](https://stripe.com/docs/upgrades#2019-10-17)
+
 ## 12.2.0 - 2019-10-31
 * [#1745](https://github.com/stripe/stripe-android/pull/1745) Make `StripeEditText` public
 * [#1746](https://github.com/stripe/stripe-android/pull/1746) Make `FpxBank` enum public
