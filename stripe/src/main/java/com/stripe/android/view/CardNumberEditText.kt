@@ -50,7 +50,7 @@ class CardNumberEditText @JvmOverloads constructor(
      */
     val cardNumber: String?
         get() = if (isCardNumberValid) {
-            StripeTextUtils.removeSpacesAndHyphens(text?.toString())
+            StripeTextUtils.removeSpacesAndHyphens(fieldText)
         } else {
             null
         }
@@ -183,24 +183,23 @@ class CardNumberEditText @JvmOverloads constructor(
                         setSelection(it)
                     }
                 }
+                formattedNumber = null
+                newCursorPosition = null
 
                 ignoreChanges = false
 
-                if (formattedNumber?.length == lengthMax) {
+                if (fieldText.length == lengthMax) {
                     val before = isCardNumberValid
-                    isCardNumberValid = CardUtils.isValidCardNumber(formattedNumber)
+                    isCardNumberValid = CardUtils.isValidCardNumber(fieldText)
                     shouldShowError = !isCardNumberValid
                     if (!before && isCardNumberValid) {
                         cardNumberCompleteListener?.onCardNumberComplete()
                     }
                 } else {
-                    isCardNumberValid = CardUtils.isValidCardNumber(text?.toString())
+                    isCardNumberValid = CardUtils.isValidCardNumber(fieldText)
                     // Don't show errors if we aren't full-length.
                     shouldShowError = false
                 }
-
-                formattedNumber = null
-                newCursorPosition = null
             }
         })
     }
