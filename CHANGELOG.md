@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 12.3.0 - unreleased
+## 12.3.0 - 2019-11-05
 * [#1775](https://github.com/stripe/stripe-android/pull/1775) Add support for idempotency key on Stripe Token API requests
 * [#1777](https://github.com/stripe/stripe-android/pull/1777) Make `Card` implement `Parcelable`
 * [#1781](https://github.com/stripe/stripe-android/pull/1781) Mark `Stripe#createToken()` as `@Deprecated`; replace with `Stripe#createCardToken()`
