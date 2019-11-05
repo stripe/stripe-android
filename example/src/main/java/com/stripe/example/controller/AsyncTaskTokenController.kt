@@ -9,15 +9,14 @@ import com.stripe.android.view.CardInputWidget
 import com.stripe.example.R
 
 /**
- * Logic needed to create tokens using the [android.os.AsyncTask] methods included in the
- * sdk: [Stripe.createToken].
+ * Logic needed to create a Card Token asynchronously using [Stripe.createCardToken].
  */
 class AsyncTaskTokenController(
     button: Button,
     private var cardInputWidget: CardInputWidget?,
     context: Context,
     private val errorDialogHandler: ErrorDialogHandler,
-    outputListController: ListViewController,
+    private val outputListController: ListViewController,
     private val progressDialogController: ProgressDialogController,
     publishableKey: String
 ) {
@@ -25,11 +24,7 @@ class AsyncTaskTokenController(
 
     init {
         button.setOnClickListener {
-            saveCard(TokenCallbackImpl(
-                errorDialogHandler,
-                outputListController,
-                progressDialogController
-            ))
+            saveCard()
         }
     }
 
@@ -37,15 +32,15 @@ class AsyncTaskTokenController(
         cardInputWidget = null
     }
 
-    private fun saveCard(tokenCallback: ApiResultCallback<Token>) {
-        val cardToSave = cardInputWidget?.card
-        if (cardToSave == null) {
-            errorDialogHandler.show("Invalid Card Data")
-            return
-        }
-
-        progressDialogController.show(R.string.progressMessage)
-        stripe.createToken(cardToSave, callback = tokenCallback)
+    private fun saveCard() {
+        cardInputWidget?.card?.let { card ->
+            progressDialogController.show(R.string.progressMessage)
+            stripe.createCardToken(card, callback = TokenCallbackImpl(
+                errorDialogHandler,
+                outputListController,
+                progressDialogController
+            ))
+        } ?: errorDialogHandler.show("Invalid Card Data")
     }
 
     private class TokenCallbackImpl constructor(

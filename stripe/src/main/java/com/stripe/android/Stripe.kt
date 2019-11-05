@@ -729,7 +729,34 @@ class Stripe internal constructor(
      */
     @UiThread
     @JvmOverloads
+    @Deprecated("Deprecated, replace with Stripe#createCardToken()",
+        ReplaceWith("Stripe#createCardToken()"))
     fun createToken(
+        card: Card,
+        idempotencyKey: String? = null,
+        callback: ApiResultCallback<Token>
+    ) {
+        createTokenFromParams(
+            stripeNetworkUtils.createCardTokenParams(card),
+            Token.TokenType.CARD,
+            idempotencyKey,
+            callback
+        )
+    }
+
+    /**
+     * Create a Card token asynchronously.
+     *
+     * See [Create a card token](https://stripe.com/docs/api/tokens/create_card).
+     * `POST /v1/tokens`
+     *
+     * @param card the [Card] used to create this payment token
+     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
+     * @param callback a [ApiResultCallback] to receive the result or error
+     */
+    @UiThread
+    @JvmOverloads
+    fun createCardToken(
         card: Card,
         idempotencyKey: String? = null,
         callback: ApiResultCallback<Token>
