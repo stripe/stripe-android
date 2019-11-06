@@ -7,7 +7,6 @@
         <item name="colorControlActivated">@color/accent</item>
         <item name="titleTextColor">@color/title</item>
         <item name="android:textColorPrimary">@color/textPrimary</item>
-        <item name="android:textColor">@color/text</item>
     </style>
 
     <style name="StripeDefaultTheme" parent="StripeBaseTheme">

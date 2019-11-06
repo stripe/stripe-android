@@ -21,14 +21,14 @@
             android:value="true"/>
 
         <activity
-            android:name=".activity.CardTokenActivity">
+            android:name=".activity.CreateCardTokenActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
             </intent-filter>
         </activity>
 
         <activity
-            android:name=".activity.RedirectActivity">
+            android:name=".activity.CreateCardSourceActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
 
@@ -65,7 +65,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.PaymentMultilineActivity">
+            android:name=".activity.CreateCardPaymentMethodActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
             </intent-filter>

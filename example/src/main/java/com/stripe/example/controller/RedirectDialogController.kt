@@ -11,28 +11,28 @@ import com.stripe.example.R
 /**
  * Controller for the redirect dialog used to direct users out of the application.
  */
-class RedirectDialogController(private val mActivity: Activity) {
-    private var mAlertDialog: AlertDialog? = null
+class RedirectDialogController(private val activity: Activity) {
+    private var alertDialog: AlertDialog? = null
 
-    fun showDialog(url: String, sourceCardData: Map<String, *>) {
+    fun showDialog(redirectUrl: String, sourceCardData: Map<String, *>) {
         val brand = sourceCardData["brand"] as String?
-        mAlertDialog = AlertDialog.Builder(mActivity)
-            .setTitle(mActivity.getString(R.string.authentication_dialog_title))
-            .setMessage(mActivity.getString(R.string.authentication_dialog_message,
+        val alertDialog = AlertDialog.Builder(activity, R.style.AlertDialogStyle)
+            .setTitle(activity.getString(R.string.authentication_dialog_title))
+            .setMessage(activity.getString(R.string.authentication_dialog_message,
                 brand, sourceCardData["last4"]))
             .setIcon(Card.getBrandIcon(brand))
             .setPositiveButton(android.R.string.yes) { _, _ ->
-                mActivity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(redirectUrl)))
             }
             .setNegativeButton(android.R.string.no, null)
             .create()
-        mAlertDialog!!.show()
+        alertDialog.show()
+
+        this.alertDialog = alertDialog
     }
 
     fun dismissDialog() {
-        if (mAlertDialog != null) {
-            mAlertDialog!!.dismiss()
-            mAlertDialog = null
-        }
+        alertDialog?.dismiss()
+        alertDialog = null
     }
 }
