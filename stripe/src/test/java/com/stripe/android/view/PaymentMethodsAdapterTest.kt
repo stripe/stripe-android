@@ -2,16 +2,13 @@ package com.stripe.android.view
 
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.model.PaymentMethodFixtures
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.*
 
 /**
  * Test class for [PaymentMethodsAdapter]
@@ -38,6 +35,7 @@ class PaymentMethodsAdapterTest {
         assertEquals(4, paymentMethodsAdapter.itemCount)
         verify<RecyclerView.AdapterDataObserver>(adapterDataObserver).onChanged()
 
+        paymentMethodsAdapter.selectedPaymentMethodId = paymentMethodsAdapter.paymentMethods[2].id
         assertEquals(
             PaymentMethodFixtures.CARD_PAYMENT_METHODS[2].id,
             requireNotNull(paymentMethodsAdapter.selectedPaymentMethod).id
@@ -57,6 +55,7 @@ class PaymentMethodsAdapterTest {
             listOf(PaymentMethodFixtures.CARD_PAYMENT_METHODS[0])
 
         paymentMethodsAdapter.setPaymentMethods(singlePaymentMethod)
+        paymentMethodsAdapter.selectedPaymentMethodId = paymentMethodsAdapter.paymentMethods[0].id
         assertEquals(2, paymentMethodsAdapter.itemCount)
         assertNotNull(paymentMethodsAdapter.selectedPaymentMethod)
 
@@ -66,6 +65,7 @@ class PaymentMethodsAdapterTest {
         )
 
         paymentMethodsAdapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
+        paymentMethodsAdapter.selectedPaymentMethodId = paymentMethodsAdapter.paymentMethods[2].id
         assertEquals(4, paymentMethodsAdapter.itemCount)
         assertEquals(
             PaymentMethodFixtures.CARD_PAYMENT_METHODS[2].id,
@@ -91,12 +91,12 @@ class PaymentMethodsAdapterTest {
     }
 
     @Test
-    fun setPaymentMethods_whenNoInitialSpecified_selectsMostRecentlyCreated() {
+    fun setPaymentMethods_whenNoInitialSpecified_returnsNull() {
         val adapter = PaymentMethodsAdapter(null,
             PaymentMethodsActivityStarter.Args.Builder()
                 .build())
         adapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
-        assertEquals("pm_3000", adapter.selectedPaymentMethod?.id)
+        assertNull(adapter.selectedPaymentMethod)
     }
 
     @Test
