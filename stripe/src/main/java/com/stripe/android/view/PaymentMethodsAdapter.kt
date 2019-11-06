@@ -25,11 +25,9 @@ internal class PaymentMethodsAdapter @JvmOverloads internal constructor(
     internal var selectedPaymentMethodId: String? = initiallySelectedPaymentMethodId
     internal val selectedPaymentMethod: PaymentMethod?
         get() {
-            // return the selected Payment Method, if it exists;
-            // otherwise, return the most recently created Payment Method
             return selectedPaymentMethodId?.let { selectedPaymentMethodId ->
                 paymentMethods.firstOrNull { it.id == selectedPaymentMethodId }
-            } ?: (paymentMethods.maxBy { it.created ?: 0 })
+            }
         }
 
     internal var listener: Listener? = null
