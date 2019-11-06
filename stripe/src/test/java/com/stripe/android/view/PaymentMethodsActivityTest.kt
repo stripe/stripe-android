@@ -169,6 +169,8 @@ class PaymentMethodsActivityTest : BaseViewTest<PaymentMethodsActivity>(PaymentM
 
         val paymentMethodsAdapter =
             recyclerView.adapter as PaymentMethodsAdapter
+
+        paymentMethodsAdapter.selectedPaymentMethodId = paymentMethod.id
         assertEquals(paymentMethod.id, paymentMethodsAdapter.selectedPaymentMethod?.id)
     }
 
