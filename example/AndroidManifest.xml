@@ -27,10 +27,6 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name=".service.TokenIntentService"
-            android:exported="false"/>
-
         <activity
             android:name=".activity.RedirectActivity">
             <intent-filter>
