@@ -5,8 +5,8 @@ import com.stripe.android.model.PaymentMethodFixtures
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.times
