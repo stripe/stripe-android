@@ -39,7 +39,8 @@ data class PaymentSessionConfig internal constructor(
 
         /**
          * @param hiddenShippingInfoFields [CustomizableShippingField] fields that should be
-         * hidden in the [ShippingInfoWidget]
+         * hidden in the shipping information screen. All fields will be shown if this list is
+         * empty. Note that not all fields can be hidden, such as country or name.
          */
         fun setHiddenShippingInfoFields(
             @CustomizableShippingField vararg hiddenShippingInfoFields: String
@@ -69,7 +70,9 @@ data class PaymentSessionConfig internal constructor(
 
         /**
          * @param shippingInfoRequired whether a [ShippingInformation] should be required.
-         * If it is required, a screen with a [ShippingInfoWidget] can be shown to collect it.
+         * If it is required, a screen with a [ShippingInfoWidget] is shown to collect it.
+         *
+         * Default is `true`.
          */
         fun setShippingInfoRequired(shippingInfoRequired: Boolean): Builder {
             this.shippingInfoRequired = shippingInfoRequired
@@ -79,7 +82,9 @@ data class PaymentSessionConfig internal constructor(
         /**
          * @param shippingMethodsRequired whether a [com.stripe.android.model.ShippingMethod]
          * should be required. If it is required, a screen with a [SelectShippingMethodWidget]
-         * can be shown to collect it.
+         * is shown to collect it.
+         *
+         * Default is `true`.
          */
         fun setShippingMethodsRequired(shippingMethodsRequired: Boolean): Builder {
             this.shippingMethodsRequired = shippingMethodsRequired
