@@ -565,7 +565,7 @@ class StripeApiRepositoryTest {
         assertTrue(paymentMethods.isEmpty())
     }
 
-    @Test
+    @Ignore("flaky end-to-end test")
     fun getFpxBankStatus_withFpxKey() {
         val fpxBankStatuses = stripeApiRepository.getFpxBankStatus(
             ApiRequest.Options(ApiKeyFixtures.FPX_PUBLISHABLE_KEY)
