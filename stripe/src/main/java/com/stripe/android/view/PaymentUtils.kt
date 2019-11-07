@@ -6,14 +6,14 @@ import java.util.Currency
 import java.util.Locale
 import kotlin.math.pow
 
-internal object PaymentUtils {
+object PaymentUtils {
 
     /**
      * Formats a monetary amount into a human friendly string where zero is returned
      * as free.
      */
-    @JvmSynthetic
-    internal fun formatPriceStringUsingFree(
+    @JvmStatic
+    fun formatPriceStringUsingFree(
         amount: Long,
         currency: Currency,
         free: String

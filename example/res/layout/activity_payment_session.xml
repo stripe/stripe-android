@@ -16,7 +16,7 @@
     <Button
         android:id="@+id/btn_select_payment_method"
         android:enabled="false"
-        android:layout_width="200dp"
+        android:layout_width="320dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="@dimen/example_vertical_spacing"
@@ -26,32 +26,57 @@
     <Button
         android:id="@+id/btn_start_payment_flow"
         android:enabled="false"
-        android:layout_width="200dp"
+        android:layout_width="320dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="@dimen/example_vertical_spacing"
+        android:layout_marginBottom="@dimen/example_vertical_spacing"
         android:text="@string/payment_session_select_shipping"
         />
 
     <TextView
-        android:id="@+id/tv_payment_session_data_title"
+        android:id="@+id/tv_ready_to_charge"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
         android:layout_margin="16dp"
-        android:layout_marginTop="@dimen/example_vertical_spacing"
-        android:text="@string/payment_session_data"
-        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
-        android:visibility="invisible"
+        android:layout_marginTop="24dp"
+        android:drawablePadding="8dp"
+        android:drawableStart="@drawable/ic_cancel"
+        android:textSize="16sp"
+        android:text="@string/ready_to_charge"
         />
 
     <TextView
-        android:id="@+id/tv_payment_session_data"
+        android:id="@+id/tv_payment_method"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
         android:layout_margin="16dp"
-        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
+        android:drawablePadding="8dp"
+        android:drawableStart="@drawable/ic_credit_card"
+        android:textSize="16sp"
+        android:text="@string/not_selected"
+        />
+
+    <TextView
+        android:id="@+id/tv_shipping_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:drawablePadding="8dp"
+        android:drawableStart="@drawable/ic_home"
+        android:textSize="16sp"
+        android:text="@string/not_selected"
+        />
+
+    <TextView
+        android:id="@+id/tv_shipping_method"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:drawablePadding="8dp"
+        android:drawableStart="@drawable/ic_shipping_method"
+        android:textSize="16sp"
+        android:text="@string/not_selected"
         />
 
 </LinearLayout>
