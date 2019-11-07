@@ -10,15 +10,33 @@
     </style>
 
     <style name="StripeDefaultTheme" parent="StripeBaseTheme">
+        <!-- Applied to toolbar background -->
         <item name="colorPrimary">@color/primary</item>
+
+        <!-- Applied to status bar -->
         <item name="colorPrimaryDark">@color/primaryDark</item>
-        <item name="android:textColorPrimary">@color/title</item>
+
+        <!-- Applied to inactive Shipping Method name and amount -->
+        <item name="android:textColorPrimary">@color/text</item>
+
+        <!-- Applied to inactive Shipping Method description -->
         <item name="android:textColorSecondary">@color/textPrimary</item>
+
+        <!-- Applied to Shipping Information drop-down items; add Payment Method footer text color -->
         <item name="android:textColor">@color/textPrimary</item>
+
+        <!-- Applied to toolbar foreground/text -->
         <item name="titleTextColor">@color/title</item>
+
+        <!-- Applied to selected Payment Method; active field; links; add new Payment Method call-to-action -->
         <item name="colorAccent">@color/accent</item>
+
+        <!-- Applied to: Payment Method icon; inactive form field highlight -->
         <item name="colorControlNormal">@color/accent</item>
+
+        <!-- Applied to form field text -->
         <item name="android:editTextColor">@color/textPrimary</item>
+
         <item name="editTextColor">@color/textPrimary</item>
     </style>
 
