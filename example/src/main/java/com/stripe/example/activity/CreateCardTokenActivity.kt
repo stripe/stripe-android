@@ -6,7 +6,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.example.R
 import com.stripe.example.module.DependencyHandler
 
-class CardTokenActivity : AppCompatActivity() {
+class CreateCardTokenActivity : AppCompatActivity() {
 
     private lateinit var dependencyHandler: DependencyHandler
 

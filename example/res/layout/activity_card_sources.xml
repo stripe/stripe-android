@@ -8,10 +8,10 @@
     android:layout_height="match_parent"
     android:paddingStart="8dp"
     android:paddingEnd="8dp"
-    tools:context="com.stripe.example.activity.RedirectActivity">
+    tools:context="com.stripe.example.activity.CreateCardSourceActivity">
 
     <TextView android:id="@+id/payment_form_title"
-              android:text="@string/addThreeDSecureCard"
+              android:text="@string/create_source_header"
               style="@style/Header" />
 
     <com.stripe.android.view.CardInputWidget
@@ -27,7 +27,7 @@
         android:layout_width="160dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="@string/addThreeDSecureCard"/>
+        android:text="@string/create_source_header"/>
 
     <Button
         android:id="@+id/btn_three_d_secure_sync"

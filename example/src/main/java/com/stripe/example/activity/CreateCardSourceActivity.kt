@@ -2,9 +2,10 @@ package com.stripe.example.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.model.Card
@@ -13,24 +14,23 @@ import com.stripe.android.model.SourceCardData
 import com.stripe.android.model.SourceParams
 import com.stripe.android.view.CardInputWidget
 import com.stripe.example.R
-import com.stripe.example.adapter.RedirectAdapter
-import com.stripe.example.controller.ErrorDialogHandler
+import com.stripe.example.adapter.SourcesAdapter
 import com.stripe.example.controller.ProgressDialogController
 import com.stripe.example.controller.RedirectDialogController
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.activity_card_sources.*
 
 /**
  * Activity that lets you redirect for a 3DS source verification.
  */
-class RedirectActivity : AppCompatActivity() {
+class CreateCardSourceActivity : AppCompatActivity() {
     private val compositeDisposable = CompositeDisposable()
 
     private lateinit var cardInputWidget: CardInputWidget
-    private lateinit var redirectAdapter: RedirectAdapter
-    private lateinit var errorDialogHandler: ErrorDialogHandler
+    private lateinit var sourcesAdapter: SourcesAdapter
     private lateinit var redirectDialogController: RedirectDialogController
     private lateinit var progressDialogController: ProgressDialogController
     private lateinit var stripe: Stripe
@@ -39,29 +39,24 @@ class RedirectActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_polling)
+        setContentView(R.layout.activity_card_sources)
 
         cardInputWidget = findViewById(R.id.card_widget_three_d)
-        errorDialogHandler = ErrorDialogHandler(this)
-        progressDialogController = ProgressDialogController(supportFragmentManager,
-            resources)
+        progressDialogController = ProgressDialogController(supportFragmentManager, resources)
         redirectDialogController = RedirectDialogController(this)
 
-        val publishableKey = PaymentConfiguration.getInstance(this).publishableKey
-        stripe = Stripe(applicationContext, publishableKey)
+        stripe = Stripe(applicationContext,
+            PaymentConfiguration.getInstance(this).publishableKey)
 
-        val threeDSecureButton = findViewById<Button>(R.id.btn_three_d_secure)
-        threeDSecureButton.setOnClickListener { beginSequence() }
+        btn_three_d_secure.setOnClickListener { beginSequence() }
+        btn_three_d_secure_sync.setOnClickListener { beginSequence() }
 
-        val threeDSyncButton = findViewById<Button>(R.id.btn_three_d_secure_sync)
-        threeDSyncButton.setOnClickListener { beginSequence() }
-
-        val recyclerView = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recycler_view)
+        val recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
         val linearLayoutManager = LinearLayoutManager(this)
         recyclerView.setHasFixedSize(true)
         recyclerView.layoutManager = linearLayoutManager
-        redirectAdapter = RedirectAdapter()
-        recyclerView.adapter = redirectAdapter
+        sourcesAdapter = SourcesAdapter()
+        recyclerView.adapter = sourcesAdapter
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -90,8 +85,9 @@ class RedirectActivity : AppCompatActivity() {
     }
 
     private fun beginSequence() {
-        val displayCard = cardInputWidget.card ?: return
-        createCardSource(displayCard)
+        cardInputWidget.card?.let {
+            createCardSource(it)
+        } ?: showSnackbar("Enter a valid card.")
     }
 
     /**
@@ -108,32 +104,35 @@ class RedirectActivity : AppCompatActivity() {
         compositeDisposable.add(cardSourceObservable
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe { progressDialogController.show(R.string.createSource) }
-            .subscribe(
+            .doOnSubscribe { progressDialogController.show(R.string.create_source) }
+            .doOnComplete { progressDialogController.dismiss() }
+            .subscribe({ source ->
+
                 // Because we've made the mapping above, we're now subscribing
                 // to the result of creating a 3DS Source
-                { source ->
-                    val sourceCardData = source.sourceTypeModel as SourceCardData?
+                val sourceCardData = source.sourceTypeModel as SourceCardData?
 
-                    val threeDSecureStatus = sourceCardData?.threeDSecureStatus
+                val threeDSecureStatus = sourceCardData?.threeDSecureStatus
 
-                    // Making a note of the Card Source in our list.
-                    redirectAdapter.addItem(
-                        source.status,
-                        threeDSecureStatus,
-                        source.id,
-                        source.type)
-                    // If we need to get 3DS verification for this card, we
-                    // first create a 3DS Source.
-                    if (SourceCardData.ThreeDSecureStatus.REQUIRED == threeDSecureStatus) {
-                        // The card Source can be used to create a 3DS Source
-                        createThreeDSecureSource(source.id!!)
-                    } else {
-                        progressDialogController.dismiss()
-                    }
-                },
-                { throwable -> errorDialogHandler.show(throwable.message ?: "") }
-            ))
+                // Making a note of the Card Source in our list.
+                sourcesAdapter.addItem(
+                    source.status,
+                    threeDSecureStatus,
+                    source.id,
+                    source.type
+                )
+                // If we need to get 3DS verification for this card, we
+                // first create a 3DS Source.
+                if (SourceCardData.ThreeDSecureStatus.REQUIRED == threeDSecureStatus) {
+                    // The card Source can be used to create a 3DS Source
+                    createThreeDSecureSource(source.id!!)
+                } else {
+                    progressDialogController.dismiss()
+                }
+            }, {
+                showSnackbar(it.message.orEmpty())
+            })
+        )
     }
 
     /**
@@ -149,10 +148,11 @@ class RedirectActivity : AppCompatActivity() {
             1000L,
             "EUR",
             getUrl(true),
-            sourceId)
+            sourceId
+        )
 
         val threeDSecureObservable = Observable.fromCallable {
-            stripe.createSourceSynchronous(threeDParams)!!
+            stripe.createSourceSynchronous(threeDParams)
         }
 
         compositeDisposable.add(threeDSecureObservable
@@ -161,7 +161,7 @@ class RedirectActivity : AppCompatActivity() {
             .doOnComplete { progressDialogController.dismiss() }
             .subscribe(
                 { showVerifyDialog(it) },
-                { throwable -> errorDialogHandler.show(throwable.message ?: "") }
+                { showSnackbar(it.message.orEmpty()) }
             ))
     }
 
@@ -170,32 +170,35 @@ class RedirectActivity : AppCompatActivity() {
      *
      * @param source the [Source] to verify
      */
-    private fun showVerifyDialog(source: Source) {
+    private fun showVerifyDialog(source: Source?) {
         // Caching the source object here because this app makes a lot of them.
         redirectSource = source
-
-        val sourceRedirect = source.redirect
-        val redirectUrl = sourceRedirect?.url
-        if (redirectUrl != null) {
+        source?.redirect?.url?.let { redirectUrl ->
             redirectDialogController.showDialog(redirectUrl, source.sourceTypeData.orEmpty())
         }
     }
 
     private fun updateSourceList(source: Source?) {
         if (source == null) {
-            redirectAdapter.addItem(
+            sourcesAdapter.addItem(
                 "No source found",
                 "Stopped",
                 "Error",
-                "None")
-            return
+                "None"
+            )
+        } else {
+            sourcesAdapter.addItem(
+                source.status,
+                "complete",
+                source.id,
+                source.type
+            )
         }
+    }
 
-        redirectAdapter.addItem(
-            source.status,
-            "complete",
-            source.id,
-            source.type)
+    private fun showSnackbar(message: String) {
+        Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG)
+            .show()
     }
 
     companion object {

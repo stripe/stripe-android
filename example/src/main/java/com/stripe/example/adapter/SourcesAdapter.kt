@@ -13,7 +13,7 @@ import java.util.ArrayList
  * A simple [RecyclerView] implementation to hold our data.
  */
 // Provide a suitable constructor (depends on the kind of dataset)
-class RedirectAdapter : RecyclerView.Adapter<RedirectAdapter.ViewHolder>() {
+class SourcesAdapter : RecyclerView.Adapter<SourcesAdapter.ViewHolder>() {
     private val data = ArrayList<ViewModel>()
 
     // Provide a reference to the views for each data item
@@ -31,10 +31,11 @@ class RedirectAdapter : RecyclerView.Adapter<RedirectAdapter.ViewHolder>() {
         }
 
         fun setSourceId(sourceId: String?) {
-            val last6 = if (sourceId == null || sourceId.length < 6)
+            val last6 = if (sourceId == null || sourceId.length < 6) {
                 sourceId
-            else
+            } else {
                 sourceId.substring(sourceId.length - 6)
+            }
             sourceIdView.text = last6
         }
 
@@ -89,7 +90,7 @@ class RedirectAdapter : RecyclerView.Adapter<RedirectAdapter.ViewHolder>() {
         sourceId: String?,
         sourceType: String?
     ) {
-        data.add(ViewModel(finalStatus, redirectStatus, sourceId, sourceType))
-        notifyDataSetChanged()
+        data.add(0, ViewModel(finalStatus, redirectStatus, sourceId, sourceType))
+        notifyItemInserted(0)
     }
 }

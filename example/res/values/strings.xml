@@ -2,8 +2,8 @@
 <resources>
     <string name="appName">Stripe Payments Example</string>
 
-    <string name="addPayment">Add Payment Method</string>
-    <string name="addThreeDSecureCard">Add Source</string>
+    <string name="create_payment_method_header">Create Payment Method</string>
+    <string name="create_source_header">Create Source</string>
     <string name="addThreeDSecureCardSync">Add Source Rx</string>
     <string name="paymentMethods">Payment Methods</string>
 
@@ -11,15 +11,17 @@
     <string name="progressMessage">Creating Token&#8230;</string>
     <string name="validationErrors">Validation Errors</string>
 
-    <string name="create_card_tokens">Create Card Tokens</string>
-    <string name="create_card_payment_methods">Create Card PaymentMethods</string>
-    <string name="create_three_d_secure">Create 3DS Sources</string>
-    <string name="createSource">Creating source&#8230;</string>
+    <string name="create_card_token">Create a Card Token</string>
+    <string name="create_card_payment_method">Create a Card Payment Method</string>
+    <string name="create_card_source">Create a Card Source</string>
+
+    <string name="create_source">Creating source&#8230;</string>
     <string name="customer_payment_data_example">Customer Payment Selection</string>
     <string name="launch_customer_session">Customer Session</string>
     <string name="launch_pay_with_google">Pay with Google</string>
     <string name="launch_payment_session">Payment Session</string>
     <string name="launch_payment_session_from_fragment">Fragment Examples</string>
+    <string name="create_with_rxjava">Create with RxJava</string>
     <string name="create_asynctask">Create Token with AsyncTask</string>
     <string name="create_rxjava">Create Token with RxJava</string>
     <string name="launch_create_pm_sepa_debit">Create SEPA Debit Payment Method</string>

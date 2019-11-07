@@ -9,7 +9,7 @@
     android:orientation="vertical">
 
     <TextView android:id="@+id/payment_form_title"
-              android:text="@string/create_card_tokens"
+              android:text="@string/create_card_token"
               style="@style/Header" />
 
     <com.stripe.android.view.CardInputWidget
