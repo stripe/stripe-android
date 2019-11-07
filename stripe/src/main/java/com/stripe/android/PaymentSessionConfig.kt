@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.annotation.LayoutRes
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
+import com.stripe.android.view.SelectShippingMethodWidget
 import com.stripe.android.view.ShippingInfoWidget
 import com.stripe.android.view.ShippingInfoWidget.CustomizableShippingField
 import kotlinx.android.parcel.Parcelize
@@ -37,7 +38,9 @@ data class PaymentSessionConfig internal constructor(
         private var addPaymentMethodFooter: Int = 0
 
         /**
-         * @param hiddenShippingInfoFields fields that should be hidden in the [ShippingInfoWidget]
+         * @param hiddenShippingInfoFields [CustomizableShippingField] fields that should be
+         * hidden in the shipping information screen. All fields will be shown if this list is
+         * empty. Note that not all fields can be hidden, such as country or name.
          */
         fun setHiddenShippingInfoFields(
             @CustomizableShippingField vararg hiddenShippingInfoFields: String
@@ -47,7 +50,8 @@ data class PaymentSessionConfig internal constructor(
         }
 
         /**
-         * @param optionalShippingInfoFields field that should be optional in the [ShippingInfoWidget]
+         * @param optionalShippingInfoFields [CustomizableShippingField] fields that should be
+         * optional in the [ShippingInfoWidget]
          */
         fun setOptionalShippingInfoFields(
             @CustomizableShippingField vararg optionalShippingInfoFields: String
@@ -57,7 +61,7 @@ data class PaymentSessionConfig internal constructor(
         }
 
         /**
-         * @param shippingInfo [ShippingInformation] that should pre-populate the [ShippingInfoWidget]
+         * @param shippingInfo [ShippingInformation] that will pre-populate the [ShippingInfoWidget]
          */
         fun setPrepopulatedShippingInfo(shippingInfo: ShippingInformation?): Builder {
             shippingInformation = shippingInfo
@@ -66,7 +70,9 @@ data class PaymentSessionConfig internal constructor(
 
         /**
          * @param shippingInfoRequired whether a [ShippingInformation] should be required.
-         * If it is required, a screen with a [ShippingInfoWidget] can be shown to collect it.
+         * If it is required, a screen with a [ShippingInfoWidget] is shown to collect it.
+         *
+         * Default is `true`.
          */
         fun setShippingInfoRequired(shippingInfoRequired: Boolean): Builder {
             this.shippingInfoRequired = shippingInfoRequired
@@ -75,8 +81,10 @@ data class PaymentSessionConfig internal constructor(
 
         /**
          * @param shippingMethodsRequired whether a [com.stripe.android.model.ShippingMethod]
-         * should be required. If it is required, a screen with a
-         * [com.stripe.android.view.SelectShippingMethodWidget] can be shown to collect it.
+         * should be required. If it is required, a screen with a [SelectShippingMethodWidget]
+         * is shown to collect it.
+         *
+         * Default is `true`.
          */
         fun setShippingMethodsRequired(shippingMethodsRequired: Boolean): Builder {
             this.shippingMethodsRequired = shippingMethodsRequired
