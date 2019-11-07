@@ -14,7 +14,12 @@ class AppInfoTest {
     @Test
     fun createClientHeaders() {
         val header = mapOf("application" to
-            "{\"name\":\"MyAwesomePlugin\",\"partner_id\":\"pp_partner_1234\"," + "\"version\":\"1.2.34\",\"url\":\"https://myawesomeplugin.info\"}"
+            mapOf(
+                "name" to "MyAwesomePlugin",
+                "partner_id" to "pp_partner_1234",
+                "version" to "1.2.34",
+                "url" to "https://myawesomeplugin.info"
+            )
         )
         assertEquals(header, APP_INFO.createClientHeaders())
     }
