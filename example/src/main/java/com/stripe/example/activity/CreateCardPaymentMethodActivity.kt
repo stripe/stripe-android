@@ -26,6 +26,7 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
 
     private lateinit var adapter: PaymentMethodsAdapter
     private lateinit var stripe: Stripe
+    private lateinit var snackbarContainer: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,11 +37,12 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
             PaymentConfiguration.getInstance(this).publishableKey
         )
 
+        snackbarContainer = findViewById(android.R.id.content)
+
         adapter = PaymentMethodsAdapter()
-        val paymentMethods: RecyclerView = findViewById(R.id.payment_methods)
-        paymentMethods.setHasFixedSize(false)
-        paymentMethods.layoutManager = LinearLayoutManager(this)
-        paymentMethods.adapter = adapter
+        rv_payment_methods.setHasFixedSize(false)
+        rv_payment_methods.layoutManager = LinearLayoutManager(this)
+        rv_payment_methods.adapter = adapter
 
         btn_create_payment_method.setOnClickListener { createPaymentMethod() }
     }
@@ -70,7 +72,7 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
     }
 
     private fun showSnackbar(message: String) {
-        Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG)
+        Snackbar.make(snackbarContainer, message, Snackbar.LENGTH_LONG)
             .show()
     }
 
