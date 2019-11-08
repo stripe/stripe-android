@@ -63,7 +63,7 @@ The Stripe Android SDK will configure your app's Proguard rules using [proguard-
 
 **Stripe API**: We provide [low-level APIs](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html) that correspond to objects and methods in the Stripe API. You can build your own entirely custom UI on top of this layer.
 
-**SCA Ready**: The SDK automatically performs native [3D Secure authentication](https://stripe.com/docs/payments/3d-secure) to comply with [Strong Customer Authentication](https://stripe.com/docs/strong-customer-authentication) regulation in Europe.
+**SCA-Ready**: The SDK automatically performs native [3D Secure authentication](https://stripe.com/docs/payments/3d-secure) to comply with [Strong Customer Authentication](https://stripe.com/docs/strong-customer-authentication) regulation in Europe.
 
 **Native UI**: We provide native screens and elements to collect payment and shipping details. For example, [CardInputWidget](https://stripe.dev/stripe-android/com/stripe/android/view/CardInputWidget.html) is a view that collects and validates card details. You can use these individually, or take all of the prebuilt UI in one flow by following the [Basic Integration guide](https://stripe.com/docs/mobile/android/basic).
 
