@@ -45,6 +45,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.MainScope
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
@@ -329,7 +330,7 @@ class AddPaymentMethodActivityTest :
             StripeNetworkUtils(context),
             StripePaymentController.create(context, stripeRepository),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            null
+            workScope = MainScope()
         )
     }
 

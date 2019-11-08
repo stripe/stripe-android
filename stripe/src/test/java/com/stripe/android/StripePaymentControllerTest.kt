@@ -35,6 +35,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlinx.coroutines.MainScope
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
@@ -109,7 +110,8 @@ class StripePaymentControllerTest {
             threeDs2Service,
             fireAndForgetRequestExecutor,
             analyticsDataFactory,
-            challengeFlowStarter
+            challengeFlowStarter,
+            MainScope()
         )
     }
 
