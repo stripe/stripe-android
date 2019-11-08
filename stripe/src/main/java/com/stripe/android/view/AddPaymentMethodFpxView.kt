@@ -54,7 +54,10 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
             itemAnimator = DefaultItemAnimator()
         }
 
-        viewModel = ViewModelProviders.of(activity).get(FpxViewModel::class.java)
+        viewModel = ViewModelProviders.of(
+            activity,
+            FpxViewModel.Factory(activity.application)
+        ).get(FpxViewModel::class.java)
         viewModel.fpxBankStatuses.observe(activity, Observer {
             onFpxBankStatusesUpdated(it)
         })

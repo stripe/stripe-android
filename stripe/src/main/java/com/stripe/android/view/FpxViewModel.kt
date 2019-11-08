@@ -1,17 +1,27 @@
 package com.stripe.android.view
 
 import android.app.Application
-import android.os.AsyncTask
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.ApiRequest
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.StripeApiRepository
 import com.stripe.android.StripeRepository
 import com.stripe.android.model.FpxBankStatuses
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-internal class FpxViewModel(application: Application) : AndroidViewModel(application) {
+internal class FpxViewModel internal constructor(
+    application: Application,
+    private val workScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
+) : AndroidViewModel(application) {
+
     private val context = application.applicationContext
 
     private val internalFpxBankStatuses: MutableLiveData<FpxBankStatuses> = MutableLiveData()
@@ -26,7 +36,7 @@ internal class FpxViewModel(application: Application) : AndroidViewModel(applica
     internal fun loadFpxBankStatues() {
         val stripeRepository: StripeRepository = StripeApiRepository(context)
         val paymentConfiguration = PaymentConfiguration.getInstance(context)
-        AsyncTask.execute {
+        workScope.launch {
             val fpxBankStatuses = try {
                 stripeRepository.getFpxBankStatus(
                     ApiRequest.Options(paymentConfiguration.publishableKey))
@@ -34,7 +44,17 @@ internal class FpxViewModel(application: Application) : AndroidViewModel(applica
                 null
             }
 
-            fpxBankStatuses?.let { this.internalFpxBankStatuses.postValue(it) }
+            withContext(Main) {
+                fpxBankStatuses?.let {
+                    this@FpxViewModel.internalFpxBankStatuses.value = it
+                }
+            }
+        }
+    }
+
+    internal class Factory(private val application: Application) : ViewModelProvider.Factory {
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            return FpxViewModel(application) as T
         }
     }
 }
