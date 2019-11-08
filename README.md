@@ -149,18 +149,6 @@ if (cardToSave == null) {
 }
 ```
 
-If the returned `Card` is `null`, error states will show on the fields that need to be fixed.
-
-### Client-side Card Validation
-
-The [Card](https://stripe.dev/stripe-android/com/stripe/android/model/Card.html) object allows you to validate user input before you send the information to the Stripe API.
-
-- [Card#validateNumber()](https://stripe.dev/stripe-android/com/stripe/android/model/Card.html#validateNumber--) - Checks that the number is formatted correctly and passes the [Luhn check](http://en.wikipedia.org/wiki/Luhn_algorithm).
-- [Card#validateExpiryDate()](https://stripe.dev/stripe-android/com/stripe/android/model/Card.html#validateExpiryDate--) - Checks whether or not the expiration date represents an actual month in the future.
-- [Card#validateCVC()](https://stripe.dev/stripe-android/com/stripe/android/model/Card.html#validateCVC--) - Checks whether or not the supplied number could be a valid verification code.
-- [Card#validateCard()](https://stripe.dev/stripe-android/com/stripe/android/model/Card.html#validateCard--) - Convenience method to validate card number, expiry date and CVC.
-
-
 ## Examples
 
 - [Accept a card payment](https://github.com/stripe-samples/accept-a-card-payment) (PaymentIntents API)
