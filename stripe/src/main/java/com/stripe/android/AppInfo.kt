@@ -1,7 +1,5 @@
 package com.stripe.android
 
-import org.json.JSONObject
-
 /**
  * Data for identifying your plug-in or library.
  *
@@ -28,7 +26,7 @@ data class AppInfo private constructor(
         ).joinToString("")
     }
 
-    internal fun createClientHeaders(): Map<String, String> {
+    internal fun createClientHeaders(): Map<String, Map<String, String?>> {
         val appInfo = mapOf(
             "name" to name,
             "version" to version,
@@ -36,7 +34,7 @@ data class AppInfo private constructor(
             "partner_id" to partnerId
         )
 
-        return mapOf("application" to JSONObject(appInfo).toString())
+        return mapOf("application" to appInfo)
     }
 
     companion object {
