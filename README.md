@@ -12,7 +12,6 @@ Get started with our [📚 integration guides](https://stripe.com/docs/payments)
 
 > Updating to a newer version of the SDK? See our [migration guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) and [changelog](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md).
 
-> If you are building an Android application that charges a credit card, you should use the Stripe Android SDK to make sure you don't pass credit card information to your server (and, so, are PCI compliant).
 
 Table of contents
 =================
@@ -75,7 +74,7 @@ The Stripe Android SDK will configure your app's Proguard rules using [proguard-
 
 ### Getting Started
 
-Get started with our [📚 integration guides](https://stripe.com/docs/payments) and [example projects](#examples), or [ browse the SDK reference](https://stripe.dev/stripe-android/).
+Get started with our [📚 integration guides](https://stripe.com/docs/payments) and [example projects](#examples), or [📘 browse the SDK reference](https://stripe.dev/stripe-android/).
 
 The `Stripe` class is the entry-point to the Stripe SDK. It must be instantiated with a [Stripe publishable key](https://stripe.com/docs/keys).
 
