@@ -6,10 +6,31 @@
 [![GitHub release](https://img.shields.io/github/release/stripe/stripe-android.svg?maxAge=60)](https://github.com/stripe/stripe-android/releases)
 [![License](https://img.shields.io/github/license/stripe/stripe-android)](https://github.com/stripe/stripe-android/blob/master/LICENSE)
 
-The Stripe Android SDK makes it quick and easy to build an excellent payment experience in your Android app. We provide powerful and customizable UI elements that can be used out-of-the-box to collect your users' payment details. We also expose the low-level APIs that power those UIs so that you can build fully custom experiences. See our [Android Integration Guide](https://stripe.com/docs/mobile/android) to get started!
+The Stripe Android SDK makes it quick and easy to build an excellent payment experience in your Android app. We provide powerful and customizable UI elements that can be used out-of-the-box to collect your users' payment details. We also expose the low-level APIs that power those UIs so that you can build fully custom experiences. 
+
+See our [📚 integration guides](https://stripe.com/docs/payments) to get started, or [📘 browse the SDK reference](https://stripe.dev/stripe-android/).
+
+> Updating to a newer version of the SDK? See our [migration guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) and [changelog](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md).
 
 > If you are building an Android application that charges a credit card, you should use the Stripe Android SDK to make sure you don't pass credit card information to your server (and, so, are PCI compliant).
 
+Table of contents
+=================
+
+<!--ts-->
+   * [Installation](#installation)
+      * [Requirements](#requirements)
+      * [Configuration](#configuration)
+      * [Releases](#releases)
+      * [Proguard](#proguard)
+   * [Features](#features)
+   * [Usage](#releases)
+      * [Getting Started](#getting-started)
+      * [Using CardInputWidget](#using-cardinputwidget)
+      * [Using CardMultilineWidget](#using-cardmultilinewidget)
+      * [Client-side Card Validation](#client-side-card-validation)
+   * [Examples](#examples)
+<!--te-->
 
 ## Installation
 
@@ -38,9 +59,23 @@ dependencies {
 
 The Stripe Android SDK will configure your app's Proguard rules using [proguard-rules.txt](stripe/proguard-rules.txt).
 
+## Features
+
+**Simplified Security**: Use the SDK to collect credit card numbers and remain [PCI compliant](https://stripe.com/docs/security#pci-dss-guidelines). This means sensitive data is sent directly to Stripe instead of passing through your server. For more information, see our [Integration Security Guide](https://stripe.com/docs/security).
+
+**Google Pay**: Stripe is fully compatible with [Google Pay](https://stripe.com/docs/google-pay).
+
+**Stripe API**: We provide [low-level APIs](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html) that correspond to objects and methods in the Stripe API. You can build your own entirely custom UI on top of this layer.
+
+**Native UI**: We provide native screens and elements to collect payment and shipping details. For example, [CardInputWidget](https://stripe.dev/stripe-android/com/stripe/android/view/CardInputWidget.html) is a view that collects and validates card details. You can use these individually, or take all of the prebuilt UI in one flow by following the [Basic Integration guide](https://stripe.com/docs/mobile/android/basic).
+
+<img width="270" height="555" src="https://raw.githubusercontent.com/stripe/stripe-android/master/assets/card_input.gif"/>
+
 ## Usage
 
 ### Getting Started
+
+See our [📚 integration guides](https://stripe.com/docs/payments) to get started.
 
 The `Stripe` class is the entry-point to the Stripe SDK. It must be instantiated with a [Stripe publishable key](https://stripe.com/docs/keys).
 
@@ -117,84 +152,6 @@ if (cardToSave == null) {
 
 If the returned `Card` is `null`, error states will show on the fields that need to be fixed.
 
-Once you have a non-null `Card` object from either widget, you can call [Stripe#createToken()](#using-createtoken).
-
-### Creating Card Tokens
-
-[Stripe#createToken()](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#createToken-com.stripe.android.model.Card-com.stripe.android.TokenCallback-) makes an asynchronous call to Stripe's [Tokens API](https://stripe.com/docs/api/tokens/create_card) that converts sensitive card data into a single-use token which you can safely pass to your server to charge the user. The [Collecting Card Details on Android](https://stripe.com/docs/payments/cards/collecting/android) explains this flow in more detail.
-
-```java
-stripe.createToken(
-    new Card("4242424242424242", 12, 2013, "123"),
-    tokenCallback
-);
-```
-
-The first argument to `createToken()` is a `Card` object. A `Card` contains the following fields:
-
-+ `number`: Card number as a string without any separators, e.g. `4242424242424242`.
-+ `expMonth`: Integer representing the card's expiration month, e.g. `12`.
-+ `expYear`: Integer representing the card's expiration year, e.g. `2013`.
-
-The following field is optional but recommended to help prevent fraud:
-
-+ `cvc`: Card security code as a string, e.g. `123`.
-
-The following fields are entirely optional — they cannot result in a token creation failing:
-
-+ `name`: Cardholder name.
-+ `addressLine1`: Billing address line 1.
-+ `addressLine2`: Billing address line 2.
-+ `addressCity`: Billing address city.
-+ `addressState`: Billing address state.
-+ `addressZip`: Billing zip as a string, e.g. `94301`.
-+ `addressCountry`: Billing address country.
-
-The second argument `tokenCallback` is a callback you provide to handle responses from Stripe.
-It should send the token to your server for processing `onSuccess()`, and notify the user `onError()`.
-
-Here's a sample implementation of the token callback:
-
-```java
-stripe.createToken(
-    card,
-    new ApiResultCallback<Token>() {
-        public void onSuccess(Token token) {
-            // Send token to your own web service
-            MyServer.chargeToken(token);
-        }
-        public void onError(Exception error) {
-            Toast.makeText(getContext(),
-                error.getLocalizedMessage(),
-                Toast.LENGTH_LONG).show();
-        }
-    }
-);
-```
-
-### Creating Card Tokens synchronously
-
-[Stripe#createTokenSynchronous()](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#createTokenSynchronous-com.stripe.android.model.Card-) allows you to handle threading on your own, using any IO framework you choose.
-
-Note: Do not call this method on the main thread or your app will crash.
-
-#### RxJava Example
-
-```kotlin
-val tokenObservable = Observable.fromCallable {
-    mStripe.createTokenSynchronous(cardToSave)!!
-}
-
-tokenObservable
-    .subscribeOn(Schedulers.io())
-    .observeOn(AndroidSchedulers.mainThread())
-    .subscribe(
-        { token -> ... },
-        { throwable -> ... }
-    )
-```
-
-
 ### Client-side Card Validation
 
 The [Card](https://stripe.dev/stripe-android/com/stripe/android/model/Card.html) object allows you to validate user input before you send the information to the Stripe API.
@@ -205,7 +162,10 @@ The [Card](https://stripe.dev/stripe-android/com/stripe/android/model/Card.html)
 - [Card#validateCard()](https://stripe.dev/stripe-android/com/stripe/android/model/Card.html#validateCard--) - Convenience method to validate card number, expiry date and CVC.
 
 
-## Apps
+## Examples
 
-- The [stripe-samples/sample-store-android](https://github.com/stripe-samples/sample-store-android) repo demonstrates a complete integration with the Stripe Android SDK.
+- [Accept a card payment](https://github.com/stripe-samples/accept-a-card-payment) (PaymentIntents API)
+- [Save a card without payment](https://github.com/stripe-samples/mobile-saving-card-without-payment) (SetupIntents API)
+- [Accept a card payment](https://github.com/stripe-samples/card-payment-charges-api) (Charges API)
+- The [stripe-samples/sample-store-android](https://github.com/stripe-samples/sample-store-android) repo demonstrates how to build a payment flow using our prebuilt UI components ([Basic Integration](https://stripe.com/docs/mobile/android/basic))
 - The [example project](https://github.com/stripe/stripe-android/tree/master/example) demonstrates using our API bindings and UI components, including how to create Tokens, Sources, and Payment Methods; how to use the Stripe class's synchronous and asynchronous methods; and how to use the CardInputWidget.
