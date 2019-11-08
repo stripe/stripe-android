@@ -30,6 +30,8 @@ import com.stripe.android.view.AuthActivityStarter
 import com.stripe.android.view.StripeIntentResultExtras
 import java.security.cert.CertificateException
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 
 /**
  * A controller responsible for confirming and authenticating payment (typically through resolving
@@ -51,7 +53,8 @@ internal class StripePaymentController internal constructor(
     private val analyticsDataFactory: AnalyticsDataFactory =
         AnalyticsDataFactory.create(context.applicationContext),
     private val challengeFlowStarter: ChallengeFlowStarter =
-        ChallengeFlowStarterImpl()
+        ChallengeFlowStarterImpl(),
+    private val workScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 ) : PaymentController {
     init {
         threeDs2Service.initialize(
@@ -70,10 +73,12 @@ internal class StripePaymentController internal constructor(
         confirmStripeIntentParams: ConfirmStripeIntentParams,
         requestOptions: ApiRequest.Options
     ) {
-        ConfirmStripeIntentTask(stripeRepository, confirmStripeIntentParams, requestOptions,
-            ConfirmStripeIntentCallback(host, requestOptions, this,
-                getRequestCode(confirmStripeIntentParams)))
-            .execute()
+        ConfirmStripeIntentTask(
+            stripeRepository, confirmStripeIntentParams, requestOptions, workScope,
+            ConfirmStripeIntentCallback(
+                host, requestOptions, this, getRequestCode(confirmStripeIntentParams)
+            )
+        ).execute()
     }
 
     override fun startAuth(
@@ -81,9 +86,7 @@ internal class StripePaymentController internal constructor(
         clientSecret: String,
         requestOptions: ApiRequest.Options
     ) {
-        RetrieveIntentTask(stripeRepository,
-            clientSecret,
-            requestOptions,
+        RetrieveIntentTask(stripeRepository, clientSecret, requestOptions, workScope,
             object : ApiResultCallback<StripeIntent> {
                 override fun onSuccess(result: StripeIntent) {
                     handleNextAction(host, result, requestOptions)
@@ -92,8 +95,8 @@ internal class StripePaymentController internal constructor(
                 override fun onError(e: Exception) {
                     handleError(host, PAYMENT_REQUEST_CODE, e)
                 }
-            })
-            .execute()
+            }
+        ).execute()
     }
 
     /**
@@ -133,7 +136,7 @@ internal class StripePaymentController internal constructor(
 
         @StripeIntentResult.Outcome val flowOutcome = data
             .getIntExtra(StripeIntentResultExtras.FLOW_OUTCOME, StripeIntentResult.Outcome.UNKNOWN)
-        RetrieveIntentTask(stripeRepository, getClientSecret(data), requestOptions,
+        RetrieveIntentTask(stripeRepository, getClientSecret(data), requestOptions, workScope,
             object : ApiResultCallback<StripeIntent> {
                 override fun onSuccess(result: StripeIntent) {
                     if (result is PaymentIntent) {
@@ -146,8 +149,8 @@ internal class StripePaymentController internal constructor(
                 override fun onError(e: Exception) {
                     callback.onError(e)
                 }
-            })
-            .execute()
+            }
+        ).execute()
     }
 
     /**
@@ -174,7 +177,7 @@ internal class StripePaymentController internal constructor(
         @StripeIntentResult.Outcome val flowOutcome = data
             .getIntExtra(StripeIntentResultExtras.FLOW_OUTCOME, StripeIntentResult.Outcome.UNKNOWN)
 
-        RetrieveIntentTask(stripeRepository, getClientSecret(data), requestOptions,
+        RetrieveIntentTask(stripeRepository, getClientSecret(data), requestOptions, workScope,
             object : ApiResultCallback<StripeIntent> {
                 override fun onSuccess(result: StripeIntent) {
                     if (result is SetupIntent) {
@@ -187,8 +190,8 @@ internal class StripePaymentController internal constructor(
                 override fun onError(e: Exception) {
                     callback.onError(e)
                 }
-            })
-            .execute()
+            }
+        ).execute()
     }
 
     internal fun getClientSecret(data: Intent): String {
@@ -342,11 +345,12 @@ internal class StripePaymentController internal constructor(
         private val stripeRepository: StripeRepository,
         private val clientSecret: String,
         private val requestOptions: ApiRequest.Options,
+        workScope: CoroutineScope,
         callback: ApiResultCallback<StripeIntent>
-    ) : ApiOperation<StripeIntent>(callback) {
+    ) : ApiOperation<StripeIntent>(workScope, callback) {
 
         @Throws(StripeException::class)
-        override fun getResult(): StripeIntent? {
+        override suspend fun getResult(): StripeIntent? {
             return when {
                 clientSecret.startsWith("pi_") ->
                     stripeRepository.retrievePaymentIntent(clientSecret, requestOptions)
@@ -357,17 +361,19 @@ internal class StripePaymentController internal constructor(
         }
     }
 
-    private class ConfirmStripeIntentTask constructor(
+    private class ConfirmStripeIntentTask(
         private val stripeRepository: StripeRepository,
         params: ConfirmStripeIntentParams,
         private val requestOptions: ApiRequest.Options,
+        workScope: CoroutineScope,
         callback: ApiResultCallback<StripeIntent>
-    ) : ApiOperation<StripeIntent>(callback) {
+    ) : ApiOperation<StripeIntent>(workScope, callback) {
         // mark this request as `use_stripe_sdk=true`
-        private val params: ConfirmStripeIntentParams = params.withShouldUseStripeSdk(true)
+        private val params: ConfirmStripeIntentParams =
+            params.withShouldUseStripeSdk(shouldUseStripeSdk = true)
 
         @Throws(StripeException::class)
-        override fun getResult(): StripeIntent? {
+        override suspend fun getResult(): StripeIntent? {
             return when (params) {
                 is ConfirmPaymentIntentParams ->
                     stripeRepository.confirmPaymentIntent(params, requestOptions)

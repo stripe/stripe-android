@@ -3,10 +3,8 @@ package com.stripe.android
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.os.AsyncTask
 import androidx.annotation.Size
 import androidx.annotation.UiThread
-import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
 import androidx.fragment.app.Fragment
 import com.stripe.android.exception.APIConnectionException
@@ -30,7 +28,8 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Token
 import com.stripe.android.view.AuthActivityStarter
-import java.util.concurrent.Executor
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 
 /**
  * Entry-point to the Stripe SDK.
@@ -49,8 +48,8 @@ class Stripe internal constructor(
     private val stripeNetworkUtils: StripeNetworkUtils,
     private val paymentController: PaymentController,
     publishableKey: String,
-    private val stripeAccountId: String?,
-    private val tokenCreator: TokenCreator
+    private val stripeAccountId: String? = null,
+    private val workScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 ) {
     private val publishableKey: String = ApiKeyValidator().requireValid(publishableKey)
 
@@ -110,19 +109,7 @@ class Stripe internal constructor(
         paymentController,
         publishableKey,
         stripeAccountId,
-        object : TokenCreator {
-            override fun create(
-                params: Map<String, Any>,
-                options: ApiRequest.Options,
-                @Token.TokenType tokenType: String,
-                executor: Executor?,
-                callback: ApiResultCallback<Token>
-            ) {
-                executeTask(executor,
-                    CreateTokenTask(stripeRepository, params, options,
-                        tokenType, callback))
-            }
-        }
+        CoroutineScope(Dispatchers.IO)
     )
 
     //
@@ -505,7 +492,7 @@ class Stripe internal constructor(
     ) {
         CreatePaymentMethodTask(
             stripeRepository, paymentMethodCreateParams, publishableKey,
-            stripeAccountId, callback
+            stripeAccountId, workScope, callback
         ).execute()
     }
 
@@ -551,7 +538,7 @@ class Stripe internal constructor(
         callback: ApiResultCallback<Source>
     ) {
         CreateSourceTask(
-            stripeRepository, sourceParams, publishableKey, stripeAccountId, callback
+            stripeRepository, sourceParams, publishableKey, stripeAccountId, workScope, callback
         ).execute()
     }
 
@@ -944,23 +931,11 @@ class Stripe internal constructor(
         idempotencyKey: String? = null,
         callback: ApiResultCallback<Token>
     ) {
-        tokenCreator.create(
-            tokenParams,
+        CreateTokenTask(
+            stripeRepository, tokenParams,
             ApiRequest.Options(publishableKey, stripeAccountId, idempotencyKey),
-            tokenType, null,
-            callback
-        )
-    }
-
-    @VisibleForTesting
-    internal interface TokenCreator {
-        fun create(
-            params: Map<String, Any>,
-            options: ApiRequest.Options,
-            @Token.TokenType tokenType: String,
-            executor: Executor?,
-            callback: ApiResultCallback<Token>
-        )
+            tokenType, workScope, callback
+        ).execute()
     }
 
     private class CreateSourceTask internal constructor(
@@ -968,13 +943,14 @@ class Stripe internal constructor(
         private val sourceParams: SourceParams,
         publishableKey: String,
         stripeAccount: String?,
+        workScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
         callback: ApiResultCallback<Source>
-    ) : ApiOperation<Source>(callback) {
+    ) : ApiOperation<Source>(workScope, callback) {
         private val options: ApiRequest.Options =
             ApiRequest.Options(publishableKey, stripeAccount)
 
         @Throws(StripeException::class)
-        override fun getResult(): Source? {
+        override suspend fun getResult(): Source? {
             return stripeRepository.createSource(sourceParams, options)
         }
     }
@@ -984,13 +960,14 @@ class Stripe internal constructor(
         private val paymentMethodCreateParams: PaymentMethodCreateParams,
         publishableKey: String,
         stripeAccount: String?,
+        workScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
         callback: ApiResultCallback<PaymentMethod>
-    ) : ApiOperation<PaymentMethod>(callback) {
+    ) : ApiOperation<PaymentMethod>(workScope, callback) {
         private val options: ApiRequest.Options =
             ApiRequest.Options(publishableKey, stripeAccount)
 
         @Throws(StripeException::class)
-        override fun getResult(): PaymentMethod? {
+        override suspend fun getResult(): PaymentMethod? {
             return stripeRepository.createPaymentMethod(paymentMethodCreateParams, options)
         }
     }
@@ -1000,11 +977,11 @@ class Stripe internal constructor(
         private val tokenParams: Map<String, Any>,
         private val options: ApiRequest.Options,
         @param:Token.TokenType @field:Token.TokenType private val tokenType: String,
+        workScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
         callback: ApiResultCallback<Token>
-    ) : ApiOperation<Token>(callback) {
-
+    ) : ApiOperation<Token>(workScope, callback) {
         @Throws(StripeException::class)
-        override fun getResult(): Token? {
+        override suspend fun getResult(): Token? {
             return stripeRepository.createToken(tokenParams, options, tokenType)
         }
     }
@@ -1022,16 +999,5 @@ class Stripe internal constructor(
          */
         @JvmStatic
         var appInfo: AppInfo? = null
-
-        private fun executeTask(
-            executor: Executor?,
-            task: AsyncTask<Void, Void, *>
-        ) {
-            if (executor != null) {
-                task.executeOnExecutor(executor)
-            } else {
-                task.execute()
-            }
-        }
     }
 }

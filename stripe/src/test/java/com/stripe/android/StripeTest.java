@@ -3,7 +3,6 @@ package com.stripe.android;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.stripe.android.exception.AuthenticationException;
@@ -32,7 +31,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.Executor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -44,7 +42,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
+import kotlinx.coroutines.CoroutineScope;
+
 import static com.stripe.android.CardNumberFixtures.VALID_VISA_NO_SPACES;
+import static kotlinx.coroutines.CoroutineScopeKt.MainScope;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -66,17 +67,6 @@ public class StripeTest {
     private static final String NON_LOGGING_PK = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY;
     private static final String DEFAULT_SECRET_KEY = "sk_default";
 
-    private static final ApiResultCallback<Token> DEFAULT_TOKEN_CALLBACK =
-            new ApiResultCallback<Token>() {
-                @Override
-                public void onError(@NonNull Exception error) {
-                }
-
-                @Override
-                public void onSuccess(@NonNull Token token) {
-                }
-            };
-
     private static final String TEST_CARD_NUMBER = "4242424242424242";
     private static final String TEST_BANK_ACCOUNT_NUMBER = "000123456789";
     private static final String TEST_BANK_ROUTING_NUMBER = "110000000";
@@ -94,6 +84,8 @@ public class StripeTest {
 
     @Captor private ArgumentCaptor<StripeRequest> mStripeRequestArgumentCaptor;
     @Mock private FireAndForgetRequestExecutor mFireAndForgetRequestExecutor;
+    @Mock private ApiResultCallback<Token> mApiResultCallback;
+    @Captor private ArgumentCaptor<Token> mTokenArgumentCaptor;
 
     @Before
     public void setup() {
@@ -145,39 +137,13 @@ public class StripeTest {
     }
 
     @Test
-    public void createCardTokenShouldCallTokenCreator() {
-        final boolean[] tokenCreatorCalled = { false };
-        final Stripe stripe = createStripe(
-                new Stripe.TokenCreator() {
-                    @Override
-                    public void create(@NonNull Map<String, ?> tokenParams,
-                                       @NonNull ApiRequest.Options requestOptions,
-                                       @NonNull @Token.TokenType String tokenType,
-                                       @Nullable Executor executor,
-                                       @NonNull ApiResultCallback<Token> callback) {
-                        tokenCreatorCalled[0] = true;
-                    }
-                });
-        stripe.createCardToken(CARD, DEFAULT_TOKEN_CALLBACK);
-        assertTrue(tokenCreatorCalled[0]);
-    }
-
-    @Test
-    public void createCardTokenShouldUseProvidedKey() {
-        final Stripe stripe = createStripe(
-                new Stripe.TokenCreator() {
-                    @Override
-                    public void create(@NonNull Map<String, ?> tokenParams,
-                                       @NonNull ApiRequest.Options requestOptions,
-                                       @NonNull @Token.TokenType String tokenType,
-                                       @Nullable Executor executor,
-                                       @NonNull ApiResultCallback<Token> callback) {
-                        assertEquals(NON_LOGGING_PK, requestOptions.getApiKey());
-                        assertNull(executor);
-                        assertEquals(DEFAULT_TOKEN_CALLBACK, callback);
-                    }
-                });
-        stripe.createCardToken(CARD, DEFAULT_TOKEN_CALLBACK);
+    public void createCardTokenShouldCreateRealToken() {
+        final Stripe stripe = createStripe(MainScope());
+        stripe.createCardToken(CARD, mApiResultCallback);
+        verify(mApiResultCallback).onSuccess(mTokenArgumentCaptor.capture());
+        final Token token = mTokenArgumentCaptor.getValue();
+        final String tokenId = token.getId();
+        assertTrue(tokenId.startsWith("tok_"));
     }
 
     @Test
@@ -1311,7 +1277,7 @@ public class StripeTest {
     }
 
     @NonNull
-    private Stripe createStripe(@NonNull Stripe.TokenCreator tokenCreator) {
+    private Stripe createStripe(@NonNull CoroutineScope workScope) {
         final StripeRepository stripeRepository = createStripeRepository(
                 new FakeFireAndForgetRequestExecutor());
         return new Stripe(
@@ -1320,7 +1286,7 @@ public class StripeTest {
                 StripePaymentController.create(mContext, stripeRepository),
                 NON_LOGGING_PK,
                 null,
-                tokenCreator
+                workScope
         );
     }
 
