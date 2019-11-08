@@ -23,8 +23,7 @@ Table of contents
       * [Releases](#releases)
       * [Proguard](#proguard)
    * [Features](#features)
-   * [Usage](#releases)
-      * [Getting Started](#getting-started)
+   * [Getting Started](#getting-started)
    * [Examples](#examples)
 <!--te-->
 
@@ -69,9 +68,7 @@ The Stripe Android SDK will configure your app's Proguard rules using [proguard-
 
 <img width="270" height="555" src="https://raw.githubusercontent.com/stripe/stripe-android/master/assets/card_input.gif"/>
 
-## Usage
-
-### Getting Started
+## Getting Started
 
 Get started with our [📚 integration guides](https://stripe.com/docs/payments) and [example projects](#examples), or [📘 browse the SDK reference](https://stripe.dev/stripe-android/).
 
