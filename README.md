@@ -27,7 +27,6 @@ Table of contents
       * [Getting Started](#getting-started)
       * [Using CardInputWidget](#using-cardinputwidget)
       * [Using CardMultilineWidget](#using-cardmultilinewidget)
-      * [Client-side Card Validation](#client-side-card-validation)
    * [Examples](#examples)
 <!--te-->
 
