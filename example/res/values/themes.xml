@@ -40,11 +40,17 @@
         <item name="editTextColor">@color/textPrimary</item>
     </style>
 
+    <!-- Applied to 3DS2 Challenge Screen -->
     <style name="Stripe3DS2Theme" parent="StripeDefault3DS2Theme">
+        <!-- 3DS2 Challenge Screen toolbar background -->
         <item name="colorPrimary">@color/primary</item>
+        <!-- 3DS2 Challenge Screen status bar -->
         <item name="colorPrimaryDark">@color/primaryDark</item>
+        <!-- 3DS2 Challenge Screen toolbar text -->
         <item name="android:textColorPrimary">@color/title</item>
+        <!-- 3DS2 Challenge Screen main text; 3DS2 Processing Screen text -->
         <item name="android:textColor">@color/textPrimary</item>
+        <!-- 3DS2 Processing Screen spinner color -->
         <item name="colorAccent">@color/accent</item>
         <item name="android:textColorHint">@color/textPrimary</item>
         <item name="textInputStyle">@style/Stripe3DS2TextInput</item>
@@ -52,28 +58,35 @@
         <item name="editTextColor">@color/textPrimary</item>
     </style>
 
-    <!-- styles for text input -->
+    <!-- Applied to 3DS2 Challenge Screen EditText -->
     <style name="Stripe3DS2TextInput" parent="Widget.MaterialComponents.TextInputLayout.FilledBox.Dense">
-        <item name="boxBackgroundColor">@android:color/transparent</item> <!-- edit text background color -->
+        <!-- EditText background color -->
+        <item name="boxBackgroundColor">@android:color/transparent</item>
         <item name="hintTextAppearance">@style/Stripe3DS2TextInputHintTextAppearance</item>
     </style>
 
+    <!-- Applied to 3DS2 Challenge Screen EditText -->
     <style name="Stripe3DS2EditTextTheme" parent="Stripe3DS2Theme">
-        <item name="colorControlActivated">@color/accent</item> <!-- edit text underline color when active, cursor color -->
-        <item name="colorControlNormal">@color/accent</item> <!-- edit text underline color when inactive -->
+        <!-- EditText underline color when active, cursor color -->
+        <item name="colorControlActivated">@color/accent</item>
+        <!-- EditText underline color when inactive -->
+        <item name="colorControlNormal">@color/accent</item>
     </style>
 
+    <!-- Applied to 3DS2 Challenge Screen EditText label/hint -->
     <style name="Stripe3DS2TextInputHintTextAppearance" parent="TextAppearance.Design.Hint">
         <!-- Inactive and Active label color, pointing to a selector-->
         <item name="android:textColor">@color/textPrimary</item>
     </style>
 
+    <!-- Applied to 3DS2 Challenge Screen toolbar Cancel button -->
     <style name="Stripe3DS2ActionBarButton" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="android:textColor">@color/title</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:minWidth">0dp</item>
     </style>
 
+    <!-- Applied to 3DS2 Challenge Screen buttons (e.g. Submit) -->
     <style name="Stripe3DS2Button" parent="Widget.MaterialComponents.Button">
         <item name="android:textAllCaps">false</item>
         <item name="cornerRadius">5dp</item>
@@ -91,12 +104,16 @@
         <item name="android:visibility">gone</item>
     </style>
 
+    <!-- Applied to 3DS2 Challenge Screen footer explanation headers -->
     <style name="Stripe3DS2FooterHeader">
         <item name="android:textColor">@color/threeds2_footer_header</item>
     </style>
 
-    <style name="Stripe3DS2FooterText"/>
+    <!-- Applied to 3DS2 Challenge Screen footer explanation text -->
+    <style name="Stripe3DS2FooterText">
+    </style>
 
+    <!-- Applied to 3DS2 Challenge Screen footer chevrons (i.e. expand/collapse) -->
     <style name="Stripe3DS2FooterChevron">
         <item name="tint">@color/threeds2_footer_header</item>
     </style>
