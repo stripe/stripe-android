@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE module PUBLIC
     "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
-    "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+    "https://checkstyle.org/dtds/configuration_1_3.dtd">
 
 <!-- This is a checkstyle configuration file. For descriptions of
 what the following rules do, please see the checkstyle configuration
@@ -38,6 +38,24 @@ page at http://checkstyle.sourceforge.net/config.html -->
         -->
         <property name="format" value="((//.*)|(\*.*))TODO[^(]" />
         <property name="message" value='All TODOs should be named.  e.g. "TODO(johndoe): Refactor when v2 is released."' />
+    </module>
+
+    <module name="LineLength">
+        <property name="fileExtensions" value="java,kt" />
+
+        <!-- Checks if a line is too long. -->
+        <property name="max" value="${com.puppycrawl.tools.checkstyle.checks.sizes.LineLength.max}" default="100"/>
+        <property name="severity" value="error"/>
+
+        <!--
+          The default ignore pattern exempts the following elements:
+            - import statements
+            - long URLs inside comments
+        -->
+
+        <property name="ignorePattern"
+            value="${com.puppycrawl.tools.checkstyle.checks.sizes.LineLength.ignorePattern}"
+            default="^(package .*;\s*)|(import .*;\s*)|( *(\*|//).*https?://.*)$"/>
     </module>
 
     <!-- All Java AST specific tests live under TreeWalker module. -->
@@ -93,24 +111,8 @@ page at http://checkstyle.sourceforge.net/config.html -->
         <module name="TypeName"/>
 
         <!--
-        LENGTH and CODING CHECKS
+        CURLY CHECKS
         -->
-        <module name="LineLength">
-            <!-- Checks if a line is too long. -->
-            <property name="max" value="${com.puppycrawl.tools.checkstyle.checks.sizes.LineLength.max}" default="100"/>
-            <property name="severity" value="error"/>
-
-            <!--
-              The default ignore pattern exempts the following elements:
-                - import statements
-                - long URLs inside comments
-            -->
-
-            <property name="ignorePattern"
-                      value="${com.puppycrawl.tools.checkstyle.checks.sizes.LineLength.ignorePattern}"
-                      default="^(package .*;\s*)|(import .*;\s*)|( *(\*|//).*https?://.*)$"/>
-        </module>
-
         <module name="LeftCurly">
             <!-- Checks for placement of the left curly brace ('{'). -->
             <property name="severity" value="warning"/>
