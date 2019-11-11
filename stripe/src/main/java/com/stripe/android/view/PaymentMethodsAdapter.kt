@@ -139,16 +139,8 @@ internal class PaymentMethodsAdapter @JvmOverloads internal constructor(
     internal fun deletePaymentMethod(paymentMethod: PaymentMethod) {
         val indexToDelete = paymentMethods.indexOfFirst { it.id == paymentMethod.id }
         if (indexToDelete >= 0) {
-            val wasSelectedPaymentMethod =
-                selectedPaymentMethodId?.let { it == paymentMethod.id } == true
             paymentMethods.removeAt(indexToDelete)
             notifyItemRemoved(indexToDelete)
-
-            // customer has deleted their selected Payment Method,
-            // so automatically select the most recently added Payment Method
-            if (wasSelectedPaymentMethod && paymentMethods.isNotEmpty()) {
-                updateSelectedPaymentMethod(0)
-            }
         }
     }
 
