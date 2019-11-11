@@ -178,11 +178,6 @@ class PaymentMethodsActivity : AppCompatActivity() {
         customerSession.addProductUsageTokenIfValid(TOKEN_PAYMENT_METHODS_ACTIVITY)
     }
 
-    private fun cancelAndFinish() {
-        setResult(Activity.RESULT_CANCELED)
-        finish()
-    }
-
     private fun setCommunicatingProgress(communicating: Boolean) {
         payment_methods_progress_bar.visibility = if (communicating) {
             View.VISIBLE
@@ -193,17 +188,19 @@ class PaymentMethodsActivity : AppCompatActivity() {
 
     @JvmSynthetic
     internal fun setSelectionAndFinish(paymentMethod: PaymentMethod?) {
-        if (paymentMethod == null) {
-            cancelAndFinish()
-        } else {
-            finishWithPaymentMethod(paymentMethod)
-        }
+        finishWithPaymentMethod(paymentMethod)
     }
 
-    private fun finishWithPaymentMethod(paymentMethod: PaymentMethod) {
-        setResult(Activity.RESULT_OK, Intent()
-            .putExtras(PaymentMethodsActivityStarter.Result(paymentMethod).toBundle())
+    private fun finishWithPaymentMethod(paymentMethod: PaymentMethod?) {
+        setResult(
+            Activity.RESULT_OK,
+            Intent().also {
+                if (paymentMethod != null) {
+                    it.putExtras(PaymentMethodsActivityStarter.Result(paymentMethod).toBundle())
+                }
+            }
         )
+
         finish()
     }
 
