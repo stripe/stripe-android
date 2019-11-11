@@ -65,4 +65,7 @@
     <string name="setup_intent_status">SetupIntent status: %s</string>
     <string name="payment_auth_intro">Tapping the button below will create a PaymentIntent then attempt to confirm it.</string>
     <string name="setup_auth_intro">Tapping the button below will create a SetupIntent then attempt to confirm it.</string>
+
+    <string name="ready_to_charge">Ready to charge?</string>
+    <string name="not_selected">Not selected</string>
 </resources>
