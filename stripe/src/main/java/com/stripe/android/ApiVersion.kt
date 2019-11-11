@@ -9,14 +9,14 @@ package com.stripe.android
  * See [https://stripe.com/docs/upgrades](https://stripe.com/docs/upgrades) for latest
  * API changes.
  */
-internal data class ApiVersion private constructor(val code: String) {
+internal data class ApiVersion internal constructor(internal val code: String) {
 
     override fun toString(): String {
         return code
     }
 
     companion object {
-        private const val API_VERSION_CODE = "2019-10-17"
+        private const val API_VERSION_CODE: String = "2019-11-05"
 
         private val INSTANCE = ApiVersion(API_VERSION_CODE)
 
