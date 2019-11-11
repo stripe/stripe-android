@@ -6,6 +6,7 @@
 * [#1799](https://github.com/stripe/stripe-android/pull/1799) Document `Stripe3DS2Theme` and related styles
 * [#1809](https://github.com/stripe/stripe-android/pull/1809) Update to Gradle 6.0
 * [#1810](https://github.com/stripe/stripe-android/pull/1810) Update API version to [2019-11-05](https://stripe.com/docs/upgrades#2019-11-05)
+* [#1812](https://github.com/stripe/stripe-android/pull/1812) Upgrade 3DS2 SDK to 2.2.2
 
 ## 12.3.0 - 2019-11-05
 * [#1775](https://github.com/stripe/stripe-android/pull/1775) Add support for idempotency key on Stripe Token API requests
