@@ -26,7 +26,7 @@ internal class IconTextInputLayoutTest :
     fun init_successfullyFindsFields() {
         val iconTextInputLayout = createActivity()
             .cardMultilineWidget
-            .findViewById<IconTextInputLayout>(R.id.tl_add_source_card_number_ml)
+            .findViewById<IconTextInputLayout>(R.id.tl_card_number)
         assertTrue(iconTextInputLayout.hasObtainedCollapsingTextHelper())
     }
 }

@@ -4,7 +4,7 @@
        android:layout_height="wrap_content">
 
     <com.stripe.android.view.IconTextInputLayout
-        android:id="@+id/tl_add_source_card_number_ml"
+        android:id="@+id/tl_card_number"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/acc_label_card_number"
@@ -12,7 +12,7 @@
         >
 
         <com.stripe.android.view.CardNumberEditText
-            android:id="@+id/et_add_source_card_number_ml"
+            android:id="@+id/et_card_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:digits="@string/valid_digits"
@@ -20,8 +20,8 @@
             android:drawableStart="@drawable/ic_unknown"
             android:imeOptions="actionNext"
             android:inputType="number"
-            android:nextFocusDown="@+id/et_add_source_expiry_ml"
-            android:nextFocusForward="@+id/et_add_source_expiry_ml"
+            android:nextFocusDown="@+id/et_expiry"
+            android:nextFocusForward="@+id/et_expiry"
             />
 
     </com.stripe.android.view.IconTextInputLayout>
@@ -36,7 +36,7 @@
         >
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tl_add_source_expiry_ml"
+            android:id="@+id/tl_expiry"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/stripe_add_card_expiry_middle_margin"
@@ -45,48 +45,46 @@
             >
 
             <com.stripe.android.view.ExpiryDateEditText
-                android:id="@+id/et_add_source_expiry_ml"
+                android:id="@+id/et_expiry"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:imeOptions="actionNext"
                 android:inputType="date"
                 android:maxLength="@integer/stripe_date_length"
-                android:nextFocusDown="@+id/et_add_source_cvc_ml"
-                android:nextFocusForward="@+id/et_add_source_cvc_ml"
+                android:nextFocusDown="@+id/et_cvc"
+                android:nextFocusForward="@+id/et_cvc"
                 />
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tl_add_source_cvc_ml"
+            android:id="@+id/tl_cvc"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/stripe_add_card_expiry_middle_margin"
             android:layout_weight="1"
             >
 
-            <com.stripe.android.view.StripeEditText
-                android:id="@+id/et_add_source_cvc_ml"
+            <com.stripe.android.view.CvcEditText
+                android:id="@+id/et_cvc"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:digits="@string/valid_digits"
                 android:imeOptions="actionNext"
-                android:inputType="numberPassword"
-                android:nextFocusDown="@+id/et_add_source_postal_ml"
-                android:nextFocusForward="@+id/et_add_source_postal_ml"
+                android:nextFocusDown="@+id/et_postal_code"
+                android:nextFocusForward="@+id/et_postal_code"
                 />
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tl_add_source_postal_ml"
+            android:id="@+id/tl_postal_code"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             >
 
             <com.stripe.android.view.PostalCodeEditText
-                android:id="@+id/et_add_source_postal_ml"
+                android:id="@+id/et_postal_code"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:imeOptions="actionDone"

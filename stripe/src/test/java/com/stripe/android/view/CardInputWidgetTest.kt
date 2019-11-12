@@ -116,7 +116,7 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         cardNumberEditText.setText("")
 
         expiryEditText = cardInputWidget.findViewById(R.id.et_expiry_date)
-        cvcEditText = cardInputWidget.findViewById(R.id.et_cvc_number)
+        cvcEditText = cardInputWidget.findViewById(R.id.et_cvc)
         val iconView = cardInputWidget.findViewById<ImageView>(R.id.iv_card_icon)
 
         // Set the width of the icon and its margin so that test calculations have
@@ -421,7 +421,7 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
 
         ViewTestUtils.sendDeleteKeyEvent(cvcEditText)
         verify<CardInputListener>(cardInputListener).onFocusChange(FOCUS_EXPIRY)
-        assertEquals(R.id.et_cvc_number, onGlobalFocusChangeListener.oldFocusId)
+        assertEquals(R.id.et_cvc, onGlobalFocusChangeListener.oldFocusId)
         assertEquals(R.id.et_expiry_date, onGlobalFocusChangeListener.newFocusId)
 
         val expectedResult = "12/7"
@@ -455,7 +455,7 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         cvcEditText.requestFocus()
 
         ViewTestUtils.sendDeleteKeyEvent(cvcEditText)
-        assertEquals(R.id.et_cvc_number, onGlobalFocusChangeListener.oldFocusId)
+        assertEquals(R.id.et_cvc, onGlobalFocusChangeListener.oldFocusId)
         assertEquals(R.id.et_expiry_date, onGlobalFocusChangeListener.newFocusId)
     }
 
@@ -764,7 +764,7 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         assertEquals("", cardNumberEditText.text.toString())
         assertEquals("", expiryEditText.text.toString())
         assertEquals("", cvcEditText.text.toString())
-        assertEquals(R.id.et_cvc_number, onGlobalFocusChangeListener.oldFocusId)
+        assertEquals(R.id.et_cvc, onGlobalFocusChangeListener.oldFocusId)
         assertEquals(R.id.et_card_number, onGlobalFocusChangeListener.newFocusId)
     }
 

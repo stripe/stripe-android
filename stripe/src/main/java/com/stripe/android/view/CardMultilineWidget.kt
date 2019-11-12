@@ -2,8 +2,8 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.graphics.Rect
+import android.graphics.drawable.Drawable
 import android.os.Build
-import android.text.InputFilter
 import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.AttributeSet
@@ -44,7 +44,7 @@ class CardMultilineWidget @JvmOverloads constructor(
 ) : LinearLayout(context, attrs, defStyleAttr), CardWidget {
     private val cardNumberEditText: CardNumberEditText
     private val expiryDateEditText: ExpiryDateEditText
-    private val cvcEditText: StripeEditText
+    private val cvcEditText: CvcEditText
     private val postalCodeEditText: StripeEditText
     private val cardNumberTextInputLayout: TextInputLayout
     private val expiryTextInputLayout: TextInputLayout
@@ -104,8 +104,7 @@ class CardMultilineWidget @JvmOverloads constructor(
      */
     val paymentMethodBillingDetails: PaymentMethod.BillingDetails?
         get() {
-            val builder = paymentMethodBillingDetailsBuilder
-            return builder?.build()
+            return paymentMethodBillingDetailsBuilder?.build()
         }
 
     /**
@@ -132,7 +131,6 @@ class CardMultilineWidget @JvmOverloads constructor(
      */
     override val card: Card?
         get() {
-            val cardBuilder = cardBuilder
             return cardBuilder?.build()
         }
 
@@ -145,12 +143,11 @@ class CardMultilineWidget @JvmOverloads constructor(
             val cardNumber = cardNumberEditText.cardNumber
             val cardDate = requireNotNull(expiryDateEditText.validDateFields)
             val cvcValue = cvcEditText.text?.toString()
+            val postalCode = postalCodeEditText.text?.toString()
+                .takeIf { shouldShowPostalCode }
 
             return Card.Builder(cardNumber, cardDate.first, cardDate.second, cvcValue)
-                .addressZip(if (shouldShowPostalCode)
-                    postalCodeEditText.text?.toString()
-                else
-                    null)
+                .addressZip(postalCode)
                 .loggingTokens(listOf(CARD_MULTILINE_TOKEN))
         }
 
@@ -167,45 +164,47 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     private val cvcHelperText: Int
         @StringRes
-        get() = if (Card.CardBrand.AMERICAN_EXPRESS == cardBrand)
-            R.string.cvc_multiline_helper_amex
-        else
-            R.string.cvc_multiline_helper
-
-    private val dynamicBufferInPixels: Int
         get() {
-            val pixelsToAdjust = resources
-                .getDimension(R.dimen.stripe_card_icon_multiline_padding_bottom)
-            return BigDecimal(pixelsToAdjust.toDouble())
-                .setScale(0, RoundingMode.HALF_DOWN)
-                .toInt()
+            return if (Card.CardBrand.AMERICAN_EXPRESS == cardBrand) {
+                R.string.cvc_multiline_helper_amex
+            } else {
+                R.string.cvc_multiline_helper
+            }
         }
+
+    private val pixelsToAdjust: Double =
+        resources
+            .getDimension(R.dimen.stripe_card_icon_multiline_padding_bottom)
+            .toDouble()
+
+    private val dynamicBufferInPixels: Int = BigDecimal(pixelsToAdjust)
+        .setScale(0, RoundingMode.HALF_DOWN)
+        .toInt()
 
     init {
         orientation = VERTICAL
         View.inflate(getContext(), R.layout.card_multiline_widget, this)
 
-        cardNumberEditText = findViewById(R.id.et_add_source_card_number_ml)
-        expiryDateEditText = findViewById(R.id.et_add_source_expiry_ml)
-        cvcEditText = findViewById(R.id.et_add_source_cvc_ml)
-        postalCodeEditText = findViewById(R.id.et_add_source_postal_ml)
+        cardNumberEditText = findViewById(R.id.et_card_number)
+        expiryDateEditText = findViewById(R.id.et_expiry)
+        cvcEditText = findViewById(R.id.et_cvc)
+        postalCodeEditText = findViewById(R.id.et_postal_code)
         tintColorInt = cardNumberEditText.hintTextColors.defaultColor
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             cardNumberEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_NUMBER)
             expiryDateEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE)
-            cvcEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE)
             postalCodeEditText.setAutofillHints(View.AUTOFILL_HINT_POSTAL_CODE)
         }
 
         // This sets the value of shouldShowPostalCode
         attrs?.let { checkAttributeSet(it) }
 
-        cardNumberTextInputLayout = findViewById(R.id.tl_add_source_card_number_ml)
-        expiryTextInputLayout = findViewById(R.id.tl_add_source_expiry_ml)
+        cardNumberTextInputLayout = findViewById(R.id.tl_card_number)
+        expiryTextInputLayout = findViewById(R.id.tl_expiry)
         // We dynamically set the hint of the CVC field, so we need to keep a reference.
-        cvcTextInputLayout = findViewById(R.id.tl_add_source_cvc_ml)
-        postalInputLayout = findViewById(R.id.tl_add_source_postal_ml)
+        cvcTextInputLayout = findViewById(R.id.tl_cvc)
+        postalInputLayout = findViewById(R.id.tl_postal_code)
 
         if (shouldShowPostalCode) {
             // Set the label/hint to the shorter value if we have three things in a row.
@@ -258,7 +257,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         postalCodeEditText.setAfterTextChangedListener(
             object : StripeEditText.AfterTextChangedListener {
                 override fun onTextChanged(text: String) {
-                    if (isPostalCodeMaximalLength(true, text)) {
+                    if (isPostalCodeMaximalLength(text)) {
                         cardInputListener?.onPostalCodeComplete()
                     }
                     postalCodeEditText.shouldShowError = false
@@ -315,8 +314,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         cvcEditText.shouldShowError = !cvcIsValid
         val postalCodeIsValidOrGone: Boolean
         if (shouldShowPostalCode) {
-            postalCodeIsValidOrGone = isPostalCodeMaximalLength(true,
-                postalCodeEditText.text?.toString())
+            postalCodeIsValidOrGone = isPostalCodeMaximalLength(postalCodeEditText.text?.toString())
             postalCodeEditText.shouldShowError = !postalCodeIsValidOrGone
         } else {
             postalCodeIsValidOrGone = true
@@ -437,7 +435,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         expiryTextInputLayout.hint = resources.getString(expiryLabel)
 
         @IdRes val focusForward = if (shouldShowPostalCode) {
-            R.id.et_add_source_postal_ml
+            R.id.et_postal_code
         } else {
             View.NO_ID
         }
@@ -581,39 +579,15 @@ class CardMultilineWidget @JvmOverloads constructor(
     }
 
     private fun updateCvc() {
-        val maxLength = if (Card.CardBrand.AMERICAN_EXPRESS == cardBrand) {
-            Card.CVC_LENGTH_AMERICAN_EXPRESS
-        } else {
-            Card.CVC_LENGTH_COMMON
-        }
-        cvcEditText.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(maxLength))
-        cvcTextInputLayout.hint = generateCvcLabel()
-    }
-
-    private fun generateCvcLabel(): String {
-        return customCvcLabel
-            ?: resources.getString(if (Card.CardBrand.AMERICAN_EXPRESS == cardBrand)
-                R.string.cvc_amex_hint
-            else
-                R.string.cvc_number_hint)
+        cvcEditText.updateBrand(cardBrand, customCvcLabel, cvcTextInputLayout)
     }
 
     private fun updateDrawable(@DrawableRes iconResourceId: Int, needsTint: Boolean) {
         val icon = ContextCompat.getDrawable(context, iconResourceId) ?: return
         val original = cardNumberEditText.compoundDrawablesRelative[0] ?: return
-
-        val copyBounds = Rect()
-        original.copyBounds(copyBounds)
-
         val iconPadding = cardNumberEditText.compoundDrawablePadding
+        icon.bounds = createDrawableBounds(original)
 
-        if (!hasAdjustedDrawable) {
-            copyBounds.top = copyBounds.top - dynamicBufferInPixels
-            copyBounds.bottom = copyBounds.bottom - dynamicBufferInPixels
-            hasAdjustedDrawable = true
-        }
-
-        icon.bounds = copyBounds
         val compatIcon = DrawableCompat.wrap(icon)
         if (needsTint) {
             DrawableCompat.setTint(compatIcon.mutate(), tintColorInt)
@@ -623,15 +597,33 @@ class CardMultilineWidget @JvmOverloads constructor(
         cardNumberEditText.setCompoundDrawablesRelative(compatIcon, null, null, null)
     }
 
+    private fun createDrawableBounds(drawable: Drawable): Rect {
+        val newBounds = Rect()
+        drawable.copyBounds(newBounds)
+
+        if (!hasAdjustedDrawable) {
+            newBounds.top = newBounds.top - dynamicBufferInPixels
+            newBounds.bottom = newBounds.bottom - dynamicBufferInPixels
+            hasAdjustedDrawable = true
+        }
+
+        return newBounds
+    }
+
     internal companion object {
 
         internal const val CARD_MULTILINE_TOKEN = "CardMultilineView"
         internal const val CARD_NUMBER_HINT_DELAY = 120L
         internal const val COMMON_HINT_DELAY = 90L
 
+        private const val POSTAL_MAX_LENGTH = 5
+
         @JvmSynthetic
-        internal fun isPostalCodeMaximalLength(isZip: Boolean, text: String?): Boolean {
-            return isZip && text != null && text.length == 5
+        internal fun isPostalCodeMaximalLength(
+            postalCode: String?,
+            maxLength: Int = POSTAL_MAX_LENGTH
+        ): Boolean {
+            return postalCode?.length == maxLength
         }
     }
 }
