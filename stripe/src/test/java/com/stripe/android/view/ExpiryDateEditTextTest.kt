@@ -12,10 +12,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyNoInteractions
-import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
 /**
@@ -23,18 +19,12 @@ import org.robolectric.RobolectricTestRunner
  */
 @RunWith(RobolectricTestRunner::class)
 class ExpiryDateEditTextTest {
-
-    @Mock
-    private lateinit var expiryDateEditListener: ExpiryDateEditText.ExpiryDateEditListener
     private lateinit var expiryDateEditText: ExpiryDateEditText
 
     @BeforeTest
     fun setup() {
-        MockitoAnnotations.initMocks(this)
-
         expiryDateEditText = ExpiryDateEditText(ApplicationProvider.getApplicationContext<Context>())
         expiryDateEditText.setText("")
-        expiryDateEditText.setExpiryDateEditListener(expiryDateEditListener)
     }
 
     @Test
@@ -93,21 +83,30 @@ class ExpiryDateEditTextTest {
 
     @Test
     fun afterAddingFinalDigit_whenGoingFromInvalidToValid_callsListener() {
+        var invocations = 0
+        expiryDateEditText.completionCallback = {
+            invocations++
+        }
+
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) <= 2059)
 
         expiryDateEditText.append("1")
         expiryDateEditText.append("2")
         expiryDateEditText.append("5")
-        verifyNoInteractions(expiryDateEditListener)
+        assertEquals(0, invocations)
 
         expiryDateEditText.append("9")
         assertTrue(expiryDateEditText.isDateValid)
-        verify<ExpiryDateEditText.ExpiryDateEditListener>(expiryDateEditListener)
-            .onExpiryDateComplete()
+        assertEquals(1, invocations)
     }
 
     @Test
     fun afterAddingFinalDigit_whenDeletingItem_revertsToInvalidState() {
+        var invocations = 0
+        expiryDateEditText.completionCallback = {
+            invocations++
+        }
+
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) <= 2059)
 
         expiryDateEditText.append("12")
@@ -115,7 +114,7 @@ class ExpiryDateEditTextTest {
         assertTrue(expiryDateEditText.isDateValid)
 
         ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
-        verify<ExpiryDateEditText.ExpiryDateEditListener>(expiryDateEditListener).onExpiryDateComplete()
+        assertEquals(1, invocations)
         assertFalse(expiryDateEditText.isDateValid)
     }
 
@@ -182,6 +181,11 @@ class ExpiryDateEditTextTest {
 
     @Test
     fun inputCompleteDate_whenInPast_showsInvalid() {
+        var invocations = 0
+        expiryDateEditText.completionCallback = {
+            invocations++
+        }
+
         // This test will be invalid if run between 2080 and 2112. Please update the code.
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2080)
         // Date translates to December, 2012 UNTIL the 2080, at which point it translates to
@@ -189,11 +193,16 @@ class ExpiryDateEditTextTest {
         expiryDateEditText.append("1212")
 
         assertTrue(expiryDateEditText.shouldShowError)
-        verifyNoInteractions(expiryDateEditListener)
+        assertEquals(0, invocations)
     }
 
     @Test
     fun inputCompleteDateInPast_thenDelete_showsValid() {
+        var invocations = 0
+        expiryDateEditText.completionCallback = {
+            invocations++
+        }
+
         // This test will be invalid if run between 2080 and 2112. Please update the code.
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2080)
         // Date translates to December, 2012 UNTIL the 2080, at which point it translates to
@@ -206,7 +215,7 @@ class ExpiryDateEditTextTest {
         assertFalse(expiryDateEditText.shouldShowError)
 
         // The date is no longer "in error", but it still shouldn't have triggered the listener.
-        verifyNoInteractions(expiryDateEditListener)
+        assertEquals(0, invocations)
     }
 
     @Test
