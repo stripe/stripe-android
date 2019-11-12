@@ -193,9 +193,7 @@ class PaymentMethodsActivityTest : BaseViewTest<PaymentMethodsActivity>(PaymentM
         paymentMethodsAdapter.selectedPaymentMethodId =
             PaymentMethodFixtures.CARD_PAYMENT_METHODS[0].id
 
-        paymentMethodsActivity.setSelectionAndFinish(
-            PaymentMethodFixtures.CARD_PAYMENT_METHODS[0]
-        )
+        paymentMethodsActivity.onBackPressed()
 
         // Now it should be gone.
         assertEquals(View.GONE, progressBar.visibility)

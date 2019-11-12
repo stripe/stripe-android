@@ -26,13 +26,13 @@ class PaymentSession @VisibleForTesting internal constructor(
     ActivityStarter<PaymentMethodsActivity, PaymentMethodsActivityStarter.Args>,
     private val paymentFlowActivityStarter:
     ActivityStarter<PaymentFlowActivity, PaymentFlowActivityStarter.Args>,
-    paymentSessionData: PaymentSessionData,
-    private val paymentSessionPrefs: PaymentSessionPrefs
+    private val paymentSessionPrefs: PaymentSessionPrefs,
+    paymentSessionData: PaymentSessionData = PaymentSessionData()
 ) {
     /**
      * @return the data associated with the instance of this class.
      */
-    var paymentSessionData: PaymentSessionData = PaymentSessionData()
+    var paymentSessionData: PaymentSessionData = paymentSessionData
         private set
     private var paymentSessionListener: PaymentSessionListener? = null
     private var config: PaymentSessionConfig = PaymentSessionConfig.EMPTY
@@ -50,7 +50,6 @@ class PaymentSession @VisibleForTesting internal constructor(
         CustomerSession.getInstance(),
         PaymentMethodsActivityStarter(activity),
         PaymentFlowActivityStarter(activity),
-        PaymentSessionData(),
         PaymentSessionPrefs.create(activity)
     )
 
@@ -59,13 +58,8 @@ class PaymentSession @VisibleForTesting internal constructor(
         CustomerSession.getInstance(),
         PaymentMethodsActivityStarter(fragment),
         PaymentFlowActivityStarter(fragment),
-        PaymentSessionData(),
         PaymentSessionPrefs.create(fragment.requireActivity())
     )
-
-    init {
-        this.paymentSessionData = paymentSessionData
-    }
 
     /**
      * Notify this payment session that it is complete
@@ -92,19 +86,18 @@ class PaymentSession @VisibleForTesting internal constructor(
 
         when (resultCode) {
             Activity.RESULT_CANCELED -> {
-                fetchCustomer()
+                if (requestCode == PaymentMethodsActivityStarter.REQUEST_CODE) {
+                    // If resultCode of `PaymentMethodsActivity` is `Activity.RESULT_CANCELED`,
+                    // the user tapped back via the toolbar or device back button.
+                    onPaymentMethodResult(data)
+                } else {
+                    fetchCustomer()
+                }
                 return false
             }
             Activity.RESULT_OK -> when (requestCode) {
                 PaymentMethodsActivityStarter.REQUEST_CODE -> {
-                    val result =
-                        PaymentMethodsActivityStarter.Result.fromIntent(data)
-                    val paymentMethod = result?.paymentMethod
-                    persistPaymentMethod(paymentMethod)
-                    paymentSessionData.paymentMethod = paymentMethod
-                    paymentSessionData.updateIsPaymentReadyToCharge(config)
-                    paymentSessionListener?.onPaymentSessionDataChanged(paymentSessionData)
-                    paymentSessionListener?.onCommunicatingStateChanged(false)
+                    onPaymentMethodResult(data)
                     return true
                 }
                 PaymentFlowActivityStarter.REQUEST_CODE -> {
@@ -123,10 +116,24 @@ class PaymentSession @VisibleForTesting internal constructor(
         }
     }
 
+    private fun onPaymentMethodResult(data: Intent) {
+        val paymentMethod: PaymentMethod? =
+            PaymentMethodsActivityStarter.Result.fromIntent(data)?.paymentMethod
+        persistPaymentMethod(paymentMethod)
+        dispatchUpdates()
+    }
+
+    private fun dispatchUpdates() {
+        paymentSessionData.updateIsPaymentReadyToCharge(config)
+        paymentSessionListener?.onPaymentSessionDataChanged(paymentSessionData)
+        paymentSessionListener?.onCommunicatingStateChanged(false)
+    }
+
     private fun persistPaymentMethod(paymentMethod: PaymentMethod?) {
         customerSession.cachedCustomer?.id?.let { customerId ->
             paymentSessionPrefs.saveSelectedPaymentMethodId(customerId, paymentMethod?.id)
         }
+        paymentSessionData.paymentMethod = paymentMethod
     }
 
     /**
@@ -283,9 +290,7 @@ class PaymentSession @VisibleForTesting internal constructor(
         customerSession.retrieveCurrentCustomer(
             object : CustomerSession.CustomerRetrievalListener {
                 override fun onCustomerRetrieved(customer: Customer) {
-                    paymentSessionData.updateIsPaymentReadyToCharge(config)
-                    paymentSessionListener?.onPaymentSessionDataChanged(paymentSessionData)
-                    paymentSessionListener?.onCommunicatingStateChanged(false)
+                    dispatchUpdates()
                 }
 
                 override fun onError(

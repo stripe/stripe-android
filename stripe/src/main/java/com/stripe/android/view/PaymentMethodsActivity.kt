@@ -99,7 +99,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
         payment_methods_recycler.adapter = adapter
         payment_methods_recycler.listener = object : PaymentMethodsRecyclerView.Listener {
             override fun onPaymentMethodSelected(paymentMethod: PaymentMethod) {
-                setSelectionAndFinish(paymentMethod)
+                finishWithPaymentMethod(paymentMethod)
             }
         }
 
@@ -119,7 +119,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        setSelectionAndFinish(adapter.selectedPaymentMethod)
+        finishWithPaymentMethod(adapter.selectedPaymentMethod, Activity.RESULT_CANCELED)
         return true
     }
 
@@ -163,7 +163,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        setSelectionAndFinish(adapter.selectedPaymentMethod)
+        finishWithPaymentMethod(adapter.selectedPaymentMethod, Activity.RESULT_CANCELED)
     }
 
     private fun fetchCustomerPaymentMethods() {
@@ -186,14 +186,12 @@ class PaymentMethodsActivity : AppCompatActivity() {
         }
     }
 
-    @JvmSynthetic
-    internal fun setSelectionAndFinish(paymentMethod: PaymentMethod?) {
-        finishWithPaymentMethod(paymentMethod)
-    }
-
-    private fun finishWithPaymentMethod(paymentMethod: PaymentMethod?) {
+    private fun finishWithPaymentMethod(
+        paymentMethod: PaymentMethod?,
+        resultCode: Int = Activity.RESULT_OK
+    ) {
         setResult(
-            Activity.RESULT_OK,
+            resultCode,
             Intent().also {
                 if (paymentMethod != null) {
                     it.putExtras(PaymentMethodsActivityStarter.Result(paymentMethod).toBundle())
