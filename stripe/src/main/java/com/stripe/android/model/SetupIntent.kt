@@ -189,7 +189,7 @@ data class SetupIntent private constructor(
             InvalidRequestError("invalid_request_error"),
             RateLimitError("rate_limit_error");
 
-            companion object {
+            internal companion object {
                 internal fun fromCode(typeCode: String?): Type? {
                     return values().firstOrNull { it.code == typeCode }
                 }

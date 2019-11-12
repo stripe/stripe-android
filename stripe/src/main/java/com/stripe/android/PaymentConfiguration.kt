@@ -32,7 +32,7 @@ data class PaymentConfiguration internal constructor(val publishableKey: String)
             }
         }
 
-        companion object {
+        private companion object {
             private val NAME = PaymentConfiguration::class.java.canonicalName
 
             private const val KEY_PUBLISHABLE_KEY = "key_publishable_key"

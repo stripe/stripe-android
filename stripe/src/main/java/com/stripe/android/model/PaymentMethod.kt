@@ -481,7 +481,7 @@ data class PaymentMethod internal constructor(
         @JvmField val bank: String?,
         @JvmField val accountHolderType: String?
     ) : Parcelable {
-        companion object {
+        internal companion object {
             private const val FIELD_ACCOUNT_HOLDER_TYPE = "account_holder_type"
             private const val FIELD_BANK = "bank"
 
@@ -516,7 +516,7 @@ data class PaymentMethod internal constructor(
         @JvmField val last4: String?
     ) : Parcelable {
 
-        companion object {
+        internal companion object {
             private const val FIELD_BANK_CODE = "bank_code"
             private const val FIELD_BRANCH_CODE = "branch_code"
             private const val FIELD_COUNTRY = "country"

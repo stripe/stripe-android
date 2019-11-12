@@ -78,7 +78,7 @@ class PaymentAuthConfig private constructor(
             }
         }
 
-        companion object {
+        internal companion object {
             internal const val DEFAULT_TIMEOUT = 5
         }
     }

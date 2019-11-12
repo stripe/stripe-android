@@ -877,7 +877,7 @@ class CardInputWidget @JvmOverloads constructor(
         }
     }
 
-    companion object {
+    internal companion object {
         internal const val LOGGING_TOKEN = "CardInputView"
 
         private const val PEEK_TEXT_COMMON = "4242"

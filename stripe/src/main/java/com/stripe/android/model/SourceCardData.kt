@@ -146,7 +146,6 @@ data class SourceCardData private constructor(
     }
 
     companion object {
-
         private const val FIELD_ADDRESS_LINE1_CHECK = "address_line1_check"
         private const val FIELD_ADDRESS_ZIP_CHECK = "address_zip_check"
         private const val FIELD_BRAND = "brand"
