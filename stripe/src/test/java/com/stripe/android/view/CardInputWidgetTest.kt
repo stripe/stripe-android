@@ -811,7 +811,7 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         assertTrue(shouldIconShowBrand(Card.CardBrand.UNKNOWN, true, "212"))
     }
 
-    companion object {
+    private companion object {
 
         // Every Card made by the CardInputView should have the card widget token.
         private val EXPECTED_LOGGING_ARRAY = arrayOf(LOGGING_TOKEN)

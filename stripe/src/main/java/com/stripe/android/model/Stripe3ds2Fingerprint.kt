@@ -36,7 +36,7 @@ internal class Stripe3ds2Fingerprint private constructor(
             return certificate as X509Certificate
         }
 
-        companion object {
+        internal companion object {
             private const val FIELD_DIRECTORY_SERVER_ID = "directory_server_id"
             private const val FIELD_CERTIFICATE = "certificate"
             private const val FIELD_KEY_ID = "key_id"
@@ -65,7 +65,7 @@ internal class Stripe3ds2Fingerprint private constructor(
         Mastercard("mastercard", "A000000004"),
         Amex("american_express", "A000000025");
 
-        companion object {
+        internal companion object {
             @JvmSynthetic
             internal fun lookup(networkName: String): DirectoryServer {
                 return values().find { it.networkName == networkName }
@@ -74,7 +74,7 @@ internal class Stripe3ds2Fingerprint private constructor(
         }
     }
 
-    companion object {
+    internal companion object {
         private const val FIELD_THREE_D_SECURE_2_SOURCE = "three_d_secure_2_source"
         private const val FIELD_DIRECTORY_SERVER_NAME = "directory_server_name"
         private const val FIELD_SERVER_TRANSACTION_ID = "server_transaction_id"

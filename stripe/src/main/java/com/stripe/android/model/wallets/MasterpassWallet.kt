@@ -48,7 +48,7 @@ data class MasterpassWallet internal constructor(
         }
     }
 
-    companion object {
+    internal companion object {
         private const val FIELD_BILLING_ADDRESS = "billing_address"
         private const val FIELD_EMAIL = "email"
         private const val FIELD_NAME = "name"

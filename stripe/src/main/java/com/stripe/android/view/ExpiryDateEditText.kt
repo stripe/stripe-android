@@ -267,7 +267,7 @@ class ExpiryDateEditText @JvmOverloads constructor(
         fun onExpiryDateComplete()
     }
 
-    companion object {
+    private companion object {
         private const val INVALID_INPUT = -1
         private const val MAX_INPUT_LENGTH = 5
     }

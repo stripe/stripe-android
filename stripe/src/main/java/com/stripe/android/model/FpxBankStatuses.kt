@@ -13,7 +13,7 @@ internal class FpxBankStatuses private constructor(
         return statuses?.get(bankId) ?: true
     }
 
-    companion object {
+    internal companion object {
         @JvmSynthetic
         internal fun fromJson(json: JSONObject?): FpxBankStatuses {
             return if (json == null) {

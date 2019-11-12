@@ -15,8 +15,8 @@ class ProgressDialogFragment : androidx.fragment.app.DialogFragment() {
         return dialog
     }
 
-    companion object {
-        fun newInstance(message: String): ProgressDialogFragment {
+    internal companion object {
+        internal fun newInstance(message: String): ProgressDialogFragment {
             val fragment = ProgressDialogFragment()
 
             val args = Bundle()

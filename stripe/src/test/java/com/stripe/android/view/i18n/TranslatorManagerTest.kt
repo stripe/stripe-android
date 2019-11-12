@@ -38,7 +38,7 @@ class TranslatorManagerTest {
                 .translate(0, "original message", STRIPE_ERROR))
     }
 
-    companion object {
+    private companion object {
         private val STRIPE_ERROR = StripeErrorFixtures.INVALID_REQUEST_ERROR
     }
 }

@@ -34,7 +34,7 @@ class SelectShippingMethodWidgetTest {
         assertEquals(shippingMethodAdapter.selectedShippingMethod, FEDEX)
     }
 
-    companion object {
+    private companion object {
         private val UPS = ShippingMethod(
             "UPS Ground",
             "ups-ground",

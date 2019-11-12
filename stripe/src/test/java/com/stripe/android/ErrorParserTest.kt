@@ -33,7 +33,7 @@ class ErrorParserTest {
         assertEquals("invalid_request_error", type)
     }
 
-    companion object {
+    private companion object {
         private val RAW_INVALID_REQUEST_ERROR =
             """
             {

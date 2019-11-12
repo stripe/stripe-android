@@ -259,7 +259,7 @@ class PaymentFlowActivity : StripeActivity() {
         }
     }
 
-    companion object {
+    internal companion object {
         internal const val TOKEN_PAYMENT_FLOW_ACTIVITY: String = "PaymentFlowActivity"
         internal const val TOKEN_SHIPPING_INFO_SCREEN: String = "ShippingInfoScreen"
         internal const val TOKEN_SHIPPING_METHOD_SCREEN: String = "ShippingMethodScreen"

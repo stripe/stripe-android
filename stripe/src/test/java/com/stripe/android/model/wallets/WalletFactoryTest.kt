@@ -61,7 +61,7 @@ class WalletFactoryTest {
         assertEquals(visaWallet, ParcelUtils.create(visaWallet))
     }
 
-    companion object {
+    private companion object {
         private val VISA_WALLET_JSON = JSONObject(
             """
             {

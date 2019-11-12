@@ -125,7 +125,7 @@ data class PaymentSessionConfig internal constructor(
         }
     }
 
-    companion object {
+    internal companion object {
         internal val EMPTY = PaymentSessionConfig()
     }
 }

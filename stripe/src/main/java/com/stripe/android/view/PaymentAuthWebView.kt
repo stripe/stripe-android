@@ -94,14 +94,14 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
         settings.domStorageEnabled = true
     }
 
-    companion object {
+    private companion object {
         /**
          * Fix for crash in API 21 and 22
          *
          * See <a href="https://stackoverflow.com/q/41025200/">https://stackoverflow.com/q/41025200/</a>
          * for more context.
          */
-        fun createContext(context: Context): Context {
+        private fun createContext(context: Context): Context {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 context.createConfigurationContext(Configuration())
             } else {

@@ -155,7 +155,7 @@ internal abstract class StripeRequest(
         internal val value: String
     )
 
-    companion object {
+    internal companion object {
         const val HEADER_USER_AGENT = "User-Agent"
         const val CHARSET = "UTF-8"
 

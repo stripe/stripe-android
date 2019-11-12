@@ -107,7 +107,7 @@ internal class TelemetryClientUtil @VisibleForTesting internal constructor(
         return mapOf("v" to value)
     }
 
-    companion object {
+    private companion object {
         private fun createTimezone(): String {
             val minutes = TimeUnit.MINUTES.convert(TimeZone.getDefault().rawOffset.toLong(),
                 TimeUnit.MILLISECONDS).toInt()

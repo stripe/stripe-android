@@ -51,15 +51,14 @@ class SourceTest {
         assertNotNull(source)
 
         assertEquals(Source.USD, source.currency)
-        assertTrue(source.isLiveMode!!)
+        assertTrue(source.isLiveMode == true)
 
         val weChat = source.weChat
         assertNotNull(weChat)
         assertEquals("wxa0df8has9d78ce", weChat.appId)
     }
 
-    companion object {
-        @JvmField
+    internal companion object {
         internal val EXAMPLE_JSON_SOURCE_WITHOUT_NULLS = JSONObject(
             """
             {

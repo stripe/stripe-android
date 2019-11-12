@@ -201,7 +201,7 @@ class CreateCardSourceActivity : AppCompatActivity() {
             .show()
     }
 
-    companion object {
+    private companion object {
 
         private const val RETURN_SCHEMA = "stripe://"
         private const val RETURN_HOST_ASYNC = "async"

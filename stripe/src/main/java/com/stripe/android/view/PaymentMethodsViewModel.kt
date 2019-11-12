@@ -48,7 +48,7 @@ internal class PaymentMethodsViewModel : ViewModel() {
             SUCCESS, ERROR
         }
 
-        companion object {
+        internal companion object {
             @JvmSynthetic
             internal fun create(paymentMethods: List<PaymentMethod>): Result<List<PaymentMethod>> {
                 return Result(Status.SUCCESS, paymentMethods)

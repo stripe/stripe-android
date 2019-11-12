@@ -69,7 +69,7 @@ class PaymentAuthWebViewStarterTest {
             extras.getString(PaymentAuthWebViewStarter.EXTRA_CLIENT_SECRET))
     }
 
-    companion object {
+    private companion object {
         private const val CLIENT_SECRET = "pi_1EceMnCRMbs6FrXfCXdF8dnx_secret_vew0L3IGaO0x9o0eyRMGzKr0k"
         private val DATA = PaymentAuthWebViewStarter.Data(
             CLIENT_SECRET,

@@ -68,7 +68,7 @@ class IconTextInputLayout @JvmOverloads constructor(
         return collapsingTextHelper != null && bounds != null && recalculateMethod != null
     }
 
-    companion object {
+    private companion object {
         private val BOUNDS_FIELD_NAMES =
             setOf("mCollapsedBounds", "collapsedBounds")
         private val TEXT_FIELD_NAMES =

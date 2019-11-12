@@ -100,9 +100,8 @@ internal class MaskedCardView @JvmOverloads constructor(
         imageView: ImageView,
         isCheckMark: Boolean
     ) {
-        val icon = DrawableCompat.wrap(
-            ContextCompat.getDrawable(context, resourceId)!!
-        )
+        val drawable = ContextCompat.getDrawable(context, resourceId) ?: return
+        val icon = DrawableCompat.wrap(drawable)
         DrawableCompat.setTint(
             icon.mutate(),
             themeConfig.getTintColor(isSelected || isCheckMark)
@@ -122,7 +121,7 @@ internal class MaskedCardView @JvmOverloads constructor(
         }
     }
 
-    companion object {
+    private companion object {
         private val ICON_RESOURCE_MAP = mapOf(
             PaymentMethod.Card.Brand.AMERICAN_EXPRESS to R.drawable.ic_amex_template_32,
             PaymentMethod.Card.Brand.DINERS_CLUB to R.drawable.ic_diners_template_32,

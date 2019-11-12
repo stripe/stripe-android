@@ -69,8 +69,8 @@ class Stripe3ds2FingerprintTest {
         assertFailsWith<IllegalArgumentException> { Stripe3ds2Fingerprint.create(sdkData) }
     }
 
-    companion object {
-        internal val DS_CERT_DATA_RSA =
+    internal companion object {
+        private val DS_CERT_DATA_RSA =
             """
             -----BEGIN CERTIFICATE-----
             MIIE0TCCA7mgAwIBAgIUXbeqM1duFcHk4dDBwT8o7Ln5wX8wDQYJKoZIhvcNAQEL
@@ -102,7 +102,7 @@ class Stripe3ds2FingerprintTest {
             -----END CERTIFICATE-----
             """.trimIndent()
 
-        val DS_RSA_PUBLIC_KEY: PublicKey = generateCertificate(DS_CERT_DATA_RSA).publicKey
+        internal val DS_RSA_PUBLIC_KEY: PublicKey = generateCertificate(DS_CERT_DATA_RSA).publicKey
 
         private fun generateCertificate(certificateData: String): X509Certificate {
             try {

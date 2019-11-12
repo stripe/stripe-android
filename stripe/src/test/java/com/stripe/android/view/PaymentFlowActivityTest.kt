@@ -256,7 +256,7 @@ class PaymentFlowActivityTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowAct
         assertEquals(resultSessionData?.shippingInformation, SHIPPING_INFO)
     }
 
-    companion object {
+    private companion object {
         private val SHIPPING_INFO = ShippingInformation(
             Address.Builder()
                 .setCity("San Francisco")

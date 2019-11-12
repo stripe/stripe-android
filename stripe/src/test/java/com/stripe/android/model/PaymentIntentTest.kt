@@ -119,7 +119,7 @@ class PaymentIntentTest {
             PaymentIntentFixtures.CANCELLED.canceledAt)
     }
 
-    companion object {
+    private companion object {
         private const val BAD_URL: String = "nonsense-blahblah"
 
         private val PAYMENT_INTENT_WITH_SOURCE_WITH_BAD_AUTH_URL_JSON = JSONObject(

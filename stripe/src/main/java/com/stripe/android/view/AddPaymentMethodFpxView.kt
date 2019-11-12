@@ -213,7 +213,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
         }
     }
 
-    companion object {
+    internal companion object {
         @JvmSynthetic
         internal fun create(activity: FragmentActivity): AddPaymentMethodFpxView {
             return AddPaymentMethodFpxView(activity)

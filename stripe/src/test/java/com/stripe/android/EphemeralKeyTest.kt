@@ -31,7 +31,7 @@ class EphemeralKeyTest {
         assertEquals(EPHEMERAL_KEY, ParcelUtils.create(EPHEMERAL_KEY))
     }
 
-    companion object {
+    private companion object {
         private val EPHEMERAL_KEY = EphemeralKey.fromJson(JSONObject(
             """
             {

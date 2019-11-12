@@ -160,7 +160,7 @@ class IssuingCardPinServiceTest {
         )
     }
 
-    companion object {
+    private companion object {
 
         private val EPHEMERAL_KEY = JSONObject(
             """

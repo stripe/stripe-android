@@ -208,7 +208,7 @@ internal class ApiRequestTest {
         assertNull(createGetRequest().languageTag)
     }
 
-    companion object {
+    private companion object {
         private fun createGetRequest(): ApiRequest {
             return ApiRequest.createGet(
                 StripeApiRepository.paymentMethodsUrl,

@@ -50,7 +50,7 @@ internal class FingerprintRequest(
         return super.typedEquals(obj) && guid == obj.guid
     }
 
-    companion object {
+    private companion object {
         private const val MIME_TYPE = "application/json"
         private const val URL = "https://m.stripe.com/4"
 

@@ -91,7 +91,7 @@ class CustomerTest {
         return rawJsonCustomer.toString()
     }
 
-    companion object {
+    private companion object {
 
         private val NON_CUSTOMER_OBJECT = JSONObject(
             """

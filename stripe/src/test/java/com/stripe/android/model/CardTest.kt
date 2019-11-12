@@ -663,7 +663,7 @@ class CardTest {
         assertEquals(expected, actual)
     }
 
-    companion object {
+    internal companion object {
         private const val YEAR_IN_FUTURE: Int = 2100
 
         internal val JSON_CARD_USD = JSONObject(

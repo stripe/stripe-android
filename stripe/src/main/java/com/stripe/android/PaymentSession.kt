@@ -340,7 +340,7 @@ class PaymentSession @VisibleForTesting internal constructor(
             get() = activityRef.get()
     }
 
-    companion object {
+    internal companion object {
         internal const val TOKEN_PAYMENT_SESSION: String = "PaymentSession"
         internal const val EXTRA_PAYMENT_SESSION_ACTIVE: String = "payment_session_active"
         internal const val STATE_PAYMENT_SESSION_DATA: String = "payment_session_data"

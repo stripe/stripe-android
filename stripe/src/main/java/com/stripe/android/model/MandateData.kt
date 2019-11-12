@@ -8,7 +8,7 @@ internal class MandateData : StripeParamsModel {
         ))
     }
 
-    companion object {
+    internal companion object {
         internal const val API_PARAM_MANDATE_DATA = "mandate_data"
     }
 }

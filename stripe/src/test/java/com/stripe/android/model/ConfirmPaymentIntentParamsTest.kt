@@ -197,7 +197,7 @@ class ConfirmPaymentIntentParamsTest {
         assertTrue(params.containsKey(MandateData.API_PARAM_MANDATE_DATA))
     }
 
-    companion object {
+    private companion object {
         private val FULL_FIELDS_VISA_CARD =
             Card.Builder(VALID_VISA_NO_SPACES, 12, 2050, "123")
                 .name("Captain Cardholder")

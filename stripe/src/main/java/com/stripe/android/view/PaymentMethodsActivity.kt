@@ -220,7 +220,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
         outState.putString(STATE_SELECTED_PAYMENT_METHOD_ID, adapter.selectedPaymentMethod?.id)
     }
 
-    companion object {
+    internal companion object {
         private const val STATE_SELECTED_PAYMENT_METHOD_ID = "state_selected_payment_method_id"
         internal const val TOKEN_PAYMENT_METHODS_ACTIVITY: String = "PaymentMethodsActivity"
     }

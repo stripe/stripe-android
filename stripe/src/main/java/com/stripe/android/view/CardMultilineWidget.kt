@@ -635,7 +635,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         cardNumberEditText.setCompoundDrawablesRelative(compatIcon, null, null, null)
     }
 
-    companion object {
+    internal companion object {
 
         internal const val CARD_MULTILINE_TOKEN = "CardMultilineView"
         internal const val CARD_NUMBER_HINT_DELAY = 120L

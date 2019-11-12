@@ -383,7 +383,7 @@ class PaymentSessionTest {
         }
     }
 
-    companion object {
+    private companion object {
         private val FIRST_CUSTOMER = CustomerFixtures.CUSTOMER
         private val SECOND_CUSTOMER = CustomerFixtures.OTHER_CUSTOMER
     }

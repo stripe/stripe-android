@@ -116,7 +116,7 @@ class AddPaymentMethodActivityStarter constructor(
             }
         }
 
-        companion object {
+        internal companion object {
             internal val DEFAULT = Builder().build()
 
             @JvmSynthetic

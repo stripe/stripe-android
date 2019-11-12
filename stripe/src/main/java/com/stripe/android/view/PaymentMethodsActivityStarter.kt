@@ -112,7 +112,7 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
             }
         }
 
-        companion object {
+        internal companion object {
             internal val DEFAULT = Builder().build()
 
             @JvmSynthetic

@@ -52,7 +52,7 @@ internal class ConnectionFactory {
         }
     }
 
-    companion object {
+    private companion object {
         private val SSL_SOCKET_FACTORY = StripeSSLSocketFactory()
         private val CONNECT_TIMEOUT = TimeUnit.SECONDS.toMillis(30).toInt()
         private val READ_TIMEOUT = TimeUnit.SECONDS.toMillis(80).toInt()

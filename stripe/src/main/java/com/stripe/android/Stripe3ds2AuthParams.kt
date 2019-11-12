@@ -55,10 +55,10 @@ internal class Stripe3ds2AuthParams(
         }
     }
 
-    companion object {
-        const val FIELD_APP = "app"
-        const val FIELD_SOURCE = "source"
-        const val FIELD_FALLBACK_RETURN_URL = "fallback_return_url"
+    internal companion object {
+        internal const val FIELD_APP = "app"
+        internal const val FIELD_SOURCE = "source"
+        internal const val FIELD_FALLBACK_RETURN_URL = "fallback_return_url"
 
         private const val FIELD_SDK_APP_ID = "sdkAppID"
         private const val FIELD_SDK_TRANS_ID = "sdkTransID"

@@ -232,7 +232,7 @@ class PayWithGoogleActivity : AppCompatActivity() {
             )
     }
 
-    companion object {
+    private companion object {
         private const val LOAD_PAYMENT_DATA_REQUEST_CODE = 53
     }
 }

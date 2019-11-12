@@ -92,12 +92,12 @@ internal class StripeSSLSocketFactory constructor(
         ).filterNotNull().toTypedArray()
     }
 
-    companion object {
+    internal companion object {
         private const val TLS_V11_PROTO = "TLSv1.1"
         private const val TLS_V12_PROTO = "TLSv1.2"
 
         // For Android prior to 4.1, TLSv1.1 and TLSv1.2 might not be supported
-        fun getSupportedProtocols(): Array<String> {
+        internal fun getSupportedProtocols(): Array<String> {
             return try {
                 SSLContext.getDefault().supportedSSLParameters.protocols
             } catch (e: NoSuchAlgorithmException) {

@@ -178,7 +178,7 @@ internal data class Stripe3ds2AuthResult private constructor(
             }
         }
 
-        companion object {
+        internal companion object {
             private const val FIELD_ACS_CHALLENGE_MANDATED = "acsChallengeMandated"
             private const val FIELD_ACS_SIGNED_CONTENT = "acsSignedContent"
             private const val FIELD_ACS_TRANS_ID = "acsTransID"
@@ -218,7 +218,7 @@ internal data class Stripe3ds2AuthResult private constructor(
         }
     }
 
-    data class MessageExtension private constructor(
+    data class MessageExtension internal constructor(
         // The name of the extension data set as defined by the extension owner.
         val name: String?,
 
@@ -266,7 +266,7 @@ internal data class Stripe3ds2AuthResult private constructor(
             }
         }
 
-        companion object {
+        internal companion object {
             private const val FIELD_NAME = "name"
             private const val FIELD_ID = "id"
             private const val FIELD_CRITICALITY_INDICATOR = "criticalityIndicator"
@@ -307,7 +307,7 @@ internal data class Stripe3ds2AuthResult private constructor(
         }
     }
 
-    data class ThreeDS2Error private constructor(
+    data class ThreeDS2Error internal constructor(
         val threeDSServerTransId: String?,
         val acsTransId: String?,
         val dsTransId: String?,
@@ -396,7 +396,7 @@ internal data class Stripe3ds2AuthResult private constructor(
             }
         }
 
-        companion object {
+        internal companion object {
             private const val FIELD_THREE_DS_SERVER_TRANS_ID = "threeDSServerTransID"
             private const val FIELD_ACS_TRANS_ID = "acsTransID"
             private const val FIELD_DS_TRANS_ID = "dsTransID"
@@ -429,7 +429,7 @@ internal data class Stripe3ds2AuthResult private constructor(
         }
     }
 
-    companion object {
+    internal companion object {
         private const val FIELD_ID = "id"
         private const val FIELD_OBJECT = "object"
         private const val FIELD_ARES = "ares"

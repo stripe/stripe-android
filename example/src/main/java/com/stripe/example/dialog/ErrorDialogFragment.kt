@@ -18,8 +18,8 @@ class ErrorDialogFragment : androidx.fragment.app.DialogFragment() {
             .create()
     }
 
-    companion object {
-        fun newInstance(title: String, message: String): ErrorDialogFragment {
+    internal companion object {
+        internal fun newInstance(title: String, message: String): ErrorDialogFragment {
             val fragment = ErrorDialogFragment()
 
             val args = Bundle()
