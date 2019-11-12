@@ -27,8 +27,19 @@ class CardNumberEditText @JvmOverloads constructor(
     var cardBrand: String = Card.CardBrand.UNKNOWN
         internal set
 
-    private var cardBrandChangeListener: CardBrandChangeListener? = null
-    private var cardNumberCompleteListener: CardNumberCompleteListener? = null
+    @JvmSynthetic
+    internal var brandChangeCallback: (String) -> Unit = {}
+        set(callback) {
+            field = callback
+
+            // Immediately display the brand if known, in case this method is invoked when
+            // partial data already exists.
+            callback(cardBrand)
+        }
+
+    // invoked when a valid card has been entered
+    @JvmSynthetic
+    internal var completionCallback: () -> Unit = {}
 
     var lengthMax: Int = MAX_LENGTH_COMMON
         private set
@@ -62,19 +73,6 @@ class CardNumberEditText @JvmOverloads constructor(
     override fun onInitializeAccessibilityNodeInfo(info: AccessibilityNodeInfo) {
         super.onInitializeAccessibilityNodeInfo(info)
         info.text = resources.getString(R.string.acc_label_card_number_node, text)
-    }
-
-    @JvmSynthetic
-    internal fun setCardNumberCompleteListener(listener: CardNumberCompleteListener) {
-        cardNumberCompleteListener = listener
-    }
-
-    @JvmSynthetic
-    internal fun setCardBrandChangeListener(listener: CardBrandChangeListener) {
-        cardBrandChangeListener = listener
-        // Immediately display the brand if known, in case this method is invoked when
-        // partial data already exists.
-        cardBrandChangeListener?.onCardBrandChanged(cardBrand)
     }
 
     @JvmSynthetic
@@ -193,7 +191,7 @@ class CardNumberEditText @JvmOverloads constructor(
                     isCardNumberValid = CardUtils.isValidCardNumber(fieldText)
                     shouldShowError = !isCardNumberValid
                     if (!before && isCardNumberValid) {
-                        cardNumberCompleteListener?.onCardNumberComplete()
+                        completionCallback()
                     }
                 } else {
                     isCardNumberValid = CardUtils.isValidCardNumber(fieldText)
@@ -211,7 +209,7 @@ class CardNumberEditText @JvmOverloads constructor(
 
         cardBrand = brand
 
-        cardBrandChangeListener?.onCardBrandChanged(cardBrand)
+        brandChangeCallback(cardBrand)
 
         val oldLength = lengthMax
         lengthMax = getLengthForBrand(cardBrand)
@@ -224,14 +222,6 @@ class CardNumberEditText @JvmOverloads constructor(
 
     private fun updateCardBrandFromNumber(partialNumber: String) {
         updateCardBrand(CardUtils.getPossibleCardType(partialNumber))
-    }
-
-    internal interface CardNumberCompleteListener {
-        fun onCardNumberComplete()
-    }
-
-    internal interface CardBrandChangeListener {
-        fun onCardBrandChanged(@Card.CardBrand brand: String)
     }
 
     internal companion object {

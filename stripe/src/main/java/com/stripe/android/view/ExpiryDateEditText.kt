@@ -22,7 +22,9 @@ class ExpiryDateEditText @JvmOverloads constructor(
         listenForTextChanges()
     }
 
-    private var expiryDateEditListener: ExpiryDateEditListener? = null
+    // invoked when a valid date has been entered
+    @JvmSynthetic
+    internal var completionCallback: () -> Unit = {}
 
     /**
      * Gets whether or not the date currently entered is valid and not yet passed.
@@ -65,10 +67,6 @@ class ExpiryDateEditText @JvmOverloads constructor(
             text
         )
         info.text = accLabel
-    }
-
-    internal fun setExpiryDateEditListener(expiryDateEditListener: ExpiryDateEditListener?) {
-        this.expiryDateEditListener = expiryDateEditListener
     }
 
     private fun listenForTextChanges() {
@@ -188,7 +186,7 @@ class ExpiryDateEditText @JvmOverloads constructor(
                     // to show an error.
                     shouldShowError = !isDateValid
                     if (!wasComplete && isDateValid) {
-                        expiryDateEditListener?.onExpiryDateComplete()
+                        completionCallback()
                     }
                 } else {
                     isDateValid = false
@@ -261,10 +259,6 @@ class ExpiryDateEditText @JvmOverloads constructor(
         }
 
         isDateValid = DateUtils.isExpiryDataValid(inputMonth, inputYear)
-    }
-
-    internal interface ExpiryDateEditListener {
-        fun onExpiryDateComplete()
     }
 
     private companion object {
