@@ -339,7 +339,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
             }
         }
 
-        companion object {
+        private companion object {
             private const val PAYMENT_METHOD_3DS2_REQUIRED = "pm_card_threeDSecure2Required"
             private const val RETURN_URL = "stripe://payment_auth"
         }

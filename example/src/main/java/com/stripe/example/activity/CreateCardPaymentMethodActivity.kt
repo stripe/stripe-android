@@ -142,7 +142,7 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
         }
     }
 
-    companion object {
+    private companion object {
         private val BILLING_DETAILS =
             PaymentMethod.BillingDetails.Builder()
                 .setName("Jenny Rosen")

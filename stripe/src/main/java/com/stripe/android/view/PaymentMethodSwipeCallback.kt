@@ -148,7 +148,7 @@ internal class PaymentMethodSwipeCallback(
         trashIcon.draw(canvas)
     }
 
-    companion object {
+    internal companion object {
         // calculate the background color while transitioning from start to end threshold
         internal fun calculateTransitionColor(
             fraction: Float,

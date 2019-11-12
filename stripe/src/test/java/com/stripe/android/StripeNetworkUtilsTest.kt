@@ -87,7 +87,7 @@ class StripeNetworkUtilsTest {
         return cardTokenParams["card"] as Map<String, Any>?
     }
 
-    companion object {
+    private companion object {
         private const val CARD_ADDRESS_L1 = "123 Main Street"
         private const val CARD_ADDRESS_L2 = "906"
         private const val CARD_CITY = "San Francisco"

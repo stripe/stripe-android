@@ -584,7 +584,7 @@ class StripeApiRepositoryTest {
         )
     }
 
-    companion object {
+    private companion object {
         private const val STRIPE_ACCOUNT_RESPONSE_HEADER = "Stripe-Account"
         private val CARD =
             Card.create("4242424242424242", 1, 2050, "123")

@@ -45,7 +45,7 @@ class AddressTest {
         assertEquals(ADDRESS, ParcelUtils.create(ADDRESS))
     }
 
-    companion object {
+    private companion object {
         private val MAP_ADDRESS = mapOf(
             "city" to "San Francisco",
             "country" to "US",

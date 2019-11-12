@@ -14,10 +14,10 @@ interface CardInputListener {
         FocusField.FOCUS_POSTAL)
     annotation class FocusField {
         companion object {
-            const val FOCUS_CARD = "focus_card"
-            const val FOCUS_EXPIRY = "focus_expiry"
-            const val FOCUS_CVC = "focus_cvc"
-            const val FOCUS_POSTAL = "focus_postal"
+            const val FOCUS_CARD: String = "focus_card"
+            const val FOCUS_EXPIRY: String = "focus_expiry"
+            const val FOCUS_CVC: String = "focus_cvc"
+            const val FOCUS_POSTAL: String = "focus_postal"
         }
     }
 

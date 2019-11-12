@@ -52,7 +52,7 @@ abstract class ActivityStarter<TargetActivityType : Activity, ArgsType : Activit
 
     interface Args : Parcelable {
         companion object {
-            const val EXTRA: String = "extra_activity_args"
+            internal const val EXTRA: String = "extra_activity_args"
         }
     }
 
@@ -60,7 +60,7 @@ abstract class ActivityStarter<TargetActivityType : Activity, ArgsType : Activit
         fun toBundle(): Bundle
 
         companion object {
-            const val EXTRA: String = "extra_activity_result"
+            internal const val EXTRA: String = "extra_activity_result"
         }
     }
 }

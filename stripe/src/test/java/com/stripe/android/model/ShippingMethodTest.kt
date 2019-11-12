@@ -22,7 +22,7 @@ class ShippingMethodTest {
         assertEquals(SHIPPING_METHOD, ParcelUtils.create(SHIPPING_METHOD))
     }
 
-    companion object {
+    private companion object {
         private val SHIPPING_METHOD = createShippingMethod()
 
         private fun createShippingMethod(): ShippingMethod {

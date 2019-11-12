@@ -39,8 +39,7 @@ internal class TestEphemeralKeyProvider : EphemeralKeyProvider {
         this.errorMessage = errorMessage
     }
 
-    companion object {
-
+    private companion object {
         private const val INVALID_ERROR_CODE = -1
     }
 }

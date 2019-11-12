@@ -257,7 +257,7 @@ class PaymentSessionActivity : AppCompatActivity() {
         }
     }
 
-    companion object {
+    private companion object {
         private val EXAMPLE_SHIPPING_INFO = ShippingInformation(
             Address.Builder()
                 .setCity("San Francisco")

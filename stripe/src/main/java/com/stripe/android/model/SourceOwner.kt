@@ -8,7 +8,7 @@ import org.json.JSONObject
  * Model for a [owner](https://stripe.com/docs/api#source_object-owner) object
  * in the Source api.
  */
-data class SourceOwner private constructor(
+data class SourceOwner internal constructor(
     val address: Address?,
     val email: String?,
     val name: String?,
@@ -48,9 +48,8 @@ data class SourceOwner private constructor(
                 return null
             }
 
-            val address: Address?
             val addressJsonOpt = jsonObject.optJSONObject(FIELD_ADDRESS)
-            address = if (addressJsonOpt != null) {
+            val address = if (addressJsonOpt != null) {
                 Address.fromJson(addressJsonOpt)
             } else {
                 null

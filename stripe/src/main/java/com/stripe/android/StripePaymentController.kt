@@ -613,10 +613,10 @@ internal class StripePaymentController internal constructor(
         internal interface Complete3ds2AuthCallbackFactory :
             Factory<Stripe3ds2CompletionStarter.StartData, ApiResultCallback<Boolean>>
 
-        companion object {
+        internal companion object {
             private const val VALUE_YES = "Y"
 
-            fun create(
+            internal fun create(
                 host: AuthActivityStarter.Host,
                 stripeRepository: StripeRepository,
                 stripeIntent: StripeIntent,
@@ -677,10 +677,10 @@ internal class StripePaymentController internal constructor(
             }, TimeUnit.SECONDS.toMillis(DELAY_SECONDS))
         }
 
-        companion object {
+        private companion object {
             private const val DELAY_SECONDS = 2L
 
-            fun createHandler(handlerThread: HandlerThread): Handler {
+            private fun createHandler(handlerThread: HandlerThread): Handler {
                 handlerThread.start()
                 return Handler(handlerThread.looper)
             }
@@ -691,7 +691,7 @@ internal class StripePaymentController internal constructor(
         fun start(runnable: Runnable)
     }
 
-    companion object {
+    internal companion object {
         internal const val PAYMENT_REQUEST_CODE = 50000
         internal const val SETUP_REQUEST_CODE = 50001
 

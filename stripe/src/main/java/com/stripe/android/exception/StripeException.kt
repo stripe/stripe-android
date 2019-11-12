@@ -29,7 +29,7 @@ abstract class StripeException @JvmOverloads constructor(
         return super.toString() + reqIdStr
     }
 
-    companion object {
+    internal companion object {
         protected const val serialVersionUID = 1L
     }
 }

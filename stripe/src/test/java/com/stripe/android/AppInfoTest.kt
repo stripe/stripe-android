@@ -60,7 +60,7 @@ class AppInfoTest {
             ))
     }
 
-    companion object {
+    internal companion object {
         internal val APP_INFO = AppInfo.create(
             "MyAwesomePlugin",
             "1.2.34",

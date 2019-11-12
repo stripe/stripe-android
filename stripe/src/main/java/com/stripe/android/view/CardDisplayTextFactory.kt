@@ -105,7 +105,7 @@ internal class CardDisplayTextFactory internal constructor(
         )
     }
 
-    companion object {
+    internal companion object {
         private val BRAND_RESOURCE_MAP = mapOf(
             PaymentMethod.Card.Brand.AMERICAN_EXPRESS to R.string.amex_short,
             PaymentMethod.Card.Brand.DINERS_CLUB to R.string.diners_club,

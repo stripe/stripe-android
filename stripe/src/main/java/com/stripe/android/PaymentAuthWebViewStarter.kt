@@ -34,7 +34,7 @@ internal class PaymentAuthWebViewStarter @JvmOverloads internal constructor(
         val returnUrl: String? = null
     )
 
-    companion object {
+    internal companion object {
         internal const val EXTRA_AUTH_URL = "auth_url"
         internal const val EXTRA_CLIENT_SECRET = "client_secret"
         internal const val EXTRA_RETURN_URL = "return_url"

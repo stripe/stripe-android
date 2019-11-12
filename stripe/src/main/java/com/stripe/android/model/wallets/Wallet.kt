@@ -29,8 +29,8 @@ abstract class Wallet internal constructor(
         SamsungPay("samsung_pay"),
         VisaCheckout("visa_checkout");
 
-        companion object {
-            fun fromCode(code: String?): Type? {
+        internal companion object {
+            internal fun fromCode(code: String?): Type? {
                 return values().firstOrNull { it.code == code }
             }
         }
@@ -95,7 +95,7 @@ abstract class Wallet internal constructor(
             }
         }
 
-        companion object {
+        internal companion object {
             private const val FIELD_CITY = "city"
             private const val FIELD_COUNTRY = "country"
             private const val FIELD_LINE1 = "line1"
@@ -120,7 +120,7 @@ abstract class Wallet internal constructor(
         }
     }
 
-    companion object {
+    internal companion object {
         internal const val FIELD_DYNAMIC_LAST4 = "dynamic_last4"
         internal const val FIELD_TYPE = "type"
     }

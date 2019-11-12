@@ -228,7 +228,7 @@ class AnalyticsDataFactoryTest {
         assertEquals(androidAnalyticsUserAgent, AnalyticsDataFactory.analyticsUa)
     }
 
-    companion object {
+    private companion object {
         private const val API_KEY = "pk_abc123"
         private val EXPECTED_SINGLE_TOKEN_LIST = listOf("CardInputView")
     }

@@ -61,7 +61,7 @@ class ShippingPostalCodeValidatorTest {
             emptyList(), emptyList())
     }
 
-    companion object {
+    private companion object {
         private val VALIDATOR = ShippingPostalCodeValidator()
     }
 }

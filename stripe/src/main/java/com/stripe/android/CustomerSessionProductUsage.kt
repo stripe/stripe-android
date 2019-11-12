@@ -21,7 +21,7 @@ internal class CustomerSessionProductUsage {
         return data.toSet()
     }
 
-    companion object {
+    private companion object {
         private val VALID_TOKENS = setOf(
             AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY,
             PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY,

@@ -105,7 +105,7 @@ internal class ApiRequest internal constructor(
         }
     }
 
-    companion object {
+    internal companion object {
         internal const val MIME_TYPE = "application/x-www-form-urlencoded"
         internal const val API_HOST = "https://api.stripe.com"
 

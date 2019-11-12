@@ -230,7 +230,7 @@ data class SetupIntent private constructor(
         RequestedByCustomer("requested_by_customer"),
         Abandoned("abandoned");
 
-        companion object {
+        internal companion object {
             internal fun fromCode(code: String?): CancellationReason? {
                 return values().firstOrNull { it.code == code }
             }
@@ -261,6 +261,7 @@ data class SetupIntent private constructor(
                 .dropLastWhile { it.isEmpty() }.toTypedArray()[0]
         }
 
+        @JvmStatic
         fun fromString(jsonString: String?): SetupIntent? {
             return if (jsonString == null) {
                 null
@@ -273,6 +274,7 @@ data class SetupIntent private constructor(
             }
         }
 
+        @JvmStatic
         fun fromJson(jsonObject: JSONObject?): SetupIntent? {
             val objectType = optString(jsonObject, FIELD_OBJECT)
             if (jsonObject == null || VALUE_SETUP_INTENT != objectType) {

@@ -54,7 +54,7 @@ class BankAccountTest {
         return params["bank_account"] as Map<String, Any>
     }
 
-    companion object {
+    private companion object {
         private const val BANK_ACCOUNT_NUMBER = "000123456789"
         private const val BANK_ROUTING_NUMBER = "110000000"
         private const val BANK_ACCOUNT_HOLDER_NAME = "Lily Thomas"

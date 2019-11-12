@@ -13,7 +13,7 @@ data class GooglePayWallet internal constructor(
         }
     }
 
-    companion object {
+    internal companion object {
         internal fun fromJson(): Builder {
             return Builder()
         }

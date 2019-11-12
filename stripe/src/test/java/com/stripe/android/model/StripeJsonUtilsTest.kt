@@ -156,7 +156,7 @@ class StripeJsonUtilsTest {
         JsonTestUtils.assertListEquals(expectedList, convertedJsonArray)
     }
 
-    companion object {
+    private companion object {
 
         private val SIMPLE_JSON_TEST_OBJECT = JSONObject(
             """

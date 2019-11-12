@@ -33,34 +33,34 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
         EventName.AUTH_3DS2_FALLBACK, EventName.AUTH_REDIRECT, EventName.AUTH_ERROR)
     internal annotation class EventName {
         companion object {
-            const val TOKEN_CREATION = "token_creation"
-            const val CREATE_PAYMENT_METHOD = "payment_method_creation"
-            const val ATTACH_PAYMENT_METHOD = "attach_payment_method"
-            const val DETACH_PAYMENT_METHOD = "detach_payment_method"
-            const val SOURCE_CREATION = "source_creation"
-            const val ADD_SOURCE = "add_source"
-            const val DEFAULT_SOURCE = "default_source"
-            const val DELETE_SOURCE = "delete_source"
-            const val SET_SHIPPING_INFO = "set_shipping_info"
-            const val CONFIRM_PAYMENT_INTENT = "payment_intent_confirmation"
-            const val RETRIEVE_PAYMENT_INTENT = "payment_intent_retrieval"
-            const val CONFIRM_SETUP_INTENT = "setup_intent_confirmation"
-            const val RETRIEVE_SETUP_INTENT = "setup_intent_retrieval"
+            internal const val TOKEN_CREATION = "token_creation"
+            internal const val CREATE_PAYMENT_METHOD = "payment_method_creation"
+            internal const val ATTACH_PAYMENT_METHOD = "attach_payment_method"
+            internal const val DETACH_PAYMENT_METHOD = "detach_payment_method"
+            internal const val SOURCE_CREATION = "source_creation"
+            internal const val ADD_SOURCE = "add_source"
+            internal const val DEFAULT_SOURCE = "default_source"
+            internal const val DELETE_SOURCE = "delete_source"
+            internal const val SET_SHIPPING_INFO = "set_shipping_info"
+            internal const val CONFIRM_PAYMENT_INTENT = "payment_intent_confirmation"
+            internal const val RETRIEVE_PAYMENT_INTENT = "payment_intent_retrieval"
+            internal const val CONFIRM_SETUP_INTENT = "setup_intent_confirmation"
+            internal const val RETRIEVE_SETUP_INTENT = "setup_intent_retrieval"
 
-            const val AUTH_3DS1_SDK = "3ds1_sdk"
+            internal const val AUTH_3DS1_SDK = "3ds1_sdk"
 
-            const val AUTH_3DS2_FINGERPRINT = "3ds2_fingerprint"
-            const val AUTH_3DS2_START = "3ds2_authenticate"
-            const val AUTH_3DS2_FRICTIONLESS = "3ds2_frictionless_flow"
-            const val AUTH_3DS2_CHALLENGE_PRESENTED = "3ds2_challenge_flow_presented"
-            const val AUTH_3DS2_CHALLENGE_CANCELED = "3ds2_challenge_flow_canceled"
-            const val AUTH_3DS2_CHALLENGE_COMPLETED = "3ds2_challenge_flow_completed"
-            const val AUTH_3DS2_CHALLENGE_ERRORED = "3ds2_challenge_flow_errored"
-            const val AUTH_3DS2_CHALLENGE_TIMEDOUT = "3ds2_challenge_flow_timed_out"
-            const val AUTH_3DS2_FALLBACK = "3ds2_fallback"
+            internal const val AUTH_3DS2_FINGERPRINT = "3ds2_fingerprint"
+            internal const val AUTH_3DS2_START = "3ds2_authenticate"
+            internal const val AUTH_3DS2_FRICTIONLESS = "3ds2_frictionless_flow"
+            internal const val AUTH_3DS2_CHALLENGE_PRESENTED = "3ds2_challenge_flow_presented"
+            internal const val AUTH_3DS2_CHALLENGE_CANCELED = "3ds2_challenge_flow_canceled"
+            internal const val AUTH_3DS2_CHALLENGE_COMPLETED = "3ds2_challenge_flow_completed"
+            internal const val AUTH_3DS2_CHALLENGE_ERRORED = "3ds2_challenge_flow_errored"
+            internal const val AUTH_3DS2_CHALLENGE_TIMEDOUT = "3ds2_challenge_flow_timed_out"
+            internal const val AUTH_3DS2_FALLBACK = "3ds2_fallback"
 
-            const val AUTH_REDIRECT = "url_redirect_next_action"
-            const val AUTH_ERROR = "auth_error"
+            internal const val AUTH_REDIRECT = "url_redirect_next_action"
+            internal const val AUTH_ERROR = "auth_error"
         }
     }
 
@@ -346,7 +346,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
             .plus(FIELD_APP_VERSION to info.versionCode)
     }
 
-    companion object {
+    internal companion object {
         internal const val UNKNOWN = "unknown"
         internal const val NO_CONTEXT = "no_context"
 

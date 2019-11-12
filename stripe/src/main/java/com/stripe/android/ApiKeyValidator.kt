@@ -18,11 +18,11 @@ internal class ApiKeyValidator {
         return apiKey
     }
 
-    companion object {
+    internal companion object {
         private val DEFAULT = ApiKeyValidator()
 
         @JvmStatic
-        fun get(): ApiKeyValidator {
+        internal fun get(): ApiKeyValidator {
             return DEFAULT
         }
     }

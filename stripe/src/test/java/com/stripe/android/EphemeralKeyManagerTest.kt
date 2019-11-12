@@ -309,7 +309,7 @@ class EphemeralKeyManagerTest {
             expires, "ephkey_123", false, "customer", "", "")
     }
 
-    companion object {
+    private companion object {
         private const val TEST_SECONDS_BUFFER = 10L
         private const val DEFAULT_EXPIRES = 1501199335L
     }

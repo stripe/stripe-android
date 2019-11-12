@@ -748,7 +748,7 @@ internal class CardMultilineWidgetTest : BaseViewTest<CardInputTestActivity>(
             parentWidget.findViewById(R.id.second_row_layout)
     }
 
-    companion object {
+    private companion object {
         // Every Card made by the CardInputView should have the card widget token.
         private val EXPECTED_LOGGING_ARRAY = arrayOf(CARD_MULTILINE_TOKEN)
     }

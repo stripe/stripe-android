@@ -969,7 +969,7 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
             "acct_abc123", true)
     }
 
-    companion object {
+    private companion object {
         private val FIRST_SAMPLE_KEY_RAW = CustomerFixtures.EPHEMERAL_KEY_FIRST.toString()
         private val SECOND_SAMPLE_KEY_RAW = CustomerFixtures.EPHEMERAL_KEY_SECOND.toString()
 

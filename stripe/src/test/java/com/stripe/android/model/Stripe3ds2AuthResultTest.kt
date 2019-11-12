@@ -153,7 +153,7 @@ class Stripe3ds2AuthResultTest {
         )
     }
 
-    companion object {
+    private companion object {
         private val AUTH_RESULT_JSON = JSONObject(
             """
             {

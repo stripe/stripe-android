@@ -26,7 +26,7 @@ class WeChatTest {
         assertEquals(expected, actual)
     }
 
-    companion object {
+    private companion object {
         private val WE_CHAT_PAY_JSON = JSONObject(
             """
             {

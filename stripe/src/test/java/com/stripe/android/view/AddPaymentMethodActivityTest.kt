@@ -334,7 +334,7 @@ class AddPaymentMethodActivityTest :
         )
     }
 
-    companion object {
+    private companion object {
         private fun createFakeRepository(paymentMethod: PaymentMethod): StripeRepository {
             return object : AbsFakeStripeRepository() {
                 override fun createPaymentMethod(

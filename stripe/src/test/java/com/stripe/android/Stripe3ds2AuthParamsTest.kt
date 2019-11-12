@@ -44,7 +44,7 @@ class Stripe3ds2AuthParamsTest {
             paramsMap[Stripe3ds2AuthParams.FIELD_FALLBACK_RETURN_URL].toString())
     }
 
-    companion object {
+    private companion object {
         private const val RETURN_URL = "stripe://payment-auth-return"
     }
 }

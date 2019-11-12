@@ -29,7 +29,7 @@ internal data class EphemeralKey internal constructor(
     internal val type: String
 ) : StripeModel(), Parcelable {
 
-    companion object {
+    internal companion object {
         private const val FIELD_CREATED = "created"
         private const val FIELD_EXPIRES = "expires"
         private const val FIELD_SECRET = "secret"

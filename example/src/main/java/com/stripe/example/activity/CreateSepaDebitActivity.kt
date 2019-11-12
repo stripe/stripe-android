@@ -59,7 +59,7 @@ class CreateSepaDebitActivity : AppCompatActivity() {
         }
     }
 
-    companion object {
+    private companion object {
         private const val CUSTOMER_NAME = "Jenny Rosen"
         private const val CUSTOMER_EMAIl = "jrosen@example.com"
     }

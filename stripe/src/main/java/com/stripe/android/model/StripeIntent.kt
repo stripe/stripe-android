@@ -70,7 +70,7 @@ interface StripeIntent {
             return code
         }
 
-        companion object {
+        internal companion object {
             internal fun fromCode(code: String?): Status? {
                 return values().firstOrNull { it.code == code }
             }
@@ -90,7 +90,7 @@ interface StripeIntent {
             return code
         }
 
-        companion object {
+        internal companion object {
             internal fun fromCode(code: String?): Usage? {
                 return values().firstOrNull { it.code == code }
             }
@@ -106,7 +106,7 @@ interface StripeIntent {
         val is3ds1: Boolean
             get() = TYPE_3DS1 == type
 
-        companion object {
+        private companion object {
             private const val FIELD_TYPE = "type"
 
             private const val TYPE_3DS2 = "stripe_3ds2_fingerprint"
@@ -125,11 +125,11 @@ interface StripeIntent {
          */
         val returnUrl: String?
     ) {
-        companion object {
+        internal companion object {
             internal const val FIELD_URL = "url"
             internal const val FIELD_RETURN_URL = "return_url"
 
-            @JvmStatic
+            @JvmSynthetic
             internal fun create(redirectToUrlHash: Map<*, *>): RedirectData? {
                 val urlObj = redirectToUrlHash[FIELD_URL]
                 val returnUrlObj = redirectToUrlHash[FIELD_RETURN_URL]

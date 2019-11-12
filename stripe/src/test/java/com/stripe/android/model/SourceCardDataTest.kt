@@ -55,7 +55,7 @@ class SourceCardDataTest {
         assertNull(SourceCardData.asThreeDSecureStatus(""))
     }
 
-    companion object {
+    private companion object {
         private val CARD_DATA =
             SourceCardData.fromJson(SOURCE_CARD_DATA_WITH_APPLE_PAY_JSON)!!
     }

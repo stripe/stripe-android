@@ -214,7 +214,7 @@ open class AddPaymentMethodActivity : StripeActivity() {
             get() = activityRef.get()
     }
 
-    companion object {
-        const val TOKEN_ADD_PAYMENT_METHOD_ACTIVITY: String = "AddPaymentMethodActivity"
+    internal companion object {
+        internal const val TOKEN_ADD_PAYMENT_METHOD_ACTIVITY: String = "AddPaymentMethodActivity"
     }
 }

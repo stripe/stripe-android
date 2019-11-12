@@ -68,7 +68,7 @@ internal class StripeConnection internal constructor(
         conn.disconnect()
     }
 
-    companion object {
+    private companion object {
         private val CHARSET = StandardCharsets.UTF_8.name()
     }
 }

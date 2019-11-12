@@ -11,9 +11,8 @@ abstract class StripeModel {
 
     abstract override fun equals(other: Any?): Boolean
 
-    companion object {
-        @JvmStatic
-        fun jsonArrayToList(jsonArray: JSONArray?): List<String> {
+    internal companion object {
+        internal fun jsonArrayToList(jsonArray: JSONArray?): List<String> {
             return jsonArray?.let {
                 (0 until jsonArray.length()).map { jsonArray.getString(it) }
             } ?: emptyList()

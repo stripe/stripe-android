@@ -177,7 +177,7 @@ internal class PaymentMethodsAdapter @JvmOverloads internal constructor(
         fun onClick(paymentMethod: PaymentMethod)
     }
 
-    companion object {
+    private companion object {
         private const val TYPE_CARD = 1
         private const val TYPE_ADD_CARD = 2
         private const val TYPE_ADD_FPX = 3

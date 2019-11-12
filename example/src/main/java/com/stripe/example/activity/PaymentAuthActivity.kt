@@ -265,12 +265,11 @@ class PaymentAuthActivity : AppCompatActivity() {
         }
     }
 
-    companion object {
+    private companion object {
 
         /**
          * See https://stripe.com/docs/payments/3d-secure#three-ds-cards for more options.
          */
-
         private fun create3ds2ConfirmParams(
             paymentIntentClientSecret: String
         ): ConfirmPaymentIntentParams {

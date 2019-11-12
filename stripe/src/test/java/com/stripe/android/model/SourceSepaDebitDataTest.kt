@@ -38,7 +38,7 @@ class SourceSepaDebitDataTest {
         )
     }
 
-    companion object {
+    private companion object {
         private val EXAMPLE_SEPA_JSON_DATA = JSONObject(
             """
             {

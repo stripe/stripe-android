@@ -723,27 +723,23 @@ class SourceParamsTest {
         return owner["address"] as Map<String, Any>
     }
 
-    companion object {
-
-        private val FULL_FIELDS_VISA_CARD: Card
+    private companion object {
 
         private val METADATA = mapOf(
             "color" to "blue",
             "animal" to "dog"
         )
 
-        init {
-            FULL_FIELDS_VISA_CARD = Card.Builder(VALID_VISA_NO_SPACES, 12, 2050, "123")
-                .name("Captain Cardholder")
-                .addressLine1("1 ABC Street")
-                .addressLine2("Apt. 123")
-                .addressCity("San Francisco")
-                .addressState("CA")
-                .addressZip("94107")
-                .addressCountry("US")
-                .currency("usd")
-                .metadata(METADATA)
-                .build()
-        }
+        private val FULL_FIELDS_VISA_CARD: Card = Card.Builder(VALID_VISA_NO_SPACES, 12, 2050, "123")
+            .name("Captain Cardholder")
+            .addressLine1("1 ABC Street")
+            .addressLine2("Apt. 123")
+            .addressCity("San Francisco")
+            .addressState("CA")
+            .addressZip("94107")
+            .addressCountry("US")
+            .currency("usd")
+            .metadata(METADATA)
+            .build()
     }
 }

@@ -35,9 +35,8 @@ internal class UidParamsFactory constructor(
         }
     }
 
-    companion object {
-        @JvmStatic
-        fun create(context: Context): UidParamsFactory {
+    internal companion object {
+        internal fun create(context: Context): UidParamsFactory {
             return UidParamsFactory(context.packageName, UidSupplier(context))
         }
 

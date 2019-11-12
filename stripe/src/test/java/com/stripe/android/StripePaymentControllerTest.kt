@@ -571,7 +571,7 @@ class StripePaymentControllerTest {
         }
     }
 
-    companion object {
+    private companion object {
         private const val MESSAGE_VERSION = Stripe3ds2Fixtures.MESSAGE_VERSION
         private val REQUEST_OPTIONS =
             ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)

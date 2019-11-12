@@ -949,8 +949,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
-    companion object {
-
+    internal companion object {
         private const val DNS_CACHE_TTL_PROPERTY_NAME = "networkaddress.cache.ttl"
 
         private fun createVerificationParam(

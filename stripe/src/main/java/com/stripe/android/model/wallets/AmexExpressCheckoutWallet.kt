@@ -13,7 +13,7 @@ data class AmexExpressCheckoutWallet internal constructor(
         }
     }
 
-    companion object {
+    internal companion object {
         internal fun fromJson(): Builder {
             return Builder()
         }

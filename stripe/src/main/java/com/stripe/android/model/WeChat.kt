@@ -16,7 +16,7 @@ data class WeChat internal constructor(
     val timestamp: String?,
     val qrCodeUrl: String? = null
 ) : StripeModel() {
-    companion object {
+    internal companion object {
         private const val FIELD_APPID = "android_appId"
         private const val FIELD_NONCE = "android_nonceStr"
         private const val FIELD_PACKAGE = "android_package"

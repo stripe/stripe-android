@@ -26,12 +26,12 @@ internal class Stripe3ds2CompletionStarter(
     @Retention(AnnotationRetention.SOURCE)
     internal annotation class ChallengeFlowOutcome {
         companion object {
-            const val COMPLETE_SUCCESSFUL = 0
-            const val COMPLETE_UNSUCCESSFUL = 1
-            const val CANCEL = 2
-            const val TIMEOUT = 3
-            const val PROTOCOL_ERROR = 4
-            const val RUNTIME_ERROR = 5
+            internal const val COMPLETE_SUCCESSFUL = 0
+            internal const val COMPLETE_UNSUCCESSFUL = 1
+            internal const val CANCEL = 2
+            internal const val TIMEOUT = 3
+            internal const val PROTOCOL_ERROR = 4
+            internal const val RUNTIME_ERROR = 5
         }
     }
 

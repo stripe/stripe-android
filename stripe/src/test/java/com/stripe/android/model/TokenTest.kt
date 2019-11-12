@@ -63,7 +63,7 @@ class TokenTest {
         assertNull(token)
     }
 
-    companion object {
+    private companion object {
         private val CARD = Card.Builder(null, 8, 2017, null)
             .id("card_189fi32eZvKYlo2CHK8NPRME")
             .brand(Card.CardBrand.VISA)

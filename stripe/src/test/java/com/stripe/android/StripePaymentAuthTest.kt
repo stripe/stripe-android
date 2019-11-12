@@ -147,7 +147,7 @@ class StripePaymentAuthTest {
         )
     }
 
-    companion object {
+    private companion object {
         private val REQUEST_OPTIONS =
             ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
     }

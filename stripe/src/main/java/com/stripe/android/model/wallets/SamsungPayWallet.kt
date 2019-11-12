@@ -12,7 +12,7 @@ data class SamsungPayWallet internal constructor(
         }
     }
 
-    companion object {
+    internal companion object {
         internal fun fromJson(): Builder {
             return Builder()
         }

@@ -137,8 +137,8 @@ class PaymentMethodTest {
         )
     }
 
-    companion object {
-        val PM_CARD_JSON: JSONObject = JSONObject(
+    internal companion object {
+        internal val PM_CARD_JSON: JSONObject = JSONObject(
             """
             {
                 "id": "pm_123456789",
