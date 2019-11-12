@@ -35,7 +35,7 @@ internal interface AuthActivityStarter<StartDataType> {
             }
         }
 
-        companion object {
+        internal companion object {
             @JvmSynthetic
             internal fun create(fragment: Fragment): Host {
                 return Host(fragment.requireActivity(), fragment)

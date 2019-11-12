@@ -43,7 +43,7 @@ interface StripeIntent {
             return code
         }
 
-        companion object {
+        internal companion object {
             internal fun fromCode(code: String?): NextActionType? {
                 return values().firstOrNull { it.code == code }
             }

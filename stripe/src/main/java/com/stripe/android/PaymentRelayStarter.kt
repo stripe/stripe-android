@@ -36,7 +36,7 @@ internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter
         val stripeIntent: StripeIntent? = null,
         val exception: Exception? = null
     ) {
-        companion object {
+        internal companion object {
             @JvmSynthetic
             internal fun create(stripeIntent: StripeIntent): Data {
                 return Data(stripeIntent = stripeIntent)

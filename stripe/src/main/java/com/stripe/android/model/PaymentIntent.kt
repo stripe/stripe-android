@@ -243,14 +243,14 @@ data class PaymentIntent private constructor(
             InvalidRequestError("invalid_request_error"),
             RateLimitError("rate_limit_error");
 
-            companion object {
+            internal companion object {
                 internal fun fromCode(typeCode: String?): Type? {
                     return values().firstOrNull { it.code == typeCode }
                 }
             }
         }
 
-        companion object {
+        internal companion object {
             private const val FIELD_CHARGE = "charge"
             private const val FIELD_CODE = "code"
             private const val FIELD_DECLINE_CODE = "decline_code"
@@ -290,7 +290,7 @@ data class PaymentIntent private constructor(
         VoidInvoice("void_invoice"),
         Automatic("automatic");
 
-        companion object {
+        internal companion object {
             internal fun fromCode(code: String?): CancellationReason? {
                 return values().firstOrNull { it.code == code }
             }

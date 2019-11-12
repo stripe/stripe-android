@@ -234,7 +234,7 @@ class CardNumberEditText @JvmOverloads constructor(
         fun onCardBrandChanged(@Card.CardBrand brand: String)
     }
 
-    companion object {
+    internal companion object {
         private const val MAX_LENGTH_COMMON = 19
         // Note that AmEx and Diners Club have the same length
         // because Diners Club has one more space, but one less digit.
