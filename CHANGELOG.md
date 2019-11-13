@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 12.4.0 - unreleased
+## 12.4.0 - 2019-11-13
 * [#1792](https://github.com/stripe/stripe-android/pull/1792) Remove default selection of a Payment Method from `PaymentMethodsActivity`
 * [#1797](https://github.com/stripe/stripe-android/pull/1797) Document `StripeDefaultTheme` style
 * [#1799](https://github.com/stripe/stripe-android/pull/1799) Document `Stripe3DS2Theme` and related styles
