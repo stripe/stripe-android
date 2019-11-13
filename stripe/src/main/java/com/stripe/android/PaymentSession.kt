@@ -174,12 +174,10 @@ class PaymentSession @VisibleForTesting internal constructor(
 
         paymentSessionListener = listener
 
-        if (savedInstanceState != null) {
-            val data: PaymentSessionData? =
-                savedInstanceState.getParcelable(STATE_PAYMENT_SESSION_DATA)
-            if (data != null) {
-                paymentSessionData = data
-            }
+        val data: PaymentSessionData? =
+            savedInstanceState?.getParcelable(STATE_PAYMENT_SESSION_DATA)
+        if (data != null) {
+            paymentSessionData = data
         }
         this.config = paymentSessionConfig
 

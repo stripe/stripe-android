@@ -58,7 +58,7 @@ class PaymentSessionActivity : AppCompatActivity() {
         errorDialogHandler = ErrorDialogHandler(this)
 
         // CustomerSession only needs to be initialized once per app.
-        paymentSession = createPaymentSession(createCustomerSession())
+        paymentSession = createPaymentSession(savedInstanceState)
 
         val localBroadcastManager = LocalBroadcastManager.getInstance(this)
         broadcastReceiver = object : BroadcastReceiver() {
@@ -101,11 +101,12 @@ class PaymentSessionActivity : AppCompatActivity() {
         return CustomerSession.getInstance()
     }
 
-    private fun createPaymentSession(customerSession: CustomerSession): PaymentSession {
+    private fun createPaymentSession(savedInstanceState: Bundle?): PaymentSession {
+        val customerSession = createCustomerSession()
         val paymentSession = PaymentSession(this)
         val paymentSessionInitialized = paymentSession.init(
-            PaymentSessionListenerImpl(this, customerSession),
-            PaymentSessionConfig.Builder()
+            listener = PaymentSessionListenerImpl(this, customerSession),
+            paymentSessionConfig = PaymentSessionConfig.Builder()
                 .setAddPaymentMethodFooter(R.layout.add_payment_method_footer)
                 .setPrepopulatedShippingInfo(EXAMPLE_SHIPPING_INFO)
                 .setHiddenShippingInfoFields(
@@ -116,7 +117,8 @@ class PaymentSessionActivity : AppCompatActivity() {
                 // Optionally specify the `PaymentMethod.Type` values to use.
                 // Defaults to `PaymentMethod.Type.Card`
                 .setPaymentMethodTypes(listOf(PaymentMethod.Type.Card))
-                .build()
+                .build(),
+            savedInstanceState = savedInstanceState
         )
         if (paymentSessionInitialized) {
             paymentSession.setCartTotal(2000L)
@@ -184,6 +186,11 @@ class PaymentSessionActivity : AppCompatActivity() {
         super.onDestroy()
         paymentSession.onDestroy()
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        paymentSession.savePaymentSessionInstanceState(outState)
     }
 
     private fun onPaymentSessionDataChanged(
