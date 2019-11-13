@@ -161,10 +161,10 @@ internal data class Stripe3ds2AuthResult internal constructor(
             @JvmSynthetic
             @Throws(JSONException::class)
             internal fun fromJson(errorJson: JSONObject?): ThreeDS2Error? {
-                if (errorJson == null) {
-                    return null
+                return if (errorJson == null) {
+                    null
                 } else {
-                    return ThreeDS2Error(
+                    ThreeDS2Error(
                         threeDSServerTransId = errorJson.getString(FIELD_THREE_DS_SERVER_TRANS_ID),
                         acsTransId = optString(errorJson, FIELD_ACS_TRANS_ID),
                         dsTransId = optString(errorJson, FIELD_DS_TRANS_ID),
