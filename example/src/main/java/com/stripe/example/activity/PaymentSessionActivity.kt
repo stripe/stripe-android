@@ -58,8 +58,7 @@ class PaymentSessionActivity : AppCompatActivity() {
         errorDialogHandler = ErrorDialogHandler(this)
 
         // CustomerSession only needs to be initialized once per app.
-        val customerSession = createCustomerSession()
-        paymentSession = createPaymentSession(customerSession)
+        paymentSession = createPaymentSession(createCustomerSession())
 
         val localBroadcastManager = LocalBroadcastManager.getInstance(this)
         broadcastReceiver = object : BroadcastReceiver() {
@@ -117,7 +116,8 @@ class PaymentSessionActivity : AppCompatActivity() {
                 // Optionally specify the `PaymentMethod.Type` values to use.
                 // Defaults to `PaymentMethod.Type.Card`
                 .setPaymentMethodTypes(listOf(PaymentMethod.Type.Card))
-                .build())
+                .build()
+        )
         if (paymentSessionInitialized) {
             paymentSession.setCartTotal(2000L)
         }

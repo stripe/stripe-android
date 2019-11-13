@@ -11,6 +11,7 @@ import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.model.Customer
 import com.stripe.android.model.CustomerFixtures
 import com.stripe.android.model.PaymentMethod
@@ -38,7 +39,6 @@ import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
-import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
@@ -111,11 +111,11 @@ class PaymentSessionTest {
 
         val paymentSession = PaymentSession(activity)
         paymentSession.init(paymentSessionListener, PaymentSessionConfig.Builder().build())
-        verify<PaymentSession.PaymentSessionListener>(paymentSessionListener)
+        verify(paymentSessionListener)
             .onCommunicatingStateChanged(eq(true))
-        verify<PaymentSession.PaymentSessionListener>(paymentSessionListener)
+        verify(paymentSessionListener)
             .onPaymentSessionDataChanged(any())
-        verify<PaymentSession.PaymentSessionListener>(paymentSessionListener)
+        verify(paymentSessionListener)
             .onCommunicatingStateChanged(eq(false))
     }
 
@@ -129,7 +129,7 @@ class PaymentSessionTest {
         paymentSession.init(paymentSessionListener, PaymentSessionConfig.Builder().build())
         paymentSession.setCartTotal(500L)
 
-        verify<PaymentSession.PaymentSessionListener>(paymentSessionListener)
+        verify(paymentSessionListener)
             .onPaymentSessionDataChanged(paymentSessionDataArgumentCaptor.capture())
         val data = paymentSessionDataArgumentCaptor.firstValue
         assertNotNull(data)
@@ -144,7 +144,7 @@ class PaymentSessionTest {
         paymentSession.init(paymentSessionListener, PaymentSessionConfig.Builder().build())
 
         // We have already tested the functionality up to here.
-        reset<PaymentSession.PaymentSessionListener>(paymentSessionListener)
+        reset(paymentSessionListener)
 
         val result = PaymentMethodsActivityStarter.Result(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         val handled = paymentSession.handlePaymentData(
@@ -152,7 +152,7 @@ class PaymentSessionTest {
             Intent().putExtras(result.toBundle()))
         assertTrue(handled)
 
-        verify<PaymentSession.PaymentSessionListener>(paymentSessionListener)
+        verify(paymentSessionListener)
             .onPaymentSessionDataChanged(paymentSessionDataArgumentCaptor.capture())
         val data = paymentSessionDataArgumentCaptor.firstValue
         assertNotNull(data)
@@ -280,7 +280,7 @@ class PaymentSessionTest {
         val loggingTokens = customerSession.productUsageTokens
         assertEquals(2, loggingTokens.size)
 
-        reset<PaymentSession.PaymentSessionListener>(paymentSessionListener)
+        reset(paymentSessionListener)
 
         paymentSession.onCompleted()
         assertTrue(customerSession.productUsageTokens.isEmpty())
@@ -297,7 +297,7 @@ class PaymentSessionTest {
 
         paymentSession.setCartTotal(300L)
 
-        verify<PaymentSession.PaymentSessionListener>(paymentSessionListener)
+        verify(paymentSessionListener)
             .onPaymentSessionDataChanged(paymentSessionDataArgumentCaptor.capture())
         val bundle = Bundle()
         paymentSession.savePaymentSessionInstanceState(bundle)
@@ -307,7 +307,7 @@ class PaymentSessionTest {
             mock(PaymentSession.PaymentSessionListener::class.java)
 
         paymentSession.init(secondListener, PaymentSessionConfig.Builder().build(), bundle)
-        verify<PaymentSession.PaymentSessionListener>(secondListener)
+        verify(secondListener)
             .onPaymentSessionDataChanged(paymentSessionDataArgumentCaptor.capture())
 
         val secondPaymentSessionData = paymentSessionDataArgumentCaptor.firstValue
@@ -321,15 +321,23 @@ class PaymentSessionTest {
     fun handlePaymentData_withInvalidRequestCode_aborts() {
         val paymentSession = createPaymentSession()
         assertFalse(paymentSession.handlePaymentData(-1, RESULT_CANCELED, Intent()))
-        verify<CustomerSession>(customerSession, never()).retrieveCurrentCustomer(any())
+        verify(customerSession, never()).retrieveCurrentCustomer(any())
     }
 
     @Test
-    fun handlePaymentData_withValidRequestCodeAndCanceledResult_retrievesCustomer() {
+    fun handlePaymentData_withPaymentMethodsActivityRequestCodeAndCanceledResult_doesNotRetrieveCustomer() {
         val paymentSession = createPaymentSession()
         assertFalse(paymentSession.handlePaymentData(PaymentMethodsActivityStarter.REQUEST_CODE,
             RESULT_CANCELED, Intent()))
-        verify<CustomerSession>(customerSession).retrieveCurrentCustomer(any())
+        verify(customerSession, never()).retrieveCurrentCustomer(any())
+    }
+
+    @Test
+    fun handlePaymentData_withPaymentFlowActivityRequestCodeAndCanceledResult_retrievesCustomer() {
+        val paymentSession = createPaymentSession()
+        assertFalse(paymentSession.handlePaymentData(PaymentFlowActivityStarter.REQUEST_CODE,
+            RESULT_CANCELED, Intent()))
+        verify(customerSession).retrieveCurrentCustomer(any())
     }
 
     private fun createPaymentSession(): PaymentSession {
@@ -338,8 +346,8 @@ class PaymentSessionTest {
             customerSession,
             paymentMethodsActivityStarter,
             paymentFlowActivityStarter,
-            paymentSessionData,
-            paymentSessionPrefs
+            paymentSessionPrefs,
+            paymentSessionData
         )
     }
 

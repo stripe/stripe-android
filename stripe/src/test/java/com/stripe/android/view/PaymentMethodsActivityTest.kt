@@ -1,5 +1,6 @@
 package com.stripe.android.view
 
+import android.app.Activity.RESULT_CANCELED
 import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
@@ -188,24 +189,21 @@ class PaymentMethodsActivityTest : BaseViewTest<PaymentMethodsActivity>(PaymentM
         listenerArgumentCaptor.firstValue
             .onPaymentMethodsRetrieved(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
         val paymentMethodsAdapter =
-            recyclerView.adapter as PaymentMethodsAdapter?
-        assertNotNull(paymentMethodsAdapter)
+            recyclerView.adapter as PaymentMethodsAdapter
         paymentMethodsAdapter.selectedPaymentMethodId =
             PaymentMethodFixtures.CARD_PAYMENT_METHODS[0].id
 
-        paymentMethodsActivity.setSelectionAndFinish(
-            PaymentMethodFixtures.CARD_PAYMENT_METHODS[0]
-        )
+        paymentMethodsActivity.onBackPressed()
 
         // Now it should be gone.
         assertEquals(View.GONE, progressBar.visibility)
         assertTrue(paymentMethodsActivity.isFinishing)
-        assertEquals(RESULT_OK, shadowActivity.resultCode)
-        val intent = shadowActivity.resultIntent
-        assertNotNull(intent)
+
+        // `resultCode` is `RESULT_CANCELED` because back was pressed
+        assertEquals(RESULT_CANCELED, shadowActivity.resultCode)
 
         val result =
-            PaymentMethodsActivityStarter.Result.fromIntent(intent)
+            PaymentMethodsActivityStarter.Result.fromIntent(shadowActivity.resultIntent)
         assertEquals(PaymentMethodFixtures.CARD_PAYMENT_METHODS[0], result?.paymentMethod)
     }
 }
