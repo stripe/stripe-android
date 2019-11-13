@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
-import android.text.InputFilter
 import android.text.Layout
 import android.text.TextWatcher
 import android.util.AttributeSet
@@ -47,7 +46,7 @@ class CardInputWidget @JvmOverloads constructor(
     private val frameLayout: FrameLayout
 
     private val cardNumberEditText: CardNumberEditText
-    private val cvcNumberEditText: StripeEditText
+    private val cvcNumberEditText: CvcEditText
     private val expiryDateEditText: ExpiryDateEditText
 
     private var cardInputListener: CardInputListener? = null
@@ -145,7 +144,7 @@ class CardInputWidget @JvmOverloads constructor(
         cardIconImageView = findViewById(R.id.iv_card_icon)
         cardNumberEditText = findViewById(R.id.et_card_number)
         expiryDateEditText = findViewById(R.id.et_expiry_date)
-        cvcNumberEditText = findViewById(R.id.et_cvc_number)
+        cvcNumberEditText = findViewById(R.id.et_cvc)
         frameLayout = findViewById(R.id.frame_container)
 
         initView(attrs)
@@ -543,7 +542,7 @@ class CardInputWidget @JvmOverloads constructor(
         cardNumberEditText.brandChangeCallback = { brand ->
             isAmEx = CardBrand.AMERICAN_EXPRESS == brand
             updateIcon(brand)
-            updateCvc(brand)
+            cvcNumberEditText.updateBrand(brand)
         }
 
         expiryDateEditText.completionCallback = {
@@ -765,16 +764,6 @@ class CardInputWidget @JvmOverloads constructor(
         }
     }
 
-    private fun updateCvc(@Card.CardBrand brand: String) {
-        if (CardBrand.AMERICAN_EXPRESS == brand) {
-            cvcNumberEditText.filters = INPUT_FILTER_AMEX
-            cvcNumberEditText.setHint(R.string.cvc_amex_hint)
-        } else {
-            cvcNumberEditText.filters = INPUT_FILTER_COMMON
-            cvcNumberEditText.setHint(R.string.cvc_number_hint)
-        }
-    }
-
     private fun updateIcon(@Card.CardBrand brand: String) {
         if (CardBrand.UNKNOWN == brand) {
             val icon = ContextCompat.getDrawable(context, R.drawable.ic_unknown)
@@ -894,12 +883,6 @@ class CardInputWidget @JvmOverloads constructor(
         private val DEFAULT_READER_ID = R.id.stripe_default_reader_id
 
         private const val ANIMATION_LENGTH = 150L
-
-        private val INPUT_FILTER_AMEX: Array<InputFilter> =
-            arrayOf(InputFilter.LengthFilter(Card.CVC_LENGTH_AMERICAN_EXPRESS))
-
-        private val INPUT_FILTER_COMMON: Array<InputFilter> =
-            arrayOf(InputFilter.LengthFilter(Card.CVC_LENGTH_COMMON))
 
         /**
          * Determines whether or not the icon should show the card brand instead of the

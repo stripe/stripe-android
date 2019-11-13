@@ -82,11 +82,11 @@
             android:hint="@string/expiry_date_hint"
             tools:ignore="UnusedAttribute"
             tools:importantForAccessibility="yes"
-            android:accessibilityTraversalBefore="@+id/et_cvc_number"
+            android:accessibilityTraversalBefore="@+id/et_cvc"
             android:accessibilityTraversalAfter="@+id/et_card_number"
-            android:nextFocusRight="@+id/et_cvc_number"
-            android:nextFocusForward="@+id/et_cvc_number"
-            android:nextFocusDown="@+id/et_cvc_number"
+            android:nextFocusRight="@+id/et_cvc"
+            android:nextFocusForward="@+id/et_cvc"
+            android:nextFocusDown="@+id/et_cvc"
             android:nextFocusLeft="@id/et_card_number"
             android:nextFocusUp="@id/et_card_number"
             android:imeOptions="actionNext"
@@ -99,8 +99,8 @@
             android:layout_gravity="start"
             />
 
-        <com.stripe.android.view.StripeEditText
-            android:id="@+id/et_cvc_number"
+        <com.stripe.android.view.CvcEditText
+            android:id="@+id/et_cvc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:ignore="UnusedAttribute"
@@ -109,10 +109,7 @@
             android:nextFocusLeft="@id/et_expiry_date"
             android:nextFocusUp="@id/et_expiry_date"
             android:background="@android:color/transparent"
-            android:hint="@string/cvc_number_hint"
             android:imeOptions="actionDone"
-            android:inputType="numberPassword"
-            android:maxLength="4"
             android:focusable="true"
             android:focusableInTouchMode="true"
             android:layout_marginStart="@dimen/stripe_card_cvc_initial_margin"

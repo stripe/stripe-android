@@ -49,13 +49,13 @@ internal open class AddPaymentMethodCardView private constructor(
                 .getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         )
 
-        cardMultilineWidget.findViewById<TextView>(R.id.et_add_source_card_number_ml)
+        cardMultilineWidget.findViewById<TextView>(R.id.et_card_number)
             .setOnEditorActionListener(listener)
-        cardMultilineWidget.findViewById<TextView>(R.id.et_add_source_expiry_ml)
+        cardMultilineWidget.findViewById<TextView>(R.id.et_expiry)
             .setOnEditorActionListener(listener)
-        cardMultilineWidget.findViewById<TextView>(R.id.et_add_source_cvc_ml)
+        cardMultilineWidget.findViewById<TextView>(R.id.et_cvc)
             .setOnEditorActionListener(listener)
-        cardMultilineWidget.findViewById<TextView>(R.id.et_add_source_postal_ml)
+        cardMultilineWidget.findViewById<TextView>(R.id.et_postal_code)
             .setOnEditorActionListener(listener)
     }
 

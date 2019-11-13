@@ -136,10 +136,10 @@ internal class CardMultilineWidgetTest : BaseViewTest<CardInputTestActivity>(
     @Test
     fun onCreate_setsCorrectHintForExpiry() {
         val shortExpiryContainer = cardMultilineWidget
-            .findViewById<TextInputLayout>(R.id.tl_add_source_expiry_ml)
+            .findViewById<TextInputLayout>(R.id.tl_expiry)
 
         val longExpiryContainer = noZipCardMultilineWidget
-            .findViewById<TextInputLayout>(R.id.tl_add_source_expiry_ml)
+            .findViewById<TextInputLayout>(R.id.tl_expiry)
 
         val shortExpiryHint = cardMultilineWidget
             .resources.getString(R.string.expiry_label_short)
@@ -178,22 +178,22 @@ internal class CardMultilineWidgetTest : BaseViewTest<CardInputTestActivity>(
 
     @Test
     fun isPostalCodeMaximalLength_whenZipEnteredAndIsMaximalLength_returnsTrue() {
-        assertTrue(CardMultilineWidget.isPostalCodeMaximalLength(true, "12345"))
+        assertTrue(CardMultilineWidget.isPostalCodeMaximalLength("12345"))
     }
 
     @Test
     fun isPostalCodeMaximalLength_whenZipEnteredAndIsNotMaximalLength_returnsFalse() {
-        assertFalse(CardMultilineWidget.isPostalCodeMaximalLength(true, "123"))
+        assertFalse(CardMultilineWidget.isPostalCodeMaximalLength("123"))
     }
 
     @Test
     fun isPostalCodeMaximalLength_whenZipEnteredAndIsEmpty_returnsFalse() {
-        assertFalse(CardMultilineWidget.isPostalCodeMaximalLength(true, ""))
+        assertFalse(CardMultilineWidget.isPostalCodeMaximalLength(""))
     }
 
     @Test
     fun isPostalCodeMaximalLength_whenZipEnteredAndIsNull_returnsFalse() {
-        assertFalse(CardMultilineWidget.isPostalCodeMaximalLength(true, null))
+        assertFalse(CardMultilineWidget.isPostalCodeMaximalLength(null))
     }
 
     /**
@@ -202,7 +202,7 @@ internal class CardMultilineWidgetTest : BaseViewTest<CardInputTestActivity>(
      */
     @Test
     fun isPostalCodeMaximalLength_whenNotZip_returnsFalse() {
-        assertFalse(CardMultilineWidget.isPostalCodeMaximalLength(false, "12345"))
+        assertFalse(CardMultilineWidget.isPostalCodeMaximalLength("12345", 10))
     }
 
     @Test
@@ -729,21 +729,21 @@ internal class CardMultilineWidgetTest : BaseViewTest<CardInputTestActivity>(
 
     internal class WidgetControlGroup(parentWidget: CardMultilineWidget) {
         val cardNumberEditText: CardNumberEditText =
-            parentWidget.findViewById(R.id.et_add_source_card_number_ml)
+            parentWidget.findViewById(R.id.et_card_number)
         val cardInputLayout: TextInputLayout =
-            parentWidget.findViewById(R.id.tl_add_source_card_number_ml)
+            parentWidget.findViewById(R.id.tl_card_number)
         val expiryDateEditText: ExpiryDateEditText =
-            parentWidget.findViewById(R.id.et_add_source_expiry_ml)
+            parentWidget.findViewById(R.id.et_expiry)
         val expiryInputLayout: TextInputLayout =
-            parentWidget.findViewById(R.id.tl_add_source_expiry_ml)
+            parentWidget.findViewById(R.id.tl_expiry)
         val cvcEditText: StripeEditText =
-            parentWidget.findViewById(R.id.et_add_source_cvc_ml)
+            parentWidget.findViewById(R.id.et_cvc)
         val cvcInputLayout: TextInputLayout =
-            parentWidget.findViewById(R.id.tl_add_source_cvc_ml)
+            parentWidget.findViewById(R.id.tl_cvc)
         val postalCodeEditText: StripeEditText =
-            parentWidget.findViewById(R.id.et_add_source_postal_ml)
+            parentWidget.findViewById(R.id.et_postal_code)
         val postalCodeInputLayout: TextInputLayout =
-            parentWidget.findViewById(R.id.tl_add_source_postal_ml)
+            parentWidget.findViewById(R.id.tl_postal_code)
         val secondRowLayout: LinearLayout =
             parentWidget.findViewById(R.id.second_row_layout)
     }

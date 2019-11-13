@@ -51,12 +51,12 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
         val paymentMethodCard =
             card_multiline_widget.paymentMethodCard ?: return
 
-        val cardSourceParams =
+        val createPaymentMethodParams =
             PaymentMethodCreateParams.create(paymentMethodCard, BILLING_DETAILS)
         // Note: using this style of Observable creation results in us having a method that
         // will not be called until we subscribe to it.
         val createPaymentMethodObservable = Observable.fromCallable {
-            stripe.createPaymentMethodSynchronous(cardSourceParams)
+            stripe.createPaymentMethodSynchronous(createPaymentMethodParams)
         }
 
         compositeDisposable.add(createPaymentMethodObservable

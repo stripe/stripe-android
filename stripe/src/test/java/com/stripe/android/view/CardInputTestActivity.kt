@@ -23,7 +23,7 @@ internal class CardInputTestActivity : AppCompatActivity() {
         get() = cardInputWidget.findViewById(R.id.et_expiry_date)
 
     val cvcEditText: StripeEditText
-        get() = cardInputWidget.findViewById(R.id.et_cvc_number)
+        get() = cardInputWidget.findViewById(R.id.et_cvc)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
