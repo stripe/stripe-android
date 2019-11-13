@@ -644,7 +644,7 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
         createActivity(PaymentFlowActivityStarter.Args.Builder()
             .setPaymentSessionConfig(PaymentSessionConfig.Builder()
                 .build())
-            .setPaymentSessionData(PaymentSessionData())
+            .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
             .build())
 
         assertTrue(customerSession.productUsageTokens.contains("ShippingInfoScreen"))
@@ -659,7 +659,7 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
             .setPaymentSessionConfig(PaymentSessionConfig.Builder()
                 .setShippingInfoRequired(false)
                 .build())
-            .setPaymentSessionData(PaymentSessionData())
+            .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
             .build())
 
         assertTrue(customerSession.productUsageTokens.contains("ShippingMethodScreen"))

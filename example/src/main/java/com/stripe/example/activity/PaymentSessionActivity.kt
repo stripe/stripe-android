@@ -57,7 +57,6 @@ class PaymentSessionActivity : AppCompatActivity() {
         progress_bar.visibility = View.VISIBLE
         errorDialogHandler = ErrorDialogHandler(this)
 
-        // CustomerSession only needs to be initialized once per app.
         paymentSession = createPaymentSession(savedInstanceState)
 
         val localBroadcastManager = LocalBroadcastManager.getInstance(this)
@@ -101,8 +100,13 @@ class PaymentSessionActivity : AppCompatActivity() {
         return CustomerSession.getInstance()
     }
 
-    private fun createPaymentSession(savedInstanceState: Bundle?): PaymentSession {
+    private fun createPaymentSession(
+        savedInstanceState: Bundle?,
+        shouldPrefetchCustomer: Boolean = true
+    ): PaymentSession {
+        // CustomerSession only needs to be initialized once per app.
         val customerSession = createCustomerSession()
+
         val paymentSession = PaymentSession(this)
         val paymentSessionInitialized = paymentSession.init(
             listener = PaymentSessionListenerImpl(this, customerSession),
@@ -118,7 +122,8 @@ class PaymentSessionActivity : AppCompatActivity() {
                 // Defaults to `PaymentMethod.Type.Card`
                 .setPaymentMethodTypes(listOf(PaymentMethod.Type.Card))
                 .build(),
-            savedInstanceState = savedInstanceState
+            savedInstanceState = savedInstanceState,
+            shouldPrefetchCustomer = shouldPrefetchCustomer
         )
         if (paymentSessionInitialized) {
             paymentSession.setCartTotal(2000L)
@@ -204,10 +209,14 @@ class PaymentSessionActivity : AppCompatActivity() {
         )
     }
 
-    private fun onCustomerRetrieved() {
+    private fun enableUi() {
         progress_bar.visibility = View.INVISIBLE
         btn_select_payment_method.isEnabled = true
         btn_start_payment_flow.isEnabled = true
+    }
+
+    private fun onCustomerRetrieved() {
+        enableUi()
 
         paymentSessionData?.let { paymentSessionData ->
             tv_ready_to_charge.setCompoundDrawablesRelativeWithIntrinsicBounds(

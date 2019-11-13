@@ -10,7 +10,7 @@ import android.view.inputmethod.InputMethodManager
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.viewpager.widget.ViewPager
 import com.stripe.android.CustomerSession
-import com.stripe.android.PaymentSession.Companion.STATE_PAYMENT_SESSION_DATA
+import com.stripe.android.PaymentSession.Companion.EXTRA_PAYMENT_SESSION_DATA
 import com.stripe.android.PaymentSession.Companion.TOKEN_PAYMENT_SESSION
 import com.stripe.android.PaymentSessionData
 import com.stripe.android.R
@@ -30,7 +30,6 @@ class PaymentFlowActivity : StripeActivity() {
     private lateinit var shippingInfoSubmittedBroadcastReceiver: BroadcastReceiver
     private lateinit var paymentFlowPagerAdapter: PaymentFlowPagerAdapter
     private lateinit var paymentSessionData: PaymentSessionData
-    private var shippingInformationSubmitted: ShippingInformation? = null
     private val validShippingMethods: MutableList<ShippingMethod> = mutableListOf()
     private var defaultShippingMethod: ShippingMethod? = null
 
@@ -44,13 +43,17 @@ class PaymentFlowActivity : StripeActivity() {
         customerSession.addProductUsageTokenIfValid(TOKEN_PAYMENT_FLOW_ACTIVITY)
         viewStub.layoutResource = R.layout.activity_shipping_flow
         viewStub.inflate()
-        paymentSessionData = requireNotNull(args.paymentSessionData) {
-            "PaymentFlowActivity launched without PaymentSessionData"
-        }
+
+        paymentSessionData = savedInstanceState?.getParcelable(STATE_PAYMENT_SESSION_DATA)
+            ?: requireNotNull(args.paymentSessionData) {
+                "PaymentFlowActivity launched without PaymentSessionData"
+            }
+
         val paymentSessionConfig = args.paymentSessionConfig
 
-        val shippingInformation = savedInstanceState?.getParcelable(STATE_SHIPPING_INFO)
-            ?: paymentSessionConfig.prepopulatedShippingInfo
+        val shippingInformation =
+            savedInstanceState?.getParcelable(STATE_SHIPPING_INFO)
+                ?: paymentSessionConfig.prepopulatedShippingInfo
 
         paymentFlowPagerAdapter = PaymentFlowPagerAdapter(
             this,
@@ -100,7 +103,7 @@ class PaymentFlowActivity : StripeActivity() {
                     } else {
                         showError(getString(R.string.invalid_shipping_information))
                     }
-                    shippingInformationSubmitted = null
+                    paymentSessionData = paymentSessionData.copy(shippingInformation = null)
                 }
             }
         }
@@ -138,6 +141,7 @@ class PaymentFlowActivity : StripeActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
+        outState.putParcelable(STATE_PAYMENT_SESSION_DATA, paymentSessionData)
         outState.putParcelable(STATE_SHIPPING_INFO, shippingInfo)
         outState.putParcelable(STATE_SHIPPING_METHOD, selectedShippingMethod)
         outState.putInt(STATE_CURRENT_ITEM, shipping_flow_viewpager.currentItem)
@@ -146,11 +150,13 @@ class PaymentFlowActivity : StripeActivity() {
     @JvmSynthetic
     internal fun onShippingInfoSaved(shippingInformation: ShippingInformation?) {
         onShippingMethodsReady(validShippingMethods, defaultShippingMethod)
-        paymentSessionData.shippingInformation = shippingInformation
+        paymentSessionData = paymentSessionData.copy(
+            shippingInformation = shippingInformation
+        )
     }
 
     private fun onShippingInfoValidated(customerSession: CustomerSession) {
-        shippingInformationSubmitted?.let {
+        paymentSessionData.shippingInformation?.let {
             customerSession.setCustomerShippingInformation(it,
                 CustomerShippingInfoSavedListener(this))
         }
@@ -166,10 +172,7 @@ class PaymentFlowActivity : StripeActivity() {
         if (hasNextPage()) {
             shipping_flow_viewpager.currentItem = shipping_flow_viewpager.currentItem + 1
         } else {
-            paymentSessionData.shippingInformation = shippingInformationSubmitted
-            setResult(Activity.RESULT_OK,
-                Intent().putExtra(STATE_PAYMENT_SESSION_DATA, paymentSessionData))
-            finish()
+            finishWithData(paymentSessionData)
         }
     }
 
@@ -177,7 +180,7 @@ class PaymentFlowActivity : StripeActivity() {
         hideKeyboard()
 
         shippingInfo?.let { shippingInfo ->
-            shippingInformationSubmitted = shippingInfo
+            paymentSessionData = paymentSessionData.copy(shippingInformation = shippingInfo)
             setCommunicatingProgress(true)
             broadcastShippingInfoSubmitted(shippingInfo)
         }
@@ -229,10 +232,15 @@ class PaymentFlowActivity : StripeActivity() {
     private fun onShippingMethodSave() {
         val selectShippingMethodWidget: SelectShippingMethodWidget =
             findViewById(R.id.select_shipping_method_widget)
-        paymentSessionData.shippingMethod = selectShippingMethodWidget.selectedShippingMethod
+        finishWithData(paymentSessionData.copy(
+            shippingMethod = selectShippingMethodWidget.selectedShippingMethod
+        ))
+        finish()
+    }
+
+    private fun finishWithData(paymentSessionData: PaymentSessionData) {
         setResult(Activity.RESULT_OK,
-            Intent()
-                .putExtra(STATE_PAYMENT_SESSION_DATA, paymentSessionData)
+            Intent().putExtra(EXTRA_PAYMENT_SESSION_DATA, paymentSessionData)
         )
         finish()
     }
@@ -264,6 +272,7 @@ class PaymentFlowActivity : StripeActivity() {
         internal const val TOKEN_SHIPPING_INFO_SCREEN: String = "ShippingInfoScreen"
         internal const val TOKEN_SHIPPING_METHOD_SCREEN: String = "ShippingMethodScreen"
 
+        private const val STATE_PAYMENT_SESSION_DATA = "state_payment_session_data"
         private const val STATE_SHIPPING_INFO: String = "state_shipping_info"
         private const val STATE_SHIPPING_METHOD: String = "state_shipping_method"
         private const val STATE_CURRENT_ITEM: String = "state_current_item"
