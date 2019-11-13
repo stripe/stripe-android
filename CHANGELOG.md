@@ -8,7 +8,10 @@
 * [#1810](https://github.com/stripe/stripe-android/pull/1810) Update API version to [2019-11-05](https://stripe.com/docs/upgrades#2019-11-05)
 * [#1812](https://github.com/stripe/stripe-android/pull/1812) Upgrade 3DS2 SDK to 2.2.2
 * [#1813](https://github.com/stripe/stripe-android/pull/1813) Don't select a new PaymentMethod after deleting one in `PaymentMethodsActivity`
-* [#1814](https://github.com/stripe/stripe-android/pull/1814) Always set `PaymentMethodsActivity` result code to `Activity.RESULT_OK`
+* [#1820](https://github.com/stripe/stripe-android/pull/1820) Update `PaymentMethodsActivity` result and `PaymentSession.handlePaymentData()` logic
+    * `PaymentMethodsActivity` returns result code of `Activity.RESULT_OK` when the user selected a Payment Method
+    * `PaymentMethodsActivity` returns result code of `Activity.RESULT_CANCELED` when the user taps back via the toolbar or device back button
+    * `PaymentSession#handlePaymentData()` now calls `PaymentSessionListener#onPaymentSessionDataChanged()` for any result from `PaymentMethodsActivity`
 
 ## 12.3.0 - 2019-11-05
 * [#1775](https://github.com/stripe/stripe-android/pull/1775) Add support for idempotency key on Stripe Token API requests
