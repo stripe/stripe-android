@@ -25,18 +25,18 @@ internal class CountryAdapter(
         this,
         context as? Activity
     )
-    private var suggestions: List<String>? = initialCountries
+    private var suggestions: List<String> = initialCountries
 
     override fun getCount(): Int {
-        return suggestions?.size ?: 0
+        return suggestions.size
     }
 
-    override fun getItem(i: Int): String? {
-        return suggestions?.get(i)
+    override fun getItem(i: Int): String {
+        return suggestions[i]
     }
 
     override fun getItemId(i: Int): Long {
-        return i.toLong()
+        return getItem(i).hashCode().toLong()
     }
 
     override fun getView(i: Int, view: View?, viewGroup: ViewGroup): View {
@@ -55,7 +55,7 @@ internal class CountryAdapter(
         return countryFilter
     }
 
-    class CountryFilter(
+    private class CountryFilter(
         private val initialCountries: List<String>,
         private val adapter: CountryAdapter,
         activity: Activity?
