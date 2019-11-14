@@ -42,6 +42,7 @@ internal class StripePaymentController internal constructor(
     context: Context,
     private val stripeRepository: StripeRepository,
     private val enableLogging: Boolean = false,
+    private val appInfo: AppInfo? = null,
     private val messageVersionRegistry: MessageVersionRegistry =
         MessageVersionRegistry(),
     private val config: PaymentAuthConfig =
@@ -246,9 +247,11 @@ internal class StripePaymentController internal constructor(
                             beginWebAuth(
                                 host,
                                 getRequestCode(stripeIntent),
-                                stripeIntent.clientSecret ?: "",
+                                requestOptions,
+                                stripeIntent.clientSecret.orEmpty(),
                                 Stripe3dsRedirect.create(sdkData).url,
-                                enableLogging = enableLogging
+                                enableLogging = enableLogging,
+                                appInfo = appInfo
                             )
                         }
                         else -> // authentication type is not supported
@@ -270,10 +273,12 @@ internal class StripePaymentController internal constructor(
                     beginWebAuth(
                         host,
                         getRequestCode(stripeIntent),
-                        stripeIntent.clientSecret ?: "",
+                        requestOptions,
+                        stripeIntent.clientSecret.orEmpty(),
                         redirectData?.url.toString(),
                         redirectData?.returnUrl,
-                        enableLogging = enableLogging
+                        enableLogging = enableLogging,
+                        appInfo = appInfo
                     )
                 }
                 else -> // next action type is not supported, so bypass authentication
@@ -287,7 +292,7 @@ internal class StripePaymentController internal constructor(
 
     private fun bypassAuth(host: AuthActivityStarter.Host, stripeIntent: StripeIntent) {
         PaymentRelayStarter.create(host, getRequestCode(stripeIntent))
-            .start(PaymentRelayStarter.Data.create(stripeIntent))
+            .start(PaymentRelayStarter.Args.create(stripeIntent))
     }
 
     private fun begin3ds2Auth(
@@ -337,7 +342,7 @@ internal class StripePaymentController internal constructor(
             Stripe3ds2AuthCallback(host, stripeRepository, transaction, timeout,
                 stripeIntent, stripe3ds2Fingerprint.source, requestOptions,
                 analyticsRequestExecutor, analyticsDataFactory,
-                challengeFlowStarter, enableLogging)
+                challengeFlowStarter, enableLogging, appInfo)
         )
     }
 
@@ -412,6 +417,7 @@ internal class StripePaymentController internal constructor(
         private val analyticsDataFactory: AnalyticsDataFactory,
         private val challengeFlowStarter: ChallengeFlowStarter,
         private val enableLogging: Boolean = false,
+        private val appInfo: AppInfo? = null,
         private val paymentRelayStarter: PaymentRelayStarter =
             PaymentRelayStarter.create(host, getRequestCode(stripeIntent))
     ) : ApiResultCallback<Stripe3ds2AuthResult> {
@@ -438,9 +444,11 @@ internal class StripePaymentController internal constructor(
                 beginWebAuth(
                     host,
                     getRequestCode(stripeIntent),
-                    stripeIntent.clientSecret ?: "",
+                    requestOptions,
+                    stripeIntent.clientSecret.orEmpty(),
                     result.fallbackRedirectUrl,
-                    enableLogging = enableLogging
+                    enableLogging = enableLogging,
+                    appInfo = appInfo
                 )
             } else {
                 val error = result.error
@@ -460,7 +468,7 @@ internal class StripePaymentController internal constructor(
         }
 
         override fun onError(e: Exception) {
-            paymentRelayStarter.start(PaymentRelayStarter.Data.create(e))
+            paymentRelayStarter.start(PaymentRelayStarter.Args.create(e))
         }
 
         private fun startFrictionlessFlow() {
@@ -473,7 +481,7 @@ internal class StripePaymentController internal constructor(
                     requestOptions
                 )
             )
-            paymentRelayStarter.start(PaymentRelayStarter.Data.create(stripeIntent))
+            paymentRelayStarter.start(PaymentRelayStarter.Args.create(stripeIntent))
         }
 
         private fun startChallengeFlow(ares: Stripe3ds2AuthResult.Ares) {
@@ -519,7 +527,7 @@ internal class StripePaymentController internal constructor(
                     requestOptions
                 )
             )
-            notifyCompletion(Stripe3ds2CompletionStarter.StartData(stripeIntent,
+            notifyCompletion(Stripe3ds2CompletionStarter.Args(stripeIntent,
                 if (VALUE_YES == completionEvent.transactionStatus)
                     Stripe3ds2CompletionStarter.ChallengeFlowOutcome.COMPLETE_SUCCESSFUL
                 else
@@ -540,7 +548,7 @@ internal class StripePaymentController internal constructor(
                     requestOptions
                 )
             )
-            notifyCompletion(Stripe3ds2CompletionStarter.StartData(stripeIntent,
+            notifyCompletion(Stripe3ds2CompletionStarter.Args(stripeIntent,
                 Stripe3ds2CompletionStarter.ChallengeFlowOutcome.CANCEL))
         }
 
@@ -557,7 +565,7 @@ internal class StripePaymentController internal constructor(
                     requestOptions
                 )
             )
-            notifyCompletion(Stripe3ds2CompletionStarter.StartData(stripeIntent,
+            notifyCompletion(Stripe3ds2CompletionStarter.Args(stripeIntent,
                 Stripe3ds2CompletionStarter.ChallengeFlowOutcome.TIMEOUT))
         }
 
@@ -573,7 +581,7 @@ internal class StripePaymentController internal constructor(
                     requestOptions
                 )
             )
-            notifyCompletion(Stripe3ds2CompletionStarter.StartData(stripeIntent,
+            notifyCompletion(Stripe3ds2CompletionStarter.Args(stripeIntent,
                 Stripe3ds2CompletionStarter.ChallengeFlowOutcome.PROTOCOL_ERROR))
         }
 
@@ -589,11 +597,11 @@ internal class StripePaymentController internal constructor(
                     requestOptions
                 )
             )
-            notifyCompletion(Stripe3ds2CompletionStarter.StartData(stripeIntent,
+            notifyCompletion(Stripe3ds2CompletionStarter.Args(stripeIntent,
                 Stripe3ds2CompletionStarter.ChallengeFlowOutcome.RUNTIME_ERROR))
         }
 
-        private fun notifyCompletion(startData: Stripe3ds2CompletionStarter.StartData) {
+        private fun notifyCompletion(args: Stripe3ds2CompletionStarter.Args) {
             analyticsRequestExecutor.executeAsync(
                 AnalyticsRequest.create(
                     analyticsDataFactory.create3ds2ChallengeParams(
@@ -607,11 +615,11 @@ internal class StripePaymentController internal constructor(
             )
 
             stripeRepository.complete3ds2Auth(sourceId, requestOptions,
-                complete3ds2AuthCallbackFactory.create(startData))
+                complete3ds2AuthCallbackFactory.create(args))
         }
 
         internal interface Complete3ds2AuthCallbackFactory :
-            Factory<Stripe3ds2CompletionStarter.StartData, ApiResultCallback<Boolean>>
+            Factory<Stripe3ds2CompletionStarter.Args, ApiResultCallback<Boolean>>
 
         internal companion object {
             private const val VALUE_YES = "Y"
@@ -648,7 +656,7 @@ internal class StripePaymentController internal constructor(
                 stripeIntent: StripeIntent
             ): Complete3ds2AuthCallbackFactory {
                 return object : Complete3ds2AuthCallbackFactory {
-                    override fun create(arg: Stripe3ds2CompletionStarter.StartData):
+                    override fun create(arg: Stripe3ds2CompletionStarter.Args):
                         ApiResultCallback<Boolean> {
                         return object : ApiResultCallback<Boolean> {
                             override fun onSuccess(result: Boolean) {
@@ -733,13 +741,21 @@ internal class StripePaymentController internal constructor(
         private fun beginWebAuth(
             host: AuthActivityStarter.Host,
             requestCode: Int,
+            requestOptions: ApiRequest.Options,
             clientSecret: String,
             authUrl: String,
             returnUrl: String? = null,
-            enableLogging: Boolean = false
+            enableLogging: Boolean = false,
+            appInfo: AppInfo? = null
         ) {
-            PaymentAuthWebViewStarter(host, requestCode, enableLogging = enableLogging).start(
-                PaymentAuthWebViewStarter.Data(clientSecret, authUrl, returnUrl))
+            Logger.getInstance(enableLogging).debug("PaymentAuthWebViewStarter#start()")
+            val starter = PaymentAuthWebViewStarter(host, requestCode)
+            starter.start(
+                PaymentAuthWebViewStarter.Args(
+                    clientSecret, authUrl, returnUrl,
+                    requestOptions, enableLogging, appInfo
+                )
+            )
         }
 
         private fun handleError(
@@ -748,7 +764,7 @@ internal class StripePaymentController internal constructor(
             exception: Exception
         ) {
             PaymentRelayStarter.create(host, requestCode)
-                .start(PaymentRelayStarter.Data.create(exception))
+                .start(PaymentRelayStarter.Args.create(exception))
         }
 
         @JvmStatic
@@ -756,9 +772,15 @@ internal class StripePaymentController internal constructor(
         fun create(
             context: Context,
             stripeRepository: StripeRepository,
-            enableLogging: Boolean = false
+            enableLogging: Boolean = false,
+            appInfo: AppInfo? = null
         ): PaymentController {
-            return StripePaymentController(context.applicationContext, stripeRepository, enableLogging)
+            return StripePaymentController(
+                context.applicationContext,
+                stripeRepository,
+                enableLogging,
+                appInfo
+            )
         }
     }
 }

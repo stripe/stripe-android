@@ -6,6 +6,7 @@ import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argThat
 import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
@@ -35,7 +36,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
@@ -300,7 +300,7 @@ class StripeApiRepositoryTest {
         assertTrue(paymentMethodDataParams["guid"] is String)
         assertEquals("card", paymentMethodDataParams["type"])
 
-        verify<FireAndForgetRequestExecutor>(fireAndForgetRequestExecutor, times(2))
+        verify(fireAndForgetRequestExecutor, times(2))
             .executeAsync(stripeRequestArgumentCaptor.capture())
         val stripeRequests = stripeRequestArgumentCaptor.allValues
         val analyticsRequest = stripeRequests[1] as ApiRequest

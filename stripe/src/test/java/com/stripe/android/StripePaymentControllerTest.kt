@@ -9,6 +9,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntent
@@ -41,7 +42,6 @@ import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
@@ -74,13 +74,13 @@ class StripePaymentControllerTest {
     private val complete3ds2AuthCallbackFactory =
         object : StripePaymentController.PaymentAuth3ds2ChallengeStatusReceiver.Complete3ds2AuthCallbackFactory {
             override fun create(
-                arg: Stripe3ds2CompletionStarter.StartData
+                arg: Stripe3ds2CompletionStarter.Args
             ): ApiResultCallback<Boolean> {
                 return complete3ds2AuthCallback
             }
         }
 
-    private lateinit var relayStarterDataArgumentCaptor: KArgumentCaptor<PaymentRelayStarter.Data>
+    private lateinit var relayStarterArgsArgumentCaptor: KArgumentCaptor<PaymentRelayStarter.Args>
     private lateinit var intentArgumentCaptor: KArgumentCaptor<Intent>
     private lateinit var apiRequestArgumentCaptor: KArgumentCaptor<StripeRequest>
     private lateinit var resultCaptor: KArgumentCaptor<SetupIntentResult>
@@ -89,7 +89,7 @@ class StripePaymentControllerTest {
     fun setup() {
         MockitoAnnotations.initMocks(this)
 
-        relayStarterDataArgumentCaptor = argumentCaptor()
+        relayStarterArgsArgumentCaptor = argumentCaptor()
         intentArgumentCaptor = argumentCaptor()
         apiRequestArgumentCaptor = argumentCaptor()
         resultCaptor = argumentCaptor()
@@ -105,6 +105,7 @@ class StripePaymentControllerTest {
             ApplicationProvider.getApplicationContext<Context>(),
             FakeStripeRepository(),
             false,
+            null,
             MessageVersionRegistry(),
             CONFIG,
             threeDs2Service,
@@ -142,13 +143,13 @@ class StripePaymentControllerTest {
             any(),
             eq(dsPublicKey),
             eq("7c4debe3f4af7f9d1569a2ffea4343c2566826ee"))
-        verify<StripePaymentController.ChallengeFlowStarter>(challengeFlowStarter)
+        verify(challengeFlowStarter)
             .start(any())
 
-        verify<Activity>(activity).startActivity(eq(
+        verify(activity).startActivity(eq(
             Intent(activity, ChallengeProgressDialogActivity::class.java)))
 
-        verify<FireAndForgetRequestExecutor>(fireAndForgetRequestExecutor)
+        verify(fireAndForgetRequestExecutor)
             .executeAsync(apiRequestArgumentCaptor.capture())
         val analyticsParams = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
         assertEquals("stripe_android.3ds2_fingerprint",
@@ -178,10 +179,10 @@ class StripePaymentControllerTest {
             any(),
             eq(Stripe3ds2FingerprintTest.DS_RSA_PUBLIC_KEY),
             eq(PaymentIntentFixtures.KEY_ID))
-        verify<StripePaymentController.ChallengeFlowStarter>(challengeFlowStarter)
+        verify(challengeFlowStarter)
             .start(any())
 
-        verify<Activity>(activity).startActivity(eq(
+        verify(activity).startActivity(eq(
             Intent(activity, ChallengeProgressDialogActivity::class.java)))
     }
 
@@ -189,16 +190,18 @@ class StripePaymentControllerTest {
     fun handleNextAction_whenSdk3ds1() {
         controller.handleNextAction(host, PaymentIntentFixtures.PI_REQUIRES_3DS1,
             REQUEST_OPTIONS)
-        verify<Activity>(activity).startActivityForResult(intentArgumentCaptor.capture(),
+        verify(activity).startActivityForResult(intentArgumentCaptor.capture(),
             eq(StripePaymentController.PAYMENT_REQUEST_CODE))
-        val intent = intentArgumentCaptor.firstValue
+        val args: PaymentAuthWebViewStarter.Args = requireNotNull(
+            intentArgumentCaptor.firstValue.getParcelableExtra(PaymentAuthWebViewStarter.EXTRA_ARGS)
+        )
         assertEquals(
             "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW",
-            intent.getStringExtra(PaymentAuthWebViewStarter.EXTRA_AUTH_URL)
+            args.url
         )
-        assertNull(intent.getStringExtra(PaymentAuthWebViewStarter.EXTRA_RETURN_URL))
+        assertNull(args.returnUrl)
 
-        verify<FireAndForgetRequestExecutor>(fireAndForgetRequestExecutor)
+        verify(fireAndForgetRequestExecutor)
             .executeAsync(apiRequestArgumentCaptor.capture())
         assertEquals("stripe_android.3ds1_sdk",
             requireNotNull(apiRequestArgumentCaptor.firstValue.params)[AnalyticsDataFactory.FIELD_EVENT])
@@ -208,18 +211,18 @@ class StripePaymentControllerTest {
     fun handleNextAction_whenBrowser3ds1() {
         controller.handleNextAction(host, PaymentIntentFixtures.PI_REQUIRES_REDIRECT,
             REQUEST_OPTIONS)
-        verify<Activity>(activity).startActivityForResult(intentArgumentCaptor.capture(),
+        verify(activity).startActivityForResult(intentArgumentCaptor.capture(),
             eq(StripePaymentController.PAYMENT_REQUEST_CODE))
-        val intent = intentArgumentCaptor.firstValue
+        val args: PaymentAuthWebViewStarter.Args = requireNotNull(
+            intentArgumentCaptor.firstValue.getParcelableExtra(PaymentAuthWebViewStarter.EXTRA_ARGS)
+        )
         assertEquals(
             "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecaz6CRMbs6FrXfuYKBRSUG/src_client_secret_F6octeOshkgxT47dr0ZxSZiv",
-            intent.getStringExtra(PaymentAuthWebViewStarter.EXTRA_AUTH_URL)
+            args.url
         )
-        assertEquals("stripe://deeplink",
-            intent.getStringExtra(PaymentAuthWebViewStarter.EXTRA_RETURN_URL)
-        )
+        assertEquals("stripe://deeplink", args.returnUrl)
 
-        verify<FireAndForgetRequestExecutor>(fireAndForgetRequestExecutor)
+        verify(fireAndForgetRequestExecutor)
             .executeAsync(apiRequestArgumentCaptor.capture())
         val analyticsParams = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
         assertEquals("stripe_android.url_redirect_next_action",
@@ -232,7 +235,7 @@ class StripePaymentControllerTest {
     fun handleNextAction_when3dsRedirectWithSetupIntent() {
         controller.handleNextAction(host, SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT,
             REQUEST_OPTIONS)
-        verify<Activity>(activity).startActivityForResult(
+        verify(activity).startActivityForResult(
             any(),
             eq(StripePaymentController.SETUP_REQUEST_CODE)
         )
@@ -408,7 +411,7 @@ class StripePaymentControllerTest {
             complete3ds2AuthCallbackFactory
         )
         receiver.cancelled("01")
-        verify<ApiResultCallback<Boolean>>(complete3ds2AuthCallback).onSuccess(true)
+        verify(complete3ds2AuthCallback).onSuccess(true)
     }
 
     @Test
@@ -489,9 +492,9 @@ class StripePaymentControllerTest {
         )
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.ARES_FRICTIONLESS_FLOW)
         verify(paymentRelayStarter)
-            .start(relayStarterDataArgumentCaptor.capture())
+            .start(relayStarterArgsArgumentCaptor.capture())
         assertEquals(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-            relayStarterDataArgumentCaptor.firstValue.stripeIntent)
+            relayStarterArgsArgumentCaptor.firstValue.stripeIntent)
 
         verify(fireAndForgetRequestExecutor).executeAsync(apiRequestArgumentCaptor.capture())
         val analyticsRequest = apiRequestArgumentCaptor.firstValue
@@ -512,14 +515,16 @@ class StripePaymentControllerTest {
             paymentRelayStarter = paymentRelayStarter
         )
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.FALLBACK_REDIRECT_URL)
-        verify<Activity>(activity).startActivityForResult(intentArgumentCaptor.capture(),
+        verify(activity).startActivityForResult(intentArgumentCaptor.capture(),
             eq(StripePaymentController.PAYMENT_REQUEST_CODE))
-        val intent = intentArgumentCaptor.firstValue
+        val args: PaymentAuthWebViewStarter.Args = requireNotNull(
+            intentArgumentCaptor.firstValue.getParcelableExtra(PaymentAuthWebViewStarter.EXTRA_ARGS)
+        )
         assertEquals(
             "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW",
-            intent.getStringExtra(PaymentAuthWebViewStarter.EXTRA_AUTH_URL)
+            args.url
         )
-        assertNull(intent.getStringExtra(PaymentAuthWebViewStarter.EXTRA_RETURN_URL))
+        assertNull(args.returnUrl)
 
         verify(fireAndForgetRequestExecutor).executeAsync(apiRequestArgumentCaptor.capture())
         val analyticsRequest = apiRequestArgumentCaptor.firstValue
@@ -537,12 +542,12 @@ class StripePaymentControllerTest {
             paymentRelayStarter = paymentRelayStarter
         )
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.ERROR)
-        verify(paymentRelayStarter).start(relayStarterDataArgumentCaptor.capture())
+        verify(paymentRelayStarter).start(relayStarterArgsArgumentCaptor.capture())
         assertEquals("Error encountered during 3DS2 authentication request. " +
             "Code: 302, Detail: null, " +
             "Description: Data could not be decrypted by the receiving system due to " +
             "technical or other reason., Component: D",
-            relayStarterDataArgumentCaptor.firstValue.exception?.message)
+            relayStarterArgsArgumentCaptor.firstValue.exception?.message)
     }
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {

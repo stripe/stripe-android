@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Intent
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.view.AuthActivityStarter
 import com.stripe.android.view.StripeIntentResultExtras
@@ -13,9 +15,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
-import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
@@ -40,8 +40,8 @@ class PaymentRelayStarterTest {
 
     @Test
     fun start_withPaymentIntent_shouldSetCorrectIntentExtras() {
-        starter.start(PaymentRelayStarter.Data.create(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2))
-        verify<Activity>(activity).startActivityForResult(intentArgumentCaptor.capture(), eq(500))
+        starter.start(PaymentRelayStarter.Args.create(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2))
+        verify(activity).startActivityForResult(intentArgumentCaptor.capture(), eq(500))
         val intent = intentArgumentCaptor.firstValue
         assertEquals(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.clientSecret,
             intent.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET))
@@ -52,8 +52,8 @@ class PaymentRelayStarterTest {
     @Test
     fun start_withException_shouldSetCorrectIntentExtras() {
         val exception = RuntimeException()
-        starter.start(PaymentRelayStarter.Data.create(exception))
-        verify<Activity>(activity).startActivityForResult(intentArgumentCaptor.capture(), eq(500))
+        starter.start(PaymentRelayStarter.Args.create(exception))
+        verify(activity).startActivityForResult(intentArgumentCaptor.capture(), eq(500))
         val intent = intentArgumentCaptor.firstValue
         assertNull(intent.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET))
         assertFalse(intent.hasExtra(StripeIntentResultExtras.FLOW_OUTCOME))
