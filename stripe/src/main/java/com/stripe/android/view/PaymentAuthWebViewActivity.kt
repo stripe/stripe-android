@@ -3,16 +3,21 @@ package com.stripe.android.view
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.stripe.android.Logger
 import com.stripe.android.PaymentAuthWebViewStarter
 import com.stripe.android.R
+import com.stripe.android.StripeApiRepository
 import com.stripe.android.stripe3ds2.utils.CustomizeUtils
 import com.ults.listeners.SdkChallengeInterface.UL_HANDLE_CHALLENGE_ACTION
 import kotlinx.android.synthetic.main.payment_auth_web_view_layout.*
@@ -21,6 +26,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
 
     private lateinit var logger: Logger
     private lateinit var args: PaymentAuthWebViewStarter.Args
+    private lateinit var viewModel: PaymentAuthWebViewActivityViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,6 +65,15 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
             return
         }
 
+        viewModel = ViewModelProviders.of(
+            this,
+            PaymentAuthWebViewActivityViewModel.Factory(
+                StripeApiRepository(
+                    this, args.appInfo, Logger.getInstance(args.enableLogging)
+                )
+            )
+        ).get(PaymentAuthWebViewActivityViewModel::class.java)
+
         logger.debug("PaymentAuthWebViewActivity#onCreate() - PaymentAuthWebView init and loadUrl")
         auth_web_view.init(this, logger, auth_web_view_progress_bar, clientSecret, returnUrl)
         auth_web_view.loadUrl(args.url)
@@ -89,15 +104,27 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         logger.debug("PaymentAuthWebViewActivity#onOptionsItemSelected()")
         if (item.itemId == R.id.action_close) {
-            onCloseButtonClicked()
+            cancelIntentSource()
             return true
         }
         return super.onOptionsItemSelected(item)
     }
 
-    private fun onCloseButtonClicked() {
-        // TODO(mshafrir-stripe): call cancel source endpoint - ANDROID-427
-        finish()
+    override fun onBackPressed() {
+        cancelIntentSource()
+    }
+
+    private fun cancelIntentSource() {
+        val sourceId = Uri.parse(args.url).lastPathSegment.orEmpty()
+
+        auth_web_view.loadBlank()
+        viewModel.intent.observe(this, Observer {
+            auth_web_view_progress_bar.visibility = View.GONE
+            finish()
+        })
+
+        auth_web_view_progress_bar.visibility = View.VISIBLE
+        viewModel.startCancelIntentSource(args.clientSecret, sourceId, args.requestOptions)
     }
 
     private fun customizeToolbar(toolbar: Toolbar) {

@@ -87,7 +87,7 @@ internal class StripePaymentController internal constructor(
         clientSecret: String,
         requestOptions: ApiRequest.Options
     ) {
-        RetrieveIntentTask(stripeRepository, clientSecret, requestOptions, workScope,
+        stripeRepository.retrieveIntent(clientSecret, requestOptions,
             object : ApiResultCallback<StripeIntent> {
                 override fun onSuccess(result: StripeIntent) {
                     handleNextAction(host, result, requestOptions)
@@ -97,7 +97,7 @@ internal class StripePaymentController internal constructor(
                     handleError(host, PAYMENT_REQUEST_CODE, e)
                 }
             }
-        ).execute()
+        )
     }
 
     /**
@@ -137,7 +137,7 @@ internal class StripePaymentController internal constructor(
 
         @StripeIntentResult.Outcome val flowOutcome = data
             .getIntExtra(StripeIntentResultExtras.FLOW_OUTCOME, StripeIntentResult.Outcome.UNKNOWN)
-        RetrieveIntentTask(stripeRepository, getClientSecret(data), requestOptions, workScope,
+        stripeRepository.retrieveIntent(getClientSecret(data), requestOptions,
             object : ApiResultCallback<StripeIntent> {
                 override fun onSuccess(result: StripeIntent) {
                     if (result is PaymentIntent) {
@@ -151,7 +151,7 @@ internal class StripePaymentController internal constructor(
                     callback.onError(e)
                 }
             }
-        ).execute()
+        )
     }
 
     /**
@@ -178,7 +178,7 @@ internal class StripePaymentController internal constructor(
         @StripeIntentResult.Outcome val flowOutcome = data
             .getIntExtra(StripeIntentResultExtras.FLOW_OUTCOME, StripeIntentResult.Outcome.UNKNOWN)
 
-        RetrieveIntentTask(stripeRepository, getClientSecret(data), requestOptions, workScope,
+        stripeRepository.retrieveIntent(getClientSecret(data), requestOptions,
             object : ApiResultCallback<StripeIntent> {
                 override fun onSuccess(result: StripeIntent) {
                     if (result is SetupIntent) {
@@ -192,7 +192,7 @@ internal class StripePaymentController internal constructor(
                     callback.onError(e)
                 }
             }
-        ).execute()
+        )
     }
 
     internal fun getClientSecret(data: Intent): String {
@@ -344,26 +344,6 @@ internal class StripePaymentController internal constructor(
                 analyticsRequestExecutor, analyticsDataFactory,
                 challengeFlowStarter, enableLogging, appInfo)
         )
-    }
-
-    private class RetrieveIntentTask constructor(
-        private val stripeRepository: StripeRepository,
-        private val clientSecret: String,
-        private val requestOptions: ApiRequest.Options,
-        workScope: CoroutineScope,
-        callback: ApiResultCallback<StripeIntent>
-    ) : ApiOperation<StripeIntent>(workScope, callback) {
-
-        @Throws(StripeException::class)
-        override suspend fun getResult(): StripeIntent? {
-            return when {
-                clientSecret.startsWith("pi_") ->
-                    stripeRepository.retrievePaymentIntent(clientSecret, requestOptions)
-                clientSecret.startsWith("seti_") ->
-                    stripeRepository.retrieveSetupIntent(clientSecret, requestOptions)
-                else -> null
-            }
-        }
     }
 
     private class ConfirmStripeIntentTask(

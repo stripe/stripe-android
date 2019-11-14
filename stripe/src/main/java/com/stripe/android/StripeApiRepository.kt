@@ -23,6 +23,7 @@ import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Stripe3ds2AuthResult
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import java.net.HttpURLConnection
 import java.security.Security
@@ -125,15 +126,23 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         paymentIntentId: String,
         sourceId: String,
         options: ApiRequest.Options
-    ) {
-        makeApiRequest(
-            ApiRequest.createPost(
-                getCancelPaymentIntentSourceUrl(paymentIntentId),
-                options,
-                mapOf("source" to sourceId),
-                appInfo
+    ): PaymentIntent? {
+        try {
+            fireFingerprintRequest()
+            val response = makeApiRequest(
+                ApiRequest.createPost(
+                    getCancelPaymentIntentSourceUrl(paymentIntentId),
+                    options,
+                    mapOf("source" to sourceId),
+                    appInfo
+                )
             )
-        )
+            return PaymentIntent.fromString(response.responseBody)
+        } catch (unexpected: CardException) {
+            // This particular kind of exception should not be possible from a PaymentI API endpoint
+            throw APIException(unexpected.message, unexpected.requestId,
+                unexpected.statusCode, null, unexpected)
+        }
     }
 
     /**
@@ -220,15 +229,41 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         setupIntentId: String,
         sourceId: String,
         options: ApiRequest.Options
-    ) {
-        makeApiRequest(
-            ApiRequest.createPost(
-                getCancelSetupIntentSourceUrl(setupIntentId),
-                options,
-                mapOf("source" to sourceId),
-                appInfo
+    ): SetupIntent? {
+        try {
+            val response = makeApiRequest(
+                ApiRequest.createPost(
+                    getCancelSetupIntentSourceUrl(setupIntentId),
+                    options,
+                    mapOf("source" to sourceId),
+                    appInfo
+                )
             )
-        )
+            return SetupIntent.fromString(response.responseBody)
+        } catch (unexpected: CardException) {
+            // This particular kind of exception should not be possible from a PaymentI API endpoint
+            throw APIException(unexpected.message, unexpected.requestId,
+                unexpected.statusCode, null, unexpected)
+        }
+    }
+
+    override fun retrieveIntent(
+        clientSecret: String,
+        options: ApiRequest.Options,
+        callback: ApiResultCallback<StripeIntent>
+    ) {
+        RetrieveIntentTask(this, clientSecret, options, callback)
+            .execute()
+    }
+
+    override fun cancelIntent(
+        stripeIntent: StripeIntent,
+        sourceId: String,
+        options: ApiRequest.Options,
+        callback: ApiResultCallback<StripeIntent>
+    ) {
+        CancelIntentTask(this, stripeIntent, sourceId, options, callback)
+            .execute()
     }
 
     /**
@@ -275,7 +310,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
      * Retrieve an existing [Source] object from the server.
      *
      * @param sourceId the [Source.id] field for the Source to query
-     * @param clientSecret the [Source.getClientSecret] field for the Source to query
+     * @param clientSecret the [Source.clientSecret] field for the Source to query
      * @return a [Source] if one could be retrieved for the input params, or `null` if
      * no such Source could be found.
      *
@@ -959,27 +994,70 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     private class Start3ds2AuthTask constructor(
-        private val mStripeApiRepository: StripeApiRepository,
-        private val mParams: Stripe3ds2AuthParams,
-        private val mStripeIntentId: String,
-        private val mRequestOptions: ApiRequest.Options,
+        private val stripeApiRepository: StripeApiRepository,
+        private val params: Stripe3ds2AuthParams,
+        private val stripeIntentId: String,
+        private val requestOptions: ApiRequest.Options,
         callback: ApiResultCallback<Stripe3ds2AuthResult>
     ) : ApiOperation<Stripe3ds2AuthResult>(callback = callback) {
         @Throws(StripeException::class, JSONException::class)
         override suspend fun getResult(): Stripe3ds2AuthResult {
-            return mStripeApiRepository.start3ds2Auth(mParams, mStripeIntentId, mRequestOptions)
+            return stripeApiRepository.start3ds2Auth(params, stripeIntentId, requestOptions)
         }
     }
 
     private class Complete3ds2AuthTask constructor(
-        private val mStripeApiRepository: StripeApiRepository,
-        private val mSourceId: String,
-        private val mRequestOptions: ApiRequest.Options,
+        private val stripeApiRepository: StripeApiRepository,
+        private val sourceId: String,
+        private val requestOptions: ApiRequest.Options,
         callback: ApiResultCallback<Boolean>
     ) : ApiOperation<Boolean>(callback = callback) {
         @Throws(StripeException::class)
         override suspend fun getResult(): Boolean {
-            return mStripeApiRepository.complete3ds2Auth(mSourceId, mRequestOptions)
+            return stripeApiRepository.complete3ds2Auth(sourceId, requestOptions)
+        }
+    }
+
+    private class RetrieveIntentTask constructor(
+        private val stripeRepository: StripeRepository,
+        private val clientSecret: String,
+        private val requestOptions: ApiRequest.Options,
+        callback: ApiResultCallback<StripeIntent>
+    ) : ApiOperation<StripeIntent>(callback = callback) {
+
+        @Throws(StripeException::class)
+        override suspend fun getResult(): StripeIntent? {
+            return when {
+                clientSecret.startsWith("pi_") ->
+                    stripeRepository.retrievePaymentIntent(clientSecret, requestOptions)
+                clientSecret.startsWith("seti_") ->
+                    stripeRepository.retrieveSetupIntent(clientSecret, requestOptions)
+                else -> null
+            }
+        }
+    }
+
+    private class CancelIntentTask constructor(
+        private val stripeRepository: StripeRepository,
+        private val stripeIntent: StripeIntent,
+        private val sourceId: String,
+        private val requestOptions: ApiRequest.Options,
+        callback: ApiResultCallback<StripeIntent>
+    ) : ApiOperation<StripeIntent>(callback = callback) {
+
+        @Throws(StripeException::class)
+        override suspend fun getResult(): StripeIntent? {
+            return when (stripeIntent) {
+                is PaymentIntent ->
+                    stripeRepository.cancelPaymentIntentSource(
+                        stripeIntent.id.orEmpty(), sourceId, requestOptions
+                    )
+                is SetupIntent ->
+                    stripeRepository.cancelSetupIntentSource(
+                        stripeIntent.id.orEmpty(), sourceId, requestOptions
+                    )
+                else -> null
+            }
         }
     }
 

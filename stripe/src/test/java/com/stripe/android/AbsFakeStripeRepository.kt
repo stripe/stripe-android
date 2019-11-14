@@ -13,6 +13,7 @@ import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Stripe3ds2AuthResult
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 
 internal abstract class AbsFakeStripeRepository : StripeRepository {
@@ -31,7 +32,12 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         return null
     }
 
-    override fun cancelPaymentIntentSource(paymentIntentId: String, sourceId: String, options: ApiRequest.Options) {
+    override fun cancelPaymentIntentSource(
+        paymentIntentId: String,
+        sourceId: String,
+        options: ApiRequest.Options
+    ): PaymentIntent? {
+        return null
     }
 
     override fun confirmSetupIntent(
@@ -48,7 +54,27 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         return null
     }
 
-    override fun cancelSetupIntentSource(setupIntentId: String, sourceId: String, options: ApiRequest.Options) {
+    override fun cancelSetupIntentSource(
+        setupIntentId: String,
+        sourceId: String,
+        options: ApiRequest.Options
+    ): SetupIntent? {
+        return null
+    }
+
+    override fun retrieveIntent(
+        clientSecret: String,
+        options: ApiRequest.Options,
+        callback: ApiResultCallback<StripeIntent>
+    ) {
+    }
+
+    override fun cancelIntent(
+        stripeIntent: StripeIntent,
+        sourceId: String,
+        options: ApiRequest.Options,
+        callback: ApiResultCallback<StripeIntent>
+    ) {
     }
 
     override fun createSource(

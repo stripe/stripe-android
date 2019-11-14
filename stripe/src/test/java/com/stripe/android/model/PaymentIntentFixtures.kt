@@ -6,7 +6,6 @@ internal object PaymentIntentFixtures {
 
     const val KEY_ID = "7c4debe3f4af7f9d1569a2ffea4343c2566826ee"
 
-    @JvmField
     val PI_REQUIRES_MASTERCARD_3DS2_JSON = JSONObject(
         """
         {
@@ -91,10 +90,8 @@ internal object PaymentIntentFixtures {
         """.trimIndent()
     )
 
-    @JvmField
     val PI_REQUIRES_MASTERCARD_3DS2 = PaymentIntent.fromJson(PI_REQUIRES_MASTERCARD_3DS2_JSON)!!
 
-    @JvmField
     val PI_REQUIRES_AMEX_3DS2 = PaymentIntent.fromJson(JSONObject(
         """
         {
@@ -157,7 +154,6 @@ internal object PaymentIntentFixtures {
         """.trimIndent()
     ))!!
 
-    @JvmField
     val PI_REQUIRES_3DS1 = PaymentIntent.fromJson(JSONObject(
         """
         {
@@ -212,7 +208,6 @@ internal object PaymentIntentFixtures {
         """.trimIndent()
     ))!!
 
-    @JvmField
     val PI_REQUIRES_REDIRECT = PaymentIntent.fromJson(JSONObject(
         """
         {
@@ -267,7 +262,6 @@ internal object PaymentIntentFixtures {
         """.trimIndent()
     ))!!
 
-    @JvmField
     val PI_WITH_LAST_PAYMENT_ERROR = PaymentIntent.fromJson(JSONObject(
         """
         {
@@ -343,7 +337,6 @@ internal object PaymentIntentFixtures {
         """.trimIndent()
     ))!!
 
-    @JvmField
     val CANCELLED = PaymentIntent.fromJson(JSONObject(
         """
         {
@@ -413,4 +406,77 @@ internal object PaymentIntentFixtures {
         }
         """.trimIndent()
     ))!!
+
+    val PAYMENT_INTENT_WITH_CANCELED_3DS1_SOURCE = PaymentIntent.fromJson(JSONObject(
+        """
+        {
+            "id": "pi_1FeqH9CRMbs6FrXfcqqpoC2H",
+            "object": "payment_intent",
+            "amount": 1099,
+            "canceled_at": null,
+            "cancellation_reason": null,
+            "capture_method": "manual",
+            "client_secret": "pi_1FeqH9CRMbs6FrXfcqqpoC2H_secret_DHYkuHTGq",
+            "confirmation_method": "automatic",
+            "created": 1573768491,
+            "currency": "usd",
+            "description": "Example PaymentIntent",
+            "last_payment_error": {
+                "message": "The PaymentMethod on this PaymentIntent was previously used without being attached to a Customer or was detached from a Customer, and may not be used again. You can try confirming again with a new PaymentMethod.",
+                "payment_method": {
+                    "id": "pm_1FeqHBCRMbs6FrXfsDE5NFJH",
+                    "object": "payment_method",
+                    "billing_details": {
+                        "address": {
+                            "city": null,
+                            "country": null,
+                            "line1": null,
+                            "line2": null,
+                            "postal_code": null,
+                            "state": null
+                        },
+                        "email": null,
+                        "name": null,
+                        "phone": null
+                    },
+                    "card": {
+                        "brand": "visa",
+                        "checks": {
+                            "address_line1_check": null,
+                            "address_postal_code_check": null,
+                            "cvc_check": null
+                        },
+                        "country": "US",
+                        "exp_month": 1,
+                        "exp_year": 2025,
+                        "funding": "credit",
+                        "generated_from": null,
+                        "last4": "3063",
+                        "three_d_secure_usage": {
+                            "supported": true
+                        },
+                        "wallet": null
+                    },
+                    "created": 1573768493,
+                    "customer": null,
+                    "livemode": false,
+                    "metadata": {},
+                    "type": "card"
+                },
+                "type": "invalid_request_error"
+            },
+            "livemode": false,
+            "next_action": null,
+            "payment_method": null,
+            "payment_method_types": [
+                "card"
+            ],
+            "receipt_email": null,
+            "setup_future_usage": null,
+            "shipping": null,
+            "source": null,
+            "status": "requires_payment_method"
+        }
+        """.trimIndent()
+    ))
 }

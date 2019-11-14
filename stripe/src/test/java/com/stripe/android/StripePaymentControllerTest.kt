@@ -18,6 +18,7 @@ import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.Stripe3ds2AuthResultFixtures
 import com.stripe.android.model.Stripe3ds2Fingerprint
 import com.stripe.android.model.Stripe3ds2FingerprintTest
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.transaction.AuthenticationRequestParameters
 import com.stripe.android.stripe3ds2.transaction.CompletionEvent
@@ -573,6 +574,15 @@ class StripePaymentControllerTest {
             callback: ApiResultCallback<Boolean>
         ) {
             callback.onSuccess(true)
+        }
+
+        override fun retrieveIntent(
+            clientSecret: String,
+            options: ApiRequest.Options,
+            callback: ApiResultCallback<StripeIntent>
+        ) {
+            super.retrieveIntent(clientSecret, options, callback)
+            callback.onSuccess(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT)
         }
     }
 

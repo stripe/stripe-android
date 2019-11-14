@@ -1,7 +1,6 @@
 package com.stripe.android
 
 import android.content.Intent
-import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.AuthActivityStarter
@@ -66,7 +65,6 @@ internal interface PaymentController {
      * Determine which authentication mechanism should be used, or bypass authentication
      * if it is not needed.
      */
-    @VisibleForTesting
     fun handleNextAction(
         host: AuthActivityStarter.Host,
         stripeIntent: StripeIntent,
