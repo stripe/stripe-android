@@ -573,6 +573,22 @@ class StripeApiRepositoryTest {
         assertTrue(fpxBankStatuses.isOnline(FpxBank.Hsbc.id))
     }
 
+    @Test
+    fun cancelPaymentIntentSource_whenAlreadyCanceled_throwsInvalidRequestException() {
+        val exception = assertFailsWith<InvalidRequestException> {
+            stripeApiRepository.cancelPaymentIntentSource(
+                "pi_1FejpSH8dsfnfKo38L276wr6",
+                "src_1FejpbH8dsfnfKo3KR7EqCzJ",
+                ApiRequest.Options(ApiKeyFixtures.FPX_PUBLISHABLE_KEY)
+            )
+        }
+        assertEquals(
+            "This PaymentIntent could be not be fulfilled via this session because a different payment method was attached to it. Another session could be attempting to fulfill this PaymentIntent. Please complete that session or try again.",
+            exception.message
+        )
+        assertEquals("payment_intent_unexpected_state", exception.errorCode)
+    }
+
     private fun create(): StripeApiRepository {
         return StripeApiRepository(
             ApplicationProvider.getApplicationContext<Context>(),
