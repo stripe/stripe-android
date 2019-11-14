@@ -28,10 +28,12 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
     @JvmSynthetic
     internal var countryChangeCallback: (Country) -> Unit = {}
 
+    private val countryAdapter: CountryAdapter
+
     init {
         View.inflate(getContext(), R.layout.country_autocomplete_textview, this)
 
-        val countryAdapter = CountryAdapter(
+        countryAdapter = CountryAdapter(
             getContext(),
             CountryUtils.getOrderedCountries(
                 ConfigurationCompat.getLocales(context.resources.configuration)[0]
@@ -54,10 +56,25 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
             }
         }
 
-        val initialCountry = countryAdapter.getItem(0)
+        selectedCountry = countryAdapter.firstItem
+        updateInitialCountry()
+    }
+
+    private fun updateInitialCountry() {
+        val initialCountry = countryAdapter.firstItem
         countryAutocomplete.setText(initialCountry.name)
         selectedCountry = initialCountry
         countryChangeCallback(initialCountry)
+    }
+
+    /**
+     * @param allowedCountryCodes A set of allowed country codes. Will be ignored if empty.
+     */
+    internal fun setAllowedCountryCodes(allowedCountryCodes: Set<String>) {
+        val isUpdated = countryAdapter.updateUnfilteredCountries(allowedCountryCodes)
+        if (isUpdated) {
+            updateInitialCountry()
+        }
     }
 
     /**
