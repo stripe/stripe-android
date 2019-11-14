@@ -1,22 +1,25 @@
 package com.stripe.android
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
+
 /**
  * Data for identifying your plug-in or library.
  *
- * See [
- * Building Stripe Plug-ins and Libraries - Setting the API version](https://stripe.com/docs/building-plugins#setappinfo).
+ * See [Building Stripe Plug-ins and Libraries - Setting the API version](https://stripe.com/docs/building-plugins#setappinfo).
  *
  * @param name Name of your application (e.g. "MyAwesomeApp")
  * @param version Version of your application (e.g. "1.2.34")
  * @param url Website for your application (e.g. "https://myawesomeapp.info")
  * @param partnerId Your Stripe Partner ID (e.g. "pp_partner_1234")
  */
-data class AppInfo private constructor(
+@Parcelize
+data class AppInfo internal constructor(
     private val name: String,
     private val version: String?,
     private val url: String?,
     private val partnerId: String?
-) {
+) : Parcelable {
 
     internal fun toUserAgent(): String {
         return listOfNotNull(

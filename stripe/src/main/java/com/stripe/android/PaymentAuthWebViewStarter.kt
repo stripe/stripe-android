@@ -9,7 +9,7 @@ import com.stripe.android.view.PaymentAuthWebViewActivity
  * A class that manages starting a [PaymentAuthWebViewActivity] instance with the correct
  * arguments.
  */
-internal class PaymentAuthWebViewStarter @JvmOverloads internal constructor(
+internal class PaymentAuthWebViewStarter internal constructor(
     private val host: AuthActivityStarter.Host,
     private val requestCode: Int,
     private val toolbarCustomization: StripeToolbarCustomization? = null,
@@ -18,13 +18,13 @@ internal class PaymentAuthWebViewStarter @JvmOverloads internal constructor(
 
     override fun start(data: Data) {
         Logger.getInstance(enableLogging).debug("PaymentAuthWebViewStarter#start()")
-        val extras = Bundle()
-        extras.putString(EXTRA_CLIENT_SECRET, data.clientSecret)
-        extras.putString(EXTRA_AUTH_URL, data.url)
-        extras.putString(EXTRA_RETURN_URL, data.returnUrl)
-        extras.putBoolean(EXTRA_ENABLE_LOGGING, enableLogging)
-        extras.putParcelable(EXTRA_UI_CUSTOMIZATION, toolbarCustomization)
-
+        val extras = Bundle().apply {
+            putString(EXTRA_CLIENT_SECRET, data.clientSecret)
+            putString(EXTRA_AUTH_URL, data.url)
+            putString(EXTRA_RETURN_URL, data.returnUrl)
+            putBoolean(EXTRA_ENABLE_LOGGING, enableLogging)
+            putParcelable(EXTRA_UI_CUSTOMIZATION, toolbarCustomization)
+        }
         host.startActivityForResult(PaymentAuthWebViewActivity::class.java, extras, requestCode)
     }
 
