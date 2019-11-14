@@ -119,6 +119,23 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
+    @Throws(AuthenticationException::class, InvalidRequestException::class,
+        APIConnectionException::class, APIException::class)
+    override fun cancelPaymentIntentSource(
+        paymentIntentId: String,
+        sourceId: String,
+        options: ApiRequest.Options
+    ) {
+        makeApiRequest(
+            ApiRequest.createPost(
+                getCancelPaymentIntentSourceUrl(paymentIntentId),
+                options,
+                mapOf("source" to sourceId),
+                appInfo
+            )
+        )
+    }
+
     /**
      * Confirm a [SetupIntent] using the provided [ConfirmSetupIntentParams]
      *
@@ -195,6 +212,23 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             throw APIException(unexpected.message, unexpected.requestId,
                 unexpected.statusCode, null, unexpected)
         }
+    }
+
+    @Throws(AuthenticationException::class, InvalidRequestException::class,
+        APIConnectionException::class, APIException::class)
+    override fun cancelSetupIntentSource(
+        setupIntentId: String,
+        sourceId: String,
+        options: ApiRequest.Options
+    ) {
+        makeApiRequest(
+            ApiRequest.createPost(
+                getCancelSetupIntentSourceUrl(setupIntentId),
+                options,
+                mapOf("source" to sourceId),
+                appInfo
+            )
+        )
     }
 
     /**
@@ -1002,7 +1036,16 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         }
 
         /**
-         * @return `https://api.stripe.com/v1/payment_intents/:id`
+         * @return `https://api.stripe.com/v1/payment_intents/:id/source_cancel`
+         */
+        @VisibleForTesting
+        @JvmSynthetic
+        internal fun getCancelPaymentIntentSourceUrl(paymentIntentId: String): String {
+            return getApiUrl("payment_intents/%s/source_cancel", paymentIntentId)
+        }
+
+        /**
+         * @return `https://api.stripe.com/v1/setup_intents/:id`
          */
         @VisibleForTesting
         @JvmSynthetic
@@ -1011,12 +1054,21 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         }
 
         /**
-         * @return `https://api.stripe.com/v1/payment_intents/:id/confirm`
+         * @return `https://api.stripe.com/v1/setup_intents/:id/confirm`
          */
         @VisibleForTesting
         @JvmSynthetic
         internal fun getConfirmSetupIntentUrl(setupIntentId: String): String {
             return getApiUrl("setup_intents/%s/confirm", setupIntentId)
+        }
+
+        /**
+         * @return `https://api.stripe.com/v1/setup_intents/:id/source_cancel`
+         */
+        @VisibleForTesting
+        @JvmSynthetic
+        internal fun getCancelSetupIntentSourceUrl(setupIntentId: String): String {
+            return getApiUrl("setup_intents/%s/source_cancel", setupIntentId)
         }
 
         /**

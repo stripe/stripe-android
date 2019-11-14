@@ -31,6 +31,9 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         return null
     }
 
+    override fun cancelPaymentIntentSource(paymentIntentId: String, sourceId: String, options: ApiRequest.Options) {
+    }
+
     override fun confirmSetupIntent(
         confirmSetupIntentParams: ConfirmSetupIntentParams,
         options: ApiRequest.Options
@@ -43,6 +46,9 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         options: ApiRequest.Options
     ): SetupIntent? {
         return null
+    }
+
+    override fun cancelSetupIntentSource(setupIntentId: String, sourceId: String, options: ApiRequest.Options) {
     }
 
     override fun createSource(

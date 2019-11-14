@@ -41,6 +41,14 @@ internal interface StripeRepository {
 
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, APIException::class)
+    fun cancelPaymentIntentSource(
+        paymentIntentId: String,
+        sourceId: String,
+        options: ApiRequest.Options
+    )
+
+    @Throws(AuthenticationException::class, InvalidRequestException::class,
+        APIConnectionException::class, APIException::class)
     fun confirmSetupIntent(
         confirmSetupIntentParams: ConfirmSetupIntentParams,
         options: ApiRequest.Options
@@ -52,6 +60,14 @@ internal interface StripeRepository {
         clientSecret: String,
         options: ApiRequest.Options
     ): SetupIntent?
+
+    @Throws(AuthenticationException::class, InvalidRequestException::class,
+        APIConnectionException::class, APIException::class)
+    fun cancelSetupIntentSource(
+        setupIntentId: String,
+        sourceId: String,
+        options: ApiRequest.Options
+    )
 
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, APIException::class)
