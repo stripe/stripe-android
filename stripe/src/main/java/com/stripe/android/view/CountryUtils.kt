@@ -4,34 +4,42 @@ import java.util.Locale
 
 internal object CountryUtils {
 
-    private val NO_POSTAL_CODE_COUNTRIES =
-        arrayOf("AE", "AG", "AN", "AO", "AW", "BF", "BI", "BJ", "BO", "BS", "BW", "BZ", "CD", "CF", "CG", "CI", "CK", "CM", "DJ", "DM", "ER", "FJ", "GD", "GH", "GM", "GN", "GQ", "GY", "HK", "IE", "JM", "KE", "KI", "KM", "KN", "KP", "LC", "ML", "MO", "MR", "MS", "MU", "MW", "NR", "NU", "PA", "QA", "RW", "SB", "SC", "SL", "SO", "SR", "ST", "SY", "TF", "TK", "TL", "TO", "TT", "TV", "TZ", "UG", "VU", "YE", "ZA", "ZW")
-    private val NO_POSTAL_CODE_COUNTRIES_SET = setOf(*NO_POSTAL_CODE_COUNTRIES)
+    private val NO_POSTAL_CODE_COUNTRIES = setOf(
+        "AE", "AG", "AN", "AO", "AW", "BF", "BI", "BJ", "BO", "BS", "BW", "BZ", "CD", "CF", "CG",
+        "CI", "CK", "CM", "DJ", "DM", "ER", "FJ", "GD", "GH", "GM", "GN", "GQ", "GY", "HK", "IE",
+        "JM", "KE", "KI", "KM", "KN", "KP", "LC", "ML", "MO", "MR", "MS", "MU", "MW", "NR", "NU",
+        "PA", "QA", "RW", "SB", "SC", "SL", "SO", "SR", "ST", "SY", "TF", "TK", "TL", "TO", "TT",
+        "TV", "TZ", "UG", "VU", "YE", "ZA", "ZW"
+    )
 
-    private val COUNTRY_NAMES_TO_CODES: Map<String, String>
-        get() {
-            return Locale.getISOCountries()
-                .associateBy { Locale("", it).displayCountry }
+    private val COUNTRIES: List<Country> =
+        Locale.getISOCountries().map { code ->
+            Country(code, Locale("", code).displayCountry)
         }
 
     @JvmSynthetic
-    internal fun getCountryCode(countryName: String?): String? {
-        return COUNTRY_NAMES_TO_CODES[countryName]
+    internal fun getCountryByName(countryName: String): Country? {
+        return COUNTRIES.firstOrNull { it.name == countryName }
     }
 
     @JvmSynthetic
-    internal fun getOrderedCountries(currentLocale: Locale): List<String> {
+    internal fun getCountryByCode(countryCode: String): Country? {
+        return COUNTRIES.firstOrNull { it.code == countryCode }
+    }
+
+    @JvmSynthetic
+    internal fun getOrderedCountries(currentLocale: Locale): List<Country> {
         // Show user's current locale first, followed by countries alphabetized by display name
-        return listOf(currentLocale.displayCountry)
+        return listOfNotNull(getCountryByCode(currentLocale.country))
             .plus(
-                COUNTRY_NAMES_TO_CODES.keys.toList()
-                    .sortedWith(compareBy { it.toLowerCase(Locale.ROOT) })
-                    .minus(currentLocale.displayCountry)
+                COUNTRIES
+                    .sortedBy { it.name.toLowerCase(Locale.ROOT) }
+                    .filterNot { it.code == currentLocale.country }
             )
     }
 
     @JvmSynthetic
     internal fun doesCountryUsePostalCode(countryCode: String): Boolean {
-        return !NO_POSTAL_CODE_COUNTRIES_SET.contains(countryCode)
+        return !NO_POSTAL_CODE_COUNTRIES.contains(countryCode)
     }
 }

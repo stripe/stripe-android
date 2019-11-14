@@ -40,9 +40,6 @@ class ShippingInfoWidgetTest : BaseViewTest<ShippingInfoTestActivity>(
     private lateinit var phoneEditText: StripeEditText
     private lateinit var countryAutoCompleteTextView: CountryAutoCompleteTextView
 
-    private val mNoPostalCodeCountry = "ZW" // Zimbabwe
-    private var mShippingInfo: ShippingInformation? = null
-
     @BeforeTest
     fun setup() {
         MockitoAnnotations.initMocks(this)
@@ -62,15 +59,6 @@ class ShippingInfoWidgetTest : BaseViewTest<ShippingInfoTestActivity>(
         stateEditText = shippingInfoWidget.findViewById(R.id.et_state_aaw)
         phoneEditText = shippingInfoWidget.findViewById(R.id.et_phone_number_aaw)
         countryAutoCompleteTextView = shippingInfoWidget.findViewById(R.id.country_autocomplete_aaw)
-        val address = Address.Builder()
-            .setCity("San Francisco")
-            .setState("CA")
-            .setCountry("US")
-            .setLine1("185 Berry St")
-            .setLine2("10th Floor")
-            .setPostalCode("12345")
-            .build()
-        mShippingInfo = ShippingInformation(address, "Fake Name", "(123) 456 - 7890")
     }
 
     @AfterTest
@@ -98,7 +86,7 @@ class ShippingInfoWidgetTest : BaseViewTest<ShippingInfoTestActivity>(
         assertEquals(postalCodeTextInputLayout.hint, shippingInfoWidget.resources.getString(R.string.address_label_postcode))
         assertEquals(stateTextInputLayout.hint, shippingInfoWidget.resources.getString(R.string.address_label_county))
 
-        countryAutoCompleteTextView.updateUiForCountryEntered(Locale("", mNoPostalCodeCountry).displayCountry)
+        countryAutoCompleteTextView.updateUiForCountryEntered(Locale("", NO_POSTAL_CODE_COUNTRY_CODE).displayCountry)
         assertEquals(addressLine1TextInputLayout.hint, shippingInfoWidget.resources.getString(R.string.address_label_address_line1))
         assertEquals(addressLine2TextInputLayout.hint, shippingInfoWidget.resources.getString(R.string.address_label_address_line2_optional))
         assertEquals(postalCodeTextInputLayout.visibility, View.GONE)
@@ -121,7 +109,7 @@ class ShippingInfoWidgetTest : BaseViewTest<ShippingInfoTestActivity>(
         postalEditText.setText("ABCDEF")
         assertFalse(shippingInfoWidget.validateAllFields())
         countryAutoCompleteTextView
-            .updateUiForCountryEntered(Locale("", mNoPostalCodeCountry).displayCountry)
+            .updateUiForCountryEntered(Locale("", NO_POSTAL_CODE_COUNTRY_CODE).displayCountry)
         assertTrue(shippingInfoWidget.validateAllFields())
     }
 
@@ -149,7 +137,7 @@ class ShippingInfoWidgetTest : BaseViewTest<ShippingInfoTestActivity>(
         shippingInfoWidget.validateAllFields()
         assertTrue(postalCodeTextInputLayout.isErrorEnabled)
         countryAutoCompleteTextView
-            .updateUiForCountryEntered(Locale("", mNoPostalCodeCountry).displayCountry)
+            .updateUiForCountryEntered(Locale("", NO_POSTAL_CODE_COUNTRY_CODE).displayCountry)
         shippingInfoWidget.validateAllFields()
         assertFalse(stateTextInputLayout.isErrorEnabled)
     }
@@ -172,7 +160,7 @@ class ShippingInfoWidgetTest : BaseViewTest<ShippingInfoTestActivity>(
         assertEquals(postalCodeTextInputLayout.error, shippingInfoWidget.resources.getString(R.string.address_postal_code_invalid))
 
         countryAutoCompleteTextView
-            .updateUiForCountryEntered(Locale("", mNoPostalCodeCountry).displayCountry)
+            .updateUiForCountryEntered(Locale("", NO_POSTAL_CODE_COUNTRY_CODE).displayCountry)
         shippingInfoWidget.validateAllFields()
         assertEquals(stateTextInputLayout.error, shippingInfoWidget.resources.getString(R.string.address_region_generic_required))
     }
@@ -225,12 +213,12 @@ class ShippingInfoWidgetTest : BaseViewTest<ShippingInfoTestActivity>(
         postalEditText.setText("12345")
         countryAutoCompleteTextView.updateUiForCountryEntered(Locale.US.displayCountry)
         val inputShippingInfo = shippingInfoWidget.shippingInformation
-        assertEquals(inputShippingInfo, mShippingInfo)
+        assertEquals(inputShippingInfo, SHIPPING_INFO)
     }
 
     @Test
     fun populateShippingInfo_whenShippingInfoProvided_populates() {
-        shippingInfoWidget.populateShippingInfo(mShippingInfo)
+        shippingInfoWidget.populateShippingInfo(SHIPPING_INFO)
         assertEquals(stateEditText.text.toString(), "CA")
         assertEquals(cityEditText.text.toString(), "San Francisco")
         assertEquals(addressLine1EditText.text.toString(), "185 Berry St")
@@ -238,6 +226,23 @@ class ShippingInfoWidgetTest : BaseViewTest<ShippingInfoTestActivity>(
         assertEquals(phoneEditText.text.toString(), "(123) 456 - 7890")
         assertEquals(postalEditText.text.toString(), "12345")
         assertEquals(nameEditText.text.toString(), "Fake Name")
-        assertEquals(countryAutoCompleteTextView.selectedCountryCode, "US")
+        assertEquals(countryAutoCompleteTextView.selectedCountry.code, "US")
+    }
+
+    private companion object {
+        private const val NO_POSTAL_CODE_COUNTRY_CODE = "ZW" // Zimbabwe
+
+        private val SHIPPING_INFO = ShippingInformation(
+            Address.Builder()
+                .setCity("San Francisco")
+                .setState("CA")
+                .setCountry("US")
+                .setLine1("185 Berry St")
+                .setLine2("10th Floor")
+                .setPostalCode("12345")
+                .build(),
+            "Fake Name",
+            "(123) 456 - 7890"
+        )
     }
 }
