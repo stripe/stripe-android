@@ -13,23 +13,29 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.stripe.android.Logger
 import com.stripe.android.PaymentAuthWebViewStarter
 import com.stripe.android.R
-import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
-import com.stripe.android.stripe3ds2.init.ui.ToolbarCustomization
 import com.stripe.android.stripe3ds2.utils.CustomizeUtils
 import com.ults.listeners.SdkChallengeInterface.UL_HANDLE_CHALLENGE_ACTION
 import kotlinx.android.synthetic.main.payment_auth_web_view_layout.*
 
 class PaymentAuthWebViewActivity : AppCompatActivity() {
 
-    private var toolbarCustomization: ToolbarCustomization? = null
     private lateinit var logger: Logger
+    private lateinit var args: PaymentAuthWebViewStarter.Args
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        logger = Logger.getInstance(
-            intent.getBooleanExtra(PaymentAuthWebViewStarter.EXTRA_ENABLE_LOGGING, false)
-        )
+        val args: PaymentAuthWebViewStarter.Args? =
+            intent.getParcelableExtra(PaymentAuthWebViewStarter.EXTRA_ARGS)
+        if (args == null) {
+            setResult(Activity.RESULT_CANCELED)
+            finish()
+            return
+        }
+
+        this.args = args
+
+        logger = Logger.getInstance(args.enableLogging)
         logger.debug("PaymentAuthWebViewActivity#onCreate()")
 
         LocalBroadcastManager.getInstance(this)
@@ -37,30 +43,25 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
 
         setContentView(R.layout.payment_auth_web_view_layout)
 
-        val toolbar = findViewById<Toolbar>(R.id.payment_auth_web_view_toolbar)
+        val toolbar: Toolbar = findViewById(R.id.payment_auth_web_view_toolbar)
         setSupportActionBar(toolbar)
-        toolbarCustomization = intent.getParcelableExtra<StripeToolbarCustomization>(
-            PaymentAuthWebViewStarter.EXTRA_UI_CUSTOMIZATION
-        )
 
         customizeToolbar(toolbar)
 
-        val clientSecret =
-            intent.getStringExtra(PaymentAuthWebViewStarter.EXTRA_CLIENT_SECRET)
-        val returnUrl =
-            intent.getStringExtra(PaymentAuthWebViewStarter.EXTRA_RETURN_URL)
+        val clientSecret = args.clientSecret
+        val returnUrl = args.returnUrl
         setResult(Activity.RESULT_OK, Intent()
             .putExtra(StripeIntentResultExtras.CLIENT_SECRET, clientSecret))
 
-        if (clientSecret.isNullOrBlank()) {
-            logger.debug("PaymentAuthWebViewActivity#onCreate() - clientSecret is null or blank")
+        if (clientSecret.isBlank()) {
+            logger.debug("PaymentAuthWebViewActivity#onCreate() - clientSecret is blank")
             finish()
             return
         }
 
         logger.debug("PaymentAuthWebViewActivity#onCreate() - PaymentAuthWebView init and loadUrl")
         auth_web_view.init(this, logger, auth_web_view_progress_bar, clientSecret, returnUrl)
-        auth_web_view.loadUrl(intent.getStringExtra(PaymentAuthWebViewStarter.EXTRA_AUTH_URL))
+        auth_web_view.loadUrl(args.url)
     }
 
     override fun onDestroy() {
@@ -73,7 +74,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         logger.debug("PaymentAuthWebViewActivity#onCreateOptionsMenu()")
         menuInflater.inflate(R.menu.payment_auth_web_view_menu, menu)
 
-        toolbarCustomization?.let {
+        args.toolbarCustomization?.let {
             val buttonText = it.buttonText
             if (!buttonText.isNullOrBlank()) {
                 logger.debug("PaymentAuthWebViewActivity#customizeToolbar() - updating close button text")
@@ -96,17 +97,16 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
 
     private fun onCloseButtonClicked() {
         // TODO(mshafrir-stripe): call cancel source endpoint - ANDROID-427
-
         finish()
     }
 
     private fun customizeToolbar(toolbar: Toolbar) {
         logger.debug("PaymentAuthWebViewActivity#customizeToolbar()")
-        toolbarCustomization?.let { toolbarCustomization ->
-            if (!toolbarCustomization.headerText.isNullOrBlank()) {
+        args.toolbarCustomization?.let { toolbarCustomization ->
+            val headerText = toolbarCustomization.headerText
+            if (!headerText.isNullOrBlank()) {
                 logger.debug("PaymentAuthWebViewActivity#customizeToolbar() - updating toolbar title")
-                toolbar.title = CustomizeUtils.buildStyledText(this,
-                    toolbarCustomization.headerText, toolbarCustomization)
+                toolbar.title = CustomizeUtils.buildStyledText(this, headerText, toolbarCustomization)
             }
 
             toolbarCustomization.backgroundColor?.let { backgroundColor ->

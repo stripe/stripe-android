@@ -10,13 +10,13 @@ import com.stripe.android.view.StripeIntentResultExtras
 internal class Stripe3ds2CompletionStarter(
     private val host: AuthActivityStarter.Host,
     private val requestCode: Int
-) : AuthActivityStarter<Stripe3ds2CompletionStarter.StartData> {
+) : AuthActivityStarter<Stripe3ds2CompletionStarter.Args> {
 
-    override fun start(data: StartData) {
+    override fun start(args: Args) {
         val extras = Bundle()
         extras.putString(StripeIntentResultExtras.CLIENT_SECRET,
-            data.stripeIntent.clientSecret)
-        extras.putInt(StripeIntentResultExtras.FLOW_OUTCOME, data.outcome)
+            args.stripeIntent.clientSecret)
+        extras.putInt(StripeIntentResultExtras.FLOW_OUTCOME, args.outcome)
         host.startActivityForResult(PaymentRelayActivity::class.java, extras, requestCode)
     }
 
@@ -35,7 +35,7 @@ internal class Stripe3ds2CompletionStarter(
         }
     }
 
-    internal data class StartData internal constructor(
+    internal data class Args internal constructor(
         val stripeIntent: StripeIntent,
         @param:ChallengeFlowOutcome @field:ChallengeFlowOutcome
         private val challengeFlowOutcome: Int

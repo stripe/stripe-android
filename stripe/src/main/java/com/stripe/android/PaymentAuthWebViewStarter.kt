@@ -1,9 +1,11 @@
 package com.stripe.android
 
 import android.os.Bundle
+import android.os.Parcelable
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 import com.stripe.android.view.AuthActivityStarter
 import com.stripe.android.view.PaymentAuthWebViewActivity
+import kotlinx.android.parcel.Parcelize
 
 /**
  * A class that manages starting a [PaymentAuthWebViewActivity] instance with the correct
@@ -11,34 +13,28 @@ import com.stripe.android.view.PaymentAuthWebViewActivity
  */
 internal class PaymentAuthWebViewStarter internal constructor(
     private val host: AuthActivityStarter.Host,
-    private val requestCode: Int,
-    private val toolbarCustomization: StripeToolbarCustomization? = null,
-    private val enableLogging: Boolean = false
-) : AuthActivityStarter<PaymentAuthWebViewStarter.Data> {
+    private val requestCode: Int
+) : AuthActivityStarter<PaymentAuthWebViewStarter.Args> {
 
-    override fun start(data: Data) {
-        Logger.getInstance(enableLogging).debug("PaymentAuthWebViewStarter#start()")
+    override fun start(args: Args) {
         val extras = Bundle().apply {
-            putString(EXTRA_CLIENT_SECRET, data.clientSecret)
-            putString(EXTRA_AUTH_URL, data.url)
-            putString(EXTRA_RETURN_URL, data.returnUrl)
-            putBoolean(EXTRA_ENABLE_LOGGING, enableLogging)
-            putParcelable(EXTRA_UI_CUSTOMIZATION, toolbarCustomization)
+            putParcelable(EXTRA_ARGS, args)
         }
         host.startActivityForResult(PaymentAuthWebViewActivity::class.java, extras, requestCode)
     }
 
-    internal class Data(
+    @Parcelize
+    internal data class Args(
         val clientSecret: String,
         val url: String,
-        val returnUrl: String? = null
-    )
+        val returnUrl: String? = null,
+        val requestOptions: ApiRequest.Options,
+        val enableLogging: Boolean = false,
+        val appInfo: AppInfo? = null,
+        val toolbarCustomization: StripeToolbarCustomization? = null
+    ) : Parcelable
 
     internal companion object {
-        internal const val EXTRA_AUTH_URL = "auth_url"
-        internal const val EXTRA_CLIENT_SECRET = "client_secret"
-        internal const val EXTRA_RETURN_URL = "return_url"
-        internal const val EXTRA_UI_CUSTOMIZATION = "ui_customization"
-        internal const val EXTRA_ENABLE_LOGGING = "enable_logging"
+        internal const val EXTRA_ARGS = "extra_args"
     }
 }

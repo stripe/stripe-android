@@ -1,11 +1,13 @@
 package com.stripe.android
 
 import android.os.Build
+import android.os.Parcelable
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.exception.InvalidRequestException
 import java.io.UnsupportedEncodingException
 import java.util.Locale
 import java.util.Objects
+import kotlinx.android.parcel.Parcelize
 import org.json.JSONObject
 
 /**
@@ -95,11 +97,12 @@ internal class ApiRequest internal constructor(
     /**
      * Data class representing options for a Stripe API request.
      */
+    @Parcelize
     internal data class Options internal constructor(
         val apiKey: String,
         internal val stripeAccount: String? = null,
         internal val idempotencyKey: String? = null
-    ) {
+    ) : Parcelable {
         init {
             ApiKeyValidator().requireValid(apiKey)
         }

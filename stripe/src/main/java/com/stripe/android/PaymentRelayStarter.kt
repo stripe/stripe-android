@@ -10,7 +10,7 @@ import com.stripe.android.view.StripeIntentResultExtras
  * Starts an instance of [PaymentRelayStarter].
  * Should only be called from [StripePaymentController].
  */
-internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter.Data> {
+internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter.Args> {
     companion object {
         @JvmSynthetic
         internal fun create(
@@ -18,12 +18,12 @@ internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter
             requestCode: Int
         ): PaymentRelayStarter {
             return object : PaymentRelayStarter {
-                override fun start(data: Data) {
+                override fun start(args: Args) {
                     val extras = Bundle()
                     extras.putString(StripeIntentResultExtras.CLIENT_SECRET,
-                        data.stripeIntent?.clientSecret)
+                        args.stripeIntent?.clientSecret)
                     extras.putSerializable(StripeIntentResultExtras.AUTH_EXCEPTION,
-                        data.exception)
+                        args.exception)
                     host.startActivityForResult(
                         PaymentRelayActivity::class.java, extras, requestCode
                     )
@@ -32,19 +32,19 @@ internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter
         }
     }
 
-    data class Data internal constructor(
+    data class Args internal constructor(
         val stripeIntent: StripeIntent? = null,
         val exception: Exception? = null
     ) {
         internal companion object {
             @JvmSynthetic
-            internal fun create(stripeIntent: StripeIntent): Data {
-                return Data(stripeIntent = stripeIntent)
+            internal fun create(stripeIntent: StripeIntent): Args {
+                return Args(stripeIntent = stripeIntent)
             }
 
             @JvmSynthetic
-            internal fun create(exception: Exception): Data {
-                return Data(exception = exception)
+            internal fun create(exception: Exception): Args {
+                return Args(exception = exception)
             }
         }
     }

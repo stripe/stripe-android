@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 import com.stripe.android.view.AuthActivityStarter
 import kotlin.test.BeforeTest
@@ -13,7 +14,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
@@ -39,42 +39,37 @@ class PaymentAuthWebViewStarterTest {
     @Test
     fun start_startsWithCorrectIntentAndRequestCode() {
         PaymentAuthWebViewStarter(host, 50000).start(DATA)
-        verify<Activity>(activity).startActivityForResult(intentArgumentCaptor.capture(),
+        verify(activity).startActivityForResult(intentArgumentCaptor.capture(),
             requestCodeCaptor.capture())
 
-        val intent = intentArgumentCaptor.firstValue
-        val extras = requireNotNull(intent.extras)
-        assertNull(extras.getParcelable(PaymentAuthWebViewStarter.EXTRA_UI_CUSTOMIZATION))
-        assertEquals(5, extras.size())
-        assertEquals(CLIENT_SECRET,
-            extras.getString(PaymentAuthWebViewStarter.EXTRA_CLIENT_SECRET))
+        val args: PaymentAuthWebViewStarter.Args = requireNotNull(
+            intentArgumentCaptor.firstValue.getParcelableExtra(PaymentAuthWebViewStarter.EXTRA_ARGS)
+        )
+        assertNull(args.toolbarCustomization)
+        assertEquals(DATA.clientSecret, args.clientSecret)
     }
 
     @Test
     fun start_startsWithCorrectIntentAndRequestCodeAndCustomization() {
-        PaymentAuthWebViewStarter(host, 50000,
-            StripeToolbarCustomization()).start(DATA)
-        verify<Activity>(activity).startActivityForResult(intentArgumentCaptor.capture(),
+        PaymentAuthWebViewStarter(host, 50000).start(DATA.copy(
+            toolbarCustomization = StripeToolbarCustomization()
+        ))
+        verify(activity).startActivityForResult(intentArgumentCaptor.capture(),
             requestCodeCaptor.capture())
 
-        val intent = intentArgumentCaptor.firstValue
-        val extras = requireNotNull(intent.extras)
-        assertNotNull(
-            extras.getParcelable<StripeToolbarCustomization>(
-                PaymentAuthWebViewStarter.EXTRA_UI_CUSTOMIZATION
-            )
+        val args: PaymentAuthWebViewStarter.Args = requireNotNull(
+            intentArgumentCaptor.firstValue.getParcelableExtra(PaymentAuthWebViewStarter.EXTRA_ARGS)
         )
-        assertEquals(5, extras.size())
-        assertEquals(CLIENT_SECRET,
-            extras.getString(PaymentAuthWebViewStarter.EXTRA_CLIENT_SECRET))
+        assertNotNull(args.toolbarCustomization)
+        assertEquals(DATA.clientSecret, args.clientSecret)
     }
 
     private companion object {
-        private const val CLIENT_SECRET = "pi_1EceMnCRMbs6FrXfCXdF8dnx_secret_vew0L3IGaO0x9o0eyRMGzKr0k"
-        private val DATA = PaymentAuthWebViewStarter.Data(
-            CLIENT_SECRET,
-            "https://hooks.stripe.com/",
-            "stripe://payment-auth"
+        private val DATA = PaymentAuthWebViewStarter.Args(
+            clientSecret = "pi_1EceMnCRMbs6FrXfCXdF8dnx_secret_vew0L3IGaO0x9o0eyRMGzKr0k",
+            url = "https://hooks.stripe.com/",
+            returnUrl = "stripe://payment-auth",
+            requestOptions = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
         )
     }
 }
