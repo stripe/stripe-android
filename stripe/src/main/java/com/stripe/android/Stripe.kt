@@ -92,7 +92,11 @@ class Stripe internal constructor(
     ) : this(
         stripeRepository,
         stripeNetworkUtils,
-        StripePaymentController.create(context.applicationContext, stripeRepository, enableLogging),
+        StripePaymentController.create(
+            context.applicationContext,
+            stripeRepository,
+            enableLogging
+        ),
         publishableKey,
         stripeAccountId
     )

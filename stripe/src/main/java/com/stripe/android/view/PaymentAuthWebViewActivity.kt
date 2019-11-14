@@ -88,10 +88,16 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         logger.debug("PaymentAuthWebViewActivity#onOptionsItemSelected()")
         if (item.itemId == R.id.action_close) {
-            finish()
+            onCloseButtonClicked()
             return true
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun onCloseButtonClicked() {
+        // TODO(mshafrir-stripe): call cancel source endpoint - ANDROID-427
+
+        finish()
     }
 
     private fun customizeToolbar(toolbar: Toolbar) {
