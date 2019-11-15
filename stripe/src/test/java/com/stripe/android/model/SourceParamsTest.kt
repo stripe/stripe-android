@@ -275,11 +275,11 @@ class SourceParamsTest {
 
         assertEquals(Source.SourceType.EPS, params.type)
         assertEquals(Source.EURO, params.currency)
-        assertEquals("Stripe", requireNotNull<Map<String, Any>>(params.owner)["name"])
+        assertEquals("Stripe", requireNotNull(params.owner)["name"])
         assertEquals("stripe://return",
-            requireNotNull<Map<String, Any>>(params.redirect)["return_url"])
+            requireNotNull(params.redirect)["return_url"])
 
-        val apiMap = requireNotNull<Map<String, Any>>(params.apiParameterMap)
+        val apiMap = requireNotNull(params.apiParameterMap)
         assertEquals("stripe descriptor", apiMap["statement_descriptor"])
     }
 
@@ -340,7 +340,7 @@ class SourceParamsTest {
         val redirect = requireNotNull(params.redirect)
         assertEquals("stripe://return", redirect["return_url"])
 
-        val apiMap = requireNotNull<Map<String, Any>>(params.apiParameterMap)
+        val apiMap = requireNotNull(params.apiParameterMap)
         assertEquals("stripe descriptor", apiMap["statement_descriptor"])
     }
 
@@ -405,7 +405,7 @@ class SourceParamsTest {
 
         assertEquals("stripe://anotherurl", requireNotNull(params.redirect)["return_url"])
 
-        val apiMap = requireNotNull<Map<String, Any>>(params.apiParameterMap)
+        val apiMap = requireNotNull(params.apiParameterMap)
         assertEquals("something you bought", apiMap["statement_descriptor"])
         assertEquals("SVB", apiMap["bank"])
     }
@@ -488,9 +488,9 @@ class SourceParamsTest {
         assertEquals(Source.EURO, params.currency)
         assertEquals(150L, params.amount)
         assertEquals("stripe://testactivity",
-            requireNotNull<Map<String, Any>>(params.redirect)["return_url"])
+            requireNotNull(params.redirect)["return_url"])
         assertEquals("multibancoholder@stripe.com",
-            requireNotNull<Map<String, Any>>(params.owner)["email"])
+            requireNotNull(params.owner)["email"])
     }
 
     @Test
@@ -533,7 +533,7 @@ class SourceParamsTest {
         assertEquals("90210", addressMap["postal_code"])
         assertEquals("EI", addressMap["country"])
 
-        val apiMap = requireNotNull<Map<String, Any>>(params.apiParameterMap)
+        val apiMap = requireNotNull(params.apiParameterMap)
         assertEquals("ibaniban", apiMap["iban"])
     }
 
@@ -584,7 +584,7 @@ class SourceParamsTest {
         assertEquals(50000L, params.amount)
         assertEquals("example://return", requireNotNull(params.redirect)["return_url"])
 
-        val apiMap = requireNotNull<Map<String, Any>>(params.apiParameterMap)
+        val apiMap = requireNotNull(params.apiParameterMap)
         assertEquals("UK", apiMap["country"])
         assertEquals("a thing you bought", apiMap["statement_descriptor"])
     }
@@ -627,7 +627,7 @@ class SourceParamsTest {
         assertEquals("stripe://returnaddress",
             requireNotNull(params.redirect)["return_url"])
 
-        val apiMap = requireNotNull<Map<String, Any>>(params.apiParameterMap)
+        val apiMap = requireNotNull(params.apiParameterMap)
         assertEquals(1, apiMap.size)
         assertEquals("card_id_123", apiMap["card"])
     }
@@ -730,16 +730,17 @@ class SourceParamsTest {
             "animal" to "dog"
         )
 
-        private val FULL_FIELDS_VISA_CARD: Card = Card.Builder(VALID_VISA_NO_SPACES, 12, 2050, "123")
-            .name("Captain Cardholder")
-            .addressLine1("1 ABC Street")
-            .addressLine2("Apt. 123")
-            .addressCity("San Francisco")
-            .addressState("CA")
-            .addressZip("94107")
-            .addressCountry("US")
-            .currency("usd")
-            .metadata(METADATA)
-            .build()
+        private val FULL_FIELDS_VISA_CARD =
+            Card.Builder(VALID_VISA_NO_SPACES, 12, 2050, "123")
+                .name("Captain Cardholder")
+                .addressLine1("1 ABC Street")
+                .addressLine2("Apt. 123")
+                .addressCity("San Francisco")
+                .addressState("CA")
+                .addressZip("94107")
+                .addressCountry("US")
+                .currency("usd")
+                .metadata(METADATA)
+                .build()
     }
 }

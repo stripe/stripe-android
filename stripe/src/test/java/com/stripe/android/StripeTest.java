@@ -638,7 +638,8 @@ public class StripeTest {
                 "123 Main St",
                 "Eureka",
                 "90210",
-                "EI");
+                "EI"
+        );
         Map<String, String> metamap = new HashMap<String, String>() {{
             put("water source", "well");
             put("type", "brackish");
@@ -801,7 +802,6 @@ public class StripeTest {
         JsonTestUtils.assertMapEquals(metamap, idealSource.getMetaData());
     }
 
-
     @Test
     public void createSourceSynchronous_withSofortParams_passesIntegrationTest()
             throws StripeException {
@@ -867,6 +867,58 @@ public class StripeTest {
         // We aren't actually updating the source on the server, so the two sources should
         // be identical.
         assertEquals(threeDSource, retrievedSource);
+    }
+
+    @Test
+    public void createSourceFromTokenParams_withExtraParams_succeeds()
+            throws StripeException {
+        final Stripe stripe = createStripe();
+        final Token token = stripe.createCardTokenSynchronous(CARD);
+        assertNotNull(token);
+
+        final Map<String, String> map = new HashMap<>();
+        map.put("usage", Source.Usage.SINGLE_USE);
+        final SourceParams sourceParams = SourceParams.createSourceFromTokenParams(token.getId())
+                .setExtraParams(map);
+
+        final Source source = stripe.createSourceSynchronous(sourceParams);
+        assertNotNull(source);
+        assertNotNull(Source.Usage.SINGLE_USE, source.getUsage());
+    }
+
+    @Test
+    public void createVisaCheckoutParams_whenUnactivated_throwsException() {
+        final Stripe stripe = createStripe();
+        final SourceParams sourceParams = SourceParams.createVisaCheckoutParams(
+                UUID.randomUUID().toString()
+        );
+        final InvalidRequestException ex = assertThrows(InvalidRequestException.class,
+                new ThrowingRunnable() {
+                    @Override
+                    public void run() throws Throwable {
+                        stripe.createSourceSynchronous(sourceParams);
+                    }
+                }
+        );
+        assertEquals("visa_checkout must be activated before use.", ex.getMessage());
+    }
+
+    @Test
+    public void createMasterpassParams_whenUnactivated_throwsException() {
+        final Stripe stripe = createStripe();
+        final SourceParams sourceParams = SourceParams.createMasterpassParams(
+                UUID.randomUUID().toString(),
+                UUID.randomUUID().toString()
+        );
+        final InvalidRequestException ex = assertThrows(InvalidRequestException.class,
+                new ThrowingRunnable() {
+                    @Override
+                    public void run() throws Throwable {
+                        stripe.createSourceSynchronous(sourceParams);
+                    }
+                }
+        );
+        assertEquals("masterpass must be activated before use.", ex.getMessage());
     }
 
     @Test
