@@ -305,11 +305,165 @@ internal object SourceFixtures {
             "livemode": false,
             "metadata": {},
             "source_order": $SOURCE_ORDER_JSON,
-            "statement_descriptor": null,
+            "statement_descriptor": "WIDGET FACTORY",
             "status": "pending",
             "type": "klarna",
             "usage": "single_use"
         }
         """.trimIndent()
     )))
+
+    internal val CUSTOMER_SOURCE_CARD_JSON = JSONObject(
+        """
+            {
+                "id": "src_19t3xKBZqEXluyI4uz2dxAfQ",
+                "object": "source",
+                "amount": 1000,
+                "client_secret": "src_client_secret_of43INi1HteJwXVe3djAUosN",
+                "code_verification": {
+                    "attempts_remaining": 3,
+                    "status": "pending"
+                },
+                "created": 1488499654,
+                "currency": "usd",
+                "flow": "receiver",
+                "livemode": false,
+                "metadata": {},
+                "owner": {
+                    "verified_phone": "4158675309",
+                    "address": {
+                        "country": "US",
+                        "city": "San Francisco",
+                        "state": "CA",
+                        "postal_code": "94107",
+                        "line2": "#345",
+                        "line1": "123 Market St"
+                    },
+                    "phone": "4158675309",
+                    "name": "Jenny Rosen",
+                    "verified_name": "Jenny Rosen",
+                    "verified_email": "jenny.rosen@example.com",
+                    "verified_address": {
+                        "country": "US",
+                        "city": "San Francisco",
+                        "state": "CA",
+                        "postal_code": "94107",
+                        "line2": "#345",
+                        "line1": "123 Market St"
+                    },
+                    "email": "jenny.rosen@example.com"
+                },
+                "redirect": {
+                    "return_url": "https://google.com",
+                    "url": "examplecompany://redirect-link",
+                    "status": "succeeded"
+                },
+                "receiver": {
+                    "address": "test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N",
+                    "amount_charged": 0,
+                    "amount_received": 0,
+                    "amount_returned": 0
+                },
+                "status": "pending",
+                "type": "card",
+                "usage": "single_use",
+                "card": {
+                    "address_zip_check": "unchecked",
+                    "tokenization_method": "apple_pay",
+                    "country": "US",
+                    "last4": "4242",
+                    "funding": "credit",
+                    "cvc_check": "unchecked",
+                    "exp_month": 12,
+                    "exp_year": 2050,
+                    "address_line1_check": "unchecked",
+                    "three_d_secure": "optional",
+                    "dynamic_last4": "4242",
+                    "brand": "Visa"
+                }
+            }
+            """.trimIndent()
+    )
+
+    internal val CUSTOMER_SOURCE_CARD = requireNotNull(
+        CustomerSource.fromJson(CUSTOMER_SOURCE_CARD_JSON)
+    )
+
+    internal const val DOGE_COIN = "dogecoin"
+
+    internal val EXAMPLE_JSON_SOURCE_CUSTOM_TYPE = JSONObject(
+        """
+            {
+                "id": "src_19t3xKBZqEXluyI4uz2dxAfQ",
+                "object": "source",
+                "amount": 1000,
+                "client_secret": "src_client_secret_of43INi1HteJwXVe3djAUosN",
+                "code_verification": {
+                    "attempts_remaining": 3,
+                    "status": "pending"
+                },
+                "created": 1488499654,
+                "currency": "usd",
+                "flow": "receiver",
+                "livemode": false,
+                "metadata": {},
+                "owner": {
+                    "verified_phone": "4158675309",
+                    "address": {
+                        "country": "US",
+                        "city": "San Francisco",
+                        "state": "CA",
+                        "postal_code": "94107",
+                        "line2": "#345",
+                        "line1": "123 Market St"
+                    },
+                    "phone": "4158675309",
+                    "name": "Jenny Rosen",
+                    "verified_name": "Jenny Rosen",
+                    "verified_email": "jenny.rosen@example.com",
+                    "verified_address": {
+                        "country": "US",
+                        "city": "San Francisco",
+                        "state": "CA",
+                        "postal_code": "94107",
+                        "line2": "#345",
+                        "line1": "123 Market St"
+                    },
+                    "email": "jenny.rosen@example.com"
+                },
+                "redirect": {
+                    "return_url": "https://google.com",
+                    "url": "examplecompany://redirect-link",
+                    "status": "succeeded"
+                },
+                "receiver": {
+                    "address": "test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N",
+                    "amount_charged": 0,
+                    "amount_received": 0,
+                    "amount_returned": 0
+                },
+                "status": "pending",
+                "type": "dogecoin",
+                "usage": "single_use",
+                "dogecoin": {
+                    "address": "test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N",
+                    "amount": 2371000,
+                    "amount_charged": 0,
+                    "amount_received": 0,
+                    "amount_returned": 0,
+                    "uri": "dogecoin:test_1MBhWS3uv4ynCfQXF3xQjJkzFPukr4K56N?amount=0.02371000"
+                }
+            }
+            """.trimIndent()
+    )
+
+    internal val DELETED_CARD_JSON = JSONObject(
+        """
+            {
+                "id": "card_1ELdAlCRMbs6FrXfNbmZEOb7",
+                "object": "card",
+                "deleted": true
+            }
+            """.trimIndent()
+    )
 }

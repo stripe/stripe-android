@@ -131,7 +131,13 @@ data class Source internal constructor(
      * Information about the items and shipping associated with the source. Required for
      * transactional credit (for example Klarna) sources before you can charge it.
      */
-    val sourceOrder: SourceOrder? = null
+    val sourceOrder: SourceOrder? = null,
+
+    /**
+     * Extra information about a source. This will appear on your customer’s statement
+     * every time you charge the source.
+     */
+    val statementDescriptor: String? = null
 ) : StripeModel(), StripePaymentSource {
 
     val weChat: WeChat
@@ -223,6 +229,7 @@ data class Source internal constructor(
         private const val FIELD_RECEIVER: String = "receiver"
         private const val FIELD_REDIRECT: String = "redirect"
         private const val FIELD_SOURCE_ORDER: String = "source_order"
+        private const val FIELD_STATEMENT_DESCRIPTOR: String = "statement_descriptor"
         private const val FIELD_STATUS: String = "status"
         private const val FIELD_TYPE: String = "type"
         private const val FIELD_USAGE: String = "usage"
@@ -303,6 +310,10 @@ data class Source internal constructor(
                 redirect = optStripeJsonModel(
                     jsonObject, FIELD_REDIRECT, SourceRedirect::class.java
                 ),
+                sourceOrder = jsonObject.optJSONObject(FIELD_SOURCE_ORDER)?.let {
+                    SourceOrder.fromJson(it)
+                },
+                statementDescriptor = optString(jsonObject, FIELD_STATEMENT_DESCRIPTOR),
                 status = asSourceStatus(optString(jsonObject, FIELD_STATUS)),
                 sourceTypeData = sourceTypeData,
                 sourceTypeModel = sourceTypeModel,
@@ -313,9 +324,6 @@ data class Source internal constructor(
                     WeChat.fromJson(jsonObject.optJSONObject(FIELD_WECHAT) ?: JSONObject())
                 } else {
                     null
-                },
-                sourceOrder = jsonObject.optJSONObject(FIELD_SOURCE_ORDER)?.let {
-                    SourceOrder.fromJson(it)
                 }
             )
         }
