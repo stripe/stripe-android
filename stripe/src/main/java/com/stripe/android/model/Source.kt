@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import androidx.annotation.Size
 import androidx.annotation.StringDef
+import com.stripe.android.model.Source.SourceFlow
 import com.stripe.android.model.Source.SourceType
 import com.stripe.android.model.StripeJsonUtils.optLong
 import com.stripe.android.model.StripeJsonUtils.optString
@@ -13,28 +14,89 @@ import org.json.JSONObject
  *
  * See [Sources API Reference](https://stripe.com/docs/api/sources/object).
  */
-data class Source private constructor(
+data class Source internal constructor(
+    /**
+     * Unique identifier for the object.
+     */
     override val id: String?,
-    val amount: Long?,
-    val clientSecret: String?,
-    val codeVerification: SourceCodeVerification?,
-    val created: Long?,
-    val currency: String?,
 
+    /**
+     * A positive integer in the smallest currency unit (that is, 100 cents for $1.00, or 1 for ¥1,
+     * Japanese Yen being a zero-decimal currency) representing the total amount associated with
+     * the source. This is the amount for which the source will be chargeable once ready.
+     * Required for `single_use` sources.
+     */
+    val amount: Long? = null,
+
+    /**
+     * The client secret of the source. Used for client-side retrieval using a publishable key.
+     */
+    val clientSecret: String? = null,
+
+    /**
+     * Information related to the code verification flow. Present if the source is authenticated
+     * by a verification code (`flow` is `code_verification`).
+     */
+    val codeVerification: SourceCodeVerification? = null,
+
+    /**
+     * Time at which the object was created. Measured in seconds since the Unix epoch.
+     */
+    val created: Long? = null,
+
+    /**
+     * Three-letter [ISO code for the currency](https://stripe.com/docs/currencies) associated with
+     * the source. This is the currency for which the source will be chargeable once ready.
+     * Required for `single_use` sources.
+     */
+    val currency: String? = null,
+
+    /**
+     * The authentication `flow` of the source.
+     * `flow` is one of `redirect`, `receiver`, `code_verification`, `none`.
+     */
     @param:SourceFlow @field:SourceFlow @get:SourceFlow
     val flow: String? = null,
 
-    val isLiveMode: Boolean?,
-    val metaData: Map<String, String>?,
-    val owner: SourceOwner?,
+    /**
+     * Has the value true if the object exists in live mode or the value false if the object
+     * exists in test mode.
+     */
+    val isLiveMode: Boolean? = null,
+
+    /**
+     * Set of key-value pairs that you can attach to an object. This can be useful for storing
+     * additional information about the object in a structured format.
+     */
+    val metaData: Map<String, String>? = null,
+
+    /**
+     * Information about the owner of the payment instrument that may be used or required by
+     * particular source types.
+     */
+    val owner: SourceOwner? = null,
+
+    /**
+     * Information related to the receiver flow.
+     * Present if the source is a receiver ([flow] is [SourceFlow.RECEIVER]).
+     */
     val receiver: SourceReceiver? = null,
+
+    /**
+     * Information related to the redirect flow. Present if the source is authenticated by a
+     * redirect ([flow] is [SourceFlow.REDIRECT]).
+     */
     val redirect: SourceRedirect? = null,
 
+    /**
+     * The status of the source, one of `canceled`, `chargeable`, `consumed`, `failed`,
+     * or `pending`. Only `chargeable` sources can be used to create a charge.
+     */
     @param:SourceStatus @field:SourceStatus @get:SourceStatus
-    val status: String?,
+    val status: String? = null,
 
-    val sourceTypeData: Map<String, Any?>?,
-    val sourceTypeModel: StripeSourceTypeModel?,
+    val sourceTypeData: Map<String, Any?>? = null,
+    val sourceTypeModel: StripeSourceTypeModel? = null,
 
     /**
      * Gets the [SourceType] of this Source, as one of the enumerated values.
@@ -55,10 +117,21 @@ data class Source private constructor(
      */
     val typeRaw: String,
 
+    /**
+     * Either `reusable` or `single_use`. Whether this source should be reusable or not. Some source
+     * types may or may not be reusable by construction, while others may leave the option at
+     * creation. If an incompatible value is passed, an error will be returned.
+     */
     @param:Usage @field:Usage @get:Usage
-    val usage: String?,
+    val usage: String? = null,
 
-    private val weChatParam: WeChat?
+    private val weChatParam: WeChat? = null,
+
+    /**
+     * Information about the items and shipping associated with the source. Required for
+     * transactional credit (for example Klarna) sources before you can charge it.
+     */
+    val sourceOrder: SourceOrder? = null
 ) : StripeModel(), StripePaymentSource {
 
     val weChat: WeChat
@@ -149,6 +222,7 @@ data class Source private constructor(
         private const val FIELD_OWNER: String = "owner"
         private const val FIELD_RECEIVER: String = "receiver"
         private const val FIELD_REDIRECT: String = "redirect"
+        private const val FIELD_SOURCE_ORDER: String = "source_order"
         private const val FIELD_STATUS: String = "status"
         private const val FIELD_TYPE: String = "type"
         private const val FIELD_USAGE: String = "usage"
@@ -181,11 +255,10 @@ data class Source private constructor(
             val sourceTypeModel = SourceCardData.fromJson(jsonObject)
 
             return Source(
-                id, null, null, null,
-                null, null, null, null,
-                null, null, null, null,
-                null, null, sourceTypeModel, SourceType.CARD,
-                SourceType.CARD, null, null
+                id,
+                sourceTypeModel = sourceTypeModel,
+                type = SourceType.CARD,
+                typeRaw = SourceType.CARD
             )
         }
 
@@ -240,6 +313,9 @@ data class Source private constructor(
                     WeChat.fromJson(jsonObject.optJSONObject(FIELD_WECHAT) ?: JSONObject())
                 } else {
                     null
+                },
+                sourceOrder = jsonObject.optJSONObject(FIELD_SOURCE_ORDER)?.let {
+                    SourceOrder.fromJson(it)
                 }
             )
         }

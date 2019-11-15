@@ -58,6 +58,14 @@ class SourceTest {
         assertEquals("wxa0df8has9d78ce", weChat.appId)
     }
 
+    @Test
+    fun fromJson_withSourceOrder() {
+        assertEquals(
+            SourceOrderFixtures.SOURCE_ORDER,
+            SourceFixtures.SOURCE_WITH_SOURCE_ORDER.sourceOrder
+        )
+    }
+
     internal companion object {
         internal val EXAMPLE_JSON_SOURCE_WITHOUT_NULLS = JSONObject(
             """
