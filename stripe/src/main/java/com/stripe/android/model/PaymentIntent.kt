@@ -15,7 +15,7 @@ import org.json.JSONObject
  * - [Payment Intents Overview](https://stripe.com/docs/payments/payment-intents)
  * - [PaymentIntents API](https://stripe.com/docs/api/payment_intents)
  */
-data class PaymentIntent private constructor(
+data class PaymentIntent internal constructor(
     /**
      * @return Unique identifier for the object.
      */

@@ -102,9 +102,9 @@ class PaymentAuthActivity : AppCompatActivity() {
         statusTextView.append("\n\nPayment authentication completed, getting result")
 
         val isPaymentResult =
-            stripe.onPaymentResult(requestCode, data, AuthResultListener(this))
+            stripe.onPaymentResult(requestCode, data, PaymentIntentResultCallback(this))
         if (!isPaymentResult) {
-            stripe.onSetupResult(requestCode, data, SetupAuthResultListener(this))
+            stripe.onSetupResult(requestCode, data, SetupIntentResultCallback(this))
         }
     }
 
@@ -223,7 +223,7 @@ class PaymentAuthActivity : AppCompatActivity() {
             )
     }
 
-    private class AuthResultListener constructor(
+    private class PaymentIntentResultCallback constructor(
         activity: PaymentAuthActivity
     ) : ApiResultCallback<PaymentIntentResult> {
         private val activityRef: WeakReference<PaymentAuthActivity> = WeakReference(activity)
@@ -246,7 +246,9 @@ class PaymentAuthActivity : AppCompatActivity() {
         }
     }
 
-    private class SetupAuthResultListener constructor(activity: PaymentAuthActivity) : ApiResultCallback<SetupIntentResult> {
+    private class SetupIntentResultCallback constructor(
+        activity: PaymentAuthActivity
+    ) : ApiResultCallback<SetupIntentResult> {
         private val activityRef: WeakReference<PaymentAuthActivity> = WeakReference(activity)
 
         override fun onSuccess(result: SetupIntentResult) {

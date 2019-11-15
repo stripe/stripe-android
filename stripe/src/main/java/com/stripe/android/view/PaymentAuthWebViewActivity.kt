@@ -7,17 +7,13 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.stripe.android.Logger
 import com.stripe.android.PaymentAuthWebViewStarter
 import com.stripe.android.R
-import com.stripe.android.StripeApiRepository
 import com.stripe.android.stripe3ds2.utils.CustomizeUtils
 import com.ults.listeners.SdkChallengeInterface.UL_HANDLE_CHALLENGE_ACTION
 import kotlinx.android.synthetic.main.payment_auth_web_view_layout.*
@@ -26,7 +22,15 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
 
     private lateinit var logger: Logger
     private lateinit var args: PaymentAuthWebViewStarter.Args
-    private lateinit var viewModel: PaymentAuthWebViewActivityViewModel
+
+    private val resultIntent: Intent
+        get() {
+            return Intent()
+                .putExtra(StripeIntentResultExtras.CLIENT_SECRET, args.clientSecret)
+                .putExtra(StripeIntentResultExtras.SOURCE_ID,
+                    Uri.parse(args.url).lastPathSegment.orEmpty()
+                )
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,9 +59,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         customizeToolbar(toolbar)
 
         val clientSecret = args.clientSecret
-        val returnUrl = args.returnUrl
-        setResult(Activity.RESULT_OK, Intent()
-            .putExtra(StripeIntentResultExtras.CLIENT_SECRET, clientSecret))
+        setResult(Activity.RESULT_OK, resultIntent)
 
         if (clientSecret.isBlank()) {
             logger.debug("PaymentAuthWebViewActivity#onCreate() - clientSecret is blank")
@@ -65,17 +67,8 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
             return
         }
 
-        viewModel = ViewModelProviders.of(
-            this,
-            PaymentAuthWebViewActivityViewModel.Factory(
-                StripeApiRepository(
-                    this, args.appInfo, Logger.getInstance(args.enableLogging)
-                )
-            )
-        ).get(PaymentAuthWebViewActivityViewModel::class.java)
-
         logger.debug("PaymentAuthWebViewActivity#onCreate() - PaymentAuthWebView init and loadUrl")
-        auth_web_view.init(this, logger, auth_web_view_progress_bar, clientSecret, returnUrl)
+        auth_web_view.init(this, logger, auth_web_view_progress_bar, clientSecret, args.returnUrl)
         auth_web_view.loadUrl(args.url)
     }
 
@@ -115,16 +108,11 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
     }
 
     private fun cancelIntentSource() {
-        val sourceId = Uri.parse(args.url).lastPathSegment.orEmpty()
-
-        auth_web_view.loadBlank()
-        viewModel.intent.observe(this, Observer {
-            auth_web_view_progress_bar.visibility = View.GONE
-            finish()
-        })
-
-        auth_web_view_progress_bar.visibility = View.VISIBLE
-        viewModel.startCancelIntentSource(args.clientSecret, sourceId, args.requestOptions)
+        setResult(Activity.RESULT_OK,
+            resultIntent
+                .putExtra(StripeIntentResultExtras.SHOULD_CANCEL_SOURCE, true)
+        )
+        finish()
     }
 
     private fun customizeToolbar(toolbar: Toolbar) {
