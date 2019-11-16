@@ -79,8 +79,7 @@ class Stripe internal constructor(
         StripeNetworkUtils(context.applicationContext),
         ApiKeyValidator.get().requireValid(publishableKey),
         stripeAccountId,
-        enableLogging,
-        appInfo
+        enableLogging
     )
 
     private constructor(
@@ -89,8 +88,7 @@ class Stripe internal constructor(
         stripeNetworkUtils: StripeNetworkUtils,
         publishableKey: String,
         stripeAccountId: String?,
-        enableLogging: Boolean,
-        appInfo: AppInfo?
+        enableLogging: Boolean
     ) : this(
         stripeRepository,
         stripeNetworkUtils,

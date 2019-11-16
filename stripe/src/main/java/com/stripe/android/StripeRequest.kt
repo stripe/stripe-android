@@ -172,22 +172,17 @@ internal abstract class StripeRequest(
 
             // Remove all null values; they cause validation errors
             for (key in HashSet(compactParams.keys)) {
-                if (compactParams[key] == null) {
-                    compactParams.remove(key)
-                }
-
-                if (compactParams[key] is CharSequence) {
-                    val sequence = compactParams[key] as CharSequence?
-                    if (sequence.isNullOrEmpty()) {
-                        compactParams.remove(key)
+                when (val value = compactParams[key]) {
+                    is CharSequence -> {
+                        if (value.isEmpty()) {
+                            compactParams.remove(key)
+                        }
                     }
-                }
-
-                if (compactParams[key] is Map<*, *>) {
-                    val nestedMap = compactParams[key] as Map<String, Any>?
-                    if (nestedMap != null) {
-                        val compactNestedMap = compactParams(nestedMap)
-                        compactParams[key] = compactNestedMap
+                    is Map<*, *> -> {
+                        compactParams[key] = compactParams(value as Map<String, *>)
+                    }
+                    null -> {
+                        compactParams.remove(key)
                     }
                 }
             }
