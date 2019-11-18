@@ -23,74 +23,74 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
      * @return 2 digit country code of the country selected by this input.
      */
     @VisibleForTesting
-    var selectedCountryCode: String? = null
+    var selectedCountry: Country
 
-    private var countryChangeListener: CountryChangeListener? = null
+    @JvmSynthetic
+    internal var countryChangeCallback: (Country) -> Unit = {}
 
     init {
         View.inflate(getContext(), R.layout.country_autocomplete_textview, this)
-        countryAutocomplete = findViewById(R.id.autocomplete_country_cat)
+
         val countryAdapter = CountryAdapter(
             getContext(),
             CountryUtils.getOrderedCountries(
                 ConfigurationCompat.getLocales(context.resources.configuration)[0]
             )
         )
+
+        countryAutocomplete = findViewById(R.id.autocomplete_country_cat)
         countryAutocomplete.threshold = 0
         countryAutocomplete.setAdapter(countryAdapter)
-        countryAutocomplete.onItemClickListener = AdapterView.OnItemClickListener { _, _, _, _ ->
-            val countryEntered = countryAutocomplete.text.toString()
-            updateUiForCountryEntered(countryEntered)
-        }
-        val defaultCountryEntered = countryAdapter.getItem(0)
-        updateUiForCountryEntered(defaultCountryEntered)
-        countryAutocomplete.setText(defaultCountryEntered)
+        countryAutocomplete.onItemClickListener =
+            AdapterView.OnItemClickListener { _, _, position, _ ->
+                updatedSelectedCountryCode(countryAdapter.getItem(position))
+            }
         countryAutocomplete.onFocusChangeListener = OnFocusChangeListener { _, focused ->
-            val countryEntered = countryAutocomplete.text.toString()
             if (focused) {
                 countryAutocomplete.showDropDown()
             } else {
+                val countryEntered = countryAutocomplete.text.toString()
                 updateUiForCountryEntered(countryEntered)
             }
         }
+
+        val initialCountry = countryAdapter.getItem(0)
+        countryAutocomplete.setText(initialCountry.name)
+        selectedCountry = initialCountry
+        countryChangeCallback(initialCountry)
     }
 
     /**
      * @param countryCode specify a country code to display in the input. The input will display
      * the full country display name.
      */
-    fun setCountrySelected(countryCode: String?) {
-        if (countryCode == null) {
-            return
-        }
+    internal fun setCountrySelected(countryCode: String) {
         updateUiForCountryEntered(getDisplayCountry(countryCode))
     }
 
-    fun setCountryChangeListener(countryChangeListener: CountryChangeListener?) {
-        this.countryChangeListener = countryChangeListener
-    }
-
     @VisibleForTesting
-    fun updateUiForCountryEntered(displayCountryEntered: String?) {
-        val displayCountry = CountryUtils.getCountryCode(displayCountryEntered)?.let {
-            if (selectedCountryCode == null || selectedCountryCode != it) {
-                selectedCountryCode = it
-                countryChangeListener?.onCountryChanged(it)
-            }
+    internal fun updateUiForCountryEntered(displayCountryEntered: String) {
+        val country = CountryUtils.getCountryByName(displayCountryEntered)
+
+        // If the user-typed country matches a valid country, update the selected country
+        // Otherwise, revert back to last valid country if country is not recognized.
+        val displayCountry = country?.let {
+            updatedSelectedCountryCode(it)
             displayCountryEntered
-        } ?: selectedCountryCode?.let {
-            // Revert back to last valid country if country is not recognized.
-            getDisplayCountry(it)
-        }
+        } ?: selectedCountry.name
 
         countryAutocomplete.setText(displayCountry)
     }
 
-    private fun getDisplayCountry(countryCode: String): String {
-        return Locale("", countryCode).displayCountry
+    private fun updatedSelectedCountryCode(country: Country) {
+        if (selectedCountry != country) {
+            selectedCountry = country
+            countryChangeCallback(country)
+        }
     }
 
-    internal interface CountryChangeListener {
-        fun onCountryChanged(countryCode: String)
+    private fun getDisplayCountry(countryCode: String): String {
+        return CountryUtils.getCountryByCode(countryCode)?.name
+            ?: Locale("", countryCode).displayCountry
     }
 }

@@ -18,20 +18,20 @@ import java.util.Locale
  */
 internal class CountryAdapter(
     context: Context,
-    initialCountries: List<String>
-) : ArrayAdapter<String>(context, R.layout.country_text_view) {
+    initialCountries: List<Country>
+) : ArrayAdapter<Country>(context, R.layout.country_text_view) {
     private val countryFilter: Filter = CountryFilter(
         initialCountries,
         this,
         context as? Activity
     )
-    private var suggestions: List<String> = initialCountries
+    private var suggestions: List<Country> = initialCountries
 
     override fun getCount(): Int {
         return suggestions.size
     }
 
-    override fun getItem(i: Int): String {
+    override fun getItem(i: Int): Country {
         return suggestions[i]
     }
 
@@ -41,12 +41,12 @@ internal class CountryAdapter(
 
     override fun getView(i: Int, view: View?, viewGroup: ViewGroup): View {
         return if (view is TextView) {
-            view.text = getItem(i)
+            view.text = getItem(i).name
             view
         } else {
             val countryText = LayoutInflater.from(context).inflate(
                 R.layout.country_text_view, viewGroup, false) as TextView
-            countryText.text = getItem(i)
+            countryText.text = getItem(i).name
             countryText
         }
     }
@@ -56,7 +56,7 @@ internal class CountryAdapter(
     }
 
     private class CountryFilter(
-        private val initialCountries: List<String>,
+        private val initialCountries: List<Country>,
         private val adapter: CountryAdapter,
         activity: Activity?
     ) : Filter() {
@@ -74,10 +74,10 @@ internal class CountryAdapter(
             constraint: CharSequence?,
             filterResults: FilterResults?
         ) {
-            val suggestions = filterResults?.values as List<String>
+            val suggestions = filterResults?.values as List<Country>
 
             activityRef.get()?.let { activity ->
-                if (suggestions.any { it == constraint }) {
+                if (suggestions.any { it.name == constraint }) {
                     hideKeyboard(activity)
                 }
             }
@@ -86,7 +86,7 @@ internal class CountryAdapter(
             adapter.notifyDataSetChanged()
         }
 
-        private fun filteredSuggestedCountries(constraint: CharSequence?): List<String> {
+        private fun filteredSuggestedCountries(constraint: CharSequence?): List<Country> {
             val suggestedCountries = getSuggestedCountries(constraint)
 
             return if (suggestedCountries.isEmpty() || isMatch(suggestedCountries, constraint)) {
@@ -96,17 +96,17 @@ internal class CountryAdapter(
             }
         }
 
-        private fun getSuggestedCountries(constraint: CharSequence?): List<String> {
+        private fun getSuggestedCountries(constraint: CharSequence?): List<Country> {
             return initialCountries
                 .filter {
-                    it.toLowerCase(Locale.ROOT).startsWith(
+                    it.name.toLowerCase(Locale.ROOT).startsWith(
                         constraint.toString().toLowerCase(Locale.ROOT)
                     )
                 }
         }
 
-        private fun isMatch(countries: List<String>, constraint: CharSequence?): Boolean {
-            return countries.size == 1 && countries[0] == constraint.toString()
+        private fun isMatch(countries: List<Country>, constraint: CharSequence?): Boolean {
+            return countries.size == 1 && countries[0].name == constraint.toString()
         }
 
         private fun hideKeyboard(activity: Activity) {

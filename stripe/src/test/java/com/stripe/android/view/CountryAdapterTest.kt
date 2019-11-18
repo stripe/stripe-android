@@ -17,9 +17,9 @@ import org.robolectric.RobolectricTestRunner
 class CountryAdapterTest {
 
     private lateinit var countryAdapter: CountryAdapter
-    private lateinit var orderedCountries: List<String>
+    private lateinit var orderedCountries: List<Country>
 
-    private val suggestions: List<String>
+    private val suggestions: List<Country>
         get() {
             return (0 until countryAdapter.count).mapNotNull {
                 countryAdapter.getItem(it)
@@ -66,7 +66,7 @@ class CountryAdapterTest {
                 "United Kingdom",
                 "United States Minor Outlying Islands"
             ),
-            suggestions
+            suggestions.map { it.name }
         )
     }
 

@@ -61,7 +61,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
         get() {
             val address = Address.Builder()
                 .setCity(cityEditText.text?.toString())
-                .setCountry(countryAutoCompleteTextView.selectedCountryCode)
+                .setCountry(countryAutoCompleteTextView.selectedCountry.code)
                 .setLine1(addressEditText.text?.toString())
                 .setLine2(addressEditText2.text?.toString())
                 .setPostalCode(postalCodeEditText.text?.toString())
@@ -136,9 +136,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
         optionalShippingInfoFields = optionalAddressFields.orEmpty()
         renderLabels()
 
-        countryAutoCompleteTextView.selectedCountryCode?.let { selectedCountryCode ->
-            renderCountrySpecificLabels(selectedCountryCode)
-        }
+        countryAutoCompleteTextView.selectedCountry.let(::renderCountrySpecificLabels)
     }
 
     /**
@@ -149,9 +147,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
         hiddenShippingInfoFields = hiddenAddressFields.orEmpty()
         renderLabels()
 
-        countryAutoCompleteTextView.selectedCountryCode?.let { selectedCountryCode ->
-            renderCountrySpecificLabels(selectedCountryCode)
-        }
+        countryAutoCompleteTextView.selectedCountry.let(::renderCountrySpecificLabels)
     }
 
     /**
@@ -193,7 +189,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
 
         val isPostalCodeValid = shippingPostalCodeValidator.isValid(
             postalCode,
-            countryAutoCompleteTextView.selectedCountryCode.orEmpty(),
+            countryAutoCompleteTextView.selectedCountry.code,
             optionalShippingInfoFields,
             hiddenShippingInfoFields
         )
@@ -235,20 +231,13 @@ class ShippingInfoWidget @JvmOverloads constructor(
     }
 
     private fun initView() {
-        countryAutoCompleteTextView.setCountryChangeListener(
-            object : CountryAutoCompleteTextView.CountryChangeListener {
-                override fun onCountryChanged(countryCode: String) {
-                    renderCountrySpecificLabels(countryCode)
-                }
-            }
-        )
+        countryAutoCompleteTextView.countryChangeCallback = ::renderCountrySpecificLabels
+
         phoneNumberEditText.addTextChangedListener(PhoneNumberFormattingTextWatcher())
         setupErrorHandling()
         renderLabels()
 
-        countryAutoCompleteTextView.selectedCountryCode?.let { selectedCountryCode ->
-            renderCountrySpecificLabels(selectedCountryCode)
-        }
+        countryAutoCompleteTextView.selectedCountry.let(::renderCountrySpecificLabels)
     }
 
     private fun setupErrorHandling() {
@@ -303,8 +292,8 @@ class ShippingInfoWidget @JvmOverloads constructor(
         }
     }
 
-    private fun renderCountrySpecificLabels(countrySelected: String) {
-        when (countrySelected) {
+    private fun renderCountrySpecificLabels(country: Country) {
+        when (country.code) {
             Locale.US.country -> renderUSForm()
             Locale.UK.country -> renderGreatBritainForm()
             Locale.CANADA.country -> renderCanadianForm()
@@ -312,7 +301,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
         }
 
         postalCodeTextInputLayout.visibility =
-            if (CountryUtils.doesCountryUsePostalCode(countrySelected) &&
+            if (CountryUtils.doesCountryUsePostalCode(country.code) &&
                 !isFieldHidden(CustomizableShippingField.POSTAL_CODE_FIELD)) {
                 View.VISIBLE
             } else {

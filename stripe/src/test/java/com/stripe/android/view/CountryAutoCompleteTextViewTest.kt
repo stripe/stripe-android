@@ -37,13 +37,13 @@ class CountryAutoCompleteTextViewTest : BaseViewTest<ShippingInfoTestActivity>(
 
     @Test
     fun countryAutoCompleteTextView_whenInitialized_displaysDefaultLocaleDisplayName() {
-        assertEquals(Locale.US.country, countryAutoCompleteTextView.selectedCountryCode)
+        assertEquals(Locale.US.country, countryAutoCompleteTextView.selectedCountry.code)
         assertEquals(Locale.US.displayCountry, autoCompleteTextView.text.toString())
     }
 
     @Test
     fun updateUIForCountryEntered_whenInvalidCountry_revertsToLastCountry() {
-        val previousValidCountryCode = countryAutoCompleteTextView.selectedCountryCode.orEmpty()
+        val previousValidCountryCode = countryAutoCompleteTextView.selectedCountry.code
         countryAutoCompleteTextView.setCountrySelected("FAKE COUNTRY CODE")
         assertNull(autoCompleteTextView.error)
         assertEquals(autoCompleteTextView.text.toString(),
@@ -56,9 +56,9 @@ class CountryAutoCompleteTextViewTest : BaseViewTest<ShippingInfoTestActivity>(
 
     @Test
     fun updateUIForCountryEntered_whenValidCountry_UIUpdates() {
-        assertEquals(Locale.US.country, countryAutoCompleteTextView.selectedCountryCode)
+        assertEquals(Locale.US.country, countryAutoCompleteTextView.selectedCountry.code)
         countryAutoCompleteTextView.setCountrySelected(Locale.UK.country)
-        assertEquals(Locale.UK.country, countryAutoCompleteTextView.selectedCountryCode)
+        assertEquals(Locale.UK.country, countryAutoCompleteTextView.selectedCountry.code)
     }
 
     @Test
@@ -67,13 +67,6 @@ class CountryAutoCompleteTextViewTest : BaseViewTest<ShippingInfoTestActivity>(
         assertFalse(autoCompleteTextView.isPopupShowing)
         autoCompleteTextView.requestFocus()
         assertTrue(autoCompleteTextView.isPopupShowing)
-    }
-
-    @Test
-    fun updateUIForCountryEntered_whenCountrySelectedNullAndNoLocale_doesNotCrash() {
-        Locale.setDefault(Locale.CHINA)
-        countryAutoCompleteTextView.selectedCountryCode = null
-        countryAutoCompleteTextView.updateUiForCountryEntered(null)
     }
 
     @AfterTest
