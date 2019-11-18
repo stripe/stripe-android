@@ -10,6 +10,7 @@ import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntent
@@ -18,6 +19,7 @@ import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.Stripe3ds2AuthResultFixtures
 import com.stripe.android.model.Stripe3ds2Fingerprint
 import com.stripe.android.model.Stripe3ds2FingerprintTest
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.transaction.AuthenticationRequestParameters
 import com.stripe.android.stripe3ds2.transaction.CompletionEvent
@@ -40,6 +42,7 @@ import kotlinx.coroutines.MainScope
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.MockitoAnnotations
@@ -48,7 +51,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class StripePaymentControllerTest {
 
-    private lateinit var controller: StripePaymentController
+    private lateinit var controller: PaymentController
     private lateinit var analyticsDataFactory: AnalyticsDataFactory
     private lateinit var host: AuthActivityStarter.Host
 
@@ -83,7 +86,8 @@ class StripePaymentControllerTest {
     private lateinit var relayStarterArgsArgumentCaptor: KArgumentCaptor<PaymentRelayStarter.Args>
     private lateinit var intentArgumentCaptor: KArgumentCaptor<Intent>
     private lateinit var apiRequestArgumentCaptor: KArgumentCaptor<StripeRequest>
-    private lateinit var resultCaptor: KArgumentCaptor<SetupIntentResult>
+    private lateinit var setupIntentResultArgumentCaptor: KArgumentCaptor<SetupIntentResult>
+    private lateinit var apiResultStripeIntentArgumentCaptor: KArgumentCaptor<ApiResultCallback<StripeIntent>>
 
     @BeforeTest
     fun setup() {
@@ -92,28 +96,19 @@ class StripePaymentControllerTest {
         relayStarterArgsArgumentCaptor = argumentCaptor()
         intentArgumentCaptor = argumentCaptor()
         apiRequestArgumentCaptor = argumentCaptor()
-        resultCaptor = argumentCaptor()
+        setupIntentResultArgumentCaptor = argumentCaptor()
+        apiResultStripeIntentArgumentCaptor = argumentCaptor()
+
+        val context: Context = ApplicationProvider.getApplicationContext<Context>()
 
         host = AuthActivityStarter.Host.create(activity)
         analyticsDataFactory =
-            AnalyticsDataFactory.create(ApplicationProvider.getApplicationContext<Context>())
+            AnalyticsDataFactory.create(context)
         `when`<AuthenticationRequestParameters>(transaction.authenticationRequestParameters)
             .thenReturn(Stripe3ds2Fixtures.AREQ_PARAMS)
         `when`<Context>(activity.applicationContext)
-            .thenReturn(ApplicationProvider.getApplicationContext<Context>())
-        controller = StripePaymentController(
-            ApplicationProvider.getApplicationContext<Context>(),
-            FakeStripeRepository(),
-            false,
-            null,
-            MessageVersionRegistry(),
-            CONFIG,
-            threeDs2Service,
-            fireAndForgetRequestExecutor,
-            analyticsDataFactory,
-            challengeFlowStarter,
-            MainScope()
-        )
+            .thenReturn(context)
+        controller = createController()
     }
 
     @Test
@@ -421,7 +416,7 @@ class StripePaymentControllerTest {
                 PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.clientSecret)
         assertNotNull(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.clientSecret)
         assertEquals(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.clientSecret,
-            controller.getClientSecret(data))
+            StripePaymentController.getClientSecret(data))
     }
 
     @Test
@@ -461,8 +456,8 @@ class StripePaymentControllerTest {
 
         controller.handleSetupResult(intent, REQUEST_OPTIONS, setupAuthResultCallback)
 
-        verify(setupAuthResultCallback).onSuccess(resultCaptor.capture())
-        val result = resultCaptor.firstValue
+        verify(setupAuthResultCallback).onSuccess(setupIntentResultArgumentCaptor.capture())
+        val result = setupIntentResultArgumentCaptor.firstValue
         assertEquals(StripeIntentResult.Outcome.SUCCEEDED, result.outcome)
         assertEquals(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT, result.intent)
     }
@@ -550,6 +545,62 @@ class StripePaymentControllerTest {
             relayStarterArgsArgumentCaptor.firstValue.exception?.message)
     }
 
+    @Test
+    fun handlePaymentResult_whenSourceShouldBeCanceled_onlyCallsCancelIntentOnce() {
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_3DS1
+        val clientSecret = paymentIntent.clientSecret.orEmpty()
+        val stripeRepository: StripeRepository = mock(StripeRepository::class.java)
+        val sourceId = "src_1Ff87qCRMbs6FrXfPABTYaEd"
+
+        val intent = Intent()
+            .putExtra(StripeIntentResultExtras.CLIENT_SECRET, clientSecret)
+            .putExtra(StripeIntentResultExtras.SOURCE_ID, sourceId)
+            .putExtra(StripeIntentResultExtras.SHOULD_CANCEL_SOURCE, true)
+
+        createController(stripeRepository)
+            .handlePaymentResult(intent, REQUEST_OPTIONS, paymentAuthResultCallback)
+
+        verify(stripeRepository).retrieveIntent(
+            eq(clientSecret),
+            eq(REQUEST_OPTIONS),
+            apiResultStripeIntentArgumentCaptor.capture()
+        )
+        // return a PaymentIntent in `requires_action` state
+        apiResultStripeIntentArgumentCaptor.firstValue.onSuccess(paymentIntent)
+
+        verify(stripeRepository).cancelIntent(
+            eq(paymentIntent),
+            eq(sourceId),
+            eq(REQUEST_OPTIONS),
+            apiResultStripeIntentArgumentCaptor.capture()
+        )
+        apiResultStripeIntentArgumentCaptor.secondValue.onSuccess(paymentIntent)
+
+        // verify that cancelIntent is only called once
+        verifyNoMoreInteractions(stripeRepository)
+
+        verify(paymentAuthResultCallback).onSuccess(
+            PaymentIntentResult(paymentIntent)
+        )
+    }
+
+    private fun createController(
+        stripeRepository: StripeRepository = FakeStripeRepository()
+    ): PaymentController {
+        return StripePaymentController(
+            ApplicationProvider.getApplicationContext(),
+            stripeRepository,
+            false,
+            MessageVersionRegistry(),
+            CONFIG,
+            threeDs2Service,
+            fireAndForgetRequestExecutor,
+            analyticsDataFactory,
+            challengeFlowStarter,
+            MainScope()
+        )
+    }
+
     private class FakeStripeRepository : AbsFakeStripeRepository() {
         override fun retrieveSetupIntent(
             clientSecret: String,
@@ -573,6 +624,15 @@ class StripePaymentControllerTest {
             callback: ApiResultCallback<Boolean>
         ) {
             callback.onSuccess(true)
+        }
+
+        override fun retrieveIntent(
+            clientSecret: String,
+            options: ApiRequest.Options,
+            callback: ApiResultCallback<StripeIntent>
+        ) {
+            super.retrieveIntent(clientSecret, options, callback)
+            callback.onSuccess(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT)
         }
     }
 

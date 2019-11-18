@@ -3,6 +3,7 @@ package com.stripe.android.view
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -21,6 +22,15 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
 
     private lateinit var logger: Logger
     private lateinit var args: PaymentAuthWebViewStarter.Args
+
+    private val resultIntent: Intent
+        get() {
+            return Intent()
+                .putExtra(StripeIntentResultExtras.CLIENT_SECRET, args.clientSecret)
+                .putExtra(StripeIntentResultExtras.SOURCE_ID,
+                    Uri.parse(args.url).lastPathSegment.orEmpty()
+                )
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,9 +59,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         customizeToolbar(toolbar)
 
         val clientSecret = args.clientSecret
-        val returnUrl = args.returnUrl
-        setResult(Activity.RESULT_OK, Intent()
-            .putExtra(StripeIntentResultExtras.CLIENT_SECRET, clientSecret))
+        setResult(Activity.RESULT_OK, resultIntent)
 
         if (clientSecret.isBlank()) {
             logger.debug("PaymentAuthWebViewActivity#onCreate() - clientSecret is blank")
@@ -60,7 +68,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         }
 
         logger.debug("PaymentAuthWebViewActivity#onCreate() - PaymentAuthWebView init and loadUrl")
-        auth_web_view.init(this, logger, auth_web_view_progress_bar, clientSecret, returnUrl)
+        auth_web_view.init(this, logger, auth_web_view_progress_bar, clientSecret, args.returnUrl)
         auth_web_view.loadUrl(args.url)
     }
 
@@ -89,14 +97,21 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         logger.debug("PaymentAuthWebViewActivity#onOptionsItemSelected()")
         if (item.itemId == R.id.action_close) {
-            onCloseButtonClicked()
+            cancelIntentSource()
             return true
         }
         return super.onOptionsItemSelected(item)
     }
 
-    private fun onCloseButtonClicked() {
-        // TODO(mshafrir-stripe): call cancel source endpoint - ANDROID-427
+    override fun onBackPressed() {
+        cancelIntentSource()
+    }
+
+    private fun cancelIntentSource() {
+        setResult(Activity.RESULT_OK,
+            resultIntent
+                .putExtra(StripeIntentResultExtras.SHOULD_CANCEL_SOURCE, true)
+        )
         finish()
     }
 

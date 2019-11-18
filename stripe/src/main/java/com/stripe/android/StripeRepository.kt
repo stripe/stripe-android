@@ -17,6 +17,7 @@ import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Stripe3ds2AuthResult
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import org.json.JSONException
 
@@ -45,7 +46,7 @@ internal interface StripeRepository {
         paymentIntentId: String,
         sourceId: String,
         options: ApiRequest.Options
-    )
+    ): PaymentIntent?
 
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, APIException::class)
@@ -67,6 +68,19 @@ internal interface StripeRepository {
         setupIntentId: String,
         sourceId: String,
         options: ApiRequest.Options
+    ): SetupIntent?
+
+    fun retrieveIntent(
+        clientSecret: String,
+        options: ApiRequest.Options,
+        callback: ApiResultCallback<StripeIntent>
+    )
+
+    fun cancelIntent(
+        stripeIntent: StripeIntent,
+        sourceId: String,
+        options: ApiRequest.Options,
+        callback: ApiResultCallback<StripeIntent>
     )
 
     @Throws(AuthenticationException::class, InvalidRequestException::class,

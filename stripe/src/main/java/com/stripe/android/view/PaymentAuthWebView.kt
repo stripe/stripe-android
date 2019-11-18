@@ -22,6 +22,7 @@ import android.widget.ProgressBar
 import androidx.appcompat.app.AlertDialog
 import com.stripe.android.Logger
 import com.stripe.android.R
+import com.stripe.android.view.PaymentAuthWebView.PaymentAuthWebViewClient.Companion.BLANK_PAGE
 
 /**
  * A `WebView` used for authenticating payment details
@@ -44,9 +45,10 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
         clientSecret: String,
         returnUrl: String? = null
     ) {
-        webViewClient = PaymentAuthWebViewClient(activity, activity.packageManager, logger,
+        val webViewClient = PaymentAuthWebViewClient(activity, activity.packageManager, logger,
             progressBar, clientSecret, returnUrl)
         setWebViewClient(webViewClient)
+        this.webViewClient = webViewClient
 
         webChromeClient = object : WebChromeClient() {
             override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
@@ -81,7 +83,7 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
     // inspired by https://stackoverflow.com/a/17458577/11103900
     private fun cleanup() {
         clearHistory()
-        loadUrl("about:blank")
+        loadBlank()
         onPause()
         removeAllViews()
         destroyDrawingCache()
@@ -92,6 +94,13 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
         settings.javaScriptEnabled = true
         settings.allowContentAccess = false
         settings.domStorageEnabled = true
+    }
+
+    internal fun loadBlank() {
+        webViewClient?.let {
+            it.hasLoadedBlank = true
+        }
+        loadUrl(BLANK_PAGE)
     }
 
     private companion object {
@@ -124,12 +133,17 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
         var completionUrlParam: String? = null
             private set
 
+        internal var hasLoadedBlank: Boolean = false
+
         override fun onPageFinished(view: WebView, url: String?) {
             logger.debug("PaymentAuthWebViewClient#onPageFinished() - $url")
             super.onPageFinished(view, url)
-            // hide the progress bar here because doing it in `onPageCommitVisible()` potentially
-            // causes a crash
-            hideProgressBar()
+
+            if (!hasLoadedBlank) {
+                // hide the progress bar here because doing it in `onPageCommitVisible()`
+                // potentially causes a crash
+                hideProgressBar()
+            }
 
             if (url != null && isCompletionUrl(url)) {
                 onAuthCompleted()
@@ -262,9 +276,9 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
             activity.finish()
         }
 
-        companion object {
-            const val PARAM_PAYMENT_CLIENT_SECRET = "payment_intent_client_secret"
-            const val PARAM_SETUP_CLIENT_SECRET = "setup_intent_client_secret"
+        internal companion object {
+            internal const val PARAM_PAYMENT_CLIENT_SECRET = "payment_intent_client_secret"
+            internal const val PARAM_SETUP_CLIENT_SECRET = "setup_intent_client_secret"
 
             private val AUTHENTICATE_URLS = setOf(
                 "https://hooks.stripe.com/three_d_secure/authenticate"
@@ -276,6 +290,8 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
             )
 
             private const val PARAM_RETURN_URL = "return_url"
+
+            internal const val BLANK_PAGE = "about:blank"
         }
     }
 }
