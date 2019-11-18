@@ -121,6 +121,7 @@ class PaymentSessionActivity : AppCompatActivity() {
                 // Optionally specify the `PaymentMethod.Type` values to use.
                 // Defaults to `PaymentMethod.Type.Card`
                 .setPaymentMethodTypes(listOf(PaymentMethod.Type.Card))
+                .setAllowedShippingCountryCodes(setOf("US", "CA"))
                 .build(),
             savedInstanceState = savedInstanceState,
             shouldPrefetchCustomer = shouldPrefetchCustomer

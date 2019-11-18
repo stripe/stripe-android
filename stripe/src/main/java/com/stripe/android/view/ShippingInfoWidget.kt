@@ -174,6 +174,10 @@ class ShippingInfoWidget @JvmOverloads constructor(
         phoneNumberEditText.setText(shippingInformation.phone)
     }
 
+    fun setAllowedCountryCodes(allowedCountryCodes: Set<String>) {
+        countryAutoCompleteTextView.setAllowedCountryCodes(allowedCountryCodes)
+    }
+
     /**
      * Validates all fields and shows error messages if appropriate.
      *

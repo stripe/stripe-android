@@ -43,6 +43,11 @@ internal object PaymentSessionFixtures {
             listOf(PaymentMethod.Type.Card)
         )
 
+        // only allowed US and Canada shipping addresses
+        .setAllowedShippingCountryCodes(
+            setOf("US", "CA")
+        )
+
         .build()
 
     internal val PAYMENT_SESSION_DATA = PaymentSessionData(PAYMENT_SESSION_CONFIG)
