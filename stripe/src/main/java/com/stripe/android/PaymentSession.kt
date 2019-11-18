@@ -35,7 +35,7 @@ class PaymentSession @VisibleForTesting internal constructor(
     var paymentSessionData: PaymentSessionData = paymentSessionData
         private set
     private var paymentSessionListener: PaymentSessionListener? = null
-    private var config: PaymentSessionConfig = PaymentSessionConfig.EMPTY
+    private var config: PaymentSessionConfig? = null
 
     /**
      * Create a PaymentSession attached to the given host Activity.
@@ -102,8 +102,8 @@ class PaymentSession @VisibleForTesting internal constructor(
                 }
                 PaymentFlowActivityStarter.REQUEST_CODE -> {
                     val paymentSessionData =
-                        data.getParcelableExtra(STATE_PAYMENT_SESSION_DATA) ?: PaymentSessionData()
-                    paymentSessionData.updateIsPaymentReadyToCharge(config)
+                        data.getParcelableExtra(EXTRA_PAYMENT_SESSION_DATA)
+                            ?: this.paymentSessionData
                     this.paymentSessionData = paymentSessionData
                     paymentSessionListener?.onPaymentSessionDataChanged(paymentSessionData)
                     return true
@@ -124,7 +124,6 @@ class PaymentSession @VisibleForTesting internal constructor(
     }
 
     private fun dispatchUpdates() {
-        paymentSessionData.updateIsPaymentReadyToCharge(config)
         paymentSessionListener?.onPaymentSessionDataChanged(paymentSessionData)
         paymentSessionListener?.onCommunicatingStateChanged(false)
     }
@@ -133,7 +132,7 @@ class PaymentSession @VisibleForTesting internal constructor(
         customerSession.cachedCustomer?.id?.let { customerId ->
             paymentSessionPrefs.saveSelectedPaymentMethodId(customerId, paymentMethod?.id)
         }
-        paymentSessionData.paymentMethod = paymentMethod
+        paymentSessionData = paymentSessionData.copy(paymentMethod = paymentMethod)
     }
 
     /**
@@ -172,14 +171,11 @@ class PaymentSession @VisibleForTesting internal constructor(
             return false
         }
 
+        this.config = paymentSessionConfig
         paymentSessionListener = listener
 
-        val data: PaymentSessionData? =
-            savedInstanceState?.getParcelable(STATE_PAYMENT_SESSION_DATA)
-        if (data != null) {
-            paymentSessionData = data
-        }
-        this.config = paymentSessionConfig
+        paymentSessionData = savedInstanceState?.getParcelable(STATE_PAYMENT_SESSION_DATA)
+            ?: PaymentSessionData(paymentSessionConfig)
 
         if (shouldPrefetchCustomer) {
             fetchCustomer()
@@ -222,10 +218,10 @@ class PaymentSession @VisibleForTesting internal constructor(
                 .setInitialPaymentMethodId(
                     getSelectedPaymentMethodId(userSelectedPaymentMethodId))
                 .setShouldRequirePostalCode(shouldRequirePostalCode)
-                .setAddPaymentMethodFooter(config.addPaymentMethodFooter)
+                .setAddPaymentMethodFooter(config?.addPaymentMethodFooter ?: 0)
                 .setIsPaymentSessionActive(true)
                 .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
-                .setPaymentMethodTypes(config.paymentMethodTypes)
+                .setPaymentMethodTypes(config?.paymentMethodTypes.orEmpty())
                 .build()
         )
     }
@@ -259,7 +255,7 @@ class PaymentSession @VisibleForTesting internal constructor(
      * a customer's cart
      */
     fun setCartTotal(@IntRange(from = 0) cartTotal: Long) {
-        paymentSessionData.cartTotal = cartTotal
+        paymentSessionData = paymentSessionData.copy(cartTotal = cartTotal)
     }
 
     /**
@@ -345,8 +341,11 @@ class PaymentSession @VisibleForTesting internal constructor(
 
     internal companion object {
         internal const val TOKEN_PAYMENT_SESSION: String = "PaymentSession"
-        internal const val EXTRA_PAYMENT_SESSION_ACTIVE: String = "payment_session_active"
-        internal const val STATE_PAYMENT_SESSION_DATA: String = "payment_session_data"
+
+        internal const val EXTRA_PAYMENT_SESSION_ACTIVE: String = "extra_payment_session_active"
+        internal const val EXTRA_PAYMENT_SESSION_DATA: String = "extra_payment_session_data"
+
+        private const val STATE_PAYMENT_SESSION_DATA: String = "state_payment_session_data"
 
         private val VALID_REQUEST_CODES = setOf(
             PaymentMethodsActivityStarter.REQUEST_CODE,

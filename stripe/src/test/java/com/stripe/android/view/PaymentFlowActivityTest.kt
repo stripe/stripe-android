@@ -18,9 +18,10 @@ import com.stripe.android.CustomerSession.ACTION_API_EXCEPTION
 import com.stripe.android.CustomerSession.EXTRA_EXCEPTION
 import com.stripe.android.EphemeralKeyProvider
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.PaymentSession.Companion.STATE_PAYMENT_SESSION_DATA
+import com.stripe.android.PaymentSession.Companion.EXTRA_PAYMENT_SESSION_DATA
 import com.stripe.android.PaymentSessionConfig
 import com.stripe.android.PaymentSessionData
+import com.stripe.android.PaymentSessionFixtures
 import com.stripe.android.R
 import com.stripe.android.exception.APIException
 import com.stripe.android.model.Address
@@ -87,7 +88,7 @@ class PaymentFlowActivityTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowAct
                 .setPaymentSessionConfig(PaymentSessionConfig.Builder()
                     .setShippingInfoRequired(false)
                     .build())
-                .setPaymentSessionData(PaymentSessionData())
+                .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
                 .build()
         )
         assertNull(paymentFlowActivity.findViewById(R.id.shipping_info_widget))
@@ -100,7 +101,7 @@ class PaymentFlowActivityTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowAct
             PaymentFlowActivityStarter.Args.Builder()
                 .setPaymentSessionConfig(PaymentSessionConfig.Builder()
                     .build())
-                .setPaymentSessionData(PaymentSessionData())
+                .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
                 .build()
         )
         shippingInfoWidget = paymentFlowActivity.findViewById(R.id.shipping_info_widget)
@@ -115,7 +116,7 @@ class PaymentFlowActivityTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowAct
             PaymentFlowActivityStarter.Args.Builder()
                 .setPaymentSessionConfig(PaymentSessionConfig.Builder()
                     .build())
-                .setPaymentSessionData(PaymentSessionData())
+                .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
                 .build()
         )
         shippingInfoWidget = paymentFlowActivity.findViewById(R.id.shipping_info_widget)
@@ -132,7 +133,7 @@ class PaymentFlowActivityTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowAct
                 .setPaymentSessionConfig(PaymentSessionConfig.Builder()
                     .setPrepopulatedShippingInfo(SHIPPING_INFO)
                     .build())
-                .setPaymentSessionData(PaymentSessionData())
+                .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
                 .build()
         )
         shippingInfoWidget = paymentFlowActivity.findViewById(R.id.shipping_info_widget)
@@ -156,7 +157,7 @@ class PaymentFlowActivityTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowAct
             PaymentFlowActivityStarter.Args.Builder()
                 .setPaymentSessionConfig(PaymentSessionConfig.Builder()
                     .build())
-                .setPaymentSessionData(PaymentSessionData())
+                .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
                 .build()
         )
         paymentFlowActivity.setAlertMessageListener(mockListener)
@@ -181,7 +182,7 @@ class PaymentFlowActivityTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowAct
                 .setPaymentSessionConfig(PaymentSessionConfig.Builder()
                     .setPrepopulatedShippingInfo(SHIPPING_INFO)
                     .build())
-                .setPaymentSessionData(PaymentSessionData())
+                .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
                 .build()
         )
 
@@ -203,7 +204,7 @@ class PaymentFlowActivityTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowAct
                 .setPaymentSessionConfig(PaymentSessionConfig.Builder()
                     .setPrepopulatedShippingInfo(SHIPPING_INFO)
                     .build())
-                .setPaymentSessionData(PaymentSessionData())
+                .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
                 .build()
         )
 
@@ -233,7 +234,7 @@ class PaymentFlowActivityTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowAct
                     .setPrepopulatedShippingInfo(SHIPPING_INFO)
                     .setShippingMethodsRequired(false)
                     .build())
-                .setPaymentSessionData(PaymentSessionData())
+                .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
                 .build()
         )
         val shadowActivity = shadowOf(paymentFlowActivity)
@@ -252,7 +253,7 @@ class PaymentFlowActivityTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowAct
 
         val extras = shadowActivity.resultIntent.extras
         val resultSessionData =
-            extras?.getParcelable<PaymentSessionData>(STATE_PAYMENT_SESSION_DATA)
+            extras?.getParcelable<PaymentSessionData>(EXTRA_PAYMENT_SESSION_DATA)
         assertEquals(resultSessionData?.shippingInformation, SHIPPING_INFO)
     }
 

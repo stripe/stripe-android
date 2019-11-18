@@ -22,13 +22,11 @@ class PaymentSessionDataTest {
             .setShippingMethodsRequired(false)
             .build()
 
-        val data = PaymentSessionData()
-        assertFalse(data.updateIsPaymentReadyToCharge(config))
+        val data = PaymentSessionData(config)
         assertFalse(data.isPaymentReadyToCharge)
-
-        data.paymentMethod = PAYMENT_METHOD
-        assertTrue(data.updateIsPaymentReadyToCharge(config))
-        assertTrue(data.isPaymentReadyToCharge)
+        assertTrue(
+            data.copy(paymentMethod = PAYMENT_METHOD).isPaymentReadyToCharge
+        )
     }
 
     @Test
@@ -38,42 +36,46 @@ class PaymentSessionDataTest {
             .setShippingMethodsRequired(true)
             .build()
 
-        val data = PaymentSessionData()
-        assertFalse(data.updateIsPaymentReadyToCharge(config))
-        assertFalse(data.isPaymentReadyToCharge)
+        assertFalse(PaymentSessionData(config).isPaymentReadyToCharge)
 
-        data.paymentMethod = PAYMENT_METHOD
-        assertFalse(data.updateIsPaymentReadyToCharge(config))
-        assertFalse(data.isPaymentReadyToCharge)
+        assertFalse(PaymentSessionData(
+            config,
+            paymentMethod = PAYMENT_METHOD
+        ).isPaymentReadyToCharge)
 
-        data.shippingInformation = ShippingInformation(null, null, null)
-        assertFalse(data.updateIsPaymentReadyToCharge(config))
-        assertFalse(data.isPaymentReadyToCharge)
+        assertFalse(PaymentSessionData(
+            config,
+            paymentMethod = PAYMENT_METHOD,
+            shippingInformation = ShippingInformation(null, null, null)
+        ).isPaymentReadyToCharge)
 
-        data.shippingMethod = ShippingMethod("label", "id", 0, "USD")
-        assertTrue(data.updateIsPaymentReadyToCharge(config))
-        assertTrue(data.isPaymentReadyToCharge)
+        assertTrue(PaymentSessionData(
+            config,
+            paymentMethod = PAYMENT_METHOD,
+            shippingInformation = ShippingInformation(null, null, null),
+            shippingMethod = ShippingMethod("label", "id", 0, "USD")
+        ).isPaymentReadyToCharge)
     }
 
     @Test
     fun writeToParcel_withNulls_readsFromParcelCorrectly() {
-        val data = PaymentSessionData()
-        data.cartTotal = 100L
-        data.shippingTotal = 150L
-        data.isPaymentReadyToCharge = false
+        val data = PaymentSessionData(
+            cartTotal = 100L,
+            shippingTotal = 150L
+        )
 
         assertEquals(data, ParcelUtils.create(data))
     }
 
     @Test
     fun writeToParcel_withoutNulls_readsFromParcelCorrectly() {
-        val data = PaymentSessionData()
-        data.cartTotal = 100L
-        data.shippingTotal = 150L
-        data.paymentMethod = PAYMENT_METHOD
-        data.isPaymentReadyToCharge = false
-        data.shippingInformation = ShippingInformation(null, null, null)
-        data.shippingMethod = ShippingMethod("UPS", "SuperFast", 10000L, "USD")
+        val data = PaymentSessionData(
+            cartTotal = 100L,
+            shippingTotal = 150L,
+            paymentMethod = PAYMENT_METHOD,
+            shippingInformation = ShippingInformation(null, null, null),
+            shippingMethod = ShippingMethod("UPS", "SuperFast", 10000L, "USD")
+        )
 
         assertEquals(data, ParcelUtils.create(data))
     }
