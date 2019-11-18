@@ -3,7 +3,6 @@ package com.stripe.android.model
 import org.json.JSONObject
 
 internal object AddressFixtures {
-    @JvmField
     val ADDRESS_JSON = JSONObject(
         """
         {
@@ -16,4 +15,6 @@ internal object AddressFixtures {
         }
         """.trimIndent()
     )
+
+    val ADDRESS = requireNotNull(Address.fromJson(ADDRESS_JSON))
 }
