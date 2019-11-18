@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 12.5.0 - unreleased 
+* [#1836](https://github.com/stripe/stripe-android/pull/1836) Add support for [statement_descriptor](https://stripe.com/docs/api/sources/object#source_object-statement_descriptor) field to `Source` model via `Source#statementDescriptor`
+* [#1839](https://github.com/stripe/stripe-android/pull/1839) Add support for [source_order](https://stripe.com/docs/api/sources/object#source_object-source_order) field to `Source` model via `Source#sourceOrder`
+
 ## 12.4.0 - 2019-11-13
 * [#1792](https://github.com/stripe/stripe-android/pull/1792) Remove default selection of a Payment Method from `PaymentMethodsActivity`
 * [#1797](https://github.com/stripe/stripe-android/pull/1797) Document `StripeDefaultTheme` style
