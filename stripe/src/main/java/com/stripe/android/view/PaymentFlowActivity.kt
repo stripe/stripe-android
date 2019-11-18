@@ -60,7 +60,8 @@ class PaymentFlowActivity : StripeActivity() {
             paymentSessionConfig,
             customerSession,
             shippingInformation,
-            savedInstanceState?.getParcelable(STATE_SHIPPING_METHOD)
+            savedInstanceState?.getParcelable(STATE_SHIPPING_METHOD),
+            paymentSessionConfig.allowedShippingCountryCodes
         )
         shipping_flow_viewpager.adapter = paymentFlowPagerAdapter
         shipping_flow_viewpager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {

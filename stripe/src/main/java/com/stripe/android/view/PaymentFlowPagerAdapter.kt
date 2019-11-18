@@ -19,7 +19,8 @@ internal class PaymentFlowPagerAdapter(
     private val paymentSessionConfig: PaymentSessionConfig,
     private val customerSession: CustomerSession,
     private val shippingInformation: ShippingInformation?,
-    private val shippingMethod: ShippingMethod?
+    private val shippingMethod: ShippingMethod?,
+    private val allowedShippingCountryCodes: Set<String> = emptySet()
 ) : PagerAdapter() {
     private val pages: MutableList<PaymentFlowPagerEnum>
 
@@ -92,6 +93,8 @@ internal class PaymentFlowPagerAdapter(
                     .setOptionalFields(paymentSessionConfig.optionalShippingInfoFields)
                 shippingInfoWidget
                     .populateShippingInfo(shippingInformation)
+                shippingInfoWidget
+                    .setAllowedCountryCodes(allowedShippingCountryCodes)
             }
         }
         collection.addView(layout)
