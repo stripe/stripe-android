@@ -4,7 +4,6 @@ import org.json.JSONObject
 
 internal object CustomerFixtures {
 
-    @JvmField
     val CUSTOMER_JSON = JSONObject(
         """
         {
@@ -22,7 +21,6 @@ internal object CustomerFixtures {
         """.trimIndent()
     )
 
-    @JvmField
     val CUSTOMER_WITH_SHIPPING = Customer.fromJson(JSONObject(
         """
         {
@@ -54,10 +52,8 @@ internal object CustomerFixtures {
         """.trimIndent()
     ))!!
 
-    @JvmField
     val CUSTOMER = Customer.fromJson(CUSTOMER_JSON)!!
 
-    @JvmField
     val OTHER_CUSTOMER = Customer.fromJson(JSONObject(
         """
         {
@@ -77,7 +73,6 @@ internal object CustomerFixtures {
         """.trimIndent()
     ))!!
 
-    @JvmField
     val EPHEMERAL_KEY_FIRST = JSONObject(
         """
         {
@@ -95,7 +90,6 @@ internal object CustomerFixtures {
         """.trimIndent()
     )
 
-    @JvmField
     val EPHEMERAL_KEY_SECOND = JSONObject(
         """
         {

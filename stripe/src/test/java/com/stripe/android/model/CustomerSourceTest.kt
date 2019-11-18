@@ -1,7 +1,7 @@
 package com.stripe.android.model
 
 import com.stripe.android.model.CardTest.Companion.JSON_CARD_USD
-import com.stripe.android.model.SourceTest.Companion.EXAMPLE_JSON_SOURCE_WITHOUT_NULLS
+import com.stripe.android.model.SourceFixtures.CUSTOMER_SOURCE_CARD
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -36,15 +36,13 @@ class CustomerSourceTest {
 
     @Test
     fun fromJson_whenSource_createsCustomerSourceData() {
-        val sourceData = CustomerSource.fromJson(EXAMPLE_JSON_SOURCE_WITHOUT_NULLS)
-        assertNotNull(sourceData)
-        assertNotNull(sourceData.asSource())
-        assertEquals("src_19t3xKBZqEXluyI4uz2dxAfQ", sourceData.id)
+        assertNotNull(CUSTOMER_SOURCE_CARD.asSource())
+        assertEquals("src_19t3xKBZqEXluyI4uz2dxAfQ", CUSTOMER_SOURCE_CARD.id)
     }
 
     @Test
     fun fromExampleJsonSource_toJson_createsSameObject() {
-        assertNotNull(CustomerSource.fromJson(EXAMPLE_JSON_SOURCE_WITHOUT_NULLS))
+        assertNotNull(CUSTOMER_SOURCE_CARD)
     }
 
     @Test

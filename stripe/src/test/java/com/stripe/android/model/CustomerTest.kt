@@ -6,7 +6,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -63,28 +62,27 @@ class CustomerTest {
     private fun createTestCustomerObjectWithApplePaySource(): String {
         val rawJsonCustomer = CustomerFixtures.CUSTOMER_JSON
         val sourcesObject = rawJsonCustomer.getJSONObject("sources")
-        val sourcesArray = sourcesObject.getJSONArray("data")
 
-        sourcesObject.put("total_count", 5)
-        sourcesArray.put(SourceFixtures.APPLE_PAY)
+        val sourcesArray = sourcesObject.getJSONArray("data").apply {
+            put(SourceFixtures.APPLE_PAY)
 
-        val manipulatedCard = JSONObject(JSON_CARD_USD.toString())
-        manipulatedCard.put("id", "card_id55555")
-        manipulatedCard.put("tokenization_method", "apple_pay")
+            // Note that we don't yet explicitly support bitcoin sources, but this data is
+            // convenient for the test because it is not an apple pay source.
+            put(SourceFixtures.CUSTOMER_SOURCE_CARD_JSON)
+            put(SourceFixtures.ALIPAY_JSON)
+            put(JSONObject(JSON_CARD_USD.toString()))
+            put(JSONObject(JSON_CARD_USD.toString()).apply {
+                put("id", "card_id55555")
+                put("tokenization_method", "apple_pay")
+            })
+        }
 
-        // Note that we don't yet explicitly support bitcoin sources, but this data is
-        // convenient for the test because it is not an apple pay source.
-        sourcesArray.put(SourceTest.EXAMPLE_JSON_SOURCE_WITHOUT_NULLS)
-        sourcesArray.put(SourceFixtures.ALIPAY_JSON)
-        sourcesArray.put(JSONObject(JSON_CARD_USD.toString()))
-        sourcesArray.put(manipulatedCard)
         sourcesObject.put("data", sourcesArray)
+        sourcesObject.put("total_count", 5)
 
         rawJsonCustomer.put("sources", sourcesObject)
 
         // Verify JSON manipulation
-        assertTrue(rawJsonCustomer.has("sources"))
-        assertTrue(rawJsonCustomer.getJSONObject("sources").has("data"))
         assertEquals(5,
             rawJsonCustomer.getJSONObject("sources").getJSONArray("data").length())
 
