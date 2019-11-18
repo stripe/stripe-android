@@ -69,6 +69,15 @@ class CountryAutoCompleteTextViewTest : BaseViewTest<ShippingInfoTestActivity>(
         assertTrue(autoCompleteTextView.isPopupShowing)
     }
 
+    @Test
+    fun setAllowedCountryCodes_withPopulatedSet_shouldUpdateSelectedCountry() {
+        countryAutoCompleteTextView.setAllowedCountryCodes(setOf("fr", "de"))
+        assertEquals(
+            "FR",
+            countryAutoCompleteTextView.selectedCountry.code
+        )
+    }
+
     @AfterTest
     fun teardown() {
         Locale.setDefault(Locale.US)

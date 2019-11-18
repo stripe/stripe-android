@@ -18,14 +18,20 @@ import java.util.Locale
  */
 internal class CountryAdapter(
     context: Context,
-    initialCountries: List<Country>
+    private var unfilteredCountries: List<Country>
 ) : ArrayAdapter<Country>(context, R.layout.country_text_view) {
-    private val countryFilter: Filter = CountryFilter(
-        initialCountries,
+    private val countryFilter: CountryFilter = CountryFilter(
+        unfilteredCountries,
         this,
         context as? Activity
     )
-    private var suggestions: List<Country> = initialCountries
+    private var suggestions: List<Country> = unfilteredCountries
+
+    internal val firstItem: Country
+        @JvmSynthetic
+        get() {
+            return getItem(0)
+        }
 
     override fun getCount(): Int {
         return suggestions.size
@@ -55,8 +61,29 @@ internal class CountryAdapter(
         return countryFilter
     }
 
+    /**
+     * @param allowedCountryCodes A set of allowed country codes. Will be ignored if empty.
+     *
+     * @return `true` if [unfilteredCountries] was updated, `false` otherwise
+     */
+    internal fun updateUnfilteredCountries(allowedCountryCodes: Set<String>): Boolean {
+        if (allowedCountryCodes.isEmpty()) {
+            return false
+        }
+
+        unfilteredCountries = unfilteredCountries.filter { (countryCode) ->
+            allowedCountryCodes.any { allowedCountryCode ->
+                allowedCountryCode.equals(countryCode, ignoreCase = true)
+            }
+        }
+        countryFilter.unfilteredCountries = unfilteredCountries
+        suggestions = unfilteredCountries
+        notifyDataSetChanged()
+        return true
+    }
+
     private class CountryFilter(
-        private val initialCountries: List<Country>,
+        internal var unfilteredCountries: List<Country>,
         private val adapter: CountryAdapter,
         activity: Activity?
     ) : Filter() {
@@ -66,7 +93,7 @@ internal class CountryAdapter(
             val filterResults = FilterResults()
             filterResults.values = constraint?.let {
                 filteredSuggestedCountries(constraint)
-            } ?: initialCountries
+            } ?: unfilteredCountries
             return filterResults
         }
 
@@ -90,14 +117,14 @@ internal class CountryAdapter(
             val suggestedCountries = getSuggestedCountries(constraint)
 
             return if (suggestedCountries.isEmpty() || isMatch(suggestedCountries, constraint)) {
-                initialCountries
+                unfilteredCountries
             } else {
                 suggestedCountries
             }
         }
 
         private fun getSuggestedCountries(constraint: CharSequence?): List<Country> {
-            return initialCountries
+            return unfilteredCountries
                 .filter {
                     it.name.toLowerCase(Locale.ROOT).startsWith(
                         constraint.toString().toLowerCase(Locale.ROOT)
