@@ -3,6 +3,7 @@ package com.stripe.android
 import com.stripe.android.model.Card
 import com.stripe.android.model.CardFixtures
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -59,11 +60,11 @@ class StripeNetworkUtilsTest {
     @Test
     fun addUidParamsToPaymentIntent_withSource_addsParamsAtRightLevel() {
         val updatedParams = networkUtils.paramsWithUid(
-            mapOf(ConfirmPaymentIntentParams.API_PARAM_SOURCE_DATA to emptyMap<String, Any>())
+            mapOf(ConfirmPaymentIntentParams.PARAM_SOURCE_DATA to emptyMap<String, Any>())
         )
 
         val updatedData =
-            updatedParams[ConfirmPaymentIntentParams.API_PARAM_SOURCE_DATA] as Map<String, *>
+            updatedParams[ConfirmPaymentIntentParams.PARAM_SOURCE_DATA] as Map<String, *>
         assertEquals(1, updatedParams.size)
         assertTrue(updatedData.containsKey("muid"))
         assertTrue(updatedData.containsKey("guid"))
@@ -72,11 +73,10 @@ class StripeNetworkUtilsTest {
     @Test
     fun addUidParamsToPaymentIntent_withPaymentMethodParams_addsUidAtRightLevel() {
         val updatedParams = networkUtils.paramsWithUid(
-            mapOf(ConfirmPaymentIntentParams.API_PARAM_PAYMENT_METHOD_DATA to
+            mapOf(PARAM_PAYMENT_METHOD_DATA to
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD.toParamMap())
         )
-        val updatedData =
-            updatedParams[ConfirmPaymentIntentParams.API_PARAM_PAYMENT_METHOD_DATA] as Map<String, *>
+        val updatedData = updatedParams[PARAM_PAYMENT_METHOD_DATA] as Map<String, *>
         assertEquals(1, updatedParams.size)
         assertTrue(updatedData.containsKey("muid"))
         assertTrue(updatedData.containsKey("guid"))

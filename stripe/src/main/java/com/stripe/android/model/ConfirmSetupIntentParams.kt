@@ -2,11 +2,11 @@ package com.stripe.android.model
 
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.ObjectBuilder
-import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_CLIENT_SECRET
-import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_PAYMENT_METHOD_DATA
-import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_PAYMENT_METHOD_ID
-import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_RETURN_URL
-import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_USE_STRIPE_SDK
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN_URL
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_STRIPE_SDK
 
 data class ConfirmSetupIntentParams internal constructor(
     @get:JvmSynthetic override val clientSecret: String,
@@ -34,19 +34,19 @@ data class ConfirmSetupIntentParams internal constructor(
      */
     override fun toParamMap(): Map<String, Any> {
         val params = mapOf(
-            API_PARAM_CLIENT_SECRET to clientSecret,
-            API_PARAM_USE_STRIPE_SDK to useStripeSdk
+            PARAM_CLIENT_SECRET to clientSecret,
+            PARAM_USE_STRIPE_SDK to useStripeSdk
         ).plus(
-            returnUrl?.let { mapOf(API_PARAM_RETURN_URL to it) }.orEmpty()
+            returnUrl?.let { mapOf(PARAM_RETURN_URL to it) }.orEmpty()
         ).toMutableMap()
 
         if (paymentMethodCreateParams != null) {
-            params[API_PARAM_PAYMENT_METHOD_DATA] = paymentMethodCreateParams.toParamMap()
+            params[PARAM_PAYMENT_METHOD_DATA] = paymentMethodCreateParams.toParamMap()
             if (paymentMethodCreateParams.type.hasMandate) {
-                params[MandateData.API_PARAM_MANDATE_DATA] = MandateData().toParamMap()
+                params[MandateData.PARAM_MANDATE_DATA] = MandateData().toParamMap()
             }
         } else if (paymentMethodId != null) {
-            params[API_PARAM_PAYMENT_METHOD_ID] = paymentMethodId
+            params[PARAM_PAYMENT_METHOD_ID] = paymentMethodId
         }
 
         return params.toMap()

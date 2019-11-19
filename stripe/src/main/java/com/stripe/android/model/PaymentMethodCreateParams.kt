@@ -73,29 +73,29 @@ data class PaymentMethodCreateParams internal constructor(
 
     override fun toParamMap(): Map<String, Any> {
         return mapOf(
-            FIELD_TYPE to type.code
+            PARAM_TYPE to type.code
         ).plus(
             billingDetails?.let {
-                mapOf(FIELD_BILLING_DETAILS to it.toParamMap())
+                mapOf(PARAM_BILLING_DETAILS to it.toParamMap())
             }.orEmpty()
         ).plus(
             when (type) {
                 Type.Card -> {
-                    mapOf(FIELD_CARD to card?.toParamMap().orEmpty())
+                    mapOf(PARAM_CARD to card?.toParamMap().orEmpty())
                 }
                 Type.Ideal -> {
-                    mapOf(FIELD_IDEAL to ideal?.toParamMap().orEmpty())
+                    mapOf(PARAM_IDEAL to ideal?.toParamMap().orEmpty())
                 }
                 Type.Fpx -> {
-                    mapOf(FIELD_FPX to fpx?.toParamMap().orEmpty())
+                    mapOf(PARAM_FPX to fpx?.toParamMap().orEmpty())
                 }
                 Type.SepaDebit -> {
-                    mapOf(FIELD_SEPA_DEBIT to sepaDebit?.toParamMap().orEmpty())
+                    mapOf(PARAM_SEPA_DEBIT to sepaDebit?.toParamMap().orEmpty())
                 }
             }
         ).plus(
             metadata?.let {
-                mapOf(FIELD_METADATA to it)
+                mapOf(PARAM_METADATA to it)
             }.orEmpty()
         )
     }
@@ -116,11 +116,11 @@ data class PaymentMethodCreateParams internal constructor(
     ) : StripeParamsModel {
         override fun toParamMap(): Map<String, Any> {
             return listOf(
-                FIELD_NUMBER to number,
-                FIELD_EXP_MONTH to expiryMonth,
-                FIELD_EXP_YEAR to expiryYear,
-                FIELD_CVC to cvc,
-                FIELD_TOKEN to token
+                PARAM_NUMBER to number,
+                PARAM_EXP_MONTH to expiryMonth,
+                PARAM_EXP_YEAR to expiryYear,
+                PARAM_CVC to cvc,
+                PARAM_TOKEN to token
             ).mapNotNull {
                 it.second?.let { value ->
                     it.first to value
@@ -169,11 +169,11 @@ data class PaymentMethodCreateParams internal constructor(
         }
 
         companion object {
-            private const val FIELD_NUMBER: String = "number"
-            private const val FIELD_EXP_MONTH: String = "exp_month"
-            private const val FIELD_EXP_YEAR: String = "exp_year"
-            private const val FIELD_CVC: String = "cvc"
-            private const val FIELD_TOKEN: String = "token"
+            private const val PARAM_NUMBER: String = "number"
+            private const val PARAM_EXP_MONTH: String = "exp_month"
+            private const val PARAM_EXP_YEAR: String = "exp_year"
+            private const val PARAM_CVC: String = "cvc"
+            private const val PARAM_TOKEN: String = "token"
 
             @JvmStatic
             fun create(token: String): Card {
@@ -184,7 +184,7 @@ data class PaymentMethodCreateParams internal constructor(
 
     data class Ideal internal constructor(private val bank: String?) : StripeParamsModel {
         override fun toParamMap(): Map<String, Any> {
-            return bank?.let { mapOf(FIELD_BANK to it) }.orEmpty()
+            return bank?.let { mapOf(PARAM_BANK to it) }.orEmpty()
         }
 
         class Builder : ObjectBuilder<Ideal> {
@@ -201,14 +201,14 @@ data class PaymentMethodCreateParams internal constructor(
         }
 
         companion object {
-            private const val FIELD_BANK: String = "bank"
+            private const val PARAM_BANK: String = "bank"
         }
     }
 
     data class Fpx internal constructor(private val bank: String?) : StripeParamsModel {
         override fun toParamMap(): Map<String, Any> {
             return bank?.let {
-                mapOf(FIELD_BANK to it)
+                mapOf(PARAM_BANK to it)
             }.orEmpty()
         }
 
@@ -226,14 +226,14 @@ data class PaymentMethodCreateParams internal constructor(
         }
 
         companion object {
-            private const val FIELD_BANK: String = "bank"
+            private const val PARAM_BANK: String = "bank"
         }
     }
 
     data class SepaDebit internal constructor(private val iban: String?) : StripeParamsModel {
         override fun toParamMap(): Map<String, Any> {
             return iban?.let {
-                mapOf(FIELD_IBAN to it)
+                mapOf(PARAM_IBAN to it)
             }.orEmpty()
         }
 
@@ -251,19 +251,19 @@ data class PaymentMethodCreateParams internal constructor(
         }
 
         companion object {
-            private const val FIELD_IBAN: String = "iban"
+            private const val PARAM_IBAN: String = "iban"
         }
     }
 
     companion object {
-        private const val FIELD_TYPE = "type"
-        private const val FIELD_CARD = "card"
-        private const val FIELD_FPX = "fpx"
-        private const val FIELD_IDEAL = "ideal"
-        private const val FIELD_SEPA_DEBIT = "sepa_debit"
+        private const val PARAM_TYPE = "type"
+        private const val PARAM_CARD = "card"
+        private const val PARAM_FPX = "fpx"
+        private const val PARAM_IDEAL = "ideal"
+        private const val PARAM_SEPA_DEBIT = "sepa_debit"
 
-        private const val FIELD_BILLING_DETAILS = "billing_details"
-        private const val FIELD_METADATA = "metadata"
+        private const val PARAM_BILLING_DETAILS = "billing_details"
+        private const val PARAM_METADATA = "metadata"
 
         @JvmStatic
         @JvmOverloads
