@@ -18,7 +18,7 @@ import java.util.Locale
  */
 internal class CountryAdapter(
     context: Context,
-    private var unfilteredCountries: List<Country>
+    internal var unfilteredCountries: List<Country>
 ) : ArrayAdapter<Country>(context, R.layout.country_text_view) {
     private val countryFilter: CountryFilter = CountryFilter(
         unfilteredCountries,

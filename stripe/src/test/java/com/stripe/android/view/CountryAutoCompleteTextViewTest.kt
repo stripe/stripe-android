@@ -9,6 +9,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
@@ -37,13 +38,14 @@ class CountryAutoCompleteTextViewTest : BaseViewTest<ShippingInfoTestActivity>(
 
     @Test
     fun countryAutoCompleteTextView_whenInitialized_displaysDefaultLocaleDisplayName() {
-        assertEquals(Locale.US.country, countryAutoCompleteTextView.selectedCountry.code)
+        assertEquals(Locale.US.country, countryAutoCompleteTextView.selectedCountry?.code)
         assertEquals(Locale.US.displayCountry, autoCompleteTextView.text.toString())
     }
 
     @Test
     fun updateUIForCountryEntered_whenInvalidCountry_revertsToLastCountry() {
-        val previousValidCountryCode = countryAutoCompleteTextView.selectedCountry.code
+        val previousValidCountryCode =
+            countryAutoCompleteTextView.selectedCountry?.code.orEmpty()
         countryAutoCompleteTextView.setCountrySelected("FAKE COUNTRY CODE")
         assertNull(autoCompleteTextView.error)
         assertEquals(autoCompleteTextView.text.toString(),
@@ -56,9 +58,9 @@ class CountryAutoCompleteTextViewTest : BaseViewTest<ShippingInfoTestActivity>(
 
     @Test
     fun updateUIForCountryEntered_whenValidCountry_UIUpdates() {
-        assertEquals(Locale.US.country, countryAutoCompleteTextView.selectedCountry.code)
+        assertEquals(Locale.US.country, countryAutoCompleteTextView.selectedCountry?.code)
         countryAutoCompleteTextView.setCountrySelected(Locale.UK.country)
-        assertEquals(Locale.UK.country, countryAutoCompleteTextView.selectedCountry.code)
+        assertEquals(Locale.UK.country, countryAutoCompleteTextView.selectedCountry?.code)
     }
 
     @Test
@@ -74,8 +76,24 @@ class CountryAutoCompleteTextViewTest : BaseViewTest<ShippingInfoTestActivity>(
         countryAutoCompleteTextView.setAllowedCountryCodes(setOf("fr", "de"))
         assertEquals(
             "FR",
-            countryAutoCompleteTextView.selectedCountry.code
+            countryAutoCompleteTextView.selectedCountry?.code
         )
+    }
+
+    @Test
+    fun validateCountry_withInvalidCountry_setsSelectedCountryToNull() {
+        assertNotNull(countryAutoCompleteTextView.selectedCountry)
+        countryAutoCompleteTextView.countryAutocomplete.setText("invalid country")
+        countryAutoCompleteTextView.validateCountry()
+        assertNull(countryAutoCompleteTextView.selectedCountry)
+    }
+
+    @Test
+    fun validateCountry_withValidCountry_setsSelectedCountry() {
+        assertNotNull(countryAutoCompleteTextView.selectedCountry)
+        countryAutoCompleteTextView.countryAutocomplete.setText("Canada")
+        countryAutoCompleteTextView.validateCountry()
+        assertEquals("Canada", countryAutoCompleteTextView.selectedCountry?.name)
     }
 
     @AfterTest

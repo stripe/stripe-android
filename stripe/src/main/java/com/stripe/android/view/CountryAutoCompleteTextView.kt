@@ -11,19 +11,21 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.os.ConfigurationCompat
 import com.stripe.android.R
 import java.util.Locale
+import kotlinx.android.synthetic.main.country_autocomplete_textview.view.*
 
 internal class CountryAutoCompleteTextView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
-    private val countryAutocomplete: AutoCompleteTextView
+    @VisibleForTesting
+    internal val countryAutocomplete: AutoCompleteTextView
 
     /**
      * @return 2 digit country code of the country selected by this input.
      */
     @VisibleForTesting
-    var selectedCountry: Country
+    var selectedCountry: Country?
 
     @JvmSynthetic
     internal var countryChangeCallback: (Country) -> Unit = {}
@@ -58,6 +60,30 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
 
         selectedCountry = countryAdapter.firstItem
         updateInitialCountry()
+
+        val errorMessage = resources.getString(R.string.address_country_invalid)
+        countryAutocomplete.validator = object : AutoCompleteTextView.Validator {
+            override fun fixText(invalidText: CharSequence?): CharSequence {
+                return invalidText ?: ""
+            }
+
+            override fun isValid(text: CharSequence?): Boolean {
+                val validCountry = countryAdapter.unfilteredCountries.firstOrNull {
+                    it.name == text.toString()
+                }
+
+                return if (validCountry != null) {
+                    selectedCountry = validCountry
+                    clearError()
+                    true
+                } else {
+                    selectedCountry = null
+                    tl_country_cat.error = errorMessage
+                    tl_country_cat.isErrorEnabled = true
+                    false
+                }
+            }
+        }
     }
 
     private fun updateInitialCountry() {
@@ -94,12 +120,13 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
         val displayCountry = country?.let {
             updatedSelectedCountryCode(it)
             displayCountryEntered
-        } ?: selectedCountry.name
+        } ?: selectedCountry?.name
 
         countryAutocomplete.setText(displayCountry)
     }
 
     private fun updatedSelectedCountryCode(country: Country) {
+        clearError()
         if (selectedCountry != country) {
             selectedCountry = country
             countryChangeCallback(country)
@@ -109,5 +136,14 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
     private fun getDisplayCountry(countryCode: String): String {
         return CountryUtils.getCountryByCode(countryCode)?.name
             ?: Locale("", countryCode).displayCountry
+    }
+
+    internal fun validateCountry() {
+        countryAutocomplete.performValidation()
+    }
+
+    private fun clearError() {
+        tl_country_cat.error = null
+        tl_country_cat.isErrorEnabled = false
     }
 }
