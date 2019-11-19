@@ -152,7 +152,7 @@ data class Source internal constructor(
     @Retention(AnnotationRetention.SOURCE)
     @StringDef(SourceType.ALIPAY, SourceType.CARD, SourceType.THREE_D_SECURE, SourceType.GIROPAY,
         SourceType.SEPA_DEBIT, SourceType.IDEAL, SourceType.SOFORT, SourceType.BANCONTACT,
-        SourceType.P24, SourceType.EPS, SourceType.MULTIBANCO, SourceType.WECHAT,
+        SourceType.P24, SourceType.EPS, SourceType.MULTIBANCO, SourceType.WECHAT, SourceType.KLARNA,
         SourceType.UNKNOWN)
     annotation class SourceType {
         companion object {
@@ -168,6 +168,7 @@ data class Source internal constructor(
             const val EPS: String = "eps"
             const val MULTIBANCO: String = "multibanco"
             const val WECHAT: String = "wechat"
+            const val KLARNA: String = "klarna"
             const val UNKNOWN: String = "unknown"
         }
     }

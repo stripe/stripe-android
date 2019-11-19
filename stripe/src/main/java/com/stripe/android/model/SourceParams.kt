@@ -270,6 +270,25 @@ class SourceParams private constructor(
         }
     }
 
+    /**
+     * [Klarna Payments with Sources](https://stripe.com/docs/sources/klarna)
+     */
+    private data class KlarnaParams(
+        private val purchaseCountry: String
+    ) : StripeParamsModel {
+        override fun toParamMap(): Map<String, Any> {
+            return mapOf(
+                PARAM_PURCHASE_COUNTRY to purchaseCountry,
+                PARAM_PRODUCT to "payment"
+            )
+        }
+
+        companion object {
+            private const val PARAM_PURCHASE_COUNTRY = "purchase_country"
+            private const val PARAM_PRODUCT = "product"
+        }
+    }
+
     override fun hashCode(): Int {
         return Objects.hash(amount, apiParameterMap, currency, typeRaw, owner, metaData,
             redirect, extraParams, token, usage, type, weChatParams)
@@ -351,6 +370,10 @@ class SourceParams private constructor(
         private const val API_PARAM_USAGE = "usage"
         private const val API_PARAM_WECHAT = "wechat"
         private const val API_PARAM_CLIENT_SECRET = "client_secret"
+        private const val API_PARAM_FLOW = "flow"
+        private const val API_PARAM_KLARNA = "klarna"
+        private const val API_PARAM_SOURCE_ORDER = "source_order"
+
         private const val FIELD_BANK = "bank"
         private const val FIELD_CARD = "card"
         private const val FIELD_COUNTRY = "country"
@@ -362,6 +385,7 @@ class SourceParams private constructor(
         private const val FIELD_RETURN_URL = "return_url"
         private const val FIELD_STATEMENT_DESCRIPTOR = "statement_descriptor"
         private const val FIELD_PREFERRED_LANGUAGE = "preferred_language"
+
         private const val VISA_CHECKOUT = "visa_checkout"
         private const val CALL_ID = "callid"
         private const val MASTERPASS = "masterpass"
@@ -493,6 +517,42 @@ class SourceParams private constructor(
                 .setCurrency(currency)
                 .setAmount(amount)
                 .setWeChatParams(WeChatParams(weChatAppId, statementDescriptor))
+        }
+
+        /**
+         * Create Klarna Source params.
+         *
+         * @param amount Amount associated with the source. This is the amount for which the source
+         * will be chargeable once ready.
+         * @param currency Three-letter ISO code for the currency associated with the source.
+         * This is the currency for which the source will be chargeable once ready.
+         * @param purchaseCountry The ISO-3166 2-letter country code of the customer's location.
+         * @param sourceOrderParams Information about the items and shipping associated with the
+         * source. Required for transactional credit (for example Klarna) sources before you can
+         * charge it.
+         * @param returnUrl The URL you provide to redirect the customer back to you after they
+         * authenticated their payment. It can use your application URI scheme in the context of
+         * a mobile application.
+         */
+        @JvmSynthetic
+        internal fun createKlarna(
+            amount: Int,
+            currency: String,
+            purchaseCountry: String,
+            sourceOrderParams: SourceOrderParams,
+            returnUrl: String
+        ): SourceParams {
+            return SourceParams(SourceType.KLARNA)
+                .setAmount(amount.toLong())
+                .setCurrency(currency)
+                .setReturnUrl(returnUrl)
+                .setExtraParams(
+                    mapOf(
+                        API_PARAM_KLARNA to KlarnaParams(purchaseCountry).toParamMap(),
+                        API_PARAM_FLOW to Source.SourceFlow.REDIRECT,
+                        API_PARAM_SOURCE_ORDER to sourceOrderParams.toParamMap()
+                    )
+                )
         }
 
         /**
