@@ -29,8 +29,9 @@ data class PaymentSessionConfig internal constructor(
     val addPaymentMethodFooter: Int = 0,
 
     val paymentMethodTypes: List<PaymentMethod.Type> = listOf(PaymentMethod.Type.Card),
-
-    val allowedShippingCountryCodes: Set<String> = emptySet()
+    val allowedShippingCountryCodes: Set<String> = emptySet(),
+    internal val shippingInformationValidator: ShippingInformationValidator? = null,
+    internal val shippingMethodsFactory: ShippingMethodsFactory? = null
 ) : Parcelable {
     init {
         val countryCodes = Locale.getISOCountries()
@@ -43,7 +44,7 @@ data class PaymentSessionConfig internal constructor(
         }
     }
 
-    private interface ShippingInformationValidator : Serializable {
+    internal interface ShippingInformationValidator : Serializable {
         /**
          * @return whether the customer's [ShippingInformation] is valid. Will run on
          * a background thread.
@@ -59,7 +60,7 @@ data class PaymentSessionConfig internal constructor(
         fun getErrorMessage(shippingInformation: ShippingInformation): String
     }
 
-    private interface ShippingMethodsFactory : Serializable {
+    internal interface ShippingMethodsFactory : Serializable {
         /**
          * @return a list of [ShippingMethod] options to present to the customer. Will run on
          * a background thread.
