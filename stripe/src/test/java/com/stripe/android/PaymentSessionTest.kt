@@ -89,7 +89,7 @@ class PaymentSessionTest {
     @Test
     fun init_addsPaymentSessionToken_andFetchesCustomer() {
         val customerSession = createCustomerSession()
-        CustomerSession.setInstance(customerSession)
+        CustomerSession.instance = customerSession
 
         val paymentSession = PaymentSession(activity)
         paymentSession.init(paymentSessionListener, PaymentSessionConfig.Builder().build())
@@ -104,7 +104,7 @@ class PaymentSessionTest {
     fun init_whenEphemeralKeyProviderContinues_fetchesCustomerAndNotifiesListener() {
         ephemeralKeyProvider
             .setNextRawEphemeralKey(CustomerFixtures.EPHEMERAL_KEY_FIRST.toString())
-        CustomerSession.setInstance(createCustomerSession())
+        CustomerSession.instance = createCustomerSession()
 
         val paymentSession = PaymentSession(activity)
         paymentSession.init(paymentSessionListener, PaymentSessionConfig.Builder().build())
@@ -118,7 +118,7 @@ class PaymentSessionTest {
 
     @Test
     fun handlePaymentData_whenPaymentMethodRequest_notifiesListenerAndFetchesCustomer() {
-        CustomerSession.setInstance(createCustomerSession())
+        CustomerSession.instance = createCustomerSession()
 
         val paymentSession = PaymentSession(activity)
         paymentSession.init(paymentSessionListener, PaymentSessionConfig.Builder().build())
@@ -140,7 +140,7 @@ class PaymentSessionTest {
 
     @Test
     fun selectPaymentMethod_launchesPaymentMethodsActivityWithLog() {
-        CustomerSession.setInstance(createCustomerSession())
+        CustomerSession.instance = createCustomerSession()
 
         val paymentSession = PaymentSession(activity)
         paymentSession.init(paymentSessionListener, PaymentSessionConfig.Builder().build())
@@ -160,7 +160,7 @@ class PaymentSessionTest {
 
     @Test
     fun presentPaymentMethodSelection_withShouldRequirePostalCode_shouldPassInIntent() {
-        CustomerSession.setInstance(createCustomerSession())
+        CustomerSession.instance = createCustomerSession()
 
         val paymentSession = PaymentSession(activity)
         paymentSession.init(paymentSessionListener, PaymentSessionConfig.Builder().build())
@@ -175,7 +175,7 @@ class PaymentSessionTest {
     @Test
     fun getSelectedPaymentMethodId_whenPrefsNotSet_returnsNull() {
         `when`<Customer>(customerSession.cachedCustomer).thenReturn(FIRST_CUSTOMER)
-        CustomerSession.setInstance(customerSession)
+        CustomerSession.instance = customerSession
         assertNull(createPaymentSession().getSelectedPaymentMethodId(null))
     }
 
@@ -199,7 +199,7 @@ class PaymentSessionTest {
             .thenReturn("pm_12345")
 
         `when`<Customer>(customerSession.cachedCustomer).thenReturn(FIRST_CUSTOMER)
-        CustomerSession.setInstance(customerSession)
+        CustomerSession.instance = customerSession
 
         assertEquals("pm_12345",
             createPaymentSession().getSelectedPaymentMethodId(null))
@@ -219,7 +219,7 @@ class PaymentSessionTest {
     @Test
     fun init_withoutSavedState_clearsLoggingTokensAndStartsWithPaymentSession() {
         val customerSession = createCustomerSession()
-        CustomerSession.setInstance(customerSession)
+        CustomerSession.instance = customerSession
         customerSession
             .addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY)
         assertEquals(1, customerSession.productUsageTokens.size)
@@ -237,7 +237,7 @@ class PaymentSessionTest {
     @Test
     fun init_withSavedStateBundle_doesNotClearLoggingTokens() {
         val customerSession = createCustomerSession()
-        CustomerSession.setInstance(customerSession)
+        CustomerSession.instance = customerSession
         customerSession
             .addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY)
         assertEquals(1, customerSession.productUsageTokens.size)
@@ -256,7 +256,7 @@ class PaymentSessionTest {
     @Test
     fun completePayment_withLoggedActions_clearsLoggingTokensAndSetsResult() {
         val customerSession = createCustomerSession()
-        CustomerSession.setInstance(customerSession)
+        CustomerSession.instance = customerSession
         customerSession
             .addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY)
         assertEquals(1, customerSession.productUsageTokens.size)
@@ -279,7 +279,7 @@ class PaymentSessionTest {
     fun init_withSavedState_setsPaymentSessionData() {
         ephemeralKeyProvider
             .setNextRawEphemeralKey(CustomerFixtures.EPHEMERAL_KEY_FIRST.toString())
-        CustomerSession.setInstance(createCustomerSession())
+        CustomerSession.instance = createCustomerSession()
 
         val paymentSession = PaymentSession(activity)
         paymentSession.init(paymentSessionListener, PaymentSessionConfig.Builder().build())

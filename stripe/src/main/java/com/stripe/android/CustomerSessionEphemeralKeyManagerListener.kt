@@ -1,12 +1,11 @@
 package com.stripe.android
 
-import java.util.HashMap
 import java.util.concurrent.ThreadPoolExecutor
 
 internal class CustomerSessionEphemeralKeyManagerListener(
     private val runnableFactory: CustomerSessionRunnableFactory,
     private val executor: ThreadPoolExecutor,
-    private val listeners: HashMap<String, CustomerSession.RetrievalListener>,
+    private val listeners: MutableMap<String, CustomerSession.RetrievalListener?>,
     private val productUsage: CustomerSessionProductUsage
 ) : EphemeralKeyManager.KeyManagerListener {
     override fun onKeyUpdate(

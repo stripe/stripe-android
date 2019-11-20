@@ -14,8 +14,8 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CustomerSession
-import com.stripe.android.CustomerSession.ACTION_API_EXCEPTION
-import com.stripe.android.CustomerSession.EXTRA_EXCEPTION
+import com.stripe.android.CustomerSession.Companion.ACTION_API_EXCEPTION
+import com.stripe.android.CustomerSession.Companion.EXTRA_EXCEPTION
 import com.stripe.android.EphemeralKeyProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentSession.Companion.EXTRA_PAYMENT_SESSION_DATA

@@ -14,7 +14,6 @@ import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CustomerSession
-import com.stripe.android.CustomerSessionTestHelper
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentSession.Companion.EXTRA_PAYMENT_SESSION_ACTIVE
 import com.stripe.android.R
@@ -60,7 +59,7 @@ class PaymentMethodsActivityTest : BaseViewTest<PaymentMethodsActivity>(PaymentM
 
         context = ApplicationProvider.getApplicationContext()
 
-        CustomerSessionTestHelper.setInstance(customerSession)
+        CustomerSession.instance = customerSession
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
         paymentMethodsActivity = createActivity(

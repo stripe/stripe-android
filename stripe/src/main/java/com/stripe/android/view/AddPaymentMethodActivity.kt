@@ -73,7 +73,7 @@ open class AddPaymentMethodActivity : StripeActivity() {
         startedFromPaymentSession = args.isPaymentSessionActive
 
         if (shouldAttachToCustomer && args.shouldInitCustomerSessionTokens) {
-            initCustomerSessionTokens()
+            initCustomerSessionTokens(CustomerSession.getInstance())
         }
     }
 
@@ -118,8 +118,8 @@ open class AddPaymentMethodActivity : StripeActivity() {
         }
     }
 
-    fun initCustomerSessionTokens() {
-        val customerSession = CustomerSession.getInstance()
+    @JvmSynthetic
+    internal fun initCustomerSessionTokens(customerSession: CustomerSession) {
         customerSession.addProductUsageTokenIfValid(TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
         if (startedFromPaymentSession) {
             customerSession.addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION)
