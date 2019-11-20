@@ -41,14 +41,18 @@ class PaymentMethodsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment_methods)
 
-        viewModel = ViewModelProviders.of(this).get(PaymentMethodsViewModel::class.java)
-
-        val args = PaymentMethodsActivityStarter.Args.create(intent)
-        startedFromPaymentSession = args.isPaymentSessionActive
-        cardDisplayTextFactory = CardDisplayTextFactory.create(this)
         customerSession = CustomerSession.getInstance()
 
-        setupRecyclerView(args, savedInstanceState)
+        val args = PaymentMethodsActivityStarter.Args.create(intent)
+        viewModel = ViewModelProviders.of(
+            this,
+            PaymentMethodsViewModel.Factory(customerSession, args.initialPaymentMethodId)
+        )[PaymentMethodsViewModel::class.java]
+
+        startedFromPaymentSession = args.isPaymentSessionActive
+        cardDisplayTextFactory = CardDisplayTextFactory.create(this)
+
+        setupRecyclerView(args)
 
         setSupportActionBar(payment_methods_toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -77,15 +81,10 @@ class PaymentMethodsActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView(
-        args: PaymentMethodsActivityStarter.Args,
-        savedInstanceState: Bundle?
+        args: PaymentMethodsActivityStarter.Args
     ) {
-        val initiallySelectedPaymentMethodId =
-            savedInstanceState?.getString(STATE_SELECTED_PAYMENT_METHOD_ID)
-                ?: args.initialPaymentMethodId
-
         adapter = PaymentMethodsAdapter(
-            initiallySelectedPaymentMethodId,
+            viewModel.selectedPaymentMethodId,
             args,
             args.paymentMethodTypes
         )
@@ -213,13 +212,12 @@ class PaymentMethodsActivity : AppCompatActivity() {
             .show()
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putString(STATE_SELECTED_PAYMENT_METHOD_ID, adapter.selectedPaymentMethod?.id)
+    override fun onDestroy() {
+        viewModel.selectedPaymentMethodId = adapter.selectedPaymentMethod?.id
+        super.onDestroy()
     }
 
     internal companion object {
-        private const val STATE_SELECTED_PAYMENT_METHOD_ID = "state_selected_payment_method_id"
         internal const val TOKEN_PAYMENT_METHODS_ACTIVITY: String = "PaymentMethodsActivity"
     }
 }
