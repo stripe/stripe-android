@@ -89,20 +89,14 @@ class PaymentFlowActivity : StripeActivity() {
                         .getParcelableExtra(PaymentFlowExtras.EXTRA_DEFAULT_SHIPPING_METHOD)
 
                     onShippingInfoValidated(
-                        CustomerSession.getInstance(),
+                        customerSession,
                         shippingMethods.orEmpty(),
                         defaultShippingMethod
                     )
                 } else {
-                    setCommunicatingProgress(false)
-                    val shippingInfoError = intent
-                        .getStringExtra(PaymentFlowExtras.EXTRA_SHIPPING_INFO_ERROR)
-                    if (!shippingInfoError.isNullOrEmpty()) {
-                        showError(shippingInfoError)
-                    } else {
-                        showError(getString(R.string.invalid_shipping_information))
-                    }
-                    paymentSessionData = paymentSessionData.copy(shippingInformation = null)
+                    val errorMessage =
+                        intent.getStringExtra(PaymentFlowExtras.EXTRA_SHIPPING_INFO_ERROR)
+                    onShippingInfoError(errorMessage)
                 }
             }
         }
@@ -246,6 +240,16 @@ class PaymentFlowActivity : StripeActivity() {
             shippingMethod = selectShippingMethodWidget.selectedShippingMethod
         ))
         finish()
+    }
+
+    private fun onShippingInfoError(errorMessage: String?) {
+        setCommunicatingProgress(false)
+        if (!errorMessage.isNullOrEmpty()) {
+            showError(errorMessage)
+        } else {
+            showError(getString(R.string.invalid_shipping_information))
+        }
+        paymentSessionData = paymentSessionData.copy(shippingInformation = null)
     }
 
     private fun finishWithData(paymentSessionData: PaymentSessionData) {
