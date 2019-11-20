@@ -288,11 +288,11 @@ class PaymentSession @VisibleForTesting internal constructor(
                 }
 
                 override fun onError(
-                    httpCode: Int,
+                    errorCode: Int,
                     errorMessage: String,
                     stripeError: StripeError?
                 ) {
-                    paymentSessionListener?.onError(httpCode, errorMessage)
+                    paymentSessionListener?.onError(errorCode, errorMessage)
                     paymentSessionListener?.onCommunicatingStateChanged(false)
                 }
             })

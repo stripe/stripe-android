@@ -640,7 +640,7 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
     @Test
     fun shippingInfoScreen_whenLaunched_logs() {
         val customerSession = createCustomerSession(null)
-        CustomerSession.setInstance(customerSession)
+        CustomerSession.instance = customerSession
         createActivity(PaymentFlowActivityStarter.Args.Builder()
             .setPaymentSessionConfig(PaymentSessionConfig.Builder()
                 .build())
@@ -653,7 +653,7 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
     @Test
     fun shippingMethodScreen_whenLaunched_logs() {
         val customerSession = createCustomerSession(null)
-        CustomerSession.setInstance(customerSession)
+        CustomerSession.instance = customerSession
 
         createActivity(PaymentFlowActivityStarter.Args.Builder()
             .setPaymentSessionConfig(PaymentSessionConfig.Builder()

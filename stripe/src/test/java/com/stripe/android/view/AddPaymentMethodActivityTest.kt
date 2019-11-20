@@ -12,13 +12,13 @@ import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.AbsFakeStripeRepository
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.ApiRequest
 import com.stripe.android.CustomerSession
-import com.stripe.android.CustomerSession.ACTION_API_EXCEPTION
-import com.stripe.android.CustomerSession.EXTRA_EXCEPTION
-import com.stripe.android.CustomerSessionTestHelper
+import com.stripe.android.CustomerSession.Companion.ACTION_API_EXCEPTION
+import com.stripe.android.CustomerSession.Companion.EXTRA_EXCEPTION
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentSession.Companion.TOKEN_PAYMENT_SESSION
 import com.stripe.android.R
@@ -50,7 +50,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.never
-import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
@@ -95,7 +94,8 @@ class AddPaymentMethodActivityTest :
         context = ApplicationProvider.getApplicationContext()
 
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-        CustomerSessionTestHelper.setInstance(customerSession)
+
+        CustomerSession.instance = customerSession
     }
 
     @AfterTest
@@ -132,7 +132,7 @@ class AddPaymentMethodActivityTest :
         }
 
         shadowActivity = shadowOf(activity)
-        activity.initCustomerSessionTokens()
+        activity.initCustomerSessionTokens(customerSession)
     }
 
     @Test
@@ -157,7 +157,7 @@ class AddPaymentMethodActivityTest :
         setUpForLocalTest()
         assertEquals(View.GONE, progressBar.visibility)
         activity.createPaymentMethod(stripe, null)
-        verify<StripeRepository>(mockStripeRepository, never()).createPaymentMethod(
+        verify(mockStripeRepository, never()).createPaymentMethod(
             any(), any()
         )
     }
@@ -181,11 +181,11 @@ class AddPaymentMethodActivityTest :
 
         val expectedPaymentMethod = PaymentMethodFixtures.FPX_PAYMENT_METHOD
 
-        verify<CustomerSession>(customerSession)
+        verify(customerSession)
             .addProductUsageTokenIfValid(TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
-        verify<CustomerSession>(customerSession)
+        verify(customerSession)
             .addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION)
-        verify<CustomerSession>(customerSession, never()).attachPaymentMethod(
+        verify(customerSession, never()).attachPaymentMethod(
             any(), any()
         )
 
@@ -213,11 +213,11 @@ class AddPaymentMethodActivityTest :
         val expectedPaymentMethod =
             requireNotNull(PaymentMethod.fromJson(PaymentMethodTest.PM_CARD_JSON))
 
-        verify<CustomerSession>(customerSession)
+        verify(customerSession)
             .addProductUsageTokenIfValid(TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
-        verify<CustomerSession>(customerSession)
+        verify(customerSession)
             .addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION)
-        verify<CustomerSession>(customerSession).attachPaymentMethod(
+        verify(customerSession).attachPaymentMethod(
             paymentMethodIdCaptor.capture(),
             listenerArgumentCaptor.capture()
         )
@@ -276,11 +276,11 @@ class AddPaymentMethodActivityTest :
 
         val expectedPaymentMethod = PaymentMethod.fromJson(PaymentMethodTest.PM_CARD_JSON)
 
-        verify<CustomerSession>(customerSession)
+        verify(customerSession)
             .addProductUsageTokenIfValid(TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
-        verify<CustomerSession>(customerSession)
+        verify(customerSession)
             .addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION)
-        verify<CustomerSession>(customerSession).attachPaymentMethod(
+        verify(customerSession).attachPaymentMethod(
             paymentMethodIdCaptor.capture(),
             listenerArgumentCaptor.capture()
         )
@@ -303,7 +303,7 @@ class AddPaymentMethodActivityTest :
         assertNull(intent)
         assertFalse(activity.isFinishing)
         assertEquals(View.GONE, progressBar.visibility)
-        verify<StripeActivity.AlertMessageListener>(alertMessageListener)
+        verify(alertMessageListener)
             .onAlertMessageDisplayed(errorMessage)
     }
 
