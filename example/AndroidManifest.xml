@@ -93,6 +93,9 @@
 
         <activity
             android:name=".activity.FpxPaymentActivity" />
+
+        <activity
+            android:name=".activity.KlarnaSourceActivity" />
     </application>
 
 </manifest>

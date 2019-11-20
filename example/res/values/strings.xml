@@ -26,6 +26,7 @@
     <string name="create_rxjava">Create Token with RxJava</string>
     <string name="launch_create_pm_sepa_debit">Create SEPA Debit Payment Method</string>
     <string name="fpx_payment_example">FPX Payment Example</string>
+    <string name="klarna_source_example">Klarna Source Example</string>
 
     <string name="select_add_card">Select or add card</string>
     <string name="selected_card">Selected card:</string>
@@ -68,4 +69,6 @@
 
     <string name="ready_to_charge">Ready to charge?</string>
     <string name="not_selected">Not selected</string>
+
+    <string name="create_klarna_source">Create Klarna Source</string>
 </resources>
