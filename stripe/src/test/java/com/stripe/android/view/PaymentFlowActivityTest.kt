@@ -222,7 +222,7 @@ class PaymentFlowActivityTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowAct
             .sendBroadcast(onShippingInfoProcessedValid)
         assertEquals(View.VISIBLE, paymentFlowActivity.progressBar.visibility)
 
-        paymentFlowActivity.onShippingInfoSaved(SHIPPING_INFO)
+        paymentFlowActivity.onShippingInfoSaved(SHIPPING_INFO, shippingMethods)
         assertEquals(View.GONE, paymentFlowActivity.progressBar.visibility)
     }
 

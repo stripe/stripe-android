@@ -30,8 +30,6 @@ class PaymentFlowActivity : StripeActivity() {
     private lateinit var shippingInfoSubmittedBroadcastReceiver: BroadcastReceiver
     private lateinit var paymentFlowPagerAdapter: PaymentFlowPagerAdapter
     private lateinit var paymentSessionData: PaymentSessionData
-    private val validShippingMethods: MutableList<ShippingMethod> = mutableListOf()
-    private var defaultShippingMethod: ShippingMethod? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,18 +81,18 @@ class PaymentFlowActivity : StripeActivity() {
                     PaymentFlowExtras.EXTRA_IS_SHIPPING_INFO_VALID,
                     false)
                 if (isShippingInfoValid) {
-                    onShippingInfoValidated(CustomerSession.getInstance())
-
-                    val intentShippingMethods: List<ShippingMethod>? =
+                    val shippingMethods: List<ShippingMethod>? =
                         intent.getParcelableArrayListExtra(
                             PaymentFlowExtras.EXTRA_VALID_SHIPPING_METHODS
                         )
-                    if (intentShippingMethods != null) {
-                        validShippingMethods.clear()
-                        validShippingMethods.addAll(intentShippingMethods)
-                    }
-                    defaultShippingMethod = intent
+                    val defaultShippingMethod: ShippingMethod? = intent
                         .getParcelableExtra(PaymentFlowExtras.EXTRA_DEFAULT_SHIPPING_METHOD)
+
+                    onShippingInfoValidated(
+                        CustomerSession.getInstance(),
+                        shippingMethods.orEmpty(),
+                        defaultShippingMethod
+                    )
                 } else {
                     setCommunicatingProgress(false)
                     val shippingInfoError = intent
@@ -149,17 +147,28 @@ class PaymentFlowActivity : StripeActivity() {
     }
 
     @JvmSynthetic
-    internal fun onShippingInfoSaved(shippingInformation: ShippingInformation?) {
-        onShippingMethodsReady(validShippingMethods, defaultShippingMethod)
+    internal fun onShippingInfoSaved(
+        shippingInformation: ShippingInformation?,
+        shippingMethods: List<ShippingMethod> = emptyList(),
+        defaultShippingMethod: ShippingMethod? = null
+    ) {
+        onShippingMethodsReady(shippingMethods, defaultShippingMethod)
         paymentSessionData = paymentSessionData.copy(
             shippingInformation = shippingInformation
         )
     }
 
-    private fun onShippingInfoValidated(customerSession: CustomerSession) {
+    private fun onShippingInfoValidated(
+        customerSession: CustomerSession,
+        shippingMethods: List<ShippingMethod>,
+        defaultShippingMethod: ShippingMethod?
+    ) {
         paymentSessionData.shippingInformation?.let {
             customerSession.setCustomerShippingInformation(it,
-                CustomerShippingInfoSavedListener(this))
+                CustomerShippingInfoSavedListener(
+                    this, shippingMethods, defaultShippingMethod
+                )
+            )
         }
     }
 
@@ -255,12 +264,16 @@ class PaymentFlowActivity : StripeActivity() {
     }
 
     private class CustomerShippingInfoSavedListener internal constructor(
-        activity: PaymentFlowActivity
+        activity: PaymentFlowActivity,
+        private val shippingMethods: List<ShippingMethod>,
+        private val defaultShippingMethod: ShippingMethod?
     ) : CustomerSession.CustomerRetrievalListener {
         private val activityRef: WeakReference<PaymentFlowActivity> = WeakReference(activity)
 
         override fun onCustomerRetrieved(customer: Customer) {
-            activityRef.get()?.onShippingInfoSaved(customer.shippingInformation)
+            activityRef.get()?.onShippingInfoSaved(
+                customer.shippingInformation, shippingMethods, defaultShippingMethod
+            )
         }
 
         override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
