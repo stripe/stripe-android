@@ -226,7 +226,7 @@ class ShippingInfoWidgetTest : BaseViewTest<ShippingInfoTestActivity>(
         assertEquals(phoneEditText.text.toString(), "(123) 456 - 7890")
         assertEquals(postalEditText.text.toString(), "12345")
         assertEquals(nameEditText.text.toString(), "Fake Name")
-        assertEquals(countryAutoCompleteTextView.selectedCountry.code, "US")
+        assertEquals(countryAutoCompleteTextView.selectedCountry?.code, "US")
     }
 
     private companion object {

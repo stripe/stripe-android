@@ -71,6 +71,11 @@
     <string name="address_postal_code_invalid">Your postal code is invalid</string>
     <!--Error text indicating zip/ postal code is invalid, used for international addresses-->
     <string name="address_zip_postal_invalid">Your ZIP/Postal code is invalid</string>
+
+    <!-- TODO(mshafrir-stripe): translate string (ANDROID-450) -->
+    <!--Error text indicating country is invalid-->
+    <string name="address_country_invalid" tools:ignore="MissingTranslation">Your country is invalid</string>
+
     <!--Label for input requesting province, used for canadian addresses-->
     <string name="address_label_province">Province</string>
     <!--Label for input requesting province where province is optional, used for canadian addresses-->

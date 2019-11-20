@@ -19,6 +19,7 @@ import com.stripe.android.model.Customer
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
 import java.lang.ref.WeakReference
+import kotlinx.android.synthetic.main.activity_enter_shipping_info.*
 import kotlinx.android.synthetic.main.activity_shipping_flow.*
 
 /**
@@ -192,8 +193,7 @@ class PaymentFlowActivity : StripeActivity() {
 
     private val shippingInfo: ShippingInformation?
         get() {
-            val shippingInfoWidget: ShippingInfoWidget = findViewById(R.id.shipping_info_widget)
-            return shippingInfoWidget.rawShippingInformation
+            return shipping_info_widget.shippingInformation
         }
 
     private val selectedShippingMethod: ShippingMethod?

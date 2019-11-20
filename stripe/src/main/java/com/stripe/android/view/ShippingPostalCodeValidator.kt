@@ -10,20 +10,26 @@ internal class ShippingPostalCodeValidator {
 
     fun isValid(
         postalCode: String,
-        countryCode: String,
+        countryCode: String?,
         optionalShippingInfoFields: List<String>,
         hiddenShippingInfoFields: List<String>
     ): Boolean {
+        if (countryCode == null) {
+            return false
+        }
+
         val postalCodePattern = POSTAL_CODE_PATTERNS[countryCode]
         return if (postalCode.isEmpty() &&
             isPostalCodeOptional(optionalShippingInfoFields, hiddenShippingInfoFields)) {
             true
-        } else postalCodePattern?.matcher(postalCode)?.matches()
-            ?: if (CountryUtils.doesCountryUsePostalCode(countryCode)) {
-                postalCode.isNotEmpty()
-            } else {
-                true
-            }
+        } else {
+            postalCodePattern?.matcher(postalCode)?.matches()
+                ?: if (CountryUtils.doesCountryUsePostalCode(countryCode)) {
+                    postalCode.isNotEmpty()
+                } else {
+                    true
+                }
+        }
     }
 
     private companion object {
