@@ -1,11 +1,11 @@
 package com.stripe.android.model
 
 import com.stripe.android.CardNumberFixtures.VALID_VISA_NO_SPACES
-import com.stripe.android.model.ConfirmPaymentIntentParams.Companion.API_PARAM_SAVE_PAYMENT_METHOD
-import com.stripe.android.model.ConfirmPaymentIntentParams.Companion.API_PARAM_SOURCE_ID
-import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_CLIENT_SECRET
-import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_PAYMENT_METHOD_ID
-import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_RETURN_URL
+import com.stripe.android.model.ConfirmPaymentIntentParams.Companion.PARAM_SAVE_PAYMENT_METHOD
+import com.stripe.android.model.ConfirmPaymentIntentParams.Companion.PARAM_SOURCE_ID
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN_URL
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -46,7 +46,7 @@ class ConfirmPaymentIntentParamsTest {
         assertEquals(SOURCE_ID, params.sourceId)
         assertTrue(params.shouldSavePaymentMethod())
 
-        assertTrue(params.toParamMap()[API_PARAM_SAVE_PAYMENT_METHOD] == true)
+        assertTrue(params.toParamMap()[PARAM_SAVE_PAYMENT_METHOD] == true)
     }
 
     @Test
@@ -95,7 +95,7 @@ class ConfirmPaymentIntentParamsTest {
         assertEquals(PM_ID, params.paymentMethodId)
         assertTrue(params.shouldSavePaymentMethod())
 
-        assertTrue(params.toParamMap()[API_PARAM_SAVE_PAYMENT_METHOD] == true)
+        assertTrue(params.toParamMap()[PARAM_SAVE_PAYMENT_METHOD] == true)
     }
 
     @Test
@@ -104,10 +104,10 @@ class ConfirmPaymentIntentParamsTest {
             .createWithSourceId(SOURCE_ID, CLIENT_SECRET, RETURN_URL)
 
         val paramMap = confirmPaymentIntentParams.toParamMap()
-        assertEquals(paramMap[API_PARAM_SOURCE_ID], SOURCE_ID)
-        assertEquals(paramMap[API_PARAM_CLIENT_SECRET], CLIENT_SECRET)
-        assertEquals(paramMap[API_PARAM_RETURN_URL], RETURN_URL)
-        assertEquals(false, paramMap[API_PARAM_SAVE_PAYMENT_METHOD])
+        assertEquals(paramMap[PARAM_SOURCE_ID], SOURCE_ID)
+        assertEquals(paramMap[PARAM_CLIENT_SECRET], CLIENT_SECRET)
+        assertEquals(paramMap[PARAM_RETURN_URL], RETURN_URL)
+        assertEquals(false, paramMap[PARAM_SAVE_PAYMENT_METHOD])
     }
 
     @Test
@@ -117,10 +117,10 @@ class ConfirmPaymentIntentParamsTest {
 
         val paramMap = confirmPaymentIntentParams.toParamMap()
 
-        assertEquals(paramMap[API_PARAM_PAYMENT_METHOD_ID], PM_ID)
-        assertEquals(paramMap[API_PARAM_CLIENT_SECRET], CLIENT_SECRET)
-        assertFalse(paramMap.containsKey(API_PARAM_RETURN_URL))
-        assertEquals(false, paramMap[API_PARAM_SAVE_PAYMENT_METHOD])
+        assertEquals(paramMap[PARAM_PAYMENT_METHOD_ID], PM_ID)
+        assertEquals(paramMap[PARAM_CLIENT_SECRET], CLIENT_SECRET)
+        assertFalse(paramMap.containsKey(PARAM_RETURN_URL))
+        assertEquals(false, paramMap[PARAM_SAVE_PAYMENT_METHOD])
     }
 
     @Test
@@ -130,10 +130,10 @@ class ConfirmPaymentIntentParamsTest {
 
         val paramMap = confirmPaymentIntentParams.toParamMap()
 
-        assertEquals(paramMap[API_PARAM_PAYMENT_METHOD_ID], PM_ID)
-        assertEquals(paramMap[API_PARAM_CLIENT_SECRET], CLIENT_SECRET)
-        assertEquals(paramMap[API_PARAM_RETURN_URL], RETURN_URL)
-        assertEquals(false, paramMap[API_PARAM_SAVE_PAYMENT_METHOD])
+        assertEquals(paramMap[PARAM_PAYMENT_METHOD_ID], PM_ID)
+        assertEquals(paramMap[PARAM_CLIENT_SECRET], CLIENT_SECRET)
+        assertEquals(paramMap[PARAM_RETURN_URL], RETURN_URL)
+        assertEquals(false, paramMap[PARAM_SAVE_PAYMENT_METHOD])
     }
 
     @Test
@@ -153,10 +153,10 @@ class ConfirmPaymentIntentParamsTest {
 
         val paramMap = confirmPaymentIntentParams.toParamMap()
 
-        assertEquals(paramMap[API_PARAM_CLIENT_SECRET], CLIENT_SECRET)
+        assertEquals(paramMap[PARAM_CLIENT_SECRET], CLIENT_SECRET)
         assertEquals(paramMap[extraParamKey1], extraParamValue1)
         assertEquals(paramMap[extraParamKey2], extraParamValue2)
-        assertEquals(false, paramMap[API_PARAM_SAVE_PAYMENT_METHOD])
+        assertEquals(false, paramMap[PARAM_SAVE_PAYMENT_METHOD])
     }
 
     @Test
@@ -194,7 +194,7 @@ class ConfirmPaymentIntentParamsTest {
             CLIENT_SECRET,
             RETURN_URL
         ).toParamMap()
-        assertTrue(params.containsKey(MandateData.API_PARAM_MANDATE_DATA))
+        assertTrue(params.containsKey(MandateData.PARAM_MANDATE_DATA))
     }
 
     private companion object {

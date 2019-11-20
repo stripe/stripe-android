@@ -59,9 +59,9 @@ class ConfirmSetupIntentParamsTest {
             null
         )
         val params = confirmSetupIntentParams.toParamMap()
-        assertNull(params[ConfirmStripeIntentParams.API_PARAM_PAYMENT_METHOD_DATA])
+        assertNull(params[ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_DATA])
         assertEquals("pm_12345",
-            params[ConfirmStripeIntentParams.API_PARAM_PAYMENT_METHOD_ID])
+            params[ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_ID])
     }
 
     @Test
@@ -71,9 +71,9 @@ class ConfirmSetupIntentParamsTest {
             "client_secret", null
         )
         val params = confirmSetupIntentParams.toParamMap()
-        assertNull(params[ConfirmStripeIntentParams.API_PARAM_PAYMENT_METHOD_ID])
+        assertNull(params[ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_ID])
         val paymentMethodData =
-            params[ConfirmStripeIntentParams.API_PARAM_PAYMENT_METHOD_DATA] as Map<String, Any>
+            params[ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_DATA] as Map<String, Any>
         assertEquals("card", paymentMethodData["type"])
         assertNotNull(paymentMethodData["card"])
     }

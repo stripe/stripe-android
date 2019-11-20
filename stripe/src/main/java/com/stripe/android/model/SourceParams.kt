@@ -146,7 +146,7 @@ class SourceParams private constructor(
      */
     fun setReturnUrl(@Size(min = 1) returnUrl: String): SourceParams {
         this.redirect = redirect.orEmpty().plus(
-            mapOf(FIELD_RETURN_URL to returnUrl)
+            mapOf(PARAM_RETURN_URL to returnUrl)
         )
         return this
     }
@@ -197,7 +197,7 @@ class SourceParams private constructor(
      * @return a String-keyed map
      */
     override fun toParamMap(): Map<String, Any> {
-        return mapOf<String, Any>(API_PARAM_TYPE to typeRaw)
+        return mapOf<String, Any>(PARAM_TYPE to typeRaw)
             .plus(
                 apiParameterMap?.let {
                     mapOf(typeRaw to it)
@@ -205,43 +205,43 @@ class SourceParams private constructor(
             )
             .plus(
                 amount?.let {
-                    mapOf(API_PARAM_AMOUNT to it)
+                    mapOf(PARAM_AMOUNT to it)
                 }.orEmpty()
             )
             .plus(
                 currency?.let {
-                    mapOf(API_PARAM_CURRENCY to it)
+                    mapOf(PARAM_CURRENCY to it)
                 }.orEmpty()
             )
             .plus(
                 owner.takeUnless { it.isNullOrEmpty() }?.let {
-                    mapOf(API_PARAM_OWNER to it)
+                    mapOf(PARAM_OWNER to it)
                 }.orEmpty()
             )
             .plus(
                 redirect?.let {
-                    mapOf(API_PARAM_REDIRECT to it)
+                    mapOf(PARAM_REDIRECT to it)
                 }.orEmpty()
             )
             .plus(
                 metaData?.let {
-                    mapOf(API_PARAM_METADATA to it)
+                    mapOf(PARAM_METADATA to it)
                 }.orEmpty()
             )
             .plus(
                 token?.let {
-                    mapOf(API_PARAM_TOKEN to it)
+                    mapOf(PARAM_TOKEN to it)
                 }.orEmpty()
             )
             .plus(
                 usage?.let {
-                    mapOf(API_PARAM_USAGE to it)
+                    mapOf(PARAM_USAGE to it)
                 }.orEmpty()
             )
             .plus(extraParams)
             .plus(
                 weChatParams?.let {
-                    mapOf(API_PARAM_WECHAT to it.toParamMap())
+                    mapOf(PARAM_WECHAT to it.toParamMap())
                 }.orEmpty()
             )
     }
@@ -254,19 +254,19 @@ class SourceParams private constructor(
             return emptyMap<String, Any>()
                 .plus(
                     appId?.let {
-                        mapOf(FIELD_APPID to it)
+                        mapOf(PARAM_APPID to it)
                     }.orEmpty()
                 )
                 .plus(
                     statementDescriptor?.let {
-                        mapOf(FIELD_STATEMENT_DESCRIPTOR to it)
+                        mapOf(PARAM_STATEMENT_DESCRIPTOR to it)
                     }.orEmpty()
                 )
         }
 
         companion object {
-            private const val FIELD_APPID = "appid"
-            private const val FIELD_STATEMENT_DESCRIPTOR = "statement_descriptor"
+            private const val PARAM_APPID = "appid"
+            private const val PARAM_STATEMENT_DESCRIPTOR = "statement_descriptor"
         }
     }
 
@@ -331,66 +331,65 @@ class SourceParams private constructor(
             return emptyMap<String, Any>()
                 .plus(
                     address?.let {
-                        mapOf(FIELD_ADDRESS to it.toParamMap())
+                        mapOf(PARAM_ADDRESS to it.toParamMap())
                     }.orEmpty()
                 )
                 .plus(
                     email?.let {
-                        mapOf(FIELD_EMAIL to it)
+                        mapOf(PARAM_EMAIL to it)
                     }.orEmpty()
                 )
                 .plus(
                     name?.let {
-                        mapOf(FIELD_NAME to it)
+                        mapOf(PARAM_NAME to it)
                     }.orEmpty()
                 )
                 .plus(
                     phone?.let {
-                        mapOf(FIELD_PHONE to it)
+                        mapOf(PARAM_PHONE to it)
                     }.orEmpty()
                 )
         }
 
         private companion object {
-            private const val FIELD_ADDRESS = "address"
-            private const val FIELD_EMAIL = "email"
-            private const val FIELD_NAME = "name"
-            private const val FIELD_PHONE = "phone"
+            private const val PARAM_ADDRESS = "address"
+            private const val PARAM_EMAIL = "email"
+            private const val PARAM_NAME = "name"
+            private const val PARAM_PHONE = "phone"
         }
     }
 
     companion object {
-        private const val API_PARAM_AMOUNT = "amount"
-        private const val API_PARAM_CURRENCY = "currency"
-        private const val API_PARAM_METADATA = "metadata"
-        private const val API_PARAM_OWNER = "owner"
-        private const val API_PARAM_REDIRECT = "redirect"
-        private const val API_PARAM_TYPE = "type"
-        private const val API_PARAM_TOKEN = "token"
-        private const val API_PARAM_USAGE = "usage"
-        private const val API_PARAM_WECHAT = "wechat"
-        private const val API_PARAM_CLIENT_SECRET = "client_secret"
-        private const val API_PARAM_FLOW = "flow"
-        private const val API_PARAM_KLARNA = "klarna"
-        private const val API_PARAM_SOURCE_ORDER = "source_order"
+        private const val PARAM_AMOUNT = "amount"
+        private const val PARAM_CURRENCY = "currency"
+        private const val PARAM_METADATA = "metadata"
+        private const val PARAM_OWNER = "owner"
+        private const val PARAM_REDIRECT = "redirect"
+        private const val PARAM_TYPE = "type"
+        private const val PARAM_TOKEN = "token"
+        private const val PARAM_USAGE = "usage"
+        private const val PARAM_WECHAT = "wechat"
+        private const val PARAM_CLIENT_SECRET = "client_secret"
+        private const val PARAM_FLOW = "flow"
+        private const val PARAM_KLARNA = "klarna"
+        private const val PARAM_SOURCE_ORDER = "source_order"
+        private const val PARAM_BANK = "bank"
+        private const val PARAM_CARD = "card"
+        private const val PARAM_COUNTRY = "country"
+        private const val PARAM_CVC = "cvc"
+        private const val PARAM_EXP_MONTH = "exp_month"
+        private const val PARAM_EXP_YEAR = "exp_year"
+        private const val PARAM_IBAN = "iban"
+        private const val PARAM_NUMBER = "number"
+        private const val PARAM_RETURN_URL = "return_url"
+        private const val PARAM_STATEMENT_DESCRIPTOR = "statement_descriptor"
+        private const val PARAM_PREFERRED_LANGUAGE = "preferred_language"
 
-        private const val FIELD_BANK = "bank"
-        private const val FIELD_CARD = "card"
-        private const val FIELD_COUNTRY = "country"
-        private const val FIELD_CVC = "cvc"
-        private const val FIELD_EXP_MONTH = "exp_month"
-        private const val FIELD_EXP_YEAR = "exp_year"
-        private const val FIELD_IBAN = "iban"
-        private const val FIELD_NUMBER = "number"
-        private const val FIELD_RETURN_URL = "return_url"
-        private const val FIELD_STATEMENT_DESCRIPTOR = "statement_descriptor"
-        private const val FIELD_PREFERRED_LANGUAGE = "preferred_language"
-
-        private const val VISA_CHECKOUT = "visa_checkout"
-        private const val CALL_ID = "callid"
-        private const val MASTERPASS = "masterpass"
-        private const val TRANSACTION_ID = "transaction_id"
-        private const val CART_ID = "cart_id"
+        private const val PARAM_VISA_CHECKOUT = "visa_checkout"
+        private const val PARAM_CALL_ID = "callid"
+        private const val PARAM_MASTERPASS = "masterpass"
+        private const val PARAM_TRANSACTION_ID = "transaction_id"
+        private const val PARAM_CART_ID = "cart_id"
 
         /**
          * Create P24 Source params.
@@ -418,7 +417,7 @@ class SourceParams private constructor(
             return SourceParams(SourceType.P24)
                 .setAmount(amount)
                 .setCurrency(currency)
-                .setRedirect(mapOf(FIELD_RETURN_URL to returnUrl))
+                .setRedirect(mapOf(PARAM_RETURN_URL to returnUrl))
                 .setOwner(Owner(
                     email = email,
                     name = name
@@ -452,7 +451,7 @@ class SourceParams private constructor(
             ).toParamMap()
             return SourceParams(SourceType.ALIPAY)
                 .setCurrency(currency)
-                .setRedirect(mapOf(FIELD_RETURN_URL to returnUrl))
+                .setRedirect(mapOf(PARAM_RETURN_URL to returnUrl))
                 .setUsage(Source.Usage.REUSABLE)
                 .setOwner(ownerMap)
         }
@@ -488,7 +487,7 @@ class SourceParams private constructor(
             return SourceParams(SourceType.ALIPAY)
                 .setCurrency(currency)
                 .setAmount(amount)
-                .setRedirect(mapOf(FIELD_RETURN_URL to returnUrl))
+                .setRedirect(mapOf(PARAM_RETURN_URL to returnUrl))
                 .setOwner(ownerMap)
         }
 
@@ -548,9 +547,9 @@ class SourceParams private constructor(
                 .setReturnUrl(returnUrl)
                 .setExtraParams(
                     mapOf(
-                        API_PARAM_KLARNA to KlarnaParams(purchaseCountry).toParamMap(),
-                        API_PARAM_FLOW to Source.SourceFlow.REDIRECT,
-                        API_PARAM_SOURCE_ORDER to sourceOrderParams.toParamMap()
+                        PARAM_KLARNA to KlarnaParams(purchaseCountry).toParamMap(),
+                        PARAM_FLOW to Source.SourceFlow.REDIRECT,
+                        PARAM_SOURCE_ORDER to sourceOrderParams.toParamMap()
                     )
                 )
         }
@@ -586,16 +585,16 @@ class SourceParams private constructor(
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
                 .setOwner(ownerMap)
-                .setRedirect(mapOf(FIELD_RETURN_URL to returnUrl))
+                .setRedirect(mapOf(PARAM_RETURN_URL to returnUrl))
             val additionalParamsMap = emptyMap<String, Any>()
                 .plus(
                     statementDescriptor?.let {
-                        mapOf(FIELD_STATEMENT_DESCRIPTOR to it)
+                        mapOf(PARAM_STATEMENT_DESCRIPTOR to it)
                     }.orEmpty()
                 )
                 .plus(
                     preferredLanguage?.let {
-                        mapOf(FIELD_PREFERRED_LANGUAGE to it)
+                        mapOf(PARAM_PREFERRED_LANGUAGE to it)
                     }.orEmpty()
                 )
             if (additionalParamsMap.isNotEmpty()) {
@@ -642,10 +641,10 @@ class SourceParams private constructor(
             // Not enforcing all fields to exist at this level.
             // Instead, the server will return an error for invalid data.
             val cardParams = mapOf(
-                FIELD_NUMBER to card.number,
-                FIELD_EXP_MONTH to card.expMonth,
-                FIELD_EXP_YEAR to card.expYear,
-                FIELD_CVC to card.cvc
+                PARAM_NUMBER to card.number,
+                PARAM_EXP_MONTH to card.expMonth,
+                PARAM_EXP_YEAR to card.expYear,
+                PARAM_CVC to card.cvc
             )
             params.setApiParameterMap(cardParams)
             params.setOwner(
@@ -743,10 +742,10 @@ class SourceParams private constructor(
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
                 .setOwner(ownerMap)
-                .setRedirect(mapOf(FIELD_RETURN_URL to returnUrl))
+                .setRedirect(mapOf(PARAM_RETURN_URL to returnUrl))
             if (statementDescriptor != null) {
                 params.setApiParameterMap(
-                    mapOf(FIELD_STATEMENT_DESCRIPTOR to statementDescriptor)
+                    mapOf(PARAM_STATEMENT_DESCRIPTOR to statementDescriptor)
                 )
             }
             return params
@@ -778,10 +777,10 @@ class SourceParams private constructor(
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
                 .setOwner(ownerMap)
-                .setRedirect(mapOf(FIELD_RETURN_URL to returnUrl))
+                .setRedirect(mapOf(PARAM_RETURN_URL to returnUrl))
             if (statementDescriptor != null) {
                 params.setApiParameterMap(
-                    mapOf(FIELD_STATEMENT_DESCRIPTOR to statementDescriptor)
+                    mapOf(PARAM_STATEMENT_DESCRIPTOR to statementDescriptor)
                 )
             }
             return params
@@ -814,18 +813,18 @@ class SourceParams private constructor(
             val params = SourceParams(SourceType.IDEAL)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
-                .setRedirect(mapOf(FIELD_RETURN_URL to returnUrl))
+                .setRedirect(mapOf(PARAM_RETURN_URL to returnUrl))
                 .setOwner(ownerMap)
 
             val additionalParamsMap = emptyMap<String, Any>()
                 .plus(
                     statementDescriptor?.let {
-                        mapOf(FIELD_STATEMENT_DESCRIPTOR to it)
+                        mapOf(PARAM_STATEMENT_DESCRIPTOR to it)
                     }.orEmpty()
                 )
                 .plus(
                     bank?.let {
-                        mapOf(FIELD_BANK to it)
+                        mapOf(PARAM_BANK to it)
                     }.orEmpty()
                 )
             if (additionalParamsMap.isNotEmpty()) {
@@ -858,7 +857,7 @@ class SourceParams private constructor(
             return SourceParams(SourceType.MULTIBANCO)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
-                .setRedirect(mapOf(FIELD_RETURN_URL to returnUrl))
+                .setRedirect(mapOf(PARAM_RETURN_URL to returnUrl))
                 .setOwner(ownerMap)
         }
 
@@ -924,7 +923,7 @@ class SourceParams private constructor(
             return SourceParams(SourceType.SEPA_DEBIT)
                 .setCurrency(Source.EURO)
                 .setOwner(ownerMap)
-                .setApiParameterMap(mapOf(FIELD_IBAN to iban))
+                .setApiParameterMap(mapOf(PARAM_IBAN to iban))
         }
 
         /**
@@ -947,16 +946,16 @@ class SourceParams private constructor(
             @Size(2) country: String,
             statementDescriptor: String?
         ): SourceParams {
-            val sofortMap = mapOf(FIELD_COUNTRY to country)
+            val sofortMap = mapOf(PARAM_COUNTRY to country)
                 .plus(
                     statementDescriptor?.let {
-                        mapOf(FIELD_STATEMENT_DESCRIPTOR to it)
+                        mapOf(PARAM_STATEMENT_DESCRIPTOR to it)
                     }.orEmpty()
                 )
             return SourceParams(SourceType.SOFORT)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
-                .setRedirect(mapOf(FIELD_RETURN_URL to returnUrl))
+                .setRedirect(mapOf(PARAM_RETURN_URL to returnUrl))
                 .setApiParameterMap(sofortMap)
         }
 
@@ -982,8 +981,8 @@ class SourceParams private constructor(
             return SourceParams(SourceType.THREE_D_SECURE)
                 .setCurrency(currency)
                 .setAmount(amount)
-                .setRedirect(mapOf(FIELD_RETURN_URL to returnUrl))
-                .setApiParameterMap(mapOf(FIELD_CARD to cardId))
+                .setRedirect(mapOf(PARAM_RETURN_URL to returnUrl))
+                .setApiParameterMap(mapOf(PARAM_CARD to cardId))
         }
 
         /**
@@ -1000,7 +999,7 @@ class SourceParams private constructor(
         fun createVisaCheckoutParams(callId: String): SourceParams {
             return SourceParams(SourceType.CARD)
                 .setApiParameterMap(
-                    mapOf(VISA_CHECKOUT to mapOf(CALL_ID to callId)))
+                    mapOf(PARAM_VISA_CHECKOUT to mapOf(PARAM_CALL_ID to callId)))
         }
 
         /**
@@ -1024,11 +1023,11 @@ class SourceParams private constructor(
             cartId: String
         ): SourceParams {
             val map = mapOf(
-                TRANSACTION_ID to transactionId,
-                CART_ID to cartId
+                PARAM_TRANSACTION_ID to transactionId,
+                PARAM_CART_ID to cartId
             )
             return SourceParams(SourceType.CARD)
-                .setApiParameterMap(mapOf(MASTERPASS to map))
+                .setApiParameterMap(mapOf(PARAM_MASTERPASS to map))
         }
 
         /**
@@ -1043,7 +1042,7 @@ class SourceParams private constructor(
         fun createRetrieveSourceParams(
             @Size(min = 1) clientSecret: String
         ): Map<String, String> {
-            return mapOf(API_PARAM_CLIENT_SECRET to clientSecret)
+            return mapOf(PARAM_CLIENT_SECRET to clientSecret)
         }
     }
 }

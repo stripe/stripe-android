@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.Card
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 
 /**
  * Utility class for static functions useful for networking and data transfer.
@@ -32,15 +33,15 @@ internal class StripeNetworkUtils @VisibleForTesting constructor(
 
     internal fun paramsWithUid(intentParams: Map<String, *>): Map<String, *> {
         return when {
-            intentParams.containsKey(ConfirmPaymentIntentParams.API_PARAM_SOURCE_DATA) ->
+            intentParams.containsKey(ConfirmPaymentIntentParams.PARAM_SOURCE_DATA) ->
                 paramsWithUid(
                     intentParams,
-                    ConfirmPaymentIntentParams.API_PARAM_SOURCE_DATA
+                    ConfirmPaymentIntentParams.PARAM_SOURCE_DATA
                 )
-            intentParams.containsKey(ConfirmPaymentIntentParams.API_PARAM_PAYMENT_METHOD_DATA) ->
+            intentParams.containsKey(PARAM_PAYMENT_METHOD_DATA) ->
                 paramsWithUid(
                     intentParams,
-                    ConfirmPaymentIntentParams.API_PARAM_PAYMENT_METHOD_DATA
+                    PARAM_PAYMENT_METHOD_DATA
                 )
             else -> intentParams
         }

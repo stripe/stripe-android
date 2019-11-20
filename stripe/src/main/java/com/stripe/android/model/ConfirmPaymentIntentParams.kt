@@ -2,8 +2,9 @@ package com.stripe.android.model
 
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.ObjectBuilder
-import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_CLIENT_SECRET
-import com.stripe.android.model.ConfirmStripeIntentParams.Companion.API_PARAM_USE_STRIPE_SDK
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_STRIPE_SDK
 
 data class ConfirmPaymentIntentParams private constructor(
     val paymentMethodCreateParams: PaymentMethodCreateParams?,
@@ -39,26 +40,26 @@ data class ConfirmPaymentIntentParams private constructor(
      */
     override fun toParamMap(): Map<String, Any> {
         val params: MutableMap<String, Any> = mutableMapOf(
-            API_PARAM_CLIENT_SECRET to clientSecret,
-            API_PARAM_SAVE_PAYMENT_METHOD to savePaymentMethod,
-            API_PARAM_USE_STRIPE_SDK to useStripeSdk
+            PARAM_CLIENT_SECRET to clientSecret,
+            PARAM_SAVE_PAYMENT_METHOD to savePaymentMethod,
+            PARAM_USE_STRIPE_SDK to useStripeSdk
         )
 
         if (paymentMethodCreateParams != null) {
-            params[API_PARAM_PAYMENT_METHOD_DATA] = paymentMethodCreateParams.toParamMap().toMap()
+            params[PARAM_PAYMENT_METHOD_DATA] = paymentMethodCreateParams.toParamMap().toMap()
             if (paymentMethodCreateParams.type.hasMandate) {
-                params[MandateData.API_PARAM_MANDATE_DATA] = MandateData().toParamMap()
+                params[MandateData.PARAM_MANDATE_DATA] = MandateData().toParamMap()
             }
         } else if (paymentMethodId != null) {
-            params[ConfirmStripeIntentParams.API_PARAM_PAYMENT_METHOD_ID] = paymentMethodId
+            params[ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_ID] = paymentMethodId
         } else if (sourceParams != null) {
-            params[API_PARAM_SOURCE_DATA] = sourceParams.toParamMap().toMap()
+            params[PARAM_SOURCE_DATA] = sourceParams.toParamMap().toMap()
         } else if (sourceId != null) {
-            params[API_PARAM_SOURCE_ID] = sourceId
+            params[PARAM_SOURCE_ID] = sourceId
         }
 
         if (returnUrl != null) {
-            params[ConfirmStripeIntentParams.API_PARAM_RETURN_URL] = returnUrl
+            params[ConfirmStripeIntentParams.PARAM_RETURN_URL] = returnUrl
         }
         if (extraParams != null) {
             params.putAll(extraParams)
@@ -193,11 +194,10 @@ data class ConfirmPaymentIntentParams private constructor(
     }
 
     companion object {
-        const val API_PARAM_SOURCE_DATA: String = "source_data"
-        const val API_PARAM_PAYMENT_METHOD_DATA: String = "payment_method_data"
+        const val PARAM_SOURCE_DATA: String = "source_data"
 
-        internal const val API_PARAM_SOURCE_ID = "source"
-        internal const val API_PARAM_SAVE_PAYMENT_METHOD = "save_payment_method"
+        internal const val PARAM_SOURCE_ID = "source"
+        internal const val PARAM_SAVE_PAYMENT_METHOD = "save_payment_method"
 
         /**
          * Create a [ConfirmPaymentIntentParams] without a payment method.
