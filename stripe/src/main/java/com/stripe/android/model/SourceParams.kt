@@ -270,25 +270,6 @@ class SourceParams private constructor(
         }
     }
 
-    /**
-     * [Klarna Payments with Sources](https://stripe.com/docs/sources/klarna)
-     */
-    private data class KlarnaParams(
-        private val purchaseCountry: String
-    ) : StripeParamsModel {
-        override fun toParamMap(): Map<String, Any> {
-            return mapOf(
-                PARAM_PURCHASE_COUNTRY to purchaseCountry,
-                PARAM_PRODUCT to "payment"
-            )
-        }
-
-        companion object {
-            private const val PARAM_PURCHASE_COUNTRY = "purchase_country"
-            private const val PARAM_PRODUCT = "product"
-        }
-    }
-
     override fun hashCode(): Int {
         return Objects.hash(amount, apiParameterMap, currency, typeRaw, owner, metaData,
             redirect, extraParams, token, usage, type, weChatParams)
@@ -519,35 +500,55 @@ class SourceParams private constructor(
         }
 
         /**
-         * Create Klarna Source params.
+         * Create params for a Klarna Source
          *
-         * @param amount Amount associated with the source. This is the amount for which the source
-         * will be chargeable once ready.
-         * @param currency Three-letter ISO code for the currency associated with the source.
-         * This is the currency for which the source will be chargeable once ready.
-         * @param purchaseCountry The ISO-3166 2-letter country code of the customer's location.
-         * @param sourceOrderParams Information about the items and shipping associated with the
-         * source. Required for transactional credit (for example Klarna) sources before you can
-         * charge it.
+         * [Klarna Payments with Sources](https://stripe.com/docs/sources/klarna)
+         *
          * @param returnUrl The URL you provide to redirect the customer back to you after they
          * authenticated their payment. It can use your application URI scheme in the context of
          * a mobile application.
+         * @param currency Three-letter ISO code for the currency associated with the source.
+         * This is the currency for which the source will be chargeable once ready.
+         * @param klarnaParams Klarna-specific params
          */
         @JvmSynthetic
         internal fun createKlarna(
-            amount: Int,
+            returnUrl: String,
             currency: String,
-            purchaseCountry: String,
-            sourceOrderParams: SourceOrderParams,
-            returnUrl: String
+            klarnaParams: KlarnaSourceParams
         ): SourceParams {
+            val totalAmount = klarnaParams.lineItems.sumBy { it.totalAmount }
+            val sourceOrderParams = SourceOrderParams(
+                items = klarnaParams.lineItems.map {
+                    val type = when (it.itemType) {
+                        KlarnaSourceParams.LineItem.Type.Sku ->
+                            SourceOrderParams.Item.Type.Sku
+                        KlarnaSourceParams.LineItem.Type.Tax ->
+                            SourceOrderParams.Item.Type.Tax
+                        KlarnaSourceParams.LineItem.Type.Shipping ->
+                            SourceOrderParams.Item.Type.Shipping
+                    }
+                    SourceOrderParams.Item(
+                        type = type,
+                        amount = it.totalAmount,
+                        currency = currency,
+                        description = it.itemDescription,
+                        quantity = it.quantity
+                    )
+                }
+            )
             return SourceParams(SourceType.KLARNA)
-                .setAmount(amount.toLong())
+                .setAmount(totalAmount.toLong())
                 .setCurrency(currency)
                 .setReturnUrl(returnUrl)
+                .setOwner(Owner(
+                    address = klarnaParams.billingAddress,
+                    email = klarnaParams.billingEmail,
+                    phone = klarnaParams.billingPhone
+                ).toParamMap())
                 .setExtraParams(
                     mapOf(
-                        PARAM_KLARNA to KlarnaParams(purchaseCountry).toParamMap(),
+                        PARAM_KLARNA to klarnaParams.toParamMap(),
                         PARAM_FLOW to Source.SourceFlow.REDIRECT,
                         PARAM_SOURCE_ORDER to sourceOrderParams.toParamMap()
                     )
