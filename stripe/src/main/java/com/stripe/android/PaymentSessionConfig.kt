@@ -6,6 +6,8 @@ import androidx.annotation.WorkerThread
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
+import com.stripe.android.view.PaymentFlowActivity
+import com.stripe.android.view.PaymentFlowExtras
 import com.stripe.android.view.SelectShippingMethodWidget
 import com.stripe.android.view.ShippingInfoWidget
 import com.stripe.android.view.ShippingInfoWidget.CustomizableShippingField
@@ -23,13 +25,12 @@ data class PaymentSessionConfig internal constructor(
     val prepopulatedShippingInfo: ShippingInformation? = null,
     val isShippingInfoRequired: Boolean = false,
     val isShippingMethodRequired: Boolean = false,
-
     @LayoutRes
     @get:LayoutRes
     val addPaymentMethodFooter: Int = 0,
-
     val paymentMethodTypes: List<PaymentMethod.Type> = listOf(PaymentMethod.Type.Card),
     val allowedShippingCountryCodes: Set<String> = emptySet(),
+
     internal val shippingInformationValidator: ShippingInformationValidator? = null,
     internal val shippingMethodsFactory: ShippingMethodsFactory? = null
 ) : Parcelable {
@@ -79,6 +80,8 @@ data class PaymentSessionConfig internal constructor(
         private var shippingInformation: ShippingInformation? = null
         private var paymentMethodTypes: List<PaymentMethod.Type> = listOf(PaymentMethod.Type.Card)
         private var allowedShippingCountryCodes: Set<String> = emptySet()
+        private var shippingInformationValidator: ShippingInformationValidator? = null
+        private var shippingMethodsFactory: ShippingMethodsFactory? = null
 
         @LayoutRes
         private var addPaymentMethodFooter: Int = 0
@@ -169,6 +172,32 @@ data class PaymentSessionConfig internal constructor(
             return this
         }
 
+        /**
+         * @param shippingInformationValidator if specified, will be used to validate
+         * [ShippingInformation] in [PaymentFlowActivity] instead of sending a broadcast with
+         * [PaymentFlowExtras.EVENT_SHIPPING_INFO_SUBMITTED].
+         */
+        @JvmSynthetic
+        internal fun setShippingInformationValidator(
+            shippingInformationValidator: ShippingInformationValidator?
+        ): Builder {
+            this.shippingInformationValidator = shippingInformationValidator
+            return this
+        }
+
+        /**
+         * @param shippingMethodsFactory required if [shippingInformationValidator] is specified
+         * and [shippingMethodsRequired] is `true`. Used to create the [ShippingMethod] options
+         * to be displayed in [PaymentFlowActivity].
+         */
+        @JvmSynthetic
+        internal fun setShippingMethodsFactory(
+            shippingMethodsFactory: ShippingMethodsFactory?
+        ): Builder {
+            this.shippingMethodsFactory = shippingMethodsFactory
+            return this
+        }
+
         override fun build(): PaymentSessionConfig {
             return PaymentSessionConfig(
                 hiddenShippingInfoFields = hiddenShippingInfoFields.orEmpty(),
@@ -178,7 +207,9 @@ data class PaymentSessionConfig internal constructor(
                 isShippingMethodRequired = shippingMethodsRequired,
                 addPaymentMethodFooter = addPaymentMethodFooter,
                 paymentMethodTypes = paymentMethodTypes,
-                allowedShippingCountryCodes = allowedShippingCountryCodes
+                allowedShippingCountryCodes = allowedShippingCountryCodes,
+                shippingInformationValidator = shippingInformationValidator,
+                shippingMethodsFactory = shippingMethodsFactory
             )
         }
     }
