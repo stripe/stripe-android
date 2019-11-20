@@ -72,16 +72,16 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
                     it.name == text.toString()
                 }
 
-                return if (validCountry != null) {
-                    selectedCountry = validCountry
+                selectedCountry = validCountry
+
+                if (validCountry != null) {
                     clearError()
-                    true
                 } else {
-                    selectedCountry = null
                     tl_country_cat.error = errorMessage
                     tl_country_cat.isErrorEnabled = true
-                    false
                 }
+
+                return validCountry != null
             }
         }
     }
