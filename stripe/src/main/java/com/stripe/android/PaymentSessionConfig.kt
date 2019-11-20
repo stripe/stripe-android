@@ -43,6 +43,15 @@ data class PaymentSessionConfig internal constructor(
                 "'$allowedShippingCountryCode' is not a valid country code"
             }
         }
+
+        if (shippingInformationValidator != null && isShippingMethodRequired) {
+            requireNotNull(shippingMethodsFactory) {
+                """
+                If isShippingMethodRequired is true and a ShippingInformationValidator is provided,
+                a ShippingMethodsFactory must also be provided.
+                """.trimIndent()
+            }
+        }
     }
 
     internal interface ShippingInformationValidator : Serializable {
@@ -129,9 +138,8 @@ data class PaymentSessionConfig internal constructor(
         }
 
         /**
-         * @param shippingMethodsRequired whether a [com.stripe.android.model.ShippingMethod]
-         * should be required. If it is required, a screen with a [SelectShippingMethodWidget]
-         * is shown to collect it.
+         * @param shippingMethodsRequired whether a [ShippingMethod] should be required.
+         * If it is required, a screen with a [SelectShippingMethodWidget] is shown to collect it.
          *
          * Default is `true`.
          */
