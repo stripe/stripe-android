@@ -312,41 +312,17 @@ data class PaymentMethodCreateParams internal constructor(
         @Throws(JSONException::class)
         @JvmStatic
         fun createFromGooglePay(googlePayPaymentData: JSONObject): PaymentMethodCreateParams {
-            val paymentMethodData = googlePayPaymentData
-                .getJSONObject("paymentMethodData")
-            val googlePayBillingAddress = paymentMethodData
-                .getJSONObject("info")
-                .optJSONObject("billingAddress")
-            val paymentToken = paymentMethodData
-                .getJSONObject("tokenizationData")
-                .getString("token")
-            val stripeToken = Token.fromJson(JSONObject(paymentToken))
-            val stripeTokenId = requireNotNull(stripeToken).id
-
-            val email = googlePayPaymentData.optString("email")
-            val billingDetails = if (googlePayBillingAddress != null) {
-                PaymentMethod.BillingDetails.Builder()
-                    .setAddress(Address.Builder()
-                        .setLine1(googlePayBillingAddress.optString("address1"))
-                        .setLine2(googlePayBillingAddress.optString("address2"))
-                        .setCity(googlePayBillingAddress.optString("locality"))
-                        .setState(googlePayBillingAddress.optString("administrativeArea"))
-                        .setCountry(googlePayBillingAddress.optString("countryCode"))
-                        .setPostalCode(googlePayBillingAddress.optString("postalCode"))
-                        .build())
-                    .setName(googlePayBillingAddress.optString("name"))
-                    .setEmail(email)
-                    .setPhone(googlePayBillingAddress.optString("phoneNumber"))
-                    .build()
-            } else {
-                PaymentMethod.BillingDetails.Builder()
-                    .setEmail(email)
-                    .build()
-            }
+            val googlePayResult = GooglePayResult.fromJson(googlePayPaymentData)
+            val tokenId = requireNotNull(googlePayResult.token?.id)
 
             return create(
-                Card.create(stripeTokenId),
-                billingDetails
+                Card.create(tokenId),
+                PaymentMethod.BillingDetails.Builder()
+                    .setAddress(googlePayResult.address)
+                    .setName(googlePayResult.name)
+                    .setEmail(googlePayResult.email)
+                    .setPhone(googlePayResult.phoneNumber)
+                    .build()
             )
         }
     }

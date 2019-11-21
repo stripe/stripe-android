@@ -3,7 +3,6 @@ package com.stripe.android.model
 import org.json.JSONObject
 
 internal object GooglePayFixtures {
-    @JvmField
     val GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS = JSONObject(
         """
         {
@@ -38,7 +37,6 @@ internal object GooglePayFixtures {
         """.trimIndent()
     )
 
-    @JvmField
     val GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS = JSONObject(
         """
         {

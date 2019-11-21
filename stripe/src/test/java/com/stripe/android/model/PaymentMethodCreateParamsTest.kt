@@ -24,7 +24,6 @@ class PaymentMethodCreateParamsTest {
         val expectedParams = PaymentMethodCreateParams.create(
             PaymentMethodCreateParams.Card.create("tok_1F4ACMCRMbs6FrXf6fPqLnN7"),
             PaymentMethod.BillingDetails.Builder()
-                .setEmail("")
                 .build()
         )
         assertEquals(expectedParams, createdParams)
@@ -43,7 +42,6 @@ class PaymentMethodCreateParamsTest {
                 .setName("Stripe Johnson")
                 .setAddress(Address.Builder()
                     .setLine1("510 Townsend St")
-                    .setLine2("")
                     .setCity("San Francisco")
                     .setState("CA")
                     .setPostalCode("94103")
