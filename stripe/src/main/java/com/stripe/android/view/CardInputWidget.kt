@@ -766,7 +766,7 @@ class CardInputWidget @JvmOverloads constructor(
 
     private fun updateIcon(@Card.CardBrand brand: String) {
         if (CardBrand.UNKNOWN == brand) {
-            val icon = ContextCompat.getDrawable(context, R.drawable.ic_unknown)
+            val icon = ContextCompat.getDrawable(context, R.drawable.stripe_ic_unknown)
             cardIconImageView.setImageDrawable(icon)
             applyTint(false)
         } else {
@@ -788,9 +788,9 @@ class CardInputWidget @JvmOverloads constructor(
 
     private fun updateIconForCvcEntry(isAmEx: Boolean) {
         cardIconImageView.setImageResource(if (isAmEx) {
-            R.drawable.ic_cvc_amex
+            R.drawable.stripe_ic_cvc_amex
         } else {
-            R.drawable.ic_cvc
+            R.drawable.stripe_ic_cvc
         })
         applyTint(true)
     }

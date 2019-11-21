@@ -608,14 +608,14 @@ data class Card internal constructor(
         private const val FIELD_TOKENIZATION_METHOD = "tokenization_method"
 
         private val BRAND_RESOURCE_MAP = mapOf(
-            CardBrand.AMERICAN_EXPRESS to R.drawable.ic_amex,
-            CardBrand.DINERS_CLUB to R.drawable.ic_diners,
-            CardBrand.DISCOVER to R.drawable.ic_discover,
-            CardBrand.JCB to R.drawable.ic_jcb,
-            CardBrand.MASTERCARD to R.drawable.ic_mastercard,
-            CardBrand.VISA to R.drawable.ic_visa,
-            CardBrand.UNIONPAY to R.drawable.ic_unionpay,
-            CardBrand.UNKNOWN to R.drawable.ic_unknown
+            CardBrand.AMERICAN_EXPRESS to R.drawable.stripe_ic_amex,
+            CardBrand.DINERS_CLUB to R.drawable.stripe_ic_diners,
+            CardBrand.DISCOVER to R.drawable.stripe_ic_discover,
+            CardBrand.JCB to R.drawable.stripe_ic_jcb,
+            CardBrand.MASTERCARD to R.drawable.stripe_ic_mastercard,
+            CardBrand.VISA to R.drawable.stripe_ic_visa,
+            CardBrand.UNIONPAY to R.drawable.stripe_ic_unionpay,
+            CardBrand.UNKNOWN to R.drawable.stripe_ic_unknown
         )
 
         /**
@@ -678,7 +678,7 @@ data class Card internal constructor(
         @DrawableRes
         fun getBrandIcon(brand: String?): Int {
             val brandIcon = BRAND_RESOURCE_MAP[brand]
-            return brandIcon ?: R.drawable.ic_unknown
+            return brandIcon ?: R.drawable.stripe_ic_unknown
         }
 
         /**

@@ -5,7 +5,7 @@
         android:id="@+id/masked_icon_view"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/stripe_masked_card_icon_width"
-        android:src="@drawable/ic_unknown"
+        android:src="@drawable/stripe_ic_unknown"
         android:layout_gravity="center_vertical|start"
         />
 

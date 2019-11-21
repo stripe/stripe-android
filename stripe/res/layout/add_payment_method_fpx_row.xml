@@ -10,13 +10,13 @@
     android:paddingEnd="@dimen/stripe_list_row_end_padding"
     android:paddingTop="@dimen/stripe_add_payment_method_vertical_padding"
     android:paddingBottom="@dimen/stripe_add_payment_method_vertical_padding"
-    android:background="@drawable/simple_button_background"
+    android:background="@drawable/stripe_simple_button_background"
     android:orientation="horizontal">
 
     <androidx.appcompat.widget.AppCompatImageView
         android:layout_width="wrap_content"
         android:layout_height="@dimen/stripe_masked_card_icon_width"
-        android:src="@drawable/ic_add_black_32dp"
+        android:src="@drawable/stripe_ic_add_black_32dp"
         android:tint="?attr/colorAccent"
         android:focusableInTouchMode="false"
         android:clickable="false"
