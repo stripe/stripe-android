@@ -18,7 +18,7 @@ object PayWithGoogleUtils {
      * @return a String that can be used as a Pay with Google price string
      */
     @JvmStatic
-    fun getPriceString(price: Long, currency: Currency): String {
+    fun getPriceString(price: Int, currency: Currency): String {
         val fractionDigits = currency.defaultFractionDigits
         val totalLength = price.toString().length
         val builder = StringBuilder()
