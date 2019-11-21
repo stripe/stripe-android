@@ -12,6 +12,9 @@
         .setAllowedShippingCountryCodes(setOf("US", "CA"))
         .build()
     ```
+* [#1845](https://github.com/stripe/stripe-android/pull/1845) Fix country code validation in `PaymentFlowActivity`'s shipping information screen
+    * Require that the customer submits a country that exists in the autocomplete dropdown
+    * Show error UI when the submitted country fails validation
 
 ## 12.4.0 - 2019-11-13
 * [#1792](https://github.com/stripe/stripe-android/pull/1792) Remove default selection of a Payment Method from `PaymentMethodsActivity`
