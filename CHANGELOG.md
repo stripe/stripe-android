@@ -15,6 +15,9 @@
 * [#1845](https://github.com/stripe/stripe-android/pull/1845) Fix country code validation in `PaymentFlowActivity`'s shipping information screen
     * Require that the customer submits a country that exists in the autocomplete dropdown
     * Show error UI when the submitted country fails validation
+* [#1857](https://github.com/stripe/stripe-android/pull/1857) Fix crash related to Kotlin Coroutines
+    * Downgrade `kotlinx-coroutines` from `1.3.2` to `1.3.0`
+    * Add Proguard rules
 
 ## 12.4.0 - 2019-11-13
 * [#1792](https://github.com/stripe/stripe-android/pull/1792) Remove default selection of a Payment Method from `PaymentMethodsActivity`
