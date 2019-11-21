@@ -490,9 +490,9 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
 
         @DrawableRes val resourceId = if (Card.CardBrand.AMERICAN_EXPRESS == cardBrand) {
-            R.drawable.ic_cvc_amex
+            R.drawable.stripe_ic_cvc_amex
         } else {
-            R.drawable.ic_cvc
+            R.drawable.stripe_ic_cvc
         }
 
         updateDrawable(resourceId, true)

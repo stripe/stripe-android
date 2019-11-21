@@ -90,7 +90,7 @@ abstract class StripeActivity : AppCompatActivity() {
         val tintedIcon = StripeColorUtils(this).getTintedIconWithAttribute(
             theme,
             R.attr.titleTextColor,
-            R.drawable.ic_checkmark)
+            R.drawable.stripe_ic_checkmark)
         saveItem.icon = tintedIcon
         return super.onPrepareOptionsMenu(menu)
     }

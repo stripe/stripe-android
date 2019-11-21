@@ -85,7 +85,7 @@ internal class MaskedCardView @JvmOverloads constructor(
     }
 
     private fun initializeCheckMark() {
-        updateDrawable(R.drawable.ic_checkmark, checkMarkImageView, true)
+        updateDrawable(R.drawable.stripe_ic_checkmark, checkMarkImageView, true)
     }
 
     private fun updateBrandIcon() {
@@ -123,14 +123,14 @@ internal class MaskedCardView @JvmOverloads constructor(
 
     private companion object {
         private val ICON_RESOURCE_MAP = mapOf(
-            PaymentMethod.Card.Brand.AMERICAN_EXPRESS to R.drawable.ic_amex_template_32,
-            PaymentMethod.Card.Brand.DINERS_CLUB to R.drawable.ic_diners_template_32,
-            PaymentMethod.Card.Brand.DISCOVER to R.drawable.ic_discover_template_32,
-            PaymentMethod.Card.Brand.JCB to R.drawable.ic_jcb_template_32,
-            PaymentMethod.Card.Brand.MASTERCARD to R.drawable.ic_mastercard_template_32,
-            PaymentMethod.Card.Brand.VISA to R.drawable.ic_visa_template_32,
-            PaymentMethod.Card.Brand.UNIONPAY to R.drawable.ic_unionpay_template_32,
-            PaymentMethod.Card.Brand.UNKNOWN to R.drawable.ic_unknown
+            PaymentMethod.Card.Brand.AMERICAN_EXPRESS to R.drawable.stripe_ic_amex_template_32,
+            PaymentMethod.Card.Brand.DINERS_CLUB to R.drawable.stripe_ic_diners_template_32,
+            PaymentMethod.Card.Brand.DISCOVER to R.drawable.stripe_ic_discover_template_32,
+            PaymentMethod.Card.Brand.JCB to R.drawable.stripe_ic_jcb_template_32,
+            PaymentMethod.Card.Brand.MASTERCARD to R.drawable.stripe_ic_mastercard_template_32,
+            PaymentMethod.Card.Brand.VISA to R.drawable.stripe_ic_visa_template_32,
+            PaymentMethod.Card.Brand.UNIONPAY to R.drawable.stripe_ic_unionpay_template_32,
+            PaymentMethod.Card.Brand.UNKNOWN to R.drawable.stripe_ic_unknown
         )
     }
 }

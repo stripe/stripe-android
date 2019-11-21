@@ -24,7 +24,7 @@ internal class PaymentMethodSwipeCallback(
     0, ItemTouchHelper.RIGHT
 ) {
     private val trashIcon =
-        ContextCompat.getDrawable(context, R.drawable.ic_trash)!!
+        ContextCompat.getDrawable(context, R.drawable.stripe_ic_trash)!!
     private val swipeStartColor =
         ContextCompat.getColor(context, R.color.stripe_swipe_start_payment_method)
     private val swipeThresholdColor =

@@ -12,7 +12,7 @@
         android:layout_width="@dimen/stripe_masked_card_icon_width"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|start"
-        android:src="@drawable/ic_bank_generic" />
+        android:src="@drawable/stripe_ic_bank_generic" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/name"
@@ -28,6 +28,6 @@
         android:layout_width="@dimen/stripe_masked_card_icon_width"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:src="@drawable/ic_checkmark" />
+        android:src="@drawable/stripe_ic_checkmark" />
 
 </LinearLayout>
