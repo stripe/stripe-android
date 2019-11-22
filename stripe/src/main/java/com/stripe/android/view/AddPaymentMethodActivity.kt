@@ -30,7 +30,7 @@ import java.lang.ref.WeakReference
  *
  * Should be started with [AddPaymentMethodActivityStarter].
  */
-open class AddPaymentMethodActivity : StripeActivity() {
+class AddPaymentMethodActivity : StripeActivity() {
     private lateinit var stripe: Stripe
     private var addPaymentMethodView: AddPaymentMethodView? = null
     private var paymentMethodType: PaymentMethod.Type? = null
@@ -54,7 +54,7 @@ open class AddPaymentMethodActivity : StripeActivity() {
             }
         }
 
-    internal open val windowToken: IBinder?
+    internal val windowToken: IBinder?
         get() = viewStub.windowToken
 
     override fun onCreate(savedInstanceState: Bundle?) {
