@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit
  *
  * See [Creating ephemeral keys](https://stripe.com/docs/mobile/android/standard#creating-ephemeral-keys)
  */
-open class CustomerSession @VisibleForTesting internal constructor(
+class CustomerSession @VisibleForTesting internal constructor(
     context: Context,
     keyProvider: EphemeralKeyProvider,
     private val proxyNowCalendar: Calendar? = null,
@@ -67,7 +67,7 @@ open class CustomerSession @VisibleForTesting internal constructor(
     }
 
     @VisibleForTesting
-    internal open val productUsageTokens: Set<String>
+    internal val productUsageTokens: Set<String>
         get() {
             return productUsage.get()
         }
@@ -148,7 +148,7 @@ open class CustomerSession @VisibleForTesting internal constructor(
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY)
-    internal open fun addProductUsageTokenIfValid(token: String?) {
+    internal fun addProductUsageTokenIfValid(token: String?) {
         productUsage.add(token)
     }
 
@@ -159,7 +159,7 @@ open class CustomerSession @VisibleForTesting internal constructor(
      * @param listener a [CustomerRetrievalListener] to invoke with the result of getting the
      * customer, either from the cache or from the server
      */
-    open fun retrieveCurrentCustomer(listener: CustomerRetrievalListener) {
+    fun retrieveCurrentCustomer(listener: CustomerRetrievalListener) {
         cachedCustomer?.let {
             listener.onCustomerRetrieved(it)
         } ?: updateCurrentCustomer(listener)
@@ -182,7 +182,7 @@ open class CustomerSession @VisibleForTesting internal constructor(
      * @return the current value of [customer], or `null` if the customer object is
      * expired.
      */
-    open val cachedCustomer: Customer?
+    val cachedCustomer: Customer?
         get() {
             return customer.takeIf { canUseCachedCustomer }
         }
@@ -230,7 +230,7 @@ open class CustomerSession @VisibleForTesting internal constructor(
      * @param listener a [PaymentMethodRetrievalListener] called when the API call
      * completes with the attached [PaymentMethod].
      */
-    open fun attachPaymentMethod(
+    fun attachPaymentMethod(
         paymentMethodId: String,
         listener: PaymentMethodRetrievalListener
     ) {
@@ -265,7 +265,7 @@ open class CustomerSession @VisibleForTesting internal constructor(
      * @param listener a [PaymentMethodRetrievalListener] called when the API call
      * completes with a list of [PaymentMethod] objects
      */
-    open fun getPaymentMethods(
+    fun getPaymentMethods(
         paymentMethodType: PaymentMethod.Type,
         listener: PaymentMethodsRetrievalListener
     ) {

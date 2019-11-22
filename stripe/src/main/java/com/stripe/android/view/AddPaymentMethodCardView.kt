@@ -17,7 +17,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
  *
  * See [AddPaymentMethodActivity] for usage.
  */
-internal open class AddPaymentMethodCardView private constructor(
+internal class AddPaymentMethodCardView private constructor(
     context: Context,
     attrs: AttributeSet?,
     defStyleAttr: Int,
