@@ -14,7 +14,7 @@ import org.json.JSONObject
  * for more details on ephemeral keys.
  */
 @Parcelize
-internal data class EphemeralKey internal constructor(
+data class EphemeralKey internal constructor(
     /**
      * Represents a customer id or issuing card id, depending on the context
      */
@@ -64,22 +64,6 @@ internal data class EphemeralKey internal constructor(
                 objectType = objectType,
                 secret = secret,
                 type = type
-            )
-        }
-
-        @JvmSynthetic
-        internal fun create(
-            objectId: String,
-            created: Long,
-            expires: Long,
-            id: String,
-            isLiveMode: Boolean,
-            objectType: String,
-            secret: String,
-            type: String
-        ): EphemeralKey {
-            return EphemeralKey(
-                objectId, created, expires, id, isLiveMode, objectType, secret, type
             )
         }
     }

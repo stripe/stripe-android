@@ -85,7 +85,11 @@ internal class EphemeralKeyManager(
             arguments: Map<String, Any>?
         )
 
-        fun onKeyError(operationId: String, errorCode: Int, errorMessage: String)
+        fun onKeyError(
+            operationId: String,
+            errorCode: Int,
+            errorMessage: String
+        )
     }
 
     private class ClientKeyUpdateListener internal constructor(

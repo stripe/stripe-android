@@ -3,6 +3,7 @@ package com.stripe.android
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.argThat
+import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.testharness.TestEphemeralKeyProvider
@@ -12,8 +13,6 @@ import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
@@ -73,22 +72,19 @@ class IssuingCardPinServiceTest {
             ))))
             .thenReturn(response)
 
-        retrievalListener = mock(IssuingCardPinService.IssuingCardPinRetrievalListener::class.java)
-
         service.retrievePin(
             "ic_abcdef",
             "iv_abcd",
             "123-456",
             retrievalListener)
 
-        verify<IssuingCardPinService.IssuingCardPinRetrievalListener>(retrievalListener)
+        verify(retrievalListener)
             .onIssuingCardPinRetrieved("1234")
     }
 
     @Test
     @Throws(InvalidRequestException::class, APIConnectionException::class)
     fun testUpdate() {
-
         val response = StripeResponse(
             200,
             """
@@ -107,8 +103,6 @@ class IssuingCardPinServiceTest {
             ))))
             .thenReturn(response)
 
-        updateListener = mock(IssuingCardPinService.IssuingCardPinUpdateListener::class.java)
-
         service.updatePin(
             "ic_abcdef",
             "1234",
@@ -117,7 +111,7 @@ class IssuingCardPinServiceTest {
             updateListener
         )
 
-        verify<IssuingCardPinService.IssuingCardPinUpdateListener>(updateListener)
+        verify(updateListener)
             .onIssuingCardPinUpdated()
     }
 
@@ -145,8 +139,6 @@ class IssuingCardPinServiceTest {
             ))))
             .thenReturn(response)
 
-        retrievalListener = mock(IssuingCardPinService.IssuingCardPinRetrievalListener::class.java)
-
         service.retrievePin(
             "ic_abcdef",
             "iv_abcd",
@@ -154,7 +146,7 @@ class IssuingCardPinServiceTest {
             retrievalListener
         )
 
-        verify<IssuingCardPinService.IssuingCardPinRetrievalListener>(retrievalListener).onError(
+        verify(retrievalListener).onError(
             IssuingCardPinService.CardPinActionError.ONE_TIME_CODE_INCORRECT,
             "The one-time code was incorrect", null
         )
