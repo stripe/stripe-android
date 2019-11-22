@@ -305,7 +305,7 @@ class EphemeralKeyManagerTest {
     }
 
     private fun createEphemeralKey(expires: Long): EphemeralKey {
-        return EphemeralKey.create("cus_AQsHpvKfKwJDrF", 1501199335L,
+        return EphemeralKey("cus_AQsHpvKfKwJDrF", 1501199335L,
             expires, "ephkey_123", false, "customer", "", "")
     }
 
