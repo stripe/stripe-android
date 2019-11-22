@@ -4,8 +4,6 @@ import androidx.annotation.IntRange
 import androidx.annotation.Size
 import com.stripe.android.model.Source.Companion.asSourceType
 import com.stripe.android.model.Source.SourceType
-import com.stripe.android.model.StripeJsonUtils.optString
-import com.stripe.android.model.Token.Companion.fromJson
 import java.util.Objects
 import org.json.JSONException
 import org.json.JSONObject
@@ -676,43 +674,15 @@ class SourceParams private constructor(
         fun createCardParamsFromGooglePay(
             googlePayPaymentData: JSONObject
         ): SourceParams {
-            val paymentMethodData = googlePayPaymentData
-                .getJSONObject("paymentMethodData")
-            val googlePayBillingAddress = paymentMethodData
-                .getJSONObject("info")
-                .optJSONObject("billingAddress")
-            val paymentToken = paymentMethodData
-                .getJSONObject("tokenizationData")
-                .getString("token")
-            val stripeToken = fromJson(JSONObject(paymentToken))
-            val stripeTokenId = requireNotNull(stripeToken).id
+            val googlePayResult = GooglePayResult.fromJson(googlePayPaymentData)
             val params = SourceParams(SourceType.CARD)
-                .setToken(stripeTokenId)
-            val address: Address?
-            val phone: String?
-            val name: String?
-            if (googlePayBillingAddress != null) {
-                name = optString(googlePayBillingAddress, "name")
-                phone = optString(googlePayBillingAddress, "phoneNumber")
-                address = Address.Builder()
-                    .setLine1(optString(googlePayBillingAddress, "address1"))
-                    .setLine2(optString(googlePayBillingAddress, "address2"))
-                    .setCity(optString(googlePayBillingAddress, "locality"))
-                    .setState(optString(googlePayBillingAddress, "administrativeArea"))
-                    .setPostalCode(optString(googlePayBillingAddress, "postalCode"))
-                    .setCountry(optString(googlePayBillingAddress, "countryCode"))
-                    .build()
-            } else {
-                name = null
-                phone = null
-                address = null
-            }
+                .setToken(requireNotNull(googlePayResult.token?.id))
             return params.setOwner(
                 Owner(
-                    address = address,
-                    email = optString(googlePayPaymentData, "email"),
-                    name = name,
-                    phone = phone
+                    address = googlePayResult.address,
+                    email = googlePayResult.email,
+                    name = googlePayResult.name,
+                    phone = googlePayResult.phoneNumber
                 ).toParamMap()
             )
         }
