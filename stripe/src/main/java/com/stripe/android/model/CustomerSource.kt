@@ -1,12 +1,14 @@
 package com.stripe.android.model
 
 import com.stripe.android.model.StripeJsonUtils.optString
+import kotlinx.android.parcel.Parcelize
 import org.json.JSONObject
 
 /**
  * Model of the "data" object inside a [Customer] "source" object.
  */
-data class CustomerSource private constructor(
+@Parcelize
+data class CustomerSource internal constructor(
     private val stripePaymentSource: StripePaymentSource
 ) : StripeModel(), StripePaymentSource {
 

@@ -1,8 +1,10 @@
 package com.stripe.android.model
 
+import android.os.Parcelable
 import androidx.annotation.StringDef
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.StripeJsonUtils.optString
+import kotlinx.android.parcel.Parcelize
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -10,11 +12,12 @@ import org.json.JSONObject
  * Model for a [redirect](https://stripe.com/docs/api/sources/object#source_object-redirect) object
  * in the Sources API.
  */
-data class SourceRedirect private constructor(
+@Parcelize
+data class SourceRedirect internal constructor(
     val returnUrl: String?,
     @param:Status @field:Status @get:Status val status: String?,
     val url: String?
-) : StripeModel() {
+) : StripeModel(), Parcelable {
 
     @Retention(AnnotationRetention.SOURCE)
     @StringDef(Status.PENDING, Status.SUCCEEDED, Status.FAILED, Status.NOT_REQUIRED)

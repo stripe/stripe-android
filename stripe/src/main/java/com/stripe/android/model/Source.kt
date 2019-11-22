@@ -1,11 +1,14 @@
 package com.stripe.android.model
 
+import android.os.Parcelable
 import androidx.annotation.Size
 import androidx.annotation.StringDef
 import com.stripe.android.model.Source.SourceFlow
 import com.stripe.android.model.Source.SourceType
 import com.stripe.android.model.StripeJsonUtils.optLong
 import com.stripe.android.model.StripeJsonUtils.optString
+import kotlinx.android.parcel.Parcelize
+import kotlinx.android.parcel.RawValue
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -14,6 +17,7 @@ import org.json.JSONObject
  *
  * See [Sources API Reference](https://stripe.com/docs/api/sources/object).
  */
+@Parcelize
 data class Source internal constructor(
     /**
      * Unique identifier for the object.
@@ -95,7 +99,8 @@ data class Source internal constructor(
     @param:SourceStatus @field:SourceStatus @get:SourceStatus
     val status: String? = null,
 
-    val sourceTypeData: Map<String, Any?>? = null,
+    val sourceTypeData: Map<String, @RawValue Any?>? = null,
+
     val sourceTypeModel: StripeSourceTypeModel? = null,
 
     /**
@@ -138,7 +143,7 @@ data class Source internal constructor(
      * every time you charge the source.
      */
     val statementDescriptor: String? = null
-) : StripeModel(), StripePaymentSource {
+) : StripeModel(), StripePaymentSource, Parcelable {
 
     val weChat: WeChat
         get() {

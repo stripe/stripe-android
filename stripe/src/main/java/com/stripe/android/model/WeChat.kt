@@ -1,10 +1,13 @@
 package com.stripe.android.model
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 import org.json.JSONObject
 
 /**
  * [WeChat Pay Payments with Sources](https://stripe.com/docs/sources/wechat-pay)
  */
+@Parcelize
 data class WeChat internal constructor(
     val statementDescriptor: String?,
     val appId: String?,
@@ -15,7 +18,7 @@ data class WeChat internal constructor(
     val sign: String?,
     val timestamp: String?,
     val qrCodeUrl: String? = null
-) : StripeModel() {
+) : StripeModel(), Parcelable {
     internal companion object {
         private const val FIELD_APPID = "android_appId"
         private const val FIELD_NONCE = "android_nonceStr"
