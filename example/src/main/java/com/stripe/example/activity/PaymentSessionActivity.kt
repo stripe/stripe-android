@@ -94,7 +94,7 @@ class PaymentSessionActivity : AppCompatActivity() {
     private fun createCustomerSession(): CustomerSession {
         CustomerSession.initCustomerSession(
             this,
-            ExampleEphemeralKeyProvider(),
+            ExampleEphemeralKeyProvider(this),
             false
         )
         return CustomerSession.getInstance()

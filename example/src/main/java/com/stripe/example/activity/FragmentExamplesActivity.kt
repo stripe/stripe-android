@@ -10,6 +10,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
@@ -25,7 +26,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.Customer
 import com.stripe.android.view.ShippingInfoWidget
 import com.stripe.example.R
-import com.stripe.example.module.RetrofitFactory
+import com.stripe.example.module.BackendApiFactory
 import com.stripe.example.service.BackendApi
 import com.stripe.example.service.ExampleEphemeralKeyProvider
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -54,7 +55,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
             .commit()
     }
 
-    class LauncherFragment : androidx.fragment.app.Fragment() {
+    class LauncherFragment : Fragment() {
 
         private val compositeDisposable = CompositeDisposable()
 
@@ -71,7 +72,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
         override fun onActivityCreated(savedInstanceState: Bundle?) {
             super.onActivityCreated(savedInstanceState)
 
-            backendApi = RetrofitFactory.instance.create(BackendApi::class.java)
+            backendApi = BackendApiFactory(requireContext()).create()
             stripe = Stripe(
                 requireContext(),
                 PaymentConfiguration.getInstance(requireContext()).publishableKey
@@ -274,7 +275,10 @@ class FragmentExamplesActivity : AppCompatActivity() {
         }
 
         private fun createCustomerSession(): CustomerSession {
-            CustomerSession.initCustomerSession(requireContext(), ExampleEphemeralKeyProvider())
+            CustomerSession.initCustomerSession(
+                requireContext(),
+                ExampleEphemeralKeyProvider(requireContext())
+            )
             val customerSession = CustomerSession.getInstance()
             customerSession.retrieveCurrentCustomer(
                 object : CustomerSession.CustomerRetrievalListener {
