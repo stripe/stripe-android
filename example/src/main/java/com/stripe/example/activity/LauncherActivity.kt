@@ -57,7 +57,9 @@ class LauncherActivity : AppCompatActivity() {
             Item(activity.getString(R.string.launch_create_pm_sepa_debit),
                 CreateSepaDebitActivity::class.java),
             Item(activity.getString(R.string.fpx_payment_example),
-                FpxPaymentActivity::class.java)
+                FpxPaymentActivity::class.java),
+            Item(activity.getString(R.string.klarna_source_example),
+                KlarnaSourceActivity::class.java)
         )
 
         override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): ExamplesViewHolder {

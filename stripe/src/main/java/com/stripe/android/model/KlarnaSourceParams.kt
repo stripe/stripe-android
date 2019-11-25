@@ -11,7 +11,7 @@ package com.stripe.android.model
  * Be careful with this option: If the provided information is invalid,
  * Klarna may reject the transaction without giving the customer a chance to correct it.
  */
-internal data class KlarnaSourceParams @JvmOverloads constructor(
+data class KlarnaSourceParams @JvmOverloads constructor(
     /**
      * The URL the customer should be redirected to after they have successfully verified the
      * payment.
