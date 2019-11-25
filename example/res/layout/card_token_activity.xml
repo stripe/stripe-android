@@ -1,46 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/coordinator"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingStart="8dp"
-    android:paddingEnd="8dp"
-    android:gravity="center_horizontal"
-    android:orientation="vertical">
-
-    <TextView android:id="@+id/payment_form_title"
-              android:text="@string/create_card_token"
-              style="@style/Header" />
-
-    <com.stripe.android.view.CardInputWidget
-        android:id="@+id/card_input_widget"
+    android:layout_height="match_parent">
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        />
+        android:layout_height="match_parent"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/create_token_asynctask"
-        android:layout_height="wrap_content"
-        android:layout_width="160dp"
-        android:text="@string/create_asynctask"
-        />
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:visibility="invisible" />
 
-    <Button
-        android:id="@+id/create_token_rxjava"
-        android:layout_height="wrap_content"
-        android:layout_width="160dp"
-        android:text="@string/create_rxjava"
-        />
+        <TextView android:id="@+id/payment_form_title"
+                  android:text="@string/create_card_token"
+                  style="@style/Header" />
 
-    <TextView android:id="@+id/token_list_title"
-              android:text="@string/paymentMethods"
-              android:layout_marginTop="12dp"
-              style="@style/Header" />
+        <com.stripe.android.view.CardInputWidget
+            android:id="@+id/card_input_widget"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
 
-    <ListView
-        android:id="@+id/tokens_list"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"/>
+        <Button
+            android:id="@+id/create_token_button"
+            android:layout_height="wrap_content"
+            android:layout_width="160dp"
+            android:text="@string/create_token"
+            />
 
-</LinearLayout>
+        <TextView android:id="@+id/token_list_title"
+                  android:text="@string/paymentMethods"
+                  android:layout_marginTop="12dp"
+                  style="@style/Header" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/tokens_list"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+    </LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
