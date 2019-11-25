@@ -9,6 +9,30 @@ configurations {
     ktlint
 }
 
+// Read values from gradle.properties or system environment variable
+def getBackendUrl() {
+    return readProperty('STRIPE_EXAMPLE_BACKEND_URL')
+}
+
+def getPublishableKey() {
+    return readProperty('STRIPE_EXAMPLE_PUBLISHABLE_KEY')
+}
+
+def getAccountId() {
+    return readProperty('STRIPE_ACCOUNT_ID')
+}
+
+private def readProperty(name) {
+    final String propValue
+    if (hasProperty(name)) {
+        propValue = property(name)
+    } else {
+        propValue = System.getenv(name)
+    }
+
+    return propValue?.trim() ? propValue : ""
+}
+
 dependencies {
     implementation project(':stripe')
     implementation 'androidx.multidex:multidex:2.0.1'
@@ -62,6 +86,12 @@ android {
         minSdkVersion 19
         targetSdkVersion rootProject.ext.compileSdkVersion
         multiDexEnabled true
+
+        manifestPlaceholders = [
+                BACKEND_URL: getBackendUrl(),
+                PUBLISHABLE_KEY: getPublishableKey(),
+                STRIPE_ACCOUNT_ID: getAccountId()
+        ]
     }
     packagingOptions {
         exclude 'LICENSE.txt'

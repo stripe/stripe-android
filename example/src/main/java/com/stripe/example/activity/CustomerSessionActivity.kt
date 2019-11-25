@@ -30,7 +30,7 @@ class CustomerSessionActivity : AppCompatActivity() {
         errorDialogHandler = ErrorDialogHandler(this)
         CustomerSession.initCustomerSession(
             this,
-            ExampleEphemeralKeyProvider(),
+            ExampleEphemeralKeyProvider(this),
             false
         )
 

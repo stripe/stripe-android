@@ -15,6 +15,16 @@
         android:supportsRtl="true"
         tools:ignore="AllowBackup">
 
+        <meta-data
+            android:name="com.stripe.example.metadata.backend_url"
+            android:value="${BACKEND_URL}" />
+        <meta-data
+            android:name="com.stripe.example.metadata.publishable_key"
+            android:value="${PUBLISHABLE_KEY}" />
+        <meta-data
+            android:name="com.stripe.example.metadata.stripe_account_id"
+            android:value="${STRIPE_ACCOUNT_ID}" />
+
         <!-- Enables the Google Payment API -->
         <meta-data
             android:name="com.google.android.gms.wallet.api.enabled"

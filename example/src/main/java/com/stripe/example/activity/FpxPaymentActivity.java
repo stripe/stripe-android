@@ -32,7 +32,7 @@ public class FpxPaymentActivity extends AppCompatActivity {
         setContentView(R.layout.activity_fpx_payment);
         setTitle(R.string.fpx_payment_example);
 
-        PaymentConfiguration.init(this, Settings.PUBLISHABLE_KEY);
+        PaymentConfiguration.init(this, new Settings(this).getPublishableKey());
 
         findViewById(R.id.btn_select_payment_method)
                 .setOnClickListener(view -> launchAddPaymentMethod());

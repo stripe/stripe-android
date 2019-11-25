@@ -16,7 +16,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.example.R
 import com.stripe.example.Settings
-import com.stripe.example.module.RetrofitFactory
+import com.stripe.example.module.BackendApiFactory
 import com.stripe.example.service.BackendApi
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -39,11 +39,11 @@ class PaymentAuthActivity : AppCompatActivity() {
     private lateinit var backendApi: BackendApi
     private lateinit var statusTextView: TextView
 
-    private val stripeAccountId: String? = Settings.STRIPE_ACCOUNT_ID
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment_auth)
+
+        val stripeAccountId = Settings(this).stripeAccountId
 
         val uiCustomization =
             PaymentAuthConfig.Stripe3ds2UiCustomization.Builder().build()
@@ -59,7 +59,7 @@ class PaymentAuthActivity : AppCompatActivity() {
             statusTextView.text = savedInstanceState.getString(STATE_STATUS)
         }
 
-        backendApi = RetrofitFactory.instance.create(BackendApi::class.java)
+        backendApi = BackendApiFactory(this).create()
         val publishableKey = PaymentConfiguration.getInstance(this).publishableKey
         stripe = Stripe(this, publishableKey,
             stripeAccountId = stripeAccountId,

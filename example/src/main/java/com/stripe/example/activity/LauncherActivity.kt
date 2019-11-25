@@ -20,7 +20,7 @@ class LauncherActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_launcher)
 
-        PaymentConfiguration.init(this, Settings.PUBLISHABLE_KEY)
+        PaymentConfiguration.init(this, Settings(this).publishableKey)
 
         val linearLayoutManager = LinearLayoutManager(this)
             .apply {

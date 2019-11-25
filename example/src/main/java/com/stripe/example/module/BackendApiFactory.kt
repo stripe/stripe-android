@@ -1,8 +1,10 @@
 package com.stripe.example.module
 
+import android.content.Context
 import com.facebook.stetho.okhttp3.StethoInterceptor
 import com.google.gson.GsonBuilder
 import com.stripe.example.Settings
+import com.stripe.example.service.BackendApi
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -12,10 +14,11 @@ import retrofit2.converter.gson.GsonConverterFactory
 /**
  * Factory to generate our Retrofit instance.
  */
-object RetrofitFactory {
-    val instance: Retrofit
+class BackendApiFactory internal constructor(private val backendUrl: String) {
 
-    init {
+    constructor(context: Context) : this(Settings(context).backendUrl)
+
+    fun create(): BackendApi {
         // Set your desired log level. Use Level.BODY for debugging errors.
         // Adding Rx so the calls can be Observable, and adding a Gson converter with
         // leniency to make parsing the results simple.
@@ -31,11 +34,12 @@ object RetrofitFactory {
             .setLenient()
             .create()
 
-        instance = Retrofit.Builder()
+        return Retrofit.Builder()
             .addConverterFactory(GsonConverterFactory.create(gson))
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .baseUrl(Settings.BASE_URL)
+            .baseUrl(backendUrl)
             .client(httpClient)
             .build()
+            .create(BackendApi::class.java)
     }
 }
