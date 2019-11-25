@@ -76,7 +76,7 @@ class PaymentFlowActivity : StripeActivity() {
 
             override fun onPageSelected(i: Int) {
                 title = paymentFlowPagerAdapter.getPageTitle(i)
-                if (paymentFlowPagerAdapter.getPageAt(i) === PaymentFlowPagerEnum.SHIPPING_INFO) {
+                if (paymentFlowPagerAdapter.getPageAt(i) === PaymentFlowPage.SHIPPING_INFO) {
                     paymentFlowPagerAdapter.hideShippingPage()
                 }
             }
@@ -126,7 +126,7 @@ class PaymentFlowActivity : StripeActivity() {
     }
 
     public override fun onActionSave() {
-        if (PaymentFlowPagerEnum.SHIPPING_INFO ==
+        if (PaymentFlowPage.SHIPPING_INFO ==
             paymentFlowPagerAdapter.getPageAt(shipping_flow_viewpager.currentItem)) {
             onShippingInfoSubmitted()
         } else {
@@ -229,7 +229,7 @@ class PaymentFlowActivity : StripeActivity() {
 
     private val selectedShippingMethod: ShippingMethod?
         get() {
-            return if (PaymentFlowPagerEnum.SHIPPING_METHOD ==
+            return if (PaymentFlowPage.SHIPPING_METHOD ==
                 paymentFlowPagerAdapter.getPageAt(shipping_flow_viewpager.currentItem)) {
                 val selectShippingMethodWidget: SelectShippingMethodWidget =
                     findViewById(R.id.select_shipping_method_widget)

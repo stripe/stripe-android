@@ -22,32 +22,33 @@ internal class PaymentFlowPagerAdapter(
     private val shippingMethod: ShippingMethod?,
     private val allowedShippingCountryCodes: Set<String> = emptySet()
 ) : PagerAdapter() {
-    private val pages: MutableList<PaymentFlowPagerEnum>
+    private val pages: MutableList<PaymentFlowPage>
 
     private var shippingInfoSaved: Boolean = false
     private var validShippingMethods: List<ShippingMethod>? = ArrayList()
     private var defaultShippingMethod: ShippingMethod? = null
 
     init {
-        pages = ArrayList()
-        if (paymentSessionConfig.isShippingInfoRequired) {
-            pages.add(PaymentFlowPagerEnum.SHIPPING_INFO)
-        }
-        if (shouldAddShippingScreen()) {
-            pages.add(PaymentFlowPagerEnum.SHIPPING_METHOD)
-        }
+        pages = listOfNotNull(
+            PaymentFlowPage.SHIPPING_INFO.takeIf {
+                paymentSessionConfig.isShippingInfoRequired
+            },
+            PaymentFlowPage.SHIPPING_METHOD.takeIf {
+                shouldAddShippingScreen()
+            }
+        ).toMutableList()
     }
 
     private fun shouldAddShippingScreen(): Boolean {
         return paymentSessionConfig.isShippingMethodRequired &&
             (!paymentSessionConfig.isShippingInfoRequired || shippingInfoSaved) &&
-            !pages.contains(PaymentFlowPagerEnum.SHIPPING_METHOD)
+            !pages.contains(PaymentFlowPage.SHIPPING_METHOD)
     }
 
     fun setShippingInfoSaved(addressSaved: Boolean) {
         shippingInfoSaved = addressSaved
         if (shouldAddShippingScreen()) {
-            pages.add(PaymentFlowPagerEnum.SHIPPING_METHOD)
+            pages.add(PaymentFlowPage.SHIPPING_METHOD)
         }
         notifyDataSetChanged()
     }
@@ -61,44 +62,54 @@ internal class PaymentFlowPagerAdapter(
     }
 
     fun hideShippingPage() {
-        pages.remove(PaymentFlowPagerEnum.SHIPPING_METHOD)
+        pages.remove(PaymentFlowPage.SHIPPING_METHOD)
         notifyDataSetChanged()
     }
 
     override fun instantiateItem(collection: ViewGroup, position: Int): Any {
         val paymentFlowPagerEnum = pages[position]
-        val layout = LayoutInflater.from(context)
-            .inflate(paymentFlowPagerEnum.layoutResId, collection, false) as ViewGroup
-
+        val layout = createItemView(paymentFlowPagerEnum, collection)
         when (paymentFlowPagerEnum) {
-            PaymentFlowPagerEnum.SHIPPING_METHOD -> {
+            PaymentFlowPage.SHIPPING_METHOD -> {
                 customerSession
                     .addProductUsageTokenIfValid(PaymentFlowActivity.TOKEN_SHIPPING_METHOD_SCREEN)
-                val selectShippingMethodWidget: SelectShippingMethodWidget =
-                    layout.findViewById(R.id.select_shipping_method_widget)
-                selectShippingMethodWidget
-                    .setShippingMethods(validShippingMethods, defaultShippingMethod)
-                shippingMethod?.let {
-                    selectShippingMethodWidget.setSelectedShippingMethod(it)
-                }
+                bindShippingMethod(layout.findViewById(R.id.select_shipping_method_widget))
             }
-            PaymentFlowPagerEnum.SHIPPING_INFO -> {
+            PaymentFlowPage.SHIPPING_INFO -> {
                 customerSession
                     .addProductUsageTokenIfValid(PaymentFlowActivity.TOKEN_SHIPPING_INFO_SCREEN)
-                val shippingInfoWidget: ShippingInfoWidget =
-                    layout.findViewById(R.id.shipping_info_widget)
-                shippingInfoWidget
-                    .setHiddenFields(paymentSessionConfig.hiddenShippingInfoFields)
-                shippingInfoWidget
-                    .setOptionalFields(paymentSessionConfig.optionalShippingInfoFields)
-                shippingInfoWidget
-                    .populateShippingInfo(shippingInformation)
-                shippingInfoWidget
-                    .setAllowedCountryCodes(allowedShippingCountryCodes)
+                bindShippingInfo(layout.findViewById(R.id.shipping_info_widget))
             }
         }
         collection.addView(layout)
         return layout
+    }
+
+    private fun createItemView(
+        paymentFlowPage: PaymentFlowPage,
+        collection: ViewGroup
+    ): View {
+        return LayoutInflater.from(context)
+            .inflate(paymentFlowPage.layoutResId, collection, false)
+    }
+
+    private fun bindShippingMethod(selectShippingMethodWidget: SelectShippingMethodWidget) {
+        selectShippingMethodWidget
+            .setShippingMethods(validShippingMethods, defaultShippingMethod)
+        shippingMethod?.let {
+            selectShippingMethodWidget.setSelectedShippingMethod(it)
+        }
+    }
+
+    private fun bindShippingInfo(shippingInfoWidget: ShippingInfoWidget) {
+        shippingInfoWidget
+            .setHiddenFields(paymentSessionConfig.hiddenShippingInfoFields)
+        shippingInfoWidget
+            .setOptionalFields(paymentSessionConfig.optionalShippingInfoFields)
+        shippingInfoWidget
+            .populateShippingInfo(shippingInformation)
+        shippingInfoWidget
+            .setAllowedCountryCodes(allowedShippingCountryCodes)
     }
 
     override fun destroyItem(collection: ViewGroup, position: Int, view: Any) {
@@ -109,7 +120,7 @@ internal class PaymentFlowPagerAdapter(
         return pages.size
     }
 
-    internal fun getPageAt(position: Int): PaymentFlowPagerEnum? {
+    internal fun getPageAt(position: Int): PaymentFlowPage? {
         return pages.getOrNull(position)
     }
 
@@ -139,7 +150,7 @@ internal class PaymentFlowPagerAdapter(
 
     @Parcelize
     internal class State(
-        internal val pages: List<PaymentFlowPagerEnum>,
+        internal val pages: List<PaymentFlowPage>,
         internal val shippingInfoSaved: Boolean,
         internal val validShippingMethods: List<ShippingMethod>?,
         internal val defaultShippingMethod: ShippingMethod?

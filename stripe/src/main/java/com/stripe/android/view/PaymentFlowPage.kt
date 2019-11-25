@@ -4,7 +4,7 @@ import androidx.annotation.LayoutRes
 import androidx.annotation.StringRes
 import com.stripe.android.R
 
-internal enum class PaymentFlowPagerEnum(
+internal enum class PaymentFlowPage(
     @param:StringRes @field:StringRes @get:StringRes val titleResId: Int,
     @param:LayoutRes @field:LayoutRes @get:LayoutRes val layoutResId: Int
 ) {
