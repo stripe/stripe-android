@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import com.stripe.android.PaymentSessionFixtures.PAYMENT_SESSION_CONFIG
+import com.stripe.android.model.ShippingInformation
 import com.stripe.android.utils.ParcelUtils
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -15,16 +16,12 @@ class PaymentSessionConfigTest {
     @Test
     fun testParcel() {
         assertEquals(PAYMENT_SESSION_CONFIG, ParcelUtils.create(PAYMENT_SESSION_CONFIG))
-        assertEquals(
-            PaymentSessionFixtures.PAYMENT_SESSION_CONFIG,
-            ParcelUtils.create(PaymentSessionFixtures.PAYMENT_SESSION_CONFIG)
-        )
     }
 
     @Test
     fun create_withValidCountryCode_succeeds() {
         val allowedShippingCountryCodes = setOf("us", "CA")
-        val config = PaymentSessionFixtures.PAYMENT_SESSION_CONFIG.copy(
+        val config = PAYMENT_SESSION_CONFIG.copy(
             allowedShippingCountryCodes = allowedShippingCountryCodes
         )
         assertEquals(allowedShippingCountryCodes, config.allowedShippingCountryCodes)
@@ -32,7 +29,7 @@ class PaymentSessionConfigTest {
 
     @Test
     fun create_withEmptyCountryCodesList_succeeds() {
-        val config = PaymentSessionFixtures.PAYMENT_SESSION_CONFIG.copy(
+        val config = PAYMENT_SESSION_CONFIG.copy(
             allowedShippingCountryCodes = emptySet()
         )
         assertTrue(config.allowedShippingCountryCodes.isEmpty())
@@ -40,8 +37,8 @@ class PaymentSessionConfigTest {
 
     @Test
     fun create_withInvalidCountryCode_throwsException() {
-        val exception = assertFailsWith<IllegalArgumentException> {
-            PaymentSessionFixtures.PAYMENT_SESSION_CONFIG.copy(
+        val exception: IllegalArgumentException = assertFailsWith {
+            PAYMENT_SESSION_CONFIG.copy(
                 allowedShippingCountryCodes = setOf("invalid_country_code")
             )
         }
@@ -49,5 +46,26 @@ class PaymentSessionConfigTest {
             "'invalid_country_code' is not a valid country code",
             exception.message
         )
+    }
+
+    @Test
+    fun create_withShippingMethodsRequiredAndShippingInformationValidatorProvided_withoutShippingMethodsFactory_throwsException() {
+        assertFailsWith<IllegalArgumentException> {
+            PaymentSessionConfig.Builder()
+                .setShippingInfoRequired(true)
+                .setShippingMethodsRequired(true)
+                .setShippingInformationValidator(FakeShippingInfoValidator())
+                .build()
+        }
+    }
+
+    private class FakeShippingInfoValidator : PaymentSessionConfig.ShippingInformationValidator {
+        override fun isValid(shippingInformation: ShippingInformation): Boolean {
+            return true
+        }
+
+        override fun getErrorMessage(shippingInformation: ShippingInformation): String {
+            return ""
+        }
     }
 }

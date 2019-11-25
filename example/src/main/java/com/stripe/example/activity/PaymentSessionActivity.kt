@@ -31,7 +31,6 @@ import com.stripe.example.R
 import com.stripe.example.controller.ErrorDialogHandler
 import com.stripe.example.service.ExampleEphemeralKeyProvider
 import kotlinx.android.synthetic.main.activity_payment_session.*
-import java.util.ArrayList
 import java.util.Currency
 import java.util.Locale
 
@@ -68,11 +67,10 @@ class PaymentSessionActivity : AppCompatActivity() {
                 if (!isValidShippingInfo(shippingInformation)) {
                     shippingInfoProcessedIntent.putExtra(EXTRA_IS_SHIPPING_INFO_VALID, false)
                 } else {
-                    val shippingMethods = createSampleShippingMethods()
                     shippingInfoProcessedIntent
                         .putExtra(EXTRA_IS_SHIPPING_INFO_VALID, true)
-                        .putParcelableArrayListExtra(EXTRA_VALID_SHIPPING_METHODS, shippingMethods)
-                        .putExtra(EXTRA_DEFAULT_SHIPPING_METHOD, shippingMethods.last())
+                        .putParcelableArrayListExtra(EXTRA_VALID_SHIPPING_METHODS, SHIPPING_METHODS)
+                        .putExtra(EXTRA_DEFAULT_SHIPPING_METHOD, SHIPPING_METHODS.last())
                 }
                 localBroadcastManager.sendBroadcast(shippingInfoProcessedIntent)
             }
@@ -172,15 +170,6 @@ class PaymentSessionActivity : AppCompatActivity() {
         } else {
             notSelectedText
         }
-    }
-
-    private fun createSampleShippingMethods(): ArrayList<ShippingMethod> {
-        return arrayListOf(
-            ShippingMethod("UPS Ground", "ups-ground",
-                0, "USD", "Arrives in 3-5 days"),
-            ShippingMethod("FedEx", "fedex",
-                599, "USD", "Arrives tomorrow")
-        )
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -286,6 +275,13 @@ class PaymentSessionActivity : AppCompatActivity() {
                 .build(),
             "Fake Name",
             "(555) 555-5555"
+        )
+
+        private val SHIPPING_METHODS = arrayListOf(
+            ShippingMethod("UPS Ground", "ups-ground",
+                0, "USD", "Arrives in 3-5 days"),
+            ShippingMethod("FedEx", "fedex",
+                599, "USD", "Arrives tomorrow")
         )
     }
 }
