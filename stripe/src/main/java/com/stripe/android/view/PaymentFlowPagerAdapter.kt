@@ -22,21 +22,21 @@ internal class PaymentFlowPagerAdapter(
     private val shippingMethod: ShippingMethod?,
     private val allowedShippingCountryCodes: Set<String> = emptySet()
 ) : PagerAdapter() {
-    private val pages: MutableList<PaymentFlowPage>
+    private val pages: MutableList<PaymentFlowPage> = mutableListOf()
 
     private var shippingInfoSaved: Boolean = false
     private var validShippingMethods: List<ShippingMethod>? = ArrayList()
     private var defaultShippingMethod: ShippingMethod? = null
 
     init {
-        pages = listOfNotNull(
+        pages.addAll(listOfNotNull(
             PaymentFlowPage.SHIPPING_INFO.takeIf {
                 paymentSessionConfig.isShippingInfoRequired
             },
             PaymentFlowPage.SHIPPING_METHOD.takeIf {
                 shouldAddShippingScreen()
             }
-        ).toMutableList()
+        ))
     }
 
     private fun shouldAddShippingScreen(): Boolean {
