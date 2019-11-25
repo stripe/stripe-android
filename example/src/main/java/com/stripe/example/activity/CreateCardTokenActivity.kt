@@ -17,12 +17,12 @@ class CreateCardTokenActivity : AppCompatActivity() {
         dependencyHandler = DependencyHandler(
             this,
             findViewById(R.id.card_input_widget),
-            findViewById(R.id.listview),
+            findViewById(R.id.tokens_list),
             PaymentConfiguration.getInstance(this).publishableKey
         )
 
-        dependencyHandler.attachAsyncTaskTokenController(findViewById(R.id.save))
-        dependencyHandler.attachRxTokenController(findViewById(R.id.saverx))
+        dependencyHandler.attachAsyncTaskTokenController(findViewById(R.id.create_token_asynctask))
+        dependencyHandler.attachRxTokenController(findViewById(R.id.create_token_rxjava))
     }
 
     override fun onDestroy() {

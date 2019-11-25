@@ -19,14 +19,14 @@
         />
 
     <Button
-        android:id="@+id/save"
+        android:id="@+id/create_token_asynctask"
         android:layout_height="wrap_content"
         android:layout_width="160dp"
         android:text="@string/create_asynctask"
         />
 
     <Button
-        android:id="@+id/saverx"
+        android:id="@+id/create_token_rxjava"
         android:layout_height="wrap_content"
         android:layout_width="160dp"
         android:text="@string/create_rxjava"
@@ -38,7 +38,7 @@
               style="@style/Header" />
 
     <ListView
-        android:id="@+id/listview"
+        android:id="@+id/tokens_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"/>
