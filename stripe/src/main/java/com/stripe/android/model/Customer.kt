@@ -3,6 +3,7 @@ package com.stripe.android.model
 import com.stripe.android.model.StripeJsonUtils.optBoolean
 import com.stripe.android.model.StripeJsonUtils.optInteger
 import com.stripe.android.model.StripeJsonUtils.optString
+import kotlinx.android.parcel.Parcelize
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -10,7 +11,8 @@ import org.json.JSONObject
 /**
  * Model for a Stripe Customer object
  */
-data class Customer private constructor(
+@Parcelize
+data class Customer internal constructor(
     val id: String?,
     val defaultSource: String?,
     val shippingInformation: ShippingInformation?,

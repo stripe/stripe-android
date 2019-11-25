@@ -1,7 +1,9 @@
 package com.stripe.android.model
 
+import android.os.Parcelable
 import androidx.annotation.Size
 import androidx.annotation.StringDef
+import kotlinx.android.parcel.Parcelize
 import org.json.JSONObject
 
 /**
@@ -10,6 +12,7 @@ import org.json.JSONObject
  * [the Stripe
  * documentation.](https://stripe.com/docs/api/java#create_bank_account_token)
  */
+@Parcelize
 data class BankAccount internal constructor(
     val accountNumber: String?,
     val accountHolderName: String?,
@@ -23,7 +26,7 @@ data class BankAccount internal constructor(
     val fingerprint: String?,
     val last4: String?,
     val routingNumber: String?
-) : StripeParamsModel {
+) : StripeParamsModel, Parcelable {
 
     @Retention(AnnotationRetention.SOURCE)
     @StringDef(BankAccountType.COMPANY, BankAccountType.INDIVIDUAL)

@@ -1,6 +1,8 @@
 package com.stripe.android.model
 
+import android.os.Parcelable
 import com.stripe.android.model.SourceOrder.Item.Type
+import kotlinx.android.parcel.Parcelize
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -10,6 +12,7 @@ import org.json.JSONObject
  *
  * [API reference](https://stripe.com/docs/api/sources/object#source_object-source_order)
  */
+@Parcelize
 data class SourceOrder internal constructor(
     /**
      * A positive integer in the smallest currency unit (that is, 100 cents for $1.00, or 1 for ¥1,
@@ -37,12 +40,13 @@ data class SourceOrder internal constructor(
      * The shipping address for the order. Present if the order is for goods to be shipped.
      */
     val shipping: Shipping? = null
-) {
+) : Parcelable {
     /**
      * List of items constituting the order.
      *
      * [API reference](https://stripe.com/docs/api/sources/object#source_object-source_order-items)
      */
+    @Parcelize
     data class Item internal constructor(
         /**
          * The type of this order item. Must be [Type.Sku], [Type.Tax], or [Type.Shipping].
@@ -69,7 +73,7 @@ data class SourceOrder internal constructor(
          * instances of the SKU to be ordered.
          */
         val quantity: Int? = null
-    ) {
+    ) : Parcelable {
         enum class Type(private val code: String) {
             Sku("sku"),
             Tax("tax"),
@@ -113,6 +117,7 @@ data class SourceOrder internal constructor(
      *
      * [API reference](https://stripe.com/docs/api/sources/object#source_object-source_order-shipping)
      */
+    @Parcelize
     data class Shipping internal constructor(
         /**
          * Shipping address.
@@ -140,7 +145,7 @@ data class SourceOrder internal constructor(
          * them with commas.
          */
         val trackingNumber: String? = null
-    ) {
+    ) : Parcelable {
         internal companion object {
             private const val FIELD_ADDRESS = "address"
             private const val FIELD_CARRIER = "carrier"

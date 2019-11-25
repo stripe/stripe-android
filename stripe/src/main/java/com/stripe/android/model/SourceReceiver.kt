@@ -1,5 +1,7 @@
 package com.stripe.android.model
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -8,12 +10,13 @@ import org.json.JSONObject
  * [receiver](https://stripe.com/docs/api/sources/object#source_object-receiver) object
  * in the Sources API. Present if the [Source] is a receiver.
  */
-data class SourceReceiver private constructor(
+@Parcelize
+data class SourceReceiver internal constructor(
     val address: String?,
     val amountCharged: Long,
     val amountReceived: Long,
     val amountReturned: Long
-) : StripeModel() {
+) : StripeModel(), Parcelable {
 
     companion object {
         private const val FIELD_ADDRESS = "address"

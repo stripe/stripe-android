@@ -3,6 +3,7 @@ package com.stripe.android.model
 import androidx.annotation.StringDef
 import com.stripe.android.model.Token.TokenType
 import java.util.Date
+import kotlinx.android.parcel.Parcelize
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -11,7 +12,8 @@ import org.json.JSONObject
  * account details or personally identifiable information (PII), directly from your customers in a
  * secure manner. A Token representing this information is returned to you to use.
  */
-data class Token private constructor(
+@Parcelize
+data class Token internal constructor(
 
     /**
      * @return the Token id

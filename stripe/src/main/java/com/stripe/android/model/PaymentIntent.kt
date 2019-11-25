@@ -1,11 +1,14 @@
 package com.stripe.android.model
 
 import android.net.Uri
+import android.os.Parcelable
 import com.stripe.android.model.StripeJsonUtils.optBoolean
 import com.stripe.android.model.StripeJsonUtils.optCurrency
 import com.stripe.android.model.StripeJsonUtils.optLong
 import com.stripe.android.model.StripeJsonUtils.optMap
 import com.stripe.android.model.StripeJsonUtils.optString
+import kotlinx.android.parcel.Parcelize
+import kotlinx.android.parcel.RawValue
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -15,6 +18,7 @@ import org.json.JSONObject
  * - [Payment Intents Overview](https://stripe.com/docs/payments/payment-intents)
  * - [PaymentIntents API](https://stripe.com/docs/api/payment_intents)
  */
+@Parcelize
 data class PaymentIntent internal constructor(
     /**
      * @return Unique identifier for the object.
@@ -103,7 +107,7 @@ data class PaymentIntent internal constructor(
      * @return If present, this property tells you what actions you need to take in order for your
      * customer to fulfill a payment using the provided source.
      */
-    val nextAction: Map<String, Any?>?,
+    val nextAction: Map<String, @RawValue Any?>?,
 
     /**
      * @return ID of the payment method (a PaymentMethod, Card, BankAccount, or saved Source object)
@@ -186,7 +190,8 @@ data class PaymentIntent internal constructor(
      *
      * See [last_payment_error](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-last_payment_error).
      */
-    data class Error private constructor(
+    @Parcelize
+    data class Error internal constructor(
 
         /**
          * For card errors, the ID of the failed charge.
@@ -233,7 +238,7 @@ data class PaymentIntent internal constructor(
          * The type of error returned.
          */
         val type: Type?
-    ) {
+    ) : Parcelable {
         enum class Type(val code: String) {
             ApiConnectionError("api_connection_error"),
             ApiError("api_error"),

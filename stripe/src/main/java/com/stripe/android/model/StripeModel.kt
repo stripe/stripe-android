@@ -1,11 +1,12 @@
 package com.stripe.android.model
 
+import android.os.Parcelable
 import org.json.JSONArray
 
 /**
  * Model for a Stripe API object.
  */
-abstract class StripeModel {
+abstract class StripeModel : Parcelable {
 
     abstract override fun hashCode(): Int
 

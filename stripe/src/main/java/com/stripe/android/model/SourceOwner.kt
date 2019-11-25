@@ -1,6 +1,8 @@
 package com.stripe.android.model
 
+import android.os.Parcelable
 import com.stripe.android.model.StripeJsonUtils.optString
+import kotlinx.android.parcel.Parcelize
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -8,6 +10,7 @@ import org.json.JSONObject
  * Model for a [owner](https://stripe.com/docs/api#source_object-owner) object
  * in the Source api.
  */
+@Parcelize
 data class SourceOwner internal constructor(
     val address: Address?,
     val email: String?,
@@ -17,7 +20,7 @@ data class SourceOwner internal constructor(
     val verifiedEmail: String?,
     val verifiedName: String?,
     val verifiedPhone: String?
-) : StripeModel() {
+) : StripeModel(), Parcelable {
     companion object {
 
         private const val VERIFIED = "verified_"

@@ -1,8 +1,11 @@
 package com.stripe.android.model
 
 import android.net.Uri
+import android.os.Parcelable
 import com.stripe.android.model.StripeJsonUtils.optMap
 import com.stripe.android.model.StripeJsonUtils.optString
+import kotlinx.android.parcel.Parcelize
+import kotlinx.android.parcel.RawValue
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -10,7 +13,8 @@ import org.json.JSONObject
  * A SetupIntent guides you through the process of setting up a customer's payment credentials for
  * future payments.
  */
-data class SetupIntent private constructor(
+@Parcelize
+data class SetupIntent internal constructor(
 
     /**
      * @return Unique identifier for the object.
@@ -50,7 +54,7 @@ data class SetupIntent private constructor(
      */
     override val isLiveMode: Boolean,
 
-    private val nextAction: Map<String, Any?>?,
+    private val nextAction: Map<String, @RawValue Any?>?,
 
     override val nextActionType: StripeIntent.NextActionType? = null,
 
@@ -137,7 +141,8 @@ data class SetupIntent private constructor(
      *
      * See [last_setup_error](https://stripe.com/docs/api/setup_intents/object#setup_intent_object-last_setup_error).
      */
-    data class Error private constructor(
+    @Parcelize
+    data class Error internal constructor(
 
         /**
          * For some errors that could be handled programmatically, a short string indicating the
@@ -179,7 +184,7 @@ data class SetupIntent private constructor(
          * The type of error returned.
          */
         val type: Type?
-    ) {
+    ) : Parcelable {
         enum class Type(val code: String) {
             ApiConnectionError("api_connection_error"),
             ApiError("api_error"),
