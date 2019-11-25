@@ -45,7 +45,7 @@ dependencies {
 
     /* Needed for RxAndroid */
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
-    implementation 'io.reactivex.rxjava2:rxjava:2.2.14'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.15'
 
     /* Needed for Rx Bindings on views */
     implementation 'com.jakewharton.rxbinding2:rxbinding:2.2.0'
@@ -72,6 +72,36 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutineVersion"
 
     ktlint 'com.pinterest:ktlint:0.35.0'
+
+    testImplementation 'androidx.test:core:1.2.0'
+
+    // Core library
+    androidTestImplementation 'androidx.test:core:1.2.0'
+    androidTestImplementation 'androidx.test:core-ktx:1.2.0'
+
+    // AndroidJUnitRunner and JUnit Rules
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test:rules:1.2.0'
+
+    // Assertions
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.ext:junit-ktx:1.1.1'
+    androidTestImplementation 'androidx.test.ext:truth:1.2.0'
+    androidTestImplementation 'com.google.truth:truth:0.42'
+
+    // Espresso dependencies
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-contrib:$espressoVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-intents:$espressoVersion"
+    androidTestImplementation "androidx.test.espresso.idling:idling-concurrent:$espressoVersion"
+
+    // The following Espresso dependency can be either "implementation"
+    // or "androidTestImplementation", depending on whether you want the
+    // dependency to appear on your APK's compile classpath or the test APK
+    // classpath.
+    androidTestImplementation "androidx.test.espresso:espresso-idling-resource:$espressoVersion"
+
+    androidTestUtil 'androidx.test:orchestrator:1.2.0'
 }
 
 android {
@@ -82,11 +112,17 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion rootProject.ext.compileSdkVersion
         multiDexEnabled true
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments clearPackageData: 'true'
 
         manifestPlaceholders = [
                 BACKEND_URL: getBackendUrl(),
@@ -94,6 +130,11 @@ android {
                 STRIPE_ACCOUNT_ID: getAccountId()
         ]
     }
+
+    testOptions {
+        execution 'ANDROIDX_TEST_ORCHESTRATOR'
+    }
+
     packagingOptions {
         exclude 'LICENSE.txt'
     }
