@@ -15,6 +15,8 @@
       STRIPE_EXAMPLE_PUBLISHABLE_KEY=pk_test_12345
       STRIPE_ACCOUNT_ID=
       ```
+* [#1883](https://github.com/stripe/stripe-android/pull/1883) Enable `PaymentSessionConfig.ShippingInformationValidator` and `PaymentSessionConfig.ShippingMethodsFactory`
+* [#1884](https://github.com/stripe/stripe-android/pull/1884) Mark `PaymentFlowExtras` as deprecated
 
 ## 12.5.0 - 2019-11-21
 * [#1836](https://github.com/stripe/stripe-android/pull/1836) Add support for [statement_descriptor](https://stripe.com/docs/api/sources/object#source_object-statement_descriptor) field to `Source` model via `Source#statementDescriptor`
