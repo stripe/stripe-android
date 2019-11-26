@@ -6,6 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.viewpager.widget.ViewPager
 import com.stripe.android.CustomerSession
@@ -14,11 +16,9 @@ import com.stripe.android.PaymentSession.Companion.TOKEN_PAYMENT_SESSION
 import com.stripe.android.PaymentSessionConfig
 import com.stripe.android.PaymentSessionData
 import com.stripe.android.R
-import com.stripe.android.StripeError
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
-import java.lang.ref.WeakReference
 import kotlinx.android.synthetic.main.activity_enter_shipping_info.*
 import kotlinx.android.synthetic.main.activity_shipping_flow.*
 import kotlinx.coroutines.CoroutineScope
@@ -36,6 +36,7 @@ class PaymentFlowActivity : StripeActivity() {
     private lateinit var paymentSessionData: PaymentSessionData
     private lateinit var paymentSessionConfig: PaymentSessionConfig
     private lateinit var customerSession: CustomerSession
+    private lateinit var viewModel: PaymentFlowViewModel
 
     private var shippingInfoSubmittedBroadcastReceiver: BroadcastReceiver? = null
 
@@ -93,6 +94,11 @@ class PaymentFlowActivity : StripeActivity() {
         }
 
         title = paymentFlowPagerAdapter.getPageTitle(shipping_flow_viewpager.currentItem)
+
+        viewModel = ViewModelProviders.of(
+            this,
+            PaymentFlowViewModel.Factory(customerSession)
+        )[PaymentFlowViewModel::class.java]
     }
 
     private fun createShippingInfoSubmittedBroadcastReceiver(): BroadcastReceiver {
@@ -110,7 +116,6 @@ class PaymentFlowActivity : StripeActivity() {
                         .getParcelableExtra(PaymentFlowExtras.EXTRA_DEFAULT_SHIPPING_METHOD)
 
                     onShippingInfoValidated(
-                        customerSession,
                         shippingMethods.orEmpty(),
                         defaultShippingMethod
                     )
@@ -177,16 +182,26 @@ class PaymentFlowActivity : StripeActivity() {
     }
 
     private fun onShippingInfoValidated(
-        customerSession: CustomerSession,
         shippingMethods: List<ShippingMethod>,
         defaultShippingMethod: ShippingMethod? = null
     ) {
-        paymentSessionData.shippingInformation?.let {
-            customerSession.setCustomerShippingInformation(it,
-                CustomerShippingInfoSavedListener(
-                    this, shippingMethods, defaultShippingMethod
-                )
-            )
+        paymentSessionData.shippingInformation?.let { shippingInfo ->
+            viewModel.saveCustomerShippingInformation(shippingInfo)
+                .observe(this, Observer {
+                    when (it.status) {
+                        PaymentFlowViewModel.Result.Status.SUCCESS -> {
+                            val customer = it.data as Customer
+                            onShippingInfoSaved(
+                                customer.shippingInformation,
+                                shippingMethods,
+                                defaultShippingMethod
+                            )
+                        }
+                        PaymentFlowViewModel.Result.Status.ERROR -> {
+                            showError(it.data as String)
+                        }
+                    }
+                })
         }
     }
 
@@ -293,7 +308,6 @@ class PaymentFlowActivity : StripeActivity() {
                 if (isValid) {
                     // show shipping methods screen
                     onShippingInfoValidated(
-                        customerSession,
                         shippingMethods
                     )
                 } else {
@@ -326,24 +340,6 @@ class PaymentFlowActivity : StripeActivity() {
             shipping_flow_viewpager.currentItem = shipping_flow_viewpager.currentItem - 1
         } else {
             super.onBackPressed()
-        }
-    }
-
-    private class CustomerShippingInfoSavedListener internal constructor(
-        activity: PaymentFlowActivity,
-        private val shippingMethods: List<ShippingMethod>,
-        private val defaultShippingMethod: ShippingMethod?
-    ) : CustomerSession.CustomerRetrievalListener {
-        private val activityRef: WeakReference<PaymentFlowActivity> = WeakReference(activity)
-
-        override fun onCustomerRetrieved(customer: Customer) {
-            activityRef.get()?.onShippingInfoSaved(
-                customer.shippingInformation, shippingMethods, defaultShippingMethod
-            )
-        }
-
-        override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
-            activityRef.get()?.showError(errorMessage)
         }
     }
 
