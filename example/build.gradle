@@ -164,6 +164,12 @@ android {
             setRoot('src/test')
         }
     }
+
+    packagingOptions {
+        exclude 'LICENSE.txt'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE'
+    }
 }
 
 task ktlint(type: JavaExec, group: "verification") {
