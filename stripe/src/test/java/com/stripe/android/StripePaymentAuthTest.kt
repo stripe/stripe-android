@@ -25,7 +25,9 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class StripePaymentAuthTest {
 
-    private lateinit var context: Context
+    private val context: Context by lazy {
+        ApplicationProvider.getApplicationContext<Context>()
+    }
 
     @Mock
     private lateinit var activity: Activity
@@ -41,7 +43,6 @@ class StripePaymentAuthTest {
     @BeforeTest
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        context = ApplicationProvider.getApplicationContext()
         hostArgumentCaptor = argumentCaptor()
     }
 

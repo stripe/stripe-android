@@ -2,7 +2,11 @@ package com.stripe.android.view
 
 import android.graphics.Color
 import androidx.annotation.ColorInt
-import kotlin.test.AfterTest
+import androidx.test.core.app.ApplicationProvider
+import com.nhaarman.mockitokotlin2.mock
+import com.stripe.android.CustomerSession
+import com.stripe.android.PaymentSessionConfig
+import com.stripe.android.PaymentSessionFixtures
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -11,29 +15,46 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-internal class StripeColorUtilsTest : BaseViewTest<CardInputTestActivity>(
-    CardInputTestActivity::class.java
-) {
+internal class StripeColorUtilsTest {
+    private val activityScenarioFactory: ActivityScenarioFactory by lazy {
+        ActivityScenarioFactory(ApplicationProvider.getApplicationContext())
+    }
 
     @BeforeTest
     fun setup() {
-    }
-
-    @AfterTest
-    override fun tearDown() {
-        super.tearDown()
+        CustomerSession.instance = mock()
     }
 
     @Test
     fun getThemeAccentColor_whenOnPostLollipopConfig_getsNonzeroColor() {
-        @ColorInt val color = create().getThemeAccentColor().data
-        assertTrue(Color.alpha(color) > 0)
+        activityScenarioFactory.create<PaymentFlowActivity>(
+            PaymentFlowActivityStarter.Args.Builder()
+                .setPaymentSessionConfig(PaymentSessionConfig.Builder()
+                    .build())
+                .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
+                .build()
+        ).use { activityScenario ->
+            activityScenario.onActivity {
+                @ColorInt val color = StripeColorUtils(it).getThemeAccentColor().data
+                assertTrue(Color.alpha(color) > 0)
+            }
+        }
     }
 
     @Test
     fun getThemeColorControlNormal_whenOnPostLollipopConfig_getsNonzeroColor() {
-        @ColorInt val color = create().getThemeColorControlNormal().data
-        assertTrue(Color.alpha(color) > 0)
+        activityScenarioFactory.create<PaymentFlowActivity>(
+            PaymentFlowActivityStarter.Args.Builder()
+                .setPaymentSessionConfig(PaymentSessionConfig.Builder()
+                    .build())
+                .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
+                .build()
+        ).use { activityScenario ->
+            activityScenario.onActivity {
+                @ColorInt val color = StripeColorUtils(it).getThemeColorControlNormal().data
+                assertTrue(Color.alpha(color) > 0)
+            }
+        }
     }
 
     @Test
@@ -87,9 +108,5 @@ internal class StripeColorUtilsTest : BaseViewTest<CardInputTestActivity>(
         assertTrue(StripeColorUtils.isColorDark(darkPurple))
         assertTrue(StripeColorUtils.isColorDark(darkishRed))
         assertTrue(StripeColorUtils.isColorDark(Color.BLACK))
-    }
-
-    private fun create(): StripeColorUtils {
-        return StripeColorUtils(createActivity())
     }
 }

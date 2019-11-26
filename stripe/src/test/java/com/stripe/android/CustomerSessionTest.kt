@@ -11,12 +11,7 @@ import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.firstValue
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
-import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
-import com.stripe.android.exception.AuthenticationException
-import com.stripe.android.exception.CardException
-import com.stripe.android.exception.InvalidRequestException
-import com.stripe.android.exception.StripeException
 import com.stripe.android.model.Customer
 import com.stripe.android.model.CustomerFixtures
 import com.stripe.android.model.PaymentMethod
@@ -25,15 +20,14 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.SourceFixtures
 import com.stripe.android.testharness.JsonTestUtils
 import com.stripe.android.testharness.TestEphemeralKeyProvider
+import com.stripe.android.view.ActivityScenarioFactory
 import com.stripe.android.view.AddPaymentMethodActivity
-import com.stripe.android.view.BaseViewTest
 import com.stripe.android.view.PaymentFlowActivity
 import com.stripe.android.view.PaymentFlowActivityStarter
 import com.stripe.android.view.PaymentMethodsActivity
 import java.util.Calendar
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -41,7 +35,6 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import org.json.JSONException
 import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -57,7 +50,7 @@ import org.robolectric.RobolectricTestRunner
  * Test class for [CustomerSession].
  */
 @RunWith(RobolectricTestRunner::class)
-class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivity::class.java) {
+class CustomerSessionTest {
 
     @Mock
     private lateinit var broadcastReceiver: BroadcastReceiver
@@ -76,18 +69,15 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
 
     private val ephemeralKeyProvider: TestEphemeralKeyProvider = TestEphemeralKeyProvider()
 
-    @AfterTest
-    override fun tearDown() {
-        super.tearDown()
+    private val activityScenarioFactory: ActivityScenarioFactory by lazy {
+        ActivityScenarioFactory(ApplicationProvider.getApplicationContext())
     }
 
-    @Throws(JSONException::class)
     private fun getCustomerEphemeralKey(key: String): EphemeralKey {
         return EphemeralKey.fromJson(JSONObject(key))
     }
 
     @BeforeTest
-    @Throws(StripeException::class)
     fun setup() {
         MockitoAnnotations.initMocks(this)
 
@@ -198,8 +188,6 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
     }
 
     @Test
-    @Throws(CardException::class, APIException::class, InvalidRequestException::class,
-        AuthenticationException::class, APIConnectionException::class, JSONException::class)
     fun create_withoutInvokingFunctions_fetchesKeyAndCustomer() {
         val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
 
@@ -215,8 +203,6 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
     }
 
     @Test
-    @Throws(CardException::class, APIException::class, InvalidRequestException::class,
-        AuthenticationException::class, APIConnectionException::class, JSONException::class)
     fun setCustomerShippingInfo_withValidInfo_callsWithExpectedArgs() {
         val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
         ephemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW)
@@ -251,8 +237,6 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
     }
 
     @Test
-    @Throws(CardException::class, APIException::class, InvalidRequestException::class,
-        AuthenticationException::class, APIConnectionException::class, JSONException::class)
     fun retrieveCustomer_withExpiredCache_updatesCustomer() {
         val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
         val secondKey = getCustomerEphemeralKey(SECOND_SAMPLE_KEY_RAW)
@@ -302,7 +286,6 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
     }
 
     @Test
-    @Throws(CardException::class, APIException::class, InvalidRequestException::class, AuthenticationException::class, APIConnectionException::class, JSONException::class)
     fun retrieveCustomer_withUnExpiredCache_returnsCustomerWithoutHittingApi() {
         val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
 
@@ -348,7 +331,6 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
     }
 
     @Test
-    @Throws(CardException::class, APIException::class, InvalidRequestException::class, AuthenticationException::class, APIConnectionException::class, JSONException::class)
     fun addSourceToCustomer_withUnExpiredCustomer_returnsAddedSourceAndEmptiesLogs() {
         val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
 
@@ -403,7 +385,6 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
     }
 
     @Test
-    @Throws(StripeException::class, JSONException::class)
     fun addSourceToCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs() {
         val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
 
@@ -448,8 +429,6 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
     }
 
     @Test
-    @Throws(CardException::class, APIException::class, InvalidRequestException::class,
-        AuthenticationException::class, APIConnectionException::class, JSONException::class)
     fun removeSourceFromCustomer_withUnExpiredCustomer_returnsRemovedSourceAndEmptiesLogs() {
         val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
 
@@ -502,7 +481,6 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
     }
 
     @Test
-    @Throws(StripeException::class, JSONException::class)
     fun removeSourceFromCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs() {
         val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
 
@@ -543,7 +521,6 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
     }
 
     @Test
-    @Throws(CardException::class, APIException::class, InvalidRequestException::class, AuthenticationException::class, APIConnectionException::class, JSONException::class)
     fun setDefaultSourceForCustomer_withUnExpiredCustomer_returnsCustomerAndClearsLog() {
         val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
 
@@ -597,7 +574,6 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
     }
 
     @Test
-    @Throws(StripeException::class, JSONException::class)
     fun setDefaultSourceForCustomer_whenApiThrows_tellsListenerBroadcastsAndClearsLogs() {
         val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
 
@@ -641,13 +617,18 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
     fun shippingInfoScreen_whenLaunched_logs() {
         val customerSession = createCustomerSession(null)
         CustomerSession.instance = customerSession
-        createActivity(PaymentFlowActivityStarter.Args.Builder()
-            .setPaymentSessionConfig(PaymentSessionConfig.Builder()
-                .build())
-            .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
-            .build())
 
-        assertTrue(customerSession.productUsageTokens.contains("ShippingInfoScreen"))
+        activityScenarioFactory.create<PaymentFlowActivity>(
+            PaymentFlowActivityStarter.Args.Builder()
+                .setPaymentSessionConfig(PaymentSessionConfig.Builder()
+                    .build())
+                .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
+                .build()
+        ).use { activityScenario ->
+            activityScenario.onActivity {
+                assertTrue(customerSession.productUsageTokens.contains("ShippingInfoScreen"))
+            }
+        }
     }
 
     @Test
@@ -655,18 +636,21 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
         val customerSession = createCustomerSession(null)
         CustomerSession.instance = customerSession
 
-        createActivity(PaymentFlowActivityStarter.Args.Builder()
-            .setPaymentSessionConfig(PaymentSessionConfig.Builder()
-                .setShippingInfoRequired(false)
-                .build())
-            .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
-            .build())
-
-        assertTrue(customerSession.productUsageTokens.contains("ShippingMethodScreen"))
+        activityScenarioFactory.create<PaymentFlowActivity>(
+            PaymentFlowActivityStarter.Args.Builder()
+                .setPaymentSessionConfig(PaymentSessionConfig.Builder()
+                    .setShippingInfoRequired(false)
+                    .build())
+                .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
+                .build()
+        ).use { activityScenario ->
+            activityScenario.onActivity {
+                assertTrue(customerSession.productUsageTokens.contains("ShippingMethodScreen"))
+            }
+        }
     }
 
     @Test
-    @Throws(CardException::class, APIException::class, InvalidRequestException::class, AuthenticationException::class, APIConnectionException::class, JSONException::class)
     fun attachPaymentMethodToCustomer_withUnExpiredCustomer_returnsAddedPaymentMethodAndEmptiesLogs() {
         val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
 
@@ -718,7 +702,6 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
     }
 
     @Test
-    @Throws(StripeException::class, JSONException::class)
     fun attachPaymentMethodToCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs() {
         val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
 
@@ -759,8 +742,6 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
     }
 
     @Test
-    @Throws(CardException::class, APIException::class, InvalidRequestException::class,
-        AuthenticationException::class, APIConnectionException::class, JSONException::class)
     fun detachPaymentMethodFromCustomer_withUnExpiredCustomer_returnsRemovedPaymentMethodAndEmptiesLogs() {
         val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
 
@@ -814,7 +795,6 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
     }
 
     @Test
-    @Throws(StripeException::class, JSONException::class)
     fun detachPaymentMethodFromCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs() {
         val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
 
@@ -855,7 +835,6 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
     }
 
     @Test
-    @Throws(StripeException::class, JSONException::class)
     fun getPaymentMethods_withUnExpiredCustomer_returnsAddedPaymentMethodAndEmptiesLogs() {
         val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
 
@@ -906,7 +885,6 @@ class CustomerSessionTest : BaseViewTest<PaymentFlowActivity>(PaymentFlowActivit
         assertNotNull(paymentMethods)
     }
 
-    @Throws(StripeException::class)
     private fun setupErrorProxy() {
         `when`<Source>(stripeRepository.addCustomerSource(
             any(),

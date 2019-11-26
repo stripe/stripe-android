@@ -1,16 +1,20 @@
 package com.stripe.android.view
 
+import android.content.Context
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.LinearLayout
+import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.textfield.TextInputLayout
 import com.nhaarman.mockitokotlin2.never
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures.VALID_AMEX_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VALID_AMEX_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.VALID_DINERS_CLUB_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.VALID_VISA_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VALID_VISA_WITH_SPACES
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
@@ -22,7 +26,6 @@ import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_EXPI
 import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_POSTAL
 import com.stripe.android.view.CardMultilineWidget.Companion.CARD_MULTILINE_TOKEN
 import java.util.Calendar
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -41,9 +44,7 @@ import org.robolectric.RobolectricTestRunner
  * Test class for [CardMultilineWidget].
  */
 @RunWith(RobolectricTestRunner::class)
-internal class CardMultilineWidgetTest : BaseViewTest<CardInputTestActivity>(
-    CardInputTestActivity::class.java
-) {
+internal class CardMultilineWidgetTest {
 
     private lateinit var cardMultilineWidget: CardMultilineWidget
     private lateinit var noZipCardMultilineWidget: CardMultilineWidget
@@ -55,65 +56,50 @@ internal class CardMultilineWidgetTest : BaseViewTest<CardInputTestActivity>(
     @Mock
     private lateinit var noZipCardListener: CardInputListener
 
+    private val activityScenarioFactory: ActivityScenarioFactory by lazy {
+        ActivityScenarioFactory(ApplicationProvider.getApplicationContext())
+    }
+
     @BeforeTest
     fun setup() {
         MockitoAnnotations.initMocks(this)
 
-        val activity = createStartedActivity()
-        cardMultilineWidget = activity.cardMultilineWidget
-        fullGroup = WidgetControlGroup(cardMultilineWidget)
+        val context: Context = ApplicationProvider.getApplicationContext()
+        PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
-        noZipCardMultilineWidget = activity.noZipCardMulitlineWidget
-        noZipGroup = WidgetControlGroup(noZipCardMultilineWidget)
+        activityScenarioFactory.create<AddPaymentMethodActivity>(
+            AddPaymentMethodActivityStarter.Args.Builder()
+                .setPaymentMethodType(PaymentMethod.Type.Card)
+                .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
+                .setShouldRequirePostalCode(true)
+                .build()
+        ).use { activityScenario ->
+            activityScenario.onActivity { activity ->
+                cardMultilineWidget = activity.findViewById(R.id.card_multiline_widget)
+                fullGroup = WidgetControlGroup(cardMultilineWidget)
 
-        fullGroup.cardNumberEditText.setText("")
+                fullGroup.cardNumberEditText.setText("")
 
-        cardMultilineWidget.setCardNumberTextWatcher(object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {
+                cardMultilineWidget.setCardNumberTextWatcher(EMPTY_WATCHER)
+                cardMultilineWidget.setExpiryDateTextWatcher(EMPTY_WATCHER)
+                cardMultilineWidget.setCvcNumberTextWatcher(EMPTY_WATCHER)
+                cardMultilineWidget.setPostalCodeTextWatcher(EMPTY_WATCHER)
+                cardMultilineWidget.paymentMethodBillingDetailsBuilder
             }
+        }
 
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+        activityScenarioFactory.create<AddPaymentMethodActivity>(
+            AddPaymentMethodActivityStarter.Args.Builder()
+                .setPaymentMethodType(PaymentMethod.Type.Card)
+                .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
+                .setShouldRequirePostalCode(false)
+                .build()
+        ).use { activityScenario ->
+            activityScenario.onActivity {
+                noZipCardMultilineWidget = it.findViewById(R.id.card_multiline_widget)
+                noZipGroup = WidgetControlGroup(noZipCardMultilineWidget)
             }
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-        })
-        cardMultilineWidget.setExpiryDateTextWatcher(object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {
-            }
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-        })
-        cardMultilineWidget.setCvcNumberTextWatcher(object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {
-            }
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-        })
-        cardMultilineWidget.setPostalCodeTextWatcher(object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {
-            }
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-        })
-        cardMultilineWidget.paymentMethodBillingDetailsBuilder
-    }
-
-    @AfterTest
-    override fun tearDown() {
-        super.tearDown()
+        }
     }
 
     @Test
@@ -163,8 +149,7 @@ internal class CardMultilineWidgetTest : BaseViewTest<CardInputTestActivity>(
         fullGroup.cvcEditText.append("123")
         fullGroup.postalCodeEditText.append("12345")
 
-        val card = cardMultilineWidget.card
-        assertNotNull(card)
+        val card = requireNotNull(cardMultilineWidget.card)
         assertEquals(VALID_VISA_NO_SPACES, card.number)
         assertNotNull(card.expMonth)
         assertNotNull(card.expYear)
@@ -751,5 +736,16 @@ internal class CardMultilineWidgetTest : BaseViewTest<CardInputTestActivity>(
     private companion object {
         // Every Card made by the CardInputView should have the card widget token.
         private val EXPECTED_LOGGING_ARRAY = arrayOf(CARD_MULTILINE_TOKEN)
+
+        private val EMPTY_WATCHER = object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {
+            }
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+        }
     }
 }

@@ -1,44 +1,25 @@
 package com.stripe.android.view
 
 import android.app.Activity
-import android.content.Intent
 import androidx.annotation.CallSuper
 import java.util.HashMap
-import org.junit.After
+import kotlin.test.AfterTest
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.android.controller.ActivityController
 
 @RunWith(RobolectricTestRunner::class)
-abstract class BaseViewTest<T : Activity> protected constructor(private val mClazz: Class<T>) {
-    private val mActivityControllers = HashMap<Int, ActivityController<T>>()
-
-    protected fun createActivity(): T {
-        val activityController = Robolectric.buildActivity(mClazz)
-            .create().start()
-            .postCreate(null).resume().visible()
-        val activity = activityController.get()
-        mActivityControllers[activity.hashCode()] = activityController
-        return activityController.get()
-    }
-
-    protected fun createActivity(args: ActivityStarter.Args?): T {
-        val intent = Intent()
-            .putExtra(ActivityStarter.Args.EXTRA, args)
-        val activityController = Robolectric.buildActivity(mClazz, intent)
-            .create().start()
-            .postCreate(null).resume().visible()
-        val activity = activityController.get()
-        mActivityControllers[activity.hashCode()] = activityController
-        return activityController.get()
-    }
+internal abstract class BaseViewTest<T : Activity> protected constructor(
+    private val activityClass: Class<T>
+) {
+    private val activityControllers = HashMap<Int, ActivityController<T>>()
 
     protected fun createStartedActivity(): T {
-        val activityController = Robolectric.buildActivity(mClazz)
+        val activityController = Robolectric.buildActivity(activityClass)
             .create().start()
         val activity = activityController.get()
-        mActivityControllers[activity.hashCode()] = activityController
+        activityControllers[activity.hashCode()] = activityController
         return activity
     }
 
@@ -46,15 +27,14 @@ abstract class BaseViewTest<T : Activity> protected constructor(private val mCla
      * Call resume() and visible() on an Activity that was created with [createStartedActivity].
      */
     protected fun resumeStartedActivity(activity: T) {
-        val activityController = mActivityControllers[activity.hashCode()]
-        activityController?.resume()?.visible()
+        activityControllers[activity.hashCode()]?.resume()?.visible()
     }
 
     @CallSuper
-    @After
+    @AfterTest
     open fun tearDown() {
-        for (activityController in mActivityControllers.values) {
-            activityController.pause().stop().destroy()
+        activityControllers.values.forEach {
+            it.pause().stop().destroy()
         }
     }
 }
