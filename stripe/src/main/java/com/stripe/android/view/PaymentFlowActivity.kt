@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import android.view.inputmethod.InputMethodManager
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.viewpager.widget.ViewPager
 import com.stripe.android.CustomerSession
@@ -39,6 +38,10 @@ class PaymentFlowActivity : StripeActivity() {
     private lateinit var customerSession: CustomerSession
 
     private var shippingInfoSubmittedBroadcastReceiver: BroadcastReceiver? = null
+
+    private val keyboardController: KeyboardController by lazy {
+        KeyboardController(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -202,7 +205,7 @@ class PaymentFlowActivity : StripeActivity() {
     }
 
     private fun onShippingInfoSubmitted() {
-        hideKeyboard()
+        keyboardController.hide()
 
         shippingInfo?.let { shippingInfo ->
             paymentSessionData = paymentSessionData.copy(shippingInformation = shippingInfo)
@@ -238,14 +241,6 @@ class PaymentFlowActivity : StripeActivity() {
                 null
             }
         }
-
-    private fun hideKeyboard() {
-        val inputMethodManager: InputMethodManager =
-            getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        if (inputMethodManager.isAcceptingText) {
-            inputMethodManager.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
-        }
-    }
 
     private fun broadcastShippingInfoSubmitted(shippingInformation: ShippingInformation) {
         LocalBroadcastManager.getInstance(this)
