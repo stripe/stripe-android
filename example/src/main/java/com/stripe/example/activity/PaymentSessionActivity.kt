@@ -1,14 +1,10 @@
 package com.stripe.example.activity
 
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession
 import com.stripe.android.PaymentSessionConfig
@@ -19,12 +15,6 @@ import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
-import com.stripe.android.view.PaymentFlowExtras.EVENT_SHIPPING_INFO_PROCESSED
-import com.stripe.android.view.PaymentFlowExtras.EVENT_SHIPPING_INFO_SUBMITTED
-import com.stripe.android.view.PaymentFlowExtras.EXTRA_DEFAULT_SHIPPING_METHOD
-import com.stripe.android.view.PaymentFlowExtras.EXTRA_IS_SHIPPING_INFO_VALID
-import com.stripe.android.view.PaymentFlowExtras.EXTRA_SHIPPING_INFO_DATA
-import com.stripe.android.view.PaymentFlowExtras.EXTRA_VALID_SHIPPING_METHODS
 import com.stripe.android.view.PaymentUtils
 import com.stripe.android.view.ShippingInfoWidget
 import com.stripe.example.R
@@ -40,7 +30,6 @@ import java.util.Locale
  */
 class PaymentSessionActivity : AppCompatActivity() {
 
-    private lateinit var broadcastReceiver: BroadcastReceiver
     private lateinit var errorDialogHandler: ErrorDialogHandler
     private lateinit var paymentSession: PaymentSession
     private lateinit var notSelectedText: String
@@ -58,29 +47,6 @@ class PaymentSessionActivity : AppCompatActivity() {
 
         paymentSession = createPaymentSession(savedInstanceState)
 
-        val localBroadcastManager = LocalBroadcastManager.getInstance(this)
-        broadcastReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                val shippingInformation = intent
-                    .getParcelableExtra<ShippingInformation>(EXTRA_SHIPPING_INFO_DATA)
-                val shippingInfoProcessedIntent = Intent(EVENT_SHIPPING_INFO_PROCESSED)
-                if (!isValidShippingInfo(shippingInformation)) {
-                    shippingInfoProcessedIntent.putExtra(EXTRA_IS_SHIPPING_INFO_VALID, false)
-                } else {
-                    shippingInfoProcessedIntent
-                        .putExtra(EXTRA_IS_SHIPPING_INFO_VALID, true)
-                        .putParcelableArrayListExtra(EXTRA_VALID_SHIPPING_METHODS, SHIPPING_METHODS)
-                        .putExtra(EXTRA_DEFAULT_SHIPPING_METHOD, SHIPPING_METHODS.last())
-                }
-                localBroadcastManager.sendBroadcast(shippingInfoProcessedIntent)
-            }
-
-            private fun isValidShippingInfo(shippingInfo: ShippingInformation?): Boolean {
-                return shippingInfo?.address?.country == Locale.US.country
-            }
-        }
-        localBroadcastManager.registerReceiver(broadcastReceiver,
-            IntentFilter(EVENT_SHIPPING_INFO_SUBMITTED))
         btn_select_payment_method.setOnClickListener {
             paymentSession.presentPaymentMethodSelection(true)
         }
@@ -120,6 +86,8 @@ class PaymentSessionActivity : AppCompatActivity() {
                 // Defaults to `PaymentMethod.Type.Card`
                 .setPaymentMethodTypes(listOf(PaymentMethod.Type.Card))
                 .setAllowedShippingCountryCodes(setOf("US", "CA"))
+                .setShippingInformationValidator(ShippingInformationValidator())
+                .setShippingMethodsFactory(ShippingMethodsFactory())
                 .build(),
             savedInstanceState = savedInstanceState,
             shouldPrefetchCustomer = shouldPrefetchCustomer
@@ -178,9 +146,8 @@ class PaymentSessionActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         paymentSession.onDestroy()
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver)
+        super.onDestroy()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -228,6 +195,22 @@ class PaymentSessionActivity : AppCompatActivity() {
         }
     }
 
+    private class ShippingInformationValidator : PaymentSessionConfig.ShippingInformationValidator {
+        override fun isValid(shippingInformation: ShippingInformation): Boolean {
+            return shippingInformation.address?.country == Locale.US.country
+        }
+
+        override fun getErrorMessage(shippingInformation: ShippingInformation): String {
+            return "The country must be US."
+        }
+    }
+
+    private class ShippingMethodsFactory : PaymentSessionConfig.ShippingMethodsFactory {
+        override fun create(shippingInformation: ShippingInformation): List<ShippingMethod> {
+            return SHIPPING_METHODS
+        }
+    }
+
     private class PaymentSessionListenerImpl internal constructor(
         activity: PaymentSessionActivity,
         private val customerSession: CustomerSession
@@ -258,7 +241,7 @@ class PaymentSessionActivity : AppCompatActivity() {
             activity?.onCustomerRetrieved()
         }
 
-        override fun onError(httpCode: Int, errorMessage: String, stripeError: StripeError?) {
+        override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
             activity?.progress_bar?.visibility = View.INVISIBLE
         }
     }

@@ -54,7 +54,7 @@ data class PaymentSessionConfig internal constructor(
         }
     }
 
-    internal interface ShippingInformationValidator : Serializable {
+    interface ShippingInformationValidator : Serializable {
         /**
          * @return whether the customer's [ShippingInformation] is valid. Will run on
          * a background thread.
@@ -70,7 +70,7 @@ data class PaymentSessionConfig internal constructor(
         fun getErrorMessage(shippingInformation: ShippingInformation): String
     }
 
-    internal interface ShippingMethodsFactory : Serializable {
+    interface ShippingMethodsFactory : Serializable {
         /**
          * @return a list of [ShippingMethod] options to present to the customer. Will run on
          * a background thread.
@@ -184,9 +184,11 @@ data class PaymentSessionConfig internal constructor(
          * @param shippingInformationValidator if specified, will be used to validate
          * [ShippingInformation] in [PaymentFlowActivity] instead of sending a broadcast with
          * [PaymentFlowExtras.EVENT_SHIPPING_INFO_SUBMITTED].
+         *
+         * Note: this instance must be [Serializable].
          */
         @JvmSynthetic
-        internal fun setShippingInformationValidator(
+        fun setShippingInformationValidator(
             shippingInformationValidator: ShippingInformationValidator?
         ): Builder {
             this.shippingInformationValidator = shippingInformationValidator
@@ -197,9 +199,11 @@ data class PaymentSessionConfig internal constructor(
          * @param shippingMethodsFactory required if [shippingInformationValidator] is specified
          * and [shippingMethodsRequired] is `true`. Used to create the [ShippingMethod] options
          * to be displayed in [PaymentFlowActivity].
+         *
+         * Note: this instance must be [Serializable].
          */
         @JvmSynthetic
-        internal fun setShippingMethodsFactory(
+        fun setShippingMethodsFactory(
             shippingMethodsFactory: ShippingMethodsFactory?
         ): Builder {
             this.shippingMethodsFactory = shippingMethodsFactory
