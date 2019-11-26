@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 12.6.0 - unreleased
+* [#1859](https://github.com/stripe/stripe-android/pull/1859) Create `GooglePayJsonFactory`, a factory for generating Google Pay JSON request objects
+* [#1860](https://github.com/stripe/stripe-android/pull/1860) Namespace drawables with `stripe_` prefix
+* [#1861](https://github.com/stripe/stripe-android/pull/1861) Create `GooglePayResult` to parse and model Google Pay Payment Data response
+* [#1863](https://github.com/stripe/stripe-android/pull/1863) Complete migration of SDK code to Kotlin 🎉
+* [#1864](https://github.com/stripe/stripe-android/pull/1864) Make Klarna Source creation methods public and create example
+    * See `SourceParams.createKlarna()`
+* [#1865](https://github.com/stripe/stripe-android/pull/1865) Make all model classes implement `Parcelable`
+* [#1871](https://github.com/stripe/stripe-android/pull/1871) Simplify configuration of example app
+    * Example app can be configured via `$HOME/.gradle/gradle.properties` instead of `Settings.kt` 
+      ```
+      STRIPE_EXAMPLE_BACKEND_URL=https://hidden-beach-12345.herokuapp.com/
+      STRIPE_EXAMPLE_PUBLISHABLE_KEY=pk_test_12345
+      STRIPE_ACCOUNT_ID=
+      ```
+
 ## 12.5.0 - 2019-11-21
 * [#1836](https://github.com/stripe/stripe-android/pull/1836) Add support for [statement_descriptor](https://stripe.com/docs/api/sources/object#source_object-statement_descriptor) field to `Source` model via `Source#statementDescriptor`
 * [#1837](https://github.com/stripe/stripe-android/pull/1837) Add support for [source_order](https://stripe.com/docs/api/sources/create#create_source-source_order) param via `SourceOrderParams`
