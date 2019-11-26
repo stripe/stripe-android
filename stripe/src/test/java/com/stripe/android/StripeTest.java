@@ -82,10 +82,12 @@ public class StripeTest {
 
     private Context mContext;
 
-    @Captor private ArgumentCaptor<StripeRequest> mStripeRequestArgumentCaptor;
-    @Mock private FireAndForgetRequestExecutor mFireAndForgetRequestExecutor;
-    @Mock private ApiResultCallback<Token> mApiResultCallback;
-    @Captor private ArgumentCaptor<Token> mTokenArgumentCaptor;
+    @Captor private ArgumentCaptor<StripeRequest> stripeRequestArgumentCaptor;
+    @Mock private FireAndForgetRequestExecutor fireAndForgetRequestExecutor;
+    @Mock private ApiResultCallback<Token> tokenCallback;
+    @Mock private ApiResultCallback<Source> sourceCallback;
+    @Captor private ArgumentCaptor<Token> tokenArgumentCaptor;
+    @Captor private ArgumentCaptor<Source> sourceArgumentCaptor;
 
     @Before
     public void setup() {
@@ -139,9 +141,9 @@ public class StripeTest {
     @Test
     public void createCardTokenShouldCreateRealToken() {
         final Stripe stripe = createStripe(MainScope());
-        stripe.createCardToken(CARD, mApiResultCallback);
-        verify(mApiResultCallback).onSuccess(mTokenArgumentCaptor.capture());
-        final Token token = mTokenArgumentCaptor.getValue();
+        stripe.createCardToken(CARD, tokenCallback);
+        verify(tokenCallback).onSuccess(tokenArgumentCaptor.capture());
+        final Token token = tokenArgumentCaptor.getValue();
         final String tokenId = token.getId();
         assertTrue(tokenId.startsWith("tok_"));
     }
@@ -252,7 +254,7 @@ public class StripeTest {
     }
 
     @Test
-    public void createSource() {
+    public void testCreateSource() {
         createStripe().createSource(CARD_SOURCE_PARAMS,
                 new ApiResultCallback<Source>() {
                     @Override
@@ -833,40 +835,36 @@ public class StripeTest {
     }
 
     @Test
+    public void retrieveSourceAsync_withValidData_passesIntegrationTest() throws StripeException {
+        final Source source = createSource();
+
+        final Stripe stripe = createStripe(MainScope());
+        stripe.retrieveSource(source.getId(), source.getClientSecret(), sourceCallback);
+        verify(sourceCallback).onSuccess(sourceArgumentCaptor.capture());
+
+        final Source capturedSource = sourceArgumentCaptor.getValue();
+        assertEquals(
+                source.getId(),
+                capturedSource.getId()
+        );
+    }
+
+    @Test
     public void retrieveSourceSynchronous_withValidData_passesIntegrationTest()
             throws StripeException {
-        final Stripe stripe = createStripe();
-        Card card = Card.create(VALID_VISA_NO_SPACES, 12, 2050, "123");
-        SourceParams params = SourceParams.createCardParams(card);
+        final Source source = createSource();
 
-        final Source cardSource = stripe.createSourceSynchronous(params);
-
-        assertNotNull(cardSource);
-        assertNotNull(cardSource.getId());
-        SourceParams threeDParams = SourceParams.createThreeDSecureParams(
-                5000L,
-                "brl",
-                "example://return",
-                cardSource.getId());
-
-        final Map<String, String> metamap = new HashMap<String, String>() {{
-            put("dimensions", "three");
-            put("type", "beach ball");
-        }};
-        threeDParams.setMetaData(metamap);
-        final Source threeDSource = stripe.createSourceSynchronous(threeDParams);
-        assertNotNull(threeDSource);
-
-        final String sourceId = threeDSource.getId();
-        final String clientSecret = threeDSource.getClientSecret();
+        final String sourceId = source.getId();
+        final String clientSecret = source.getClientSecret();
         assertNotNull(sourceId);
         assertNotNull(clientSecret);
 
-        final Source retrievedSource = stripe.retrieveSourceSynchronous(sourceId, clientSecret);
+        final Source retrievedSource = createStripe()
+                .retrieveSourceSynchronous(sourceId, clientSecret);
 
         // We aren't actually updating the source on the server, so the two sources should
         // be identical.
-        assertEquals(threeDSource, retrievedSource);
+        assertEquals(source, retrievedSource);
     }
 
     @Test
@@ -1183,7 +1181,7 @@ public class StripeTest {
 
         final PaymentMethodCreateParams paymentMethodCreateParams =
                 PaymentMethodCreateParamsFixtures.createWith(metadata);
-        final Stripe stripe = createStripe(mFireAndForgetRequestExecutor);
+        final Stripe stripe = createStripe(fireAndForgetRequestExecutor);
         final PaymentMethod createdPaymentMethod = stripe.createPaymentMethodSynchronous(
                 paymentMethodCreateParams);
         assertNotNull(createdPaymentMethod);
@@ -1193,10 +1191,10 @@ public class StripeTest {
         assertEquals("4242", createdPaymentMethod.card.last4);
         assertEquals(metadata, createdPaymentMethod.metadata);
 
-        verify(mFireAndForgetRequestExecutor, times(2))
-                .executeAsync(mStripeRequestArgumentCaptor.capture());
+        verify(fireAndForgetRequestExecutor, times(2))
+                .executeAsync(stripeRequestArgumentCaptor.capture());
         final List<StripeRequest> fireAndForgetRequests =
-                mStripeRequestArgumentCaptor.getAllValues();
+                stripeRequestArgumentCaptor.getAllValues();
         final StripeRequest analyticsRequest = fireAndForgetRequests.get(1);
         assertEquals(AnalyticsRequest.HOST, analyticsRequest.getBaseUrl());
         assertEquals(createdPaymentMethod.id,
@@ -1225,7 +1223,7 @@ public class StripeTest {
                                 .setBank("ing")
                                 .build(),
                         expectedBillingDetails);
-        final Stripe stripe = createStripe(mFireAndForgetRequestExecutor);
+        final Stripe stripe = createStripe(fireAndForgetRequestExecutor);
         final PaymentMethod createdPaymentMethod = stripe.createPaymentMethodSynchronous(
                 paymentMethodCreateParams);
         assertNotNull(createdPaymentMethod);
@@ -1233,10 +1231,10 @@ public class StripeTest {
         assertNull(createdPaymentMethod.card);
         assertEquals("INGBNL2A", createdPaymentMethod.ideal.bankIdentifierCode);
 
-        verify(mFireAndForgetRequestExecutor, times(2))
-                .executeAsync(mStripeRequestArgumentCaptor.capture());
+        verify(fireAndForgetRequestExecutor, times(2))
+                .executeAsync(stripeRequestArgumentCaptor.capture());
         final List<StripeRequest> fireAndForgetRequests =
-                mStripeRequestArgumentCaptor.getAllValues();
+                stripeRequestArgumentCaptor.getAllValues();
         final StripeRequest analyticsRequest = fireAndForgetRequests.get(1);
         assertEquals(AnalyticsRequest.HOST, analyticsRequest.getBaseUrl());
         assertEquals(createdPaymentMethod.id,
@@ -1280,9 +1278,9 @@ public class StripeTest {
         assertEquals("hsbc", createdPaymentMethod.fpx.bank);
 
         verify(fireAndForgetRequestExecutor, times(2))
-                .executeAsync(mStripeRequestArgumentCaptor.capture());
+                .executeAsync(stripeRequestArgumentCaptor.capture());
         final List<StripeRequest> fireAndForgetRequests =
-                mStripeRequestArgumentCaptor.getAllValues();
+                stripeRequestArgumentCaptor.getAllValues();
         final StripeRequest analyticsRequest = fireAndForgetRequests.get(1);
         assertEquals(AnalyticsRequest.HOST, analyticsRequest.getBaseUrl());
         assertEquals(createdPaymentMethod.id,
@@ -1296,6 +1294,35 @@ public class StripeTest {
         final AppInfo appInfo = AppInfo.create("myapp");
         Stripe.setAppInfo(appInfo);
         assertEquals(appInfo, Stripe.getAppInfo());
+    }
+
+    @NonNull
+    private Source createSource() throws StripeException {
+        final Stripe stripe = createStripe();
+        final SourceParams params = SourceParams.createCardParams(
+                Card.create(VALID_VISA_NO_SPACES, 12, 2050, "123")
+        );
+
+        final Source cardSource = stripe.createSourceSynchronous(params);
+
+        assertNotNull(cardSource);
+        assertNotNull(cardSource.getId());
+        SourceParams threeDParams = SourceParams.createThreeDSecureParams(
+                5000L,
+                "brl",
+                "example://return",
+                cardSource.getId()
+        );
+
+        final Map<String, String> metamap = new HashMap<String, String>() {{
+            put("dimensions", "three");
+            put("type", "beach ball");
+        }};
+        threeDParams.setMetaData(metamap);
+
+        final Source source = stripe.createSourceSynchronous(threeDParams);
+        assertNotNull(source);
+        return source;
     }
 
     @NonNull
