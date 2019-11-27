@@ -19,6 +19,8 @@
     * See the [Migration Guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) for an example of how to use the new interfaces
 * [#1884](https://github.com/stripe/stripe-android/pull/1884) Mark `PaymentFlowExtras` as deprecated
 * [#1885](https://github.com/stripe/stripe-android/pull/1885) Create `Stripe#retrieveSource()` for asynchronous `Source` retrieval
+* [#1890](https://github.com/stripe/stripe-android/pull/1890) Upgrade 3DS2 SDK to 2.2.3
+    * Fix crash when using Instant App
 
 ## 12.5.0 - 2019-11-21
 * [#1836](https://github.com/stripe/stripe-android/pull/1836) Add support for [statement_descriptor](https://stripe.com/docs/api/sources/object#source_object-statement_descriptor) field to `Source` model via `Source#statementDescriptor`
