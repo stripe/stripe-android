@@ -570,9 +570,35 @@ class Stripe internal constructor(
     }
 
     /**
-     * Retrieve an existing [Source] from the Stripe API. Note that this is a
-     * synchronous method, and cannot be called on the main thread. Doing so will cause your app
-     * to crash.
+     * Retrieve a [Source] asynchronously.
+     *
+     * See [Retrieve a source](https://stripe.com/docs/api/sources/retrieve).
+     * `GET /v1/sources/:id`
+     *
+     * @param sourceId the [Source.id] field of the desired Source object
+     * @param clientSecret the [Source.clientSecret] field of the desired Source object
+     * @param callback a [ApiResultCallback] to receive the result or error
+     *
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
+     */
+    @UiThread
+    fun retrieveSource(
+        @Size(min = 1) sourceId: String,
+        @Size(min = 1) clientSecret: String,
+        callback: ApiResultCallback<Source>
+    ) {
+        RetrieveSourceTask(
+            stripeRepository, sourceId, clientSecret, publishableKey, stripeAccountId, workScope,
+            callback
+        ).execute()
+    }
+
+    /**
+     * Retrieve an existing [Source] from the Stripe API. Do not call this on the UI thread
+     * or your app will crash.
      *
      * See [Retrieve a source](https://stripe.com/docs/api/sources/retrieve).
      * `GET /v1/sources/:id`
@@ -956,6 +982,24 @@ class Stripe internal constructor(
         @Throws(StripeException::class)
         override suspend fun getResult(): Source? {
             return stripeRepository.createSource(sourceParams, options)
+        }
+    }
+
+    private class RetrieveSourceTask internal constructor(
+        private val stripeRepository: StripeRepository,
+        private val sourceId: String,
+        private val clientSecret: String,
+        publishableKey: String,
+        stripeAccount: String?,
+        workScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
+        callback: ApiResultCallback<Source>
+    ) : ApiOperation<Source>(workScope, callback) {
+        private val options: ApiRequest.Options =
+            ApiRequest.Options(publishableKey, stripeAccount)
+
+        @Throws(StripeException::class)
+        override suspend fun getResult(): Source? {
+            return stripeRepository.retrieveSource(sourceId, clientSecret, options)
         }
     }
 
