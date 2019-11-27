@@ -22,7 +22,7 @@ class PaymentFlowActivityStarter :
     @Parcelize
     data class Args internal constructor(
         internal val paymentSessionConfig: PaymentSessionConfig,
-        internal val paymentSessionData: PaymentSessionData?,
+        internal val paymentSessionData: PaymentSessionData,
         internal val isPaymentSessionActive: Boolean
     ) : ActivityStarter.Args {
         class Builder : ObjectBuilder<Args> {
@@ -49,14 +49,18 @@ class PaymentFlowActivityStarter :
                 return Args(
                     paymentSessionConfig = paymentSessionConfig
                         ?: PaymentSessionConfig.Builder().build(),
-                    paymentSessionData = paymentSessionData,
+                    paymentSessionData = requireNotNull(paymentSessionData) {
+                        "PaymentFlowActivity launched without PaymentSessionData"
+                    },
                     isPaymentSessionActive = isPaymentSessionActive
                 )
             }
         }
 
         companion object {
-            internal val DEFAULT = Builder().build()
+            internal val DEFAULT = Builder()
+                .setPaymentSessionData(PaymentSessionData())
+                .build()
 
             @JvmStatic
             fun create(intent: Intent): Args {

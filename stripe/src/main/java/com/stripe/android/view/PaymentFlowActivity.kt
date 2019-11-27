@@ -21,10 +21,6 @@ import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
 import kotlinx.android.synthetic.main.activity_enter_shipping_info.*
 import kotlinx.android.synthetic.main.activity_shipping_flow.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  * Activity containing a two-part payment flow that allows users to provide a shipping address
@@ -33,7 +29,6 @@ import kotlinx.coroutines.withContext
 class PaymentFlowActivity : StripeActivity() {
 
     private lateinit var paymentFlowPagerAdapter: PaymentFlowPagerAdapter
-    private lateinit var paymentSessionData: PaymentSessionData
     private lateinit var paymentSessionConfig: PaymentSessionConfig
     private lateinit var customerSession: CustomerSession
     private lateinit var viewModel: PaymentFlowViewModel
@@ -55,10 +50,10 @@ class PaymentFlowActivity : StripeActivity() {
         viewStub.layoutResource = R.layout.activity_shipping_flow
         viewStub.inflate()
 
-        paymentSessionData = savedInstanceState?.getParcelable(STATE_PAYMENT_SESSION_DATA)
-            ?: requireNotNull(args.paymentSessionData) {
-                "PaymentFlowActivity launched without PaymentSessionData"
-            }
+        viewModel = ViewModelProviders.of(
+            this,
+            PaymentFlowViewModel.Factory(customerSession, args.paymentSessionData)
+        )[PaymentFlowViewModel::class.java]
 
         paymentSessionConfig = args.paymentSessionConfig
 
@@ -94,11 +89,6 @@ class PaymentFlowActivity : StripeActivity() {
         }
 
         title = paymentFlowPagerAdapter.getPageTitle(shipping_flow_viewpager.currentItem)
-
-        viewModel = ViewModelProviders.of(
-            this,
-            PaymentFlowViewModel.Factory(customerSession)
-        )[PaymentFlowViewModel::class.java]
     }
 
     private fun createShippingInfoSubmittedBroadcastReceiver(): BroadcastReceiver {
@@ -163,7 +153,6 @@ class PaymentFlowActivity : StripeActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putParcelable(STATE_PAYMENT_SESSION_DATA, paymentSessionData)
         outState.putParcelable(STATE_SHIPPING_INFO, shippingInfo)
         outState.putParcelable(STATE_SHIPPING_METHOD, selectedShippingMethod)
         outState.putInt(STATE_CURRENT_ITEM, shipping_flow_viewpager.currentItem)
@@ -176,7 +165,7 @@ class PaymentFlowActivity : StripeActivity() {
         defaultShippingMethod: ShippingMethod? = null
     ) {
         onShippingMethodsReady(shippingMethods, defaultShippingMethod)
-        paymentSessionData = paymentSessionData.copy(
+        viewModel.paymentSessionData = viewModel.paymentSessionData.copy(
             shippingInformation = shippingInformation
         )
     }
@@ -185,11 +174,11 @@ class PaymentFlowActivity : StripeActivity() {
         shippingMethods: List<ShippingMethod>,
         defaultShippingMethod: ShippingMethod? = null
     ) {
-        paymentSessionData.shippingInformation?.let { shippingInfo ->
+        viewModel.paymentSessionData.shippingInformation?.let { shippingInfo ->
             viewModel.saveCustomerShippingInformation(shippingInfo)
                 .observe(this, Observer {
                     when (it.status) {
-                        PaymentFlowViewModel.Result.Status.SUCCESS -> {
+                        PaymentFlowViewModel.Status.SUCCESS -> {
                             val customer = it.data as Customer
                             onShippingInfoSaved(
                                 customer.shippingInformation,
@@ -197,7 +186,7 @@ class PaymentFlowActivity : StripeActivity() {
                                 defaultShippingMethod
                             )
                         }
-                        PaymentFlowViewModel.Result.Status.ERROR -> {
+                        PaymentFlowViewModel.Status.ERROR -> {
                             showError(it.data as String)
                         }
                     }
@@ -215,7 +204,7 @@ class PaymentFlowActivity : StripeActivity() {
         if (hasNextPage()) {
             shipping_flow_viewpager.currentItem = shipping_flow_viewpager.currentItem + 1
         } else {
-            finishWithData(paymentSessionData)
+            finishWithData(viewModel.paymentSessionData)
         }
     }
 
@@ -223,7 +212,9 @@ class PaymentFlowActivity : StripeActivity() {
         keyboardController.hide()
 
         shippingInfo?.let { shippingInfo ->
-            paymentSessionData = paymentSessionData.copy(shippingInformation = shippingInfo)
+            viewModel.paymentSessionData = viewModel.paymentSessionData.copy(
+                shippingInformation = shippingInfo
+            )
             setCommunicatingProgress(true)
 
             val shippingInfoValidator =
@@ -277,45 +268,35 @@ class PaymentFlowActivity : StripeActivity() {
     private fun onShippingMethodSave() {
         val selectShippingMethodWidget: SelectShippingMethodWidget =
             findViewById(R.id.select_shipping_method_widget)
-        finishWithData(paymentSessionData.copy(
+        finishWithData(viewModel.paymentSessionData.copy(
             shippingMethod = selectShippingMethodWidget.selectedShippingMethod
         ))
         finish()
     }
 
-    /**
-     * Validate [shippingInformation] using [shippingMethodsFactory]. If valid, use
-     * [shippingMethodsFactory] to create the [ShippingMethod] options.
-     */
     private fun validateShippingInformation(
         shippingInfoValidator: PaymentSessionConfig.ShippingInformationValidator,
         shippingMethodsFactory: PaymentSessionConfig.ShippingMethodsFactory?,
         shippingInformation: ShippingInformation
     ) {
-        CoroutineScope(Dispatchers.IO).launch {
-            val isValid = shippingInfoValidator.isValid(shippingInformation)
-
-            val errorMessage = if (isValid) {
-                null
-            } else {
-                shippingInfoValidator.getErrorMessage(shippingInformation)
-            }
-
-            val shippingMethods =
-                shippingMethodsFactory?.create(shippingInformation).orEmpty()
-
-            withContext(Dispatchers.Main) {
-                if (isValid) {
+        viewModel.validateShippingInformation(
+            shippingInfoValidator,
+            shippingMethodsFactory,
+            shippingInformation
+        ).observe(this, Observer {
+            when (it.status) {
+                PaymentFlowViewModel.Status.SUCCESS -> {
+                    val shippingMethods = it.data as List<ShippingMethod>
                     // show shipping methods screen
-                    onShippingInfoValidated(
-                        shippingMethods
-                    )
-                } else {
+                    onShippingInfoValidated(shippingMethods)
+                }
+                PaymentFlowViewModel.Status.ERROR -> {
+                    val errorMessage = it.data as String
                     // show error on current screen
                     onShippingInfoError(errorMessage)
                 }
             }
-        }
+        })
     }
 
     private fun onShippingInfoError(errorMessage: String?) {
@@ -325,7 +306,9 @@ class PaymentFlowActivity : StripeActivity() {
         } else {
             showError(getString(R.string.invalid_shipping_information))
         }
-        paymentSessionData = paymentSessionData.copy(shippingInformation = null)
+        viewModel.paymentSessionData = viewModel.paymentSessionData.copy(
+            shippingInformation = null
+        )
     }
 
     private fun finishWithData(paymentSessionData: PaymentSessionData) {
@@ -348,7 +331,6 @@ class PaymentFlowActivity : StripeActivity() {
         internal const val TOKEN_SHIPPING_INFO_SCREEN: String = "ShippingInfoScreen"
         internal const val TOKEN_SHIPPING_METHOD_SCREEN: String = "ShippingMethodScreen"
 
-        private const val STATE_PAYMENT_SESSION_DATA = "state_payment_session_data"
         private const val STATE_SHIPPING_INFO: String = "state_shipping_info"
         private const val STATE_SHIPPING_METHOD: String = "state_shipping_method"
         private const val STATE_CURRENT_ITEM: String = "state_current_item"
