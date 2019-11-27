@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 12.6.0 - unreleased
+## 12.6.0 - 2019-11-27
 * [#1859](https://github.com/stripe/stripe-android/pull/1859) Create `GooglePayJsonFactory`, a factory for generating Google Pay JSON request objects
 * [#1860](https://github.com/stripe/stripe-android/pull/1860) Namespace drawables with `stripe_` prefix
 * [#1861](https://github.com/stripe/stripe-android/pull/1861) Create `GooglePayResult` to parse and model Google Pay Payment Data response
