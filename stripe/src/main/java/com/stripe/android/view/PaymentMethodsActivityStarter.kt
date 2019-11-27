@@ -41,7 +41,7 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
     data class Args internal constructor(
         internal val initialPaymentMethodId: String?,
         val shouldRequirePostalCode: Boolean,
-        @LayoutRes val addPaymentMethodFooter: Int,
+        @LayoutRes val addPaymentMethodFooterLayoutId: Int,
         internal val isPaymentSessionActive: Boolean,
         internal val paymentMethodTypes: List<PaymentMethod.Type>,
         internal val paymentConfiguration: PaymentConfiguration?
@@ -53,7 +53,7 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
             private var paymentMethodTypes: List<PaymentMethod.Type>? = null
             private var paymentConfiguration: PaymentConfiguration? = null
             @LayoutRes
-            private var addPaymentMethodFooter: Int = 0
+            private var addPaymentMethodFooterLayoutId: Int = 0
 
             fun setInitialPaymentMethodId(initialPaymentMethodId: String?): Builder {
                 this.initialPaymentMethodId = initialPaymentMethodId
@@ -95,8 +95,12 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
                 return this
             }
 
-            fun setAddPaymentMethodFooter(@LayoutRes addPaymentMethodFooter: Int): Builder {
-                this.addPaymentMethodFooter = addPaymentMethodFooter
+            /**
+             * @param addPaymentMethodFooterLayoutId optional layout id that will be inflated and
+             * displayed beneath the payment details collection form on [AddPaymentMethodActivity]
+             */
+            fun setAddPaymentMethodFooter(@LayoutRes addPaymentMethodFooterLayoutId: Int): Builder {
+                this.addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId
                 return this
             }
 
@@ -107,7 +111,7 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
                     isPaymentSessionActive = isPaymentSessionActive,
                     paymentMethodTypes = paymentMethodTypes ?: listOf(PaymentMethod.Type.Card),
                     paymentConfiguration = paymentConfiguration,
-                    addPaymentMethodFooter = addPaymentMethodFooter
+                    addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId
                 )
             }
         }

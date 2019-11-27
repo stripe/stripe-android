@@ -218,7 +218,7 @@ class PaymentSession @VisibleForTesting internal constructor(
                 .setInitialPaymentMethodId(
                     getSelectedPaymentMethodId(userSelectedPaymentMethodId))
                 .setShouldRequirePostalCode(shouldRequirePostalCode)
-                .setAddPaymentMethodFooter(config?.addPaymentMethodFooter ?: 0)
+                .setAddPaymentMethodFooter(config?.addPaymentMethodFooterLayoutId ?: 0)
                 .setIsPaymentSessionActive(true)
                 .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
                 .setPaymentMethodTypes(config?.paymentMethodTypes.orEmpty())

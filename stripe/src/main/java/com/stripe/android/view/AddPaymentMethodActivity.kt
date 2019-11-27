@@ -85,8 +85,8 @@ class AddPaymentMethodActivity : StripeActivity() {
         addPaymentMethodView = createPaymentMethodView(args)
         contentRoot.addView(addPaymentMethodView)
 
-        if (args.addPaymentMethodFooter > 0) {
-            val footerView = layoutInflater.inflate(args.addPaymentMethodFooter, contentRoot, false)
+        if (args.addPaymentMethodFooterLayoutId > 0) {
+            val footerView = layoutInflater.inflate(args.addPaymentMethodFooterLayoutId, contentRoot, false)
             if (footerView is TextView) {
                 LinkifyCompat.addLinks(footerView, Linkify.ALL)
                 footerView.movementMethod = LinkMovementMethod.getInstance()

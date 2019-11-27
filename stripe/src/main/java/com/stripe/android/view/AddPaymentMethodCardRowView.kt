@@ -18,7 +18,7 @@ internal class AddPaymentMethodCardRowView internal constructor(
         .setShouldRequirePostalCode(args.shouldRequirePostalCode)
         .setIsPaymentSessionActive(args.isPaymentSessionActive)
         .setPaymentMethodType(PaymentMethod.Type.Card)
-        .setAddPaymentMethodFooter(args.addPaymentMethodFooter)
+        .setAddPaymentMethodFooter(args.addPaymentMethodFooterLayoutId)
         .setPaymentConfiguration(args.paymentConfiguration)
         .build()
 )

@@ -34,7 +34,7 @@ class AddPaymentMethodActivityStarter constructor(
         internal val shouldInitCustomerSessionTokens: Boolean,
         internal val paymentMethodType: PaymentMethod.Type,
         internal val paymentConfiguration: PaymentConfiguration?,
-        @LayoutRes internal val addPaymentMethodFooter: Int
+        @LayoutRes internal val addPaymentMethodFooterLayoutId: Int
     ) : ActivityStarter.Args {
 
         class Builder : ObjectBuilder<Args> {
@@ -45,7 +45,7 @@ class AddPaymentMethodActivityStarter constructor(
             private var paymentMethodType: PaymentMethod.Type? = PaymentMethod.Type.Card
             private var paymentConfiguration: PaymentConfiguration? = null
             @LayoutRes
-            private var addPaymentMethodFooter: Int = 0
+            private var addPaymentMethodFooterLayoutId: Int = 0
 
             /**
              * If true, the created Payment Method will be attached to the current Customer
@@ -76,6 +76,15 @@ class AddPaymentMethodActivityStarter constructor(
                 return this
             }
 
+            /**
+             * @param addPaymentMethodFooterLayoutId optional layout id that will be inflated and
+             * displayed beneath the payment details collection form on [AddPaymentMethodActivity]
+             */
+            fun setAddPaymentMethodFooter(@LayoutRes addPaymentMethodFooterLayoutId: Int): Builder {
+                this.addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId
+                return this
+            }
+
             @JvmSynthetic
             internal fun setIsPaymentSessionActive(isPaymentSessionActive: Boolean): Builder {
                 this.isPaymentSessionActive = isPaymentSessionActive
@@ -98,11 +107,6 @@ class AddPaymentMethodActivityStarter constructor(
                 return this
             }
 
-            fun setAddPaymentMethodFooter(@LayoutRes addPaymentMethodFooter: Int): Builder {
-                this.addPaymentMethodFooter = addPaymentMethodFooter
-                return this
-            }
-
             override fun build(): Args {
                 return Args(
                     shouldAttachToCustomer = shouldAttachToCustomer,
@@ -111,7 +115,7 @@ class AddPaymentMethodActivityStarter constructor(
                     shouldInitCustomerSessionTokens = shouldInitCustomerSessionTokens,
                     paymentMethodType = paymentMethodType ?: PaymentMethod.Type.Card,
                     paymentConfiguration = paymentConfiguration,
-                    addPaymentMethodFooter = addPaymentMethodFooter
+                    addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId
                 )
             }
         }
