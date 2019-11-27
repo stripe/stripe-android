@@ -1,6 +1,119 @@
-## Migration Guides
+# Migration Guide
 
-### Migrating from versions < 12.0.0
+## Migrating from versions < 13.0.0
+- Update shipping information validation and shipping methods creation logic when using `PaymentSession`.
+  Previously, this was accomplished by creating a `BroadcastReceiver` and registering it for a
+  particular `Intent`. This has been greatly simplified by providing `ShippingInformationValidator`
+  and `ShippingMethodsFactory` interfaces that can be defined when creating the `PaymentSessionConfig`.
+  See below for an example.
+
+  - **Before** using `BroadcastReceiver`
+    ```kotlin
+    class PaymentSessionActivity : AppCompatActivity() {
+        private lateinit var broadcastReceiver: BroadcastReceiver
+    
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
+    
+            val localBroadcastManager = LocalBroadcastManager.getInstance(this)
+            broadcastReceiver = object : BroadcastReceiver() {
+                override fun onReceive(context: Context, intent: Intent) {
+                    val shippingInformation = intent
+                        .getParcelableExtra<ShippingInformation>(EXTRA_SHIPPING_INFO_DATA)
+                    val shippingInfoProcessedIntent = Intent(EVENT_SHIPPING_INFO_PROCESSED)
+                    if (!isValidShippingInfo(shippingInformation)) {
+                        shippingInfoProcessedIntent.putExtra(EXTRA_IS_SHIPPING_INFO_VALID, false)
+                    } else {
+                        shippingInfoProcessedIntent
+                            .putExtra(EXTRA_IS_SHIPPING_INFO_VALID, true)
+                            .putParcelableArrayListExtra(
+                                EXTRA_VALID_SHIPPING_METHODS, SHIPPING_METHODS
+                            )
+                            .putExtra(
+                                EXTRA_DEFAULT_SHIPPING_METHOD, SHIPPING_METHODS.last()
+                            )
+                    }
+                    localBroadcastManager.sendBroadcast(shippingInfoProcessedIntent)
+                }
+    
+                private fun isValidShippingInfo(shippingInfo: ShippingInformation?): Boolean {
+                    return shippingInfo?.address?.country == Locale.US.country
+                }
+            }
+            localBroadcastManager.registerReceiver(broadcastReceiver,
+                IntentFilter(EVENT_SHIPPING_INFO_SUBMITTED))
+        }
+    
+        override fun onDestroy() {
+            LocalBroadcastManager.getInstance(this)
+                .unregisterReceiver(broadcastReceiver)
+            super.onDestroy()
+        }
+    
+        private companion object {
+            private val SHIPPING_METHODS = arrayListOf(
+                ShippingMethod("UPS Ground", "ups-ground",
+                    0, "USD", "Arrives in 3-5 days"),
+                ShippingMethod("FedEx", "fedex",
+                    599, "USD", "Arrives tomorrow")
+            )
+        }
+    }
+    ```
+
+  - **After** using `ShippingInformationValidator` and `ShippingMethodsFactory`
+    ```kotlin
+    class PaymentSessionActivity : AppCompatActivity() {
+        private fun createPaymentSession(): PaymentSession {
+            val customerSession = createCustomerSession()
+            val paymentSession = PaymentSession(this)
+            paymentSession.init(
+                listener = createPaymentSessionListener(),
+                paymentSessionConfig = createPaymentSessionConfig(),
+                savedInstanceState = savedInstanceState
+            )
+            return paymentSession
+        }
+
+        private fun createPaymentSessionConfig(): PaymentSessionConfig {
+            PaymentSessionConfig.Builder()
+                .setShippingInformationValidator(ShippingInformationValidator())
+                .setShippingMethodsFactory(ShippingMethodsFactory())
+                .build()
+        }
+        
+        private class ShippingInformationValidator :
+                PaymentSessionConfig.ShippingInformationValidator {
+            override fun isValid(
+                shippingInformation: ShippingInformation
+            ): Boolean {
+                return shippingInformation.address?.country == Locale.US.country
+            }
+    
+            override fun getErrorMessage(
+                shippingInformation: ShippingInformation
+            ): String {
+                return "The country must be US."
+            }
+        }
+    
+        private class ShippingMethodsFactory :
+                PaymentSessionConfig.ShippingMethodsFactory {
+            override fun create(
+                shippingInformation: ShippingInformation
+            ): List<ShippingMethod> {
+                return listOf(
+                    ShippingMethod("UPS Ground", "ups-ground",
+                        0, "USD", "Arrives in 3-5 days"),
+                    ShippingMethod("FedEx", "fedex",
+                        599, "USD", "Arrives tomorrow")
+                )
+            }
+        }
+    }
+    ```
+
+## Migrating from versions < 12.0.0
 - Replace `Stripe#createTokenSynchronous(Card)` with `Stripe#createCardTokenSynchronous(Card)`
     ```java
     // Java
@@ -150,7 +263,7 @@
     }
     ```
 
-### Migrating from versions < 11.0.0
+## Migrating from versions < 11.0.0
 - [AndroidX](https://developer.android.com/jetpack/androidx) is required. Please read the [Migrating to AndroidX](https://developer.android.com/jetpack/androidx/migrate) guide for more information. See [#1478](https://github.com/stripe/stripe-android/pull/1478).
 - The signatures of `PaymentConfiguration.init()` and `PaymentConfiguration.getInstance()` have been changed. They now both take a `Context` instance as the first argument. See [#1479](https://github.com/stripe/stripe-android/pull/1479).
     ```kotlin
@@ -184,14 +297,14 @@
 - Remove `PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT`. Use `PaymentMethodsActivityStarter.Result#fromIntent(intent)` to obtain the result of `PaymentMethodsActivity`.
 - Remove `Stripe#createToken()` with `Executor` argument. Use [Stripe#createToken(Card, ApiResultCallback)](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#createToken-com.stripe.android.model.Card-com.stripe.android.ApiResultCallback-) instead.
 
-### Migration from versions < 10.1.0
+## Migration from versions < 10.1.0
 - You must call `PaymentConfiguration.init()` before calling `CustomerSession.initCustomerSession()`.
     ```java
     PaymentConfiguration.init(PUBLISHABLE_KEY);
     CustomerSession.initCustomerSession(context, ephemeralKeyProvider);
     ```
 
-### Migration from versions < 10.0.0
+## Migration from versions < 10.0.0
 - The signature of `Stripe#retrievePaymentIntentSynchronous()` has [changed](https://github.com/stripe/stripe-android/commit/5e56663c739ec694a6a393e96b651bd3d3c7a3e7#diff-26062503dd732750d15be3173b992de6R618). It now takes a [client_secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret) `String` instead of a `PaymentIntentParams` instance.
   See [#1172](https://github.com/stripe/stripe-android/pull/1172).
     ```java
@@ -247,7 +360,7 @@
     }
     ```
 
-### Migration from versions < 9.3.3
+## Migration from versions < 9.3.3
 - The enum `PaymentIntent.Status` is now `StripeIntent.Status`
 - The enum `PaymentIntent.NextActionType` is now `StripeIntent.NextActionType`
 
@@ -261,7 +374,7 @@ PaymentIntent.Status.Succeeded
 StripeIntent.Status.Succeeded
 ```
 
-### Migration from versions < 9.3.0
+## Migration from versions < 9.3.0
 - `CustomerSession`'s Listener interfaces's `onError()` method now have a `@NonNull` `errorMessage` argument
     ```java
     // before
@@ -307,11 +420,11 @@ StripeIntent.Status.Succeeded
     }
     ```
 
-### Migration from versions < 9.2.0
+## Migration from versions < 9.2.0
 - `Card` model is now immutable
   - `Card#getType()` is now `Card#getBrand()`
 
-### Migration from versions < 9.1.0
+## Migration from versions < 9.1.0
 - [Standard UI components](https://stripe.com/docs/mobile/android/standard) now use `PaymentMethod` instead of `Source`
     - Setting a customer's default payment method is not available for PaymentMethod objects
     - `CustomerSession#getPaymentMethods()` and `CustomerSession#attachPaymentMethod()` have been added
@@ -322,7 +435,7 @@ StripeIntent.Status.Succeeded
   - `getShouldUseSourcesForCards()`
   - `setShouldUseSourcesForCards()`
 
-### Migration from versions < 9.0.0
+## Migration from versions < 9.0.0
 - `minSdkVersion` is now 19
 
 - `AccountParams.createAccountParams()` requires a `AccountParams#BusinessType` parameter
@@ -374,17 +487,17 @@ StripeIntent.Status.Succeeded
 - [`Address`](https://github.com/stripe/stripe-android/blob/master/stripe/src/main/java/com/stripe/android/model/Address.java) is now immutable and its setters have been removed.
   Use `Address.Builder` to create a new `Address` object.
 
-### Migrating from versions < 7.0.0
+## Migrating from versions < 7.0.0
 - Remove Bitcoin source support because Stripe [no longer processes Bitcoin payments](https://stripe.com/blog/ending-bitcoin-support)
     - Sources can no longer have a "BITCOIN" source type. These sources will now be interpreted as "UNKNOWN".
     - You can no longer `createBitcoinParams`. Please use a different payment method.
 
-### Migrating from versions < 5.0.0
+## Migrating from versions < 5.0.0
 - `StripeApiHandler` methods can no longer be called directly.
 - `PaymentConfiguration` now stores your public key and is depended upon for `CustomerSession`.
 - Many *Utils* classes have been migrated to package-private access.
 
-### Migrating from versions < 4.0.0
+## Migrating from versions < 4.0.0
 
 - Instantiation of a Stripe object can no longer throw an `AuthenticationException`.
     - Any time you were instantiating a Stripe object in a try/catch block will be simplified.
