@@ -34,7 +34,7 @@ internal class AddPaymentMethodCardView private constructor(
 
     init {
         View.inflate(getContext(), R.layout.add_payment_method_card_layout, this)
-        cardMultilineWidget = findViewById(R.id.add_source_card_entry_widget)
+        cardMultilineWidget = findViewById(R.id.card_multiline_widget)
         cardMultilineWidget.setShouldShowPostalCode(shouldShowPostalCode)
         initEnterListeners()
     }

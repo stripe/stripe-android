@@ -1,13 +1,16 @@
 package com.stripe.android
 
+import androidx.test.core.app.ApplicationProvider
+import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.stripe3ds2.init.ui.StripeButtonCustomization
 import com.stripe.android.stripe3ds2.init.ui.StripeLabelCustomization
 import com.stripe.android.stripe3ds2.init.ui.StripeTextBoxCustomization
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import com.stripe.android.stripe3ds2.init.ui.UiCustomization
-import com.stripe.android.view.BaseViewTest
-import kotlin.test.AfterTest
+import com.stripe.android.view.ActivityScenarioFactory
+import com.stripe.android.view.PaymentFlowActivity
+import com.stripe.android.view.PaymentFlowActivityStarter
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -17,18 +20,15 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class PaymentAuthConfigTest : BaseViewTest<Fake3ds2ChallengeActivity>(
-    Fake3ds2ChallengeActivity::class.java
-) {
+class PaymentAuthConfigTest {
+    private val activityScenarioFactory: ActivityScenarioFactory by lazy {
+        ActivityScenarioFactory(ApplicationProvider.getApplicationContext())
+    }
 
     @BeforeTest
     fun setup() {
+        CustomerSession.instance = mock()
         PaymentAuthConfig.reset()
-    }
-
-    @AfterTest
-    override fun tearDown() {
-        super.tearDown()
     }
 
     @Test
@@ -87,12 +87,14 @@ class PaymentAuthConfigTest : BaseViewTest<Fake3ds2ChallengeActivity>(
             .setTextFontSize(24)
             .build()
 
-        val expectedButtonCustomization = StripeButtonCustomization()
-        expectedButtonCustomization.setBackgroundColor("#000000")
-        expectedButtonCustomization.cornerRadius = 16
-        expectedButtonCustomization.setTextColor("#FFFFFF")
-        expectedButtonCustomization.setTextFontName("Font Name")
-        expectedButtonCustomization.textFontSize = 24
+        val expectedButtonCustomization =
+            StripeButtonCustomization().apply {
+                setBackgroundColor("#000000")
+                cornerRadius = 16
+                setTextColor("#FFFFFF")
+                setTextFontName("Font Name")
+                textFontSize = 24
+            }
 
         assertEquals(expectedButtonCustomization, buttonCustomization.buttonCustomization)
     }
@@ -108,13 +110,15 @@ class PaymentAuthConfigTest : BaseViewTest<Fake3ds2ChallengeActivity>(
             .setTextFontSize(24)
             .build()
 
-        val expectedLabelCustomization = StripeLabelCustomization()
-        expectedLabelCustomization.setHeadingTextFontName("Header Font Name")
-        expectedLabelCustomization.setHeadingTextColor("#FFFFFF")
-        expectedLabelCustomization.headingTextFontSize = 32
-        expectedLabelCustomization.setTextColor("#000000")
-        expectedLabelCustomization.setTextFontName("Font Name")
-        expectedLabelCustomization.textFontSize = 24
+        val expectedLabelCustomization =
+            StripeLabelCustomization().apply {
+                setHeadingTextFontName("Header Font Name")
+                setHeadingTextColor("#FFFFFF")
+                headingTextFontSize = 32
+                setTextColor("#000000")
+                setTextFontName("Font Name")
+                textFontSize = 24
+            }
 
         assertEquals(expectedLabelCustomization, labelCustomization.labelCustomization)
     }
@@ -130,13 +134,15 @@ class PaymentAuthConfigTest : BaseViewTest<Fake3ds2ChallengeActivity>(
             .setTextFontSize(24)
             .build()
 
-        val expectedTextBoxCustomization = StripeTextBoxCustomization()
-        expectedTextBoxCustomization.setBorderColor("#000000")
-        expectedTextBoxCustomization.borderWidth = 8
-        expectedTextBoxCustomization.cornerRadius = 16
-        expectedTextBoxCustomization.setTextColor("#FFFFFF")
-        expectedTextBoxCustomization.setTextFontName("Font Name")
-        expectedTextBoxCustomization.textFontSize = 24
+        val expectedTextBoxCustomization =
+            StripeTextBoxCustomization().apply {
+                setBorderColor("#000000")
+                borderWidth = 8
+                cornerRadius = 16
+                setTextColor("#FFFFFF")
+                setTextFontName("Font Name")
+                textFontSize = 24
+            }
 
         assertEquals(expectedTextBoxCustomization, textBoxCustomization.textBoxCustomization)
     }
@@ -153,14 +159,16 @@ class PaymentAuthConfigTest : BaseViewTest<Fake3ds2ChallengeActivity>(
             .setTextFontSize(16)
             .build()
 
-        val expectedCustomization = StripeToolbarCustomization()
-        expectedCustomization.setBackgroundColor("#000000")
-        expectedCustomization.setStatusBarColor("#000001")
-        expectedCustomization.setButtonText("Button Text")
-        expectedCustomization.setHeaderText("Header Text")
-        expectedCustomization.setTextColor("#FFFFFF")
-        expectedCustomization.setTextFontName("Font Name")
-        expectedCustomization.textFontSize = 16
+        val expectedCustomization =
+            StripeToolbarCustomization().apply {
+                setBackgroundColor("#000000")
+                setStatusBarColor("#000001")
+                setButtonText("Button Text")
+                setHeaderText("Header Text")
+                setTextColor("#FFFFFF")
+                setTextFontName("Font Name")
+                textFontSize = 16
+            }
 
         assertEquals(expectedCustomization, toolbarCustomization.toolbarCustomization)
     }
@@ -233,15 +241,30 @@ class PaymentAuthConfigTest : BaseViewTest<Fake3ds2ChallengeActivity>(
 
     @Test
     fun createWithAppTheme_shouldCreateExpectedToolbarCustomization() {
-        val uiCustomizationFromTheme = PaymentAuthConfig.Stripe3ds2UiCustomization.Builder
-            .createWithAppTheme(createActivity())
-            .build()
-        val toolbarCustomization = StripeToolbarCustomization()
-        toolbarCustomization.setBackgroundColor("#FF222222")
-        toolbarCustomization.setStatusBarColor("#FF000000")
-        toolbarCustomization.setTextColor("#00000621")
-        toolbarCustomization.setStatusBarColor("#FF000000")
-        assertEquals(toolbarCustomization,
-            uiCustomizationFromTheme.uiCustomization.toolbarCustomization)
+        activityScenarioFactory.create<PaymentFlowActivity>(
+            PaymentFlowActivityStarter.Args.Builder()
+                .setPaymentSessionConfig(PaymentSessionConfig.Builder()
+                    .build())
+                .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
+                .build()
+        ).use { activityScenario ->
+            activityScenario.onActivity { activity ->
+                activity.setTheme(android.R.style.Theme)
+
+                val uiCustomizationFromTheme =
+                    PaymentAuthConfig.Stripe3ds2UiCustomization.Builder
+                        .createWithAppTheme(activity)
+                        .build()
+                val toolbarCustomization =
+                    StripeToolbarCustomization().apply {
+                        setBackgroundColor("#FF222222")
+                        setStatusBarColor("#FF000000")
+                        setTextColor("#00000621")
+                        setStatusBarColor("#FF000000")
+                    }
+                assertEquals(toolbarCustomization,
+                    uiCustomizationFromTheme.uiCustomization.toolbarCustomization)
+            }
+        }
     }
 }

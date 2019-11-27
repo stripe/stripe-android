@@ -1,8 +1,6 @@
 package com.stripe.android.view
 
 import com.stripe.android.model.Card
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -15,18 +13,7 @@ import org.robolectric.RobolectricTestRunner
  * Test class for [ViewUtils]
  */
 @RunWith(RobolectricTestRunner::class)
-internal class ViewUtilsTest : BaseViewTest<CardInputTestActivity>(
-    CardInputTestActivity::class.java
-) {
-
-    @BeforeTest
-    fun setup() {
-    }
-
-    @AfterTest
-    override fun tearDown() {
-        super.tearDown()
-    }
+internal class ViewUtilsTest {
 
     @Test
     fun separateCardNumberGroups_withVisa_returnsCorrectCardGroups() {

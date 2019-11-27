@@ -1,12 +1,19 @@
 package com.stripe.android.view
 
+import android.content.Context
 import android.view.View
+import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.textfield.TextInputLayout
+import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.CustomerSession
+import com.stripe.android.EphemeralKeyProvider
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.PaymentSessionConfig
+import com.stripe.android.PaymentSessionFixtures
 import com.stripe.android.R
 import com.stripe.android.model.Address
 import com.stripe.android.model.ShippingInformation
 import java.util.Locale
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -14,6 +21,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
+import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
@@ -21,9 +29,7 @@ import org.robolectric.RobolectricTestRunner
  * Test class for [ShippingInfoWidget]
  */
 @RunWith(RobolectricTestRunner::class)
-class ShippingInfoWidgetTest : BaseViewTest<ShippingInfoTestActivity>(
-    ShippingInfoTestActivity::class.java
-) {
+class ShippingInfoWidgetTest {
     private lateinit var shippingInfoWidget: ShippingInfoWidget
     private lateinit var addressLine1TextInputLayout: TextInputLayout
     private lateinit var addressLine2TextInputLayout: TextInputLayout
@@ -40,30 +46,51 @@ class ShippingInfoWidgetTest : BaseViewTest<ShippingInfoTestActivity>(
     private lateinit var phoneEditText: StripeEditText
     private lateinit var countryAutoCompleteTextView: CountryAutoCompleteTextView
 
+    @Mock
+    private lateinit var ephemeralKeyProvider: EphemeralKeyProvider
+
+    private val context: Context by lazy {
+        ApplicationProvider.getApplicationContext<Context>()
+    }
+
+    private val activityScenarioFactory: ActivityScenarioFactory by lazy {
+        ActivityScenarioFactory(context)
+    }
+
     @BeforeTest
     fun setup() {
         MockitoAnnotations.initMocks(this)
         Locale.setDefault(Locale.US)
-        shippingInfoWidget = createStartedActivity().shippingInfoWidget
-        addressLine1TextInputLayout = shippingInfoWidget.findViewById(R.id.tl_address_line1_aaw)
-        addressLine2TextInputLayout = shippingInfoWidget.findViewById(R.id.tl_address_line2_aaw)
-        cityTextInputLayout = shippingInfoWidget.findViewById(R.id.tl_city_aaw)
-        nameTextInputLayout = shippingInfoWidget.findViewById(R.id.tl_name_aaw)
-        postalCodeTextInputLayout = shippingInfoWidget.findViewById(R.id.tl_postal_code_aaw)
-        stateTextInputLayout = shippingInfoWidget.findViewById(R.id.tl_state_aaw)
-        addressLine1EditText = shippingInfoWidget.findViewById(R.id.et_address_line_one_aaw)
-        addressLine2EditText = shippingInfoWidget.findViewById(R.id.et_address_line_two_aaw)
-        cityEditText = shippingInfoWidget.findViewById(R.id.et_city_aaw)
-        nameEditText = shippingInfoWidget.findViewById(R.id.et_name_aaw)
-        postalEditText = shippingInfoWidget.findViewById(R.id.et_postal_code_aaw)
-        stateEditText = shippingInfoWidget.findViewById(R.id.et_state_aaw)
-        phoneEditText = shippingInfoWidget.findViewById(R.id.et_phone_number_aaw)
-        countryAutoCompleteTextView = shippingInfoWidget.findViewById(R.id.country_autocomplete_aaw)
-    }
 
-    @AfterTest
-    override fun tearDown() {
-        super.tearDown()
+        PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        CustomerSession.initCustomerSession(context, ephemeralKeyProvider)
+
+        val args = PaymentFlowActivityStarter.Args.Builder()
+            .setPaymentSessionConfig(PaymentSessionConfig.Builder()
+                .build())
+            .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
+            .build()
+        activityScenarioFactory.create<PaymentFlowActivity>(
+            args
+        ).use { activityScenario ->
+            activityScenario.onActivity {
+                shippingInfoWidget = it.findViewById(R.id.shipping_info_widget)
+                addressLine1TextInputLayout = shippingInfoWidget.findViewById(R.id.tl_address_line1_aaw)
+                addressLine2TextInputLayout = shippingInfoWidget.findViewById(R.id.tl_address_line2_aaw)
+                cityTextInputLayout = shippingInfoWidget.findViewById(R.id.tl_city_aaw)
+                nameTextInputLayout = shippingInfoWidget.findViewById(R.id.tl_name_aaw)
+                postalCodeTextInputLayout = shippingInfoWidget.findViewById(R.id.tl_postal_code_aaw)
+                stateTextInputLayout = shippingInfoWidget.findViewById(R.id.tl_state_aaw)
+                addressLine1EditText = shippingInfoWidget.findViewById(R.id.et_address_line_one_aaw)
+                addressLine2EditText = shippingInfoWidget.findViewById(R.id.et_address_line_two_aaw)
+                cityEditText = shippingInfoWidget.findViewById(R.id.et_city_aaw)
+                nameEditText = shippingInfoWidget.findViewById(R.id.et_name_aaw)
+                postalEditText = shippingInfoWidget.findViewById(R.id.et_postal_code_aaw)
+                stateEditText = shippingInfoWidget.findViewById(R.id.et_state_aaw)
+                phoneEditText = shippingInfoWidget.findViewById(R.id.et_phone_number_aaw)
+                countryAutoCompleteTextView = shippingInfoWidget.findViewById(R.id.country_autocomplete_aaw)
+            }
+        }
     }
 
     @Test
