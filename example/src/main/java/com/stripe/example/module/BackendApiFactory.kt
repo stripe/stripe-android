@@ -10,11 +10,12 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 
 /**
  * Factory to generate our Retrofit instance.
  */
-class BackendApiFactory internal constructor(private val backendUrl: String) {
+internal class BackendApiFactory internal constructor(private val backendUrl: String) {
 
     constructor(context: Context) : this(Settings(context).backendUrl)
 
@@ -26,6 +27,8 @@ class BackendApiFactory internal constructor(private val backendUrl: String) {
             .setLevel(HttpLoggingInterceptor.Level.BODY)
 
         val httpClient = OkHttpClient.Builder()
+            .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .addInterceptor(logging)
             .addNetworkInterceptor(StethoInterceptor())
             .build()
@@ -41,5 +44,9 @@ class BackendApiFactory internal constructor(private val backendUrl: String) {
             .client(httpClient)
             .build()
             .create(BackendApi::class.java)
+    }
+
+    private companion object {
+        private const val TIMEOUT_SECONDS = 15L
     }
 }
