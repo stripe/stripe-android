@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 12.6.1 - unreleased
+## 12.6.1 - 2019-12-02
 * [#1897](https://github.com/stripe/stripe-android/pull/1897) Upgrade 3DS2 SDK to 2.2.4
     * Fix crash when using Instant App
 
