@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 12.6.1 - unreleased
+* [#1897](https://github.com/stripe/stripe-android/pull/1897) Upgrade 3DS2 SDK to 2.2.4
+    * Fix crash when using Instant App
+
 ## 12.6.0 - 2019-11-27
 * [#1859](https://github.com/stripe/stripe-android/pull/1859) Create `GooglePayJsonFactory`, a factory for generating Google Pay JSON request objects
 * [#1860](https://github.com/stripe/stripe-android/pull/1860) Namespace drawables with `stripe_` prefix
