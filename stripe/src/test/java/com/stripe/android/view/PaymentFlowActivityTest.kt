@@ -52,9 +52,6 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class PaymentFlowActivityTest {
 
-    private var shippingInfoWidget: ShippingInfoWidget? = null
-    private lateinit var localBroadcastManager: LocalBroadcastManager
-
     @Mock
     private lateinit var ephemeralKeyProvider: EphemeralKeyProvider
     @Mock
@@ -64,8 +61,16 @@ class PaymentFlowActivityTest {
     @Mock
     private lateinit var shippingMethodsFactory: PaymentSessionConfig.ShippingMethodsFactory
 
-    private lateinit var intentArgumentCaptor: KArgumentCaptor<Intent>
+    private val intentArgumentCaptor: KArgumentCaptor<Intent> by lazy {
+        argumentCaptor<Intent>()
+    }
 
+    private val context: Context by lazy {
+        ApplicationProvider.getApplicationContext<Context>()
+    }
+    private val localBroadcastManager: LocalBroadcastManager by lazy {
+        LocalBroadcastManager.getInstance(context)
+    }
     private val activityScenarioFactory: ActivityScenarioFactory by lazy {
         ActivityScenarioFactory(ApplicationProvider.getApplicationContext())
     }
@@ -73,10 +78,6 @@ class PaymentFlowActivityTest {
     @BeforeTest
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        intentArgumentCaptor = argumentCaptor()
-
-        val context: Context = ApplicationProvider.getApplicationContext()
-        localBroadcastManager = LocalBroadcastManager.getInstance(context)
         localBroadcastManager.registerReceiver(broadcastReceiver,
             IntentFilter(PaymentFlowExtras.EVENT_SHIPPING_INFO_SUBMITTED))
         PaymentConfiguration.init(ApplicationProvider.getApplicationContext(),
@@ -100,10 +101,8 @@ class PaymentFlowActivityTest {
                 .build()
         ).use { activityScenario ->
             activityScenario.onActivity { paymentFlowActivity ->
-                assertNull(paymentFlowActivity.findViewById(R.id.shipping_info_widget))
-                assertNotNull(
-                    paymentFlowActivity.findViewById<View>(R.id.select_shipping_method_widget)
-                )
+                assertNull(getShippingInfoWidget(paymentFlowActivity))
+                assertNotNull(getShippingMethodWidget(paymentFlowActivity))
             }
         }
     }
@@ -118,8 +117,7 @@ class PaymentFlowActivityTest {
                 .build()
         ).use { activityScenario ->
             activityScenario.onActivity { paymentFlowActivity ->
-                shippingInfoWidget = paymentFlowActivity.findViewById(R.id.shipping_info_widget)
-                assertNotNull(shippingInfoWidget)
+                assertNotNull(getShippingInfoWidget(paymentFlowActivity))
                 paymentFlowActivity.onActionSave()
                 assertFalse(paymentFlowActivity.isFinishing)
             }
@@ -136,11 +134,10 @@ class PaymentFlowActivityTest {
                 .build()
         ).use { activityScenario ->
             activityScenario.onActivity { paymentFlowActivity ->
-                shippingInfoWidget = paymentFlowActivity.findViewById(R.id.shipping_info_widget)
-                assertNotNull(shippingInfoWidget)
+                assertNotNull(getShippingInfoWidget(paymentFlowActivity))
                 paymentFlowActivity.onActionSave()
                 assertFalse(paymentFlowActivity.isFinishing)
-                assertNotNull(paymentFlowActivity.findViewById<View>(R.id.shipping_info_widget))
+                assertNotNull(getShippingInfoWidget(paymentFlowActivity))
             }
         }
     }
@@ -156,8 +153,7 @@ class PaymentFlowActivityTest {
                 .build()
         ).use { activityScenario ->
             activityScenario.onActivity { paymentFlowActivity ->
-                shippingInfoWidget = paymentFlowActivity.findViewById(R.id.shipping_info_widget)
-                assertNotNull(shippingInfoWidget)
+                assertNotNull(getShippingInfoWidget(paymentFlowActivity))
                 paymentFlowActivity.onActionSave()
                 verify(broadcastReceiver).onReceive(any(), intentArgumentCaptor.capture())
 
@@ -312,6 +308,14 @@ class PaymentFlowActivityTest {
                 verify(shippingMethodsFactory).create(SHIPPING_INFO)
             }
         }
+    }
+
+    private fun getShippingInfoWidget(activity: Activity): ShippingInfoWidget? {
+        return activity.findViewById(R.id.shipping_info_widget)
+    }
+
+    private fun getShippingMethodWidget(activity: Activity): SelectShippingMethodWidget? {
+        return activity.findViewById(R.id.select_shipping_method_widget)
     }
 
     private companion object {
