@@ -6,6 +6,7 @@ import androidx.annotation.WorkerThread
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
+import com.stripe.android.view.AddPaymentMethodActivity
 import com.stripe.android.view.PaymentFlowActivity
 import com.stripe.android.view.PaymentFlowExtras
 import com.stripe.android.view.SelectShippingMethodWidget
@@ -27,7 +28,7 @@ data class PaymentSessionConfig internal constructor(
     val isShippingMethodRequired: Boolean = false,
     @LayoutRes
     @get:LayoutRes
-    val addPaymentMethodFooter: Int = 0,
+    val addPaymentMethodFooterLayoutId: Int = 0,
     val paymentMethodTypes: List<PaymentMethod.Type> = listOf(PaymentMethod.Type.Card),
     val allowedShippingCountryCodes: Set<String> = emptySet(),
 
@@ -93,7 +94,7 @@ data class PaymentSessionConfig internal constructor(
         private var shippingMethodsFactory: ShippingMethodsFactory? = null
 
         @LayoutRes
-        private var addPaymentMethodFooter: Int = 0
+        private var addPaymentMethodFooterLayoutId: Int = 0
 
         /**
          * @param hiddenShippingInfoFields [CustomizableShippingField] fields that should be
@@ -148,8 +149,12 @@ data class PaymentSessionConfig internal constructor(
             return this
         }
 
+        /**
+         * @param addPaymentMethodFooterLayoutId optional layout id that will be inflated and
+         * displayed beneath the payment details collection form on [AddPaymentMethodActivity]
+         */
         fun setAddPaymentMethodFooter(@LayoutRes addPaymentMethodFooterLayoutId: Int): Builder {
-            this.addPaymentMethodFooter = addPaymentMethodFooterLayoutId
+            this.addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId
             return this
         }
 
@@ -217,7 +222,7 @@ data class PaymentSessionConfig internal constructor(
                 prepopulatedShippingInfo = shippingInformation,
                 isShippingInfoRequired = shippingInfoRequired,
                 isShippingMethodRequired = shippingMethodsRequired,
-                addPaymentMethodFooter = addPaymentMethodFooter,
+                addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId,
                 paymentMethodTypes = paymentMethodTypes,
                 allowedShippingCountryCodes = allowedShippingCountryCodes,
                 shippingInformationValidator = shippingInformationValidator,
