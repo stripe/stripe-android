@@ -1,10 +1,13 @@
 package com.stripe.example.activity
 
+import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
@@ -12,11 +15,8 @@ import com.stripe.android.model.Card
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceCardData
 import com.stripe.android.model.SourceParams
-import com.stripe.android.view.CardInputWidget
 import com.stripe.example.R
 import com.stripe.example.adapter.SourcesAdapter
-import com.stripe.example.controller.ProgressDialogController
-import com.stripe.example.controller.RedirectDialogController
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -29,11 +29,14 @@ import kotlinx.android.synthetic.main.activity_card_sources.*
 class CreateCardSourceActivity : AppCompatActivity() {
     private val compositeDisposable = CompositeDisposable()
 
-    private lateinit var cardInputWidget: CardInputWidget
-    private lateinit var sourcesAdapter: SourcesAdapter
-    private lateinit var redirectDialogController: RedirectDialogController
-    private lateinit var progressDialogController: ProgressDialogController
-    private lateinit var stripe: Stripe
+    private val sourcesAdapter: SourcesAdapter by lazy { SourcesAdapter() }
+    private val redirectDialogController: RedirectDialogController by lazy {
+        RedirectDialogController(this)
+    }
+    private val stripe: Stripe by lazy {
+        Stripe(applicationContext,
+            PaymentConfiguration.getInstance(this).publishableKey)
+    }
 
     private var redirectSource: Source? = null
 
@@ -41,22 +44,12 @@ class CreateCardSourceActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_card_sources)
 
-        cardInputWidget = findViewById(R.id.card_widget_three_d)
-        progressDialogController = ProgressDialogController(supportFragmentManager, resources)
-        redirectDialogController = RedirectDialogController(this)
-
-        stripe = Stripe(applicationContext,
-            PaymentConfiguration.getInstance(this).publishableKey)
-
         btn_three_d_secure.setOnClickListener { beginSequence() }
         btn_three_d_secure_sync.setOnClickListener { beginSequence() }
 
-        val recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
-        val linearLayoutManager = LinearLayoutManager(this)
-        recyclerView.setHasFixedSize(true)
-        recyclerView.layoutManager = linearLayoutManager
-        sourcesAdapter = SourcesAdapter()
-        recyclerView.adapter = sourcesAdapter
+        recycler_view.setHasFixedSize(true)
+        recycler_view.layoutManager = LinearLayoutManager(this)
+        recycler_view.adapter = sourcesAdapter
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -85,7 +78,7 @@ class CreateCardSourceActivity : AppCompatActivity() {
     }
 
     private fun beginSequence() {
-        cardInputWidget.card?.let {
+        card_widget_three_d.card?.let {
             createCardSource(it)
         } ?: showSnackbar("Enter a valid card.")
     }
@@ -104,13 +97,21 @@ class CreateCardSourceActivity : AppCompatActivity() {
         compositeDisposable.add(cardSourceObservable
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe { progressDialogController.show(R.string.create_source) }
-            .doOnComplete { progressDialogController.dismiss() }
+            .doOnSubscribe {
+                btn_three_d_secure.isEnabled = false
+                btn_three_d_secure_sync.isEnabled = false
+                progress_bar.visibility = View.VISIBLE
+            }
+            .doOnComplete {
+                btn_three_d_secure.isEnabled = true
+                btn_three_d_secure_sync.isEnabled = true
+                progress_bar.visibility = View.INVISIBLE
+            }
             .subscribe({ source ->
-
                 // Because we've made the mapping above, we're now subscribing
                 // to the result of creating a 3DS Source
                 val sourceCardData = source.sourceTypeModel as SourceCardData?
+                val sourceId = source.id
 
                 val threeDSecureStatus = sourceCardData?.threeDSecureStatus
 
@@ -118,16 +119,17 @@ class CreateCardSourceActivity : AppCompatActivity() {
                 sourcesAdapter.addItem(
                     source.status,
                     threeDSecureStatus,
-                    source.id,
+                    sourceId,
                     source.type
                 )
                 // If we need to get 3DS verification for this card, we
                 // first create a 3DS Source.
-                if (SourceCardData.ThreeDSecureStatus.REQUIRED == threeDSecureStatus) {
+                if (sourceId != null &&
+                    SourceCardData.ThreeDSecureStatus.REQUIRED == threeDSecureStatus) {
                     // The card Source can be used to create a 3DS Source
-                    createThreeDSecureSource(source.id!!)
+                    createThreeDSecureSource(sourceId)
                 } else {
-                    progressDialogController.dismiss()
+                    progress_bar.visibility = View.INVISIBLE
                 }
             }, {
                 showSnackbar(it.message.orEmpty())
@@ -158,7 +160,7 @@ class CreateCardSourceActivity : AppCompatActivity() {
         compositeDisposable.add(threeDSecureObservable
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnComplete { progressDialogController.dismiss() }
+            .doOnComplete { progress_bar.visibility = View.INVISIBLE }
             .subscribe(
                 { showVerifyDialog(it) },
                 { showSnackbar(it.message.orEmpty()) }
@@ -201,8 +203,36 @@ class CreateCardSourceActivity : AppCompatActivity() {
             .show()
     }
 
-    private companion object {
+    /**
+     * Controller for the redirect dialog used to direct users out of the application.
+     */
+    internal class RedirectDialogController(private val activity: Activity) {
+        private var alertDialog: AlertDialog? = null
 
+        fun showDialog(redirectUrl: String, sourceCardData: Map<String, *>) {
+            val brand = sourceCardData["brand"] as String?
+            val alertDialog = AlertDialog.Builder(activity, R.style.AlertDialogStyle)
+                .setTitle(activity.getString(R.string.authentication_dialog_title))
+                .setMessage(activity.getString(R.string.authentication_dialog_message,
+                    brand, sourceCardData["last4"]))
+                .setIcon(Card.getBrandIcon(brand))
+                .setPositiveButton(android.R.string.yes) { _, _ ->
+                    activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(redirectUrl)))
+                }
+                .setNegativeButton(android.R.string.no, null)
+                .create()
+            alertDialog.show()
+
+            this.alertDialog = alertDialog
+        }
+
+        fun dismissDialog() {
+            alertDialog?.dismiss()
+            alertDialog = null
+        }
+    }
+
+    private companion object {
         private const val RETURN_SCHEMA = "stripe://"
         private const val RETURN_HOST_ASYNC = "async"
         private const val RETURN_HOST_SYNC = "sync"

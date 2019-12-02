@@ -154,7 +154,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
 
         if (snackbarText != null) {
             Snackbar.make(
-                payment_methods_coordinator,
+                coordinator,
                 snackbarText,
                 Snackbar.LENGTH_SHORT
             ).show()

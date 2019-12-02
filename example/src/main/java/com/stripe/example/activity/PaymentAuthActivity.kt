@@ -3,7 +3,6 @@ package com.stripe.example.activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentAuthConfig
@@ -34,10 +33,10 @@ import java.lang.ref.WeakReference
 class PaymentAuthActivity : AppCompatActivity() {
 
     private val compositeSubscription = CompositeDisposable()
-
+    private val backendApi: BackendApi by lazy {
+        BackendApiFactory(this).create()
+    }
     private lateinit var stripe: Stripe
-    private lateinit var backendApi: BackendApi
-    private lateinit var statusTextView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,12 +53,10 @@ class PaymentAuthActivity : AppCompatActivity() {
                 .build())
             .build())
 
-        statusTextView = findViewById(R.id.status)
         if (savedInstanceState != null) {
-            statusTextView.text = savedInstanceState.getString(STATE_STATUS)
+            tv_status.text = savedInstanceState.getString(STATE_STATUS)
         }
 
-        backendApi = BackendApiFactory(this).create()
         val publishableKey = PaymentConfiguration.getInstance(this).publishableKey
         stripe = Stripe(this, publishableKey,
             stripeAccountId = stripeAccountId,
@@ -80,7 +77,7 @@ class PaymentAuthActivity : AppCompatActivity() {
         paymentIntentClientSecret: String,
         authType: AuthType
     ) {
-        statusTextView.append("\n\nStarting payment authentication")
+        tv_status.append("\n\nStarting payment authentication")
         stripe.confirmPayment(
             this,
             when (authType) {
@@ -91,7 +88,7 @@ class PaymentAuthActivity : AppCompatActivity() {
     }
 
     private fun confirmSetupIntent(setupIntentClientSecret: String) {
-        statusTextView.append("\n\nStarting setup intent authentication")
+        tv_status.append("\n\nStarting setup intent authentication")
         stripe.confirmSetupIntent(this, create3ds2SetupIntentParams(setupIntentClientSecret))
     }
 
@@ -99,7 +96,7 @@ class PaymentAuthActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
 
         progress_bar.visibility = View.VISIBLE
-        statusTextView.append("\n\nPayment authentication completed, getting result")
+        tv_status.append("\n\nPayment authentication completed, getting result")
 
         val isPaymentResult =
             stripe.onPaymentResult(requestCode, data, PaymentIntentResultCallback(this))
@@ -120,7 +117,7 @@ class PaymentAuthActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(bundle: Bundle) {
         super.onSaveInstanceState(bundle)
-        bundle.putString(STATE_STATUS, statusTextView.text.toString())
+        bundle.putString(STATE_STATUS, tv_status.text.toString())
     }
 
     private fun createPaymentIntent(
@@ -138,7 +135,7 @@ class PaymentAuthActivity : AppCompatActivity() {
                     buy_3ds2_button.isEnabled = false
                     buy_3ds1_button.isEnabled = false
                     setup_button.isEnabled = false
-                    statusTextView.setText(R.string.creating_payment_intent)
+                    tv_status.setText(R.string.creating_payment_intent)
                 }
                 .subscribe(
                     { handleCreatePaymentIntentResponse(it, authType) },
@@ -157,7 +154,7 @@ class PaymentAuthActivity : AppCompatActivity() {
                     buy_3ds2_button.isEnabled = false
                     buy_3ds1_button.isEnabled = false
                     setup_button.isEnabled = false
-                    statusTextView.setText(R.string.creating_setup_intent)
+                    tv_status.setText(R.string.creating_setup_intent)
                 }
                 .subscribe(
                     { handleCreateSetupIntentResponse(it) },
@@ -169,7 +166,7 @@ class PaymentAuthActivity : AppCompatActivity() {
     private fun handleError(err: Throwable) {
         progress_bar.visibility = View.INVISIBLE
         err.printStackTrace()
-        statusTextView.append("\n\n" + err.message)
+        tv_status.append("\n\n" + err.message)
     }
 
     private fun handleCreatePaymentIntentResponse(
@@ -178,7 +175,7 @@ class PaymentAuthActivity : AppCompatActivity() {
     ) {
         try {
             val responseData = JSONObject(responseBody.string())
-            statusTextView.append("\n\n" + getString(R.string.payment_intent_status,
+            tv_status.append("\n\n" + getString(R.string.payment_intent_status,
                 responseData.getString("status")))
             val secret = responseData.getString("secret")
             confirmPaymentIntent(secret, authType)
@@ -192,7 +189,7 @@ class PaymentAuthActivity : AppCompatActivity() {
     private fun handleCreateSetupIntentResponse(responseBody: ResponseBody) {
         try {
             val responseData = JSONObject(responseBody.string())
-            statusTextView.append("\n\n" + getString(R.string.setup_intent_status,
+            tv_status.append("\n\n" + getString(R.string.setup_intent_status,
                 responseData.getString("status")))
             val secret = responseData.getString("secret")
             confirmSetupIntent(secret)
@@ -232,7 +229,7 @@ class PaymentAuthActivity : AppCompatActivity() {
             val activity = activityRef.get() ?: return
 
             val paymentIntent = result.intent
-            activity.statusTextView.append("\n\n" +
+            activity.tv_status.append("\n\n" +
                 "Auth outcome: " + result.outcome + "\n\n" +
                 activity.getString(R.string.payment_intent_status, paymentIntent.status))
             activity.onAuthComplete()
@@ -241,7 +238,7 @@ class PaymentAuthActivity : AppCompatActivity() {
         override fun onError(e: Exception) {
             val activity = activityRef.get() ?: return
 
-            activity.statusTextView.append("\n\nException: " + e.message)
+            activity.tv_status.append("\n\nException: " + e.message)
             activity.onAuthComplete()
         }
     }
@@ -255,14 +252,14 @@ class PaymentAuthActivity : AppCompatActivity() {
             val activity = activityRef.get() ?: return
 
             val setupIntent = result.intent
-            activity.statusTextView.append("\n\n" + activity.getString(R.string.setup_intent_status, setupIntent.status))
+            activity.tv_status.append("\n\n" + activity.getString(R.string.setup_intent_status, setupIntent.status))
             activity.onAuthComplete()
         }
 
         override fun onError(e: Exception) {
             val activity = activityRef.get() ?: return
 
-            activity.statusTextView.append("\n\nException: " + e.message)
+            activity.tv_status.append("\n\nException: " + e.message)
             activity.onAuthComplete()
         }
     }

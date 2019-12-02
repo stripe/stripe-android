@@ -11,14 +11,14 @@ import com.stripe.example.R
 import kotlinx.android.synthetic.main.activity_klarna_source.*
 
 class KlarnaSourceActivity : AppCompatActivity() {
-    private lateinit var viewModel: SourceViewModel
+    private val viewModel: SourceViewModel by lazy {
+        ViewModelProviders.of(this)[SourceViewModel::class.java]
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_klarna_source)
-
-        viewModel = ViewModelProviders.of(this)[SourceViewModel::class.java]
 
         viewModel.createdSource.observe(this, Observer {
             progress_bar.visibility = View.INVISIBLE

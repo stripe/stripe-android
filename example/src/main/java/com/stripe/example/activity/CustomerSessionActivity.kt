@@ -5,13 +5,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.CustomerSession
 import com.stripe.android.StripeError
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.view.PaymentMethodsActivityStarter
 import com.stripe.example.R
-import com.stripe.example.controller.ErrorDialogHandler
 import com.stripe.example.service.ExampleEphemeralKeyProvider
 import kotlinx.android.synthetic.main.activity_customer_session.*
 
@@ -21,13 +21,10 @@ import kotlinx.android.synthetic.main.activity_customer_session.*
  */
 class CustomerSessionActivity : AppCompatActivity() {
 
-    private lateinit var errorDialogHandler: ErrorDialogHandler
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_customer_session)
         setTitle(R.string.customer_payment_data_example)
-        errorDialogHandler = ErrorDialogHandler(this)
         CustomerSession.initCustomerSession(
             this,
             ExampleEphemeralKeyProvider(this),
@@ -40,6 +37,8 @@ class CustomerSessionActivity : AppCompatActivity() {
 
         btn_launch_payment_methods.isEnabled = false
         btn_launch_payment_methods.setOnClickListener { launchWithCustomer() }
+
+        onRetrieveError("Error!!")
     }
 
     private fun launchWithCustomer() {
@@ -69,8 +68,9 @@ class CustomerSessionActivity : AppCompatActivity() {
 
     private fun onRetrieveError(errorMessage: String) {
         btn_launch_payment_methods.isEnabled = false
-        errorDialogHandler.show(errorMessage)
         progress_bar.visibility = View.INVISIBLE
+        Snackbar.make(coordinator, errorMessage, Snackbar.LENGTH_LONG)
+            .show()
     }
 
     private class CustomerRetrievalListenerImpl constructor(
@@ -81,7 +81,7 @@ class CustomerSessionActivity : AppCompatActivity() {
             activity?.onCustomerRetrieved()
         }
 
-        override fun onError(httpCode: Int, errorMessage: String, stripeError: StripeError?) {
+        override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
             activity?.onRetrieveError(errorMessage)
         }
     }

@@ -28,22 +28,22 @@ import org.json.JSONObject
 
 class PayWithGoogleActivity : AppCompatActivity() {
 
-    private lateinit var stripe: Stripe
-    private lateinit var paymentsClient: PaymentsClient
-    private lateinit var googlePayJsonFactory: GooglePayJsonFactory
+    private val stripe: Stripe by lazy {
+        Stripe(this, PaymentConfiguration.getInstance(this).publishableKey)
+    }
+    private val paymentsClient: PaymentsClient by lazy {
+        Wallet.getPaymentsClient(this,
+            Wallet.WalletOptions.Builder()
+                .setEnvironment(WalletConstants.ENVIRONMENT_TEST)
+                .build())
+    }
+    private val googlePayJsonFactory: GooglePayJsonFactory by lazy {
+        GooglePayJsonFactory(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pay_with_google)
-
-        stripe = Stripe(this, PaymentConfiguration.getInstance(this).publishableKey)
-
-        googlePayJsonFactory = GooglePayJsonFactory(this)
-
-        paymentsClient = Wallet.getPaymentsClient(this,
-            Wallet.WalletOptions.Builder()
-                .setEnvironment(WalletConstants.ENVIRONMENT_TEST)
-                .build())
 
         google_pay_button.isEnabled = false
         google_pay_button.setOnClickListener { payWithGoogle() }
