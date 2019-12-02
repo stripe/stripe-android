@@ -9,11 +9,7 @@ import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.stripe.android.exception.APIConnectionException
-import com.stripe.android.exception.APIException
-import com.stripe.android.exception.AuthenticationException
-import com.stripe.android.exception.CardException
 import com.stripe.android.exception.InvalidRequestException
-import com.stripe.android.exception.StripeException
 import com.stripe.android.model.Card
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -21,8 +17,8 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.SourceParams
 import com.stripe.android.view.FpxBank
-import java.io.UnsupportedEncodingException
 import java.net.HttpURLConnection
+import java.net.UnknownHostException
 import java.util.Locale
 import java.util.UUID
 import kotlin.test.BeforeTest
@@ -45,21 +41,26 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class StripeApiRepositoryTest {
 
-    private val stripeApiRepository = StripeApiRepository(ApplicationProvider.getApplicationContext<Context>())
+    private val context: Context by lazy {
+        ApplicationProvider.getApplicationContext<Context>()
+    }
+    private val stripeApiRepository = StripeApiRepository(context)
 
     @Mock
     private lateinit var stripeApiRequestExecutor: ApiRequestExecutor
     @Mock
     private lateinit var fireAndForgetRequestExecutor: FireAndForgetRequestExecutor
 
-    private lateinit var apiRequestArgumentCaptor: KArgumentCaptor<ApiRequest>
-    private lateinit var stripeRequestArgumentCaptor: KArgumentCaptor<StripeRequest>
+    private val apiRequestArgumentCaptor: KArgumentCaptor<ApiRequest> by lazy {
+        argumentCaptor<ApiRequest>()
+    }
+    private val stripeRequestArgumentCaptor: KArgumentCaptor<StripeRequest> by lazy {
+        argumentCaptor<StripeRequest>()
+    }
 
     @BeforeTest
     fun before() {
         MockitoAnnotations.initMocks(this)
-        apiRequestArgumentCaptor = argumentCaptor()
-        stripeRequestArgumentCaptor = argumentCaptor()
     }
 
     @Test
@@ -156,17 +157,17 @@ class StripeApiRepositoryTest {
     }
 
     @Test
-    @Throws(APIException::class, AuthenticationException::class, InvalidRequestException::class, APIConnectionException::class)
     fun createSource_shouldLogSourceCreation_andReturnSource() {
-        val source = stripeApiRepository.createSource(SourceParams.createCardParams(CARD),
-            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
+        val source = stripeApiRepository.createSource(
+            SourceParams.createCardParams(CARD),
+            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        )
 
         // Check that we get a token back; we don't care about its fields for this test.
         assertNotNull(source)
     }
 
     @Test
-    @Throws(APIException::class, AuthenticationException::class, InvalidRequestException::class, APIConnectionException::class)
     fun createSource_withConnectAccount_keepsHeaderInAccount() {
         val connectAccountId = "acct_1Acj2PBUgO3KuWzz"
         val source = stripeApiRepository.createSource(SourceParams.createCardParams(CARD),
@@ -231,8 +232,6 @@ class StripeApiRepositoryTest {
     }
 
     @Test
-    @Throws(CardException::class, APIException::class, AuthenticationException::class,
-        InvalidRequestException::class, APIConnectionException::class)
     fun requestData_withConnectAccount_shouldReturnCorrectResponseHeaders() {
         val connectAccountId = "acct_1Acj2PBUgO3KuWzz"
         val response = stripeApiRepository.makeApiRequest(
@@ -266,8 +265,6 @@ class StripeApiRepositoryTest {
     }
 
     @Test
-    @Throws(APIException::class, AuthenticationException::class, InvalidRequestException::class,
-        APIConnectionException::class)
     fun confirmPaymentIntent_withSourceData_canSuccessfulConfirm() {
         val clientSecret = "temporarily put a private key here simulate the backend"
 
@@ -308,8 +305,6 @@ class StripeApiRepositoryTest {
     }
 
     @Ignore("requires a secret key")
-    @Throws(APIException::class, AuthenticationException::class, InvalidRequestException::class,
-        APIConnectionException::class)
     fun disabled_confirmPaymentIntent_withSourceId_canSuccessfulConfirm() {
         val clientSecret = "temporarily put a private key here simulate the backend"
         val publishableKey = "put a public key that matches the private key here"
@@ -326,7 +321,6 @@ class StripeApiRepositoryTest {
     }
 
     @Ignore("requires a secret key")
-    @Throws(APIException::class, AuthenticationException::class, InvalidRequestException::class, APIConnectionException::class)
     fun disabled_confirmRetrieve_withSourceId_canSuccessfulRetrieve() {
         val clientSecret = "temporarily put a private key here simulate the backend"
         val publishableKey = "put a public key that matches the private key here"
@@ -339,7 +333,6 @@ class StripeApiRepositoryTest {
     }
 
     @Test
-    @Throws(APIException::class, AuthenticationException::class, InvalidRequestException::class, APIConnectionException::class)
     fun createSource_withNonLoggingListener_doesNotLogButDoesCreateSource() {
         val stripeApiRepository = StripeApiRepository(
             ApplicationProvider.getApplicationContext<Context>(),
@@ -364,7 +357,6 @@ class StripeApiRepositoryTest {
     }
 
     @Test
-    @Throws(StripeException::class, UnsupportedEncodingException::class)
     fun getPaymentMethods_whenPopulated_returnsExpectedList() {
         val responseBody =
             """
@@ -527,7 +519,6 @@ class StripeApiRepositoryTest {
     }
 
     @Test
-    @Throws(StripeException::class, UnsupportedEncodingException::class)
     fun getPaymentMethods_whenNotPopulated_returnsEmptydList() {
         val responseBody =
             """
@@ -587,6 +578,20 @@ class StripeApiRepositoryTest {
             exception.message
         )
         assertEquals("payment_intent_unexpected_state", exception.errorCode)
+    }
+
+    @Test
+    fun createSource_whenUnknownHostExceptionThrown_convertsToAPIConnectionException() {
+        `when`(stripeApiRequestExecutor.execute(any())).thenAnswer {
+            throw UnknownHostException()
+        }
+
+        assertFailsWith<APIConnectionException> {
+            create().createSource(
+                SourceParams.createCardParams(CARD),
+                ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+            )
+        }
     }
 
     private fun create(): StripeApiRepository {

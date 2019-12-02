@@ -9,11 +9,11 @@ class APIConnectionException(
     message: String?,
     e: Throwable?
 ) : StripeException(null, message, null, STATUS_CODE, e) {
-    companion object {
+    internal companion object {
         private const val STATUS_CODE = 0
 
-        @JvmStatic
-        fun create(e: IOException, url: String? = null): APIConnectionException {
+        @JvmSynthetic
+        internal fun create(e: IOException, url: String? = null): APIConnectionException {
             val displayUrl = listOfNotNull(
                 "Stripe",
                 "($url)".takeUnless { url.isNullOrBlank() }

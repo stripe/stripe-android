@@ -62,9 +62,9 @@ class AnalyticsDataFactoryTest {
         val expectedSize = AnalyticsDataFactory.VALID_PARAM_FIELDS.size - 1
         val tokens = listOf("CardInputView")
         val loggingParams = analyticsDataFactory.getSourceCreationParams(
-            tokens,
             API_KEY,
-            Source.SourceType.SEPA_DEBIT)
+            Source.SourceType.SEPA_DEBIT,
+            tokens)
         assertEquals(expectedSize.toLong(), loggingParams.size.toLong())
         assertEquals(Source.SourceType.SEPA_DEBIT,
             loggingParams[AnalyticsDataFactory.FIELD_SOURCE_TYPE])
@@ -175,7 +175,7 @@ class AnalyticsDataFactoryTest {
         val expectedTokenName = AnalyticsDataFactory.getEventParamName(AnalyticsDataFactory.EventName.SOURCE_CREATION)
         val expectedUaName = AnalyticsDataFactory.analyticsUa
 
-        val params = analyticsDataFactory.getSourceCreationParams(null, API_KEY, Token.TokenType.BANK_ACCOUNT)
+        val params = analyticsDataFactory.getSourceCreationParams(API_KEY, Token.TokenType.BANK_ACCOUNT)
         assertEquals((AnalyticsDataFactory.VALID_PARAM_FIELDS.size - 2).toLong(), params.size.toLong())
         assertEquals(API_KEY, params[AnalyticsDataFactory.FIELD_PUBLISHABLE_KEY])
         assertEquals(Token.TokenType.BANK_ACCOUNT, params[AnalyticsDataFactory.FIELD_SOURCE_TYPE])

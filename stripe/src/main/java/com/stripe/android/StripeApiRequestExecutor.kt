@@ -3,6 +3,7 @@ package com.stripe.android
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.InvalidRequestException
 import java.io.IOException
+import java.net.UnknownHostException
 
 /**
  * Used by [StripeApiRepository] to make HTTP requests
@@ -15,7 +16,7 @@ internal class StripeApiRequestExecutor internal constructor(
     /**
      * Make the request and return the response as a [StripeResponse]
      */
-    @Throws(APIConnectionException::class, InvalidRequestException::class)
+    @Throws(APIConnectionException::class, InvalidRequestException::class, UnknownHostException::class)
     override fun execute(request: ApiRequest): StripeResponse {
         logger.info(request.toString())
 
