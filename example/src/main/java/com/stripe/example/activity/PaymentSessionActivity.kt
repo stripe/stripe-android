@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession
 import com.stripe.android.PaymentSessionConfig
@@ -18,7 +19,6 @@ import com.stripe.android.model.ShippingMethod
 import com.stripe.android.view.PaymentUtils
 import com.stripe.android.view.ShippingInfoWidget
 import com.stripe.example.R
-import com.stripe.example.controller.ErrorDialogHandler
 import com.stripe.example.service.ExampleEphemeralKeyProvider
 import kotlinx.android.synthetic.main.activity_payment_session.*
 import java.util.Currency
@@ -30,9 +30,10 @@ import java.util.Locale
  */
 class PaymentSessionActivity : AppCompatActivity() {
 
-    private lateinit var errorDialogHandler: ErrorDialogHandler
     private lateinit var paymentSession: PaymentSession
-    private lateinit var notSelectedText: String
+    private val notSelectedText: String by lazy {
+        getString(R.string.not_selected)
+    }
 
     private var paymentSessionData: PaymentSessionData? = null
 
@@ -40,10 +41,7 @@ class PaymentSessionActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment_session)
 
-        notSelectedText = getString(R.string.not_selected)
-
         progress_bar.visibility = View.VISIBLE
-        errorDialogHandler = ErrorDialogHandler(this)
 
         paymentSession = createPaymentSession(savedInstanceState)
 
@@ -211,6 +209,11 @@ class PaymentSessionActivity : AppCompatActivity() {
         }
     }
 
+    private fun showError(errorMessage: String) {
+        Snackbar.make(coordinator, errorMessage, Snackbar.LENGTH_LONG)
+            .show()
+    }
+
     private class PaymentSessionListenerImpl internal constructor(
         activity: PaymentSessionActivity,
         private val customerSession: CustomerSession
@@ -225,7 +228,7 @@ class PaymentSessionActivity : AppCompatActivity() {
         }
 
         override fun onError(errorCode: Int, errorMessage: String) {
-            listenerActivity?.errorDialogHandler?.show(errorMessage)
+            listenerActivity?.showError(errorMessage)
         }
 
         override fun onPaymentSessionDataChanged(data: PaymentSessionData) {
@@ -260,7 +263,7 @@ class PaymentSessionActivity : AppCompatActivity() {
             "(555) 555-5555"
         )
 
-        private val SHIPPING_METHODS = arrayListOf(
+        private val SHIPPING_METHODS = listOf(
             ShippingMethod("UPS Ground", "ups-ground",
                 0, "USD", "Arrives in 3-5 days"),
             ShippingMethod("FedEx", "fedex",

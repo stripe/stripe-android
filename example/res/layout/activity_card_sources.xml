@@ -10,6 +10,14 @@
     android:paddingEnd="8dp"
     tools:context="com.stripe.example.activity.CreateCardSourceActivity">
 
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="invisible" />
+
     <TextView android:id="@+id/payment_form_title"
               android:text="@string/create_source_header"
               style="@style/Header" />

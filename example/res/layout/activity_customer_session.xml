@@ -1,56 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/coordinator"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
+    android:layout_height="match_parent">
 
     <LinearLayout
-        android:id="@+id/ll_output_layout_acs"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="@dimen/example_activity_total_margin"
-        android:layout_marginEnd="@dimen/example_activity_total_margin"
-        android:layout_marginTop="@dimen/example_vertical_spacing"
-        android:orientation="horizontal"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
         >
 
-        <TextView
-            android:layout_width="0dp"
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/example_customer_view_padding"
-            android:layout_weight="3"
-            android:text="@string/selected_card"
-            android:textAppearance="?attr/actionMenuTextAppearance"
+            android:indeterminate="true"
+            android:visibility="gone"
             />
 
-        <TextView
-            android:id="@+id/tv_selected_payment_method"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:id="@+id/ll_output_layout_acs"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="5"
+            android:layout_marginStart="@dimen/example_activity_total_margin"
+            android:layout_marginEnd="@dimen/example_activity_total_margin"
+            android:layout_marginTop="@dimen/example_vertical_spacing"
+            android:orientation="horizontal"
+            >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/example_customer_view_padding"
+                android:layout_weight="3"
+                android:text="@string/selected_card"
+                android:textAppearance="?attr/actionMenuTextAppearance"
+                />
+
+            <TextView
+                android:id="@+id/tv_selected_payment_method"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="5"
+                />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_launch_payment_methods"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/example_vertical_spacing"
+            android:text="@string/select_add_card"
             />
 
     </LinearLayout>
-
-    <Button
-        android:id="@+id/btn_launch_payment_methods"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/ll_output_layout_acs"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="@dimen/example_vertical_spacing"
-        android:text="@string/select_add_card"
-        />
-
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:indeterminate="true"
-        />
-
-</RelativeLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

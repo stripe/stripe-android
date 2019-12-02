@@ -24,22 +24,21 @@ import kotlinx.android.synthetic.main.activity_card_payment_methods.*
 class CreateCardPaymentMethodActivity : AppCompatActivity() {
     private val compositeDisposable = CompositeDisposable()
 
-    private lateinit var adapter: PaymentMethodsAdapter
-    private lateinit var stripe: Stripe
+    private val adapter: PaymentMethodsAdapter = PaymentMethodsAdapter()
+    private val stripe: Stripe by lazy {
+        Stripe(
+            applicationContext,
+            PaymentConfiguration.getInstance(this).publishableKey
+        )
+    }
     private lateinit var snackbarContainer: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_card_payment_methods)
 
-        stripe = Stripe(
-            applicationContext,
-            PaymentConfiguration.getInstance(this).publishableKey
-        )
-
         snackbarContainer = findViewById(android.R.id.content)
 
-        adapter = PaymentMethodsAdapter()
         rv_payment_methods.setHasFixedSize(false)
         rv_payment_methods.layoutManager = LinearLayoutManager(this)
         rv_payment_methods.adapter = adapter

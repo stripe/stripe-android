@@ -1,87 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/coordinator"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <ProgressBar
-            android:id="@+id/progress_bar"
-            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:indeterminate="true"
-            />
+            android:orientation="vertical">
 
-        <Button
-            android:id="@+id/btn_select_payment_method"
-            android:enabled="false"
-            android:layout_width="320dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/example_vertical_spacing"
-            android:text="@string/payment_session_select_payment"
-            />
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                />
 
-        <Button
-            android:id="@+id/btn_start_payment_flow"
-            android:enabled="false"
-            android:layout_width="320dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/example_vertical_spacing"
-            android:layout_marginBottom="@dimen/example_vertical_spacing"
-            android:text="@string/payment_session_select_shipping"
-            />
+            <Button
+                android:id="@+id/btn_select_payment_method"
+                android:enabled="false"
+                android:layout_width="320dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/example_vertical_spacing"
+                android:text="@string/payment_session_select_payment"
+                />
 
-        <TextView
-            android:id="@+id/tv_ready_to_charge"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:layout_marginTop="24dp"
-            android:drawablePadding="8dp"
-            android:drawableStart="@drawable/ic_cancel"
-            android:textSize="16sp"
-            android:text="@string/ready_to_charge"
-            />
+            <Button
+                android:id="@+id/btn_start_payment_flow"
+                android:enabled="false"
+                android:layout_width="320dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/example_vertical_spacing"
+                android:layout_marginBottom="@dimen/example_vertical_spacing"
+                android:text="@string/payment_session_select_shipping"
+                />
 
-        <TextView
-            android:id="@+id/tv_payment_method"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:drawablePadding="8dp"
-            android:drawableStart="@drawable/ic_credit_card"
-            android:textSize="16sp"
-            android:text="@string/not_selected"
-            />
+            <TextView
+                android:id="@+id/tv_ready_to_charge"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:layout_marginTop="24dp"
+                android:drawablePadding="8dp"
+                android:drawableStart="@drawable/ic_cancel"
+                android:textSize="16sp"
+                android:text="@string/ready_to_charge"
+                />
 
-        <TextView
-            android:id="@+id/tv_shipping_info"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:drawablePadding="8dp"
-            android:drawableStart="@drawable/ic_home"
-            android:textSize="16sp"
-            android:text="@string/not_selected"
-            />
+            <TextView
+                android:id="@+id/tv_payment_method"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:drawablePadding="8dp"
+                android:drawableStart="@drawable/ic_credit_card"
+                android:textSize="16sp"
+                android:text="@string/not_selected"
+                />
 
-        <TextView
-            android:id="@+id/tv_shipping_method"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:drawablePadding="8dp"
-            android:drawableStart="@drawable/ic_shipping_method"
-            android:textSize="16sp"
-            android:text="@string/not_selected"
-            />
+            <TextView
+                android:id="@+id/tv_shipping_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:drawablePadding="8dp"
+                android:drawableStart="@drawable/ic_home"
+                android:textSize="16sp"
+                android:text="@string/not_selected"
+                />
 
-    </LinearLayout>
-</ScrollView>
+            <TextView
+                android:id="@+id/tv_shipping_method"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:drawablePadding="8dp"
+                android:drawableStart="@drawable/ic_shipping_method"
+                android:textSize="16sp"
+                android:text="@string/not_selected"
+                />
+
+        </LinearLayout>
+    </ScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

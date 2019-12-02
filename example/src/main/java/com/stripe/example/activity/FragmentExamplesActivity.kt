@@ -80,7 +80,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
             paymentSession = createPaymentSession(createCustomerSession())
 
             val rootView = requireNotNull(view)
-            statusTextView = rootView.findViewById(R.id.status)
+            statusTextView = rootView.findViewById(R.id.tv_status)
             progressBar = rootView.findViewById(R.id.progress_bar)
 
             launchPaymentSessionButton = rootView.findViewById(R.id.launch_payment_session)
