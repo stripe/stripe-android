@@ -43,9 +43,10 @@ ext {
     buildToolsVersion = "29.0.2"
     compileSdkVersion = 29
 
-    javaAnnotationVersion = "1.0"
-    coroutineVersion = '1.3.0'
-    espressoVersion = "3.2.0"
+    javaAnnotationVersion = '1.0'
+    kotlinVersion = '1.3.61'
+    kotlinCoroutinesVersion = '1.3.0'
+    espressoVersion = '3.2.0'
 }
 
 if (JavaVersion.current().isJava8Compatible()) {
