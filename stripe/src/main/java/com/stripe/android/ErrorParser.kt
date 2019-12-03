@@ -21,19 +21,17 @@ internal object ErrorParser {
     private const val FIELD_TYPE = "type"
 
     @JvmSynthetic
-    internal fun parseError(errorResponse: String?): StripeError {
+    internal fun parseError(errorData: JSONObject): StripeError {
         return try {
-            errorResponse?.let {
-                val errorObject = JSONObject(it).getJSONObject(FIELD_ERROR)
-                StripeError(
-                    charge = errorObject.optString(FIELD_CHARGE),
-                    code = errorObject.optString(FIELD_CODE),
-                    declineCode = errorObject.optString(FIELD_DECLINE_CODE),
-                    message = errorObject.optString(FIELD_MESSAGE),
-                    param = errorObject.optString(FIELD_PARAM),
-                    type = errorObject.optString(FIELD_TYPE)
-                )
-            } ?: MALFORMED
+            val errorObject = errorData.getJSONObject(FIELD_ERROR)
+            StripeError(
+                charge = errorObject.optString(FIELD_CHARGE),
+                code = errorObject.optString(FIELD_CODE),
+                declineCode = errorObject.optString(FIELD_DECLINE_CODE),
+                message = errorObject.optString(FIELD_MESSAGE),
+                param = errorObject.optString(FIELD_PARAM),
+                type = errorObject.optString(FIELD_TYPE)
+            )
         } catch (jsonException: JSONException) {
             MALFORMED
         }

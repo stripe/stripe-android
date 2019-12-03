@@ -87,7 +87,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     apiUrl, options, params, appInfo
                 )
             )
-            return PaymentIntent.fromString(response.responseBody)
+            return PaymentIntent.fromJson(response.responseJson)
         } catch (unexpected: CardException) {
             // This particular kind of exception should not be possible from a Source API endpoint.
             throw APIException.create(unexpected)
@@ -121,7 +121,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     appInfo
                 )
             )
-            return PaymentIntent.fromString(response.responseBody)
+            return PaymentIntent.fromJson(response.responseJson)
         } catch (unexpected: CardException) {
             // This particular kind of exception should not be possible from a Source API endpoint.
             throw APIException.create(unexpected)
@@ -146,7 +146,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     appInfo
                 )
             )
-            return PaymentIntent.fromString(response.responseBody)
+            return PaymentIntent.fromJson(response.responseJson)
         } catch (unexpected: CardException) {
             // This particular kind of exception should not be possible from a Source API endpoint.
             throw APIException.create(unexpected)
@@ -182,7 +182,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     appInfo
                 )
             )
-            val setupIntent = SetupIntent.fromString(response.responseBody)
+            val setupIntent = SetupIntent.fromJson(response.responseJson)
 
             fireAnalyticsRequest(
                 analyticsDataFactory.getSetupIntentConfirmationParams(
@@ -227,7 +227,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     appInfo
                 )
             )
-            return SetupIntent.fromString(response.responseBody)
+            return SetupIntent.fromJson(response.responseJson)
         } catch (unexpected: CardException) {
             // This particular kind of exception should not be possible from a Source API endpoint.
             throw APIException.create(unexpected)
@@ -252,7 +252,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     appInfo
                 )
             )
-            return SetupIntent.fromString(response.responseBody)
+            return SetupIntent.fromJson(response.responseJson)
         } catch (unexpected: CardException) {
             // This particular kind of exception should not be possible from a Source API endpoint.
             throw APIException.create(unexpected)
@@ -312,7 +312,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     appInfo
                 )
             )
-            return Source.fromString(response.responseBody)
+            return Source.fromJson(response.responseJson)
         } catch (unexpected: CardException) {
             // This particular kind of exception should not be possible from a Source API endpoint.
             throw APIException.create(unexpected)
@@ -350,7 +350,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     appInfo
                 )
             )
-            return Source.fromString(response.responseBody)
+            return Source.fromJson(response.responseJson)
         } catch (unexpected: CardException) {
             // This particular kind of exception should not be possible from a Source API endpoint.
             throw APIException.create(unexpected)
@@ -377,7 +377,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     appInfo
                 )
             )
-            val paymentMethod = PaymentMethod.fromString(response.responseBody)
+            val paymentMethod = PaymentMethod.fromJson(response.responseJson)
 
             fireAnalyticsRequest(
                 analyticsDataFactory.createPaymentMethodCreationParams(
@@ -460,7 +460,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 appInfo
             )
         )
-        return Source.fromString(response.responseBody)
+        return Source.fromJson(response.responseJson)
     }
 
     @Throws(InvalidRequestException::class, APIConnectionException::class, APIException::class,
@@ -484,7 +484,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 requestOptions, appInfo)
         )
 
-        return Source.fromString(response.responseBody)
+        return Source.fromJson(response.responseJson)
     }
 
     @Throws(InvalidRequestException::class, APIConnectionException::class, APIException::class,
@@ -510,7 +510,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 mapOf("customer" to customerId), appInfo
             )
         )
-        return PaymentMethod.fromString(response.responseBody)
+        return PaymentMethod.fromJson(response.responseJson)
     }
 
     @Throws(InvalidRequestException::class, APIConnectionException::class, APIException::class,
@@ -535,7 +535,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 appInfo = appInfo
             )
         )
-        return PaymentMethod.fromString(response.responseBody)
+        return PaymentMethod.fromJson(response.responseJson)
     }
 
     /**
@@ -570,8 +570,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         )
 
         return try {
-            val data =
-                JSONObject(response.responseBody).optJSONArray("data") ?: JSONArray()
+            val data = response.responseJson.optJSONArray("data") ?: JSONArray()
             (0 until data.length()).mapNotNull {
                 PaymentMethod.fromJson(data.optJSONObject(it))
             }
@@ -609,7 +608,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             )
         )
 
-        return Customer.fromString(response.responseBody)
+        return Customer.fromJson(response.responseJson)
     }
 
     @Throws(InvalidRequestException::class, APIConnectionException::class, APIException::class,
@@ -636,7 +635,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 requestOptions,
                 mapOf("shipping" to shippingInformation.toParamMap()), appInfo)
         )
-        return Customer.fromString(response.responseBody)
+        return Customer.fromJson(response.responseJson)
     }
 
     @Throws(InvalidRequestException::class, APIConnectionException::class, APIException::class,
@@ -652,7 +651,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 appInfo = appInfo
             )
         )
-        return Customer.fromString(response.responseBody)
+        return Customer.fromJson(response.responseJson)
     }
 
     @Throws(InvalidRequestException::class, APIConnectionException::class, APIException::class,
@@ -671,7 +670,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 appInfo
             )
         )
-        return JSONObject(response.responseBody).getString("pin")
+        return response.responseJson.getString("pin")
     }
 
     @Throws(InvalidRequestException::class, APIConnectionException::class, APIException::class,
@@ -707,7 +706,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 appInfo
             )
         )
-        return FpxBankStatuses.fromJson(response.responseBody?.let { JSONObject(it) })
+        return FpxBankStatuses.fromJson(response.responseJson)
     }
 
     @VisibleForTesting
@@ -733,7 +732,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 appInfo
             )
         )
-        return Stripe3ds2AuthResult.fromJson(JSONObject(response.responseBody))
+        return Stripe3ds2AuthResult.fromJson(response.responseJson)
     }
 
     override fun start3ds2Auth(
@@ -776,18 +775,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     @VisibleForTesting
     fun getDetachPaymentMethodUrl(paymentMethodId: String): String {
         return getApiUrl("payment_methods/%s/detach", paymentMethodId)
-    }
-
-    @Throws(InvalidRequestException::class, APIException::class, AuthenticationException::class,
-        CardException::class)
-    private fun convertErrorsToExceptionsAndThrowIfNecessary(response: StripeResponse) {
-        val responseCode = response.responseCode
-        val responseBody = response.responseBody
-        val requestId = response.responseHeaders?.get("Request-Id")?.firstOrNull()
-
-        if (responseCode < 200 || responseCode >= 300) {
-            handleApiError(responseBody, responseCode, requestId)
-        }
     }
 
     /**
@@ -862,8 +849,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
     @Throws(InvalidRequestException::class, AuthenticationException::class, CardException::class,
         APIException::class)
-    private fun handleApiError(responseBody: String?, responseCode: Int, requestId: String?) {
-        val stripeError = ErrorParser.parseError(responseBody)
+    private fun handleApiError(response: StripeResponse) {
+        val requestId = response.requestId
+        val responseCode = response.responseCode
+        val stripeError = ErrorParser.parseError(response.responseJson)
         when (responseCode) {
             HttpURLConnection.HTTP_BAD_REQUEST, HttpURLConnection.HTTP_NOT_FOUND -> {
                 throw InvalidRequestException(
@@ -915,7 +904,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         }
 
         if (response.hasErrorCode()) {
-            handleApiError(response.responseBody, response.responseCode, response.requestId)
+            handleApiError(response)
         }
 
         resetDnsCacheTtl(dnsCacheData)
@@ -961,7 +950,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         val response = makeApiRequest(
             ApiRequest.createPost(url, options, params, appInfo)
         )
-        return Token.fromString(response.responseBody)
+        return Token.fromJson(response.responseJson)
     }
 
     private fun fireFingerprintRequest() {

@@ -1,6 +1,8 @@
 package com.stripe.android
 
 import java.net.HttpURLConnection
+import org.json.JSONException
+import org.json.JSONObject
 
 /**
  * Represents a response from the Stripe servers.
@@ -32,6 +34,14 @@ internal data class StripeResponse internal constructor(
     internal fun hasErrorCode(): Boolean {
         return responseCode < 200 || responseCode >= 300
     }
+
+    internal val responseJson: JSONObject
+        @Throws(JSONException::class)
+        get() {
+            return responseBody?.let {
+                JSONObject(it)
+            } ?: JSONObject()
+        }
 
     override fun toString(): String {
         return "Request-Id: $requestId, Status Code: $responseCode"

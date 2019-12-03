@@ -2,6 +2,7 @@ package com.stripe.android
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.json.JSONObject
 
 /**
  * Test class for [ErrorParser].
@@ -15,6 +16,11 @@ class ErrorParserTest {
         assertEquals(errorMessage, message)
         assertEquals("invalid_request_error", type)
         assertEquals("", param)
+    }
+
+    @Test
+    fun parseError_withEmptyJson_addsInvalidResponseMessage() {
+        assertEquals(ErrorParser.MALFORMED, ErrorParser.parseError(JSONObject()))
     }
 
     @Test
@@ -34,7 +40,7 @@ class ErrorParserTest {
     }
 
     private companion object {
-        private val RAW_INVALID_REQUEST_ERROR =
+        private val RAW_INVALID_REQUEST_ERROR = JSONObject(
             """
             {
                 "error": {
@@ -43,16 +49,18 @@ class ErrorParserTest {
                 }
             }
             """.trimIndent()
+        )
 
-        private val RAW_INCORRECT_FORMAT_ERROR =
+        private val RAW_INCORRECT_FORMAT_ERROR = JSONObject(
             """
             {
                 "message": "The Stripe API is only accessible over HTTPS.  Please see <https://stripe.com/docs> for more information.",
                 "type": "invalid_request_error"
             }
             """.trimIndent()
+        )
 
-        private val RAW_ERROR_WITH_ALL_FIELDS =
+        private val RAW_ERROR_WITH_ALL_FIELDS = JSONObject(
             """
             {
                 "error": {
@@ -65,5 +73,6 @@ class ErrorParserTest {
                 }
             }
             """.trimIndent()
+        )
     }
 }
