@@ -27,8 +27,6 @@ import com.stripe.android.PaymentSessionData
 import com.stripe.android.PaymentSessionFixtures
 import com.stripe.android.R
 import com.stripe.android.exception.APIException
-import com.stripe.android.model.Address
-import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
 import com.stripe.android.view.PaymentFlowExtras.EVENT_SHIPPING_INFO_PROCESSED
 import com.stripe.android.view.PaymentFlowExtras.EXTRA_IS_SHIPPING_INFO_VALID
@@ -319,19 +317,7 @@ class PaymentFlowActivityTest {
     }
 
     private companion object {
-        private val SHIPPING_INFO = ShippingInformation(
-            Address.Builder()
-                .setCity("San Francisco")
-                .setCountry("US")
-                .setLine1("123 Market St")
-                .setLine2("#345")
-                .setPostalCode("94107")
-                .setState("CA")
-                .build(),
-            "Fake Name",
-            "(555) 555-5555"
-        )
-
+        private val SHIPPING_INFO = ShippingInfoFixtures.DEFAULT
         private val SHIPPING_METHODS = arrayListOf(
             ShippingMethod("UPS Ground", "ups-ground",
                 0, "USD", "Arrives in 3-5 days"),
