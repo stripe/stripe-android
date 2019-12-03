@@ -27,8 +27,10 @@ import androidx.core.view.AccessibilityDelegateCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import com.stripe.android.R
+import com.stripe.android.model.Address
 import com.stripe.android.model.Card
 import com.stripe.android.model.Card.CardBrand
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_CARD
 import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_CVC
@@ -63,6 +65,15 @@ class CardInputWidget @JvmOverloads constructor(
     private var dimensionOverrides: DimensionOverrideSettings? = null
     internal val placementParameters: PlacementParameters = PlacementParameters()
 
+    private val postalCode: String? = null
+
+    private val cvcValue: String?
+        get() {
+            return cvcNumberEditText.cvcValue
+        }
+
+    private val standardFields: List<StripeEditText>
+
     /**
      * Gets a [PaymentMethodCreateParams.Card] object from the user input, if all fields are
      * valid. If not, returns `null`.
@@ -70,13 +81,13 @@ class CardInputWidget @JvmOverloads constructor(
      * @return a valid [PaymentMethodCreateParams.Card] object based on user input, or
      * `null` if any field is invalid
      */
-    override // CVC/CVV is the only field not validated by the entry control itself, so we check here.
-    val paymentMethodCard: PaymentMethodCreateParams.Card?
+    override val paymentMethodCard: PaymentMethodCreateParams.Card?
         get() {
             val cardNumber = cardNumberEditText.cardNumber
             val cardDate = expiryDateEditText.validDateFields
-            val cvcValue = cvcNumberEditText.text.toString().trim()
-            return if (cardNumber == null || cardDate == null || !isCvcLengthValid(cvcValue)) {
+            val cvcValue = cvcValue
+
+            return if (cardNumber == null || cardDate == null || cvcValue == null) {
                 null
             } else {
                 PaymentMethodCreateParams.Card.Builder()
@@ -88,11 +99,22 @@ class CardInputWidget @JvmOverloads constructor(
             }
         }
 
+    private val billingDetails: PaymentMethod.BillingDetails?
+        get() {
+            return postalCode?.let {
+                PaymentMethod.BillingDetails(
+                    address = Address(
+                        postalCode = it
+                    )
+                )
+            }
+        }
+
     override val paymentMethodCreateParams: PaymentMethodCreateParams?
         get() {
-            val card = paymentMethodCard ?: return null
-
-            return PaymentMethodCreateParams.create(card)
+            return paymentMethodCard?.let { card ->
+                PaymentMethodCreateParams.create(card, billingDetails)
+            }
         }
 
     /**
@@ -108,19 +130,16 @@ class CardInputWidget @JvmOverloads constructor(
             return builder?.build()
         }
 
-    override // CVC/CVV is the only field not validated by the entry control itself, so we check here.
-    val cardBuilder: Card.Builder?
+    override val cardBuilder: Card.Builder?
         get() {
             val cardNumber = cardNumberEditText.cardNumber
             val cardDate = expiryDateEditText.validDateFields
             return if (cardNumber == null || cardDate == null) {
                 null
             } else {
-                val cvcValue = cvcNumberEditText.text.toString().trim()
-                if (!isCvcLengthValid(cvcValue)) {
-                    null
-                } else {
-                    Card.Builder(cardNumber, cardDate.first, cardDate.second, cvcValue)
+                cvcValue?.let {
+                    Card.Builder(cardNumber, cardDate.first, cardDate.second, it)
+                        .addressZip(postalCode)
                         .loggingTokens(listOf(LOGGING_TOKEN))
                 }
             }
@@ -141,11 +160,16 @@ class CardInputWidget @JvmOverloads constructor(
         orientation = HORIZONTAL
         minimumWidth = resources.getDimensionPixelSize(R.dimen.stripe_card_widget_min_width)
 
-        cardIconImageView = findViewById(R.id.iv_card_icon)
-        cardNumberEditText = findViewById(R.id.et_card_number)
-        expiryDateEditText = findViewById(R.id.et_expiry_date)
-        cvcNumberEditText = findViewById(R.id.et_cvc)
         frameLayout = findViewById(R.id.frame_container)
+        cardNumberEditText = frameLayout.findViewById(R.id.et_card_number)
+        expiryDateEditText = frameLayout.findViewById(R.id.et_expiry_date)
+        cvcNumberEditText = frameLayout.findViewById(R.id.et_cvc)
+
+        cardIconImageView = findViewById(R.id.iv_card_icon)
+
+        standardFields = listOf(
+            cardNumberEditText, cvcNumberEditText, expiryDateEditText
+        )
 
         initView(attrs)
     }
@@ -212,9 +236,8 @@ class CardInputWidget @JvmOverloads constructor(
             this.hasFocus()) {
             cardNumberEditText.requestFocus()
         }
-        cvcNumberEditText.setText("")
-        expiryDateEditText.setText("")
-        cardNumberEditText.setText("")
+
+        standardFields.forEach { it.setText("") }
     }
 
     /**
@@ -223,9 +246,7 @@ class CardInputWidget @JvmOverloads constructor(
      * @param isEnabled boolean indicating whether fields should be enabled
      */
     override fun setEnabled(isEnabled: Boolean) {
-        cardNumberEditText.isEnabled = isEnabled
-        expiryDateEditText.isEnabled = isEnabled
-        cvcNumberEditText.isEnabled = isEnabled
+        standardFields.forEach { it.isEnabled = isEnabled }
     }
 
     /**
@@ -257,9 +278,7 @@ class CardInputWidget @JvmOverloads constructor(
      * `false` otherwise
      */
     override fun isEnabled(): Boolean {
-        return cardNumberEditText.isEnabled &&
-            expiryDateEditText.isEnabled &&
-            cvcNumberEditText.isEnabled
+        return standardFields.all { it.isEnabled }
     }
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
@@ -274,15 +293,15 @@ class CardInputWidget @JvmOverloads constructor(
     }
 
     override fun onSaveInstanceState(): Parcelable {
-        val bundle = Bundle()
-        bundle.putParcelable(EXTRA_SUPER_STATE, super.onSaveInstanceState())
-        bundle.putBoolean(EXTRA_CARD_VIEWED, cardNumberIsViewed)
-        return bundle
+        return Bundle().apply {
+            putParcelable(STATE_SUPER_STATE, super.onSaveInstanceState())
+            putBoolean(STATE_CARD_VIEWED, cardNumberIsViewed)
+        }
     }
 
     override fun onRestoreInstanceState(state: Parcelable) {
         if (state is Bundle) {
-            cardNumberIsViewed = state.getBoolean(EXTRA_CARD_VIEWED, true)
+            cardNumberIsViewed = state.getBoolean(STATE_CARD_VIEWED, true)
             updateSpaceSizes(cardNumberIsViewed)
             totalLengthInPixels = frameWidth
             val cardMargin: Int
@@ -295,16 +314,14 @@ class CardInputWidget @JvmOverloads constructor(
             } else {
                 cardMargin = -1 * placementParameters.hiddenCardWidth
                 dateMargin = placementParameters.peekCardWidth + placementParameters.cardDateSeparation
-                cvcMargin = (dateMargin +
-                    placementParameters.dateWidth +
-                    placementParameters.dateCvcSeparation)
+                cvcMargin = dateMargin + placementParameters.dateWidth + placementParameters.dateCvcSeparation
             }
 
             setLayoutValues(placementParameters.cardWidth, cardMargin, cardNumberEditText)
             setLayoutValues(placementParameters.dateWidth, dateMargin, expiryDateEditText)
             setLayoutValues(placementParameters.cvcWidth, cvcMargin, cvcNumberEditText)
 
-            super.onRestoreInstanceState(state.getParcelable(EXTRA_SUPER_STATE))
+            super.onRestoreInstanceState(state.getParcelable(STATE_SUPER_STATE))
         } else {
             super.onRestoreInstanceState(state)
         }
@@ -424,13 +441,6 @@ class CardInputWidget @JvmOverloads constructor(
         }
     }
 
-    private fun isCvcLengthValid(cvcValue: String): Boolean {
-        val cvcLength = cvcValue.length
-        return if (isAmEx && cvcLength == Card.CVC_LENGTH_AMERICAN_EXPRESS) {
-            true
-        } else cvcLength == Card.CVC_LENGTH_COMMON
-    }
-
     private fun setLayoutValues(width: Int, margin: Int, editText: StripeEditText) {
         val layoutParams = editText.layoutParams as FrameLayout.LayoutParams
         layoutParams.width = width
@@ -488,9 +498,8 @@ class CardInputWidget @JvmOverloads constructor(
         cardHintText?.let {
             cardNumberEditText.hint = it
         }
-        cardNumberEditText.setErrorColor(errorColorInt)
-        expiryDateEditText.setErrorColor(errorColorInt)
-        cvcNumberEditText.setErrorColor(errorColorInt)
+
+        standardFields.forEach { it.setErrorColor(errorColorInt) }
 
         cardNumberEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
@@ -517,7 +526,7 @@ class CardInputWidget @JvmOverloads constructor(
             updateIconCvc(
                 cardNumberEditText.cardBrand,
                 hasFocus,
-                cvcNumberEditText.text.toString()
+                cvcValue
             )
         }
 
@@ -648,10 +657,10 @@ class CardInputWidget @JvmOverloads constructor(
             }
         }
 
-        val cvcDestination = (placementParameters.peekCardWidth +
+        val cvcDestination = placementParameters.peekCardWidth +
             placementParameters.cardDateSeparation +
             placementParameters.dateWidth +
-            placementParameters.dateCvcSeparation)
+            placementParameters.dateCvcSeparation
         val cvcStartMargin = cvcDestination + (dateStartMargin - dateDestination)
 
         val slideCvcRightAnimation = object : Animation() {
@@ -874,8 +883,8 @@ class CardInputWidget @JvmOverloads constructor(
         private const val FULL_SIZING_CARD_TEXT = "4242 4242 4242 4242"
         private const val FULL_SIZING_DATE_TEXT = "MM/MM"
 
-        private const val EXTRA_CARD_VIEWED = "extra_card_viewed"
-        private const val EXTRA_SUPER_STATE = "extra_super_state"
+        private const val STATE_CARD_VIEWED = "state_card_viewed"
+        private const val STATE_SUPER_STATE = "state_super_state"
 
         // This value is used to ensure that onSaveInstanceState is called
         // in the event that the user doesn't give this control an ID.

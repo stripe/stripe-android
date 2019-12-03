@@ -4,6 +4,7 @@ import android.os.Build
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageView
+import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.CardNumberFixtures.VALID_AMEX_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VALID_AMEX_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.VALID_DINERS_CLUB_NO_SPACES
@@ -32,7 +33,6 @@ import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.reset
-import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -45,12 +45,23 @@ import org.robolectric.annotation.Config
 internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
     CardInputTestActivity::class.java
 ) {
-    private lateinit var cardInputWidget: CardInputWidget
-    private lateinit var cardNumberEditText: CardNumberEditText
-    private lateinit var expiryEditText: StripeEditText
-    private lateinit var cvcEditText: StripeEditText
-    private lateinit var onGlobalFocusChangeListener: TestFocusChangeListener
-    private lateinit var activity: CardInputTestActivity
+    private val onGlobalFocusChangeListener: TestFocusChangeListener = TestFocusChangeListener()
+
+    private val activity: CardInputTestActivity by lazy {
+        createStartedActivity()
+    }
+    private val cardInputWidget: CardInputWidget by lazy {
+        activity.cardInputWidget
+    }
+    private val cardNumberEditText: CardNumberEditText by lazy {
+        activity.cardNumberEditText
+    }
+    private val expiryEditText: StripeEditText by lazy {
+        cardInputWidget.findViewById<StripeEditText>(R.id.et_expiry_date)
+    }
+    private val cvcEditText: CvcEditText by lazy {
+        cardInputWidget.findViewById<CvcEditText>(R.id.et_cvc)
+    }
 
     @Mock
     private lateinit var cardInputListener: CardInputListener
@@ -58,8 +69,6 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
     @BeforeTest
     fun setup() {
         MockitoAnnotations.initMocks(this)
-
-        activity = createStartedActivity()
 
         val dimensionOverrides = object : CardInputWidget.DimensionOverrideSettings {
             override val frameWidth: Int
@@ -72,22 +81,16 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
             }
         }
 
-        cardInputWidget = activity.cardInputWidget
-
         cardInputWidget.setCardNumberTextWatcher(object : StripeTextWatcher() {})
         cardInputWidget.setExpiryDateTextWatcher(object : StripeTextWatcher() {})
         cardInputWidget.setCvcNumberTextWatcher(object : StripeTextWatcher() {})
 
         cardInputWidget.setDimensionOverrideSettings(dimensionOverrides)
-        onGlobalFocusChangeListener = TestFocusChangeListener()
         cardInputWidget.viewTreeObserver
             .addOnGlobalFocusChangeListener(onGlobalFocusChangeListener)
 
-        cardNumberEditText = activity.cardNumberEditText
         cardNumberEditText.setText("")
 
-        expiryEditText = cardInputWidget.findViewById(R.id.et_expiry_date)
-        cvcEditText = cardInputWidget.findViewById(R.id.et_cvc)
         val iconView = cardInputWidget.findViewById<ImageView>(R.id.iv_card_icon)
 
         // Set the width of the icon and its margin so that test calculations have
@@ -127,10 +130,14 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         assertTrue(card.validateCard())
         assertTrue(EXPECTED_LOGGING_ARRAY.contentEquals(card.loggingTokens.toTypedArray()))
 
-        val paymentMethodCard = cardInputWidget.paymentMethodCard
-        assertNotNull(paymentMethodCard)
-        val expectedPaymentMethodCard = PaymentMethodCreateParams.Card.Builder().setNumber(VALID_VISA_NO_SPACES)
-            .setCvc("123").setExpiryYear(2050).setExpiryMonth(12).build()
+        val paymentMethodCard = requireNotNull(cardInputWidget.paymentMethodCard)
+        val expectedPaymentMethodCard =
+            PaymentMethodCreateParams.Card.Builder()
+                .setNumber(VALID_VISA_NO_SPACES)
+                .setCvc("123")
+                .setExpiryYear(2050)
+                .setExpiryMonth(12)
+                .build()
         assertEquals(expectedPaymentMethodCard, paymentMethodCard)
     }
 
@@ -144,8 +151,7 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         expiryEditText.append("50")
         cvcEditText.append("1234")
 
-        val card = cardInputWidget.card
-        assertNotNull(card)
+        val card = requireNotNull(cardInputWidget.card)
         assertEquals(VALID_AMEX_NO_SPACES, card.number)
         assertNotNull(card.expMonth)
         assertNotNull(card.expYear)
@@ -176,8 +182,7 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         expiryEditText.append("50")
         cvcEditText.append("123")
 
-        val card = cardInputWidget.card
-        assertNotNull(card)
+        val card = requireNotNull(cardInputWidget.card)
         assertEquals(VALID_DINERS_CLUB_NO_SPACES, card.number)
         assertNotNull(card.expMonth)
         assertNotNull(card.expYear)
@@ -332,8 +337,8 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
 
         cardNumberEditText.setText(VALID_VISA_WITH_SPACES)
 
-        verify<CardInputListener>(cardInputListener).onCardComplete()
-        verify<CardInputListener>(cardInputListener).onFocusChange(FOCUS_EXPIRY)
+        verify(cardInputListener).onCardComplete()
+        verify(cardInputListener).onFocusChange(FOCUS_EXPIRY)
         assertEquals(R.id.et_card_number, onGlobalFocusChangeListener.oldFocusId)
         assertEquals(R.id.et_expiry_date, onGlobalFocusChangeListener.newFocusId)
     }
@@ -348,7 +353,7 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         reset<CardInputListener>(cardInputListener)
 
         ViewTestUtils.sendDeleteKeyEvent(expiryEditText)
-        verify<CardInputListener>(cardInputListener).onFocusChange(FOCUS_CARD)
+        verify(cardInputListener).onFocusChange(FOCUS_CARD)
         assertEquals(R.id.et_expiry_date, onGlobalFocusChangeListener.oldFocusId)
         assertEquals(R.id.et_card_number, onGlobalFocusChangeListener.newFocusId)
 
@@ -377,21 +382,21 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         cardInputWidget.setCardInputListener(cardInputListener)
         cardNumberEditText.setText(VALID_VISA_WITH_SPACES)
 
-        verify<CardInputListener>(cardInputListener).onCardComplete()
-        verify<CardInputListener>(cardInputListener).onFocusChange(FOCUS_EXPIRY)
+        verify(cardInputListener).onCardComplete()
+        verify(cardInputListener).onFocusChange(FOCUS_EXPIRY)
 
         expiryEditText.append("12")
         expiryEditText.append("79")
 
-        verify<CardInputListener>(cardInputListener).onExpirationComplete()
-        verify<CardInputListener>(cardInputListener).onFocusChange(FOCUS_CVC)
+        verify(cardInputListener).onExpirationComplete()
+        verify(cardInputListener).onFocusChange(FOCUS_CVC)
         assertTrue(cvcEditText.hasFocus())
 
         // Clearing already-verified data.
         reset<CardInputListener>(cardInputListener)
 
         ViewTestUtils.sendDeleteKeyEvent(cvcEditText)
-        verify<CardInputListener>(cardInputListener).onFocusChange(FOCUS_EXPIRY)
+        verify(cardInputListener).onFocusChange(FOCUS_EXPIRY)
         assertEquals(R.id.et_cvc, onGlobalFocusChangeListener.oldFocusId)
         assertEquals(R.id.et_expiry_date, onGlobalFocusChangeListener.newFocusId)
 
@@ -783,7 +788,6 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
     }
 
     private companion object {
-
         // Every Card made by the CardInputView should have the card widget token.
         private val EXPECTED_LOGGING_ARRAY = arrayOf(LOGGING_TOKEN)
     }
