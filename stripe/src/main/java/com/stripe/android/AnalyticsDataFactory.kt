@@ -169,9 +169,9 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     }
 
     internal fun getSourceCreationParams(
-        productUsageTokens: List<String>?,
         publishableKey: String,
-        @Source.SourceType sourceType: String
+        @Source.SourceType sourceType: String,
+        productUsageTokens: List<String>? = null
     ): Map<String, Any> {
         return getEventLoggingParams(
             EventName.SOURCE_CREATION,
