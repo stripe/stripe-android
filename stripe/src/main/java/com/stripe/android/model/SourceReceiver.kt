@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
+import com.stripe.android.model.parsers.SourceReceiverJsonParser
 import kotlinx.android.parcel.Parcelize
 import org.json.JSONException
 import org.json.JSONObject
@@ -19,11 +20,6 @@ data class SourceReceiver internal constructor(
 ) : StripeModel(), Parcelable {
 
     companion object {
-        private const val FIELD_ADDRESS = "address"
-        private const val FIELD_AMOUNT_CHARGED = "amount_charged"
-        private const val FIELD_AMOUNT_RECEIVED = "amount_received"
-        private const val FIELD_AMOUNT_RETURNED = "amount_returned"
-
         @JvmStatic
         fun fromString(jsonString: String?): SourceReceiver? {
             if (jsonString == null) {
@@ -39,14 +35,9 @@ data class SourceReceiver internal constructor(
 
         @JvmStatic
         fun fromJson(jsonObject: JSONObject?): SourceReceiver? {
-            return if (jsonObject == null) {
-                null
-            } else SourceReceiver(
-                StripeJsonUtils.optString(jsonObject, FIELD_ADDRESS),
-                jsonObject.optLong(FIELD_AMOUNT_CHARGED),
-                jsonObject.optLong(FIELD_AMOUNT_RECEIVED),
-                jsonObject.optLong(FIELD_AMOUNT_RETURNED)
-            )
+            return jsonObject?.let {
+                SourceReceiverJsonParser().parse(it)
+            }
         }
     }
 }

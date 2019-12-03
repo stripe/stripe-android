@@ -2,7 +2,7 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import androidx.annotation.StringDef
-import com.stripe.android.model.StripeJsonUtils.optString
+import com.stripe.android.model.parsers.SourceCodeVerificationJsonParser
 import kotlinx.android.parcel.Parcelize
 import org.json.JSONObject
 
@@ -31,27 +31,10 @@ data class SourceCodeVerification internal constructor(
     }
 
     companion object {
-        private const val FIELD_ATTEMPTS_REMAINING = "attempts_remaining"
-        private const val FIELD_STATUS = "status"
-        private const val INVALID_ATTEMPTS_REMAINING = -1
-
         @JvmStatic
         fun fromJson(jsonObject: JSONObject?): SourceCodeVerification? {
-            return if (jsonObject == null) {
-                null
-            } else SourceCodeVerification(
-                jsonObject.optInt(FIELD_ATTEMPTS_REMAINING, INVALID_ATTEMPTS_REMAINING),
-                asStatus(optString(jsonObject, FIELD_STATUS))
-            )
-        }
-
-        @Status
-        private fun asStatus(stringStatus: String?): String? {
-            return when (stringStatus) {
-                Status.PENDING -> Status.PENDING
-                Status.SUCCEEDED -> Status.SUCCEEDED
-                Status.FAILED -> Status.FAILED
-                else -> null
+            return jsonObject?.let {
+                SourceCodeVerificationJsonParser().parse(it)
             }
         }
     }

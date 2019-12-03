@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import com.stripe.android.model.parsers.AddressJsonParser
 import org.json.JSONObject
 
 internal object AddressFixtures {
@@ -16,5 +17,5 @@ internal object AddressFixtures {
         """.trimIndent()
     )
 
-    val ADDRESS = requireNotNull(Address.fromJson(ADDRESS_JSON))
+    val ADDRESS = AddressJsonParser().parse(ADDRESS_JSON)
 }

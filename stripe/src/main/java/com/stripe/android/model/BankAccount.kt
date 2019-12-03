@@ -3,6 +3,7 @@ package com.stripe.android.model
 import android.os.Parcelable
 import androidx.annotation.Size
 import androidx.annotation.StringDef
+import com.stripe.android.model.parsers.BankAccountJsonParser
 import kotlinx.android.parcel.Parcelize
 import org.json.JSONObject
 
@@ -26,7 +27,7 @@ data class BankAccount internal constructor(
     val fingerprint: String?,
     val last4: String?,
     val routingNumber: String?
-) : StripeParamsModel, Parcelable {
+) : StripeModel(), StripeParamsModel, Parcelable {
 
     @Retention(AnnotationRetention.SOURCE)
     @StringDef(BankAccountType.COMPANY, BankAccountType.INDIVIDUAL)
@@ -96,15 +97,6 @@ data class BankAccount internal constructor(
     }
 
     companion object {
-        private const val FIELD_ACCOUNT_HOLDER_NAME = "account_holder_name"
-        private const val FIELD_ACCOUNT_HOLDER_TYPE = "account_holder_type"
-        private const val FIELD_BANK_NAME = "bank_name"
-        private const val FIELD_COUNTRY = "country"
-        private const val FIELD_CURRENCY = "currency"
-        private const val FIELD_FINGERPRINT = "fingerprint"
-        private const val FIELD_LAST4 = "last4"
-        private const val FIELD_ROUTING_NUMBER = "routing_number"
-
         /**
          * Converts a String value into the appropriate [BankAccountType].
          *
@@ -122,15 +114,7 @@ data class BankAccount internal constructor(
         }
 
         fun fromJson(jsonObject: JSONObject): BankAccount {
-            return BankAccount(
-                StripeJsonUtils.optString(jsonObject, FIELD_ACCOUNT_HOLDER_NAME),
-                asBankAccountType(StripeJsonUtils.optString(jsonObject, FIELD_ACCOUNT_HOLDER_TYPE)),
-                StripeJsonUtils.optString(jsonObject, FIELD_BANK_NAME),
-                StripeJsonUtils.optCountryCode(jsonObject, FIELD_COUNTRY),
-                StripeJsonUtils.optCurrency(jsonObject, FIELD_CURRENCY),
-                StripeJsonUtils.optString(jsonObject, FIELD_FINGERPRINT),
-                StripeJsonUtils.optString(jsonObject, FIELD_LAST4),
-                StripeJsonUtils.optString(jsonObject, FIELD_ROUTING_NUMBER))
+            return BankAccountJsonParser().parse(jsonObject)
         }
     }
 }

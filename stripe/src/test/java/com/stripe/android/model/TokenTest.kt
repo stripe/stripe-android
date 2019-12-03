@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import com.stripe.android.model.parsers.TokenJsonParser
 import java.util.Date
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -7,9 +8,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import org.json.JSONObject
 
-/**
- * Test class for [Token].
- */
 class TokenTest {
 
     @Test
@@ -53,13 +51,13 @@ class TokenTest {
 
     @Test
     fun parseToken_withoutId_returnsNull() {
-        val token = Token.fromJson(RAW_TOKEN_NO_ID)
+        val token = TokenJsonParser().parse(RAW_TOKEN_NO_ID)
         assertNull(token)
     }
 
     @Test
     fun parseToken_withoutType_returnsNull() {
-        val token = Token.fromJson(RAW_BANK_TOKEN_NO_TYPE)
+        val token = TokenJsonParser().parse(RAW_BANK_TOKEN_NO_TYPE)
         assertNull(token)
     }
 

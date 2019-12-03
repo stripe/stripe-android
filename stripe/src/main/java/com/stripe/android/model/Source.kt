@@ -7,6 +7,14 @@ import com.stripe.android.model.Source.SourceFlow
 import com.stripe.android.model.Source.SourceType
 import com.stripe.android.model.StripeJsonUtils.optLong
 import com.stripe.android.model.StripeJsonUtils.optString
+import com.stripe.android.model.parsers.SourceCardDataJsonParser
+import com.stripe.android.model.parsers.SourceCodeVerificationJsonParser
+import com.stripe.android.model.parsers.SourceOrderJsonParser
+import com.stripe.android.model.parsers.SourceOwnerJsonParser
+import com.stripe.android.model.parsers.SourceReceiverJsonParser
+import com.stripe.android.model.parsers.SourceRedirectJsonParser
+import com.stripe.android.model.parsers.SourceSepaDebitDataJsonParser
+import com.stripe.android.model.parsers.WeChatJsonParser
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.parcel.RawValue
 import org.json.JSONException
@@ -264,12 +272,9 @@ data class Source internal constructor(
         }
 
         private fun fromCardJson(jsonObject: JSONObject): Source {
-            val id = optString(jsonObject, FIELD_ID)
-            val sourceTypeModel = SourceCardData.fromJson(jsonObject)
-
             return Source(
-                id,
-                sourceTypeModel = sourceTypeModel,
+                optString(jsonObject, FIELD_ID),
+                sourceTypeModel = SourceCardDataJsonParser().parse(jsonObject),
                 type = SourceType.CARD,
                 typeRaw = SourceType.CARD
             )
@@ -286,7 +291,7 @@ data class Source internal constructor(
                 jsonObject.optJSONObject(typeRaw)
             )
             val sourceTypeModel = if (MODELED_TYPES.contains(typeRaw)) {
-                optStripeJsonModel(jsonObject, typeRaw, StripeSourceTypeModel::class.java)
+                optStripeJsonModel<StripeSourceTypeModel>(jsonObject, typeRaw)
             } else {
                 null
             }
@@ -297,8 +302,7 @@ data class Source internal constructor(
                 clientSecret = optString(jsonObject, FIELD_CLIENT_SECRET),
                 codeVerification = optStripeJsonModel(
                     jsonObject,
-                    FIELD_CODE_VERIFICATION,
-                    SourceCodeVerification::class.java
+                    FIELD_CODE_VERIFICATION
                 ),
                 created = optLong(jsonObject, FIELD_CREATED),
                 currency = optString(jsonObject, FIELD_CURRENCY),
@@ -307,17 +311,11 @@ data class Source internal constructor(
                 metaData = StripeJsonUtils.jsonObjectToStringMap(
                     jsonObject.optJSONObject(FIELD_METADATA)
                 ),
-                owner = optStripeJsonModel(jsonObject, FIELD_OWNER, SourceOwner::class.java),
-                receiver = optStripeJsonModel(
-                    jsonObject,
-                    FIELD_RECEIVER,
-                    SourceReceiver::class.java
-                ),
-                redirect = optStripeJsonModel(
-                    jsonObject, FIELD_REDIRECT, SourceRedirect::class.java
-                ),
+                owner = optStripeJsonModel(jsonObject, FIELD_OWNER),
+                receiver = optStripeJsonModel(jsonObject, FIELD_RECEIVER),
+                redirect = optStripeJsonModel(jsonObject, FIELD_REDIRECT),
                 sourceOrder = jsonObject.optJSONObject(FIELD_SOURCE_ORDER)?.let {
-                    SourceOrder.fromJson(it)
+                    SourceOrderJsonParser().parse(it)
                 },
                 statementDescriptor = optString(jsonObject, FIELD_STATEMENT_DESCRIPTOR),
                 status = asSourceStatus(optString(jsonObject, FIELD_STATUS)),
@@ -327,53 +325,60 @@ data class Source internal constructor(
                 typeRaw = typeRaw,
                 usage = asUsage(optString(jsonObject, FIELD_USAGE)),
                 weChatParam = if (SourceType.WECHAT == type) {
-                    WeChat.fromJson(jsonObject.optJSONObject(FIELD_WECHAT) ?: JSONObject())
+                    WeChatJsonParser().parse(
+                        jsonObject.optJSONObject(FIELD_WECHAT) ?: JSONObject()
+                    )
                 } else {
                     null
                 }
             )
         }
 
-        private fun <T : StripeModel> optStripeJsonModel(
+        private inline fun <reified T : StripeModel> optStripeJsonModel(
             jsonObject: JSONObject,
-            @Size(min = 1) key: String,
-            type: Class<T>
+            @Size(min = 1) key: String
         ): T? {
             if (!jsonObject.has(key)) {
                 return null
             }
 
-            when (key) {
+            val model: StripeModel? = when (key) {
                 FIELD_CODE_VERIFICATION -> {
-                    return type.cast(SourceCodeVerification.fromJson(
-                        jsonObject.optJSONObject(FIELD_CODE_VERIFICATION)
-                    ))
+                    jsonObject.optJSONObject(FIELD_CODE_VERIFICATION)?.let {
+                        SourceCodeVerificationJsonParser().parse(it)
+                    }
                 }
                 FIELD_OWNER -> {
-                    return type.cast(
-                        SourceOwner.fromJson(jsonObject.optJSONObject(FIELD_OWNER)))
+                    jsonObject.optJSONObject(FIELD_OWNER)?.let {
+                        SourceOwnerJsonParser().parse(it)
+                    }
                 }
                 FIELD_RECEIVER -> {
-                    return type.cast(
-                        SourceReceiver.fromJson(jsonObject.optJSONObject(FIELD_RECEIVER)))
+                    jsonObject.optJSONObject(FIELD_RECEIVER)?.let {
+                        SourceReceiverJsonParser().parse(it)
+                    }
                 }
                 FIELD_REDIRECT -> {
-                    return type.cast(
-                        SourceRedirect.fromJson(jsonObject.optJSONObject(FIELD_REDIRECT)))
+                    jsonObject.optJSONObject(FIELD_REDIRECT)?.let {
+                        SourceRedirectJsonParser().parse(it)
+                    }
                 }
                 SourceType.CARD -> {
-                    return type.cast(
-                        SourceCardData.fromJson(jsonObject.optJSONObject(SourceType.CARD)))
+                    jsonObject.optJSONObject(SourceType.CARD)?.let {
+                        SourceCardDataJsonParser().parse(it)
+                    }
                 }
                 SourceType.SEPA_DEBIT -> {
-                    return type.cast(SourceSepaDebitData.fromJson(
-                        jsonObject.optJSONObject(SourceType.SEPA_DEBIT)
-                    ))
+                    jsonObject.optJSONObject(SourceType.SEPA_DEBIT)?.let {
+                        SourceSepaDebitDataJsonParser().parse(it)
+                    }
                 }
                 else -> {
-                    return null
+                    null
                 }
             }
+
+            return model as? T
         }
 
         @SourceStatus

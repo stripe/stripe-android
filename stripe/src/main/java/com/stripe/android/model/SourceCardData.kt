@@ -1,9 +1,7 @@
 package com.stripe.android.model
 
 import androidx.annotation.StringDef
-import androidx.annotation.VisibleForTesting
-import com.stripe.android.model.StripeJsonUtils.optInteger
-import com.stripe.android.model.StripeJsonUtils.optString
+import com.stripe.android.model.parsers.SourceCardDataJsonParser
 import kotlinx.android.parcel.Parcelize
 import org.json.JSONObject
 
@@ -51,61 +49,10 @@ data class SourceCardData internal constructor(
     }
 
     companion object {
-        private const val FIELD_ADDRESS_LINE1_CHECK = "address_line1_check"
-        private const val FIELD_ADDRESS_ZIP_CHECK = "address_zip_check"
-        private const val FIELD_BRAND = "brand"
-        private const val FIELD_COUNTRY = "country"
-        private const val FIELD_CVC_CHECK = "cvc_check"
-        private const val FIELD_DYNAMIC_LAST4 = "dynamic_last4"
-        private const val FIELD_EXP_MONTH = "exp_month"
-        private const val FIELD_EXP_YEAR = "exp_year"
-        private const val FIELD_FUNDING = "funding"
-        private const val FIELD_LAST4 = "last4"
-        private const val FIELD_THREE_D_SECURE = "three_d_secure"
-        private const val FIELD_TOKENIZATION_METHOD = "tokenization_method"
-
         @JvmStatic
         fun fromJson(jsonObject: JSONObject?): SourceCardData? {
-            if (jsonObject == null) {
-                return null
-            }
-
-            return SourceCardData(
-                addressLine1Check = optString(jsonObject, FIELD_ADDRESS_LINE1_CHECK),
-                addressZipCheck = optString(jsonObject, FIELD_ADDRESS_ZIP_CHECK),
-                brand = Card.asCardBrand(optString(jsonObject, FIELD_BRAND)),
-                country = optString(jsonObject, FIELD_COUNTRY),
-                cvcCheck = optString(jsonObject, FIELD_CVC_CHECK),
-                dynamicLast4 = optString(jsonObject, FIELD_DYNAMIC_LAST4),
-                expiryMonth = optInteger(jsonObject, FIELD_EXP_MONTH),
-                expiryYear = optInteger(jsonObject, FIELD_EXP_YEAR),
-                funding = Card.asFundingType(optString(jsonObject, FIELD_FUNDING)),
-                last4 = optString(jsonObject, FIELD_LAST4),
-                threeDSecureStatus = asThreeDSecureStatus(
-                    optString(jsonObject, FIELD_THREE_D_SECURE)
-                ),
-                tokenizationMethod = optString(jsonObject, FIELD_TOKENIZATION_METHOD)
-            )
-        }
-
-        @JvmSynthetic
-        @VisibleForTesting
-        @ThreeDSecureStatus
-        internal fun asThreeDSecureStatus(threeDSecureStatus: String?): String? {
-            if (StripeJsonUtils.nullIfNullOrEmpty(threeDSecureStatus) == null) {
-                return null
-            }
-
-            return when {
-                ThreeDSecureStatus.REQUIRED.equals(threeDSecureStatus, ignoreCase = true) ->
-                    ThreeDSecureStatus.REQUIRED
-                ThreeDSecureStatus.OPTIONAL.equals(threeDSecureStatus, ignoreCase = true) ->
-                    ThreeDSecureStatus.OPTIONAL
-                ThreeDSecureStatus.NOT_SUPPORTED.equals(threeDSecureStatus, ignoreCase = true) ->
-                    ThreeDSecureStatus.NOT_SUPPORTED
-                ThreeDSecureStatus.RECOMMENDED.equals(threeDSecureStatus, ignoreCase = true) ->
-                    ThreeDSecureStatus.RECOMMENDED
-                else -> ThreeDSecureStatus.UNKNOWN
+            return jsonObject?.let {
+                SourceCardDataJsonParser().parse(it)
             }
         }
     }

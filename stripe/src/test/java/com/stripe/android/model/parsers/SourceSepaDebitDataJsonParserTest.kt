@@ -1,18 +1,15 @@
-package com.stripe.android.model
+package com.stripe.android.model.parsers
 
+import com.stripe.android.model.SourceSepaDebitData
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import org.json.JSONObject
 
-/**
- * Test class for [SourceSepaDebitData].
- */
-class SourceSepaDebitDataTest {
-
+class SourceSepaDebitDataJsonParserTest {
     @Test
     fun fromJson_withExampleData_returnsExpectedObject() {
-        val sepaData = SourceSepaDebitData.fromJson(EXAMPLE_SEPA_JSON_DATA)!!
+        val sepaData = parse(EXAMPLE_SEPA_JSON_DATA)
         assertEquals("37040044", sepaData.bankCode)
         assertEquals("R8MJxzkSUv1Kv07L", sepaData.fingerPrint)
         assertEquals("CK4K2GFVPOVR4T5B", sepaData.mandateReference)
@@ -25,17 +22,21 @@ class SourceSepaDebitDataTest {
     @Test
     fun testEquals() {
         assertEquals(
-            SourceSepaDebitData.fromJson(EXAMPLE_SEPA_JSON_DATA),
-            SourceSepaDebitData.fromJson(EXAMPLE_SEPA_JSON_DATA)
+            parse(EXAMPLE_SEPA_JSON_DATA),
+            parse(EXAMPLE_SEPA_JSON_DATA)
         )
     }
 
     @Test
     fun testHashCode() {
         assertEquals(
-            SourceSepaDebitData.fromJson(EXAMPLE_SEPA_JSON_DATA)!!.hashCode(),
-            SourceSepaDebitData.fromJson(EXAMPLE_SEPA_JSON_DATA)!!.hashCode()
+            parse(EXAMPLE_SEPA_JSON_DATA).hashCode(),
+            parse(EXAMPLE_SEPA_JSON_DATA).hashCode()
         )
+    }
+
+    private fun parse(jsonObject: JSONObject): SourceSepaDebitData {
+        return SourceSepaDebitDataJsonParser().parse(jsonObject)
     }
 
     private companion object {

@@ -1,7 +1,7 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
-import com.stripe.android.model.StripeJsonUtils.optString
+import com.stripe.android.model.parsers.ShippingInformationJsonParser
 import kotlinx.android.parcel.Parcelize
 import org.json.JSONObject
 
@@ -17,29 +17,23 @@ data class ShippingInformation constructor(
 
     override fun toParamMap(): Map<String, Any> {
         return listOf(
-            FIELD_NAME to name,
-            FIELD_PHONE to phone,
-            FIELD_ADDRESS to address?.toParamMap()
+            PARAM_NAME to name,
+            PARAM_PHONE to phone,
+            PARAM_ADDRESS to address?.toParamMap()
         )
             .mapNotNull { (first, second) -> second?.let { Pair(first, it) } }
             .toMap()
     }
 
     companion object {
-        private const val FIELD_ADDRESS = "address"
-        private const val FIELD_NAME = "name"
-        private const val FIELD_PHONE = "phone"
+        private const val PARAM_ADDRESS = "address"
+        private const val PARAM_NAME = "name"
+        private const val PARAM_PHONE = "phone"
 
         @JvmStatic
         fun fromJson(jsonObject: JSONObject?): ShippingInformation? {
-            return if (jsonObject == null) {
-                null
-            } else {
-                ShippingInformation(
-                    Address.fromJson(jsonObject.optJSONObject(FIELD_ADDRESS)),
-                    optString(jsonObject, FIELD_NAME),
-                    optString(jsonObject, FIELD_PHONE)
-                )
+            return jsonObject?.let {
+                ShippingInformationJsonParser().parse(it)
             }
         }
     }

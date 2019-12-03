@@ -8,11 +8,7 @@ import androidx.annotation.StringDef
 import com.stripe.android.CardUtils
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.R
-import com.stripe.android.model.StripeJsonUtils.optCountryCode
-import com.stripe.android.model.StripeJsonUtils.optCurrency
-import com.stripe.android.model.StripeJsonUtils.optHash
-import com.stripe.android.model.StripeJsonUtils.optInteger
-import com.stripe.android.model.StripeJsonUtils.optString
+import com.stripe.android.model.parsers.CardJsonParser
 import java.util.Calendar
 import kotlinx.android.parcel.Parcelize
 import org.json.JSONException
@@ -583,30 +579,6 @@ data class Card internal constructor(
 
         internal const val VALUE_CARD = "card"
 
-        private const val FIELD_OBJECT = "object"
-        private const val FIELD_ADDRESS_CITY = "address_city"
-        private const val FIELD_ADDRESS_COUNTRY = "address_country"
-        private const val FIELD_ADDRESS_LINE1 = "address_line1"
-        private const val FIELD_ADDRESS_LINE1_CHECK = "address_line1_check"
-        private const val FIELD_ADDRESS_LINE2 = "address_line2"
-        private const val FIELD_ADDRESS_STATE = "address_state"
-        private const val FIELD_ADDRESS_ZIP = "address_zip"
-        private const val FIELD_ADDRESS_ZIP_CHECK = "address_zip_check"
-        private const val FIELD_BRAND = "brand"
-        private const val FIELD_COUNTRY = "country"
-        private const val FIELD_CURRENCY = "currency"
-        private const val FIELD_CUSTOMER = "customer"
-        private const val FIELD_CVC_CHECK = "cvc_check"
-        private const val FIELD_EXP_MONTH = "exp_month"
-        private const val FIELD_EXP_YEAR = "exp_year"
-        private const val FIELD_FINGERPRINT = "fingerprint"
-        private const val FIELD_FUNDING = "funding"
-        private const val FIELD_METADATA = "metadata"
-        private const val FIELD_NAME = "name"
-        private const val FIELD_LAST4 = "last4"
-        private const val FIELD_ID = "id"
-        private const val FIELD_TOKENIZATION_METHOD = "tokenization_method"
-
         private val BRAND_RESOURCE_MAP = mapOf(
             CardBrand.AMERICAN_EXPRESS to R.drawable.stripe_ic_amex,
             CardBrand.DINERS_CLUB to R.drawable.stripe_ic_diners,
@@ -700,41 +672,9 @@ data class Card internal constructor(
 
         @JvmStatic
         fun fromJson(jsonObject: JSONObject?): Card? {
-            if (jsonObject == null || VALUE_CARD != jsonObject.optString(FIELD_OBJECT)) {
-                return null
+            return jsonObject?.let {
+                CardJsonParser().parse(it)
             }
-
-            // It's okay for the month to be missing, but not for it to be outside 1-12.
-            // We treat an invalid month the same way we would an invalid brand, by reading it as
-            // null.
-            val expMonth = (optInteger(jsonObject, FIELD_EXP_MONTH) ?: -1)
-                .takeUnless { it < 1 || it > 12 }
-            val expYear = (optInteger(jsonObject, FIELD_EXP_YEAR) ?: -1)
-                .takeUnless { it < 0 }
-
-            // Note that we'll never get the CVC or card number in JSON, so those values are null
-            return Builder(null, expMonth, expYear, null)
-                .addressCity(optString(jsonObject, FIELD_ADDRESS_CITY))
-                .addressLine1(optString(jsonObject, FIELD_ADDRESS_LINE1))
-                .addressLine1Check(optString(jsonObject, FIELD_ADDRESS_LINE1_CHECK))
-                .addressLine2(optString(jsonObject, FIELD_ADDRESS_LINE2))
-                .addressCountry(optString(jsonObject, FIELD_ADDRESS_COUNTRY))
-                .addressState(optString(jsonObject, FIELD_ADDRESS_STATE))
-                .addressZip(optString(jsonObject, FIELD_ADDRESS_ZIP))
-                .addressZipCheck(optString(jsonObject, FIELD_ADDRESS_ZIP_CHECK))
-                .brand(asCardBrand(optString(jsonObject, FIELD_BRAND)))
-                .country(optCountryCode(jsonObject, FIELD_COUNTRY))
-                .customer(optString(jsonObject, FIELD_CUSTOMER))
-                .currency(optCurrency(jsonObject, FIELD_CURRENCY))
-                .cvcCheck(optString(jsonObject, FIELD_CVC_CHECK))
-                .funding(asFundingType(optString(jsonObject, FIELD_FUNDING)))
-                .fingerprint(optString(jsonObject, FIELD_FINGERPRINT))
-                .id(optString(jsonObject, FIELD_ID))
-                .last4(optString(jsonObject, FIELD_LAST4))
-                .name(optString(jsonObject, FIELD_NAME))
-                .tokenizationMethod(optString(jsonObject, FIELD_TOKENIZATION_METHOD))
-                .metadata(optHash(jsonObject, FIELD_METADATA))
-                .build()
         }
 
         /**

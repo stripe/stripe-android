@@ -2,7 +2,7 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import com.stripe.android.ObjectBuilder
-import com.stripe.android.model.StripeJsonUtils.optString
+import com.stripe.android.model.parsers.AddressJsonParser
 import java.util.Locale
 import kotlinx.android.parcel.Parcelize
 import org.json.JSONObject
@@ -23,12 +23,12 @@ data class Address internal constructor(
 
     override fun toParamMap(): Map<String, Any> {
         return mapOf(
-            FIELD_CITY to city.orEmpty(),
-            FIELD_COUNTRY to country.orEmpty(),
-            FIELD_LINE_1 to line1.orEmpty(),
-            FIELD_LINE_2 to line2.orEmpty(),
-            FIELD_POSTAL_CODE to postalCode.orEmpty(),
-            FIELD_STATE to state.orEmpty()
+            PARAM_CITY to city.orEmpty(),
+            PARAM_COUNTRY to country.orEmpty(),
+            PARAM_LINE_1 to line1.orEmpty(),
+            PARAM_LINE_2 to line2.orEmpty(),
+            PARAM_POSTAL_CODE to postalCode.orEmpty(),
+            PARAM_STATE to state.orEmpty()
         ).filterValues { it.isNotEmpty() }
     }
 
@@ -40,34 +40,28 @@ data class Address internal constructor(
         private var postalCode: String? = null
         private var state: String? = null
 
-        fun setCity(city: String?): Builder {
+        fun setCity(city: String?): Builder = apply {
             this.city = city
-            return this
         }
 
-        fun setCountry(country: String?): Builder {
+        fun setCountry(country: String?): Builder = apply {
             this.country = country?.toUpperCase(Locale.ROOT)
-            return this
         }
 
-        fun setLine1(line1: String?): Builder {
+        fun setLine1(line1: String?): Builder = apply {
             this.line1 = line1
-            return this
         }
 
-        fun setLine2(line2: String?): Builder {
+        fun setLine2(line2: String?): Builder = apply {
             this.line2 = line2
-            return this
         }
 
-        fun setPostalCode(postalCode: String?): Builder {
+        fun setPostalCode(postalCode: String?): Builder = apply {
             this.postalCode = postalCode
-            return this
         }
 
-        fun setState(state: String?): Builder {
+        fun setState(state: String?): Builder = apply {
             this.state = state
-            return this
         }
 
         override fun build(): Address {
@@ -83,27 +77,19 @@ data class Address internal constructor(
     }
 
     companion object {
-        private const val FIELD_CITY = "city"
+        private const val PARAM_CITY = "city"
         // 2 Character Country Code
-        private const val FIELD_COUNTRY = "country"
-        private const val FIELD_LINE_1 = "line1"
-        private const val FIELD_LINE_2 = "line2"
-        private const val FIELD_POSTAL_CODE = "postal_code"
-        private const val FIELD_STATE = "state"
+        private const val PARAM_COUNTRY = "country"
+        private const val PARAM_LINE_1 = "line1"
+        private const val PARAM_LINE_2 = "line2"
+        private const val PARAM_POSTAL_CODE = "postal_code"
+        private const val PARAM_STATE = "state"
 
         @JvmStatic
         fun fromJson(jsonObject: JSONObject?): Address? {
-            if (jsonObject == null) {
-                return null
+            return jsonObject?.let {
+                AddressJsonParser().parse(it)
             }
-
-            val city = optString(jsonObject, FIELD_CITY)
-            val country = optString(jsonObject, FIELD_COUNTRY)
-            val line1 = optString(jsonObject, FIELD_LINE_1)
-            val line2 = optString(jsonObject, FIELD_LINE_2)
-            val postalCode = optString(jsonObject, FIELD_POSTAL_CODE)
-            val state = optString(jsonObject, FIELD_STATE)
-            return Address(city, country, line1, line2, postalCode, state)
         }
     }
 }

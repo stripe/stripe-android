@@ -1,10 +1,11 @@
 package com.stripe.android.model
 
+import com.stripe.android.model.parsers.CardJsonParser
 import org.json.JSONObject
 
-internal object CardFixtures {
+object CardFixtures {
     @JvmField
-    val MINIMUM_CARD = Card.create("4242424242424242", 1, 2050, "123")
+    val MINIMUM_CARD: Card = Card.create("4242424242424242", 1, 2050, "123")
 
     private const val CARD_ADDRESS_L1 = "123 Main Street"
     private const val CARD_ADDRESS_L2 = "906"
@@ -17,8 +18,7 @@ internal object CardFixtures {
     private const val CARD_STATE = "CA"
     private const val CARD_ZIP = "94107"
 
-    @JvmField
-    val CARD = Card.Builder(CARD_NUMBER, 8, 2019, CARD_CVC)
+    internal val CARD = Card.Builder(CARD_NUMBER, 8, 2019, CARD_CVC)
         .addressCity(CARD_CITY)
         .addressLine1(CARD_ADDRESS_L1)
         .addressLine2(CARD_ADDRESS_L2)
@@ -29,8 +29,7 @@ internal object CardFixtures {
         .name(CARD_NAME)
         .build()
 
-    @JvmField
-    val CARD_USD = Card.fromJson(JSONObject(
+    internal val CARD_USD = requireNotNull(CardJsonParser().parse(JSONObject(
         """
         {
             "id": "card_189fi32eZvKYlo2CHK8NPRME",
@@ -60,10 +59,9 @@ internal object CardFixtures {
             }
         }
         """.trimIndent()
-    ))!!
+    )))
 
-    @JvmField
-    val CARD_EUR = Card.fromJson(JSONObject(
+    internal val CARD_EUR = requireNotNull(CardJsonParser().parse(JSONObject(
         """
         {
             "id": "card_189fi32eZvKYlo2CHK8NPRME",
@@ -93,5 +91,5 @@ internal object CardFixtures {
             }
         }
         """.trimIndent()
-    ))!!
+    )))
 }

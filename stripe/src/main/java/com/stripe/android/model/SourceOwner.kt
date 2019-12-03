@@ -1,7 +1,7 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
-import com.stripe.android.model.StripeJsonUtils.optString
+import com.stripe.android.model.parsers.SourceOwnerJsonParser
 import kotlinx.android.parcel.Parcelize
 import org.json.JSONException
 import org.json.JSONObject
@@ -22,17 +22,6 @@ data class SourceOwner internal constructor(
     val verifiedPhone: String?
 ) : StripeModel(), Parcelable {
     companion object {
-
-        private const val VERIFIED = "verified_"
-        private const val FIELD_ADDRESS = "address"
-        private const val FIELD_EMAIL = "email"
-        private const val FIELD_NAME = "name"
-        private const val FIELD_PHONE = "phone"
-        private const val FIELD_VERIFIED_ADDRESS = VERIFIED + FIELD_ADDRESS
-        private const val FIELD_VERIFIED_EMAIL = VERIFIED + FIELD_EMAIL
-        private const val FIELD_VERIFIED_NAME = VERIFIED + FIELD_NAME
-        private const val FIELD_VERIFIED_PHONE = VERIFIED + FIELD_PHONE
-
         @JvmStatic
         fun fromString(jsonString: String?): SourceOwner? {
             if (jsonString == null) {
@@ -47,42 +36,9 @@ data class SourceOwner internal constructor(
 
         @JvmStatic
         fun fromJson(jsonObject: JSONObject?): SourceOwner? {
-            if (jsonObject == null) {
-                return null
+            return jsonObject?.let {
+                SourceOwnerJsonParser().parse(it)
             }
-
-            val addressJsonOpt = jsonObject.optJSONObject(FIELD_ADDRESS)
-            val address = if (addressJsonOpt != null) {
-                Address.fromJson(addressJsonOpt)
-            } else {
-                null
-            }
-
-            val email = optString(jsonObject, FIELD_EMAIL)
-            val name = optString(jsonObject, FIELD_NAME)
-            val phone = optString(jsonObject, FIELD_PHONE)
-
-            val verifiedAddressJsonOpt = jsonObject.optJSONObject(FIELD_VERIFIED_ADDRESS)
-            val verifiedAddress = if (verifiedAddressJsonOpt != null) {
-                Address.fromJson(verifiedAddressJsonOpt)
-            } else {
-                null
-            }
-
-            val verifiedEmail = optString(jsonObject, FIELD_VERIFIED_EMAIL)
-            val verifiedName = optString(jsonObject, FIELD_VERIFIED_NAME)
-            val verifiedPhone = optString(jsonObject, FIELD_VERIFIED_PHONE)
-
-            return SourceOwner(
-                address,
-                email,
-                name,
-                phone,
-                verifiedAddress,
-                verifiedEmail,
-                verifiedName,
-                verifiedPhone
-            )
         }
     }
 }
