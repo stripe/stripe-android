@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import androidx.annotation.StringDef
 import com.stripe.android.model.Token.TokenType
+import com.stripe.android.model.parsers.TokenJsonParser
 import java.util.Date
 import kotlinx.android.parcel.Parcelize
 import org.json.JSONException
@@ -51,7 +52,7 @@ data class Token internal constructor(
      * @return the [Card] for this token
      */
     val card: Card? = null
-) : StripePaymentSource {
+) : StripeModel(), StripePaymentSource {
     @Retention(AnnotationRetention.SOURCE)
     @StringDef(TokenType.CARD, TokenType.BANK_ACCOUNT, TokenType.PII, TokenType.ACCOUNT,
         TokenType.CVC_UPDATE)
@@ -122,25 +123,13 @@ data class Token internal constructor(
     )
 
     companion object {
-        // The key for these object fields is identical to their retrieved values
-        // from the Type field.
-        private const val FIELD_BANK_ACCOUNT = TokenType.BANK_ACCOUNT
-        private const val FIELD_CARD = TokenType.CARD
-        private const val FIELD_CREATED = "created"
-        private const val FIELD_ID = "id"
-        private const val FIELD_LIVEMODE = "livemode"
-
-        private const val FIELD_TYPE = "type"
-        private const val FIELD_USED = "used"
-
         @JvmStatic
         fun fromString(jsonString: String?): Token? {
             if (jsonString == null) {
                 return null
             }
             return try {
-                val tokenObject = JSONObject(jsonString)
-                fromJson(tokenObject)
+                fromJson(JSONObject(jsonString))
             } catch (exception: JSONException) {
                 null
             }
@@ -148,51 +137,8 @@ data class Token internal constructor(
 
         @JvmStatic
         fun fromJson(jsonObject: JSONObject?): Token? {
-            if (jsonObject == null) {
-                return null
-            }
-            val tokenId = StripeJsonUtils.optString(jsonObject, FIELD_ID)
-            val createdTimeStamp = StripeJsonUtils.optLong(jsonObject, FIELD_CREATED)
-            @TokenType val tokenType =
-                asTokenType(StripeJsonUtils.optString(jsonObject, FIELD_TYPE))
-            if (tokenId == null || createdTimeStamp == null) {
-                return null
-            }
-
-            val used = StripeJsonUtils.optBoolean(jsonObject, FIELD_USED)
-            val liveMode = StripeJsonUtils.optBoolean(jsonObject, FIELD_LIVEMODE)
-            val date = Date(createdTimeStamp * 1000)
-
-            return if (TokenType.BANK_ACCOUNT == tokenType) {
-                val bankAccountObject = jsonObject.optJSONObject(FIELD_BANK_ACCOUNT) ?: return null
-                Token(tokenId, liveMode, date, used, BankAccount.fromJson(bankAccountObject))
-            } else if (TokenType.CARD == tokenType) {
-                val cardObject = jsonObject.optJSONObject(FIELD_CARD) ?: return null
-                Token(tokenId, liveMode, date, used, Card.fromJson(cardObject))
-            } else if (TokenType.PII == tokenType || TokenType.ACCOUNT == tokenType ||
-                TokenType.CVC_UPDATE == tokenType) {
-                Token(tokenId, tokenType, liveMode, date, used)
-            } else {
-                null
-            }
-        }
-
-        /**
-         * Converts an unchecked String value to a [TokenType] or `null`.
-         *
-         * @param possibleTokenType a String that might match a [TokenType] or be empty
-         * @return `null` if the input is blank or otherwise does not match a [TokenType],
-         * else the appropriate [TokenType].
-         */
-        @TokenType
-        private fun asTokenType(possibleTokenType: String?): String? {
-            return when (possibleTokenType) {
-                TokenType.CARD -> TokenType.CARD
-                TokenType.BANK_ACCOUNT -> TokenType.BANK_ACCOUNT
-                TokenType.PII -> TokenType.PII
-                TokenType.ACCOUNT -> TokenType.ACCOUNT
-                TokenType.CVC_UPDATE -> TokenType.CVC_UPDATE
-                else -> null
+            return jsonObject?.let {
+                TokenJsonParser().parse(it)
             }
         }
     }

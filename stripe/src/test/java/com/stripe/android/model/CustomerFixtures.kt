@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import com.stripe.android.model.parsers.CustomerJsonParser
 import org.json.JSONObject
 
 internal object CustomerFixtures {
@@ -21,7 +22,7 @@ internal object CustomerFixtures {
         """.trimIndent()
     )
 
-    val CUSTOMER_WITH_SHIPPING = Customer.fromJson(JSONObject(
+    val CUSTOMER_WITH_SHIPPING = requireNotNull(CustomerJsonParser().parse(JSONObject(
         """
         {
             "id": "cus_AQsHpvKfKwJDrF",
@@ -50,11 +51,11 @@ internal object CustomerFixtures {
             }
         }
         """.trimIndent()
-    ))!!
+    )))
 
-    val CUSTOMER = Customer.fromJson(CUSTOMER_JSON)!!
+    val CUSTOMER = requireNotNull(CustomerJsonParser().parse(CUSTOMER_JSON))
 
-    val OTHER_CUSTOMER = Customer.fromJson(JSONObject(
+    val OTHER_CUSTOMER = requireNotNull(CustomerJsonParser().parse(JSONObject(
         """
         {
             "id": "cus_ABC123",
@@ -71,7 +72,7 @@ internal object CustomerFixtures {
             }
         }
         """.trimIndent()
-    ))!!
+    )))
 
     val EPHEMERAL_KEY_FIRST = JSONObject(
         """

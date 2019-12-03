@@ -2,8 +2,7 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import androidx.annotation.StringDef
-import androidx.annotation.VisibleForTesting
-import com.stripe.android.model.StripeJsonUtils.optString
+import com.stripe.android.model.parsers.SourceRedirectJsonParser
 import kotlinx.android.parcel.Parcelize
 import org.json.JSONException
 import org.json.JSONObject
@@ -31,10 +30,6 @@ data class SourceRedirect internal constructor(
     }
 
     companion object {
-        private const val FIELD_RETURN_URL = "return_url"
-        private const val FIELD_STATUS = "status"
-        private const val FIELD_URL = "url"
-
         @JvmStatic
         fun fromString(jsonString: String?): SourceRedirect? {
             if (jsonString == null) {
@@ -50,25 +45,8 @@ data class SourceRedirect internal constructor(
 
         @JvmStatic
         fun fromJson(jsonObject: JSONObject?): SourceRedirect? {
-            if (jsonObject == null) {
-                return null
-            }
-
-            val returnUrl = optString(jsonObject, FIELD_RETURN_URL)
-            @Status val status = asStatus(optString(jsonObject, FIELD_STATUS))
-            val url = optString(jsonObject, FIELD_URL)
-            return SourceRedirect(returnUrl, status, url)
-        }
-
-        @Status
-        @VisibleForTesting
-        internal fun asStatus(stringStatus: String?): String? {
-            return when (stringStatus) {
-                Status.PENDING -> Status.PENDING
-                Status.SUCCEEDED -> Status.SUCCEEDED
-                Status.FAILED -> Status.FAILED
-                Status.NOT_REQUIRED -> Status.NOT_REQUIRED
-                else -> null
+            return jsonObject?.let {
+                SourceRedirectJsonParser().parse(it)
             }
         }
     }

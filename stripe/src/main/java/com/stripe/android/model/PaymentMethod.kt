@@ -8,6 +8,7 @@ import com.stripe.android.model.StripeJsonUtils.optHash
 import com.stripe.android.model.StripeJsonUtils.optInteger
 import com.stripe.android.model.StripeJsonUtils.optLong
 import com.stripe.android.model.StripeJsonUtils.optString
+import com.stripe.android.model.parsers.AddressJsonParser
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.model.wallets.WalletFactory
 import java.util.HashMap
@@ -230,7 +231,11 @@ data class PaymentMethod internal constructor(
                     null
                 } else {
                     Builder()
-                        .setAddress(Address.fromJson(billingDetails.optJSONObject(FIELD_ADDRESS)))
+                        .setAddress(
+                            billingDetails.optJSONObject(FIELD_ADDRESS)?.let {
+                                AddressJsonParser().parse(it)
+                            }
+                        )
                         .setEmail(optString(billingDetails, FIELD_EMAIL))
                         .setName(optString(billingDetails, FIELD_NAME))
                         .setPhone(optString(billingDetails, FIELD_PHONE))

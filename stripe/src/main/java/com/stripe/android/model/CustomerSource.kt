@@ -1,6 +1,6 @@
 package com.stripe.android.model
 
-import com.stripe.android.model.StripeJsonUtils.optString
+import com.stripe.android.model.parsers.CustomerSourceJsonParser
 import kotlinx.android.parcel.Parcelize
 import org.json.JSONObject
 
@@ -48,21 +48,8 @@ data class CustomerSource internal constructor(
     companion object {
         @JvmStatic
         fun fromJson(jsonObject: JSONObject?): CustomerSource? {
-            if (jsonObject == null) {
-                return null
-            }
-
-            val sourceObject: StripePaymentSource? =
-                when (optString(jsonObject, "object")) {
-                    Card.VALUE_CARD -> Card.fromJson(jsonObject)
-                    Source.VALUE_SOURCE -> Source.fromJson(jsonObject)
-                    else -> null
-                }
-
-            return if (sourceObject == null) {
-                null
-            } else {
-                CustomerSource(sourceObject)
+            return jsonObject?.let {
+                CustomerSourceJsonParser().parse(jsonObject)
             }
         }
     }

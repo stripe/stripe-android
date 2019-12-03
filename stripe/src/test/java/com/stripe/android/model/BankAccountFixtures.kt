@@ -1,9 +1,10 @@
 package com.stripe.android.model
 
+import com.stripe.android.model.parsers.BankAccountJsonParser
 import org.json.JSONObject
 
-object BankAccountFixtures {
-    val BANK_ACCOUNT: BankAccount = BankAccount.fromJson(JSONObject(
+internal object BankAccountFixtures {
+    val BANK_ACCOUNT = BankAccountJsonParser().parse(JSONObject(
         """
         {
             "id": "ba_19d8Fh2eZvKYlo2C9qw8RwpV",

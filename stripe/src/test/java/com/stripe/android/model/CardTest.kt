@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import com.stripe.android.model.Card.Companion.asCardBrand
 import com.stripe.android.model.Card.Companion.asFundingType
+import com.stripe.android.model.parsers.CardJsonParser
 import java.util.Calendar
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -610,7 +611,7 @@ class CardTest {
     @Test
     fun fromString_whenStringIsValidJson_returnsExpectedCard() {
         val expectedCard = CARD_USD
-        val actualCard = Card.fromJson(JSON_CARD_USD)
+        val actualCard = CardJsonParser().parse(JSON_CARD_USD)
         assertEquals(expectedCard, actualCard)
     }
 
@@ -633,7 +634,7 @@ class CardTest {
 
     @Test
     fun toBuilder_withLoggingToken_whenUnchanged_isEquals() {
-        val card = requireNotNull(Card.fromJson(JSON_CARD_USD))
+        val card = requireNotNull(CardJsonParser().parse(JSON_CARD_USD))
         card.toBuilder()
             .loggingTokens(listOf("hello"))
 

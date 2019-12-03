@@ -1,6 +1,6 @@
 package com.stripe.android.model
 
-import com.stripe.android.model.StripeJsonUtils.optString
+import com.stripe.android.model.parsers.SourceSepaDebitDataJsonParser
 import kotlinx.android.parcel.Parcelize
 import org.json.JSONObject
 
@@ -19,29 +19,11 @@ data class SourceSepaDebitData internal constructor(
 ) : StripeSourceTypeModel() {
 
     companion object {
-        private const val FIELD_BANK_CODE = "bank_code"
-        private const val FIELD_BRANCH_CODE = "branch_code"
-        private const val FIELD_COUNTRY = "country"
-        private const val FIELD_FINGERPRINT = "fingerprint"
-        private const val FIELD_LAST4 = "last4"
-        private const val FIELD_MANDATE_REFERENCE = "mandate_reference"
-        private const val FIELD_MANDATE_URL = "mandate_url"
-
         @JvmStatic
         fun fromJson(jsonObject: JSONObject?): SourceSepaDebitData? {
-            if (jsonObject == null) {
-                return null
+            return jsonObject?.let {
+                SourceSepaDebitDataJsonParser().parse(it)
             }
-
-            return SourceSepaDebitData(
-                bankCode = optString(jsonObject, FIELD_BANK_CODE),
-                branchCode = optString(jsonObject, FIELD_BRANCH_CODE),
-                country = optString(jsonObject, FIELD_COUNTRY),
-                fingerPrint = optString(jsonObject, FIELD_FINGERPRINT),
-                last4 = optString(jsonObject, FIELD_LAST4),
-                mandateReference = optString(jsonObject, FIELD_MANDATE_REFERENCE),
-                mandateUrl = optString(jsonObject, FIELD_MANDATE_URL)
-            )
         }
     }
 }
