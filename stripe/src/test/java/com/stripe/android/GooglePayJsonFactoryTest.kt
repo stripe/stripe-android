@@ -30,8 +30,8 @@ class GooglePayJsonFactoryTest {
                         "type": "PAYMENT_GATEWAY",
                         "parameters": {
                             "gateway": "stripe",
-                            "stripe:version": "2019-11-05",
-                            "stripe:publishableKey": "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
+                            "stripe:version": "${ApiVersion.get().code}",
+                            "stripe:publishableKey": "${ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY}"
                         }
                     }
                 }]
@@ -69,8 +69,8 @@ class GooglePayJsonFactoryTest {
                         "type": "PAYMENT_GATEWAY",
                         "parameters": {
                             "gateway": "stripe",
-                            "stripe:version": "2019-11-05",
-                            "stripe:publishableKey": "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
+                            "stripe:version": "${ApiVersion.get().code}",
+                            "stripe:publishableKey": "${ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY}"
                         }
                     }
                 }],
@@ -102,8 +102,8 @@ class GooglePayJsonFactoryTest {
                         "type": "PAYMENT_GATEWAY",
                         "parameters": {
                             "gateway": "stripe",
-                            "stripe:version": "2019-11-05",
-                            "stripe:publishableKey": "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
+                            "stripe:version": "${ApiVersion.get().code}",
+                            "stripe:publishableKey": "${ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY}"
                         }
                     }
                 }],
