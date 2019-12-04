@@ -220,6 +220,10 @@ class PaymentSessionActivity : AppCompatActivity() {
     ) : PaymentSession.ActivityPaymentSessionListener<PaymentSessionActivity>(activity) {
 
         override fun onCommunicatingStateChanged(isCommunicating: Boolean) {
+            if (isCommunicating) {
+                BackgroundTaskTracker.onStart()
+            }
+
             listenerActivity?.progress_bar?.visibility = if (isCommunicating) {
                 View.VISIBLE
             } else {
@@ -228,10 +232,12 @@ class PaymentSessionActivity : AppCompatActivity() {
         }
 
         override fun onError(errorCode: Int, errorMessage: String) {
+            BackgroundTaskTracker.onStop()
             listenerActivity?.showError(errorMessage)
         }
 
         override fun onPaymentSessionDataChanged(data: PaymentSessionData) {
+            BackgroundTaskTracker.onStop()
             listenerActivity?.onPaymentSessionDataChanged(customerSession, data)
         }
     }
@@ -240,11 +246,17 @@ class PaymentSessionActivity : AppCompatActivity() {
         activity: PaymentSessionActivity
     ) : CustomerSession.ActivityCustomerRetrievalListener<PaymentSessionActivity>(activity) {
 
+        init {
+            BackgroundTaskTracker.onStart()
+        }
+
         override fun onCustomerRetrieved(customer: Customer) {
+            BackgroundTaskTracker.onStop()
             activity?.onCustomerRetrieved()
         }
 
         override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
+            BackgroundTaskTracker.onStop()
             activity?.progress_bar?.visibility = View.INVISIBLE
         }
     }

@@ -3,6 +3,7 @@ package com.stripe.example
 import android.os.StrictMode
 import androidx.multidex.MultiDexApplication
 import com.facebook.stetho.Stetho
+import com.stripe.android.PaymentConfiguration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -10,6 +11,8 @@ import kotlinx.coroutines.launch
 class ExampleApplication : MultiDexApplication() {
 
     override fun onCreate() {
+        PaymentConfiguration.init(this, Settings(this).publishableKey)
+
         StrictMode.setThreadPolicy(
             StrictMode.ThreadPolicy.Builder()
                 .detectDiskReads()
