@@ -42,6 +42,8 @@ class CreateCardTokenActivity : AppCompatActivity() {
         )[CreateCardTokenViewModel::class.java]
 
         create_token_button.setOnClickListener {
+            BackgroundTaskTracker.onStart()
+
             val card = card_input_widget.card
 
             if (card != null) {
@@ -120,10 +122,12 @@ class CreateCardTokenActivity : AppCompatActivity() {
 
             stripe.createCardToken(card, callback = object : ApiResultCallback<Token> {
                 override fun onSuccess(result: Token) {
+                    BackgroundTaskTracker.onStop()
                     data.value = result
                 }
 
                 override fun onError(e: Exception) {
+                    BackgroundTaskTracker.onStop()
                     Log.e("StripeExample", "Error while creating card token", e)
                 }
             })

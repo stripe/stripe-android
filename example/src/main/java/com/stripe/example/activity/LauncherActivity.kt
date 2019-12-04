@@ -9,9 +9,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.stripe.android.PaymentConfiguration
 import com.stripe.example.R
-import com.stripe.example.Settings
 import kotlinx.android.synthetic.main.activity_launcher.*
 
 class LauncherActivity : AppCompatActivity() {
@@ -19,8 +17,6 @@ class LauncherActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_launcher)
-
-        PaymentConfiguration.init(this, Settings(this).publishableKey)
 
         val linearLayoutManager = LinearLayoutManager(this)
             .apply {
