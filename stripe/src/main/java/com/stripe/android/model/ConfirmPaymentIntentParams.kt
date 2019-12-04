@@ -18,7 +18,6 @@ data class ConfirmPaymentIntentParams private constructor(
 
     private val savePaymentMethod: Boolean,
     private val useStripeSdk: Boolean
-
 ) : ConfirmStripeIntentParams {
 
     fun shouldSavePaymentMethod(): Boolean {
@@ -111,9 +110,8 @@ data class ConfirmPaymentIntentParams private constructor(
          */
         internal fun setPaymentMethodCreateParams(
             paymentMethodCreateParams: PaymentMethodCreateParams
-        ): Builder {
+        ): Builder = apply {
             this.paymentMethodCreateParams = paymentMethodCreateParams
-            return this
         }
 
         /**
@@ -123,9 +121,8 @@ data class ConfirmPaymentIntentParams private constructor(
          * PaymentIntent. Only one of PaymentMethodParam, PaymentMethodId,
          * SourceParam, SourceId should be used at a time.
          */
-        internal fun setPaymentMethodId(paymentMethodId: String): Builder {
+        internal fun setPaymentMethodId(paymentMethodId: String): Builder = apply {
             this.paymentMethodId = paymentMethodId
-            return this
         }
 
         /**
@@ -134,9 +131,8 @@ data class ConfirmPaymentIntentParams private constructor(
          * @param sourceParams params for the source that will be attached to this PaymentIntent.
          * Only one of SourceParam and SourceId should be used at at time.
          */
-        internal fun setSourceParams(sourceParams: SourceParams): Builder {
+        internal fun setSourceParams(sourceParams: SourceParams): Builder = apply {
             this.sourceParams = sourceParams
-            return this
         }
 
         /**
@@ -145,37 +141,32 @@ data class ConfirmPaymentIntentParams private constructor(
          * PaymentIntent. Only one of SourceParam and SourceId should be used at a
          * time.
          */
-        internal fun setSourceId(sourceId: String?): Builder {
+        internal fun setSourceId(sourceId: String?): Builder = apply {
             this.sourceId = sourceId
-            return this
         }
 
         /**
          * @param returnUrl the URL the customer should be redirected to after the authentication
          * process
          */
-        internal fun setReturnUrl(returnUrl: String?): Builder {
+        internal fun setReturnUrl(returnUrl: String?): Builder = apply {
             this.returnUrl = returnUrl
-            return this
         }
 
         /**
          * @param extraParams params that will be included in the request. Incorrect params may
          * result in errors when connecting to Stripe's API.
          */
-        internal fun setExtraParams(extraParams: Map<String, Any>?): Builder {
+        internal fun setExtraParams(extraParams: Map<String, Any>?): Builder = apply {
             this.extraParams = extraParams
-            return this
         }
 
-        internal fun setSavePaymentMethod(savePaymentMethod: Boolean): Builder {
+        internal fun setSavePaymentMethod(savePaymentMethod: Boolean): Builder = apply {
             this.savePaymentMethod = savePaymentMethod
-            return this
         }
 
-        internal fun setShouldUseSdk(shouldUseSdk: Boolean): Builder {
+        internal fun setShouldUseSdk(shouldUseSdk: Boolean): Builder = apply {
             this.shouldUseSdk = shouldUseSdk
-            return this
         }
 
         override fun build(): ConfirmPaymentIntentParams {

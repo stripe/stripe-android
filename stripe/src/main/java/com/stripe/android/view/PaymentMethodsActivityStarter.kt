@@ -55,26 +55,22 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
             @LayoutRes
             private var addPaymentMethodFooterLayoutId: Int = 0
 
-            fun setInitialPaymentMethodId(initialPaymentMethodId: String?): Builder {
+            fun setInitialPaymentMethodId(initialPaymentMethodId: String?): Builder = apply {
                 this.initialPaymentMethodId = initialPaymentMethodId
-                return this
             }
 
-            fun setShouldRequirePostalCode(shouldRequirePostalCode: Boolean): Builder {
+            fun setShouldRequirePostalCode(shouldRequirePostalCode: Boolean): Builder = apply {
                 this.shouldRequirePostalCode = shouldRequirePostalCode
-                return this
             }
 
-            fun setIsPaymentSessionActive(isPaymentSessionActive: Boolean): Builder {
+            fun setIsPaymentSessionActive(isPaymentSessionActive: Boolean): Builder = apply {
                 this.isPaymentSessionActive = isPaymentSessionActive
-                return this
             }
 
             fun setPaymentConfiguration(
                 paymentConfiguration: PaymentConfiguration?
-            ): Builder {
+            ): Builder = apply {
                 this.paymentConfiguration = paymentConfiguration
-                return this
             }
 
             /**
@@ -90,18 +86,18 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
              */
             fun setPaymentMethodTypes(
                 paymentMethodTypes: List<PaymentMethod.Type>
-            ): Builder {
+            ): Builder = apply {
                 this.paymentMethodTypes = paymentMethodTypes
-                return this
             }
 
             /**
              * @param addPaymentMethodFooterLayoutId optional layout id that will be inflated and
              * displayed beneath the payment details collection form on [AddPaymentMethodActivity]
              */
-            fun setAddPaymentMethodFooter(@LayoutRes addPaymentMethodFooterLayoutId: Int): Builder {
+            fun setAddPaymentMethodFooter(
+                @LayoutRes addPaymentMethodFooterLayoutId: Int
+            ): Builder = apply {
                 this.addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId
-                return this
             }
 
             override fun build(): Args {

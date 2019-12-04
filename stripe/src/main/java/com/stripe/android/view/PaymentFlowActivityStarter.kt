@@ -30,19 +30,18 @@ class PaymentFlowActivityStarter :
             private var paymentSessionData: PaymentSessionData? = null
             private var isPaymentSessionActive = false
 
-            fun setPaymentSessionConfig(paymentSessionConfig: PaymentSessionConfig?): Builder {
+            fun setPaymentSessionConfig(
+                paymentSessionConfig: PaymentSessionConfig?
+            ): Builder = apply {
                 this.paymentSessionConfig = paymentSessionConfig
-                return this
             }
 
-            fun setPaymentSessionData(paymentSessionData: PaymentSessionData?): Builder {
+            fun setPaymentSessionData(paymentSessionData: PaymentSessionData?): Builder = apply {
                 this.paymentSessionData = paymentSessionData
-                return this
             }
 
-            fun setIsPaymentSessionActive(isPaymentSessionActive: Boolean): Builder {
+            fun setIsPaymentSessionActive(isPaymentSessionActive: Boolean): Builder = apply {
                 this.isPaymentSessionActive = isPaymentSessionActive
-                return this
             }
 
             override fun build(): Args {

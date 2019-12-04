@@ -4,7 +4,6 @@ import org.json.JSONObject
 
 internal object TokenFixtures {
 
-    @JvmField
     val CARD_TOKEN = Token.fromJson(JSONObject(
         """
         {
@@ -42,7 +41,6 @@ internal object TokenFixtures {
         """.trimIndent()
     ))!!
 
-    @JvmField
     val BANK_TOKEN = Token.fromJson(JSONObject(
         """
         {

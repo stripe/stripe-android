@@ -22,9 +22,8 @@ class PaymentAuthConfig private constructor(
     class Builder : ObjectBuilder<PaymentAuthConfig> {
         private var stripe3ds2Config: Stripe3ds2Config? = null
 
-        fun set3ds2Config(stripe3ds2Config: Stripe3ds2Config): Builder {
+        fun set3ds2Config(stripe3ds2Config: Stripe3ds2Config): Builder = apply {
             this.stripe3ds2Config = stripe3ds2Config
-            return this
         }
 
         override fun build(): PaymentAuthConfig {
@@ -60,14 +59,12 @@ class PaymentAuthConfig private constructor(
              *
              * Must be a value between 5 and 99, inclusive.
              */
-            fun setTimeout(@IntRange(from = 5, to = 99) timeout: Int): Builder {
+            fun setTimeout(@IntRange(from = 5, to = 99) timeout: Int): Builder = apply {
                 this.timeout = timeout
-                return this
             }
 
-            fun setUiCustomization(uiCustomization: Stripe3ds2UiCustomization): Builder {
+            fun setUiCustomization(uiCustomization: Stripe3ds2UiCustomization): Builder = apply {
                 this.uiCustomization = uiCustomization
-                return this
             }
 
             override fun build(): Stripe3ds2Config {
@@ -100,9 +97,8 @@ class PaymentAuthConfig private constructor(
              * @throws RuntimeException If the color cannot be parsed
              */
             @Throws(RuntimeException::class)
-            fun setBackgroundColor(hexColor: String): Builder {
+            fun setBackgroundColor(hexColor: String): Builder = apply {
                 buttonCustomization.backgroundColor = hexColor
-                return this
             }
 
             /**
@@ -112,9 +108,8 @@ class PaymentAuthConfig private constructor(
              * @throws RuntimeException If the corner radius is less than 0
              */
             @Throws(RuntimeException::class)
-            fun setCornerRadius(cornerRadius: Int): Builder {
+            fun setCornerRadius(cornerRadius: Int): Builder = apply {
                 buttonCustomization.cornerRadius = cornerRadius
-                return this
             }
 
             /**
@@ -124,9 +119,8 @@ class PaymentAuthConfig private constructor(
              * @throws RuntimeException If font name is null or empty
              */
             @Throws(RuntimeException::class)
-            fun setTextFontName(fontName: String): Builder {
+            fun setTextFontName(fontName: String): Builder = apply {
                 buttonCustomization.textFontName = fontName
-                return this
             }
 
             /**
@@ -136,9 +130,8 @@ class PaymentAuthConfig private constructor(
              * @throws RuntimeException If the color cannot be parsed
              */
             @Throws(RuntimeException::class)
-            fun setTextColor(hexColor: String): Builder {
+            fun setTextColor(hexColor: String): Builder = apply {
                 buttonCustomization.textColor = hexColor
-                return this
             }
 
             /**
@@ -148,9 +141,8 @@ class PaymentAuthConfig private constructor(
              * @throws RuntimeException If the font size is 0 or less
              */
             @Throws(RuntimeException::class)
-            fun setTextFontSize(fontSize: Int): Builder {
+            fun setTextFontSize(fontSize: Int): Builder = apply {
                 buttonCustomization.textFontSize = fontSize
-                return this
             }
 
             /**
@@ -180,9 +172,8 @@ class PaymentAuthConfig private constructor(
              * @throws RuntimeException If the color cannot be parsed
              */
             @Throws(RuntimeException::class)
-            fun setHeadingTextColor(hexColor: String): Builder {
+            fun setHeadingTextColor(hexColor: String): Builder = apply {
                 labelCustomization.headingTextColor = hexColor
-                return this
             }
 
             /**
@@ -192,9 +183,8 @@ class PaymentAuthConfig private constructor(
              * @throws RuntimeException If the font name is null or empty
              */
             @Throws(RuntimeException::class)
-            fun setHeadingTextFontName(fontName: String): Builder {
+            fun setHeadingTextFontName(fontName: String): Builder = apply {
                 labelCustomization.headingTextFontName = fontName
-                return this
             }
 
             /**
@@ -204,9 +194,8 @@ class PaymentAuthConfig private constructor(
              * @throws RuntimeException If the font size is 0 or less
              */
             @Throws(RuntimeException::class)
-            fun setHeadingTextFontSize(fontSize: Int): Builder {
+            fun setHeadingTextFontSize(fontSize: Int): Builder = apply {
                 labelCustomization.headingTextFontSize = fontSize
-                return this
             }
 
             /**
@@ -216,9 +205,8 @@ class PaymentAuthConfig private constructor(
              * @throws RuntimeException If the font name is null or empty
              */
             @Throws(RuntimeException::class)
-            fun setTextFontName(fontName: String): Builder {
+            fun setTextFontName(fontName: String): Builder = apply {
                 labelCustomization.textFontName = fontName
-                return this
             }
 
             /**
@@ -228,9 +216,8 @@ class PaymentAuthConfig private constructor(
              * @throws RuntimeException If the color cannot be parsed
              */
             @Throws(RuntimeException::class)
-            fun setTextColor(hexColor: String): Builder {
+            fun setTextColor(hexColor: String): Builder = apply {
                 labelCustomization.textColor = hexColor
-                return this
             }
 
             /**
@@ -240,9 +227,8 @@ class PaymentAuthConfig private constructor(
              * @throws RuntimeException If the font size is 0 or less
              */
             @Throws(RuntimeException::class)
-            fun setTextFontSize(fontSize: Int): Builder {
+            fun setTextFontSize(fontSize: Int): Builder = apply {
                 labelCustomization.textFontSize = fontSize
-                return this
             }
 
             /**
@@ -272,9 +258,8 @@ class PaymentAuthConfig private constructor(
              * @throws RuntimeException If the border width is less than 0
              */
             @Throws(RuntimeException::class)
-            fun setBorderWidth(borderWidth: Int): Builder {
+            fun setBorderWidth(borderWidth: Int): Builder = apply {
                 textBoxCustomization.borderWidth = borderWidth
-                return this
             }
 
             /**
@@ -284,9 +269,8 @@ class PaymentAuthConfig private constructor(
              * @throws RuntimeException If the color cannot be parsed
              */
             @Throws(RuntimeException::class)
-            fun setBorderColor(hexColor: String): Builder {
+            fun setBorderColor(hexColor: String): Builder = apply {
                 textBoxCustomization.borderColor = hexColor
-                return this
             }
 
             /**
@@ -296,9 +280,8 @@ class PaymentAuthConfig private constructor(
              * @throws RuntimeException If the corner radius is less than 0
              */
             @Throws(RuntimeException::class)
-            fun setCornerRadius(cornerRadius: Int): Builder {
+            fun setCornerRadius(cornerRadius: Int): Builder = apply {
                 textBoxCustomization.cornerRadius = cornerRadius
-                return this
             }
 
             /**
@@ -308,9 +291,8 @@ class PaymentAuthConfig private constructor(
              * @throws RuntimeException If the font name is null or empty.
              */
             @Throws(RuntimeException::class)
-            fun setTextFontName(fontName: String): Builder {
+            fun setTextFontName(fontName: String): Builder = apply {
                 textBoxCustomization.textFontName = fontName
-                return this
             }
 
             /**
@@ -320,9 +302,8 @@ class PaymentAuthConfig private constructor(
              * @throws RuntimeException If the color cannot be parsed
              */
             @Throws(RuntimeException::class)
-            fun setTextColor(hexColor: String): Builder {
+            fun setTextColor(hexColor: String): Builder = apply {
                 textBoxCustomization.textColor = hexColor
-                return this
             }
 
             /**
@@ -332,9 +313,8 @@ class PaymentAuthConfig private constructor(
              * @throws RuntimeException If the font size is 0 or less
              */
             @Throws(RuntimeException::class)
-            fun setTextFontSize(fontSize: Int): Builder {
+            fun setTextFontSize(fontSize: Int): Builder = apply {
                 textBoxCustomization.textFontSize = fontSize
-                return this
             }
 
             /**
@@ -364,9 +344,8 @@ class PaymentAuthConfig private constructor(
              * @throws RuntimeException If the color cannot be parsed
              */
             @Throws(RuntimeException::class)
-            fun setBackgroundColor(hexColor: String): Builder {
+            fun setBackgroundColor(hexColor: String): Builder = apply {
                 toolbarCustomization.backgroundColor = hexColor
-                return this
             }
 
             /**
@@ -377,9 +356,8 @@ class PaymentAuthConfig private constructor(
              * @throws RuntimeException If the color cannot be parsed
              */
             @Throws(RuntimeException::class)
-            fun setStatusBarColor(hexColor: String): Builder {
+            fun setStatusBarColor(hexColor: String): Builder = apply {
                 toolbarCustomization.statusBarColor = hexColor
-                return this
             }
 
             /**
@@ -389,9 +367,8 @@ class PaymentAuthConfig private constructor(
              * @throws RuntimeException if the title is null or empty
              */
             @Throws(RuntimeException::class)
-            fun setHeaderText(headerText: String): Builder {
+            fun setHeaderText(headerText: String): Builder = apply {
                 toolbarCustomization.headerText = headerText
-                return this
             }
 
             /**
@@ -401,9 +378,8 @@ class PaymentAuthConfig private constructor(
              * @throws RuntimeException If the button text is null or empty
              */
             @Throws(RuntimeException::class)
-            fun setButtonText(buttonText: String): Builder {
+            fun setButtonText(buttonText: String): Builder = apply {
                 toolbarCustomization.buttonText = buttonText
-                return this
             }
 
             /**
@@ -413,9 +389,8 @@ class PaymentAuthConfig private constructor(
              * @throws RuntimeException If the font name is null or empty
              */
             @Throws(RuntimeException::class)
-            fun setTextFontName(fontName: String): Builder {
+            fun setTextFontName(fontName: String): Builder = apply {
                 toolbarCustomization.textFontName = fontName
-                return this
             }
 
             /**
@@ -425,9 +400,8 @@ class PaymentAuthConfig private constructor(
              * @throws RuntimeException If the color cannot be parsed
              */
             @Throws(RuntimeException::class)
-            fun setTextColor(hexColor: String): Builder {
+            fun setTextColor(hexColor: String): Builder = apply {
                 toolbarCustomization.textColor = hexColor
-                return this
             }
 
             /**
@@ -437,9 +411,8 @@ class PaymentAuthConfig private constructor(
              * @throws RuntimeException If the font size is 0 or less
              */
             @Throws(RuntimeException::class)
-            fun setTextFontSize(fontSize: Int): Builder {
+            fun setTextFontSize(fontSize: Int): Builder = apply {
                 toolbarCustomization.textFontSize = fontSize
-                return this
             }
 
             /**
@@ -510,10 +483,9 @@ class PaymentAuthConfig private constructor(
             fun setButtonCustomization(
                 buttonCustomization: Stripe3ds2ButtonCustomization,
                 buttonType: ButtonType
-            ): Builder {
+            ): Builder = apply {
                 uiCustomization.setButtonCustomization(buttonCustomization.buttonCustomization,
                     getUiButtonType(buttonType))
-                return this
             }
 
             /**
@@ -525,10 +497,9 @@ class PaymentAuthConfig private constructor(
             @Throws(RuntimeException::class)
             fun setToolbarCustomization(
                 toolbarCustomization: Stripe3ds2ToolbarCustomization
-            ): Builder {
+            ): Builder = apply {
                 uiCustomization
                     .setToolbarCustomization(toolbarCustomization.toolbarCustomization)
-                return this
             }
 
             /**
@@ -540,9 +511,8 @@ class PaymentAuthConfig private constructor(
             @Throws(RuntimeException::class)
             fun setLabelCustomization(
                 labelCustomization: Stripe3ds2LabelCustomization
-            ): Builder {
+            ): Builder = apply {
                 uiCustomization.setLabelCustomization(labelCustomization.labelCustomization)
-                return this
             }
 
             /**
@@ -554,10 +524,9 @@ class PaymentAuthConfig private constructor(
             @Throws(RuntimeException::class)
             fun setTextBoxCustomization(
                 textBoxCustomization: Stripe3ds2TextBoxCustomization
-            ): Builder {
+            ): Builder = apply {
                 uiCustomization
                     .setTextBoxCustomization(textBoxCustomization.textBoxCustomization)
-                return this
             }
 
             /**
@@ -567,9 +536,8 @@ class PaymentAuthConfig private constructor(
              * @throws RuntimeException If the color cannot be parsed
              */
             @Throws(RuntimeException::class)
-            fun setAccentColor(hexColor: String): Builder {
+            fun setAccentColor(hexColor: String): Builder = apply {
                 uiCustomization.setAccentColor(hexColor)
-                return this
             }
 
             /**

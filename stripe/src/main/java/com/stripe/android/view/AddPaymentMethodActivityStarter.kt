@@ -51,18 +51,16 @@ class AddPaymentMethodActivityStarter constructor(
              * If true, the created Payment Method will be attached to the current Customer
              * using an already-initialized [com.stripe.android.CustomerSession].
              */
-            fun setShouldAttachToCustomer(shouldAttachToCustomer: Boolean): Builder {
+            fun setShouldAttachToCustomer(shouldAttachToCustomer: Boolean): Builder = apply {
                 this.shouldAttachToCustomer = shouldAttachToCustomer
-                return this
             }
 
             /**
              * If true, a postal code field will be shown and validated.
              * Currently, only US ZIP Codes are supported.
              */
-            fun setShouldRequirePostalCode(shouldRequirePostalCode: Boolean): Builder {
+            fun setShouldRequirePostalCode(shouldRequirePostalCode: Boolean): Builder = apply {
                 this.shouldRequirePostalCode = shouldRequirePostalCode
-                return this
             }
 
             /**
@@ -71,40 +69,39 @@ class AddPaymentMethodActivityStarter constructor(
              * If unspecified, defaults to [PaymentMethod.Type.Card].
              * Currently only [PaymentMethod.Type.Card] and [PaymentMethod.Type.Fpx] are supported.
              */
-            fun setPaymentMethodType(paymentMethodType: PaymentMethod.Type): Builder {
+            fun setPaymentMethodType(paymentMethodType: PaymentMethod.Type): Builder = apply {
                 this.paymentMethodType = paymentMethodType
-                return this
             }
 
             /**
              * @param addPaymentMethodFooterLayoutId optional layout id that will be inflated and
              * displayed beneath the payment details collection form on [AddPaymentMethodActivity]
              */
-            fun setAddPaymentMethodFooter(@LayoutRes addPaymentMethodFooterLayoutId: Int): Builder {
+            fun setAddPaymentMethodFooter(
+                @LayoutRes addPaymentMethodFooterLayoutId: Int
+            ): Builder = apply {
                 this.addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId
-                return this
             }
 
             @JvmSynthetic
-            internal fun setIsPaymentSessionActive(isPaymentSessionActive: Boolean): Builder {
+            internal fun setIsPaymentSessionActive(
+                isPaymentSessionActive: Boolean
+            ): Builder = apply {
                 this.isPaymentSessionActive = isPaymentSessionActive
-                return this
             }
 
             @JvmSynthetic
             internal fun setShouldInitCustomerSessionTokens(
                 shouldInitCustomerSessionTokens: Boolean
-            ): Builder {
+            ): Builder = apply {
                 this.shouldInitCustomerSessionTokens = shouldInitCustomerSessionTokens
-                return this
             }
 
             @JvmSynthetic
             internal fun setPaymentConfiguration(
                 paymentConfiguration: PaymentConfiguration?
-            ): Builder {
+            ): Builder = apply {
                 this.paymentConfiguration = paymentConfiguration
-                return this
             }
 
             override fun build(): Args {
