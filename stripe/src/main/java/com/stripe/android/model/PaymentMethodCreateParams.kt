@@ -138,24 +138,20 @@ data class PaymentMethodCreateParams internal constructor(
             private var expiryYear: Int? = null
             private var cvc: String? = null
 
-            fun setNumber(number: String?): Builder {
+            fun setNumber(number: String?): Builder = apply {
                 this.number = number
-                return this
             }
 
-            fun setExpiryMonth(expiryMonth: Int?): Builder {
+            fun setExpiryMonth(expiryMonth: Int?): Builder = apply {
                 this.expiryMonth = expiryMonth
-                return this
             }
 
-            fun setExpiryYear(expiryYear: Int?): Builder {
+            fun setExpiryYear(expiryYear: Int?): Builder = apply {
                 this.expiryYear = expiryYear
-                return this
             }
 
-            fun setCvc(cvc: String?): Builder {
+            fun setCvc(cvc: String?): Builder = apply {
                 this.cvc = cvc
-                return this
             }
 
             override fun build(): Card {
@@ -190,9 +186,8 @@ data class PaymentMethodCreateParams internal constructor(
         class Builder : ObjectBuilder<Ideal> {
             internal var bank: String? = null
 
-            fun setBank(bank: String?): Builder {
+            fun setBank(bank: String?): Builder = apply {
                 this.bank = bank
-                return this
             }
 
             override fun build(): Ideal {
@@ -215,9 +210,8 @@ data class PaymentMethodCreateParams internal constructor(
         class Builder : ObjectBuilder<Fpx> {
             internal var bank: String? = null
 
-            fun setBank(bank: String?): Builder {
+            fun setBank(bank: String?): Builder = apply {
                 this.bank = bank
-                return this
             }
 
             override fun build(): Fpx {
@@ -240,9 +234,8 @@ data class PaymentMethodCreateParams internal constructor(
         class Builder : ObjectBuilder<SepaDebit> {
             private var iban: String? = null
 
-            fun setIban(iban: String?): Builder {
+            fun setIban(iban: String?): Builder = apply {
                 this.iban = iban
-                return this
             }
 
             override fun build(): SepaDebit {

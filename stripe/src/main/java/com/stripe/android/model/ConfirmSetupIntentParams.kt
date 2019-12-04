@@ -72,26 +72,22 @@ data class ConfirmSetupIntentParams internal constructor(
         private var returnUrl: String? = null
         private var useStripeSdk: Boolean = false
 
-        internal fun setPaymentMethodId(paymentMethodId: String): Builder {
+        internal fun setPaymentMethodId(paymentMethodId: String): Builder = apply {
             this.paymentMethodId = paymentMethodId
-            return this
         }
 
         internal fun setPaymentMethodCreateParams(
             paymentMethodCreateParams: PaymentMethodCreateParams
-        ): Builder {
+        ): Builder = apply {
             this.paymentMethodCreateParams = paymentMethodCreateParams
-            return this
         }
 
-        internal fun setReturnUrl(returnUrl: String?): Builder {
+        internal fun setReturnUrl(returnUrl: String?): Builder = apply {
             this.returnUrl = returnUrl
-            return this
         }
 
-        internal fun setShouldUseSdk(useStripeSdk: Boolean): Builder {
+        internal fun setShouldUseSdk(useStripeSdk: Boolean): Builder = apply {
             this.useStripeSdk = useStripeSdk
-            return this
         }
 
         override fun build(): ConfirmSetupIntentParams {

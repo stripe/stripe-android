@@ -103,9 +103,8 @@ data class PaymentSessionConfig internal constructor(
          */
         fun setHiddenShippingInfoFields(
             @CustomizableShippingField vararg hiddenShippingInfoFields: String
-        ): Builder {
+        ): Builder = apply {
             this.hiddenShippingInfoFields = listOf(*hiddenShippingInfoFields)
-            return this
         }
 
         /**
@@ -114,17 +113,15 @@ data class PaymentSessionConfig internal constructor(
          */
         fun setOptionalShippingInfoFields(
             @CustomizableShippingField vararg optionalShippingInfoFields: String
-        ): Builder {
+        ): Builder = apply {
             this.optionalShippingInfoFields = listOf(*optionalShippingInfoFields)
-            return this
         }
 
         /**
          * @param shippingInfo [ShippingInformation] that will pre-populate the [ShippingInfoWidget]
          */
-        fun setPrepopulatedShippingInfo(shippingInfo: ShippingInformation?): Builder {
+        fun setPrepopulatedShippingInfo(shippingInfo: ShippingInformation?): Builder = apply {
             shippingInformation = shippingInfo
-            return this
         }
 
         /**
@@ -133,9 +130,8 @@ data class PaymentSessionConfig internal constructor(
          *
          * Default is `true`.
          */
-        fun setShippingInfoRequired(shippingInfoRequired: Boolean): Builder {
+        fun setShippingInfoRequired(shippingInfoRequired: Boolean): Builder = apply {
             this.shippingInfoRequired = shippingInfoRequired
-            return this
         }
 
         /**
@@ -144,18 +140,18 @@ data class PaymentSessionConfig internal constructor(
          *
          * Default is `true`.
          */
-        fun setShippingMethodsRequired(shippingMethodsRequired: Boolean): Builder {
+        fun setShippingMethodsRequired(shippingMethodsRequired: Boolean): Builder = apply {
             this.shippingMethodsRequired = shippingMethodsRequired
-            return this
         }
 
         /**
          * @param addPaymentMethodFooterLayoutId optional layout id that will be inflated and
          * displayed beneath the payment details collection form on [AddPaymentMethodActivity]
          */
-        fun setAddPaymentMethodFooter(@LayoutRes addPaymentMethodFooterLayoutId: Int): Builder {
+        fun setAddPaymentMethodFooter(
+            @LayoutRes addPaymentMethodFooterLayoutId: Int
+        ): Builder = apply {
             this.addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId
-            return this
         }
 
         /**
@@ -169,9 +165,8 @@ data class PaymentSessionConfig internal constructor(
          * Currently only [PaymentMethod.Type.Card] and [PaymentMethod.Type.Fpx] are supported.
          * If not specified or empty, [PaymentMethod.Type.Card] will be used.
          */
-        fun setPaymentMethodTypes(paymentMethodTypes: List<PaymentMethod.Type>): Builder {
+        fun setPaymentMethodTypes(paymentMethodTypes: List<PaymentMethod.Type>): Builder = apply {
             this.paymentMethodTypes = paymentMethodTypes
-            return this
         }
 
         /**
@@ -180,9 +175,8 @@ data class PaymentSessionConfig internal constructor(
          */
         fun setAllowedShippingCountryCodes(
             allowedShippingCountryCodes: Set<String>
-        ): Builder {
+        ): Builder = apply {
             this.allowedShippingCountryCodes = allowedShippingCountryCodes
-            return this
         }
 
         /**
@@ -195,9 +189,8 @@ data class PaymentSessionConfig internal constructor(
         @JvmSynthetic
         fun setShippingInformationValidator(
             shippingInformationValidator: ShippingInformationValidator?
-        ): Builder {
+        ): Builder = apply {
             this.shippingInformationValidator = shippingInformationValidator
-            return this
         }
 
         /**
@@ -210,9 +203,8 @@ data class PaymentSessionConfig internal constructor(
         @JvmSynthetic
         fun setShippingMethodsFactory(
             shippingMethodsFactory: ShippingMethodsFactory?
-        ): Builder {
+        ): Builder = apply {
             this.shippingMethodsFactory = shippingMethodsFactory
-            return this
         }
 
         override fun build(): PaymentSessionConfig {

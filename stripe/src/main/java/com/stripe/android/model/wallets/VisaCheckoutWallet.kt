@@ -19,24 +19,20 @@ data class VisaCheckoutWallet internal constructor(
         private var name: String? = null
         private var shippingAddress: Address? = null
 
-        fun setBillingAddress(billingAddress: Address?): Builder {
+        fun setBillingAddress(billingAddress: Address?): Builder = apply {
             this.billingAddress = billingAddress
-            return this
         }
 
-        fun setEmail(email: String?): Builder {
+        fun setEmail(email: String?): Builder = apply {
             this.email = email
-            return this
         }
 
-        fun setName(name: String?): Builder {
+        fun setName(name: String?): Builder = apply {
             this.name = name
-            return this
         }
 
-        fun setShippingAddress(shippingAddress: Address?): Builder {
+        fun setShippingAddress(shippingAddress: Address?): Builder = apply {
             this.shippingAddress = shippingAddress
-            return this
         }
 
         public override fun build(): VisaCheckoutWallet {

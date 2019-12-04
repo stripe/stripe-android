@@ -4,6 +4,7 @@ import com.stripe.android.model.parsers.CardJsonParser
 import org.json.JSONObject
 
 object CardFixtures {
+
     @JvmField
     val MINIMUM_CARD: Card = Card.create("4242424242424242", 1, 2050, "123")
 

@@ -4,7 +4,6 @@ import org.json.JSONObject
 
 internal object SetupIntentFixtures {
 
-    @JvmField
     internal val SI_NEXT_ACTION_REDIRECT_JSON =
         """
         {
@@ -32,7 +31,6 @@ internal object SetupIntentFixtures {
         }
         """.trimIndent()
 
-    @JvmField
     internal val SI_WITH_LAST_PAYMENT_ERROR = SetupIntent.fromJson(JSONObject(
         """
         {
@@ -106,7 +104,6 @@ internal object SetupIntentFixtures {
         """.trimIndent()
     ))!!
 
-    @JvmField
     internal val CANCELLED = SetupIntent.fromString(
         """
         {
@@ -138,6 +135,5 @@ internal object SetupIntentFixtures {
         """.trimIndent()
     )!!
 
-    @JvmField
     val SI_NEXT_ACTION_REDIRECT = SetupIntent.fromString(SI_NEXT_ACTION_REDIRECT_JSON)!!
 }
