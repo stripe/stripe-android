@@ -17,7 +17,7 @@ data class Customer internal constructor(
     val hasMore: Boolean,
     val totalCount: Int?,
     val url: String?
-) : StripeModel() {
+) : StripeModel {
 
     fun getSourceById(sourceId: String): CustomerSource? {
         return sources.firstOrNull { it.id == sourceId }

@@ -1,6 +1,7 @@
 package com.stripe.android.model.parsers
 
 import com.stripe.android.model.BankAccount
+import com.stripe.android.model.BankAccount.BankAccountType
 import com.stripe.android.model.StripeJsonUtils
 import org.json.JSONObject
 
@@ -8,7 +9,7 @@ internal class BankAccountJsonParser : ModelJsonParser<BankAccount> {
     override fun parse(json: JSONObject): BankAccount {
         return BankAccount(
             StripeJsonUtils.optString(json, FIELD_ACCOUNT_HOLDER_NAME),
-            BankAccount.asBankAccountType(
+            asBankAccountType(
                 StripeJsonUtils.optString(json, FIELD_ACCOUNT_HOLDER_TYPE)
             ),
             StripeJsonUtils.optString(json, FIELD_BANK_NAME),
@@ -29,5 +30,21 @@ internal class BankAccountJsonParser : ModelJsonParser<BankAccount> {
         private const val FIELD_FINGERPRINT = "fingerprint"
         private const val FIELD_LAST4 = "last4"
         private const val FIELD_ROUTING_NUMBER = "routing_number"
+
+        /**
+         * Converts a String value into the appropriate [BankAccountType].
+         *
+         * @param possibleAccountType a String that might match a [BankAccountType] or be empty.
+         * @return `null` if the input is blank or of unknown type, else the appropriate
+         * [BankAccountType].
+         */
+        @BankAccountType
+        private fun asBankAccountType(possibleAccountType: String?): String? {
+            return when (possibleAccountType) {
+                BankAccountType.COMPANY -> BankAccountType.COMPANY
+                BankAccountType.INDIVIDUAL -> BankAccountType.INDIVIDUAL
+                else -> null
+            }
+        }
     }
 }

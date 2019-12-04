@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import com.stripe.android.model.CardTest.Companion.JSON_CARD_USD
+import com.stripe.android.model.parsers.CustomerJsonParser
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -21,7 +22,7 @@ class CustomerTest {
 
     @Test
     fun fromJson_whenNotACustomer_returnsNull() {
-        assertNull(Customer.fromJson(NON_CUSTOMER_OBJECT))
+        assertNull(parse(NON_CUSTOMER_OBJECT))
     }
 
     @Test
@@ -40,7 +41,7 @@ class CustomerTest {
     @Test
     @Throws(JSONException::class)
     fun fromJson_whenCustomerHasApplePay_returnsCustomerWithoutApplePaySources() {
-        val customer = Customer.fromString(createTestCustomerObjectWithApplePaySource())
+        val customer = parse(createTestCustomerObjectWithApplePaySource())
         assertNotNull(customer)
         assertEquals(2, customer.sources.size)
         // Note that filtering the apple_pay sources intentionally does not change the total
@@ -50,16 +51,16 @@ class CustomerTest {
 
     @Test
     fun fromJson_createsSameObject() {
-        val expectedCustomer = Customer.fromJson(CustomerFixtures.CUSTOMER_JSON)
+        val expectedCustomer = parse(CustomerFixtures.CUSTOMER_JSON)
         assertNotNull(expectedCustomer)
         assertEquals(
             expectedCustomer,
-            Customer.fromJson(CustomerFixtures.CUSTOMER_JSON)
+            parse(CustomerFixtures.CUSTOMER_JSON)
         )
     }
 
     @Throws(JSONException::class)
-    private fun createTestCustomerObjectWithApplePaySource(): String {
+    private fun createTestCustomerObjectWithApplePaySource(): JSONObject {
         val rawJsonCustomer = CustomerFixtures.CUSTOMER_JSON
         val sourcesObject = rawJsonCustomer.getJSONObject("sources")
 
@@ -86,11 +87,10 @@ class CustomerTest {
         assertEquals(5,
             rawJsonCustomer.getJSONObject("sources").getJSONArray("data").length())
 
-        return rawJsonCustomer.toString()
+        return JSONObject(rawJsonCustomer.toString())
     }
 
     private companion object {
-
         private val NON_CUSTOMER_OBJECT = JSONObject(
             """
             {
@@ -101,5 +101,9 @@ class CustomerTest {
             }
             """.trimIndent()
         )
+
+        private fun parse(jsonObject: JSONObject): Customer? {
+            return CustomerJsonParser().parse(jsonObject)
+        }
     }
 }

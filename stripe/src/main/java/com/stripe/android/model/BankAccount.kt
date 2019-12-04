@@ -1,11 +1,8 @@
 package com.stripe.android.model
 
-import android.os.Parcelable
 import androidx.annotation.Size
 import androidx.annotation.StringDef
-import com.stripe.android.model.parsers.BankAccountJsonParser
 import kotlinx.android.parcel.Parcelize
-import org.json.JSONObject
 
 /**
  * Model class representing a bank account that can be used to create a token
@@ -27,7 +24,7 @@ data class BankAccount internal constructor(
     val fingerprint: String?,
     val last4: String?,
     val routingNumber: String?
-) : StripeModel(), StripeParamsModel, Parcelable {
+) : StripeModel, StripeParamsModel {
 
     @Retention(AnnotationRetention.SOURCE)
     @StringDef(BankAccountType.COMPANY, BankAccountType.INDIVIDUAL)
@@ -94,27 +91,5 @@ data class BankAccount internal constructor(
         )
 
         return mapOf(Token.TokenType.BANK_ACCOUNT to accountParams)
-    }
-
-    companion object {
-        /**
-         * Converts a String value into the appropriate [BankAccountType].
-         *
-         * @param possibleAccountType a String that might match a [BankAccountType] or be empty.
-         * @return `null` if the input is blank or of unknown type, else the appropriate
-         * [BankAccountType].
-         */
-        @BankAccountType
-        fun asBankAccountType(possibleAccountType: String?): String? {
-            return when (possibleAccountType) {
-                BankAccountType.COMPANY -> BankAccountType.COMPANY
-                BankAccountType.INDIVIDUAL -> BankAccountType.INDIVIDUAL
-                else -> null
-            }
-        }
-
-        fun fromJson(jsonObject: JSONObject): BankAccount {
-            return BankAccountJsonParser().parse(jsonObject)
-        }
     }
 }

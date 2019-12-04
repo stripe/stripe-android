@@ -1,6 +1,5 @@
 package com.stripe.android.model.wallets
 
-import android.os.Parcelable
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.StripeJsonUtils.optString
 import com.stripe.android.model.StripeModel
@@ -9,7 +8,7 @@ import org.json.JSONObject
 
 abstract class Wallet internal constructor(
     internal val walletType: Type
-) : StripeModel(), Parcelable {
+) : StripeModel {
     internal abstract class Builder<WalletType : Wallet> {
         var dynamicLast4: String? = null
 
@@ -44,7 +43,7 @@ abstract class Wallet internal constructor(
         val line2: String?,
         val postalCode: String?,
         val state: String?
-    ) : StripeModel(), Parcelable {
+    ) : StripeModel {
         internal class Builder : ObjectBuilder<Address> {
             private var city: String? = null
             private var country: String? = null

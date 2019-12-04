@@ -1,6 +1,5 @@
 package com.stripe.android.model
 
-import android.os.Parcelable
 import com.stripe.android.model.parsers.WeChatJsonParser
 import kotlinx.android.parcel.Parcelize
 import org.json.JSONObject
@@ -19,7 +18,7 @@ data class WeChat internal constructor(
     val sign: String?,
     val timestamp: String?,
     val qrCodeUrl: String? = null
-) : StripeModel(), Parcelable {
+) : StripeModel {
     internal companion object {
         @JvmSynthetic
         internal fun fromJson(json: JSONObject): WeChat {

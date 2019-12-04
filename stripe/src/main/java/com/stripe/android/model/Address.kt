@@ -1,6 +1,5 @@
 package com.stripe.android.model
 
-import android.os.Parcelable
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.parsers.AddressJsonParser
 import java.util.Locale
@@ -19,7 +18,7 @@ data class Address internal constructor(
     val line2: String? = null,
     val postalCode: String? = null,
     val state: String? = null
-) : StripeModel(), StripeParamsModel, Parcelable {
+) : StripeModel, StripeParamsModel {
 
     override fun toParamMap(): Map<String, Any> {
         return mapOf(
