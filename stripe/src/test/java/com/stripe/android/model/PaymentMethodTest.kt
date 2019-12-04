@@ -23,7 +23,7 @@ class PaymentMethodTest {
             .setType("ideal")
             .setCustomerId("cus_AQsHpvKfKwJDrF")
             .setBillingDetails(PaymentMethodFixtures.BILLING_DETAILS)
-            .setIdeal(PaymentMethod.Ideal.create("my bank", "bank id"))
+            .setIdeal(PaymentMethod.Ideal("my bank", "bank id"))
             .build()
 
         assertEquals(paymentMethod, PaymentMethod.fromJson(PM_IDEAL_JSON))
@@ -45,7 +45,7 @@ class PaymentMethodTest {
                 .setLiveMode(false)
                 .setCreated(1570809799L)
                 .setSepaDebit(
-                    PaymentMethod.SepaDebit.create(
+                    PaymentMethod.SepaDebit(
                         "3704",
                         null,
                         "DE",
@@ -100,8 +100,8 @@ class PaymentMethodTest {
             .build()
             .toParamMap()
         assertEquals(1, billingDetails.size)
-        assertFalse(billingDetails.containsKey(PaymentMethod.BillingDetails.FIELD_ADDRESS))
-        assertTrue(billingDetails.containsKey(PaymentMethod.BillingDetails.FIELD_NAME))
+        assertFalse(billingDetails.containsKey(PaymentMethod.BillingDetails.PARAM_ADDRESS))
+        assertTrue(billingDetails.containsKey(PaymentMethod.BillingDetails.PARAM_NAME))
     }
 
     @Test
@@ -121,7 +121,7 @@ class PaymentMethodTest {
             .setCard(PaymentMethodFixtures.CARD)
             .setCardPresent(PaymentMethod.CardPresent.EMPTY)
             .setFpx(PaymentMethodFixtures.FPX_PAYMENT_METHOD.fpx)
-            .setIdeal(PaymentMethod.Ideal.create("my bank", "bank id"))
+            .setIdeal(PaymentMethod.Ideal("my bank", "bank id"))
             .setSepaDebit(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD.sepaDebit)
             .build()
 
