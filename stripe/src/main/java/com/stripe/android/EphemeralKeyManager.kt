@@ -1,5 +1,6 @@
 package com.stripe.android
 
+import com.stripe.android.model.parsers.EphemeralKeyJsonParser
 import java.net.HttpURLConnection
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
@@ -54,7 +55,7 @@ internal class EphemeralKeyManager(
             return
         }
         try {
-            val ephemeralKey = EphemeralKey.fromJson(JSONObject(key))
+            val ephemeralKey = EphemeralKeyJsonParser().parse(JSONObject(key))
             this.ephemeralKey = ephemeralKey
             listener.onKeyUpdate(ephemeralKey, operationId, actionString, arguments)
         } catch (e: JSONException) {

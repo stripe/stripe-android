@@ -1,5 +1,6 @@
 package com.stripe.android
 
+import com.stripe.android.model.parsers.EphemeralKeyJsonParser
 import com.stripe.android.utils.ParcelUtils
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -32,7 +33,7 @@ class EphemeralKeyTest {
     }
 
     private companion object {
-        private val EPHEMERAL_KEY = EphemeralKey.fromJson(JSONObject(
+        private val EPHEMERAL_KEY = EphemeralKeyJsonParser().parse(JSONObject(
             """
             {
                 "id": "ephkey_123",

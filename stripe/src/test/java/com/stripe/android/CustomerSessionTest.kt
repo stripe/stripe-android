@@ -18,6 +18,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceFixtures
+import com.stripe.android.model.parsers.EphemeralKeyJsonParser
 import com.stripe.android.testharness.JsonTestUtils
 import com.stripe.android.testharness.TestEphemeralKeyProvider
 import com.stripe.android.view.ActivityScenarioFactory
@@ -74,7 +75,7 @@ class CustomerSessionTest {
     }
 
     private fun getCustomerEphemeralKey(key: String): EphemeralKey {
-        return EphemeralKey.fromJson(JSONObject(key))
+        return EphemeralKeyJsonParser().parse(JSONObject(key))
     }
 
     @BeforeTest

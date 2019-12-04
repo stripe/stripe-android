@@ -577,7 +577,7 @@ data class Card internal constructor(
         const val MAX_LENGTH_AMERICAN_EXPRESS: Int = 15
         const val MAX_LENGTH_DINERS_CLUB: Int = 14
 
-        internal const val VALUE_CARD = "card"
+        internal const val OBJECT_TYPE = "card"
 
         private val BRAND_RESOURCE_MAP = mapOf(
             CardBrand.AMERICAN_EXPRESS to R.drawable.stripe_ic_amex,
