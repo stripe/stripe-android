@@ -38,7 +38,7 @@ class PaymentSessionActivityTest {
     }
 
     @Test
-    fun test() {
+    fun testSelectPaymentMethod() {
         // launch PaymentSessionActivity
         Espresso.onView(ViewMatchers.withId(R.id.examples)).perform(
             RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(5, click())
