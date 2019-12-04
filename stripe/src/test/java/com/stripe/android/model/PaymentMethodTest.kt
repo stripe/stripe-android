@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.utils.ParcelUtils
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -26,14 +27,14 @@ class PaymentMethodTest {
             .setIdeal(PaymentMethod.Ideal("my bank", "bank id"))
             .build()
 
-        assertEquals(paymentMethod, PaymentMethod.fromJson(PM_IDEAL_JSON))
+        assertEquals(paymentMethod, PaymentMethodJsonParser().parse(PM_IDEAL_JSON))
     }
 
     @Test
     @Throws(JSONException::class)
     fun toJson_withFpx_shouldCreateExpectedObject() {
         assertEquals(PaymentMethodFixtures.FPX_PAYMENT_METHOD,
-            PaymentMethod.fromJson(PM_FPX_JSON))
+            PaymentMethodJsonParser().parse(PM_FPX_JSON))
     }
 
     @Test
@@ -83,13 +84,13 @@ class PaymentMethodTest {
     @Throws(JSONException::class)
     fun fromString_shouldReturnExpectedPaymentMethod() {
         assertEquals(PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-            PaymentMethod.fromJson(PM_CARD_JSON))
+            PaymentMethodJsonParser().parse(PM_CARD_JSON))
     }
 
     @Test
     @Throws(JSONException::class)
     fun fromString_withIdeal_returnsExpectedObject() {
-        val paymentMethod = PaymentMethod.fromJson(PM_IDEAL_JSON)
+        val paymentMethod = PaymentMethodJsonParser().parse(PM_IDEAL_JSON)
         assertEquals("ideal", paymentMethod?.type)
     }
 

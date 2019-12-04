@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
 import org.json.JSONObject
@@ -59,7 +60,7 @@ internal object PaymentMethodFixtures {
         ))
         .build()
 
-    val SEPA_DEBIT_PAYMENT_METHOD = PaymentMethod.fromJson(JSONObject(
+    val SEPA_DEBIT_PAYMENT_METHOD = PaymentMethodJsonParser().parse(JSONObject(
         """
         {
           "id": "pm_1FSQaJCR",
@@ -91,7 +92,7 @@ internal object PaymentMethodFixtures {
           "type": "sepa_debit"
         }
         """.trimIndent()
-    ))!!
+    ))
 
     val CARD_PAYMENT_METHODS = listOf(
         PaymentMethod.Builder()

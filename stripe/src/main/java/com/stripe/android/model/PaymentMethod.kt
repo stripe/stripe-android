@@ -6,7 +6,6 @@ import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.wallets.Wallet
 import kotlinx.android.parcel.Parcelize
-import org.json.JSONException
 import org.json.JSONObject
 
 /**
@@ -370,19 +369,6 @@ data class PaymentMethod internal constructor(
     ) : StripeModel()
 
     companion object {
-        @JvmStatic
-        fun fromString(jsonString: String?): PaymentMethod? {
-            if (jsonString == null) {
-                return null
-            }
-
-            return try {
-                fromJson(JSONObject(jsonString))
-            } catch (ignored: JSONException) {
-                null
-            }
-        }
-
         @JvmStatic
         fun fromJson(paymentMethod: JSONObject?): PaymentMethod? {
             return paymentMethod?.let {

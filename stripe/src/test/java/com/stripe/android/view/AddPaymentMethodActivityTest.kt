@@ -37,6 +37,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodTest
+import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.view.AddPaymentMethodActivity.Companion.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY
 import java.util.Calendar
 import kotlin.test.BeforeTest
@@ -367,6 +368,6 @@ class AddPaymentMethodActivityTest {
                 .build()
 
         private val EXPECTED_PAYMENT_METHOD =
-            requireNotNull(PaymentMethod.fromJson(PaymentMethodTest.PM_CARD_JSON))
+            requireNotNull(PaymentMethodJsonParser().parse(PaymentMethodTest.PM_CARD_JSON))
     }
 }
