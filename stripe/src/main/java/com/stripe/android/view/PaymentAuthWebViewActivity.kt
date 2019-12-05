@@ -3,13 +3,13 @@ package com.stripe.android.view
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
-import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.stripe.android.Logger
 import com.stripe.android.PaymentAuthWebViewStarter
@@ -21,16 +21,7 @@ import kotlinx.android.synthetic.main.payment_auth_web_view_layout.*
 class PaymentAuthWebViewActivity : AppCompatActivity() {
 
     private lateinit var logger: Logger
-    private lateinit var args: PaymentAuthWebViewStarter.Args
-
-    private val resultIntent: Intent
-        get() {
-            return Intent()
-                .putExtra(StripeIntentResultExtras.CLIENT_SECRET, args.clientSecret)
-                .putExtra(StripeIntentResultExtras.SOURCE_ID,
-                    Uri.parse(args.url).lastPathSegment.orEmpty()
-                )
-        }
+    private lateinit var viewModel: PaymentAuthWebViewActivityViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,7 +34,9 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
             return
         }
 
-        this.args = args
+        viewModel = ViewModelProviders.of(
+            this, PaymentAuthWebViewActivityViewModel.Factory(args)
+        )[PaymentAuthWebViewActivityViewModel::class.java]
 
         logger = Logger.getInstance(args.enableLogging)
         logger.debug("PaymentAuthWebViewActivity#onCreate()")
@@ -53,13 +46,11 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
 
         setContentView(R.layout.payment_auth_web_view_layout)
 
-        val toolbar: Toolbar = findViewById(R.id.payment_auth_web_view_toolbar)
-        setSupportActionBar(toolbar)
-
-        customizeToolbar(toolbar)
+        setSupportActionBar(payment_auth_web_view_toolbar)
+        customizeToolbar()
 
         val clientSecret = args.clientSecret
-        setResult(Activity.RESULT_OK, resultIntent)
+        setResult(Activity.RESULT_OK, viewModel.resultIntent)
 
         if (clientSecret.isBlank()) {
             logger.debug("PaymentAuthWebViewActivity#onCreate() - clientSecret is blank")
@@ -82,13 +73,9 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         logger.debug("PaymentAuthWebViewActivity#onCreateOptionsMenu()")
         menuInflater.inflate(R.menu.payment_auth_web_view_menu, menu)
 
-        args.toolbarCustomization?.let {
-            val buttonText = it.buttonText
-            if (!buttonText.isNullOrBlank()) {
-                logger.debug("PaymentAuthWebViewActivity#customizeToolbar() - updating close button text")
-                val closeMenuItem = menu.findItem(R.id.action_close)
-                closeMenuItem.title = buttonText
-            }
+        viewModel.buttonText?.let {
+            logger.debug("PaymentAuthWebViewActivity#customizeToolbar() - updating close button text")
+            menu.findItem(R.id.action_close).title = it
         }
 
         return super.onCreateOptionsMenu(menu)
@@ -108,28 +95,26 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
     }
 
     private fun cancelIntentSource() {
-        setResult(Activity.RESULT_OK,
-            resultIntent
-                .putExtra(StripeIntentResultExtras.SHOULD_CANCEL_SOURCE, true)
-        )
-        finish()
+        viewModel.cancelIntentSource().observe(this, Observer { intent ->
+            setResult(Activity.RESULT_OK, intent)
+            finish()
+        })
     }
 
-    private fun customizeToolbar(toolbar: Toolbar) {
+    private fun customizeToolbar() {
         logger.debug("PaymentAuthWebViewActivity#customizeToolbar()")
-        args.toolbarCustomization?.let { toolbarCustomization ->
-            val headerText = toolbarCustomization.headerText
-            if (!headerText.isNullOrBlank()) {
-                logger.debug("PaymentAuthWebViewActivity#customizeToolbar() - updating toolbar title")
-                toolbar.title = CustomizeUtils.buildStyledText(this, headerText, toolbarCustomization)
-            }
 
-            toolbarCustomization.backgroundColor?.let { backgroundColor ->
-                logger.debug("PaymentAuthWebViewActivity#customizeToolbar() - updating toolbar background color")
-                @ColorInt val backgroundColorInt = Color.parseColor(backgroundColor)
-                toolbar.setBackgroundColor(backgroundColorInt)
-                CustomizeUtils.setStatusBarColor(this, backgroundColorInt)
-            }
+        viewModel.toolbarTitle?.let {
+            logger.debug("PaymentAuthWebViewActivity#customizeToolbar() - updating toolbar title")
+            payment_auth_web_view_toolbar.title =
+                CustomizeUtils.buildStyledText(this, it.text, it.toolbarCustomization)
+        }
+
+        viewModel.toolbarBackgroundColor?.let { backgroundColor ->
+            logger.debug("PaymentAuthWebViewActivity#customizeToolbar() - updating toolbar background color")
+            @ColorInt val backgroundColorInt = Color.parseColor(backgroundColor)
+            payment_auth_web_view_toolbar.setBackgroundColor(backgroundColorInt)
+            CustomizeUtils.setStatusBarColor(this, backgroundColorInt)
         }
     }
 }
