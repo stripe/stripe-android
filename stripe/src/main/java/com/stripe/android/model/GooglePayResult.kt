@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import com.stripe.android.model.StripeJsonUtils.optString
+import com.stripe.android.model.parsers.TokenJsonParser
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -28,7 +29,7 @@ data class GooglePayResult constructor(
             val paymentToken = paymentMethodData
                 .getJSONObject("tokenizationData")
                 .getString("token")
-            val stripeToken = Token.fromJson(JSONObject(paymentToken))
+            val stripeToken = TokenJsonParser().parse(JSONObject(paymentToken))
 
             val googlePayBillingAddress = paymentMethodData
                 .getJSONObject("info")

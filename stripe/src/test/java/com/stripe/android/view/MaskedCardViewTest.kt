@@ -8,6 +8,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodTest
+import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import java.util.Calendar
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -57,7 +58,7 @@ class MaskedCardViewTest {
 
     @Test
     fun setPaymentMethod_setsCorrectData() {
-        val paymentMethod = PaymentMethod.fromJson(PaymentMethodTest.PM_CARD_JSON)
+        val paymentMethod = PaymentMethodJsonParser().parse(PaymentMethodTest.PM_CARD_JSON)
         assertNotNull(paymentMethod)
         maskedCardView.setPaymentMethod(paymentMethod)
         assertEquals("4242", maskedCardView.last4)
@@ -67,7 +68,7 @@ class MaskedCardViewTest {
 
     @Test
     fun setSelected_changesCheckMarkVisibility() {
-        val paymentMethod = PaymentMethod.fromJson(PaymentMethodTest.PM_CARD_JSON)
+        val paymentMethod = PaymentMethodJsonParser().parse(PaymentMethodTest.PM_CARD_JSON)
         assertNotNull(paymentMethod)
         maskedCardView.setPaymentMethod(paymentMethod)
 

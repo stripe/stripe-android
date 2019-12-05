@@ -1,10 +1,12 @@
 package com.stripe.android.model
 
+import com.stripe.android.model.parsers.SetupIntentJsonParser
 import org.json.JSONObject
 
 internal object SetupIntentFixtures {
+    private val PARSER = SetupIntentJsonParser()
 
-    internal val SI_NEXT_ACTION_REDIRECT_JSON =
+    private val SI_NEXT_ACTION_REDIRECT_JSON = JSONObject(
         """
         {
             "id": "seti_1EqTSZGMT9dGPIDGVzCUs6dV",
@@ -30,8 +32,9 @@ internal object SetupIntentFixtures {
             "usage": "off_session"
         }
         """.trimIndent()
+    )
 
-    internal val SI_WITH_LAST_PAYMENT_ERROR = SetupIntent.fromJson(JSONObject(
+    internal val SI_WITH_LAST_PAYMENT_ERROR = requireNotNull(PARSER.parse(JSONObject(
         """
         {
             "id": "seti_1EqTSZGMT9dGPIDGVzCUs6dV",
@@ -102,9 +105,9 @@ internal object SetupIntentFixtures {
             "usage": "off_session"
         }
         """.trimIndent()
-    ))!!
+    )))
 
-    internal val CANCELLED = SetupIntent.fromString(
+    internal val CANCELLED = requireNotNull(PARSER.parse(JSONObject(
         """
         {
             "id": "seti_1FCoS9CRMbs6FrXfxFQOp8Mm",
@@ -133,7 +136,9 @@ internal object SetupIntentFixtures {
             "usage": "off_session"
         }
         """.trimIndent()
-    )!!
+    )))
 
-    val SI_NEXT_ACTION_REDIRECT = SetupIntent.fromString(SI_NEXT_ACTION_REDIRECT_JSON)!!
+    val SI_NEXT_ACTION_REDIRECT = requireNotNull(
+        PARSER.parse(SI_NEXT_ACTION_REDIRECT_JSON)
+    )
 }
