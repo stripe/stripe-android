@@ -195,9 +195,8 @@ class AddPaymentMethodActivity : StripeActivity() {
             errorMessage: String,
             stripeError: StripeError?
         ) {
-            // No need to show this error, because it will be broadcast
-            // from the CustomerSession
             activity?.setCommunicatingProgress(false)
+            activity?.showError(errorMessage)
         }
     }
 

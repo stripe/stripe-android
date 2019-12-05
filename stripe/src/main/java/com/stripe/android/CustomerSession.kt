@@ -5,7 +5,6 @@ import android.content.Context
 import android.os.Handler
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.stripe.android.PaymentConfiguration.Companion.getInstance
 import com.stripe.android.Stripe.Companion.appInfo
 import com.stripe.android.exception.StripeException
@@ -50,7 +49,6 @@ class CustomerSession @VisibleForTesting internal constructor(
             CustomerSessionRunnableFactory(
                 stripeRepository,
                 createHandler(),
-                LocalBroadcastManager.getInstance(context),
                 publishableKey,
                 stripeAccountId,
                 productUsage
@@ -411,9 +409,6 @@ class CustomerSession @VisibleForTesting internal constructor(
     }
 
     companion object {
-        internal const val ACTION_API_EXCEPTION = "action_api_exception"
-        internal const val EXTRA_EXCEPTION = "exception"
-
         internal const val ACTION_ADD_SOURCE = "add_source"
         internal const val ACTION_DELETE_SOURCE = "delete_source"
         internal const val ACTION_ATTACH_PAYMENT_METHOD = "attach_payment_method"
