@@ -151,10 +151,10 @@ data class PaymentMethod internal constructor(
 
     @Parcelize
     data class BillingDetails internal constructor(
-        @JvmField val address: Address?,
-        @JvmField val email: String?,
-        @JvmField val name: String?,
-        @JvmField val phone: String?
+        @JvmField val address: Address? = null,
+        @JvmField val email: String? = null,
+        @JvmField val name: String? = null,
+        @JvmField val phone: String? = null
     ) : StripeModel(), StripeParamsModel {
 
         fun toBuilder(): Builder {

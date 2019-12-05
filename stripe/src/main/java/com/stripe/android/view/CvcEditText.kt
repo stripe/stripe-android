@@ -17,6 +17,31 @@ class CvcEditText @JvmOverloads constructor(
     defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
+    /**
+     * @return the inputted CVC value if valid; otherwise, null
+     */
+    val cvcValue: String?
+        get() {
+            return rawCvcValue.takeIf { isValid }
+        }
+
+    private val rawCvcValue: String
+        get() {
+            return text.toString().trim()
+        }
+
+    private var isAmex: Boolean = false
+
+    private val isValid: Boolean
+        get() {
+            val cvcLength = rawCvcValue.length
+            return if (isAmex && cvcLength == Card.CVC_LENGTH_AMERICAN_EXPRESS) {
+                true
+            } else {
+                cvcLength == Card.CVC_LENGTH_COMMON
+            }
+        }
+
     init {
         setHint(R.string.cvc_number_hint)
         maxLines = 1
@@ -42,7 +67,7 @@ class CvcEditText @JvmOverloads constructor(
         customHintText: String? = null,
         textInputLayout: TextInputLayout? = null
     ) {
-        val isAmex = Card.CardBrand.AMERICAN_EXPRESS == brand
+        isAmex = Card.CardBrand.AMERICAN_EXPRESS == brand
         filters = if (isAmex) {
             INPUT_FILTER_AMEX
         } else {
