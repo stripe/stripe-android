@@ -31,7 +31,7 @@ data class PaymentMethod internal constructor(
     @JvmField val fpx: Fpx? = null,
     @JvmField val ideal: Ideal? = null,
     @JvmField val sepaDebit: SepaDebit? = null
-) : StripeModel() {
+) : StripeModel {
 
     @Parcelize
     enum class Type constructor(
@@ -154,7 +154,7 @@ data class PaymentMethod internal constructor(
         @JvmField val email: String? = null,
         @JvmField val name: String? = null,
         @JvmField val phone: String? = null
-    ) : StripeModel(), StripeParamsModel {
+    ) : StripeModel, StripeParamsModel {
 
         fun toBuilder(): Builder {
             return Builder()
@@ -238,7 +238,7 @@ data class PaymentMethod internal constructor(
         @JvmField val last4: String? = null,
         @JvmField val threeDSecureUsage: ThreeDSecureUsage? = null,
         @JvmField val wallet: Wallet? = null
-    ) : StripeModel() {
+    ) : StripeModel {
 
         @Retention(AnnotationRetention.SOURCE)
         @StringDef(Brand.AMERICAN_EXPRESS, Brand.DISCOVER, Brand.JCB, Brand.DINERS_CLUB,
@@ -323,18 +323,18 @@ data class PaymentMethod internal constructor(
             @JvmField val addressLine1Check: String?,
             @JvmField val addressPostalCodeCheck: String?,
             @JvmField val cvcCheck: String?
-        ) : StripeModel()
+        ) : StripeModel
 
         @Parcelize
         data class ThreeDSecureUsage internal constructor(
             @JvmField val isSupported: Boolean
-        ) : StripeModel()
+        ) : StripeModel
     }
 
     @Parcelize
     data class CardPresent internal constructor(
         private val ignore: Boolean = true
-    ) : StripeModel() {
+    ) : StripeModel {
         internal companion object {
             @JvmSynthetic
             internal val EMPTY: CardPresent = CardPresent()
@@ -345,7 +345,7 @@ data class PaymentMethod internal constructor(
     data class Ideal internal constructor(
         @JvmField val bank: String?,
         @JvmField val bankIdentifierCode: String?
-    ) : StripeModel()
+    ) : StripeModel
 
     /**
      * Requires the FPX payment method enabled on your account via
@@ -357,7 +357,7 @@ data class PaymentMethod internal constructor(
     data class Fpx internal constructor(
         @JvmField val bank: String?,
         @JvmField val accountHolderType: String?
-    ) : StripeModel()
+    ) : StripeModel
 
     @Parcelize
     data class SepaDebit internal constructor(
@@ -366,7 +366,7 @@ data class PaymentMethod internal constructor(
         @JvmField val country: String?,
         @JvmField val fingerprint: String?,
         @JvmField val last4: String?
-    ) : StripeModel()
+    ) : StripeModel
 
     companion object {
         @JvmStatic

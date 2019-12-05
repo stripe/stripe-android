@@ -1,6 +1,5 @@
 package com.stripe.android
 
-import android.os.Parcelable
 import com.stripe.android.model.StripeModel
 import kotlinx.android.parcel.Parcelize
 
@@ -25,4 +24,4 @@ data class EphemeralKey internal constructor(
     internal val objectType: String,
     val secret: String,
     internal val type: String
-) : StripeModel(), Parcelable
+) : StripeModel

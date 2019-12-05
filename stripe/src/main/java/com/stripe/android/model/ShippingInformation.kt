@@ -1,6 +1,5 @@
 package com.stripe.android.model
 
-import android.os.Parcelable
 import com.stripe.android.model.parsers.ShippingInformationJsonParser
 import kotlinx.android.parcel.Parcelize
 import org.json.JSONObject
@@ -13,7 +12,7 @@ data class ShippingInformation constructor(
     val address: Address? = null,
     val name: String? = null,
     val phone: String? = null
-) : StripeModel(), StripeParamsModel, Parcelable {
+) : StripeModel, StripeParamsModel {
 
     override fun toParamMap(): Map<String, Any> {
         return listOf(

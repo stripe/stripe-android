@@ -1,6 +1,5 @@
 package com.stripe.android.model
 
-import android.os.Parcelable
 import androidx.annotation.StringDef
 import com.stripe.android.model.Source.SourceFlow
 import com.stripe.android.model.Source.SourceType
@@ -140,7 +139,7 @@ data class Source internal constructor(
      * every time you charge the source.
      */
     val statementDescriptor: String? = null
-) : StripeModel(), StripePaymentSource, Parcelable {
+) : StripeModel, StripePaymentSource {
 
     val weChat: WeChat
         get() {

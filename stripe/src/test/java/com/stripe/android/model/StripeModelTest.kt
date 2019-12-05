@@ -1,11 +1,13 @@
 package com.stripe.android.model
 
+import com.stripe.android.model.parsers.CardJsonParser
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNotSame
 import kotlin.test.assertTrue
+import org.json.JSONObject
 
 /**
  * Test class for [StripeModel].
@@ -16,8 +18,8 @@ class StripeModelTest {
     fun equals_whenEquals_returnsTrue() {
         assertTrue(StripeModel::class.java.isAssignableFrom(Card::class.java))
 
-        val firstCard = Card.fromJson(CardTest.JSON_CARD_USD)
-        val secondCard = Card.fromJson(CardTest.JSON_CARD_USD)
+        val firstCard = parse(CardTest.JSON_CARD_USD)
+        val secondCard = parse(CardTest.JSON_CARD_USD)
 
         assertEquals(firstCard, secondCard)
         // Just confirming for sanity
@@ -36,8 +38,8 @@ class StripeModelTest {
     fun hashCode_whenEquals_returnsSameValue() {
         assertTrue(StripeModel::class.java.isAssignableFrom(Card::class.java))
 
-        val firstCard = Card.fromJson(CardTest.JSON_CARD_USD)
-        val secondCard = Card.fromJson(CardTest.JSON_CARD_USD)
+        val firstCard = parse(CardTest.JSON_CARD_USD)
+        val secondCard = parse(CardTest.JSON_CARD_USD)
         assertNotNull(firstCard)
         assertNotNull(secondCard)
 
@@ -55,5 +57,9 @@ class StripeModelTest {
         assertNotNull(eurCard)
 
         assertNotEquals(usdCard.hashCode(), eurCard.hashCode())
+    }
+
+    private fun parse(json: JSONObject): Card? {
+        return requireNotNull(CardJsonParser().parse(json))
     }
 }

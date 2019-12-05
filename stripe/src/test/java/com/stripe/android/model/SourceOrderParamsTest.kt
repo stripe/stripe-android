@@ -18,7 +18,7 @@ class SourceOrderParamsTest {
                 )
             ),
             shipping = SourceOrderParams.Shipping(
-                address = requireNotNull(Address.fromJson(AddressFixtures.ADDRESS_JSON)),
+                address = AddressFixtures.ADDRESS,
                 carrier = "UPS",
                 name = "Jenny Rosen"
             )

@@ -1,7 +1,5 @@
 package com.stripe.android.model.parsers
 
-import com.stripe.android.model.BankAccount
-import com.stripe.android.model.Card
 import com.stripe.android.model.StripeJsonUtils
 import com.stripe.android.model.Token
 import com.stripe.android.model.Token.TokenType
@@ -23,13 +21,17 @@ internal class TokenJsonParser : ModelJsonParser<Token?> {
         val date = Date(createdTimeStamp * 1000)
 
         return if (TokenType.BANK_ACCOUNT == tokenType) {
-            val bankAccountObject = json.optJSONObject(FIELD_BANK_ACCOUNT) ?: return null
-            Token(tokenId, liveMode, date, used, BankAccount.fromJson(bankAccountObject))
+            json.optJSONObject(FIELD_BANK_ACCOUNT)?.let {
+                Token(tokenId, liveMode, date, used, BankAccountJsonParser().parse(it))
+            }
         } else if (TokenType.CARD == tokenType) {
-            val cardObject = json.optJSONObject(FIELD_CARD) ?: return null
-            Token(tokenId, liveMode, date, used, Card.fromJson(cardObject))
-        } else if (TokenType.PII == tokenType || TokenType.ACCOUNT == tokenType ||
-            TokenType.CVC_UPDATE == tokenType) {
+            json.optJSONObject(FIELD_CARD)?.let {
+                Token(tokenId, liveMode, date, used, CardJsonParser().parse(it))
+            }
+        } else if (
+            TokenType.PII == tokenType || TokenType.ACCOUNT == tokenType ||
+            TokenType.CVC_UPDATE == tokenType
+        ) {
             Token(tokenId, tokenType, liveMode, date, used)
         } else {
             null

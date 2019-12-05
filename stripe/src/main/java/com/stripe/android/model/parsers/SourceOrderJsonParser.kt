@@ -7,13 +7,15 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 internal class SourceOrderJsonParser : ModelJsonParser<SourceOrder> {
+    private val itemJsonParser = ItemJsonParser()
+
     override fun parse(json: JSONObject): SourceOrder {
         val itemsJson = json.optJSONArray(FIELD_ITEMS) ?: JSONArray()
 
         val items = (0 until itemsJson.length())
             .map { idx -> itemsJson.optJSONObject(idx) }
             .mapNotNull {
-                SourceOrder.Item.fromJson(it)
+                itemJsonParser.parse(it)
             }
         return SourceOrder(
             amount = StripeJsonUtils.optInteger(json, FIELD_AMOUNT),
@@ -21,7 +23,7 @@ internal class SourceOrderJsonParser : ModelJsonParser<SourceOrder> {
             email = StripeJsonUtils.optString(json, FIELD_EMAIL),
             items = items,
             shipping = json.optJSONObject(FIELD_SHIPPING)?.let {
-                SourceOrder.Shipping.fromJson(it)
+                ShippingJsonParser().parse(it)
             }
         )
     }

@@ -4,7 +4,7 @@ import com.stripe.android.model.parsers.AddressJsonParser
 import org.json.JSONObject
 
 internal object AddressFixtures {
-    val ADDRESS_JSON = JSONObject(
+    val ADDRESS = AddressJsonParser().parse(JSONObject(
         """
         {
             "city": "San Francisco",
@@ -15,7 +15,5 @@ internal object AddressFixtures {
             "state": "CA"
         }
         """.trimIndent()
-    )
-
-    val ADDRESS = AddressJsonParser().parse(ADDRESS_JSON)
+    ))
 }

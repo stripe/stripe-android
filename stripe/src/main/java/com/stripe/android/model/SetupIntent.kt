@@ -85,7 +85,7 @@ data class SetupIntent internal constructor(
      * @return The error encountered in the previous SetupIntent confirmation.
      */
     val lastSetupError: Error?
-) : StripeModel(), StripeIntent {
+) : StripeModel, StripeIntent {
 
     override val redirectData: StripeIntent.RedirectData?
         get() {
@@ -181,7 +181,7 @@ data class SetupIntent internal constructor(
          * The type of error returned.
          */
         val type: Type?
-    ) : StripeModel() {
+    ) : StripeModel {
         enum class Type(val code: String) {
             ApiConnectionError("api_connection_error"),
             ApiError("api_error"),

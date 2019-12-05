@@ -126,7 +126,7 @@ data class PaymentIntent internal constructor(
      * @return The payment error encountered in the previous PaymentIntent confirmation.
      */
     val lastPaymentError: Error?
-) : StripeModel(), StripeIntent {
+) : StripeModel, StripeIntent {
     @IgnoredOnParcel
     override val nextActionType: StripeIntent.NextActionType? = nextAction?.let {
         StripeIntent.NextActionType.fromCode(it[FIELD_NEXT_ACTION_TYPE] as String?)
@@ -234,7 +234,7 @@ data class PaymentIntent internal constructor(
          * The type of error returned.
          */
         val type: Type?
-    ) : StripeModel() {
+    ) : StripeModel {
         enum class Type(val code: String) {
             ApiConnectionError("api_connection_error"),
             ApiError("api_error"),

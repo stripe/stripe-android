@@ -25,6 +25,7 @@ import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
+import com.stripe.android.model.parsers.CustomerJsonParser
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.parsers.SetupIntentJsonParser
@@ -613,7 +614,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             )
         )
 
-        return Customer.fromJson(response.responseJson)
+        return CustomerJsonParser().parse(response.responseJson)
     }
 
     @Throws(InvalidRequestException::class, APIConnectionException::class, APIException::class,
@@ -640,7 +641,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 requestOptions,
                 mapOf("shipping" to shippingInformation.toParamMap()), appInfo)
         )
-        return Customer.fromJson(response.responseJson)
+        return CustomerJsonParser().parse(response.responseJson)
     }
 
     @Throws(InvalidRequestException::class, APIConnectionException::class, APIException::class,
@@ -656,7 +657,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 appInfo = appInfo
             )
         )
-        return Customer.fromJson(response.responseJson)
+        return CustomerJsonParser().parse(response.responseJson)
     }
 
     @Throws(InvalidRequestException::class, APIConnectionException::class, APIException::class,

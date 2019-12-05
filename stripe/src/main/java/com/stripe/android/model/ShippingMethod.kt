@@ -1,6 +1,5 @@
 package com.stripe.android.model
 
-import android.os.Parcelable
 import androidx.annotation.Size
 import java.util.Currency
 import kotlinx.android.parcel.Parcelize
@@ -35,7 +34,7 @@ data class ShippingMethod @JvmOverloads constructor(
      * the UI
      */
     val detail: String? = null
-) : StripeModel(), Parcelable {
+) : StripeModel {
 
     @JvmOverloads
     constructor(
