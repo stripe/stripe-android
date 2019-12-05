@@ -1,15 +1,12 @@
 package com.stripe.android
 
-import android.content.BroadcastReceiver
 import android.content.Intent
-import android.content.IntentFilter
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.firstValue
+import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.stripe.android.exception.APIException
 import com.stripe.android.model.Customer
@@ -38,12 +35,10 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.json.JSONObject
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
@@ -53,8 +48,6 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class CustomerSessionTest {
 
-    @Mock
-    private lateinit var broadcastReceiver: BroadcastReceiver
     @Mock
     private lateinit var stripeRepository: StripeRepository
     @Mock
@@ -89,10 +82,6 @@ class CustomerSessionTest {
         customerArgumentCaptor = argumentCaptor()
         intentArgumentCaptor = argumentCaptor()
         requestOptionsArgumentCaptor = argumentCaptor()
-
-        LocalBroadcastManager.getInstance(ApplicationProvider.getApplicationContext())
-            .registerReceiver(broadcastReceiver,
-                IntentFilter(CustomerSession.ACTION_API_EXCEPTION))
 
         `when`<Customer>(stripeRepository.retrieveCustomer(any(), any()))
             .thenReturn(FIRST_CUSTOMER, SECOND_CUSTOMER)
@@ -195,7 +184,7 @@ class CustomerSessionTest {
         ephemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW)
         val customerSession = createCustomerSession(null)
 
-        verify<StripeRepository>(stripeRepository).retrieveCustomer(eq(firstKey.objectId),
+        verify(stripeRepository).retrieveCustomer(eq(firstKey.objectId),
             requestOptionsArgumentCaptor.capture())
         assertEquals(firstKey.secret,
             requestOptionsArgumentCaptor.firstValue.apiKey)
@@ -226,7 +215,7 @@ class CustomerSessionTest {
             })
 
         assertNotNull(FIRST_CUSTOMER.id)
-        verify<StripeRepository>(stripeRepository).setCustomerShippingInfo(
+        verify(stripeRepository).setCustomerShippingInfo(
             eq(FIRST_CUSTOMER.id.orEmpty()),
             eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             productUsageArgumentCaptor.capture(),
@@ -268,7 +257,8 @@ class CustomerSessionTest {
         val mockListener = mock(CustomerSession.CustomerRetrievalListener::class.java)
         customerSession.retrieveCurrentCustomer(mockListener)
 
-        verify<CustomerSession.CustomerRetrievalListener>(mockListener).onCustomerRetrieved(customerArgumentCaptor.capture())
+        verify(mockListener)
+            .onCustomerRetrieved(customerArgumentCaptor.capture())
         val capturedCustomer = customerArgumentCaptor.firstValue
         assertEquals(SECOND_CUSTOMER.id, capturedCustomer.id)
 
@@ -276,11 +266,11 @@ class CustomerSessionTest {
         //  Make sure the value is cached.
         assertEquals(SECOND_CUSTOMER.id, customerId)
 
-        verify<StripeRepository>(stripeRepository).retrieveCustomer(eq(firstKey.objectId),
+        verify(stripeRepository).retrieveCustomer(eq(firstKey.objectId),
             requestOptionsArgumentCaptor.capture())
         assertEquals(firstKey.secret,
             requestOptionsArgumentCaptor.firstValue.apiKey)
-        verify<StripeRepository>(stripeRepository).retrieveCustomer(eq(secondKey.objectId),
+        verify(stripeRepository).retrieveCustomer(eq(secondKey.objectId),
             requestOptionsArgumentCaptor.capture())
         assertEquals(secondKey.secret,
             requestOptionsArgumentCaptor.allValues[1].apiKey)
@@ -305,7 +295,7 @@ class CustomerSessionTest {
         assertEquals(firstKey.objectId, FIRST_CUSTOMER.id)
         assertEquals(firstKey.objectId, customerSession.customer?.id)
 
-        verify<StripeRepository>(stripeRepository).retrieveCustomer(eq(firstKey.objectId),
+        verify(stripeRepository).retrieveCustomer(eq(firstKey.objectId),
             requestOptionsArgumentCaptor.capture())
         assertEquals(firstKey.secret,
             requestOptionsArgumentCaptor.firstValue.apiKey)
@@ -322,7 +312,7 @@ class CustomerSessionTest {
         val mockListener = mock(CustomerSession.CustomerRetrievalListener::class.java)
         customerSession.retrieveCurrentCustomer(mockListener)
 
-        verify<CustomerSession.CustomerRetrievalListener>(mockListener).onCustomerRetrieved(customerArgumentCaptor.capture())
+        verify(mockListener).onCustomerRetrieved(customerArgumentCaptor.capture())
         val capturedCustomer = customerArgumentCaptor.firstValue
 
         assertEquals(FIRST_CUSTOMER.id, capturedCustomer.id)
@@ -364,7 +354,7 @@ class CustomerSessionTest {
 
         assertTrue(customerSession.productUsageTokens.isEmpty())
         assertNotNull(FIRST_CUSTOMER.id)
-        verify<StripeRepository>(stripeRepository).addCustomerSource(
+        verify(stripeRepository).addCustomerSource(
             eq(FIRST_CUSTOMER.id.orEmpty()),
             eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             productUsageArgumentCaptor.capture(),
@@ -379,7 +369,7 @@ class CustomerSessionTest {
         assertTrue(productUsage.contains(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY))
         assertTrue(productUsage.contains(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY))
 
-        verify<CustomerSession.SourceRetrievalListener>(mockListener)
+        verify(mockListener)
             .onSourceRetrieved(sourceArgumentCaptor.capture())
         val capturedSource = sourceArgumentCaptor.firstValue
         assertEquals(SourceFixtures.SOURCE_CARD.id, capturedSource.id)
@@ -412,19 +402,9 @@ class CustomerSessionTest {
         val mockListener = mock(CustomerSession.SourceRetrievalListener::class.java)
 
         setupErrorProxy()
-        customerSession.addCustomerSource(
-            "abc123",
-            Source.SourceType.CARD,
-            mockListener)
+        customerSession.addCustomerSource("abc123", Source.SourceType.CARD, mockListener)
 
-        verify<BroadcastReceiver>(broadcastReceiver)
-            .onReceive(any(), intentArgumentCaptor.capture())
-
-        val captured = intentArgumentCaptor.firstValue
-        assertTrue(captured.hasExtra(CustomerSession.EXTRA_EXCEPTION))
-        assertTrue(captured.getSerializableExtra(CustomerSession.EXTRA_EXCEPTION) is APIException)
-
-        verify<CustomerSession.SourceRetrievalListener>(mockListener)
+        verify(mockListener)
             .onError(404, "The card is invalid", null)
         assertTrue(customerSession.productUsageTokens.isEmpty())
     }
@@ -461,7 +441,7 @@ class CustomerSessionTest {
 
         assertTrue(customerSession.productUsageTokens.isEmpty())
         assertNotNull(FIRST_CUSTOMER.id)
-        verify<StripeRepository>(stripeRepository).deleteCustomerSource(
+        verify(stripeRepository).deleteCustomerSource(
             eq(FIRST_CUSTOMER.id.orEmpty()),
             eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             productUsageArgumentCaptor.capture(),
@@ -475,7 +455,7 @@ class CustomerSessionTest {
         assertTrue(productUsage.contains(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY))
         assertTrue(productUsage.contains(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY))
 
-        verify<CustomerSession.SourceRetrievalListener>(mockListener)
+        verify(mockListener)
             .onSourceRetrieved(sourceArgumentCaptor.capture())
         val capturedSource = sourceArgumentCaptor.firstValue
         assertEquals(SourceFixtures.SOURCE_CARD.id, capturedSource.id)
@@ -510,13 +490,7 @@ class CustomerSessionTest {
         setupErrorProxy()
         customerSession.deleteCustomerSource("abc123", mockListener)
 
-        verify<BroadcastReceiver>(broadcastReceiver).onReceive(any(),
-            intentArgumentCaptor.capture())
-        val captured = intentArgumentCaptor.firstValue
-        assertTrue(captured.hasExtra(CustomerSession.EXTRA_EXCEPTION))
-        assertTrue(captured.getSerializableExtra(CustomerSession.EXTRA_EXCEPTION) is APIException)
-
-        verify<CustomerSession.SourceRetrievalListener>(mockListener)
+        verify(mockListener)
             .onError(404, "The card does not exist", null)
         assertTrue(customerSession.productUsageTokens.isEmpty())
     }
@@ -553,7 +527,7 @@ class CustomerSessionTest {
 
         assertTrue(customerSession.productUsageTokens.isEmpty())
         assertNotNull(FIRST_CUSTOMER.id)
-        verify<StripeRepository>(stripeRepository).setDefaultCustomerSource(
+        verify(stripeRepository).setDefaultCustomerSource(
             eq(FIRST_CUSTOMER.id.orEmpty()),
             eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             productUsageArgumentCaptor.capture(),
@@ -568,7 +542,7 @@ class CustomerSessionTest {
         assertEquals(1, productUsage.size)
         assertTrue(productUsage.contains(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY))
 
-        verify<CustomerSession.CustomerRetrievalListener>(mockListener).onCustomerRetrieved(customerArgumentCaptor.capture())
+        verify(mockListener).onCustomerRetrieved(customerArgumentCaptor.capture())
         val capturedCustomer = customerArgumentCaptor.firstValue
         assertNotNull(SECOND_CUSTOMER)
         assertEquals(SECOND_CUSTOMER.id, capturedCustomer.id)
@@ -602,14 +576,7 @@ class CustomerSessionTest {
         customerSession.setCustomerDefaultSource("abc123", Source.SourceType.CARD,
             mockListener)
 
-        val intentArgumentCaptor = ArgumentCaptor.forClass(Intent::class.java)
-        verify<BroadcastReceiver>(broadcastReceiver).onReceive(any(),
-            intentArgumentCaptor.capture())
-
-        val captured = intentArgumentCaptor.firstValue
-        assertTrue(captured.hasExtra(CustomerSession.EXTRA_EXCEPTION))
-        assertTrue(captured.getSerializableExtra(CustomerSession.EXTRA_EXCEPTION) is APIException)
-        verify<CustomerSession.CustomerRetrievalListener>(mockListener)
+        verify(mockListener)
             .onError(405, "auth error", null)
         assertTrue(customerSession.productUsageTokens.isEmpty())
     }
@@ -681,7 +648,7 @@ class CustomerSessionTest {
 
         assertTrue(customerSession.productUsageTokens.isEmpty())
         assertNotNull(FIRST_CUSTOMER.id)
-        verify<StripeRepository>(stripeRepository).attachPaymentMethod(
+        verify(stripeRepository).attachPaymentMethod(
             eq(FIRST_CUSTOMER.id.orEmpty()),
             eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             productUsageArgumentCaptor.capture(),
@@ -696,7 +663,7 @@ class CustomerSessionTest {
         assertTrue(productUsage.contains(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY))
         assertTrue(productUsage.contains(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY))
 
-        verify<CustomerSession.PaymentMethodRetrievalListener>(mockListener)
+        verify(mockListener)
             .onPaymentMethodRetrieved(paymentMethodArgumentCaptor.capture())
         val capturedPaymentMethod = paymentMethodArgumentCaptor.firstValue
         assertEquals(PAYMENT_METHOD.id, capturedPaymentMethod.id)
@@ -731,13 +698,7 @@ class CustomerSessionTest {
         setupErrorProxy()
         customerSession.attachPaymentMethod("pm_abc123", mockListener)
 
-        verify<BroadcastReceiver>(broadcastReceiver).onReceive(any(), intentArgumentCaptor.capture())
-
-        val captured = intentArgumentCaptor.firstValue
-        assertTrue(captured.hasExtra(CustomerSession.EXTRA_EXCEPTION))
-        assertTrue(captured.getSerializableExtra(CustomerSession.EXTRA_EXCEPTION) is APIException)
-
-        verify<CustomerSession.PaymentMethodRetrievalListener>(mockListener)
+        verify(mockListener)
             .onError(404, "The payment method is invalid", null)
         assertTrue(customerSession.productUsageTokens.isEmpty())
     }
@@ -775,7 +736,7 @@ class CustomerSessionTest {
 
         assertTrue(customerSession.productUsageTokens.isEmpty())
         assertNotNull(FIRST_CUSTOMER.id)
-        verify<StripeRepository>(stripeRepository).detachPaymentMethod(
+        verify(stripeRepository).detachPaymentMethod(
             eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             productUsageArgumentCaptor.capture(),
             eq("pm_abc123"),
@@ -789,7 +750,7 @@ class CustomerSessionTest {
         assertTrue(productUsage.contains(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY))
         assertTrue(productUsage.contains(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY))
 
-        verify<CustomerSession.PaymentMethodRetrievalListener>(mockListener)
+        verify(mockListener)
             .onPaymentMethodRetrieved(paymentMethodArgumentCaptor.capture())
         val capturedPaymentMethod = paymentMethodArgumentCaptor.firstValue
         assertEquals(PAYMENT_METHOD.id, capturedPaymentMethod.id)
@@ -824,13 +785,7 @@ class CustomerSessionTest {
         setupErrorProxy()
         customerSession.detachPaymentMethod("pm_abc123", mockListener)
 
-        verify<BroadcastReceiver>(broadcastReceiver).onReceive(any(),
-            intentArgumentCaptor.capture())
-        val captured = intentArgumentCaptor.firstValue
-        assertTrue(captured.hasExtra(CustomerSession.EXTRA_EXCEPTION))
-        assertTrue(captured.getSerializableExtra(CustomerSession.EXTRA_EXCEPTION) is APIException)
-
-        verify<CustomerSession.PaymentMethodRetrievalListener>(mockListener)
+        verify(mockListener)
             .onError(404, "The payment method does not exist", null)
         assertTrue(customerSession.productUsageTokens.isEmpty())
     }
@@ -865,7 +820,7 @@ class CustomerSessionTest {
 
         assertTrue(customerSession.productUsageTokens.isEmpty())
         assertNotNull(FIRST_CUSTOMER.id)
-        verify<StripeRepository>(stripeRepository).getPaymentMethods(
+        verify(stripeRepository).getPaymentMethods(
             eq(FIRST_CUSTOMER.id.orEmpty()),
             eq("card"),
             eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
@@ -880,7 +835,7 @@ class CustomerSessionTest {
         assertTrue(productUsage.contains(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY))
         assertTrue(productUsage.contains(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY))
 
-        verify<CustomerSession.PaymentMethodsRetrievalListener>(mockListener)
+        verify(mockListener)
             .onPaymentMethodsRetrieved(paymentMethodsArgumentCaptor.capture())
         val paymentMethods = paymentMethodsArgumentCaptor.firstValue
         assertNotNull(paymentMethods)

@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -34,6 +33,10 @@ class PaymentMethodsActivity : AppCompatActivity() {
     private var startedFromPaymentSession: Boolean = false
     private lateinit var customerSession: CustomerSession
     private lateinit var cardDisplayTextFactory: CardDisplayTextFactory
+
+    private val alertDisplayer: AlertDisplayer by lazy {
+        AlertDisplayer.DefaultAlertDisplayer(this)
+    }
 
     private lateinit var viewModel: PaymentMethodsViewModel
 
@@ -68,7 +71,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
                     val exception = it.data as StripeException
                     val displayedError = TranslatorManager.getErrorMessageTranslator()
                         .translate(exception.statusCode, exception.message, exception.stripeError)
-                    showError(displayedError)
+                    alertDisplayer.show(displayedError)
                 }
             }
             setCommunicatingProgress(false)
@@ -199,17 +202,6 @@ class PaymentMethodsActivity : AppCompatActivity() {
         )
 
         finish()
-    }
-
-    private fun showError(error: String) {
-        AlertDialog.Builder(this, R.style.AlertDialogStyle)
-            .setMessage(error)
-            .setCancelable(true)
-            .setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
-                dialogInterface.dismiss()
-            }
-            .create()
-            .show()
     }
 
     override fun onDestroy() {
