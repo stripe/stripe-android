@@ -116,5 +116,23 @@
             android:layout_gravity="start"
             />
 
+        <com.stripe.android.view.PostalCodeEditText
+            android:id="@+id/et_postal_code"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:ignore="UnusedAttribute"
+            tools:importantForAccessibility="yes"
+            android:accessibilityTraversalAfter="@+id/et_cvc"
+            android:nextFocusLeft="@id/et_cvc"
+            android:nextFocusUp="@id/et_cvc"
+            android:background="@android:color/transparent"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:layout_marginStart="@dimen/stripe_card_cvc_initial_margin"
+            android:layout_gravity="start"
+            android:visibility="gone"
+            android:enabled="false"
+            />
+
     </FrameLayout>
 </merge>
