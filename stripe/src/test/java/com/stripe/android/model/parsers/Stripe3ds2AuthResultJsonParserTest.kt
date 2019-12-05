@@ -1,5 +1,6 @@
-package com.stripe.android.model
+package com.stripe.android.model.parsers
 
+import com.stripe.android.model.Stripe3ds2AuthResult
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -9,11 +10,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class Stripe3ds2AuthResultTest {
+class Stripe3ds2AuthResultJsonParserTest {
 
     @Test
-    fun fromJSON_validData_createsObject() {
-        val result = Stripe3ds2AuthResult.fromJson(AUTH_RESULT_JSON)
+    fun parse_validData_createsObject() {
+        val result = parse(AUTH_RESULT_JSON)
         assertTrue(result.ares?.isChallenge == true)
 
         val expectedResult = Stripe3ds2AuthResult(
@@ -40,8 +41,8 @@ class Stripe3ds2AuthResultTest {
     }
 
     @Test
-    fun fromJSON_dataWithMessageExtensions_createsObject() {
-        val jsonResult = Stripe3ds2AuthResult.fromJson(AUTH_RESULT_WITH_EXTENSIONS_JSON)
+    fun parse_dataWithMessageExtensions_createsObject() {
+        val jsonResult = parse(AUTH_RESULT_WITH_EXTENSIONS_JSON)
 
         val extensions = listOf(
             Stripe3ds2AuthResult.MessageExtension(
@@ -91,8 +92,8 @@ class Stripe3ds2AuthResultTest {
     }
 
     @Test
-    fun fromJSON_errorData_createsObjectWithError() {
-        val jsonResult = Stripe3ds2AuthResult.fromJson(AUTH_RESULT_ERROR_JSON)
+    fun parse_errorData_createsObjectWithError() {
+        val jsonResult = parse(AUTH_RESULT_ERROR_JSON)
 
         val expectedResult = Stripe3ds2AuthResult(
             id = "threeds2_1Ecwz3CRMbs6FrXfThtfogua",
@@ -130,8 +131,8 @@ class Stripe3ds2AuthResultTest {
     }
 
     @Test
-    fun fromJson_invalidElementFormatJson_shouldPopulateErrorField() {
-        val result = Stripe3ds2AuthResult.fromJson(AUTH_RESULT_ERROR_INVALID_ELEMENT_FORMAT_JSON)
+    fun parse_invalidElementFormatJson_shouldPopulateErrorField() {
+        val result = parse(AUTH_RESULT_ERROR_INVALID_ELEMENT_FORMAT_JSON)
         assertNull(result.ares)
         assertNull(result.fallbackRedirectUrl)
         val error = result.error
@@ -143,8 +144,8 @@ class Stripe3ds2AuthResultTest {
     }
 
     @Test
-    fun fromJson_fallbackRedirectUrl_shouldReturnValidRedirectData() {
-        val result = Stripe3ds2AuthResult.fromJson(AUTH_RESULT_FALLBACK_REDIRECT_URL_JSON)
+    fun parse_fallbackRedirectUrl_shouldReturnValidRedirectData() {
+        val result = parse(AUTH_RESULT_FALLBACK_REDIRECT_URL_JSON)
         assertNull(result.ares)
         assertNull(result.error)
 
@@ -315,5 +316,9 @@ class Stripe3ds2AuthResultTest {
             }
             """.trimIndent()
         )
+
+        private fun parse(jsonObject: JSONObject): Stripe3ds2AuthResult {
+            return Stripe3ds2AuthResultJsonParser().parse(jsonObject)
+        }
     }
 }
