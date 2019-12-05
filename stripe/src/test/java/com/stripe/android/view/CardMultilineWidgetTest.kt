@@ -1,8 +1,6 @@
 package com.stripe.android.view
 
 import android.content.Context
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.View
 import android.widget.LinearLayout
 import androidx.test.core.app.ApplicationProvider
@@ -737,15 +735,6 @@ internal class CardMultilineWidgetTest {
         // Every Card made by the CardInputView should have the card widget token.
         private val EXPECTED_LOGGING_ARRAY = arrayOf(CARD_MULTILINE_TOKEN)
 
-        private val EMPTY_WATCHER = object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {
-            }
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-        }
+        private val EMPTY_WATCHER = object : StripeTextWatcher() {}
     }
 }
