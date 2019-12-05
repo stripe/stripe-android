@@ -30,6 +30,7 @@ import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.parsers.SetupIntentJsonParser
 import com.stripe.android.model.parsers.SourceJsonParser
+import com.stripe.android.model.parsers.Stripe3ds2AuthResultJsonParser
 import com.stripe.android.model.parsers.TokenJsonParser
 import java.io.IOException
 import java.net.HttpURLConnection
@@ -738,7 +739,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 appInfo
             )
         )
-        return Stripe3ds2AuthResult.fromJson(response.responseJson)
+
+        return Stripe3ds2AuthResultJsonParser().parse(response.responseJson)
     }
 
     override fun start3ds2Auth(
