@@ -5,7 +5,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeJsonUtils
 import org.json.JSONObject
 
-internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent?> {
+internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
     override fun parse(json: JSONObject): PaymentIntent? {
         if (VALUE_PAYMENT_INTENT != json.optString(FIELD_OBJECT)) {
             return null

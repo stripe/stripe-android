@@ -4,8 +4,8 @@ import com.stripe.android.model.StripeModel
 import org.json.JSONArray
 import org.json.JSONObject
 
-internal interface ModelJsonParser<out ModelType : StripeModel?> {
-    fun parse(json: JSONObject): ModelType
+internal interface ModelJsonParser<out ModelType : StripeModel> {
+    fun parse(json: JSONObject): ModelType?
 
     companion object {
         internal fun jsonArrayToList(jsonArray: JSONArray?): List<String> {

@@ -6,7 +6,7 @@ import com.stripe.android.model.Card.FundingType
 import com.stripe.android.model.StripeJsonUtils
 import org.json.JSONObject
 
-internal class CardJsonParser : ModelJsonParser<Card?> {
+internal class CardJsonParser : ModelJsonParser<Card> {
     override fun parse(json: JSONObject): Card? {
         if (VALUE_CARD != json.optString(FIELD_OBJECT)) {
             return null
