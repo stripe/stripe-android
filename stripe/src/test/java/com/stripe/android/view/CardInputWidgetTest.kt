@@ -1,8 +1,8 @@
 package com.stripe.android.view
 
 import android.os.Build
+import android.text.TextPaint
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.ImageView
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.CardNumberFixtures.VALID_AMEX_NO_SPACES
@@ -37,9 +37,6 @@ import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/**
- * Test class for [CardInputWidget].
- */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
 internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
@@ -70,22 +67,18 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
     fun setup() {
         MockitoAnnotations.initMocks(this)
 
-        val dimensionOverrides = object : CardInputWidget.DimensionOverrideSettings {
-            override val frameWidth: Int
-                // That's a pretty small screen, but one that we theoretically support.
-                get() = 500
-
-            override fun getPixelWidth(text: String, editText: EditText): Int {
-                // This makes it simple to know what to expect.
-                return text.length * 10
-            }
-        }
-
         cardInputWidget.setCardNumberTextWatcher(object : StripeTextWatcher() {})
         cardInputWidget.setExpiryDateTextWatcher(object : StripeTextWatcher() {})
         cardInputWidget.setCvcNumberTextWatcher(object : StripeTextWatcher() {})
 
-        cardInputWidget.setDimensionOverrideSettings(dimensionOverrides)
+        cardInputWidget.layoutWidthCalculator = object : CardInputWidget.LayoutWidthCalculator {
+            override fun calculate(text: String, paint: TextPaint): Int {
+                return text.length * 10
+            }
+        }
+        cardInputWidget.frameWidthSupplier = {
+            500 // That's a pretty small screen, but one that we theoretically support.
+        }
         cardInputWidget.viewTreeObserver
             .addOnGlobalFocusChangeListener(onGlobalFocusChangeListener)
 
@@ -537,7 +530,7 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch between 60 and 100 does nothing
-        cardInputWidget.setCardNumberIsViewed(false)
+        cardInputWidget.cardNumberIsViewed = false
         cardInputWidget.updateSpaceSizes(false)
         assertNull(cardInputWidget.getFocusRequestOnTouch(75))
     }
@@ -548,7 +541,7 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch between 100 and 192 returns the card editor
-        cardInputWidget.setCardNumberIsViewed(false)
+        cardInputWidget.cardNumberIsViewed = false
         cardInputWidget.updateSpaceSizes(false)
         val focusRequester = cardInputWidget.getFocusRequestOnTouch(150)
         assertNotNull(focusRequester)
@@ -561,7 +554,7 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch between 192 and 285 returns the date editor
-        cardInputWidget.setCardNumberIsViewed(false)
+        cardInputWidget.cardNumberIsViewed = false
         cardInputWidget.updateSpaceSizes(false)
         val focusRequester = cardInputWidget.getFocusRequestOnTouch(200)
         assertNotNull(focusRequester)
@@ -574,7 +567,7 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch between 285 and 335 does nothing
-        cardInputWidget.setCardNumberIsViewed(false)
+        cardInputWidget.cardNumberIsViewed = false
         cardInputWidget.updateSpaceSizes(false)
         assertNull(cardInputWidget.getFocusRequestOnTouch(300))
     }
@@ -585,7 +578,7 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch between 335 and 432 returns the date editor
-        cardInputWidget.setCardNumberIsViewed(false)
+        cardInputWidget.cardNumberIsViewed = false
         cardInputWidget.updateSpaceSizes(false)
         val focusRequester = cardInputWidget.getFocusRequestOnTouch(400)
         assertNotNull(focusRequester)
@@ -598,7 +591,7 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch between 432 and 530 returns the date editor
-        cardInputWidget.setCardNumberIsViewed(false)
+        cardInputWidget.cardNumberIsViewed = false
         cardInputWidget.updateSpaceSizes(false)
         val focusRequester = cardInputWidget.getFocusRequestOnTouch(485)
         assertNotNull(focusRequester)
@@ -611,7 +604,7 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch over 530 does nothing
-        cardInputWidget.setCardNumberIsViewed(false)
+        cardInputWidget.cardNumberIsViewed = false
         cardInputWidget.updateSpaceSizes(false)
         assertNull(cardInputWidget.getFocusRequestOnTouch(545))
     }

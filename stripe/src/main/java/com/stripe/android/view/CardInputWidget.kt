@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.Layout
+import android.text.TextPaint
 import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -13,7 +14,6 @@ import android.view.View.OnFocusChangeListener
 import android.view.animation.Animation
 import android.view.animation.AnimationSet
 import android.view.animation.Transformation
-import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -48,11 +48,13 @@ class CardInputWidget @JvmOverloads constructor(
     private val frameLayout: FrameLayout
 
     private val cardNumberEditText: CardNumberEditText
-    private val cvcNumberEditText: CvcEditText
     private val expiryDateEditText: ExpiryDateEditText
+    private val cvcNumberEditText: CvcEditText
 
     private var cardInputListener: CardInputListener? = null
-    private var cardNumberIsViewed = true
+
+    @JvmSynthetic
+    internal var cardNumberIsViewed = true
 
     @ColorInt
     private var tintColorInt: Int = 0
@@ -60,9 +62,9 @@ class CardInputWidget @JvmOverloads constructor(
     private var isAmEx: Boolean = false
     private var initFlag: Boolean = false
 
-    private var totalLengthInPixels: Int = 0
+    @JvmSynthetic
+    internal var layoutWidthCalculator: LayoutWidthCalculator = DefaultLayoutWidthCalculator()
 
-    private var dimensionOverrides: DimensionOverrideSettings? = null
     internal val placementParameters: PlacementParameters = PlacementParameters()
 
     private val postalCode: String? = null
@@ -146,7 +148,10 @@ class CardInputWidget @JvmOverloads constructor(
         }
 
     private val frameWidth: Int
-        get() = dimensionOverrides?.frameWidth ?: frameLayout.width
+        get() = frameWidthSupplier()
+
+    @JvmSynthetic
+    internal var frameWidthSupplier: () -> Int
 
     init {
         View.inflate(getContext(), R.layout.card_input_widget, this)
@@ -164,6 +169,8 @@ class CardInputWidget @JvmOverloads constructor(
         cardNumberEditText = frameLayout.findViewById(R.id.et_card_number)
         expiryDateEditText = frameLayout.findViewById(R.id.et_expiry_date)
         cvcNumberEditText = frameLayout.findViewById(R.id.et_cvc)
+
+        frameWidthSupplier = { frameLayout.width }
 
         cardIconImageView = findViewById(R.id.iv_card_icon)
 
@@ -190,7 +197,7 @@ class CardInputWidget @JvmOverloads constructor(
      */
     override fun setCardNumber(cardNumber: String?) {
         cardNumberEditText.setText(cardNumber)
-        setCardNumberIsViewed(!cardNumberEditText.isCardNumberValid)
+        this.cardNumberIsViewed = !cardNumberEditText.isCardNumberValid
     }
 
     override fun setCardHint(cardHint: String) {
@@ -303,14 +310,14 @@ class CardInputWidget @JvmOverloads constructor(
         if (state is Bundle) {
             cardNumberIsViewed = state.getBoolean(STATE_CARD_VIEWED, true)
             updateSpaceSizes(cardNumberIsViewed)
-            totalLengthInPixels = frameWidth
+            placementParameters.totalLengthInPixels = frameWidth
             val cardMargin: Int
             val dateMargin: Int
             val cvcMargin: Int
             if (cardNumberIsViewed) {
                 cardMargin = 0
                 dateMargin = placementParameters.cardWidth + placementParameters.cardDateSeparation
-                cvcMargin = totalLengthInPixels
+                cvcMargin = placementParameters.totalLengthInPixels
             } else {
                 cardMargin = -1 * placementParameters.hiddenCardWidth
                 dateMargin = placementParameters.peekCardWidth + placementParameters.cardDateSeparation
@@ -380,16 +387,6 @@ class CardInputWidget @JvmOverloads constructor(
     }
 
     @VisibleForTesting
-    internal fun setDimensionOverrideSettings(dimensonOverrides: DimensionOverrideSettings?) {
-        dimensionOverrides = dimensonOverrides
-    }
-
-    @VisibleForTesting
-    internal fun setCardNumberIsViewed(cardNumberIsViewed: Boolean) {
-        this.cardNumberIsViewed = cardNumberIsViewed
-    }
-
-    @VisibleForTesting
     internal fun updateSpaceSizes(isCardViewed: Boolean) {
         val frameWidth = frameWidth
         val frameStart = frameLayout.left
@@ -398,47 +395,28 @@ class CardInputWidget @JvmOverloads constructor(
             return
         }
 
-        placementParameters.cardWidth = getDesiredWidthInPixels(FULL_SIZING_CARD_TEXT, cardNumberEditText)
+        placementParameters.cardWidth = getDesiredWidthInPixels(
+            FULL_SIZING_CARD_TEXT, cardNumberEditText
+        )
 
-        placementParameters.dateWidth = getDesiredWidthInPixels(FULL_SIZING_DATE_TEXT, expiryDateEditText)
+        placementParameters.dateWidth = getDesiredWidthInPixels(
+            FULL_SIZING_DATE_TEXT, expiryDateEditText
+        )
 
         @Card.CardBrand val brand = cardNumberEditText.cardBrand
-        placementParameters.hiddenCardWidth = getDesiredWidthInPixels(getHiddenTextForBrand(brand), cardNumberEditText)
+        placementParameters.hiddenCardWidth = getDesiredWidthInPixels(
+            getHiddenTextForBrand(brand), cardNumberEditText
+        )
 
-        placementParameters.cvcWidth = getDesiredWidthInPixels(getCvcPlaceHolderForBrand(brand), cvcNumberEditText)
+        placementParameters.cvcWidth = getDesiredWidthInPixels(
+            getCvcPlaceHolderForBrand(brand), cvcNumberEditText
+        )
 
-        placementParameters.peekCardWidth = getDesiredWidthInPixels(getPeekCardTextForBrand(brand), cardNumberEditText)
+        placementParameters.peekCardWidth = getDesiredWidthInPixels(
+            getPeekCardTextForBrand(brand), cardNumberEditText
+        )
 
-        if (isCardViewed) {
-            placementParameters.cardDateSeparation = (frameWidth -
-                placementParameters.cardWidth - placementParameters.dateWidth)
-            placementParameters.cardTouchBufferLimit = (frameStart +
-                placementParameters.cardWidth + placementParameters.cardDateSeparation / 2)
-            placementParameters.dateStartPosition = (frameStart +
-                placementParameters.cardWidth + placementParameters.cardDateSeparation)
-        } else {
-            placementParameters.cardDateSeparation = (frameWidth / 2 -
-                placementParameters.peekCardWidth -
-                placementParameters.dateWidth / 2)
-            placementParameters.dateCvcSeparation = (frameWidth -
-                placementParameters.peekCardWidth -
-                placementParameters.cardDateSeparation -
-                placementParameters.dateWidth -
-                placementParameters.cvcWidth)
-
-            placementParameters.cardTouchBufferLimit = (frameStart +
-                placementParameters.peekCardWidth +
-                placementParameters.cardDateSeparation / 2)
-            placementParameters.dateStartPosition = (frameStart +
-                placementParameters.peekCardWidth +
-                placementParameters.cardDateSeparation)
-            placementParameters.dateRightTouchBufferLimit = (placementParameters.dateStartPosition +
-                placementParameters.dateWidth +
-                placementParameters.dateCvcSeparation / 2)
-            placementParameters.cvcStartPosition = (placementParameters.dateStartPosition +
-                placementParameters.dateWidth +
-                placementParameters.dateCvcSeparation)
-        }
+        placementParameters.updateSpacing(isCardViewed, frameStart, frameWidth)
     }
 
     private fun setLayoutValues(width: Int, margin: Int, editText: StripeEditText) {
@@ -449,8 +427,7 @@ class CardInputWidget @JvmOverloads constructor(
     }
 
     private fun getDesiredWidthInPixels(text: String, editText: StripeEditText): Int {
-        return dimensionOverrides?.getPixelWidth(text, editText)
-            ?: Layout.getDesiredWidth(text, editText.paint).toInt()
+        return layoutWidthCalculator.calculate(text, editText.paint)
     }
 
     private fun initView(attrs: AttributeSet?) {
@@ -589,8 +566,9 @@ class CardInputWidget @JvmOverloads constructor(
             override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
                 super.applyTransformation(interpolatedTime, t)
                 val tempValue = (interpolatedTime * dateDestination + (1 - interpolatedTime) * dateStartPosition).toInt()
-                val params = expiryDateEditText.layoutParams as FrameLayout.LayoutParams
-                params.leftMargin = tempValue
+                val params = (expiryDateEditText.layoutParams as FrameLayout.LayoutParams).apply {
+                    leftMargin = tempValue
+                }
                 expiryDateEditText.layoutParams = params
             }
         }
@@ -600,10 +578,11 @@ class CardInputWidget @JvmOverloads constructor(
             override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
                 super.applyTransformation(interpolatedTime, t)
                 val tempValue = (interpolatedTime * cvcDestination + (1 - interpolatedTime) * cvcStartPosition).toInt()
-                val params = cvcNumberEditText.layoutParams as FrameLayout.LayoutParams
-                params.leftMargin = tempValue
-                params.rightMargin = 0
-                params.width = placementParameters.cvcWidth
+                val params = (cvcNumberEditText.layoutParams as FrameLayout.LayoutParams).apply {
+                    leftMargin = tempValue
+                    rightMargin = 0
+                    width = placementParameters.cvcWidth
+                }
                 cvcNumberEditText.layoutParams = params
             }
         }
@@ -657,10 +636,7 @@ class CardInputWidget @JvmOverloads constructor(
             }
         }
 
-        val cvcDestination = placementParameters.peekCardWidth +
-            placementParameters.cardDateSeparation +
-            placementParameters.dateWidth +
-            placementParameters.dateCvcSeparation
+        val cvcDestination = placementParameters.cvcDestination
         val cvcStartMargin = cvcDestination + (dateStartMargin - dateDestination)
 
         val slideCvcRightAnimation = object : Animation() {
@@ -706,7 +682,7 @@ class CardInputWidget @JvmOverloads constructor(
         super.onLayout(changed, l, t, r, b)
         if (!initFlag && width != 0) {
             initFlag = true
-            totalLengthInPixels = frameWidth
+            placementParameters.totalLengthInPixels = frameWidth
 
             updateSpaceSizes(cardNumberIsViewed)
 
@@ -717,19 +693,10 @@ class CardInputWidget @JvmOverloads constructor(
             }
             setLayoutValues(placementParameters.cardWidth, cardLeftMargin, cardNumberEditText)
 
-            val dateMargin = if (cardNumberIsViewed) {
-                placementParameters.cardWidth + placementParameters.cardDateSeparation
-            } else {
-                placementParameters.peekCardWidth + placementParameters.cardDateSeparation
-            }
+            val dateMargin = placementParameters.getDateMargin(cardNumberIsViewed)
             setLayoutValues(placementParameters.dateWidth, dateMargin, expiryDateEditText)
 
-            val cvcMargin = if (cardNumberIsViewed) {
-                totalLengthInPixels
-            } else {
-                placementParameters.peekCardWidth + placementParameters.cardDateSeparation +
-                    placementParameters.dateWidth + placementParameters.dateCvcSeparation
-            }
+            val cvcMargin = placementParameters.getCvcMargin(cardNumberIsViewed)
             setLayoutValues(placementParameters.cvcWidth, cvcMargin, cvcNumberEditText)
         }
     }
@@ -805,18 +772,11 @@ class CardInputWidget @JvmOverloads constructor(
     }
 
     /**
-     * Interface useful for testing calculations without generating real views.
-     */
-    internal interface DimensionOverrideSettings {
-        val frameWidth: Int
-
-        fun getPixelWidth(text: String, editText: EditText): Int
-    }
-
-    /**
-     * A data-dump class.
+     * A class for tracking the placement and layout of fields
      */
     internal class PlacementParameters {
+        internal var totalLengthInPixels: Int = 0
+
         internal var cardWidth: Int = 0
         internal var hiddenCardWidth: Int = 0
         internal var peekCardWidth: Int = 0
@@ -829,6 +789,52 @@ class CardInputWidget @JvmOverloads constructor(
         internal var dateStartPosition: Int = 0
         internal var dateRightTouchBufferLimit: Int = 0
         internal var cvcStartPosition: Int = 0
+
+        internal val cvcDestination: Int
+            @JvmSynthetic
+            get() {
+                return peekCardWidth + cardDateSeparation + dateWidth + dateCvcSeparation
+            }
+
+        @JvmSynthetic
+        internal fun getDateMargin(cardNumberIsViewed: Boolean): Int {
+            return if (cardNumberIsViewed) {
+                cardWidth + cardDateSeparation
+            } else {
+                peekCardWidth + cardDateSeparation
+            }
+        }
+
+        @JvmSynthetic
+        internal fun getCvcMargin(cardNumberIsViewed: Boolean): Int {
+            return if (cardNumberIsViewed) {
+                totalLengthInPixels
+            } else {
+                peekCardWidth + cardDateSeparation + dateWidth + dateCvcSeparation
+            }
+        }
+
+        @JvmSynthetic
+        internal fun updateSpacing(
+            isCardViewed: Boolean,
+            frameStart: Int,
+            frameWidth: Int
+        ) {
+            if (isCardViewed) {
+                cardDateSeparation = (frameWidth - cardWidth - dateWidth)
+                cardTouchBufferLimit = (frameStart + cardWidth + cardDateSeparation / 2)
+                dateStartPosition = (frameStart + cardWidth + cardDateSeparation)
+            } else {
+                cardDateSeparation = (frameWidth / 2 - peekCardWidth - dateWidth / 2)
+                dateCvcSeparation = (frameWidth - peekCardWidth - cardDateSeparation -
+                    dateWidth - cvcWidth)
+
+                cardTouchBufferLimit = (frameStart + peekCardWidth + cardDateSeparation / 2)
+                dateStartPosition = (frameStart + peekCardWidth + cardDateSeparation)
+                dateRightTouchBufferLimit = (dateStartPosition + dateWidth + dateCvcSeparation / 2)
+                cvcStartPosition = (dateStartPosition + dateWidth + dateCvcSeparation)
+            }
+        }
 
         override fun toString(): String {
             val touchBufferData = """
@@ -863,6 +869,16 @@ class CardInputWidget @JvmOverloads constructor(
 
         override fun onAnimationRepeat(animation: Animation) {
             // Intentional No-op
+        }
+    }
+
+    internal interface LayoutWidthCalculator {
+        fun calculate(text: String, paint: TextPaint): Int
+    }
+
+    internal class DefaultLayoutWidthCalculator : LayoutWidthCalculator {
+        override fun calculate(text: String, paint: TextPaint): Int {
+            return Layout.getDesiredWidth(text, paint).toInt()
         }
     }
 
