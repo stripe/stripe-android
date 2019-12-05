@@ -1,6 +1,5 @@
 package com.stripe.android.model.parsers
 
-import com.stripe.android.model.Address
 import com.stripe.android.model.SourceOrder
 import com.stripe.android.model.StripeJsonUtils
 import org.json.JSONArray
@@ -57,7 +56,9 @@ internal class SourceOrderJsonParser : ModelJsonParser<SourceOrder> {
     internal class ShippingJsonParser : ModelJsonParser<SourceOrder.Shipping> {
         override fun parse(json: JSONObject): SourceOrder.Shipping {
             return SourceOrder.Shipping(
-                address = Address.fromJson(json.optJSONObject(FIELD_ADDRESS)),
+                address = json.optJSONObject(FIELD_ADDRESS)?.let {
+                    AddressJsonParser().parse(it)
+                },
                 carrier = StripeJsonUtils.optString(json, FIELD_CARRIER),
                 name = StripeJsonUtils.optString(json, FIELD_NAME),
                 phone = StripeJsonUtils.optString(json, FIELD_PHONE),

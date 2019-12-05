@@ -1,16 +1,17 @@
-package com.stripe.android.model
+package com.stripe.android.model.parsers
 
+import com.stripe.android.model.WeChat
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.json.JSONException
 import org.json.JSONObject
 
-class WeChatTest {
+class WeChatJsonParserTest {
 
     @Test
     @Throws(JSONException::class)
-    fun fromJson_shouldReturnExpectedObject() {
-        val actual = WeChat.fromJson(WE_CHAT_PAY_JSON)
+    fun parse_shouldReturnExpectedObject() {
+        val actual = WeChatJsonParser().parse(WE_CHAT_PAY_JSON)
 
         val expected = WeChat(
             statementDescriptor = "ORDER 123",

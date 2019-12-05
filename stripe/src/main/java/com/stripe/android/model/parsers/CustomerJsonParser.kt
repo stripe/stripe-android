@@ -8,6 +8,8 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 internal class CustomerJsonParser : ModelJsonParser<Customer> {
+    private val customerSourceJsonParser = CustomerSourceJsonParser()
+
     override fun parse(json: JSONObject): Customer? {
         val objectType = StripeJsonUtils.optString(json, FIELD_OBJECT)
         if (VALUE_CUSTOMER != objectType) {
@@ -32,7 +34,7 @@ internal class CustomerJsonParser : ModelJsonParser<Customer> {
             sources =
                 (0 until dataArray.length())
                     .map { idx -> dataArray.getJSONObject(idx) }
-                    .mapNotNull { CustomerSource.fromJson(it) }
+                    .mapNotNull { customerSourceJsonParser.parse(it) }
                     .filterNot { source -> VALUE_APPLE_PAY == source.tokenizationMethod }
         } else {
             hasMore = false
