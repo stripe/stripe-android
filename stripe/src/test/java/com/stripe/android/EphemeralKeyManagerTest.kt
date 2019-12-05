@@ -8,6 +8,7 @@ import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.stripe.android.model.CustomerFixtures
+import com.stripe.android.model.parsers.EphemeralKeyJsonParser
 import com.stripe.android.testharness.TestEphemeralKeyProvider
 import java.net.HttpURLConnection
 import java.util.Calendar
@@ -36,11 +37,12 @@ class EphemeralKeyManagerTest {
     private lateinit var keyManagerListener: EphemeralKeyManager.KeyManagerListener
 
     private val operationIdFactory = OperationIdFactory.get()
+    private val customerEphemeralKey: EphemeralKey =
+        EphemeralKeyJsonParser().parse(CustomerFixtures.EPHEMERAL_KEY_FIRST)
 
     private lateinit var argCaptor: KArgumentCaptor<Map<String, Any>>
     private lateinit var actionArgumentCaptor: KArgumentCaptor<String>
     private lateinit var ephemeralKeyArgumentCaptor: KArgumentCaptor<EphemeralKey>
-    private lateinit var customerEphemeralKey: EphemeralKey
     private lateinit var testEphemeralKeyProvider: TestEphemeralKeyProvider
 
     @BeforeTest
@@ -49,7 +51,6 @@ class EphemeralKeyManagerTest {
         argCaptor = argumentCaptor()
         actionArgumentCaptor = argumentCaptor()
         ephemeralKeyArgumentCaptor = argumentCaptor()
-        customerEphemeralKey = EphemeralKey.fromJson(CustomerFixtures.EPHEMERAL_KEY_FIRST)
         testEphemeralKeyProvider = TestEphemeralKeyProvider()
     }
 

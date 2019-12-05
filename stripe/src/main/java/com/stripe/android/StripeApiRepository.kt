@@ -25,6 +25,7 @@ import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
+import com.stripe.android.model.parsers.SourceJsonParser
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.security.Security
@@ -312,7 +313,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     appInfo
                 )
             )
-            return Source.fromJson(response.responseJson)
+            return SourceJsonParser().parse(response.responseJson)
         } catch (unexpected: CardException) {
             // This particular kind of exception should not be possible from a Source API endpoint.
             throw APIException.create(unexpected)
@@ -350,7 +351,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     appInfo
                 )
             )
-            return Source.fromJson(response.responseJson)
+            return SourceJsonParser().parse(response.responseJson)
         } catch (unexpected: CardException) {
             // This particular kind of exception should not be possible from a Source API endpoint.
             throw APIException.create(unexpected)
@@ -460,7 +461,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 appInfo
             )
         )
-        return Source.fromJson(response.responseJson)
+        return SourceJsonParser().parse(response.responseJson)
     }
 
     @Throws(InvalidRequestException::class, APIConnectionException::class, APIException::class,
@@ -484,7 +485,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 requestOptions, appInfo)
         )
 
-        return Source.fromJson(response.responseJson)
+        return SourceJsonParser().parse(response.responseJson)
     }
 
     @Throws(InvalidRequestException::class, APIConnectionException::class, APIException::class,
