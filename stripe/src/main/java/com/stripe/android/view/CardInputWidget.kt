@@ -14,6 +14,7 @@ import android.view.View.OnFocusChangeListener
 import android.view.animation.Animation
 import android.view.animation.AnimationSet
 import android.view.animation.Transformation
+import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -50,6 +51,7 @@ class CardInputWidget @JvmOverloads constructor(
     private val cardNumberEditText: CardNumberEditText
     private val expiryDateEditText: ExpiryDateEditText
     private val cvcNumberEditText: CvcEditText
+    private val postalCodeEditText: PostalCodeEditText
 
     private var cardInputListener: CardInputListener? = null
 
@@ -74,7 +76,18 @@ class CardInputWidget @JvmOverloads constructor(
             return cvcNumberEditText.cvcValue
         }
 
-    private val standardFields: List<StripeEditText>
+    @VisibleForTesting
+    @JvmSynthetic
+    internal val standardFields: List<StripeEditText>
+
+    @VisibleForTesting
+    internal val allFields: List<StripeEditText>
+        @JvmSynthetic
+        get() {
+            return standardFields
+                .plus(postalCodeEditText.takeIf { postalCodeEnabled })
+                .filterNotNull()
+        }
 
     /**
      * Gets a [PaymentMethodCreateParams.Card] object from the user input, if all fields are
@@ -153,6 +166,12 @@ class CardInputWidget @JvmOverloads constructor(
     @JvmSynthetic
     internal var frameWidthSupplier: () -> Int
 
+    private var postalCodeEnabled: Boolean = false
+        set(value) {
+            updatePostalCodeEditText(value)
+            field = value
+        }
+
     init {
         View.inflate(getContext(), R.layout.card_input_widget, this)
 
@@ -169,6 +188,8 @@ class CardInputWidget @JvmOverloads constructor(
         cardNumberEditText = frameLayout.findViewById(R.id.et_card_number)
         expiryDateEditText = frameLayout.findViewById(R.id.et_expiry_date)
         cvcNumberEditText = frameLayout.findViewById(R.id.et_cvc)
+        postalCodeEditText = frameLayout.findViewById(R.id.et_postal_code)
+        postalCodeEditText.configureForGlobal()
 
         frameWidthSupplier = { frameLayout.width }
 
@@ -237,10 +258,7 @@ class CardInputWidget @JvmOverloads constructor(
      * Clear all text fields in the CardInputWidget.
      */
     override fun clear() {
-        if (cardNumberEditText.hasFocus() ||
-            expiryDateEditText.hasFocus() ||
-            cvcNumberEditText.hasFocus() ||
-            this.hasFocus()) {
+        if (allFields.any { it.hasFocus() } || this.hasFocus()) {
             cardNumberEditText.requestFocus()
         }
 
@@ -303,11 +321,13 @@ class CardInputWidget @JvmOverloads constructor(
         return Bundle().apply {
             putParcelable(STATE_SUPER_STATE, super.onSaveInstanceState())
             putBoolean(STATE_CARD_VIEWED, cardNumberIsViewed)
+            putBoolean(STATE_POSTAL_CODE_ENABLED, postalCodeEnabled)
         }
     }
 
     override fun onRestoreInstanceState(state: Parcelable) {
         if (state is Bundle) {
+            postalCodeEnabled = state.getBoolean(STATE_POSTAL_CODE_ENABLED, false)
             cardNumberIsViewed = state.getBoolean(STATE_CARD_VIEWED, true)
             updateSpaceSizes(cardNumberIsViewed)
             placementParameters.totalLengthInPixels = frameWidth
@@ -331,6 +351,20 @@ class CardInputWidget @JvmOverloads constructor(
             super.onRestoreInstanceState(state.getParcelable(STATE_SUPER_STATE))
         } else {
             super.onRestoreInstanceState(state)
+        }
+    }
+
+    private fun updatePostalCodeEditText(isEnabled: Boolean) {
+        if (isEnabled) {
+            postalCodeEditText.isEnabled = true
+            postalCodeEditText.visibility = View.VISIBLE
+
+            cvcNumberEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
+        } else {
+            postalCodeEditText.isEnabled = false
+            postalCodeEditText.visibility = View.GONE
+
+            cvcNumberEditText.imeOptions = EditorInfo.IME_ACTION_DONE
         }
     }
 
@@ -435,6 +469,7 @@ class CardInputWidget @JvmOverloads constructor(
             cardNumberEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_NUMBER)
             expiryDateEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE)
             cvcNumberEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE)
+            postalCodeEditText.setAutofillHints(View.AUTOFILL_HINT_POSTAL_CODE)
         }
 
         ViewCompat.setAccessibilityDelegate(
@@ -494,6 +529,7 @@ class CardInputWidget @JvmOverloads constructor(
 
         expiryDateEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(cardNumberEditText))
         cvcNumberEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(expiryDateEditText))
+        postalCodeEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(cvcNumberEditText))
 
         cvcNumberEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
@@ -534,6 +570,12 @@ class CardInputWidget @JvmOverloads constructor(
         expiryDateEditText.completionCallback = {
             cvcNumberEditText.requestFocus()
             cardInputListener?.onExpirationComplete()
+        }
+
+        cvcNumberEditText.completionCallback = {
+            if (postalCodeEnabled) {
+                postalCodeEditText.requestFocus()
+            }
         }
 
         cardNumberEditText.requestFocus()
@@ -901,6 +943,7 @@ class CardInputWidget @JvmOverloads constructor(
 
         private const val STATE_CARD_VIEWED = "state_card_viewed"
         private const val STATE_SUPER_STATE = "state_super_state"
+        private const val STATE_POSTAL_CODE_ENABLED = "state_postal_code_enabled"
 
         // This value is used to ensure that onSaveInstanceState is called
         // in the event that the user doesn't give this control an ID.

@@ -780,6 +780,11 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         assertTrue(shouldIconShowBrand(Card.CardBrand.UNKNOWN, true, "212"))
     }
 
+    @Test
+    fun allFields_whenPostalCodeDisabled() {
+        assertEquals(cardInputWidget.standardFields, cardInputWidget.allFields)
+    }
+
     private companion object {
         // Every Card made by the CardInputView should have the card widget token.
         private val EXPECTED_LOGGING_ARRAY = arrayOf(LOGGING_TOKEN)
