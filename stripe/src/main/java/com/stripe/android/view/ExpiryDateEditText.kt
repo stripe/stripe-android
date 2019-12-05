@@ -2,7 +2,6 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.text.Editable
-import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.EditText
@@ -70,7 +69,7 @@ class ExpiryDateEditText @JvmOverloads constructor(
     }
 
     private fun listenForTextChanges() {
-        addTextChangedListener(object : TextWatcher {
+        addTextChangedListener(object : StripeTextWatcher() {
             private var ignoreChanges = false
             private var latestChangeStart: Int = 0
             private var latestInsertionSize: Int = 0
@@ -91,7 +90,7 @@ class ExpiryDateEditText @JvmOverloads constructor(
                     return parts[1]
                 }
 
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
                 if (ignoreChanges) {
                     return
                 }
@@ -99,14 +98,15 @@ class ExpiryDateEditText @JvmOverloads constructor(
                 latestInsertionSize = after
             }
 
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if (ignoreChanges) {
                     return
                 }
 
                 var inErrorState = false
 
-                var rawNumericInput = s.toString().replace("/".toRegex(), "")
+                val inputText = s?.toString().orEmpty()
+                var rawNumericInput = inputText.replace("/".toRegex(), "")
 
                 if (rawNumericInput.length == 1 && latestChangeStart == 0 &&
                     latestInsertionSize == 1) {
@@ -152,7 +152,7 @@ class ExpiryDateEditText @JvmOverloads constructor(
                 this.formattedDate = formattedDate
             }
 
-            override fun afterTextChanged(s: Editable) {
+            override fun afterTextChanged(s: Editable?) {
                 if (ignoreChanges) {
                     return
                 }

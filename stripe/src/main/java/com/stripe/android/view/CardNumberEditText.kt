@@ -3,7 +3,6 @@ package com.stripe.android.view
 import android.content.Context
 import android.text.Editable
 import android.text.InputFilter
-import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.annotation.VisibleForTesting
@@ -129,27 +128,28 @@ class CardNumberEditText @JvmOverloads constructor(
     }
 
     private fun listenForTextChanges() {
-        addTextChangedListener(object : TextWatcher {
+        addTextChangedListener(object : StripeTextWatcher() {
             private var latestChangeStart: Int = 0
             private var latestInsertionSize: Int = 0
 
             private var newCursorPosition: Int? = null
             private var formattedNumber: String? = null
 
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
                 if (!ignoreChanges) {
                     latestChangeStart = start
                     latestInsertionSize = after
                 }
             }
 
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if (ignoreChanges) {
                     return
                 }
 
+                val inputText = s?.toString().orEmpty()
                 if (start < 4) {
-                    updateCardBrandFromNumber(s.toString())
+                    updateCardBrandFromNumber(inputText)
                 }
 
                 if (start > 16) {
@@ -157,7 +157,7 @@ class CardNumberEditText @JvmOverloads constructor(
                     return
                 }
 
-                val spacelessNumber = StripeTextUtils.removeSpacesAndHyphens(s.toString())
+                val spacelessNumber = StripeTextUtils.removeSpacesAndHyphens(inputText)
                     ?: return
 
                 val formattedNumber = createFormattedNumber(
@@ -169,7 +169,7 @@ class CardNumberEditText @JvmOverloads constructor(
                 this.formattedNumber = formattedNumber
             }
 
-            override fun afterTextChanged(s: Editable) {
+            override fun afterTextChanged(s: Editable?) {
                 if (ignoreChanges) {
                     return
                 }

@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.os.Handler
 import android.text.Editable
-import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo
@@ -172,17 +171,9 @@ open class StripeEditText @JvmOverloads constructor(
     }
 
     private fun listenForTextChanges() {
-        addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
-                // purposefully not implemented.
-            }
-
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                // purposefully not implemented.
-            }
-
-            override fun afterTextChanged(s: Editable) {
-                afterTextChangedListener?.onTextChanged(s.toString())
+        addTextChangedListener(object : StripeTextWatcher() {
+            override fun afterTextChanged(s: Editable?) {
+                afterTextChangedListener?.onTextChanged(s?.toString().orEmpty())
             }
         })
     }

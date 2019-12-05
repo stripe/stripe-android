@@ -1,8 +1,6 @@
 package com.stripe.android.view
 
 import android.os.Build
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageView
@@ -76,36 +74,9 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
 
         cardInputWidget = activity.cardInputWidget
 
-        cardInputWidget.setCardNumberTextWatcher(object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {
-            }
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-        })
-        cardInputWidget.setExpiryDateTextWatcher(object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {
-            }
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-        })
-        cardInputWidget.setCvcNumberTextWatcher(object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {
-            }
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-        })
+        cardInputWidget.setCardNumberTextWatcher(object : StripeTextWatcher() {})
+        cardInputWidget.setExpiryDateTextWatcher(object : StripeTextWatcher() {})
+        cardInputWidget.setCvcNumberTextWatcher(object : StripeTextWatcher() {})
 
         cardInputWidget.setDimensionOverrideSettings(dimensionOverrides)
         onGlobalFocusChangeListener = TestFocusChangeListener()
