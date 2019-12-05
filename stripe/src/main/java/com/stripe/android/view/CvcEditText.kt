@@ -2,6 +2,7 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.os.Build
+import android.text.Editable
 import android.text.InputFilter
 import android.text.InputType
 import android.text.method.DigitsKeyListener
@@ -42,6 +43,10 @@ class CvcEditText @JvmOverloads constructor(
             }
         }
 
+    // invoked when a valid CVC has been entered
+    @JvmSynthetic
+    internal var completionCallback: () -> Unit = {}
+
     init {
         setHint(R.string.cvc_number_hint)
         maxLines = 1
@@ -53,6 +58,14 @@ class CvcEditText @JvmOverloads constructor(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE)
         }
+
+        addTextChangedListener(object : StripeTextWatcher() {
+            override fun afterTextChanged(s: Editable?) {
+                if (isValid) {
+                    completionCallback()
+                }
+            }
+        })
     }
 
     /**
