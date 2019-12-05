@@ -14,15 +14,33 @@ class PostalCodeEditText @JvmOverloads constructor(
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     init {
-        setHint(R.string.acc_label_zip)
-        maxLines = 1
-        filters = arrayOf(InputFilter.LengthFilter(MAX_LENGTH))
+        configureForUs()
 
+        maxLines = 1
         inputType = InputType.TYPE_CLASS_NUMBER
         keyListener = DigitsKeyListener.getInstance(false, true)
     }
 
+    /**
+     * Configure the field for United States users
+     */
+    @JvmSynthetic
+    internal fun configureForUs() {
+        setHint(R.string.address_label_zip_code)
+        filters = arrayOf(InputFilter.LengthFilter(MAX_LENGTH_US))
+    }
+
+    /**
+     * Configure the field for global users
+     */
+    @JvmSynthetic
+    internal fun configureForGlobal() {
+        setHint(R.string.address_label_postal_code)
+        filters = arrayOf(InputFilter.LengthFilter(MAX_LENGTH_GLOBAL))
+    }
+
     private companion object {
-        private const val MAX_LENGTH = 5
+        private const val MAX_LENGTH_US = 5
+        private const val MAX_LENGTH_GLOBAL = 13
     }
 }
