@@ -7,7 +7,7 @@ import com.stripe.android.model.StripeJsonUtils
 import org.json.JSONArray
 import org.json.JSONObject
 
-internal class CustomerJsonParser : ModelJsonParser<Customer?> {
+internal class CustomerJsonParser : ModelJsonParser<Customer> {
     override fun parse(json: JSONObject): Customer? {
         val objectType = StripeJsonUtils.optString(json, FIELD_OBJECT)
         if (VALUE_CUSTOMER != objectType) {

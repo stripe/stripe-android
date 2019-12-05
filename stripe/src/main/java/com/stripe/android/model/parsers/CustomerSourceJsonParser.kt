@@ -7,7 +7,7 @@ import com.stripe.android.model.StripeJsonUtils
 import com.stripe.android.model.StripePaymentSource
 import org.json.JSONObject
 
-internal class CustomerSourceJsonParser : ModelJsonParser<CustomerSource?> {
+internal class CustomerSourceJsonParser : ModelJsonParser<CustomerSource> {
     override fun parse(json: JSONObject): CustomerSource? {
         val sourceObject: StripePaymentSource? =
             when (StripeJsonUtils.optString(json, "object")) {

@@ -6,7 +6,7 @@ import com.stripe.android.model.Token.TokenType
 import java.util.Date
 import org.json.JSONObject
 
-internal class TokenJsonParser : ModelJsonParser<Token?> {
+internal class TokenJsonParser : ModelJsonParser<Token> {
     override fun parse(json: JSONObject): Token? {
         val tokenId = StripeJsonUtils.optString(json, FIELD_ID)
         val createdTimeStamp = StripeJsonUtils.optLong(json, FIELD_CREATED)

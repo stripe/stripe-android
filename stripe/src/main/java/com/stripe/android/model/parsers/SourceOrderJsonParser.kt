@@ -28,7 +28,7 @@ internal class SourceOrderJsonParser : ModelJsonParser<SourceOrder> {
         )
     }
 
-    internal class ItemJsonParser : ModelJsonParser<SourceOrder.Item?> {
+    internal class ItemJsonParser : ModelJsonParser<SourceOrder.Item> {
         override fun parse(json: JSONObject): SourceOrder.Item? {
             val type =
                 SourceOrder.Item.Type.fromCode(StripeJsonUtils.optString(json, FIELD_TYPE))

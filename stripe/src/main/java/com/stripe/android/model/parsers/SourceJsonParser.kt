@@ -7,7 +7,7 @@ import com.stripe.android.model.StripeModel
 import com.stripe.android.model.StripeSourceTypeModel
 import org.json.JSONObject
 
-internal class SourceJsonParser : ModelJsonParser<Source?> {
+internal class SourceJsonParser : ModelJsonParser<Source> {
     override fun parse(json: JSONObject): Source? {
         return when (json.optString(FIELD_OBJECT)) {
             VALUE_CARD -> fromCardJson(json)

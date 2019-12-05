@@ -5,7 +5,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeJsonUtils
 import org.json.JSONObject
 
-internal class SetupIntentJsonParser : ModelJsonParser<SetupIntent?> {
+internal class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
     override fun parse(json: JSONObject): SetupIntent? {
         val objectType = StripeJsonUtils.optString(json, FIELD_OBJECT)
         if (VALUE_SETUP_INTENT != objectType) {
