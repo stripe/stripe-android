@@ -316,12 +316,12 @@ class CardInputWidget @JvmOverloads constructor(
             val cvcMargin: Int
             if (cardNumberIsViewed) {
                 cardMargin = 0
-                dateMargin = placementParameters.cardWidth + placementParameters.cardDateSeparation
-                cvcMargin = placementParameters.totalLengthInPixels
+                dateMargin = placementParameters.getDateLeftMargin(isFullCard = true)
+                cvcMargin = placementParameters.getCvcLeftMargin(isFullCard = true)
             } else {
                 cardMargin = -1 * placementParameters.hiddenCardWidth
-                dateMargin = placementParameters.peekCardWidth + placementParameters.cardDateSeparation
-                cvcMargin = dateMargin + placementParameters.dateWidth + placementParameters.dateCvcSeparation
+                dateMargin = placementParameters.getDateLeftMargin(isFullCard = false)
+                cvcMargin = placementParameters.getCvcLeftMargin(isFullCard = false)
             }
 
             updateFieldLayout(
@@ -557,8 +557,8 @@ class CardInputWidget @JvmOverloads constructor(
             return
         }
 
-        val dateStartPosition = placementParameters.dateDestination
-        val cvcStartPosition = dateStartPosition + placementParameters.dateWidth + placementParameters.dateCvcSeparation
+        val dateStartPosition = placementParameters.getDateLeftMargin(isFullCard = false)
+        val cvcStartPosition = placementParameters.getCvcLeftMargin(isFullCard = false)
 
         updateSpaceSizes(isCardViewed = true)
 
@@ -566,7 +566,7 @@ class CardInputWidget @JvmOverloads constructor(
             view = cardNumberEditText
         )
 
-        val dateDestination = placementParameters.cardWidth + placementParameters.cardDateSeparation
+        val dateDestination = placementParameters.getDateLeftMargin(isFullCard = true)
         val slideDateLeftAnimation = ExpiryDateSlideLeftAnimation(
             view = expiryDateEditText,
             startPosition = dateStartPosition,
@@ -596,7 +596,7 @@ class CardInputWidget @JvmOverloads constructor(
             return
         }
 
-        val dateStartMargin = placementParameters.cardWidth + placementParameters.cardDateSeparation
+        val dateStartMargin = placementParameters.getDateLeftMargin(isFullCard = true)
 
         updateSpaceSizes(isCardViewed = false)
 
@@ -606,14 +606,14 @@ class CardInputWidget @JvmOverloads constructor(
             focusOnEndView = expiryDateEditText
         )
 
-        val dateDestination = placementParameters.dateDestination
+        val dateDestination = placementParameters.getDateLeftMargin(isFullCard = false)
         val slideDateRightAnimation = ExpiryDateSlideRightAnimation(
             view = expiryDateEditText,
             startMargin = dateStartMargin,
             destination = dateDestination
         )
 
-        val cvcDestination = placementParameters.cvcDestination
+        val cvcDestination = placementParameters.getCvcLeftMargin(isFullCard = false)
         val slideCvcRightAnimation = CvcSlideRightAnimation(
             view = cvcNumberEditText,
             startMargin = cvcDestination + (dateStartMargin - dateDestination),
@@ -665,13 +665,13 @@ class CardInputWidget @JvmOverloads constructor(
             updateFieldLayout(
                 view = expiryDateEditText,
                 width = placementParameters.dateWidth,
-                margin = placementParameters.getDateMargin(cardNumberIsViewed)
+                margin = placementParameters.getDateLeftMargin(cardNumberIsViewed)
             )
 
             updateFieldLayout(
                 view = cvcNumberEditText,
                 width = placementParameters.cvcWidth,
-                margin = placementParameters.getCvcMargin(cardNumberIsViewed)
+                margin = placementParameters.getCvcLeftMargin(cardNumberIsViewed)
             )
         }
     }
@@ -765,33 +765,33 @@ class CardInputWidget @JvmOverloads constructor(
         internal var dateRightTouchBufferLimit: Int = 0
         internal var cvcStartPosition: Int = 0
 
-        internal val dateDestination: Int
+        private val cardPeekDateLeftMargin: Int
             @JvmSynthetic
             get() {
                 return peekCardWidth + cardDateSeparation
             }
 
-        internal val cvcDestination: Int
+        private val cardPeekCvcLeftMargin: Int
             @JvmSynthetic
             get() {
-                return dateDestination + dateWidth + dateCvcSeparation
+                return cardPeekDateLeftMargin + dateWidth + dateCvcSeparation
             }
 
         @JvmSynthetic
-        internal fun getDateMargin(cardNumberIsViewed: Boolean): Int {
-            return if (cardNumberIsViewed) {
+        internal fun getDateLeftMargin(isFullCard: Boolean): Int {
+            return if (isFullCard) {
                 cardWidth + cardDateSeparation
             } else {
-                dateDestination
+                cardPeekDateLeftMargin
             }
         }
 
         @JvmSynthetic
-        internal fun getCvcMargin(cardNumberIsViewed: Boolean): Int {
-            return if (cardNumberIsViewed) {
+        internal fun getCvcLeftMargin(isFullCard: Boolean): Int {
+            return if (isFullCard) {
                 totalLengthInPixels
             } else {
-                cvcDestination
+                cardPeekCvcLeftMargin
             }
         }
 
