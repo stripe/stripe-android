@@ -24,13 +24,13 @@ internal class PaymentFlowViewModel(
     @JvmSynthetic
     internal fun saveCustomerShippingInformation(
         shippingInformation: ShippingInformation
-    ): LiveData<SaveCustomerShippingInfoResult<*>> {
-        val resultData = MutableLiveData<SaveCustomerShippingInfoResult<*>>()
+    ): LiveData<SaveCustomerShippingInfoResult> {
+        val resultData = MutableLiveData<SaveCustomerShippingInfoResult>()
         customerSession.setCustomerShippingInformation(
             shippingInformation,
             object : CustomerSession.CustomerRetrievalListener {
                 override fun onCustomerRetrieved(customer: Customer) {
-                    resultData.value = SaveCustomerShippingInfoResult.create(customer)
+                    resultData.value = SaveCustomerShippingInfoResult.Success(customer)
                 }
 
                 override fun onError(
@@ -38,7 +38,7 @@ internal class PaymentFlowViewModel(
                     errorMessage: String,
                     stripeError: StripeError?
                 ) {
-                    resultData.value = SaveCustomerShippingInfoResult.create(errorMessage)
+                    resultData.value = SaveCustomerShippingInfoResult.Error(errorMessage)
                 }
             }
         )
@@ -54,60 +54,30 @@ internal class PaymentFlowViewModel(
         shippingInfoValidator: PaymentSessionConfig.ShippingInformationValidator,
         shippingMethodsFactory: PaymentSessionConfig.ShippingMethodsFactory?,
         shippingInformation: ShippingInformation
-    ): LiveData<ValidateShippingInfoResult<*>> {
-        val resultData = MutableLiveData<ValidateShippingInfoResult<*>>()
+    ): LiveData<ValidateShippingInfoResult> {
+        val resultData = MutableLiveData<ValidateShippingInfoResult>()
         workScope.launch {
             val isValid = shippingInfoValidator.isValid(shippingInformation)
             if (isValid) {
                 val shippingMethods =
                     shippingMethodsFactory?.create(shippingInformation).orEmpty()
-                resultData.postValue(ValidateShippingInfoResult.create(shippingMethods))
+                resultData.postValue(ValidateShippingInfoResult.Success(shippingMethods))
             } else {
                 val errorMessage = shippingInfoValidator.getErrorMessage(shippingInformation)
-                resultData.postValue(ValidateShippingInfoResult.create(errorMessage))
+                resultData.postValue(ValidateShippingInfoResult.Error(errorMessage))
             }
         }
         return resultData
     }
 
-    internal data class SaveCustomerShippingInfoResult<out T> internal constructor(
-        internal val status: Status,
-        internal val data: T
-    ) {
-        internal companion object {
-            @JvmSynthetic
-            internal fun create(customer: Customer): SaveCustomerShippingInfoResult<Customer> {
-                return SaveCustomerShippingInfoResult(Status.SUCCESS, customer)
-            }
-
-            @JvmSynthetic
-            internal fun create(errorMessage: String): SaveCustomerShippingInfoResult<String> {
-                return SaveCustomerShippingInfoResult(Status.ERROR, errorMessage)
-            }
-        }
+    internal sealed class SaveCustomerShippingInfoResult {
+        data class Success(val customer: Customer) : SaveCustomerShippingInfoResult()
+        data class Error(val errorMessage: String) : SaveCustomerShippingInfoResult()
     }
 
-    internal data class ValidateShippingInfoResult<out T> internal constructor(
-        internal val status: Status,
-        internal val data: T
-    ) {
-        internal companion object {
-            @JvmSynthetic
-            internal fun create(
-                shippingMethods: List<ShippingMethod>
-            ): ValidateShippingInfoResult<List<ShippingMethod>> {
-                return ValidateShippingInfoResult(Status.SUCCESS, shippingMethods)
-            }
-
-            @JvmSynthetic
-            internal fun create(errorMessage: String): ValidateShippingInfoResult<String> {
-                return ValidateShippingInfoResult(Status.ERROR, errorMessage)
-            }
-        }
-    }
-
-    internal enum class Status {
-        SUCCESS, ERROR
+    internal sealed class ValidateShippingInfoResult {
+        data class Success(val shippingMethods: List<ShippingMethod>) : ValidateShippingInfoResult()
+        data class Error(val errorMessage: String) : ValidateShippingInfoResult()
     }
 
     internal class Factory(
