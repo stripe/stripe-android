@@ -70,64 +70,52 @@ data class PaymentMethod internal constructor(
         private var fpx: Fpx? = null
         private var sepaDebit: SepaDebit? = null
 
-        fun setId(id: String?): Builder {
+        fun setId(id: String?): Builder = apply {
             this.id = id
-            return this
         }
 
-        fun setCreated(created: Long?): Builder {
+        fun setCreated(created: Long?): Builder = apply {
             this.created = created
-            return this
         }
 
-        fun setLiveMode(liveMode: Boolean): Builder {
+        fun setLiveMode(liveMode: Boolean): Builder = apply {
             this.liveMode = liveMode
-            return this
         }
 
-        fun setMetadata(metadata: Map<String, String>?): Builder {
+        fun setMetadata(metadata: Map<String, String>?): Builder = apply {
             this.metadata = metadata
-            return this
         }
 
-        fun setType(type: String?): Builder {
+        fun setType(type: String?): Builder = apply {
             this.type = type
-            return this
         }
 
-        fun setBillingDetails(billingDetails: BillingDetails?): Builder {
+        fun setBillingDetails(billingDetails: BillingDetails?): Builder = apply {
             this.billingDetails = billingDetails
-            return this
         }
 
-        fun setCard(card: Card?): Builder {
+        fun setCard(card: Card?): Builder = apply {
             this.card = card
-            return this
         }
 
-        fun setCardPresent(cardPresent: CardPresent?): Builder {
+        fun setCardPresent(cardPresent: CardPresent?): Builder = apply {
             this.cardPresent = cardPresent
-            return this
         }
 
-        fun setCustomerId(customerId: String?): Builder {
+        fun setCustomerId(customerId: String?): Builder = apply {
             this.customerId = customerId
-            return this
         }
 
-        fun setIdeal(ideal: Ideal?): Builder {
+        fun setIdeal(ideal: Ideal?): Builder = apply {
             this.ideal = ideal
-            return this
         }
 
-        fun setFpx(fpx: Fpx?): Builder {
+        fun setFpx(fpx: Fpx?): Builder = apply {
             this.fpx = fpx
-            return this
         }
 
-        fun setSepaDebit(sepaDebit: SepaDebit?): Builder {
+        fun setSepaDebit(sepaDebit: SepaDebit?): Builder = apply {
             this.sepaDebit = sepaDebit
-            return this
         }
 
         override fun build(): PaymentMethod {
@@ -194,24 +182,20 @@ data class PaymentMethod internal constructor(
             private var name: String? = null
             private var phone: String? = null
 
-            fun setAddress(address: Address?): Builder {
+            fun setAddress(address: Address?): Builder = apply {
                 this.address = address
-                return this
             }
 
-            fun setEmail(email: String?): Builder {
+            fun setEmail(email: String?): Builder = apply {
                 this.email = email
-                return this
             }
 
-            fun setName(name: String?): Builder {
+            fun setName(name: String?): Builder = apply {
                 this.name = name
-                return this
             }
 
-            fun setPhone(phone: String?): Builder {
+            fun setPhone(phone: String?): Builder = apply {
                 this.phone = phone
-                return this
             }
 
             override fun build(): BillingDetails {
@@ -267,49 +251,40 @@ data class PaymentMethod internal constructor(
             private var threeDSecureUsage: ThreeDSecureUsage? = null
             private var wallet: Wallet? = null
 
-            fun setBrand(@Brand brand: String?): Builder {
+            fun setBrand(@Brand brand: String?): Builder = apply {
                 this.brand = brand
-                return this
             }
 
-            fun setChecks(checks: Checks?): Builder {
+            fun setChecks(checks: Checks?): Builder = apply {
                 this.checks = checks
-                return this
             }
 
-            fun setCountry(country: String?): Builder {
+            fun setCountry(country: String?): Builder = apply {
                 this.country = country
-                return this
             }
 
-            fun setExpiryMonth(expiryMonth: Int?): Builder {
+            fun setExpiryMonth(expiryMonth: Int?): Builder = apply {
                 this.expiryMonth = expiryMonth
-                return this
             }
 
-            fun setExpiryYear(expiryYear: Int?): Builder {
+            fun setExpiryYear(expiryYear: Int?): Builder = apply {
                 this.expiryYear = expiryYear
-                return this
             }
 
-            fun setFunding(funding: String?): Builder {
+            fun setFunding(funding: String?): Builder = apply {
                 this.funding = funding
-                return this
             }
 
-            fun setLast4(last4: String?): Builder {
+            fun setLast4(last4: String?): Builder = apply {
                 this.last4 = last4
-                return this
             }
 
-            fun setThreeDSecureUsage(threeDSecureUsage: ThreeDSecureUsage?): Builder {
+            fun setThreeDSecureUsage(threeDSecureUsage: ThreeDSecureUsage?): Builder = apply {
                 this.threeDSecureUsage = threeDSecureUsage
-                return this
             }
 
-            fun setWallet(wallet: Wallet?): Builder {
+            fun setWallet(wallet: Wallet?): Builder = apply {
                 this.wallet = wallet
-                return this
             }
 
             override fun build(): Card {

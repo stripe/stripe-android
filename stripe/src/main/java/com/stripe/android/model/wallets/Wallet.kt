@@ -1,24 +1,50 @@
 package com.stripe.android.model.wallets
 
-import com.stripe.android.ObjectBuilder
-import com.stripe.android.model.StripeJsonUtils.optString
+import android.os.Parcelable
+import com.stripe.android.model.Address
 import com.stripe.android.model.StripeModel
 import kotlinx.android.parcel.Parcelize
-import org.json.JSONObject
 
-abstract class Wallet internal constructor(
+sealed class Wallet(
     internal val walletType: Type
 ) : StripeModel {
-    internal abstract class Builder<WalletType : Wallet> {
-        var dynamicLast4: String? = null
 
-        fun setDynamicLast4(dynamicLast4: String?): Builder<*> {
-            this.dynamicLast4 = dynamicLast4
-            return this
-        }
+    @Parcelize
+    data class AmexExpressCheckoutWallet internal constructor(
+        val dynamicLast4: String?
+    ) : Wallet(Type.AmexExpressCheckout)
 
-        internal abstract fun build(): WalletType
-    }
+    @Parcelize
+    data class ApplePayWallet internal constructor(
+        val dynamicLast4: String?
+    ) : Wallet(Type.ApplePay)
+
+    @Parcelize
+    data class GooglePayWallet internal constructor(
+        val dynamicLast4: String?
+    ) : Wallet(Type.GooglePay), Parcelable
+
+    @Parcelize
+    data class MasterpassWallet internal constructor(
+        val billingAddress: Address?,
+        val email: String?,
+        val name: String?,
+        val shippingAddress: Address?
+    ) : Wallet(Type.Masterpass)
+
+    @Parcelize
+    data class SamsungPayWallet internal constructor(
+        val dynamicLast4: String?
+    ) : Wallet(Type.SamsungPay)
+
+    @Parcelize
+    data class VisaCheckoutWallet internal constructor(
+        val billingAddress: Address?,
+        val email: String?,
+        val name: String?,
+        val shippingAddress: Address?,
+        val dynamicLast4: String?
+    ) : Wallet(Type.VisaCheckout)
 
     internal enum class Type(val code: String) {
         AmexExpressCheckout("amex_express_checkout"),
@@ -33,94 +59,5 @@ abstract class Wallet internal constructor(
                 return values().firstOrNull { it.code == code }
             }
         }
-    }
-
-    @Parcelize
-    data class Address internal constructor(
-        val city: String?,
-        val country: String?,
-        val line1: String?,
-        val line2: String?,
-        val postalCode: String?,
-        val state: String?
-    ) : StripeModel {
-        internal class Builder : ObjectBuilder<Address> {
-            private var city: String? = null
-            private var country: String? = null
-            private var line1: String? = null
-            private var line2: String? = null
-            private var postalCode: String? = null
-            private var state: String? = null
-
-            fun setCity(city: String?): Builder {
-                this.city = city
-                return this
-            }
-
-            fun setCountry(country: String?): Builder {
-                this.country = country
-                return this
-            }
-
-            fun setLine1(line1: String?): Builder {
-                this.line1 = line1
-                return this
-            }
-
-            fun setLine2(line2: String?): Builder {
-                this.line2 = line2
-                return this
-            }
-
-            fun setPostalCode(postalCode: String?): Builder {
-                this.postalCode = postalCode
-                return this
-            }
-
-            fun setState(state: String?): Builder {
-                this.state = state
-                return this
-            }
-
-            override fun build(): Address {
-                return Address(
-                    city = city,
-                    country = country,
-                    line1 = line1,
-                    line2 = line2,
-                    postalCode = postalCode,
-                    state = state
-                )
-            }
-        }
-
-        internal companion object {
-            private const val FIELD_CITY = "city"
-            private const val FIELD_COUNTRY = "country"
-            private const val FIELD_LINE1 = "line1"
-            private const val FIELD_LINE2 = "line2"
-            private const val FIELD_POSTAL_CODE = "postal_code"
-            private const val FIELD_STATE = "state"
-
-            internal fun fromJson(addressJson: JSONObject?): Address? {
-                return if (addressJson == null) {
-                    null
-                } else {
-                    Builder()
-                        .setCity(optString(addressJson, FIELD_CITY))
-                        .setCountry(optString(addressJson, FIELD_COUNTRY))
-                        .setLine1(optString(addressJson, FIELD_LINE1))
-                        .setLine2(optString(addressJson, FIELD_LINE2))
-                        .setPostalCode(optString(addressJson, FIELD_POSTAL_CODE))
-                        .setState(optString(addressJson, FIELD_STATE))
-                        .build()
-                }
-            }
-        }
-    }
-
-    internal companion object {
-        internal const val FIELD_DYNAMIC_LAST4 = "dynamic_last4"
-        internal const val FIELD_TYPE = "type"
     }
 }
