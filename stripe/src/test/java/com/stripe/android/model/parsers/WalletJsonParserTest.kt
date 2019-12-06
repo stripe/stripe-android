@@ -1,63 +1,98 @@
-package com.stripe.android.model.wallets
+package com.stripe.android.model.parsers
 
+import com.stripe.android.model.Address
+import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.utils.ParcelUtils
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class WalletFactoryTest {
+class WalletJsonParserTest {
 
     @Test
-    fun testCreateVisaCheckoutWallet() {
-        val wallet = WalletFactory().create(VISA_WALLET_JSON)
-        assertTrue(wallet is VisaCheckoutWallet)
+    fun testParseVisaCheckoutWallet() {
+        val actualWallet = parse(VISA_WALLET_JSON)
+        val expectedWallet = Wallet.VisaCheckoutWallet(
+            email = "me@example.com",
+            name = "John Doe",
+            dynamicLast4 = "1234",
+            billingAddress = Address(
+                line1 = "510 Townsend St",
+                city = "San Francisco",
+                state = "CA",
+                postalCode = "94103",
+                country = "US"
+            ),
+            shippingAddress = Address(
+                line1 = "1355 Market St",
+                city = "San Francisco",
+                state = "CA",
+                postalCode = "94103",
+                country = "US"
+            )
+        )
+        assertEquals(expectedWallet, actualWallet)
     }
 
     @Test
-    fun testCreateMasterpassWallet() {
-        val wallet = WalletFactory().create(MASTERPASS_WALLET_JSON)
-        assertTrue(wallet is MasterpassWallet)
+    fun testParseMasterpassWallet() {
+        val actualWallet = parse(MASTERPASS_WALLET_JSON)
+        val expectedWallet = Wallet.MasterpassWallet(
+            email = "me@example.com",
+            name = "John Doe",
+            billingAddress = Address(
+                line1 = "510 Townsend St",
+                city = "San Francisco",
+                state = "CA",
+                postalCode = "94103",
+                country = "US"
+            ),
+            shippingAddress = Address(
+                line1 = "1355 Market St",
+                city = "San Francisco",
+                state = "CA",
+                postalCode = "94103",
+                country = "US"
+            )
+        )
+
+        assertEquals(expectedWallet, actualWallet)
     }
 
     @Test
-    fun testCreateAmexExpressCheckoutWallet() {
-        val wallet = WalletFactory().create(AMEX_EXPRESS_CHECKOUT_WALLET_JSON)
-        assertTrue(wallet is AmexExpressCheckoutWallet)
+    fun testParseAmexExpressCheckoutWallet() {
+        val wallet = parse(AMEX_EXPRESS_CHECKOUT_WALLET_JSON)
+        assertEquals(Wallet.AmexExpressCheckoutWallet("1234"), wallet)
     }
 
     @Test
-    fun testCreateApplePayWallet() {
-        val wallet = WalletFactory().create(APPLE_PAY_WALLET_JSON)
-        assertTrue(wallet is ApplePayWallet)
+    fun testParseApplePayWallet() {
+        val wallet = parse(APPLE_PAY_WALLET_JSON)
+        assertEquals(Wallet.ApplePayWallet("1234"), wallet)
     }
 
     @Test
-    fun testCreateGooglePayWallet() {
-        val wallet = WalletFactory().create(GOOGLE_PAY_WALLET_JSON)
-        assertTrue(wallet is GooglePayWallet)
+    fun testParseGooglePayWallet() {
+        val wallet = parse(GOOGLE_PAY_WALLET_JSON)
+        assertEquals(Wallet.GooglePayWallet("1234"), wallet)
     }
 
     @Test
-    fun testCreateSamsungPayWallet() {
-        val wallet = WalletFactory().create(SAMSUNG_PAY_WALLET_JSON)
-        assertTrue(wallet is SamsungPayWallet)
+    fun testParseSamsungPayWallet() {
+        val wallet = parse(SAMSUNG_PAY_WALLET_JSON)
+        assertEquals(Wallet.SamsungPayWallet("1234"), wallet)
     }
 
     @Test
     fun testParcelable_shouldBeEqualAfterParcel() {
-        val walletFactory = WalletFactory()
-
-        val samsungPayWallet =
-            walletFactory.create(SAMSUNG_PAY_WALLET_JSON) as SamsungPayWallet
+        val samsungPayWallet = parse(SAMSUNG_PAY_WALLET_JSON) as Wallet.SamsungPayWallet
         assertEquals(Wallet.Type.SamsungPay, samsungPayWallet.walletType)
         assertEquals(samsungPayWallet, ParcelUtils.create(samsungPayWallet))
 
-        val visaWallet =
-            walletFactory.create(VISA_WALLET_JSON) as VisaCheckoutWallet
+        val visaWallet = parse(VISA_WALLET_JSON) as Wallet.VisaCheckoutWallet
         assertEquals(visaWallet, ParcelUtils.create(visaWallet))
     }
 
@@ -155,5 +190,9 @@ class WalletFactoryTest {
             }
             """.trimIndent()
         )
+
+        private fun parse(json: JSONObject): Wallet? {
+            return WalletJsonParser().parse(json)
+        }
     }
 }

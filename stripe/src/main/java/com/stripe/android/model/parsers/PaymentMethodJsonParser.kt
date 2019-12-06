@@ -2,7 +2,6 @@ package com.stripe.android.model.parsers
 
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeJsonUtils
-import com.stripe.android.model.wallets.WalletFactory
 import org.json.JSONObject
 
 internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
@@ -90,7 +89,9 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                 threeDSecureUsage = json.optJSONObject(FIELD_THREE_D_SECURE_USAGE)?.let {
                     ThreeDSecureUsageJsonParser().parse(it)
                 },
-                wallet = WalletFactory().create(json.optJSONObject(FIELD_WALLET))
+                wallet = json.optJSONObject(FIELD_WALLET)?.let {
+                    WalletJsonParser().parse(it)
+                }
             )
         }
 
