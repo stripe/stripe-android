@@ -12,7 +12,6 @@ import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession.Companion.TOKEN_PAYMENT_SESSION
 import com.stripe.android.R
-import com.stripe.android.exception.StripeException
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.view.i18n.TranslatorManager
 import kotlinx.android.synthetic.main.activity_payment_methods.*
@@ -60,22 +59,6 @@ class PaymentMethodsActivity : AppCompatActivity() {
         setSupportActionBar(payment_methods_toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
-
-        viewModel.paymentMethods.observe(this, Observer {
-            when (it.status) {
-                PaymentMethodsViewModel.Result.Status.SUCCESS -> {
-                    val paymentMethods = it.data as List<PaymentMethod>
-                    adapter.setPaymentMethods(paymentMethods)
-                }
-                PaymentMethodsViewModel.Result.Status.ERROR -> {
-                    val exception = it.data as StripeException
-                    val displayedError = TranslatorManager.getErrorMessageTranslator()
-                        .translate(exception.statusCode, exception.message, exception.stripeError)
-                    alertDisplayer.show(displayedError)
-                }
-            }
-            setCommunicatingProgress(false)
-        })
 
         fetchCustomerPaymentMethods()
 
@@ -170,7 +153,20 @@ class PaymentMethodsActivity : AppCompatActivity() {
 
     private fun fetchCustomerPaymentMethods() {
         setCommunicatingProgress(true)
-        viewModel.loadPaymentMethods()
+        viewModel.getPaymentMethods().observe(this, Observer {
+            when (it) {
+                is PaymentMethodsViewModel.Result.Success -> {
+                    adapter.setPaymentMethods(it.paymentMethods)
+                }
+                is PaymentMethodsViewModel.Result.Error -> {
+                    val exception = it.exception
+                    val displayedError = TranslatorManager.getErrorMessageTranslator()
+                        .translate(exception.statusCode, exception.message, exception.stripeError)
+                    alertDisplayer.show(displayedError)
+                }
+            }
+            setCommunicatingProgress(false)
+        })
     }
 
     private fun initLoggingTokens() {
