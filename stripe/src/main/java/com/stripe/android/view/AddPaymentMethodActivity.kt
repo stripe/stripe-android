@@ -3,11 +3,9 @@ package com.stripe.android.view
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.os.IBinder
 import android.text.method.LinkMovementMethod
 import android.text.util.Linkify
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.core.text.util.LinkifyCompat
@@ -31,11 +29,32 @@ import java.lang.ref.WeakReference
  * Should be started with [AddPaymentMethodActivityStarter].
  */
 class AddPaymentMethodActivity : StripeActivity() {
-    private lateinit var stripe: Stripe
-    private var addPaymentMethodView: AddPaymentMethodView? = null
-    private var paymentMethodType: PaymentMethod.Type? = null
-    private var startedFromPaymentSession: Boolean = false
-    private var shouldAttachToCustomer: Boolean = false
+
+    private val args: AddPaymentMethodActivityStarter.Args by lazy {
+        AddPaymentMethodActivityStarter.Args.create(intent)
+    }
+
+    private val stripe: Stripe by lazy {
+        val paymentConfiguration = args.paymentConfiguration
+            ?: PaymentConfiguration.getInstance(this)
+        Stripe(applicationContext, paymentConfiguration.publishableKey)
+    }
+
+    private val paymentMethodType: PaymentMethod.Type by lazy {
+        args.paymentMethodType
+    }
+
+    private val startedFromPaymentSession: Boolean by lazy {
+        args.isPaymentSessionActive
+    }
+
+    private val shouldAttachToCustomer: Boolean by lazy {
+        paymentMethodType.isReusable && args.shouldAttachToCustomer
+    }
+
+    private val addPaymentMethodView: AddPaymentMethodView by lazy {
+        createPaymentMethodView(args)
+    }
 
     private val titleStringRes: Int
         @StringRes
@@ -49,40 +68,31 @@ class AddPaymentMethodActivity : StripeActivity() {
                 }
                 else -> {
                     throw IllegalArgumentException(
-                        "Unsupported Payment Method type: ${paymentMethodType?.code}")
+                        "Unsupported Payment Method type: ${paymentMethodType.code}")
                 }
             }
         }
 
-    internal val windowToken: IBinder?
-        get() = viewStub.windowToken
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val args = AddPaymentMethodActivityStarter.Args.create(intent)
-        val paymentConfiguration = args.paymentConfiguration
-            ?: PaymentConfiguration.getInstance(this)
-        stripe = Stripe(applicationContext, paymentConfiguration.publishableKey)
-        paymentMethodType = args.paymentMethodType
-
         configureView(args)
-
-        shouldAttachToCustomer = paymentMethodType?.isReusable == true &&
-            args.shouldAttachToCustomer
-        startedFromPaymentSession = args.isPaymentSessionActive
 
         if (shouldAttachToCustomer && args.shouldInitCustomerSessionTokens) {
             initCustomerSessionTokens(CustomerSession.getInstance())
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        addPaymentMethodView.requestFocus()
+    }
+
     private fun configureView(args: AddPaymentMethodActivityStarter.Args) {
         viewStub.layoutResource = R.layout.add_payment_method_layout
         val scrollView = viewStub.inflate() as ViewGroup
-        val contentRoot = scrollView.findViewById<ViewGroup>(R.id.stripe_add_payment_method_content_root)
-
-        addPaymentMethodView = createPaymentMethodView(args)
+        val contentRoot: ViewGroup =
+            scrollView.findViewById(R.id.stripe_add_payment_method_content_root)
         contentRoot.addView(addPaymentMethodView)
 
         if (args.addPaymentMethodFooterLayoutId > 0) {
@@ -95,10 +105,6 @@ class AddPaymentMethodActivity : StripeActivity() {
         }
 
         setTitle(titleStringRes)
-
-        if (paymentMethodType == PaymentMethod.Type.Card) {
-            window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
-        }
     }
 
     private fun createPaymentMethodView(
@@ -113,7 +119,7 @@ class AddPaymentMethodActivity : StripeActivity() {
             }
             else -> {
                 throw IllegalArgumentException(
-                    "Unsupported Payment Method type: ${paymentMethodType?.code}")
+                    "Unsupported Payment Method type: ${paymentMethodType.code}")
             }
         }
     }
@@ -127,7 +133,7 @@ class AddPaymentMethodActivity : StripeActivity() {
     }
 
     public override fun onActionSave() {
-        createPaymentMethod(stripe, addPaymentMethodView?.createParams)
+        createPaymentMethod(stripe, addPaymentMethodView.createParams)
     }
 
     fun createPaymentMethod(stripe: Stripe, params: PaymentMethodCreateParams?) {
@@ -156,7 +162,7 @@ class AddPaymentMethodActivity : StripeActivity() {
 
     override fun setCommunicatingProgress(communicating: Boolean) {
         super.setCommunicatingProgress(communicating)
-        addPaymentMethodView?.setCommunicatingProgress(communicating)
+        addPaymentMethodView.setCommunicatingProgress(communicating)
     }
 
     private class PaymentMethodCallbackImpl constructor(

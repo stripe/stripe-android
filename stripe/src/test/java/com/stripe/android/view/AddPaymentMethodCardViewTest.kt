@@ -1,7 +1,6 @@
 package com.stripe.android.view
 
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import kotlin.test.BeforeTest
@@ -21,7 +20,7 @@ class AddPaymentMethodCardViewTest {
     @Mock
     private lateinit var addPaymentMethodCardView: AddPaymentMethodCardView
     @Mock
-    private lateinit var inputMethodManager: InputMethodManager
+    private lateinit var keyboardController: KeyboardController
 
     @BeforeTest
     fun setup() {
@@ -33,9 +32,9 @@ class AddPaymentMethodCardViewTest {
         `when`<PaymentMethodCreateParams>(addPaymentMethodCardView.createParams)
             .thenReturn(PaymentMethodCreateParamsFixtures.DEFAULT_CARD)
         AddPaymentMethodCardView.OnEditorActionListenerImpl(
-            activity, addPaymentMethodCardView, inputMethodManager)
+            activity, addPaymentMethodCardView, keyboardController)
             .onEditorAction(null, EditorInfo.IME_ACTION_DONE, null)
-        verify(inputMethodManager).hideSoftInputFromWindow(null, 0)
+        verify(keyboardController).hide()
         verify(activity).onActionSave()
     }
 }

@@ -2,7 +2,6 @@ package com.stripe.android.model.parsers
 
 import com.stripe.android.model.Customer
 import com.stripe.android.model.CustomerSource
-import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.StripeJsonUtils
 import org.json.JSONArray
 import org.json.JSONObject
@@ -17,8 +16,9 @@ internal class CustomerJsonParser : ModelJsonParser<Customer> {
         }
         val id = StripeJsonUtils.optString(json, FIELD_ID)
         val defaultSource = StripeJsonUtils.optString(json, FIELD_DEFAULT_SOURCE)
-        val shippingInformation =
-            ShippingInformation.fromJson(json.optJSONObject(FIELD_SHIPPING))
+        val shippingInformation = json.optJSONObject(FIELD_SHIPPING)?.let {
+            ShippingInformationJsonParser().parse(it)
+        }
         val sourcesJson = json.optJSONObject(FIELD_SOURCES)
 
         val hasMore: Boolean

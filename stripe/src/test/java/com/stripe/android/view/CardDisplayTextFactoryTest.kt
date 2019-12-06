@@ -35,9 +35,9 @@ class CardDisplayTextFactoryTest {
         assertEquals(
             "Unknown ending in 4242",
             cardDisplayTextFactory.createUnstyled(
-                PaymentMethod.Card.Builder()
-                    .setLast4("4242")
-                    .build()
+                PaymentMethod.Card(
+                    last4 = "4242"
+                )
             )
         )
     }
