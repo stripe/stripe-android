@@ -1,6 +1,5 @@
 package com.stripe.android.model
 
-import com.stripe.android.model.SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT_JSON
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -21,8 +20,7 @@ class SetupIntentTest {
 
     @Test
     fun fromJsonStringWithNextAction_createsSetupIntentWithNextAction() {
-        val setupIntent = SetupIntent.fromString(SI_NEXT_ACTION_REDIRECT_JSON)
-        assertNotNull(setupIntent)
+        val setupIntent = SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT
         assertEquals("seti_1EqTSZGMT9dGPIDGVzCUs6dV", setupIntent.id)
         assertEquals("seti_1EqTSZGMT9dGPIDGVzCUs6dV_secret_FL9mS9ILygVyGEOSmVNqHT83rxkqy0Y",
             setupIntent.clientSecret)

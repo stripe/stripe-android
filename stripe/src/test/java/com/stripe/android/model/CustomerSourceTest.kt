@@ -2,11 +2,13 @@ package com.stripe.android.model
 
 import com.stripe.android.model.CardTest.Companion.JSON_CARD_USD
 import com.stripe.android.model.SourceFixtures.CUSTOMER_SOURCE_CARD
+import com.stripe.android.model.parsers.CustomerSourceJsonParser
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import org.json.JSONException
+import org.json.JSONObject
 
 /**
  * Test class for [CustomerSource] model class.
@@ -17,7 +19,7 @@ class CustomerSourceTest {
     @Throws(JSONException::class)
     fun fromJson_whenCard_createsCustomerSourceData() {
         val jsonCard = JSON_CARD_USD
-        val sourceData = CustomerSource.fromJson(jsonCard)
+        val sourceData = parse(jsonCard)
         assertNotNull(sourceData)
         assertNotNull(sourceData.asCard())
         assertEquals("card_189fi32eZvKYlo2CHK8NPRME", sourceData.id)
@@ -27,7 +29,7 @@ class CustomerSourceTest {
     @Test
     fun fromJson_whenCardWithTokenization_createsSourceDataWithTokenization() {
         val jsonCard = SourceFixtures.APPLE_PAY
-        val sourceData = CustomerSource.fromJson(jsonCard)
+        val sourceData = parse(jsonCard)
         assertNotNull(sourceData)
         assertNotNull(sourceData.asCard())
         assertEquals("card_189fi32eZvKYlo2CHK8NPRME", sourceData.id)
@@ -48,15 +50,21 @@ class CustomerSourceTest {
     @Test
     @Throws(JSONException::class)
     fun getSourceType_whenCard_returnsCard() {
-        val sourceData = CustomerSource.fromJson(JSON_CARD_USD)
+        val sourceData = parse(JSON_CARD_USD)
         assertNotNull(sourceData)
         assertEquals(Source.SourceType.CARD, sourceData.sourceType)
     }
 
     @Test
     fun getSourceType_whenSourceThatIsNotCard_returnsSourceType() {
-        val alipaySource = CustomerSource.fromJson(SourceFixtures.ALIPAY_JSON)
+        val alipaySource = parse(SourceFixtures.ALIPAY_JSON)
         assertNotNull(alipaySource)
         assertEquals(Source.SourceType.ALIPAY, alipaySource.sourceType)
+    }
+
+    private companion object {
+        private fun parse(jsonObject: JSONObject): CustomerSource? {
+            return CustomerSourceJsonParser().parse(jsonObject)
+        }
     }
 }

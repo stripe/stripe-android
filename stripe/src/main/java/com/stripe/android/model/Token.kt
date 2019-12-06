@@ -52,7 +52,7 @@ data class Token internal constructor(
      * @return the [Card] for this token
      */
     val card: Card? = null
-) : StripeModel(), StripePaymentSource {
+) : StripeModel, StripePaymentSource {
     @Retention(AnnotationRetention.SOURCE)
     @StringDef(TokenType.CARD, TokenType.BANK_ACCOUNT, TokenType.PII, TokenType.ACCOUNT,
         TokenType.CVC_UPDATE)

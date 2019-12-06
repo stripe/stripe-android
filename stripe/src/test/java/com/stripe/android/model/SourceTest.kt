@@ -4,11 +4,13 @@ import com.stripe.android.model.SourceFixtures.CUSTOMER_SOURCE_CARD_JSON
 import com.stripe.android.model.SourceFixtures.DELETED_CARD_JSON
 import com.stripe.android.model.SourceFixtures.DOGE_COIN
 import com.stripe.android.model.SourceFixtures.EXAMPLE_JSON_SOURCE_CUSTOM_TYPE
+import com.stripe.android.model.parsers.SourceJsonParser
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.json.JSONObject
 
 /**
  * Test class for [Source] model.
@@ -16,12 +18,12 @@ import kotlin.test.assertTrue
 class SourceTest {
     @Test
     fun fromJsonStringWithoutNulls_isNotNull() {
-        assertNotNull(Source.fromJson(CUSTOMER_SOURCE_CARD_JSON))
+        assertNotNull(parse(CUSTOMER_SOURCE_CARD_JSON))
     }
 
     @Test
     fun fromJsonString_withCustomType_createsSourceWithCustomType() {
-        val customSource = requireNotNull(Source.fromJson(EXAMPLE_JSON_SOURCE_CUSTOM_TYPE))
+        val customSource = requireNotNull(parse(EXAMPLE_JSON_SOURCE_CUSTOM_TYPE))
         assertEquals(Source.SourceType.UNKNOWN, customSource.type)
         assertEquals(DOGE_COIN, customSource.typeRaw)
         assertNull(customSource.sourceTypeModel)
@@ -33,7 +35,7 @@ class SourceTest {
 
     @Test
     fun fromJsonString_withDeletedCardJson_shouldReturnSourceWithCardId() {
-        val source = Source.fromJson(DELETED_CARD_JSON)
+        val source = parse(DELETED_CARD_JSON)
         assertEquals("card_1ELdAlCRMbs6FrXfNbmZEOb7", source?.id)
     }
 
@@ -72,5 +74,11 @@ class SourceTest {
             "WIDGET FACTORY",
             SourceFixtures.SOURCE_WITH_SOURCE_ORDER.statementDescriptor
         )
+    }
+
+    private companion object {
+        private fun parse(jsonObject: JSONObject): Source? {
+            return SourceJsonParser().parse(jsonObject)
+        }
     }
 }

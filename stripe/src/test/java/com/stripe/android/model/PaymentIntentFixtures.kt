@@ -1,8 +1,10 @@
 package com.stripe.android.model
 
+import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import org.json.JSONObject
 
 internal object PaymentIntentFixtures {
+    private val PARSER = PaymentIntentJsonParser()
 
     const val KEY_ID = "7c4debe3f4af7f9d1569a2ffea4343c2566826ee"
 
@@ -90,9 +92,9 @@ internal object PaymentIntentFixtures {
         """.trimIndent()
     )
 
-    val PI_REQUIRES_MASTERCARD_3DS2 = PaymentIntent.fromJson(PI_REQUIRES_MASTERCARD_3DS2_JSON)!!
+    val PI_REQUIRES_MASTERCARD_3DS2 = PARSER.parse(PI_REQUIRES_MASTERCARD_3DS2_JSON)!!
 
-    val PI_REQUIRES_AMEX_3DS2 = PaymentIntent.fromJson(JSONObject(
+    val PI_REQUIRES_AMEX_3DS2 = PARSER.parse(JSONObject(
         """
         {
             "id": "pi_1EceMnCRMbs6FrXfCXdF8dnx",
@@ -154,7 +156,7 @@ internal object PaymentIntentFixtures {
         """.trimIndent()
     ))!!
 
-    val PI_REQUIRES_3DS1 = PaymentIntent.fromJson(JSONObject(
+    val PI_REQUIRES_3DS1 = PARSER.parse(JSONObject(
         """
         {
             "id": "pi_1EceMnCRMbs6FrXfCXdF8dnx",
@@ -208,7 +210,7 @@ internal object PaymentIntentFixtures {
         """.trimIndent()
     ))!!
 
-    val PI_REQUIRES_REDIRECT = PaymentIntent.fromJson(JSONObject(
+    val PI_REQUIRES_REDIRECT = PARSER.parse(JSONObject(
         """
         {
             "id": "pi_1EZlvVCRMbs6FrXfKpq2xMmy",
@@ -262,7 +264,7 @@ internal object PaymentIntentFixtures {
         """.trimIndent()
     ))!!
 
-    val PI_WITH_LAST_PAYMENT_ERROR = PaymentIntent.fromJson(JSONObject(
+    val PI_WITH_LAST_PAYMENT_ERROR = PARSER.parse(JSONObject(
         """
         {
             "id": "pi_1F7J1aCRMbs6FrXfaJcvbxF6",
@@ -337,7 +339,7 @@ internal object PaymentIntentFixtures {
         """.trimIndent()
     ))!!
 
-    val CANCELLED = PaymentIntent.fromJson(JSONObject(
+    val CANCELLED = PARSER.parse(JSONObject(
         """
         {
             "id": "pi_1FCpMECRMbs6FrXfVulorSf5",
@@ -407,7 +409,7 @@ internal object PaymentIntentFixtures {
         """.trimIndent()
     ))!!
 
-    val PAYMENT_INTENT_WITH_CANCELED_3DS1_SOURCE = PaymentIntent.fromJson(JSONObject(
+    val PAYMENT_INTENT_WITH_CANCELED_3DS1_SOURCE = PARSER.parse(JSONObject(
         """
         {
             "id": "pi_1FeqH9CRMbs6FrXfcqqpoC2H",

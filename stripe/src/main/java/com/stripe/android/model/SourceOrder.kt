@@ -1,9 +1,7 @@
 package com.stripe.android.model
 
 import com.stripe.android.model.SourceOrder.Item.Type
-import com.stripe.android.model.parsers.SourceOrderJsonParser
 import kotlinx.android.parcel.Parcelize
-import org.json.JSONObject
 
 /**
  * Information about the items and shipping associated with the source.
@@ -39,7 +37,7 @@ data class SourceOrder internal constructor(
      * The shipping address for the order. Present if the order is for goods to be shipped.
      */
     val shipping: Shipping? = null
-) : StripeModel() {
+) : StripeModel {
     /**
      * List of items constituting the order.
      *
@@ -72,7 +70,7 @@ data class SourceOrder internal constructor(
          * instances of the SKU to be ordered.
          */
         val quantity: Int? = null
-    ) : StripeModel() {
+    ) : StripeModel {
         enum class Type(private val code: String) {
             Sku("sku"),
             Tax("tax"),
@@ -83,13 +81,6 @@ data class SourceOrder internal constructor(
                 internal fun fromCode(code: String?): Type? {
                     return values().firstOrNull { it.code == code }
                 }
-            }
-        }
-
-        internal companion object {
-            @JvmSynthetic
-            internal fun fromJson(json: JSONObject): Item? {
-                return SourceOrderJsonParser.ItemJsonParser().parse(json)
             }
         }
     }
@@ -127,19 +118,5 @@ data class SourceOrder internal constructor(
          * them with commas.
          */
         val trackingNumber: String? = null
-    ) : StripeModel() {
-        internal companion object {
-            @JvmSynthetic
-            internal fun fromJson(json: JSONObject): Shipping? {
-                return SourceOrderJsonParser.ShippingJsonParser().parse(json)
-            }
-        }
-    }
-
-    internal companion object {
-        @JvmSynthetic
-        internal fun fromJson(json: JSONObject): SourceOrder {
-            return SourceOrderJsonParser().parse(json)
-        }
-    }
+    ) : StripeModel
 }

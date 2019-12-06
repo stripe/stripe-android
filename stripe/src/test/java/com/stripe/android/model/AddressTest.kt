@@ -15,7 +15,7 @@ class AddressTest {
 
     @Test
     fun fromJsonString_toParamMap_createsExpectedParamMap() {
-        assertMapEquals(MAP_ADDRESS, ADDRESS.toParamMap())
+        assertMapEquals(MAP_ADDRESS, AddressFixtures.ADDRESS.toParamMap())
     }
 
     @Test
@@ -28,7 +28,7 @@ class AddressTest {
             .setPostalCode("94107")
             .setState("CA")
             .build()
-        assertEquals(address, ADDRESS)
+        assertEquals(address, AddressFixtures.ADDRESS)
     }
 
     @Test
@@ -42,7 +42,7 @@ class AddressTest {
 
     @Test
     fun testParcelize() {
-        assertEquals(ADDRESS, ParcelUtils.create(ADDRESS))
+        assertEquals(AddressFixtures.ADDRESS, ParcelUtils.create(AddressFixtures.ADDRESS))
     }
 
     private companion object {
@@ -54,7 +54,5 @@ class AddressTest {
             "postal_code" to "94107",
             "state" to "CA"
         )
-
-        private val ADDRESS = Address.fromJson(AddressFixtures.ADDRESS_JSON)!!
     }
 }

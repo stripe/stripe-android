@@ -10,7 +10,7 @@ import org.json.JSONObject
 @Parcelize
 data class CustomerSource internal constructor(
     private val stripePaymentSource: StripePaymentSource
-) : StripeModel(), StripePaymentSource {
+) : StripeModel, StripePaymentSource {
 
     override val id: String?
         get() = stripePaymentSource.id

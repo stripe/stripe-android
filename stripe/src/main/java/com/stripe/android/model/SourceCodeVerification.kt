@@ -1,6 +1,5 @@
 package com.stripe.android.model
 
-import android.os.Parcelable
 import androidx.annotation.StringDef
 import com.stripe.android.model.parsers.SourceCodeVerificationJsonParser
 import kotlinx.android.parcel.Parcelize
@@ -16,7 +15,7 @@ import org.json.JSONObject
 data class SourceCodeVerification internal constructor(
     val attemptsRemaining: Int,
     @param:Status @field:Status @get:Status val status: String?
-) : StripeModel(), Parcelable {
+) : StripeModel {
 
     // Note: these are the same as the values for the @Redirect.Status StringDef.
     // They don't have to stay the same forever, so they are redefined here.

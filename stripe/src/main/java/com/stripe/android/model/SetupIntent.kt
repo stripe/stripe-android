@@ -1,12 +1,9 @@
 package com.stripe.android.model
 
 import android.net.Uri
-import android.os.Parcelable
-import com.stripe.android.model.StripeJsonUtils.optMap
-import com.stripe.android.model.StripeJsonUtils.optString
+import com.stripe.android.model.parsers.SetupIntentJsonParser
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.parcel.RawValue
-import org.json.JSONException
 import org.json.JSONObject
 
 /**
@@ -88,7 +85,7 @@ data class SetupIntent internal constructor(
      * @return The error encountered in the previous SetupIntent confirmation.
      */
     val lastSetupError: Error?
-) : StripeModel(), StripeIntent {
+) : StripeModel, StripeIntent {
 
     override val redirectData: StripeIntent.RedirectData?
         get() {
@@ -184,7 +181,7 @@ data class SetupIntent internal constructor(
          * The type of error returned.
          */
         val type: Type?
-    ) : Parcelable {
+    ) : StripeModel {
         enum class Type(val code: String) {
             ApiConnectionError("api_connection_error"),
             ApiError("api_error"),
@@ -197,34 +194,6 @@ data class SetupIntent internal constructor(
             internal companion object {
                 internal fun fromCode(typeCode: String?): Type? {
                     return values().firstOrNull { it.code == typeCode }
-                }
-            }
-        }
-
-        companion object {
-            private const val FIELD_CODE = "code"
-            private const val FIELD_DECLINE_CODE = "decline_code"
-            private const val FIELD_DOC_URL = "doc_url"
-            private const val FIELD_MESSAGE = "message"
-            private const val FIELD_PARAM = "param"
-            private const val FIELD_PAYMENT_METHOD = "payment_method"
-            private const val FIELD_TYPE = "type"
-
-            internal fun fromJson(errorJson: JSONObject?): Error? {
-                return if (errorJson == null) {
-                    null
-                } else {
-                    Error(
-                        code = optString(errorJson, FIELD_CODE),
-                        declineCode = optString(errorJson, FIELD_DECLINE_CODE),
-                        docUrl = optString(errorJson, FIELD_DOC_URL),
-                        message = optString(errorJson, FIELD_MESSAGE),
-                        param = optString(errorJson, FIELD_PARAM),
-                        paymentMethod = PaymentMethod.fromJson(
-                            errorJson.optJSONObject(FIELD_PAYMENT_METHOD)
-                        ),
-                        type = Type.fromCode(optString(errorJson, FIELD_TYPE))
-                    )
                 }
             }
         }
@@ -243,22 +212,6 @@ data class SetupIntent internal constructor(
     }
 
     companion object {
-        private const val VALUE_SETUP_INTENT = "setup_intent"
-
-        private const val FIELD_ID = "id"
-        private const val FIELD_OBJECT = "object"
-        private const val FIELD_CANCELLATION_REASON = "cancellation_reason"
-        private const val FIELD_CREATED = "created"
-        private const val FIELD_CLIENT_SECRET = "client_secret"
-        private const val FIELD_DESCRIPTION = "description"
-        private const val FIELD_LAST_SETUP_ERROR = "last_setup_error"
-        private const val FIELD_LIVEMODE = "livemode"
-        private const val FIELD_NEXT_ACTION = "next_action"
-        private const val FIELD_PAYMENT_METHOD_TYPES = "payment_method_types"
-        private const val FIELD_STATUS = "status"
-        private const val FIELD_USAGE = "usage"
-        private const val FIELD_PAYMENT_METHOD = "payment_method"
-
         private const val FIELD_NEXT_ACTION_TYPE = "type"
 
         internal fun parseIdFromClientSecret(clientSecret: String): String {
@@ -267,51 +220,10 @@ data class SetupIntent internal constructor(
         }
 
         @JvmStatic
-        fun fromString(jsonString: String?): SetupIntent? {
-            return if (jsonString == null) {
-                null
-            } else {
-                try {
-                    fromJson(JSONObject(jsonString))
-                } catch (ignored: JSONException) {
-                    null
-                }
-            }
-        }
-
-        @JvmStatic
         fun fromJson(jsonObject: JSONObject?): SetupIntent? {
-            val objectType = optString(jsonObject, FIELD_OBJECT)
-            if (jsonObject == null || VALUE_SETUP_INTENT != objectType) {
-                return null
+            return jsonObject?.let {
+                SetupIntentJsonParser().parse(it)
             }
-
-            val nextAction = optMap(jsonObject, FIELD_NEXT_ACTION)
-            val nextActionType = nextAction?.let {
-                StripeIntent.NextActionType.fromCode(it[FIELD_NEXT_ACTION_TYPE] as String?)
-            }
-            return SetupIntent(
-                id = optString(jsonObject, FIELD_ID),
-                objectType = objectType,
-                created = jsonObject.optLong(FIELD_CREATED),
-                clientSecret = optString(jsonObject, FIELD_CLIENT_SECRET),
-                cancellationReason = CancellationReason.fromCode(
-                    optString(jsonObject, FIELD_CANCELLATION_REASON)
-                ),
-                description = optString(jsonObject, FIELD_DESCRIPTION),
-                isLiveMode = jsonObject.optBoolean(FIELD_LIVEMODE),
-                paymentMethodId = optString(jsonObject, FIELD_PAYMENT_METHOD),
-                paymentMethodTypes = jsonArrayToList(
-                    jsonObject.optJSONArray(FIELD_PAYMENT_METHOD_TYPES)
-                ),
-                status = StripeIntent.Status.fromCode(optString(jsonObject, FIELD_STATUS)),
-                usage = StripeIntent.Usage.fromCode(optString(jsonObject, FIELD_USAGE)),
-                nextAction = nextAction,
-                nextActionType = nextActionType,
-                lastSetupError = Error.fromJson(
-                    jsonObject.optJSONObject(FIELD_LAST_SETUP_ERROR)
-                )
-            )
         }
     }
 }

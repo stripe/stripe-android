@@ -1,23 +1,11 @@
 package com.stripe.android.model
 
-import android.os.Parcelable
-import androidx.annotation.Size
 import androidx.annotation.StringDef
 import com.stripe.android.model.Source.SourceFlow
 import com.stripe.android.model.Source.SourceType
-import com.stripe.android.model.StripeJsonUtils.optLong
-import com.stripe.android.model.StripeJsonUtils.optString
-import com.stripe.android.model.parsers.SourceCardDataJsonParser
-import com.stripe.android.model.parsers.SourceCodeVerificationJsonParser
-import com.stripe.android.model.parsers.SourceOrderJsonParser
-import com.stripe.android.model.parsers.SourceOwnerJsonParser
-import com.stripe.android.model.parsers.SourceReceiverJsonParser
-import com.stripe.android.model.parsers.SourceRedirectJsonParser
-import com.stripe.android.model.parsers.SourceSepaDebitDataJsonParser
-import com.stripe.android.model.parsers.WeChatJsonParser
+import com.stripe.android.model.parsers.SourceJsonParser
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.parcel.RawValue
-import org.json.JSONException
 import org.json.JSONObject
 
 /**
@@ -151,7 +139,7 @@ data class Source internal constructor(
      * every time you charge the source.
      */
     val statementDescriptor: String? = null
-) : StripeModel(), StripePaymentSource, Parcelable {
+) : StripeModel, StripePaymentSource {
 
     val weChat: WeChat
         get() {
@@ -221,175 +209,15 @@ data class Source internal constructor(
     }
 
     companion object {
-        internal const val VALUE_SOURCE = "source"
-        private const val VALUE_CARD = "card"
-
-        private val MODELED_TYPES = setOf(SourceType.CARD, SourceType.SEPA_DEBIT)
+        internal const val OBJECT_TYPE = "source"
 
         internal const val EURO: String = "eur"
         internal const val USD: String = "usd"
 
-        private const val FIELD_ID: String = "id"
-        private const val FIELD_OBJECT: String = "object"
-        private const val FIELD_AMOUNT: String = "amount"
-        private const val FIELD_CLIENT_SECRET: String = "client_secret"
-        private const val FIELD_CODE_VERIFICATION: String = "code_verification"
-        private const val FIELD_CREATED: String = "created"
-        private const val FIELD_CURRENCY: String = "currency"
-        private const val FIELD_FLOW: String = "flow"
-        private const val FIELD_LIVEMODE: String = "livemode"
-        private const val FIELD_METADATA: String = "metadata"
-        private const val FIELD_OWNER: String = "owner"
-        private const val FIELD_RECEIVER: String = "receiver"
-        private const val FIELD_REDIRECT: String = "redirect"
-        private const val FIELD_SOURCE_ORDER: String = "source_order"
-        private const val FIELD_STATEMENT_DESCRIPTOR: String = "statement_descriptor"
-        private const val FIELD_STATUS: String = "status"
-        private const val FIELD_TYPE: String = "type"
-        private const val FIELD_USAGE: String = "usage"
-        private const val FIELD_WECHAT: String = "wechat"
-
-        @JvmStatic
-        fun fromString(jsonString: String?): Source? {
-            if (jsonString == null) {
-                return null
-            }
-
-            return try {
-                fromJson(JSONObject(jsonString))
-            } catch (ignored: JSONException) {
-                null
-            }
-        }
-
         @JvmStatic
         fun fromJson(jsonObject: JSONObject?): Source? {
-            return when (jsonObject?.optString(FIELD_OBJECT)) {
-                VALUE_CARD -> fromCardJson(jsonObject)
-                VALUE_SOURCE -> fromSourceJson(jsonObject)
-                else -> null
-            }
-        }
-
-        private fun fromCardJson(jsonObject: JSONObject): Source {
-            return Source(
-                optString(jsonObject, FIELD_ID),
-                sourceTypeModel = SourceCardDataJsonParser().parse(jsonObject),
-                type = SourceType.CARD,
-                typeRaw = SourceType.CARD
-            )
-        }
-
-        private fun fromSourceJson(jsonObject: JSONObject): Source {
-            @SourceType val typeRaw = optString(jsonObject, FIELD_TYPE) ?: SourceType.UNKNOWN
-            @SourceType val type = asSourceType(typeRaw)
-
-            // Until we have models for all types, keep the original hash and the
-            // model object. The customType variable can be any field, and is not altered by
-            // trying to force it to be a type that we know of.
-            val sourceTypeData = StripeJsonUtils.jsonObjectToMap(
-                jsonObject.optJSONObject(typeRaw)
-            )
-            val sourceTypeModel = if (MODELED_TYPES.contains(typeRaw)) {
-                optStripeJsonModel<StripeSourceTypeModel>(jsonObject, typeRaw)
-            } else {
-                null
-            }
-
-            return Source(
-                id = optString(jsonObject, FIELD_ID),
-                amount = optLong(jsonObject, FIELD_AMOUNT),
-                clientSecret = optString(jsonObject, FIELD_CLIENT_SECRET),
-                codeVerification = optStripeJsonModel(
-                    jsonObject,
-                    FIELD_CODE_VERIFICATION
-                ),
-                created = optLong(jsonObject, FIELD_CREATED),
-                currency = optString(jsonObject, FIELD_CURRENCY),
-                flow = asSourceFlow(optString(jsonObject, FIELD_FLOW)),
-                isLiveMode = jsonObject.optBoolean(FIELD_LIVEMODE),
-                metaData = StripeJsonUtils.jsonObjectToStringMap(
-                    jsonObject.optJSONObject(FIELD_METADATA)
-                ),
-                owner = optStripeJsonModel(jsonObject, FIELD_OWNER),
-                receiver = optStripeJsonModel(jsonObject, FIELD_RECEIVER),
-                redirect = optStripeJsonModel(jsonObject, FIELD_REDIRECT),
-                sourceOrder = jsonObject.optJSONObject(FIELD_SOURCE_ORDER)?.let {
-                    SourceOrderJsonParser().parse(it)
-                },
-                statementDescriptor = optString(jsonObject, FIELD_STATEMENT_DESCRIPTOR),
-                status = asSourceStatus(optString(jsonObject, FIELD_STATUS)),
-                sourceTypeData = sourceTypeData,
-                sourceTypeModel = sourceTypeModel,
-                type = type,
-                typeRaw = typeRaw,
-                usage = asUsage(optString(jsonObject, FIELD_USAGE)),
-                weChatParam = if (SourceType.WECHAT == type) {
-                    WeChatJsonParser().parse(
-                        jsonObject.optJSONObject(FIELD_WECHAT) ?: JSONObject()
-                    )
-                } else {
-                    null
-                }
-            )
-        }
-
-        private inline fun <reified T : StripeModel> optStripeJsonModel(
-            jsonObject: JSONObject,
-            @Size(min = 1) key: String
-        ): T? {
-            if (!jsonObject.has(key)) {
-                return null
-            }
-
-            val model: StripeModel? = when (key) {
-                FIELD_CODE_VERIFICATION -> {
-                    jsonObject.optJSONObject(FIELD_CODE_VERIFICATION)?.let {
-                        SourceCodeVerificationJsonParser().parse(it)
-                    }
-                }
-                FIELD_OWNER -> {
-                    jsonObject.optJSONObject(FIELD_OWNER)?.let {
-                        SourceOwnerJsonParser().parse(it)
-                    }
-                }
-                FIELD_RECEIVER -> {
-                    jsonObject.optJSONObject(FIELD_RECEIVER)?.let {
-                        SourceReceiverJsonParser().parse(it)
-                    }
-                }
-                FIELD_REDIRECT -> {
-                    jsonObject.optJSONObject(FIELD_REDIRECT)?.let {
-                        SourceRedirectJsonParser().parse(it)
-                    }
-                }
-                SourceType.CARD -> {
-                    jsonObject.optJSONObject(SourceType.CARD)?.let {
-                        SourceCardDataJsonParser().parse(it)
-                    }
-                }
-                SourceType.SEPA_DEBIT -> {
-                    jsonObject.optJSONObject(SourceType.SEPA_DEBIT)?.let {
-                        SourceSepaDebitDataJsonParser().parse(it)
-                    }
-                }
-                else -> {
-                    null
-                }
-            }
-
-            return model as? T
-        }
-
-        @SourceStatus
-        private fun asSourceStatus(sourceStatus: String?): String? {
-            return when (sourceStatus) {
-                SourceStatus.PENDING -> SourceStatus.PENDING
-                SourceStatus.CHARGEABLE -> SourceStatus.CHARGEABLE
-                SourceStatus.CONSUMED -> SourceStatus.CONSUMED
-                SourceStatus.CANCELED -> SourceStatus.CANCELED
-                SourceStatus.FAILED -> SourceStatus.FAILED
-                else -> null
+            return jsonObject?.let {
+                SourceJsonParser().parse(it)
             }
         }
 
@@ -411,26 +239,6 @@ data class Source internal constructor(
                 SourceType.WECHAT -> SourceType.WECHAT
                 SourceType.UNKNOWN -> SourceType.UNKNOWN
                 else -> SourceType.UNKNOWN
-            }
-        }
-
-        @Usage
-        private fun asUsage(usage: String?): String? {
-            return when (usage) {
-                Usage.REUSABLE -> Usage.REUSABLE
-                Usage.SINGLE_USE -> Usage.SINGLE_USE
-                else -> null
-            }
-        }
-
-        @SourceFlow
-        private fun asSourceFlow(sourceFlow: String?): String? {
-            return when (sourceFlow) {
-                SourceFlow.REDIRECT -> SourceFlow.REDIRECT
-                SourceFlow.RECEIVER -> SourceFlow.RECEIVER
-                SourceFlow.CODE_VERIFICATION -> SourceFlow.CODE_VERIFICATION
-                SourceFlow.NONE -> SourceFlow.NONE
-                else -> null
             }
         }
     }

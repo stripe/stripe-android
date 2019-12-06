@@ -4,7 +4,9 @@ import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.model.Card
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -53,5 +55,20 @@ class CvcEditTextTest {
         cvcEditText.setText("1234")
         cvcEditText.updateBrand(Card.CardBrand.AMERICAN_EXPRESS)
         assertEquals("1234", cvcEditText.cvcValue)
+    }
+
+    @Test
+    fun completionCallback_isInvoked_whenValid() {
+        var hasCompleted = false
+        cvcEditText.completionCallback = { hasCompleted = true }
+
+        cvcEditText.setText("1")
+        assertFalse(hasCompleted)
+
+        cvcEditText.setText("12")
+        assertFalse(hasCompleted)
+
+        cvcEditText.setText("123")
+        assertTrue(hasCompleted)
     }
 }

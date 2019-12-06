@@ -1,6 +1,5 @@
 package com.stripe.android.model
 
-import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import androidx.annotation.IntRange
 import androidx.annotation.Size
@@ -148,7 +147,7 @@ data class Card internal constructor(
      * @return the [metadata] of this card
      */
     val metadata: Map<String, String>?
-) : StripeModel(), StripePaymentSource, StripeParamsModel, Parcelable {
+) : StripeModel, StripePaymentSource, StripeParamsModel {
 
     @Retention(AnnotationRetention.SOURCE)
     @StringDef(CardBrand.AMERICAN_EXPRESS, CardBrand.DISCOVER, CardBrand.JCB,
@@ -577,7 +576,7 @@ data class Card internal constructor(
         const val MAX_LENGTH_AMERICAN_EXPRESS: Int = 15
         const val MAX_LENGTH_DINERS_CLUB: Int = 14
 
-        internal const val VALUE_CARD = "card"
+        internal const val OBJECT_TYPE = "card"
 
         private val BRAND_RESOURCE_MAP = mapOf(
             CardBrand.AMERICAN_EXPRESS to R.drawable.stripe_ic_amex,

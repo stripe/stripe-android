@@ -4,10 +4,8 @@ import android.app.Activity.RESULT_OK
 import android.app.Instrumentation
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
 import android.view.View
 import android.widget.ProgressBar
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.any
@@ -18,8 +16,6 @@ import com.stripe.android.AbsFakeStripeRepository
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.ApiRequest
 import com.stripe.android.CustomerSession
-import com.stripe.android.CustomerSession.Companion.ACTION_API_EXCEPTION
-import com.stripe.android.CustomerSession.Companion.EXTRA_EXCEPTION
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentSession.Companion.TOKEN_PAYMENT_SESSION
 import com.stripe.android.R
@@ -37,6 +33,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodTest
+import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.view.AddPaymentMethodActivity.Companion.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY
 import java.util.Calendar
 import kotlin.test.BeforeTest
@@ -60,15 +57,21 @@ import org.robolectric.Shadows.shadowOf
 @RunWith(RobolectricTestRunner::class)
 class AddPaymentMethodActivityTest {
 
-    private lateinit var paymentMethodIdCaptor: KArgumentCaptor<String>
-    private lateinit var listenerArgumentCaptor:
-        KArgumentCaptor<CustomerSession.PaymentMethodRetrievalListener>
-
     @Mock
-    private lateinit var mockStripeRepository: StripeRepository
+    private lateinit var stripeRepository: StripeRepository
 
     @Mock
     private lateinit var customerSession: CustomerSession
+
+    @Mock
+    private lateinit var alertDisplayer: AlertDisplayer
+
+    private val paymentMethodIdCaptor: KArgumentCaptor<String> by lazy {
+        argumentCaptor<String>()
+    }
+    private val listenerArgumentCaptor: KArgumentCaptor<CustomerSession.PaymentMethodRetrievalListener> by lazy {
+        argumentCaptor<CustomerSession.PaymentMethodRetrievalListener>()
+    }
 
     private val context: Context by lazy {
         ApplicationProvider.getApplicationContext<Context>()
@@ -83,9 +86,6 @@ class AddPaymentMethodActivityTest {
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
 
         MockitoAnnotations.initMocks(this)
-
-        paymentMethodIdCaptor = argumentCaptor()
-        listenerArgumentCaptor = argumentCaptor()
 
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
@@ -131,8 +131,8 @@ class AddPaymentMethodActivityTest {
             activityScenario.onActivity { activity ->
                 val progressBar: ProgressBar = activity.findViewById(R.id.progress_bar_as)
                 assertEquals(View.GONE, progressBar.visibility)
-                activity.createPaymentMethod(createStripe(mockStripeRepository), null)
-                verify(mockStripeRepository, never()).createPaymentMethod(
+                activity.createPaymentMethod(createStripe(stripeRepository), null)
+                verify(stripeRepository, never()).createPaymentMethod(
                     any(), any()
                 )
             }
@@ -244,8 +244,7 @@ class AddPaymentMethodActivityTest {
             activityScenario.onActivity { activity ->
                 val progressBar: ProgressBar = activity.findViewById(R.id.progress_bar_as)
 
-                val alertMessageListener: StripeActivity.AlertMessageListener = mock()
-                activity.setAlertMessageListener(alertMessageListener)
+                activity.alertDisplayer = alertDisplayer
 
                 assertEquals(View.GONE, progressBar.visibility)
                 activity.createPaymentMethod(stripe, PaymentMethodCreateParamsFixtures.DEFAULT_CARD)
@@ -253,7 +252,7 @@ class AddPaymentMethodActivityTest {
                 assertNull(shadowOf(activity).resultIntent)
                 assertFalse(activity.isFinishing)
                 assertEquals(View.GONE, progressBar.visibility)
-                verify(alertMessageListener).onAlertMessageDisplayed(errorMessage)
+                verify(alertDisplayer).show(errorMessage)
             }
         }
     }
@@ -270,8 +269,7 @@ class AddPaymentMethodActivityTest {
                 val cardMultilineWidget: CardMultilineWidget = activity.findViewById(R.id.card_multiline_widget)
                 activity.initCustomerSessionTokens(customerSession)
 
-                val alertMessageListener: StripeActivity.AlertMessageListener = mock()
-                activity.setAlertMessageListener(alertMessageListener)
+                activity.alertDisplayer = alertDisplayer
 
                 assertEquals(View.GONE, progressBar.visibility)
                 assertTrue(cardMultilineWidget.isEnabled)
@@ -297,19 +295,11 @@ class AddPaymentMethodActivityTest {
                 `when`(error.localizedMessage).thenReturn(errorMessage)
                 listenerArgumentCaptor.firstValue.onError(400, errorMessage, null)
 
-                // We're mocking the CustomerSession, so we have to replicate its broadcast behavior.
-                val bundle = Bundle()
-                bundle.putSerializable(EXTRA_EXCEPTION, error)
-                LocalBroadcastManager.getInstance(activity)
-                    .sendBroadcast(Intent(ACTION_API_EXCEPTION)
-                        .putExtras(bundle))
-
                 val intent = shadowOf(activity).resultIntent
                 assertNull(intent)
                 assertFalse(activity.isFinishing)
                 assertEquals(View.GONE, progressBar.visibility)
-                verify(alertMessageListener)
-                    .onAlertMessageDisplayed(errorMessage)
+                verify(alertDisplayer).show(errorMessage)
             }
         }
     }
@@ -367,6 +357,6 @@ class AddPaymentMethodActivityTest {
                 .build()
 
         private val EXPECTED_PAYMENT_METHOD =
-            requireNotNull(PaymentMethod.fromJson(PaymentMethodTest.PM_CARD_JSON))
+            requireNotNull(PaymentMethodJsonParser().parse(PaymentMethodTest.PM_CARD_JSON))
     }
 }

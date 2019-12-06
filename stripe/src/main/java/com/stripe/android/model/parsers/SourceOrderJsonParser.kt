@@ -1,19 +1,20 @@
 package com.stripe.android.model.parsers
 
-import com.stripe.android.model.Address
 import com.stripe.android.model.SourceOrder
 import com.stripe.android.model.StripeJsonUtils
 import org.json.JSONArray
 import org.json.JSONObject
 
 internal class SourceOrderJsonParser : ModelJsonParser<SourceOrder> {
+    private val itemJsonParser = ItemJsonParser()
+
     override fun parse(json: JSONObject): SourceOrder {
         val itemsJson = json.optJSONArray(FIELD_ITEMS) ?: JSONArray()
 
         val items = (0 until itemsJson.length())
             .map { idx -> itemsJson.optJSONObject(idx) }
             .mapNotNull {
-                SourceOrder.Item.fromJson(it)
+                itemJsonParser.parse(it)
             }
         return SourceOrder(
             amount = StripeJsonUtils.optInteger(json, FIELD_AMOUNT),
@@ -21,12 +22,12 @@ internal class SourceOrderJsonParser : ModelJsonParser<SourceOrder> {
             email = StripeJsonUtils.optString(json, FIELD_EMAIL),
             items = items,
             shipping = json.optJSONObject(FIELD_SHIPPING)?.let {
-                SourceOrder.Shipping.fromJson(it)
+                ShippingJsonParser().parse(it)
             }
         )
     }
 
-    internal class ItemJsonParser : ModelJsonParser<SourceOrder.Item?> {
+    internal class ItemJsonParser : ModelJsonParser<SourceOrder.Item> {
         override fun parse(json: JSONObject): SourceOrder.Item? {
             val type =
                 SourceOrder.Item.Type.fromCode(StripeJsonUtils.optString(json, FIELD_TYPE))
@@ -55,7 +56,9 @@ internal class SourceOrderJsonParser : ModelJsonParser<SourceOrder> {
     internal class ShippingJsonParser : ModelJsonParser<SourceOrder.Shipping> {
         override fun parse(json: JSONObject): SourceOrder.Shipping {
             return SourceOrder.Shipping(
-                address = Address.fromJson(json.optJSONObject(FIELD_ADDRESS)),
+                address = json.optJSONObject(FIELD_ADDRESS)?.let {
+                    AddressJsonParser().parse(it)
+                },
                 carrier = StripeJsonUtils.optString(json, FIELD_CARRIER),
                 name = StripeJsonUtils.optString(json, FIELD_NAME),
                 phone = StripeJsonUtils.optString(json, FIELD_PHONE),

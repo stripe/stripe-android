@@ -18,6 +18,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodTest
+import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.testharness.TestEphemeralKeyProvider
 import com.stripe.android.view.ActivityStarter
 import com.stripe.android.view.PaymentFlowActivity
@@ -359,7 +360,7 @@ class PaymentSessionTest {
             paymentMethodCreateParams: PaymentMethodCreateParams,
             options: ApiRequest.Options
         ): PaymentMethod {
-            return PaymentMethod.fromJson(PaymentMethodTest.PM_CARD_JSON)!!
+            return PaymentMethodJsonParser().parse(PaymentMethodTest.PM_CARD_JSON)
         }
 
         override fun setDefaultCustomerSource(

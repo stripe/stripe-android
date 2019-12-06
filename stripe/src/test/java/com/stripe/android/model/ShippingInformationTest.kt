@@ -19,7 +19,6 @@ class ShippingInformationTest {
     }
 
     private fun createShippingInformation(): ShippingInformation {
-        return ShippingInformation(Address.fromJson(AddressFixtures.ADDRESS_JSON),
-            "home", "555-123-4567")
+        return ShippingInformation(AddressFixtures.ADDRESS, "home", "555-123-4567")
     }
 }

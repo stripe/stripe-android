@@ -1,21 +1,14 @@
 package com.stripe.android.view
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewStub
 import android.widget.ProgressBar
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import com.stripe.android.CustomerSession
 import com.stripe.android.R
-import com.stripe.android.exception.StripeException
 
 /**
  * Provides a toolbar, save button, and loading states for the save button.
@@ -25,10 +18,9 @@ abstract class StripeActivity : AppCompatActivity() {
     lateinit var progressBar: ProgressBar
     lateinit var viewStub: ViewStub
 
-    private lateinit var alertBroadcastReceiver: BroadcastReceiver
-
-    private var alertMessageListener: AlertMessageListener? = null
     private var communicating: Boolean = false
+
+    internal lateinit var alertDisplayer: AlertDisplayer
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,30 +31,7 @@ abstract class StripeActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         setCommunicatingProgress(false)
-        alertBroadcastReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                val exception =
-                    intent.getSerializableExtra(CustomerSession.EXTRA_EXCEPTION) as StripeException
-                val errorMessage = exception.localizedMessage
-                if (errorMessage != null) {
-                    showError(errorMessage)
-                }
-            }
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).unregisterReceiver(alertBroadcastReceiver)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this)
-            .registerReceiver(
-                alertBroadcastReceiver,
-                IntentFilter(CustomerSession.ACTION_API_EXCEPTION)
-            )
+        alertDisplayer = AlertDisplayer.DefaultAlertDisplayer(this)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -107,24 +76,7 @@ abstract class StripeActivity : AppCompatActivity() {
         invalidateOptionsMenu()
     }
 
-    fun setAlertMessageListener(listener: AlertMessageListener?) {
-        alertMessageListener = listener
-    }
-
-    fun showError(error: String) {
-        alertMessageListener?.onAlertMessageDisplayed(error)
-
-        AlertDialog.Builder(this)
-            .setMessage(error)
-            .setCancelable(true)
-            .setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
-                dialogInterface.dismiss()
-            }
-            .create()
-            .show()
-    }
-
-    interface AlertMessageListener {
-        fun onAlertMessageDisplayed(message: String)
+    protected fun showError(error: String) {
+        alertDisplayer.show(error)
     }
 }

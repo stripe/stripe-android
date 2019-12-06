@@ -1,28 +1,21 @@
 package com.stripe.android.model.parsers
 
-import com.stripe.android.model.Address
 import com.stripe.android.model.SourceOwner
 import com.stripe.android.model.StripeJsonUtils
 import org.json.JSONObject
 
 internal class SourceOwnerJsonParser : ModelJsonParser<SourceOwner> {
     override fun parse(json: JSONObject): SourceOwner {
-        val addressJsonOpt = json.optJSONObject(FIELD_ADDRESS)
-        val address = if (addressJsonOpt != null) {
-            Address.fromJson(addressJsonOpt)
-        } else {
-            null
+        val address = json.optJSONObject(FIELD_ADDRESS)?.let {
+            AddressJsonParser().parse(it)
         }
 
         val email = StripeJsonUtils.optString(json, FIELD_EMAIL)
         val name = StripeJsonUtils.optString(json, FIELD_NAME)
         val phone = StripeJsonUtils.optString(json, FIELD_PHONE)
 
-        val verifiedAddressJsonOpt = json.optJSONObject(FIELD_VERIFIED_ADDRESS)
-        val verifiedAddress = if (verifiedAddressJsonOpt != null) {
-            Address.fromJson(verifiedAddressJsonOpt)
-        } else {
-            null
+        val verifiedAddress = json.optJSONObject(FIELD_VERIFIED_ADDRESS)?.let {
+            AddressJsonParser().parse(it)
         }
 
         val verifiedEmail = StripeJsonUtils.optString(json, FIELD_VERIFIED_EMAIL)
