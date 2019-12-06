@@ -1,5 +1,6 @@
 package com.stripe.android.view
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -15,15 +16,12 @@ internal class PaymentMethodsViewModel(
 ) : ViewModel() {
 
     @JvmSynthetic
-    internal val paymentMethods: MutableLiveData<Result<*>> = MutableLiveData()
-
-    @JvmSynthetic
-    internal fun loadPaymentMethods() {
+    internal fun getPaymentMethods(): LiveData<Result> {
+        val resultData = MutableLiveData<Result>()
         customerSession.getPaymentMethods(PaymentMethod.Type.Card,
             object : CustomerSession.PaymentMethodsRetrievalListener {
                 override fun onPaymentMethodsRetrieved(paymentMethods: List<PaymentMethod>) {
-                    this@PaymentMethodsViewModel.paymentMethods.value =
-                        Result.create(paymentMethods)
+                    resultData.value = Result.Success(paymentMethods)
                 }
 
                 override fun onError(
@@ -31,7 +29,7 @@ internal class PaymentMethodsViewModel(
                     errorMessage: String,
                     stripeError: StripeError?
                 ) {
-                    paymentMethods.value = Result.create(
+                    resultData.value = Result.Error(
                         APIException(
                             statusCode = errorCode,
                             message = errorMessage,
@@ -41,6 +39,13 @@ internal class PaymentMethodsViewModel(
                 }
             }
         )
+
+        return resultData
+    }
+
+    internal sealed class Result {
+        data class Success(val paymentMethods: List<PaymentMethod>) : Result()
+        data class Error(val exception: StripeException) : Result()
     }
 
     internal class Factory(
@@ -49,27 +54,6 @@ internal class PaymentMethodsViewModel(
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             return PaymentMethodsViewModel(customerSession, initialPaymentMethodId) as T
-        }
-    }
-
-    internal data class Result<out T> internal constructor(
-        internal val status: Status,
-        internal val data: T
-    ) {
-        enum class Status {
-            SUCCESS, ERROR
-        }
-
-        internal companion object {
-            @JvmSynthetic
-            internal fun create(paymentMethods: List<PaymentMethod>): Result<List<PaymentMethod>> {
-                return Result(Status.SUCCESS, paymentMethods)
-            }
-
-            @JvmSynthetic
-            internal fun create(exception: StripeException): Result<StripeException> {
-                return Result(Status.ERROR, exception)
-            }
         }
     }
 }
