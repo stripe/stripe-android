@@ -336,17 +336,29 @@ class CardInputWidget @JvmOverloads constructor(
             val cvcMargin: Int
             if (cardNumberIsViewed) {
                 cardMargin = 0
-                dateMargin = placementParameters.cardWidth + placementParameters.cardDateSeparation
-                cvcMargin = placementParameters.totalLengthInPixels
+                dateMargin = placementParameters.getDateLeftMargin(isFullCard = true)
+                cvcMargin = placementParameters.getCvcLeftMargin(isFullCard = true)
             } else {
                 cardMargin = -1 * placementParameters.hiddenCardWidth
-                dateMargin = placementParameters.peekCardWidth + placementParameters.cardDateSeparation
-                cvcMargin = dateMargin + placementParameters.dateWidth + placementParameters.dateCvcSeparation
+                dateMargin = placementParameters.getDateLeftMargin(isFullCard = false)
+                cvcMargin = placementParameters.getCvcLeftMargin(isFullCard = false)
             }
 
-            setLayoutValues(placementParameters.cardWidth, cardMargin, cardNumberEditText)
-            setLayoutValues(placementParameters.dateWidth, dateMargin, expiryDateEditText)
-            setLayoutValues(placementParameters.cvcWidth, cvcMargin, cvcNumberEditText)
+            updateFieldLayout(
+                view = cardNumberEditText,
+                width = placementParameters.cardWidth,
+                margin = cardMargin
+            )
+            updateFieldLayout(
+                view = expiryDateEditText,
+                width = placementParameters.dateWidth,
+                margin = dateMargin
+            )
+            updateFieldLayout(
+                view = cvcNumberEditText,
+                width = placementParameters.cvcWidth,
+                margin = cvcMargin
+            )
 
             super.onRestoreInstanceState(state.getParcelable(STATE_SUPER_STATE))
         } else {
@@ -453,11 +465,11 @@ class CardInputWidget @JvmOverloads constructor(
         placementParameters.updateSpacing(isCardViewed, frameStart, frameWidth)
     }
 
-    private fun setLayoutValues(width: Int, margin: Int, editText: StripeEditText) {
-        val layoutParams = editText.layoutParams as FrameLayout.LayoutParams
-        layoutParams.width = width
-        layoutParams.leftMargin = margin
-        editText.layoutParams = layoutParams
+    private fun updateFieldLayout(view: View, width: Int, margin: Int) {
+        view.layoutParams = (view.layoutParams as FrameLayout.LayoutParams).apply {
+            this.width = width
+            this.leftMargin = margin
+        }
     }
 
     private fun getDesiredWidthInPixels(text: String, editText: StripeEditText): Int {
@@ -581,136 +593,90 @@ class CardInputWidget @JvmOverloads constructor(
         cardNumberEditText.requestFocus()
     }
 
+    // reveal the full card number field
     private fun scrollLeft() {
         if (cardNumberIsViewed || !initFlag) {
             return
         }
 
-        val dateStartPosition = placementParameters.peekCardWidth +
-            placementParameters.cardDateSeparation
-        val cvcStartPosition = (dateStartPosition +
-            placementParameters.dateWidth + placementParameters.dateCvcSeparation)
+        val dateStartPosition = placementParameters.getDateLeftMargin(isFullCard = false)
+        val cvcStartPosition = placementParameters.getCvcLeftMargin(isFullCard = false)
 
-        updateSpaceSizes(true)
+        updateSpaceSizes(isCardViewed = true)
 
-        val startPoint = (cardNumberEditText.layoutParams as FrameLayout.LayoutParams).leftMargin
-        val slideCardLeftAnimation = object : Animation() {
-            override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
-                super.applyTransformation(interpolatedTime, t)
-                val params = cardNumberEditText.layoutParams as FrameLayout.LayoutParams
-                params.leftMargin = (startPoint * (1 - interpolatedTime)).toInt()
-                cardNumberEditText.layoutParams = params
-            }
-        }
+        val slideCardLeftAnimation = CardNumberSlideLeftAnimation(
+            view = cardNumberEditText
+        )
 
-        val dateDestination = placementParameters.cardWidth + placementParameters.cardDateSeparation
-        val slideDateLeftAnimation = object : Animation() {
-            override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
-                super.applyTransformation(interpolatedTime, t)
-                val tempValue = (interpolatedTime * dateDestination + (1 - interpolatedTime) * dateStartPosition).toInt()
-                val params = (expiryDateEditText.layoutParams as FrameLayout.LayoutParams).apply {
-                    leftMargin = tempValue
-                }
-                expiryDateEditText.layoutParams = params
-            }
-        }
+        val dateDestination = placementParameters.getDateLeftMargin(isFullCard = true)
+        val slideDateLeftAnimation = ExpiryDateSlideLeftAnimation(
+            view = expiryDateEditText,
+            startPosition = dateStartPosition,
+            destination = dateDestination
+        )
 
         val cvcDestination = cvcStartPosition + (dateDestination - dateStartPosition)
-        val slideCvcLeftAnimation = object : Animation() {
-            override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
-                super.applyTransformation(interpolatedTime, t)
-                val tempValue = (interpolatedTime * cvcDestination + (1 - interpolatedTime) * cvcStartPosition).toInt()
-                val params = (cvcNumberEditText.layoutParams as FrameLayout.LayoutParams).apply {
-                    leftMargin = tempValue
-                    rightMargin = 0
-                    width = placementParameters.cvcWidth
-                }
-                cvcNumberEditText.layoutParams = params
-            }
-        }
+        val slideCvcLeftAnimation = CvcSlideLeftAnimation(
+            view = cvcNumberEditText,
+            startPosition = cvcStartPosition,
+            destination = cvcDestination,
+            newWidth = placementParameters.cvcWidth
+        )
 
-        slideCardLeftAnimation.setAnimationListener(object : AnimationEndListener() {
-            override fun onAnimationEnd(animation: Animation) {
-                cardNumberEditText.requestFocus()
-            }
-        })
+        startSlideAnimation(listOf(
+            slideCardLeftAnimation,
+            slideDateLeftAnimation,
+            slideCvcLeftAnimation
+        ))
 
-        slideCardLeftAnimation.duration = ANIMATION_LENGTH
-        slideDateLeftAnimation.duration = ANIMATION_LENGTH
-        slideCvcLeftAnimation.duration = ANIMATION_LENGTH
-
-        val animationSet = AnimationSet(true).apply {
-            addAnimation(slideCardLeftAnimation)
-            addAnimation(slideDateLeftAnimation)
-            addAnimation(slideCvcLeftAnimation)
-        }
-        frameLayout.startAnimation(animationSet)
         cardNumberIsViewed = true
     }
 
+    // reveal the secondary fields
     private fun scrollRight() {
         if (!cardNumberIsViewed || !initFlag) {
             return
         }
 
-        val dateStartMargin = placementParameters.cardWidth + placementParameters.cardDateSeparation
+        val dateStartMargin = placementParameters.getDateLeftMargin(isFullCard = true)
 
         updateSpaceSizes(isCardViewed = false)
 
-        val slideCardRightAnimation = object : Animation() {
-            override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
-                super.applyTransformation(interpolatedTime, t)
-                val cardParams = cardNumberEditText.layoutParams as FrameLayout.LayoutParams
-                cardParams.leftMargin = (-1f * placementParameters.hiddenCardWidth.toFloat() * interpolatedTime).toInt()
-                cardNumberEditText.layoutParams = cardParams
-            }
-        }
+        val slideCardRightAnimation = CardNumberSlideRightAnimation(
+            view = cardNumberEditText,
+            hiddenCardWidth = placementParameters.hiddenCardWidth,
+            focusOnEndView = expiryDateEditText
+        )
 
-        val dateDestination = placementParameters.peekCardWidth + placementParameters.cardDateSeparation
+        val dateDestination = placementParameters.getDateLeftMargin(isFullCard = false)
+        val slideDateRightAnimation = ExpiryDateSlideRightAnimation(
+            view = expiryDateEditText,
+            startMargin = dateStartMargin,
+            destination = dateDestination
+        )
 
-        val slideDateRightAnimation = object : Animation() {
-            override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
-                super.applyTransformation(interpolatedTime, t)
-                val tempValue = (interpolatedTime * dateDestination + (1 - interpolatedTime) * dateStartMargin).toInt()
-                val dateParams = expiryDateEditText.layoutParams as FrameLayout.LayoutParams
-                dateParams.leftMargin = tempValue
-                expiryDateEditText.layoutParams = dateParams
-            }
-        }
+        val cvcDestination = placementParameters.getCvcLeftMargin(isFullCard = false)
+        val slideCvcRightAnimation = CvcSlideRightAnimation(
+            view = cvcNumberEditText,
+            startMargin = cvcDestination + (dateStartMargin - dateDestination),
+            destination = cvcDestination,
+            newWidth = placementParameters.cvcWidth
+        )
 
-        val cvcDestination = placementParameters.cvcDestination
-        val cvcStartMargin = cvcDestination + (dateStartMargin - dateDestination)
+        startSlideAnimation(listOf(
+            slideCardRightAnimation,
+            slideDateRightAnimation,
+            slideCvcRightAnimation
+        ))
 
-        val slideCvcRightAnimation = object : Animation() {
-            override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
-                super.applyTransformation(interpolatedTime, t)
-                val tempValue = (interpolatedTime * cvcDestination + (1 - interpolatedTime) * cvcStartMargin).toInt()
-                val cardParams = cvcNumberEditText.layoutParams as FrameLayout.LayoutParams
-                cardParams.leftMargin = tempValue
-                cardParams.rightMargin = 0
-                cardParams.width = placementParameters.cvcWidth
-                cvcNumberEditText.layoutParams = cardParams
-            }
-        }
-
-        slideCardRightAnimation.duration = ANIMATION_LENGTH
-        slideDateRightAnimation.duration = ANIMATION_LENGTH
-        slideCvcRightAnimation.duration = ANIMATION_LENGTH
-
-        slideCardRightAnimation.setAnimationListener(object : AnimationEndListener() {
-            override fun onAnimationEnd(animation: Animation) {
-                expiryDateEditText.requestFocus()
-            }
-        })
-
-        val animationSet = AnimationSet(true).apply {
-            addAnimation(slideCardRightAnimation)
-            addAnimation(slideDateRightAnimation)
-            addAnimation(slideCvcRightAnimation)
-        }
-
-        frameLayout.startAnimation(animationSet)
         cardNumberIsViewed = false
+    }
+
+    private fun startSlideAnimation(animations: List<Animation>) {
+        val animationSet = AnimationSet(true).apply {
+            animations.forEach { addAnimation(it) }
+        }
+        frameLayout.startAnimation(animationSet)
     }
 
     override fun onWindowFocusChanged(hasWindowFocus: Boolean) {
@@ -728,18 +694,27 @@ class CardInputWidget @JvmOverloads constructor(
 
             updateSpaceSizes(cardNumberIsViewed)
 
-            val cardLeftMargin = if (cardNumberIsViewed) {
-                0
-            } else {
-                -1 * placementParameters.hiddenCardWidth
-            }
-            setLayoutValues(placementParameters.cardWidth, cardLeftMargin, cardNumberEditText)
+            updateFieldLayout(
+                view = cardNumberEditText,
+                width = placementParameters.cardWidth,
+                margin = if (cardNumberIsViewed) {
+                    0
+                } else {
+                    -1 * placementParameters.hiddenCardWidth
+                }
+            )
 
-            val dateMargin = placementParameters.getDateMargin(cardNumberIsViewed)
-            setLayoutValues(placementParameters.dateWidth, dateMargin, expiryDateEditText)
+            updateFieldLayout(
+                view = expiryDateEditText,
+                width = placementParameters.dateWidth,
+                margin = placementParameters.getDateLeftMargin(cardNumberIsViewed)
+            )
 
-            val cvcMargin = placementParameters.getCvcMargin(cardNumberIsViewed)
-            setLayoutValues(placementParameters.cvcWidth, cvcMargin, cvcNumberEditText)
+            updateFieldLayout(
+                view = cvcNumberEditText,
+                width = placementParameters.cvcWidth,
+                margin = placementParameters.getCvcLeftMargin(cardNumberIsViewed)
+            )
         }
     }
 
@@ -832,27 +807,33 @@ class CardInputWidget @JvmOverloads constructor(
         internal var dateRightTouchBufferLimit: Int = 0
         internal var cvcStartPosition: Int = 0
 
-        internal val cvcDestination: Int
+        private val cardPeekDateLeftMargin: Int
             @JvmSynthetic
             get() {
-                return peekCardWidth + cardDateSeparation + dateWidth + dateCvcSeparation
+                return peekCardWidth + cardDateSeparation
+            }
+
+        private val cardPeekCvcLeftMargin: Int
+            @JvmSynthetic
+            get() {
+                return cardPeekDateLeftMargin + dateWidth + dateCvcSeparation
             }
 
         @JvmSynthetic
-        internal fun getDateMargin(cardNumberIsViewed: Boolean): Int {
-            return if (cardNumberIsViewed) {
+        internal fun getDateLeftMargin(isFullCard: Boolean): Int {
+            return if (isFullCard) {
                 cardWidth + cardDateSeparation
             } else {
-                peekCardWidth + cardDateSeparation
+                cardPeekDateLeftMargin
             }
         }
 
         @JvmSynthetic
-        internal fun getCvcMargin(cardNumberIsViewed: Boolean): Int {
-            return if (cardNumberIsViewed) {
+        internal fun getCvcLeftMargin(isFullCard: Boolean): Int {
+            return if (isFullCard) {
                 totalLengthInPixels
             } else {
-                peekCardWidth + cardDateSeparation + dateWidth + dateCvcSeparation
+                cardPeekCvcLeftMargin
             }
         }
 
@@ -863,18 +844,17 @@ class CardInputWidget @JvmOverloads constructor(
             frameWidth: Int
         ) {
             if (isCardViewed) {
-                cardDateSeparation = (frameWidth - cardWidth - dateWidth)
-                cardTouchBufferLimit = (frameStart + cardWidth + cardDateSeparation / 2)
-                dateStartPosition = (frameStart + cardWidth + cardDateSeparation)
+                cardDateSeparation = frameWidth - cardWidth - dateWidth
+                cardTouchBufferLimit = frameStart + cardWidth + cardDateSeparation / 2
+                dateStartPosition = frameStart + cardWidth + cardDateSeparation
             } else {
-                cardDateSeparation = (frameWidth / 2 - peekCardWidth - dateWidth / 2)
-                dateCvcSeparation = (frameWidth - peekCardWidth - cardDateSeparation -
-                    dateWidth - cvcWidth)
+                cardDateSeparation = frameWidth / 2 - peekCardWidth - dateWidth / 2
+                dateCvcSeparation = frameWidth - peekCardWidth - cardDateSeparation - dateWidth - cvcWidth
 
-                cardTouchBufferLimit = (frameStart + peekCardWidth + cardDateSeparation / 2)
-                dateStartPosition = (frameStart + peekCardWidth + cardDateSeparation)
-                dateRightTouchBufferLimit = (dateStartPosition + dateWidth + dateCvcSeparation / 2)
-                cvcStartPosition = (dateStartPosition + dateWidth + dateCvcSeparation)
+                cardTouchBufferLimit = frameStart + peekCardWidth + cardDateSeparation / 2
+                dateStartPosition = frameStart + peekCardWidth + cardDateSeparation
+                dateRightTouchBufferLimit = dateStartPosition + dateWidth + dateCvcSeparation / 2
+                cvcStartPosition = dateStartPosition + dateWidth + dateCvcSeparation
             }
         }
 
@@ -901,10 +881,121 @@ class CardInputWidget @JvmOverloads constructor(
         }
     }
 
+    private abstract class CardFieldAnimation : Animation() {
+        init {
+            duration = ANIMATION_LENGTH
+        }
+
+        private companion object {
+            private const val ANIMATION_LENGTH = 150L
+        }
+    }
+
+    private class CardNumberSlideLeftAnimation(
+        private val view: View
+    ) : CardFieldAnimation() {
+        init {
+            setAnimationListener(object : AnimationEndListener() {
+                override fun onAnimationEnd(animation: Animation) {
+                    view.requestFocus()
+                }
+            })
+        }
+
+        override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
+            super.applyTransformation(interpolatedTime, t)
+            view.layoutParams = (view.layoutParams as FrameLayout.LayoutParams).apply {
+                leftMargin = (leftMargin * (1 - interpolatedTime)).toInt()
+            }
+        }
+    }
+
+    private class ExpiryDateSlideLeftAnimation(
+        private val view: View,
+        private val startPosition: Int,
+        private val destination: Int
+    ) : CardFieldAnimation() {
+        override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
+            super.applyTransformation(interpolatedTime, t)
+            view.layoutParams = (view.layoutParams as FrameLayout.LayoutParams).apply {
+                leftMargin =
+                    (interpolatedTime * destination + (1 - interpolatedTime) * startPosition).toInt()
+            }
+        }
+    }
+
+    private class CvcSlideLeftAnimation(
+        private val view: View,
+        private val startPosition: Int,
+        private val destination: Int,
+        private val newWidth: Int
+    ) : CardFieldAnimation() {
+        override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
+            super.applyTransformation(interpolatedTime, t)
+            view.layoutParams = (view.layoutParams as FrameLayout.LayoutParams).apply {
+                this.leftMargin = (interpolatedTime * destination + (1 - interpolatedTime) * startPosition).toInt()
+                this.rightMargin = 0
+                this.width = newWidth
+            }
+        }
+    }
+
+    private class CardNumberSlideRightAnimation(
+        private val view: View,
+        private val hiddenCardWidth: Int,
+        private val focusOnEndView: View
+    ) : CardFieldAnimation() {
+        init {
+            setAnimationListener(object : AnimationEndListener() {
+                override fun onAnimationEnd(animation: Animation) {
+                    focusOnEndView.requestFocus()
+                }
+            })
+        }
+
+        override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
+            super.applyTransformation(interpolatedTime, t)
+            view.layoutParams = (view.layoutParams as FrameLayout.LayoutParams).apply {
+                leftMargin = (-1f * hiddenCardWidth.toFloat() * interpolatedTime).toInt()
+            }
+        }
+    }
+
+    private class ExpiryDateSlideRightAnimation(
+        private val view: View,
+        private val startMargin: Int,
+        private val destination: Int
+    ) : CardFieldAnimation() {
+        override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
+            super.applyTransformation(interpolatedTime, t)
+            view.layoutParams = (view.layoutParams as FrameLayout.LayoutParams).apply {
+                leftMargin =
+                    (interpolatedTime * destination + (1 - interpolatedTime) * startMargin).toInt()
+            }
+        }
+    }
+
+    private class CvcSlideRightAnimation(
+        private val view: View,
+        private val startMargin: Int,
+        private val destination: Int,
+        private val newWidth: Int
+    ) : CardFieldAnimation() {
+        override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
+            super.applyTransformation(interpolatedTime, t)
+            view.layoutParams = (view.layoutParams as FrameLayout.LayoutParams).apply {
+                leftMargin =
+                    (interpolatedTime * destination + (1 - interpolatedTime) * startMargin).toInt()
+                rightMargin = 0
+                width = newWidth
+            }
+        }
+    }
+
     /**
      * A convenience class for when we only want to listen for when an animation ends.
      */
-    private abstract inner class AnimationEndListener : Animation.AnimationListener {
+    private abstract class AnimationEndListener : Animation.AnimationListener {
         override fun onAnimationStart(animation: Animation) {
             // Intentional No-op
         }
@@ -949,8 +1040,6 @@ class CardInputWidget @JvmOverloads constructor(
         // in the event that the user doesn't give this control an ID.
         @IdRes
         private val DEFAULT_READER_ID = R.id.stripe_default_reader_id
-
-        private const val ANIMATION_LENGTH = 150L
 
         /**
          * Determines whether or not the icon should show the card brand instead of the
