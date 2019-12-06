@@ -1,9 +1,6 @@
 package com.stripe.android.model
 
-import com.stripe.android.model.parsers.Stripe3ds2AuthResultJsonParser
 import kotlinx.android.parcel.Parcelize
-import org.json.JSONArray
-import org.json.JSONException
 
 @Parcelize
 internal data class Stripe3ds2AuthResult internal constructor(
@@ -56,22 +53,7 @@ internal data class Stripe3ds2AuthResult internal constructor(
 
         // The data carried in the extension.
         val data: Map<String, String>?
-    ) : StripeModel {
-        internal companion object {
-
-            @JvmSynthetic
-            @Throws(JSONException::class)
-            internal fun fromJson(messageExtensionsJson: JSONArray?): List<MessageExtension>? {
-                if (messageExtensionsJson == null) {
-                    return null
-                }
-
-                return (0 until messageExtensionsJson.length())
-                    .mapNotNull { messageExtensionsJson.optJSONObject(it) }
-                    .map { Stripe3ds2AuthResultJsonParser.MessageExtensionJsonParser().parse(it) }
-            }
-        }
-    }
+    ) : StripeModel
 
     @Parcelize
     data class ThreeDS2Error internal constructor(

@@ -1,8 +1,6 @@
 package com.stripe.android.model
 
-import com.stripe.android.model.parsers.ShippingInformationJsonParser
 import kotlinx.android.parcel.Parcelize
-import org.json.JSONObject
 
 /**
  * Model representing a shipping address object
@@ -28,12 +26,5 @@ data class ShippingInformation constructor(
         private const val PARAM_ADDRESS = "address"
         private const val PARAM_NAME = "name"
         private const val PARAM_PHONE = "phone"
-
-        @JvmStatic
-        fun fromJson(jsonObject: JSONObject?): ShippingInformation? {
-            return jsonObject?.let {
-                ShippingInformationJsonParser().parse(it)
-            }
-        }
     }
 }

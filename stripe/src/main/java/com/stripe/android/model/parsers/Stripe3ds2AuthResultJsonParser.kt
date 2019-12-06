@@ -56,9 +56,9 @@ internal class Stripe3ds2AuthResultJsonParser : ModelJsonParser<Stripe3ds2AuthRe
                 messageVersion = json.getString(FIELD_MESSAGE_VERSION),
                 sdkTransId = StripeJsonUtils.optString(json, FIELD_SDK_TRANS_ID),
                 transStatus = StripeJsonUtils.optString(json, FIELD_TRANS_STATUS),
-                messageExtension = Stripe3ds2AuthResult.MessageExtension.fromJson(
-                    json.optJSONArray(FIELD_MESSAGE_EXTENSION)
-                )
+                messageExtension = json.optJSONArray(FIELD_MESSAGE_EXTENSION)?.let {
+                    MessageExtensionJsonParser().parse(it)
+                }
             )
         }
 
@@ -79,6 +79,12 @@ internal class Stripe3ds2AuthResultJsonParser : ModelJsonParser<Stripe3ds2AuthRe
     }
 
     internal class MessageExtensionJsonParser : ModelJsonParser<Stripe3ds2AuthResult.MessageExtension> {
+        fun parse(jsonArray: JSONArray): List<Stripe3ds2AuthResult.MessageExtension> {
+            return (0 until jsonArray.length())
+                .mapNotNull { jsonArray.optJSONObject(it) }
+                .map { parse(it) }
+        }
+
         override fun parse(json: JSONObject): Stripe3ds2AuthResult.MessageExtension {
             val dataJson = json.optJSONObject(FIELD_DATA)
             val data = if (dataJson != null) {

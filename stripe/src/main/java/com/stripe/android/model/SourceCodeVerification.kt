@@ -1,9 +1,7 @@
 package com.stripe.android.model
 
 import androidx.annotation.StringDef
-import com.stripe.android.model.parsers.SourceCodeVerificationJsonParser
 import kotlinx.android.parcel.Parcelize
-import org.json.JSONObject
 
 /**
  * Model for a [code verification](https://stripe.com/docs/api/sources/object#source_object-code_verification)
@@ -26,15 +24,6 @@ data class SourceCodeVerification internal constructor(
             const val PENDING = "pending"
             const val SUCCEEDED = "succeeded"
             const val FAILED = "failed"
-        }
-    }
-
-    companion object {
-        @JvmStatic
-        fun fromJson(jsonObject: JSONObject?): SourceCodeVerification? {
-            return jsonObject?.let {
-                SourceCodeVerificationJsonParser().parse(it)
-            }
         }
     }
 }
