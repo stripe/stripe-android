@@ -9,16 +9,14 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.core.text.util.LinkifyCompat
-import com.stripe.android.ApiResultCallback
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.PaymentSession.Companion.TOKEN_PAYMENT_SESSION
 import com.stripe.android.R
 import com.stripe.android.Stripe
-import com.stripe.android.StripeError
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import java.lang.ref.WeakReference
 
 /**
  * Activity used to display a [AddPaymentMethodView] and receive the resulting
@@ -44,16 +42,22 @@ class AddPaymentMethodActivity : StripeActivity() {
         args.paymentMethodType
     }
 
-    private val startedFromPaymentSession: Boolean by lazy {
-        args.isPaymentSessionActive
-    }
-
     private val shouldAttachToCustomer: Boolean by lazy {
         paymentMethodType.isReusable && args.shouldAttachToCustomer
     }
 
     private val addPaymentMethodView: AddPaymentMethodView by lazy {
         createPaymentMethodView(args)
+    }
+
+    private val customerSession: CustomerSession by lazy {
+        CustomerSession.getInstance()
+    }
+
+    private val viewModel: AddPaymentMethodViewModel by lazy {
+        ViewModelProviders.of(this, AddPaymentMethodViewModel.Factory(
+            stripe, customerSession, args
+        ))[AddPaymentMethodViewModel::class.java]
     }
 
     private val titleStringRes: Int
@@ -75,12 +79,8 @@ class AddPaymentMethodActivity : StripeActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         configureView(args)
-
-        if (shouldAttachToCustomer && args.shouldInitCustomerSessionTokens) {
-            initCustomerSessionTokens(CustomerSession.getInstance())
-        }
+        viewModel.logProductUsage()
     }
 
     override fun onResume() {
@@ -96,7 +96,9 @@ class AddPaymentMethodActivity : StripeActivity() {
         contentRoot.addView(addPaymentMethodView)
 
         if (args.addPaymentMethodFooterLayoutId > 0) {
-            val footerView = layoutInflater.inflate(args.addPaymentMethodFooterLayoutId, contentRoot, false)
+            val footerView = layoutInflater.inflate(
+                args.addPaymentMethodFooterLayoutId, contentRoot, false
+            )
             if (footerView is TextView) {
                 LinkifyCompat.addLinks(footerView, Linkify.ALL)
                 footerView.movementMethod = LinkMovementMethod.getInstance()
@@ -124,33 +126,51 @@ class AddPaymentMethodActivity : StripeActivity() {
         }
     }
 
-    @JvmSynthetic
-    internal fun initCustomerSessionTokens(customerSession: CustomerSession) {
-        customerSession.addProductUsageTokenIfValid(TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
-        if (startedFromPaymentSession) {
-            customerSession.addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION)
-        }
-    }
-
     public override fun onActionSave() {
-        createPaymentMethod(stripe, addPaymentMethodView.createParams)
+        createPaymentMethod(viewModel, addPaymentMethodView.createParams)
     }
 
-    fun createPaymentMethod(stripe: Stripe, params: PaymentMethodCreateParams?) {
+    internal fun createPaymentMethod(
+        viewModel: AddPaymentMethodViewModel,
+        params: PaymentMethodCreateParams?
+    ) {
         if (params == null) {
             return
         }
 
         setCommunicatingProgress(true)
-        stripe.createPaymentMethod(params,
-            PaymentMethodCallbackImpl(this, shouldAttachToCustomer))
+
+        viewModel.createPaymentMethod(params).observe(this, Observer {
+            when (it) {
+                is AddPaymentMethodViewModel.PaymentMethodResult.Success -> {
+                    if (shouldAttachToCustomer) {
+                        attachPaymentMethodToCustomer(it.paymentMethod)
+                    } else {
+                        finishWithPaymentMethod(it.paymentMethod)
+                    }
+                }
+                is AddPaymentMethodViewModel.PaymentMethodResult.Error -> {
+                    setCommunicatingProgress(false)
+                    showError(it.errorMessage)
+                }
+            }
+        })
     }
 
     private fun attachPaymentMethodToCustomer(paymentMethod: PaymentMethod) {
-        CustomerSession.getInstance().attachPaymentMethod(
-            requireNotNull(paymentMethod.id),
-            PaymentMethodRetrievalListenerImpl(this)
-        )
+        viewModel.attachPaymentMethod(
+            paymentMethod
+        ).observe(this, Observer {
+            when (it) {
+                is AddPaymentMethodViewModel.PaymentMethodResult.Success -> {
+                    finishWithPaymentMethod(it.paymentMethod)
+                }
+                is AddPaymentMethodViewModel.PaymentMethodResult.Error -> {
+                    setCommunicatingProgress(false)
+                    showError(it.errorMessage)
+                }
+            }
+        })
     }
 
     private fun finishWithPaymentMethod(paymentMethod: PaymentMethod) {
@@ -163,60 +183,6 @@ class AddPaymentMethodActivity : StripeActivity() {
     override fun setCommunicatingProgress(communicating: Boolean) {
         super.setCommunicatingProgress(communicating)
         addPaymentMethodView.setCommunicatingProgress(communicating)
-    }
-
-    private class PaymentMethodCallbackImpl constructor(
-        activity: AddPaymentMethodActivity,
-        private val updatesCustomer: Boolean
-    ) : ActivityPaymentMethodCallback<AddPaymentMethodActivity>(activity) {
-
-        override fun onError(e: Exception) {
-            activity?.let { activity ->
-                activity.setCommunicatingProgress(false)
-                // This error is independent of the CustomerSession, so we have to surface it here.
-                activity.showError(e.localizedMessage.orEmpty())
-            }
-        }
-
-        override fun onSuccess(result: PaymentMethod) {
-            activity?.let { activity ->
-                if (updatesCustomer) {
-                    activity.attachPaymentMethodToCustomer(result)
-                } else {
-                    activity.finishWithPaymentMethod(result)
-                }
-            }
-        }
-    }
-
-    private class PaymentMethodRetrievalListenerImpl constructor(
-        activity: AddPaymentMethodActivity
-    ) : CustomerSession.ActivityPaymentMethodRetrievalListener<AddPaymentMethodActivity>(activity) {
-        override fun onPaymentMethodRetrieved(paymentMethod: PaymentMethod) {
-            activity?.finishWithPaymentMethod(paymentMethod)
-        }
-
-        override fun onError(
-            errorCode: Int,
-            errorMessage: String,
-            stripeError: StripeError?
-        ) {
-            activity?.setCommunicatingProgress(false)
-            activity?.showError(errorMessage)
-        }
-    }
-
-    /**
-     * Abstract implementation of [ApiResultCallback] that holds a [WeakReference]
-     * to an `Activity` object.
-     */
-    private abstract class ActivityPaymentMethodCallback<A : Activity> internal constructor(
-        activity: A
-    ) : ApiResultCallback<PaymentMethod> {
-        private val activityRef: WeakReference<A> = WeakReference(activity)
-
-        val activity: A?
-            get() = activityRef.get()
     }
 
     internal companion object {

@@ -6,30 +6,25 @@ import android.content.Context
 import android.content.Intent
 import android.view.View
 import android.widget.ProgressBar
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
-import com.stripe.android.AbsFakeStripeRepository
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.ApiRequest
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentSession.Companion.TOKEN_PAYMENT_SESSION
 import com.stripe.android.R
-import com.stripe.android.Stripe
-import com.stripe.android.StripeNetworkUtils
-import com.stripe.android.StripePaymentController
-import com.stripe.android.StripeRepository
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.AuthenticationException
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodTest
@@ -42,7 +37,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import kotlinx.coroutines.MainScope
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
@@ -58,13 +52,13 @@ import org.robolectric.Shadows.shadowOf
 class AddPaymentMethodActivityTest {
 
     @Mock
-    private lateinit var stripeRepository: StripeRepository
-
-    @Mock
     private lateinit var customerSession: CustomerSession
 
     @Mock
     private lateinit var alertDisplayer: AlertDisplayer
+
+    @Mock
+    private lateinit var viewModel: AddPaymentMethodViewModel
 
     private val paymentMethodIdCaptor: KArgumentCaptor<String> by lazy {
         argumentCaptor<String>()
@@ -84,11 +78,8 @@ class AddPaymentMethodActivityTest {
     fun setup() {
         // The input in this test class will be invalid after 2050. Please update the test.
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
-
         MockitoAnnotations.initMocks(this)
-
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-
         CustomerSession.instance = customerSession
     }
 
@@ -110,12 +101,13 @@ class AddPaymentMethodActivityTest {
     @Test
     fun testConstructionForCustomerSession() {
         activityScenarioFactory.create<AddPaymentMethodActivity>(
-            createArgs(PaymentMethod.Type.Card)
+            createArgs(PaymentMethod.Type.Card, true)
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
-                val cardMultilineWidget: CardMultilineWidget = activity.findViewById(R.id.card_multiline_widget)
-                val widgetControlGroup = CardMultilineWidgetTest.WidgetControlGroup(cardMultilineWidget)
-                activity.initCustomerSessionTokens(customerSession)
+                val cardMultilineWidget: CardMultilineWidget =
+                    activity.findViewById(R.id.card_multiline_widget)
+                val widgetControlGroup =
+                    CardMultilineWidgetTest.WidgetControlGroup(cardMultilineWidget)
                 assertEquals(View.VISIBLE, widgetControlGroup.postalCodeInputLayout.visibility)
             }
         }
@@ -131,25 +123,26 @@ class AddPaymentMethodActivityTest {
             activityScenario.onActivity { activity ->
                 val progressBar: ProgressBar = activity.findViewById(R.id.progress_bar_as)
                 assertEquals(View.GONE, progressBar.visibility)
-                activity.createPaymentMethod(createStripe(stripeRepository), null)
-                verify(stripeRepository, never()).createPaymentMethod(
-                    any(), any()
-                )
+                activity.createPaymentMethod(viewModel, null)
+                verify(viewModel, never()).createPaymentMethod(any())
             }
         }
     }
 
     @Test
     fun addCardData_whenDataIsValidAndServerReturnsSuccess_finishesWithIntent() {
-        val stripe = createStripe(createFakeRepository(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
-
         activityScenarioFactory.create<AddPaymentMethodActivity>(
             BASE_CARD_ARGS
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
                 val progressBar: ProgressBar = activity.findViewById(R.id.progress_bar_as)
                 assertEquals(View.GONE, progressBar.visibility)
-                activity.createPaymentMethod(stripe, PaymentMethodCreateParamsFixtures.DEFAULT_CARD)
+
+                `when`(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
+                    .thenReturn(createSuccessLiveData(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
+                activity.createPaymentMethod(
+                    viewModel, PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+                )
                 verifyFinishesWithResult(activityScenario.result)
             }
         }
@@ -157,19 +150,20 @@ class AddPaymentMethodActivityTest {
 
     @Test
     fun addFpx_whenServerReturnsSuccessAndUpdatesCustomer_finishesWithIntent() {
-        val stripe = createStripe(
-            createFakeRepository(PaymentMethodFixtures.FPX_PAYMENT_METHOD)
-        )
-
         activityScenarioFactory.create<AddPaymentMethodActivity>(
-            createArgs(PaymentMethod.Type.Fpx)
+            createArgs(
+                PaymentMethod.Type.Fpx,
+                initCustomerSessionTokens = true
+            )
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
                 val progressBar: ProgressBar = activity.findViewById(R.id.progress_bar_as)
-                activity.initCustomerSessionTokens(customerSession)
 
                 assertEquals(View.GONE, progressBar.visibility)
-                activity.createPaymentMethod(stripe, PaymentMethodCreateParamsFixtures.DEFAULT_FPX)
+
+                `when`(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_FPX))
+                    .thenReturn(createSuccessLiveData(PaymentMethodFixtures.FPX_PAYMENT_METHOD))
+                activity.createPaymentMethod(viewModel, PaymentMethodCreateParamsFixtures.DEFAULT_FPX)
 
                 val expectedPaymentMethod = PaymentMethodFixtures.FPX_PAYMENT_METHOD
 
@@ -192,20 +186,22 @@ class AddPaymentMethodActivityTest {
 
     @Test
     fun addCardData_whenServerReturnsSuccessAndUpdatesCustomer_finishesWithIntent() {
-        val stripe = createStripe(createFakeRepository(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
         activityScenarioFactory.create<AddPaymentMethodActivity>(
-            createArgs(PaymentMethod.Type.Card)
+            createArgs(
+                PaymentMethod.Type.Card,
+                initCustomerSessionTokens = true
+            )
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
                 val progressBar: ProgressBar = activity.findViewById(R.id.progress_bar_as)
                 val cardMultilineWidget: CardMultilineWidget = activity.findViewById(R.id.card_multiline_widget)
 
-                activity.initCustomerSessionTokens(customerSession)
-
                 assertEquals(View.GONE, progressBar.visibility)
                 assertTrue(cardMultilineWidget.isEnabled)
 
-                activity.createPaymentMethod(stripe, PaymentMethodCreateParamsFixtures.DEFAULT_CARD)
+                `when`(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
+                    .thenReturn(createSuccessLiveData(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
+                activity.createPaymentMethod(viewModel, PaymentMethodCreateParamsFixtures.DEFAULT_CARD)
                 assertEquals(View.VISIBLE, progressBar.visibility)
                 assertFalse(cardMultilineWidget.isEnabled)
 
@@ -229,14 +225,6 @@ class AddPaymentMethodActivityTest {
     @Test
     fun addCardData_whenDataIsValidButServerReturnsError_doesNotFinish() {
         val errorMessage = "Oh no! An Error!"
-        val stripe = createStripe(object : AbsFakeStripeRepository() {
-            override fun createPaymentMethod(
-                paymentMethodCreateParams: PaymentMethodCreateParams,
-                options: ApiRequest.Options
-            ): PaymentMethod? {
-                throw APIException(errorMessage, null, 0, null, null)
-            }
-        })
 
         activityScenarioFactory.create<AddPaymentMethodActivity>(
             BASE_CARD_ARGS
@@ -247,7 +235,12 @@ class AddPaymentMethodActivityTest {
                 activity.alertDisplayer = alertDisplayer
 
                 assertEquals(View.GONE, progressBar.visibility)
-                activity.createPaymentMethod(stripe, PaymentMethodCreateParamsFixtures.DEFAULT_CARD)
+
+                `when`(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
+                    .thenReturn(createErrorLiveData(errorMessage))
+                activity.createPaymentMethod(
+                    viewModel, PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+                )
 
                 assertNull(shadowOf(activity).resultIntent)
                 assertFalse(activity.isFinishing)
@@ -259,22 +252,24 @@ class AddPaymentMethodActivityTest {
 
     @Test
     fun addCardData_whenPaymentMethodCreateWorksButAddToCustomerFails_showErrorNotFinish() {
-        val stripe = createStripe(createFakeRepository(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
-
         activityScenarioFactory.create<AddPaymentMethodActivity>(
-            createArgs(PaymentMethod.Type.Card)
+            createArgs(
+                PaymentMethod.Type.Card,
+                initCustomerSessionTokens = true
+            )
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
                 val progressBar: ProgressBar = activity.findViewById(R.id.progress_bar_as)
                 val cardMultilineWidget: CardMultilineWidget = activity.findViewById(R.id.card_multiline_widget)
-                activity.initCustomerSessionTokens(customerSession)
 
                 activity.alertDisplayer = alertDisplayer
 
                 assertEquals(View.GONE, progressBar.visibility)
                 assertTrue(cardMultilineWidget.isEnabled)
 
-                activity.createPaymentMethod(stripe, PaymentMethodCreateParamsFixtures.DEFAULT_CARD)
+                `when`(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
+                    .thenReturn(createSuccessLiveData(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
+                activity.createPaymentMethod(viewModel, PaymentMethodCreateParamsFixtures.DEFAULT_CARD)
 
                 assertEquals(View.VISIBLE, progressBar.visibility)
                 assertFalse(cardMultilineWidget.isEnabled)
@@ -304,6 +299,18 @@ class AddPaymentMethodActivityTest {
         }
     }
 
+    @Test
+    fun logProductUsage_whenInitCustomerSessionTokensIsFalse_shouldNotLog() {
+        activityScenarioFactory.create<AddPaymentMethodActivity>(
+            createArgs(
+                PaymentMethod.Type.Fpx
+            )
+        ).use {
+            verify(customerSession, never())
+                .addProductUsageTokenIfValid(any())
+        }
+    }
+
     private fun verifyFinishesWithResult(activityResult: Instrumentation.ActivityResult) {
         assertEquals(RESULT_OK, activityResult.resultCode)
         val paymentMethod = getPaymentMethodFromIntent(activityResult.resultData)
@@ -312,45 +319,25 @@ class AddPaymentMethodActivityTest {
 
     private fun getPaymentMethodFromIntent(intent: Intent): PaymentMethod {
         val result =
-            AddPaymentMethodActivityStarter.Result.fromIntent(intent)
-        return result!!.paymentMethod
-    }
-
-    private fun createStripe(stripeRepository: StripeRepository): Stripe {
-        return Stripe(
-            stripeRepository,
-            StripeNetworkUtils(context),
-            StripePaymentController.create(context, stripeRepository),
-            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            workScope = MainScope()
-        )
+            requireNotNull(AddPaymentMethodActivityStarter.Result.fromIntent(intent))
+        return result.paymentMethod
     }
 
     private fun createArgs(
-        paymentMethodType: PaymentMethod.Type
+        paymentMethodType: PaymentMethod.Type,
+        initCustomerSessionTokens: Boolean = false
     ): AddPaymentMethodActivityStarter.Args {
         return AddPaymentMethodActivityStarter.Args.Builder()
             .setShouldAttachToCustomer(true)
             .setShouldRequirePostalCode(true)
             .setIsPaymentSessionActive(true)
-            .setShouldInitCustomerSessionTokens(false)
+            .setShouldInitCustomerSessionTokens(initCustomerSessionTokens)
             .setPaymentMethodType(paymentMethodType)
             .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
             .build()
     }
 
     private companion object {
-        private fun createFakeRepository(paymentMethod: PaymentMethod): StripeRepository {
-            return object : AbsFakeStripeRepository() {
-                override fun createPaymentMethod(
-                    paymentMethodCreateParams: PaymentMethodCreateParams,
-                    options: ApiRequest.Options
-                ): PaymentMethod? {
-                    return paymentMethod
-                }
-            }
-        }
-
         private val BASE_CARD_ARGS =
             AddPaymentMethodActivityStarter.Args.Builder()
                 .setPaymentMethodType(PaymentMethod.Type.Card)
@@ -358,5 +345,21 @@ class AddPaymentMethodActivityTest {
 
         private val EXPECTED_PAYMENT_METHOD =
             requireNotNull(PaymentMethodJsonParser().parse(PaymentMethodTest.PM_CARD_JSON))
+
+        private fun createSuccessLiveData(
+            paymentMethod: PaymentMethod
+        ): LiveData<AddPaymentMethodViewModel.PaymentMethodResult> {
+            return MutableLiveData<AddPaymentMethodViewModel.PaymentMethodResult>().apply {
+                value = AddPaymentMethodViewModel.PaymentMethodResult.Success(paymentMethod)
+            }
+        }
+
+        private fun createErrorLiveData(
+            errorMessage: String
+        ): LiveData<AddPaymentMethodViewModel.PaymentMethodResult> {
+            return MutableLiveData<AddPaymentMethodViewModel.PaymentMethodResult>().apply {
+                value = AddPaymentMethodViewModel.PaymentMethodResult.Error(errorMessage)
+            }
+        }
     }
 }
