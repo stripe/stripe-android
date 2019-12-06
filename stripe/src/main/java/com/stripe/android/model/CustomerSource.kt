@@ -1,8 +1,6 @@
 package com.stripe.android.model
 
-import com.stripe.android.model.parsers.CustomerSourceJsonParser
 import kotlinx.android.parcel.Parcelize
-import org.json.JSONObject
 
 /**
  * Model of the "data" object inside a [Customer] "source" object.
@@ -43,14 +41,5 @@ data class CustomerSource internal constructor(
         return if (stripePaymentSource is Card) {
             stripePaymentSource
         } else null
-    }
-
-    companion object {
-        @JvmStatic
-        fun fromJson(jsonObject: JSONObject?): CustomerSource? {
-            return jsonObject?.let {
-                CustomerSourceJsonParser().parse(jsonObject)
-            }
-        }
     }
 }

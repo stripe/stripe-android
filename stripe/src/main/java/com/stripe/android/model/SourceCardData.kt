@@ -1,9 +1,7 @@
 package com.stripe.android.model
 
 import androidx.annotation.StringDef
-import com.stripe.android.model.parsers.SourceCardDataJsonParser
 import kotlinx.android.parcel.Parcelize
-import org.json.JSONObject
 
 /**
  * Model for data contained in the SourceTypeData of a Card Source.
@@ -45,15 +43,6 @@ data class SourceCardData internal constructor(
             const val NOT_SUPPORTED: String = "not_supported"
             const val RECOMMENDED: String = "recommended"
             const val UNKNOWN: String = "unknown"
-        }
-    }
-
-    companion object {
-        @JvmStatic
-        fun fromJson(jsonObject: JSONObject?): SourceCardData? {
-            return jsonObject?.let {
-                SourceCardDataJsonParser().parse(it)
-            }
         }
     }
 }
