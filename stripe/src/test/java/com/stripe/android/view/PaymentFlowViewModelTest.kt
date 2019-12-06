@@ -13,6 +13,8 @@ import com.stripe.android.model.ShippingMethod
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.MainScope
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -53,9 +55,8 @@ class PaymentFlowViewModelTest {
 
         customerRetrievalListener.firstValue.onCustomerRetrieved(CustomerFixtures.CUSTOMER)
 
-        val resultValue = requireNotNull(result.value)
-        assertEquals(PaymentFlowViewModel.Status.SUCCESS, resultValue.status)
-        assertEquals(CustomerFixtures.CUSTOMER, resultValue.data)
+        val resultValue = requireNotNull(result.value) as PaymentFlowViewModel.SaveCustomerShippingInfoResult.Success
+        assertNotNull(resultValue.customer)
     }
 
     @Test
@@ -66,9 +67,9 @@ class PaymentFlowViewModelTest {
             ShippingInfoFixtures.DEFAULT
         )
 
-        val resultValue = requireNotNull(result.value)
-        assertEquals(PaymentFlowViewModel.Status.SUCCESS, resultValue.status)
-        assertEquals(SHIPPING_METHODS, resultValue.data)
+        val resultValue =
+            requireNotNull(result.value) as PaymentFlowViewModel.ValidateShippingInfoResult.Success
+        assertEquals(SHIPPING_METHODS, resultValue.shippingMethods)
     }
 
     @Test
@@ -79,9 +80,9 @@ class PaymentFlowViewModelTest {
             ShippingInfoFixtures.DEFAULT
         )
 
-        val resultValue = requireNotNull(result.value)
-        assertEquals(PaymentFlowViewModel.Status.SUCCESS, resultValue.status)
-        assertEquals(emptyList<ShippingMethod>(), resultValue.data)
+        val resultValue =
+            requireNotNull(result.value) as PaymentFlowViewModel.ValidateShippingInfoResult.Success
+        assertTrue(resultValue.shippingMethods.isEmpty())
     }
 
     @Test
@@ -92,9 +93,9 @@ class PaymentFlowViewModelTest {
             ShippingInfoFixtures.DEFAULT
         )
 
-        val resultValue = requireNotNull(result.value)
-        assertEquals(PaymentFlowViewModel.Status.ERROR, resultValue.status)
-        assertEquals(SHIPPING_ERROR_MESSAGE, resultValue.data)
+        val resultValue =
+            requireNotNull(result.value) as PaymentFlowViewModel.ValidateShippingInfoResult.Error
+        assertEquals(SHIPPING_ERROR_MESSAGE, resultValue.errorMessage)
     }
 
     private class FakeShippingInformationValidator : PaymentSessionConfig.ShippingInformationValidator {
@@ -130,7 +131,7 @@ class PaymentFlowViewModelTest {
     }
 
     private companion object {
-        private val SHIPPING_ERROR_MESSAGE = "Shipping info was invalid"
+        private const val SHIPPING_ERROR_MESSAGE = "Shipping info was invalid"
         private val SHIPPING_METHODS = listOf(
             ShippingMethod("UPS Ground", "ups-ground",
                 0, "USD", "Arrives in 3-5 days"),

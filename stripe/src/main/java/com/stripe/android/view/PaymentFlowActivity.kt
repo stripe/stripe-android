@@ -16,7 +16,6 @@ import com.stripe.android.PaymentSession.Companion.TOKEN_PAYMENT_SESSION
 import com.stripe.android.PaymentSessionConfig
 import com.stripe.android.PaymentSessionData
 import com.stripe.android.R
-import com.stripe.android.model.Customer
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
 import kotlinx.android.synthetic.main.activity_enter_shipping_info.*
@@ -177,17 +176,16 @@ class PaymentFlowActivity : StripeActivity() {
         viewModel.paymentSessionData.shippingInformation?.let { shippingInfo ->
             viewModel.saveCustomerShippingInformation(shippingInfo)
                 .observe(this, Observer {
-                    when (it.status) {
-                        PaymentFlowViewModel.Status.SUCCESS -> {
-                            val customer = it.data as Customer
+                    when (it) {
+                        is PaymentFlowViewModel.SaveCustomerShippingInfoResult.Success -> {
                             onShippingInfoSaved(
-                                customer.shippingInformation,
+                                it.customer.shippingInformation,
                                 shippingMethods,
                                 defaultShippingMethod
                             )
                         }
-                        PaymentFlowViewModel.Status.ERROR -> {
-                            showError(it.data as String)
+                        is PaymentFlowViewModel.SaveCustomerShippingInfoResult.Error -> {
+                            showError(it.errorMessage)
                         }
                     }
                 })
@@ -284,16 +282,14 @@ class PaymentFlowActivity : StripeActivity() {
             shippingMethodsFactory,
             shippingInformation
         ).observe(this, Observer {
-            when (it.status) {
-                PaymentFlowViewModel.Status.SUCCESS -> {
-                    val shippingMethods = it.data as List<ShippingMethod>
+            when (it) {
+                is PaymentFlowViewModel.ValidateShippingInfoResult.Success -> {
                     // show shipping methods screen
-                    onShippingInfoValidated(shippingMethods)
+                    onShippingInfoValidated(it.shippingMethods)
                 }
-                PaymentFlowViewModel.Status.ERROR -> {
-                    val errorMessage = it.data as String
+                is PaymentFlowViewModel.ValidateShippingInfoResult.Error -> {
                     // show error on current screen
-                    onShippingInfoError(errorMessage)
+                    onShippingInfoError(it.errorMessage)
                 }
             }
         })
