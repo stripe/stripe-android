@@ -38,7 +38,6 @@ import java.security.Security
 import java.util.Locale
 import org.json.JSONArray
 import org.json.JSONException
-import org.json.JSONObject
 
 /**
  * An implementation of [StripeRepository] that makes network requests to the Stripe API.
@@ -783,76 +782,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     @VisibleForTesting
     fun getDetachPaymentMethodUrl(paymentMethodId: String): String {
         return getApiUrl("payment_methods/%s/detach", paymentMethodId)
-    }
-
-    /**
-     * Converts a string-keyed [Map] into a [JSONObject]. This will cause a
-     * [ClassCastException] if any sub-map has keys that are not [Strings][String].
-     *
-     * @param mapObject the [Map] that you'd like in JSON form
-     * @return a [JSONObject] representing the input map, or `null` if the input
-     * object is `null`
-     */
-    private fun mapToJsonObject(mapObject: Map<String, *>?): JSONObject? {
-        if (mapObject == null) {
-            return null
-        }
-        val jsonObject = JSONObject()
-        for (key in mapObject.keys) {
-            val value = mapObject[key] ?: continue
-
-            try {
-                if (value is Map<*, *>) {
-                    try {
-                        val mapValue = value as Map<String, Any>
-                        jsonObject.put(key, mapToJsonObject(mapValue))
-                    } catch (classCastException: ClassCastException) {
-                        // We don't include the item in the JSONObject if the keys are not Strings.
-                    }
-                } else if (value is List<*>) {
-                    jsonObject.put(key, listToJsonArray(value as List<Any>))
-                } else if (value is Number || value is Boolean) {
-                    jsonObject.put(key, value)
-                } else {
-                    jsonObject.put(key, value.toString())
-                }
-            } catch (jsonException: JSONException) {
-                // Simply skip this value
-            }
-        }
-        return jsonObject
-    }
-
-    /**
-     * Converts a [List] into a [JSONArray]. A [ClassCastException] will be
-     * thrown if any object in the list (or any sub-list or sub-map) is a [Map] whose keys
-     * are not [Strings][String].
-     *
-     * @param values a [List] of values to be put in a [JSONArray]
-     * @return a [JSONArray], or `null` if the input was `null`
-     */
-    private fun listToJsonArray(values: List<*>?): JSONArray? {
-        if (values == null) {
-            return null
-        }
-
-        val jsonArray = JSONArray()
-        for (`object` in values) {
-            if (`object` is Map<*, *>) {
-                // We are ignoring type erasure here and crashing on bad input.
-                // Now that this method is not public, we have more control on what is
-                // passed to it.
-                val mapObject = `object` as Map<String, Any>
-                jsonArray.put(mapToJsonObject(mapObject))
-            } else if (`object` is List<*>) {
-                jsonArray.put(listToJsonArray(`object`))
-            } else if (`object` is Number || `object` is Boolean) {
-                jsonArray.put(`object`)
-            } else {
-                jsonArray.put(`object`.toString())
-            }
-        }
-        return jsonArray
     }
 
     @Throws(InvalidRequestException::class, AuthenticationException::class, CardException::class,
