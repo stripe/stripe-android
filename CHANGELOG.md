@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 12.6.2 - unreleased
+* [#1915](https://github.com/stripe/stripe-android/pull/1915) Update API version to [2019-12-03](https://stripe.com/docs/upgrades#2019-12-03)
+* [#1928](https://github.com/stripe/stripe-android/pull/1928) Make Payment Method `Wallet` a sealed class
+* [#1930](https://github.com/stripe/stripe-android/pull/1930) Update text size for `CardInputWidget` fields
+* [#1939](https://github.com/stripe/stripe-android/pull/1939) Update Android Gradle Plugin to `3.5.3`
+
 ## 12.6.1 - 2019-12-02
 * [#1897](https://github.com/stripe/stripe-android/pull/1897) Upgrade 3DS2 SDK to 2.2.4
     * Fix crash when using Instant App
