@@ -15,10 +15,10 @@ import java.util.ArrayList
  * A [RecyclerView.Adapter] that holds a set of [MaskedCardView] items for a given set
  * of [PaymentMethod] objects.
  */
-internal class PaymentMethodsAdapter @JvmOverloads internal constructor(
-    initiallySelectedPaymentMethodId: String?,
+internal class PaymentMethodsAdapter constructor(
     private val intentArgs: PaymentMethodsActivityStarter.Args,
-    private val addableTypes: List<PaymentMethod.Type> = listOf(PaymentMethod.Type.Card)
+    private val addableTypes: List<PaymentMethod.Type> = listOf(PaymentMethod.Type.Card),
+    initiallySelectedPaymentMethodId: String? = null
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     internal val paymentMethods = ArrayList<PaymentMethod>()
@@ -52,15 +52,16 @@ internal class PaymentMethodsAdapter @JvmOverloads internal constructor(
         return if (position < paymentMethods.size) {
             val type = paymentMethods[position].type
             if (PaymentMethod.Type.Card.code == type) {
-                TYPE_CARD
+                ViewType.Card.ordinal
             } else {
                 super.getItemViewType(position)
             }
         } else {
-            val paymentMethodType = addableTypes[getAddableTypesPosition(position)]
+            val paymentMethodType =
+                addableTypes[getAddableTypesPosition(position)]
             return when (paymentMethodType) {
-                PaymentMethod.Type.Card -> TYPE_ADD_CARD
-                PaymentMethod.Type.Fpx -> TYPE_ADD_FPX
+                PaymentMethod.Type.Card -> ViewType.AddCard.ordinal
+                PaymentMethod.Type.Fpx -> ViewType.AddFpx.ordinal
                 else ->
                     throw IllegalArgumentException(
                         "Unsupported PaymentMethod type: ${paymentMethodType.code}")
@@ -77,7 +78,7 @@ internal class PaymentMethodsAdapter @JvmOverloads internal constructor(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        if (holder is PaymentMethodViewHolder) {
+        if (holder is ViewHolder.PaymentMethodViewHolder) {
             val paymentMethod = paymentMethods[position]
             holder.setPaymentMethod(paymentMethod)
             holder.setSelected(paymentMethod.id == selectedPaymentMethodId)
@@ -109,31 +110,48 @@ internal class PaymentMethodsAdapter @JvmOverloads internal constructor(
         notifyItemChanged(position)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return when (viewType) {
-            TYPE_CARD -> createPaymentMethodViewHolder(parent)
-            TYPE_ADD_CARD -> createAddCardPaymentMethodViewHolder(parent)
-            TYPE_ADD_FPX -> createAddFpxPaymentMethodViewHolder(parent)
-            else -> throw IllegalArgumentException("Unsupported viewType: $viewType")
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int
+    ): RecyclerView.ViewHolder {
+        return when (ViewType.values()[viewType]) {
+            ViewType.Card -> createPaymentMethodViewHolder(parent)
+            ViewType.AddCard -> createAddCardPaymentMethodViewHolder(parent)
+            ViewType.AddFpx -> createAddFpxPaymentMethodViewHolder(parent)
+            ViewType.GooglePay -> createGooglePayViewHolder(parent)
         }
     }
 
-    private fun createAddCardPaymentMethodViewHolder(parent: ViewGroup): AddCardPaymentMethodViewHolder {
-        return AddCardPaymentMethodViewHolder(
+    private fun createAddCardPaymentMethodViewHolder(
+        parent: ViewGroup
+    ): ViewHolder.AddCardPaymentMethodViewHolder {
+        return ViewHolder.AddCardPaymentMethodViewHolder(
             AddPaymentMethodCardRowView(parent.context as Activity, intentArgs)
         )
     }
 
-    private fun createAddFpxPaymentMethodViewHolder(parent: ViewGroup): AddFpxPaymentMethodViewHolder {
-        return AddFpxPaymentMethodViewHolder(
+    private fun createAddFpxPaymentMethodViewHolder(
+        parent: ViewGroup
+    ): ViewHolder.AddFpxPaymentMethodViewHolder {
+        return ViewHolder.AddFpxPaymentMethodViewHolder(
             AddPaymentMethodFpxRowView(parent.context as Activity, intentArgs)
         )
     }
 
-    private fun createPaymentMethodViewHolder(parent: ViewGroup): PaymentMethodViewHolder {
+    private fun createPaymentMethodViewHolder(
+        parent: ViewGroup
+    ): ViewHolder.PaymentMethodViewHolder {
         val itemView = LayoutInflater.from(parent.context)
             .inflate(R.layout.masked_card_row, parent, false)
-        return PaymentMethodViewHolder(itemView)
+        return ViewHolder.PaymentMethodViewHolder(itemView)
+    }
+
+    private fun createGooglePayViewHolder(
+        parent: ViewGroup
+    ): ViewHolder.GooglePayViewHolder {
+        val itemView = LayoutInflater.from(parent.context)
+            .inflate(R.layout.google_pay_row, parent, false)
+        return ViewHolder.GooglePayViewHolder(itemView)
     }
 
     internal fun deletePaymentMethod(paymentMethod: PaymentMethod) {
@@ -151,35 +169,46 @@ internal class PaymentMethodsAdapter @JvmOverloads internal constructor(
         }
     }
 
-    private fun getAddableTypesPosition(position: Int) = position - paymentMethods.size
-
-    internal class PaymentMethodViewHolder constructor(
-        itemView: View
-    ) : RecyclerView.ViewHolder(itemView) {
-        private val cardView: MaskedCardView = itemView.findViewById(R.id.masked_card_item)
-
-        fun setPaymentMethod(paymentMethod: PaymentMethod) {
-            cardView.setPaymentMethod(paymentMethod)
-        }
-
-        fun setSelected(selected: Boolean) {
-            cardView.isSelected = selected
-        }
+    private fun getAddableTypesPosition(position: Int): Int {
+        return position - paymentMethods.size
     }
 
-    internal class AddCardPaymentMethodViewHolder(itemView: View) :
-        RecyclerView.ViewHolder(itemView)
+    internal sealed class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        internal class AddCardPaymentMethodViewHolder(
+            itemView: View
+        ) : RecyclerView.ViewHolder(itemView)
 
-    internal class AddFpxPaymentMethodViewHolder(itemView: View) :
-        RecyclerView.ViewHolder(itemView)
+        internal class AddFpxPaymentMethodViewHolder(
+            itemView: View
+        ) : RecyclerView.ViewHolder(itemView)
+
+        internal class GooglePayViewHolder(
+            itemView: View
+        ) : RecyclerView.ViewHolder(itemView)
+
+        internal class PaymentMethodViewHolder constructor(
+            itemView: View
+        ) : ViewHolder(itemView) {
+            private val cardView: MaskedCardView = itemView.findViewById(R.id.masked_card_item)
+
+            fun setPaymentMethod(paymentMethod: PaymentMethod) {
+                cardView.setPaymentMethod(paymentMethod)
+            }
+
+            fun setSelected(selected: Boolean) {
+                cardView.isSelected = selected
+            }
+        }
+    }
 
     internal interface Listener {
         fun onClick(paymentMethod: PaymentMethod)
     }
 
-    private companion object {
-        private const val TYPE_CARD = 1
-        private const val TYPE_ADD_CARD = 2
-        private const val TYPE_ADD_FPX = 3
+    private enum class ViewType {
+        Card,
+        AddCard,
+        AddFpx,
+        GooglePay
     }
 }

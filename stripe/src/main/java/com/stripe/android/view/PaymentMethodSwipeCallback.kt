@@ -50,7 +50,7 @@ internal class PaymentMethodSwipeCallback(
         recyclerView: RecyclerView,
         viewHolder: RecyclerView.ViewHolder
     ): Int {
-        return if (viewHolder is PaymentMethodsAdapter.PaymentMethodViewHolder) {
+        return if (viewHolder is PaymentMethodsAdapter.ViewHolder.PaymentMethodViewHolder) {
             // only allow swiping on Payment Method items
             super.getSwipeDirs(recyclerView, viewHolder)
         } else {
@@ -68,7 +68,7 @@ internal class PaymentMethodSwipeCallback(
         isCurrentlyActive: Boolean
     ) {
         super.onChildDraw(canvas, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-        if (viewHolder is PaymentMethodsAdapter.PaymentMethodViewHolder) {
+        if (viewHolder is PaymentMethodsAdapter.ViewHolder.PaymentMethodViewHolder) {
             val itemView = viewHolder.itemView
 
             val startTransition = itemView.width * START_TRANSITION_THRESHOLD
