@@ -1,6 +1,7 @@
 package com.stripe.android.view
 
 import androidx.recyclerview.widget.RecyclerView
+import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.model.PaymentMethodFixtures
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -10,7 +11,6 @@ import kotlin.test.assertNull
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
@@ -21,15 +21,15 @@ import org.robolectric.RobolectricTestRunner
 class PaymentMethodsAdapterTest {
     @Mock
     private lateinit var adapterDataObserver: RecyclerView.AdapterDataObserver
-    private lateinit var paymentMethodsAdapter: PaymentMethodsAdapter
+
+    private val paymentMethodsAdapter: PaymentMethodsAdapter =
+        PaymentMethodsAdapter(PaymentMethodsActivityStarter.Args.Builder()
+            .build()
+        )
 
     @BeforeTest
     fun setup() {
-        PaymentMethodFixtures.createCard()
         MockitoAnnotations.initMocks(this)
-        paymentMethodsAdapter = PaymentMethodsAdapter(null,
-            PaymentMethodsActivityStarter.Args.Builder()
-                .build())
         paymentMethodsAdapter.registerAdapterDataObserver(adapterDataObserver)
     }
 
@@ -37,7 +37,7 @@ class PaymentMethodsAdapterTest {
     fun setSelection_changesSelection() {
         paymentMethodsAdapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
         assertEquals(4, paymentMethodsAdapter.itemCount)
-        verify<RecyclerView.AdapterDataObserver>(adapterDataObserver).onChanged()
+        verify(adapterDataObserver).onChanged()
 
         paymentMethodsAdapter.selectedPaymentMethodId = paymentMethodsAdapter.paymentMethods[2].id
         assertEquals(
@@ -75,7 +75,7 @@ class PaymentMethodsAdapterTest {
             PaymentMethodFixtures.CARD_PAYMENT_METHODS[2].id,
             paymentMethodsAdapter.selectedPaymentMethod?.id
         )
-        verify<RecyclerView.AdapterDataObserver>(adapterDataObserver, times(2))
+        verify(adapterDataObserver, times(2))
             .onChanged()
     }
 
@@ -96,18 +96,21 @@ class PaymentMethodsAdapterTest {
 
     @Test
     fun setPaymentMethods_whenNoInitialSpecified_returnsNull() {
-        val adapter = PaymentMethodsAdapter(null,
-            PaymentMethodsActivityStarter.Args.Builder()
-                .build())
+        val adapter = PaymentMethodsAdapter(
+            intentArgs = PaymentMethodsActivityStarter.Args.Builder()
+                .build()
+        )
         adapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
         assertNull(adapter.selectedPaymentMethod)
     }
 
     @Test
     fun setPaymentMethods_whenInitialSpecified_selectsIt() {
-        val adapter = PaymentMethodsAdapter("pm_1000",
-            PaymentMethodsActivityStarter.Args.Builder()
-                .build())
+        val adapter = PaymentMethodsAdapter(
+            intentArgs = PaymentMethodsActivityStarter.Args.Builder()
+                .build(),
+            initiallySelectedPaymentMethodId = "pm_1000"
+        )
         adapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
         assertEquals("pm_1000", adapter.selectedPaymentMethod?.id)
     }

@@ -70,9 +70,9 @@ class PaymentMethodsActivity : AppCompatActivity() {
         args: PaymentMethodsActivityStarter.Args
     ) {
         adapter = PaymentMethodsAdapter(
-            viewModel.selectedPaymentMethodId,
             args,
-            args.paymentMethodTypes
+            args.paymentMethodTypes,
+            viewModel.selectedPaymentMethodId
         )
 
         adapter.listener = object : PaymentMethodsAdapter.Listener {
