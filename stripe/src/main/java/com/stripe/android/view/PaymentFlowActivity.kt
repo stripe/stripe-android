@@ -42,6 +42,7 @@ class PaymentFlowActivity : StripeActivity() {
         super.onCreate(savedInstanceState)
 
         val args = PaymentFlowActivityStarter.Args.create(intent)
+        args.windowFlags?.let { window.addFlags(it) }
 
         customerSession = CustomerSession.getInstance()
         customerSession.addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION)

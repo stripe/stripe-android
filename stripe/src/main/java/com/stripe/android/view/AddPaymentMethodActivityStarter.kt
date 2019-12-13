@@ -34,7 +34,8 @@ class AddPaymentMethodActivityStarter constructor(
         internal val shouldInitCustomerSessionTokens: Boolean,
         internal val paymentMethodType: PaymentMethod.Type,
         internal val paymentConfiguration: PaymentConfiguration?,
-        @LayoutRes internal val addPaymentMethodFooterLayoutId: Int
+        @LayoutRes internal val addPaymentMethodFooterLayoutId: Int,
+        internal val windowFlags: Int? = null
     ) : ActivityStarter.Args {
 
         class Builder : ObjectBuilder<Args> {
@@ -46,6 +47,7 @@ class AddPaymentMethodActivityStarter constructor(
             private var paymentConfiguration: PaymentConfiguration? = null
             @LayoutRes
             private var addPaymentMethodFooterLayoutId: Int = 0
+            private var windowFlags: Int? = null
 
             /**
              * If true, the created Payment Method will be attached to the current Customer
@@ -83,6 +85,15 @@ class AddPaymentMethodActivityStarter constructor(
                 this.addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId
             }
 
+            /**
+             * @param windowFlags optional flags to set on the `Window` object of Stripe Activities
+             *
+             * See [WindowManager.LayoutParams](https://developer.android.com/reference/android/view/WindowManager.LayoutParams)
+             */
+            fun setWindowFlags(windowFlags: Int?): Builder = apply {
+                this.windowFlags = windowFlags
+            }
+
             @JvmSynthetic
             internal fun setIsPaymentSessionActive(
                 isPaymentSessionActive: Boolean
@@ -112,7 +123,8 @@ class AddPaymentMethodActivityStarter constructor(
                     shouldInitCustomerSessionTokens = shouldInitCustomerSessionTokens,
                     paymentMethodType = paymentMethodType ?: PaymentMethod.Type.Card,
                     paymentConfiguration = paymentConfiguration,
-                    addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId
+                    addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId,
+                    windowFlags = windowFlags
                 )
             }
         }

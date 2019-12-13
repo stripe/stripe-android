@@ -222,6 +222,7 @@ class PaymentSession @VisibleForTesting internal constructor(
                 .setIsPaymentSessionActive(true)
                 .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
                 .setPaymentMethodTypes(config?.paymentMethodTypes.orEmpty())
+                .setWindowFlags(config?.windowFlags)
                 .build()
         )
     }
@@ -267,6 +268,7 @@ class PaymentSession @VisibleForTesting internal constructor(
                 .setPaymentSessionConfig(config)
                 .setPaymentSessionData(paymentSessionData)
                 .setIsPaymentSessionActive(true)
+                .setWindowFlags(config?.windowFlags)
                 .build()
         )
     }

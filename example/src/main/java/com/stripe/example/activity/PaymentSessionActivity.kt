@@ -3,6 +3,7 @@ package com.stripe.example.activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
@@ -86,6 +87,7 @@ class PaymentSessionActivity : AppCompatActivity() {
                 .setAllowedShippingCountryCodes(setOf("US", "CA"))
                 .setShippingInformationValidator(ShippingInformationValidator())
                 .setShippingMethodsFactory(ShippingMethodsFactory())
+                .setWindowFlags(WindowManager.LayoutParams.FLAG_SECURE)
                 .build(),
             savedInstanceState = savedInstanceState,
             shouldPrefetchCustomer = shouldPrefetchCustomer

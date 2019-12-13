@@ -44,7 +44,8 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
         @LayoutRes val addPaymentMethodFooterLayoutId: Int,
         internal val isPaymentSessionActive: Boolean,
         internal val paymentMethodTypes: List<PaymentMethod.Type>,
-        internal val paymentConfiguration: PaymentConfiguration?
+        internal val paymentConfiguration: PaymentConfiguration?,
+        internal val windowFlags: Int? = null
     ) : ActivityStarter.Args {
         class Builder : ObjectBuilder<Args> {
             private var initialPaymentMethodId: String? = null
@@ -54,6 +55,7 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
             private var paymentConfiguration: PaymentConfiguration? = null
             @LayoutRes
             private var addPaymentMethodFooterLayoutId: Int = 0
+            private var windowFlags: Int? = null
 
             fun setInitialPaymentMethodId(initialPaymentMethodId: String?): Builder = apply {
                 this.initialPaymentMethodId = initialPaymentMethodId
@@ -100,6 +102,15 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
                 this.addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId
             }
 
+            /**
+             * @param windowFlags optional flags to set on the `Window` object of Stripe Activities
+             *
+             * See [WindowManager.LayoutParams](https://developer.android.com/reference/android/view/WindowManager.LayoutParams)
+             */
+            fun setWindowFlags(windowFlags: Int?): Builder = apply {
+                this.windowFlags = windowFlags
+            }
+
             override fun build(): Args {
                 return Args(
                     initialPaymentMethodId = initialPaymentMethodId,
@@ -107,7 +118,8 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
                     isPaymentSessionActive = isPaymentSessionActive,
                     paymentMethodTypes = paymentMethodTypes ?: listOf(PaymentMethod.Type.Card),
                     paymentConfiguration = paymentConfiguration,
-                    addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId
+                    addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId,
+                    windowFlags = windowFlags
                 )
             }
         }

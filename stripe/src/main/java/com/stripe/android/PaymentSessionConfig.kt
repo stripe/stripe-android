@@ -33,7 +33,9 @@ data class PaymentSessionConfig internal constructor(
     val allowedShippingCountryCodes: Set<String> = emptySet(),
 
     internal val shippingInformationValidator: ShippingInformationValidator? = null,
-    internal val shippingMethodsFactory: ShippingMethodsFactory? = null
+    internal val shippingMethodsFactory: ShippingMethodsFactory? = null,
+
+    internal val windowFlags: Int? = null
 ) : Parcelable {
     init {
         val countryCodes = Locale.getISOCountries()
@@ -92,6 +94,7 @@ data class PaymentSessionConfig internal constructor(
         private var allowedShippingCountryCodes: Set<String> = emptySet()
         private var shippingInformationValidator: ShippingInformationValidator? = null
         private var shippingMethodsFactory: ShippingMethodsFactory? = null
+        private var windowFlags: Int? = null
 
         @LayoutRes
         private var addPaymentMethodFooterLayoutId: Int = 0
@@ -180,6 +183,15 @@ data class PaymentSessionConfig internal constructor(
         }
 
         /**
+         * @param windowFlags optional flags to set on the `Window` object of Stripe Activities
+         *
+         * See [WindowManager.LayoutParams](https://developer.android.com/reference/android/view/WindowManager.LayoutParams)
+         */
+        fun setWindowFlags(windowFlags: Int?): Builder = apply {
+            this.windowFlags = windowFlags
+        }
+
+        /**
          * @param shippingInformationValidator if specified, will be used to validate
          * [ShippingInformation] in [PaymentFlowActivity] instead of sending a broadcast with
          * [PaymentFlowExtras.EVENT_SHIPPING_INFO_SUBMITTED].
@@ -218,7 +230,8 @@ data class PaymentSessionConfig internal constructor(
                 paymentMethodTypes = paymentMethodTypes,
                 allowedShippingCountryCodes = allowedShippingCountryCodes,
                 shippingInformationValidator = shippingInformationValidator,
-                shippingMethodsFactory = shippingMethodsFactory
+                shippingMethodsFactory = shippingMethodsFactory,
+                windowFlags = windowFlags
             )
         }
     }

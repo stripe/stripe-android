@@ -51,6 +51,10 @@ class PaymentMethodsActivity : AppCompatActivity() {
             PaymentMethodsViewModel.Factory(customerSession, args.initialPaymentMethodId)
         )[PaymentMethodsViewModel::class.java]
 
+        args.windowFlags?.let {
+            window.addFlags(it)
+        }
+
         startedFromPaymentSession = args.isPaymentSessionActive
         cardDisplayTextFactory = CardDisplayTextFactory.create(this)
 
