@@ -132,15 +132,34 @@ open class StripeEditText @JvmOverloads constructor(
     /**
      * Change the hint value of this control after a delay.
      *
-     * @param hintResource the string resource for the hint to be set
+     * @param hintResource the string resource for the hint text
      * @param delayMilliseconds a delay period, measured in milliseconds
      */
     fun setHintDelayed(@StringRes hintResource: Int, delayMilliseconds: Long) {
-        hintHandler.postDelayed({ setHint(hintResource) }, delayMilliseconds)
+        setHintDelayed(resources.getText(hintResource), delayMilliseconds)
     }
 
-    fun setHintDelayed(hint: String, delayMilliseconds: Long) {
-        hintHandler.postDelayed({ setHint(hint) }, delayMilliseconds)
+    /**
+     * Change the hint value of this control after a delay.
+     *
+     * @param hint the hint text
+     * @param delayMilliseconds a delay period, measured in milliseconds
+     */
+    fun setHintDelayed(hint: CharSequence, delayMilliseconds: Long) {
+        hintHandler.postDelayed({
+            setHintSafely(hint)
+        }, delayMilliseconds)
+    }
+
+    /**
+     * Call setHint() and guard against NPE. This is a workaround for a
+     * [known issue on Samsung devices](https://issuetracker.google.com/issues/37127697).
+     */
+    private fun setHintSafely(hint: CharSequence) {
+        try {
+            setHint(hint)
+        } catch (e: NullPointerException) {
+        }
     }
 
     override fun onDetachedFromWindow() {
