@@ -173,8 +173,7 @@ class CardInputWidget @JvmOverloads constructor(
     @JvmSynthetic
     internal var frameWidthSupplier: () -> Int
 
-    @JvmSynthetic
-    internal var postalCodeEnabled: Boolean = false
+    var postalCodeEnabled: Boolean = false
         set(value) {
             updatePostalCodeEditText(value)
             field = value
@@ -534,6 +533,8 @@ class CardInputWidget @JvmOverloads constructor(
     }
 
     private fun initView(attrs: AttributeSet?) {
+        attrs?.let { applyAttributes(it) }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             cardNumberEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_NUMBER)
             expiryDateEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE)
@@ -648,6 +649,19 @@ class CardInputWidget @JvmOverloads constructor(
         }
 
         cardNumberEditText.requestFocus()
+    }
+
+    private fun applyAttributes(attrs: AttributeSet) {
+        val typedArray = context.theme.obtainStyledAttributes(
+            attrs, R.styleable.CardElement, 0, 0
+        )
+
+        try {
+            postalCodeEnabled =
+                typedArray.getBoolean(R.styleable.CardElement_shouldShowPostalCode, false)
+        } finally {
+            typedArray.recycle()
+        }
     }
 
     // reveal the full card number field
