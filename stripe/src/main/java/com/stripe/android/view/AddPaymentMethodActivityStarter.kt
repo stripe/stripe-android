@@ -28,6 +28,7 @@ class AddPaymentMethodActivityStarter constructor(
 ) {
     @Parcelize
     data class Args internal constructor(
+        internal val billingAddressFields: BillingAddressFields,
         internal val shouldAttachToCustomer: Boolean,
         internal val shouldRequirePostalCode: Boolean,
         internal val isPaymentSessionActive: Boolean,
@@ -38,6 +39,7 @@ class AddPaymentMethodActivityStarter constructor(
     ) : ActivityStarter.Args {
 
         class Builder : ObjectBuilder<Args> {
+            private var billingAddressFields: BillingAddressFields = BillingAddressFields.None
             private var shouldAttachToCustomer: Boolean = false
             private var shouldRequirePostalCode: Boolean = false
             private var isPaymentSessionActive = false
@@ -56,11 +58,25 @@ class AddPaymentMethodActivityStarter constructor(
             }
 
             /**
+             * @param billingAddressFields the billing address fields to require on [AddPaymentMethodActivity]
+             */
+            fun setBillingAddressFields(
+                billingAddressFields: BillingAddressFields
+            ): Builder = apply {
+                this.billingAddressFields = billingAddressFields
+            }
+
+            /**
              * If true, a postal code field will be shown and validated.
              * Currently, only US ZIP Codes are supported.
              */
+            @Deprecated("Use setBillingAddressFields()",
+                ReplaceWith("setBillingAddressFields(BillingAddressFields.PostalCode"))
             fun setShouldRequirePostalCode(shouldRequirePostalCode: Boolean): Builder = apply {
                 this.shouldRequirePostalCode = shouldRequirePostalCode
+                if (shouldRequirePostalCode) {
+                    this.billingAddressFields = BillingAddressFields.PostalCode
+                }
             }
 
             /**
@@ -106,6 +122,7 @@ class AddPaymentMethodActivityStarter constructor(
 
             override fun build(): Args {
                 return Args(
+                    billingAddressFields = billingAddressFields,
                     shouldAttachToCustomer = shouldAttachToCustomer,
                     shouldRequirePostalCode = shouldRequirePostalCode,
                     isPaymentSessionActive = isPaymentSessionActive,

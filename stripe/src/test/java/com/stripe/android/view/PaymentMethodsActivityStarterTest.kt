@@ -29,6 +29,7 @@ class PaymentMethodsActivityStarterTest {
             .setPaymentMethodTypes(listOf(PaymentMethod.Type.Card, PaymentMethod.Type.Fpx))
             .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
             .setAddPaymentMethodFooter(R.layout.activity_payment_methods)
+            .setBillingAddressFields(BillingAddressFields.Full)
             .build()
 
         assertEquals(args, ParcelUtils.create(args))

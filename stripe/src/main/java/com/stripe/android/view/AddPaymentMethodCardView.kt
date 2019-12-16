@@ -19,17 +19,58 @@ internal class AddPaymentMethodCardView @JvmOverloads internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
-    shouldShowPostalCode: Boolean = false
+    private val billingAddressFields: BillingAddressFields
 ) : AddPaymentMethodView(context, attrs, defStyleAttr) {
     private val cardMultilineWidget: CardMultilineWidget
+    private val billingAddressWidget: ShippingInfoWidget
 
     override val createParams: PaymentMethodCreateParams?
-        get() = cardMultilineWidget.paymentMethodCreateParams
+        get() {
+            return when (billingAddressFields) {
+                BillingAddressFields.Full -> {
+                    val paymentMethodCard = cardMultilineWidget.paymentMethodCard
+                    val billingDetails = this.billingDetails
+                    if (paymentMethodCard != null && billingDetails != null) {
+                        PaymentMethodCreateParams.create(
+                            paymentMethodCard,
+                            billingDetails
+                        )
+                    } else {
+                        null
+                    }
+                }
+                BillingAddressFields.None -> {
+                    cardMultilineWidget.paymentMethodCreateParams
+                }
+                BillingAddressFields.PostalCode -> {
+                    cardMultilineWidget.paymentMethodCreateParams
+                }
+            }
+        }
+
+    private val billingDetails: PaymentMethod.BillingDetails?
+        get() {
+            return if (billingAddressFields == BillingAddressFields.Full) {
+                billingAddressWidget.shippingInformation?.let {
+                    PaymentMethod.BillingDetails.create(it)
+                }
+            } else {
+                null
+            }
+        }
 
     init {
         View.inflate(getContext(), R.layout.add_payment_method_card_layout, this)
         cardMultilineWidget = findViewById(R.id.card_multiline_widget)
-        cardMultilineWidget.setShouldShowPostalCode(shouldShowPostalCode)
+        cardMultilineWidget.setShouldShowPostalCode(
+            billingAddressFields == BillingAddressFields.PostalCode
+        )
+
+        billingAddressWidget = findViewById(R.id.billing_address_widget)
+        if (billingAddressFields == BillingAddressFields.Full) {
+            billingAddressWidget.visibility = View.VISIBLE
+        }
+
         initEnterListeners()
     }
 
@@ -71,13 +112,6 @@ internal class AddPaymentMethodCardView @JvmOverloads internal constructor(
                 return true
             }
             return false
-        }
-    }
-
-    companion object {
-        @JvmStatic
-        fun create(context: Context, shouldShowPostalCode: Boolean): AddPaymentMethodCardView {
-            return AddPaymentMethodCardView(context, null, 0, shouldShowPostalCode)
         }
     }
 }
