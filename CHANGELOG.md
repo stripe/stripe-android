@@ -5,9 +5,13 @@
 * [#1928](https://github.com/stripe/stripe-android/pull/1928) Make Payment Method `Wallet` a sealed class
 * [#1930](https://github.com/stripe/stripe-android/pull/1930) Update text size for `CardInputWidget` fields
 * [#1939](https://github.com/stripe/stripe-android/pull/1939) Update Android Gradle Plugin to `3.5.3`
+* [#1946](https://github.com/stripe/stripe-android/pull/1946) Upgrade 3DS2 SDK to `2.2.5`
+    * Upgrade to `com.google.android.material:material:1.2.0-alpha2`
+* [#1949](https://github.com/stripe/stripe-android/pull/1949) Catch `NullPointerException` when calling `StripeEditText.setHint()`.
+  This is a workaround for a [known issue on some Samsung devices](https://issuetracker.google.com/issues/37127697).
 
 ## 12.6.1 - 2019-12-02
-* [#1897](https://github.com/stripe/stripe-android/pull/1897) Upgrade 3DS2 SDK to 2.2.4
+* [#1897](https://github.com/stripe/stripe-android/pull/1897) Upgrade 3DS2 SDK to `2.2.4`
     * Fix crash when using Instant App
 
 ## 12.6.0 - 2019-11-27
