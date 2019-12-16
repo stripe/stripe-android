@@ -6,7 +6,7 @@
         <attr name="cardTextErrorColor" format="color"/>
     </declare-styleable>
 
-    <declare-styleable name="CardMultilineWidget">
+    <declare-styleable name="CardElement">
         <attr name="shouldShowPostalCode" format="boolean" />
     </declare-styleable>
 </resources>
