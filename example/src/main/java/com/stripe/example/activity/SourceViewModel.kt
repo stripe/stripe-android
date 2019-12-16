@@ -24,14 +24,16 @@ internal class SourceViewModel(
     internal val createdSourceException: MutableLiveData<Exception> = MutableLiveData()
 
     internal fun createSource(sourceParams: SourceParams) {
-        stripe.createSource(sourceParams, object : ApiResultCallback<Source> {
-            override fun onSuccess(result: Source) {
-                createdSource.value = result
-            }
+        stripe.createSource(
+            sourceParams = sourceParams,
+            callback = object : ApiResultCallback<Source> {
+                override fun onSuccess(result: Source) {
+                    createdSource.value = result
+                }
 
-            override fun onError(e: Exception) {
-                createdSourceException.value = e
-            }
-        })
+                override fun onError(e: Exception) {
+                    createdSourceException.value = e
+                }
+            })
     }
 }

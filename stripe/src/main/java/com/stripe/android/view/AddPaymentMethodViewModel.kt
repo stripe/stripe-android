@@ -34,15 +34,17 @@ internal class AddPaymentMethodViewModel(
         params: PaymentMethodCreateParams
     ): LiveData<PaymentMethodResult> {
         val resultData = MutableLiveData<PaymentMethodResult>()
-        stripe.createPaymentMethod(params, object : ApiResultCallback<PaymentMethod> {
-            override fun onSuccess(result: PaymentMethod) {
-                resultData.value = PaymentMethodResult.Success(result)
-            }
+        stripe.createPaymentMethod(
+            paymentMethodCreateParams = params,
+            callback = object : ApiResultCallback<PaymentMethod> {
+                override fun onSuccess(result: PaymentMethod) {
+                    resultData.value = PaymentMethodResult.Success(result)
+                }
 
-            override fun onError(e: Exception) {
-                resultData.value = PaymentMethodResult.Error(e.localizedMessage.orEmpty())
-            }
-        })
+                override fun onError(e: Exception) {
+                    resultData.value = PaymentMethodResult.Error(e.localizedMessage.orEmpty())
+                }
+            })
         return resultData
     }
 
