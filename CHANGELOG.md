@@ -1,6 +1,20 @@
 # CHANGELOG
 
 ## 12.8.0 - unreleased
+* [#1947](https://github.com/stripe/stripe-android/pull/1947) Allow setting of window flags on Stripe Activities
+    * Basic Integration
+      ```
+      PaymentSessionConfig.Builder()
+          .setWindowFlags(WindowManager.LayoutParams.FLAG_SECURE)
+          .build()
+      ```
+
+    * Custom Integration
+      ```
+      AddPaymentMethodActivityStarter.Args.Builder()
+          .setWindowFlags(WindowManager.LayoutParams.FLAG_SECURE)
+          .build()
+      ```
 * [#1956](https://github.com/stripe/stripe-android/pull/1956) Add support for configuring billing address fields on `AddPaymentMethodActivity`
     * Basic Integration
       ```
