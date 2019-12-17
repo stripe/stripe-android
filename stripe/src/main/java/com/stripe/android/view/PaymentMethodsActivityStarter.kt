@@ -45,6 +45,7 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
         internal val isPaymentSessionActive: Boolean,
         internal val paymentMethodTypes: List<PaymentMethod.Type>,
         internal val paymentConfiguration: PaymentConfiguration?,
+        internal val windowFlags: Int? = null,
         internal val billingAddressFields: BillingAddressFields
     ) : ActivityStarter.Args {
         class Builder : ObjectBuilder<Args> {
@@ -56,6 +57,7 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
             private var paymentConfiguration: PaymentConfiguration? = null
             @LayoutRes
             private var addPaymentMethodFooterLayoutId: Int = 0
+            private var windowFlags: Int? = null
 
             /**
              * @param billingAddressFields the billing address fields to require on [AddPaymentMethodActivity]
@@ -113,6 +115,15 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
                 this.addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId
             }
 
+            /**
+             * @param windowFlags optional flags to set on the `Window` object of Stripe Activities
+             *
+             * See [WindowManager.LayoutParams](https://developer.android.com/reference/android/view/WindowManager.LayoutParams)
+             */
+            fun setWindowFlags(windowFlags: Int?): Builder = apply {
+                this.windowFlags = windowFlags
+            }
+
             override fun build(): Args {
                 return Args(
                     initialPaymentMethodId = initialPaymentMethodId,
@@ -121,6 +132,7 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
                     paymentMethodTypes = paymentMethodTypes ?: listOf(PaymentMethod.Type.Card),
                     paymentConfiguration = paymentConfiguration,
                     addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId,
+                    windowFlags = windowFlags,
                     billingAddressFields = billingAddressFields
                 )
             }

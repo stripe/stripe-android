@@ -20,5 +20,6 @@ internal class AddPaymentMethodCardRowView internal constructor(
         .setPaymentMethodType(PaymentMethod.Type.Card)
         .setAddPaymentMethodFooter(args.addPaymentMethodFooterLayoutId)
         .setPaymentConfiguration(args.paymentConfiguration)
+        .setWindowFlags(args.windowFlags)
         .build()
 )

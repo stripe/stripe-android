@@ -23,12 +23,14 @@ class PaymentFlowActivityStarter :
     data class Args internal constructor(
         internal val paymentSessionConfig: PaymentSessionConfig,
         internal val paymentSessionData: PaymentSessionData,
-        internal val isPaymentSessionActive: Boolean
+        internal val isPaymentSessionActive: Boolean,
+        internal val windowFlags: Int? = null
     ) : ActivityStarter.Args {
         class Builder : ObjectBuilder<Args> {
             private var paymentSessionConfig: PaymentSessionConfig? = null
             private var paymentSessionData: PaymentSessionData? = null
             private var isPaymentSessionActive = false
+            private var windowFlags: Int? = null
 
             fun setPaymentSessionConfig(
                 paymentSessionConfig: PaymentSessionConfig?
@@ -44,6 +46,15 @@ class PaymentFlowActivityStarter :
                 this.isPaymentSessionActive = isPaymentSessionActive
             }
 
+            /**
+             * @param windowFlags optional flags to set on the `Window` object of Stripe Activities
+             *
+             * See [WindowManager.LayoutParams](https://developer.android.com/reference/android/view/WindowManager.LayoutParams)
+             */
+            fun setWindowFlags(windowFlags: Int?): Builder = apply {
+                this.windowFlags = windowFlags
+            }
+
             override fun build(): Args {
                 return Args(
                     paymentSessionConfig = paymentSessionConfig
@@ -51,7 +62,8 @@ class PaymentFlowActivityStarter :
                     paymentSessionData = requireNotNull(paymentSessionData) {
                         "PaymentFlowActivity launched without PaymentSessionData"
                     },
-                    isPaymentSessionActive = isPaymentSessionActive
+                    isPaymentSessionActive = isPaymentSessionActive,
+                    windowFlags = windowFlags
                 )
             }
         }
