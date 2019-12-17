@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 12.8.0 - unreleased
+## 12.8.0 - 2019-12-17
 * [#1947](https://github.com/stripe/stripe-android/pull/1947) Allow setting of window flags on Stripe Activities
     * Basic Integration
       ```
