@@ -71,9 +71,9 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options
     ): PaymentIntent? {
         val params = networkUtils.paramsWithUid(confirmPaymentIntentParams.toParamMap())
-        val paymentIntentId =
-            PaymentIntent.parseIdFromClientSecret(confirmPaymentIntentParams.clientSecret)
-        val apiUrl = getConfirmPaymentIntentUrl(paymentIntentId)
+        val apiUrl = getConfirmPaymentIntentUrl(
+            PaymentIntent.ClientSecret(confirmPaymentIntentParams.clientSecret).paymentIntentId
+        )
 
         try {
             fireFingerprintRequest()
@@ -114,8 +114,9 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         options: ApiRequest.Options
     ): PaymentIntent? {
-        val paymentIntentId = PaymentIntent.parseIdFromClientSecret(clientSecret)
-        val apiUrl = getRetrievePaymentIntentUrl(paymentIntentId)
+        val apiUrl = getRetrievePaymentIntentUrl(
+            PaymentIntent.ClientSecret(clientSecret).paymentIntentId
+        )
 
         try {
             fireFingerprintRequest()
@@ -178,9 +179,9 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     ): SetupIntent? {
         val params = networkUtils.paramsWithUid(confirmSetupIntentParams.toParamMap())
 
-        val setupIntentId =
-            SetupIntent.parseIdFromClientSecret(confirmSetupIntentParams.clientSecret)
-        val apiUrl = getConfirmSetupIntentUrl(setupIntentId)
+        val apiUrl = getConfirmSetupIntentUrl(
+            SetupIntent.ClientSecret(confirmSetupIntentParams.clientSecret).setupIntentId
+        )
 
         try {
             fireFingerprintRequest()
@@ -219,7 +220,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         options: ApiRequest.Options
     ): SetupIntent? {
-        val setupIntentId = SetupIntent.parseIdFromClientSecret(clientSecret)
+        val setupIntentId = SetupIntent.ClientSecret(clientSecret).setupIntentId
         val apiUrl = getRetrieveSetupIntentUrl(setupIntentId)
 
         try {

@@ -3,6 +3,7 @@ package com.stripe.android.model
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -50,8 +51,8 @@ class PaymentIntentTest {
     @Test
     fun parseIdFromClientSecret_parsesCorrectly() {
         val clientSecret = "pi_1CkiBMLENEVhOs7YMtUehLau_secret_s4O8SDh7s6spSmHDw1VaYPGZA"
-        val id = PaymentIntent.parseIdFromClientSecret(clientSecret)
-        assertEquals("pi_1CkiBMLENEVhOs7YMtUehLau", id)
+        val paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId
+        assertEquals("pi_1CkiBMLENEVhOs7YMtUehLau", paymentIntentId)
     }
 
     @Test
@@ -118,6 +119,25 @@ class PaymentIntentTest {
             PaymentIntentFixtures.CANCELLED.cancellationReason)
         assertEquals(1567091866L,
             PaymentIntentFixtures.CANCELLED.canceledAt)
+    }
+
+    @Test
+    fun clientSecret_withInvalidKeys_throwsException() {
+        assertFailsWith<IllegalArgumentException> {
+            PaymentIntent.ClientSecret("pi_12345")
+        }
+
+        assertFailsWith<IllegalArgumentException> {
+            PaymentIntent.ClientSecret("pi_12345_secret_")
+        }
+    }
+
+    @Test
+    fun clientSecret_withValidKeys_throwsException() {
+        assertEquals(
+            "pi_a1b2c3_secret_x7y8z9",
+            PaymentIntent.ClientSecret("pi_a1b2c3_secret_x7y8z9").value
+        )
     }
 
     private companion object {

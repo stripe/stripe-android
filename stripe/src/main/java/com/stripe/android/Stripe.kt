@@ -173,7 +173,7 @@ class Stripe internal constructor(
     fun authenticatePayment(activity: Activity, clientSecret: String) {
         paymentController.startAuth(
             AuthActivityStarter.Host.create(activity),
-            clientSecret,
+            PaymentIntent.ClientSecret(clientSecret).value,
             ApiRequest.Options(publishableKey, stripeAccountId)
         )
     }
@@ -192,7 +192,7 @@ class Stripe internal constructor(
     fun handleNextActionForPayment(activity: Activity, clientSecret: String) {
         paymentController.startAuth(
             AuthActivityStarter.Host.create(activity),
-            clientSecret,
+            PaymentIntent.ClientSecret(clientSecret).value,
             ApiRequest.Options(publishableKey, stripeAccountId)
         )
     }
@@ -211,7 +211,7 @@ class Stripe internal constructor(
     fun authenticatePayment(fragment: Fragment, clientSecret: String) {
         paymentController.startAuth(
             AuthActivityStarter.Host.create(fragment),
-            clientSecret,
+            PaymentIntent.ClientSecret(clientSecret).value,
             ApiRequest.Options(publishableKey, stripeAccountId)
         )
     }
@@ -230,7 +230,7 @@ class Stripe internal constructor(
     fun handleNextActionForPayment(fragment: Fragment, clientSecret: String) {
         paymentController.startAuth(
             AuthActivityStarter.Host.create(fragment),
-            clientSecret,
+            PaymentIntent.ClientSecret(clientSecret).value,
             ApiRequest.Options(publishableKey, stripeAccountId)
         )
     }
@@ -273,7 +273,7 @@ class Stripe internal constructor(
     @WorkerThread
     fun retrievePaymentIntentSynchronous(clientSecret: String): PaymentIntent? {
         return stripeRepository.retrievePaymentIntent(
-            clientSecret,
+            PaymentIntent.ClientSecret(clientSecret).value,
             ApiRequest.Options(publishableKey, stripeAccountId)
         )
     }
@@ -353,7 +353,7 @@ class Stripe internal constructor(
     fun authenticateSetup(activity: Activity, clientSecret: String) {
         paymentController.startAuth(
             AuthActivityStarter.Host.create(activity),
-            clientSecret,
+            SetupIntent.ClientSecret(clientSecret).value,
             ApiRequest.Options(publishableKey, stripeAccountId)
         )
     }
@@ -370,7 +370,7 @@ class Stripe internal constructor(
     fun handleNextActionForSetupIntent(activity: Activity, clientSecret: String) {
         paymentController.startAuth(
             AuthActivityStarter.Host.create(activity),
-            clientSecret,
+            SetupIntent.ClientSecret(clientSecret).value,
             ApiRequest.Options(publishableKey, stripeAccountId)
         )
     }
@@ -388,7 +388,7 @@ class Stripe internal constructor(
     fun authenticateSetup(fragment: Fragment, clientSecret: String) {
         paymentController.startAuth(
             AuthActivityStarter.Host.create(fragment),
-            clientSecret,
+            SetupIntent.ClientSecret(clientSecret).value,
             ApiRequest.Options(publishableKey, stripeAccountId)
         )
     }
@@ -405,7 +405,7 @@ class Stripe internal constructor(
     fun handleNextActionForSetupIntent(fragment: Fragment, clientSecret: String) {
         paymentController.startAuth(
             AuthActivityStarter.Host.create(fragment),
-            clientSecret,
+            SetupIntent.ClientSecret(clientSecret).value,
             ApiRequest.Options(publishableKey, stripeAccountId)
         )
     }
@@ -447,7 +447,7 @@ class Stripe internal constructor(
     @WorkerThread
     fun retrieveSetupIntentSynchronous(clientSecret: String): SetupIntent? {
         return stripeRepository.retrieveSetupIntent(
-            clientSecret,
+            SetupIntent.ClientSecret(clientSecret).value,
             ApiRequest.Options(publishableKey, stripeAccountId)
         )
     }

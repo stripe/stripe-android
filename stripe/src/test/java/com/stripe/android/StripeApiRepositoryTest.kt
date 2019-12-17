@@ -266,7 +266,8 @@ class StripeApiRepositoryTest {
 
     @Test
     fun confirmPaymentIntent_withSourceData_canSuccessfulConfirm() {
-        val clientSecret = "temporarily put a private key here simulate the backend"
+        // put a private key here to simulate the backend
+        val clientSecret = "pi_12345_secret_fake"
 
         `when`(stripeApiRequestExecutor.execute(any()))
             .thenReturn(
