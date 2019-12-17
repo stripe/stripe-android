@@ -1,5 +1,24 @@
 # CHANGELOG
 
+## 12.8.0 - unreleased
+* [#1956](https://github.com/stripe/stripe-android/pull/1956) Add support for configuring billing address fields on `AddPaymentMethodActivity`
+    * Basic Integration
+      ```
+      PaymentSessionConfig.Builder()
+          .setBillingAddressFields(BillingAddressFields.Full)
+          .build()
+      ```
+
+    * Custom Integration
+      ```
+      AddPaymentMethodActivityStarter.Args.Builder()
+          .setBillingAddressFields(BillingAddressFields.Full)
+          .build()
+      ```
+* [#1957](https://github.com/stripe/stripe-android/pull/1957) Enable `PaymentSessionConfig.ShippingInformationValidator` and `PaymentSessionConfig.ShippingMethodsFactory`
+* [#1958](https://github.com/stripe/stripe-android/pull/1958) Add validation for PaymentIntent and SetupIntent client secrets
+
+
 ## 12.7.0 - 2019-12-16
 * [#1915](https://github.com/stripe/stripe-android/pull/1915) Update API version to [2019-12-03](https://stripe.com/docs/upgrades#2019-12-03)
 * [#1928](https://github.com/stripe/stripe-android/pull/1928) Make Payment Method `Wallet` a sealed class
