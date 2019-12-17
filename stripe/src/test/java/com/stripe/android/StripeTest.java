@@ -1085,20 +1085,16 @@ public class StripeTest {
     }
 
     @Test
-    public void retrievePaymentIntent_withInvalidClientSecretInGermanyLocale_shouldReturnLocalizedMessage() {
+    public void retrievePaymentIntent_withInvalidClientSecret_shouldThrowException() {
         Locale.setDefault(Locale.GERMANY);
 
-        // This card is missing quite a few numbers.
         final Stripe stripe = createStripe();
-        final InvalidRequestException exception = assertThrows(
-                InvalidRequestException.class,
-                new ThrowingRunnable() {
-                    @Override
-                    public void run() throws Throwable {
-                        stripe.retrievePaymentIntentSynchronous("invalid");
-                    }
-                });
-        assertEquals("Keine solche payment_intent: invalid", exception.getStripeError().getMessage());
+        assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
+            @Override
+            public void run() throws Throwable {
+                stripe.retrievePaymentIntentSynchronous("invalid");
+            }
+        });
     }
 
     @Test

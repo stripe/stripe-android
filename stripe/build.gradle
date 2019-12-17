@@ -20,11 +20,12 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation "androidx.lifecycle:lifecycle-viewmodel:2.1.0"
     implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0'
+    implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
 
     // Api for this import because we use reflection to alter TextInputLayout
     api 'com.google.android.material:material:1.0.0'
 
-    implementation "com.stripe:stripe-3ds2-android:2.2.4"
+    implementation "com.stripe:stripe-3ds2-android:2.2.5"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"

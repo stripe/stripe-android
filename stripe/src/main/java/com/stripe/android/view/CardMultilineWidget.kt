@@ -330,10 +330,7 @@ class CardMultilineWidget @JvmOverloads constructor(
             }
         }
 
-        return (cardNumberIsValid &&
-            expiryIsValid &&
-            cvcIsValid &&
-            postalCodeIsValidOrGone)
+        return cardNumberIsValid && expiryIsValid && cvcIsValid && postalCodeIsValidOrGone
     }
 
     override fun onWindowFocusChanged(hasWindowFocus: Boolean) {
@@ -473,12 +470,12 @@ class CardMultilineWidget @JvmOverloads constructor(
     private fun checkAttributeSet(attrs: AttributeSet) {
         val a = context.theme.obtainStyledAttributes(
             attrs,
-            R.styleable.CardMultilineWidget,
+            R.styleable.CardElement,
             0, 0)
 
         try {
             shouldShowPostalCode =
-                a.getBoolean(R.styleable.CardMultilineWidget_shouldShowPostalCode, false)
+                a.getBoolean(R.styleable.CardElement_shouldShowPostalCode, false)
         } finally {
             a.recycle()
         }

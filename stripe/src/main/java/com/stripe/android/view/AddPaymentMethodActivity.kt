@@ -118,7 +118,10 @@ class AddPaymentMethodActivity : StripeActivity() {
     ): AddPaymentMethodView {
         return when (paymentMethodType) {
             PaymentMethod.Type.Card -> {
-                AddPaymentMethodCardView.create(this, args.shouldRequirePostalCode)
+                AddPaymentMethodCardView(
+                    context = this,
+                    billingAddressFields = args.billingAddressFields
+                )
             }
             PaymentMethod.Type.Fpx -> {
                 AddPaymentMethodFpxView.create(this)

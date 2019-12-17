@@ -21,6 +21,7 @@ import com.stripe.android.model.PaymentMethodTest
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.testharness.TestEphemeralKeyProvider
 import com.stripe.android.view.ActivityStarter
+import com.stripe.android.view.BillingAddressFields
 import com.stripe.android.view.PaymentFlowActivity
 import com.stripe.android.view.PaymentFlowActivityStarter
 import com.stripe.android.view.PaymentMethodsActivity
@@ -164,13 +165,18 @@ class PaymentSessionTest {
         CustomerSession.instance = createCustomerSession()
 
         val paymentSession = PaymentSession(activity)
-        paymentSession.init(paymentSessionListener, PaymentSessionConfig.Builder().build())
-        paymentSession.presentPaymentMethodSelection(true)
+        paymentSession.init(paymentSessionListener, PaymentSessionConfig.Builder()
+            .setBillingAddressFields(BillingAddressFields.PostalCode)
+            .build())
+        paymentSession.presentPaymentMethodSelection()
 
         verify(activity).startActivityForResult(intentArgumentCaptor.capture(),
             eq(PaymentMethodsActivityStarter.REQUEST_CODE))
-        assertTrue(PaymentMethodsActivityStarter.Args.create(intentArgumentCaptor.firstValue)
-            .shouldRequirePostalCode)
+        assertEquals(
+            BillingAddressFields.PostalCode,
+            PaymentMethodsActivityStarter.Args.create(intentArgumentCaptor.firstValue)
+                .billingAddressFields
+        )
     }
 
     @Test

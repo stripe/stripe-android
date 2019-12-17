@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import android.net.Uri
 import com.stripe.android.model.parsers.SetupIntentJsonParser
+import java.util.regex.Pattern
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.parcel.RawValue
 import org.json.JSONObject
@@ -199,6 +200,22 @@ data class SetupIntent internal constructor(
         }
     }
 
+    internal data class ClientSecret(internal val value: String) {
+        internal val setupIntentId: String =
+            value.split("_secret".toRegex())
+                .dropLastWhile { it.isEmpty() }.toTypedArray()[0]
+
+        init {
+            require(PATTERN.matcher(value).matches()) {
+                "Invalid client secret: $value"
+            }
+        }
+
+        private companion object {
+            private val PATTERN = Pattern.compile("^seti_(\\w)+_secret_(\\w)+$")
+        }
+    }
+
     enum class CancellationReason(private val code: String) {
         Duplicate("duplicate"),
         RequestedByCustomer("requested_by_customer"),
@@ -213,11 +230,6 @@ data class SetupIntent internal constructor(
 
     companion object {
         private const val FIELD_NEXT_ACTION_TYPE = "type"
-
-        internal fun parseIdFromClientSecret(clientSecret: String): String {
-            return clientSecret.split("_secret".toRegex())
-                .dropLastWhile { it.isEmpty() }.toTypedArray()[0]
-        }
 
         @JvmStatic
         fun fromJson(jsonObject: JSONObject?): SetupIntent? {

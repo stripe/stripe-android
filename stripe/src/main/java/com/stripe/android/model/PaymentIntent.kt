@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import android.net.Uri
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
+import java.util.regex.Pattern
 import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.parcel.RawValue
@@ -249,6 +250,22 @@ data class PaymentIntent internal constructor(
                     return values().firstOrNull { it.code == typeCode }
                 }
             }
+        }
+    }
+
+    internal data class ClientSecret(internal val value: String) {
+        internal val paymentIntentId: String =
+            value.split("_secret".toRegex())
+                .dropLastWhile { it.isEmpty() }.toTypedArray()[0]
+
+        init {
+            require(PATTERN.matcher(value).matches()) {
+                "Invalid client secret: $value"
+            }
+        }
+
+        private companion object {
+            private val PATTERN = Pattern.compile("^pi_(\\w)+_secret_(\\w)+$")
         }
     }
 

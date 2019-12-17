@@ -7,6 +7,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
 import com.stripe.android.view.AddPaymentMethodActivity
+import com.stripe.android.view.BillingAddressFields
 import com.stripe.android.view.PaymentFlowActivity
 import com.stripe.android.view.PaymentFlowExtras
 import com.stripe.android.view.SelectShippingMethodWidget
@@ -31,10 +32,10 @@ data class PaymentSessionConfig internal constructor(
     val addPaymentMethodFooterLayoutId: Int = 0,
     val paymentMethodTypes: List<PaymentMethod.Type> = listOf(PaymentMethod.Type.Card),
     val allowedShippingCountryCodes: Set<String> = emptySet(),
+    val billingAddressFields: BillingAddressFields = BillingAddressFields.None,
 
     internal val shippingInformationValidator: ShippingInformationValidator? = null,
     internal val shippingMethodsFactory: ShippingMethodsFactory? = null,
-
     internal val windowFlags: Int? = null
 ) : Parcelable {
     init {
@@ -85,6 +86,7 @@ data class PaymentSessionConfig internal constructor(
     }
 
     class Builder : ObjectBuilder<PaymentSessionConfig> {
+        private var billingAddressFields: BillingAddressFields = BillingAddressFields.None
         private var shippingInfoRequired = true
         private var shippingMethodsRequired = true
         private var hiddenShippingInfoFields: List<String>? = null
@@ -98,6 +100,15 @@ data class PaymentSessionConfig internal constructor(
 
         @LayoutRes
         private var addPaymentMethodFooterLayoutId: Int = 0
+
+        /**
+         * @param billingAddressFields the billing address fields to require on [AddPaymentMethodActivity]
+         */
+        fun setBillingAddressFields(
+            billingAddressFields: BillingAddressFields
+        ): Builder = apply {
+            this.billingAddressFields = billingAddressFields
+        }
 
         /**
          * @param hiddenShippingInfoFields [CustomizableShippingField] fields that should be
@@ -198,7 +209,6 @@ data class PaymentSessionConfig internal constructor(
          *
          * Note: this instance must be [Serializable].
          */
-        @JvmSynthetic
         fun setShippingInformationValidator(
             shippingInformationValidator: ShippingInformationValidator?
         ): Builder = apply {
@@ -212,7 +222,6 @@ data class PaymentSessionConfig internal constructor(
          *
          * Note: this instance must be [Serializable].
          */
-        @JvmSynthetic
         fun setShippingMethodsFactory(
             shippingMethodsFactory: ShippingMethodsFactory?
         ): Builder = apply {
@@ -231,7 +240,8 @@ data class PaymentSessionConfig internal constructor(
                 allowedShippingCountryCodes = allowedShippingCountryCodes,
                 shippingInformationValidator = shippingInformationValidator,
                 shippingMethodsFactory = shippingMethodsFactory,
-                windowFlags = windowFlags
+                windowFlags = windowFlags,
+                billingAddressFields = billingAddressFields
             )
         }
     }

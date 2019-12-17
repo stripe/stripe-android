@@ -17,6 +17,7 @@ import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
+import com.stripe.android.view.BillingAddressFields
 import com.stripe.android.view.PaymentUtils
 import com.stripe.android.view.ShippingInfoWidget
 import com.stripe.example.R
@@ -47,7 +48,7 @@ class PaymentSessionActivity : AppCompatActivity() {
         paymentSession = createPaymentSession(savedInstanceState)
 
         btn_select_payment_method.setOnClickListener {
-            paymentSession.presentPaymentMethodSelection(true)
+            paymentSession.presentPaymentMethodSelection()
         }
         btn_start_payment_flow.setOnClickListener {
             paymentSession.presentShippingFlow()
@@ -88,6 +89,7 @@ class PaymentSessionActivity : AppCompatActivity() {
                 .setShippingInformationValidator(ShippingInformationValidator())
                 .setShippingMethodsFactory(ShippingMethodsFactory())
                 .setWindowFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                .setBillingAddressFields(BillingAddressFields.Full)
                 .build(),
             savedInstanceState = savedInstanceState,
             shouldPrefetchCustomer = shouldPrefetchCustomer
