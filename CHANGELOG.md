@@ -31,7 +31,7 @@
       ```
 * [#1957](https://github.com/stripe/stripe-android/pull/1957) Enable `PaymentSessionConfig.ShippingInformationValidator` and `PaymentSessionConfig.ShippingMethodsFactory`
 * [#1958](https://github.com/stripe/stripe-android/pull/1958) Add validation for PaymentIntent and SetupIntent client secrets
-
+* [#1959](https://github.com/stripe/stripe-android/pull/1959) Upgrade 3DS2 SDK to `2.2.6`
 
 ## 12.7.0 - 2019-12-16
 * [#1915](https://github.com/stripe/stripe-android/pull/1915) Update API version to [2019-12-03](https://stripe.com/docs/upgrades#2019-12-03)
