@@ -75,13 +75,18 @@ class PaymentMethodsActivity : AppCompatActivity() {
     ) {
         adapter = PaymentMethodsAdapter(
             args,
-            args.paymentMethodTypes,
-            viewModel.selectedPaymentMethodId
+            addableTypes = args.paymentMethodTypes,
+            initiallySelectedPaymentMethodId = viewModel.selectedPaymentMethodId,
+            shouldShowGooglePay = args.shouldShowGooglePay
         )
 
         adapter.listener = object : PaymentMethodsAdapter.Listener {
-            override fun onClick(paymentMethod: PaymentMethod) {
+            override fun onPaymentMethodClick(paymentMethod: PaymentMethod) {
                 payment_methods_recycler.tappedPaymentMethod = paymentMethod
+            }
+
+            override fun onGooglePayClick() {
+                finishWithGooglePay()
             }
         }
 
@@ -186,6 +191,12 @@ class PaymentMethodsActivity : AppCompatActivity() {
         } else {
             View.GONE
         }
+    }
+
+    private fun finishWithGooglePay() {
+        // TODO(mshafrir-stripe): set correct result - ANDROID-457
+
+        finish()
     }
 
     private fun finishWithPaymentMethod(

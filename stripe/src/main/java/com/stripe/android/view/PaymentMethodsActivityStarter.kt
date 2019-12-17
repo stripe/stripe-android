@@ -46,7 +46,8 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
         internal val paymentMethodTypes: List<PaymentMethod.Type>,
         internal val paymentConfiguration: PaymentConfiguration?,
         internal val windowFlags: Int? = null,
-        internal val billingAddressFields: BillingAddressFields
+        internal val billingAddressFields: BillingAddressFields,
+        internal val shouldShowGooglePay: Boolean = false
     ) : ActivityStarter.Args {
         class Builder : ObjectBuilder<Args> {
             private var billingAddressFields: BillingAddressFields = BillingAddressFields.None
@@ -54,6 +55,7 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
             private var shouldRequirePostalCode = false
             private var isPaymentSessionActive = false
             private var paymentMethodTypes: List<PaymentMethod.Type>? = null
+            private var shouldShowGooglePay: Boolean = false
             private var paymentConfiguration: PaymentConfiguration? = null
             @LayoutRes
             private var addPaymentMethodFooterLayoutId: Int = 0
@@ -106,6 +108,16 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
             }
 
             /**
+             * @param shouldShowGooglePay if `true`, will show "Google Pay" as an option on the
+             * Payment Methods selection screen. If a user selects the Google Pay option,
+             * [PaymentMethodsActivityStarter.Result.useGooglePay] will be `true`.
+             */
+            @JvmSynthetic
+            internal fun setShouldShowGooglePay(shouldShowGooglePay: Boolean): Builder = apply {
+                this.shouldShowGooglePay = shouldShowGooglePay
+            }
+
+            /**
              * @param addPaymentMethodFooterLayoutId optional layout id that will be inflated and
              * displayed beneath the payment details collection form on [AddPaymentMethodActivity]
              */
@@ -130,6 +142,7 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
                     shouldRequirePostalCode = shouldRequirePostalCode,
                     isPaymentSessionActive = isPaymentSessionActive,
                     paymentMethodTypes = paymentMethodTypes ?: listOf(PaymentMethod.Type.Card),
+                    shouldShowGooglePay = shouldShowGooglePay,
                     paymentConfiguration = paymentConfiguration,
                     addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId,
                     windowFlags = windowFlags,
