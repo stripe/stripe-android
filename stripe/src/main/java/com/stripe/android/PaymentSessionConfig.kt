@@ -32,6 +32,7 @@ data class PaymentSessionConfig internal constructor(
     @get:LayoutRes
     val addPaymentMethodFooterLayoutId: Int = 0,
     val paymentMethodTypes: List<PaymentMethod.Type> = listOf(PaymentMethod.Type.Card),
+    val shouldShowGooglePay: Boolean,
     val allowedShippingCountryCodes: Set<String> = emptySet(),
     val billingAddressFields: BillingAddressFields = BillingAddressFields.None,
 
@@ -95,6 +96,7 @@ data class PaymentSessionConfig internal constructor(
         private var optionalShippingInfoFields: List<String>? = null
         private var shippingInformation: ShippingInformation? = null
         private var paymentMethodTypes: List<PaymentMethod.Type> = listOf(PaymentMethod.Type.Card)
+        private var shouldShowGooglePay: Boolean = false
         private var allowedShippingCountryCodes: Set<String> = emptySet()
         private var shippingInformationValidator: ShippingInformationValidator? = null
         private var shippingMethodsFactory: ShippingMethodsFactory? = null
@@ -187,6 +189,15 @@ data class PaymentSessionConfig internal constructor(
         }
 
         /**
+         * @param shouldShowGooglePay if `true`, will show "Google Pay" as an option on the
+         * Payment Methods selection screen. If a user selects the Google Pay option,
+         * [PaymentSessionData.useGooglePay] will be `true`.
+         */
+        fun setShouldShowGooglePay(shouldShowGooglePay: Boolean): Builder = apply {
+            this.shouldShowGooglePay = shouldShowGooglePay
+        }
+
+        /**
          * @param allowedShippingCountryCodes A set of allowed country codes for the
          * customer's shipping address. Will be ignored if empty.
          */
@@ -250,6 +261,7 @@ data class PaymentSessionConfig internal constructor(
                 isShippingMethodRequired = shippingMethodsRequired,
                 addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId,
                 paymentMethodTypes = paymentMethodTypes,
+                shouldShowGooglePay = shouldShowGooglePay,
                 allowedShippingCountryCodes = allowedShippingCountryCodes,
                 shippingInformationValidator = shippingInformationValidator,
                 shippingMethodsFactory = shippingMethodsFactory,

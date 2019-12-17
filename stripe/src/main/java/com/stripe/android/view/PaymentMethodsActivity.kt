@@ -194,7 +194,11 @@ class PaymentMethodsActivity : AppCompatActivity() {
     }
 
     private fun finishWithGooglePay() {
-        // TODO(mshafrir-stripe): set correct result - ANDROID-457
+        setResult(Activity.RESULT_OK,
+            Intent().putExtras(
+                PaymentMethodsActivityStarter.Result(useGooglePay = true).toBundle()
+            )
+        )
 
         finish()
     }
