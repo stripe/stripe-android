@@ -186,7 +186,6 @@ data class PaymentSessionConfig internal constructor(
          *
          * Note: this instance must be [Serializable].
          */
-        @JvmSynthetic
         fun setShippingInformationValidator(
             shippingInformationValidator: ShippingInformationValidator?
         ): Builder = apply {
@@ -200,7 +199,6 @@ data class PaymentSessionConfig internal constructor(
          *
          * Note: this instance must be [Serializable].
          */
-        @JvmSynthetic
         fun setShippingMethodsFactory(
             shippingMethodsFactory: ShippingMethodsFactory?
         ): Builder = apply {
