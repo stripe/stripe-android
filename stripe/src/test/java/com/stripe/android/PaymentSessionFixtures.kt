@@ -3,6 +3,7 @@ package com.stripe.android
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
+import com.stripe.android.view.BillingAddressFields
 import com.stripe.android.view.ShippingInfoWidget
 
 internal object PaymentSessionFixtures {
@@ -47,6 +48,8 @@ internal object PaymentSessionFixtures {
         .setAllowedShippingCountryCodes(
             setOf("US", "CA")
         )
+
+        .setBillingAddressFields(BillingAddressFields.Full)
 
         .build()
 

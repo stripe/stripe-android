@@ -208,6 +208,14 @@ data class PaymentMethod internal constructor(
             internal const val PARAM_EMAIL = "email"
             internal const val PARAM_NAME = "name"
             internal const val PARAM_PHONE = "phone"
+
+            fun create(shippingInformation: ShippingInformation): BillingDetails {
+                return BillingDetails(
+                    address = shippingInformation.address,
+                    name = shippingInformation.name,
+                    phone = shippingInformation.phone
+                )
+            }
         }
     }
 

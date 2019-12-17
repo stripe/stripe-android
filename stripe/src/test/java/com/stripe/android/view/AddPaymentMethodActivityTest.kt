@@ -185,6 +185,81 @@ class AddPaymentMethodActivityTest {
     }
 
     @Test
+    fun addCardData_withFullBillingFieldsRequirement_shouldShowBillingAddressWidget() {
+        activityScenarioFactory.create<AddPaymentMethodActivity>(
+            createArgs(
+                PaymentMethod.Type.Card,
+                initCustomerSessionTokens = true,
+                billingAddressFields = BillingAddressFields.Full
+            )
+        ).use { activityScenario ->
+            activityScenario.onActivity { activity ->
+                assertEquals(
+                    View.VISIBLE,
+                    activity.findViewById<View>(R.id.billing_address_widget).visibility
+                )
+
+                val cardMultilineWidget: CardMultilineWidget =
+                    activity.findViewById(R.id.card_multiline_widget)
+                assertEquals(
+                    View.GONE,
+                    cardMultilineWidget.findViewById<View>(R.id.tl_postal_code).visibility
+                )
+            }
+        }
+    }
+
+    @Test
+    fun addCardData_withPostalCodeBillingFieldsRequirement_shouldHideBillingAddressWidget() {
+        activityScenarioFactory.create<AddPaymentMethodActivity>(
+            createArgs(
+                PaymentMethod.Type.Card,
+                initCustomerSessionTokens = true,
+                billingAddressFields = BillingAddressFields.PostalCode
+            )
+        ).use { activityScenario ->
+            activityScenario.onActivity { activity ->
+                assertEquals(
+                    View.GONE,
+                    activity.findViewById<View>(R.id.billing_address_widget).visibility
+                )
+
+                val cardMultilineWidget: CardMultilineWidget =
+                    activity.findViewById(R.id.card_multiline_widget)
+                assertEquals(
+                    View.VISIBLE,
+                    cardMultilineWidget.findViewById<View>(R.id.tl_postal_code).visibility
+                )
+            }
+        }
+    }
+
+    @Test
+    fun addCardData_withNoBillingFieldsRequirement_shouldHideBillingAddressWidgetAndPostalCode() {
+        activityScenarioFactory.create<AddPaymentMethodActivity>(
+            createArgs(
+                PaymentMethod.Type.Card,
+                initCustomerSessionTokens = true,
+                billingAddressFields = BillingAddressFields.None
+            )
+        ).use { activityScenario ->
+            activityScenario.onActivity { activity ->
+                assertEquals(
+                    View.GONE,
+                    activity.findViewById<View>(R.id.billing_address_widget).visibility
+                )
+
+                val cardMultilineWidget: CardMultilineWidget =
+                    activity.findViewById(R.id.card_multiline_widget)
+                assertEquals(
+                    View.GONE,
+                    cardMultilineWidget.findViewById<View>(R.id.tl_postal_code).visibility
+                )
+            }
+        }
+    }
+
+    @Test
     fun addCardData_whenServerReturnsSuccessAndUpdatesCustomer_finishesWithIntent() {
         activityScenarioFactory.create<AddPaymentMethodActivity>(
             createArgs(
@@ -325,15 +400,16 @@ class AddPaymentMethodActivityTest {
 
     private fun createArgs(
         paymentMethodType: PaymentMethod.Type,
-        initCustomerSessionTokens: Boolean = false
+        initCustomerSessionTokens: Boolean = false,
+        billingAddressFields: BillingAddressFields = BillingAddressFields.PostalCode
     ): AddPaymentMethodActivityStarter.Args {
         return AddPaymentMethodActivityStarter.Args.Builder()
             .setShouldAttachToCustomer(true)
-            .setShouldRequirePostalCode(true)
             .setIsPaymentSessionActive(true)
             .setShouldInitCustomerSessionTokens(initCustomerSessionTokens)
             .setPaymentMethodType(paymentMethodType)
             .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
+            .setBillingAddressFields(billingAddressFields)
             .build()
     }
 

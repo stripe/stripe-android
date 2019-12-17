@@ -16,7 +16,7 @@ class AddPaymentMethodActivityStarterTest {
         val args = AddPaymentMethodActivityStarter.Args.Builder()
             .setPaymentMethodType(PaymentMethod.Type.Fpx)
             .setIsPaymentSessionActive(true)
-            .setShouldRequirePostalCode(true)
+            .setBillingAddressFields(BillingAddressFields.PostalCode)
             .build()
 
         assertEquals(args, ParcelUtils.create(args))

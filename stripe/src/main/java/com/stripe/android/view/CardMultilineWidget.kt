@@ -330,10 +330,7 @@ class CardMultilineWidget @JvmOverloads constructor(
             }
         }
 
-        return (cardNumberIsValid &&
-            expiryIsValid &&
-            cvcIsValid &&
-            postalCodeIsValidOrGone)
+        return cardNumberIsValid && expiryIsValid && cvcIsValid && postalCodeIsValidOrGone
     }
 
     override fun onWindowFocusChanged(hasWindowFocus: Boolean) {

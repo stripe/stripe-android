@@ -44,9 +44,11 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
         @LayoutRes val addPaymentMethodFooterLayoutId: Int,
         internal val isPaymentSessionActive: Boolean,
         internal val paymentMethodTypes: List<PaymentMethod.Type>,
-        internal val paymentConfiguration: PaymentConfiguration?
+        internal val paymentConfiguration: PaymentConfiguration?,
+        internal val billingAddressFields: BillingAddressFields
     ) : ActivityStarter.Args {
         class Builder : ObjectBuilder<Args> {
+            private var billingAddressFields: BillingAddressFields = BillingAddressFields.None
             private var initialPaymentMethodId: String? = null
             private var shouldRequirePostalCode = false
             private var isPaymentSessionActive = false
@@ -55,10 +57,21 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
             @LayoutRes
             private var addPaymentMethodFooterLayoutId: Int = 0
 
+            /**
+             * @param billingAddressFields the billing address fields to require on [AddPaymentMethodActivity]
+             */
+            fun setBillingAddressFields(
+                billingAddressFields: BillingAddressFields
+            ): Builder = apply {
+                this.billingAddressFields = billingAddressFields
+            }
+
             fun setInitialPaymentMethodId(initialPaymentMethodId: String?): Builder = apply {
                 this.initialPaymentMethodId = initialPaymentMethodId
             }
 
+            @Deprecated("Use setBillingAddressFields()",
+                ReplaceWith("setBillingAddressFields(BillingAddressFields.PostalCode"))
             fun setShouldRequirePostalCode(shouldRequirePostalCode: Boolean): Builder = apply {
                 this.shouldRequirePostalCode = shouldRequirePostalCode
             }
@@ -107,7 +120,8 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
                     isPaymentSessionActive = isPaymentSessionActive,
                     paymentMethodTypes = paymentMethodTypes ?: listOf(PaymentMethod.Type.Card),
                     paymentConfiguration = paymentConfiguration,
-                    addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId
+                    addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId,
+                    billingAddressFields = billingAddressFields
                 )
             }
         }
