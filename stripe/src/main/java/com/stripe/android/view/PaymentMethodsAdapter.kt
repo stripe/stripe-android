@@ -18,7 +18,8 @@ import java.util.ArrayList
 internal class PaymentMethodsAdapter constructor(
     private val intentArgs: PaymentMethodsActivityStarter.Args,
     private val addableTypes: List<PaymentMethod.Type> = listOf(PaymentMethod.Type.Card),
-    initiallySelectedPaymentMethodId: String? = null
+    initiallySelectedPaymentMethodId: String? = null,
+    private val shouldShowGooglePay: Boolean = false
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     internal val paymentMethods = ArrayList<PaymentMethod>()
@@ -32,6 +33,7 @@ internal class PaymentMethodsAdapter constructor(
 
     internal var listener: Listener? = null
     private val handler = Handler(Looper.getMainLooper())
+    private val googlePayCount = 1.takeIf { shouldShowGooglePay } ?: 0
 
     init {
         setHasStableIds(true)
@@ -45,45 +47,70 @@ internal class PaymentMethodsAdapter constructor(
     }
 
     override fun getItemCount(): Int {
-        return paymentMethods.size + addableTypes.size
+        return paymentMethods.size + addableTypes.size + googlePayCount
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (position < paymentMethods.size) {
-            val type = paymentMethods[position].type
-            if (PaymentMethod.Type.Card.code == type) {
-                ViewType.Card.ordinal
-            } else {
-                super.getItemViewType(position)
+        return when {
+            isGooglePayPosition(position) -> ViewType.GooglePay.ordinal
+            isPaymentMethodsPosition(position) -> {
+                val type = getPaymentMethodAtPosition(position).type
+                if (PaymentMethod.Type.Card.code == type) {
+                    ViewType.Card.ordinal
+                } else {
+                    super.getItemViewType(position)
+                }
             }
-        } else {
-            val paymentMethodType =
-                addableTypes[getAddableTypesPosition(position)]
-            return when (paymentMethodType) {
-                PaymentMethod.Type.Card -> ViewType.AddCard.ordinal
-                PaymentMethod.Type.Fpx -> ViewType.AddFpx.ordinal
-                else ->
-                    throw IllegalArgumentException(
-                        "Unsupported PaymentMethod type: ${paymentMethodType.code}")
+            else -> {
+                val paymentMethodType =
+                    addableTypes[getAddableTypesPosition(position)]
+                return when (paymentMethodType) {
+                    PaymentMethod.Type.Card -> ViewType.AddCard.ordinal
+                    PaymentMethod.Type.Fpx -> ViewType.AddFpx.ordinal
+                    else ->
+                        throw IllegalArgumentException(
+                            "Unsupported PaymentMethod type: ${paymentMethodType.code}")
+                }
             }
         }
     }
 
-    override fun getItemId(position: Int): Long {
-        return if (position < paymentMethods.size) {
-            paymentMethods[position].hashCode().toLong()
+    private fun isGooglePayPosition(position: Int): Boolean {
+        return shouldShowGooglePay && position == 0
+    }
+
+    private fun isPaymentMethodsPosition(position: Int): Boolean {
+        val range = if (shouldShowGooglePay) {
+            1..paymentMethods.size
         } else {
-            addableTypes[getAddableTypesPosition(position)].hashCode().toLong()
+            0 until paymentMethods.size
+        }
+        return position in range
+    }
+
+    override fun getItemId(position: Int): Long {
+        return when {
+            isGooglePayPosition(position) ->
+                GOOGLE_PAY_ITEM_ID
+            isPaymentMethodsPosition(position) ->
+                getPaymentMethodAtPosition(position).hashCode().toLong()
+            else ->
+                addableTypes[getAddableTypesPosition(position)].code.hashCode().toLong()
         }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is ViewHolder.PaymentMethodViewHolder) {
-            val paymentMethod = paymentMethods[position]
+            val paymentMethod = getPaymentMethodAtPosition(position)
             holder.setPaymentMethod(paymentMethod)
             holder.setSelected(paymentMethod.id == selectedPaymentMethodId)
             holder.itemView.setOnClickListener {
                 onPositionClicked(holder.adapterPosition)
+            }
+        } else if (holder is ViewHolder.GooglePayViewHolder) {
+            holder.itemView.setOnClickListener {
+                selectedPaymentMethodId = null
+                listener?.onGooglePayClick()
             }
         }
     }
@@ -91,7 +118,7 @@ internal class PaymentMethodsAdapter constructor(
     private fun onPositionClicked(position: Int) {
         updateSelectedPaymentMethod(position)
         handler.post {
-            listener?.onClick(paymentMethods[position])
+            listener?.onPaymentMethodClick(getPaymentMethodAtPosition(position))
         }
     }
 
@@ -169,8 +196,16 @@ internal class PaymentMethodsAdapter constructor(
         }
     }
 
+    private fun getPaymentMethodAtPosition(position: Int): PaymentMethod {
+        return paymentMethods[getPaymentMethodPosition(position)]
+    }
+
+    private fun getPaymentMethodPosition(position: Int): Int {
+        return position - googlePayCount
+    }
+
     private fun getAddableTypesPosition(position: Int): Int {
-        return position - paymentMethods.size
+        return position - paymentMethods.size - googlePayCount
     }
 
     internal sealed class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -202,13 +237,18 @@ internal class PaymentMethodsAdapter constructor(
     }
 
     internal interface Listener {
-        fun onClick(paymentMethod: PaymentMethod)
+        fun onPaymentMethodClick(paymentMethod: PaymentMethod)
+        fun onGooglePayClick()
     }
 
-    private enum class ViewType {
+    internal enum class ViewType {
         Card,
         AddCard,
         AddFpx,
         GooglePay
+    }
+
+    internal companion object {
+        internal val GOOGLE_PAY_ITEM_ID = "pm_google_pay".hashCode().toLong()
     }
 }
