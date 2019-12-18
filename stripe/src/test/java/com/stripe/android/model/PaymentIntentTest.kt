@@ -130,10 +130,22 @@ class PaymentIntentTest {
         assertFailsWith<IllegalArgumentException> {
             PaymentIntent.ClientSecret("pi_12345_secret_")
         }
+
+        assertFailsWith<IllegalArgumentException> {
+            SetupIntent.ClientSecret("pi_secret")
+        }
+
+        assertFailsWith<IllegalArgumentException> {
+            SetupIntent.ClientSecret("pi_secret_a")
+        }
+
+        assertFailsWith<IllegalArgumentException> {
+            PaymentIntent.ClientSecret("pi_a1b2c3_secret_x7y8z9pi_a1b2c3_secret_x7y8z9")
+        }
     }
 
     @Test
-    fun clientSecret_withValidKeys_throwsException() {
+    fun clientSecret_withValidKeys_succeeds() {
         assertEquals(
             "pi_a1b2c3_secret_x7y8z9",
             PaymentIntent.ClientSecret("pi_a1b2c3_secret_x7y8z9").value
