@@ -17,7 +17,7 @@
         android:id="@+id/auth_web_view_container"
         android:layout_below="@id/payment_auth_web_view_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
         <com.stripe.android.view.PaymentAuthWebView
             android:id="@+id/auth_web_view"
             android:layout_width="match_parent"
