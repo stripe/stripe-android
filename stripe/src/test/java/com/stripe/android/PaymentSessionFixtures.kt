@@ -51,6 +51,8 @@ internal object PaymentSessionFixtures {
 
         .setBillingAddressFields(BillingAddressFields.Full)
 
+        .setShouldPrefetchCustomer(true)
+
         .build()
 
     internal val PAYMENT_SESSION_DATA = PaymentSessionData(PAYMENT_SESSION_CONFIG)

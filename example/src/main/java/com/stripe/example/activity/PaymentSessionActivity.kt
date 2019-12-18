@@ -90,9 +90,9 @@ class PaymentSessionActivity : AppCompatActivity() {
                 .setShippingMethodsFactory(ShippingMethodsFactory())
                 .setWindowFlags(WindowManager.LayoutParams.FLAG_SECURE)
                 .setBillingAddressFields(BillingAddressFields.Full)
+                .setShouldPrefetchCustomer(shouldPrefetchCustomer)
                 .build(),
-            savedInstanceState = savedInstanceState,
-            shouldPrefetchCustomer = shouldPrefetchCustomer
+            savedInstanceState = savedInstanceState
         )
         if (paymentSessionInitialized) {
             paymentSession.setCartTotal(2000L)
