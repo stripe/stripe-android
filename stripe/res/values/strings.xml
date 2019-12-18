@@ -139,4 +139,10 @@
     <!-- TODO(mshafrir-stripe): translate string - ANDROID-432 -->
     <!-- Label that will show that an FPX bank is offline. For example, "AmBank - Offline" -->
     <string name="fpx_bank_offline" tools:ignore="MissingTranslation">%s - Offline</string>
+
+    <!--
+    Google Pay brand guidelines specify that the text should not be translated
+    https://developers.google.com/pay/api/android/guides/brand-guidelines#using-pay-in-text
+    -->
+    <string name="google_pay" tools:ignore="MissingTranslation">Google Pay</string>
 </resources>
