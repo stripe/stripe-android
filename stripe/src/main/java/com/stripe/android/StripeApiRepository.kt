@@ -368,6 +368,15 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
+    override fun retrieveSource(
+        sourceId: String,
+        clientSecret: String,
+        options: ApiRequest.Options,
+        callback: ApiResultCallback<Source>
+    ) {
+        RetrieveSourceTask(this, sourceId, clientSecret, options, callback).execute()
+    }
+
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, APIException::class)
     override fun createPaymentMethod(
@@ -991,6 +1000,20 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     )
                 else -> null
             }
+        }
+    }
+
+    private class RetrieveSourceTask constructor(
+        private val stripeRepository: StripeRepository,
+        private val sourceId: String,
+        private val clientSecret: String,
+        private val requestOptions: ApiRequest.Options,
+        callback: ApiResultCallback<Source>
+    ) : ApiOperation<Source>(callback = callback) {
+
+        @Throws(StripeException::class)
+        override suspend fun getResult(): Source? {
+            return stripeRepository.retrieveSource(sourceId, clientSecret, requestOptions)
         }
     }
 

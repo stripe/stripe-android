@@ -15,6 +15,8 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.model.Source
+import com.stripe.android.model.SourceFixtures
 import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.Stripe3ds2AuthResultFixtures
 import com.stripe.android.model.Stripe3ds2Fingerprint
@@ -30,6 +32,7 @@ import com.stripe.android.stripe3ds2.transaction.RuntimeErrorEvent
 import com.stripe.android.stripe3ds2.transaction.Transaction
 import com.stripe.android.stripe3ds2.views.ChallengeProgressDialogActivity
 import com.stripe.android.view.AuthActivityStarter
+import com.stripe.android.view.PaymentRelayActivity
 import com.stripe.android.view.StripeIntentResultExtras
 import java.security.cert.CertificateException
 import kotlin.test.BeforeTest
@@ -38,6 +41,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.MainScope
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -51,10 +55,6 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class StripePaymentControllerTest {
 
-    private lateinit var controller: PaymentController
-    private lateinit var analyticsDataFactory: AnalyticsDataFactory
-    private lateinit var host: AuthActivityStarter.Host
-
     @Mock
     private lateinit var activity: Activity
     @Mock
@@ -66,6 +66,8 @@ class StripePaymentControllerTest {
     @Mock
     private lateinit var setupAuthResultCallback: ApiResultCallback<SetupIntentResult>
     @Mock
+    private lateinit var sourceCallback: ApiResultCallback<Source>
+    @Mock
     private lateinit var complete3ds2AuthCallback: ApiResultCallback<Boolean>
     @Mock
     private lateinit var paymentRelayStarter: PaymentRelayStarter
@@ -73,6 +75,19 @@ class StripePaymentControllerTest {
     private lateinit var fireAndForgetRequestExecutor: FireAndForgetRequestExecutor
     @Mock
     private lateinit var challengeFlowStarter: StripePaymentController.ChallengeFlowStarter
+
+    private val context: Context by lazy {
+        ApplicationProvider.getApplicationContext<Context>()
+    }
+    private val controller: PaymentController by lazy {
+        createController()
+    }
+    private val analyticsDataFactory: AnalyticsDataFactory by lazy {
+        AnalyticsDataFactory.create(context)
+    }
+    private val host: AuthActivityStarter.Host by lazy {
+        AuthActivityStarter.Host.create(activity)
+    }
 
     private val complete3ds2AuthCallbackFactory =
         object : StripePaymentController.PaymentAuth3ds2ChallengeStatusReceiver.Complete3ds2AuthCallbackFactory {
@@ -88,6 +103,7 @@ class StripePaymentControllerTest {
     private lateinit var apiRequestArgumentCaptor: KArgumentCaptor<StripeRequest>
     private lateinit var setupIntentResultArgumentCaptor: KArgumentCaptor<SetupIntentResult>
     private lateinit var apiResultStripeIntentArgumentCaptor: KArgumentCaptor<ApiResultCallback<StripeIntent>>
+    private lateinit var sourceArgumentCaptor: KArgumentCaptor<Source>
 
     @BeforeTest
     fun setup() {
@@ -98,17 +114,12 @@ class StripePaymentControllerTest {
         apiRequestArgumentCaptor = argumentCaptor()
         setupIntentResultArgumentCaptor = argumentCaptor()
         apiResultStripeIntentArgumentCaptor = argumentCaptor()
+        sourceArgumentCaptor = argumentCaptor()
 
-        val context: Context = ApplicationProvider.getApplicationContext<Context>()
-
-        host = AuthActivityStarter.Host.create(activity)
-        analyticsDataFactory =
-            AnalyticsDataFactory.create(context)
         `when`<AuthenticationRequestParameters>(transaction.authenticationRequestParameters)
             .thenReturn(Stripe3ds2Fixtures.AREQ_PARAMS)
         `when`<Context>(activity.applicationContext)
             .thenReturn(context)
-        controller = createController()
     }
 
     @Test
@@ -584,11 +595,51 @@ class StripePaymentControllerTest {
         )
     }
 
+    @Test
+    fun shouldHandleSourceResult_withSourceRequestCode_returnsTrue() {
+        assertTrue(
+            controller.shouldHandleSourceResult(StripePaymentController.SOURCE_REQUEST_CODE, Intent())
+        )
+    }
+
+    @Test
+    fun handleSourceResult_withSuccessfulResult_shouldCallOnSuccess() {
+        controller.handleSourceResult(
+            data = Intent()
+                .putExtra(StripeIntentResultExtras.SOURCE_ID, "src_123")
+                .putExtra(StripeIntentResultExtras.CLIENT_SECRET, "src_123_secret_abc"),
+            requestOptions = REQUEST_OPTIONS,
+            callback = sourceCallback
+        )
+        verify(sourceCallback).onSuccess(sourceArgumentCaptor.capture())
+        assertEquals(
+            Source.SourceStatus.CHARGEABLE,
+            sourceArgumentCaptor.firstValue.status
+        )
+    }
+
+    @Test
+    fun startAuthenticateSource_withNoneFlowSource_shouldBypassAuth() {
+        controller.startAuthenticateSource(
+            host = host,
+            source = SourceFixtures.SOURCE_WITH_SOURCE_ORDER.copy(
+                flow = Source.SourceFlow.NONE
+            ),
+            requestOptions = REQUEST_OPTIONS
+        )
+        verify(activity).startActivityForResult(
+            intentArgumentCaptor.capture(),
+            eq(StripePaymentController.SOURCE_REQUEST_CODE)
+        )
+        val intent = intentArgumentCaptor.firstValue
+        assertEquals(PaymentRelayActivity::class.java.name, intent.component?.className)
+    }
+
     private fun createController(
         stripeRepository: StripeRepository = FakeStripeRepository()
     ): PaymentController {
         return StripePaymentController(
-            ApplicationProvider.getApplicationContext(),
+            context,
             stripeRepository,
             false,
             MessageVersionRegistry(),
@@ -633,6 +684,17 @@ class StripePaymentControllerTest {
         ) {
             super.retrieveIntent(clientSecret, options, callback)
             callback.onSuccess(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT)
+        }
+
+        override fun retrieveSource(
+            sourceId: String,
+            clientSecret: String,
+            options: ApiRequest.Options,
+            callback: ApiResultCallback<Source>
+        ) {
+            callback.onSuccess(
+                SourceFixtures.SOURCE_CARD.copy(status = Source.SourceStatus.CHARGEABLE)
+            )
         }
     }
 

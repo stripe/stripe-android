@@ -19,4 +19,6 @@ internal object StripeIntentResultExtras {
     const val SHOULD_CANCEL_SOURCE = "should_cancel_source"
 
     const val SOURCE_ID = "source_id"
+
+    const val SOURCE = "source"
 }

@@ -2,6 +2,7 @@ package com.stripe.android
 
 import android.content.Intent
 import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.AuthActivityStarter
 
@@ -21,6 +22,12 @@ internal interface PaymentController {
         requestOptions: ApiRequest.Options
     )
 
+    fun startAuthenticateSource(
+        host: AuthActivityStarter.Host,
+        source: Source,
+        requestOptions: ApiRequest.Options
+    )
+
     /**
      * Decide whether [handlePaymentResult] should be called.
      */
@@ -30,6 +37,8 @@ internal interface PaymentController {
      * Decide whether [handleSetupResult] should be called.
      */
     fun shouldHandleSetupResult(requestCode: Int, data: Intent?): Boolean
+
+    fun shouldHandleSourceResult(requestCode: Int, data: Intent?): Boolean
 
     /**
      * If payment authentication triggered an exception, get the exception object and pass to
@@ -59,6 +68,12 @@ internal interface PaymentController {
         data: Intent,
         requestOptions: ApiRequest.Options,
         callback: ApiResultCallback<SetupIntentResult>
+    )
+
+    fun handleSourceResult(
+        data: Intent,
+        requestOptions: ApiRequest.Options,
+        callback: ApiResultCallback<Source>
     )
 
     /**
