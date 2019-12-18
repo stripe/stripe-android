@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 12.8.1 - 2019-12-18
+* [#1968](https://github.com/stripe/stripe-android/pull/1968) Upgrade 3DS2 SDK to `2.2.7`
+    * Downgrade to `com.google.android.material:material:1.0.0`
+
 ## 12.8.0 - 2019-12-17
 * [#1947](https://github.com/stripe/stripe-android/pull/1947) Allow setting of window flags on Stripe Activities
     * Basic Integration
