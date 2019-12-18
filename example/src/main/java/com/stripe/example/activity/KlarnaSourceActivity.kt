@@ -5,6 +5,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.stripe.android.model.Address
 import com.stripe.android.model.KlarnaSourceParams
 import com.stripe.android.model.SourceParams
 import com.stripe.example.R
@@ -34,10 +35,20 @@ class KlarnaSourceActivity : AppCompatActivity() {
     private fun createKlarnaSource() {
         viewModel.createSource(SourceParams.createKlarna(
             returnUrl = RETURN_URL,
-            currency = "eur",
+            currency = "gbp",
             klarnaParams = KlarnaSourceParams(
-                purchaseCountry = "DE",
-                lineItems = LINE_ITEMS
+                purchaseCountry = "UK",
+                lineItems = LINE_ITEMS,
+                billingFirstName = "Arthur",
+                billingLastName = "Dent",
+                billingAddress = Address.Builder()
+                    .setLine1("29 Arlington Avenue")
+                    .setCity("London")
+                    .setCountry("UK")
+                    .setPostalCode("N1 7BE")
+                    .build(),
+                billingEmail = "test@example.com",
+                billingPhone = "02012267709"
             )
         ))
     }
