@@ -212,7 +212,7 @@ data class SetupIntent internal constructor(
         }
 
         private companion object {
-            private val PATTERN = Pattern.compile("^seti_(\\w)+_secret_(\\w)+$")
+            private val PATTERN = Pattern.compile("^seti_([a-zA-Z0-9])+_secret_([a-zA-Z0-9])+$")
         }
     }
 
