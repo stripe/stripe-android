@@ -3,7 +3,6 @@ package com.stripe.android.view
 import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
 
-@Suppress("unused")
 enum class FpxBank(
     val id: String,
     val code: String,

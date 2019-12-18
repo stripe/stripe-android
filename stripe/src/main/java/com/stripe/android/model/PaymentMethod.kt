@@ -16,7 +16,6 @@ import org.json.JSONObject
  *
  * See [PaymentMethodCreateParams] for PaymentMethod creation
  */
-@Suppress("DataClassPrivateConstructor")
 @Parcelize
 data class PaymentMethod internal constructor(
     @JvmField val id: String?,
