@@ -11,14 +11,16 @@ internal interface AlertDisplayer {
         private val activity: Activity
     ) : AlertDisplayer {
         override fun show(message: String) {
-            AlertDialog.Builder(activity, R.style.AlertDialogStyle)
-                .setMessage(message)
-                .setCancelable(true)
-                .setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
-                    dialogInterface.dismiss()
-                }
-                .create()
-                .show()
+            if (!activity.isFinishing) {
+                AlertDialog.Builder(activity, R.style.AlertDialogStyle)
+                    .setMessage(message)
+                    .setCancelable(true)
+                    .setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
+                        dialogInterface.dismiss()
+                    }
+                    .create()
+                    .show()
+            }
         }
     }
 }
