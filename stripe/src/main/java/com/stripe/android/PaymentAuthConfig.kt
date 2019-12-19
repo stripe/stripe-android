@@ -51,7 +51,7 @@ class PaymentAuthConfig private constructor(
                 Stripe3ds2UiCustomization.Builder().build()
 
             /**
-             * The 3DS2 challenge flow timeout, in seconds.
+             * The 3DS2 challenge flow timeout, in minutes.
              *
              * If the timeout is reached, the challenge screen will close, control will return to
              * the launching Activity/Fragment, payment authentication will not succeed, and the
