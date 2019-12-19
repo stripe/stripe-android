@@ -3,6 +3,7 @@ package com.stripe.android
 import android.os.Parcelable
 import androidx.annotation.LayoutRes
 import androidx.annotation.WorkerThread
+import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
@@ -34,6 +35,7 @@ data class PaymentSessionConfig internal constructor(
     val allowedShippingCountryCodes: Set<String> = emptySet(),
     val billingAddressFields: BillingAddressFields = BillingAddressFields.None,
 
+    internal val shouldPrefetchCustomer: Boolean = true,
     internal val shippingInformationValidator: ShippingInformationValidator? = null,
     internal val shippingMethodsFactory: ShippingMethodsFactory? = null,
     internal val windowFlags: Int? = null
@@ -97,6 +99,7 @@ data class PaymentSessionConfig internal constructor(
         private var shippingInformationValidator: ShippingInformationValidator? = null
         private var shippingMethodsFactory: ShippingMethodsFactory? = null
         private var windowFlags: Int? = null
+        private var shouldPrefetchCustomer: Boolean = true
 
         @LayoutRes
         private var addPaymentMethodFooterLayoutId: Int = 0
@@ -228,6 +231,16 @@ data class PaymentSessionConfig internal constructor(
             this.shippingMethodsFactory = shippingMethodsFactory
         }
 
+        /**
+         * @param shouldPrefetchCustomer If true, will immediately fetch the [Customer] associated
+         * with this session. Otherwise, will only fetch when needed.
+         *
+         * Defaults to true.
+         */
+        fun setShouldPrefetchCustomer(shouldPrefetchCustomer: Boolean): Builder = apply {
+            this.shouldPrefetchCustomer = shouldPrefetchCustomer
+        }
+
         override fun build(): PaymentSessionConfig {
             return PaymentSessionConfig(
                 hiddenShippingInfoFields = hiddenShippingInfoFields.orEmpty(),
@@ -241,7 +254,8 @@ data class PaymentSessionConfig internal constructor(
                 shippingInformationValidator = shippingInformationValidator,
                 shippingMethodsFactory = shippingMethodsFactory,
                 windowFlags = windowFlags,
-                billingAddressFields = billingAddressFields
+                billingAddressFields = billingAddressFields,
+                shouldPrefetchCustomer = shouldPrefetchCustomer
             )
         }
     }
