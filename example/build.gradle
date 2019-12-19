@@ -73,20 +73,20 @@ dependencies {
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 
-    testImplementation 'androidx.test:core:1.2.0'
+    testImplementation "androidx.test:core:$androidTestVersion"
 
     // Core library
-    androidTestImplementation 'androidx.test:core:1.2.0'
-    androidTestImplementation 'androidx.test:core-ktx:1.2.0'
+    androidTestImplementation "androidx.test:core:$androidTestVersion"
+    androidTestImplementation "androidx.test:core-ktx:$androidTestVersion"
 
     // AndroidJUnitRunner and JUnit Rules
-    androidTestImplementation 'androidx.test:runner:1.2.0'
-    androidTestImplementation 'androidx.test:rules:1.2.0'
+    androidTestImplementation "androidx.test:runner:$androidTestVersion"
+    androidTestImplementation "androidx.test:rules:$androidTestVersion"
 
     // Assertions
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.ext:junit-ktx:1.1.1'
-    androidTestImplementation 'androidx.test.ext:truth:1.2.0'
+    androidTestImplementation "androidx.test.ext:truth:$androidTestVersion"
     androidTestImplementation 'com.google.truth:truth:1.0'
 
     // Espresso dependencies
@@ -101,7 +101,7 @@ dependencies {
     // classpath.
     androidTestImplementation "androidx.test.espresso:espresso-idling-resource:$espressoVersion"
 
-    androidTestUtil 'androidx.test:orchestrator:1.2.0'
+    androidTestUtil "androidx.test:orchestrator:$androidTestVersion"
 }
 
 android {
