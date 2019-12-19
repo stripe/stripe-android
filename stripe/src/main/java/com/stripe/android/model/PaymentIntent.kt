@@ -265,7 +265,7 @@ data class PaymentIntent internal constructor(
         }
 
         private companion object {
-            private val PATTERN = Pattern.compile("^pi_([a-zA-Z0-9])+_secret_([a-zA-Z0-9])+$")
+            private val PATTERN = Pattern.compile("^pi_[^_]+_secret_[^_]+$")
         }
     }
 
