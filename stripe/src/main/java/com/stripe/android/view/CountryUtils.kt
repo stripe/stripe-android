@@ -4,7 +4,7 @@ import java.util.Locale
 
 internal object CountryUtils {
 
-    private val NO_POSTAL_CODE_COUNTRIES = setOf(
+    internal val NO_POSTAL_CODE_COUNTRIES = setOf(
         "AE", "AG", "AN", "AO", "AW", "BF", "BI", "BJ", "BO", "BS", "BW", "BZ", "CD", "CF", "CG",
         "CI", "CK", "CM", "DJ", "DM", "ER", "FJ", "GD", "GH", "GM", "GN", "GQ", "GY", "HK", "IE",
         "JM", "KE", "KI", "KM", "KN", "KP", "LC", "ML", "MO", "MR", "MS", "MU", "MW", "NR", "NU",
