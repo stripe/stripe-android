@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 12.8.2 - unreleased
+* [#1974](https://github.com/stripe/stripe-android/pull/1974) Add `PaymentSessionConfig#shouldPrefetchCustomer`
+    * Mark `PaymentSessionConfig#init()` with `shouldPrefetchCustomer` argument as deprecated
+* [#1980](https://github.com/stripe/stripe-android/pull/1980) Don't show a `Dialog` in `StripeActivity` if `isFinishing()`
+
 ## 12.8.1 - 2019-12-18
 * [#1968](https://github.com/stripe/stripe-android/pull/1968) Upgrade 3DS2 SDK to `2.2.7`
     * Downgrade to `com.google.android.material:material:1.0.0`
