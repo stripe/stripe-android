@@ -49,7 +49,7 @@ class CountryAutoCompleteTextViewTest {
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         CustomerSession.initCustomerSession(context, ephemeralKeyProvider)
 
-        val config = PaymentSessionFixtures.PAYMENT_SESSION_CONFIG.copy(
+        val config = PaymentSessionFixtures.CONFIG.copy(
             prepopulatedShippingInfo = null,
             allowedShippingCountryCodes = emptySet()
         )

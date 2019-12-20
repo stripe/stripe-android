@@ -3,12 +3,13 @@ package com.stripe.android
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
+import com.stripe.android.model.ShippingMethod
 import com.stripe.android.view.BillingAddressFields
 import com.stripe.android.view.PaymentFlowActivityStarter
 import com.stripe.android.view.ShippingInfoWidget
 
 internal object PaymentSessionFixtures {
-    internal val PAYMENT_SESSION_CONFIG = PaymentSessionConfig.Builder()
+    internal val CONFIG = PaymentSessionConfig.Builder()
 
         // hide the phone field on the shipping information form
         .setHiddenShippingInfoFields(
@@ -49,17 +50,38 @@ internal object PaymentSessionFixtures {
         .setAllowedShippingCountryCodes(
             setOf("US", "CA")
         )
-
         .setBillingAddressFields(BillingAddressFields.Full)
-
         .setShouldPrefetchCustomer(true)
 
+        .setShippingInformationValidator(FakeShippingInformationValidator())
+        .setShippingMethodsFactory(FakeShippingMethodsFactory())
         .build()
 
-    internal val PAYMENT_SESSION_DATA = PaymentSessionData(PAYMENT_SESSION_CONFIG)
+    internal val PAYMENT_SESSION_DATA = PaymentSessionData(CONFIG)
 
     internal val PAYMENT_FLOW_ARGS = PaymentFlowActivityStarter.Args(
-        paymentSessionConfig = PAYMENT_SESSION_CONFIG,
+        paymentSessionConfig = CONFIG,
         paymentSessionData = PAYMENT_SESSION_DATA
     )
+
+    private class FakeShippingInformationValidator : PaymentSessionConfig.ShippingInformationValidator {
+        override fun isValid(shippingInformation: ShippingInformation): Boolean {
+            return true
+        }
+
+        override fun getErrorMessage(shippingInformation: ShippingInformation): String {
+            return ""
+        }
+    }
+
+    private class FakeShippingMethodsFactory : PaymentSessionConfig.ShippingMethodsFactory {
+        override fun create(shippingInformation: ShippingInformation): List<ShippingMethod> {
+            return listOf(
+                ShippingMethod("UPS Ground", "ups-ground",
+                    0, "USD", "Arrives in 3-5 days"),
+                ShippingMethod("FedEx", "fedex",
+                    599, "USD", "Arrives tomorrow")
+            )
+        }
+    }
 }

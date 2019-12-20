@@ -1,14 +1,10 @@
 package com.stripe.android.view
 
 import android.app.Activity
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.viewpager.widget.ViewPager
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession.Companion.EXTRA_PAYMENT_SESSION_DATA
@@ -31,8 +27,6 @@ class PaymentFlowActivity : StripeActivity() {
     private lateinit var paymentSessionConfig: PaymentSessionConfig
     private lateinit var customerSession: CustomerSession
     private lateinit var viewModel: PaymentFlowViewModel
-
-    private var shippingInfoSubmittedBroadcastReceiver: BroadcastReceiver? = null
 
     private val keyboardController: KeyboardController by lazy {
         KeyboardController(this)
@@ -84,38 +78,7 @@ class PaymentFlowActivity : StripeActivity() {
             }
         })
 
-        if (paymentSessionConfig.shippingInformationValidator == null) {
-            shippingInfoSubmittedBroadcastReceiver = createShippingInfoSubmittedBroadcastReceiver()
-        }
-
         title = paymentFlowPagerAdapter.getPageTitle(shipping_flow_viewpager.currentItem)
-    }
-
-    private fun createShippingInfoSubmittedBroadcastReceiver(): BroadcastReceiver {
-        return object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                val isShippingInfoValid = intent.getBooleanExtra(
-                    PaymentFlowExtras.EXTRA_IS_SHIPPING_INFO_VALID,
-                    false)
-                if (isShippingInfoValid) {
-                    val shippingMethods: List<ShippingMethod>? =
-                        intent.getParcelableArrayListExtra(
-                            PaymentFlowExtras.EXTRA_VALID_SHIPPING_METHODS
-                        )
-                    val defaultShippingMethod: ShippingMethod? = intent
-                        .getParcelableExtra(PaymentFlowExtras.EXTRA_DEFAULT_SHIPPING_METHOD)
-
-                    onShippingInfoValidated(
-                        shippingMethods.orEmpty(),
-                        defaultShippingMethod
-                    )
-                } else {
-                    val errorMessage =
-                        intent.getStringExtra(PaymentFlowExtras.EXTRA_SHIPPING_INFO_ERROR)
-                    onShippingInfoError(errorMessage)
-                }
-            }
-        }
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -129,25 +92,6 @@ class PaymentFlowActivity : StripeActivity() {
             onShippingInfoSubmitted()
         } else {
             onShippingMethodSave()
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-
-        shippingInfoSubmittedBroadcastReceiver?.let {
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(it)
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        shippingInfoSubmittedBroadcastReceiver?.let {
-            LocalBroadcastManager.getInstance(this).registerReceiver(
-                it,
-                IntentFilter(PaymentFlowExtras.EVENT_SHIPPING_INFO_PROCESSED)
-            )
         }
     }
 
@@ -216,17 +160,11 @@ class PaymentFlowActivity : StripeActivity() {
             )
             setCommunicatingProgress(true)
 
-            val shippingInfoValidator =
-                paymentSessionConfig.shippingInformationValidator
-            if (shippingInfoValidator != null) {
-                validateShippingInformation(
-                    shippingInfoValidator,
-                    paymentSessionConfig.shippingMethodsFactory,
-                    shippingInfo
-                )
-            } else {
-                broadcastShippingInfoSubmitted(shippingInfo)
-            }
+            validateShippingInformation(
+                paymentSessionConfig.shippingInformationValidator,
+                paymentSessionConfig.shippingMethodsFactory,
+                shippingInfo
+            )
         }
     }
 
@@ -246,14 +184,6 @@ class PaymentFlowActivity : StripeActivity() {
                 null
             }
         }
-
-    private fun broadcastShippingInfoSubmitted(shippingInformation: ShippingInformation) {
-        LocalBroadcastManager.getInstance(this)
-            .sendBroadcast(
-                Intent(PaymentFlowExtras.EVENT_SHIPPING_INFO_SUBMITTED)
-                    .putExtra(PaymentFlowExtras.EXTRA_SHIPPING_INFO_DATA, shippingInformation)
-            )
-    }
 
     private fun hasNextPage(): Boolean {
         return shipping_flow_viewpager.currentItem + 1 < paymentFlowPagerAdapter.count

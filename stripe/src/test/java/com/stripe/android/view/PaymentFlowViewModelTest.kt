@@ -35,7 +35,7 @@ class PaymentFlowViewModelTest {
     private val viewModel: PaymentFlowViewModel by lazy {
         PaymentFlowViewModel(
             customerSession = customerSession,
-            paymentSessionData = PaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_CONFIG),
+            paymentSessionData = PaymentSessionData(PaymentSessionFixtures.CONFIG),
             workScope = MainScope()
         )
     }

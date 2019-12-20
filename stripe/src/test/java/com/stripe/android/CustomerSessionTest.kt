@@ -53,13 +53,27 @@ class CustomerSessionTest {
     @Mock
     private lateinit var threadPoolExecutor: ThreadPoolExecutor
 
-    private lateinit var productUsageArgumentCaptor: KArgumentCaptor<Set<String>>
-    private lateinit var sourceArgumentCaptor: KArgumentCaptor<Source>
-    private lateinit var paymentMethodArgumentCaptor: KArgumentCaptor<PaymentMethod>
-    private lateinit var paymentMethodsArgumentCaptor: KArgumentCaptor<List<PaymentMethod>>
-    private lateinit var customerArgumentCaptor: KArgumentCaptor<Customer>
-    private lateinit var intentArgumentCaptor: KArgumentCaptor<Intent>
-    private lateinit var requestOptionsArgumentCaptor: KArgumentCaptor<ApiRequest.Options>
+    private val productUsageArgumentCaptor: KArgumentCaptor<Set<String>> by lazy {
+        argumentCaptor<Set<String>>()
+    }
+    private val sourceArgumentCaptor: KArgumentCaptor<Source> by lazy {
+        argumentCaptor<Source>()
+    }
+    private val paymentMethodArgumentCaptor: KArgumentCaptor<PaymentMethod> by lazy {
+        argumentCaptor<PaymentMethod>()
+    }
+    private val paymentMethodsArgumentCaptor: KArgumentCaptor<List<PaymentMethod>> by lazy {
+        argumentCaptor<List<PaymentMethod>>()
+    }
+    private val customerArgumentCaptor: KArgumentCaptor<Customer> by lazy {
+        argumentCaptor<Customer>()
+    }
+    private val intentArgumentCaptor: KArgumentCaptor<Intent> by lazy {
+        argumentCaptor<Intent>()
+    }
+    private val requestOptionsArgumentCaptor: KArgumentCaptor<ApiRequest.Options> by lazy {
+        argumentCaptor<ApiRequest.Options>()
+    }
 
     private val ephemeralKeyProvider: TestEphemeralKeyProvider = TestEphemeralKeyProvider()
 
@@ -67,21 +81,9 @@ class CustomerSessionTest {
         ActivityScenarioFactory(ApplicationProvider.getApplicationContext())
     }
 
-    private fun getCustomerEphemeralKey(key: String): EphemeralKey {
-        return EphemeralKeyJsonParser().parse(JSONObject(key))
-    }
-
     @BeforeTest
     fun setup() {
         MockitoAnnotations.initMocks(this)
-
-        productUsageArgumentCaptor = argumentCaptor()
-        sourceArgumentCaptor = argumentCaptor()
-        paymentMethodArgumentCaptor = argumentCaptor()
-        paymentMethodsArgumentCaptor = argumentCaptor()
-        customerArgumentCaptor = argumentCaptor()
-        intentArgumentCaptor = argumentCaptor()
-        requestOptionsArgumentCaptor = argumentCaptor()
 
         `when`<Customer>(stripeRepository.retrieveCustomer(any(), any()))
             .thenReturn(FIRST_CUSTOMER, SECOND_CUSTOMER)
@@ -586,6 +588,9 @@ class CustomerSessionTest {
         val customerSession = createCustomerSession(null)
         CustomerSession.instance = customerSession
 
+        val config = PaymentSessionFixtures.CONFIG.copy(
+            allowedShippingCountryCodes = emptySet()
+        )
         activityScenarioFactory.create<PaymentFlowActivity>(
             PaymentSessionFixtures.PAYMENT_FLOW_ARGS
         ).use { activityScenario ->
@@ -600,10 +605,9 @@ class CustomerSessionTest {
         val customerSession = createCustomerSession(null)
         CustomerSession.instance = customerSession
 
-        val config = PaymentSessionConfig.Builder()
-            .setShippingInfoRequired(false)
-            .build()
-
+        val config = PaymentSessionFixtures.CONFIG.copy(
+            isShippingInfoRequired = false
+        )
         activityScenarioFactory.create<PaymentFlowActivity>(
             PaymentFlowActivityStarter.Args(
                 paymentSessionConfig = config,
@@ -909,5 +913,9 @@ class CustomerSessionTest {
         private val SECOND_CUSTOMER = CustomerFixtures.OTHER_CUSTOMER
 
         private val PAYMENT_METHOD = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+
+        private fun getCustomerEphemeralKey(key: String): EphemeralKey {
+            return EphemeralKeyJsonParser().parse(JSONObject(key))
+        }
     }
 }

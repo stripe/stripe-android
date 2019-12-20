@@ -69,8 +69,9 @@ class PaymentFlowActivityStarter :
 
             override fun build(): Args {
                 return Args(
-                    paymentSessionConfig = paymentSessionConfig
-                        ?: PaymentSessionConfig.Builder().build(),
+                    paymentSessionConfig = requireNotNull(paymentSessionConfig) {
+                        "PaymentFlowActivity launched without PaymentSessionConfig"
+                    },
                     paymentSessionData = requireNotNull(paymentSessionData) {
                         "PaymentFlowActivity launched without PaymentSessionData"
                     },

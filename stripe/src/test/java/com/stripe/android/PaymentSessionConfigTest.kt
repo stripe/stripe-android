@@ -1,6 +1,6 @@
 package com.stripe.android
 
-import com.stripe.android.PaymentSessionFixtures.PAYMENT_SESSION_CONFIG
+import com.stripe.android.PaymentSessionFixtures.CONFIG
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.utils.ParcelUtils
 import kotlin.test.Test
@@ -15,13 +15,13 @@ class PaymentSessionConfigTest {
 
     @Test
     fun testParcel() {
-        assertEquals(PAYMENT_SESSION_CONFIG, ParcelUtils.create(PAYMENT_SESSION_CONFIG))
+        assertEquals(CONFIG, ParcelUtils.create(CONFIG))
     }
 
     @Test
     fun create_withValidCountryCode_succeeds() {
         val allowedShippingCountryCodes = setOf("us", "CA")
-        val config = PAYMENT_SESSION_CONFIG.copy(
+        val config = CONFIG.copy(
             allowedShippingCountryCodes = allowedShippingCountryCodes
         )
         assertEquals(allowedShippingCountryCodes, config.allowedShippingCountryCodes)
@@ -29,7 +29,7 @@ class PaymentSessionConfigTest {
 
     @Test
     fun create_withEmptyCountryCodesList_succeeds() {
-        val config = PAYMENT_SESSION_CONFIG.copy(
+        val config = CONFIG.copy(
             allowedShippingCountryCodes = emptySet()
         )
         assertTrue(config.allowedShippingCountryCodes.isEmpty())
@@ -38,7 +38,7 @@ class PaymentSessionConfigTest {
     @Test
     fun create_withInvalidCountryCode_throwsException() {
         val exception: IllegalArgumentException = assertFailsWith {
-            PAYMENT_SESSION_CONFIG.copy(
+            CONFIG.copy(
                 allowedShippingCountryCodes = setOf("invalid_country_code")
             )
         }
