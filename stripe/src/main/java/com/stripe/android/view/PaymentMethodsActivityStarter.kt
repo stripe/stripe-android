@@ -40,7 +40,6 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
     @Parcelize
     data class Args internal constructor(
         internal val initialPaymentMethodId: String?,
-        val shouldRequirePostalCode: Boolean,
         @LayoutRes val addPaymentMethodFooterLayoutId: Int,
         internal val isPaymentSessionActive: Boolean,
         internal val paymentMethodTypes: List<PaymentMethod.Type>,
@@ -52,7 +51,6 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
         class Builder : ObjectBuilder<Args> {
             private var billingAddressFields: BillingAddressFields = BillingAddressFields.None
             private var initialPaymentMethodId: String? = null
-            private var shouldRequirePostalCode = false
             private var isPaymentSessionActive = false
             private var paymentMethodTypes: List<PaymentMethod.Type>? = null
             private var shouldShowGooglePay: Boolean = false
@@ -72,12 +70,6 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
 
             fun setInitialPaymentMethodId(initialPaymentMethodId: String?): Builder = apply {
                 this.initialPaymentMethodId = initialPaymentMethodId
-            }
-
-            @Deprecated("Use setBillingAddressFields()",
-                ReplaceWith("setBillingAddressFields(BillingAddressFields.PostalCode"))
-            fun setShouldRequirePostalCode(shouldRequirePostalCode: Boolean): Builder = apply {
-                this.shouldRequirePostalCode = shouldRequirePostalCode
             }
 
             fun setIsPaymentSessionActive(isPaymentSessionActive: Boolean): Builder = apply {
@@ -138,7 +130,6 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
             override fun build(): Args {
                 return Args(
                     initialPaymentMethodId = initialPaymentMethodId,
-                    shouldRequirePostalCode = shouldRequirePostalCode,
                     isPaymentSessionActive = isPaymentSessionActive,
                     paymentMethodTypes = paymentMethodTypes ?: listOf(PaymentMethod.Type.Card),
                     shouldShowGooglePay = shouldShowGooglePay,

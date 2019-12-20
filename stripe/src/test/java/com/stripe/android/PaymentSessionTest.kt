@@ -185,7 +185,7 @@ class PaymentSessionTest {
         assertEquals(PaymentMethodsActivity::class.java.name, component?.className)
 
         val args = PaymentMethodsActivityStarter.Args.create(intent)
-        assertFalse(args.shouldRequirePostalCode)
+        assertEquals(BillingAddressFields.None, args.billingAddressFields)
     }
 
     @Test

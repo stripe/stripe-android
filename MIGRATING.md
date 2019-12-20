@@ -15,6 +15,8 @@
       If you need to specify `shouldPrefetchCustomer`, use `PaymentSessionConfig.Builder.setShouldPrefetchCustomer()`.
     - `PaymentSession#presentPaymentMethodSelection(shouldRequirePostalCode, userSelectedPaymentMethodId)` is deleted.
       If you need to specify billing details, use `PaymentSessionConfig.Builder#setBillingAddressFields()`.
+    - `setShouldRequirePostalCode()` has been removed from `AddPaymentMethodActivityStarter.Args` and
+      `PaymentMethodsActivityStarter.Args`. Use `setBillingAddressFields()` instead.
     - Shipping information validation and shipping methods creation logic when using `PaymentSession` has been improved.
       Previously, this was accomplished by creating a `BroadcastReceiver` and registering it for a
       particular `Intent`. This has been greatly simplified by providing `ShippingInformationValidator`
