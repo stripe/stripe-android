@@ -85,6 +85,7 @@ class PaymentSessionActivity : AppCompatActivity() {
                 // Optionally specify the `PaymentMethod.Type` values to use.
                 // Defaults to `PaymentMethod.Type.Card`
                 .setPaymentMethodTypes(listOf(PaymentMethod.Type.Card))
+                .setShouldShowGooglePay(true)
                 .setAllowedShippingCountryCodes(setOf("US", "CA"))
                 .setShippingInformationValidator(ShippingInformationValidator())
                 .setShippingMethodsFactory(ShippingMethodsFactory())
@@ -102,11 +103,20 @@ class PaymentSessionActivity : AppCompatActivity() {
     }
 
     private fun createPaymentMethodDescription(data: PaymentSessionData): String {
-        return data.paymentMethod?.let { paymentMethod ->
-            paymentMethod.card?.let { card ->
-                "${card.brand} ending in ${card.last4}"
-            } ?: paymentMethod.type
-        } ?: notSelectedText
+        val paymentMethod = data.paymentMethod
+        return when {
+            paymentMethod != null -> {
+                paymentMethod.card?.let { card ->
+                    "${card.brand} ending in ${card.last4}"
+                } ?: paymentMethod.type.orEmpty()
+            }
+            data.useGooglePay -> {
+                "Use Google Pay"
+            }
+            else -> {
+                notSelectedText
+            }
+        }
     }
 
     private fun createShippingInfoDescription(shippingInformation: ShippingInformation?): String {

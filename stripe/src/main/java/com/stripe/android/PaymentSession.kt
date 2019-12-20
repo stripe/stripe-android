@@ -118,9 +118,11 @@ class PaymentSession @VisibleForTesting internal constructor(
     }
 
     private fun onPaymentMethodResult(data: Intent) {
-        val paymentMethod: PaymentMethod? =
-            PaymentMethodsActivityStarter.Result.fromIntent(data)?.paymentMethod
-        persistPaymentMethod(paymentMethod)
+        val result = PaymentMethodsActivityStarter.Result.fromIntent(data)
+        persistPaymentMethodResult(
+            paymentMethod = result?.paymentMethod,
+            useGooglePay = result?.useGooglePay ?: false
+        )
         dispatchUpdates()
     }
 
@@ -129,11 +131,17 @@ class PaymentSession @VisibleForTesting internal constructor(
         paymentSessionListener?.onCommunicatingStateChanged(false)
     }
 
-    private fun persistPaymentMethod(paymentMethod: PaymentMethod?) {
+    private fun persistPaymentMethodResult(
+        paymentMethod: PaymentMethod?,
+        useGooglePay: Boolean
+    ) {
         customerSession.cachedCustomer?.id?.let { customerId ->
             paymentSessionPrefs.saveSelectedPaymentMethodId(customerId, paymentMethod?.id)
         }
-        paymentSessionData = paymentSessionData.copy(paymentMethod = paymentMethod)
+        paymentSessionData = paymentSessionData.copy(
+            paymentMethod = paymentMethod,
+            useGooglePay = useGooglePay
+        )
     }
 
     /**
@@ -260,6 +268,7 @@ class PaymentSession @VisibleForTesting internal constructor(
                 .setIsPaymentSessionActive(true)
                 .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
                 .setPaymentMethodTypes(config?.paymentMethodTypes.orEmpty())
+                .setShouldShowGooglePay(config?.shouldShowGooglePay ?: false)
                 .setWindowFlags(config?.windowFlags)
                 .setBillingAddressFields(config?.billingAddressFields ?: BillingAddressFields.None)
                 .build()

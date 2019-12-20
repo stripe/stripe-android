@@ -112,8 +112,7 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
              * Payment Methods selection screen. If a user selects the Google Pay option,
              * [PaymentMethodsActivityStarter.Result.useGooglePay] will be `true`.
              */
-            @JvmSynthetic
-            internal fun setShouldShowGooglePay(shouldShowGooglePay: Boolean): Builder = apply {
+            fun setShouldShowGooglePay(shouldShowGooglePay: Boolean): Builder = apply {
                 this.shouldShowGooglePay = shouldShowGooglePay
             }
 
@@ -168,8 +167,8 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
      */
     @Parcelize
     data class Result internal constructor(
-        @JvmField val paymentMethod: PaymentMethod?,
-        private val useGooglePay: Boolean = false
+        @JvmField val paymentMethod: PaymentMethod? = null,
+        val useGooglePay: Boolean = false
     ) : ActivityStarter.Result {
         override fun toBundle(): Bundle {
             val bundle = Bundle()

@@ -119,7 +119,7 @@ class PaymentSessionTest {
     }
 
     @Test
-    fun handlePaymentData_whenPaymentMethodRequest_notifiesListenerAndFetchesCustomer() {
+    fun handlePaymentData_whenPaymentMethodSelected_notifiesListenerAndFetchesCustomer() {
         CustomerSession.instance = createCustomerSession()
 
         val paymentSession = PaymentSession(activity)
@@ -128,7 +128,9 @@ class PaymentSessionTest {
         // We have already tested the functionality up to here.
         reset(paymentSessionListener)
 
-        val result = PaymentMethodsActivityStarter.Result(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        val result = PaymentMethodsActivityStarter.Result(
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        )
         val handled = paymentSession.handlePaymentData(
             PaymentMethodsActivityStarter.REQUEST_CODE, RESULT_OK,
             Intent().putExtras(result.toBundle()))
@@ -138,6 +140,32 @@ class PaymentSessionTest {
             .onPaymentSessionDataChanged(paymentSessionDataArgumentCaptor.capture())
         val data = paymentSessionDataArgumentCaptor.firstValue
         assertEquals(PaymentMethodFixtures.CARD_PAYMENT_METHOD, data.paymentMethod)
+        assertFalse(data.useGooglePay)
+    }
+
+    @Test
+    fun handlePaymentData_whenGooglePaySelected_notifiesListenerAndFetchesCustomer() {
+        CustomerSession.instance = createCustomerSession()
+
+        val paymentSession = PaymentSession(activity)
+        paymentSession.init(paymentSessionListener, PaymentSessionConfig.Builder().build())
+
+        // We have already tested the functionality up to here.
+        reset(paymentSessionListener)
+
+        val result = PaymentMethodsActivityStarter.Result(
+            useGooglePay = true
+        )
+        val handled = paymentSession.handlePaymentData(
+            PaymentMethodsActivityStarter.REQUEST_CODE, RESULT_OK,
+            Intent().putExtras(result.toBundle()))
+        assertTrue(handled)
+
+        verify(paymentSessionListener)
+            .onPaymentSessionDataChanged(paymentSessionDataArgumentCaptor.capture())
+        val data = paymentSessionDataArgumentCaptor.firstValue
+        assertNull(data.paymentMethod)
+        assertTrue(data.useGooglePay)
     }
 
     @Test

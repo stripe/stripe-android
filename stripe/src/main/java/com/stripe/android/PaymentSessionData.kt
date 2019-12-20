@@ -36,7 +36,14 @@ data class PaymentSessionData internal constructor(
     /**
      * @return the selected payment method for the associated [PaymentSession]
      */
-    val paymentMethod: PaymentMethod? = null
+    val paymentMethod: PaymentMethod? = null,
+
+    /**
+     * When `true`, the customer has indicated their intent to pay with Google Pay. Use the
+     * [Google Pay API](https://developers.google.com/pay/api/android/overview) to complete
+     * payment with Google Pay.
+     */
+    val useGooglePay: Boolean = false
 ) : Parcelable {
 
     /**
@@ -45,7 +52,7 @@ data class PaymentSessionData internal constructor(
      */
     val isPaymentReadyToCharge: Boolean
         get() =
-            paymentMethod != null && config != null &&
+            (paymentMethod != null || useGooglePay) && config != null &&
                 (!config.isShippingInfoRequired || shippingInformation != null) &&
                 (!config.isShippingMethodRequired || shippingMethod != null)
 }
