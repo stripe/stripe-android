@@ -40,7 +40,7 @@ class CreateSepaDebitActivity : AppCompatActivity() {
                         .setEmail(CUSTOMER_EMAIl)
                         .build()
                 ),
-                object : ApiResultCallback<PaymentMethod> {
+                callback = object : ApiResultCallback<PaymentMethod> {
                     override fun onSuccess(result: PaymentMethod) {
                         progressBar.visibility = View.INVISIBLE
                         Toast.makeText(

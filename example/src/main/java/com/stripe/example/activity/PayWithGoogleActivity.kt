@@ -150,8 +150,9 @@ class PayWithGoogleActivity : AppCompatActivity() {
         val paymentMethodCreateParams =
             PaymentMethodCreateParams.createFromGooglePay(paymentDataJson)
 
-        stripe.createPaymentMethod(paymentMethodCreateParams,
-            object : ApiResultCallback<PaymentMethod> {
+        stripe.createPaymentMethod(
+            paymentMethodCreateParams,
+            callback = object : ApiResultCallback<PaymentMethod> {
                 override fun onSuccess(result: PaymentMethod) {
                     showSnackbar("Created PaymentMethod ${result.id}")
                 }
@@ -160,7 +161,8 @@ class PayWithGoogleActivity : AppCompatActivity() {
                     Log.e("StripeExample", "Exception while creating PaymentMethod", e)
                     showSnackbar("Exception while creating PaymentMethod")
                 }
-            })
+            }
+        )
     }
 
     private fun showSnackbar(message: String) {
