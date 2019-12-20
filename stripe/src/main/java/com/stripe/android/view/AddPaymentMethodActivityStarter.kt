@@ -30,7 +30,6 @@ class AddPaymentMethodActivityStarter constructor(
     data class Args internal constructor(
         internal val billingAddressFields: BillingAddressFields,
         internal val shouldAttachToCustomer: Boolean,
-        internal val shouldRequirePostalCode: Boolean,
         internal val isPaymentSessionActive: Boolean,
         internal val shouldInitCustomerSessionTokens: Boolean,
         internal val paymentMethodType: PaymentMethod.Type,
@@ -42,7 +41,6 @@ class AddPaymentMethodActivityStarter constructor(
         class Builder : ObjectBuilder<Args> {
             private var billingAddressFields: BillingAddressFields = BillingAddressFields.None
             private var shouldAttachToCustomer: Boolean = false
-            private var shouldRequirePostalCode: Boolean = false
             private var isPaymentSessionActive = false
             private var shouldInitCustomerSessionTokens = true
             private var paymentMethodType: PaymentMethod.Type? = PaymentMethod.Type.Card
@@ -66,19 +64,6 @@ class AddPaymentMethodActivityStarter constructor(
                 billingAddressFields: BillingAddressFields
             ): Builder = apply {
                 this.billingAddressFields = billingAddressFields
-            }
-
-            /**
-             * If true, a postal code field will be shown and validated.
-             * Currently, only US ZIP Codes are supported.
-             */
-            @Deprecated("Use setBillingAddressFields()",
-                ReplaceWith("setBillingAddressFields(BillingAddressFields.PostalCode"))
-            fun setShouldRequirePostalCode(shouldRequirePostalCode: Boolean): Builder = apply {
-                this.shouldRequirePostalCode = shouldRequirePostalCode
-                if (shouldRequirePostalCode) {
-                    this.billingAddressFields = BillingAddressFields.PostalCode
-                }
             }
 
             /**
@@ -135,7 +120,6 @@ class AddPaymentMethodActivityStarter constructor(
                 return Args(
                     billingAddressFields = billingAddressFields,
                     shouldAttachToCustomer = shouldAttachToCustomer,
-                    shouldRequirePostalCode = shouldRequirePostalCode,
                     isPaymentSessionActive = isPaymentSessionActive,
                     shouldInitCustomerSessionTokens = shouldInitCustomerSessionTokens,
                     paymentMethodType = paymentMethodType ?: PaymentMethod.Type.Card,
