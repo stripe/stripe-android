@@ -56,8 +56,11 @@ internal class CardMultilineWidgetTest {
     @Mock
     private lateinit var noZipCardListener: CardInputListener
 
+    private val context: Context by lazy {
+        ApplicationProvider.getApplicationContext<Context>()
+    }
     private val activityScenarioFactory: ActivityScenarioFactory by lazy {
-        ActivityScenarioFactory(ApplicationProvider.getApplicationContext())
+        ActivityScenarioFactory(context)
     }
 
     @BeforeTest
@@ -66,7 +69,6 @@ internal class CardMultilineWidgetTest {
 
         CustomerSession.instance = mock()
 
-        val context: Context = ApplicationProvider.getApplicationContext()
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
         activityScenarioFactory.create<AddPaymentMethodActivity>(
@@ -99,6 +101,7 @@ internal class CardMultilineWidgetTest {
         ).use { activityScenario ->
             activityScenario.onActivity {
                 noZipCardMultilineWidget = it.findViewById(R.id.card_multiline_widget)
+                noZipCardMultilineWidget.setShouldShowPostalCode(false)
                 noZipGroup = WidgetControlGroup(noZipCardMultilineWidget)
             }
         }
@@ -164,36 +167,7 @@ internal class CardMultilineWidgetTest {
     }
 
     @Test
-    fun isPostalCodeMaximalLength_whenZipEnteredAndIsMaximalLength_returnsTrue() {
-        assertTrue(CardMultilineWidget.isPostalCodeMaximalLength("12345"))
-    }
-
-    @Test
-    fun isPostalCodeMaximalLength_whenZipEnteredAndIsNotMaximalLength_returnsFalse() {
-        assertFalse(CardMultilineWidget.isPostalCodeMaximalLength("123"))
-    }
-
-    @Test
-    fun isPostalCodeMaximalLength_whenZipEnteredAndIsEmpty_returnsFalse() {
-        assertFalse(CardMultilineWidget.isPostalCodeMaximalLength(""))
-    }
-
-    @Test
-    fun isPostalCodeMaximalLength_whenZipEnteredAndIsNull_returnsFalse() {
-        assertFalse(CardMultilineWidget.isPostalCodeMaximalLength(null))
-    }
-
-    /**
-     * This test should change when we allow and validate postal codes outside of the US
-     * in this control.
-     */
-    @Test
-    fun isPostalCodeMaximalLength_whenNotZip_returnsFalse() {
-        assertFalse(CardMultilineWidget.isPostalCodeMaximalLength("12345", 10))
-    }
-
-    @Test
-    fun getCard_whenInputIsValidVisaButInputHasNoZip_returnsNull() {
+    fun getCard_whenInputIsValidVisaButInputHasNoZip_returnsValidCard() {
         // The input date here will be invalid after 2050. Please update the test.
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
 
@@ -203,7 +177,7 @@ internal class CardMultilineWidgetTest {
         fullGroup.cvcEditText.append("123")
 
         val card = cardMultilineWidget.card
-        assertNull(card)
+        assertNotNull(card)
     }
 
     @Test
@@ -462,7 +436,7 @@ internal class CardMultilineWidgetTest {
         assertTrue(fullGroup.cardNumberEditText.shouldShowError)
         assertTrue(fullGroup.expiryDateEditText.shouldShowError)
         assertTrue(fullGroup.cvcEditText.shouldShowError)
-        assertTrue(fullGroup.postalCodeEditText.shouldShowError)
+        assertFalse(fullGroup.postalCodeEditText.shouldShowError)
 
         cardMultilineWidget.clear()
 
@@ -649,7 +623,6 @@ internal class CardMultilineWidgetTest {
         fullGroup.postalCodeEditText.append("12345")
 
         val card = cardMultilineWidget.card
-
         assertEquals(VALID_VISA_NO_SPACES, card?.number)
     }
 

@@ -13,7 +13,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.example.R
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -47,15 +46,13 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
     }
 
     private fun createPaymentMethod() {
-        val paymentMethodCard =
-            card_multiline_widget.paymentMethodCard ?: return
+        val paymentMethodCreateParams =
+            card_multiline_widget.paymentMethodCreateParams ?: return
 
-        val createPaymentMethodParams =
-            PaymentMethodCreateParams.create(paymentMethodCard, BILLING_DETAILS)
         // Note: using this style of Observable creation results in us having a method that
         // will not be called until we subscribe to it.
         val createPaymentMethodObservable = Observable.fromCallable {
-            stripe.createPaymentMethodSynchronous(createPaymentMethodParams)
+            stripe.createPaymentMethodSynchronous(paymentMethodCreateParams)
         }
 
         compositeDisposable.add(createPaymentMethodObservable
