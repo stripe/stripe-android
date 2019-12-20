@@ -22,7 +22,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr) {
 
-    private val shippingPostalCodeValidator: ShippingPostalCodeValidator
+    private val postalCodeValidator: PostalCodeValidator
     private var optionalShippingInfoFields: List<String> = emptyList()
     private var hiddenShippingInfoFields: List<String> = emptyList()
 
@@ -123,7 +123,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
             phoneNumberEditText.setAutofillHints(View.AUTOFILL_HINT_PHONE)
         }
 
-        shippingPostalCodeValidator = ShippingPostalCodeValidator()
+        postalCodeValidator = PostalCodeValidator()
 
         initView()
     }
@@ -193,7 +193,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
         countryAutoCompleteTextView.validateCountry()
         val selectedCountry = countryAutoCompleteTextView.selectedCountry
 
-        val isPostalCodeValid = shippingPostalCodeValidator.isValid(
+        val isPostalCodeValid = postalCodeValidator.isValid(
             postalCode,
             selectedCountry?.code,
             optionalShippingInfoFields,
