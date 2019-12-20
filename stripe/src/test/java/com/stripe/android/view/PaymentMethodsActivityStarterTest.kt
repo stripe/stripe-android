@@ -25,7 +25,6 @@ class PaymentMethodsActivityStarterTest {
         val args = PaymentMethodsActivityStarter.Args.Builder()
             .setInitialPaymentMethodId("pm_12345")
             .setIsPaymentSessionActive(true)
-            .setShouldRequirePostalCode(true)
             .setPaymentMethodTypes(listOf(PaymentMethod.Type.Card, PaymentMethod.Type.Fpx))
             .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
             .setAddPaymentMethodFooter(R.layout.activity_payment_methods)

@@ -156,33 +156,6 @@ class PaymentSession @VisibleForTesting internal constructor(
         paymentSessionConfig: PaymentSessionConfig,
         savedInstanceState: Bundle? = null
     ): Boolean {
-        return init(listener, paymentSessionConfig, savedInstanceState, true)
-    }
-
-    /**
-     * Initialize the PaymentSession with a [PaymentSessionListener] to be notified of
-     * data changes.
-     *
-     * @param listener a [PaymentSessionListener] that will receive notifications of changes
-     * in payment session status, including networking status
-     * @param paymentSessionConfig a [PaymentSessionConfig] used to decide which items are
-     * necessary in the PaymentSession.
-     * @param savedInstanceState a `Bundle` containing the saved state of a
-     * PaymentSession that was stored in [savePaymentSessionInstanceState]
-     * @param shouldPrefetchCustomer If true, will immediately fetch the [Customer] associated
-     * with this session. Otherwise, will only fetch when needed.
-     *
-     * @return `true` if the PaymentSession is initialized, `false` if a state error
-     * occurs. Failure can only occur if there is no initialized [CustomerSession].
-     */
-    @Deprecated("Use PaymentSessionConfig.Builder.setShouldPrefetchCustomer() to specify shouldPrefetchCustomer.")
-    @JvmOverloads
-    fun init(
-        listener: PaymentSessionListener,
-        paymentSessionConfig: PaymentSessionConfig,
-        savedInstanceState: Bundle? = null,
-        shouldPrefetchCustomer: Boolean
-    ): Boolean {
         // Checking to make sure that there is a valid CustomerSession -- the getInstance() call
         // will throw a runtime exception if none is ready.
         try {
@@ -201,7 +174,7 @@ class PaymentSession @VisibleForTesting internal constructor(
         paymentSessionData = savedInstanceState?.getParcelable(STATE_PAYMENT_SESSION_DATA)
             ?: PaymentSessionData(paymentSessionConfig)
 
-        if (shouldPrefetchCustomer || paymentSessionConfig.shouldPrefetchCustomer) {
+        if (paymentSessionConfig.shouldPrefetchCustomer) {
             fetchCustomer()
         }
 
@@ -225,37 +198,10 @@ class PaymentSession @VisibleForTesting internal constructor(
      * initially selected on the Payment Method selection screen
      */
     fun presentPaymentMethodSelection(selectedPaymentMethodId: String? = null) {
-        presentPaymentMethodSelection(false, selectedPaymentMethodId)
-    }
-
-    /**
-     * Launch the [PaymentMethodsActivity] to allow the user to select a payment method,
-     * or to add a new one.
-     *
-     * The initial selected Payment Method ID uses the following logic.
-     *
-     *  1. If {@param userSelectedPaymentMethodId} is specified, use that
-     *  2. If the instance's [PaymentSessionData.paymentMethod] is non-null, use that
-     *  3. If the instance's [PaymentSessionPrefs.getSelectedPaymentMethodId] is non-null, use that
-     *  4. Otherwise, choose the most recently added Payment Method
-     *
-     * See [getSelectedPaymentMethodId]
-     *
-     * @param shouldRequirePostalCode if true, require postal code when adding a payment method
-     * @param userSelectedPaymentMethodId if non-null, the ID of the Payment Method that should be
-     * initially selected on the Payment Method selection screen
-     */
-    @Deprecated("Use presentPaymentMethodSelection(selectedPaymentMethodId) and configure billing fields using PaymentSessionConfig.Builder.setBillingAddressFields()")
-    @JvmOverloads
-    fun presentPaymentMethodSelection(
-        shouldRequirePostalCode: Boolean,
-        userSelectedPaymentMethodId: String? = null
-    ) {
         paymentMethodsActivityStarter.startForResult(
             PaymentMethodsActivityStarter.Args.Builder()
                 .setInitialPaymentMethodId(
-                    getSelectedPaymentMethodId(userSelectedPaymentMethodId))
-                .setShouldRequirePostalCode(shouldRequirePostalCode)
+                    getSelectedPaymentMethodId(selectedPaymentMethodId))
                 .setAddPaymentMethodFooter(config?.addPaymentMethodFooterLayoutId ?: 0)
                 .setIsPaymentSessionActive(true)
                 .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
