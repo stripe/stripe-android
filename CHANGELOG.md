@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 12.8.2 - unreleased
+## 12.8.2 - 2019-12-20
 * [#1974](https://github.com/stripe/stripe-android/pull/1974) Add `PaymentSessionConfig#shouldPrefetchCustomer`
     * Mark `PaymentSessionConfig#init()` with `shouldPrefetchCustomer` argument as deprecated
 * [#1980](https://github.com/stripe/stripe-android/pull/1980) Don't show a `Dialog` in `StripeActivity` if `isFinishing()`
