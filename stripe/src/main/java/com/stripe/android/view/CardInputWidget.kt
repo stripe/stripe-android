@@ -173,7 +173,7 @@ class CardInputWidget @JvmOverloads constructor(
     @JvmSynthetic
     internal var frameWidthSupplier: () -> Int
 
-    var postalCodeEnabled: Boolean = false
+    var postalCodeEnabled: Boolean = true
         set(value) {
             updatePostalCodeEditText(value)
             field = value
@@ -339,7 +339,7 @@ class CardInputWidget @JvmOverloads constructor(
 
     override fun onRestoreInstanceState(state: Parcelable) {
         if (state is Bundle) {
-            postalCodeEnabled = state.getBoolean(STATE_POSTAL_CODE_ENABLED, false)
+            postalCodeEnabled = state.getBoolean(STATE_POSTAL_CODE_ENABLED, true)
             cardNumberIsViewed = state.getBoolean(STATE_CARD_VIEWED, true)
             updateSpaceSizes(cardNumberIsViewed)
             placementParameters.totalLengthInPixels = frameWidth
@@ -658,7 +658,7 @@ class CardInputWidget @JvmOverloads constructor(
 
         try {
             postalCodeEnabled =
-                typedArray.getBoolean(R.styleable.CardElement_shouldShowPostalCode, false)
+                typedArray.getBoolean(R.styleable.CardElement_shouldShowPostalCode, true)
         } finally {
             typedArray.recycle()
         }
