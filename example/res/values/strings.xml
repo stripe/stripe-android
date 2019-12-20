@@ -21,6 +21,7 @@
     <string name="launch_create_pm_sepa_debit">Create SEPA Debit Payment Method</string>
     <string name="fpx_payment_example">FPX Payment Example</string>
     <string name="klarna_source_example">Klarna Source Example</string>
+    <string name="card_brands">Card Brands</string>
 
     <string name="select_add_card">Select or add card</string>
     <string name="selected_card">Selected card:</string>

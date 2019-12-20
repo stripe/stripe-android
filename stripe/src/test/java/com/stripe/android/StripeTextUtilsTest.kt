@@ -2,60 +2,12 @@ package com.stripe.android
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 /**
  * Test class for [StripeTextUtils].
  */
 class StripeTextUtilsTest {
-
-    @Test
-    fun hasAnyPrefixShouldFailIfNull() {
-        assertFalse(StripeTextUtils.hasAnyPrefix(null))
-    }
-
-    @Test
-    fun hasAnyPrefixShouldFailIfEmpty() {
-        assertFalse(StripeTextUtils.hasAnyPrefix(""))
-    }
-
-    @Test
-    fun hasAnyPrefixShouldFailWithNullAndEmptyPrefix() {
-        assertFalse(StripeTextUtils.hasAnyPrefix(null, ""))
-    }
-
-    @Test
-    fun hasAnyPrefixShouldFailWithNullAndSomePrefix() {
-        assertFalse(StripeTextUtils.hasAnyPrefix(null, "1"))
-    }
-
-    @Test
-    fun hasAnyPrefixShouldMatch() {
-        assertTrue(StripeTextUtils.hasAnyPrefix("1234", "12"))
-    }
-
-    @Test
-    fun hasAnyPrefixShouldMatchMultiple() {
-        assertTrue(StripeTextUtils.hasAnyPrefix("1234", "12", "1"))
-    }
-
-    @Test
-    fun hasAnyPrefixShouldMatchSome() {
-        assertTrue(StripeTextUtils.hasAnyPrefix("abcd", "bc", "ab"))
-    }
-
-    @Test
-    fun hasAnyPrefixShouldNotMatch() {
-        assertFalse(StripeTextUtils.hasAnyPrefix("1234", "23"))
-    }
-
-    @Test
-    fun hasAnyPrefixShouldNotMatchWithSpace() {
-        assertFalse(StripeTextUtils.hasAnyPrefix("xyz", " x"))
-    }
-
     @Test
     fun removeSpacesAndHyphens_withSpacesInInterior_returnsSpacelessNumber() {
         val testCardNumber = "4242 4242 4242 4242"

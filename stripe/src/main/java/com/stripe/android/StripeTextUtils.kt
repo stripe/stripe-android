@@ -25,17 +25,6 @@ object StripeTextUtils {
     }
 
     /**
-     * Check to see if the input number has any of the given prefixes.
-     *
-     * @param number the number to test
-     * @param prefixes the prefixes to test against
-     * @return `true` if number begins with any of the input prefixes
-     */
-    internal fun hasAnyPrefix(number: String?, vararg prefixes: String): Boolean {
-        return prefixes.any { number?.startsWith(it) == true }
-    }
-
-    /**
      * Calculate a hash value of a String input and convert the result to a hex string.
      *
      * @param toHash a value to hash

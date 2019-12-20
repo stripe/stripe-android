@@ -109,6 +109,9 @@
 
         <activity
             android:name=".activity.KlarnaSourceActivity" />
+
+        <activity
+            android:name=".activity.CardBrandsActivity" />
     </application>
 
 </manifest>

@@ -55,7 +55,9 @@ class LauncherActivity : AppCompatActivity() {
             Item(activity.getString(R.string.fpx_payment_example),
                 FpxPaymentActivity::class.java),
             Item(activity.getString(R.string.klarna_source_example),
-                KlarnaSourceActivity::class.java)
+                KlarnaSourceActivity::class.java),
+            Item(activity.getString(R.string.card_brands),
+                CardBrandsActivity::class.java)
         )
 
         override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): ExamplesViewHolder {
