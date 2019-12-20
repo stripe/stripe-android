@@ -168,7 +168,7 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
      */
     @Parcelize
     data class Result internal constructor(
-        @JvmField val paymentMethod: PaymentMethod,
+        @JvmField val paymentMethod: PaymentMethod?,
         private val useGooglePay: Boolean = false
     ) : ActivityStarter.Result {
         override fun toBundle(): Bundle {
