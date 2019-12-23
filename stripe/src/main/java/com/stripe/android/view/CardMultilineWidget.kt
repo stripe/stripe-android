@@ -40,12 +40,12 @@ class CardMultilineWidget @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
-    private var shouldShowPostalCode: Boolean = false
+    private var shouldShowPostalCode: Boolean = DEFAULT_POSTAL_CODE_ENABLED
 ) : LinearLayout(context, attrs, defStyleAttr), CardWidget {
     private val cardNumberEditText: CardNumberEditText
     private val expiryDateEditText: ExpiryDateEditText
     private val cvcEditText: CvcEditText
-    private val postalCodeEditText: StripeEditText
+    private val postalCodeEditText: PostalCodeEditText
     private val cardNumberTextInputLayout: TextInputLayout
     private val expiryTextInputLayout: TextInputLayout
     private val cvcTextInputLayout: TextInputLayout
@@ -189,6 +189,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         expiryDateEditText = findViewById(R.id.et_expiry)
         cvcEditText = findViewById(R.id.et_cvc)
         postalCodeEditText = findViewById(R.id.et_postal_code)
+
         tintColorInt = cardNumberEditText.hintTextColors.defaultColor
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -206,10 +207,10 @@ class CardMultilineWidget @JvmOverloads constructor(
         cvcTextInputLayout = findViewById(R.id.tl_cvc)
         postalInputLayout = findViewById(R.id.tl_postal_code)
 
-        if (shouldShowPostalCode) {
-            // Set the label/hint to the shorter value if we have three things in a row.
-            expiryTextInputLayout.hint = resources.getString(R.string.expiry_label_short)
-        }
+        // configure postal code
+        postalCodeEditText.configureForGlobal()
+        postalInputLayout.hint = postalCodeEditText.hint
+        postalCodeEditText.hint = ""
 
         initTextInputLayoutErrorHandlers(
             cardNumberTextInputLayout,
@@ -252,17 +253,7 @@ class CardMultilineWidget @JvmOverloads constructor(
                 }
             })
 
-        adjustViewForPostalCodeAttribute()
-
-        postalCodeEditText.setAfterTextChangedListener(
-            object : StripeEditText.AfterTextChangedListener {
-                override fun onTextChanged(text: String) {
-                    if (isPostalCodeMaximalLength(text)) {
-                        cardInputListener?.onPostalCodeComplete()
-                    }
-                    postalCodeEditText.shouldShowError = false
-                }
-            })
+        adjustViewForPostalCodeAttribute(shouldShowPostalCode)
 
         cardNumberEditText.updateLengthFilter()
 
@@ -312,13 +303,6 @@ class CardMultilineWidget @JvmOverloads constructor(
         cardNumberEditText.shouldShowError = !cardNumberIsValid
         expiryDateEditText.shouldShowError = !expiryIsValid
         cvcEditText.shouldShowError = !cvcIsValid
-        val postalCodeIsValidOrGone: Boolean
-        if (shouldShowPostalCode) {
-            postalCodeIsValidOrGone = isPostalCodeMaximalLength(postalCodeEditText.text?.toString())
-            postalCodeEditText.shouldShowError = !postalCodeIsValidOrGone
-        } else {
-            postalCodeIsValidOrGone = true
-        }
 
         val fields = listOf(
             cardNumberEditText, expiryDateEditText, cvcEditText, postalCodeEditText
@@ -330,7 +314,7 @@ class CardMultilineWidget @JvmOverloads constructor(
             }
         }
 
-        return cardNumberIsValid && expiryIsValid && cvcIsValid && postalCodeIsValidOrGone
+        return cardNumberIsValid && expiryIsValid && cvcIsValid
     }
 
     override fun onWindowFocusChanged(hasWindowFocus: Boolean) {
@@ -350,7 +334,7 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     fun setShouldShowPostalCode(shouldShowPostalCode: Boolean) {
         this.shouldShowPostalCode = shouldShowPostalCode
-        adjustViewForPostalCodeAttribute()
+        adjustViewForPostalCodeAttribute(shouldShowPostalCode)
     }
 
     /**
@@ -422,7 +406,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         isEnabled = enabled
     }
 
-    private fun adjustViewForPostalCodeAttribute() {
+    private fun adjustViewForPostalCodeAttribute(shouldShowPostalCode: Boolean) {
         // Set the label/hint to the shorter value if we have three things in a row.
         @StringRes val expiryLabel = if (shouldShowPostalCode) {
             R.string.expiry_label_short
@@ -474,8 +458,9 @@ class CardMultilineWidget @JvmOverloads constructor(
             0, 0)
 
         try {
-            shouldShowPostalCode =
-                a.getBoolean(R.styleable.CardElement_shouldShowPostalCode, false)
+            shouldShowPostalCode = a.getBoolean(
+                R.styleable.CardElement_shouldShowPostalCode, DEFAULT_POSTAL_CODE_ENABLED
+            )
         } finally {
             a.recycle()
         }
@@ -608,19 +593,10 @@ class CardMultilineWidget @JvmOverloads constructor(
     }
 
     internal companion object {
-
         internal const val CARD_MULTILINE_TOKEN = "CardMultilineView"
         internal const val CARD_NUMBER_HINT_DELAY = 120L
         internal const val COMMON_HINT_DELAY = 90L
 
-        private const val POSTAL_MAX_LENGTH = 5
-
-        @JvmSynthetic
-        internal fun isPostalCodeMaximalLength(
-            postalCode: String?,
-            maxLength: Int = POSTAL_MAX_LENGTH
-        ): Boolean {
-            return postalCode?.length == maxLength
-        }
+        private const val DEFAULT_POSTAL_CODE_ENABLED = true
     }
 }

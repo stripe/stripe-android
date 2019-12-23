@@ -2,7 +2,12 @@
 
 ## Migrating from versions < 13.0.0
 - Changes to `CardInputWidget`
-    - The postal code field is now displayed by default. The postal code input is not validated.
+    - The postal code field is now displayed by default
+    - The postal code input is not validated
+- Changes to `CardMultilineWidget`
+    - The postal code field is now displayed by default
+    - The postal code input is not validated
+    - `CardInputListener.onPostalCodeComplete()` has been removed
 - Changes to `Stripe`
     - Bindings for API POST methods now take an optional `idempotencyKey`.
       Read about [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests) for more details.

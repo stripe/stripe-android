@@ -47,10 +47,4 @@ interface CardInputListener {
      * the user edits the CVC.
      */
     fun onCvcComplete()
-
-    /**
-     * Called when a potentially valid postal code or zip code has been entered.
-     * May be called multiple times.
-     */
-    fun onPostalCodeComplete()
 }
