@@ -71,10 +71,9 @@ class PaymentSessionActivity : AppCompatActivity() {
         // CustomerSession only needs to be initialized once per app.
         val customerSession = createCustomerSession()
 
-        val paymentSession = PaymentSession(this)
-        val paymentSessionInitialized = paymentSession.init(
-            listener = PaymentSessionListenerImpl(this, customerSession),
-            paymentSessionConfig = PaymentSessionConfig.Builder()
+        val paymentSession = PaymentSession(
+            activity = this,
+            config = PaymentSessionConfig.Builder()
                 .setAddPaymentMethodFooter(R.layout.add_payment_method_footer)
                 .setPrepopulatedShippingInfo(EXAMPLE_SHIPPING_INFO)
                 .setHiddenShippingInfoFields(
@@ -92,7 +91,10 @@ class PaymentSessionActivity : AppCompatActivity() {
                 .setWindowFlags(WindowManager.LayoutParams.FLAG_SECURE)
                 .setBillingAddressFields(BillingAddressFields.Full)
                 .setShouldPrefetchCustomer(shouldPrefetchCustomer)
-                .build(),
+                .build()
+        )
+        val paymentSessionInitialized = paymentSession.init(
+            listener = PaymentSessionListenerImpl(this, customerSession),
             savedInstanceState = savedInstanceState
         )
         if (paymentSessionInitialized) {

@@ -10,7 +10,6 @@ import androidx.fragment.app.Fragment
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.view.ActivityStarter
-import com.stripe.android.view.BillingAddressFields
 import com.stripe.android.view.PaymentFlowActivity
 import com.stripe.android.view.PaymentFlowActivityStarter
 import com.stripe.android.view.PaymentMethodsActivity
@@ -22,6 +21,7 @@ import java.lang.ref.WeakReference
  */
 class PaymentSession @VisibleForTesting internal constructor(
     private val context: Context,
+    private val config: PaymentSessionConfig,
     private val customerSession: CustomerSession,
     private val paymentMethodsActivityStarter:
     ActivityStarter<PaymentMethodsActivity, PaymentMethodsActivityStarter.Args>,
@@ -36,7 +36,6 @@ class PaymentSession @VisibleForTesting internal constructor(
     var paymentSessionData: PaymentSessionData = paymentSessionData
         private set
     private var paymentSessionListener: PaymentSessionListener? = null
-    private var config: PaymentSessionConfig? = null
 
     /**
      * Create a PaymentSession attached to the given host Activity.
@@ -45,17 +44,28 @@ class PaymentSession @VisibleForTesting internal constructor(
      * Activity will receive results in
      * `Activity#onActivityResult(int, int, Intent)` that should be
      * passed back to this session.
+     * @param config a [PaymentSessionConfig] that configures this [PaymentSession] instance
      */
-    constructor(activity: Activity) : this(
+    constructor(activity: Activity, config: PaymentSessionConfig) : this(
         activity.applicationContext,
+        config,
         CustomerSession.getInstance(),
         PaymentMethodsActivityStarter(activity),
         PaymentFlowActivityStarter(activity),
         PaymentSessionPrefs.create(activity)
     )
 
-    constructor(fragment: Fragment) : this(
+    /**
+     * Create a PaymentSession attached to the given host Fragment.
+     *
+     * @param fragment a `Fragment` from which to launch other Stripe Activities. This
+     * Fragment will receive results in `Fragment#onActivityResult(int, int, Intent)` that should be
+     * passed back to this session.
+     * @param config a [PaymentSessionConfig] that configures this [PaymentSession] instance
+     */
+    constructor(fragment: Fragment, config: PaymentSessionConfig) : this(
         fragment.requireContext().applicationContext,
+        config,
         CustomerSession.getInstance(),
         PaymentMethodsActivityStarter(fragment),
         PaymentFlowActivityStarter(fragment),
@@ -150,8 +160,6 @@ class PaymentSession @VisibleForTesting internal constructor(
      *
      * @param listener a [PaymentSessionListener] that will receive notifications of changes
      * in payment session status, including networking status
-     * @param paymentSessionConfig a [PaymentSessionConfig] used to decide which items are
-     * necessary in the PaymentSession.
      * @param savedInstanceState a `Bundle` containing the saved state of a
      * PaymentSession that was stored in [savePaymentSessionInstanceState]
      *
@@ -161,7 +169,6 @@ class PaymentSession @VisibleForTesting internal constructor(
     @JvmOverloads
     fun init(
         listener: PaymentSessionListener,
-        paymentSessionConfig: PaymentSessionConfig,
         savedInstanceState: Bundle? = null
     ): Boolean {
         // Checking to make sure that there is a valid CustomerSession -- the getInstance() call
@@ -176,13 +183,12 @@ class PaymentSession @VisibleForTesting internal constructor(
             return false
         }
 
-        this.config = paymentSessionConfig
         paymentSessionListener = listener
 
         paymentSessionData = savedInstanceState?.getParcelable(STATE_PAYMENT_SESSION_DATA)
-            ?: PaymentSessionData(paymentSessionConfig)
+            ?: PaymentSessionData(config)
 
-        if (paymentSessionConfig.shouldPrefetchCustomer) {
+        if (config.shouldPrefetchCustomer) {
             fetchCustomer()
         }
 
@@ -210,13 +216,13 @@ class PaymentSession @VisibleForTesting internal constructor(
             PaymentMethodsActivityStarter.Args.Builder()
                 .setInitialPaymentMethodId(
                     getSelectedPaymentMethodId(selectedPaymentMethodId))
-                .setAddPaymentMethodFooter(config?.addPaymentMethodFooterLayoutId ?: 0)
+                .setAddPaymentMethodFooter(config.addPaymentMethodFooterLayoutId)
                 .setIsPaymentSessionActive(true)
                 .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
-                .setPaymentMethodTypes(config?.paymentMethodTypes.orEmpty())
-                .setShouldShowGooglePay(config?.shouldShowGooglePay ?: false)
-                .setWindowFlags(config?.windowFlags)
-                .setBillingAddressFields(config?.billingAddressFields ?: BillingAddressFields.None)
+                .setPaymentMethodTypes(config.paymentMethodTypes)
+                .setShouldShowGooglePay(config.shouldShowGooglePay)
+                .setWindowFlags(config.windowFlags)
+                .setBillingAddressFields(config.billingAddressFields)
                 .build()
         )
     }
@@ -262,7 +268,7 @@ class PaymentSession @VisibleForTesting internal constructor(
                 .setPaymentSessionConfig(config)
                 .setPaymentSessionData(paymentSessionData)
                 .setIsPaymentSessionActive(true)
-                .setWindowFlags(config?.windowFlags)
+                .setWindowFlags(config.windowFlags)
                 .build()
         )
     }
