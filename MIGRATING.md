@@ -14,6 +14,7 @@
 - Changes to `PaymentMethodsActivityStarter.Result`
     - The type of `paymentMethod` has been changed from `PaymentMethod` to `PaymentMethod?` (i.e. it is nullable)
 - Changes to `PaymentSession`
+    - `PaymentSession` now takes the `PaymentSessionConfig` instance through its constructor, instead of `init()`
     - By default, users will be asked for their postal code (i.e. `BillingAddressFields.PostalCode`) when adding a new
       card payment method.
     - `PaymentSession#init(listener, paymentSessionConfig, savedInstanceState, shouldPrefetchCustomer)` is deleted.

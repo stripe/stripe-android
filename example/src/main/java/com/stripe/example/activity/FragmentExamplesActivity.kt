@@ -236,7 +236,15 @@ class FragmentExamplesActivity : AppCompatActivity() {
         }
 
         private fun createPaymentSession(customerSession: CustomerSession): PaymentSession {
-            val paymentSession = PaymentSession(this)
+            val paymentSession = PaymentSession(
+                fragment = this,
+                config = PaymentSessionConfig.Builder()
+                    .setHiddenShippingInfoFields(
+                        ShippingInfoWidget.CustomizableShippingField.PHONE_FIELD,
+                        ShippingInfoWidget.CustomizableShippingField.CITY_FIELD
+                    )
+                    .build()
+            )
             val paymentSessionInitialized = paymentSession.init(
                 object : PaymentSession.PaymentSessionListener {
                     override fun onCommunicatingStateChanged(isCommunicating: Boolean) {
@@ -260,13 +268,8 @@ class FragmentExamplesActivity : AppCompatActivity() {
                                 }
                             })
                     }
-                },
-                PaymentSessionConfig.Builder()
-                    .setHiddenShippingInfoFields(
-                        ShippingInfoWidget.CustomizableShippingField.PHONE_FIELD,
-                        ShippingInfoWidget.CustomizableShippingField.CITY_FIELD
-                    )
-                    .build())
+                }
+            )
             if (paymentSessionInitialized) {
                 paymentSession.setCartTotal(2000L)
             }
