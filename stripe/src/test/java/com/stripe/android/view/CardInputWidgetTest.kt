@@ -15,6 +15,7 @@ import com.stripe.android.CardNumberFixtures.VALID_VISA_WITH_SPACES
 import com.stripe.android.R
 import com.stripe.android.model.Address
 import com.stripe.android.model.Card
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.TestFocusChangeListener
@@ -1097,7 +1098,7 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         assertEquals(12, card.expMonth)
         assertEquals(2079, card.expYear)
         assertEquals("1234", card.cvc)
-        assertEquals(Card.CardBrand.AMERICAN_EXPRESS, card.brand)
+        assertEquals(CardBrand.AmericanExpress, card.brand)
 
         val paymentMethodCard = cardInputWidget.paymentMethodCard
         assertNotNull(paymentMethodCard)
@@ -1127,7 +1128,7 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         assertEquals(12, card.expMonth)
         assertEquals(2079, card.expYear)
         assertEquals("1234", card.cvc)
-        assertEquals(Card.CardBrand.AMERICAN_EXPRESS, card.brand)
+        assertEquals(CardBrand.AmericanExpress, card.brand)
 
         val paymentMethodCard = cardInputWidget.paymentMethodCard
         assertNotNull(paymentMethodCard)
@@ -1172,45 +1173,45 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
 
     @Test
     fun shouldIconShowBrand_whenCvcNotFocused_isAlwaysTrue() {
-        assertTrue(shouldIconShowBrand(Card.CardBrand.AMERICAN_EXPRESS, false, CVC_VALUE_AMEX))
-        assertTrue(shouldIconShowBrand(Card.CardBrand.AMERICAN_EXPRESS, false, ""))
-        assertTrue(shouldIconShowBrand(Card.CardBrand.VISA, false, "333"))
-        assertTrue(shouldIconShowBrand(Card.CardBrand.DINERS_CLUB, false, "12"))
-        assertTrue(shouldIconShowBrand(Card.CardBrand.DISCOVER, false, null))
-        assertTrue(shouldIconShowBrand(Card.CardBrand.JCB, false, "7"))
+        assertTrue(shouldIconShowBrand(CardBrand.AmericanExpress, false, CVC_VALUE_AMEX))
+        assertTrue(shouldIconShowBrand(CardBrand.AmericanExpress, false, ""))
+        assertTrue(shouldIconShowBrand(CardBrand.Visa, false, "333"))
+        assertTrue(shouldIconShowBrand(CardBrand.DinersClub, false, "12"))
+        assertTrue(shouldIconShowBrand(CardBrand.Discover, false, null))
+        assertTrue(shouldIconShowBrand(CardBrand.JCB, false, "7"))
     }
 
     @Test
     fun shouldIconShowBrand_whenAmexAndCvCStringLengthNotFour_isFalse() {
-        assertFalse(shouldIconShowBrand(Card.CardBrand.AMERICAN_EXPRESS, true, ""))
-        assertFalse(shouldIconShowBrand(Card.CardBrand.AMERICAN_EXPRESS, true, "1"))
-        assertFalse(shouldIconShowBrand(Card.CardBrand.AMERICAN_EXPRESS, true, "22"))
-        assertFalse(shouldIconShowBrand(Card.CardBrand.AMERICAN_EXPRESS, true, "333"))
+        assertFalse(shouldIconShowBrand(CardBrand.AmericanExpress, true, ""))
+        assertFalse(shouldIconShowBrand(CardBrand.AmericanExpress, true, "1"))
+        assertFalse(shouldIconShowBrand(CardBrand.AmericanExpress, true, "22"))
+        assertFalse(shouldIconShowBrand(CardBrand.AmericanExpress, true, "333"))
     }
 
     @Test
     fun shouldIconShowBrand_whenAmexAndCvcStringLengthIsFour_isTrue() {
-        assertTrue(shouldIconShowBrand(Card.CardBrand.AMERICAN_EXPRESS, true, CVC_VALUE_AMEX))
+        assertTrue(shouldIconShowBrand(CardBrand.AmericanExpress, true, CVC_VALUE_AMEX))
     }
 
     @Test
     fun shouldIconShowBrand_whenNotAmexAndCvcStringLengthIsNotThree_isFalse() {
-        assertFalse(shouldIconShowBrand(Card.CardBrand.VISA, true, ""))
-        assertFalse(shouldIconShowBrand(Card.CardBrand.DISCOVER, true, "12"))
-        assertFalse(shouldIconShowBrand(Card.CardBrand.JCB, true, "55"))
-        assertFalse(shouldIconShowBrand(Card.CardBrand.MASTERCARD, true, "9"))
-        assertFalse(shouldIconShowBrand(Card.CardBrand.DINERS_CLUB, true, null))
-        assertFalse(shouldIconShowBrand(Card.CardBrand.UNKNOWN, true, "12"))
+        assertFalse(shouldIconShowBrand(CardBrand.Visa, true, ""))
+        assertFalse(shouldIconShowBrand(CardBrand.Discover, true, "12"))
+        assertFalse(shouldIconShowBrand(CardBrand.JCB, true, "55"))
+        assertFalse(shouldIconShowBrand(CardBrand.MasterCard, true, "9"))
+        assertFalse(shouldIconShowBrand(CardBrand.DinersClub, true, null))
+        assertFalse(shouldIconShowBrand(CardBrand.Unknown, true, "12"))
     }
 
     @Test
     fun shouldIconShowBrand_whenNotAmexAndCvcStringLengthIsThree_isTrue() {
-        assertTrue(shouldIconShowBrand(Card.CardBrand.VISA, true, "999"))
-        assertTrue(shouldIconShowBrand(Card.CardBrand.DISCOVER, true, "123"))
-        assertTrue(shouldIconShowBrand(Card.CardBrand.JCB, true, "555"))
-        assertTrue(shouldIconShowBrand(Card.CardBrand.MASTERCARD, true, "919"))
-        assertTrue(shouldIconShowBrand(Card.CardBrand.DINERS_CLUB, true, "415"))
-        assertTrue(shouldIconShowBrand(Card.CardBrand.UNKNOWN, true, "212"))
+        assertTrue(shouldIconShowBrand(CardBrand.Visa, true, "999"))
+        assertTrue(shouldIconShowBrand(CardBrand.Discover, true, "123"))
+        assertTrue(shouldIconShowBrand(CardBrand.JCB, true, "555"))
+        assertTrue(shouldIconShowBrand(CardBrand.MasterCard, true, "919"))
+        assertTrue(shouldIconShowBrand(CardBrand.DinersClub, true, "415"))
+        assertTrue(shouldIconShowBrand(CardBrand.Unknown, true, "212"))
     }
 
     @Test

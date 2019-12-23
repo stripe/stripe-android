@@ -11,19 +11,28 @@ class StripeTextUtilsTest {
     @Test
     fun removeSpacesAndHyphens_withSpacesInInterior_returnsSpacelessNumber() {
         val testCardNumber = "4242 4242 4242 4242"
-        assertEquals("4242424242424242", StripeTextUtils.removeSpacesAndHyphens(testCardNumber))
+        assertEquals(
+            CardNumberFixtures.VALID_VISA_NO_SPACES,
+            StripeTextUtils.removeSpacesAndHyphens(testCardNumber)
+        )
     }
 
     @Test
     fun removeSpacesAndHyphens_withExcessiveSpacesInInterior_returnsSpacelessNumber() {
         val testCardNumber = "4  242                  4 242 4  242 42 4   2"
-        assertEquals("4242424242424242", StripeTextUtils.removeSpacesAndHyphens(testCardNumber))
+        assertEquals(
+            CardNumberFixtures.VALID_VISA_NO_SPACES,
+            StripeTextUtils.removeSpacesAndHyphens(testCardNumber)
+        )
     }
 
     @Test
     fun removeSpacesAndHyphens_withSpacesOnExterior_returnsSpacelessNumber() {
         val testCardNumber = "      42424242 4242 4242    "
-        assertEquals("4242424242424242", StripeTextUtils.removeSpacesAndHyphens(testCardNumber))
+        assertEquals(
+            CardNumberFixtures.VALID_VISA_NO_SPACES,
+            StripeTextUtils.removeSpacesAndHyphens(testCardNumber)
+        )
     }
 
     @Test
@@ -38,14 +47,19 @@ class StripeTextUtilsTest {
 
     @Test
     fun removeSpacesAndHyphens_withHyphenatedCardNumber_returnsCardNumber() {
-        assertEquals("4242424242424242",
-            StripeTextUtils.removeSpacesAndHyphens("4242-4242-4242-4242"))
+        assertEquals(
+            CardNumberFixtures.VALID_VISA_NO_SPACES,
+            StripeTextUtils.removeSpacesAndHyphens("4242-4242-4242-4242")
+        )
     }
 
     @Test
     fun removeSpacesAndHyphens_removesMultipleSpacesAndHyphens() {
         assertEquals("123",
-            StripeTextUtils.removeSpacesAndHyphens(" -    1-  --- 2   3- - - -------- "))
+            StripeTextUtils.removeSpacesAndHyphens(
+                " -    1-  --- 2   3- - - -------- "
+            )
+        )
     }
 
     @Test

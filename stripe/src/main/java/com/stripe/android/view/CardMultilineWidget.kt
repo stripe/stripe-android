@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.os.Build
-import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.View
@@ -23,6 +22,7 @@ import com.stripe.android.CardUtils
 import com.stripe.android.R
 import com.stripe.android.model.Address
 import com.stripe.android.model.Card
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_CARD
@@ -57,8 +57,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     private var hasAdjustedDrawable: Boolean = false
     private var customCvcLabel: String? = null
 
-    @Card.CardBrand
-    private var cardBrand: String = Card.CardBrand.UNKNOWN
+    private var cardBrand: CardBrand = CardBrand.Unknown
     @ColorInt
     private val tintColorInt: Int
 
@@ -153,19 +152,13 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     private val isCvcLengthValid: Boolean
         get() {
-            val cvcLength = cvcEditText.text?.toString()?.trim()?.length
-            return if (TextUtils.equals(Card.CardBrand.AMERICAN_EXPRESS, cardBrand) &&
-                cvcLength == Card.CVC_LENGTH_AMERICAN_EXPRESS) {
-                true
-            } else {
-                cvcLength == Card.CVC_LENGTH_COMMON
-            }
+            return cardBrand.isValidCvc(cvcEditText.rawCvcValue)
         }
 
     private val cvcHelperText: Int
         @StringRes
         get() {
-            return if (Card.CardBrand.AMERICAN_EXPRESS == cardBrand) {
+            return if (CardBrand.AmericanExpress == cardBrand) {
                 R.string.cvc_multiline_helper_amex
             } else {
                 R.string.cvc_multiline_helper
@@ -257,7 +250,7 @@ class CardMultilineWidget @JvmOverloads constructor(
 
         cardNumberEditText.updateLengthFilter()
 
-        cardBrand = Card.CardBrand.UNKNOWN
+        cardBrand = CardBrand.Unknown
         updateBrandUi()
 
         isEnabled = true
@@ -276,7 +269,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         cvcEditText.shouldShowError = false
         postalCodeEditText.shouldShowError = false
 
-        cardBrand = Card.CardBrand.UNKNOWN
+        cardBrand = CardBrand.Unknown
         updateBrandUi()
     }
 
@@ -471,13 +464,7 @@ class CardMultilineWidget @JvmOverloads constructor(
             return
         }
 
-        @DrawableRes val resourceId = if (Card.CardBrand.AMERICAN_EXPRESS == cardBrand) {
-            R.drawable.stripe_ic_cvc_amex
-        } else {
-            R.drawable.stripe_ic_cvc
-        }
-
-        updateDrawable(resourceId, true)
+        updateDrawable(cardBrand.cvcIcon, true)
     }
 
     private fun initDeleteEmptyListeners() {
@@ -557,7 +544,7 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     private fun updateBrandUi() {
         updateCvc()
-        updateDrawable(Card.getBrandIcon(cardBrand), Card.CardBrand.UNKNOWN == cardBrand)
+        updateDrawable(cardBrand.icon, CardBrand.Unknown == cardBrand)
     }
 
     private fun updateCvc() {

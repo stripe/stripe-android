@@ -9,7 +9,7 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.CardUtils
 import com.stripe.android.R
 import com.stripe.android.StripeTextUtils
-import com.stripe.android.model.Card
+import com.stripe.android.model.CardBrand
 
 /**
  * A [StripeEditText] that handles spacing out the digits of a credit card.
@@ -21,13 +21,11 @@ class CardNumberEditText @JvmOverloads constructor(
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     @VisibleForTesting
-    @Card.CardBrand
-    @get:Card.CardBrand
-    var cardBrand: String = Card.CardBrand.UNKNOWN
+    var cardBrand: CardBrand = CardBrand.Unknown
         internal set
 
     @JvmSynthetic
-    internal var brandChangeCallback: (String) -> Unit = {}
+    internal var brandChangeCallback: (CardBrand) -> Unit = {}
         set(callback) {
             field = callback
 
@@ -40,8 +38,10 @@ class CardNumberEditText @JvmOverloads constructor(
     @JvmSynthetic
     internal var completionCallback: () -> Unit = {}
 
-    var lengthMax: Int = MAX_LENGTH_COMMON
-        private set
+    val lengthMax: Int
+        get() {
+            return cardBrand.maxLengthWithSpaces
+        }
 
     private var ignoreChanges = false
 
@@ -96,11 +96,7 @@ class CardNumberEditText @JvmOverloads constructor(
         editActionAddition: Int
     ): Int {
         var gapsJumped = 0
-        val gapSet = if (Card.CardBrand.AMERICAN_EXPRESS == cardBrand) {
-            SPACE_SET_AMEX
-        } else {
-            SPACE_SET_COMMON
-        }
+        val gapSet = cardBrand.spacePositions
 
         var skipBack = false
         gapSet.forEach { gap ->
@@ -202,45 +198,26 @@ class CardNumberEditText @JvmOverloads constructor(
         })
     }
 
-    private fun updateCardBrand(@Card.CardBrand brand: String) {
+    private fun updateCardBrand(brand: CardBrand) {
         if (cardBrand == brand) {
             return
         }
 
-        cardBrand = brand
-
-        brandChangeCallback(cardBrand)
-
         val oldLength = lengthMax
-        lengthMax = getLengthForBrand(cardBrand)
-        if (oldLength == lengthMax) {
-            return
-        }
 
-        updateLengthFilter()
+        cardBrand = brand
+        brandChangeCallback(cardBrand)
+        if (oldLength != lengthMax) {
+            updateLengthFilter()
+        }
     }
 
-    private fun updateCardBrandFromNumber(partialNumber: String) {
+    @JvmSynthetic
+    internal fun updateCardBrandFromNumber(partialNumber: String) {
         updateCardBrand(CardUtils.getPossibleCardType(partialNumber))
     }
 
     internal companion object {
-        private const val MAX_LENGTH_COMMON = 19
-        // Note that AmEx and Diners Club have the same length
-        // because Diners Club has one more space, but one less digit.
-        private const val MAX_LENGTH_AMEX_DINERS = 17
-
-        private val SPACE_SET_COMMON = setOf(4, 9, 14)
-        private val SPACE_SET_AMEX = setOf(4, 11)
-
-        private fun getLengthForBrand(@Card.CardBrand cardBrand: String): Int {
-            return when (cardBrand) {
-                Card.CardBrand.AMERICAN_EXPRESS, Card.CardBrand.DINERS_CLUB ->
-                    MAX_LENGTH_AMEX_DINERS
-                else -> MAX_LENGTH_COMMON
-            }
-        }
-
         @JvmSynthetic
         internal fun createFormattedNumber(cardParts: Array<String?>): String {
             return cardParts

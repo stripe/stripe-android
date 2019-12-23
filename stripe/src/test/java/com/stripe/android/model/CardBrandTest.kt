@@ -3,6 +3,8 @@ package com.stripe.android.model
 import com.stripe.android.CardNumberFixtures
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class CardBrandTest {
 
@@ -51,6 +53,17 @@ class CardBrandTest {
         assertEquals(
             CardBrand.Unknown,
             CardBrand.fromCardNumber("1" + CardNumberFixtures.VALID_VISA_NO_SPACES)
+        )
+    }
+
+    @Test
+    fun isValidCardLengthWithBrand_whenBrandUnknown_alwaysReturnsFalse() {
+        // Adding this check to ensure the input number is correct
+        assertTrue(
+            CardBrand.Visa.isValidCardNumberLength(CardNumberFixtures.VALID_VISA_NO_SPACES)
+        )
+        assertFalse(
+            CardBrand.Unknown.isValidCardNumberLength(CardNumberFixtures.VALID_VISA_NO_SPACES)
         )
     }
 }

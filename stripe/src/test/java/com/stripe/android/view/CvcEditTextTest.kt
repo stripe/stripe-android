@@ -1,7 +1,7 @@
 package com.stripe.android.view
 
 import androidx.test.core.app.ApplicationProvider
-import com.stripe.android.model.Card
+import com.stripe.android.model.CardBrand
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -25,35 +25,35 @@ class CvcEditTextTest {
     @Test
     fun cvcValue_withValidVisaValue_returnsCvcValue() {
         cvcEditText.setText("123")
-        cvcEditText.updateBrand(Card.CardBrand.VISA)
+        cvcEditText.updateBrand(CardBrand.Visa)
         assertEquals("123", cvcEditText.cvcValue)
     }
 
     @Test
     fun cvcValue_withValidInvalidVisaValue_returnsCvcValue() {
         cvcEditText.setText("1234")
-        cvcEditText.updateBrand(Card.CardBrand.VISA)
+        cvcEditText.updateBrand(CardBrand.Visa)
         assertNull(cvcEditText.cvcValue)
     }
 
     @Test
     fun cvcValue_withInvalidAmexValue_returnsCvcValue() {
         cvcEditText.setText("12")
-        cvcEditText.updateBrand(Card.CardBrand.AMERICAN_EXPRESS)
+        cvcEditText.updateBrand(CardBrand.AmericanExpress)
         assertNull(cvcEditText.cvcValue)
     }
 
     @Test
     fun cvcValue_withValid3DigitAmexValue_returnsCvcValue() {
         cvcEditText.setText("123")
-        cvcEditText.updateBrand(Card.CardBrand.AMERICAN_EXPRESS)
+        cvcEditText.updateBrand(CardBrand.AmericanExpress)
         assertEquals("123", cvcEditText.cvcValue)
     }
 
     @Test
     fun cvcValue_withValid4DigitAmexValue_returnsCvcValue() {
         cvcEditText.setText("1234")
-        cvcEditText.updateBrand(Card.CardBrand.AMERICAN_EXPRESS)
+        cvcEditText.updateBrand(CardBrand.AmericanExpress)
         assertEquals("1234", cvcEditText.cvcValue)
     }
 

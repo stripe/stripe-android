@@ -1,29 +1,19 @@
 package com.stripe.android
 
-import com.stripe.android.model.Card
-import com.stripe.android.model.Card.CardBrand
-import com.stripe.android.model.CardBrand.Companion.fromCardNumber
+import com.stripe.android.model.CardBrand
 
 /**
  * Utility class for functions to do with cards.
  */
 object CardUtils {
 
-    private const val LENGTH_COMMON_CARD = 16
-    private const val LENGTH_AMERICAN_EXPRESS = 15
-    private const val LENGTH_DINERS_CLUB = 14
-
     /**
-     * Returns a [CardBrand] corresponding to a partial card number,
-     * or [Card.CardBrand.UNKNOWN] if the card brand can't be determined from the input value.
-     *
-     * @param cardNumber a credit card number or partial card number
-     * @return the [Card.CardBrand] corresponding to that number,
-     * or [CardBrand.UNKNOWN] if it can't be determined
+     * @param cardNumber a full or partial card number
+     * @return the [CardBrand] that matches the card number based on prefixes,
+     * or [CardBrand.Unknown] if it can't be determined
      */
     @JvmStatic
-    @Card.CardBrand
-    fun getPossibleCardType(cardNumber: String?): String {
+    fun getPossibleCardType(cardNumber: String?): CardBrand {
         return getPossibleCardType(cardNumber, true)
     }
 
@@ -85,44 +75,13 @@ object CardUtils {
      * @return `true` if the card number is of known type and the correct length
      */
     internal fun isValidCardLength(cardNumber: String?): Boolean {
-        return cardNumber != null && isValidCardLength(cardNumber,
-            getPossibleCardType(cardNumber, false))
+        return cardNumber != null &&
+            getPossibleCardType(cardNumber, false).isValidCardNumberLength(cardNumber)
     }
 
-    /**
-     * Checks to see whether the input number is of the correct length, given the assumed brand of
-     * the card. This function does not perform a Luhn check.
-     *
-     * @param cardNumber the card number with no spaces or dashes
-     * @param cardBrand a [Card.CardBrand] used to get the correct size
-     * @return `true` if the card number is the correct length for the assumed brand
-     */
-    internal fun isValidCardLength(
-        cardNumber: String?,
-        @CardBrand cardBrand: String
-    ): Boolean {
-        if (cardNumber == null || CardBrand.UNKNOWN == cardBrand) {
-            return false
-        }
-
-        val length = cardNumber.length
-        return when (cardBrand) {
-            CardBrand.AMERICAN_EXPRESS -> {
-                length == LENGTH_AMERICAN_EXPRESS
-            }
-            CardBrand.DINERS_CLUB -> {
-                length == LENGTH_DINERS_CLUB
-            }
-            else -> {
-                length == LENGTH_COMMON_CARD
-            }
-        }
-    }
-
-    @CardBrand
-    private fun getPossibleCardType(cardNumber: String?, shouldNormalize: Boolean): String {
+    private fun getPossibleCardType(cardNumber: String?, shouldNormalize: Boolean): CardBrand {
         if (cardNumber.isNullOrBlank()) {
-            return CardBrand.UNKNOWN
+            return CardBrand.Unknown
         }
 
         val spacelessCardNumber =
@@ -132,6 +91,6 @@ object CardUtils {
                 cardNumber
             }
 
-        return fromCardNumber(spacelessCardNumber).displayName
+        return CardBrand.fromCardNumber(spacelessCardNumber)
     }
 }

@@ -1,6 +1,6 @@
 package com.stripe.android.model
 
-import com.stripe.android.model.Card.Companion.asCardBrand
+import com.stripe.android.CardNumberFixtures
 import com.stripe.android.model.Card.Companion.asFundingType
 import com.stripe.android.model.parsers.CardJsonParser
 import java.util.Calendar
@@ -25,57 +25,6 @@ class CardTest {
         calendar.set(Calendar.YEAR, 1997)
         calendar.set(Calendar.MONTH, Calendar.AUGUST)
         calendar.set(Calendar.DAY_OF_MONTH, 29)
-    }
-
-    @Test
-    fun asCardBrand_whenBlank_returnsNull() {
-        assertNull(asCardBrand("   "))
-        assertNull(asCardBrand(null))
-    }
-
-    @Test
-    fun asCardBrand_whenNonemptyButWeird_returnsUnknown() {
-        assertEquals(Card.CardBrand.UNKNOWN, asCardBrand("Awesome New CardBrand"))
-    }
-
-    @Test
-    fun asCardBrand_whenMastercard_returnsMasterCard() {
-        assertEquals(Card.CardBrand.MASTERCARD, asCardBrand("MasterCard"))
-    }
-
-    @Test
-    fun asCardBrand_whenCapitalizedStrangely_stillRecognizesCard() {
-        assertEquals(Card.CardBrand.MASTERCARD, asCardBrand("Mastercard"))
-    }
-
-    @Test
-    fun asCardBrand_whenVisa_returnsVisa() {
-        assertEquals(Card.CardBrand.VISA, asCardBrand("visa"))
-    }
-
-    @Test
-    fun asCardBrand_whenJcb_returnsJcb() {
-        assertEquals(Card.CardBrand.JCB, asCardBrand("Jcb"))
-    }
-
-    @Test
-    fun asCardBrand_whenDiscover_returnsDiscover() {
-        assertEquals(Card.CardBrand.DISCOVER, asCardBrand("Discover"))
-    }
-
-    @Test
-    fun asCardBrand_whenDinersClub_returnsDinersClub() {
-        assertEquals(Card.CardBrand.DINERS_CLUB, asCardBrand("Diners Club"))
-    }
-
-    @Test
-    fun asCardBrand_whenAmericanExpress_returnsAmericanExpress() {
-        assertEquals(Card.CardBrand.AMERICAN_EXPRESS, asCardBrand("American express"))
-    }
-
-    @Test
-    fun asCardBrand_whenUnionPay_returnsUnionPay() {
-        assertEquals(Card.CardBrand.UNIONPAY, asCardBrand("UnionPay"))
     }
 
     @Test
@@ -115,141 +64,141 @@ class CardTest {
 
     @Test
     fun canInitializeWithMinimalArguments() {
-        val card = Card.create("4242-4242-4242-4242", 12, 2050, "123")
+        val card = Card.create(number = "4242-4242-4242-4242", expMonth = 12, expYear = 2050, cvc = "123")
         assertTrue(card.validateNumber())
     }
 
     @Test
     fun testTypeReturnsCorrectlyForAmexCard() {
-        val card = Card.create("3412123412341234", null, null, null)
-        assertEquals(Card.CardBrand.AMERICAN_EXPRESS, card.brand)
+        val card = Card.create(number = "3412123412341234")
+        assertEquals(CardBrand.AmericanExpress, card.brand)
     }
 
     @Test
     fun testTypeReturnsCorrectlyForDiscoverCard() {
-        val card = Card.create("6452123412341234", null, null, null)
-        assertEquals(Card.CardBrand.DISCOVER, card.brand)
+        val card = Card.create(number = "6452123412341234")
+        assertEquals(CardBrand.Discover, card.brand)
     }
 
     @Test
     fun testTypeReturnsCorrectlyForJCBCard() {
-        val card = Card.create("3512123412341234", null, null, null)
-        assertEquals(Card.CardBrand.JCB, card.brand)
+        val card = Card.create(number = "3512123412341234")
+        assertEquals(CardBrand.JCB, card.brand)
     }
 
     @Test
     fun testTypeReturnsCorrectlyForDinersClubCard() {
-        val card = Card.create("3612123412341234", null, null, null)
-        assertEquals(Card.CardBrand.DINERS_CLUB, card.brand)
+        val card = Card.create(number = "3612123412341234")
+        assertEquals(CardBrand.DinersClub, card.brand)
     }
 
     @Test
     fun testTypeReturnsCorrectlyForVisaCard() {
-        val card = Card.create("4112123412341234", null, null, null)
-        assertEquals(Card.CardBrand.VISA, card.brand)
+        val card = Card.create(number = "4112123412341234")
+        assertEquals(CardBrand.Visa, card.brand)
     }
 
     @Test
     fun testTypeReturnsCorrectlyForMasterCard() {
-        val card = Card.create("5112123412341234", null, null, null)
-        assertEquals(Card.CardBrand.MASTERCARD, card.brand)
+        val card = Card.create(number = "5112123412341234")
+        assertEquals(CardBrand.MasterCard, card.brand)
     }
 
     @Test
     fun testTypeReturnsCorrectlyForUnionPay() {
-        val card = Card.create("6200000000000005", null, null, null)
-        assertEquals(Card.CardBrand.UNIONPAY, card.brand)
+        val card = Card.create(number = "6200000000000005")
+        assertEquals(CardBrand.UnionPay, card.brand)
     }
 
     @Test
     fun shouldPassValidateNumberIfLuhnNumber() {
-        val card = Card.create("4242-4242-4242-4242", null, null, null)
+        val card = Card.create(number = "4242-4242-4242-4242")
         assertTrue(card.validateNumber())
     }
 
     @Test
     fun shouldFailValidateNumberIfNotLuhnNumber() {
-        val card = Card.create("4242-4242-4242-4241", null, null, null)
+        val card = Card.create(number = "4242-4242-4242-4241")
         assertFalse(card.validateNumber())
     }
 
     @Test
     fun shouldPassValidateNumberIfLuhnNumberAmex() {
-        val card = Card.create("378282246310005", null, null, null)
-        assertEquals(Card.CardBrand.AMERICAN_EXPRESS, card.brand)
+        val card = Card.create(number = "378282246310005")
+        assertEquals(CardBrand.AmericanExpress, card.brand)
         assertTrue(card.validateNumber())
     }
 
     @Test
     fun shouldFailValidateNumberIfNull() {
-        val card = Card.create(null, null, null, null)
+        val card = Card.create(cvc = null)
         assertFalse(card.validateNumber())
     }
 
     @Test
     fun shouldFailValidateNumberIfBlank() {
-        val card = Card.create("", null, null, null)
+        val card = Card.create(number = "")
         assertFalse(card.validateNumber())
     }
 
     @Test
     fun shouldFailValidateNumberIfJustSpaces() {
-        val card = Card.create("    ", null, null, null)
+        val card = Card.create(number = "    ")
         assertFalse(card.validateNumber())
     }
 
     @Test
     fun shouldFailValidateNumberIfTooShort() {
-        val card = Card.create("0", null, null, null)
+        val card = Card.create(number = "0")
         assertFalse(card.validateNumber())
     }
 
     @Test
     fun shouldFailValidateNumberIfContainsLetters() {
-        val card = Card.create("424242424242a4242", null, null, null)
+        val card = Card.create(number = "424242424242a4242")
         assertFalse(card.validateNumber())
     }
 
     @Test
     fun shouldFailValidateNumberIfTooLong() {
-        val card = Card.create("4242 4242 4242 4242 6", null, null, null)
-        assertEquals(Card.CardBrand.VISA, card.brand)
+        val card = Card.create(number = "4242 4242 4242 4242 6")
+        assertEquals(CardBrand.Visa, card.brand)
         assertFalse(card.validateNumber())
     }
 
     @Test
     fun shouldPassValidateNumber() {
-        val card = Card.create("4242424242424242", null, null, null)
+        val card = Card.create(CardNumberFixtures.VALID_VISA_NO_SPACES)
         assertTrue(card.validateNumber())
     }
 
     @Test
     fun shouldPassValidateNumberSpaces() {
-        val card = Card.create("4242 4242 4242 4242", null, null, null)
+        val card = Card.create(CardNumberFixtures.VALID_VISA_WITH_SPACES)
         assertTrue(card.validateNumber())
     }
 
     @Test
     fun shouldPassValidateNumberDashes() {
-        val card = Card.create("4242-4242-4242-4242", null, null, null)
+        val card = Card.create(number = "4242-4242-4242-4242")
         assertTrue(card.validateNumber())
     }
 
     @Test
     fun shouldPassValidateNumberWithMixedSeparators() {
-        val card = Card.create("4242-4   242 424-24 242", null, null, null)
+        val card = Card.create(number = "4242-4   242 424-24 242")
         assertTrue(card.validateNumber())
     }
 
     @Test
     fun shouldFailValidateNumberIfWithDot() {
-        val card = Card.create("4242.4242.4242.4242", null, null, null)
+        val card = Card.create(number = "4242.4242.4242.4242")
         assertFalse(card.validateNumber())
     }
 
     @Test
     fun shouldFailValidateExpiryDateIfNull() {
-        val card = Card.create(null, null, null, null)
+        val card = Card.create(cvc = null)
         assertFalse(card.validateExpMonth())
         assertFalse(card.validateExpYear(calendar))
         assertFalse(card.validateExpiryDate(calendar))
@@ -257,7 +206,7 @@ class CardTest {
 
     @Test
     fun shouldFailValidateExpiryDateIfNullMonth() {
-        val card = Card.create(null, null, YEAR_IN_FUTURE, null)
+        val card = Card.create(expYear = YEAR_IN_FUTURE)
         assertFalse(card.validateExpMonth())
         assertTrue(card.validateExpYear(calendar))
         assertFalse(card.validateExpiryDate(calendar))
@@ -265,7 +214,7 @@ class CardTest {
 
     @Test
     fun shouldFailValidateExpiryDateIfZeroMonth() {
-        val card = Card.create(null, 0, YEAR_IN_FUTURE, null)
+        val card = Card.create(expMonth = 0, expYear = YEAR_IN_FUTURE)
         assertFalse(card.validateExpMonth())
         assertTrue(card.validateExpYear(calendar))
         assertFalse(card.validateExpiryDate(calendar))
@@ -273,7 +222,7 @@ class CardTest {
 
     @Test
     fun shouldFailValidateExpiryDateIfNegativeMonth() {
-        val card = Card.create(null, -1, YEAR_IN_FUTURE, null)
+        val card = Card.create(expMonth = -1, expYear = YEAR_IN_FUTURE)
         assertFalse(card.validateExpMonth())
         assertTrue(card.validateExpYear(calendar))
         assertFalse(card.validateExpiryDate(calendar))
@@ -281,7 +230,7 @@ class CardTest {
 
     @Test
     fun shouldFailValidateExpiryDateIfMonthToLarge() {
-        val card = Card.create(null, 13, YEAR_IN_FUTURE, null)
+        val card = Card.create(expMonth = 13, expYear = YEAR_IN_FUTURE)
         assertFalse(card.validateExpMonth())
         assertTrue(card.validateExpYear(calendar))
         assertFalse(card.validateExpiryDate(calendar))
@@ -289,13 +238,13 @@ class CardTest {
 
     @Test
     fun shouldFailValidateExpiryDateIfNullYear() {
-        val card = Card.create(null, 1, null, null)
+        val card = Card.create(expMonth = 1)
         assertFalse(card.validateExpiryDate(calendar))
     }
 
     @Test
     fun shouldFailValidateExpiryDateIfZeroYear() {
-        val card = Card.create(null, 12, 0, null)
+        val card = Card.create(expMonth = 12, expYear = 0)
         assertTrue(card.validateExpMonth())
         assertFalse(card.validateExpYear(calendar))
         assertFalse(card.validateExpiryDate(calendar))
@@ -303,7 +252,7 @@ class CardTest {
 
     @Test
     fun shouldFailValidateExpiryDateIfNegativeYear() {
-        val card = Card.create(null, 12, -1, null)
+        val card = Card.create(expMonth = 12, expYear = -1)
         assertTrue(card.validateExpMonth())
         assertFalse(card.validateExpYear(calendar))
         assertFalse(card.validateExpiryDate(calendar))
@@ -311,7 +260,7 @@ class CardTest {
 
     @Test
     fun shouldPassValidateExpiryDateForDecemberOfThisYear() {
-        val card = Card.create(null, 12, 1997, null)
+        val card = Card.create(expMonth = 12, expYear = 1997)
         assertTrue(card.validateExpMonth())
         assertTrue(card.validateExpYear(calendar))
         assertTrue(card.validateExpiryDate(calendar))
@@ -319,7 +268,7 @@ class CardTest {
 
     @Test
     fun shouldPassValidateExpiryDateIfCurrentMonth() {
-        val card = Card.create(null, 8, 1997, null)
+        val card = Card.create(expMonth = 8, expYear = 1997)
         assertTrue(card.validateExpMonth())
         assertTrue(card.validateExpYear(calendar))
         assertTrue(card.validateExpiryDate(calendar))
@@ -327,7 +276,7 @@ class CardTest {
 
     @Test
     fun shouldPassValidateExpiryDateIfCurrentMonthTwoDigitYear() {
-        val card = Card.create(null, 8, 97, null)
+        val card = Card.create(expMonth = 8, expYear = 97)
         assertTrue(card.validateExpMonth())
         assertTrue(card.validateExpYear(calendar))
         assertTrue(card.validateExpiryDate(calendar))
@@ -335,7 +284,7 @@ class CardTest {
 
     @Test
     fun shouldFailValidateExpiryDateIfLastMonth() {
-        val card = Card.create(null, 7, 1997, null)
+        val card = Card.create(expMonth = 7, expYear = 1997)
         assertTrue(card.validateExpMonth())
         assertTrue(card.validateExpYear(calendar))
         assertFalse(card.validateExpiryDate(calendar))
@@ -343,7 +292,7 @@ class CardTest {
 
     @Test
     fun shouldPassValidateExpiryDateIfNextMonth() {
-        val card = Card.create(null, 9, 1997, null)
+        val card = Card.create(expMonth = 9, expYear = 1997)
         assertTrue(card.validateExpMonth())
         assertTrue(card.validateExpYear(calendar))
         assertTrue(card.validateExpiryDate(calendar))
@@ -351,7 +300,7 @@ class CardTest {
 
     @Test
     fun shouldPassValidateExpiryDateForJanuary00() {
-        val card = Card.create(null, 1, 0, null)
+        val card = Card.create(expMonth = 1, expYear = 0)
         assertTrue(card.validateExpMonth())
         assertFalse(card.validateExpYear(calendar))
         assertFalse(card.validateExpiryDate(calendar))
@@ -359,7 +308,7 @@ class CardTest {
 
     @Test
     fun shouldPassValidateExpiryDateForDecember99() {
-        val card = Card.create(null, 12, 99, null)
+        val card = Card.create(expMonth = 12, expYear = 99)
         assertTrue(card.validateExpMonth())
         assertTrue(card.validateExpYear(calendar))
         assertTrue(card.validateExpiryDate(calendar))
@@ -367,103 +316,103 @@ class CardTest {
 
     @Test
     fun shouldFailValidateCVCIfNull() {
-        val card = Card.create(null, null, null, null)
+        val card = Card.create(cvc = null)
         assertFalse(card.validateCVC())
     }
 
     @Test
     fun shouldFailValidateCVCIfBlank() {
-        val card = Card.create(null, null, null, "")
+        val card = Card.create(cvc = "")
         assertFalse(card.validateCVC())
     }
 
     @Test
     fun shouldFailValidateCVCIfUnknownTypeAndLength2() {
-        val card = Card.create(null, null, null, "12")
+        val card = Card.create(cvc = "12")
         assertFalse(card.validateCVC())
     }
 
     @Test
     fun shouldPassValidateCVCIfUnknownTypeAndLength3() {
-        val card = Card.create(null, null, null, "123")
+        val card = Card.create(cvc = "123")
         assertTrue(card.validateCVC())
     }
 
     @Test
     fun shouldPassValidateCVCIfUnknownTypeAndLength4() {
-        val card = Card.create(null, null, null, "1234")
+        val card = Card.create(cvc = "1234")
         assertTrue(card.validateCVC())
     }
 
     @Test
     fun shouldFailValidateCVCIfUnknownTypeAndLength5() {
-        val card = Card.create(null, null, null, "12345")
+        val card = Card.create(cvc = "12345")
         assertFalse(card.validateCVC())
     }
 
     @Test
     fun shouldFailValidateCVCIfVisaAndLength2() {
-        val card = Card.create("4242 4242 4242 4242", null, null, "12")
+        val card = Card.create(number = "4242 4242 4242 4242", cvc = "12")
         assertFalse(card.validateCVC())
     }
 
     @Test
     fun shouldPassValidateCVCIfVisaAndLength3() {
-        val card = Card.create("4242 4242 4242 4242", null, null, "123")
+        val card = Card.create(number = "4242 4242 4242 4242", cvc = "123")
         assertTrue(card.validateCVC())
     }
 
     @Test
     fun shouldFailValidateCVCIfVisaAndLength4() {
-        val card = Card.create("4242 4242 4242 4242", null, null, "1234")
+        val card = Card.create(number = "4242 4242 4242 4242", cvc = "1234")
         assertFalse(card.validateCVC())
     }
 
     @Test
     fun shouldFailValidateCVCIfVisaAndLength5() {
-        val card = Card.create("4242 4242 4242 4242", null, null, "12345")
+        val card = Card.create(number = "4242 4242 4242 4242", cvc = "12345")
         assertFalse(card.validateCVC())
     }
 
     @Test
     fun shouldFailValidateCVCIfVisaAndNotNumeric() {
-        val card = Card.create("4242 4242 4242 4242", null, null, "12a")
+        val card = Card.create(number = "4242 4242 4242 4242", cvc = "12a")
         assertFalse(card.validateCVC())
     }
 
     @Test
     fun shouldPassValidateCVCIfAmexAndLength2() {
-        val card = Card.create("378282246310005", null, null, "12")
+        val card = Card.create(number = "378282246310005", cvc = "12")
         assertFalse(card.validateCVC())
     }
 
     @Test
     fun shouldPassValidateCVCIfAmexAndLength3() {
-        val card = Card.create("378282246310005", null, null, "123")
+        val card = Card.create(number = "378282246310005", cvc = "123")
         assertTrue(card.validateCVC())
     }
 
     @Test
     fun shouldPassValidateCVCIfAmexAndLength4() {
-        val card = Card.create("378282246310005", null, null, "1234")
+        val card = Card.create(number = "378282246310005", cvc = "1234")
         assertTrue(card.validateCVC())
     }
 
     @Test
     fun shouldFailValidateCVCIfAmexAndLength5() {
-        val card = Card.create("378282246310005", null, null, "12345")
+        val card = Card.create(number = "378282246310005", cvc = "12345")
         assertFalse(card.validateCVC())
     }
 
     @Test
     fun shouldFailValidateCVCIfAmexAndNotNumeric() {
-        val card = Card.create("378282246310005", null, null, "123d")
+        val card = Card.create(number = "378282246310005", cvc = "123d")
         assertFalse(card.validateCVC())
     }
 
     @Test
     fun shouldFailValidateCardIfNotLuhnNumber() {
-        val card = Card.create("4242-4242-4242-4241", 12, 2050, "123")
+        val card = Card.create(number = "4242-4242-4242-4241", expMonth = 12, expYear = 2050, cvc = "123")
         assertFalse(card.validateCard())
         assertFalse(card.validateNumber())
         assertTrue(card.validateExpiryDate(calendar))
@@ -472,7 +421,7 @@ class CardTest {
 
     @Test
     fun shouldFailValidateCardInvalidMonth() {
-        val card = Card.create("4242-4242-4242-4242", 13, 2050, "123")
+        val card = Card.create(number = "4242-4242-4242-4242", expMonth = 13, expYear = 2050, cvc = "123")
         assertFalse(card.validateCard())
         assertTrue(card.validateNumber())
         assertFalse(card.validateExpiryDate(calendar))
@@ -481,7 +430,7 @@ class CardTest {
 
     @Test
     fun shouldFailValidateCardInvalidYear() {
-        val card = Card.create("4242-4242-4242-4242", 1, 1990, "123")
+        val card = Card.create(number = "4242-4242-4242-4242", expMonth = 1, expYear = 1990, cvc = "123")
         assertFalse(card.validateCard(calendar))
         assertTrue(card.validateNumber())
         assertFalse(card.validateExpiryDate(calendar))
@@ -490,7 +439,7 @@ class CardTest {
 
     @Test
     fun shouldPassValidateCardWithNullCVC() {
-        val card = Card.create("4242-4242-4242-4242", 12, 2050, null)
+        val card = Card.create(number = "4242-4242-4242-4242", expMonth = 12, expYear = 2050)
         assertTrue(card.validateCard(calendar))
         assertTrue(card.validateNumber())
         assertTrue(card.validateExpiryDate(calendar))
@@ -499,7 +448,7 @@ class CardTest {
 
     @Test
     fun shouldPassValidateCardVisa() {
-        val card = Card.create("4242-4242-4242-4242", 12, 2050, "123")
+        val card = Card.create(number = "4242-4242-4242-4242", expMonth = 12, expYear = 2050, cvc = "123")
         assertTrue(card.validateCard(calendar))
         assertTrue(card.validateNumber())
         assertTrue(card.validateExpiryDate(calendar))
@@ -508,7 +457,7 @@ class CardTest {
 
     @Test
     fun shouldFailValidateCardVisaWithShortCVC() {
-        val card = Card.create("4242-4242-4242-4242", 12, 2050, "12")
+        val card = Card.create(number = "4242-4242-4242-4242", expMonth = 12, expYear = 2050, cvc = "12")
         assertFalse(card.validateCard(calendar))
         assertTrue(card.validateNumber())
         assertTrue(card.validateExpiryDate(calendar))
@@ -517,7 +466,7 @@ class CardTest {
 
     @Test
     fun shouldFailValidateCardVisaWithLongCVC() {
-        val card = Card.create("4242-4242-4242-4242", 12, 2050, "1234")
+        val card = Card.create(number = "4242-4242-4242-4242", expMonth = 12, expYear = 2050, cvc = "1234")
         assertFalse(card.validateCard(calendar))
         assertTrue(card.validateNumber())
         assertTrue(card.validateExpiryDate(calendar))
@@ -526,7 +475,7 @@ class CardTest {
 
     @Test
     fun shouldFailValidateCardVisaWithBadCVC() {
-        val card = Card.create("4242-4242-4242-4242", 12, 2050, "bad")
+        val card = Card.create(number = "4242-4242-4242-4242", expMonth = 12, expYear = 2050, cvc = "bad")
         assertFalse(card.validateCard(calendar))
         assertTrue(card.validateNumber())
         assertTrue(card.validateExpiryDate(calendar))
@@ -535,7 +484,7 @@ class CardTest {
 
     @Test
     fun shouldPassValidateCardAmex() {
-        val card = Card.create("378282246310005", 12, 2050, "1234")
+        val card = Card.create(number = "378282246310005", expMonth = 12, expYear = 2050, cvc = "1234")
         assertTrue(card.validateCard(calendar))
         assertTrue(card.validateNumber())
         assertTrue(card.validateExpiryDate(calendar))
@@ -544,7 +493,7 @@ class CardTest {
 
     @Test
     fun shouldPassValidateCardAmexWithNullCVC() {
-        val card = Card.create("378282246310005", 12, 2050, null)
+        val card = Card.create(number = "378282246310005", expMonth = 12, expYear = 2050)
         assertTrue(card.validateCard(calendar))
         assertTrue(card.validateNumber())
         assertTrue(card.validateExpiryDate(calendar))
@@ -553,7 +502,7 @@ class CardTest {
 
     @Test
     fun shouldFailValidateCardAmexWithShortCVC() {
-        val card = Card.create("378282246310005", 12, 2050, "12")
+        val card = Card.create(number = "378282246310005", expMonth = 12, expYear = 2050, cvc = "12")
         assertFalse(card.validateCard(calendar))
         assertTrue(card.validateNumber())
         assertTrue(card.validateExpiryDate(calendar))
@@ -562,7 +511,7 @@ class CardTest {
 
     @Test
     fun shouldFailValidateCardAmexWithLongCVC() {
-        val card = Card.create("378282246310005", 12, 2050, "12345")
+        val card = Card.create(number = "378282246310005", expMonth = 12, expYear = 2050, cvc = "12345")
         assertFalse(card.validateCard(calendar))
         assertTrue(card.validateNumber())
         assertTrue(card.validateExpiryDate(calendar))
@@ -571,7 +520,7 @@ class CardTest {
 
     @Test
     fun shouldFailValidateCardAmexWithBadCVC() {
-        val card = Card.create("378282246310005", 12, 2050, "bad")
+        val card = Card.create(number = "378282246310005", expMonth = 12, expYear = 2050, cvc = "bad")
         assertFalse(card.validateCard(calendar))
         assertTrue(card.validateNumber())
         assertTrue(card.validateExpiryDate(calendar))
@@ -580,13 +529,13 @@ class CardTest {
 
     @Test
     fun testLast4() {
-        val card = Card.create("42 42 42 42 42 42 42 42", null, null, null)
+        val card = Card.create(number = "42 42 42 42 42 42 42 42")
         assertEquals("4242", card.last4)
     }
 
     @Test
     fun last4ShouldBeNullWhenNumberIsNull() {
-        val card = Card.create(null, null, null, null)
+        val card = Card.create(cvc = null)
         assertNull(card.last4)
     }
 
@@ -603,9 +552,9 @@ class CardTest {
     fun getBrand_whenNumberIsNullButBrandIsSet_returnsCorrectValue() {
         val card = Card.Builder(null, 2, 2020, "123")
             .name("John Q Public")
-            .brand(Card.CardBrand.AMERICAN_EXPRESS)
+            .brand(CardBrand.AmericanExpress)
             .build()
-        assertEquals(Card.CardBrand.AMERICAN_EXPRESS, card.brand)
+        assertEquals(CardBrand.AmericanExpress, card.brand)
     }
 
     @Test
@@ -701,8 +650,8 @@ class CardTest {
 
         private const val BAD_JSON: String = "{ \"id\": "
 
-        internal val CARD_USD = Card.Builder(null, 8, 2017, null)
-            .brand(Card.CardBrand.VISA)
+        internal val CARD_USD = Card.Builder(expMonth = 8, expYear = 2017)
+            .brand(CardBrand.Visa)
             .funding(Card.FundingType.CREDIT)
             .last4("4242")
             .id("card_189fi32eZvKYlo2CHK8NPRME")

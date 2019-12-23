@@ -3,39 +3,59 @@ package com.stripe.android.model
 import androidx.annotation.DrawableRes
 import com.stripe.android.R
 
+/**
+ * A representation of supported card brands and related data
+ */
 enum class CardBrand(
     val code: String,
     val displayName: String,
     @DrawableRes val icon: Int,
+    @DrawableRes val cvcIcon: Int = R.drawable.stripe_ic_cvc,
+
+    /**
+     * Accepted CVC lengths
+     */
+    val cvcLength: Set<Int> = setOf(3),
+
     val maxLengthWithSpaces: Int = 19,
     val maxLengthWithoutSpaces: Int = 16,
 
     /**
      * Based on [Issuer identification number table](http://en.wikipedia.org/wiki/Bank_card_number#Issuer_identification_number_.28IIN.29)
      */
-    private val prefixes: Set<String> = emptySet()
+    val prefixes: List<String> = emptyList(),
+
+    /**
+     * The position of spaces in a formatted card number. For example, "4242424242424242" is
+     * formatted to "4242 4242 4242 4242". The spaces in that number are at the positions
+     * specified by [spacePositions].
+     */
+    val spacePositions: Set<Int> = setOf(4, 9, 14)
 ) {
     AmericanExpress(
         "amex",
         "American Express",
         R.drawable.stripe_ic_amex,
+        cvcIcon = R.drawable.stripe_ic_cvc_amex,
+        cvcLength = setOf(3, 4),
         maxLengthWithSpaces = 17,
         maxLengthWithoutSpaces = 15,
-        prefixes = setOf("34", "37")
+        prefixes = listOf("34", "37"),
+        spacePositions = setOf(4, 11)
     ),
 
     Discover(
         "discover",
         "Discover",
         R.drawable.stripe_ic_discover,
-        prefixes = setOf("60", "64", "65")
+        prefixes = listOf("60", "64", "65")
     ),
 
     JCB(
         "jcb",
         "JCB",
         R.drawable.stripe_ic_jcb,
-        prefixes = setOf("35")
+        prefixes = listOf("35")
     ),
 
     DinersClub(
@@ -44,7 +64,7 @@ enum class CardBrand(
         R.drawable.stripe_ic_diners,
         maxLengthWithSpaces = 17,
         maxLengthWithoutSpaces = 14,
-        prefixes = setOf(
+        prefixes = listOf(
             "300", "301", "302", "303", "304", "305", "309", "36", "38", "39"
         )
     ),
@@ -53,14 +73,14 @@ enum class CardBrand(
         "visa",
         "Visa",
         R.drawable.stripe_ic_visa,
-        prefixes = setOf("4")
+        prefixes = listOf("4")
     ),
 
     MasterCard(
         "mastercard",
         "MasterCard",
         R.drawable.stripe_ic_mastercard,
-        prefixes = setOf(
+        prefixes = listOf(
             "2221", "2222", "2223", "2224", "2225", "2226", "2227", "2228", "2229", "223", "224",
             "225", "226", "227", "228", "229", "23", "24", "25", "26", "270", "271", "2720",
             "50", "51", "52", "53", "54", "55", "67"
@@ -71,14 +91,31 @@ enum class CardBrand(
         "unionpay",
         "UnionPay",
         R.drawable.stripe_ic_unionpay,
-        prefixes = setOf("62")
+        prefixes = listOf("62")
     ),
 
     Unknown(
         "unknown",
         "Unknown",
-        R.drawable.stripe_ic_unknown
+        R.drawable.stripe_ic_unknown,
+        cvcLength = setOf(3, 4)
     );
+
+    /**
+     * Checks to see whether the input number is of the correct length, given the assumed brand of
+     * the card. This function does not perform a Luhn check.
+     *
+     * @param cardNumber the card number with no spaces or dashes
+     * @return `true` if the card number is the correct length for the assumed brand
+     */
+    fun isValidCardNumberLength(cardNumber: String?): Boolean {
+        return cardNumber != null && Unknown != this &&
+            cardNumber.length == maxLengthWithoutSpaces
+    }
+
+    fun isValidCvc(cvc: String): Boolean {
+        return cvcLength.contains(cvc.length)
+    }
 
     companion object {
         /**
@@ -99,10 +136,11 @@ enum class CardBrand(
         }
 
         /**
-         * @param code a brand code, such as `visa` or `amex`. See [PaymentMethod.Card.brand].
+         * @param code a brand code, such as `Visa` or `American Express`.
+         * See [PaymentMethod.Card.brand].
          */
         fun fromCode(code: String?): CardBrand {
-            return values().firstOrNull { it.code == code } ?: Unknown
+            return values().firstOrNull { it.code.equals(code, ignoreCase = true) } ?: Unknown
         }
     }
 }
