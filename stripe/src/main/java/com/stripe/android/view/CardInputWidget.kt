@@ -39,6 +39,9 @@ import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_EXPI
 
 /**
  * A card input widget that handles all animation on its own.
+ *
+ * The individual `EditText` views of this widget can be styled by defining a style
+ * `Stripe.CardInputWidget.EditText` that extends `Stripe.Base.CardInputWidget.EditText`.
  */
 class CardInputWidget @JvmOverloads constructor(
     context: Context,

@@ -72,7 +72,7 @@
             android:focusable="true"
             android:focusableInTouchMode="true"
             android:visibility="visible"
-            android:textSize="@dimen/ciw_stripe_edit_text_size"
+            style="@style/Stripe.CardInputWidget.EditText"
             />
 
         <com.stripe.android.view.ExpiryDateEditText
@@ -98,7 +98,7 @@
             android:focusableInTouchMode="true"
             android:layout_marginStart="@dimen/stripe_card_expiry_initial_margin"
             android:layout_gravity="start"
-            android:textSize="@dimen/ciw_stripe_edit_text_size"
+            style="@style/Stripe.CardInputWidget.EditText"
             />
 
         <com.stripe.android.view.CvcEditText
@@ -116,7 +116,7 @@
             android:focusableInTouchMode="true"
             android:layout_marginStart="@dimen/stripe_card_cvc_initial_margin"
             android:layout_gravity="start"
-            android:textSize="@dimen/ciw_stripe_edit_text_size"
+            style="@style/Stripe.CardInputWidget.EditText"
             />
 
         <com.stripe.android.view.PostalCodeEditText
@@ -135,7 +135,7 @@
             android:layout_gravity="start"
             android:visibility="gone"
             android:enabled="false"
-            android:textSize="@dimen/ciw_stripe_edit_text_size"
+            style="@style/Stripe.CardInputWidget.EditText"
             />
 
     </FrameLayout>
