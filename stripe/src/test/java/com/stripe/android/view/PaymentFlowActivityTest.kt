@@ -86,12 +86,11 @@ class PaymentFlowActivityTest {
     @Test
     fun launchPaymentFlowActivity_withHideShippingInfoConfig_hidesShippingInfoView() {
         activityScenarioFactory.create<PaymentFlowActivity>(
-            PaymentFlowActivityStarter.Args.Builder()
-                .setPaymentSessionConfig(PaymentSessionConfig.Builder()
+            createStarterArgs(
+                PaymentSessionConfig.Builder()
                     .setShippingInfoRequired(false)
-                    .build())
-                .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
-                .build()
+                    .build()
+            )
         ).use { activityScenario ->
             activityScenario.onActivity { paymentFlowActivity ->
                 assertNull(getShippingInfoWidget(paymentFlowActivity))
@@ -103,11 +102,7 @@ class PaymentFlowActivityTest {
     @Test
     fun onShippingInfoSave_whenShippingNotPopulated_doesNotFinish() {
         activityScenarioFactory.create<PaymentFlowActivity>(
-            PaymentFlowActivityStarter.Args.Builder()
-                .setPaymentSessionConfig(PaymentSessionConfig.Builder()
-                    .build())
-                .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
-                .build()
+            PaymentSessionFixtures.PAYMENT_FLOW_ARGS
         ).use { activityScenario ->
             activityScenario.onActivity { paymentFlowActivity ->
                 assertNotNull(getShippingInfoWidget(paymentFlowActivity))
@@ -120,11 +115,7 @@ class PaymentFlowActivityTest {
     @Test
     fun onShippingInfoSave_whenShippingInfoNotPopulated_doesNotContinue() {
         activityScenarioFactory.create<PaymentFlowActivity>(
-            PaymentFlowActivityStarter.Args.Builder()
-                .setPaymentSessionConfig(PaymentSessionConfig.Builder()
-                    .build())
-                .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
-                .build()
+            PaymentSessionFixtures.PAYMENT_FLOW_ARGS
         ).use { activityScenario ->
             activityScenario.onActivity { paymentFlowActivity ->
                 assertNotNull(getShippingInfoWidget(paymentFlowActivity))
@@ -138,12 +129,11 @@ class PaymentFlowActivityTest {
     @Test
     fun onShippingInfoSave_whenShippingPopulated_sendsCorrectIntent() {
         activityScenarioFactory.create<PaymentFlowActivity>(
-            PaymentFlowActivityStarter.Args.Builder()
-                .setPaymentSessionConfig(PaymentSessionConfig.Builder()
+            createStarterArgs(
+                PaymentSessionConfig.Builder()
                     .setPrepopulatedShippingInfo(SHIPPING_INFO)
-                    .build())
-                .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
-                .build()
+                    .build()
+            )
         ).use { activityScenario ->
             activityScenario.onActivity { paymentFlowActivity ->
                 assertNotNull(getShippingInfoWidget(paymentFlowActivity))
@@ -163,12 +153,11 @@ class PaymentFlowActivityTest {
     @Test
     fun onShippingInfoProcessed_whenInvalidShippingInfoSubmitted_rendersCorrectly() {
         activityScenarioFactory.create<PaymentFlowActivity>(
-            PaymentFlowActivityStarter.Args.Builder()
-                .setPaymentSessionConfig(PaymentSessionConfig.Builder()
+            createStarterArgs(
+                PaymentSessionConfig.Builder()
                     .setPrepopulatedShippingInfo(SHIPPING_INFO)
-                    .build())
-                .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
-                .build()
+                    .build()
+            )
         ).use { activityScenario ->
             activityScenario.onActivity { paymentFlowActivity ->
                 // invalid result
@@ -187,12 +176,11 @@ class PaymentFlowActivityTest {
     @Test
     fun onShippingInfoProcessed_whenValidShippingInfoSubmitted_rendersCorrectly() {
         activityScenarioFactory.create<PaymentFlowActivity>(
-            PaymentFlowActivityStarter.Args.Builder()
-                .setPaymentSessionConfig(PaymentSessionConfig.Builder()
+            createStarterArgs(
+                PaymentSessionConfig.Builder()
                     .setPrepopulatedShippingInfo(SHIPPING_INFO)
-                    .build())
-                .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
-                .build()
+                    .build()
+            )
         ).use { activityScenario ->
             activityScenario.onActivity { paymentFlowActivity ->
                 // valid result
@@ -214,13 +202,12 @@ class PaymentFlowActivityTest {
     @Test
     fun onShippingInfoSaved_whenOnlyShippingInfo_finishWithSuccess() {
         activityScenarioFactory.create<PaymentFlowActivity>(
-            PaymentFlowActivityStarter.Args.Builder()
-                .setPaymentSessionConfig(PaymentSessionConfig.Builder()
+            createStarterArgs(
+                PaymentSessionConfig.Builder()
                     .setPrepopulatedShippingInfo(SHIPPING_INFO)
                     .setShippingMethodsRequired(false)
-                    .build())
-                .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
-                .build()
+                    .build()
+            )
         ).use { activityScenario ->
             activityScenario.onActivity { paymentFlowActivity ->
                 // valid result
@@ -252,14 +239,13 @@ class PaymentFlowActivityTest {
         `when`(shippingMethodsFactory.create(SHIPPING_INFO)).thenReturn(SHIPPING_METHODS)
 
         activityScenarioFactory.create<PaymentFlowActivity>(
-            PaymentFlowActivityStarter.Args.Builder()
-                .setPaymentSessionConfig(PaymentSessionConfig.Builder()
+            createStarterArgs(
+                PaymentSessionConfig.Builder()
                     .setPrepopulatedShippingInfo(SHIPPING_INFO)
                     .setShippingInformationValidator(shippingInformationValidator)
                     .setShippingMethodsFactory(shippingMethodsFactory)
-                    .build())
-                .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
-                .build()
+                    .build()
+            )
         ).use { activityScenario ->
             activityScenario.onActivity { paymentFlowActivity ->
                 // valid result
@@ -291,5 +277,14 @@ class PaymentFlowActivityTest {
             ShippingMethod("FedEx", "fedex",
                 599, "USD", "Arrives tomorrow")
         )
+
+        private fun createStarterArgs(
+            config: PaymentSessionConfig
+        ): PaymentFlowActivityStarter.Args {
+            return PaymentFlowActivityStarter.Args(
+                paymentSessionConfig = config,
+                paymentSessionData = PaymentSessionData(config)
+            )
+        }
     }
 }

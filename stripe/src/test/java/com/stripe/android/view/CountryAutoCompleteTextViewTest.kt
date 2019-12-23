@@ -7,7 +7,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CustomerSession
 import com.stripe.android.EphemeralKeyProvider
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.PaymentSessionConfig
+import com.stripe.android.PaymentSessionData
 import com.stripe.android.PaymentSessionFixtures
 import com.stripe.android.R
 import java.util.Locale
@@ -49,12 +49,15 @@ class CountryAutoCompleteTextViewTest {
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         CustomerSession.initCustomerSession(context, ephemeralKeyProvider)
 
+        val config = PaymentSessionFixtures.PAYMENT_SESSION_CONFIG.copy(
+            prepopulatedShippingInfo = null,
+            allowedShippingCountryCodes = emptySet()
+        )
         activityScenarioFactory.create<PaymentFlowActivity>(
-            PaymentFlowActivityStarter.Args.Builder()
-                .setPaymentSessionConfig(PaymentSessionConfig.Builder()
-                    .build())
-                .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
-                .build()
+            PaymentFlowActivityStarter.Args(
+                paymentSessionConfig = config,
+                paymentSessionData = PaymentSessionData(config)
+            )
         ).use { activityScenario ->
             activityScenario.onActivity {
                 countryAutoCompleteTextView = it

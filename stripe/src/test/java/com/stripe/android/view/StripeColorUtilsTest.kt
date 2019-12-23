@@ -5,7 +5,6 @@ import androidx.annotation.ColorInt
 import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.CustomerSession
-import com.stripe.android.PaymentSessionConfig
 import com.stripe.android.PaymentSessionFixtures
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -28,11 +27,7 @@ internal class StripeColorUtilsTest {
     @Test
     fun getThemeAccentColor_whenOnPostLollipopConfig_getsNonzeroColor() {
         activityScenarioFactory.create<PaymentFlowActivity>(
-            PaymentFlowActivityStarter.Args.Builder()
-                .setPaymentSessionConfig(PaymentSessionConfig.Builder()
-                    .build())
-                .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
-                .build()
+            PaymentSessionFixtures.PAYMENT_FLOW_ARGS
         ).use { activityScenario ->
             activityScenario.onActivity {
                 @ColorInt val color = StripeColorUtils(it).getThemeAccentColor().data
@@ -44,11 +39,7 @@ internal class StripeColorUtilsTest {
     @Test
     fun getThemeColorControlNormal_whenOnPostLollipopConfig_getsNonzeroColor() {
         activityScenarioFactory.create<PaymentFlowActivity>(
-            PaymentFlowActivityStarter.Args.Builder()
-                .setPaymentSessionConfig(PaymentSessionConfig.Builder()
-                    .build())
-                .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
-                .build()
+            PaymentSessionFixtures.PAYMENT_FLOW_ARGS
         ).use { activityScenario ->
             activityScenario.onActivity {
                 @ColorInt val color = StripeColorUtils(it).getThemeColorControlNormal().data

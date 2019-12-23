@@ -10,7 +10,6 @@ import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import com.stripe.android.stripe3ds2.init.ui.UiCustomization
 import com.stripe.android.view.ActivityScenarioFactory
 import com.stripe.android.view.PaymentFlowActivity
-import com.stripe.android.view.PaymentFlowActivityStarter
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -242,11 +241,7 @@ class PaymentAuthConfigTest {
     @Test
     fun createWithAppTheme_shouldCreateExpectedToolbarCustomization() {
         activityScenarioFactory.create<PaymentFlowActivity>(
-            PaymentFlowActivityStarter.Args.Builder()
-                .setPaymentSessionConfig(PaymentSessionConfig.Builder()
-                    .build())
-                .setPaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_DATA)
-                .build()
+            PaymentSessionFixtures.PAYMENT_FLOW_ARGS
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
                 activity.setTheme(android.R.style.Theme)

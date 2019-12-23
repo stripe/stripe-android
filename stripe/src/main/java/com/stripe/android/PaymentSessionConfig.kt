@@ -32,7 +32,7 @@ data class PaymentSessionConfig internal constructor(
     @get:LayoutRes
     val addPaymentMethodFooterLayoutId: Int = 0,
     val paymentMethodTypes: List<PaymentMethod.Type> = listOf(PaymentMethod.Type.Card),
-    val shouldShowGooglePay: Boolean,
+    val shouldShowGooglePay: Boolean = false,
     val allowedShippingCountryCodes: Set<String> = emptySet(),
     val billingAddressFields: BillingAddressFields = BillingAddressFields.None,
 

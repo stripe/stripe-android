@@ -28,7 +28,7 @@ class PaymentSession @VisibleForTesting internal constructor(
     private val paymentFlowActivityStarter:
     ActivityStarter<PaymentFlowActivity, PaymentFlowActivityStarter.Args>,
     private val paymentSessionPrefs: PaymentSessionPrefs,
-    paymentSessionData: PaymentSessionData = PaymentSessionData()
+    paymentSessionData: PaymentSessionData = PaymentSessionData(config)
 ) {
     /**
      * @return the data associated with the instance of this class.
@@ -51,7 +51,7 @@ class PaymentSession @VisibleForTesting internal constructor(
         config,
         CustomerSession.getInstance(),
         PaymentMethodsActivityStarter(activity),
-        PaymentFlowActivityStarter(activity),
+        PaymentFlowActivityStarter(activity, config),
         PaymentSessionPrefs.create(activity)
     )
 
@@ -68,7 +68,7 @@ class PaymentSession @VisibleForTesting internal constructor(
         config,
         CustomerSession.getInstance(),
         PaymentMethodsActivityStarter(fragment),
-        PaymentFlowActivityStarter(fragment),
+        PaymentFlowActivityStarter(fragment, config),
         PaymentSessionPrefs.create(fragment.requireActivity())
     )
 
@@ -264,12 +264,12 @@ class PaymentSession @VisibleForTesting internal constructor(
      */
     fun presentShippingFlow() {
         paymentFlowActivityStarter.startForResult(
-            PaymentFlowActivityStarter.Args.Builder()
-                .setPaymentSessionConfig(config)
-                .setPaymentSessionData(paymentSessionData)
-                .setIsPaymentSessionActive(true)
-                .setWindowFlags(config.windowFlags)
-                .build()
+            PaymentFlowActivityStarter.Args(
+                paymentSessionConfig = config,
+                paymentSessionData = paymentSessionData,
+                isPaymentSessionActive = true,
+                windowFlags = config.windowFlags
+            )
         )
     }
 

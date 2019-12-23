@@ -11,7 +11,7 @@ import kotlinx.android.parcel.Parcelize
  */
 @Parcelize
 data class PaymentSessionData internal constructor(
-    private val config: PaymentSessionConfig? = null,
+    private val config: PaymentSessionConfig,
 
     /**
      * The cart total value, excluding shipping and tax items.
