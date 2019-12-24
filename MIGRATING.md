@@ -1,9 +1,10 @@
 # Migration Guide
 
 ## Migrating from versions < 13.0.0
-- Changes to `Card` and `SourceCard`
-    - Make `brand` property a `CardBrand` instead of `String?`
+- Changes to `Card` and `SourceCardData`
+    - Change the type of `brand` property from `String?` to `CardBrand`
     - Remove `Card.CardBrand`
+    - Change the type of `tokenizationMethod` property from `String?` to `TokenizationMethod?`
 - Changes to `CardInputWidget`
     - The postal code field is now displayed by default
     - The postal code input is not validated
