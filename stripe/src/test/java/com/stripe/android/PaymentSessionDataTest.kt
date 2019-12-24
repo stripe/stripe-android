@@ -60,6 +60,7 @@ class PaymentSessionDataTest {
     @Test
     fun writeToParcel_withNulls_readsFromParcelCorrectly() {
         val data = PaymentSessionData(
+            config = PaymentSessionFixtures.PAYMENT_SESSION_CONFIG,
             cartTotal = 100L,
             shippingTotal = 150L
         )
@@ -70,6 +71,7 @@ class PaymentSessionDataTest {
     @Test
     fun writeToParcel_withoutNulls_readsFromParcelCorrectly() {
         val data = PaymentSessionData(
+            config = PaymentSessionFixtures.PAYMENT_SESSION_CONFIG,
             cartTotal = 100L,
             shippingTotal = 150L,
             paymentMethod = PAYMENT_METHOD,

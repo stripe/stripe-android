@@ -4,6 +4,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.view.BillingAddressFields
+import com.stripe.android.view.PaymentFlowActivityStarter
 import com.stripe.android.view.ShippingInfoWidget
 
 internal object PaymentSessionFixtures {
@@ -56,4 +57,9 @@ internal object PaymentSessionFixtures {
         .build()
 
     internal val PAYMENT_SESSION_DATA = PaymentSessionData(PAYMENT_SESSION_CONFIG)
+
+    internal val PAYMENT_FLOW_ARGS = PaymentFlowActivityStarter.Args(
+        paymentSessionConfig = PAYMENT_SESSION_CONFIG,
+        paymentSessionData = PAYMENT_SESSION_DATA
+    )
 }

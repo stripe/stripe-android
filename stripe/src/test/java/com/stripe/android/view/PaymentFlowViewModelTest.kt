@@ -7,6 +7,7 @@ import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSessionConfig
 import com.stripe.android.PaymentSessionData
+import com.stripe.android.PaymentSessionFixtures
 import com.stripe.android.model.CustomerFixtures
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
@@ -34,7 +35,7 @@ class PaymentFlowViewModelTest {
     private val viewModel: PaymentFlowViewModel by lazy {
         PaymentFlowViewModel(
             customerSession = customerSession,
-            paymentSessionData = PaymentSessionData(),
+            paymentSessionData = PaymentSessionData(PaymentSessionFixtures.PAYMENT_SESSION_CONFIG),
             workScope = MainScope()
         )
     }
