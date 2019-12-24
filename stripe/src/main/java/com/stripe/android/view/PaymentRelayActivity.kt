@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.ults.listeners.SdkChallengeInterface.UL_HANDLE_CHALLENGE_ACTION
 
 /**
@@ -12,9 +13,17 @@ import com.ults.listeners.SdkChallengeInterface.UL_HANDLE_CHALLENGE_ACTION
 internal class PaymentRelayActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this)
+        LocalBroadcastManager.getInstance(this)
             .sendBroadcast(Intent().setAction(UL_HANDLE_CHALLENGE_ACTION))
-        setResult(Activity.RESULT_OK, Intent().putExtras(intent.extras!!))
+        setResult(
+            Activity.RESULT_OK,
+            Intent()
+                .apply {
+                    intent.extras?.let {
+                        putExtras(it)
+                    }
+                }
+        )
         finish()
     }
 }

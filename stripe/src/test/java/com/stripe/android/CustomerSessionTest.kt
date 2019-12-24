@@ -1,6 +1,5 @@
 package com.stripe.android
 
-import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.any
@@ -67,9 +66,6 @@ class CustomerSessionTest {
     }
     private val customerArgumentCaptor: KArgumentCaptor<Customer> by lazy {
         argumentCaptor<Customer>()
-    }
-    private val intentArgumentCaptor: KArgumentCaptor<Intent> by lazy {
-        argumentCaptor<Intent>()
     }
     private val requestOptionsArgumentCaptor: KArgumentCaptor<ApiRequest.Options> by lazy {
         argumentCaptor<ApiRequest.Options>()
@@ -378,7 +374,7 @@ class CustomerSessionTest {
     }
 
     @Test
-    fun addSourceToCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs() {
+    fun addSourceToCustomer_whenApiThrowsError_callsListenerAndEmptiesLogs() {
         val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
 
         val proxyCalendar = Calendar.getInstance()
@@ -464,7 +460,7 @@ class CustomerSessionTest {
     }
 
     @Test
-    fun removeSourceFromCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs() {
+    fun removeSourceFromCustomer_whenApiThrowsError_callsListenerAndEmptiesLogs() {
         val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
 
         val proxyCalendar = Calendar.getInstance()
@@ -551,7 +547,7 @@ class CustomerSessionTest {
     }
 
     @Test
-    fun setDefaultSourceForCustomer_whenApiThrows_tellsListenerBroadcastsAndClearsLogs() {
+    fun setDefaultSourceForCustomer_whenApiThrows_callsListenerAndClearsLogs() {
         val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
 
         val proxyCalendar = Calendar.getInstance()
@@ -588,9 +584,6 @@ class CustomerSessionTest {
         val customerSession = createCustomerSession(null)
         CustomerSession.instance = customerSession
 
-        val config = PaymentSessionFixtures.CONFIG.copy(
-            allowedShippingCountryCodes = emptySet()
-        )
         activityScenarioFactory.create<PaymentFlowActivity>(
             PaymentSessionFixtures.PAYMENT_FLOW_ARGS
         ).use { activityScenario ->
@@ -672,7 +665,7 @@ class CustomerSessionTest {
     }
 
     @Test
-    fun attachPaymentMethodToCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs() {
+    fun attachPaymentMethodToCustomer_whenApiThrowsError_callsListenerAndEmptiesLogs() {
         val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
 
         val proxyCalendar = Calendar.getInstance()
@@ -759,7 +752,7 @@ class CustomerSessionTest {
     }
 
     @Test
-    fun detachPaymentMethodFromCustomer_whenApiThrowsError_tellsListenerBroadcastsAndEmptiesLogs() {
+    fun detachPaymentMethodFromCustomer_whenApiThrowsError_callsListenerAndEmptiesLogs() {
         val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
 
         val proxyCalendar = Calendar.getInstance()
