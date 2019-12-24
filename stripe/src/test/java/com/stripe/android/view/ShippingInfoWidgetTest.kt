@@ -8,8 +8,8 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CustomerSession
 import com.stripe.android.EphemeralKeyProvider
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.PaymentSessionConfig
 import com.stripe.android.PaymentSessionData
+import com.stripe.android.PaymentSessionFixtures
 import com.stripe.android.R
 import com.stripe.android.model.Address
 import com.stripe.android.model.ShippingInformation
@@ -65,9 +65,9 @@ class ShippingInfoWidgetTest {
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         CustomerSession.initCustomerSession(context, ephemeralKeyProvider)
 
-        val config = PaymentSessionConfig(
-            isShippingInfoRequired = true,
-            isShippingMethodRequired = true
+        val config = PaymentSessionFixtures.CONFIG.copy(
+            prepopulatedShippingInfo = null,
+            allowedShippingCountryCodes = emptySet()
         )
         activityScenarioFactory.create<PaymentFlowActivity>(
             PaymentFlowActivityStarter.Args(

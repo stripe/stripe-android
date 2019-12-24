@@ -93,7 +93,7 @@ class PaymentSessionTest {
         val customerSession = createCustomerSession()
         CustomerSession.instance = customerSession
 
-        val paymentSession = PaymentSession(activity, EMPTY_CONFIG)
+        val paymentSession = PaymentSession(activity, DEFAULT_CONFIG)
         paymentSession.init(paymentSessionListener)
 
         assertTrue(customerSession.productUsageTokens
@@ -108,7 +108,7 @@ class PaymentSessionTest {
             .setNextRawEphemeralKey(CustomerFixtures.EPHEMERAL_KEY_FIRST.toString())
         CustomerSession.instance = createCustomerSession()
 
-        val paymentSession = PaymentSession(activity, EMPTY_CONFIG)
+        val paymentSession = PaymentSession(activity, DEFAULT_CONFIG)
         paymentSession.init(paymentSessionListener)
         verify(paymentSessionListener)
             .onCommunicatingStateChanged(eq(true))
@@ -122,7 +122,7 @@ class PaymentSessionTest {
     fun handlePaymentData_whenPaymentMethodSelected_notifiesListenerAndFetchesCustomer() {
         CustomerSession.instance = createCustomerSession()
 
-        val paymentSession = PaymentSession(activity, EMPTY_CONFIG)
+        val paymentSession = PaymentSession(activity, DEFAULT_CONFIG)
         paymentSession.init(paymentSessionListener)
 
         // We have already tested the functionality up to here.
@@ -147,7 +147,7 @@ class PaymentSessionTest {
     fun handlePaymentData_whenGooglePaySelected_notifiesListenerAndFetchesCustomer() {
         CustomerSession.instance = createCustomerSession()
 
-        val paymentSession = PaymentSession(activity, EMPTY_CONFIG)
+        val paymentSession = PaymentSession(activity, DEFAULT_CONFIG)
         paymentSession.init(paymentSessionListener)
 
         // We have already tested the functionality up to here.
@@ -172,7 +172,7 @@ class PaymentSessionTest {
     fun selectPaymentMethod_launchesPaymentMethodsActivityWithLog() {
         CustomerSession.instance = createCustomerSession()
 
-        val paymentSession = PaymentSession(activity, EMPTY_CONFIG)
+        val paymentSession = PaymentSession(activity, DEFAULT_CONFIG)
         paymentSession.init(paymentSessionListener)
 
         paymentSession.presentPaymentMethodSelection()
@@ -185,7 +185,7 @@ class PaymentSessionTest {
         assertEquals(PaymentMethodsActivity::class.java.name, component?.className)
 
         val args = PaymentMethodsActivityStarter.Args.create(intent)
-        assertEquals(BillingAddressFields.None, args.billingAddressFields)
+        assertEquals(BillingAddressFields.Full, args.billingAddressFields)
     }
 
     @Test
@@ -194,6 +194,7 @@ class PaymentSessionTest {
 
         val paymentSession = PaymentSession(activity,
             PaymentSessionConfig.Builder()
+                .setShippingMethodsRequired(false)
                 .setBillingAddressFields(BillingAddressFields.PostalCode)
                 .build()
         )
@@ -261,7 +262,7 @@ class PaymentSessionTest {
             .addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY)
         assertEquals(1, customerSession.productUsageTokens.size)
 
-        val paymentSession = PaymentSession(activity, EMPTY_CONFIG)
+        val paymentSession = PaymentSession(activity, DEFAULT_CONFIG)
         paymentSession.init(paymentSessionListener)
 
         // The init removes PaymentMethodsActivity, but then adds PaymentSession
@@ -279,7 +280,7 @@ class PaymentSessionTest {
             .addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY)
         assertEquals(1, customerSession.productUsageTokens.size)
 
-        val paymentSession = PaymentSession(activity, EMPTY_CONFIG)
+        val paymentSession = PaymentSession(activity, DEFAULT_CONFIG)
         // If it is given any saved state at all, the tokens are not cleared out.
         paymentSession.init(paymentSessionListener, Bundle())
 
@@ -297,7 +298,7 @@ class PaymentSessionTest {
             .addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY)
         assertEquals(1, customerSession.productUsageTokens.size)
 
-        val paymentSession = PaymentSession(activity, EMPTY_CONFIG)
+        val paymentSession = PaymentSession(activity, DEFAULT_CONFIG)
         // If it is given any saved state at all, the tokens are not cleared out.
         paymentSession.init(paymentSessionListener, Bundle())
 
@@ -316,7 +317,7 @@ class PaymentSessionTest {
             .setNextRawEphemeralKey(CustomerFixtures.EPHEMERAL_KEY_FIRST.toString())
         CustomerSession.instance = createCustomerSession()
 
-        val paymentSession = PaymentSession(activity, EMPTY_CONFIG)
+        val paymentSession = PaymentSession(activity, DEFAULT_CONFIG)
         paymentSession.init(paymentSessionListener)
         paymentSession.setCartTotal(300L)
 
@@ -368,7 +369,7 @@ class PaymentSessionTest {
     ): PaymentSession {
         return PaymentSession(
             ApplicationProvider.getApplicationContext<Context>(),
-            EMPTY_CONFIG,
+            DEFAULT_CONFIG,
             customerSession,
             paymentMethodsActivityStarter,
             paymentFlowActivityStarter,
@@ -421,6 +422,6 @@ class PaymentSessionTest {
         private val FIRST_CUSTOMER = CustomerFixtures.CUSTOMER
         private val SECOND_CUSTOMER = CustomerFixtures.OTHER_CUSTOMER
 
-        private val EMPTY_CONFIG = PaymentSessionConfig.Builder().build()
+        private val DEFAULT_CONFIG = PaymentSessionFixtures.CONFIG
     }
 }

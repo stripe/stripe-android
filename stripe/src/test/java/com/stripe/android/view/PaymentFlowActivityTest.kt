@@ -1,19 +1,11 @@
 package com.stripe.android.view
 
 import android.app.Activity
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.view.View
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.test.core.app.ApplicationProvider
-import com.nhaarman.mockitokotlin2.KArgumentCaptor
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CustomerSession
 import com.stripe.android.EphemeralKeyProvider
@@ -24,11 +16,6 @@ import com.stripe.android.PaymentSessionData
 import com.stripe.android.PaymentSessionFixtures
 import com.stripe.android.R
 import com.stripe.android.model.ShippingMethod
-import com.stripe.android.view.PaymentFlowExtras.EVENT_SHIPPING_INFO_PROCESSED
-import com.stripe.android.view.PaymentFlowExtras.EXTRA_IS_SHIPPING_INFO_VALID
-import com.stripe.android.view.PaymentFlowExtras.EXTRA_SHIPPING_INFO_DATA
-import com.stripe.android.view.PaymentFlowExtras.EXTRA_VALID_SHIPPING_METHODS
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -48,21 +35,12 @@ class PaymentFlowActivityTest {
     @Mock
     private lateinit var ephemeralKeyProvider: EphemeralKeyProvider
     @Mock
-    private lateinit var broadcastReceiver: BroadcastReceiver
-    @Mock
     private lateinit var shippingInformationValidator: PaymentSessionConfig.ShippingInformationValidator
     @Mock
     private lateinit var shippingMethodsFactory: PaymentSessionConfig.ShippingMethodsFactory
 
-    private val intentArgumentCaptor: KArgumentCaptor<Intent> by lazy {
-        argumentCaptor<Intent>()
-    }
-
     private val context: Context by lazy {
         ApplicationProvider.getApplicationContext<Context>()
-    }
-    private val localBroadcastManager: LocalBroadcastManager by lazy {
-        LocalBroadcastManager.getInstance(context)
     }
     private val activityScenarioFactory: ActivityScenarioFactory by lazy {
         ActivityScenarioFactory(ApplicationProvider.getApplicationContext())
@@ -71,25 +49,18 @@ class PaymentFlowActivityTest {
     @BeforeTest
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        localBroadcastManager.registerReceiver(broadcastReceiver,
-            IntentFilter(PaymentFlowExtras.EVENT_SHIPPING_INFO_SUBMITTED))
         PaymentConfiguration.init(ApplicationProvider.getApplicationContext(),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         CustomerSession.initCustomerSession(context, ephemeralKeyProvider)
-    }
-
-    @AfterTest
-    fun tearDown() {
-        localBroadcastManager.unregisterReceiver(broadcastReceiver)
     }
 
     @Test
     fun launchPaymentFlowActivity_withHideShippingInfoConfig_hidesShippingInfoView() {
         activityScenarioFactory.create<PaymentFlowActivity>(
             createStarterArgs(
-                PaymentSessionConfig.Builder()
-                    .setShippingInfoRequired(false)
-                    .build()
+                PaymentSessionFixtures.CONFIG.copy(
+                    isShippingInfoRequired = false
+                )
             )
         ).use { activityScenario ->
             activityScenario.onActivity { paymentFlowActivity ->
@@ -127,70 +98,18 @@ class PaymentFlowActivityTest {
     }
 
     @Test
-    fun onShippingInfoSave_whenShippingPopulated_sendsCorrectIntent() {
-        activityScenarioFactory.create<PaymentFlowActivity>(
-            createStarterArgs(
-                PaymentSessionConfig.Builder()
-                    .setPrepopulatedShippingInfo(SHIPPING_INFO)
-                    .build()
-            )
-        ).use { activityScenario ->
-            activityScenario.onActivity { paymentFlowActivity ->
-                assertNotNull(getShippingInfoWidget(paymentFlowActivity))
-                paymentFlowActivity.onActionSave()
-                verify(broadcastReceiver).onReceive(any(), intentArgumentCaptor.capture())
-
-                assertEquals(
-                    requireNotNull(
-                        intentArgumentCaptor.firstValue.getParcelableExtra(EXTRA_SHIPPING_INFO_DATA)
-                    ),
-                    SHIPPING_INFO
-                )
-            }
-        }
-    }
-
-    @Test
-    fun onShippingInfoProcessed_whenInvalidShippingInfoSubmitted_rendersCorrectly() {
-        activityScenarioFactory.create<PaymentFlowActivity>(
-            createStarterArgs(
-                PaymentSessionConfig.Builder()
-                    .setPrepopulatedShippingInfo(SHIPPING_INFO)
-                    .build()
-            )
-        ).use { activityScenario ->
-            activityScenario.onActivity { paymentFlowActivity ->
-                // invalid result
-                paymentFlowActivity.onActionSave()
-                assertEquals(paymentFlowActivity.progressBar.visibility, View.VISIBLE)
-
-                localBroadcastManager.sendBroadcast(
-                    Intent(EVENT_SHIPPING_INFO_PROCESSED)
-                        .putExtra(EXTRA_IS_SHIPPING_INFO_VALID, false)
-                )
-                assertEquals(paymentFlowActivity.progressBar.visibility, View.GONE)
-            }
-        }
-    }
-
-    @Test
     fun onShippingInfoProcessed_whenValidShippingInfoSubmitted_rendersCorrectly() {
         activityScenarioFactory.create<PaymentFlowActivity>(
             createStarterArgs(
-                PaymentSessionConfig.Builder()
-                    .setPrepopulatedShippingInfo(SHIPPING_INFO)
-                    .build()
+                PaymentSessionFixtures.CONFIG.copy(
+                    prepopulatedShippingInfo = SHIPPING_INFO
+                )
             )
         ).use { activityScenario ->
             activityScenario.onActivity { paymentFlowActivity ->
                 // valid result
                 paymentFlowActivity.onActionSave()
 
-                localBroadcastManager.sendBroadcast(
-                    Intent(EVENT_SHIPPING_INFO_PROCESSED)
-                        .putExtra(EXTRA_IS_SHIPPING_INFO_VALID, true)
-                        .putExtra(EXTRA_VALID_SHIPPING_METHODS, SHIPPING_METHODS)
-                )
                 assertEquals(View.VISIBLE, paymentFlowActivity.progressBar.visibility)
 
                 paymentFlowActivity.onShippingInfoSaved(SHIPPING_INFO, SHIPPING_METHODS)
@@ -213,11 +132,6 @@ class PaymentFlowActivityTest {
                 // valid result
                 paymentFlowActivity.onActionSave()
 
-                localBroadcastManager.sendBroadcast(
-                    Intent(EVENT_SHIPPING_INFO_PROCESSED)
-                        .putExtra(EXTRA_IS_SHIPPING_INFO_VALID, true)
-                )
-
                 paymentFlowActivity.onShippingInfoSaved(SHIPPING_INFO)
                 assertTrue(paymentFlowActivity.isFinishing)
 
@@ -232,9 +146,7 @@ class PaymentFlowActivityTest {
     }
 
     @Test
-    fun onShippingInfoSaved_withValidatorAndFactory_doesNotSendBroadcast() {
-        verifyNoMoreInteractions(broadcastReceiver)
-
+    fun onShippingInfoSaved_withValidatorAndFactory() {
         `when`(shippingInformationValidator.isValid(SHIPPING_INFO)).thenReturn(true)
         `when`(shippingMethodsFactory.create(SHIPPING_INFO)).thenReturn(SHIPPING_METHODS)
 
