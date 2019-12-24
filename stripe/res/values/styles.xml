@@ -29,4 +29,10 @@
     <style name="StripeDefault3DS2Theme" parent="BaseStripe3DS2Theme" />
 
     <style name="AlertDialogStyle" parent="Theme.AppCompat.DayNight.Dialog" />
+
+    <style name="Stripe.Base.CardInputWidget.EditText" parent="Widget.AppCompat.EditText">
+        <item name="android:textSize">@dimen/ciw_stripe_edit_text_size</item>
+    </style>
+
+    <style name="Stripe.CardInputWidget.EditText" parent="Stripe.Base.CardInputWidget.EditText" />
 </resources>
