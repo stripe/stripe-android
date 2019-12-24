@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import android.os.Bundle
+import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.AuthActivityStarter
 import com.stripe.android.view.PaymentRelayActivity
@@ -20,10 +21,15 @@ internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter
             return object : PaymentRelayStarter {
                 override fun start(args: Args) {
                     val extras = Bundle()
-                    extras.putString(StripeIntentResultExtras.CLIENT_SECRET,
-                        args.stripeIntent?.clientSecret)
-                    extras.putSerializable(StripeIntentResultExtras.AUTH_EXCEPTION,
-                        args.exception)
+                    args.stripeIntent?.let {
+                        extras.putString(StripeIntentResultExtras.CLIENT_SECRET, it.clientSecret)
+                    }
+                    args.source?.let {
+                        extras.putParcelable(StripeIntentResultExtras.SOURCE, it)
+                    }
+                    args.exception?.let {
+                        extras.putSerializable(StripeIntentResultExtras.AUTH_EXCEPTION, it)
+                    }
                     host.startActivityForResult(
                         PaymentRelayActivity::class.java, extras, requestCode
                     )
@@ -34,12 +40,18 @@ internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter
 
     data class Args internal constructor(
         val stripeIntent: StripeIntent? = null,
+        val source: Source? = null,
         val exception: Exception? = null
     ) {
         internal companion object {
             @JvmSynthetic
             internal fun create(stripeIntent: StripeIntent): Args {
                 return Args(stripeIntent = stripeIntent)
+            }
+
+            @JvmSynthetic
+            internal fun create(source: Source): Args {
+                return Args(source = source)
             }
 
             @JvmSynthetic

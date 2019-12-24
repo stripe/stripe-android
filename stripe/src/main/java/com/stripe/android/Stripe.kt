@@ -607,6 +607,72 @@ class Stripe internal constructor(
     //
 
     /**
+     * Authenticate a [Source] that requires user action via a redirect (i.e. [Source.flow] is
+     * [Source.SourceFlow.REDIRECT].
+     *
+     * The result of this operation will be returned via `Activity#onActivityResult(int, int, Intent)}}`
+     *
+     * @param activity the `Activity` that is launching the [Source] authentication flow
+     * @param source the [Source] to confirm
+     */
+    fun authenticateSource(
+        activity: Activity,
+        source: Source
+    ) {
+        paymentController.startAuthenticateSource(
+            AuthActivityStarter.Host.create(activity),
+            source,
+            ApiRequest.Options(publishableKey, stripeAccountId)
+        )
+    }
+
+    /**
+     * Authenticate a [Source] that requires user action via a redirect (i.e. [Source.flow] is
+     * [Source.SourceFlow.REDIRECT].
+     *
+     * The result of this operation will be returned via `Activity#onActivityResult(int, int, Intent)}}`
+     *
+     * @param fragment the `Fragment` that is launching the [Source] authentication flow
+     * @param source the [Source] to confirm
+     */
+    fun authenticateSource(
+        fragment: Fragment,
+        source: Source
+    ) {
+        paymentController.startAuthenticateSource(
+            AuthActivityStarter.Host.create(fragment),
+            source,
+            ApiRequest.Options(publishableKey, stripeAccountId)
+        )
+    }
+
+    /**
+     * Should be called in `onActivityResult()` to determine if the result is for Source authentication
+     */
+    fun isAuthenticateSourceResult(
+        requestCode: Int,
+        data: Intent?
+    ): Boolean {
+        return data != null && paymentController.shouldHandleSourceResult(requestCode, data)
+    }
+
+    /**
+     * The result of a call to [authenticateSource].
+     *
+     * Use [isAuthenticateSourceResult] before calling this method.
+     */
+    fun onAuthenticateSourceResult(
+        data: Intent,
+        callback: ApiResultCallback<Source>
+    ) {
+        paymentController.handleSourceResult(
+            data,
+            ApiRequest.Options(publishableKey, stripeAccountId),
+            callback
+        )
+    }
+
+    /**
      * Create a [Source] asynchronously.
      *
      * See [Create a source](https://stripe.com/docs/api/sources/create).

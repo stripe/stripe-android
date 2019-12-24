@@ -98,6 +98,16 @@ internal interface StripeRepository {
         options: ApiRequest.Options
     ): Source?
 
+    /**
+     * Retrieve a [Source] asynchronously
+     */
+    fun retrieveSource(
+        sourceId: String,
+        clientSecret: String,
+        options: ApiRequest.Options,
+        callback: ApiResultCallback<Source>
+    )
+
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, APIException::class)
     fun createPaymentMethod(

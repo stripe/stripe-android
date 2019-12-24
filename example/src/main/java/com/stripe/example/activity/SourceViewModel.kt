@@ -2,6 +2,7 @@ package com.stripe.example.activity
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.Stripe
@@ -17,23 +18,50 @@ internal class SourceViewModel(
         Settings(application.applicationContext).publishableKey
     )
 
-    @JvmSynthetic
-    internal val createdSource: MutableLiveData<Source> = MutableLiveData()
+    internal var source: Source? = null
 
-    @JvmSynthetic
-    internal val createdSourceException: MutableLiveData<Exception> = MutableLiveData()
-
-    internal fun createSource(sourceParams: SourceParams) {
+    internal fun createSource(sourceParams: SourceParams): LiveData<SourceResult> {
+        val resultData = MutableLiveData<SourceResult>()
         stripe.createSource(
             sourceParams = sourceParams,
             callback = object : ApiResultCallback<Source> {
                 override fun onSuccess(result: Source) {
-                    createdSource.value = result
+                    resultData.value = SourceResult.Success(result)
                 }
 
                 override fun onError(e: Exception) {
-                    createdSourceException.value = e
+                    resultData.value = SourceResult.Error(e)
                 }
             })
+        return resultData
+    }
+
+    internal fun fetchSource(source: Source?): LiveData<SourceResult> {
+        val resultData = MutableLiveData<SourceResult>()
+        if (source != null) {
+            stripe.retrieveSource(
+                source.id.orEmpty(),
+                source.clientSecret.orEmpty(),
+                callback = object : ApiResultCallback<Source> {
+                    override fun onSuccess(result: Source) {
+                        resultData.value = SourceResult.Success(result)
+                    }
+
+                    override fun onError(e: Exception) {
+                        resultData.value = SourceResult.Error(e)
+                    }
+                }
+            )
+        } else {
+            resultData.value = SourceResult.Error(
+                IllegalArgumentException("Create and authenticate a Source before fetching it.")
+            )
+        }
+        return resultData
+    }
+
+    internal sealed class SourceResult {
+        data class Success(val source: Source) : SourceResult()
+        data class Error(val e: Exception) : SourceResult()
     }
 }

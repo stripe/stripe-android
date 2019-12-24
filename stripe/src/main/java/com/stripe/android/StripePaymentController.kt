@@ -11,6 +11,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.Source
 import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.Stripe3ds2Fingerprint
 import com.stripe.android.model.Stripe3dsRedirect
@@ -101,6 +102,46 @@ internal class StripePaymentController internal constructor(
         )
     }
 
+    override fun startAuthenticateSource(
+        host: AuthActivityStarter.Host,
+        source: Source,
+        requestOptions: ApiRequest.Options
+    ) {
+        stripeRepository.retrieveSource(
+            sourceId = source.id.orEmpty(),
+            clientSecret = source.clientSecret.orEmpty(),
+            options = requestOptions,
+            callback = object : ApiResultCallback<Source> {
+                override fun onSuccess(result: Source) {
+                    onSourceRetrieved(host, result)
+                }
+
+                override fun onError(e: Exception) {
+                    handleError(host, SOURCE_REQUEST_CODE, e)
+                }
+            }
+        )
+    }
+
+    private fun onSourceRetrieved(
+        host: AuthActivityStarter.Host,
+        source: Source
+    ) {
+        if (source.flow == Source.SourceFlow.REDIRECT) {
+            PaymentAuthWebViewStarter(
+                host,
+                SOURCE_REQUEST_CODE
+            ).start(PaymentAuthWebViewStarter.Args(
+                clientSecret = source.clientSecret.orEmpty(),
+                url = source.redirect?.url.orEmpty(),
+                returnUrl = source.redirect?.returnUrl,
+                enableLogging = enableLogging
+            ))
+        } else {
+            bypassAuth(host, source)
+        }
+    }
+
     /**
      * Decide whether [handlePaymentResult] should be called.
      */
@@ -113,6 +154,10 @@ internal class StripePaymentController internal constructor(
      */
     override fun shouldHandleSetupResult(requestCode: Int, data: Intent?): Boolean {
         return requestCode == SETUP_REQUEST_CODE && data != null
+    }
+
+    override fun shouldHandleSourceResult(requestCode: Int, data: Intent?): Boolean {
+        return requestCode == SOURCE_REQUEST_CODE && data != null
     }
 
     /**
@@ -181,6 +226,20 @@ internal class StripePaymentController internal constructor(
                 requestOptions, flowOutcome, sourceId, shouldCancelSource, callback
             )
         )
+    }
+
+    override fun handleSourceResult(
+        data: Intent,
+        requestOptions: ApiRequest.Options,
+        callback: ApiResultCallback<Source>
+    ) {
+        val extras = data.extras
+        val sourceId = extras?.getString(StripeIntentResultExtras.SOURCE_ID)
+            .orEmpty()
+        val clientSecret = extras?.getString(StripeIntentResultExtras.CLIENT_SECRET)
+            .orEmpty()
+
+        stripeRepository.retrieveSource(sourceId, clientSecret, requestOptions, callback)
     }
 
     private fun createPaymentIntentCallback(
@@ -359,6 +418,11 @@ internal class StripePaymentController internal constructor(
     private fun bypassAuth(host: AuthActivityStarter.Host, stripeIntent: StripeIntent) {
         PaymentRelayStarter.create(host, getRequestCode(stripeIntent))
             .start(PaymentRelayStarter.Args.create(stripeIntent))
+    }
+
+    private fun bypassAuth(host: AuthActivityStarter.Host, source: Source) {
+        PaymentRelayStarter.create(host, SOURCE_REQUEST_CODE)
+            .start(PaymentRelayStarter.Args.create(source))
     }
 
     private fun begin3ds2Auth(
@@ -745,6 +809,7 @@ internal class StripePaymentController internal constructor(
     internal companion object {
         internal const val PAYMENT_REQUEST_CODE = 50000
         internal const val SETUP_REQUEST_CODE = 50001
+        internal const val SOURCE_REQUEST_CODE = 50002
 
         /**
          * Get the appropriate request code for the given stripe intent type

@@ -92,6 +92,14 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         return null
     }
 
+    override fun retrieveSource(
+        sourceId: String,
+        clientSecret: String,
+        options: ApiRequest.Options,
+        callback: ApiResultCallback<Source>
+    ) {
+    }
+
     override fun createPaymentMethod(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         options: ApiRequest.Options
