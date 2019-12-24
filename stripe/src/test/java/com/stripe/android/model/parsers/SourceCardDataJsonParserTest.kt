@@ -4,6 +4,7 @@ import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.SourceCardData
 import com.stripe.android.model.SourceFixtures
+import com.stripe.android.model.TokenizationMethod
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -36,7 +37,7 @@ class SourceCardDataJsonParserTest {
         assertEquals(2050, CARD_DATA.expiryYear)
         assertEquals("US", CARD_DATA.country)
         assertEquals("optional", CARD_DATA.threeDSecureStatus)
-        assertEquals("apple_pay", CARD_DATA.tokenizationMethod)
+        assertEquals(TokenizationMethod.ApplePay, CARD_DATA.tokenizationMethod)
     }
 
     @Test

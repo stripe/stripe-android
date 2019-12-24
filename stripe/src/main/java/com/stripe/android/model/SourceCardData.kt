@@ -28,7 +28,7 @@ data class SourceCardData internal constructor(
     @get:ThreeDSecureStatus
     val threeDSecureStatus: String?,
 
-    val tokenizationMethod: String?
+    val tokenizationMethod: TokenizationMethod? = null
 ) : StripeSourceTypeModel() {
     @Retention(AnnotationRetention.SOURCE)
     @StringDef(ThreeDSecureStatus.REQUIRED, ThreeDSecureStatus.OPTIONAL,

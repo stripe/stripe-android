@@ -188,7 +188,7 @@ data class Card internal constructor(
      *
      * [API Reference](https://stripe.com/docs/api/cards/object#card_object-tokenization_method)
      */
-    internal val tokenizationMethod: String?,
+    val tokenizationMethod: TokenizationMethod? = null,
 
     /**
      * @return Set of key-value pairs that you can attach to an object. This can be useful fo
@@ -408,7 +408,7 @@ data class Card internal constructor(
         private var customerId: String? = null
         private var cvcCheck: String? = null
         private var id: String? = null
-        private var tokenizationMethod: String? = null
+        private var tokenizationMethod: TokenizationMethod? = null
         private var metadata: Map<String, String>? = null
         private var loggingTokens: List<String>? = null
 
@@ -485,7 +485,7 @@ data class Card internal constructor(
             this.id = id
         }
 
-        fun tokenizationMethod(tokenizationMethod: String?): Builder = apply {
+        fun tokenizationMethod(tokenizationMethod: TokenizationMethod?): Builder = apply {
             this.tokenizationMethod = tokenizationMethod
         }
 
@@ -528,7 +528,7 @@ data class Card internal constructor(
                 customerId = customerId.takeUnless { it.isNullOrBlank() },
                 cvcCheck = cvcCheck.takeUnless { it.isNullOrBlank() },
                 id = id.takeUnless { it.isNullOrBlank() },
-                tokenizationMethod = tokenizationMethod.takeUnless { it.isNullOrBlank() },
+                tokenizationMethod = tokenizationMethod,
                 metadata = metadata,
                 loggingTokens = loggingTokens.orEmpty().toMutableList()
             )

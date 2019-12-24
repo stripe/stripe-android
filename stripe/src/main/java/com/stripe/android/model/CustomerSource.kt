@@ -19,8 +19,10 @@ data class CustomerSource internal constructor(
             val paymentAsCard = asCard()
             return if (paymentAsSource != null && Source.SourceType.CARD == paymentAsSource.type) {
                 val cardData = paymentAsSource.sourceTypeModel as SourceCardData?
-                cardData?.tokenizationMethod
-            } else paymentAsCard?.tokenizationMethod
+                cardData?.tokenizationMethod?.code
+            } else {
+                paymentAsCard?.tokenizationMethod?.code
+            }
         }
 
     val sourceType: String
