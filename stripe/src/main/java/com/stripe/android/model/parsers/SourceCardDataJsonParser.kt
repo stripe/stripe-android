@@ -5,6 +5,7 @@ import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.SourceCardData
 import com.stripe.android.model.StripeJsonUtils
+import com.stripe.android.model.TokenizationMethod
 import java.util.Locale
 import org.json.JSONObject
 
@@ -24,7 +25,9 @@ internal class SourceCardDataJsonParser : ModelJsonParser<SourceCardData> {
             threeDSecureStatus = asThreeDSecureStatus(
                 StripeJsonUtils.optString(json, FIELD_THREE_D_SECURE)
             ),
-            tokenizationMethod = StripeJsonUtils.optString(json, FIELD_TOKENIZATION_METHOD)
+            tokenizationMethod = TokenizationMethod.fromCode(
+                StripeJsonUtils.optString(json, FIELD_TOKENIZATION_METHOD)
+            )
         )
     }
 

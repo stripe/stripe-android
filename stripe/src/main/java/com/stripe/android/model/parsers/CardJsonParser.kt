@@ -4,6 +4,7 @@ import com.stripe.android.model.Card
 import com.stripe.android.model.Card.FundingType
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.StripeJsonUtils
+import com.stripe.android.model.TokenizationMethod
 import org.json.JSONObject
 
 internal class CardJsonParser : ModelJsonParser<Card> {
@@ -40,7 +41,11 @@ internal class CardJsonParser : ModelJsonParser<Card> {
             .id(StripeJsonUtils.optString(json, FIELD_ID))
             .last4(StripeJsonUtils.optString(json, FIELD_LAST4))
             .name(StripeJsonUtils.optString(json, FIELD_NAME))
-            .tokenizationMethod(StripeJsonUtils.optString(json, FIELD_TOKENIZATION_METHOD))
+            .tokenizationMethod(
+                TokenizationMethod.fromCode(
+                    StripeJsonUtils.optString(json, FIELD_TOKENIZATION_METHOD)
+                )
+            )
             .metadata(StripeJsonUtils.optHash(json, FIELD_METADATA))
             .build()
     }

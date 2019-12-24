@@ -93,4 +93,37 @@ object CardFixtures {
         }
         """.trimIndent()
     )))
+
+    internal val CARD_GOOGLE_PAY = requireNotNull(CardJsonParser().parse(JSONObject(
+        """
+        {
+            "id": "card_189fi32eZvKYlo2CHK8NPRME",
+            "object": "card",
+            "address_city": "Des Moines",
+            "address_country": "US",
+            "address_line1": "123 Any Street",
+            "address_line1_check": "unavailable",
+            "address_line2": "456",
+            "address_state": "IA",
+            "address_zip": "50305",
+            "address_zip_check": "unavailable",
+            "brand": "Visa",
+            "country": "US",
+            "currency": "usd",
+            "customer": "customer77",
+            "cvc_check": "unavailable",
+            "exp_month": 8,
+            "exp_year": 2017,
+            "funding": "credit",
+            "fingerprint": "abc123",
+            "last4": "4242",
+            "name": "John Cardholder",
+            "tokenization_method": "google_pay",
+            "metadata": {
+                "color": "blue",
+                "animal": "dog"
+            }
+        }
+        """.trimIndent()
+    )))
 }
