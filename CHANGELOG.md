@@ -1,5 +1,82 @@
 # CHANGELOG
 
+## 13.0.0 - unreleased
+* [#1950](https://github.com/stripe/stripe-android/pull/1950) Add idempotency key for `Stripe` API POST methods
+     ```kotlin
+    class MyActivity : AppCompatActivity() {
+
+        private fun createPaymentMethod(
+            params: PaymentMethodCreateParams,
+            idempotencyKey: String?
+        ) {
+            stripe.createPaymentMethod(
+                params = params,
+                idempotencyKey = idempotencyKey,
+                callback = object : ApiResultCallback<PaymentMethod> {
+                    override fun onSuccess(result: PaymentMethod) {
+                    }
+
+                    override fun onError(e: Exception) {
+                    }
+                }
+            )
+        }
+    }
+    ```
+
+* [#1995](https://github.com/stripe/stripe-android/pull/1995) Enable Google Pay option in Basic Integration and Stripe Activities
+    * PaymentSession
+      ```kotlin
+      PaymentSessionConfig.Builder()
+          // other settings
+          .setShouldShowGooglePay(true)
+          .build()
+      ```
+
+    * PaymentMethodsActivity
+      ```kotlin
+      PaymentMethodsActivityStarter.Args.Builder()
+          // other settings
+          .setShouldShowGooglePay(true)
+          .build()
+      ```
+* [#2002](https://github.com/stripe/stripe-android/pull/2002) Fix regression in `CardInputWidget` styling
+    To customize the individual `EditText` fields of `CardInputWidget`, define a `Stripe.CardInputWidget.EditText` style
+    that extends `Stripe.Base.CardInputWidget.EditText`. For example,
+    ```xml
+    <style name="Stripe.CardInputWidget.EditText" parent="Stripe.Base.CardInputWidget.EditText">
+        <item name="android:textSize">22sp</item>
+        <item name="android:textColor">@android:color/holo_blue_light</item>
+        <item name="android:textColorHint">@android:color/holo_orange_light</item>
+    </style>
+    ```
+
+* [#2003](https://github.com/stripe/stripe-android/pull/2003) Add support for authenticating a `Source` via in-app WebView
+    ```kotlin
+    class MyActivity : AppCompatActivity() {
+        private fun authenticateSource(source: Source) {
+            stripe.authenticateSource(this, source)
+        }
+
+        override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+            super.onActivityResult(requestCode, resultCode, data)
+
+            if (data != null && stripe.isAuthenticateSourceResult(requestCode, data)) {
+                stripe.onAuthenticateSourceResult(
+                    data,
+                    object : ApiResultCallback<Source> {
+                        override fun onSuccess(result: Source) {
+                        }
+
+                        override fun onError(e: Exception) {
+                        }
+                    }
+                )
+            }
+        }
+    }
+    ```
+
 ## 12.8.2 - 2019-12-20
 * [#1974](https://github.com/stripe/stripe-android/pull/1974) Add `PaymentSessionConfig#shouldPrefetchCustomer`
     * Mark `PaymentSessionConfig#init()` with `shouldPrefetchCustomer` argument as deprecated
