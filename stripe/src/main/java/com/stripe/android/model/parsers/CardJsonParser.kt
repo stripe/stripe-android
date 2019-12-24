@@ -1,8 +1,8 @@
 package com.stripe.android.model.parsers
 
 import com.stripe.android.model.Card
-import com.stripe.android.model.Card.CardBrand
 import com.stripe.android.model.Card.FundingType
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.StripeJsonUtils
 import org.json.JSONObject
 
@@ -21,7 +21,7 @@ internal class CardJsonParser : ModelJsonParser<Card> {
             .takeUnless { it < 0 }
 
         // Note that we'll never get the CVC or card number in JSON, so those values are null
-        return Card.Builder(null, expMonth, expYear, null)
+        return Card.Builder(expMonth = expMonth, expYear = expYear)
             .addressCity(StripeJsonUtils.optString(json, FIELD_ADDRESS_CITY))
             .addressLine1(StripeJsonUtils.optString(json, FIELD_ADDRESS_LINE1))
             .addressLine1Check(StripeJsonUtils.optString(json, FIELD_ADDRESS_LINE1_CHECK))
@@ -30,7 +30,7 @@ internal class CardJsonParser : ModelJsonParser<Card> {
             .addressState(StripeJsonUtils.optString(json, FIELD_ADDRESS_STATE))
             .addressZip(StripeJsonUtils.optString(json, FIELD_ADDRESS_ZIP))
             .addressZipCheck(StripeJsonUtils.optString(json, FIELD_ADDRESS_ZIP_CHECK))
-            .brand(asCardBrand(StripeJsonUtils.optString(json, FIELD_BRAND)))
+            .brand(CardBrand.fromCode(StripeJsonUtils.optString(json, FIELD_BRAND)))
             .country(StripeJsonUtils.optCountryCode(json, FIELD_COUNTRY))
             .customer(StripeJsonUtils.optString(json, FIELD_CUSTOMER))
             .currency(StripeJsonUtils.optCurrency(json, FIELD_CURRENCY))
@@ -72,38 +72,6 @@ internal class CardJsonParser : ModelJsonParser<Card> {
         private const val FIELD_LAST4 = "last4"
         private const val FIELD_ID = "id"
         private const val FIELD_TOKENIZATION_METHOD = "tokenization_method"
-
-        /**
-         * Converts an unchecked String value to a [CardBrand] or `null`.
-         *
-         * @param possibleCardType a String that might match a [CardBrand] or be empty.
-         * @return `null` if the input is blank, else the appropriate [CardBrand].
-         */
-        @JvmStatic
-        @CardBrand
-        fun asCardBrand(possibleCardType: String?): String? {
-            if (possibleCardType.isNullOrBlank()) {
-                return null
-            }
-
-            return when {
-                CardBrand.AMERICAN_EXPRESS.equals(possibleCardType, ignoreCase = true) ->
-                    CardBrand.AMERICAN_EXPRESS
-                CardBrand.MASTERCARD.equals(possibleCardType, ignoreCase = true) ->
-                    CardBrand.MASTERCARD
-                CardBrand.DINERS_CLUB.equals(possibleCardType, ignoreCase = true) ->
-                    CardBrand.DINERS_CLUB
-                CardBrand.DISCOVER.equals(possibleCardType, ignoreCase = true) ->
-                    CardBrand.DISCOVER
-                CardBrand.JCB.equals(possibleCardType, ignoreCase = true) ->
-                    CardBrand.JCB
-                CardBrand.VISA.equals(possibleCardType, ignoreCase = true) ->
-                    CardBrand.VISA
-                CardBrand.UNIONPAY.equals(possibleCardType, ignoreCase = true) ->
-                    CardBrand.UNIONPAY
-                else -> CardBrand.UNKNOWN
-            }
-        }
 
         /**
          * Converts an unchecked String value to a [FundingType] or `null`.

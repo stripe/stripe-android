@@ -1,6 +1,9 @@
 # Migration Guide
 
 ## Migrating from versions < 13.0.0
+- Changes to `Card` and `SourceCard`
+    - Make `brand` property a `CardBrand` instead of `String?`
+    - Remove `Card.CardBrand`
 - Changes to `CardInputWidget`
     - The postal code field is now displayed by default
     - The postal code input is not validated

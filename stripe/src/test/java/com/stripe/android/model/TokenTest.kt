@@ -62,9 +62,9 @@ class TokenTest {
     }
 
     private companion object {
-        private val CARD = Card.Builder(null, 8, 2017, null)
+        private val CARD = Card.Builder(expMonth = 8, expYear = 2017)
             .id("card_189fi32eZvKYlo2CHK8NPRME")
-            .brand(Card.CardBrand.VISA)
+            .brand(CardBrand.Visa)
             .country("US")
             .last4("4242")
             .funding(Card.FundingType.CREDIT)

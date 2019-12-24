@@ -11,9 +11,7 @@ data class SourceCardData internal constructor(
     val addressLine1Check: String?,
     val addressZipCheck: String?,
 
-    @Card.CardBrand
-    @get:Card.CardBrand
-    val brand: String?,
+    val brand: CardBrand,
 
     val country: String?,
     val cvcCheck: String?,

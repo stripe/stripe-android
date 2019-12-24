@@ -8,7 +8,7 @@ import com.stripe.android.CardNumberFixtures.VALID_DINERS_CLUB_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VALID_DINERS_CLUB_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.VALID_VISA_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VALID_VISA_WITH_SPACES
-import com.stripe.android.model.Card
+import com.stripe.android.model.CardBrand
 import com.stripe.android.testharness.ViewTestUtils
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -28,8 +28,10 @@ class CardNumberEditTextTest {
     private var completionCallbackInvocations = 0
     private val completionCallback: () -> Unit = { completionCallbackInvocations++ }
 
-    private var lastBrandChangeCallbackInvocation: String? = null
-    private val brandChangeCallback: (String) -> Unit = { lastBrandChangeCallbackInvocation = it }
+    private var lastBrandChangeCallbackInvocation: CardBrand? = null
+    private val brandChangeCallback: (CardBrand) -> Unit = {
+        lastBrandChangeCallbackInvocation = it
+    }
 
     private lateinit var cardNumberEditText: CardNumberEditText
 
@@ -46,7 +48,7 @@ class CardNumberEditTextTest {
     @Test
     fun updateSelectionIndex_whenVisa_increasesIndexWhenGoingPastTheSpaces() {
         // Directly setting card brand as a testing hack (annotated in source)
-        cardNumberEditText.cardBrand = Card.CardBrand.VISA
+        cardNumberEditText.cardBrand = CardBrand.Visa
 
         // Adding 1 character, starting at position 4, with a final string length 6
         assertEquals(6, cardNumberEditText.updateSelectionIndex(6, 4, 1))
@@ -57,14 +59,14 @@ class CardNumberEditTextTest {
 
     @Test
     fun updateSelectionIndex_whenAmEx_increasesIndexWhenGoingPastTheSpaces() {
-        cardNumberEditText.cardBrand = Card.CardBrand.AMERICAN_EXPRESS
+        cardNumberEditText.cardBrand = CardBrand.AmericanExpress
         assertEquals(6, cardNumberEditText.updateSelectionIndex(6, 4, 1))
         assertEquals(13, cardNumberEditText.updateSelectionIndex(13, 11, 1))
     }
 
     @Test
     fun updateSelectionIndex_whenDinersClub_decreasesIndexWhenDeletingPastTheSpaces() {
-        cardNumberEditText.cardBrand = Card.CardBrand.DINERS_CLUB
+        cardNumberEditText.cardBrand = CardBrand.DinersClub
         assertEquals(4, cardNumberEditText.updateSelectionIndex(6, 5, 0))
         assertEquals(9, cardNumberEditText.updateSelectionIndex(13, 10, 0))
         assertEquals(14, cardNumberEditText.updateSelectionIndex(17, 15, 0))
@@ -72,38 +74,38 @@ class CardNumberEditTextTest {
 
     @Test
     fun updateSelectionIndex_whenDeletingNotOnGaps_doesNotDecreaseIndex() {
-        cardNumberEditText.cardBrand = Card.CardBrand.DINERS_CLUB
+        cardNumberEditText.cardBrand = CardBrand.DinersClub
         assertEquals(7, cardNumberEditText.updateSelectionIndex(12, 7, 0))
     }
 
     @Test
     fun updateSelectionIndex_whenAmEx_decreasesIndexWhenDeletingPastTheSpaces() {
-        cardNumberEditText.cardBrand = Card.CardBrand.AMERICAN_EXPRESS
+        cardNumberEditText.cardBrand = CardBrand.AmericanExpress
         assertEquals(4, cardNumberEditText.updateSelectionIndex(10, 5, 0))
         assertEquals(11, cardNumberEditText.updateSelectionIndex(13, 12, 0))
     }
 
     @Test
     fun updateSelectionIndex_whenSelectionInTheMiddle_increasesIndexOverASpace() {
-        cardNumberEditText.cardBrand = Card.CardBrand.VISA
+        cardNumberEditText.cardBrand = CardBrand.Visa
         assertEquals(6, cardNumberEditText.updateSelectionIndex(10, 4, 1))
     }
 
     @Test
     fun updateSelectionIndex_whenPastingIntoAGap_includesTheGapJump() {
-        cardNumberEditText.cardBrand = Card.CardBrand.UNKNOWN
+        cardNumberEditText.cardBrand = CardBrand.Unknown
         assertEquals(11, cardNumberEditText.updateSelectionIndex(12, 8, 2))
     }
 
     @Test
     fun updateSelectionIndex_whenPastingOverAGap_includesTheGapJump() {
-        cardNumberEditText.cardBrand = Card.CardBrand.UNKNOWN
+        cardNumberEditText.cardBrand = CardBrand.Unknown
         assertEquals(9, cardNumberEditText.updateSelectionIndex(12, 3, 5))
     }
 
     @Test
     fun updateSelectionIndex_whenIndexWouldGoOutOfBounds_setsToEndOfString() {
-        cardNumberEditText.cardBrand = Card.CardBrand.VISA
+        cardNumberEditText.cardBrand = CardBrand.Visa
         // This case could happen when you paste over 5 digits with only 2
         assertEquals(3, cardNumberEditText.updateSelectionIndex(3, 3, 2))
     }
@@ -224,7 +226,7 @@ class CardNumberEditTextTest {
 
     @Test
     fun setCardBrandChangeListener_callsSetCardBrand() {
-        assertEquals(Card.CardBrand.UNKNOWN, lastBrandChangeCallbackInvocation)
+        assertEquals(CardBrand.Unknown, lastBrandChangeCallbackInvocation)
     }
 
     @Test
@@ -232,35 +234,35 @@ class CardNumberEditTextTest {
         // We reset because just attaching the listener calls the method once.
         lastBrandChangeCallbackInvocation = null
         // There is only one Visa Prefix.
-        cardNumberEditText.setText(cardNumberEditText.text?.toString() + Card.PREFIXES_VISA[0])
-        assertEquals(Card.CardBrand.VISA, lastBrandChangeCallbackInvocation)
+        cardNumberEditText.setText(cardNumberEditText.text?.toString() + CardBrand.Visa.prefixes[0])
+        assertEquals(CardBrand.Visa, lastBrandChangeCallbackInvocation)
     }
 
     @Test
     fun addAmExPrefix_callsBrandListener() {
-        Card.PREFIXES_AMERICAN_EXPRESS.forEach(
-            verifyCardBrandPrefix(Card.CardBrand.AMERICAN_EXPRESS)
+        CardBrand.AmericanExpress.prefixes.forEach(
+            verifyCardBrandPrefix(CardBrand.AmericanExpress)
         )
     }
 
     @Test
     fun addDinersClubPrefix_callsBrandListener() {
-        Card.PREFIXES_DINERS_CLUB.forEach(verifyCardBrandPrefix(Card.CardBrand.DINERS_CLUB))
+        CardBrand.DinersClub.prefixes.forEach(verifyCardBrandPrefix(CardBrand.DinersClub))
     }
 
     @Test
     fun addDiscoverPrefix_callsBrandListener() {
-        Card.PREFIXES_DISCOVER.forEach(verifyCardBrandPrefix(Card.CardBrand.DISCOVER))
+        CardBrand.Discover.prefixes.forEach(verifyCardBrandPrefix(CardBrand.Discover))
     }
 
     @Test
     fun addMasterCardPrefix_callsBrandListener() {
-        Card.PREFIXES_MASTERCARD.forEach(verifyCardBrandPrefix(Card.CardBrand.MASTERCARD))
+        CardBrand.MasterCard.prefixes.forEach(verifyCardBrandPrefix(CardBrand.MasterCard))
     }
 
     @Test
     fun addJCBPrefix_callsBrandListener() {
-        Card.PREFIXES_JCB.forEach(verifyCardBrandPrefix(Card.CardBrand.JCB))
+        CardBrand.JCB.prefixes.forEach(verifyCardBrandPrefix(CardBrand.JCB))
     }
 
     @Test
@@ -270,31 +272,31 @@ class CardNumberEditTextTest {
         val suffix = VALID_AMEX_WITH_SPACES.substring(2)
         cardNumberEditText.setText(cardNumberEditText.text?.toString() + prefix)
         cardNumberEditText.setText(cardNumberEditText.text?.toString() + suffix)
-        assertEquals(Card.CardBrand.AMERICAN_EXPRESS, lastBrandChangeCallbackInvocation)
+        assertEquals(CardBrand.AmericanExpress, lastBrandChangeCallbackInvocation)
     }
 
     @Test
     fun enterBrandPrefix_thenDelete_callsUpdateWithUnknown() {
         lastBrandChangeCallbackInvocation = null
-        val dinersPrefix = Card.PREFIXES_DINERS_CLUB[0]
+        val dinersPrefix = CardBrand.DinersClub.prefixes[0]
         // All the Diners Club prefixes are longer than one character, but I specifically want
         // to test that a nonempty string still triggers this action, so this test will fail if
         // the Diners Club prefixes are ever changed.
         assertTrue(dinersPrefix.length > 1)
 
         cardNumberEditText.setText(cardNumberEditText.text?.toString() + dinersPrefix)
-        assertEquals(Card.CardBrand.DINERS_CLUB, lastBrandChangeCallbackInvocation)
+        assertEquals(CardBrand.DinersClub, lastBrandChangeCallbackInvocation)
 
         ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
-        assertEquals(Card.CardBrand.UNKNOWN, lastBrandChangeCallbackInvocation)
+        assertEquals(CardBrand.Unknown, lastBrandChangeCallbackInvocation)
     }
 
     @Test
     fun enterBrandPrefix_thenClearAllText_callsUpdateWithUnknown() {
         lastBrandChangeCallbackInvocation = null
-        val prefixVisa = Card.PREFIXES_VISA[0]
+        val prefixVisa = CardBrand.Visa.prefixes[0]
         cardNumberEditText.setText(cardNumberEditText.text?.toString() + prefixVisa)
-        assertEquals(Card.CardBrand.VISA, lastBrandChangeCallbackInvocation)
+        assertEquals(CardBrand.Visa, lastBrandChangeCallbackInvocation)
 
         // Just adding some other text. Not enough to invalidate the card or complete it.
         lastBrandChangeCallbackInvocation = null
@@ -304,7 +306,7 @@ class CardNumberEditTextTest {
         // This simulates the user selecting all text and deleting it.
         cardNumberEditText.setText("")
 
-        assertEquals(Card.CardBrand.UNKNOWN, lastBrandChangeCallbackInvocation)
+        assertEquals(CardBrand.Unknown, lastBrandChangeCallbackInvocation)
     }
 
     @Test
@@ -351,7 +353,15 @@ class CardNumberEditTextTest {
         )
     }
 
-    private fun verifyCardBrandPrefix(cardBrand: String): (String) -> Unit {
+    @Test
+    fun testUpdateCardBrandFromNumber() {
+        cardNumberEditText.updateCardBrandFromNumber(VALID_DINERS_CLUB_NO_SPACES)
+        assertEquals(CardBrand.DinersClub, lastBrandChangeCallbackInvocation)
+        cardNumberEditText.updateCardBrandFromNumber(VALID_AMEX_NO_SPACES)
+        assertEquals(CardBrand.AmericanExpress, lastBrandChangeCallbackInvocation)
+    }
+
+    private fun verifyCardBrandPrefix(cardBrand: CardBrand): (String) -> Unit {
         return { prefix ->
             // Reset inside the loop so we don't count each prefix
             lastBrandChangeCallbackInvocation = null

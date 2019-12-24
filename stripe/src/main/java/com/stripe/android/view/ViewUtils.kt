@@ -1,8 +1,8 @@
 package com.stripe.android.view
 
-import com.stripe.android.model.Card
 import com.stripe.android.model.Card.Companion.CVC_LENGTH_AMERICAN_EXPRESS
 import com.stripe.android.model.Card.Companion.CVC_LENGTH_COMMON
+import com.stripe.android.model.CardBrand
 
 /**
  * Static utility functions needed for View classes.
@@ -10,11 +10,11 @@ import com.stripe.android.model.Card.Companion.CVC_LENGTH_COMMON
 internal object ViewUtils {
     @JvmStatic
     fun isCvcMaximalLength(
-        @Card.CardBrand cardBrand: String,
+        cardBrand: CardBrand,
         cvcText: String?
     ): Boolean {
         val cvcLength = cvcText?.trim { it <= ' ' }?.length ?: 0
-        return if (Card.CardBrand.AMERICAN_EXPRESS == cardBrand) {
+        return if (CardBrand.AmericanExpress == cardBrand) {
             cvcLength == CVC_LENGTH_AMERICAN_EXPRESS
         } else {
             cvcLength == CVC_LENGTH_COMMON
@@ -27,23 +27,25 @@ internal object ViewUtils {
      * Note that this does not verify that the card number is valid, or even that it is a number.
      *
      * @param spacelessCardNumber the raw card number, without spaces
-     * @param brand the [Card.CardBrand] to use as a separating scheme
+     * @param brand the [CardBrand] to use as a separating scheme
      * @return an array of strings with the number groups, in order. If the number is not complete,
      * some of the array entries may be `null`.
      */
     @JvmStatic
     fun separateCardNumberGroups(
         spacelessCardNumber: String,
-        @Card.CardBrand brand: String
+        brand: CardBrand
     ): Array<String?> {
-        return if (brand == Card.CardBrand.AMERICAN_EXPRESS) {
+        return if (brand == CardBrand.AmericanExpress) {
             separateAmexCardNumberGroups(spacelessCardNumber.take(16))
         } else {
             separateDefaultCardNumberGroups(spacelessCardNumber.take(16))
         }
     }
 
-    private fun separateDefaultCardNumberGroups(spacelessCardNumber: String): Array<String?> {
+    private fun separateDefaultCardNumberGroups(
+        spacelessCardNumber: String
+    ): Array<String?> {
         val numberGroups = arrayOfNulls<String?>(4)
         var i = 0
         var previousStart = 0

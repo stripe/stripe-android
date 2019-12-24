@@ -2,6 +2,7 @@ package com.stripe.android.model.parsers
 
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.Card
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.SourceCardData
 import com.stripe.android.model.StripeJsonUtils
 import java.util.Locale
@@ -12,7 +13,7 @@ internal class SourceCardDataJsonParser : ModelJsonParser<SourceCardData> {
         return SourceCardData(
             addressLine1Check = StripeJsonUtils.optString(json, FIELD_ADDRESS_LINE1_CHECK),
             addressZipCheck = StripeJsonUtils.optString(json, FIELD_ADDRESS_ZIP_CHECK),
-            brand = Card.asCardBrand(StripeJsonUtils.optString(json, FIELD_BRAND)),
+            brand = CardBrand.fromCode(StripeJsonUtils.optString(json, FIELD_BRAND)),
             country = StripeJsonUtils.optString(json, FIELD_COUNTRY),
             cvcCheck = StripeJsonUtils.optString(json, FIELD_CVC_CHECK),
             dynamicLast4 = StripeJsonUtils.optString(json, FIELD_DYNAMIC_LAST4),

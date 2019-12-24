@@ -22,7 +22,6 @@ import androidx.annotation.ColorInt
 import androidx.annotation.IdRes
 import androidx.annotation.IntRange
 import androidx.annotation.VisibleForTesting
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.AccessibilityDelegateCompat
 import androidx.core.view.ViewCompat
@@ -30,7 +29,7 @@ import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import com.stripe.android.R
 import com.stripe.android.model.Address
 import com.stripe.android.model.Card
-import com.stripe.android.model.Card.CardBrand
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_CARD
@@ -64,7 +63,6 @@ class CardInputWidget @JvmOverloads constructor(
     @ColorInt
     private var tintColorInt: Int = 0
 
-    private var isAmEx: Boolean = false
     private var initFlag: Boolean = false
 
     @JvmSynthetic
@@ -84,6 +82,11 @@ class CardInputWidget @JvmOverloads constructor(
     private val cvcValue: String?
         get() {
             return cvcNumberEditText.cvcValue
+        }
+
+    private val brand: CardBrand
+        get() {
+            return cardNumberEditText.cardBrand
         }
 
     @VisibleForTesting
@@ -504,13 +507,12 @@ class CardInputWidget @JvmOverloads constructor(
             FULL_SIZING_DATE_TEXT, expiryDateEditText
         )
 
-        @Card.CardBrand val brand = cardNumberEditText.cardBrand
         placementParameters.hiddenCardWidth = getDesiredWidthInPixels(
-            getHiddenTextForBrand(brand), cardNumberEditText
+            hiddenCardText, cardNumberEditText
         )
 
         placementParameters.cvcWidth = getDesiredWidthInPixels(
-            getCvcPlaceHolderForBrand(brand), cvcNumberEditText
+            cvcPlaceHolder, cvcNumberEditText
         )
 
         placementParameters.postalCodeWidth = getDesiredWidthInPixels(
@@ -518,7 +520,7 @@ class CardInputWidget @JvmOverloads constructor(
         )
 
         placementParameters.peekCardWidth = getDesiredWidthInPixels(
-            getPeekCardTextForBrand(brand), cardNumberEditText
+            peekCardText, cardNumberEditText
         )
 
         placementParameters.updateSpacing(isCardViewed, postalCodeEnabled, frameStart, frameWidth)
@@ -609,22 +611,16 @@ class CardInputWidget @JvmOverloads constructor(
                 scrollRight()
                 cardInputListener?.onFocusChange(FOCUS_CVC)
             }
-            updateIconCvc(
-                cardNumberEditText.cardBrand,
-                hasFocus,
-                cvcValue
-            )
+            updateIconCvc(hasFocus, cvcValue)
         }
 
         cvcNumberEditText.setAfterTextChangedListener(
             object : StripeEditText.AfterTextChangedListener {
                 override fun onTextChanged(text: String) {
-                    if (ViewUtils.isCvcMaximalLength(cardNumberEditText.cardBrand, text)) {
+                    if (ViewUtils.isCvcMaximalLength(brand, text)) {
                         cardInputListener?.onCvcComplete()
                     }
-                    updateIconCvc(cardNumberEditText.cardBrand,
-                        cvcNumberEditText.hasFocus(),
-                        text)
+                    updateIconCvc(cvcNumberEditText.hasFocus(), text)
                 }
             }
         )
@@ -635,8 +631,7 @@ class CardInputWidget @JvmOverloads constructor(
         }
 
         cardNumberEditText.brandChangeCallback = { brand ->
-            isAmEx = CardBrand.AMERICAN_EXPRESS == brand
-            updateIcon(brand)
+            updateIcon()
             cvcNumberEditText.updateBrand(brand)
         }
 
@@ -827,38 +822,35 @@ class CardInputWidget @JvmOverloads constructor(
         }
     }
 
-    private fun getHiddenTextForBrand(@CardBrand brand: String): String {
-        return if (CardBrand.AMERICAN_EXPRESS == brand) {
-            HIDDEN_TEXT_AMEX
-        } else {
-            HIDDEN_TEXT_COMMON
+    private val hiddenCardText: String
+        get() {
+            return if (CardBrand.AmericanExpress == brand) {
+                HIDDEN_TEXT_AMEX
+            } else {
+                HIDDEN_TEXT_COMMON
+            }
         }
-    }
 
-    private fun getCvcPlaceHolderForBrand(@Card.CardBrand brand: String): String {
-        return if (CardBrand.AMERICAN_EXPRESS == brand) {
-            CVC_PLACEHOLDER_AMEX
-        } else {
-            CVC_PLACEHOLDER_COMMON
+    private val cvcPlaceHolder: String
+        get() {
+            return if (CardBrand.AmericanExpress == brand) {
+                CVC_PLACEHOLDER_AMEX
+            } else {
+                CVC_PLACEHOLDER_COMMON
+            }
         }
-    }
 
-    private fun getPeekCardTextForBrand(@Card.CardBrand brand: String): String {
-        return when (brand) {
-            CardBrand.AMERICAN_EXPRESS -> {
-                PEEK_TEXT_AMEX
-            }
-            CardBrand.DINERS_CLUB -> {
-                PEEK_TEXT_DINERS
-            }
-            else -> {
-                PEEK_TEXT_COMMON
+    private val peekCardText: String
+        get() {
+            return when (brand) {
+                CardBrand.AmericanExpress -> PEEK_TEXT_AMEX
+                CardBrand.DinersClub -> PEEK_TEXT_DINERS
+                else -> PEEK_TEXT_COMMON
             }
         }
-    }
 
     private fun applyTint(isCvc: Boolean) {
-        if (isCvc || CardBrand.UNKNOWN == cardNumberEditText.cardBrand) {
+        if (isCvc || CardBrand.Unknown == brand) {
             val icon = cardIconImageView.drawable
             val compatIcon = DrawableCompat.wrap(icon)
             DrawableCompat.setTint(compatIcon.mutate(), tintColorInt)
@@ -866,34 +858,26 @@ class CardInputWidget @JvmOverloads constructor(
         }
     }
 
-    private fun updateIcon(@Card.CardBrand brand: String) {
-        if (CardBrand.UNKNOWN == brand) {
-            val icon = ContextCompat.getDrawable(context, R.drawable.stripe_ic_unknown)
-            cardIconImageView.setImageDrawable(icon)
+    private fun updateIcon() {
+        cardIconImageView.setImageResource(brand.icon)
+        if (brand == CardBrand.Unknown) {
             applyTint(false)
-        } else {
-            cardIconImageView.setImageResource(Card.getBrandIcon(brand))
         }
     }
 
     private fun updateIconCvc(
-        @CardBrand brand: String,
         hasFocus: Boolean,
         cvcText: String?
     ) {
         if (shouldIconShowBrand(brand, hasFocus, cvcText)) {
-            updateIcon(brand)
+            updateIcon()
         } else {
-            updateIconForCvcEntry(CardBrand.AMERICAN_EXPRESS == brand)
+            updateIconForCvcEntry()
         }
     }
 
-    private fun updateIconForCvcEntry(isAmEx: Boolean) {
-        cardIconImageView.setImageResource(if (isAmEx) {
-            R.drawable.stripe_ic_cvc_amex
-        } else {
-            R.drawable.stripe_ic_cvc
-        })
+    private fun updateIconForCvcEntry() {
+        cardIconImageView.setImageResource(brand.cvcIcon)
         applyTint(true)
     }
 
@@ -1235,15 +1219,16 @@ class CardInputWidget @JvmOverloads constructor(
          * Determines whether or not the icon should show the card brand instead of the
          * CVC helper icon.
          *
-         * @param brand the [Card.CardBrand] in question, used for determining max length
+         * @param brand the [CardBrand] of the card number
          * @param cvcHasFocus `true` if the CVC entry field has focus, `false` otherwise
          * @param cvcText the current content of [cvcNumberEditText]
+         *
          * @return `true` if we should show the brand of the card, or `false` if we
          * should show the CVC helper icon instead
          */
         @VisibleForTesting
         internal fun shouldIconShowBrand(
-            @Card.CardBrand brand: String,
+            brand: CardBrand,
             cvcHasFocus: Boolean,
             cvcText: String?
         ): Boolean {

@@ -11,6 +11,7 @@ import android.view.View
 import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
 import com.stripe.android.model.Card
+import com.stripe.android.model.CardBrand
 
 class CvcEditText @JvmOverloads constructor(
     context: Context,
@@ -26,7 +27,8 @@ class CvcEditText @JvmOverloads constructor(
             return rawCvcValue.takeIf { isValid }
         }
 
-    private val rawCvcValue: String
+    internal val rawCvcValue: String
+        @JvmSynthetic
         get() {
             return text.toString().trim()
         }
@@ -69,18 +71,18 @@ class CvcEditText @JvmOverloads constructor(
     }
 
     /**
-     * @param brand - the [Card.CardBrand] used to update the view
-     * @param customHintText - optional user-specified hint text
-     * @param textInputLayout - if specified, hint text will be set on this [TextInputLayout]
+     * @param cardBrand the [CardBrand] used to update the view
+     * @param customHintText optional user-specified hint text
+     * @param textInputLayout if specified, hint text will be set on this [TextInputLayout]
      * instead of directly on the [CvcEditText]
      */
     @JvmSynthetic
     internal fun updateBrand(
-        @Card.CardBrand brand: String,
+        cardBrand: CardBrand,
         customHintText: String? = null,
         textInputLayout: TextInputLayout? = null
     ) {
-        isAmex = Card.CardBrand.AMERICAN_EXPRESS == brand
+        isAmex = CardBrand.AmericanExpress == cardBrand
         filters = if (isAmex) {
             INPUT_FILTER_AMEX
         } else {

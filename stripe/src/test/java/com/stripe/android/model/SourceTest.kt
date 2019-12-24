@@ -47,7 +47,7 @@ class SourceTest {
         assertTrue(source.sourceTypeModel is SourceCardData)
 
         val sourceCardData = source.sourceTypeModel as SourceCardData?
-        assertEquals(Card.CardBrand.VISA, sourceCardData?.brand)
+        assertEquals(CardBrand.Visa, sourceCardData?.brand)
     }
 
     @Test

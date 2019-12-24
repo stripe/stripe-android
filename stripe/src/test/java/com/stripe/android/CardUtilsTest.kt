@@ -1,6 +1,6 @@
 package com.stripe.android
 
-import com.stripe.android.model.Card
+import com.stripe.android.model.CardBrand
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -13,62 +13,62 @@ class CardUtilsTest {
 
     @Test
     fun getPossibleCardType_withEmptyCard_returnsUnknown() {
-        assertEquals(Card.CardBrand.UNKNOWN, CardUtils.getPossibleCardType("   "))
+        assertEquals(CardBrand.Unknown, CardUtils.getPossibleCardType("   "))
     }
 
     @Test
     fun getPossibleCardType_withNullCardNumber_returnsUnknown() {
-        assertEquals(Card.CardBrand.UNKNOWN, CardUtils.getPossibleCardType(null))
+        assertEquals(CardBrand.Unknown, CardUtils.getPossibleCardType(null))
     }
 
     @Test
     fun getPossibleCardType_withVisaPrefix_returnsVisa() {
-        assertEquals(Card.CardBrand.VISA, CardUtils.getPossibleCardType("4899 99"))
-        assertEquals(Card.CardBrand.VISA, CardUtils.getPossibleCardType("4"))
+        assertEquals(CardBrand.Visa, CardUtils.getPossibleCardType("4899 99"))
+        assertEquals(CardBrand.Visa, CardUtils.getPossibleCardType("4"))
     }
 
     @Test
     fun getPossibleCardType_withAmexPrefix_returnsAmex() {
-        assertEquals(Card.CardBrand.AMERICAN_EXPRESS, CardUtils.getPossibleCardType("345"))
-        assertEquals(Card.CardBrand.AMERICAN_EXPRESS, CardUtils.getPossibleCardType("37999999999"))
+        assertEquals(CardBrand.AmericanExpress, CardUtils.getPossibleCardType("345"))
+        assertEquals(CardBrand.AmericanExpress, CardUtils.getPossibleCardType("37999999999"))
     }
 
     @Test
     fun getPossibleCardType_withJCBPrefix_returnsJCB() {
-        assertEquals(Card.CardBrand.JCB, CardUtils.getPossibleCardType("3535 3535"))
+        assertEquals(CardBrand.JCB, CardUtils.getPossibleCardType("3535 3535"))
     }
 
     @Test
     fun getPossibleCardType_withMasterCardPrefix_returnsMasterCard() {
-        assertEquals(Card.CardBrand.MASTERCARD, CardUtils.getPossibleCardType("2222 452"))
-        assertEquals(Card.CardBrand.MASTERCARD, CardUtils.getPossibleCardType("5050"))
+        assertEquals(CardBrand.MasterCard, CardUtils.getPossibleCardType("2222 452"))
+        assertEquals(CardBrand.MasterCard, CardUtils.getPossibleCardType("5050"))
     }
 
     @Test
     fun getPossibleCardType_withDinersClubPrefix_returnsDinersClub() {
-        assertEquals(Card.CardBrand.DINERS_CLUB, CardUtils.getPossibleCardType("303922 2234"))
-        assertEquals(Card.CardBrand.DINERS_CLUB, CardUtils.getPossibleCardType("36778 9098"))
+        assertEquals(CardBrand.DinersClub, CardUtils.getPossibleCardType("303922 2234"))
+        assertEquals(CardBrand.DinersClub, CardUtils.getPossibleCardType("36778 9098"))
     }
 
     @Test
     fun getPossibleCardType_withDiscoverPrefix_returnsDiscover() {
-        assertEquals(Card.CardBrand.DISCOVER, CardUtils.getPossibleCardType("60355"))
-        assertEquals(Card.CardBrand.DISCOVER, CardUtils.getPossibleCardType("6433 8 90923"))
+        assertEquals(CardBrand.Discover, CardUtils.getPossibleCardType("60355"))
+        assertEquals(CardBrand.Discover, CardUtils.getPossibleCardType("6433 8 90923"))
         // This one has too many numbers on purpose. Checking for length is not part of the
         // function under test.
-        assertEquals(Card.CardBrand.DISCOVER, CardUtils.getPossibleCardType("6523452309209340293423"))
+        assertEquals(CardBrand.Discover, CardUtils.getPossibleCardType("6523452309209340293423"))
     }
 
     @Test
     fun getPossibleCardType_withUnionPayPrefix_returnsUnionPay() {
-        assertEquals(Card.CardBrand.UNIONPAY, CardUtils.getPossibleCardType("62"))
+        assertEquals(CardBrand.UnionPay, CardUtils.getPossibleCardType("62"))
     }
 
     @Test
     fun getPossibleCardType_withNonsenseNumber_returnsUnknown() {
-        assertEquals(Card.CardBrand.UNKNOWN, CardUtils.getPossibleCardType("1234567890123456"))
-        assertEquals(Card.CardBrand.UNKNOWN, CardUtils.getPossibleCardType("9999 9999 9999 9999"))
-        assertEquals(Card.CardBrand.UNKNOWN, CardUtils.getPossibleCardType("3"))
+        assertEquals(CardBrand.Unknown, CardUtils.getPossibleCardType("1234567890123456"))
+        assertEquals(CardBrand.Unknown, CardUtils.getPossibleCardType("9999 9999 9999 9999"))
+        assertEquals(CardBrand.Unknown, CardUtils.getPossibleCardType("3"))
     }
 
     @Test
@@ -139,14 +139,6 @@ class CardUtilsTest {
     @Test
     fun isValidCardLength_whenDinersClubStyleNumberStyleNumberButAmexLength_returnsFalse() {
         assertFalse(CardUtils.isValidCardLength("305693090259040"))
-    }
-
-    @Test
-    fun isValidCardLengthWithBrand_whenBrandUnknown_alwaysReturnsFalse() {
-        val validVisa = "4242424242424242"
-        // Adding this check to ensure the input number is correct
-        assertTrue(CardUtils.isValidCardLength(validVisa))
-        assertFalse(CardUtils.isValidCardLength(validVisa, Card.CardBrand.UNKNOWN))
     }
 
     @Test

@@ -12,6 +12,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.model.Card
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceCardData
 import com.stripe.android.model.SourceParams
@@ -210,12 +211,12 @@ class CreateCardSourceActivity : AppCompatActivity() {
         private var alertDialog: AlertDialog? = null
 
         fun showDialog(redirectUrl: String, sourceCardData: Map<String, *>) {
-            val brand = sourceCardData["brand"] as String?
+            val brand = CardBrand.fromCode(sourceCardData["brand"] as String?)
             val alertDialog = AlertDialog.Builder(activity, R.style.AlertDialogStyle)
                 .setTitle(activity.getString(R.string.authentication_dialog_title))
                 .setMessage(activity.getString(R.string.authentication_dialog_message,
                     brand, sourceCardData["last4"]))
-                .setIcon(Card.getBrandIcon(brand))
+                .setIcon(brand.icon)
                 .setPositiveButton(android.R.string.yes) { _, _ ->
                     activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(redirectUrl)))
                 }
