@@ -23,6 +23,9 @@
         }
     }
     ```
+* [#1993](https://github.com/stripe/stripe-android/pull/1993) Remove deprecated methods from `PaymentSession`
+    * See the [Migration Guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) for more details
+* [#1994](https://github.com/stripe/stripe-android/pull/1994) Enable postal code field in `CardInputWidget` by default
 * [#1995](https://github.com/stripe/stripe-android/pull/1995) Enable Google Pay option in Basic Integration and Stripe Activities
     * PaymentSession
       ```kotlin
@@ -39,9 +42,18 @@
           .setShouldShowGooglePay(true)
           .build()
       ```
+* [#1996](https://github.com/stripe/stripe-android/pull/1996) Update postal code logic for `CardMultilineWidget`
+    * Default to showing postal code (i.e. `shouldShowPostalCode = true`)
+    * Postal code is now optional when displayed
+    * Remove validation on postal code field
+    * Change postal code field hint text to "Postal Code"
+    * Remove `CardInputListener.onPostalCodeComplete()`
 * [#1998](https://github.com/stripe/stripe-android/pull/1998) Use `CardBrand` enum to represent card brands
     * Change the type of `Card#brand` and `SourceCardData#brand` properties from `String?` to `CardBrand`
     * Remove `Card.CardBrand`
+* [#1999](https://github.com/stripe/stripe-android/pull/1999) Remove deprecated `BroadcastReceiver` logic from `PaymentFlowActivity`
+    * See the [Migration Guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) for more details
+* [#2000](https://github.com/stripe/stripe-android/pull/2000) Pass `PaymentSessionConfig` instance to `PaymentSession` constructor
 * [#2002](https://github.com/stripe/stripe-android/pull/2002) Fix regression in `CardInputWidget` styling
     To customize the individual `EditText` fields of `CardInputWidget`, define a `Stripe.CardInputWidget.EditText` style
     that extends `Stripe.Base.CardInputWidget.EditText`. For example,
@@ -77,7 +89,6 @@
         }
     }
     ```
-
 * [#2006](https://github.com/stripe/stripe-android/pull/2006) Create `TokenizationMethod` enum
     * Change the type of `Card#tokenizationMethod` and `SourceCardData#tokenizationMethod` from `String?` to `TokenizationMethod?`
 

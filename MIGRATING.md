@@ -10,6 +10,7 @@
     - The postal code input is not validated
 - Changes to `CardMultilineWidget`
     - The postal code field is now displayed by default
+    - The postal code field is now optional when displayed
     - The postal code input is not validated
     - `CardInputListener.onPostalCodeComplete()` has been removed
 - Changes to `Stripe`
