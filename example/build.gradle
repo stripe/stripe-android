@@ -51,7 +51,7 @@ dependencies {
     implementation 'com.jakewharton.rxbinding2:rxbinding:2.2.0'
 
     /* Used for server calls */
-    implementation 'com.squareup.okio:okio:2.4.2'
+    implementation 'com.squareup.okio:okio:2.4.3'
     implementation 'com.squareup.retrofit2:retrofit:2.7.0'
     implementation 'com.facebook.stetho:stetho:1.5.1'
     implementation 'com.facebook.stetho:stetho-okhttp3:1.5.1'
