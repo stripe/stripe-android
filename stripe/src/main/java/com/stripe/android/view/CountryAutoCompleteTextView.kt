@@ -89,7 +89,7 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
     private fun updateInitialCountry() {
         val initialCountry = countryAdapter.firstItem
         countryAutocomplete.setText(initialCountry.name)
-        selectedCountry = initialCountry
+        selectedCountry = selectedCountry ?: initialCountry
         countryChangeCallback(initialCountry)
     }
 

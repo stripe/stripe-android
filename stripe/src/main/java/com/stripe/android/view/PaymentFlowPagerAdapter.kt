@@ -162,9 +162,9 @@ internal class PaymentFlowPagerAdapter(
                 shippingInfoWidget
                     .setOptionalFields(paymentSessionConfig.optionalShippingInfoFields)
                 shippingInfoWidget
-                    .populateShippingInfo(shippingInformation)
-                shippingInfoWidget
                     .setAllowedCountryCodes(allowedShippingCountryCodes)
+                shippingInfoWidget
+                        .populateShippingInfo(shippingInformation)
             }
         }
 

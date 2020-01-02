@@ -258,6 +258,20 @@ class ShippingInfoWidgetTest {
         assertEquals(countryAutoCompleteTextView.selectedCountry?.code, "US")
     }
 
+    @Test
+    fun getSelectedShippingCountry_whenShippingInfoProvided_returnsExpected() {
+        shippingInfoWidget.populateShippingInfo(SHIPPING_INFO_CA)
+        shippingInfoWidget.setAllowedCountryCodes(setOf("US", "CA"))
+        assertEquals(stateEditText.text.toString(), "Ontario")
+        assertEquals(cityEditText.text.toString(), "Ontario")
+        assertEquals(addressLine1EditText.text.toString(), "185 Berry St")
+        assertEquals(addressLine2EditText.text.toString(), "10th Floor")
+        assertEquals(phoneEditText.text.toString(), "416-759-0260")
+        assertEquals(postalEditText.text.toString(), "M4B1B5")
+        assertEquals(nameEditText.text.toString(), "Fake Name")
+        assertEquals(countryAutoCompleteTextView.selectedCountry?.code, "CA")
+    }
+
     private companion object {
         private const val NO_POSTAL_CODE_COUNTRY_CODE = "ZW" // Zimbabwe
 
@@ -272,6 +286,19 @@ class ShippingInfoWidgetTest {
                 .build(),
             "Fake Name",
             "(123) 456 - 7890"
+        )
+
+        private val SHIPPING_INFO_CA = ShippingInformation(
+                Address.Builder()
+                        .setCity("Ontario")
+                        .setState("Ontario")
+                        .setCountry("CA")
+                        .setLine1("185 Berry St")
+                        .setLine2("10th Floor")
+                        .setPostalCode("M4B1B5")
+                        .build(),
+                "Fake Name",
+                "416-759-0260"
         )
     }
 }
