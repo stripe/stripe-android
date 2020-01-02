@@ -23,7 +23,6 @@
         }
     }
     ```
-
 * [#1995](https://github.com/stripe/stripe-android/pull/1995) Enable Google Pay option in Basic Integration and Stripe Activities
     * PaymentSession
       ```kotlin
@@ -40,6 +39,9 @@
           .setShouldShowGooglePay(true)
           .build()
       ```
+* [#1998](https://github.com/stripe/stripe-android/pull/1998) Use `CardBrand` enum to represent card brands
+    * Change the type of `Card#brand` and `SourceCardData#brand` properties from `String?` to `CardBrand`
+    * Remove `Card.CardBrand`
 * [#2002](https://github.com/stripe/stripe-android/pull/2002) Fix regression in `CardInputWidget` styling
     To customize the individual `EditText` fields of `CardInputWidget`, define a `Stripe.CardInputWidget.EditText` style
     that extends `Stripe.Base.CardInputWidget.EditText`. For example,
@@ -50,7 +52,6 @@
         <item name="android:textColorHint">@android:color/holo_orange_light</item>
     </style>
     ```
-
 * [#2003](https://github.com/stripe/stripe-android/pull/2003) Add support for authenticating a `Source` via in-app WebView
     ```kotlin
     class MyActivity : AppCompatActivity() {
@@ -76,6 +77,9 @@
         }
     }
     ```
+
+* [#2006](https://github.com/stripe/stripe-android/pull/2006) Create `TokenizationMethod` enum
+    * Change the type of `Card#tokenizationMethod` and `SourceCardData#tokenizationMethod` from `String?` to `TokenizationMethod?`
 
 ## 12.8.2 - 2019-12-20
 * [#1974](https://github.com/stripe/stripe-android/pull/1974) Add `PaymentSessionConfig#shouldPrefetchCustomer`
