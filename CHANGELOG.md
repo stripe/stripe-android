@@ -91,6 +91,7 @@
     ```
 * [#2006](https://github.com/stripe/stripe-android/pull/2006) Create `TokenizationMethod` enum
     * Change the type of `Card#tokenizationMethod` and `SourceCardData#tokenizationMethod` from `String?` to `TokenizationMethod?`
+* [#2013](https://github.com/stripe/stripe-android/pull/2013) Populate shipping address country from pre-populated shipping info
 
 ## 12.8.2 - 2019-12-20
 * [#1974](https://github.com/stripe/stripe-android/pull/1974) Add `PaymentSessionConfig#shouldPrefetchCustomer`
