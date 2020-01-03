@@ -61,6 +61,8 @@ class CreateCardTokenActivity : AppCompatActivity() {
                     .show()
             }
         }
+
+        card_input_widget.requestFocus()
     }
 
     private fun onRequestStart() {

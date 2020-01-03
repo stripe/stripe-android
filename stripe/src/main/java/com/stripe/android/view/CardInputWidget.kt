@@ -26,6 +26,7 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.AccessibilityDelegateCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
+import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
 import com.stripe.android.model.Address
 import com.stripe.android.model.Card
@@ -49,6 +50,11 @@ class CardInputWidget @JvmOverloads constructor(
 ) : LinearLayout(context, attrs, defStyleAttr), CardWidget {
     private val cardIconImageView: ImageView
     private val frameLayout: FrameLayout
+
+    private val cardNumberTextInputLayout: TextInputLayout
+    private val expiryDateTextInputLayout: TextInputLayout
+    private val cvcNumberTextInputLayout: TextInputLayout
+    private val postalCodeTextInputLayout: TextInputLayout
 
     private val cardNumberEditText: CardNumberEditText
     private val expiryDateEditText: ExpiryDateEditText
@@ -154,8 +160,7 @@ class CardInputWidget @JvmOverloads constructor(
      */
     override val card: Card?
         get() {
-            val builder = cardBuilder
-            return builder?.build()
+            return cardBuilder?.build()
         }
 
     override val cardBuilder: Card.Builder?
@@ -198,10 +203,16 @@ class CardInputWidget @JvmOverloads constructor(
         minimumWidth = resources.getDimensionPixelSize(R.dimen.stripe_card_widget_min_width)
 
         frameLayout = findViewById(R.id.frame_container)
-        cardNumberEditText = frameLayout.findViewById(R.id.et_card_number)
-        expiryDateEditText = frameLayout.findViewById(R.id.et_expiry_date)
-        cvcNumberEditText = frameLayout.findViewById(R.id.et_cvc)
-        postalCodeEditText = frameLayout.findViewById(R.id.et_postal_code)
+
+        cardNumberTextInputLayout = frameLayout.findViewById(R.id.tl_card_number)
+        expiryDateTextInputLayout = frameLayout.findViewById(R.id.tl_expiry_date)
+        cvcNumberTextInputLayout = frameLayout.findViewById(R.id.tl_cvc)
+        postalCodeTextInputLayout = frameLayout.findViewById(R.id.tl_postal_code)
+
+        cardNumberEditText = cardNumberTextInputLayout.findViewById(R.id.et_card_number)
+        expiryDateEditText = expiryDateTextInputLayout.findViewById(R.id.et_expiry_date)
+        cvcNumberEditText = cvcNumberTextInputLayout.findViewById(R.id.et_cvc)
+        postalCodeEditText = postalCodeTextInputLayout.findViewById(R.id.et_postal_code)
         postalCodeEditText.configureForGlobal()
 
         frameWidthSupplier = { frameLayout.width }
@@ -370,22 +381,22 @@ class CardInputWidget @JvmOverloads constructor(
             }
 
             updateFieldLayout(
-                view = cardNumberEditText,
+                view = cardNumberTextInputLayout,
                 width = placementParameters.cardWidth,
                 leftMargin = cardLeftMargin
             )
             updateFieldLayout(
-                view = expiryDateEditText,
+                view = expiryDateTextInputLayout,
                 width = placementParameters.dateWidth,
                 leftMargin = dateLeftMargin
             )
             updateFieldLayout(
-                view = cvcNumberEditText,
+                view = cvcNumberTextInputLayout,
                 width = placementParameters.cvcWidth,
                 leftMargin = cvcLeftMargin
             )
             updateFieldLayout(
-                view = postalCodeEditText,
+                view = postalCodeTextInputLayout,
                 width = placementParameters.postalCodeWidth,
                 leftMargin = postalCodeLeftMargin
             )
@@ -399,12 +410,12 @@ class CardInputWidget @JvmOverloads constructor(
     private fun updatePostalCodeEditText(isEnabled: Boolean) {
         if (isEnabled) {
             postalCodeEditText.isEnabled = true
-            postalCodeEditText.visibility = View.VISIBLE
+            postalCodeTextInputLayout.visibility = View.VISIBLE
 
             cvcNumberEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
         } else {
             postalCodeEditText.isEnabled = false
-            postalCodeEditText.visibility = View.GONE
+            postalCodeTextInputLayout.visibility = View.GONE
 
             cvcNumberEditText.imeOptions = EditorInfo.IME_ACTION_DONE
         }
@@ -424,7 +435,7 @@ class CardInputWidget @JvmOverloads constructor(
      * if no such request is necessary.
      */
     @VisibleForTesting
-    internal fun getFocusRequestOnTouch(touchX: Int): StripeEditText? {
+    internal fun getFocusRequestOnTouch(touchX: Int): View? {
         val frameStart = frameLayout.left
 
         return when {
@@ -546,6 +557,20 @@ class CardInputWidget @JvmOverloads constructor(
             cvcNumberEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE)
             postalCodeEditText.setAutofillHints(View.AUTOFILL_HINT_POSTAL_CODE)
         }
+
+        ViewCompat.setAccessibilityDelegate(
+            cardNumberEditText,
+            object : AccessibilityDelegateCompat() {
+                override fun onInitializeAccessibilityNodeInfo(
+                    host: View,
+                    info: AccessibilityNodeInfoCompat
+                ) {
+                    super.onInitializeAccessibilityNodeInfo(host, info)
+
+                    // Avoid reading out "1234 1234 1234 1234"
+                    info.hintText = null
+                }
+            })
 
         ViewCompat.setAccessibilityDelegate(
             cvcNumberEditText,
@@ -675,19 +700,19 @@ class CardInputWidget @JvmOverloads constructor(
         updateSpaceSizes(isCardViewed = true)
 
         val slideCardLeftAnimation = CardNumberSlideLeftAnimation(
-            view = cardNumberEditText
+            view = cardNumberTextInputLayout
         )
 
         val dateDestination = placementParameters.getDateLeftMargin(isFullCard = true)
         val slideDateLeftAnimation = ExpiryDateSlideLeftAnimation(
-            view = expiryDateEditText,
+            view = expiryDateTextInputLayout,
             startPosition = dateStartPosition,
             destination = dateDestination
         )
 
         val cvcDestination = cvcStartPosition + (dateDestination - dateStartPosition)
         val slideCvcLeftAnimation = CvcSlideLeftAnimation(
-            view = cvcNumberEditText,
+            view = cvcNumberTextInputLayout,
             startPosition = cvcStartPosition,
             destination = cvcDestination,
             newWidth = placementParameters.cvcWidth
@@ -696,7 +721,7 @@ class CardInputWidget @JvmOverloads constructor(
         val postalCodeDestination = postalCodeStartPosition + (cvcDestination - cvcStartPosition)
         val slidePostalCodeLeftAnimation = if (postalCodeEnabled) {
             PostalCodeSlideLeftAnimation(
-                view = postalCodeEditText,
+                view = postalCodeTextInputLayout,
                 startPosition = postalCodeStartPosition,
                 destination = postalCodeDestination,
                 newWidth = placementParameters.postalCodeWidth
@@ -726,14 +751,14 @@ class CardInputWidget @JvmOverloads constructor(
         updateSpaceSizes(isCardViewed = false)
 
         val slideCardRightAnimation = CardNumberSlideRightAnimation(
-            view = cardNumberEditText,
+            view = cardNumberTextInputLayout,
             hiddenCardWidth = placementParameters.hiddenCardWidth,
             focusOnEndView = expiryDateEditText
         )
 
         val dateDestination = placementParameters.getDateLeftMargin(isFullCard = false)
         val slideDateRightAnimation = ExpiryDateSlideRightAnimation(
-            view = expiryDateEditText,
+            view = expiryDateTextInputLayout,
             startMargin = dateStartMargin,
             destination = dateDestination
         )
@@ -741,7 +766,7 @@ class CardInputWidget @JvmOverloads constructor(
         val cvcDestination = placementParameters.getCvcLeftMargin(isFullCard = false)
         val cvcStartMargin = cvcDestination + (dateStartMargin - dateDestination)
         val slideCvcRightAnimation = CvcSlideRightAnimation(
-            view = cvcNumberEditText,
+            view = cvcNumberTextInputLayout,
             startMargin = cvcStartMargin,
             destination = cvcDestination,
             newWidth = placementParameters.cvcWidth
@@ -751,7 +776,7 @@ class CardInputWidget @JvmOverloads constructor(
         val postalCodeStartMargin = postalCodeDestination + (cvcStartMargin - cvcDestination)
         val slidePostalCodeRightAnimation = if (postalCodeEnabled) {
             PostalCodeSlideRightAnimation(
-                view = postalCodeEditText,
+                view = postalCodeTextInputLayout,
                 startMargin = postalCodeStartMargin,
                 destination = postalCodeDestination,
                 newWidth = placementParameters.postalCodeWidth
@@ -793,7 +818,7 @@ class CardInputWidget @JvmOverloads constructor(
             updateSpaceSizes(cardNumberIsViewed)
 
             updateFieldLayout(
-                view = cardNumberEditText,
+                view = cardNumberTextInputLayout,
                 width = placementParameters.cardWidth,
                 leftMargin = if (cardNumberIsViewed) {
                     0
@@ -803,19 +828,19 @@ class CardInputWidget @JvmOverloads constructor(
             )
 
             updateFieldLayout(
-                view = expiryDateEditText,
+                view = expiryDateTextInputLayout,
                 width = placementParameters.dateWidth,
                 leftMargin = placementParameters.getDateLeftMargin(cardNumberIsViewed)
             )
 
             updateFieldLayout(
-                view = cvcNumberEditText,
+                view = cvcNumberTextInputLayout,
                 width = placementParameters.cvcWidth,
                 leftMargin = placementParameters.getCvcLeftMargin(cardNumberIsViewed)
             )
 
             updateFieldLayout(
-                view = postalCodeEditText,
+                view = postalCodeTextInputLayout,
                 width = placementParameters.postalCodeWidth,
                 leftMargin = placementParameters.getPostalCodeLeftMargin(cardNumberIsViewed)
             )
