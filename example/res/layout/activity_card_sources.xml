@@ -31,19 +31,11 @@
         />
 
     <Button
-        android:id="@+id/btn_three_d_secure"
+        android:id="@+id/btn_create_source"
         android:layout_width="160dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="@string/create_source_header"/>
-
-    <Button
-        android:id="@+id/btn_three_d_secure_sync"
-        android:layout_width="160dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="10dp"
-        android:text="@string/addThreeDSecureCardSync"/>
 
     <TextView android:text="@string/updatedSources"
               style="@style/Header" />

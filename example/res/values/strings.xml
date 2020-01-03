@@ -4,7 +4,6 @@
 
     <string name="create_payment_method_header">Create Payment Method</string>
     <string name="create_source_header">Create Source</string>
-    <string name="addThreeDSecureCardSync">Add Source Rx</string>
     <string name="paymentMethods">Payment Methods</string>
 
     <string name="create_card_token">Create a Card Token</string>
