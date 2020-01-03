@@ -55,7 +55,7 @@ internal class PaymentMethodsAdapter constructor(
             isGooglePayPosition(position) -> ViewType.GooglePay.ordinal
             isPaymentMethodsPosition(position) -> {
                 val type = getPaymentMethodAtPosition(position).type
-                if (PaymentMethod.Type.Card.code == type) {
+                if (PaymentMethod.Type.Card == type) {
                     ViewType.Card.ordinal
                 } else {
                     super.getItemViewType(position)

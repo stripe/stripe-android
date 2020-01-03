@@ -110,7 +110,7 @@ class PaymentSessionActivity : AppCompatActivity() {
             paymentMethod != null -> {
                 paymentMethod.card?.let { card ->
                     "${card.brand} ending in ${card.last4}"
-                } ?: paymentMethod.type.orEmpty()
+                } ?: paymentMethod.type?.code.orEmpty()
             }
             data.useGooglePay -> {
                 "Use Google Pay"

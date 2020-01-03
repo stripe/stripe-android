@@ -21,7 +21,7 @@ data class PaymentMethod internal constructor(
     @JvmField val id: String?,
     @JvmField val created: Long?,
     @JvmField val liveMode: Boolean,
-    @JvmField val type: String?,
+    @JvmField val type: Type?,
     @JvmField val billingDetails: BillingDetails? = null,
     @JvmField val customerId: String? = null,
     @JvmField val metadata: Map<String, String>? = null,
@@ -49,7 +49,7 @@ data class PaymentMethod internal constructor(
 
         companion object {
             @JvmSynthetic
-            internal fun lookup(code: String?): Type? {
+            internal fun fromCode(code: String?): Type? {
                 return values().firstOrNull { it.code == code }
             }
         }
@@ -59,7 +59,7 @@ data class PaymentMethod internal constructor(
         private var id: String? = null
         private var created: Long? = null
         private var liveMode: Boolean = false
-        private var type: String? = null
+        private var type: Type? = null
         private var billingDetails: BillingDetails? = null
         private var metadata: Map<String, String>? = null
         private var customerId: String? = null
@@ -85,7 +85,7 @@ data class PaymentMethod internal constructor(
             this.metadata = metadata
         }
 
-        fun setType(type: String?): Builder = apply {
+        fun setType(type: Type?): Builder = apply {
             this.type = type
         }
 

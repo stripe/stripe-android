@@ -21,7 +21,7 @@ class PaymentMethodTest {
             id = "pm_123456789",
             created = 1550757934255L,
             liveMode = true,
-            type = PaymentMethod.Type.Ideal.code,
+            type = PaymentMethod.Type.Ideal,
             customerId = "cus_AQsHpvKfKwJDrF",
             billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
             ideal = PaymentMethod.Ideal(
@@ -44,7 +44,7 @@ class PaymentMethodTest {
     fun toJson_withSepaDebit_shouldCreateExpectedObject() {
         assertEquals(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
             PaymentMethod(
-                type = PaymentMethod.Type.SepaDebit.code,
+                type = PaymentMethod.Type.SepaDebit,
                 id = "pm_1FSQaJCR",
                 liveMode = false,
                 created = 1570809799L,
@@ -72,7 +72,7 @@ class PaymentMethodTest {
                 id = "pm_123456789",
                 created = 1550757934255L,
                 liveMode = true,
-                type = PaymentMethod.Type.Card.code,
+                type = PaymentMethod.Type.Card,
                 customerId = "cus_AQsHpvKfKwJDrF",
                 billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
                 card = PaymentMethodFixtures.CARD,
@@ -92,7 +92,7 @@ class PaymentMethodTest {
     @Throws(JSONException::class)
     fun fromString_withIdeal_returnsExpectedObject() {
         val paymentMethod = PaymentMethodJsonParser().parse(PM_IDEAL_JSON)
-        assertEquals("ideal", paymentMethod.type)
+        assertEquals(PaymentMethod.Type.Ideal, paymentMethod.type)
     }
 
     @Test
@@ -115,7 +115,7 @@ class PaymentMethodTest {
             created = 1550757934255L,
             customerId = "cus_AQsHpvKfKwJDrF",
             id = "pm_123456789",
-            type = PaymentMethod.Type.Card.code,
+            type = PaymentMethod.Type.Card,
             liveMode = true,
             metadata = metadata,
             card = PaymentMethodFixtures.CARD,

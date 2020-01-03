@@ -6,7 +6,8 @@ import org.json.JSONObject
 
 internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
     override fun parse(json: JSONObject): PaymentMethod {
-        val type = StripeJsonUtils.optString(json, FIELD_TYPE)
+        val type =
+            PaymentMethod.Type.fromCode(StripeJsonUtils.optString(json, FIELD_TYPE))
         val builder = PaymentMethod.Builder()
             .setId(StripeJsonUtils.optString(json, FIELD_ID))
             .setType(type)
@@ -21,27 +22,27 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
             .setMetadata(StripeJsonUtils.optHash(json, FIELD_METADATA))
 
         when (type) {
-            FIELD_CARD ->
+            PaymentMethod.Type.Card ->
                 builder.setCard(
                     json.optJSONObject(FIELD_CARD)?.let {
                         CardJsonParser().parse(it)
                     }
                 )
-            FIELD_CARD_PRESENT ->
+            PaymentMethod.Type.CardPresent ->
                 builder.setCardPresent(PaymentMethod.CardPresent.EMPTY)
-            FIELD_IDEAL ->
+            PaymentMethod.Type.Ideal ->
                 builder.setIdeal(
                     json.optJSONObject(FIELD_IDEAL)?.let {
                         IdealJsonParser().parse(it)
                     }
                 )
-            FIELD_FPX ->
+            PaymentMethod.Type.Fpx ->
                 builder.setFpx(
                     json.optJSONObject(FIELD_FPX)?.let {
                         FpxJsonParser().parse(it)
                     }
                 )
-            FIELD_SEPA_DEBIT ->
+            PaymentMethod.Type.SepaDebit ->
                 builder.setSepaDebit(
                     json.optJSONObject(FIELD_SEPA_DEBIT)?.let {
                         SepaDebitJsonParser().parse(it)
