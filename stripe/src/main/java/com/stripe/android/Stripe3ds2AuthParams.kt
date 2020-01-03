@@ -1,12 +1,15 @@
 package com.stripe.android
 
+import android.os.Parcelable
 import com.stripe.android.model.StripeParamsModel
 import java.text.DecimalFormat
+import kotlinx.android.parcel.Parcelize
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
-internal class Stripe3ds2AuthParams(
+@Parcelize
+internal data class Stripe3ds2AuthParams(
     private val sourceId: String,
     private val sdkAppId: String,
     private val sdkReferenceNumber: String,
@@ -16,7 +19,7 @@ internal class Stripe3ds2AuthParams(
     private val messageVersion: String,
     private val maxTimeout: Int,
     private val returnUrl: String?
-) : StripeParamsModel {
+) : StripeParamsModel, Parcelable {
 
     override fun toParamMap(): Map<String, Any> {
         val params = mapOf(

@@ -1,7 +1,9 @@
 package com.stripe.android.model
 
+import android.os.Parcelable
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.Stripe
+import kotlinx.android.parcel.Parcelize
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -14,6 +16,7 @@ import org.json.JSONObject
  *
  * See [PaymentMethod] for API object.
  */
+@Parcelize
 data class PaymentMethodCreateParams internal constructor(
     internal val type: Type,
     private val card: Card? = null,
@@ -22,7 +25,7 @@ data class PaymentMethodCreateParams internal constructor(
     private val sepaDebit: SepaDebit? = null,
     private val billingDetails: PaymentMethod.BillingDetails? = null,
     private val metadata: Map<String, String>? = null
-) : StripeParamsModel {
+) : StripeParamsModel, Parcelable {
 
     val typeCode: String
         get() = type.code
@@ -107,13 +110,14 @@ data class PaymentMethodCreateParams internal constructor(
         SepaDebit("sepa_debit", true)
     }
 
+    @Parcelize
     data class Card internal constructor(
         private val number: String? = null,
         private val expiryMonth: Int? = null,
         private val expiryYear: Int? = null,
         private val cvc: String? = null,
         private val token: String? = null
-    ) : StripeParamsModel {
+    ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
             return listOf(
                 PARAM_NUMBER to number,
@@ -178,7 +182,10 @@ data class PaymentMethodCreateParams internal constructor(
         }
     }
 
-    data class Ideal internal constructor(private val bank: String?) : StripeParamsModel {
+    @Parcelize
+    data class Ideal internal constructor(
+        private val bank: String?
+    ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
             return bank?.let { mapOf(PARAM_BANK to it) }.orEmpty()
         }
@@ -200,7 +207,10 @@ data class PaymentMethodCreateParams internal constructor(
         }
     }
 
-    data class Fpx internal constructor(private val bank: String?) : StripeParamsModel {
+    @Parcelize
+    data class Fpx internal constructor(
+        private val bank: String?
+    ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
             return bank?.let {
                 mapOf(PARAM_BANK to it)
@@ -224,7 +234,10 @@ data class PaymentMethodCreateParams internal constructor(
         }
     }
 
-    data class SepaDebit internal constructor(private val iban: String?) : StripeParamsModel {
+    @Parcelize
+    data class SepaDebit internal constructor(
+        private val iban: String?
+    ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
             return iban?.let {
                 mapOf(PARAM_IBAN to it)

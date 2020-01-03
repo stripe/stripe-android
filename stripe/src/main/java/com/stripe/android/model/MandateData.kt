@@ -1,6 +1,10 @@
 package com.stripe.android.model
 
-internal class MandateData : StripeParamsModel {
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
+
+@Parcelize
+internal class MandateData : StripeParamsModel, Parcelable {
     override fun toParamMap(): Map<String, Any> {
         return mapOf("customer_acceptance" to mapOf(
             "type" to "online",

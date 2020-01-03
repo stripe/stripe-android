@@ -1,5 +1,9 @@
 package com.stripe.android.model
 
+import android.os.Parcelable
+import com.stripe.android.model.KlarnaSourceParams.LineItem
+import kotlinx.android.parcel.Parcelize
+
 /**
  * [Klarna Payments with Sources](https://stripe.com/docs/sources/klarna)
  *
@@ -11,6 +15,7 @@ package com.stripe.android.model
  * Be careful with this option: If the provided information is invalid,
  * Klarna may reject the transaction without giving the customer a chance to correct it.
  */
+@Parcelize
 data class KlarnaSourceParams @JvmOverloads constructor(
     /**
      * The URL the customer should be redirected to after they have successfully verified the
@@ -83,7 +88,7 @@ data class KlarnaSourceParams @JvmOverloads constructor(
      * for more information.
      */
     val pageOptions: PaymentPageOptions? = null
-) : StripeParamsModel {
+) : StripeParamsModel, Parcelable {
     override fun toParamMap(): Map<String, Any> {
         return mapOf(
             PARAM_PRODUCT to "payment",
@@ -115,6 +120,7 @@ data class KlarnaSourceParams @JvmOverloads constructor(
         )
     }
 
+    @Parcelize
     data class LineItem(
         /**
          * The line item's type. One of `sku` (for a product), `tax` (for taxes),
@@ -138,7 +144,7 @@ data class KlarnaSourceParams @JvmOverloads constructor(
          * The quantity to display for this line item.
          */
         val quantity: Int? = null
-    ) {
+    ) : Parcelable {
         enum class Type(internal val code: String) {
             Sku("sku"),
             Tax("tax"),
@@ -162,6 +168,7 @@ data class KlarnaSourceParams @JvmOverloads constructor(
      * [Klarna SDK documentation](https://developers.klarna.com/en/us/kco-v3/hpp/4-customize/)
      * for more information.
      */
+    @Parcelize
     data class PaymentPageOptions(
         /**
          * A public URL for your businesses logo, must be served over HTTPS.
@@ -182,7 +189,7 @@ data class KlarnaSourceParams @JvmOverloads constructor(
          * The buy button type.
          */
         val purchaseType: PurchaseType? = null
-    ) : StripeParamsModel {
+    ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
             return emptyMap<String, Any>()
                 .plus(

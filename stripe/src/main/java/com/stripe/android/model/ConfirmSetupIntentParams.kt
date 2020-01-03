@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import android.os.Parcelable
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
@@ -7,14 +8,16 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMEN
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN_URL
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_STRIPE_SDK
+import kotlinx.android.parcel.Parcelize
 
+@Parcelize
 data class ConfirmSetupIntentParams internal constructor(
     @get:JvmSynthetic override val clientSecret: String,
     @get:JvmSynthetic internal val paymentMethodId: String? = null,
     @get:JvmSynthetic internal val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
     private val returnUrl: String? = null,
     private val useStripeSdk: Boolean
-) : ConfirmStripeIntentParams {
+) : ConfirmStripeIntentParams, Parcelable {
 
     override fun shouldUseStripeSdk(): Boolean {
         return useStripeSdk
