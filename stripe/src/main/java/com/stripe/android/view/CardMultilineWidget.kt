@@ -74,12 +74,12 @@ class CardMultilineWidget @JvmOverloads constructor(
         get() {
             return if (validateAllFields()) {
                 expiryDateEditText.validDateFields?.let { (month, year) ->
-                    PaymentMethodCreateParams.Card.Builder()
-                        .setNumber(cardNumberEditText.cardNumber)
-                        .setCvc(cvcEditText.text?.toString())
-                        .setExpiryMonth(month)
-                        .setExpiryYear(year)
-                        .build()
+                    PaymentMethodCreateParams.Card(
+                        number = cardNumberEditText.cardNumber,
+                        cvc = cvcEditText.text?.toString(),
+                        expiryMonth = month,
+                        expiryYear = year
+                    )
                 }
             } else {
                 null

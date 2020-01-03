@@ -7,12 +7,12 @@ class PaymentMethodCreateParamsTest {
 
     @Test
     fun card_toPaymentMethodParamsCard() {
-        val expectedCard = PaymentMethodCreateParams.Card.Builder()
-            .setNumber("4242424242424242")
-            .setCvc("123")
-            .setExpiryMonth(8)
-            .setExpiryYear(2019)
-            .build()
+        val expectedCard = PaymentMethodCreateParams.Card(
+            number = "4242424242424242",
+            cvc = "123",
+            expiryMonth = 8,
+            expiryYear = 2019
+        )
         assertEquals(expectedCard, CardFixtures.CARD.toPaymentMethodParamsCard())
     }
 
@@ -36,18 +36,18 @@ class PaymentMethodCreateParamsTest {
 
         val expectedParams = PaymentMethodCreateParams.create(
             PaymentMethodCreateParams.Card.create("tok_1F4VSjBbvEcIpqUbSsbEtBap"),
-            PaymentMethod.BillingDetails.Builder()
-                .setPhone("1-888-555-1234")
-                .setEmail("stripe@example.com")
-                .setName("Stripe Johnson")
-                .setAddress(Address.Builder()
-                    .setLine1("510 Townsend St")
-                    .setCity("San Francisco")
-                    .setState("CA")
-                    .setPostalCode("94103")
-                    .setCountry("US")
-                    .build())
-                .build()
+            PaymentMethod.BillingDetails(
+                phone = "1-888-555-1234",
+                email = "stripe@example.com",
+                name = "Stripe Johnson",
+                address = Address(
+                    line1 = "510 Townsend St",
+                    city = "San Francisco",
+                    state = "CA",
+                    postalCode = "94103",
+                    country = "US"
+                )
+            )
         )
         assertEquals(expectedParams, createdParams)
     }
@@ -85,22 +85,20 @@ class PaymentMethodCreateParamsTest {
 
     private fun createFpx(): PaymentMethodCreateParams {
         return PaymentMethodCreateParams.create(
-            PaymentMethodCreateParams.Fpx.Builder()
-                .setBank("hsbc")
-                .build(),
-            PaymentMethod.BillingDetails.Builder()
-                .setPhone("1-888-555-1234")
-                .setEmail("stripe@example.com")
-                .setName("Stripe Johnson")
-                .setAddress(Address.Builder()
-                    .setLine1("510 Townsend St")
-                    .setLine2("")
-                    .setCity("San Francisco")
-                    .setState("CA")
-                    .setPostalCode("94103")
-                    .setCountry("US")
-                    .build())
-                .build()
+            PaymentMethodCreateParams.Fpx(bank = "hsbc"),
+            PaymentMethod.BillingDetails(
+                phone = "1-888-555-1234",
+                email = "stripe@example.com",
+                name = "Stripe Johnson",
+                address = Address(
+                    line1 = "510 Townsend St",
+                    line2 = "",
+                    city = "San Francisco",
+                    state = "CA",
+                    postalCode = "94103",
+                    country = "US"
+                )
+            )
         )
     }
 }

@@ -17,7 +17,7 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                 }
             )
             .setCustomerId(StripeJsonUtils.optString(json, FIELD_CUSTOMER))
-            .setLiveMode(java.lang.Boolean.TRUE == json.optBoolean(FIELD_LIVEMODE))
+            .setLiveMode(json.optBoolean(FIELD_LIVEMODE))
             .setMetadata(StripeJsonUtils.optHash(json, FIELD_METADATA))
 
         when (type) {
@@ -54,16 +54,14 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
 
     internal class BillingDetails : ModelJsonParser<PaymentMethod.BillingDetails> {
         override fun parse(json: JSONObject): PaymentMethod.BillingDetails {
-            return PaymentMethod.BillingDetails.Builder()
-                .setAddress(
-                    json.optJSONObject(FIELD_ADDRESS)?.let {
-                        AddressJsonParser().parse(it)
-                    }
-                )
-                .setEmail(StripeJsonUtils.optString(json, FIELD_EMAIL))
-                .setName(StripeJsonUtils.optString(json, FIELD_NAME))
-                .setPhone(StripeJsonUtils.optString(json, FIELD_PHONE))
-                .build()
+            return PaymentMethod.BillingDetails(
+                address = json.optJSONObject(FIELD_ADDRESS)?.let {
+                    AddressJsonParser().parse(it)
+                },
+                email = StripeJsonUtils.optString(json, FIELD_EMAIL),
+                name = StripeJsonUtils.optString(json, FIELD_NAME),
+                phone = StripeJsonUtils.optString(json, FIELD_PHONE)
+            )
         }
 
         private companion object {

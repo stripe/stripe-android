@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
-import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.example.R
 import io.reactivex.Observable
@@ -136,21 +135,5 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
                 last4View.text = card?.last4.orEmpty()
             }
         }
-    }
-
-    private companion object {
-        private val BILLING_DETAILS =
-            PaymentMethod.BillingDetails.Builder()
-                .setName("Jenny Rosen")
-                .setPhone("4158675309")
-                .setEmail("jenny.rosen@example.com")
-                .setAddress(Address.Builder()
-                    .setLine1("123 Market St")
-                    .setLine2("#345")
-                    .setCity("San Francisco")
-                    .setPostalCode("94107")
-                    .setCountry("US")
-                    .build())
-                .build()
     }
 }

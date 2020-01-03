@@ -22,17 +22,37 @@ internal class TokenJsonParser : ModelJsonParser<Token> {
 
         return if (TokenType.BANK_ACCOUNT == tokenType) {
             json.optJSONObject(FIELD_BANK_ACCOUNT)?.let {
-                Token(tokenId, liveMode, date, used, BankAccountJsonParser().parse(it))
+                Token(
+                    id = tokenId,
+                    livemode = liveMode,
+                    created = date,
+                    used = used,
+                    type = TokenType.BANK_ACCOUNT,
+                    bankAccount = BankAccountJsonParser().parse(it)
+                )
             }
         } else if (TokenType.CARD == tokenType) {
             json.optJSONObject(FIELD_CARD)?.let {
-                Token(tokenId, liveMode, date, used, CardJsonParser().parse(it))
+                Token(
+                    id = tokenId,
+                    livemode = liveMode,
+                    created = date,
+                    used = used,
+                    type = TokenType.CARD,
+                    card = CardJsonParser().parse(it)
+                )
             }
         } else if (
             TokenType.PII == tokenType || TokenType.ACCOUNT == tokenType ||
             TokenType.CVC_UPDATE == tokenType
         ) {
-            Token(tokenId, tokenType, liveMode, date, used)
+            Token(
+                id = tokenId,
+                type = tokenType,
+                livemode = liveMode,
+                created = date,
+                used = used
+            )
         } else {
             null
         }

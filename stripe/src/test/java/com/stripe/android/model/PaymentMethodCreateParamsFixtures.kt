@@ -1,25 +1,25 @@
 package com.stripe.android.model
 
 internal object PaymentMethodCreateParamsFixtures {
-    internal val CARD = PaymentMethodCreateParams.Card.Builder()
-        .setNumber("4242424242424242")
-        .setExpiryMonth(1)
-        .setExpiryYear(2024)
-        .setCvc("111")
-        .build()
+    internal val CARD = PaymentMethodCreateParams.Card(
+        number = "4242424242424242",
+        expiryMonth = 1,
+        expiryYear = 2024,
+        cvc = "111"
+    )
 
     @JvmField
-    internal val BILLING_DETAILS = PaymentMethod.BillingDetails.Builder()
-        .setName("Home")
-        .setEmail("me@example.com")
-        .setPhone("1-800-555-1234")
-        .setAddress(Address.Builder()
-            .setLine1("123 Main St")
-            .setCity("Los Angeles")
-            .setState("CA")
-            .setCountry("US")
-            .build())
-        .build()
+    internal val BILLING_DETAILS = PaymentMethod.BillingDetails(
+        name = "Home",
+        email = "me@example.com",
+        phone = "1-800-555-1234",
+        address = Address(
+            line1 = "123 Main St",
+            city = "Los Angeles",
+            state = "CA",
+            country = "US"
+        )
+    )
 
     @JvmField
     internal val DEFAULT_CARD = PaymentMethodCreateParams.create(
@@ -28,15 +28,13 @@ internal object PaymentMethodCreateParamsFixtures {
     )
 
     internal val DEFAULT_FPX = PaymentMethodCreateParams.create(
-        PaymentMethodCreateParams.Fpx.Builder()
-            .setBank("hsbc")
-            .build()
+        PaymentMethodCreateParams.Fpx(
+            bank = "hsbc"
+        )
     )
 
     internal val DEFAULT_SEPA_DEBIT = PaymentMethodCreateParams.create(
-        PaymentMethodCreateParams.SepaDebit.Builder()
-            .setIban("my_iban")
-            .build()
+        PaymentMethodCreateParams.SepaDebit(iban = "my_iban")
     )
 
     @JvmStatic

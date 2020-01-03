@@ -24,41 +24,41 @@ internal object PaymentMethodFixtures {
         wallet = null
     )
 
-    val BILLING_DETAILS = PaymentMethod.BillingDetails.Builder()
-        .setAddress(Address.Builder()
-            .setLine1("510 Townsend St")
-            .setCity("San Francisco")
-            .setState("CA")
-            .setPostalCode("94103")
-            .setCountry("USA")
-            .build())
-        .setEmail("patrick@example.com")
-        .setName("Patrick")
-        .setPhone("123-456-7890")
-        .build()
+    val BILLING_DETAILS = PaymentMethod.BillingDetails(
+        address = Address(
+            line1 = "510 Townsend St",
+            city = "San Francisco",
+            state = "CA",
+            postalCode = "94103",
+            country = "USA"
+        ),
+        email = "patrick@example.com",
+        name = "Patrick",
+        phone = "123-456-7890"
+    )
 
-    val CARD_PAYMENT_METHOD = PaymentMethod.Builder()
-        .setId("pm_123456789")
-        .setCreated(1550757934255L)
-        .setLiveMode(true)
-        .setType("card")
-        .setCustomerId("cus_AQsHpvKfKwJDrF")
-        .setBillingDetails(BILLING_DETAILS)
-        .setCard(CARD)
-        .setMetadata(mapOf("order_id" to "123456789"))
-        .build()
+    val CARD_PAYMENT_METHOD = PaymentMethod(
+        id = "pm_123456789",
+        created = 1550757934255L,
+        liveMode = true,
+        type = PaymentMethod.Type.Card.code,
+        customerId = "cus_AQsHpvKfKwJDrF",
+        billingDetails = BILLING_DETAILS,
+        card = CARD,
+        metadata = mapOf("order_id" to "123456789")
+    )
 
-    val FPX_PAYMENT_METHOD = PaymentMethod.Builder()
-        .setId("pm_1F5GlnH8dsfnfKo3gtixzcq0")
-        .setCreated(1565290527L)
-        .setLiveMode(true)
-        .setType("fpx")
-        .setBillingDetails(BILLING_DETAILS)
-        .setFpx(PaymentMethod.Fpx(
-            "hsbc",
-            "individual"
-        ))
-        .build()
+    val FPX_PAYMENT_METHOD = PaymentMethod(
+        id = "pm_1F5GlnH8dsfnfKo3gtixzcq0",
+        created = 1565290527L,
+        liveMode = true,
+        type = PaymentMethod.Type.Fpx.code,
+        billingDetails = BILLING_DETAILS,
+        fpx = PaymentMethod.Fpx(
+            bank = "hsbc",
+            accountHolderType = "individual"
+        )
+    )
 
     val SEPA_DEBIT_PAYMENT_METHOD = PaymentMethodJsonParser().parse(JSONObject(
         """
@@ -95,53 +95,55 @@ internal object PaymentMethodFixtures {
     ))
 
     val CARD_PAYMENT_METHODS = listOf(
-        PaymentMethod.Builder()
-            .setType("card")
-            .setCreated(1000L)
-            .setId("pm_1000")
-            .setCard(PaymentMethod.Card(
+        PaymentMethod(
+            type = PaymentMethod.Type.Card.code,
+            liveMode = false,
+            created = 1000L,
+            id = "pm_1000",
+            card = PaymentMethod.Card(
                 brand = "visa",
                 last4 = "4242"
-            ))
-            .build(),
-        PaymentMethod.Builder()
-            .setType("card")
-            .setCreated(2000L)
-            .setId("pm_2000")
-            .setCard(PaymentMethod.Card(
+            )
+        ),
+        PaymentMethod(
+            type = PaymentMethod.Type.Card.code,
+            liveMode = false,
+            created = 2000L,
+            id = "pm_2000",
+            card = PaymentMethod.Card(
                 brand = "visa",
                 last4 = "3063"
-            ))
-            .build(),
-        PaymentMethod.Builder()
-            .setType("card")
-            .setCreated(3000L)
-            .setId("pm_3000")
-            .setCard(PaymentMethod.Card(
+            )
+        ),
+        PaymentMethod(
+            type = PaymentMethod.Type.Card.code,
+            liveMode = false,
+            created = 3000L,
+            id = "pm_3000",
+            card = PaymentMethod.Card(
                 brand = "visa",
                 last4 = "3220"
-            ))
-            .build()
+            )
+        )
     )
 
     @JvmOverloads
     fun createCard(createdOrigin: Long? = null): PaymentMethod {
         val id = "pm_" + UUID.randomUUID().toString()
             .replace("-", "")
-        return PaymentMethod.Builder()
-            .setType("card")
-            .setCreated(
-                ThreadLocalRandom.current().nextLong(
-                    createdOrigin ?: 1L,
-                    10000000
-                )
-            )
-            .setId(id)
-            .setCard(PaymentMethod.Card(
+        return PaymentMethod(
+            type = PaymentMethod.Type.Card.code,
+            liveMode = false,
+            created = ThreadLocalRandom.current().nextLong(
+                createdOrigin ?: 1L,
+                10000000
+            ),
+            id = id,
+            card = PaymentMethod.Card(
                 brand = "visa",
                 last4 = createLast4()
-            ))
-            .build()
+            )
+        )
     }
 
     private fun createLast4(): String {

@@ -7,6 +7,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodTest
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import java.util.Calendar
@@ -82,8 +83,7 @@ class MaskedCardViewTest {
     }
 
     @Test
-    fun whenSourceNotCard_doesNotCrash() {
-        val paymentMethod = PaymentMethod.Builder().build()
-        maskedCardView.setPaymentMethod(paymentMethod)
+    fun whenTypeNotCard_doesNotCrash() {
+        maskedCardView.setPaymentMethod(PaymentMethodFixtures.FPX_PAYMENT_METHOD)
     }
 }

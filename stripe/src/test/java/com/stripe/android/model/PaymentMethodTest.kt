@@ -17,15 +17,18 @@ class PaymentMethodTest {
     @Test
     @Throws(JSONException::class)
     fun toJson_withIdeal_shouldCreateExpectedObject() {
-        val paymentMethod = PaymentMethod.Builder()
-            .setId("pm_123456789")
-            .setCreated(1550757934255L)
-            .setLiveMode(true)
-            .setType("ideal")
-            .setCustomerId("cus_AQsHpvKfKwJDrF")
-            .setBillingDetails(PaymentMethodFixtures.BILLING_DETAILS)
-            .setIdeal(PaymentMethod.Ideal("my bank", "bank id"))
-            .build()
+        val paymentMethod = PaymentMethod(
+            id = "pm_123456789",
+            created = 1550757934255L,
+            liveMode = true,
+            type = PaymentMethod.Type.Ideal.code,
+            customerId = "cus_AQsHpvKfKwJDrF",
+            billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
+            ideal = PaymentMethod.Ideal(
+                bank = "my bank",
+                bankIdentifierCode = "bank id"
+            )
+        )
 
         assertEquals(paymentMethod, PaymentMethodJsonParser().parse(PM_IDEAL_JSON))
     }
@@ -40,44 +43,42 @@ class PaymentMethodTest {
     @Test
     fun toJson_withSepaDebit_shouldCreateExpectedObject() {
         assertEquals(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
-            PaymentMethod.Builder()
-                .setType(PaymentMethod.Type.SepaDebit.code)
-                .setId("pm_1FSQaJCR")
-                .setLiveMode(false)
-                .setCreated(1570809799L)
-                .setSepaDebit(
-                    PaymentMethod.SepaDebit(
-                        "3704",
-                        null,
-                        "DE",
-                        "vIZc7Ywn0",
-                        "3000"
-                    )
+            PaymentMethod(
+                type = PaymentMethod.Type.SepaDebit.code,
+                id = "pm_1FSQaJCR",
+                liveMode = false,
+                created = 1570809799L,
+                sepaDebit = PaymentMethod.SepaDebit(
+                    "3704",
+                    null,
+                    "DE",
+                    "vIZc7Ywn0",
+                    "3000"
+                ),
+                billingDetails = PaymentMethod.BillingDetails(
+                    name = "Jenny Rosen",
+                    email = "jrosen@example.com",
+                    address = Address()
                 )
-                .setBillingDetails(
-                    PaymentMethod.BillingDetails.Builder()
-                        .setName("Jenny Rosen")
-                        .setEmail("jrosen@example.com")
-                        .setAddress(Address.Builder().build())
-                        .build()
-                )
-                .build()
+            )
         )
     }
 
     @Test
     fun equals_withEqualPaymentMethods_shouldReturnTrue() {
-        assertEquals(PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-            PaymentMethod.Builder()
-                .setId("pm_123456789")
-                .setCreated(1550757934255L)
-                .setLiveMode(true)
-                .setType("card")
-                .setCustomerId("cus_AQsHpvKfKwJDrF")
-                .setBillingDetails(PaymentMethodFixtures.BILLING_DETAILS)
-                .setCard(PaymentMethodFixtures.CARD)
-                .setMetadata(mapOf("order_id" to "123456789"))
-                .build())
+        assertEquals(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            PaymentMethod(
+                id = "pm_123456789",
+                created = 1550757934255L,
+                liveMode = true,
+                type = PaymentMethod.Type.Card.code,
+                customerId = "cus_AQsHpvKfKwJDrF",
+                billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
+                card = PaymentMethodFixtures.CARD,
+                metadata = mapOf("order_id" to "123456789")
+            )
+        )
     }
 
     @Test
@@ -91,14 +92,12 @@ class PaymentMethodTest {
     @Throws(JSONException::class)
     fun fromString_withIdeal_returnsExpectedObject() {
         val paymentMethod = PaymentMethodJsonParser().parse(PM_IDEAL_JSON)
-        assertEquals("ideal", paymentMethod?.type)
+        assertEquals("ideal", paymentMethod.type)
     }
 
     @Test
     fun billingDetails_toParamMap_removesNullValues() {
-        val billingDetails = PaymentMethod.BillingDetails.Builder()
-            .setName("name")
-            .build()
+        val billingDetails = PaymentMethod.BillingDetails(name = "name")
             .toParamMap()
         assertEquals(1, billingDetails.size)
         assertFalse(billingDetails.containsKey(PaymentMethod.BillingDetails.PARAM_ADDRESS))
@@ -111,21 +110,20 @@ class PaymentMethodTest {
             "meta" to "data",
             "meta2" to "data2"
         )
-        val paymentMethod = PaymentMethod.Builder()
-            .setBillingDetails(PaymentMethodFixtures.BILLING_DETAILS)
-            .setCreated(1550757934255L)
-            .setCustomerId("cus_AQsHpvKfKwJDrF")
-            .setId("pm_123456789")
-            .setType("card")
-            .setLiveMode(true)
-            .setMetadata(metadata)
-            .setCard(PaymentMethodFixtures.CARD)
-            .setCardPresent(PaymentMethod.CardPresent.EMPTY)
-            .setFpx(PaymentMethodFixtures.FPX_PAYMENT_METHOD.fpx)
-            .setIdeal(PaymentMethod.Ideal("my bank", "bank id"))
-            .setSepaDebit(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD.sepaDebit)
-            .build()
-
+        val paymentMethod = PaymentMethod(
+            billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
+            created = 1550757934255L,
+            customerId = "cus_AQsHpvKfKwJDrF",
+            id = "pm_123456789",
+            type = PaymentMethod.Type.Card.code,
+            liveMode = true,
+            metadata = metadata,
+            card = PaymentMethodFixtures.CARD,
+            cardPresent = PaymentMethod.CardPresent.EMPTY,
+            fpx = PaymentMethodFixtures.FPX_PAYMENT_METHOD.fpx,
+            ideal = PaymentMethod.Ideal("my bank", "bank id"),
+            sepaDebit = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD.sepaDebit
+        )
         assertEquals(paymentMethod, ParcelUtils.create(paymentMethod))
     }
 

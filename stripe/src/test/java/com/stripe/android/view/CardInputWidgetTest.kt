@@ -136,12 +136,12 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
             requireNotNull(cardInputWidget.paymentMethodCreateParams)
         val expectedPaymentMethodParams =
             PaymentMethodCreateParams.create(
-                PaymentMethodCreateParams.Card.Builder()
-                    .setNumber(VALID_VISA_NO_SPACES)
-                    .setCvc(CVC_VALUE_COMMON)
-                    .setExpiryYear(2050)
-                    .setExpiryMonth(12)
-                    .build()
+                card = PaymentMethodCreateParams.Card(
+                    number = VALID_VISA_NO_SPACES,
+                    cvc = CVC_VALUE_COMMON,
+                    expiryMonth = 12,
+                    expiryYear = 2050
+                )
             )
         assertEquals(expectedPaymentMethodParams, actualPaymentMethodParams)
     }
@@ -173,17 +173,17 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
             requireNotNull(cardInputWidget.paymentMethodCreateParams)
         val expectedPaymentMethodParams =
             PaymentMethodCreateParams.create(
-                PaymentMethodCreateParams.Card.Builder()
-                    .setNumber(VALID_VISA_NO_SPACES)
-                    .setCvc(CVC_VALUE_COMMON)
-                    .setExpiryYear(2050)
-                    .setExpiryMonth(12)
-                    .build(),
-                PaymentMethod.BillingDetails.Builder()
-                    .setAddress(Address(
+                card = PaymentMethodCreateParams.Card(
+                    number = VALID_VISA_NO_SPACES,
+                    cvc = CVC_VALUE_COMMON,
+                    expiryMonth = 12,
+                    expiryYear = 2050
+                ),
+                billingDetails = PaymentMethod.BillingDetails(
+                    address = Address(
                         postalCode = POSTAL_CODE_VALUE
-                    ))
-                    .build()
+                    )
+                )
             )
         assertEquals(expectedPaymentMethodParams, actualPaymentMethodParams)
     }
@@ -211,15 +211,14 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
 
         val actualPaymentMethodParams =
             requireNotNull(cardInputWidget.paymentMethodCreateParams)
-        val expectedPaymentMethodParams =
-            PaymentMethodCreateParams.create(
-                PaymentMethodCreateParams.Card.Builder()
-                    .setNumber(VALID_AMEX_NO_SPACES)
-                    .setCvc(CVC_VALUE_AMEX)
-                    .setExpiryYear(2050)
-                    .setExpiryMonth(12)
-                    .build()
+        val expectedPaymentMethodParams = PaymentMethodCreateParams.create(
+            PaymentMethodCreateParams.Card(
+                number = VALID_AMEX_NO_SPACES,
+                cvc = CVC_VALUE_AMEX,
+                expiryMonth = 12,
+                expiryYear = 2050
             )
+        )
         assertEquals(expectedPaymentMethodParams, actualPaymentMethodParams)
     }
 
@@ -250,12 +249,12 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         assertNotNull(actualPaymentMethodParams)
         val expectedPaymentMethodParams =
             PaymentMethodCreateParams.create(
-                card = PaymentMethodCreateParams.Card.Builder()
-                    .setNumber(VALID_AMEX_NO_SPACES)
-                    .setCvc(CVC_VALUE_AMEX)
-                    .setExpiryYear(2050)
-                    .setExpiryMonth(12)
-                    .build(),
+                card = PaymentMethodCreateParams.Card(
+                    number = VALID_AMEX_NO_SPACES,
+                    cvc = CVC_VALUE_AMEX,
+                    expiryYear = 2050,
+                    expiryMonth = 12
+                ),
                 billingDetails = PaymentMethod.BillingDetails.Builder()
                     .setAddress(Address(
                         postalCode = POSTAL_CODE_VALUE
@@ -290,12 +289,12 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         val paymentMethodCard = cardInputWidget.paymentMethodCard
         assertNotNull(paymentMethodCard)
         val expectedPaymentMethodCard =
-            PaymentMethodCreateParams.Card.Builder()
-                .setNumber(VALID_DINERS_CLUB_NO_SPACES)
-                .setCvc(CVC_VALUE_COMMON)
-                .setExpiryYear(2050)
-                .setExpiryMonth(12)
-                .build()
+            PaymentMethodCreateParams.Card(
+                number = VALID_DINERS_CLUB_NO_SPACES,
+                cvc = CVC_VALUE_COMMON,
+                expiryMonth = 12,
+                expiryYear = 2050
+            )
         assertEquals(expectedPaymentMethodCard, paymentMethodCard)
     }
 
@@ -324,13 +323,12 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
 
         val paymentMethodCard = cardInputWidget.paymentMethodCard
         assertNotNull(paymentMethodCard)
-        val expectedPaymentMethodCard =
-            PaymentMethodCreateParams.Card.Builder()
-                .setNumber(VALID_DINERS_CLUB_NO_SPACES)
-                .setCvc(CVC_VALUE_COMMON)
-                .setExpiryYear(2050)
-                .setExpiryMonth(12)
-                .build()
+        val expectedPaymentMethodCard = PaymentMethodCreateParams.Card(
+            number = VALID_DINERS_CLUB_NO_SPACES,
+            cvc = CVC_VALUE_COMMON,
+            expiryYear = 2050,
+            expiryMonth = 12
+        )
         assertEquals(expectedPaymentMethodCard, paymentMethodCard)
     }
 
@@ -479,17 +477,17 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         assertNotNull(params)
 
         val expectedParams = PaymentMethodCreateParams.create(
-            PaymentMethodCreateParams.Card.Builder()
-                .setNumber(VALID_VISA_NO_SPACES)
-                .setCvc(CVC_VALUE_COMMON)
-                .setExpiryYear(2030)
-                .setExpiryMonth(12)
-                .build(),
-            PaymentMethod.BillingDetails.Builder()
-                .setAddress(Address(
+            card = PaymentMethodCreateParams.Card(
+                number = VALID_VISA_NO_SPACES,
+                cvc = CVC_VALUE_COMMON,
+                expiryMonth = 12,
+                expiryYear = 2030
+            ),
+            billingDetails = PaymentMethod.BillingDetails(
+                address = Address(
                     postalCode = POSTAL_CODE_VALUE
-                ))
-                .build()
+                )
+            )
         )
         assertEquals(expectedParams, params)
     }
@@ -1102,12 +1100,12 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
 
         val paymentMethodCard = cardInputWidget.paymentMethodCard
         assertNotNull(paymentMethodCard)
-        val expectedPaymentMethodCard = PaymentMethodCreateParams.Card.Builder()
-            .setNumber(VALID_AMEX_NO_SPACES)
-            .setCvc(CVC_VALUE_AMEX)
-            .setExpiryYear(2079)
-            .setExpiryMonth(12)
-            .build()
+        val expectedPaymentMethodCard = PaymentMethodCreateParams.Card(
+            number = VALID_AMEX_NO_SPACES,
+            cvc = CVC_VALUE_AMEX,
+            expiryMonth = 12,
+            expiryYear = 2079
+        )
         assertEquals(expectedPaymentMethodCard, paymentMethodCard)
     }
 
@@ -1132,12 +1130,12 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
 
         val paymentMethodCard = cardInputWidget.paymentMethodCard
         assertNotNull(paymentMethodCard)
-        val expectedPaymentMethodCard = PaymentMethodCreateParams.Card.Builder()
-            .setNumber(VALID_AMEX_NO_SPACES)
-            .setCvc(CVC_VALUE_AMEX)
-            .setExpiryYear(2079)
-            .setExpiryMonth(12)
-            .build()
+        val expectedPaymentMethodCard = PaymentMethodCreateParams.Card(
+            number = VALID_AMEX_NO_SPACES,
+            cvc = CVC_VALUE_AMEX,
+            expiryYear = 2079,
+            expiryMonth = 12
+        )
         assertEquals(expectedPaymentMethodCard, paymentMethodCard)
     }
 

@@ -13,11 +13,12 @@ class TokenTest {
     @Test
     fun parseToken_whenCardToken_readsObjectCorrectly() {
         val expectedToken = Token(
-            "tok_189fi32eZvKYlo2Ct0KZvU5Y",
-            false,
-            Date(1462905355L * 1000L),
-            false,
-            CARD
+            id = "tok_189fi32eZvKYlo2Ct0KZvU5Y",
+            livemode = false,
+            created = Date(1462905355L * 1000L),
+            used = false,
+            type = Token.TokenType.CARD,
+            card = CARD
         )
         assertEquals(expectedToken, TokenFixtures.CARD_TOKEN)
     }
@@ -31,11 +32,12 @@ class TokenTest {
     fun parseToken_whenBankAccount_readsObject() {
         val createdDate = Date(1484765567L * 1000L)
         val expectedToken = Token(
-            "btok_9xJAbronBnS9bH",
-            false,
-            createdDate,
-            false,
-            BankAccount("11", "US", "usd", "22")
+            id = "btok_9xJAbronBnS9bH",
+            livemode = false,
+            created = createdDate,
+            used = false,
+            type = Token.TokenType.BANK_ACCOUNT,
+            bankAccount = BankAccountFixtures.BANK_ACCOUNT
         )
         val answerToken = TokenFixtures.BANK_TOKEN
         assertNotNull(answerToken)
