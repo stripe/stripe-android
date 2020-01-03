@@ -8,34 +8,32 @@ class AccountParamsTest {
 
     @Test
     fun toParamMap_withBusinessData() {
-        val businessData = mapOf("name" to "Stripe")
-        val params = AccountParams
-            .createAccountParams(
-                true,
-                AccountParams.BusinessType.Company,
-                businessData
-            )
+        val company = AccountParams.BusinessTypeParams.Company(name = "Stripe")
+        val params = AccountParams.create(
+            true,
+            company
+        )
             .toParamMap()
 
         val accountData = params["account"] as Map<String, *>?
         assertNotNull(accountData)
         assertEquals(3, accountData.size)
-        assertEquals(java.lang.Boolean.TRUE, accountData[AccountParams.API_TOS_SHOWN_AND_ACCEPTED])
+        assertEquals(java.lang.Boolean.TRUE, accountData[AccountParams.PARAM_TOS_SHOWN_AND_ACCEPTED])
         assertEquals(AccountParams.BusinessType.Company.code,
-            accountData[AccountParams.API_BUSINESS_TYPE])
-        assertEquals(businessData,
-            accountData[AccountParams.BusinessType.Company.code])
+            accountData[AccountParams.PARAM_BUSINESS_TYPE])
+        assertEquals(
+            company.toParamMap(),
+            accountData[AccountParams.BusinessType.Company.code]
+        )
     }
 
     @Test
     fun toParamMap_withNoBusinessData() {
-        val params =
-            AccountParams.createAccountParams(true, null, null)
-                .toParamMap()
+        val params = AccountParams.create(true).toParamMap()
 
         val accountData = params["account"] as Map<String, *>?
         assertNotNull(accountData)
         assertEquals(1, accountData.size)
-        assertEquals(java.lang.Boolean.TRUE, accountData[AccountParams.API_TOS_SHOWN_AND_ACCEPTED])
+        assertEquals(java.lang.Boolean.TRUE, accountData[AccountParams.PARAM_TOS_SHOWN_AND_ACCEPTED])
     }
 }

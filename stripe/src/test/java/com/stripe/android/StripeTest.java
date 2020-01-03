@@ -11,6 +11,7 @@ import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.AccountParams;
 import com.stripe.android.model.Address;
+import com.stripe.android.model.AddressFixtures;
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.CardBrand;
@@ -969,23 +970,18 @@ public class StripeTest {
     @Test
     public void createAccountTokenSynchronous_withIndividualEntity_passesIntegrationTest()
             throws StripeException {
-        final Address exampleAddress = new Address
-                .Builder()
-                .setCity("SF")
-                .setCountry("US")
-                .setState("CA")
-                .build();
-        final Map<String, Object> businessData = new HashMap<String, Object>() {{
-            put("address", exampleAddress.toParamMap());
-            put("ssn_last_4", "1234");
-            put("first_name", "Kathy");
-            put("last_name", "Sun");
-        }};
-
         final Stripe stripe = createStripe();
         final Token token = stripe.createAccountTokenSynchronous(
-                AccountParams.createAccountParams(true,
-                        AccountParams.BusinessType.Individual, businessData));
+                AccountParams.create(
+                        true,
+                        new AccountParams.BusinessTypeParams.Individual.Builder()
+                                .setAddress(AddressFixtures.ADDRESS)
+                                .setFirstName("Kathy")
+                                .setLastName("Sun")
+                                .setSsnLast4("1234")
+                                .build()
+                )
+        );
         assertNotNull(token);
         assertEquals(Token.TokenType.ACCOUNT, token.getType());
         assertFalse(token.getLivemode());
@@ -996,21 +992,17 @@ public class StripeTest {
     @Test
     public void createAccountTokenSynchronous_withCompanyEntity_isSuccessful()
             throws StripeException {
-        final Address exampleAddress = new Address
-                .Builder()
-                .setCity("SF")
-                .setCountry("US")
-                .setState("CA").build();
-        final Map<String, Object> businessData = new HashMap<String, Object>() {{
-            put("address", exampleAddress.toParamMap());
-            put("tax_id", "123-23-1234");
-            put("name", "My Corp.");
-        }};
-
         final Stripe stripe = createStripe();
         final Token token = stripe.createAccountTokenSynchronous(
-                AccountParams.createAccountParams(true,
-                        AccountParams.BusinessType.Company, businessData));
+                AccountParams.create(
+                        true,
+                        new AccountParams.BusinessTypeParams.Company.Builder()
+                                .setAddress(AddressFixtures.ADDRESS)
+                                .setTaxId("123-23-1234")
+                                .setName("My Corp.")
+                                .build()
+                )
+        );
         assertNotNull(token);
         assertEquals(Token.TokenType.ACCOUNT, token.getType());
         assertFalse(token.getLivemode());
@@ -1021,21 +1013,17 @@ public class StripeTest {
     @Test
     public void createAccountTokenSynchronous_withoutTosShown_isSuccessful()
             throws StripeException {
-        final Address address = new Address.Builder()
-                .setCity("SF")
-                .setCountry("US")
-                .setState("CA").build();
-        final Map<String, Object> businessData = new HashMap<String, Object>() {{
-            put("address", address.toParamMap());
-            put("ssn_last_4", "1234");
-            put("first_name", "Kathy");
-            put("last_name", "Sun");
-        }};
-
         final Stripe stripe = createStripe();
-        Token token = stripe.createAccountTokenSynchronous(
-                AccountParams.createAccountParams(false,
-                        AccountParams.BusinessType.Individual, businessData));
+        final Token token = stripe.createAccountTokenSynchronous(
+                AccountParams.create(false,
+                        new AccountParams.BusinessTypeParams.Individual.Builder()
+                                .setAddress(AddressFixtures.ADDRESS)
+                                .setFirstName("Kathy")
+                                .setLastName("Sun")
+                                .setSsnLast4("1234")
+                                .build()
+                )
+        );
         assertNotNull(token);
         assertEquals(Token.TokenType.ACCOUNT, token.getType());
         assertFalse(token.getLivemode());
@@ -1048,8 +1036,11 @@ public class StripeTest {
             throws StripeException {
         final Stripe stripe = createStripe();
         final Token token = stripe.createAccountTokenSynchronous(
-                AccountParams.createAccountParams(false,
-                        AccountParams.BusinessType.Individual, null));
+                AccountParams.create(
+                        false,
+                        AccountParams.BusinessType.Individual
+                )
+        );
         assertNotNull(token);
         assertEquals(Token.TokenType.ACCOUNT, token.getType());
         assertFalse(token.getLivemode());
@@ -1061,9 +1052,7 @@ public class StripeTest {
     public void createAccountTokenSynchronous_withoutBusinessType_isValid()
             throws StripeException {
         final Stripe stripe = createStripe();
-        final Token token = stripe.createAccountTokenSynchronous(
-                AccountParams.createAccountParams(false,
-                        null, null));
+        final Token token = stripe.createAccountTokenSynchronous(AccountParams.create(false));
         assertNotNull(token);
         assertEquals(Token.TokenType.ACCOUNT, token.getType());
         assertFalse(token.getLivemode());

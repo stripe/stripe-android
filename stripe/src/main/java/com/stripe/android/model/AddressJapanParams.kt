@@ -67,30 +67,51 @@ data class AddressJapanParams(
         private var state: String? = null
         private var town: String? = null
 
+        /**
+         * @param city City or ward.
+         */
         fun setCity(city: String?): Builder = apply {
             this.city = city
         }
 
+        /**
+         * @param country Two-letter country code (ISO 3166-1 alpha-2).
+         */
         fun setCountry(country: String?): Builder = apply {
             this.country = country?.toUpperCase(Locale.ROOT)
         }
 
+        /**
+         * @param line1 Block or building number.
+         */
         fun setLine1(line1: String?): Builder = apply {
             this.line1 = line1
         }
 
+        /**
+         * @param line2 Building details.
+         */
         fun setLine2(line2: String?): Builder = apply {
             this.line2 = line2
         }
 
+        /**
+         * @param postalCode Postal code.
+         */
         fun setPostalCode(postalCode: String?): Builder = apply {
             this.postalCode = postalCode
         }
 
+        /**
+         * @param state Prefecture.
+         */
         fun setState(state: String?): Builder = apply {
             this.state = state
         }
 
+        /**
+         * @param town Town or cho-me.
+         */
         fun setTown(town: String?): Builder = apply {
             this.town = town
         }

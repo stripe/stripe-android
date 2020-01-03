@@ -3,8 +3,9 @@ package com.stripe.android.model
 import com.stripe.android.model.parsers.AddressJsonParser
 import org.json.JSONObject
 
-internal object AddressFixtures {
-    val ADDRESS = AddressJsonParser().parse(JSONObject(
+object AddressFixtures {
+    @JvmField
+    val ADDRESS: Address = AddressJsonParser().parse(JSONObject(
         """
         {
             "city": "San Francisco",
