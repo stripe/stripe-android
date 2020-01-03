@@ -1,11 +1,16 @@
 package com.stripe.android.model
 
+import android.os.Parcelable
+import com.stripe.android.model.SourceOrderParams.Item.Type
+import kotlinx.android.parcel.Parcelize
+
 /**
  * Information about the items and shipping associated with the source. Required for transactional
  * credit (for example Klarna) sources before you can charge it.
  *
  * [API reference](https://stripe.com/docs/api/sources/create#create_source-source_order)
  */
+@Parcelize
 data class SourceOrderParams @JvmOverloads constructor(
     /**
      * List of items constituting the order.
@@ -17,7 +22,7 @@ data class SourceOrderParams @JvmOverloads constructor(
      * `shippable` set to true.
      */
     val shipping: Shipping? = null
-) : StripeParamsModel {
+) : StripeParamsModel, Parcelable {
     override fun toParamMap(): Map<String, Any> {
         return emptyMap<String, Any>()
             .plus(
@@ -34,6 +39,7 @@ data class SourceOrderParams @JvmOverloads constructor(
      *
      * [API reference](https://stripe.com/docs/api/sources/create#create_source-source_order-items)
      */
+    @Parcelize
     data class Item(
         /**
          * Optional. The type of this order item.
@@ -66,7 +72,7 @@ data class SourceOrderParams @JvmOverloads constructor(
          * instances of the SKU to be ordered.
          */
         val quantity: Int? = null
-    ) : StripeParamsModel {
+    ) : StripeParamsModel, Parcelable {
 
         override fun toParamMap(): Map<String, Any> {
             return emptyMap<String, Any>()
@@ -112,6 +118,7 @@ data class SourceOrderParams @JvmOverloads constructor(
      *
      * [API reference](https://stripe.com/docs/api/sources/create#create_source-source_order-shipping)
      */
+    @Parcelize
     data class Shipping(
         /**
          * Required. Shipping address.
@@ -140,7 +147,7 @@ data class SourceOrderParams @JvmOverloads constructor(
          * them with commas.
          */
         val trackingNumber: String? = null
-    ) : StripeParamsModel {
+    ) : StripeParamsModel, Parcelable {
 
         override fun toParamMap(): Map<String, Any> {
             return mapOf(

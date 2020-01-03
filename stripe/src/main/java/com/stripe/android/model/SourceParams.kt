@@ -1,10 +1,12 @@
 package com.stripe.android.model
 
+import android.os.Parcelable
 import androidx.annotation.IntRange
 import androidx.annotation.Size
 import com.stripe.android.model.Source.Companion.asSourceType
 import com.stripe.android.model.Source.SourceType
 import java.util.Objects
+import kotlinx.android.parcel.Parcelize
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -244,10 +246,11 @@ class SourceParams private constructor(
             )
     }
 
+    @Parcelize
     internal data class WeChatParams(
         private val appId: String?,
         private val statementDescriptor: String?
-    ) : StripeParamsModel {
+    ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
             return emptyMap<String, Any>()
                 .plus(
