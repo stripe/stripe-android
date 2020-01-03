@@ -183,7 +183,7 @@ data class PaymentMethodCreateParams internal constructor(
     }
 
     @Parcelize
-    data class Ideal internal constructor(
+    data class Ideal constructor(
         private val bank: String?
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
@@ -208,7 +208,7 @@ data class PaymentMethodCreateParams internal constructor(
     }
 
     @Parcelize
-    data class Fpx internal constructor(
+    data class Fpx constructor(
         private val bank: String?
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
@@ -235,7 +235,7 @@ data class PaymentMethodCreateParams internal constructor(
     }
 
     @Parcelize
-    data class SepaDebit internal constructor(
+    data class SepaDebit constructor(
         private val iban: String?
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
@@ -323,12 +323,12 @@ data class PaymentMethodCreateParams internal constructor(
 
             return create(
                 Card.create(tokenId),
-                PaymentMethod.BillingDetails.Builder()
-                    .setAddress(googlePayResult.address)
-                    .setName(googlePayResult.name)
-                    .setEmail(googlePayResult.email)
-                    .setPhone(googlePayResult.phoneNumber)
-                    .build()
+                PaymentMethod.BillingDetails(
+                    address = googlePayResult.address,
+                    name = googlePayResult.name,
+                    email = googlePayResult.email,
+                    phone = googlePayResult.phoneNumber
+                )
             )
         }
     }

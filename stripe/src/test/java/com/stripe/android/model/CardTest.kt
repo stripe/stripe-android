@@ -594,21 +594,21 @@ class CardTest {
     fun toPaymentMethodsParams() {
         val actual = CARD_USD.toPaymentMethodsParams()
         val expected = PaymentMethodCreateParams.create(
-            PaymentMethodCreateParams.Card.Builder()
-                .setExpiryMonth(8)
-                .setExpiryYear(2017)
-                .build(),
-            PaymentMethod.BillingDetails.Builder()
-                .setName("John Cardholder")
-                .setAddress(Address.Builder()
+            card = PaymentMethodCreateParams.Card(
+                expiryMonth = 8,
+                expiryYear = 2017
+            ),
+            billingDetails = PaymentMethod.BillingDetails(
+                name = "John Cardholder",
+                address = Address.Builder()
                     .setLine1("123 Any Street")
                     .setLine2("456")
                     .setCity("Des Moines")
                     .setState("IA")
                     .setPostalCode("50305")
                     .setCountry("US")
-                    .build())
-                .build()
+                    .build()
+            )
         )
         assertEquals(expected, actual)
     }

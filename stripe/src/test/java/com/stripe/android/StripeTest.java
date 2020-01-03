@@ -1216,10 +1216,9 @@ public class StripeTest {
 
         final PaymentMethodCreateParams paymentMethodCreateParams =
                 PaymentMethodCreateParams.create(
-                        new PaymentMethodCreateParams.Ideal.Builder()
-                                .setBank("ing")
-                                .build(),
-                        expectedBillingDetails);
+                        new PaymentMethodCreateParams.Ideal("ing"),
+                        expectedBillingDetails
+                );
         final Stripe stripe = createStripe(fireAndForgetRequestExecutor);
         final PaymentMethod createdPaymentMethod = stripe.createPaymentMethodSynchronous(
                 paymentMethodCreateParams);
@@ -1259,10 +1258,9 @@ public class StripeTest {
 
         final PaymentMethodCreateParams paymentMethodCreateParams =
                 PaymentMethodCreateParams.create(
-                        new PaymentMethodCreateParams.Fpx.Builder()
-                                .setBank("hsbc")
-                                .build(),
-                        expectedBillingDetails);
+                        new PaymentMethodCreateParams.Fpx("hsbc"),
+                        expectedBillingDetails
+                );
         final Stripe stripe = createStripe(
                 ApiKeyFixtures.FPX_PUBLISHABLE_KEY,
                 fireAndForgetRequestExecutor

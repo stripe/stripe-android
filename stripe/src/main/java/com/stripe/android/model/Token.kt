@@ -66,62 +66,6 @@ data class Token internal constructor(
         }
     }
 
-    /**
-     * Constructor that should not be invoked in your code.  This is used by Stripe to
-     * create tokens using a Stripe API response.
-     */
-    constructor(
-        id: String,
-        livemode: Boolean,
-        created: Date,
-        used: Boolean?,
-        card: Card?
-    ) : this(
-        id = id,
-        type = TokenType.CARD,
-        created = created,
-        livemode = livemode,
-        card = card,
-        used = java.lang.Boolean.TRUE == used
-    )
-
-    /**
-     * Constructor that should not be invoked in your code.  This is used by Stripe to
-     * create tokens using a Stripe API response.
-     */
-    constructor(
-        id: String,
-        livemode: Boolean,
-        created: Date,
-        used: Boolean?,
-        bankAccount: BankAccount
-    ) : this(
-        id = id,
-        type = TokenType.BANK_ACCOUNT,
-        created = created,
-        livemode = livemode,
-        used = java.lang.Boolean.TRUE == used,
-        bankAccount = bankAccount
-    )
-
-    /**
-     * Constructor that should not be invoked in your code.  This is used by Stripe to
-     * create tokens using a Stripe API response.
-     */
-    constructor(
-        id: String,
-        type: String,
-        livemode: Boolean,
-        created: Date,
-        used: Boolean?
-    ) : this(
-        id = id,
-        type = type,
-        created = created,
-        used = java.lang.Boolean.TRUE == used,
-        livemode = livemode
-    )
-
     companion object {
         @JvmStatic
         fun fromString(jsonString: String?): Token? {

@@ -32,13 +32,13 @@ class CreateSepaDebitActivity : AppCompatActivity() {
 
             stripe.createPaymentMethod(
                 PaymentMethodCreateParams.create(
-                    PaymentMethodCreateParams.SepaDebit.Builder()
-                        .setIban(ibanInput.text.toString())
-                        .build(),
-                    PaymentMethod.BillingDetails.Builder()
-                        .setName(CUSTOMER_NAME)
-                        .setEmail(CUSTOMER_EMAIl)
-                        .build()
+                    PaymentMethodCreateParams.SepaDebit(
+                        iban = ibanInput.text.toString()
+                    ),
+                    PaymentMethod.BillingDetails(
+                        name = CUSTOMER_NAME,
+                        email = CUSTOMER_EMAIL
+                    )
                 ),
                 callback = object : ApiResultCallback<PaymentMethod> {
                     override fun onSuccess(result: PaymentMethod) {
@@ -61,6 +61,6 @@ class CreateSepaDebitActivity : AppCompatActivity() {
 
     private companion object {
         private const val CUSTOMER_NAME = "Jenny Rosen"
-        private const val CUSTOMER_EMAIl = "jrosen@example.com"
+        private const val CUSTOMER_EMAIL = "jrosen@example.com"
     }
 }

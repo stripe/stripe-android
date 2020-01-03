@@ -116,12 +116,12 @@ class CardInputWidget @JvmOverloads constructor(
             val cvcValue = cvcValue
 
             return if (cardNumber != null && cardDate != null && cvcValue != null) {
-                PaymentMethodCreateParams.Card.Builder()
-                    .setNumber(cardNumber)
-                    .setCvc(cvcValue)
-                    .setExpiryMonth(cardDate.first)
-                    .setExpiryYear(cardDate.second)
-                    .build()
+                PaymentMethodCreateParams.Card(
+                    number = cardNumber,
+                    cvc = cvcValue,
+                    expiryMonth = cardDate.first,
+                    expiryYear = cardDate.second
+                )
             } else {
                 null
             }

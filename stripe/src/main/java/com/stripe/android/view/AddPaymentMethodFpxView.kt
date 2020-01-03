@@ -35,9 +35,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
             val fpxBank = fpxAdapter.selectedBank ?: return null
 
             return PaymentMethodCreateParams.create(
-                PaymentMethodCreateParams.Fpx.Builder()
-                    .setBank(fpxBank.code)
-                    .build()
+                PaymentMethodCreateParams.Fpx(bank = fpxBank.code)
             )
         }
 

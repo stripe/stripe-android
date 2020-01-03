@@ -136,7 +136,7 @@ data class PaymentMethod internal constructor(
     }
 
     @Parcelize
-    data class BillingDetails internal constructor(
+    data class BillingDetails @JvmOverloads constructor(
         @JvmField val address: Address? = null,
         @JvmField val email: String? = null,
         @JvmField val name: String? = null,
