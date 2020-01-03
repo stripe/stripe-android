@@ -1,27 +1,58 @@
 package com.stripe.android.model
 
 import android.net.Uri
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 
 /**
  * An interface for methods available in [PaymentIntent] and [SetupIntent]
  */
-interface StripeIntent {
+interface StripeIntent : StripeModel {
+    /**
+     * Unique identifier for the object.
+     */
     val id: String?
 
+    /**
+     * Time at which the object was created. Measured in seconds since the Unix epoch.
+     */
     val created: Long
 
+    /**
+     * An arbitrary string attached to the object. Often useful for displaying to users.
+     */
     val description: String?
 
+    /**
+     * Has the value true if the object exists in live mode or the value false if the object exists
+     * in test mode.
+     */
     val isLiveMode: Boolean
 
+    /**
+     * ID of the payment method used in this PaymentIntent.
+     */
     val paymentMethodId: String?
 
+    /**
+     * The list of payment method types (e.g. card) that this PaymentIntent is allowed to use.
+     */
     val paymentMethodTypes: List<String>
 
     val nextActionType: NextActionType?
 
     val redirectData: RedirectData?
 
+    /**
+     * The client secret of this PaymentIntent. Used for client-side retrieval using a
+     * publishable key.
+     *
+     * The client secret can be used to complete a payment from your frontend. It should not be
+     * stored, logged, embedded in URLs, or exposed to anyone other than the customer. Make sure
+     * that you have TLS enabled on any page that includes the client secret.
+     *
+     * Refer to our docs to accept a payment and learn about how client_secret should be handled.
+     */
     val clientSecret: String?
 
     val stripeSdkData: SdkData?
@@ -82,8 +113,17 @@ interface StripeIntent {
      * [Reusing Cards](https://stripe.com/docs/payments/cards/reusing-cards).
      */
     enum class Usage(val code: String) {
+        /**
+         * Use on_session if you intend to only reuse the payment method when your customer is
+         * present in your checkout flow.
+         */
         OnSession("on_session"),
+
+        /**
+         * Use off_session if your customer may or may not be in your checkout flow.
+         */
         OffSession("off_session"),
+
         OneTime("one_time");
 
         override fun toString(): String {
@@ -97,7 +137,7 @@ interface StripeIntent {
         }
     }
 
-    class SdkData internal constructor(internal val data: Map<String, *>) {
+    data class SdkData internal constructor(internal val data: Map<String, *>) {
         internal val type: String = data[FIELD_TYPE] as String
 
         val is3ds2: Boolean
@@ -114,7 +154,8 @@ interface StripeIntent {
         }
     }
 
-    data class RedirectData private constructor(
+    @Parcelize
+    data class RedirectData internal constructor(
         /**
          * See [PaymentIntent.next_action.redirect_to_url.url](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-next_action-redirect_to_url-url)
          */
@@ -124,7 +165,7 @@ interface StripeIntent {
          * See [PaymentIntent.next_action.redirect_to_url.return_url](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-next_action-redirect_to_url-return_url)
          */
         val returnUrl: String?
-    ) {
+    ) : Parcelable {
         internal companion object {
             internal const val FIELD_URL = "url"
             internal const val FIELD_RETURN_URL = "return_url"
