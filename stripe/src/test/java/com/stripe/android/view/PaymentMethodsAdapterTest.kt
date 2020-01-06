@@ -178,30 +178,10 @@ class PaymentMethodsAdapterTest {
             adapter.getItemId(0)
         )
 
-        assertEquals(
-            643895348L,
-            adapter.getItemId(1)
-        )
-
-        assertEquals(
-            91030075L,
-            adapter.getItemId(2)
-        )
-
-        assertEquals(
-            -420206809L,
-            adapter.getItemId(3)
-        )
-
-        assertEquals(
-            3046160L,
-            adapter.getItemId(4)
-        )
-
-        assertEquals(
-            101614L,
-            adapter.getItemId(5)
-        )
+        val uniqueItemIds = (1..5)
+            .map { adapter.getItemId(it) }
+            .toSet()
+        assertEquals(5, uniqueItemIds.size)
     }
 
     @Test

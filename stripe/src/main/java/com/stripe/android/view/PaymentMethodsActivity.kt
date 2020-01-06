@@ -128,8 +128,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
     }
 
     private fun onAddedPaymentMethod(paymentMethod: PaymentMethod) {
-        val type = PaymentMethod.Type.lookup(paymentMethod.type)
-        if (type?.isReusable == true) {
+        if (paymentMethod.type?.isReusable == true) {
             // Refresh the list of Payment Methods with the new reusable Payment Method.
             fetchCustomerPaymentMethods()
             showSnackbar(paymentMethod, R.string.added)

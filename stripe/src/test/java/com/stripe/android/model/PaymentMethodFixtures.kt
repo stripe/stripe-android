@@ -41,7 +41,7 @@ internal object PaymentMethodFixtures {
         id = "pm_123456789",
         created = 1550757934255L,
         liveMode = true,
-        type = PaymentMethod.Type.Card.code,
+        type = PaymentMethod.Type.Card,
         customerId = "cus_AQsHpvKfKwJDrF",
         billingDetails = BILLING_DETAILS,
         card = CARD,
@@ -52,7 +52,7 @@ internal object PaymentMethodFixtures {
         id = "pm_1F5GlnH8dsfnfKo3gtixzcq0",
         created = 1565290527L,
         liveMode = true,
-        type = PaymentMethod.Type.Fpx.code,
+        type = PaymentMethod.Type.Fpx,
         billingDetails = BILLING_DETAILS,
         fpx = PaymentMethod.Fpx(
             bank = "hsbc",
@@ -96,7 +96,7 @@ internal object PaymentMethodFixtures {
 
     val CARD_PAYMENT_METHODS = listOf(
         PaymentMethod(
-            type = PaymentMethod.Type.Card.code,
+            type = PaymentMethod.Type.Card,
             liveMode = false,
             created = 1000L,
             id = "pm_1000",
@@ -106,7 +106,7 @@ internal object PaymentMethodFixtures {
             )
         ),
         PaymentMethod(
-            type = PaymentMethod.Type.Card.code,
+            type = PaymentMethod.Type.Card,
             liveMode = false,
             created = 2000L,
             id = "pm_2000",
@@ -116,7 +116,7 @@ internal object PaymentMethodFixtures {
             )
         ),
         PaymentMethod(
-            type = PaymentMethod.Type.Card.code,
+            type = PaymentMethod.Type.Card,
             liveMode = false,
             created = 3000L,
             id = "pm_3000",
@@ -132,7 +132,7 @@ internal object PaymentMethodFixtures {
         val id = "pm_" + UUID.randomUUID().toString()
             .replace("-", "")
         return PaymentMethod(
-            type = PaymentMethod.Type.Card.code,
+            type = PaymentMethod.Type.Card,
             liveMode = false,
             created = ThreadLocalRandom.current().nextLong(
                 createdOrigin ?: 1L,
