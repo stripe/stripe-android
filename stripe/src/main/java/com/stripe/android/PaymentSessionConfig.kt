@@ -33,7 +33,7 @@ data class PaymentSessionConfig internal constructor(
     val paymentMethodTypes: List<PaymentMethod.Type> = listOf(PaymentMethod.Type.Card),
     val shouldShowGooglePay: Boolean = false,
     val allowedShippingCountryCodes: Set<String> = emptySet(),
-    val billingAddressFields: BillingAddressFields = BillingAddressFields.None,
+    val billingAddressFields: BillingAddressFields = DEFAULT_BILLING_ADDRESS_FIELDS,
 
     internal val shouldPrefetchCustomer: Boolean = true,
     internal val shippingInformationValidator: ShippingInformationValidator = DefaultShippingInfoValidator(),
@@ -87,7 +87,7 @@ data class PaymentSessionConfig internal constructor(
     }
 
     class Builder : ObjectBuilder<PaymentSessionConfig> {
-        private var billingAddressFields: BillingAddressFields = BillingAddressFields.None
+        private var billingAddressFields: BillingAddressFields = DEFAULT_BILLING_ADDRESS_FIELDS
         private var shippingInfoRequired = true
         private var shippingMethodsRequired = true
         private var hiddenShippingInfoFields: List<String>? = null
@@ -280,5 +280,9 @@ data class PaymentSessionConfig internal constructor(
         override fun getErrorMessage(shippingInformation: ShippingInformation): String {
             return ""
         }
+    }
+
+    private companion object {
+        private val DEFAULT_BILLING_ADDRESS_FIELDS = BillingAddressFields.PostalCode
     }
 }
