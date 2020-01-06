@@ -408,7 +408,8 @@ public class StripeTest {
                 "John Doe",
                 "example://path",
                 "a statement described",
-                "en");
+                "en"
+        );
         final Map<String, String> metamap = new HashMap<String, String>() {{
             put("flavor", "strawberry");
             put("type", "sherbet");

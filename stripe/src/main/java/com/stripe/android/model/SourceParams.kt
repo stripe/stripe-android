@@ -15,20 +15,24 @@ import org.json.JSONObject
  */
 class SourceParams private constructor(
     /**
-     * @return a custom type of this source, if one has been set
+     * @return a custom type of this Source, if one has been set
      */
     @SourceType val typeRaw: String
 ) : StripeParamsModel {
 
     /**
-     * @return the [Type][SourceType] of this source
+     * @return The type of the source to create.
      */
     @get:SourceType
     @SourceType
     val type: String = asSourceType(typeRaw)
 
     /**
-     * @return the amount of the transaction
+     * @return Amount associated with the source. This is the amount for which the source will
+     * be chargeable once ready. Required for `single_use` sources. Not supported for `receiver`
+     * type sources, where charge amount may not be specified until funds land.
+     *
+     * See [amount](https://stripe.com/docs/api/sources/create#create_source-amount)
      */
     @IntRange(from = 0)
     var amount: Long? = null
@@ -41,15 +45,26 @@ class SourceParams private constructor(
         private set
 
     /**
-     * @return the currency code for the transaction
+     * @return Three-letter ISO code for the currency associated with the source.
+     * This is the currency for which the source will be chargeable once ready.
+     *
+     * See [currency](https://stripe.com/docs/api/sources/create#create_source-currency)
      */
     var currency: String? = null
         private set
 
     /**
-     * @return details about the source owner (map contents are specific to source type)
+     * The URL you provide to redirect the customer back to you after they authenticated their
+     * payment. It can use your application URI scheme in the context of a mobile application.
      */
-    var owner: Map<String, Any>? = null
+    var returnUrl: String? = null
+        private set
+
+    /**
+     * Information about the owner of the payment instrument that may be used or required by
+     * particular source types.
+     */
+    var owner: OwnerParams? = null
         private set
 
     /**
@@ -58,18 +73,22 @@ class SourceParams private constructor(
     var metaData: Map<String, String>? = null
         private set
 
-    /**
-     * @return redirect map for the source
-     */
-    var redirect: Map<String, Any?>? = null
-        private set
-
     private var extraParams: Map<String, Any> = emptyMap()
 
+    /**
+     * @return An optional token used to create the source. When passed, token properties will
+     * override source parameters.
+     *
+     * See [token](https://stripe.com/docs/api/sources/create#create_source-token)
+     */
     private var token: String? = null
 
     /**
-     * @return the current usage of this source, if one has been set
+     * @return Either `reusable` or `single_use`. Whether this source should be reusable or not.
+     * Some source types may or may not be reusable by construction, while others may leave the
+     * option at creation. If an incompatible value is passed, an error will be returned.
+     *
+     * See [usage](https://stripe.com/docs/api/sources/create#create_source-usage)
      */
     @get:Source.Usage
     @Source.Usage
@@ -80,109 +99,92 @@ class SourceParams private constructor(
 
     /*---- Setters ----*/
     /**
-     * @param amount currency amount for this source, in the lowest denomination.
-     * @return `this`, for chaining purposes
+     * @param amount Amount associated with the source. This is the amount for which the source will
+     * be chargeable once ready. Required for `single_use` sources. Not supported for `receiver`
+     * type sources, where charge amount may not be specified until funds land.
+     *
+     * See [amount](https://stripe.com/docs/api/sources/create#create_source-amount)
      */
-    fun setAmount(@IntRange(from = 0) amount: Long?): SourceParams {
+    fun setAmount(@IntRange(from = 0) amount: Long?): SourceParams = apply {
         this.amount = amount
-        return this
     }
 
     /**
      * @param apiParameterMap a map of parameters specific for this type of source
-     * @return `this`, for chaining purposes
      */
-    fun setApiParameterMap(
-        apiParameterMap: Map<String, Any?>
-    ): SourceParams {
+    fun setApiParameterMap(apiParameterMap: Map<String, Any?>?): SourceParams = apply {
         this.apiParameterMap = apiParameterMap
-        return this
     }
 
     /**
-     * @param currency currency code for this source (i.e. "EUR")
-     * @return `this`, for chaining purposes
-     */
-    fun setCurrency(currency: String): SourceParams {
-        this.currency = currency
-        return this
-    }
-
-    /**
-     * @param owner an [SourceOwner] object for this source
-     * @return `this`, for chaining purposes
-     */
-    fun setOwner(owner: Map<String, Any>): SourceParams {
-        this.owner = owner.takeIf { it.isNotEmpty() }
-        return this
-    }
-
-    /**
-     * Sets a redirect property map for this source object. If you only want to
-     * set a return url, use [setReturnUrl].
+     * @param currency Three-letter ISO code for the currency associated with the source.
+     * This is the currency for which the source will be chargeable once ready.
      *
-     * @param redirect a set of redirect parameters
-     * @return `this`, for chaining purposes
+     * See [currency](https://stripe.com/docs/api/sources/create#create_source-currency)
      */
-    fun setRedirect(redirect: Map<String, Any?>): SourceParams {
-        this.redirect = redirect
-        return this
+    fun setCurrency(currency: String): SourceParams = apply {
+        this.currency = currency
+    }
+
+    /**
+     * @param owner Information about the owner of the payment instrument that may be used or
+     * required by particular source types.
+     *
+     * See [owner](https://stripe.com/docs/api/sources/create#create_source-owner)
+     */
+    fun setOwner(owner: OwnerParams?): SourceParams = apply {
+        this.owner = owner
     }
 
     /**
      * Sets extra params for this source object.
      *
      * @param extraParams a set of params
-     * @return `this`, for chaining purposes
      */
-    fun setExtraParams(extraParams: Map<String, Any>): SourceParams {
+    fun setExtraParams(extraParams: Map<String, Any>): SourceParams = apply {
         this.extraParams = extraParams
-        return this
     }
 
     /**
-     * @param returnUrl a redirect URL for this source.
-     * @return `this`, for chaining purposes
-     */
-    fun setReturnUrl(@Size(min = 1) returnUrl: String): SourceParams {
-        this.redirect = redirect.orEmpty().plus(
-            mapOf(PARAM_RETURN_URL to returnUrl)
-        )
-        return this
-    }
-
-    /**
-     * Set custom metadata on the parameters.
+     * @param returnUrl The URL you provide to redirect the customer back to you after they
+     * authenticated their payment. It can use your application URI scheme in the context of a
+     * mobile application.
      *
-     * @return `this`, for chaining purposes
+     * See [redirect.return_url](https://stripe.com/docs/api/sources/create#create_source-redirect-return_url)
      */
-    fun setMetaData(metaData: Map<String, String>): SourceParams {
+    fun setReturnUrl(@Size(min = 1) returnUrl: String): SourceParams = apply {
+        this.returnUrl = returnUrl
+    }
+
+    /**
+     * @param metaData A set of key-value pairs that you can attach to a source object. It can be
+     * useful for storing additional information about the source in a structured format.
+     *
+     * See [metadata](https://stripe.com/docs/api/sources/create#create_source-metadata)
+     */
+    fun setMetaData(metaData: Map<String, String>?): SourceParams = apply {
         this.metaData = metaData
-        return this
     }
 
     /**
-     * Sets a token ID on the parameters.
+     * @param token An optional token used to create the source. When passed, token properties will
+     * override source parameters.
      *
-     * @param token a token ID
-     * @return `this`, for chaining purposes
+     * See [token](https://stripe.com/docs/api/sources/create#create_source-token)
      */
-    fun setToken(token: String): SourceParams {
+    fun setToken(token: String): SourceParams = apply {
         this.token = token
-        return this
     }
 
     /**
-     * Sets a usage value on the parameters. Used for Alipay, and should be
-     * either "single_use" or "reusable". Not setting this value defaults
-     * to "single_use".
+     * @param usage Either `reusable` or `single_use`. Whether this source should be reusable or not.
+     * Some source types may or may not be reusable by construction, while others may leave the
+     * option at creation. If an incompatible value is passed, an error will be returned.
      *
-     * @param usage either "single_use" or "reusable"
-     * @return `this` for chaining purposes
+     * See [usage](https://stripe.com/docs/api/sources/create#create_source-usage)
      */
-    fun setUsage(@Source.Usage usage: String): SourceParams {
+    fun setUsage(@Source.Usage usage: String): SourceParams = apply {
         this.usage = usage
-        return this
     }
 
     private fun setWeChatParams(weChatParams: WeChatParams): SourceParams {
@@ -191,10 +193,7 @@ class SourceParams private constructor(
     }
 
     /**
-     * Create a string-keyed map representing this object that is
-     * ready to be sent over the network.
-     *
-     * @return a String-keyed map
+     * Create a string-keyed map representing this object that is ready to be sent over the network.
      */
     override fun toParamMap(): Map<String, Any> {
         return mapOf<String, Any>(PARAM_TYPE to typeRaw)
@@ -214,13 +213,13 @@ class SourceParams private constructor(
                 }.orEmpty()
             )
             .plus(
-                owner.takeUnless { it.isNullOrEmpty() }?.let {
-                    mapOf(PARAM_OWNER to it)
+                owner?.let {
+                    mapOf(PARAM_OWNER to it.toParamMap())
                 }.orEmpty()
             )
             .plus(
-                redirect?.let {
-                    mapOf(PARAM_REDIRECT to it)
+                returnUrl?.let {
+                    mapOf(PARAM_REDIRECT to mapOf(PARAM_RETURN_URL to it))
                 }.orEmpty()
             )
             .plus(
@@ -248,8 +247,8 @@ class SourceParams private constructor(
 
     @Parcelize
     internal data class WeChatParams(
-        private val appId: String?,
-        private val statementDescriptor: String?
+        private val appId: String? = null,
+        private val statementDescriptor: String? = null
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
             return emptyMap<String, Any>()
@@ -273,7 +272,7 @@ class SourceParams private constructor(
 
     override fun hashCode(): Int {
         return Objects.hash(amount, apiParameterMap, currency, typeRaw, owner, metaData,
-            redirect, extraParams, token, usage, type, weChatParams)
+            returnUrl, extraParams, token, usage, type, weChatParams)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -291,7 +290,7 @@ class SourceParams private constructor(
             Objects.equals(typeRaw, params.typeRaw) &&
             Objects.equals(owner, params.owner) &&
             Objects.equals(metaData, params.metaData) &&
-            Objects.equals(redirect, params.redirect) &&
+            Objects.equals(returnUrl, params.returnUrl) &&
             Objects.equals(extraParams, params.extraParams) &&
             Objects.equals(token, params.token) &&
             Objects.equals(usage, params.usage) &&
@@ -300,15 +299,18 @@ class SourceParams private constructor(
     }
 
     /**
-     * [Owner param](https://stripe.com/docs/api/sources/create#create_source-owner)
+     * [owner](https://stripe.com/docs/api/sources/create#create_source-owner) param
+     *
+     * Information about the owner of the payment instrument that may be used or required by
+     * particular source types.
      */
-    private data class Owner internal constructor(
-        private val address: Address? = null,
-        private val email: String? = null,
-        private val name: String? = null,
-        private val phone: String? = null
-    ) : StripeParamsModel {
-
+    @Parcelize
+    data class OwnerParams internal constructor(
+        internal val address: Address? = null,
+        internal val email: String? = null,
+        internal val name: String? = null,
+        internal val phone: String? = null
+    ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
             return emptyMap<String, Any>()
                 .plus(
@@ -399,11 +401,13 @@ class SourceParams private constructor(
             return SourceParams(SourceType.P24)
                 .setAmount(amount)
                 .setCurrency(currency)
-                .setRedirect(mapOf(PARAM_RETURN_URL to returnUrl))
-                .setOwner(Owner(
-                    email = email,
-                    name = name
-                ).toParamMap())
+                .setReturnUrl(returnUrl)
+                .setOwner(
+                    OwnerParams(
+                        email = email,
+                        name = name
+                    )
+                )
         }
 
         /**
@@ -423,19 +427,20 @@ class SourceParams private constructor(
         @JvmStatic
         fun createAlipayReusableParams(
             currency: String,
-            name: String?,
-            email: String?,
+            name: String? = null,
+            email: String? = null,
             returnUrl: String
         ): SourceParams {
-            val ownerMap = Owner(
-                email = email,
-                name = name
-            ).toParamMap()
             return SourceParams(SourceType.ALIPAY)
                 .setCurrency(currency)
-                .setRedirect(mapOf(PARAM_RETURN_URL to returnUrl))
+                .setReturnUrl(returnUrl)
                 .setUsage(Source.Usage.REUSABLE)
-                .setOwner(ownerMap)
+                .setOwner(
+                    OwnerParams(
+                        email = email,
+                        name = name
+                    )
+                )
         }
 
         /**
@@ -458,19 +463,20 @@ class SourceParams private constructor(
         fun createAlipaySingleUseParams(
             @IntRange(from = 0) amount: Long,
             currency: String,
-            name: String?,
-            email: String?,
+            name: String? = null,
+            email: String? = null,
             returnUrl: String
         ): SourceParams {
-            val ownerMap = Owner(
-                email = email,
-                name = name
-            ).toParamMap()
             return SourceParams(SourceType.ALIPAY)
                 .setCurrency(currency)
                 .setAmount(amount)
-                .setRedirect(mapOf(PARAM_RETURN_URL to returnUrl))
-                .setOwner(ownerMap)
+                .setReturnUrl(returnUrl)
+                .setOwner(
+                    OwnerParams(
+                        email = email,
+                        name = name
+                    )
+                )
         }
 
         /**
@@ -492,7 +498,7 @@ class SourceParams private constructor(
             @IntRange(from = 0) amount: Long,
             currency: String,
             weChatAppId: String,
-            statementDescriptor: String?
+            statementDescriptor: String? = null
         ): SourceParams {
             return SourceParams(SourceType.WECHAT)
                 .setCurrency(currency)
@@ -542,11 +548,13 @@ class SourceParams private constructor(
                 .setAmount(totalAmount.toLong())
                 .setCurrency(currency)
                 .setReturnUrl(returnUrl)
-                .setOwner(Owner(
-                    address = klarnaParams.billingAddress,
-                    email = klarnaParams.billingEmail,
-                    phone = klarnaParams.billingPhone
-                ).toParamMap())
+                .setOwner(
+                    OwnerParams(
+                        address = klarnaParams.billingAddress,
+                        email = klarnaParams.billingEmail,
+                        phone = klarnaParams.billingPhone
+                    )
+                )
                 .setExtraParams(
                     mapOf(
                         PARAM_KLARNA to klarnaParams.toParamMap(),
@@ -578,16 +586,16 @@ class SourceParams private constructor(
             @IntRange(from = 0) amount: Long,
             name: String,
             returnUrl: String,
-            statementDescriptor: String?,
-            preferredLanguage: String?
+            statementDescriptor: String? = null,
+            preferredLanguage: String? = null
         ): SourceParams {
-            val ownerMap = Owner(name = name)
-                .toParamMap()
             val params = SourceParams(SourceType.BANCONTACT)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
-                .setOwner(ownerMap)
-                .setRedirect(mapOf(PARAM_RETURN_URL to returnUrl))
+                .setOwner(
+                    OwnerParams(name = name)
+                )
+                .setReturnUrl(returnUrl)
             val additionalParamsMap = emptyMap<String, Any>()
                 .plus(
                     statementDescriptor?.let {
@@ -639,33 +647,29 @@ class SourceParams private constructor(
          */
         @JvmStatic
         fun createCardParams(card: Card): SourceParams {
-            val params = SourceParams(SourceType.CARD)
-            // Not enforcing all fields to exist at this level.
-            // Instead, the server will return an error for invalid data.
-            val cardParams = mapOf(
-                PARAM_NUMBER to card.number,
-                PARAM_EXP_MONTH to card.expMonth,
-                PARAM_EXP_YEAR to card.expYear,
-                PARAM_CVC to card.cvc
-            )
-            params.setApiParameterMap(cardParams)
-            params.setOwner(
-                Owner(
-                    address = Address.Builder()
-                        .setLine1(card.addressLine1)
-                        .setLine2(card.addressLine2)
-                        .setCity(card.addressCity)
-                        .setState(card.addressState)
-                        .setPostalCode(card.addressZip)
-                        .setCountry(card.addressCountry)
-                        .build(),
-                    name = card.name
-                ).toParamMap()
-            )
-            if (card.metadata != null) {
-                params.setMetaData(card.metadata)
-            }
-            return params
+            return SourceParams(SourceType.CARD)
+                .setApiParameterMap(
+                    mapOf(
+                        PARAM_NUMBER to card.number,
+                        PARAM_EXP_MONTH to card.expMonth,
+                        PARAM_EXP_YEAR to card.expYear,
+                        PARAM_CVC to card.cvc
+                    )
+                )
+                .setOwner(
+                    OwnerParams(
+                        address = Address.Builder()
+                            .setLine1(card.addressLine1)
+                            .setLine2(card.addressLine2)
+                            .setCity(card.addressCity)
+                            .setState(card.addressState)
+                            .setPostalCode(card.addressZip)
+                            .setCountry(card.addressCountry)
+                            .build(),
+                        name = card.name
+                    )
+                )
+                .setMetaData(card.metadata)
         }
 
         /**
@@ -678,16 +682,16 @@ class SourceParams private constructor(
             googlePayPaymentData: JSONObject
         ): SourceParams {
             val googlePayResult = GooglePayResult.fromJson(googlePayPaymentData)
-            val params = SourceParams(SourceType.CARD)
+            return SourceParams(SourceType.CARD)
                 .setToken(requireNotNull(googlePayResult.token?.id))
-            return params.setOwner(
-                Owner(
-                    address = googlePayResult.address,
-                    email = googlePayResult.email,
-                    name = googlePayResult.name,
-                    phone = googlePayResult.phoneNumber
-                ).toParamMap()
-            )
+                .setOwner(
+                    OwnerParams(
+                        address = googlePayResult.address,
+                        email = googlePayResult.email,
+                        name = googlePayResult.name,
+                        phone = googlePayResult.phoneNumber
+                    )
+                )
         }
 
         /**
@@ -708,21 +712,18 @@ class SourceParams private constructor(
             @IntRange(from = 0) amount: Long,
             name: String,
             returnUrl: String,
-            statementDescriptor: String?
+            statementDescriptor: String? = null
         ): SourceParams {
-            val ownerMap = Owner(name = name)
-                .toParamMap()
-            val params = SourceParams(SourceType.EPS)
+            return SourceParams(SourceType.EPS)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
-                .setOwner(ownerMap)
-                .setRedirect(mapOf(PARAM_RETURN_URL to returnUrl))
-            if (statementDescriptor != null) {
-                params.setApiParameterMap(
-                    mapOf(PARAM_STATEMENT_DESCRIPTOR to statementDescriptor)
+                .setOwner(OwnerParams(name = name))
+                .setReturnUrl(returnUrl)
+                .setApiParameterMap(
+                    statementDescriptor?.let {
+                        mapOf(PARAM_STATEMENT_DESCRIPTOR to it)
+                    }
                 )
-            }
-            return params
         }
 
         /**
@@ -743,21 +744,18 @@ class SourceParams private constructor(
             @IntRange(from = 0) amount: Long,
             name: String,
             returnUrl: String,
-            statementDescriptor: String?
+            statementDescriptor: String? = null
         ): SourceParams {
-            val ownerMap = Owner(name = name)
-                .toParamMap()
-            val params = SourceParams(SourceType.GIROPAY)
+            return SourceParams(SourceType.GIROPAY)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
-                .setOwner(ownerMap)
-                .setRedirect(mapOf(PARAM_RETURN_URL to returnUrl))
-            if (statementDescriptor != null) {
-                params.setApiParameterMap(
-                    mapOf(PARAM_STATEMENT_DESCRIPTOR to statementDescriptor)
+                .setOwner(OwnerParams(name = name))
+                .setReturnUrl(returnUrl)
+                .setApiParameterMap(
+                    statementDescriptor?.let {
+                        mapOf(PARAM_STATEMENT_DESCRIPTOR to it)
+                    }
                 )
-            }
-            return params
         }
 
         /**
@@ -779,16 +777,14 @@ class SourceParams private constructor(
             @IntRange(from = 0) amount: Long,
             name: String?,
             returnUrl: String,
-            statementDescriptor: String?,
-            bank: String?
+            statementDescriptor: String? = null,
+            bank: String? = null
         ): SourceParams {
-            val ownerMap = Owner(name = name)
-                .toParamMap()
             val params = SourceParams(SourceType.IDEAL)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
-                .setRedirect(mapOf(PARAM_RETURN_URL to returnUrl))
-                .setOwner(ownerMap)
+                .setReturnUrl(returnUrl)
+                .setOwner(OwnerParams(name = name))
 
             val additionalParamsMap = emptyMap<String, Any>()
                 .plus(
@@ -826,13 +822,11 @@ class SourceParams private constructor(
             returnUrl: String,
             email: String
         ): SourceParams {
-            val ownerMap = Owner(email = email)
-                .toParamMap()
             return SourceParams(SourceType.MULTIBANCO)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
-                .setRedirect(mapOf(PARAM_RETURN_URL to returnUrl))
-                .setOwner(ownerMap)
+                .setReturnUrl(returnUrl)
+                .setOwner(OwnerParams(email = email))
         }
 
         /**
@@ -884,19 +878,20 @@ class SourceParams private constructor(
             postalCode: String?,
             @Size(2) country: String?
         ): SourceParams {
-            val ownerMap = Owner(
-                address = Address.Builder()
-                    .setLine1(addressLine1)
-                    .setCity(city)
-                    .setPostalCode(postalCode)
-                    .setCountry(country)
-                    .build(),
-                email = email,
-                name = name
-            ).toParamMap()
             return SourceParams(SourceType.SEPA_DEBIT)
                 .setCurrency(Source.EURO)
-                .setOwner(ownerMap)
+                .setOwner(
+                    OwnerParams(
+                        address = Address.Builder()
+                            .setLine1(addressLine1)
+                            .setCity(city)
+                            .setPostalCode(postalCode)
+                            .setCountry(country)
+                            .build(),
+                        email = email,
+                        name = name
+                    )
+                )
                 .setApiParameterMap(mapOf(PARAM_IBAN to iban))
         }
 
@@ -918,9 +913,9 @@ class SourceParams private constructor(
             @IntRange(from = 0) amount: Long,
             returnUrl: String,
             @Size(2) country: String,
-            statementDescriptor: String?
+            statementDescriptor: String? = null
         ): SourceParams {
-            val sofortMap = mapOf(PARAM_COUNTRY to country)
+            val sofortData = mapOf(PARAM_COUNTRY to country)
                 .plus(
                     statementDescriptor?.let {
                         mapOf(PARAM_STATEMENT_DESCRIPTOR to it)
@@ -929,8 +924,8 @@ class SourceParams private constructor(
             return SourceParams(SourceType.SOFORT)
                 .setCurrency(Source.EURO)
                 .setAmount(amount)
-                .setRedirect(mapOf(PARAM_RETURN_URL to returnUrl))
-                .setApiParameterMap(sofortMap)
+                .setReturnUrl(returnUrl)
+                .setApiParameterMap(sofortData)
         }
 
         /**
@@ -955,7 +950,7 @@ class SourceParams private constructor(
             return SourceParams(SourceType.THREE_D_SECURE)
                 .setCurrency(currency)
                 .setAmount(amount)
-                .setRedirect(mapOf(PARAM_RETURN_URL to returnUrl))
+                .setReturnUrl(returnUrl)
                 .setApiParameterMap(mapOf(PARAM_CARD to cardId))
         }
 
