@@ -174,7 +174,7 @@ class CardNumberEditText @JvmOverloads constructor(
                 if (formattedNumber != null) {
                     setText(formattedNumber)
                     newCursorPosition?.let {
-                        setSelection(it)
+                        setSelection(it.coerceIn(0, fieldText.length))
                     }
                 }
                 formattedNumber = null

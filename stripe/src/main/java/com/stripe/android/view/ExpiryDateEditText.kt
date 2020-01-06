@@ -161,7 +161,7 @@ class ExpiryDateEditText @JvmOverloads constructor(
                 if (formattedDate != null) {
                     setText(formattedDate)
                     newCursorPosition?.let {
-                        setSelection(it)
+                        setSelection(it.coerceIn(0, fieldText.length))
                     }
                 }
 
