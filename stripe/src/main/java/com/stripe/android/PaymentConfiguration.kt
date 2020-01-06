@@ -58,12 +58,14 @@ data class PaymentConfiguration internal constructor(val publishableKey: String)
             return Store(context).load()?.let {
                 instance = it
                 it
-            } ?: throw IllegalStateException("PaymentConfiguration was not initialized")
+            }
+                ?: throw IllegalStateException(
+                    "PaymentConfiguration was not initialized. Call PaymentConfiguration.init()."
+                )
         }
 
         /**
-         * A publishable key from the Dashboard's
-         * [API keys](https://dashboard.stripe.com/apikeys) page.
+         * A publishable key from the Dashboard's [API keys](https://dashboard.stripe.com/apikeys) page.
          */
         @JvmStatic
         fun init(context: Context, publishableKey: String) {
