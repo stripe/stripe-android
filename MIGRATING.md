@@ -7,6 +7,13 @@
     - Change the type of `tokenizationMethod` property from `String?` to `TokenizationMethod?`
 - Changes to `PaymentMethod`
     - Change the type of `type` property from `String?` to `PaymentMethod.Type?`
+      ```kotlin
+      // before
+      paymentMethod.type == "card"
+
+      // after
+      paymentMethod.type == PaymentMethod.Type.Card
+      ```
 - Changes to `CardInputWidget`
     - The postal code field is now displayed by default
     - The postal code input is not validated
@@ -24,7 +31,7 @@
     - `PaymentSession` now takes the `PaymentSessionConfig` instance through its constructor, instead of `init()`
     - By default, users will be asked for their postal code (i.e. `BillingAddressFields.PostalCode`) when adding a new
       card payment method.
-    - `PaymentSession#init(listener, paymentSessionConfig, savedInstanceState, shouldPrefetchCustomer)` is deleted.
+    - `PaymentSession#init()` no longer takes a `shouldPrefetchCustomer` argument.
       If you need to specify `shouldPrefetchCustomer`, use `PaymentSessionConfig.Builder.setShouldPrefetchCustomer()`.
     - `PaymentSession#presentPaymentMethodSelection(shouldRequirePostalCode, userSelectedPaymentMethodId)` is deleted.
       If you need to specify billing details, use `PaymentSessionConfig.Builder#setBillingAddressFields()`.

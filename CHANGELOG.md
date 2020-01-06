@@ -92,6 +92,8 @@
 * [#2006](https://github.com/stripe/stripe-android/pull/2006) Create `TokenizationMethod` enum
     * Change the type of `Card#tokenizationMethod` and `SourceCardData#tokenizationMethod` from `String?` to `TokenizationMethod?`
 * [#2013](https://github.com/stripe/stripe-android/pull/2013) Populate shipping address country from pre-populated shipping info
+* [#2015](https://github.com/stripe/stripe-android/pull/2015) Update `PaymentSessionConfig`'s default `BillingAddressFields` to `PostalCode`
+* [#2020](https://github.com/stripe/stripe-android/pull/2020) Change `PaymentMethod.type` from `String?` to `PaymentMethod.Type?`
 
 ## 12.8.2 - 2019-12-20
 * [#1974](https://github.com/stripe/stripe-android/pull/1974) Add `PaymentSessionConfig#shouldPrefetchCustomer`
