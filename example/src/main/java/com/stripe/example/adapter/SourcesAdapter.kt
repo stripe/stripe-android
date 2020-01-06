@@ -6,91 +6,64 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.model.Source
+import com.stripe.android.model.SourceCardData
 import com.stripe.example.R
-import java.util.ArrayList
 
-/**
- * A simple [RecyclerView] implementation to hold our data.
- */
-// Provide a suitable constructor (depends on the kind of dataset)
-class SourcesAdapter : RecyclerView.Adapter<SourcesAdapter.ViewHolder>() {
-    private val data = ArrayList<ViewModel>()
+internal class SourcesAdapter : RecyclerView.Adapter<SourcesAdapter.ViewHolder>() {
+    private val sources: MutableList<Source> = mutableListOf()
 
-    // Provide a reference to the views for each data item
-    // Complex data items may need more than one view per item, and
-    // you provide access to all the views for a data item in a view holder
-    class ViewHolder(pollingLayout: View) : RecyclerView.ViewHolder(pollingLayout) {
-        // each data item is just a string in this case
-        private val finalStatusView: TextView = pollingLayout.findViewById(R.id.tv_ending_status)
-        private val redirectStatusView: TextView = pollingLayout.findViewById(R.id.tv_redirect_status)
-        private val sourceIdView: TextView = pollingLayout.findViewById(R.id.tv_source_id)
-        private val sourceTypeView: TextView = pollingLayout.findViewById(R.id.tv_source_type)
+    init {
+        setHasStableIds(true)
+        notifyDataSetChanged()
+    }
 
-        fun setFinalStatus(finalStatus: String?) {
-            finalStatusView.text = finalStatus
-        }
+    internal class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val statusView: TextView = itemView.findViewById(R.id.tv_ending_status)
+        private val redirectStatusView: TextView = itemView.findViewById(R.id.tv_redirect_status)
+        private val idView: TextView = itemView.findViewById(R.id.tv_source_id)
+        private val typeView: TextView = itemView.findViewById(R.id.tv_source_type)
 
-        fun setSourceId(sourceId: String?) {
-            val last6 = if (sourceId == null || sourceId.length < 6) {
-                sourceId
-            } else {
+        fun bind(source: Source) {
+            statusView.text = source.status
+            redirectStatusView.text = getRedirectStatus(source)
+            idView.text = source.id?.let { sourceId ->
                 sourceId.substring(sourceId.length - 6)
             }
-            sourceIdView.text = last6
-        }
 
-        fun setSourceType(sourceType: String?) {
-            val viewableType: String? = if (Source.SourceType.THREE_D_SECURE == sourceType) {
+            typeView.text = if (Source.SourceType.THREE_D_SECURE == source.type) {
                 "3DS"
             } else {
-                sourceType
+                source.type
             }
-            sourceTypeView.text = viewableType
         }
 
-        fun setRedirectStatus(redirectStatus: String?) {
-            redirectStatusView.text = redirectStatus
+        private fun getRedirectStatus(source: Source): String? {
+            return source.redirect?.status
+                ?: (source.sourceTypeModel as SourceCardData).threeDSecureStatus
         }
     }
 
-    internal data class ViewModel constructor(
-        val finalStatus: String?,
-        val redirectStatus: String?,
-        val sourceId: String?,
-        val sourceType: String?
-    )
-
-    // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        // create a new view
         return ViewHolder(
             LayoutInflater.from(parent.context)
-                .inflate(R.layout.polling_list_item, parent, false))
+                .inflate(R.layout.sources_list_item, parent, false)
+        )
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        // - get element from your dataset at this position
-        // - replace the contents of the view with that element
-        val model = data[position]
-        holder.setFinalStatus(model.finalStatus)
-        holder.setRedirectStatus(model.redirectStatus)
-        holder.setSourceId(model.sourceId)
-        holder.setSourceType(model.sourceType)
+        holder.bind(sources[position])
     }
 
-    // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount(): Int {
-        return data.size
+        return sources.size
     }
 
-    fun addItem(
-        finalStatus: String?,
-        redirectStatus: String?,
-        sourceId: String?,
-        sourceType: String?
-    ) {
-        data.add(0, ViewModel(finalStatus, redirectStatus, sourceId, sourceType))
+    override fun getItemId(position: Int): Long {
+        return sources[position].id.orEmpty().hashCode().toLong()
+    }
+
+    fun addSource(source: Source) {
+        sources.add(0, source)
         notifyItemInserted(0)
     }
 }
