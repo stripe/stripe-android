@@ -85,8 +85,8 @@ data class SetupIntent internal constructor(
     /**
      * @return The error encountered in the previous SetupIntent confirmation.
      */
-    val lastSetupError: Error?
-) : StripeModel, StripeIntent {
+    val lastSetupError: Error? = null
+) : StripeIntent {
 
     override val redirectData: StripeIntent.RedirectData?
         get() {

@@ -7,7 +7,7 @@ import org.json.JSONObject
 
 internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
     override fun parse(json: JSONObject): PaymentIntent? {
-        if (VALUE_PAYMENT_INTENT != json.optString(FIELD_OBJECT)) {
+        if (OBJECT_TYPE != json.optString(FIELD_OBJECT)) {
             return null
         }
 
@@ -42,25 +42,25 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
             }
 
         return PaymentIntent(
-            id,
-            objectType,
-            paymentMethodTypes,
-            amount,
-            canceledAt,
-            cancellationReason,
-            captureMethod,
-            clientSecret,
-            confirmationMethod,
-            created,
-            currency,
-            description,
-            livemode,
-            nextAction,
-            paymentMethodId,
-            receiptEmail,
-            status,
-            setupFutureUsage,
-            lastPaymentError
+            id = id,
+            objectType = objectType,
+            paymentMethodTypes = paymentMethodTypes,
+            amount = amount,
+            canceledAt = canceledAt,
+            cancellationReason = cancellationReason,
+            captureMethod = captureMethod,
+            clientSecret = clientSecret,
+            confirmationMethod = confirmationMethod,
+            created = created,
+            currency = currency,
+            description = description,
+            isLiveMode = livemode,
+            nextAction = nextAction,
+            paymentMethodId = paymentMethodId,
+            receiptEmail = receiptEmail,
+            status = status,
+            setupFutureUsage = setupFutureUsage,
+            lastPaymentError = lastPaymentError
         )
     }
 
@@ -95,7 +95,7 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
     }
 
     private companion object {
-        private const val VALUE_PAYMENT_INTENT = "payment_intent"
+        private const val OBJECT_TYPE = "payment_intent"
 
         private const val FIELD_ID = "id"
         private const val FIELD_OBJECT = "object"
