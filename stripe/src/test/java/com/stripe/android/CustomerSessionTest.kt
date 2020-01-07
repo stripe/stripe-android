@@ -15,7 +15,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceFixtures
 import com.stripe.android.model.parsers.EphemeralKeyJsonParser
-import com.stripe.android.testharness.JsonTestUtils
 import com.stripe.android.testharness.TestEphemeralKeyProvider
 import com.stripe.android.view.ActivityScenarioFactory
 import com.stripe.android.view.AddPaymentMethodActivity
@@ -157,11 +156,11 @@ class CustomerSessionTest {
 
         val expectedTokens = listOf(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
 
-        JsonTestUtils.assertListEquals(expectedTokens, customerSession.productUsageTokens.toList())
+        assertEquals(expectedTokens, customerSession.productUsageTokens.toList())
 
         customerSession.addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY)
 
-        JsonTestUtils.assertListEquals(
+        assertEquals(
             expectedTokens.plus(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY),
             customerSession.productUsageTokens.toList()
         )
@@ -171,8 +170,7 @@ class CustomerSessionTest {
     fun addProductUsageTokenIfValid_whenNotValid_addsNoTokens() {
         val customerSession = createCustomerSession(null)
         customerSession.addProductUsageTokenIfValid("SomeUnknownActivity")
-        JsonTestUtils.assertListEquals(emptyList<String>(),
-            customerSession.productUsageTokens.toList())
+        assertTrue(customerSession.productUsageTokens.toList().isEmpty())
     }
 
     @Test

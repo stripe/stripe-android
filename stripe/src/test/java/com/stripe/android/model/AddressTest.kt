@@ -1,6 +1,5 @@
 package com.stripe.android.model
 
-import com.stripe.android.testharness.JsonTestUtils.assertMapEquals
 import com.stripe.android.utils.ParcelUtils
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -15,7 +14,7 @@ class AddressTest {
 
     @Test
     fun fromJsonString_toParamMap_createsExpectedParamMap() {
-        assertMapEquals(MAP_ADDRESS, AddressFixtures.ADDRESS.toParamMap())
+        assertEquals(MAP_ADDRESS, AddressFixtures.ADDRESS.toParamMap())
     }
 
     @Test
