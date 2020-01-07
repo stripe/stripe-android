@@ -66,6 +66,7 @@ class CardNumberEditText @JvmOverloads constructor(
         }
 
     init {
+        setErrorMessage(resources.getString(R.string.invalid_card_number))
         listenForTextChanges()
     }
 

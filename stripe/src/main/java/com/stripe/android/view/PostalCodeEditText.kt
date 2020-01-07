@@ -15,6 +15,7 @@ class PostalCodeEditText @JvmOverloads constructor(
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     init {
+        setErrorMessage(resources.getString(R.string.invalid_zip))
         maxLines = 1
         configureForUs()
     }

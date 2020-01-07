@@ -211,7 +211,6 @@ class CardMultilineWidget @JvmOverloads constructor(
             cvcTextInputLayout,
             postalInputLayout)
 
-        initErrorMessages()
         initFocusChangeListeners()
         initDeleteEmptyListeners()
 
@@ -478,13 +477,6 @@ class CardMultilineWidget @JvmOverloads constructor(
         // we can still say where you go when you delete an empty field from it.
         postalCodeEditText.setDeleteEmptyListener(
             BackUpFieldDeleteListener(cvcEditText))
-    }
-
-    private fun initErrorMessages() {
-        cardNumberEditText.setErrorMessage(context.getString(R.string.invalid_card_number))
-        expiryDateEditText.setErrorMessage(context.getString(R.string.invalid_expiry_year))
-        cvcEditText.setErrorMessage(context.getString(R.string.invalid_cvc))
-        postalCodeEditText.setErrorMessage(context.getString(R.string.invalid_zip))
     }
 
     private fun initFocusChangeListeners() {

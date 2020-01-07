@@ -50,6 +50,7 @@ class CvcEditText @JvmOverloads constructor(
     internal var completionCallback: () -> Unit = {}
 
     init {
+        setErrorMessage(resources.getString(R.string.invalid_cvc))
         setHint(R.string.cvc_number_hint)
         maxLines = 1
         filters = INPUT_FILTER_AMEX

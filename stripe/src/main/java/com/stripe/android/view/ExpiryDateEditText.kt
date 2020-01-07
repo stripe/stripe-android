@@ -17,7 +17,9 @@ class ExpiryDateEditText @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle
 ) : StripeEditText(context, attrs, defStyleAttr) {
+
     init {
+        setErrorMessage(resources.getString(R.string.invalid_expiry_year))
         listenForTextChanges()
     }
 
