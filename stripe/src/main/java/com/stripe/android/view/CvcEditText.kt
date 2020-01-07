@@ -10,7 +10,6 @@ import android.util.AttributeSet
 import android.view.View
 import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
-import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
 
 class CvcEditText @JvmOverloads constructor(
@@ -30,19 +29,14 @@ class CvcEditText @JvmOverloads constructor(
     internal val rawCvcValue: String
         @JvmSynthetic
         get() {
-            return text.toString().trim()
+            return fieldText.trim()
         }
 
-    private var isAmex: Boolean = false
+    private var cardBrand: CardBrand = CardBrand.Unknown
 
     private val isValid: Boolean
         get() {
-            val cvcLength = rawCvcValue.length
-            return if (isAmex && cvcLength == Card.CVC_LENGTH_AMERICAN_EXPRESS) {
-                true
-            } else {
-                cvcLength == Card.CVC_LENGTH_COMMON
-            }
+            return cardBrand.isValidCvc(rawCvcValue)
         }
 
     // invoked when a valid CVC has been entered
@@ -52,7 +46,7 @@ class CvcEditText @JvmOverloads constructor(
     init {
         setHint(R.string.cvc_number_hint)
         maxLines = 1
-        filters = INPUT_FILTER_AMEX
+        filters = createFilters(CardBrand.Unknown)
 
         inputType = InputType.TYPE_NUMBER_VARIATION_PASSWORD
         keyListener = DigitsKeyListener.getInstance(false, true)
@@ -63,7 +57,7 @@ class CvcEditText @JvmOverloads constructor(
 
         addTextChangedListener(object : StripeTextWatcher() {
             override fun afterTextChanged(s: Editable?) {
-                if (isValid) {
+                if (cardBrand.isMaxCvc(rawCvcValue)) {
                     completionCallback()
                 }
             }
@@ -82,15 +76,11 @@ class CvcEditText @JvmOverloads constructor(
         customHintText: String? = null,
         textInputLayout: TextInputLayout? = null
     ) {
-        isAmex = CardBrand.AmericanExpress == cardBrand
-        filters = if (isAmex) {
-            INPUT_FILTER_AMEX
-        } else {
-            INPUT_FILTER_COMMON
-        }
+        this.cardBrand = cardBrand
+        filters = createFilters(cardBrand)
 
         val hintText = customHintText
-            ?: if (isAmex) {
+            ?: if (cardBrand == CardBrand.AmericanExpress) {
                 resources.getString(R.string.cvc_amex_hint)
             } else {
                 resources.getString(R.string.cvc_number_hint)
@@ -103,11 +93,7 @@ class CvcEditText @JvmOverloads constructor(
         }
     }
 
-    private companion object {
-        private val INPUT_FILTER_AMEX: Array<InputFilter> =
-            arrayOf(InputFilter.LengthFilter(Card.CVC_LENGTH_AMERICAN_EXPRESS))
-
-        private val INPUT_FILTER_COMMON: Array<InputFilter> =
-            arrayOf(InputFilter.LengthFilter(Card.CVC_LENGTH_COMMON))
+    private fun createFilters(cardBrand: CardBrand): Array<InputFilter> {
+        return arrayOf(InputFilter.LengthFilter(cardBrand.maxCvcLength))
     }
 }

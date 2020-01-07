@@ -3,9 +3,7 @@ package com.stripe.android.view
 import com.stripe.android.model.CardBrand
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -121,57 +119,6 @@ internal class ViewUtilsTest {
         assertEquals("0566", groups[1])
         assertEquals("5566", groups[2])
         assertEquals("555", groups[3])
-    }
-
-    @Test
-    fun isCvcMaximalLength_whenThreeDigitsAndNotAmEx_returnsTrue() {
-        assertTrue(ViewUtils.isCvcMaximalLength(CardBrand.Visa, "123"))
-        assertTrue(ViewUtils.isCvcMaximalLength(CardBrand.MasterCard, "345"))
-        assertTrue(ViewUtils.isCvcMaximalLength(CardBrand.JCB, "678"))
-        assertTrue(ViewUtils.isCvcMaximalLength(CardBrand.DinersClub, "910"))
-        assertTrue(ViewUtils.isCvcMaximalLength(CardBrand.Discover, "234"))
-        assertTrue(ViewUtils.isCvcMaximalLength(CardBrand.Unknown, "333"))
-    }
-
-    @Test
-    fun isCvcMaximalLength_whenThreeDigitsAndIsAmEx_returnsFalse() {
-        assertFalse(ViewUtils.isCvcMaximalLength(CardBrand.AmericanExpress, "123"))
-    }
-
-    @Test
-    fun isCvcMaximalLength_whenFourDigitsAndIsAmEx_returnsTrue() {
-        assertTrue(ViewUtils.isCvcMaximalLength(CardBrand.AmericanExpress, "1234"))
-    }
-
-    @Test
-    fun isCvcMaximalLength_whenTooManyDigits_returnsFalse() {
-        assertFalse(ViewUtils.isCvcMaximalLength(CardBrand.AmericanExpress, "12345"))
-        assertFalse(ViewUtils.isCvcMaximalLength(CardBrand.Visa, "1234"))
-        assertFalse(ViewUtils.isCvcMaximalLength(CardBrand.MasterCard, "123456"))
-        assertFalse(ViewUtils.isCvcMaximalLength(CardBrand.DinersClub, "1234567"))
-        assertFalse(ViewUtils.isCvcMaximalLength(CardBrand.Discover, "12345678"))
-        assertFalse(ViewUtils.isCvcMaximalLength(CardBrand.JCB, "123456789012345"))
-    }
-
-    @Test
-    fun isCvcMaximalLength_whenNotEnoughDigits_returnsFalse() {
-        assertFalse(ViewUtils.isCvcMaximalLength(CardBrand.AmericanExpress, ""))
-        assertFalse(ViewUtils.isCvcMaximalLength(CardBrand.Visa, "1"))
-        assertFalse(ViewUtils.isCvcMaximalLength(CardBrand.MasterCard, "12"))
-        assertFalse(ViewUtils.isCvcMaximalLength(CardBrand.DinersClub, ""))
-        assertFalse(ViewUtils.isCvcMaximalLength(CardBrand.Discover, "8"))
-        assertFalse(ViewUtils.isCvcMaximalLength(CardBrand.JCB, "1"))
-    }
-
-    @Test
-    fun isCvcMaximalLength_whenWhitespaceAndNotEnoughDigits_returnsFalse() {
-        assertFalse(ViewUtils.isCvcMaximalLength(CardBrand.AmericanExpress, "   "))
-        assertFalse(ViewUtils.isCvcMaximalLength(CardBrand.Visa, "  1"))
-    }
-
-    @Test
-    fun isCvcMaximalLength_whenNull_returnsFalse() {
-        assertFalse(ViewUtils.isCvcMaximalLength(CardBrand.AmericanExpress, null))
     }
 
     @Test

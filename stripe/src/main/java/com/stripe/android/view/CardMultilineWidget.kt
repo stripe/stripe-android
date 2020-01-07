@@ -233,7 +233,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         cvcEditText.setAfterTextChangedListener(
             object : StripeEditText.AfterTextChangedListener {
                 override fun onTextChanged(text: String) {
-                    if (ViewUtils.isCvcMaximalLength(cardBrand, text)) {
+                    if (cardBrand.isMaxCvc(text)) {
                         updateBrandUi()
                         if (shouldShowPostalCode) {
                             postalCodeEditText.requestFocus()
@@ -460,7 +460,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     }
 
     private fun flipToCvcIconIfNotFinished() {
-        if (ViewUtils.isCvcMaximalLength(cardBrand, cvcEditText.text?.toString())) {
+        if (cardBrand.isMaxCvc(cvcEditText.text?.toString())) {
             return
         }
 

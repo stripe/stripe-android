@@ -66,4 +66,55 @@ class CardBrandTest {
             CardBrand.Unknown.isValidCardNumberLength(CardNumberFixtures.VALID_VISA_NO_SPACES)
         )
     }
+
+    @Test
+    fun isMaxCvc_whenThreeDigitsAndNotAmEx_returnsTrue() {
+        assertTrue(CardBrand.Visa.isMaxCvc("123"))
+        assertTrue(CardBrand.MasterCard.isMaxCvc("345"))
+        assertTrue(CardBrand.JCB.isMaxCvc("678"))
+        assertTrue(CardBrand.DinersClub.isMaxCvc("910"))
+        assertTrue(CardBrand.Discover.isMaxCvc("234"))
+        assertTrue(CardBrand.Unknown.isMaxCvc("3333"))
+    }
+
+    @Test
+    fun isMaxCvc_whenThreeDigitsAndIsAmEx_returnsFalse() {
+        assertFalse(CardBrand.AmericanExpress.isMaxCvc("123"))
+    }
+
+    @Test
+    fun isMaxCvc_whenFourDigitsAndIsAmEx_returnsTrue() {
+        assertTrue(CardBrand.AmericanExpress.isMaxCvc("1234"))
+    }
+
+    @Test
+    fun isMaxCvc_whenTooManyDigits_returnsFalse() {
+        assertFalse(CardBrand.AmericanExpress.isMaxCvc("12345"))
+        assertFalse(CardBrand.Visa.isMaxCvc("1234"))
+        assertFalse(CardBrand.MasterCard.isMaxCvc("123456"))
+        assertFalse(CardBrand.DinersClub.isMaxCvc("1234567"))
+        assertFalse(CardBrand.Discover.isMaxCvc("12345678"))
+        assertFalse(CardBrand.JCB.isMaxCvc("123456789012345"))
+    }
+
+    @Test
+    fun isMaxCvc_whenNotEnoughDigits_returnsFalse() {
+        assertFalse(CardBrand.AmericanExpress.isMaxCvc(""))
+        assertFalse(CardBrand.Visa.isMaxCvc("1"))
+        assertFalse(CardBrand.MasterCard.isMaxCvc("12"))
+        assertFalse(CardBrand.DinersClub.isMaxCvc(""))
+        assertFalse(CardBrand.Discover.isMaxCvc("8"))
+        assertFalse(CardBrand.JCB.isMaxCvc("1"))
+    }
+
+    @Test
+    fun isMaxCvc_whenWhitespaceAndNotEnoughDigits_returnsFalse() {
+        assertFalse(CardBrand.AmericanExpress.isMaxCvc("   "))
+        assertFalse(CardBrand.Visa.isMaxCvc("  1"))
+    }
+
+    @Test
+    fun isMaxCvc_whenNull_returnsFalse() {
+        assertFalse(CardBrand.AmericanExpress.isMaxCvc(null))
+    }
 }

@@ -642,7 +642,7 @@ class CardInputWidget @JvmOverloads constructor(
         cvcNumberEditText.setAfterTextChangedListener(
             object : StripeEditText.AfterTextChangedListener {
                 override fun onTextChanged(text: String) {
-                    if (ViewUtils.isCvcMaximalLength(brand, text)) {
+                    if (brand.isMaxCvc(text)) {
                         cardInputListener?.onCvcComplete()
                     }
                     updateIconCvc(cvcNumberEditText.hasFocus(), text)
@@ -1257,7 +1257,7 @@ class CardInputWidget @JvmOverloads constructor(
             cvcHasFocus: Boolean,
             cvcText: String?
         ): Boolean {
-            return !cvcHasFocus || ViewUtils.isCvcMaximalLength(brand, cvcText)
+            return !cvcHasFocus || brand.isMaxCvc(cvcText)
         }
     }
 }

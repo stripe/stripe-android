@@ -639,13 +639,13 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
     fun onUpdateIcon_forCommonLengthBrand_setsLengthOnCvc() {
         // This should set the brand to Visa. Note that more extensive brand checking occurs
         // in CardNumberEditTextTest.
-        cardNumberEditText.append(Card.PREFIXES_VISA[0])
+        cardNumberEditText.append(CardBrand.Visa.prefixes.first())
         assertTrue(ViewTestUtils.hasMaxLength(cvcEditText, 3))
     }
 
     @Test
     fun onUpdateText_forAmExPrefix_setsLengthOnCvc() {
-        cardNumberEditText.append(Card.PREFIXES_AMERICAN_EXPRESS[0])
+        cardNumberEditText.append(CardBrand.AmericanExpress.prefixes.first())
         assertTrue(ViewTestUtils.hasMaxLength(cvcEditText, 4))
     }
 
@@ -1029,6 +1029,7 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
 
     @Test
     fun setCvcCode_withLongString_truncatesValue() {
+        cvcEditText.updateBrand(CardBrand.Visa)
         cardInputWidget.setCvcCode(CVC_VALUE_AMEX)
         assertEquals(CVC_VALUE_COMMON, cvcEditText.text.toString())
     }
@@ -1209,7 +1210,11 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         assertTrue(shouldIconShowBrand(CardBrand.JCB, true, "555"))
         assertTrue(shouldIconShowBrand(CardBrand.MasterCard, true, "919"))
         assertTrue(shouldIconShowBrand(CardBrand.DinersClub, true, "415"))
-        assertTrue(shouldIconShowBrand(CardBrand.Unknown, true, "212"))
+    }
+
+    @Test
+    fun shouldIconShowBrand_whenUnknownBrandAndCvcStringLengthIsFour_isTrue() {
+        assertTrue(shouldIconShowBrand(CardBrand.Unknown, true, "2124"))
     }
 
     @Test

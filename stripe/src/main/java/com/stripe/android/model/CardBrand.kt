@@ -17,7 +17,14 @@ enum class CardBrand(
      */
     val cvcLength: Set<Int> = setOf(3),
 
+    /**
+     * The max length when the card number is formatted with spaces (e.g. "4242 4242 4242 4242")
+     */
     val maxLengthWithSpaces: Int = 19,
+
+    /**
+     * The max length when the card number is formatted without spaces (e.g. "4242424242424242")
+     */
     val maxLengthWithoutSpaces: Int = 16,
 
     /**
@@ -101,6 +108,11 @@ enum class CardBrand(
         cvcLength = setOf(3, 4)
     );
 
+    val maxCvcLength: Int
+        get() {
+            return cvcLength.max() ?: CVC_COMMON_LENGTH
+        }
+
     /**
      * Checks to see whether the input number is of the correct length, given the assumed brand of
      * the card. This function does not perform a Luhn check.
@@ -115,6 +127,11 @@ enum class CardBrand(
 
     fun isValidCvc(cvc: String): Boolean {
         return cvcLength.contains(cvc.length)
+    }
+
+    fun isMaxCvc(cvcText: String?): Boolean {
+        val cvcLength = cvcText?.trim()?.length ?: 0
+        return maxCvcLength == cvcLength
     }
 
     companion object {
@@ -142,5 +159,7 @@ enum class CardBrand(
         fun fromCode(code: String?): CardBrand {
             return values().firstOrNull { it.code.equals(code, ignoreCase = true) } ?: Unknown
         }
+
+        private const val CVC_COMMON_LENGTH: Int = 3
     }
 }
