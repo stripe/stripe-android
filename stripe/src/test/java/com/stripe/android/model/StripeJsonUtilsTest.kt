@@ -1,6 +1,5 @@
 package com.stripe.android.model
 
-import com.stripe.android.testharness.JsonTestUtils
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -80,7 +79,7 @@ class StripeJsonUtilsTest {
         )
 
         val mappedObject = StripeJsonUtils.jsonObjectToMap(SIMPLE_JSON_TEST_OBJECT)
-        JsonTestUtils.assertMapEquals(expectedMap, mappedObject)
+        assertEquals(expectedMap, mappedObject)
     }
 
     @Test
@@ -93,7 +92,7 @@ class StripeJsonUtilsTest {
         )
 
         val mappedObject = StripeJsonUtils.jsonObjectToStringMap(SIMPLE_JSON_TEST_OBJECT)
-        JsonTestUtils.assertMapEquals(expectedMap, mappedObject)
+        assertEquals(expectedMap, mappedObject)
     }
 
     @Test
@@ -109,7 +108,7 @@ class StripeJsonUtilsTest {
         )
 
         val mappedObject = StripeJsonUtils.jsonObjectToMap(NESTED_JSON_TEST_OBJECT)
-        JsonTestUtils.assertMapEquals(expectedMap, mappedObject)
+        assertEquals(expectedMap, mappedObject)
     }
 
     @Test
@@ -123,7 +122,7 @@ class StripeJsonUtilsTest {
         )
 
         val mappedObject = StripeJsonUtils.jsonObjectToStringMap(NESTED_JSON_TEST_OBJECT)
-        JsonTestUtils.assertMapEquals(expectedMap, mappedObject)
+        assertEquals(expectedMap, mappedObject)
     }
 
     @Test
@@ -146,14 +145,14 @@ class StripeJsonUtilsTest {
 
         val convertedMap =
             StripeJsonUtils.jsonObjectToMap(NESTED_MIXED_ARRAY_OBJECT)
-        JsonTestUtils.assertMapEquals(expectedMap, convertedMap)
+        assertEquals(expectedMap, convertedMap)
     }
 
     @Test
     fun jsonArrayToList_forSimpleList_returnsExpectedList() {
         val expectedList = listOf(1, 2, 3, "a", true, "cde")
         val convertedJsonArray = StripeJsonUtils.jsonArrayToList(SIMPLE_JSON_TEST_ARRAY)
-        JsonTestUtils.assertListEquals(expectedList, convertedJsonArray)
+        assertEquals(expectedList, convertedJsonArray)
     }
 
     private companion object {

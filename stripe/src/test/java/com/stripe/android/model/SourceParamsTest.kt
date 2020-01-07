@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import com.stripe.android.CardNumberFixtures.VALID_VISA_NO_SPACES
-import com.stripe.android.testharness.JsonTestUtils
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -133,7 +132,7 @@ class SourceParamsTest {
             )
         )
 
-        JsonTestUtils.assertMapEquals(expectedMap, params.toParamMap())
+        assertEquals(expectedMap, params.toParamMap())
     }
 
     @Test
@@ -226,7 +225,7 @@ class SourceParamsTest {
             "metadata" to METADATA
         )
 
-        JsonTestUtils.assertMapEquals(totalExpectedMap, params.toParamMap())
+        assertEquals(totalExpectedMap, params.toParamMap())
     }
 
     @Test
@@ -300,7 +299,7 @@ class SourceParamsTest {
             Source.SourceType.EPS to mapOf("statement_descriptor" to "stripe descriptor")
         )
 
-        JsonTestUtils.assertMapEquals(expectedMap, params.toParamMap())
+        assertEquals(expectedMap, params.toParamMap())
     }
 
     @Test
@@ -318,7 +317,7 @@ class SourceParamsTest {
             "redirect" to mapOf("return_url" to "stripe://return")
         )
 
-        JsonTestUtils.assertMapEquals(expectedMap, params.toParamMap())
+        assertEquals(expectedMap, params.toParamMap())
     }
 
     @Test
@@ -367,7 +366,7 @@ class SourceParamsTest {
             )
         )
 
-        JsonTestUtils.assertMapEquals(expectedMap, params.toParamMap())
+        assertEquals(expectedMap, params.toParamMap())
     }
 
     @Test
@@ -431,7 +430,7 @@ class SourceParamsTest {
             )
         )
 
-        JsonTestUtils.assertMapEquals(expectedMap, params.toParamMap())
+        assertEquals(expectedMap, params.toParamMap())
     }
 
     @Test
@@ -508,7 +507,7 @@ class SourceParamsTest {
             "redirect" to mapOf("return_url" to "stripe://testactivity")
         )
 
-        JsonTestUtils.assertMapEquals(expectedMap, params.toParamMap())
+        assertEquals(expectedMap, params.toParamMap())
     }
 
     @Test
@@ -567,7 +566,7 @@ class SourceParamsTest {
         assertEquals(Source.SourceType.SEPA_DEBIT, params.type)
 
         val actualMap = params.toParamMap()
-        JsonTestUtils.assertMapEquals(expectedMap, actualMap)
+        assertEquals(expectedMap, actualMap)
     }
 
     @Test
@@ -608,7 +607,7 @@ class SourceParamsTest {
             )
         )
 
-        JsonTestUtils.assertMapEquals(expectedMap, params.toParamMap())
+        assertEquals(expectedMap, params.toParamMap())
     }
 
     @Test
@@ -648,7 +647,7 @@ class SourceParamsTest {
             Source.SourceType.THREE_D_SECURE to mapOf("card" to "card_id_123")
         )
 
-        JsonTestUtils.assertMapEquals(expectedMap, params.toParamMap())
+        assertEquals(expectedMap, params.toParamMap())
     }
 
     @Test
@@ -677,7 +676,7 @@ class SourceParamsTest {
             dogecoin to mapOf("statement_descriptor" to "stripe descriptor")
         )
 
-        JsonTestUtils.assertMapEquals(expectedMap, params.toParamMap())
+        assertEquals(expectedMap, params.toParamMap())
     }
 
     @Test
