@@ -58,8 +58,10 @@ class CvcEditTextTest {
     }
 
     @Test
-    fun completionCallback_isInvoked_whenValid() {
+    fun completionCallback_whenVisa_isInvoked_whenMax() {
         var hasCompleted = false
+
+        cvcEditText.updateBrand(CardBrand.Visa)
         cvcEditText.completionCallback = { hasCompleted = true }
 
         cvcEditText.setText("1")
@@ -69,6 +71,26 @@ class CvcEditTextTest {
         assertFalse(hasCompleted)
 
         cvcEditText.setText("123")
+        assertTrue(hasCompleted)
+    }
+
+    @Test
+    fun completionCallback_whenAmex_isInvoked_whenMax() {
+        var hasCompleted = false
+
+        cvcEditText.updateBrand(CardBrand.AmericanExpress)
+        cvcEditText.completionCallback = { hasCompleted = true }
+
+        cvcEditText.setText("1")
+        assertFalse(hasCompleted)
+
+        cvcEditText.setText("12")
+        assertFalse(hasCompleted)
+
+        cvcEditText.setText("123")
+        assertFalse(hasCompleted)
+
+        cvcEditText.setText("1234")
         assertTrue(hasCompleted)
     }
 }

@@ -1,26 +1,11 @@
 package com.stripe.android.view
 
-import com.stripe.android.model.Card.Companion.CVC_LENGTH_AMERICAN_EXPRESS
-import com.stripe.android.model.Card.Companion.CVC_LENGTH_COMMON
 import com.stripe.android.model.CardBrand
 
 /**
  * Static utility functions needed for View classes.
  */
 internal object ViewUtils {
-    @JvmStatic
-    fun isCvcMaximalLength(
-        cardBrand: CardBrand,
-        cvcText: String?
-    ): Boolean {
-        val cvcLength = cvcText?.trim { it <= ' ' }?.length ?: 0
-        return if (CardBrand.AmericanExpress == cardBrand) {
-            cvcLength == CVC_LENGTH_AMERICAN_EXPRESS
-        } else {
-            cvcLength == CVC_LENGTH_COMMON
-        }
-    }
-
     /**
      * Separates a card number according to the brand requirements, including prefixes of card
      * numbers, so that the groups can be easily displayed if the user is typing them in.

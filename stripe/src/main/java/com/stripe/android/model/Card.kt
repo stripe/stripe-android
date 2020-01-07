@@ -546,31 +546,6 @@ data class Card internal constructor(
     }
 
     companion object {
-        const val CVC_LENGTH_AMERICAN_EXPRESS: Int = 4
-        const val CVC_LENGTH_COMMON: Int = 3
-
-        /**
-         * Based on [Issuer identification number table](http://en.wikipedia.org/wiki/Bank_card_number#Issuer_identification_number_.28IIN.29)
-         */
-        @Deprecated("Use CardBrand.AmericanExpress.prefixes", ReplaceWith("CardBrand.AmericanExpress.prefixes"))
-        val PREFIXES_AMERICAN_EXPRESS: Array<String> = CardBrand.AmericanExpress.prefixes.toTypedArray()
-        @Deprecated("Use CardBrand.Discover.prefixes", ReplaceWith("CardBrand.Discover.prefixes"))
-        val PREFIXES_DISCOVER: Array<String> = CardBrand.Discover.prefixes.toTypedArray()
-        @Deprecated("Use CardBrand.JCB.prefixes", ReplaceWith("CardBrand.JCB.prefixes"))
-        val PREFIXES_JCB: Array<String> = CardBrand.JCB.prefixes.toTypedArray()
-        @Deprecated("Use CardBrand.DinersClub.prefixes", ReplaceWith("CardBrand.DinersClub.prefixes"))
-        val PREFIXES_DINERS_CLUB: Array<String> = CardBrand.DinersClub.prefixes.toTypedArray()
-        @Deprecated("Use CardBrand.Visa.prefixes", ReplaceWith("CardBrand.Visa.prefixes"))
-        val PREFIXES_VISA: Array<String> = CardBrand.Visa.prefixes.toTypedArray()
-        @Deprecated("Use CardBrand.MasterCard.prefixes", ReplaceWith("CardBrand.MasterCard.prefixes"))
-        val PREFIXES_MASTERCARD: Array<String> = CardBrand.MasterCard.prefixes.toTypedArray()
-        @Deprecated("Use CardBrand.UnionPay.prefixes", ReplaceWith("CardBrand.AmericanExpress.prefixes"))
-        val PREFIXES_UNIONPAY: Array<String> = CardBrand.UnionPay.prefixes.toTypedArray()
-
-        const val MAX_LENGTH_STANDARD: Int = 16
-        const val MAX_LENGTH_AMERICAN_EXPRESS: Int = 15
-        const val MAX_LENGTH_DINERS_CLUB: Int = 14
-
         internal const val OBJECT_TYPE = "card"
 
         /**
