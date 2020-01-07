@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
+       xmlns:app="http://schemas.android.com/apk/res-auto"
        xmlns:tools="http://schemas.android.com/tools">
 
     <ImageView
@@ -20,123 +21,123 @@
         android:layout_gravity="center_vertical"
         >
 
-        <!--The only purpose of this TextView is to be an accessibility label.-->
-        <TextView
-            android:id="@+id/card_number_label"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:textColor="@android:color/transparent"
-            android:labelFor="@+id/et_card_number"
-            android:clickable="false"
-            android:focusable="false"
-            tools:importantForAccessibility="no"
-            android:focusableInTouchMode="false"
-            android:text="@string/acc_label_card_number"
-            android:visibility="gone"
-            />
-
-        <!--The only purpose of this TextView is to be an accessibility label.-->
-        <TextView
-            android:id="@+id/expiry_date_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:textColor="@android:color/transparent"
-            android:labelFor="@+id/et_expiry_date"
-            tools:importantForAccessibility="no"
-            android:clickable="false"
-            android:focusable="false"
-            android:focusableInTouchMode="false"
-            android:text="@string/acc_label_expiry_date"
-            android:visibility="gone"
-            />
-
         <!-- The accessibilityTraversalBefore attribute is ignored in sdk < 22 -->
-        <com.stripe.android.view.CardNumberEditText
-            android:id="@+id/et_card_number"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tl_card_number"
+            android:labelFor="@id/et_card_number"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:hint="@string/card_number_hint"
-            android:nextFocusRight="@+id/et_expiry_date"
-            android:nextFocusForward="@+id/et_expiry_date"
-            android:nextFocusDown="@+id/et_expiry_date"
-            tools:ignore="UnusedAttribute"
-            tools:importantForAccessibility="yes"
-            android:accessibilityTraversalBefore="@+id/et_expiry_date"
-            android:imeOptions="actionNext"
-            android:inputType="number"
-            android:maxLength="19"
             android:layout_gravity="start"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
             android:visibility="visible"
-            style="@style/Stripe.CardInputWidget.EditText"
-            />
+            android:background="@android:color/transparent"
+            tools:ignore="UnusedAttribute"
+            android:accessibilityTraversalBefore="@+id/tl_expiry_date"
+            android:nextFocusRight="@+id/tl_expiry_date"
+            android:nextFocusForward="@+id/tl_expiry_date"
+            android:nextFocusDown="@+id/tl_expiry_date"
+            android:contentDescription="@string/acc_label_card_number"
+            app:hintEnabled="false">
+            <com.stripe.android.view.CardNumberEditText
+                android:id="@+id/et_card_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:imeOptions="actionNext"
+                android:inputType="number"
+                android:maxLength="19"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:hint="@string/card_number_hint"
+                style="@style/Stripe.CardInputWidget.EditText"
+                />
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <com.stripe.android.view.ExpiryDateEditText
-            android:id="@+id/et_expiry_date"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tl_expiry_date"
+            android:labelFor="@id/et_expiry_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:hint="@string/expiry_date_hint"
-            tools:ignore="UnusedAttribute"
-            tools:importantForAccessibility="yes"
-            android:accessibilityTraversalBefore="@+id/et_cvc"
-            android:accessibilityTraversalAfter="@+id/et_card_number"
-            android:nextFocusRight="@+id/et_cvc"
-            android:nextFocusForward="@+id/et_cvc"
-            android:nextFocusDown="@+id/et_cvc"
-            android:nextFocusLeft="@id/et_card_number"
-            android:nextFocusUp="@id/et_card_number"
-            android:imeOptions="actionNext"
-            android:inputType="date"
-            android:maxLength="5"
-            android:visibility="visible"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
             android:layout_marginStart="@dimen/stripe_card_expiry_initial_margin"
             android:layout_gravity="start"
-            style="@style/Stripe.CardInputWidget.EditText"
-            />
+            android:visibility="visible"
+            android:background="@android:color/transparent"
+            tools:ignore="UnusedAttribute"
+            android:accessibilityTraversalBefore="@+id/tl_cvc"
+            android:accessibilityTraversalAfter="@+id/tl_card_number"
+            android:nextFocusRight="@+id/tl_cvc"
+            android:nextFocusForward="@+id/tl_cvc"
+            android:nextFocusDown="@+id/tl_cvc"
+            android:nextFocusLeft="@id/tl_card_number"
+            android:nextFocusUp="@id/tl_card_number"
+            android:contentDescription="@string/acc_label_expiry_date"
+            app:hintEnabled="false">
+            <com.stripe.android.view.ExpiryDateEditText
+                android:id="@+id/et_expiry_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:imeOptions="actionNext"
+                android:inputType="date"
+                android:maxLength="5"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:hint="@string/expiry_date_hint"
+                style="@style/Stripe.CardInputWidget.EditText"
+                />
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <com.stripe.android.view.CvcEditText
-            android:id="@+id/et_cvc"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tl_cvc"
+            android:labelFor="@id/et_cvc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:ignore="UnusedAttribute"
-            tools:importantForAccessibility="yes"
-            android:accessibilityTraversalAfter="@+id/et_expiry_date"
-            android:nextFocusLeft="@id/et_expiry_date"
-            android:nextFocusUp="@id/et_expiry_date"
-            android:background="@android:color/transparent"
-            android:imeOptions="actionDone"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
             android:layout_marginStart="@dimen/stripe_card_cvc_initial_margin"
             android:layout_gravity="start"
-            style="@style/Stripe.CardInputWidget.EditText"
-            />
+            android:background="@android:color/transparent"
+            tools:ignore="UnusedAttribute"
+            android:accessibilityTraversalAfter="@+id/tl_expiry_date"
+            android:nextFocusLeft="@id/tl_expiry_date"
+            android:nextFocusUp="@id/tl_expiry_date"
+            android:contentDescription="@string/cvc_number_hint"
+            app:hintEnabled="false">
+            <com.stripe.android.view.CvcEditText
+                android:id="@+id/et_cvc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:imeOptions="actionDone"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                style="@style/Stripe.CardInputWidget.EditText"
+                />
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <com.stripe.android.view.PostalCodeEditText
-            android:id="@+id/et_postal_code"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tl_postal_code"
+            android:labelFor="@id/et_postal_code"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:ignore="UnusedAttribute"
-            tools:importantForAccessibility="yes"
-            android:accessibilityTraversalAfter="@+id/et_cvc"
-            android:nextFocusLeft="@id/et_cvc"
-            android:nextFocusUp="@id/et_cvc"
-            android:background="@android:color/transparent"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:layout_marginStart="@dimen/stripe_card_cvc_initial_margin"
-            android:layout_gravity="start"
             android:visibility="gone"
-            android:enabled="false"
-            style="@style/Stripe.CardInputWidget.EditText"
-            />
+            android:layout_marginStart="@dimen/stripe_card_cvc_initial_margin"
+            android:layout_gravity="start"
+            android:background="@android:color/transparent"
+            tools:ignore="UnusedAttribute"
+            android:accessibilityTraversalAfter="@+id/tl_cvc"
+            android:nextFocusLeft="@id/tl_cvc"
+            android:nextFocusUp="@id/tl_cvc"
+            android:contentDescription="@string/address_label_postal_code"
+            app:hintEnabled="false">
+            <com.stripe.android.view.PostalCodeEditText
+                android:id="@+id/et_postal_code"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:enabled="false"
+                style="@style/Stripe.CardInputWidget.EditText"
+                />
+        </com.google.android.material.textfield.TextInputLayout>
 
     </FrameLayout>
 </merge>
