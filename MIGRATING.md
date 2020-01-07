@@ -14,9 +14,15 @@
       // after
       paymentMethod.type == PaymentMethod.Type.Card
       ```
+- Changes to `SourceParams`
+    - `setOwner()` now takes `OwnerParams` instead of `Map`
+    - `setRedirect()` has been removed; use `setReturnUrl()` instead
+- Changes to `StripeEditText`
+    - `StripeEditText` now extends `TextInputEditText` instead of `AppCompatEditText`
 - Changes to `CardInputWidget`
     - The postal code field is now displayed by default
     - The postal code input is not validated
+    - `StripeEditText` subclasses (e.g. `CardNumberEditText`) used in this widget are now wrapped in `TextInputLayout`
 - Changes to `CardMultilineWidget`
     - The postal code field is now displayed by default
     - The postal code field is now optional when displayed
