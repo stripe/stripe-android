@@ -28,6 +28,8 @@ open class StripeEditText @JvmOverloads constructor(
     defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle
 ) : TextInputEditText(context, attrs, defStyleAttr) {
 
+    protected var isLastKeyDelete: Boolean = false
+
     private var afterTextChangedListener: AfterTextChangedListener? = null
     private var deleteEmptyListener: DeleteEmptyListener? = null
     var cachedColorStateList: ColorStateList? = null
@@ -82,7 +84,10 @@ open class StripeEditText @JvmOverloads constructor(
         }
 
     init {
-        initView()
+        listenForTextChanges()
+        listenForDeleteEmpty()
+        determineDefaultErrorColor()
+        cachedColorStateList = textColors
     }
 
     override fun onCreateInputConnection(outAttrs: EditorInfo): InputConnection? {
@@ -167,13 +172,6 @@ open class StripeEditText @JvmOverloads constructor(
         hintHandler.removeCallbacksAndMessages(null)
     }
 
-    private fun initView() {
-        listenForTextChanges()
-        listenForDeleteEmpty()
-        determineDefaultErrorColor()
-        cachedColorStateList = textColors
-    }
-
     private fun determineDefaultErrorColor() {
         cachedColorStateList = textColors
         defaultErrorColor = ContextCompat.getColor(
@@ -199,17 +197,16 @@ open class StripeEditText @JvmOverloads constructor(
     private fun listenForDeleteEmpty() {
         // This method works for hard keyboards and older phones.
         setOnKeyListener { _, keyCode, event ->
-            if (isEmptyDelete(keyCode, event)) {
+            isLastKeyDelete = isDeleteKey(keyCode, event)
+            if (isLastKeyDelete && length() == 0) {
                 deleteEmptyListener?.onDeleteEmpty()
             }
             false
         }
     }
 
-    private fun isEmptyDelete(keyCode: Int, event: KeyEvent): Boolean {
-        return keyCode == KeyEvent.KEYCODE_DEL &&
-            event.action == KeyEvent.ACTION_DOWN &&
-            length() == 0
+    private fun isDeleteKey(keyCode: Int, event: KeyEvent): Boolean {
+        return keyCode == KeyEvent.KEYCODE_DEL && event.action == KeyEvent.ACTION_DOWN
     }
 
     interface DeleteEmptyListener {

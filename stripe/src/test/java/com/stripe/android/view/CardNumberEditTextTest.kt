@@ -33,13 +33,12 @@ class CardNumberEditTextTest {
         lastBrandChangeCallbackInvocation = it
     }
 
-    private lateinit var cardNumberEditText: CardNumberEditText
+    private val cardNumberEditText: CardNumberEditText by lazy {
+        CardNumberEditText(ApplicationProvider.getApplicationContext<Context>())
+    }
 
     @BeforeTest
     fun setup() {
-        cardNumberEditText = CardNumberEditText(
-            ApplicationProvider.getApplicationContext<Context>()
-        )
         cardNumberEditText.setText("")
         cardNumberEditText.completionCallback = completionCallback
         cardNumberEditText.brandChangeCallback = brandChangeCallback

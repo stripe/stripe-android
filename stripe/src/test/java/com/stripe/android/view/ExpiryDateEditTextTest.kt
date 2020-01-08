@@ -19,11 +19,12 @@ import org.robolectric.RobolectricTestRunner
  */
 @RunWith(RobolectricTestRunner::class)
 class ExpiryDateEditTextTest {
-    private lateinit var expiryDateEditText: ExpiryDateEditText
+    private val expiryDateEditText: ExpiryDateEditText by lazy {
+        ExpiryDateEditText(ApplicationProvider.getApplicationContext<Context>())
+    }
 
     @BeforeTest
     fun setup() {
-        expiryDateEditText = ExpiryDateEditText(ApplicationProvider.getApplicationContext<Context>())
         expiryDateEditText.setText("")
     }
 
@@ -72,13 +73,13 @@ class ExpiryDateEditTextTest {
     }
 
     @Test
-    fun afterInputThreeDigits_whenDeletingOne_textDoesNotContainSlash() {
+    fun afterInputThreeDigits_whenDeletingOne_textDoesContainSlash() {
         expiryDateEditText.append("1")
         expiryDateEditText.append("2")
         expiryDateEditText.append("3")
         ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
         val text = expiryDateEditText.text.toString()
-        assertEquals("12", text)
+        assertEquals("12/", text)
     }
 
     @Test
@@ -171,12 +172,12 @@ class ExpiryDateEditTextTest {
     }
 
     @Test
-    fun delete_whenAcrossSeparator_alwaysDeletesNumber() {
+    fun delete_whenAcrossSeparator_deletesSeparator() {
         expiryDateEditText.append("12")
         assertEquals("12/", expiryDateEditText.text.toString())
 
         ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
-        assertEquals("1", expiryDateEditText.text.toString())
+        assertEquals("12", expiryDateEditText.text.toString())
     }
 
     @Test
