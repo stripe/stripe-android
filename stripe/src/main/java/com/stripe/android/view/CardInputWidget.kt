@@ -117,19 +117,13 @@ class CardInputWidget @JvmOverloads constructor(
      */
     override val paymentMethodCard: PaymentMethodCreateParams.Card?
         get() {
-            val cardNumber = cardNumberEditText.cardNumber
-            val cardDate = expiryDateEditText.validDateFields
-            val cvcValue = cvcValue
-
-            return if (cardNumber != null && cardDate != null && cvcValue != null) {
+            return card?.let {
                 PaymentMethodCreateParams.Card(
-                    number = cardNumber,
-                    cvc = cvcValue,
-                    expiryMonth = cardDate.first,
-                    expiryYear = cardDate.second
+                    number = it.number,
+                    cvc = it.cvc,
+                    expiryMonth = it.expMonth,
+                    expiryYear = it.expYear
                 )
-            } else {
-                null
             }
         }
 
@@ -167,15 +161,26 @@ class CardInputWidget @JvmOverloads constructor(
         get() {
             val cardNumber = cardNumberEditText.cardNumber
             val cardDate = expiryDateEditText.validDateFields
-            return if (cardNumber != null && cardDate != null) {
-                cvcValue?.let {
-                    Card.Builder(cardNumber, cardDate.first, cardDate.second, it)
+            val cvcValue = this.cvcValue
+
+            when {
+                cardNumber == null -> {
+                    cardNumberEditText.requestFocus()
+                }
+                cardDate == null -> {
+                    expiryDateEditText.requestFocus()
+                }
+                cvcValue == null -> {
+                    cvcNumberEditText.requestFocus()
+                }
+                else -> {
+                    return Card.Builder(cardNumber, cardDate.first, cardDate.second, cvcValue)
                         .addressZip(postalCodeValue)
                         .loggingTokens(listOf(LOGGING_TOKEN))
                 }
-            } else {
-                null
             }
+
+            return null
         }
 
     private val frameWidth: Int
