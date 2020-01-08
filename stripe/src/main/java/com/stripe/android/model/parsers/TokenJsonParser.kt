@@ -44,7 +44,7 @@ internal class TokenJsonParser : ModelJsonParser<Token> {
             }
         } else if (
             TokenType.PII == tokenType || TokenType.ACCOUNT == tokenType ||
-            TokenType.CVC_UPDATE == tokenType
+            TokenType.CVC_UPDATE == tokenType || TokenType.PERSON == tokenType
         ) {
             Token(
                 id = tokenId,
@@ -85,6 +85,7 @@ internal class TokenJsonParser : ModelJsonParser<Token> {
                 TokenType.PII -> TokenType.PII
                 TokenType.ACCOUNT -> TokenType.ACCOUNT
                 TokenType.CVC_UPDATE -> TokenType.CVC_UPDATE
+                TokenType.PERSON -> TokenType.PERSON
                 else -> null
             }
         }
