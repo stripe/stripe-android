@@ -171,7 +171,7 @@ class CardNumberEditText @JvmOverloads constructor(
                 }
 
                 ignoreChanges = true
-                if (formattedNumber != null) {
+                if (!isLastKeyDelete && formattedNumber != null) {
                     setText(formattedNumber)
                     newCursorPosition?.let {
                         setSelection(it.coerceIn(0, fieldText.length))
@@ -183,10 +183,10 @@ class CardNumberEditText @JvmOverloads constructor(
                 ignoreChanges = false
 
                 if (fieldText.length == lengthMax) {
-                    val before = isCardNumberValid
+                    val wasCardNumberValid = isCardNumberValid
                     isCardNumberValid = CardUtils.isValidCardNumber(fieldText)
                     shouldShowError = !isCardNumberValid
-                    if (!before && isCardNumberValid) {
+                    if (!wasCardNumberValid && isCardNumberValid) {
                         completionCallback()
                     }
                 } else {

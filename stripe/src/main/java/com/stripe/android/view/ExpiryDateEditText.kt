@@ -158,7 +158,7 @@ class ExpiryDateEditText @JvmOverloads constructor(
                 }
 
                 ignoreChanges = true
-                if (formattedDate != null) {
+                if (!isLastKeyDelete && formattedDate != null) {
                     setText(formattedDate)
                     newCursorPosition?.let {
                         setSelection(it.coerceIn(0, fieldText.length))
