@@ -22,6 +22,7 @@ import com.stripe.android.model.CvcTokenParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PersonTokenParams
 import com.stripe.android.model.PiiTokenParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.Source
@@ -1152,6 +1153,63 @@ class Stripe internal constructor(
                 idempotencyKey = idempotencyKey
             ),
             Token.TokenType.CVC_UPDATE
+        )
+    }
+
+    /**
+     * Creates a single-use token that represents the details for a person. Use this when creating or
+     * updating persons associated with a Connect account.
+     * See [the documentation](https://stripe.com/docs/connect/account-tokens) to learn more.
+     *
+     * See [Create a person token](https://stripe.com/docs/api/tokens/create_person)
+     *
+     * @param params the person token creation params
+     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
+     * @param callback a [ApiResultCallback] to receive the result or error
+     */
+    @UiThread
+    @JvmOverloads
+    fun createPersonToken(
+        params: PersonTokenParams,
+        idempotencyKey: String? = null,
+        callback: ApiResultCallback<Token>
+    ) {
+        createTokenFromParams(
+            params.toParamMap(),
+            Token.TokenType.PERSON,
+            idempotencyKey,
+            callback
+        )
+    }
+
+    /**
+     * Creates a single-use token that represents the details for a person. Use this when creating or
+     * updating persons associated with a Connect account.
+     * See [the documentation](https://stripe.com/docs/connect/account-tokens) to learn more.
+     *
+     * See [Create a person token](https://stripe.com/docs/api/tokens/create_person)
+     *
+     * @param params the person token creation params
+     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
+     *
+     * @return a [Token] representing the person
+     */
+    @Throws(AuthenticationException::class, InvalidRequestException::class,
+        APIConnectionException::class, CardException::class, APIException::class)
+    @WorkerThread
+    @JvmOverloads
+    fun createPersonTokenSynchronous(
+        params: PersonTokenParams,
+        idempotencyKey: String? = null
+    ): Token? {
+        return stripeRepository.createToken(
+            params.toParamMap(),
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId,
+                idempotencyKey = idempotencyKey
+            ),
+            Token.TokenType.PERSON
         )
     }
 

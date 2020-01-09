@@ -18,6 +18,7 @@ import com.stripe.android.model.CardFixtures;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures;
+import com.stripe.android.model.PersonTokenParamsFixtures;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceCardData;
 import com.stripe.android.model.SourceParams;
@@ -30,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -944,6 +946,24 @@ public class StripeTest {
         assertFalse(token.getUsed());
         assertNotNull(token.getId());
         assertTrue(token.getId().startsWith("cvctok_"));
+    }
+
+    @Test
+    public void testCreatePersonToken() {
+        final Stripe stripe = createStripe(MainScope());
+        stripe.createPersonToken(PersonTokenParamsFixtures.PARAMS, tokenCallback);
+        verify(tokenCallback).onSuccess(tokenArgumentCaptor.capture());
+        final Token token = tokenArgumentCaptor.getValue();
+        assertEquals(Token.TokenType.PERSON, Objects.requireNonNull(token).getType());
+        assertTrue(token.getId().startsWith("cpt_"));
+    }
+
+    @Test
+    public void testCreatePersonTokenSynchronous() throws StripeException {
+        final Stripe stripe = createStripe();
+        final Token token = stripe.createPersonTokenSynchronous(PersonTokenParamsFixtures.PARAMS);
+        assertEquals(Token.TokenType.PERSON, Objects.requireNonNull(token).getType());
+        assertTrue(token.getId().startsWith("cpt_"));
     }
 
     @Test

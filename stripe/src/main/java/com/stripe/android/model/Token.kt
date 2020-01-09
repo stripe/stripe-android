@@ -55,7 +55,7 @@ data class Token internal constructor(
 ) : StripeModel, StripePaymentSource {
     @Retention(AnnotationRetention.SOURCE)
     @StringDef(TokenType.CARD, TokenType.BANK_ACCOUNT, TokenType.PII, TokenType.ACCOUNT,
-        TokenType.CVC_UPDATE)
+        TokenType.CVC_UPDATE, TokenType.PERSON)
     annotation class TokenType {
         companion object {
             const val CARD: String = "card"
@@ -63,6 +63,7 @@ data class Token internal constructor(
             const val PII: String = "pii"
             const val ACCOUNT: String = "account"
             const val CVC_UPDATE: String = "cvc_update"
+            const val PERSON: String = "person"
         }
     }
 

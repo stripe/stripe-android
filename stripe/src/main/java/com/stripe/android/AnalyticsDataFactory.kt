@@ -142,7 +142,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     internal fun getTokenCreationParams(
         productUsageTokens: List<String>?,
         publishableKey: String,
-        tokenType: String?
+        @Token.TokenType tokenType: String?
     ): Map<String, Any> {
         return getEventLoggingParams(
             EventName.TOKEN_CREATION,
