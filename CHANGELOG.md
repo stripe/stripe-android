@@ -101,6 +101,8 @@
     * Update comments
 * [#2029](https://github.com/stripe/stripe-android/pull/2029) Update `CardInputWidget` to use `TextInputLayout`
     * Make `StripeEditText` extend `TextInputEditText`
+* [#2039](https://github.com/stripe/stripe-android/pull/2039) Add support for creating a person token
+    * Add `Stripe#createPersonToken()` and `Stripe#createPersonTokenSynchronous()`
 
 ## 12.8.2 - 2019-12-20
 * [#1974](https://github.com/stripe/stripe-android/pull/1974) Add `PaymentSessionConfig#shouldPrefetchCustomer`
