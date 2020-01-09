@@ -9,9 +9,6 @@ import kotlinx.android.parcel.Parcelize
  * updating persons associated with a Connect account.
  * See [the documentation](https://stripe.com/docs/connect/account-tokens) to learn more.
  *
- * Person tokens may be created only in live mode, with your application’s publishable key.
- * Your application’s secret key may be used to create person tokens only in test mode.
- *
  * See [Create a person token](https://stripe.com/docs/api/tokens/create_person)
  */
 @Parcelize

@@ -1161,9 +1161,6 @@ class Stripe internal constructor(
      * updating persons associated with a Connect account.
      * See [the documentation](https://stripe.com/docs/connect/account-tokens) to learn more.
      *
-     * Person tokens may be created only in live mode, with your application’s publishable key.
-     * Your application’s secret key may be used to create person tokens only in test mode.
-     *
      * See [Create a person token](https://stripe.com/docs/api/tokens/create_person)
      *
      * @param params the person token creation params
@@ -1189,9 +1186,6 @@ class Stripe internal constructor(
      * Creates a single-use token that represents the details for a person. Use this when creating or
      * updating persons associated with a Connect account.
      * See [the documentation](https://stripe.com/docs/connect/account-tokens) to learn more.
-     *
-     * Person tokens may be created only in live mode, with your application’s publishable key.
-     * Your application’s secret key may be used to create person tokens only in test mode.
      *
      * See [Create a person token](https://stripe.com/docs/api/tokens/create_person)
      *
