@@ -1,11 +1,13 @@
 package com.stripe.android.model
 
 import com.stripe.android.CardNumberFixtures.VALID_VISA_NO_SPACES
+import com.stripe.android.model.ConfirmPaymentIntentParams.Companion.PARAM_PAYMENT_METHOD_OPTIONS
 import com.stripe.android.model.ConfirmPaymentIntentParams.Companion.PARAM_SAVE_PAYMENT_METHOD
 import com.stripe.android.model.ConfirmPaymentIntentParams.Companion.PARAM_SOURCE_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN_URL
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_STRIPE_SDK
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -195,6 +197,28 @@ class ConfirmPaymentIntentParamsTest {
             RETURN_URL
         ).toParamMap()
         assertTrue(params.containsKey(MandateData.PARAM_MANDATE_DATA))
+    }
+
+    @Test
+    fun create_withPaymentMethodOptions() {
+        val params = ConfirmPaymentIntentParams(
+            paymentMethodId = "pm_123",
+            paymentMethodOptions = PaymentMethodOptionsParams.Card(
+                cvc = "123"
+            ),
+            clientSecret = "client_secret"
+        ).toParamMap()
+
+        assertEquals(
+            mapOf(
+                PARAM_PAYMENT_METHOD_ID to "pm_123",
+                PARAM_PAYMENT_METHOD_OPTIONS to mapOf("card" to mapOf("cvc" to "123")),
+                PARAM_CLIENT_SECRET to "client_secret",
+                PARAM_SAVE_PAYMENT_METHOD to false,
+                PARAM_USE_STRIPE_SDK to false
+            ),
+            params
+        )
     }
 
     private companion object {

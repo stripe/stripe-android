@@ -6,18 +6,19 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_STRIPE_SDK
 
-data class ConfirmPaymentIntentParams private constructor(
-    val paymentMethodCreateParams: PaymentMethodCreateParams?,
-    val paymentMethodId: String?,
-    val sourceParams: SourceParams?,
-    val sourceId: String?,
+data class ConfirmPaymentIntentParams internal constructor(
+    val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
+    val paymentMethodId: String? = null,
+    val sourceParams: SourceParams? = null,
+    val sourceId: String? = null,
 
-    val extraParams: Map<String, Any>?,
+    val extraParams: Map<String, Any>? = null,
     override val clientSecret: String,
-    val returnUrl: String?,
+    val returnUrl: String? = null,
 
-    private val savePaymentMethod: Boolean,
-    private val useStripeSdk: Boolean
+    private val savePaymentMethod: Boolean = false,
+    private val useStripeSdk: Boolean = false,
+    private val paymentMethodOptions: PaymentMethodOptionsParams? = null
 ) : ConfirmStripeIntentParams {
 
     fun shouldSavePaymentMethod(): Boolean {
@@ -63,6 +64,9 @@ data class ConfirmPaymentIntentParams private constructor(
         if (extraParams != null) {
             params.putAll(extraParams)
         }
+        paymentMethodOptions?.let {
+            params[PARAM_PAYMENT_METHOD_OPTIONS] = it.toParamMap()
+        }
 
         return params.toMap()
     }
@@ -74,6 +78,7 @@ data class ConfirmPaymentIntentParams private constructor(
             .setSourceId(sourceId)
             .setSavePaymentMethod(savePaymentMethod)
             .setExtraParams(extraParams)
+            .setPaymentMethodOptions(paymentMethodOptions)
             .also { builder ->
                 paymentMethodId?.let { builder.setPaymentMethodId(it) }
                 paymentMethodCreateParams?.let { builder.setPaymentMethodCreateParams(it) }
@@ -99,6 +104,7 @@ data class ConfirmPaymentIntentParams private constructor(
 
         private var savePaymentMethod: Boolean = false
         private var shouldUseSdk: Boolean = false
+        private var paymentMethodOptions: PaymentMethodOptionsParams? = null
 
         /**
          * Sets the PaymentMethod data that will be included with this PaymentIntent
@@ -169,6 +175,12 @@ data class ConfirmPaymentIntentParams private constructor(
             this.shouldUseSdk = shouldUseSdk
         }
 
+        internal fun setPaymentMethodOptions(
+            paymentMethodOptions: PaymentMethodOptionsParams?
+        ): Builder = apply {
+            this.paymentMethodOptions = paymentMethodOptions
+        }
+
         override fun build(): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
@@ -179,7 +191,8 @@ data class ConfirmPaymentIntentParams private constructor(
                 sourceParams = sourceParams,
                 savePaymentMethod = savePaymentMethod,
                 extraParams = extraParams,
-                useStripeSdk = shouldUseSdk
+                useStripeSdk = shouldUseSdk,
+                paymentMethodOptions = paymentMethodOptions
             )
         }
     }
@@ -189,6 +202,7 @@ data class ConfirmPaymentIntentParams private constructor(
 
         internal const val PARAM_SOURCE_ID = "source"
         internal const val PARAM_SAVE_PAYMENT_METHOD = "save_payment_method"
+        internal const val PARAM_PAYMENT_METHOD_OPTIONS = "payment_method_options"
 
         /**
          * Create a [ConfirmPaymentIntentParams] without a payment method.
@@ -221,6 +235,7 @@ data class ConfirmPaymentIntentParams private constructor(
          * in the same request or the current payment method attached to the
          * PaymentIntent and must be specified again if a new payment method is
          * added.
+         * @param paymentMethodOptions Optional [PaymentMethodOptionsParams]
          */
         @JvmOverloads
         @JvmStatic
@@ -229,14 +244,17 @@ data class ConfirmPaymentIntentParams private constructor(
             clientSecret: String,
             returnUrl: String? = null,
             savePaymentMethod: Boolean = false,
-            extraParams: Map<String, Any>? = null
+            extraParams: Map<String, Any>? = null,
+            paymentMethodOptions: PaymentMethodOptionsParams? = null
         ): ConfirmPaymentIntentParams {
-            return Builder(clientSecret)
-                .setPaymentMethodId(paymentMethodId)
-                .setReturnUrl(returnUrl)
-                .setSavePaymentMethod(savePaymentMethod)
-                .setExtraParams(extraParams)
-                .build()
+            return ConfirmPaymentIntentParams(
+                clientSecret = clientSecret,
+                paymentMethodId = paymentMethodId,
+                returnUrl = returnUrl,
+                savePaymentMethod = savePaymentMethod,
+                extraParams = extraParams,
+                paymentMethodOptions = paymentMethodOptions
+            )
         }
 
         /**
