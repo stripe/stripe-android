@@ -8,16 +8,69 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_ST
 
 data class ConfirmPaymentIntentParams internal constructor(
     val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
+
+    /**
+     * ID of the payment method (a PaymentMethod, Card, or compatible Source object) to attach to
+     * this PaymentIntent.
+     *
+     * [payment_method](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-payment_method)
+     */
     val paymentMethodId: String? = null,
     val sourceParams: SourceParams? = null,
     val sourceId: String? = null,
 
     val extraParams: Map<String, Any>? = null,
+
+    /**
+     * The client secret of this PaymentIntent. Used for client-side retrieval using a
+     * publishable key.
+     *
+     * The client secret can be used to complete a payment from your frontend. It should not be
+     * stored, logged, embedded in URLs, or exposed to anyone other than the customer. Make sure
+     * that you have TLS enabled on any page that includes the client secret.
+     *
+     * Refer to our docs to [accept a payment](https://stripe.com/docs/payments/accept-a-payment)
+     * and learn about how `client_secret` should be handled.
+     *
+     * [client_secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret)
+     */
     override val clientSecret: String,
+
+    /**
+     * The URL to redirect your customer back to after they authenticate or cancel their payment on
+     * the payment method’s app or site. If you’d prefer to redirect to a mobile application, you
+     * can alternatively supply an application URI scheme. This parameter is only used for cards
+     * and other redirect-based payment methods.
+     *
+     * [return_url](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-return_url)
+     */
     val returnUrl: String? = null,
 
+    /**
+     * If the PaymentIntent has a payment_method and a customer or if you’re attaching a payment
+     * method to the PaymentIntent in this request, you can pass `save_payment_method=true` to save
+     * the payment method to the customer. Defaults to `false`.
+     *
+     * If the payment method is already saved to a customer, this does nothing. If this type of
+     * payment method cannot be saved to a customer, the request will error.
+     *
+     * [save_payment_method](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-save_payment_method)
+     */
     private val savePaymentMethod: Boolean = false,
+
+    /**
+     * Set to `true` only when using manual confirmation and the iOS or Android SDKs to handle
+     * additional authentication steps.
+     *
+     * [use_stripe_sdk](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-use_stripe_sdk)
+     */
     private val useStripeSdk: Boolean = false,
+
+    /**
+     * Payment-method-specific configuration for this PaymentIntent.
+     *
+     * [payment_method_options](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-payment_method_options)
+     */
     private val paymentMethodOptions: PaymentMethodOptionsParams? = null
 ) : ConfirmStripeIntentParams {
 
@@ -282,12 +335,13 @@ data class ConfirmPaymentIntentParams internal constructor(
             savePaymentMethod: Boolean = false,
             extraParams: Map<String, Any>? = null
         ): ConfirmPaymentIntentParams {
-            return Builder(clientSecret)
-                .setPaymentMethodCreateParams(paymentMethodCreateParams)
-                .setReturnUrl(returnUrl)
-                .setSavePaymentMethod(savePaymentMethod)
-                .setExtraParams(extraParams)
-                .build()
+            return ConfirmPaymentIntentParams(
+                clientSecret = clientSecret,
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                returnUrl = returnUrl,
+                savePaymentMethod = savePaymentMethod,
+                extraParams = extraParams
+            )
         }
 
         /**
@@ -314,12 +368,13 @@ data class ConfirmPaymentIntentParams internal constructor(
             savePaymentMethod: Boolean = false,
             extraParams: Map<String, Any>? = null
         ): ConfirmPaymentIntentParams {
-            return Builder(clientSecret)
-                .setSourceId(sourceId)
-                .setReturnUrl(returnUrl)
-                .setSavePaymentMethod(savePaymentMethod)
-                .setExtraParams(extraParams)
-                .build()
+            return ConfirmPaymentIntentParams(
+                clientSecret = clientSecret,
+                sourceId = sourceId,
+                returnUrl = returnUrl,
+                savePaymentMethod = savePaymentMethod,
+                extraParams = extraParams
+            )
         }
 
         /**
@@ -344,12 +399,13 @@ data class ConfirmPaymentIntentParams internal constructor(
             savePaymentMethod: Boolean = false,
             extraParams: Map<String, Any>? = null
         ): ConfirmPaymentIntentParams {
-            return Builder(clientSecret)
-                .setSourceParams(sourceParams)
-                .setReturnUrl(returnUrl)
-                .setSavePaymentMethod(savePaymentMethod)
-                .setExtraParams(extraParams)
-                .build()
+            return ConfirmPaymentIntentParams(
+                clientSecret = clientSecret,
+                sourceParams = sourceParams,
+                returnUrl = returnUrl,
+                savePaymentMethod = savePaymentMethod,
+                extraParams = extraParams
+            )
         }
     }
 }
