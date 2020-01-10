@@ -101,8 +101,11 @@
     * Update comments
 * [#2029](https://github.com/stripe/stripe-android/pull/2029) Update `CardInputWidget` to use `TextInputLayout`
     * Make `StripeEditText` extend `TextInputEditText`
+* [#2038](https://github.com/stripe/stripe-android/pull/2038) Update `CardInputWidget` to focus on first error field when validating
 * [#2039](https://github.com/stripe/stripe-android/pull/2039) Add support for creating a person token
     * Add `Stripe#createPersonToken()` and `Stripe#createPersonTokenSynchronous()`
+* [#2040](https://github.com/stripe/stripe-android/pull/2040) Add support for CVC recollection in PaymentIntents
+    * Update `ConfirmPaymentIntentParams.createWithPaymentMethodId()` with optional `PaymentMethodOptionsParams?` argument
 
 ## 12.8.2 - 2019-12-20
 * [#1974](https://github.com/stripe/stripe-android/pull/1974) Add `PaymentSessionConfig#shouldPrefetchCustomer`
