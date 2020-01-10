@@ -10,31 +10,26 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class StripeApiRequestExecutorTest {
     @Test
-    fun getOutputBytes_shouldHandleUnsupportedEncodingException() {
-        val stripeRequest = object : StripeRequest(
-            Method.POST,
-            ApiRequest.API_HOST,
-            null,
-            ApiRequest.MIME_TYPE
-        ) {
+    fun bodyBytes_shouldHandleUnsupportedEncodingException() {
+        val stripeRequest = object : StripeRequest() {
+            override val method: Method = Method.POST
+            override val baseUrl: String = ApiRequest.API_HOST
+            override val params: Map<String, *>? = null
+            override val mimeType: MimeType = MimeType.Form
+            override val userAgent: String = DEFAULT_USER_AGENT
 
-            override fun getUserAgent(): String {
-                return DEFAULT_USER_AGENT
-            }
-
-            @Throws(UnsupportedEncodingException::class)
-            override fun getOutputBytes(): ByteArray {
-                throw UnsupportedEncodingException()
-            }
+            override val body: String
+                get() {
+                    throw UnsupportedEncodingException()
+                }
 
             override fun createHeaders(): Map<String, String> {
                 return emptyMap()
             }
         }
 
-        val connectionFactory = ConnectionFactory()
         assertFailsWith<InvalidRequestException> {
-            connectionFactory.getRequestOutputBytes(stripeRequest)
+            stripeRequest.bodyBytes
         }
     }
 }

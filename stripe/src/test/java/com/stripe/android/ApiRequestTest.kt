@@ -2,10 +2,9 @@ package com.stripe.android
 
 import android.os.Build
 import com.stripe.android.ApiRequest.Companion.HEADER_STRIPE_CLIENT_USER_AGENT
-import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.CardFixtures
-import java.io.UnsupportedEncodingException
 import java.util.Locale
+import java.util.UUID
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -13,7 +12,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.json.JSONException
 import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
@@ -28,14 +26,14 @@ internal class ApiRequestTest {
     }
 
     @Test
-    fun getHeaders_withAllRequestOptions_properlyMapsRequestOptions() {
+    fun headers_withAllRequestOptions_properlyMapsRequestOptions() {
         Locale.setDefault(Locale.US)
 
         val stripeAccount = "acct_123abc"
-        val headers = ApiRequest.createGet(StripeApiRepository.sourcesUrl,
-            ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                stripeAccount))
-            .headers
+        val headers = ApiRequest.createGet(
+            StripeApiRepository.sourcesUrl,
+            ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccount)
+        ).headers
 
         assertEquals(
             "Bearer ${ApiKeyFixtures.FAKE_PUBLISHABLE_KEY}",
@@ -47,25 +45,25 @@ internal class ApiRequestTest {
     }
 
     @Test
-    fun getHeaders_withOnlyRequiredOptions_doesNotAddEmptyOptions() {
-        val headerMap = ApiRequest.createGet(StripeApiRepository.sourcesUrl,
-            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
-            .headers
+    fun headers_withOnlyRequiredOptions_doesNotAddEmptyOptions() {
+        val headers = ApiRequest.createGet(
+            StripeApiRepository.sourcesUrl,
+            OPTIONS
+        ).headers
 
-        assertTrue(headerMap.containsKey("Stripe-Version"))
-        assertFalse(headerMap.containsKey("Stripe-Account"))
-        assertTrue(headerMap.containsKey("Authorization"))
+        assertTrue(headers.containsKey("Stripe-Version"))
+        assertFalse(headers.containsKey("Stripe-Account"))
+        assertTrue(headers.containsKey("Authorization"))
     }
 
     @Test
-    @Throws(JSONException::class)
-    fun getHeaders_containsPropertyMapValues() {
+    fun headers_containsPropertyMapValues() {
         val headers = ApiRequest(
             StripeRequest.Method.GET,
             StripeApiRepository.sourcesUrl,
             params = null,
-            options = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
-            systemPropertySupplier = FakeSystemPropertySupplier()
+            options = OPTIONS,
+            systemPropertySupplier = { UUID.randomUUID().toString() }
         ).headers
 
         val userAgentData = JSONObject(requireNotNull(headers[HEADER_STRIPE_CLIENT_USER_AGENT]))
@@ -79,73 +77,76 @@ internal class ApiRequestTest {
     }
 
     @Test
-    fun getHeaders_correctlyAddsExpectedAdditionalParameters() {
-        val headerMap = ApiRequest.createGet(StripeApiRepository.sourcesUrl,
-            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
+    fun headers_correctlyAddsExpectedAdditionalParameters() {
+        val headers = ApiRequest.createGet(
+            StripeApiRepository.sourcesUrl,
+            OPTIONS
+        )
             .headers
 
         val expectedUserAgent = "Stripe/v1 AndroidBindings/${BuildConfig.VERSION_NAME}"
-        assertEquals(expectedUserAgent, headerMap[StripeRequest.HEADER_USER_AGENT])
-        assertEquals("application/json", headerMap["Accept"])
-        assertEquals("UTF-8", headerMap["Accept-Charset"])
+        assertEquals(expectedUserAgent, headers["User-Agent"])
+        assertEquals("application/json", headers["Accept"])
+        assertEquals("UTF-8", headers["Accept-Charset"])
     }
 
     @Test
-    @Throws(UnsupportedEncodingException::class, InvalidRequestException::class)
-    fun createQuery_withCardData_createsProperQueryString() {
+    fun url_withCardData_createsProperQueryString() {
         val cardMap = NETWORK_UTILS.createCardTokenParams(CardFixtures.MINIMUM_CARD)
-        val query = ApiRequest.createGet(
+        val url = ApiRequest.createGet(
             StripeApiRepository.sourcesUrl,
-            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+            OPTIONS,
             cardMap
-        ).query
+        ).url
 
-        val expectedValue = "muid=BF3BF4D775100923AAAFA82884FB759001162E28&product_usage=&guid=6367C48DD193D56EA7B0BAAD25B19455E529F5EE&card%5Bexp_month%5D=1&card%5Bexp_year%5D=2050&card%5Bnumber%5D=4242424242424242&card%5Bcvc%5D=123"
-        assertEquals(expectedValue, query)
+        val expectedValue = "https://api.stripe.com/v1/sources?muid=BF3BF4D775100923AAAFA82884FB759001162E28&product_usage=&guid=6367C48DD193D56EA7B0BAAD25B19455E529F5EE&card%5Bexp_month%5D=1&card%5Bexp_year%5D=2050&card%5Bnumber%5D=4242424242424242&card%5Bcvc%5D=123"
+        assertEquals(expectedValue, url)
     }
 
     @Test
     fun getContentType() {
-        val contentType = ApiRequest.createGet(StripeApiRepository.sourcesUrl,
-            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
-            .contentType
+        val contentType = ApiRequest.createGet(
+            StripeApiRepository.sourcesUrl,
+            OPTIONS
+        ).contentType
         assertEquals("application/x-www-form-urlencoded; charset=UTF-8", contentType)
     }
 
     @Test
-    @Throws(UnsupportedEncodingException::class, InvalidRequestException::class)
-    fun getOutputBytes_withEmptyBody_shouldHaveZeroLength() {
-        val output = ApiRequest.createPost(StripeApiRepository.paymentMethodsUrl,
-            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
-            .getOutputBytes()
-        assertEquals(0, output.size)
+    fun body_withEmptyBody_shouldHaveZeroLength() {
+        val bodyBytes = ApiRequest.createPost(
+            StripeApiRepository.paymentMethodsUrl,
+            OPTIONS
+        ).bodyBytes
+        assertTrue(bodyBytes.isEmpty())
     }
 
     @Test
-    @Throws(UnsupportedEncodingException::class, InvalidRequestException::class)
-    fun getOutputBytes_withNonEmptyBody_shouldHaveNonZeroLength() {
+    fun bodyBytes_withNonEmptyBody_shouldHaveNonZeroLength() {
         val params = mapOf("customer" to "cus_123")
 
-        val output = ApiRequest.createPost(
-            StripeApiRepository.paymentMethodsUrl,
-            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
-            params
-        ).getOutputBytes()
-        assertEquals(16, output.size)
+        val bodyBytes =
+            ApiRequest.createPost(
+                StripeApiRepository.paymentMethodsUrl,
+                OPTIONS,
+                params
+            ).bodyBytes
+        assertEquals(16, bodyBytes.size)
     }
 
     @Test
     fun testEquals() {
         val params = mapOf("customer" to "cus_123")
+
         assertEquals(
             ApiRequest.createPost(
                 StripeApiRepository.paymentMethodsUrl,
-                ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+                OPTIONS,
                 params
             ),
             ApiRequest.createPost(
                 StripeApiRepository.paymentMethodsUrl,
-                ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+                OPTIONS,
                 params
             )
         )
@@ -153,7 +154,7 @@ internal class ApiRequestTest {
         assertNotEquals(
             ApiRequest.createPost(
                 StripeApiRepository.paymentMethodsUrl,
-                ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+                OPTIONS,
                 params
             ),
             ApiRequest.createPost(
@@ -165,17 +166,16 @@ internal class ApiRequestTest {
     }
 
     @Test
-    @Throws(JSONException::class)
-    fun getHeaders_withAppInfo() {
+    fun headers_withAppInfo() {
         val apiRequest = ApiRequest.createGet(
             StripeApiRepository.paymentMethodsUrl,
-            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+            OPTIONS,
             appInfo = AppInfoTest.APP_INFO
         )
         val headers = apiRequest.headers
         assertEquals(
             "${StripeRequest.DEFAULT_USER_AGENT} MyAwesomePlugin/1.2.34 (https://myawesomeplugin.info)",
-            headers[StripeRequest.HEADER_USER_AGENT]
+            headers["User-Agent"]
         )
 
         val stripeClientUserAgent = headers[HEADER_STRIPE_CLIENT_USER_AGENT]
@@ -199,20 +199,20 @@ internal class ApiRequestTest {
     @Test
     fun testGetLanguageTag() {
         Locale.setDefault(Locale.JAPAN)
-        assertEquals("ja-JP", createGetRequest().languageTag)
+        assertEquals("ja-JP", createGetRequest().createHeaders()["Accept-Language"])
 
         Locale.setDefault(Locale.ENGLISH)
-        assertEquals("en", createGetRequest().languageTag)
+        assertEquals("en", createGetRequest().createHeaders()["Accept-Language"])
 
         Locale.setDefault(Locale.ROOT)
-        assertNull(createGetRequest().languageTag)
+        assertNull(createGetRequest().createHeaders()["Accept-Language"])
     }
 
     private companion object {
         private fun createGetRequest(): ApiRequest {
             return ApiRequest.createGet(
                 StripeApiRepository.paymentMethodsUrl,
-                ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+                OPTIONS
             )
         }
 
@@ -222,5 +222,7 @@ internal class ApiRequestTest {
                 FakeUidSupplier("abc123")
             )
         )
+
+        private val OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
     }
 }

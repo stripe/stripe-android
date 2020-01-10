@@ -2,8 +2,6 @@ package com.stripe.android
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import com.stripe.android.exception.InvalidRequestException
-import java.io.UnsupportedEncodingException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -12,6 +10,10 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class FingerprintRequestTest {
+    private val telemetryClientUtil: TelemetryClientUtil by lazy {
+        TelemetryClientUtil(ApplicationProvider.getApplicationContext<Context>())
+    }
+
     @Test
     fun getContentType() {
         assertEquals(
@@ -25,19 +27,17 @@ class FingerprintRequestTest {
         val headers = FingerprintRequest(emptyMap(), "guid").headers
         assertEquals(
             StripeRequest.DEFAULT_USER_AGENT,
-            headers[StripeRequest.HEADER_USER_AGENT]
+            headers["User-Agent"]
         )
         assertEquals("m=guid", headers["Cookie"])
     }
 
     @Test
-    @Throws(UnsupportedEncodingException::class, InvalidRequestException::class)
-    fun getOutputBytes() {
-        val telemetryClientUtil =
-            TelemetryClientUtil(ApplicationProvider.getApplicationContext<Context>())
-        val output =
+    fun testBody() {
+        val bodyBytes =
             FingerprintRequest(telemetryClientUtil.createTelemetryMap(), "guid")
-                .getOutputBytes()
-        assertTrue(output.isNotEmpty())
+                .body
+                .toByteArray()
+        assertTrue(bodyBytes.isNotEmpty())
     }
 }

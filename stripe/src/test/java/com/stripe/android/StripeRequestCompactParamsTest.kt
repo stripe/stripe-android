@@ -62,24 +62,17 @@ class StripeRequestCompactParamsTest {
     }
 
     private fun getCompactedParams(params: Map<String, Any?>): Map<String, *> {
-        return FakeRequest(params).params!!
+        return FakeRequest(params).compactParams.orEmpty()
     }
 
     private class FakeRequest internal constructor(
-        params: Map<String, *>?
-    ) : StripeRequest(
-        Method.POST,
-        "https://example.com",
-        params,
-        "application/x-www-form-urlencoded"
-    ) {
-        override fun getUserAgent(): String {
-            return ""
-        }
-
-        override fun getOutputBytes(): ByteArray {
-            return ByteArray(0)
-        }
+        override val params: Map<String, *>?
+    ) : StripeRequest() {
+        override val method: Method = Method.POST
+        override val baseUrl: String = "https://example.com"
+        override val mimeType: MimeType = MimeType.Form
+        override val userAgent: String = ""
+        override val body: String = ""
 
         override fun createHeaders(): Map<String, String> {
             return emptyMap()
