@@ -17,6 +17,8 @@
 - Changes to `SourceParams`
     - `setOwner()` now takes `OwnerParams` instead of `Map`
     - `setRedirect()` has been removed; use `setReturnUrl()` instead
+- Changes to `AccountParams`
+    - `AccountParams.createAccountParams()` is now deprecated; use the appropriate `AccountParams.create()` method.
 - Changes to `StripeEditText`
     - `StripeEditText` now extends `TextInputEditText` instead of `AppCompatEditText`
 - Changes to `CardInputWidget`
