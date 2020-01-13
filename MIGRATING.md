@@ -5,6 +5,13 @@
     - Change the type of `brand` property from `String?` to `CardBrand`
     - Remove `Card.CardBrand`
     - Change the type of `tokenizationMethod` property from `String?` to `TokenizationMethod?`
+      ```kotlin
+      // before
+      card.tokenizationMethod == "google_pay"
+
+      // after
+      card.tokenizationMethod == TokenizationMethod.GooglePay
+      ```
 - Changes to `PaymentMethod`
     - Change the type of `type` property from `String?` to `PaymentMethod.Type?`
       ```kotlin
@@ -16,9 +23,69 @@
       ```
 - Changes to `SourceParams`
     - `setOwner()` now takes `OwnerParams` instead of `Map`
+      ```kotlin
+      // before
+      sourceParams
+          .setOwner(mapOf(
+              "name" to "Jenny Rosen"
+          ))
+
+      // after
+      sourceParams
+          .setOwner(OwnerParams(
+              name = "Jenny Rosen"
+          ))
+      ```
     - `setRedirect()` has been removed; use `setReturnUrl()` instead
+      ```kotlin
+      // before
+      sourceParams
+          .setRedirect(mapOf("return_url" to "myapp://return"))
+
+      // after
+      sourceParams
+          .setReturnUrl("myapp://return")
+      ```
 - Changes to `AccountParams`
     - `AccountParams.createAccountParams()` is now deprecated; use the appropriate `AccountParams.create()` method.
+      ```kotlin
+      // before
+      AccountParams.createAccountParams(
+          true,
+          AccountParams.BusinessType.Individual,
+          mapOf(
+              "address" to mapOf(
+                  "line1" to "123 Market St",
+                  "line2" to "#345",
+                  "city" to "San Francisco",
+                  "state" to "CA",
+                  "postal_code" to "94107",
+                  "country" to "US"
+              ),
+              "ssn_last_4" to "1234",
+              "first_name" to "Jenny",
+              "last_name" to "Rosen"
+          )
+      )
+
+      // after
+      AccountParams.create(
+          true,
+          AccountParams.BusinessTypeParams.Individual(
+              address = Address(
+                  line1 = "123 Market St",
+                  line2 = "#345",
+                  city = "San Francisco",
+                  state = "CA",
+                  postal_code = "94107",
+                  country = "US"
+              ),
+              ssnLast4 = "1234",
+              firstName = "Jenny",
+              lastName = "Rosen"
+          )
+      )
+      ```
 - Changes to `StripeEditText`
     - `StripeEditText` now extends `TextInputEditText` instead of `AppCompatEditText`
 - Changes to `CardInputWidget`
@@ -33,10 +100,39 @@
 - Changes to `Stripe`
     - Bindings for API POST methods now take an optional `idempotencyKey`.
       Read about [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests) for more details.
+      ```kotlin
+      // before
+      stripe.createPaymentMethod(
+            paymentMethodCreateParams,
+            callback
+      )
+
+      // after - without idempotency key
+      stripe.createPaymentMethod(
+            paymentMethodCreateParams,
+            callback = callback
+      )
+
+      // after - with idempotency key
+      stripe.createPaymentMethod(
+            paymentMethodCreateParams,
+            idempotencyKey = idempotencyKey,
+            callback = callback
+      )
+      ```
 - Changes to `PaymentMethodsActivityStarter.Result`
     - The type of `paymentMethod` has been changed from `PaymentMethod` to `PaymentMethod?` (i.e. it is nullable)
 - Changes to `PaymentSession`
     - `PaymentSession` now takes the `PaymentSessionConfig` instance through its constructor, instead of `init()`
+      ```kotlin
+      // before
+      val paymentSession = PaymentSession(activity)
+      paymentSession.init(listener, paymentSessionConfig)
+
+      // after
+      val paymentSession = PaymentSession(activity, paymentSessionConfig)
+      paymentSession.init(listener)
+      ```
     - By default, users will be asked for their postal code (i.e. `BillingAddressFields.PostalCode`) when adding a new
       card payment method.
     - `PaymentSession#init()` no longer takes a `shouldPrefetchCustomer` argument.
