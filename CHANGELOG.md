@@ -106,6 +106,13 @@
     * Add `Stripe#createPersonToken()` and `Stripe#createPersonTokenSynchronous()`
 * [#2040](https://github.com/stripe/stripe-android/pull/2040) Add support for CVC recollection in PaymentIntents
     * Update `ConfirmPaymentIntentParams.createWithPaymentMethodId()` with optional `PaymentMethodOptionsParams?` argument
+* [#2042](https://github.com/stripe/stripe-android/pull/2042) Create `AccountParams.BusinessTypeParams`
+    * `BusinessTypeParams.Company` and `BusinessTypeParams.Individual` model the parameters for creating a
+      [company](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company) or
+      [individual](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual)
+      [account token](https://stripe.com/docs/api/tokens/create_account).
+      Use these instead of creating raw maps representing the data.
+    * `AccountParams.createAccountParams()` is now deprecated. Use the appropriate `AccountParams.create()` method.
 
 ## 12.8.2 - 2019-12-20
 * [#1974](https://github.com/stripe/stripe-android/pull/1974) Add `PaymentSessionConfig#shouldPrefetchCustomer`
