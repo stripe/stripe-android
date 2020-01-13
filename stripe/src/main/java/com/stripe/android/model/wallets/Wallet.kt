@@ -5,6 +5,11 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.StripeModel
 import kotlinx.android.parcel.Parcelize
 
+/**
+ * Details of the card wallet.
+ *
+ * [card.wallet](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-wallet)
+ */
 sealed class Wallet(
     internal val walletType: Type
 ) : StripeModel {
