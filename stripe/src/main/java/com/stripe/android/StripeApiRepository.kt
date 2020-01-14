@@ -805,41 +805,29 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     private fun handleApiError(response: StripeResponse) {
         val requestId = response.requestId
         val responseCode = response.responseCode
-        val stripeError = ErrorParser.parseError(response.responseJson)
+        val stripeError = StripeErrorJsonParser().parse(response.responseJson)
         when (responseCode) {
             HttpURLConnection.HTTP_BAD_REQUEST, HttpURLConnection.HTTP_NOT_FOUND -> {
                 throw InvalidRequestException(
-                    stripeError.message,
-                    stripeError.param,
+                    stripeError,
                     requestId,
-                    responseCode,
-                    stripeError.code,
-                    stripeError.declineCode,
-                    stripeError, null)
-            }
-            HttpURLConnection.HTTP_UNAUTHORIZED -> {
-                throw AuthenticationException(stripeError.message, requestId, stripeError)
-            }
-            HttpURLConnection.HTTP_PAYMENT_REQUIRED -> {
-                throw CardException(
-                    stripeError.message,
-                    requestId,
-                    stripeError.code,
-                    stripeError.param,
-                    stripeError.declineCode,
-                    stripeError.charge,
-                    stripeError
+                    responseCode
                 )
             }
+            HttpURLConnection.HTTP_UNAUTHORIZED -> {
+                throw AuthenticationException(stripeError, requestId)
+            }
+            HttpURLConnection.HTTP_PAYMENT_REQUIRED -> {
+                throw CardException(stripeError, requestId)
+            }
             HttpURLConnection.HTTP_FORBIDDEN -> {
-                throw PermissionException(stripeError.message, requestId, stripeError)
+                throw PermissionException(stripeError, requestId)
             }
             429 -> {
-                throw RateLimitException(stripeError.message, stripeError.param, requestId,
-                    stripeError)
+                throw RateLimitException(stripeError, requestId)
             }
             else -> {
-                throw APIException(stripeError.message, requestId, responseCode, stripeError, null)
+                throw APIException(stripeError, requestId, responseCode)
             }
         }
     }

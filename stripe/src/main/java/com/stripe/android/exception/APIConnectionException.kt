@@ -6,12 +6,13 @@ import java.io.IOException
  * An [Exception] that represents a failure to connect to Stripe's API.
  */
 class APIConnectionException(
-    message: String?,
-    e: Throwable?
-) : StripeException(null, message, null, STATUS_CODE, e) {
+    message: String? = null,
+    e: Throwable? = null
+) : StripeException(
+    e = e,
+    message = message
+) {
     internal companion object {
-        private const val STATUS_CODE = 0
-
         @JvmSynthetic
         internal fun create(e: IOException, url: String? = null): APIConnectionException {
             val displayUrl = listOfNotNull(

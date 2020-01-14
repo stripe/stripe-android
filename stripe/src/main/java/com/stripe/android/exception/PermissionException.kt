@@ -8,9 +8,8 @@ import java.net.HttpURLConnection
  * to perform the requested action.
  */
 class PermissionException(
-    message: String?,
-    requestId: String?,
-    stripeError: StripeError?
-) : AuthenticationException(
-    message, requestId, HttpURLConnection.HTTP_FORBIDDEN, stripeError
+    stripeError: StripeError,
+    requestId: String? = null
+) : StripeException(
+    stripeError, requestId, HttpURLConnection.HTTP_FORBIDDEN
 )
