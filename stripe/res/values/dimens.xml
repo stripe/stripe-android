@@ -30,5 +30,5 @@
     <dimen name="stripe_shipping_widget_outer_margin">12dp</dimen>
 
     <!-- Text size of CardInputWidget EditText views -->
-    <dimen name="ciw_stripe_edit_text_size">19sp</dimen>
+    <dimen name="ciw_stripe_edit_text_size">18sp</dimen>
 </resources>
