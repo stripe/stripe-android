@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.CustomerSession
 import com.stripe.android.StripeError
 import com.stripe.android.model.Customer
@@ -20,6 +19,10 @@ import kotlinx.android.synthetic.main.activity_customer_session.*
  * add and select sources for the current customer.
  */
 class CustomerSessionActivity : AppCompatActivity() {
+
+    private val snackbarController: SnackbarController by lazy {
+        SnackbarController(coordinator)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,8 +40,6 @@ class CustomerSessionActivity : AppCompatActivity() {
 
         btn_launch_payment_methods.isEnabled = false
         btn_launch_payment_methods.setOnClickListener { launchWithCustomer() }
-
-        onRetrieveError("Error!!")
     }
 
     private fun launchWithCustomer() {
@@ -69,8 +70,7 @@ class CustomerSessionActivity : AppCompatActivity() {
     private fun onRetrieveError(errorMessage: String) {
         btn_launch_payment_methods.isEnabled = false
         progress_bar.visibility = View.INVISIBLE
-        Snackbar.make(coordinator, errorMessage, Snackbar.LENGTH_LONG)
-            .show()
+        snackbarController.show(errorMessage)
     }
 
     private class CustomerRetrievalListenerImpl constructor(
