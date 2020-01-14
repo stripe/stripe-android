@@ -16,16 +16,12 @@ class StripeApiRequestExecutorTest {
             override val baseUrl: String = ApiRequest.API_HOST
             override val params: Map<String, *>? = null
             override val mimeType: MimeType = MimeType.Form
-            override val userAgent: String = DEFAULT_USER_AGENT
+            override val headersFactory = RequestHeadersFactory.Default()
 
             override val body: String
                 get() {
                     throw UnsupportedEncodingException()
                 }
-
-            override fun createHeaders(): Map<String, String> {
-                return emptyMap()
-            }
         }
 
         assertFailsWith<InvalidRequestException> {

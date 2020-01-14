@@ -26,7 +26,7 @@ class FingerprintRequestTest {
     fun getHeaders() {
         val headers = FingerprintRequest(emptyMap(), "guid").headers
         assertEquals(
-            StripeRequest.DEFAULT_USER_AGENT,
+            RequestHeadersFactory.DEFAULT_USER_AGENT,
             headers["User-Agent"]
         )
         assertEquals("m=guid", headers["Cookie"])
@@ -34,10 +34,9 @@ class FingerprintRequestTest {
 
     @Test
     fun testBody() {
-        val bodyBytes =
+        val body =
             FingerprintRequest(telemetryClientUtil.createTelemetryMap(), "guid")
                 .body
-                .toByteArray()
-        assertTrue(bodyBytes.isNotEmpty())
+        assertTrue(body.isNotEmpty())
     }
 }

@@ -13,6 +13,7 @@ internal abstract class StripeRequest {
     abstract val baseUrl: String
     abstract val params: Map<String, *>?
     abstract val mimeType: MimeType
+    abstract val headersFactory: RequestHeadersFactory
 
     private val queryStringFactory = QueryStringFactory()
     internal val compactParams: Map<String, *>?
@@ -41,16 +42,8 @@ internal abstract class StripeRequest {
 
     internal val headers: Map<String, String>
         get() {
-            return createHeaders()
-                .plus(
-                    mapOf(
-                        HEADER_USER_AGENT to userAgent,
-                        HEADER_ACCEPT_CHARSET to CHARSET
-                    )
-                )
+            return headersFactory.create()
         }
-
-    internal abstract val userAgent: String
 
     internal abstract val body: String
 
@@ -66,8 +59,6 @@ internal abstract class StripeRequest {
                 )
             }
         }
-
-    internal abstract fun createHeaders(): Map<String, String>
 
     internal val query: String
         get() {
@@ -103,11 +94,7 @@ internal abstract class StripeRequest {
         override fun toString(): String = code
     }
 
-    internal companion object {
-        const val DEFAULT_USER_AGENT = "Stripe/v1 ${Stripe.VERSION}"
-
-        private const val HEADER_USER_AGENT = "User-Agent"
-        private const val HEADER_ACCEPT_CHARSET = "Accept-Charset"
+    private companion object {
         private val CHARSET = Charsets.UTF_8.name()
 
         /**
