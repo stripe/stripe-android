@@ -44,12 +44,13 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation "androidx.lifecycle:lifecycle-viewmodel:2.1.0"
     implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0'
+    implementation 'com.google.android.material:material:1.1.0-rc01'
 
     implementation 'com.google.android.gms:play-services-wallet:18.0.0'
 
     /* Needed for RxAndroid */
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
-    implementation 'io.reactivex.rxjava2:rxjava:2.2.16'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.17'
 
     /* Needed for Rx Bindings on views */
     implementation 'com.jakewharton.rxbinding2:rxbinding:2.2.0'

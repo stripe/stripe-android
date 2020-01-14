@@ -8,7 +8,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
@@ -37,6 +36,9 @@ class CreateCardSourceActivity : AppCompatActivity() {
     }
     private val keyboardController: KeyboardController by lazy {
         KeyboardController(this)
+    }
+    private val snackbarController: SnackbarController by lazy {
+        SnackbarController(findViewById(android.R.id.content))
     }
 
     private var alertDialog: AlertDialog? = null
@@ -185,8 +187,7 @@ class CreateCardSourceActivity : AppCompatActivity() {
     }
 
     private fun showSnackbar(message: String) {
-        Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG)
-            .show()
+        snackbarController.show(message)
     }
 
     private companion object {

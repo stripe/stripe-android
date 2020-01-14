@@ -6,7 +6,6 @@ import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession
 import com.stripe.android.PaymentSessionConfig
@@ -35,6 +34,9 @@ class PaymentSessionActivity : AppCompatActivity() {
     private lateinit var paymentSession: PaymentSession
     private val notSelectedText: String by lazy {
         getString(R.string.not_selected)
+    }
+    private val snackbarController: SnackbarController by lazy {
+        SnackbarController(coordinator)
     }
 
     private var paymentSessionData: PaymentSessionData? = null
@@ -226,8 +228,7 @@ class PaymentSessionActivity : AppCompatActivity() {
     }
 
     private fun showError(errorMessage: String) {
-        Snackbar.make(coordinator, errorMessage, Snackbar.LENGTH_LONG)
-            .show()
+        snackbarController.show(errorMessage)
     }
 
     private class PaymentSessionListenerImpl internal constructor(

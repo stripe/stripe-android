@@ -15,7 +15,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
@@ -25,6 +24,10 @@ import com.stripe.example.R
 import kotlinx.android.synthetic.main.card_token_activity.*
 
 class CreateCardTokenActivity : AppCompatActivity() {
+
+    private val snackbarController: SnackbarController by lazy {
+        SnackbarController(findViewById(android.R.id.content))
+    }
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,12 +56,7 @@ class CreateCardTokenActivity : AppCompatActivity() {
                     adapter.addToken(it)
                 })
             } else {
-                Snackbar.make(
-                    findViewById(android.R.id.content),
-                    R.string.invalid_card_details,
-                    Snackbar.LENGTH_SHORT
-                )
-                    .show()
+                snackbarController.show(getString(R.string.invalid_card_details))
             }
         }
 

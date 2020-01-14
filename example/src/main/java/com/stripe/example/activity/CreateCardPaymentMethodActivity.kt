@@ -8,7 +8,6 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.model.PaymentMethod
@@ -29,13 +28,13 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
             PaymentConfiguration.getInstance(this).publishableKey
         )
     }
-    private lateinit var snackbarContainer: View
+    private val snackbarController: SnackbarController by lazy {
+        SnackbarController(findViewById(android.R.id.content))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_card_payment_methods)
-
-        snackbarContainer = findViewById(android.R.id.content)
 
         rv_payment_methods.setHasFixedSize(false)
         rv_payment_methods.layoutManager = LinearLayoutManager(this)
@@ -67,8 +66,7 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
     }
 
     private fun showSnackbar(message: String) {
-        Snackbar.make(snackbarContainer, message, Snackbar.LENGTH_LONG)
-            .show()
+        snackbarController.show(message)
     }
 
     private fun onCreatePaymentMethodStart() {

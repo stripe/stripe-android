@@ -15,7 +15,6 @@ import com.google.android.gms.wallet.PaymentDataRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.android.gms.wallet.Wallet
 import com.google.android.gms.wallet.WalletConstants
-import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
@@ -39,6 +38,9 @@ class PayWithGoogleActivity : AppCompatActivity() {
     }
     private val googlePayJsonFactory: GooglePayJsonFactory by lazy {
         GooglePayJsonFactory(this)
+    }
+    private val snackbarController: SnackbarController by lazy {
+        SnackbarController(coordinator)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -166,8 +168,7 @@ class PayWithGoogleActivity : AppCompatActivity() {
     }
 
     private fun showSnackbar(message: String) {
-        Snackbar.make(coordinator, message, Snackbar.LENGTH_SHORT)
-            .show()
+        snackbarController.show(message)
     }
 
     private companion object {
