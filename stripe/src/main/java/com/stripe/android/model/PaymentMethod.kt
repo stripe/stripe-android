@@ -9,26 +9,102 @@ import kotlinx.android.parcel.Parcelize
 import org.json.JSONObject
 
 /**
- * Model for a [Payment Methods API](https://stripe.com/docs/payments/payment-methods)
- * object.
+ * [PaymentMethod](https://stripe.com/docs/api/payment_methods) objects represent your customer's
+ * payment instruments. They can be used with
+ * [PaymentIntents](https://stripe.com/docs/payments/payment-intents) to collect payments or saved
+ * to Customer objects to store instrument details for future payments.
  *
- * See [Payment Methods API reference](https://stripe.com/docs/api/payment_methods).
+ * Related guides: [Payment Methods](https://stripe.com/docs/payments/payment-methods) and
+ * [More Payment Scenarios](https://stripe.com/docs/payments/more-payment-scenarios).
  *
  * See [PaymentMethodCreateParams] for PaymentMethod creation
  */
 @Parcelize
 data class PaymentMethod internal constructor(
+    /**
+     * Unique identifier for the object.
+     *
+     * [id](https://stripe.com/docs/api/payment_methods/object#payment_method_object-id)
+     */
     @JvmField val id: String?,
+
+    /**
+     * Time at which the object was created. Measured in seconds since the Unix epoch.
+     *
+     * [created](https://stripe.com/docs/api/payment_methods/object#payment_method_object-created)
+     */
     @JvmField val created: Long?,
+
+    /**
+     * Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode.
+     *
+     * [livemode](https://stripe.com/docs/api/payment_methods/object#payment_method_object-livemode)
+     */
     @JvmField val liveMode: Boolean,
+
+    /**
+     * The type of the PaymentMethod. An additional hash is included on the PaymentMethod with a
+     * name matching this value. It contains additional information specific to the
+     * PaymentMethod type.
+     *
+     * [type](https://stripe.com/docs/api/payment_methods/object#payment_method_object-type)
+     */
     @JvmField val type: Type?,
+
+    /**
+     * Billing information associated with the PaymentMethod that may be used or required by particular types of payment methods.
+     *
+     * [billing_details](https://stripe.com/docs/api/payment_methods/object#payment_method_object-billing_details)
+     */
     @JvmField val billingDetails: BillingDetails? = null,
+
+    /**
+     * The ID of the Customer to which this PaymentMethod is saved. This will not be set when the
+     * PaymentMethod has not been saved to a Customer.
+     *
+     * [customer](https://stripe.com/docs/api/payment_methods/object#payment_method_object-customer)
+     */
     @JvmField val customerId: String? = null,
+
+    /**
+     * Set of key-value pairs that you can attach to an object. This can be useful for storing
+     * additional information about the object in a structured format.
+     *
+     * [metadata](https://stripe.com/docs/api/payment_methods/object#payment_method_object-metadata)
+     */
     @JvmField val metadata: Map<String, String>? = null,
+
+    /**
+     * If this is a `card` PaymentMethod, this hash contains details about the card.
+     *
+     * [card](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card)
+     */
     @JvmField val card: Card? = null,
+
+    /**
+     * If this is a `card_present` PaymentMethod, this hash contains details about the Card Present payment method.
+     *
+     * [card_present](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card_present)
+     */
     @JvmField val cardPresent: CardPresent? = null,
+
+    /**
+     * If this is a `fpx` PaymentMethod, this hash contains details about the FPX payment method.
+     */
     @JvmField val fpx: Fpx? = null,
+
+    /**
+     * If this is an `ideal` PaymentMethod, this hash contains details about the iDEAL payment method.
+     *
+     * [ideal](https://stripe.com/docs/api/payment_methods/object#payment_method_object-ideal)
+     */
     @JvmField val ideal: Ideal? = null,
+
+    /**
+     * If this is a `sepa_debit` PaymentMethod, this hash contains details about the SEPA debit bank account.
+     *
+     * [sepa_debit](https://stripe.com/docs/api/payment_methods/object#payment_method_object-sepa_debit)
+     */
     @JvmField val sepaDebit: SepaDebit? = null
 ) : StripeModel {
 
@@ -135,11 +211,39 @@ data class PaymentMethod internal constructor(
         }
     }
 
+    /**
+     * Billing information associated with the PaymentMethod that may be used or required by particular types of payment methods.
+     *
+     * [billing_details](https://stripe.com/docs/api/payment_methods/object#payment_method_object-billing_details)
+     */
     @Parcelize
     data class BillingDetails @JvmOverloads constructor(
+        /**
+         * Billing address.
+         *
+         * [billing_details.address](https://stripe.com/docs/api/payment_methods/object#payment_method_object-billing_details-address)
+         */
         @JvmField val address: Address? = null,
+
+        /**
+         * Email address.
+         *
+         * [billing_details.email](https://stripe.com/docs/api/payment_methods/object#payment_method_object-billing_details-email)
+         */
         @JvmField val email: String? = null,
+
+        /**
+         * Full name.
+         *
+         * [billing_details.name](https://stripe.com/docs/api/payment_methods/object#payment_method_object-billing_details-name)
+         */
         @JvmField val name: String? = null,
+
+        /**
+         * Billing phone number (including extension).
+         *
+         * [billing_details.phone](https://stripe.com/docs/api/payment_methods/object#payment_method_object-billing_details-phone)
+         */
         @JvmField val phone: String? = null
     ) : StripeModel, StripeParamsModel {
 
@@ -218,16 +322,75 @@ data class PaymentMethod internal constructor(
         }
     }
 
+    /**
+     * If this is a `card` PaymentMethod, this hash contains details about the card.
+     *
+     * [card](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card)
+     */
     @Parcelize
     data class Card internal constructor(
+        /**
+         * Card brand. Can be `amex`, `diners`, `discover`, `jcb`, `mastercard`, `unionpay`,
+         * `visa`, or `unknown`.
+         *
+         * [card.brand](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-brand)
+         */
         @field:Brand @JvmField val brand: String? = null,
+
+        /**
+         * Checks on Card address and CVC if provided
+         *
+         * [card.checks](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-checks)
+         */
         @JvmField val checks: Checks? = null,
+
+        /**
+         * Two-letter ISO code representing the country of the card. You could use this attribute to get a sense of the international breakdown of cards you’ve collected.
+         *
+         * [card.country](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-country)
+         */
         @JvmField val country: String? = null,
+
+        /**
+         * Two-digit number representing the card’s expiration month.
+         *
+         * [card.exp_month](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-exp_month)
+         */
         @JvmField val expiryMonth: Int? = null,
+
+        /**
+         * Four-digit number representing the card’s expiration year.
+         *
+         * [card.exp_year](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-exp_year)
+         */
         @JvmField val expiryYear: Int? = null,
+
+        /**
+         * Card funding type. Can be `credit`, `debit, `prepaid`, or `unknown`.
+         *
+         * [card.funding](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-funding)
+         */
         @JvmField val funding: String? = null,
+
+        /**
+         * The last four digits of the card.
+         *
+         * [card.last4](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-last4)
+         */
         @JvmField val last4: String? = null,
+
+        /**
+         * Contains details on how this Card maybe be used for 3D Secure authentication.
+         *
+         * [card.three_d_secure_usage](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-three_d_secure_usage)
+         */
         @JvmField val threeDSecureUsage: ThreeDSecureUsage? = null,
+
+        /**
+         * If this Card is part of a card wallet, this contains the details of the card wallet.
+         *
+         * [card.wallet](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-wallet)
+         */
         @JvmField val wallet: Wallet? = null
     ) : StripeModel {
 
@@ -300,19 +463,56 @@ data class PaymentMethod internal constructor(
             }
         }
 
+        /**
+         * Checks on Card address and CVC if provided
+         *
+         * [card.checks](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-checks)
+         */
         @Parcelize
         data class Checks internal constructor(
+            /**
+             * If a address line1 was provided, results of the check, one of `pass`, `fail`, `unavailable`, or `unchecked`.
+             *
+             * [payment_method.card.checks.address_line1_check](https://stripe.com/docs/api/errors#errors-payment_method-card-checks-address_line1_check)
+             */
             @JvmField val addressLine1Check: String?,
+
+            /**
+             * If a address postal code was provided, results of the check, one of `pass`, `fail`, `unavailable`, or `unchecked`.
+             *
+             * [payment_method.card.checks.address_postal_code_check](https://stripe.com/docs/api/errors#errors-payment_method-card-checks-address_postal_code_check)
+             */
             @JvmField val addressPostalCodeCheck: String?,
+
+            /**
+             * If a CVC was provided, results of the check, one of `pass`, `fail`, `unavailable`, or `unchecked`.
+             *
+             * [payment_method.card.checks.cvc_check](https://stripe.com/docs/api/errors#errors-payment_method-card-checks-cvc_check)
+             */
             @JvmField val cvcCheck: String?
         ) : StripeModel
 
+        /**
+         * Contains details on how this Card maybe be used for 3D Secure authentication.
+         *
+         * [card.three_d_secure_usage](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-three_d_secure_usage)
+         */
         @Parcelize
         data class ThreeDSecureUsage internal constructor(
+            /**
+             * Whether 3D Secure is supported on this card.
+             *
+             * [payment_method.card.three_d_secure_usage.supported](https://stripe.com/docs/api/errors#errors-payment_method-card-three_d_secure_usage-supported)
+             */
             @JvmField val isSupported: Boolean
         ) : StripeModel
     }
 
+    /**
+     * If this is a `card_present` PaymentMethod, this hash contains details about the Card Present payment method.
+     *
+     * [card_present](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card_present)
+     */
     @Parcelize
     data class CardPresent internal constructor(
         private val ignore: Boolean = true
@@ -323,9 +523,27 @@ data class PaymentMethod internal constructor(
         }
     }
 
+    /**
+     * If this is an `ideal` PaymentMethod, this hash contains details about the iDEAL payment method.
+     *
+     * [ideal](https://stripe.com/docs/api/payment_methods/object#payment_method_object-ideal)
+     */
     @Parcelize
     data class Ideal internal constructor(
+        /**
+         * The customer’s bank, if provided. Can be one of `abn_amro`, `asn_bank`, `bunq`,
+         * `handelsbanken`, `ing`, `knab`, `moneyou`, `rabobank`, `regiobank`, `sns_bank`,
+         * `triodos_bank`, or `van_lanschot`.
+         *
+         * [ideal.bank](https://stripe.com/docs/api/payment_methods/object#payment_method_object-ideal-bank)
+         */
         @JvmField val bank: String?,
+
+        /**
+         * The Bank Identifier Code of the customer’s bank, if the bank was provided.
+         *
+         * [ideal.bic](https://stripe.com/docs/api/payment_methods/object#payment_method_object-ideal-bic)
+         */
         @JvmField val bankIdentifierCode: String?
     ) : StripeModel
 
@@ -341,12 +559,46 @@ data class PaymentMethod internal constructor(
         @JvmField val accountHolderType: String?
     ) : StripeModel
 
+    /**
+     * If this is a `sepa_debit` PaymentMethod, this hash contains details about the SEPA debit bank account.
+     *
+     * [sepa_debit](https://stripe.com/docs/api/payment_methods/object#payment_method_object-sepa_debit)
+     */
     @Parcelize
     data class SepaDebit internal constructor(
+        /**
+         * Bank code of bank associated with the bank account.
+         *
+         * [sepa_debit.bank_code](https://stripe.com/docs/api/payment_methods/object#payment_method_object-sepa_debit-bank_code)
+         */
         @JvmField val bankCode: String?,
+
+        /**
+         * Branch code of bank associated with the bank account.
+         *
+         * [sepa_debit.branch_code](https://stripe.com/docs/api/payment_methods/object#payment_method_object-sepa_debit-branch_code)
+         */
         @JvmField val branchCode: String?,
+
+        /**
+         * Two-letter ISO code representing the country the bank account is located in.
+         *
+         * [sepa_debit.country](https://stripe.com/docs/api/payment_methods/object#payment_method_object-sepa_debit-country)
+         */
         @JvmField val country: String?,
+
+        /**
+         * Uniquely identifies this particular bank account. You can use this attribute to check whether two bank accounts are the same.
+         *
+         * [sepa_debit.fingerprint](https://stripe.com/docs/api/payment_methods/object#payment_method_object-sepa_debit-fingerprint)
+         */
         @JvmField val fingerprint: String?,
+
+        /**
+         * Last four characters of the IBAN.
+         *
+         * [sepa_debit.last4](https://stripe.com/docs/api/payment_methods/object#payment_method_object-sepa_debit-last4)
+         */
         @JvmField val last4: String?
     ) : StripeModel
 

@@ -12,6 +12,9 @@ import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
 import com.stripe.android.model.CardBrand
 
+/**
+ * A [StripeEditText] for CVC input.
+ */
 class CvcEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
