@@ -6,14 +6,14 @@ import com.stripe.android.StripeError
  * An [Exception] indicating that invalid parameters were used in a request.
  */
 open class InvalidRequestException(
-    message: String?,
-    val param: String?,
-    requestId: String?,
-    statusCode: Int,
-    val errorCode: String?,
-    val errorDeclineCode: String?,
-    stripeError: StripeError?,
-    e: Throwable?
+    message: String? = null,
+    val param: String? = null,
+    requestId: String? = null,
+    statusCode: Int = 0,
+    val errorCode: String? = null,
+    val errorDeclineCode: String? = null,
+    stripeError: StripeError? = null,
+    e: Throwable? = null
 ) : StripeException(
     stripeError,
     message,
