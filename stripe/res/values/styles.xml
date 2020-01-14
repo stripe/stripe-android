@@ -35,4 +35,11 @@
     </style>
 
     <style name="Stripe.CardInputWidget.EditText" parent="Stripe.Base.CardInputWidget.EditText" />
+
+    <style name="Stripe.Base.CardInputWidget.TextInputLayout"
+        parent="Widget.Design.TextInputLayout">
+    </style>
+
+    <style name="Stripe.CardInputWidget.TextInputLayout"
+        parent="Stripe.Base.CardInputWidget.TextInputLayout" />
 </resources>

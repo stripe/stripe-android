@@ -36,7 +36,8 @@
             android:nextFocusForward="@+id/tl_expiry_date"
             android:nextFocusDown="@+id/tl_expiry_date"
             android:contentDescription="@string/acc_label_card_number"
-            app:hintEnabled="false">
+            app:hintEnabled="false"
+            style="@style/Stripe.CardInputWidget.TextInputLayout">
             <com.stripe.android.view.CardNumberEditText
                 android:id="@+id/et_card_number"
                 android:layout_width="match_parent"
@@ -70,7 +71,8 @@
             android:nextFocusLeft="@id/tl_card_number"
             android:nextFocusUp="@id/tl_card_number"
             android:contentDescription="@string/acc_label_expiry_date"
-            app:hintEnabled="false">
+            app:hintEnabled="false"
+            style="@style/Stripe.CardInputWidget.TextInputLayout">
             <com.stripe.android.view.ExpiryDateEditText
                 android:id="@+id/et_expiry_date"
                 android:layout_width="match_parent"
@@ -99,7 +101,8 @@
             android:nextFocusLeft="@id/tl_expiry_date"
             android:nextFocusUp="@id/tl_expiry_date"
             android:contentDescription="@string/cvc_number_hint"
-            app:hintEnabled="false">
+            app:hintEnabled="false"
+            style="@style/Stripe.CardInputWidget.TextInputLayout">
             <com.stripe.android.view.CvcEditText
                 android:id="@+id/et_cvc"
                 android:layout_width="match_parent"
@@ -126,7 +129,8 @@
             android:nextFocusLeft="@id/tl_cvc"
             android:nextFocusUp="@id/tl_cvc"
             android:contentDescription="@string/address_label_postal_code"
-            app:hintEnabled="false">
+            app:hintEnabled="false"
+            style="@style/Stripe.CardInputWidget.TextInputLayout">
             <com.stripe.android.view.PostalCodeEditText
                 android:id="@+id/et_postal_code"
                 android:layout_width="match_parent"
