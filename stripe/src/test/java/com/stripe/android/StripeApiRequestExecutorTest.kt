@@ -25,7 +25,9 @@ class StripeApiRequestExecutorTest {
         }
 
         assertFailsWith<InvalidRequestException> {
-            stripeRequest.bodyBytes
+            FakeOutputStream().use {
+                stripeRequest.writeBody(it)
+            }
         }
     }
 }
