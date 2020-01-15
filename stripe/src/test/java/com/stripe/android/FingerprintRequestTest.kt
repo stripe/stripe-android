@@ -7,6 +7,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.io.ByteArrayOutputStream
 
 @RunWith(RobolectricTestRunner::class)
 class FingerprintRequestTest {
@@ -34,10 +35,10 @@ class FingerprintRequestTest {
 
     @Test
     fun writeBody_shouldWriteNonEmptyBytes() {
-        FakeOutputStream().use {
+        ByteArrayOutputStream().use {
             FingerprintRequest(telemetryClientUtil.createTelemetryMap(), "guid")
                 .writeBody(it)
-            assertTrue(it.writtenBytesSize > 0)
+            assertTrue(it.size() > 0)
         }
     }
 }

@@ -4,10 +4,11 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeFilePurpose
-import kotlin.test.Test
-import kotlin.test.assertEquals
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.io.ByteArrayOutputStream
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
 class FileUploadRequestTest {
@@ -29,12 +30,12 @@ class FileUploadRequestTest {
             boundary = "5955816017232305695"
         )
 
-        FakeOutputStream().use {
+        ByteArrayOutputStream().use {
             request.writeBody(it)
 
             assertEquals(
                 1247,
-                it.writtenBytesSize
+                it.size()
             )
         }
     }
