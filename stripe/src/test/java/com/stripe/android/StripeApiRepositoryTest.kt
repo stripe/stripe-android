@@ -269,7 +269,7 @@ class StripeApiRepositoryTest {
         // put a private key here to simulate the backend
         val clientSecret = "pi_12345_secret_fake"
 
-        `when`(stripeApiRequestExecutor.execute(any()))
+        `when`(stripeApiRequestExecutor.execute(any<ApiRequest>()))
             .thenReturn(
                 StripeResponse(200,
                     PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2_JSON.toString(),
@@ -337,7 +337,7 @@ class StripeApiRepositoryTest {
     fun createSource_withNonLoggingListener_doesNotLogButDoesCreateSource() {
         val stripeApiRepository = StripeApiRepository(
             ApplicationProvider.getApplicationContext<Context>(),
-            stripeApiRequestExecutor = StripeApiRequestExecutor(),
+            stripeApiRequestExecutor = ApiRequestExecutor.Default(),
             fireAndForgetRequestExecutor = FakeFireAndForgetRequestExecutor()
         )
         val source = stripeApiRepository.createSource(SourceParams.createCardParams(CARD),
@@ -503,7 +503,7 @@ class StripeApiRepositoryTest {
             .url
 
         `when`(
-            stripeApiRequestExecutor.execute(argThat {
+            stripeApiRequestExecutor.execute(argThat<ApiRequest> {
                 ApiRequestMatcher(StripeRequest.Method.GET, url, options, queryParams)
                     .matches(this)
             })
@@ -544,7 +544,7 @@ class StripeApiRepositoryTest {
             .url
 
         `when`(
-            stripeApiRequestExecutor.execute(argThat {
+            stripeApiRequestExecutor.execute(argThat<ApiRequest> {
                 ApiRequestMatcher(StripeRequest.Method.GET, url, options, queryParams)
                     .matches(this)
             })
@@ -583,7 +583,7 @@ class StripeApiRepositoryTest {
 
     @Test
     fun createSource_whenUnknownHostExceptionThrown_convertsToAPIConnectionException() {
-        `when`(stripeApiRequestExecutor.execute(any())).thenAnswer {
+        `when`(stripeApiRequestExecutor.execute(any<ApiRequest>())).thenAnswer {
             throw UnknownHostException()
         }
 

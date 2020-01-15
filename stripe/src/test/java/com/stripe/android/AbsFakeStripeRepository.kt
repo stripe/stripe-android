@@ -13,6 +13,8 @@ import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Stripe3ds2AuthResult
+import com.stripe.android.model.StripeFile
+import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 
@@ -234,5 +236,12 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         requestOptions: ApiRequest.Options,
         callback: ApiResultCallback<Boolean>
     ) {
+    }
+
+    override fun createFile(
+        fileParams: StripeFileParams,
+        requestOptions: ApiRequest.Options
+    ): StripeFile {
+        return StripeFile()
     }
 }

@@ -17,6 +17,8 @@ import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Stripe3ds2AuthResult
+import com.stripe.android.model.StripeFile
+import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import org.json.JSONException
@@ -234,4 +236,9 @@ internal interface StripeRepository {
         requestOptions: ApiRequest.Options,
         callback: ApiResultCallback<Boolean>
     )
+
+    fun createFile(
+        fileParams: StripeFileParams,
+        requestOptions: ApiRequest.Options
+    ): StripeFile
 }

@@ -7,7 +7,7 @@ package com.stripe.android.model
  *
  * [purpose](https://stripe.com/docs/api/files/create#create_file-purpose)
 */
-internal enum class StripeFilePurpose(internal val code: String) {
+enum class StripeFilePurpose(internal val code: String) {
     BusinessIcon("business_icon"),
     BusinessLogo("business_logo"),
     CustomerSignature("customer_signature"),

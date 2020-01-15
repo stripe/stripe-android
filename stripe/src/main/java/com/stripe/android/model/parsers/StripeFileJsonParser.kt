@@ -16,7 +16,8 @@ internal class StripeFileJsonParser : ModelJsonParser<StripeFile> {
             purpose = StripeFilePurpose.fromCode(optString(json, FIELD_PURPOSE)),
             size = optInteger(json, FIELD_SIZE),
             title = optString(json, FIELD_TITLE),
-            type = optString(json, FIELD_TYPE)
+            type = optString(json, FIELD_TYPE),
+            url = optString(json, FIELD_URL)
         )
     }
 
@@ -28,5 +29,6 @@ internal class StripeFileJsonParser : ModelJsonParser<StripeFile> {
         private const val FIELD_SIZE = "size"
         private const val FIELD_TITLE = "title"
         private const val FIELD_TYPE = "type"
+        private const val FIELD_URL = "url"
     }
 }

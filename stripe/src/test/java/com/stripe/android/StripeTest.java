@@ -24,9 +24,13 @@ import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceCardData;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.SourceSepaDebitData;
+import com.stripe.android.model.StripeFile;
+import com.stripe.android.model.StripeFileParams;
+import com.stripe.android.model.StripeFilePurpose;
 import com.stripe.android.model.Token;
 import com.stripe.android.model.WeChat;
 
+import java.io.File;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -83,19 +87,23 @@ public class StripeTest {
             TEST_BANK_ROUTING_NUMBER);
     private static final SourceParams CARD_SOURCE_PARAMS = SourceParams.createCardParams(CARD);
 
-    private Context mContext;
+    private Context context;
 
     @Captor private ArgumentCaptor<StripeRequest> stripeRequestArgumentCaptor;
     @Mock private FireAndForgetRequestExecutor fireAndForgetRequestExecutor;
+
     @Mock private ApiResultCallback<Token> tokenCallback;
     @Mock private ApiResultCallback<Source> sourceCallback;
+    @Mock private ApiResultCallback<StripeFile> stripeFileCallback;
+
     @Captor private ArgumentCaptor<Token> tokenArgumentCaptor;
     @Captor private ArgumentCaptor<Source> sourceArgumentCaptor;
+    @Captor private ArgumentCaptor<StripeFile> stripeFileArgumentCaptor;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mContext = ApplicationProvider.getApplicationContext();
+        context = ApplicationProvider.getApplicationContext();
     }
 
     @Test
@@ -116,7 +124,7 @@ public class StripeTest {
         assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
             @Override
             public void run() {
-                new Stripe(mContext, null);
+                new Stripe(context, null);
             }
         });
     }
@@ -126,7 +134,7 @@ public class StripeTest {
         assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
             @Override
             public void run() {
-                new Stripe(mContext, "");
+                new Stripe(context, "");
             }
         });
     }
@@ -136,7 +144,7 @@ public class StripeTest {
         assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
             @Override
             public void run() {
-                new Stripe(mContext, DEFAULT_SECRET_KEY);
+                new Stripe(context, DEFAULT_SECRET_KEY);
             }
         });
     }
@@ -173,7 +181,7 @@ public class StripeTest {
     public void createCardTokenSynchronous_withValidDataAndConnectAccount_returnsToken()
             throws StripeException {
         final Stripe stripe = new Stripe(
-                mContext,
+                context,
                 ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
                 "acct_1Acj2PBUgO3KuWzz"
         );
@@ -1300,6 +1308,52 @@ public class StripeTest {
         assertEquals(appInfo, Stripe.getAppInfo());
     }
 
+    @Test
+    public void createFile_shouldCreateFile() {
+        final File file = new FileFactory(context).create();
+        final Stripe stripe = createStripe(MainScope());
+        stripe.createFile(
+                new StripeFileParams(
+                        file,
+                        StripeFilePurpose.BusinessIcon
+                ),
+                stripeFileCallback
+        );
+        verify(stripeFileCallback).onSuccess(stripeFileArgumentCaptor.capture());
+
+        final StripeFile stripeFile = stripeFileArgumentCaptor.getValue();
+
+        assertNotNull(stripeFile.getId());
+        assertEquals(StripeFilePurpose.BusinessIcon, stripeFile.getPurpose());
+        assertEquals("png", stripeFile.getType());
+        assertEquals("example.png", stripeFile.getFilename());
+        assertEquals(976L, (int) stripeFile.getSize());
+
+        final String url = stripeFile.getUrl();
+        assertNotNull(url);
+        assertTrue(url.startsWith("https://files.stripe.com/v1/files/file_"));
+    }
+
+    @Test
+    public void createFileSynchronous_shouldCreateFile() {
+        final File file = new FileFactory(context).create();
+        final StripeFile stripeFile = createStripe().createFileSynchronous(
+                new StripeFileParams(
+                        file,
+                        StripeFilePurpose.BusinessIcon
+                )
+        );
+        assertNotNull(stripeFile.getId());
+        assertEquals(StripeFilePurpose.BusinessIcon, stripeFile.getPurpose());
+        assertEquals("png", stripeFile.getType());
+        assertEquals("example.png", stripeFile.getFilename());
+        assertEquals(976L, (int) stripeFile.getSize());
+
+        final String url = stripeFile.getUrl();
+        assertNotNull(url);
+        assertTrue(url.startsWith("https://files.stripe.com/v1/files/file_"));
+    }
+
     @NonNull
     private Source createSource() throws StripeException {
         final Stripe stripe = createStripe();
@@ -1352,8 +1406,8 @@ public class StripeTest {
         final StripeRepository stripeRepository = createStripeRepository(fireAndForgetRequestExecutor);
         return new Stripe(
                 stripeRepository,
-                new StripeNetworkUtils(mContext),
-                StripePaymentController.create(mContext, stripeRepository),
+                new StripeNetworkUtils(context),
+                StripePaymentController.create(context, stripeRepository),
                 publishableKey,
                 null
         );
@@ -1365,8 +1419,8 @@ public class StripeTest {
                 new FakeFireAndForgetRequestExecutor());
         return new Stripe(
                 stripeRepository,
-                new StripeNetworkUtils(mContext),
-                StripePaymentController.create(mContext, stripeRepository),
+                new StripeNetworkUtils(context),
+                StripePaymentController.create(context, stripeRepository),
                 NON_LOGGING_PK,
                 null,
                 workScope
@@ -1377,13 +1431,13 @@ public class StripeTest {
     private StripeRepository createStripeRepository(
             @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor) {
         return new StripeApiRepository(
-                mContext,
+                context,
                 null,
                 new FakeLogger(),
-                new StripeApiRequestExecutor(),
+                new ApiRequestExecutor.Default(),
                 fireAndForgetRequestExecutor,
                 new FingerprintRequestFactory(
-                        new TelemetryClientUtil(mContext, new FakeUidSupplier())
+                        new TelemetryClientUtil(context, new FakeUidSupplier())
                 )
         );
     }
