@@ -42,8 +42,10 @@ internal class FileUploadRequest(
             PrintWriter(it, true).use { writer ->
                 writer.write(purposeContents)
                 writer.flush()
+
                 writer.write(fileMetadata)
                 writer.flush()
+
                 writeFile(outputStream)
                 writer.write(LINE_BREAK)
                 writer.write("--$boundary--")
@@ -53,14 +55,7 @@ internal class FileUploadRequest(
     }
 
     private fun writeFile(outputStream: OutputStream) {
-        fileParams.file.inputStream().use { inputStream ->
-            val buffer = ByteArray(4096)
-            var bytesRead: Int
-            while (inputStream.read(buffer).also { bytesRead = it } != -1) {
-                outputStream.write(buffer, 0, bytesRead)
-            }
-            outputStream.flush()
-        }
+        fileParams.file.inputStream().copyTo(outputStream)
     }
 
     override val contentType: String
