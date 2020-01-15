@@ -33,13 +33,11 @@ class ApiRequestHeadersFactoryTest {
 
     @Test
     fun headers_withAllRequestOptions_properlyMapsRequestOptions() {
-        Locale.setDefault(Locale.US)
-
         val stripeAccount = "acct_123abc"
-        val headers = ApiRequest.createGet(
-            StripeApiRepository.sourcesUrl,
-            ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccount)
-        ).headers
+        val headers = createHeaders(
+            locale = Locale.US,
+            options = ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccount)
+        )
 
         assertEquals(
             "Bearer ${ApiKeyFixtures.FAKE_PUBLISHABLE_KEY}",
@@ -111,10 +109,11 @@ class ApiRequestHeadersFactoryTest {
 
     private fun createHeaders(
         locale: Locale = Locale.getDefault(),
+        options: ApiRequest.Options = OPTIONS,
         appInfo: AppInfo? = null
     ): Map<String, String> {
         return RequestHeadersFactory.Api(
-            options = OPTIONS,
+            options = options,
             appInfo = appInfo,
             locale = locale,
             systemPropertySupplier = { UUID.randomUUID().toString() }

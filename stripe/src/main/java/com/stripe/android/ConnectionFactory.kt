@@ -25,7 +25,7 @@ internal class ConnectionFactory {
             if (StripeRequest.Method.POST == request.method) {
                 doOutput = true
                 setRequestProperty(HEADER_CONTENT_TYPE, request.contentType)
-                outputStream.use { output -> output.write(request.bodyBytes) }
+                outputStream.use { output -> request.writeBody(output) }
             }
         }
 

@@ -33,10 +33,11 @@ class FingerprintRequestTest {
     }
 
     @Test
-    fun testBody() {
-        val body =
+    fun writeBody_shouldWriteNonEmptyBytes() {
+        FakeOutputStream().use {
             FingerprintRequest(telemetryClientUtil.createTelemetryMap(), "guid")
-                .body
-        assertTrue(body.isNotEmpty())
+                .writeBody(it)
+            assertTrue(it.writtenBytesSize > 0)
+        }
     }
 }

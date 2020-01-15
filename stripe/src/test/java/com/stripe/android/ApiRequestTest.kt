@@ -34,25 +34,26 @@ internal class ApiRequestTest {
     }
 
     @Test
-    fun body_withEmptyBody_shouldHaveZeroLength() {
-        val bodyBytes = ApiRequest.createPost(
-            StripeApiRepository.paymentMethodsUrl,
-            OPTIONS
-        ).bodyBytes
-        assertTrue(bodyBytes.isEmpty())
+    fun writeBody_withEmptyBody_shouldHaveZeroLength() {
+        FakeOutputStream().use {
+            ApiRequest.createPost(
+                StripeApiRepository.paymentMethodsUrl,
+                OPTIONS
+            ).writeBody(it)
+            assertTrue(it.writtenBytesSize == 0)
+        }
     }
 
     @Test
-    fun bodyBytes_withNonEmptyBody_shouldHaveNonZeroLength() {
-        val params = mapOf("customer" to "cus_123")
-
-        val bodyBytes =
+    fun writeBody_withNonEmptyBody_shouldHaveNonZeroLength() {
+        FakeOutputStream().use {
             ApiRequest.createPost(
                 StripeApiRepository.paymentMethodsUrl,
                 OPTIONS,
-                params
-            ).bodyBytes
-        assertEquals(16, bodyBytes.size)
+                mapOf("customer" to "cus_123")
+            ).writeBody(it)
+            assertEquals(16, it.writtenBytesSize)
+        }
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import com.stripe.android.exception.InvalidRequestException
+import java.io.OutputStream
 import java.io.UnsupportedEncodingException
 import java.util.HashMap
 import java.util.HashSet
@@ -45,12 +46,25 @@ internal abstract class StripeRequest {
             return headersFactory.create()
         }
 
-    internal abstract val body: String
+    /**
+     * Override for complex request body logic (i.e. multipart form requests)
+     */
+    internal open fun writeBody(outputStream: OutputStream) {
+        bodyBytes?.let {
+            outputStream.write(it)
+            outputStream.flush()
+        }
+    }
 
-    internal val bodyBytes: ByteArray
+    /**
+     * Override for standard requests (i.e. not multipart form requests)
+     */
+    protected open val body: String? = null
+
+    private val bodyBytes: ByteArray?
         get() {
             try {
-                return body.toByteArray(Charsets.UTF_8)
+                return body?.toByteArray(Charsets.UTF_8)
             } catch (e: UnsupportedEncodingException) {
                 throw InvalidRequestException(
                     message = "Unable to encode parameters to ${Charsets.UTF_8.name()}. " +
@@ -60,7 +74,7 @@ internal abstract class StripeRequest {
             }
         }
 
-    internal val query: String
+    protected val query: String
         get() {
             return queryStringFactory.create(compactParams)
         }
