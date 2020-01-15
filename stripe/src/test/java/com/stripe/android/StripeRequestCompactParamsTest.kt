@@ -71,11 +71,7 @@ class StripeRequestCompactParamsTest {
         override val method: Method = Method.POST
         override val baseUrl: String = "https://example.com"
         override val mimeType: MimeType = MimeType.Form
-        override val userAgent: String = ""
         override val body: String = ""
-
-        override fun createHeaders(): Map<String, String> {
-            return emptyMap()
-        }
+        override val headersFactory = RequestHeadersFactory.Default()
     }
 }
