@@ -81,9 +81,5 @@ internal data class ApiRequest internal constructor(
         ): ApiRequest {
             return ApiRequest(Method.DELETE, url, null, options, appInfo)
         }
-
-        private val DEFAULT_SYSTEM_PROPERTY_SUPPLIER = { name: String ->
-            System.getProperty(name).orEmpty()
-        }
     }
 }

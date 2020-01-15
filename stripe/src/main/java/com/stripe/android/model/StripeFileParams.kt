@@ -16,7 +16,7 @@ internal data class StripeFileParams(
      * A file to upload. The file should follow the specifications of RFC 2388 (which defines file
      * transfers for the `multipart/form-data` protocol).
      */
-    private val file: File,
+    internal val file: File,
 
     /**
      * The purpose of the uploaded file. Possible values are `business_icon`, `business_logo`,
@@ -25,7 +25,7 @@ internal data class StripeFileParams(
      *
      * [purpose](https://stripe.com/docs/api/files/create#create_file-purpose)
      */
-    private val purpose: StripeFilePurpose,
+    internal val purpose: StripeFilePurpose,
 
     /**
      * Optional parameters to automatically create a

@@ -36,7 +36,7 @@ internal abstract class StripeRequest {
             }
         }
 
-    internal val contentType: String
+    internal open val contentType: String
         get() {
             return "$mimeType; charset=$CHARSET"
         }
@@ -103,12 +103,17 @@ internal abstract class StripeRequest {
 
     internal enum class MimeType(val code: String) {
         Form("application/x-www-form-urlencoded"),
+        MultipartForm("multipart/form-data"),
         Json("application/json");
 
         override fun toString(): String = code
     }
 
-    private companion object {
+    internal companion object {
+        internal val DEFAULT_SYSTEM_PROPERTY_SUPPLIER = { name: String ->
+            System.getProperty(name).orEmpty()
+        }
+
         private val CHARSET = Charsets.UTF_8.name()
 
         /**
