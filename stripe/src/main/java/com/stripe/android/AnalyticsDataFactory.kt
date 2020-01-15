@@ -25,7 +25,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
         EventName.ADD_SOURCE, EventName.DEFAULT_SOURCE, EventName.DELETE_SOURCE,
         EventName.SET_SHIPPING_INFO, EventName.CONFIRM_PAYMENT_INTENT,
         EventName.RETRIEVE_PAYMENT_INTENT, EventName.CONFIRM_SETUP_INTENT,
-        EventName.RETRIEVE_SETUP_INTENT, EventName.AUTH_3DS1_SDK,
+        EventName.RETRIEVE_SETUP_INTENT, EventName.CREATE_FILE, EventName.AUTH_3DS1_SDK,
         EventName.AUTH_3DS2_FINGERPRINT, EventName.AUTH_3DS2_START,
         EventName.AUTH_3DS2_FRICTIONLESS, EventName.AUTH_3DS2_CHALLENGE_PRESENTED,
         EventName.AUTH_3DS2_CHALLENGE_CANCELED, EventName.AUTH_3DS2_CHALLENGE_COMPLETED,
@@ -46,6 +46,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
             internal const val RETRIEVE_PAYMENT_INTENT = "payment_intent_retrieval"
             internal const val CONFIRM_SETUP_INTENT = "setup_intent_confirmation"
             internal const val RETRIEVE_SETUP_INTENT = "setup_intent_retrieval"
+            internal const val CREATE_FILE = "create_file"
 
             internal const val AUTH_3DS1_SDK = "3ds1_sdk"
 
