@@ -6,7 +6,7 @@ import kotlinx.android.parcel.Parcelize
  * [The file object](https://stripe.com/docs/api/files/object)
  */
 @Parcelize
-internal data class StripeFile internal constructor(
+data class StripeFile internal constructor(
     /**
      * Unique identifier for the object.
      *
@@ -56,5 +56,12 @@ internal data class StripeFile internal constructor(
      *
      * [type](https://stripe.com/docs/api/files/object#file_object-type)
      */
-    val type: String? = null
+    val type: String? = null,
+
+    /**
+     * The URL from which the file can be downloaded using your live secret API key.
+     *
+     * [url](https://stripe.com/docs/api/files/object#file_object-url)
+     */
+    val url: String? = null
 ) : StripeModel

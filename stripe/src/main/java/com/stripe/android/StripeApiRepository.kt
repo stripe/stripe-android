@@ -23,6 +23,8 @@ import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Stripe3ds2AuthResult
+import com.stripe.android.model.StripeFile
+import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeModel
 import com.stripe.android.model.Token
@@ -33,6 +35,7 @@ import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.parsers.SetupIntentJsonParser
 import com.stripe.android.model.parsers.SourceJsonParser
 import com.stripe.android.model.parsers.Stripe3ds2AuthResultJsonParser
+import com.stripe.android.model.parsers.StripeFileJsonParser
 import com.stripe.android.model.parsers.TokenJsonParser
 import java.io.IOException
 import java.net.HttpURLConnection
@@ -48,7 +51,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     context: Context,
     private val appInfo: AppInfo? = null,
     private val logger: Logger = Logger.noop(),
-    private val stripeApiRequestExecutor: ApiRequestExecutor = StripeApiRequestExecutor(logger),
+    private val stripeApiRequestExecutor: ApiRequestExecutor = ApiRequestExecutor.Default(logger),
     private val fireAndForgetRequestExecutor: FireAndForgetRequestExecutor =
         StripeFireAndForgetRequestExecutor(logger),
     private val fingerprintRequestFactory: FingerprintRequestFactory =
@@ -792,6 +795,16 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             .execute()
     }
 
+    override fun createFile(
+        fileParams: StripeFileParams,
+        requestOptions: ApiRequest.Options
+    ): StripeFile {
+        val response = makeFileUploadRequest(
+            FileUploadRequest(fileParams, requestOptions, appInfo)
+        )
+        return StripeFileJsonParser().parse(response.responseJson)
+    }
+
     /**
      * @return `https://api.stripe.com/v1/payment_methods/:id/detach`
      */
@@ -861,6 +874,27 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             stripeApiRequestExecutor.execute(apiRequest)
         } catch (ex: IOException) {
             throw APIConnectionException.create(ex, apiRequest.baseUrl)
+        }
+
+        if (response.hasErrorCode()) {
+            handleApiError(response)
+        }
+
+        resetDnsCacheTtl(dnsCacheData)
+
+        return response
+    }
+
+    @VisibleForTesting
+    @Throws(AuthenticationException::class, InvalidRequestException::class,
+        APIConnectionException::class, CardException::class, APIException::class)
+    internal fun makeFileUploadRequest(fileUploadRequest: FileUploadRequest): StripeResponse {
+        val dnsCacheData = disableDnsCache()
+
+        val response = try {
+            stripeApiRequestExecutor.execute(fileUploadRequest)
+        } catch (ex: IOException) {
+            throw APIConnectionException.create(ex, fileUploadRequest.baseUrl)
         }
 
         if (response.hasErrorCode()) {

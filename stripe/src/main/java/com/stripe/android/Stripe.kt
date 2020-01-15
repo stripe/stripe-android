@@ -27,6 +27,8 @@ import com.stripe.android.model.PiiTokenParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
+import com.stripe.android.model.StripeFile
+import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.Token
 import com.stripe.android.view.AuthActivityStarter
 import kotlinx.coroutines.CoroutineScope
@@ -1233,6 +1235,53 @@ class Stripe internal constructor(
         ).execute()
     }
 
+    /**
+     * [Create a file](https://stripe.com/docs/api/files/create) asynchronously
+     *
+     * @param fileParams the [StripeFileParams] used to create the [StripeFile]
+     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
+     * @param callback a [ApiResultCallback] to receive the result or error
+     */
+    @JvmOverloads
+    fun createFile(
+        fileParams: StripeFileParams,
+        idempotencyKey: String? = null,
+        callback: ApiResultCallback<StripeFile>
+    ) {
+        CreateFileTask(
+            stripeRepository,
+            fileParams,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId,
+                idempotencyKey = idempotencyKey
+            ),
+            workScope,
+            callback
+        ).execute()
+    }
+
+    /**
+     * [Create a file](https://stripe.com/docs/api/files/create) synchronously
+     *
+     * @param fileParams the [StripeFileParams] used to create the [StripeFile]
+     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
+     */
+    @JvmOverloads
+    fun createFileSynchronous(
+        fileParams: StripeFileParams,
+        idempotencyKey: String? = null
+    ): StripeFile {
+        return stripeRepository.createFile(
+            fileParams,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId,
+                idempotencyKey = idempotencyKey
+            )
+        )
+    }
+
     private class CreateSourceTask internal constructor(
         private val stripeRepository: StripeRepository,
         private val sourceParams: SourceParams,
@@ -1284,6 +1333,19 @@ class Stripe internal constructor(
         @Throws(StripeException::class)
         override suspend fun getResult(): Token? {
             return stripeRepository.createToken(tokenParams, options, tokenType)
+        }
+    }
+
+    private class CreateFileTask internal constructor(
+        private val stripeRepository: StripeRepository,
+        private val fileParams: StripeFileParams,
+        private val options: ApiRequest.Options,
+        workScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
+        callback: ApiResultCallback<StripeFile>
+    ) : ApiOperation<StripeFile>(workScope, callback) {
+        @Throws(StripeException::class)
+        override suspend fun getResult(): StripeFile {
+            return stripeRepository.createFile(fileParams, options)
         }
     }
 

@@ -18,10 +18,11 @@ class StripeFileJsonParserTest {
             id = "file_1FzRQ6CRMbs6FrXfgjerzyUQ",
             created = 1578677834L,
             filename = "upload.png",
-            purpose = StripeFilePurpose.IdentityDocument,
+            purpose = StripeFilePurpose.BusinessIcon,
             size = 25722,
             title = null,
-            type = "png"
+            type = "png",
+            url = "https://files.stripe.com/v1/files/file_1G1H0DBbvEc/contents"
         )
 
         private val FILE_JSON = JSONObject("""
@@ -30,10 +31,11 @@ class StripeFileJsonParserTest {
                 "object": "file",
                 "created": 1578677834,
                 "filename": "upload.png",
-                "purpose": "identity_document",
+                "purpose": "business_icon",
                 "size": 25722,
                 "title": null,
-                "type": "png"
+                "type": "png",
+                "url": "https://files.stripe.com/v1/files/file_1G1H0DBbvEc/contents"
             }
         """.trimIndent())
     }

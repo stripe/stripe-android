@@ -11,7 +11,7 @@ import kotlinx.android.parcel.Parcelize
  * The request should contain the file you would like to upload, as well as the parameters for
  * creating a file.
  */
-internal data class StripeFileParams(
+data class StripeFileParams constructor(
     /**
      * A file to upload. The file should follow the specifications of RFC 2388 (which defines file
      * transfers for the `multipart/form-data` protocol).
@@ -25,15 +25,7 @@ internal data class StripeFileParams(
      *
      * [purpose](https://stripe.com/docs/api/files/create#create_file-purpose)
      */
-    internal val purpose: StripeFilePurpose,
-
-    /**
-     * Optional parameters to automatically create a
-     * [file link](https://stripe.com/docs/api/files/create#file_links) for the newly created file.
-     *
-     * [file_link_data]](https://stripe.com/docs/api/files/create#create_file-file_link_data)
-     */
-    private val fileLink: FileLink? = null
+    internal val purpose: StripeFilePurpose
 ) {
     /**
      * Optional parameters to automatically create a
@@ -41,8 +33,16 @@ internal data class StripeFileParams(
      *
      * [file_link_data]](https://stripe.com/docs/api/files/create#create_file-file_link_data)
      */
+    private val fileLink: FileLink? = null
+
+    /**
+     * Optional parameters to automatically create a
+     * [file link](https://stripe.com/docs/api/files/create#file_links) for the newly created file.
+     *
+     * [file_link_data]](https://stripe.com/docs/api/files/create#create_file-file_link_data)
+     */
     @Parcelize
-    data class FileLink(
+    data class FileLink @JvmOverloads constructor(
         /**
          * Set this to `true` to create a file link for the newly created file. Creating a link is
          * only possible when the file’s `purpose` is one of the following: `business_icon`,

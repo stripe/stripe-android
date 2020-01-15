@@ -139,7 +139,7 @@ class StripePaymentAuthTest {
             StripeApiRepository(
                 context,
                 null,
-                stripeApiRequestExecutor = StripeApiRequestExecutor(),
+                stripeApiRequestExecutor = ApiRequestExecutor.Default(),
                 fireAndForgetRequestExecutor = FakeFireAndForgetRequestExecutor()
             ),
             StripeNetworkUtils(context),
