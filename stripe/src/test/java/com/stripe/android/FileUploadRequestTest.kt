@@ -4,11 +4,11 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeFilePurpose
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import java.io.ByteArrayOutputStream
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class FileUploadRequestTest {
@@ -51,16 +51,13 @@ class FileUploadRequestTest {
             boundary = "5955816017232305695"
         )
 
-        val expected =
-            """
+        val expected = """
             --5955816017232305695
             Content-Disposition: form-data; name="purpose"
     
             identity_document
             
-            """
-                .trimIndent()
-                .replace("\n", FileUploadRequest.LINE_BREAK)
+            """.trimIndent()
         assertEquals(expected, request.purposeContents)
     }
 
@@ -75,17 +72,14 @@ class FileUploadRequestTest {
             boundary = "5955816017232305695"
         )
 
-        val expected =
-            """
+        val expected = """
             --5955816017232305695
             Content-Disposition: form-data; name="file"; filename="example.png"
             Content-Type: image/png
             Content-Transfer-Encoding: binary
             
             
-            """
-                .trimIndent()
-                .replace("\n", FileUploadRequest.LINE_BREAK)
+            """.trimIndent()
         assertEquals(expected, request.fileMetadata)
     }
 

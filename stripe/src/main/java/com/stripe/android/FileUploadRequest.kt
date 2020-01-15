@@ -40,18 +40,20 @@ internal class FileUploadRequest(
     override fun writeBody(outputStream: OutputStream) {
         outputStream.writer().use {
             PrintWriter(it, true).use { writer ->
-                writer.write(purposeContents)
-                writer.flush()
-
-                writer.write(fileMetadata)
-                writer.flush()
-
+                writeString(writer, purposeContents)
+                writeString(writer, fileMetadata)
                 writeFile(outputStream)
+
                 writer.write(LINE_BREAK)
                 writer.write("--$boundary--")
                 writer.flush()
             }
         }
+    }
+
+    private fun writeString(writer: PrintWriter, contents: String) {
+        writer.write(contents.replace("\n", LINE_BREAK))
+        writer.flush()
     }
 
     private fun writeFile(outputStream: OutputStream) {
@@ -68,26 +70,30 @@ internal class FileUploadRequest(
         get() {
             val fileName = fileParams.file.name
             val probableContentType = URLConnection.guessContentTypeFromName(fileName)
-            return listOf(
-                "--$boundary",
-                "Content-Disposition: form-data; name=\"file\"; filename=\"$fileName\"",
-                "Content-Type: $probableContentType",
-                "Content-Transfer-Encoding: binary$LINE_BREAK"
-            ).joinToString(separator = LINE_BREAK, postfix = LINE_BREAK)
+            return """
+                --$boundary
+                Content-Disposition: form-data; name="file"; filename="$fileName"
+                Content-Type: $probableContentType
+                Content-Transfer-Encoding: binary
+
+
+            """.trimIndent()
         }
 
     @VisibleForTesting
     internal val purposeContents: String
         get() {
-            return listOf(
-                "--$boundary",
-                "Content-Disposition: form-data; name=\"purpose\"$LINE_BREAK",
-                fileParams.purpose.code
-            ).joinToString(separator = LINE_BREAK, postfix = LINE_BREAK)
+            return """
+                --$boundary
+                Content-Disposition: form-data; name="purpose"
+
+                ${fileParams.purpose.code}
+
+            """.trimIndent()
         }
 
     internal companion object {
-        internal const val LINE_BREAK = "\r\n"
+        private const val LINE_BREAK = "\r\n"
 
         private fun createBoundary(): String {
             return Random.Default.nextLong(0, Long.MAX_VALUE).toString()

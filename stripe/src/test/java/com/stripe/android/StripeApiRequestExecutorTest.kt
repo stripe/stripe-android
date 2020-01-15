@@ -1,12 +1,12 @@
 package com.stripe.android
 
 import com.stripe.android.exception.InvalidRequestException
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import java.io.ByteArrayOutputStream
 import java.io.UnsupportedEncodingException
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class StripeApiRequestExecutorTest {

@@ -1,13 +1,13 @@
 package com.stripe.android
 
 import com.stripe.android.model.CardFixtures
+import java.io.ByteArrayOutputStream
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.io.ByteArrayOutputStream
 
 @RunWith(RobolectricTestRunner::class)
 internal class ApiRequestTest {

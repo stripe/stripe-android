@@ -2,12 +2,12 @@ package com.stripe.android
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import java.io.ByteArrayOutputStream
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.io.ByteArrayOutputStream
 
 @RunWith(RobolectricTestRunner::class)
 class FingerprintRequestTest {
