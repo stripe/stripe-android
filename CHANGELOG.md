@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 13.0.1 - unreleased
+* [#2055](https://github.com/stripe/stripe-android/pull/2055) Fix styling of `CardInputWidget` and `CardMultilineWidget`
+    * `com.google.android.material:material:1.1.0-rc01` breaks `TextInputLayout` styling;
+      fix by explicitly setting a style that extends `Widget.Design.TextInputLayout`
+* [#2056](https://github.com/stripe/stripe-android/pull/2056) Update `CardInputWidget`'s `EditText` size
+    * Fix "Postal Code" field being partially cut off on some screens
+
 ## 13.0.0 - 2020-01-13
 This release includes several breaking changes.
 See the [migration guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) for more details.
