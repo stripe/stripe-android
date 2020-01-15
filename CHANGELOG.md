@@ -6,6 +6,8 @@
       fix by explicitly setting a style that extends `Widget.Design.TextInputLayout`
 * [#2056](https://github.com/stripe/stripe-android/pull/2056) Update `CardInputWidget`'s `EditText` size
     * Fix "Postal Code" field being partially cut off on some screens
+* [#2066](https://github.com/stripe/stripe-android/pull/2066) Add support for uploading a file to Stripe
+    * See `Stripe#createFile()` and `Stripe#createFileSynchronous()`
 
 ## 13.0.0 - 2020-01-13
 This release includes several breaking changes.
