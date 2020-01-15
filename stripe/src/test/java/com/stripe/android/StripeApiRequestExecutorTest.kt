@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import com.stripe.android.exception.InvalidRequestException
+import java.io.ByteArrayOutputStream
 import java.io.UnsupportedEncodingException
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
@@ -25,7 +26,7 @@ class StripeApiRequestExecutorTest {
         }
 
         assertFailsWith<InvalidRequestException> {
-            FakeOutputStream().use {
+            ByteArrayOutputStream().use {
                 stripeRequest.writeBody(it)
             }
         }

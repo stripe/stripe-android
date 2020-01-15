@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import com.stripe.android.model.CardFixtures
+import java.io.ByteArrayOutputStream
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -35,24 +36,24 @@ internal class ApiRequestTest {
 
     @Test
     fun writeBody_withEmptyBody_shouldHaveZeroLength() {
-        FakeOutputStream().use {
+        ByteArrayOutputStream().use {
             ApiRequest.createPost(
                 StripeApiRepository.paymentMethodsUrl,
                 OPTIONS
             ).writeBody(it)
-            assertTrue(it.writtenBytesSize == 0)
+            assertTrue(it.size() == 0)
         }
     }
 
     @Test
     fun writeBody_withNonEmptyBody_shouldHaveNonZeroLength() {
-        FakeOutputStream().use {
+        ByteArrayOutputStream().use {
             ApiRequest.createPost(
                 StripeApiRepository.paymentMethodsUrl,
                 OPTIONS,
                 mapOf("customer" to "cus_123")
             ).writeBody(it)
-            assertEquals(16, it.writtenBytesSize)
+            assertEquals(16, it.size())
         }
     }
 

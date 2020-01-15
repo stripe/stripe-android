@@ -2,6 +2,7 @@ package com.stripe.android
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import java.io.ByteArrayOutputStream
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -34,10 +35,10 @@ class FingerprintRequestTest {
 
     @Test
     fun writeBody_shouldWriteNonEmptyBytes() {
-        FakeOutputStream().use {
+        ByteArrayOutputStream().use {
             FingerprintRequest(telemetryClientUtil.createTelemetryMap(), "guid")
                 .writeBody(it)
-            assertTrue(it.writtenBytesSize > 0)
+            assertTrue(it.size() > 0)
         }
     }
 }
