@@ -6,14 +6,10 @@ import com.stripe.android.StripeError
  * An [Exception] indicating that too many requests have hit the API too quickly.
  */
 class RateLimitException(
-    message: String? = null,
-    param: String? = null,
-    requestId: String? = null,
-    stripeError: StripeError? = null
+    stripeError: StripeError,
+    requestId: String? = null
 ) : InvalidRequestException(
-    message = message,
-    param = param,
+    stripeError = stripeError,
     requestId = requestId,
-    statusCode = 429,
-    stripeError = stripeError
+    statusCode = 429
 )

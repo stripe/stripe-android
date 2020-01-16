@@ -31,9 +31,9 @@ internal class PaymentMethodsViewModel(
                 ) {
                     resultData.value = Result.Error(
                         APIException(
+                            stripeError = stripeError,
                             statusCode = errorCode,
-                            message = errorMessage,
-                            stripeError = stripeError
+                            message = errorMessage
                         )
                     )
                 }

@@ -9,11 +9,15 @@ import java.net.HttpURLConnection
  * They result when the user enters a card that can't be charged for some reason.
  */
 class CardException(
-    message: String?,
-    requestId: String?,
-    val code: String?,
-    val param: String?,
-    val declineCode: String?,
-    val charge: String?,
-    stripeError: StripeError
-) : StripeException(stripeError, message, requestId, HttpURLConnection.HTTP_PAYMENT_REQUIRED)
+    stripeError: StripeError,
+    requestId: String? = null
+) : StripeException(
+    stripeError,
+    requestId,
+    HttpURLConnection.HTTP_PAYMENT_REQUIRED
+) {
+    val code: String? = stripeError.code
+    val param: String? = stripeError.param
+    val declineCode: String? = stripeError.declineCode
+    val charge: String? = stripeError.charge
+}

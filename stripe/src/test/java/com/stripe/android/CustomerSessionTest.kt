@@ -843,7 +843,7 @@ class CustomerSessionTest {
             any(),
             any()
         ))
-            .thenThrow(APIException("The card is invalid", "request_123", 404, null, null))
+            .thenThrow(APIException(statusCode = 404, message = "The card is invalid"))
 
         `when`<Source>(stripeRepository.deleteCustomerSource(
             any(),
@@ -851,7 +851,7 @@ class CustomerSessionTest {
             any(),
             any(),
             any()))
-            .thenThrow(APIException("The card does not exist", "request_123", 404, null, null))
+            .thenThrow(APIException(statusCode = 404, message = "The card does not exist"))
 
         `when`<Customer>(stripeRepository.setDefaultCustomerSource(
             any(),
@@ -860,7 +860,7 @@ class CustomerSessionTest {
             any(),
             any(),
             any()))
-            .thenThrow(APIException("auth error", "reqId", 405, null, null))
+            .thenThrow(APIException(statusCode = 405, message = "auth error"))
 
         `when`<PaymentMethod>(stripeRepository.attachPaymentMethod(
             any(),
@@ -869,15 +869,14 @@ class CustomerSessionTest {
             any(),
             any()
         ))
-            .thenThrow(APIException("The payment method is invalid", "request_123", 404, null, null))
+            .thenThrow(APIException(statusCode = 404, message = "The payment method is invalid"))
 
         `when`<PaymentMethod>(stripeRepository.detachPaymentMethod(
             eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             any(),
             any(),
             any()))
-            .thenThrow(APIException("The payment method does not exist", "request_123",
-                404, null, null))
+            .thenThrow(APIException(statusCode = 404, message = "The payment method does not exist"))
 
         `when`(stripeRepository.getPaymentMethods(
             any(),
@@ -885,8 +884,7 @@ class CustomerSessionTest {
             eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             any(),
             any()))
-            .thenThrow(APIException("The payment method does not exist", "request_123",
-                404, null, null))
+            .thenThrow(APIException(statusCode = 404, message = "The payment method does not exist"))
     }
 
     private fun createCustomerSession(calendar: Calendar?): CustomerSession {
