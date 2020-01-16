@@ -153,7 +153,7 @@ internal class PaymentMethodsAdapter constructor(
         parent: ViewGroup
     ): ViewHolder.AddCardPaymentMethodViewHolder {
         return ViewHolder.AddCardPaymentMethodViewHolder(
-            AddPaymentMethodCardRowView(parent.context as Activity, intentArgs)
+            AddPaymentMethodRowView.createCard(parent.context as Activity, intentArgs)
         )
     }
 
@@ -161,7 +161,7 @@ internal class PaymentMethodsAdapter constructor(
         parent: ViewGroup
     ): ViewHolder.AddFpxPaymentMethodViewHolder {
         return ViewHolder.AddFpxPaymentMethodViewHolder(
-            AddPaymentMethodFpxRowView(parent.context as Activity, intentArgs)
+            AddPaymentMethodRowView.createFpx(parent.context as Activity, intentArgs)
         )
     }
 
