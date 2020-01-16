@@ -802,6 +802,14 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         val response = makeFileUploadRequest(
             FileUploadRequest(fileParams, requestOptions, appInfo)
         )
+        fireFingerprintRequest()
+        fireAnalyticsRequest(
+            analyticsDataFactory.getEventLoggingParams(
+                AnalyticsDataFactory.EventName.CREATE_FILE,
+                requestOptions.apiKey
+            ),
+            requestOptions.apiKey
+        )
         return StripeFileJsonParser().parse(response.responseJson)
     }
 

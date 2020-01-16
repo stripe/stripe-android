@@ -6,6 +6,7 @@ import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argThat
 import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.stripe.android.exception.APIConnectionException
@@ -16,6 +17,9 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.SourceParams
+import com.stripe.android.model.StripeFileFixtures
+import com.stripe.android.model.StripeFileParams
+import com.stripe.android.model.StripeFilePurpose
 import com.stripe.android.view.FpxBank
 import java.net.HttpURLConnection
 import java.net.UnknownHostException
@@ -44,23 +48,34 @@ class StripeApiRepositoryTest {
     private val context: Context by lazy {
         ApplicationProvider.getApplicationContext<Context>()
     }
-    private val stripeApiRepository = StripeApiRepository(context)
+    private val stripeApiRepository: StripeApiRepository by lazy {
+        StripeApiRepository(context)
+    }
+    private val fileFactory: FileFactory by lazy {
+        FileFactory(context)
+    }
 
     @Mock
     private lateinit var stripeApiRequestExecutor: ApiRequestExecutor
     @Mock
     private lateinit var fireAndForgetRequestExecutor: FireAndForgetRequestExecutor
 
-    private val apiRequestArgumentCaptor: KArgumentCaptor<ApiRequest> by lazy {
-        argumentCaptor<ApiRequest>()
-    }
-    private val stripeRequestArgumentCaptor: KArgumentCaptor<StripeRequest> by lazy {
-        argumentCaptor<StripeRequest>()
-    }
+    private val apiRequestArgumentCaptor: KArgumentCaptor<ApiRequest> = argumentCaptor()
+    private val fileUploadRequestArgumentCaptor: KArgumentCaptor<FileUploadRequest> = argumentCaptor()
+    private val stripeRequestArgumentCaptor: KArgumentCaptor<StripeRequest> = argumentCaptor()
 
     @BeforeTest
     fun before() {
         MockitoAnnotations.initMocks(this)
+
+        `when`(stripeApiRequestExecutor.execute(any<FileUploadRequest>()))
+            .thenReturn(
+                StripeResponse(
+                    200,
+                    StripeFileFixtures.DEFAULT.toString(),
+                    emptyMap()
+                )
+            )
     }
 
     @Test
@@ -160,7 +175,7 @@ class StripeApiRepositoryTest {
     fun createSource_shouldLogSourceCreation_andReturnSource() {
         val source = stripeApiRepository.createSource(
             SourceParams.createCardParams(CARD),
-            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+            DEFAULT_OPTIONS
         )
 
         // Check that we get a token back; we don't care about its fields for this test.
@@ -200,10 +215,14 @@ class StripeApiRepositoryTest {
             "stripe://payment-auth-return"
         )
 
-        val invalidRequestException = assertFailsWith<InvalidRequestException> {
-            stripeApiRepository.start3ds2Auth(authParams, "pi_12345",
-                ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
-        }
+        val invalidRequestException =
+            assertFailsWith<InvalidRequestException> {
+                stripeApiRepository.start3ds2Auth(
+                    authParams,
+                    "pi_12345",
+                    DEFAULT_OPTIONS
+                )
+            }
 
         assertEquals("source", invalidRequestException.param)
         assertEquals("resource_missing", invalidRequestException.errorCode)
@@ -213,8 +232,10 @@ class StripeApiRepositoryTest {
     fun complete3ds2Auth_withInvalidSource_shouldThrowInvalidRequestException() {
         val invalidRequestException =
             assertFailsWith<InvalidRequestException> {
-                stripeApiRepository.complete3ds2Auth("src_123",
-                    ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
+                stripeApiRepository.complete3ds2Auth(
+                    "src_123",
+                    DEFAULT_OPTIONS
+                )
             }
         assertEquals(HttpURLConnection.HTTP_NOT_FOUND, invalidRequestException.statusCode)
         assertEquals("source", invalidRequestException.param)
@@ -227,7 +248,7 @@ class StripeApiRepositoryTest {
         // we are testing whether or not we log.
         stripeApiRepository.fireAnalyticsRequest(
             emptyMap(),
-            ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+            DEFAULT_OPTIONS.apiKey
         )
     }
 
@@ -336,12 +357,14 @@ class StripeApiRepositoryTest {
     @Test
     fun createSource_withNonLoggingListener_doesNotLogButDoesCreateSource() {
         val stripeApiRepository = StripeApiRepository(
-            ApplicationProvider.getApplicationContext<Context>(),
+            context,
             stripeApiRequestExecutor = ApiRequestExecutor.Default(),
             fireAndForgetRequestExecutor = FakeFireAndForgetRequestExecutor()
         )
-        val source = stripeApiRepository.createSource(SourceParams.createCardParams(CARD),
-            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
+        val source = stripeApiRepository.createSource(
+            SourceParams.createCardParams(CARD),
+            DEFAULT_OPTIONS
+        )
 
         // Check that we get a token back; we don't care about its fields for this test.
         assertNotNull(source)
@@ -352,7 +375,7 @@ class StripeApiRepositoryTest {
         val stripeApiRepository = create()
         stripeApiRepository.fireAnalyticsRequest(
             emptyMap(),
-            ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+            DEFAULT_OPTIONS.apiKey
         )
         verifyNoMoreInteractions(stripeApiRequestExecutor)
     }
@@ -510,9 +533,13 @@ class StripeApiRepositoryTest {
         ).thenReturn(stripeResponse)
         val stripeApiRepository = create()
         val paymentMethods = stripeApiRepository
-            .getPaymentMethods("cus_123", PaymentMethod.Type.Card.code,
-                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, emptySet(),
-                ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY))
+            .getPaymentMethods(
+                "cus_123",
+                PaymentMethod.Type.Card.code,
+                DEFAULT_OPTIONS.apiKey,
+                emptySet(),
+                ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
+            )
         assertEquals(3, paymentMethods.size)
         assertEquals("pm_1EVNYJCRMbs6FrXfG8n52JaK", paymentMethods[0].id)
         assertEquals("pm_1EVNXtCRMbs6FrXfTlZGIdGq", paymentMethods[1].id)
@@ -551,9 +578,13 @@ class StripeApiRepositoryTest {
         ).thenReturn(stripeResponse)
         val stripeApiRepository = create()
         val paymentMethods = stripeApiRepository
-            .getPaymentMethods("cus_123", PaymentMethod.Type.Card.code,
-                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, emptySet(),
-                ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY))
+            .getPaymentMethods(
+                "cus_123",
+                PaymentMethod.Type.Card.code,
+                DEFAULT_OPTIONS.apiKey,
+                emptySet(),
+                ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
+            )
         assertTrue(paymentMethods.isEmpty())
     }
 
@@ -590,14 +621,45 @@ class StripeApiRepositoryTest {
         assertFailsWith<APIConnectionException> {
             create().createSource(
                 SourceParams.createCardParams(CARD),
-                ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+                DEFAULT_OPTIONS
             )
         }
     }
 
+    @Test
+    fun createFile_shouldFireExpectedRequests() {
+        val stripeRepository = create()
+
+        stripeRepository.createFile(
+            StripeFileParams(
+                file = fileFactory.create(),
+                purpose = StripeFilePurpose.IdentityDocument
+            ),
+            DEFAULT_OPTIONS
+        )
+
+        verify(stripeApiRequestExecutor, never()).execute(any<ApiRequest>())
+        verify(stripeApiRequestExecutor).execute(fileUploadRequestArgumentCaptor.capture())
+        assertNotNull(fileUploadRequestArgumentCaptor.firstValue)
+
+        verify(fireAndForgetRequestExecutor, times(2))
+            .executeAsync(stripeRequestArgumentCaptor.capture())
+
+        val fireAndForgetRequests = stripeRequestArgumentCaptor.allValues
+
+        val fingerprintRequest = fireAndForgetRequests[0] as FingerprintRequest
+        assertNotNull(fingerprintRequest)
+
+        val analyticsRequest = fireAndForgetRequests[1]
+        assertEquals(
+            "stripe_android.create_file",
+            analyticsRequest.compactParams?.get("event")
+        )
+    }
+
     private fun create(): StripeApiRepository {
         return StripeApiRepository(
-            ApplicationProvider.getApplicationContext<Context>(),
+            context,
             stripeApiRequestExecutor = stripeApiRequestExecutor,
             fireAndForgetRequestExecutor = fireAndForgetRequestExecutor,
             networkUtils = StripeNetworkUtils(
@@ -610,5 +672,7 @@ class StripeApiRepositoryTest {
         private const val STRIPE_ACCOUNT_RESPONSE_HEADER = "Stripe-Account"
         private val CARD =
             Card.create("4242424242424242", 1, 2050, "123")
+
+        private val DEFAULT_OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
     }
 }
