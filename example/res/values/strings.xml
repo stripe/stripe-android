@@ -15,7 +15,7 @@
     <string name="launch_pay_with_google">Pay with Google</string>
     <string name="launch_payment_session">Payment Session</string>
     <string name="launch_payment_session_from_fragment">Fragment Examples</string>
-    <string name="create_with_rxjava">Create with RxJava</string>
+    <string name="create_payment_method">Create Payment Method</string>
     <string name="create_token">Create Token</string>
     <string name="launch_create_pm_sepa_debit">Create SEPA Debit Payment Method</string>
     <string name="fpx_payment_example">FPX Payment Example</string>

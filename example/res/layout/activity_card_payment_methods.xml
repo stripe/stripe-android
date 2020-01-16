@@ -30,7 +30,7 @@
         android:id="@+id/btn_create_payment_method"
         android:layout_height="wrap_content"
         android:layout_width="320dp"
-        android:text="@string/create_with_rxjava" />
+        android:text="@string/create_payment_method" />
 
     <TextView
         style="@style/Header"
