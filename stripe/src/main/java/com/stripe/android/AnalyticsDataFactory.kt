@@ -19,51 +19,11 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     private val packageManager: PackageManager?,
     private val packageName: String?
 ) {
-    @Retention(AnnotationRetention.SOURCE)
-    @StringDef(EventName.TOKEN_CREATION, EventName.CREATE_PAYMENT_METHOD,
-        EventName.ATTACH_PAYMENT_METHOD, EventName.DETACH_PAYMENT_METHOD, EventName.SOURCE_CREATION,
-        EventName.ADD_SOURCE, EventName.DEFAULT_SOURCE, EventName.DELETE_SOURCE,
-        EventName.SET_SHIPPING_INFO, EventName.CONFIRM_PAYMENT_INTENT,
-        EventName.RETRIEVE_PAYMENT_INTENT, EventName.CONFIRM_SETUP_INTENT,
-        EventName.RETRIEVE_SETUP_INTENT, EventName.CREATE_FILE, EventName.AUTH_3DS1_SDK,
-        EventName.AUTH_3DS2_FINGERPRINT, EventName.AUTH_3DS2_START,
-        EventName.AUTH_3DS2_FRICTIONLESS, EventName.AUTH_3DS2_CHALLENGE_PRESENTED,
-        EventName.AUTH_3DS2_CHALLENGE_CANCELED, EventName.AUTH_3DS2_CHALLENGE_COMPLETED,
-        EventName.AUTH_3DS2_CHALLENGE_ERRORED, EventName.AUTH_3DS2_CHALLENGE_TIMEDOUT,
-        EventName.AUTH_3DS2_FALLBACK, EventName.AUTH_REDIRECT, EventName.AUTH_ERROR)
-    internal annotation class EventName {
-        companion object {
-            internal const val TOKEN_CREATION = "token_creation"
-            internal const val CREATE_PAYMENT_METHOD = "payment_method_creation"
-            internal const val ATTACH_PAYMENT_METHOD = "attach_payment_method"
-            internal const val DETACH_PAYMENT_METHOD = "detach_payment_method"
-            internal const val SOURCE_CREATION = "source_creation"
-            internal const val ADD_SOURCE = "add_source"
-            internal const val DEFAULT_SOURCE = "default_source"
-            internal const val DELETE_SOURCE = "delete_source"
-            internal const val SET_SHIPPING_INFO = "set_shipping_info"
-            internal const val CONFIRM_PAYMENT_INTENT = "payment_intent_confirmation"
-            internal const val RETRIEVE_PAYMENT_INTENT = "payment_intent_retrieval"
-            internal const val CONFIRM_SETUP_INTENT = "setup_intent_confirmation"
-            internal const val RETRIEVE_SETUP_INTENT = "setup_intent_retrieval"
-            internal const val CREATE_FILE = "create_file"
 
-            internal const val AUTH_3DS1_SDK = "3ds1_sdk"
-
-            internal const val AUTH_3DS2_FINGERPRINT = "3ds2_fingerprint"
-            internal const val AUTH_3DS2_START = "3ds2_authenticate"
-            internal const val AUTH_3DS2_FRICTIONLESS = "3ds2_frictionless_flow"
-            internal const val AUTH_3DS2_CHALLENGE_PRESENTED = "3ds2_challenge_flow_presented"
-            internal const val AUTH_3DS2_CHALLENGE_CANCELED = "3ds2_challenge_flow_canceled"
-            internal const val AUTH_3DS2_CHALLENGE_COMPLETED = "3ds2_challenge_flow_completed"
-            internal const val AUTH_3DS2_CHALLENGE_ERRORED = "3ds2_challenge_flow_errored"
-            internal const val AUTH_3DS2_CHALLENGE_TIMEDOUT = "3ds2_challenge_flow_timed_out"
-            internal const val AUTH_3DS2_FALLBACK = "3ds2_fallback"
-
-            internal const val AUTH_REDIRECT = "url_redirect_next_action"
-            internal const val AUTH_ERROR = "auth_error"
-        }
-    }
+    internal constructor(context: Context) : this(
+        context.applicationContext.packageManager,
+        context.applicationContext.packageName
+    )
 
     @Retention(AnnotationRetention.SOURCE)
     @StringDef(ThreeDS2UiType.NONE, ThreeDS2UiType.TEXT, ThreeDS2UiType.SINGLE_SELECT,
@@ -79,44 +39,53 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
         }
     }
 
+    @JvmSynthetic
     internal fun createAuthParams(
-        @EventName eventName: String,
+        event: AnalyticsEvent,
         intentId: String,
         publishableKey: String
     ): Map<String, Any> {
-        return getEventLoggingParams(eventName, publishableKey)
-            .plus(FIELD_INTENT_ID to intentId)
+        return createParams(
+            event,
+            publishableKey,
+            extraParams = createIntentParam(intentId)
+        )
     }
 
+    @JvmSynthetic
     internal fun create3ds2ChallengeParams(
-        @EventName eventName: String,
+        event: AnalyticsEvent,
         intentId: String,
         uiTypeCode: String,
         publishableKey: String
     ): Map<String, Any> {
-        return getEventLoggingParams(eventName, publishableKey)
-            .plus(FIELD_INTENT_ID to intentId)
-            .plus(FIELD_3DS2_UI_TYPE to get3ds2UiType(uiTypeCode))
+        return createParams(
+            event,
+            publishableKey,
+            extraParams = createIntentParam(intentId)
+                .plus(FIELD_3DS2_UI_TYPE to get3ds2UiType(uiTypeCode))
+        )
     }
 
+    @JvmSynthetic
     internal fun create3ds2ChallengeErrorParams(
         intentId: String,
         runtimeErrorEvent: RuntimeErrorEvent,
         publishableKey: String
     ): Map<String, Any> {
-        return getEventLoggingParams(
-            EventName.AUTH_3DS2_CHALLENGE_ERRORED,
-            publishableKey
-        )
-            .plus(FIELD_INTENT_ID to intentId)
-            .plus(FIELD_ERROR_DATA to
-                mapOf(
+        return createParams(
+            AnalyticsEvent.Auth3ds2ChallengeErrored,
+            publishableKey,
+            extraParams = createIntentParam(intentId)
+                .plus(FIELD_ERROR_DATA to mapOf(
                     "type" to "runtime_error_event",
                     "error_code" to runtimeErrorEvent.errorCode,
                     "error_message" to runtimeErrorEvent.errorMessage
                 ))
+        )
     }
 
+    @JvmSynthetic
     internal fun create3ds2ChallengeErrorParams(
         intentId: String,
         protocolErrorEvent: ProtocolErrorEvent,
@@ -132,180 +101,212 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
             "trans_id" to errorMessage.transactionId
         )
 
-        return getEventLoggingParams(
-            EventName.AUTH_3DS2_CHALLENGE_ERRORED,
-            publishableKey
+        return createParams(
+            AnalyticsEvent.Auth3ds2ChallengeErrored,
+            publishableKey,
+            extraParams = createIntentParam(intentId)
+                .plus(FIELD_ERROR_DATA to errorData)
         )
-            .plus(FIELD_INTENT_ID to intentId)
-            .plus(FIELD_ERROR_DATA to errorData)
     }
 
-    internal fun getTokenCreationParams(
-        productUsageTokens: List<String>?,
+    @JvmSynthetic
+    internal fun createTokenCreationParams(
+        productUsageTokens: Collection<String>?,
         publishableKey: String,
-        @Token.TokenType tokenType: String?
+        @Token.TokenType tokenType: String
     ): Map<String, Any> {
-        return getEventLoggingParams(
-            EventName.TOKEN_CREATION,
+        return createParams(
+            AnalyticsEvent.TokenCreate,
             publishableKey,
             productUsageTokens = productUsageTokens,
             tokenType = tokenType
         )
     }
 
+    @JvmSynthetic
     internal fun createPaymentMethodCreationParams(
         publishableKey: String,
         paymentMethodId: String?
     ): Map<String, Any> {
-        val params =
-            getEventLoggingParams(
-                EventName.CREATE_PAYMENT_METHOD,
-                publishableKey
-            )
-        return if (paymentMethodId != null) {
-            params.plus(FIELD_PAYMENT_METHOD_ID to paymentMethodId)
-        } else {
-            params
-        }
+        return createParams(
+            AnalyticsEvent.PaymentMethodCreate,
+            publishableKey,
+            extraParams = paymentMethodId?.let {
+                mapOf(FIELD_PAYMENT_METHOD_ID to it)
+            }
+        )
     }
 
-    internal fun getSourceCreationParams(
+    @JvmSynthetic
+    internal fun createSourceCreationParams(
         publishableKey: String,
         @Source.SourceType sourceType: String,
-        productUsageTokens: List<String>? = null
+        productUsageTokens: Collection<String>? = null
     ): Map<String, Any> {
-        return getEventLoggingParams(
-            EventName.SOURCE_CREATION,
+        return createParams(
+            AnalyticsEvent.SourceCreate,
             publishableKey,
             productUsageTokens = productUsageTokens,
             sourceType = sourceType
         )
     }
 
-    internal fun getAddSourceParams(
-        productUsageTokens: List<String>?,
+    @JvmSynthetic
+    internal fun createAddSourceParams(
+        productUsageTokens: Collection<String>? = null,
         publishableKey: String,
         @Source.SourceType sourceType: String
     ): Map<String, Any> {
-        return getEventLoggingParams(
-            EventName.ADD_SOURCE,
+        return createParams(
+            AnalyticsEvent.CustomerAddSource,
             publishableKey,
             productUsageTokens = productUsageTokens,
             sourceType = sourceType
         )
     }
 
-    internal fun getDeleteSourceParams(
-        productUsageTokens: List<String>?,
+    @JvmSynthetic
+    internal fun createDeleteSourceParams(
+        productUsageTokens: Collection<String>?,
         publishableKey: String
     ): Map<String, Any> {
-        return getEventLoggingParams(
-            EventName.DELETE_SOURCE,
+        return createParams(
+            AnalyticsEvent.CustomerDeleteSource,
             publishableKey,
             productUsageTokens = productUsageTokens
         )
     }
 
-    internal fun getAttachPaymentMethodParams(
-        productUsageTokens: List<String>?,
+    @JvmSynthetic
+    internal fun createAttachPaymentMethodParams(
+        productUsageTokens: Collection<String>?,
         publishableKey: String
     ): Map<String, Any> {
-        return getEventLoggingParams(
-            EventName.ATTACH_PAYMENT_METHOD,
+        return createParams(
+            AnalyticsEvent.CustomerAttachPaymentMethod,
             publishableKey,
             productUsageTokens = productUsageTokens
         )
     }
 
-    internal fun getDetachPaymentMethodParams(
-        productUsageTokens: List<String>?,
+    @JvmSynthetic
+    internal fun createDetachPaymentMethodParams(
+        productUsageTokens: Collection<String>?,
         publishableKey: String
     ): Map<String, Any> {
-        return getEventLoggingParams(
-            EventName.DETACH_PAYMENT_METHOD,
+        return createParams(
+            AnalyticsEvent.CustomerDetachPaymentMethod,
             publishableKey,
             productUsageTokens = productUsageTokens
         )
     }
 
-    internal fun getPaymentIntentConfirmationParams(
-        productUsageTokens: List<String>?,
+    @JvmSynthetic
+    internal fun createPaymentIntentConfirmationParams(
         publishableKey: String,
-        paymentMethodType: String?
+        paymentMethodType: String? = null
     ): Map<String, Any> {
-        return getEventLoggingParams(
-            EventName.CONFIRM_PAYMENT_INTENT,
+        return createParams(
+            AnalyticsEvent.PaymentIntentConfirm,
             publishableKey,
-            productUsageTokens = productUsageTokens,
             sourceType = paymentMethodType
         )
     }
 
-    internal fun getPaymentIntentRetrieveParams(
-        productUsageTokens: List<String>?,
-        publishableKey: String
+    @JvmSynthetic
+    internal fun createPaymentIntentRetrieveParams(
+        publishableKey: String,
+        intentId: String
     ): Map<String, Any> {
-        return getEventLoggingParams(
-            EventName.RETRIEVE_PAYMENT_INTENT,
+        return createParams(
+            AnalyticsEvent.PaymentIntentRetrieve,
             publishableKey,
-            productUsageTokens = productUsageTokens
+            extraParams = createIntentParam(intentId)
         )
     }
 
-    internal fun getSetupIntentConfirmationParams(
+    @JvmSynthetic
+    internal fun createSetupIntentConfirmationParams(
         publishableKey: String,
-        paymentMethodType: String?
+        paymentMethodType: String?,
+        intentId: String
     ): Map<String, Any> {
-        val params =
-            getEventLoggingParams(EventName.CONFIRM_SETUP_INTENT, publishableKey)
-        return if (paymentMethodType != null) {
-            params.plus(FIELD_PAYMENT_METHOD_TYPE to paymentMethodType)
-        } else {
-            params
-        }
+        return createParams(
+            AnalyticsEvent.SetupIntentConfirm,
+            publishableKey,
+            extraParams = createIntentParam(intentId)
+                .plus(
+                    paymentMethodType?.let {
+                        mapOf(FIELD_PAYMENT_METHOD_TYPE to it)
+                    }.orEmpty()
+                )
+        )
     }
 
-    internal fun getSetupIntentRetrieveParams(publishableKey: String): Map<String, Any> {
-        return getEventLoggingParams(EventName.RETRIEVE_SETUP_INTENT, publishableKey)
-    }
-
-    internal fun getEventLoggingParams(
-        @EventName eventName: String,
+    @JvmSynthetic
+    internal fun createSetupIntentRetrieveParams(
         publishableKey: String,
-        productUsageTokens: List<String>? = null,
+        intentId: String
+    ): Map<String, Any> {
+        return createParams(
+            AnalyticsEvent.SetupIntentRetrieve,
+            publishableKey,
+            extraParams = createIntentParam(intentId)
+        )
+    }
+
+    @JvmSynthetic
+    internal fun createParams(
+        event: AnalyticsEvent,
+        publishableKey: String,
+        productUsageTokens: Collection<String>? = null,
+        @Source.SourceType sourceType: String? = null,
+        @Token.TokenType tokenType: String? = null,
+        extraParams: Map<String, Any>? = null
+    ): Map<String, Any> {
+        return createStandardParams(event, publishableKey)
+            .plus(createNameAndVersionParams())
+            .plus(
+                productUsageTokens?.let {
+                    mapOf(FIELD_PRODUCT_USAGE to it.toList())
+                }.orEmpty()
+            )
+            .plus(sourceType?.let { mapOf(FIELD_SOURCE_TYPE to it) }.orEmpty())
+            .plus(createTokenTypeParam(sourceType, tokenType))
+            .plus(extraParams.orEmpty())
+    }
+
+    private fun createTokenTypeParam(
         @Source.SourceType sourceType: String? = null,
         @Token.TokenType tokenType: String? = null
+    ): Map<String, String> {
+        val value = when {
+            tokenType != null -> tokenType
+            // This is not a source event, so to match iOS we log a token without type
+            // as type "unknown"
+            sourceType == null -> "unknown"
+            else -> null
+        }
+
+        return value?.let {
+            mapOf(FIELD_TOKEN_TYPE to it)
+        }.orEmpty()
+    }
+
+    private fun createStandardParams(
+        event: AnalyticsEvent,
+        publishableKey: String
     ): Map<String, Any> {
-        val paramsObject = mapOf(
-            FIELD_ANALYTICS_UA to analyticsUa,
-            FIELD_EVENT to getEventParamName(eventName),
+        return mapOf(
+            FIELD_ANALYTICS_UA to ANALYTICS_UA,
+            FIELD_EVENT to event.toString(),
             FIELD_PUBLISHABLE_KEY to publishableKey,
             FIELD_OS_NAME to Build.VERSION.CODENAME,
             FIELD_OS_RELEASE to Build.VERSION.RELEASE,
             FIELD_OS_VERSION to Build.VERSION.SDK_INT,
-            FIELD_DEVICE_TYPE to deviceLoggingString,
+            FIELD_DEVICE_TYPE to DEVICE_TYPE,
             FIELD_BINDINGS_VERSION to BuildConfig.VERSION_NAME
         )
-            .plus(createNameAndVersionParams())
-            .toMutableMap()
-
-        if (productUsageTokens != null) {
-            paramsObject[FIELD_PRODUCT_USAGE] = productUsageTokens
-        }
-
-        if (sourceType != null) {
-            paramsObject[FIELD_SOURCE_TYPE] = sourceType
-        }
-
-        if (tokenType != null) {
-            paramsObject[FIELD_TOKEN_TYPE] = tokenType
-        } else if (sourceType == null) {
-            // This is not a source event, so to match iOS we log a token without type
-            // as type "unknown"
-            paramsObject[FIELD_TOKEN_TYPE] = "unknown"
-        }
-
-        return paramsObject
     }
 
     internal fun createNameAndVersionParams(): Map<String, Any> {
@@ -381,17 +382,9 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
         private const val ANALYTICS_NAME = "stripe_android"
         private const val ANALYTICS_VERSION = "1.0"
 
-        private val deviceLoggingString: String
-            get() = Build.MANUFACTURER + '_'.toString() + Build.BRAND + '_'.toString() + Build.MODEL
+        private val DEVICE_TYPE: String = "${Build.MANUFACTURER}_${Build.BRAND}_${Build.MODEL}"
 
-        internal val analyticsUa: String
-            @JvmSynthetic
-            get() = "$ANALYTICS_PREFIX.$ANALYTICS_NAME-$ANALYTICS_VERSION"
-
-        @JvmSynthetic
-        internal fun getEventParamName(@EventName eventName: String): String {
-            return "$ANALYTICS_NAME.$eventName"
-        }
+        internal const val ANALYTICS_UA = "$ANALYTICS_PREFIX.$ANALYTICS_NAME-$ANALYTICS_VERSION"
 
         @ThreeDS2UiType
         private fun get3ds2UiType(uiTypeCode: String): String {
@@ -405,11 +398,9 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
             }
         }
 
-        @JvmSynthetic
-        internal fun create(context: Context): AnalyticsDataFactory {
-            return AnalyticsDataFactory(
-                context.applicationContext.packageManager,
-                context.applicationContext.packageName
+        private fun createIntentParam(intentId: String): Map<String, String> {
+            return mapOf(
+                FIELD_INTENT_ID to intentId
             )
         }
     }
