@@ -11,15 +11,15 @@
     android:paddingTop="@dimen/stripe_add_payment_method_vertical_padding"
     android:paddingBottom="@dimen/stripe_add_payment_method_vertical_padding"
     android:background="@drawable/stripe_simple_button_background"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:focusable="true"
+    android:clickable="true">
 
     <androidx.appcompat.widget.AppCompatImageView
         android:layout_width="wrap_content"
         android:layout_height="@dimen/stripe_masked_card_icon_width"
         android:src="@drawable/stripe_ic_add_black_32dp"
         android:tint="?attr/colorAccent"
-        android:focusableInTouchMode="false"
-        android:clickable="false"
         android:layout_gravity="center_vertical|start"
         />
 
@@ -31,8 +31,6 @@
         android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
         android:text="@string/payment_method_add_new_card"
         android:textColor="?attr/colorAccent"
-        android:focusableInTouchMode="false"
-        android:clickable="false"
         android:layout_gravity="center_vertical|start"
         />
 

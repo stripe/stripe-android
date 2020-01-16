@@ -5,6 +5,8 @@
     android:layout_height="wrap_content"
     android:paddingEnd="@dimen/stripe_list_row_end_padding"
     android:paddingStart="@dimen/stripe_list_row_start_padding"
+    android:focusable="true"
+    android:clickable="true"
     >
 
     <com.stripe.android.view.MaskedCardView
