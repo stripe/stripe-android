@@ -107,13 +107,24 @@ internal class StripePaymentController internal constructor(
         source: Source,
         requestOptions: ApiRequest.Options
     ) {
+        analyticsRequestExecutor.executeAsync(
+            AnalyticsRequest.create(
+                analyticsDataFactory.createAuthSourceParams(
+                    AnalyticsEvent.AuthSourceStart,
+                    requestOptions.apiKey,
+                    source.id
+                ),
+                requestOptions
+            )
+        )
+
         stripeRepository.retrieveSource(
             sourceId = source.id.orEmpty(),
             clientSecret = source.clientSecret.orEmpty(),
             options = requestOptions,
             callback = object : ApiResultCallback<Source> {
                 override fun onSuccess(result: Source) {
-                    onSourceRetrieved(host, result)
+                    onSourceRetrieved(host, result, requestOptions)
                 }
 
                 override fun onError(e: Exception) {
@@ -125,9 +136,21 @@ internal class StripePaymentController internal constructor(
 
     private fun onSourceRetrieved(
         host: AuthActivityStarter.Host,
-        source: Source
+        source: Source,
+        requestOptions: ApiRequest.Options
     ) {
         if (source.flow == Source.SourceFlow.REDIRECT) {
+            analyticsRequestExecutor.executeAsync(
+                AnalyticsRequest.create(
+                    analyticsDataFactory.createAuthSourceParams(
+                        AnalyticsEvent.AuthSourceRedirect,
+                        requestOptions.apiKey,
+                        source.id
+                    ),
+                    requestOptions
+                )
+            )
+
             PaymentAuthWebViewStarter(
                 host,
                 SOURCE_REQUEST_CODE
@@ -238,6 +261,17 @@ internal class StripePaymentController internal constructor(
             .orEmpty()
         val clientSecret = extras?.getString(StripeIntentResultExtras.CLIENT_SECRET)
             .orEmpty()
+
+        analyticsRequestExecutor.executeAsync(
+            AnalyticsRequest.create(
+                analyticsDataFactory.createAuthSourceParams(
+                    AnalyticsEvent.AuthSourceResult,
+                    requestOptions.apiKey,
+                    sourceId
+                ),
+                requestOptions
+            )
+        )
 
         stripeRepository.retrieveSource(sourceId, clientSecret, requestOptions, callback)
     }
