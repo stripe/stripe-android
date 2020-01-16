@@ -53,6 +53,19 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     }
 
     @JvmSynthetic
+    internal fun createAuthSourceParams(
+        event: AnalyticsEvent,
+        publishableKey: String,
+        sourceId: String?
+    ): Map<String, Any> {
+        return createParams(
+            event,
+            publishableKey,
+            extraParams = sourceId?.let { mapOf(FIELD_SOURCE_ID to it) }
+        )
+    }
+
+    @JvmSynthetic
     internal fun create3ds2ChallengeParams(
         event: AnalyticsEvent,
         intentId: String,
@@ -367,6 +380,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
         internal const val FIELD_PAYMENT_METHOD_ID = "payment_method_id"
         internal const val FIELD_PAYMENT_METHOD_TYPE = "payment_method_type"
         internal const val FIELD_PUBLISHABLE_KEY = "publishable_key"
+        internal const val FIELD_SOURCE_ID = "source_id"
         internal const val FIELD_SOURCE_TYPE = "source_type"
         internal const val FIELD_3DS2_UI_TYPE = "3ds2_ui_type"
         internal const val FIELD_TOKEN_TYPE = "token_type"

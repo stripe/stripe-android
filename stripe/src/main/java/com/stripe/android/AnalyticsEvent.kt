@@ -1,12 +1,13 @@
 package com.stripe.android
 
-internal enum class AnalyticsEvent(private val code: String) {
+internal enum class AnalyticsEvent(internal val code: String) {
+    // Token
     TokenCreate("token_creation"),
 
     // Payment Methods
     PaymentMethodCreate("payment_method_creation"),
 
-    // Customer Methods
+    // Customer
     CustomerRetrieve("retrieve_customer"),
     CustomerRetrievePaymentMethods("retrieve_payment_methods"),
     CustomerAttachPaymentMethod("attach_payment_method"),
@@ -36,6 +37,7 @@ internal enum class AnalyticsEvent(private val code: String) {
     // File
     FileCreate("create_file"),
 
+    // 3DS1
     Auth3ds1Sdk("3ds1_sdk"),
 
     // 3DS2
@@ -50,7 +52,12 @@ internal enum class AnalyticsEvent(private val code: String) {
     Auth3ds2Fallback("3ds2_fallback"),
 
     AuthRedirect("url_redirect_next_action"),
-    AuthError("auth_error");
+    AuthError("auth_error"),
+
+    // Source Authentication
+    AuthSourceStart("auth_source_start"),
+    AuthSourceRedirect("auth_source_redirect"),
+    AuthSourceResult("auth_source_result");
 
     override fun toString(): String {
         return "$PREFIX.$code"
