@@ -232,6 +232,7 @@ internal class PaymentMethodsAdapter constructor(
 
             fun setSelected(selected: Boolean) {
                 cardView.isSelected = selected
+                itemView.isSelected = selected
             }
         }
     }
