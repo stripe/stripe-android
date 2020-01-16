@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 13.0.1 - unreleased
+## 13.1.0 - unreleased
 * [#2055](https://github.com/stripe/stripe-android/pull/2055) Fix styling of `CardInputWidget` and `CardMultilineWidget`
     * `com.google.android.material:material:1.1.0-rc01` breaks `TextInputLayout` styling;
       fix by explicitly setting a style that extends `Widget.Design.TextInputLayout`
