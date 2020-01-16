@@ -319,8 +319,8 @@ class StripeApiRepositoryTest {
         assertTrue(paymentMethodDataParams["guid"] is String)
         assertEquals("card", paymentMethodDataParams["type"])
 
-        verify(fireAndForgetRequestExecutor, times(2))
-            .executeAsync(stripeRequestArgumentCaptor.capture())
+        verifyFingerprintAndAnalyticsRequests(AnalyticsEvent.PaymentIntentConfirm)
+
         val stripeRequests = stripeRequestArgumentCaptor.allValues
         val analyticsRequest = stripeRequests[1] as ApiRequest
         assertEquals(PaymentMethod.Type.Card.code, analyticsRequest.params?.get("source_type"))
@@ -355,19 +355,19 @@ class StripeApiRepositoryTest {
     }
 
     @Test
-    fun createSource_withNonLoggingListener_doesNotLogButDoesCreateSource() {
+    fun createSource_createsObjectAndLogs() {
         val stripeApiRepository = StripeApiRepository(
             context,
             stripeApiRequestExecutor = ApiRequestExecutor.Default(),
-            fireAndForgetRequestExecutor = FakeFireAndForgetRequestExecutor()
+            fireAndForgetRequestExecutor = fireAndForgetRequestExecutor
         )
         val source = stripeApiRepository.createSource(
             SourceParams.createCardParams(CARD),
             DEFAULT_OPTIONS
         )
-
-        // Check that we get a token back; we don't care about its fields for this test.
         assertNotNull(source)
+
+        verifyFingerprintAndAnalyticsRequests(AnalyticsEvent.SourceCreate)
     }
 
     @Test
@@ -544,6 +544,8 @@ class StripeApiRepositoryTest {
         assertEquals("pm_1EVNYJCRMbs6FrXfG8n52JaK", paymentMethods[0].id)
         assertEquals("pm_1EVNXtCRMbs6FrXfTlZGIdGq", paymentMethods[1].id)
         assertEquals("src_1EVO8DCRMbs6FrXf2Dspj49a", paymentMethods[2].id)
+
+        verifyFingerprintAndAnalyticsRequests(AnalyticsEvent.CustomerRetrievePaymentMethods)
     }
 
     @Test
@@ -642,6 +644,12 @@ class StripeApiRepositoryTest {
         verify(stripeApiRequestExecutor).execute(fileUploadRequestArgumentCaptor.capture())
         assertNotNull(fileUploadRequestArgumentCaptor.firstValue)
 
+        verifyFingerprintAndAnalyticsRequests(AnalyticsEvent.FileCreate)
+    }
+
+    private fun verifyFingerprintAndAnalyticsRequests(
+        event: AnalyticsEvent
+    ) {
         verify(fireAndForgetRequestExecutor, times(2))
             .executeAsync(stripeRequestArgumentCaptor.capture())
 
@@ -652,7 +660,7 @@ class StripeApiRepositoryTest {
 
         val analyticsRequest = fireAndForgetRequests[1]
         assertEquals(
-            "stripe_android.create_file",
+            event.toString(),
             analyticsRequest.compactParams?.get("event")
         )
     }
