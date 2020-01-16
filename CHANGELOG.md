@@ -8,6 +8,9 @@
     * Fix "Postal Code" field being partially cut off on some screens
 * [#2066](https://github.com/stripe/stripe-android/pull/2066) Add support for uploading a file to Stripe
     * See `Stripe#createFile()` and `Stripe#createFileSynchronous()`
+ * [#2071](https://github.com/stripe/stripe-android/pull/2071) Fix accessibility issues on Payment Methods selection screen
+    * Mark `View`s representing existing payment methods and add a new payment method action as focusable and clickable
+
 
 ## 13.0.0 - 2020-01-13
 This release includes several breaking changes.
