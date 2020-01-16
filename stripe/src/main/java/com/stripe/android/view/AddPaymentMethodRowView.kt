@@ -18,5 +18,9 @@ internal abstract class AddPaymentMethodRowView(
         id = idRes
         setOnClickListener { AddPaymentMethodActivityStarter(activity).startForResult(args) }
         layoutParams = ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+
+        isFocusable = true
+        isClickable = true
+        isFocusableInTouchMode = true
     }
 }
