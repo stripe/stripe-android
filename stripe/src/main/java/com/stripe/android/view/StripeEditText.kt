@@ -6,6 +6,7 @@ import android.os.Handler
 import android.text.Editable
 import android.util.AttributeSet
 import android.view.KeyEvent
+import android.view.accessibility.AccessibilityNodeInfo
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
 import android.view.inputmethod.InputConnectionWrapper
@@ -165,6 +166,11 @@ open class StripeEditText @JvmOverloads constructor(
             setHint(hint)
         } catch (e: NullPointerException) {
         }
+    }
+
+    override fun onInitializeAccessibilityNodeInfo(info: AccessibilityNodeInfo) {
+        super.onInitializeAccessibilityNodeInfo(info)
+        info.isContentInvalid = shouldShowError
     }
 
     override fun onDetachedFromWindow() {
