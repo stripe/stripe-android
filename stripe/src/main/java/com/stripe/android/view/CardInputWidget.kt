@@ -163,6 +163,10 @@ class CardInputWidget @JvmOverloads constructor(
             val cardDate = expiryDateEditText.validDateFields
             val cvcValue = this.cvcValue
 
+            cardNumberEditText.shouldShowError = cardNumber == null
+            expiryDateEditText.shouldShowError = cardDate == null
+            cvcNumberEditText.shouldShowError = cvcValue == null
+
             // Announce error messages for accessibility
             if (cardNumber == null) {
                 cardNumberEditText.errorMessage?.let {
@@ -591,21 +595,6 @@ class CardInputWidget @JvmOverloads constructor(
 
                     // Avoid reading out "1234 1234 1234 1234"
                     info.hintText = null
-                }
-            })
-
-        ViewCompat.setAccessibilityDelegate(
-            cvcNumberEditText,
-            object : AccessibilityDelegateCompat() {
-                override fun onInitializeAccessibilityNodeInfo(
-                    host: View,
-                    info: AccessibilityNodeInfoCompat
-                ) {
-                    super.onInitializeAccessibilityNodeInfo(host, info)
-                    info.text = resources.getString(
-                        R.string.acc_label_cvc_node,
-                        cvcNumberEditText.text
-                    )
                 }
             })
 

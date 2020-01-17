@@ -4,7 +4,6 @@ import android.content.Context
 import android.text.Editable
 import android.text.InputFilter
 import android.util.AttributeSet
-import android.view.accessibility.AccessibilityNodeInfo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.CardUtils
 import com.stripe.android.R
@@ -70,10 +69,10 @@ class CardNumberEditText @JvmOverloads constructor(
         listenForTextChanges()
     }
 
-    override fun onInitializeAccessibilityNodeInfo(info: AccessibilityNodeInfo) {
-        super.onInitializeAccessibilityNodeInfo(info)
-        info.text = resources.getString(R.string.acc_label_card_number_node, text)
-    }
+    override val accessibilityText: String?
+        get() {
+            return resources.getString(R.string.acc_label_card_number_node, text)
+        }
 
     @JvmSynthetic
     internal fun updateLengthFilter() {
