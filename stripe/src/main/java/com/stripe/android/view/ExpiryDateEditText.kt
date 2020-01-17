@@ -3,7 +3,6 @@ package com.stripe.android.view
 import android.content.Context
 import android.text.Editable
 import android.util.AttributeSet
-import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.EditText
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.R
@@ -61,10 +60,10 @@ class ExpiryDateEditText @JvmOverloads constructor(
             }
         }
 
-    override fun onInitializeAccessibilityNodeInfo(info: AccessibilityNodeInfo) {
-        super.onInitializeAccessibilityNodeInfo(info)
-        info.text = resources.getString(R.string.acc_label_expiry_date_node, text)
-    }
+    override val accessibilityText: String?
+        get() {
+            return resources.getString(R.string.acc_label_expiry_date_node, text)
+        }
 
     private fun listenForTextChanges() {
         addTextChangedListener(object : StripeTextWatcher() {

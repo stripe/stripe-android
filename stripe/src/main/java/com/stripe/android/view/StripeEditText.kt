@@ -2,6 +2,7 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.os.Build
 import android.os.Handler
 import android.text.Editable
 import android.util.AttributeSet
@@ -92,6 +93,8 @@ open class StripeEditText @JvmOverloads constructor(
         cachedColorStateList = textColors
     }
 
+    protected open val accessibilityText: String? = null
+
     override fun onCreateInputConnection(outAttrs: EditorInfo): InputConnection? {
         val inputConnection = super.onCreateInputConnection(outAttrs)
         return inputConnection?.let {
@@ -171,6 +174,10 @@ open class StripeEditText @JvmOverloads constructor(
     override fun onInitializeAccessibilityNodeInfo(info: AccessibilityNodeInfo) {
         super.onInitializeAccessibilityNodeInfo(info)
         info.isContentInvalid = shouldShowError
+        accessibilityText?.let { info.text = it }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            info.error = errorMessage.takeIf { shouldShowError }
+        }
     }
 
     override fun onDetachedFromWindow() {

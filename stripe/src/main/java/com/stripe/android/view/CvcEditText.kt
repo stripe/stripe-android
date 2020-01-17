@@ -68,6 +68,11 @@ class CvcEditText @JvmOverloads constructor(
         })
     }
 
+    override val accessibilityText: String?
+        get() {
+            return resources.getString(R.string.acc_label_cvc_node, text)
+        }
+
     /**
      * @param cardBrand the [CardBrand] used to update the view
      * @param customHintText optional user-specified hint text
