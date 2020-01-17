@@ -27,42 +27,56 @@ import kotlinx.android.synthetic.main.activity_payment_methods.*
  * to retrieve the result of this activity from an intent in onActivityResult().
  */
 class PaymentMethodsActivity : AppCompatActivity() {
-
-    private lateinit var adapter: PaymentMethodsAdapter
-    private var startedFromPaymentSession: Boolean = false
-    private lateinit var customerSession: CustomerSession
-    private lateinit var cardDisplayTextFactory: CardDisplayTextFactory
+    private val startedFromPaymentSession: Boolean by lazy {
+        args.isPaymentSessionActive
+    }
+    private val customerSession: CustomerSession by lazy {
+        CustomerSession.getInstance()
+    }
+    private val cardDisplayTextFactory: CardDisplayTextFactory by lazy {
+        CardDisplayTextFactory(this)
+    }
 
     private val alertDisplayer: AlertDisplayer by lazy {
         AlertDisplayer.DefaultAlertDisplayer(this)
     }
 
-    private lateinit var viewModel: PaymentMethodsViewModel
+    private val args: PaymentMethodsActivityStarter.Args by lazy {
+        PaymentMethodsActivityStarter.Args.create(intent)
+    }
+
+    private val viewModel: PaymentMethodsViewModel by lazy {
+        ViewModelProviders.of(
+            this,
+            PaymentMethodsViewModel.Factory(customerSession, args.initialPaymentMethodId)
+        )[PaymentMethodsViewModel::class.java]
+    }
+
+    private val adapter: PaymentMethodsAdapter by lazy {
+        PaymentMethodsAdapter(
+            args,
+            addableTypes = args.paymentMethodTypes,
+            initiallySelectedPaymentMethodId = viewModel.selectedPaymentMethodId,
+            shouldShowGooglePay = args.shouldShowGooglePay
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment_methods)
 
-        customerSession = CustomerSession.getInstance()
-
-        val args = PaymentMethodsActivityStarter.Args.create(intent)
-        viewModel = ViewModelProviders.of(
-            this,
-            PaymentMethodsViewModel.Factory(customerSession, args.initialPaymentMethodId)
-        )[PaymentMethodsViewModel::class.java]
-
         args.windowFlags?.let {
             window.addFlags(it)
         }
 
-        startedFromPaymentSession = args.isPaymentSessionActive
-        cardDisplayTextFactory = CardDisplayTextFactory.create(this)
-
-        setupRecyclerView(args)
+        setupRecyclerView()
 
         setSupportActionBar(payment_methods_toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setDisplayShowHomeEnabled(true)
+
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            setDisplayShowHomeEnabled(true)
+        }
 
         fetchCustomerPaymentMethods()
 
@@ -70,14 +84,12 @@ class PaymentMethodsActivity : AppCompatActivity() {
         payment_methods_recycler.requestFocusFromTouch()
     }
 
-    private fun setupRecyclerView(
-        args: PaymentMethodsActivityStarter.Args
-    ) {
-        adapter = PaymentMethodsAdapter(
-            args,
-            addableTypes = args.paymentMethodTypes,
-            initiallySelectedPaymentMethodId = viewModel.selectedPaymentMethodId,
-            shouldShowGooglePay = args.shouldShowGooglePay
+    private fun setupRecyclerView() {
+        val deletePaymentMethodDialogFactory = DeletePaymentMethodDialogFactory(
+            this,
+            adapter,
+            cardDisplayTextFactory,
+            customerSession
         )
 
         adapter.listener = object : PaymentMethodsAdapter.Listener {
@@ -87,6 +99,10 @@ class PaymentMethodsActivity : AppCompatActivity() {
 
             override fun onGooglePayClick() {
                 finishWithGooglePay()
+            }
+
+            override fun onDeletePaymentMethodAction(paymentMethod: PaymentMethod) {
+                deletePaymentMethodDialogFactory.create(paymentMethod).show()
             }
         }
 
@@ -98,9 +114,10 @@ class PaymentMethodsActivity : AppCompatActivity() {
         }
 
         payment_methods_recycler.attachItemTouchHelper(
-            PaymentMethodSwipeCallback(this, adapter,
-                SwipeToDeleteCallbackListener(this, adapter, cardDisplayTextFactory,
-                    customerSession))
+            PaymentMethodSwipeCallback(
+                this, adapter,
+                SwipeToDeleteCallbackListener(deletePaymentMethodDialogFactory)
+            )
         )
     }
 

@@ -131,7 +131,9 @@
     <!-- TODO(mshafrir-stripe): translate string - ANDROID-413 -->
     <string name="added" tools:ignore="MissingTranslation">Added %s</string>
     <string name="removed" tools:ignore="MissingTranslation">Removed %s</string>
-    <string name="delete_payment_method" tools:ignore="MissingTranslation">Delete Payment Method?</string>
+
+    <string name="delete_payment_method_prompt_title" tools:ignore="MissingTranslation">Delete payment method?</string>
+    <string name="delete_payment_method" tools:ignore="MissingTranslation">Delete payment method</string>
 
     <!-- TODO(mshafrir-stripe): translate string - ANDROID-432 -->
     <!-- Label that will show that an FPX bank is offline. For example, "AmBank - Offline" -->
