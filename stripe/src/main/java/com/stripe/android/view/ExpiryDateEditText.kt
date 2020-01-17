@@ -63,11 +63,7 @@ class ExpiryDateEditText @JvmOverloads constructor(
 
     override fun onInitializeAccessibilityNodeInfo(info: AccessibilityNodeInfo) {
         super.onInitializeAccessibilityNodeInfo(info)
-        val accLabel = resources.getString(
-            R.string.acc_label_expiry_date_node,
-            text
-        )
-        info.text = accLabel
+        info.text = resources.getString(R.string.acc_label_expiry_date_node, text)
     }
 
     private fun listenForTextChanges() {

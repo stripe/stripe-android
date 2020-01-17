@@ -46,8 +46,6 @@
                 android:imeOptions="actionNext"
                 android:inputType="number"
                 android:maxLength="19"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
                 android:hint="@string/card_number_hint"
                 style="@style/Stripe.CardInputWidget.EditText"
                 />
@@ -81,8 +79,6 @@
                 android:imeOptions="actionNext"
                 android:inputType="date"
                 android:maxLength="5"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
                 android:hint="@string/expiry_date_hint"
                 style="@style/Stripe.CardInputWidget.EditText"
                 />
@@ -109,8 +105,6 @@
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
                 android:imeOptions="actionDone"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
                 style="@style/Stripe.CardInputWidget.EditText"
                 />
         </com.google.android.material.textfield.TextInputLayout>
@@ -136,8 +130,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
                 android:enabled="false"
                 style="@style/Stripe.CardInputWidget.EditText"
                 />
