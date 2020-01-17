@@ -6,6 +6,7 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
@@ -170,7 +171,17 @@ internal class PaymentMethodsAdapter constructor(
     ): ViewHolder.PaymentMethodViewHolder {
         val itemView = LayoutInflater.from(parent.context)
             .inflate(R.layout.masked_card_row, parent, false)
-        return ViewHolder.PaymentMethodViewHolder(itemView)
+        val viewHolder = ViewHolder.PaymentMethodViewHolder(itemView)
+        ViewCompat.addAccessibilityAction(
+            itemView,
+            parent.context.getString(R.string.delete_payment_method)
+        ) { _, _ ->
+            listener?.onDeletePaymentMethodAction(
+                paymentMethod = getPaymentMethodAtPosition(viewHolder.adapterPosition)
+            )
+            true
+        }
+        return viewHolder
     }
 
     private fun createGooglePayViewHolder(
@@ -240,6 +251,7 @@ internal class PaymentMethodsAdapter constructor(
     internal interface Listener {
         fun onPaymentMethodClick(paymentMethod: PaymentMethod)
         fun onGooglePayClick()
+        fun onDeletePaymentMethodAction(paymentMethod: PaymentMethod)
     }
 
     internal enum class ViewType {
