@@ -163,6 +163,23 @@ class CardInputWidget @JvmOverloads constructor(
             val cardDate = expiryDateEditText.validDateFields
             val cvcValue = this.cvcValue
 
+            // Announce error messages for accessibility
+            if (cardNumber == null) {
+                cardNumberEditText.errorMessage?.let {
+                    cardNumberEditText.announceForAccessibility(it)
+                }
+            }
+            if (cardDate == null) {
+                expiryDateEditText.errorMessage?.let {
+                    expiryDateEditText.announceForAccessibility(it)
+                }
+            }
+            if (cvcValue == null) {
+                cvcNumberEditText.errorMessage?.let {
+                    cvcNumberEditText.announceForAccessibility(it)
+                }
+            }
+
             when {
                 cardNumber == null -> {
                     cardNumberEditText.requestFocus()

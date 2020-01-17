@@ -57,6 +57,8 @@ open class StripeEditText @JvmOverloads constructor(
             refreshDrawableState()
         }
 
+    internal var errorMessage: String? = null
+
     protected val fieldText: String
         get() {
             return text?.toString().orEmpty()
@@ -68,7 +70,6 @@ open class StripeEditText @JvmOverloads constructor(
     private var errorColor: Int? = null
 
     private val hintHandler: Handler = Handler()
-    private var errorMessage: String? = null
     private var errorMessageListener: ErrorMessageListener? = null
 
     /**
