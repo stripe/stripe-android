@@ -11,11 +11,15 @@ import com.stripe.android.Stripe
 import com.stripe.android.StripeError
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.view.i18n.ErrorMessageTranslator
+import com.stripe.android.view.i18n.TranslatorManager
 
 internal class AddPaymentMethodViewModel(
     private val stripe: Stripe,
     private val customerSession: CustomerSession,
-    private val args: AddPaymentMethodActivityStarter.Args
+    private val args: AddPaymentMethodActivityStarter.Args,
+    private val errorMessageTranslator: ErrorMessageTranslator =
+        TranslatorManager.getErrorMessageTranslator()
 ) : ViewModel() {
 
     @JvmSynthetic
@@ -63,7 +67,13 @@ internal class AddPaymentMethodViewModel(
                     errorMessage: String,
                     stripeError: StripeError?
                 ) {
-                    resultData.value = PaymentMethodResult.Error(errorMessage)
+                    resultData.value = PaymentMethodResult.Error(
+                        errorMessageTranslator.translate(
+                            errorCode,
+                            errorMessage,
+                            stripeError
+                        )
+                    )
                 }
             }
         )
