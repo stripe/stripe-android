@@ -75,16 +75,14 @@ public class StripeTest {
     private static final String DEFAULT_SECRET_KEY = "sk_default";
 
     private static final String TEST_CARD_NUMBER = "4242424242424242";
-    private static final String TEST_BANK_ACCOUNT_NUMBER = "000123456789";
-    private static final String TEST_BANK_ROUTING_NUMBER = "110000000";
 
     private static final int YEAR = Calendar.getInstance().get(Calendar.YEAR) + 1;
     private static final Card CARD = Card.create(TEST_CARD_NUMBER, 12, YEAR, "123");
     private static final BankAccount BANK_ACCOUNT = new BankAccount(
-            TEST_BANK_ACCOUNT_NUMBER,
+            "000123456789",
             "US",
             "usd",
-            TEST_BANK_ROUTING_NUMBER,
+            "314074269",
             "Jenny Rosen",
             BankAccount.BankAccountType.INDIVIDUAL
     );
@@ -304,12 +302,16 @@ public class StripeTest {
 
         final BankAccount returnedBankAccount = token.getBankAccount();
         assertNotNull(returnedBankAccount);
-        final String expectedLast4 = TEST_BANK_ACCOUNT_NUMBER
-                .substring(TEST_BANK_ACCOUNT_NUMBER.length() - 4);
-        assertEquals(expectedLast4, returnedBankAccount.getLast4());
-        assertEquals(BANK_ACCOUNT.getCountryCode(), returnedBankAccount.getCountryCode());
-        assertEquals(BANK_ACCOUNT.getCurrency(), returnedBankAccount.getCurrency());
-        assertEquals(BANK_ACCOUNT.getRoutingNumber(), returnedBankAccount.getRoutingNumber());
+        final String bankAccountId = Objects.requireNonNull(returnedBankAccount.getId());
+        assertTrue(bankAccountId.startsWith("ba_"));
+        assertEquals("Jenny Rosen", returnedBankAccount.getAccountHolderName());
+        assertEquals(BankAccount.BankAccountType.INDIVIDUAL, returnedBankAccount.getAccountHolderType());
+        assertEquals("US", returnedBankAccount.getCountryCode());
+        assertEquals("usd", returnedBankAccount.getCurrency());
+        assertNull(returnedBankAccount.getFingerprint());
+        assertEquals("6789", returnedBankAccount.getLast4());
+        assertEquals("314074269", returnedBankAccount.getRoutingNumber());
+        assertEquals(BankAccount.Status.New, returnedBankAccount.getStatus());
     }
 
     @Test

@@ -12,7 +12,7 @@ class BankAccountTest {
     @Test
     fun parseSampleAccount_returnsExpectedValue() {
         val expectedAccount = BankAccount(
-            accountNumber = null,
+            id = "ba_19d8Fh2eZvKYlo2C9qw8RwpV",
             accountHolderName = "Jane Austen",
             accountHolderType = BankAccount.BankAccountType.INDIVIDUAL,
             bankName = "STRIPE TEST BANK",
@@ -20,7 +20,8 @@ class BankAccountTest {
             currency = "usd",
             fingerprint = "1JWtPxqbdX5Gamtc",
             last4 = "6789",
-            routingNumber = "110000000"
+            routingNumber = "110000000",
+            status = BankAccount.Status.New
         )
         assertEquals(expectedAccount, BankAccountFixtures.BANK_ACCOUNT)
     }
@@ -38,9 +39,14 @@ class BankAccountTest {
 
     @Test
     fun paramsFromBankAccount_mapsCorrectFields() {
-        val bankAccount = BankAccount(BANK_ACCOUNT_NUMBER,
-            BANK_ACCOUNT_HOLDER_NAME, BankAccount.BankAccountType.INDIVIDUAL, null, "US",
-            "usd", null, null, BANK_ROUTING_NUMBER)
+        val bankAccount = BankAccount(
+            accountNumber = BANK_ACCOUNT_NUMBER,
+            countryCode = "US",
+            currency = "usd",
+            routingNumber = BANK_ROUTING_NUMBER,
+            accountHolderType = BankAccount.BankAccountType.INDIVIDUAL,
+            accountHolderName = BANK_ACCOUNT_HOLDER_NAME
+        )
         val bankAccountMap = getBankAccountTokenParamData(bankAccount)
         assertEquals(BANK_ACCOUNT_NUMBER, bankAccountMap["account_number"])
         assertEquals(BANK_ROUTING_NUMBER, bankAccountMap["routing_number"])
