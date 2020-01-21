@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 13.1.1 - unreleased
+* [#2074](https://github.com/stripe/stripe-android/pull/2074) Populate `isSelected` for selected `PaymentMethodsAdapter` item
+* [#2076](https://github.com/stripe/stripe-android/pull/2076) Announce invalid fields when validating `CardInputWidget`
+* [#2077](https://github.com/stripe/stripe-android/pull/2077) Add delete payment method accessibility action in `PaymentMethodsAdapter`
+* [#2078](https://github.com/stripe/stripe-android/pull/2078) Make `StripeEditText` errors accessible 
+* [#2082](https://github.com/stripe/stripe-android/pull/2082) Use ErrorMessageTranslator for AddPaymentMethodActivity errors
+* [#2083](https://github.com/stripe/stripe-android/pull/2083) Add accessibility traversal rules on `AddPaymentMethodActivity`
+* [#2084](https://github.com/stripe/stripe-android/pull/2084) Update `BankAccount` constructor to support all bank account token parameters
+* [#2086](https://github.com/stripe/stripe-android/pull/2086) Add `id` and `status` fields to `BankAccount`
+
 ## 13.1.0 - 2020-01-16
 * [#2055](https://github.com/stripe/stripe-android/pull/2055) Fix styling of `CardInputWidget` and `CardMultilineWidget`
     * `com.google.android.material:material:1.1.0-rc01` breaks `TextInputLayout` styling;
