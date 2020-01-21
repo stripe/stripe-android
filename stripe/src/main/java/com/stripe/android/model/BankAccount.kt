@@ -5,7 +5,7 @@ import androidx.annotation.StringDef
 import kotlinx.android.parcel.Parcelize
 
 /**
- * [Create a bank account token](https://stripe.com/docs/api/tokens/create_bank_account)
+ * [The bank account object](https://stripe.com/docs/api/customer_bank_accounts/object)
  */
 @Parcelize
 data class BankAccount internal constructor(
@@ -16,6 +16,7 @@ data class BankAccount internal constructor(
      */
     val id: String? = null,
 
+    @Deprecated("Use BankAccountTokenParams")
     val accountNumber: String? = null,
 
     /**
@@ -138,6 +139,7 @@ data class BankAccount internal constructor(
      * either `individual` or `company`. This field is required when attaching the bank account to
      * a `Customer` object.
      */
+    @Deprecated("Use BankAccountTokenParams")
     @JvmOverloads
     constructor(
         accountNumber: String,
@@ -192,19 +194,13 @@ data class BankAccount internal constructor(
     )
 
     override fun toParamMap(): Map<String, Any> {
-        val bankAccountParams: Map<String, String> = listOf(
-            "country" to countryCode,
-            "currency" to currency,
-            "account_number" to accountNumber,
-            "routing_number" to routingNumber,
-            "account_holder_name" to accountHolderName,
-            "account_holder_type" to accountHolderType
-        ).fold(emptyMap()) { acc, (key, value) ->
-            acc.plus(
-                value?.let { mapOf(key to it) }.orEmpty()
-            )
-        }
-
-        return mapOf(Token.TokenType.BANK_ACCOUNT to bankAccountParams)
+        return BankAccountTokenParams(
+            country = countryCode.orEmpty(),
+            currency = currency.orEmpty(),
+            accountNumber = accountNumber.orEmpty(),
+            routingNumber = routingNumber,
+            accountHolderName = accountHolderName,
+            accountHolderType = BankAccountTokenParams.Type.fromCode(accountHolderType)
+        ).toParamMap()
     }
 }

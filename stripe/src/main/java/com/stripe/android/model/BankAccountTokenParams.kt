@@ -1,9 +1,13 @@
 package com.stripe.android.model
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
+
 /**
  * [Create a bank account token](https://stripe.com/docs/api/tokens/create_bank_account)
  */
-private data class BankAccountTokenParams @JvmOverloads constructor(
+@Parcelize
+data class BankAccountTokenParams @JvmOverloads constructor(
     /**
      * The country in which the bank account is located.
      *
@@ -50,10 +54,17 @@ private data class BankAccountTokenParams @JvmOverloads constructor(
      * [bank_account.routing_number](https://stripe.com/docs/api/tokens/create_bank_account#create_bank_account_token-bank_account-routing_number)
      */
     private val routingNumber: String? = null
-) : StripeParamsModel {
+) : StripeParamsModel, Parcelable {
     enum class Type(internal val code: String) {
         Individual("individual"),
-        Company("company")
+        Company("company");
+
+        internal companion object {
+            @JvmSynthetic
+            internal fun fromCode(code: String?): Type? {
+                return values().firstOrNull { it.code == code }
+            }
+        }
     }
 
     override fun toParamMap(): Map<String, Any> {
