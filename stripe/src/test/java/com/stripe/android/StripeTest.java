@@ -13,6 +13,7 @@ import com.stripe.android.model.AccountParams;
 import com.stripe.android.model.Address;
 import com.stripe.android.model.AddressFixtures;
 import com.stripe.android.model.BankAccount;
+import com.stripe.android.model.BankAccountTokenParamsFixtures;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.CardBrand;
 import com.stripe.android.model.CardFixtures;
@@ -78,14 +79,7 @@ public class StripeTest {
 
     private static final int YEAR = Calendar.getInstance().get(Calendar.YEAR) + 1;
     private static final Card CARD = Card.create(TEST_CARD_NUMBER, 12, YEAR, "123");
-    private static final BankAccount BANK_ACCOUNT = new BankAccount(
-            "000123456789",
-            "US",
-            "usd",
-            "314074269",
-            "Jenny Rosen",
-            BankAccount.BankAccountType.INDIVIDUAL
-    );
+
     private static final SourceParams CARD_SOURCE_PARAMS = SourceParams.createCardParams(CARD);
 
     private Context context;
@@ -229,7 +223,7 @@ public class StripeTest {
     @Test
     public void createBankAccountToken() {
         createStripe().createBankAccountToken(
-                BANK_ACCOUNT,
+                BankAccountTokenParamsFixtures.DEFAULT,
                 new ApiResultCallback<Token>() {
                     @Override
                     public void onSuccess(@NonNull Token result) {
@@ -295,7 +289,9 @@ public class StripeTest {
             throws StripeException {
         final Stripe stripe = createStripe();
 
-        final Token token = stripe.createBankAccountTokenSynchronous(BANK_ACCOUNT);
+        final Token token = stripe.createBankAccountTokenSynchronous(
+                BankAccountTokenParamsFixtures.DEFAULT
+        );
         assertNotNull(token);
         assertEquals(Token.TokenType.BANK_ACCOUNT, token.getType());
         assertNull(token.getCard());
@@ -310,7 +306,7 @@ public class StripeTest {
         assertEquals("usd", returnedBankAccount.getCurrency());
         assertNull(returnedBankAccount.getFingerprint());
         assertEquals("6789", returnedBankAccount.getLast4());
-        assertEquals("314074269", returnedBankAccount.getRoutingNumber());
+        assertEquals("110000000", returnedBankAccount.getRoutingNumber());
         assertEquals(BankAccount.Status.New, returnedBankAccount.getStatus());
     }
 

@@ -15,6 +15,7 @@ import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.AccountParams
 import com.stripe.android.model.BankAccount
+import com.stripe.android.model.BankAccountTokenParams
 import com.stripe.android.model.Card
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -885,10 +886,79 @@ class Stripe internal constructor(
      * See [Create a bank account token](https://stripe.com/docs/api/tokens/create_bank_account).
      * `POST /v1/tokens`
      *
+     * @param bankAccountTokenParams the [BankAccountTokenParams] used to create this token
+     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
+     * @param callback a [ApiResultCallback] to receive the result or error
+     */
+    @UiThread
+    @JvmOverloads
+    fun createBankAccountToken(
+        bankAccountTokenParams: BankAccountTokenParams,
+        idempotencyKey: String? = null,
+        callback: ApiResultCallback<Token>
+    ) {
+        val params = bankAccountTokenParams.toParamMap()
+            .plus(stripeNetworkUtils.createUidParams())
+        createTokenFromParams(
+            params,
+            Token.TokenType.BANK_ACCOUNT,
+            idempotencyKey,
+            callback
+        )
+    }
+
+    /**
+     * Blocking method to create a [Token] for a [BankAccount]. Do not call this on
+     * the UI thread or your app will crash.
+     *
+     * See [Create a bank account token](https://stripe.com/docs/api/tokens/create_bank_account).
+     * `POST /v1/tokens`
+     *
+     * @param bankAccountTokenParams the [BankAccountTokenParams] to use for this token
+     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
+     *
+     * @return a [Token] that can be used for this [BankAccount]
+     *
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws CardException should not be thrown with this type of token, but is theoretically
+     * possible given the underlying methods called
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     * Stripe's servers
+     */
+    @Throws(AuthenticationException::class, InvalidRequestException::class,
+        APIConnectionException::class, CardException::class, APIException::class)
+    @WorkerThread
+    @JvmOverloads
+    fun createBankAccountTokenSynchronous(
+        bankAccountTokenParams: BankAccountTokenParams,
+        idempotencyKey: String? = null
+    ): Token? {
+        val params = bankAccountTokenParams.toParamMap()
+            .plus(stripeNetworkUtils.createUidParams())
+        return stripeRepository.createToken(
+            params,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId,
+                idempotencyKey = idempotencyKey
+            ),
+            Token.TokenType.BANK_ACCOUNT
+        )
+    }
+
+    /**
+     * Create a [BankAccount] token asynchronously.
+     *
+     * See [Create a bank account token](https://stripe.com/docs/api/tokens/create_bank_account).
+     * `POST /v1/tokens`
+     *
      * @param bankAccount the [BankAccount] used to create this token
      * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
      * @param callback a [ApiResultCallback] to receive the result or error
      */
+    @Deprecated("Use BankAccountTokenParams")
     @UiThread
     @JvmOverloads
     fun createBankAccountToken(
@@ -913,7 +983,7 @@ class Stripe internal constructor(
      * See [Create a bank account token](https://stripe.com/docs/api/tokens/create_bank_account).
      * `POST /v1/tokens`
      *
-     * @param bankAccount the [Card] to use for this token
+     * @param bankAccount the [BankAccount] to use for this token
      * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
      *
      * @return a [Token] that can be used for this [BankAccount]
@@ -926,6 +996,7 @@ class Stripe internal constructor(
      * @throws APIException any other type of problem (for instance, a temporary issue with
      * Stripe's servers
      */
+    @Deprecated("Use BankAccountTokenParams")
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, CardException::class, APIException::class)
     @WorkerThread
