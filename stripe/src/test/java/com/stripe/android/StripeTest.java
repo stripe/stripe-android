@@ -84,7 +84,10 @@ public class StripeTest {
             TEST_BANK_ACCOUNT_NUMBER,
             "US",
             "usd",
-            TEST_BANK_ROUTING_NUMBER);
+            TEST_BANK_ROUTING_NUMBER,
+            "Jenny Rosen",
+            BankAccount.BankAccountType.INDIVIDUAL
+    );
     private static final SourceParams CARD_SOURCE_PARAMS = SourceParams.createCardParams(CARD);
 
     private Context context;
@@ -227,16 +230,8 @@ public class StripeTest {
 
     @Test
     public void createBankAccountToken() {
-        createStripe()
-                .createBankAccountToken(new BankAccount(
-                        "Jane Austen",
-                                BankAccount.BankAccountType.INDIVIDUAL,
-                        "STRIPE TEST BANK",
-                        "US",
-                        "usd",
-                        "1JWtPxqbdX5Gamtc",
-                        "6789",
-                        "110000000"),
+        createStripe().createBankAccountToken(
+                BANK_ACCOUNT,
                 new ApiResultCallback<Token>() {
                     @Override
                     public void onSuccess(@NonNull Token result) {
@@ -245,7 +240,8 @@ public class StripeTest {
                     @Override
                     public void onError(@NonNull Exception e) {
                     }
-                });
+                }
+        );
     }
 
     @Test

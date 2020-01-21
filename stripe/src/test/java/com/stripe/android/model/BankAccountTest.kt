@@ -12,14 +12,15 @@ class BankAccountTest {
     @Test
     fun parseSampleAccount_returnsExpectedValue() {
         val expectedAccount = BankAccount(
-            "Jane Austen",
-            BankAccount.BankAccountType.INDIVIDUAL,
-            "STRIPE TEST BANK",
-            "US",
-            "usd",
-            "1JWtPxqbdX5Gamtc",
-            "6789",
-            "110000000"
+            accountNumber = null,
+            accountHolderName = "Jane Austen",
+            accountHolderType = BankAccount.BankAccountType.INDIVIDUAL,
+            bankName = "STRIPE TEST BANK",
+            countryCode = "US",
+            currency = "usd",
+            fingerprint = "1JWtPxqbdX5Gamtc",
+            last4 = "6789",
+            routingNumber = "110000000"
         )
         assertEquals(expectedAccount, BankAccountFixtures.BANK_ACCOUNT)
     }

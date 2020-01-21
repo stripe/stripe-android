@@ -5,25 +5,22 @@ import androidx.annotation.StringDef
 import kotlinx.android.parcel.Parcelize
 
 /**
- * Model class representing a bank account that can be used to create a token
- * via the protocol outlined in
- * [the Stripe
- * documentation.](https://stripe.com/docs/api/java#create_bank_account_token)
+ * [Create a bank account token](https://stripe.com/docs/api/tokens/create_bank_account)
  */
 @Parcelize
 data class BankAccount internal constructor(
-    val accountNumber: String?,
-    val accountHolderName: String?,
+    val accountNumber: String? = null,
+    val accountHolderName: String? = null,
     @param:BankAccountType @field:BankAccountType @get:BankAccountType
-    val accountHolderType: String?,
-    val bankName: String?,
+    val accountHolderType: String? = null,
+    val bankName: String? = null,
     @param:Size(2) @field:Size(2) @get:Size(2)
-    val countryCode: String?,
+    val countryCode: String? = null,
     @param:Size(3) @field:Size(3) @get:Size(3)
-    val currency: String?,
-    val fingerprint: String?,
-    val last4: String?,
-    val routingNumber: String?
+    val currency: String? = null,
+    val fingerprint: String? = null,
+    val last4: String? = null,
+    val routingNumber: String? = null
 ) : StripeModel, StripeParamsModel {
 
     @Retention(AnnotationRetention.SOURCE)
@@ -36,23 +33,39 @@ data class BankAccount internal constructor(
     }
 
     /**
-     * Constructor used to create a BankAccount object with the required parameters
-     * to send to Stripe's server.
+     * [Create a bank account token](https://stripe.com/docs/api/tokens/create_bank_account)
      *
-     * @param accountNumber the account number for this BankAccount
-     * @param countryCode the two-letter country code that this account was created in
-     * @param currency the currency of this account
-     * @param routingNumber the routing number of this account. Can be null for non US bank
-     * accounts.
+     * @param accountNumber The account number for the bank account, in string form.
+     * Must be a checking account.
+     * @param countryCode The country in which the bank account is located.
+     * @param currency The currency the bank account is in. This must be a country/currency pairing
+     * that Stripe supports.
+     * @param routingNumber Optional. The routing number, sort code, or other country-appropriate
+     * institution number for the bank account. For US bank accounts, this is required and should
+     * be the ACH routing number, not the wire routing number. If you are providing an IBAN for
+     * `account_number`, this field is not required.
+     * @param accountHolderName Optional. The name of the person or business that owns the bank
+     * account. This field is required when attaching the bank account to a `Customer` object.
+     * @param accountHolderType Optional. The type of entity that holds the account. This can be
+     * either `individual` or `company`. This field is required when attaching the bank account to
+     * a `Customer` object.
      */
+    @JvmOverloads
     constructor(
         accountNumber: String,
         @Size(2) countryCode: String,
         @Size(3) currency: String,
-        routingNumber: String?
+        routingNumber: String? = null,
+        accountHolderName: String? = null,
+        @BankAccountType accountHolderType: String? = null
     ) : this(
-        accountNumber, null, null, null, countryCode,
-        currency, null, null, routingNumber
+        accountNumber = accountNumber,
+        accountHolderName = accountHolderName,
+        accountHolderType = accountHolderType,
+        countryCode = countryCode,
+        currency = currency,
+        routingNumber = routingNumber,
+        fingerprint = null
     )
 
     /**
@@ -68,6 +81,7 @@ data class BankAccount internal constructor(
      * @param last4 the last four digits of the account number
      * @param routingNumber the routing number of the bank
      */
+    @Deprecated("For internal use only")
     constructor(
         accountHolderName: String?,
         @BankAccountType accountHolderType: String?,
@@ -81,15 +95,19 @@ data class BankAccount internal constructor(
         currency, fingerprint, last4, routingNumber)
 
     override fun toParamMap(): Map<String, Any> {
-        val accountParams = mapOf(
+        val bankAccountParams: Map<String, String> = listOf(
             "country" to countryCode,
             "currency" to currency,
             "account_number" to accountNumber,
-            "routing_number" to routingNumber.takeUnless { it.isNullOrBlank() },
-            "account_holder_name" to accountHolderName.takeUnless { it.isNullOrBlank() },
-            "account_holder_type" to accountHolderType.takeUnless { it.isNullOrBlank() }
-        )
+            "routing_number" to routingNumber,
+            "account_holder_name" to accountHolderName,
+            "account_holder_type" to accountHolderType
+        ).fold(emptyMap()) { acc, (key, value) ->
+            acc.plus(
+                value?.let { mapOf(key to it) }.orEmpty()
+            )
+        }
 
-        return mapOf(Token.TokenType.BANK_ACCOUNT to accountParams)
+        return mapOf(Token.TokenType.BANK_ACCOUNT to bankAccountParams)
     }
 }
