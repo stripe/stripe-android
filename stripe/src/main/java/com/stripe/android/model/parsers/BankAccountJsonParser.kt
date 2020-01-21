@@ -8,16 +8,17 @@ import org.json.JSONObject
 internal class BankAccountJsonParser : ModelJsonParser<BankAccount> {
     override fun parse(json: JSONObject): BankAccount {
         return BankAccount(
-            StripeJsonUtils.optString(json, FIELD_ACCOUNT_HOLDER_NAME),
-            asBankAccountType(
+            accountNumber = null,
+            accountHolderName = StripeJsonUtils.optString(json, FIELD_ACCOUNT_HOLDER_NAME),
+            accountHolderType = asBankAccountType(
                 StripeJsonUtils.optString(json, FIELD_ACCOUNT_HOLDER_TYPE)
             ),
-            StripeJsonUtils.optString(json, FIELD_BANK_NAME),
-            StripeJsonUtils.optCountryCode(json, FIELD_COUNTRY),
-            StripeJsonUtils.optCurrency(json, FIELD_CURRENCY),
-            StripeJsonUtils.optString(json, FIELD_FINGERPRINT),
-            StripeJsonUtils.optString(json, FIELD_LAST4),
-            StripeJsonUtils.optString(json, FIELD_ROUTING_NUMBER)
+            bankName = StripeJsonUtils.optString(json, FIELD_BANK_NAME),
+            countryCode = StripeJsonUtils.optCountryCode(json, FIELD_COUNTRY),
+            currency = StripeJsonUtils.optCurrency(json, FIELD_CURRENCY),
+            fingerprint = StripeJsonUtils.optString(json, FIELD_FINGERPRINT),
+            last4 = StripeJsonUtils.optString(json, FIELD_LAST4),
+            routingNumber = StripeJsonUtils.optString(json, FIELD_ROUTING_NUMBER)
         )
     }
 
