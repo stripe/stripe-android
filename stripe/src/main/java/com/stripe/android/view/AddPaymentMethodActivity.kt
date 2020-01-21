@@ -2,13 +2,16 @@ package com.stripe.android.view
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.text.method.LinkMovementMethod
 import android.text.util.Linkify
+import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.core.text.util.LinkifyCompat
+import androidx.core.view.ViewCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.stripe.android.CustomerSession
@@ -47,7 +50,9 @@ class AddPaymentMethodActivity : StripeActivity() {
     }
 
     private val addPaymentMethodView: AddPaymentMethodView by lazy {
-        createPaymentMethodView(args)
+        createPaymentMethodView(args).also {
+            it.id = R.id.stripe_add_payment_method_form
+        }
     }
 
     private val customerSession: CustomerSession by lazy {
@@ -98,16 +103,12 @@ class AddPaymentMethodActivity : StripeActivity() {
         val contentRoot: ViewGroup =
             scrollView.findViewById(R.id.stripe_add_payment_method_content_root)
         contentRoot.addView(addPaymentMethodView)
-
-        if (args.addPaymentMethodFooterLayoutId > 0) {
-            val footerView = layoutInflater.inflate(
-                args.addPaymentMethodFooterLayoutId, contentRoot, false
-            )
-            if (footerView is TextView) {
-                LinkifyCompat.addLinks(footerView, Linkify.ALL)
-                footerView.movementMethod = LinkMovementMethod.getInstance()
+        createFooterView(contentRoot)?.let {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                addPaymentMethodView.accessibilityTraversalBefore = it.id
+                it.accessibilityTraversalAfter = addPaymentMethodView.id
             }
-            contentRoot.addView(footerView)
+            contentRoot.addView(it)
         }
 
         setTitle(titleStringRes)
@@ -130,6 +131,25 @@ class AddPaymentMethodActivity : StripeActivity() {
                 throw IllegalArgumentException(
                     "Unsupported Payment Method type: ${paymentMethodType.code}")
             }
+        }
+    }
+
+    private fun createFooterView(
+        contentRoot: ViewGroup
+    ): View? {
+        return if (args.addPaymentMethodFooterLayoutId > 0) {
+            val footerView = layoutInflater.inflate(
+                args.addPaymentMethodFooterLayoutId, contentRoot, false
+            )
+            footerView.id = R.id.stripe_add_payment_method_footer
+            if (footerView is TextView) {
+                LinkifyCompat.addLinks(footerView, Linkify.ALL)
+                ViewCompat.enableAccessibleClickableSpanSupport(footerView)
+                footerView.movementMethod = LinkMovementMethod.getInstance()
+            }
+            footerView
+        } else {
+            null
         }
     }
 
