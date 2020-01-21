@@ -9,6 +9,9 @@
 * [#2083](https://github.com/stripe/stripe-android/pull/2083) Add accessibility traversal rules on `AddPaymentMethodActivity`
 * [#2084](https://github.com/stripe/stripe-android/pull/2084) Update `BankAccount` constructor to support all bank account token parameters
 * [#2086](https://github.com/stripe/stripe-android/pull/2086) Add `id` and `status` fields to `BankAccount`
+* [#2087](https://github.com/stripe/stripe-android/pull/2087) Use `BankAccountTokenParams` for bank account token creation
+    * Create `Stripe#createBankAccountToken()` and `Stripe#createBankAccountTokenSynchronous()` that take a `BankAccountTokenParams` object
+    * Deprecate `BankAccount` for token creation
 
 ## 13.1.0 - 2020-01-16
 * [#2055](https://github.com/stripe/stripe-android/pull/2055) Fix styling of `CardInputWidget` and `CardMultilineWidget`
