@@ -22,10 +22,10 @@ internal sealed class RequestHeadersFactory {
         private val options: ApiRequest.Options,
         private val appInfo: AppInfo? = null,
         private val locale: Locale = Locale.getDefault(),
-        private val systemPropertySupplier: (String) -> String = DEFAULT_SYSTEM_PROPERTY_SUPPLIER
+        private val systemPropertySupplier: (String) -> String = DEFAULT_SYSTEM_PROPERTY_SUPPLIER,
+        private val apiVersion: String = ApiVersion.get().code,
+        private val sdkVersion: String = Stripe.VERSION
     ) : RequestHeadersFactory() {
-        private val apiVersion: String = ApiVersion.get().code
-
         private val languageTag: String?
             get() {
                 return locale.toString().replace("_", "-")
@@ -35,7 +35,7 @@ internal sealed class RequestHeadersFactory {
         override val userAgent: String
             get() {
                 return listOfNotNull(
-                    DEFAULT_USER_AGENT, appInfo?.toUserAgent()
+                    getUserAgent(sdkVersion), appInfo?.toUserAgent()
                 ).joinToString(" ")
             }
 
@@ -86,13 +86,14 @@ internal sealed class RequestHeadersFactory {
     }
 
     class Default(
-        override val extraHeaders: Map<String, String> = emptyMap()
+        override val extraHeaders: Map<String, String> = emptyMap(),
+        sdkVersion: String = Stripe.VERSION
     ) : RequestHeadersFactory() {
-        override val userAgent: String = DEFAULT_USER_AGENT
+        override val userAgent: String = getUserAgent(sdkVersion)
     }
 
     internal companion object {
-        internal const val DEFAULT_USER_AGENT = "Stripe/v1 ${Stripe.VERSION}"
+        internal fun getUserAgent(sdkVersion: String = Stripe.VERSION) = "Stripe/v1 $sdkVersion"
 
         private const val HEADER_USER_AGENT = "User-Agent"
         private const val HEADER_ACCEPT_CHARSET = "Accept-Charset"

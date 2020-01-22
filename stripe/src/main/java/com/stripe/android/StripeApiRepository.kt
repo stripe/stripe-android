@@ -58,8 +58,15 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         FingerprintRequestFactory(context),
     private val uidParamsFactory: UidParamsFactory = UidParamsFactory.create(context),
     private val analyticsDataFactory: AnalyticsDataFactory = AnalyticsDataFactory(context),
-    private val networkUtils: StripeNetworkUtils = StripeNetworkUtils(context)
+    private val networkUtils: StripeNetworkUtils = StripeNetworkUtils(context),
+    apiVersion: String = ApiVersion.get().code,
+    sdkVersion: String = Stripe.VERSION
 ) : StripeRepository {
+    private val apiRequestFactory = ApiRequest.Factory(
+        appInfo = appInfo,
+        apiVersion = apiVersion,
+        sdkVersion = sdkVersion
+    )
 
     /**
      * Confirm a [PaymentIntent] using the provided [ConfirmPaymentIntentParams]
@@ -97,9 +104,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             )
 
             return fetchStripeModel(
-                ApiRequest.createPost(
-                    apiUrl, options, params, appInfo
-                ),
+                apiRequestFactory.createPost(apiUrl, options, params),
                 PaymentIntentJsonParser()
             )
         } catch (unexpected: CardException) {
@@ -134,11 +139,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
         try {
             return fetchStripeModel(
-                ApiRequest.createGet(
+                apiRequestFactory.createGet(
                     getRetrievePaymentIntentUrl(paymentIntentId),
                     options,
-                    createClientSecretParam(clientSecret),
-                    appInfo
+                    createClientSecretParam(clientSecret)
                 ),
                 PaymentIntentJsonParser()
             )
@@ -163,11 +167,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
         try {
             return fetchStripeModel(
-                ApiRequest.createPost(
+                apiRequestFactory.createPost(
                     getCancelPaymentIntentSourceUrl(paymentIntentId),
                     options,
-                    mapOf("source" to sourceId),
-                    appInfo
+                    mapOf("source" to sourceId)
                 ),
                 PaymentIntentJsonParser()
             )
@@ -207,11 +210,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
         try {
             return fetchStripeModel(
-                ApiRequest.createPost(
+                apiRequestFactory.createPost(
                     getConfirmSetupIntentUrl(setupIntentId),
                     options,
-                    networkUtils.paramsWithUid(confirmSetupIntentParams.toParamMap()),
-                    appInfo
+                    networkUtils.paramsWithUid(confirmSetupIntentParams.toParamMap())
                 ),
                 SetupIntentJsonParser()
             )
@@ -247,11 +249,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             )
 
             return fetchStripeModel(
-                ApiRequest.createGet(
+                apiRequestFactory.createGet(
                     getRetrieveSetupIntentUrl(setupIntentId),
                     options,
-                    createClientSecretParam(clientSecret),
-                    appInfo
+                    createClientSecretParam(clientSecret)
                 ),
                 SetupIntentJsonParser()
             )
@@ -276,11 +277,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
         try {
             return fetchStripeModel(
-                ApiRequest.createPost(
+                apiRequestFactory.createPost(
                     getCancelSetupIntentSourceUrl(setupIntentId),
                     options,
-                    mapOf("source" to sourceId),
-                    appInfo
+                    mapOf("source" to sourceId)
                 ),
                 SetupIntentJsonParser()
             )
@@ -332,12 +332,11 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
         try {
             return fetchStripeModel(
-                ApiRequest.createPost(
+                apiRequestFactory.createPost(
                     sourcesUrl,
                     options,
                     sourceParams.toParamMap()
-                        .plus(uidParamsFactory.createParams()),
-                    appInfo
+                        .plus(uidParamsFactory.createParams())
                 ),
                 SourceJsonParser()
             )
@@ -366,11 +365,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
         try {
             return fetchStripeModel(
-                ApiRequest.createGet(
+                apiRequestFactory.createGet(
                     apiUrl,
                     options,
-                    SourceParams.createRetrieveSourceParams(clientSecret),
-                    appInfo
+                    SourceParams.createRetrieveSourceParams(clientSecret)
                 ),
                 SourceJsonParser()
             )
@@ -402,12 +400,11 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
         try {
             val paymentMethod = fetchStripeModel(
-                ApiRequest.createPost(
+                apiRequestFactory.createPost(
                     paymentMethodsUrl,
                     options,
                     paymentMethodCreateParams.toParamMap()
-                        .plus(uidParamsFactory.createParams()),
-                    appInfo
+                        .plus(uidParamsFactory.createParams())
                 ),
                 PaymentMethodJsonParser()
             )
@@ -489,11 +486,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         )
 
         return fetchStripeModel(
-            ApiRequest.createPost(
+            apiRequestFactory.createPost(
                 getAddCustomerSourceUrl(customerId),
                 requestOptions,
-                mapOf("source" to sourceId),
-                appInfo
+                mapOf("source" to sourceId)
             ),
             SourceJsonParser()
         )
@@ -517,9 +513,9 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         )
 
         return fetchStripeModel(
-            ApiRequest.createDelete(
+            apiRequestFactory.createDelete(
                 getDeleteCustomerSourceUrl(customerId, sourceId),
-                requestOptions, appInfo
+                requestOptions
             ),
             SourceJsonParser()
         )
@@ -545,10 +541,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         )
 
         return fetchStripeModel(
-            ApiRequest.createPost(
+            apiRequestFactory.createPost(
                 getAttachPaymentMethodUrl(paymentMethodId),
                 requestOptions,
-                mapOf("customer" to customerId), appInfo
+                mapOf("customer" to customerId)
             ),
             PaymentMethodJsonParser()
         )
@@ -572,10 +568,9 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         )
 
         return fetchStripeModel(
-            ApiRequest.createPost(
+            apiRequestFactory.createPost(
                 getDetachPaymentMethodUrl(paymentMethodId),
-                requestOptions,
-                appInfo = appInfo
+                requestOptions
             ),
             PaymentMethodJsonParser()
         )
@@ -596,14 +591,13 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         requestOptions: ApiRequest.Options
     ): List<PaymentMethod> {
         val response = makeApiRequest(
-            ApiRequest.createGet(
+            apiRequestFactory.createGet(
                 paymentMethodsUrl,
                 requestOptions,
                 mapOf(
                     "customer" to customerId,
                     "type" to paymentMethodType
-                ),
-                appInfo
+                )
             )
         )
 
@@ -652,11 +646,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         )
 
         return fetchStripeModel(
-            ApiRequest.createPost(
+            apiRequestFactory.createPost(
                 getRetrieveCustomerUrl(customerId),
                 requestOptions,
-                mapOf("default_source" to sourceId),
-                appInfo
+                mapOf("default_source" to sourceId)
             ),
             CustomerJsonParser()
         )
@@ -684,10 +677,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         )
 
         return fetchStripeModel(
-            ApiRequest.createPost(
+            apiRequestFactory.createPost(
                 getRetrieveCustomerUrl(customerId),
                 requestOptions,
-                mapOf("shipping" to shippingInformation.toParamMap()), appInfo
+                mapOf("shipping" to shippingInformation.toParamMap())
             ),
             CustomerJsonParser()
         )
@@ -708,10 +701,9 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         )
 
         return fetchStripeModel(
-            ApiRequest.createGet(
+            apiRequestFactory.createGet(
                 getRetrieveCustomerUrl(customerId),
-                requestOptions,
-                appInfo = appInfo
+                requestOptions
             ),
             CustomerJsonParser()
         )
@@ -734,11 +726,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         )
 
         val response = makeApiRequest(
-            ApiRequest.createGet(
+            apiRequestFactory.createGet(
                 getIssuingCardPinUrl(cardId),
                 ApiRequest.Options(ephemeralKeySecret),
-                mapOf("verification" to createVerificationParam(verificationId, userOneTimeCode)),
-                appInfo
+                mapOf("verification" to createVerificationParam(verificationId, userOneTimeCode))
             )
         )
         return response.responseJson.getString("pin")
@@ -762,14 +753,13 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         )
 
         makeApiRequest(
-            ApiRequest.createPost(
+            apiRequestFactory.createPost(
                 getIssuingCardPinUrl(cardId),
                 ApiRequest.Options(ephemeralKeySecret),
                 mapOf(
                     "verification" to createVerificationParam(verificationId, userOneTimeCode),
                     "pin" to newPin
-                ),
-                appInfo
+                )
             )
         )
     }
@@ -778,11 +768,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         APIConnectionException::class, APIException::class, CardException::class)
     override fun getFpxBankStatus(options: ApiRequest.Options): FpxBankStatuses {
         val response = makeApiRequest(
-            ApiRequest.createGet(
+            apiRequestFactory.createGet(
                 getApiUrl("fpx/bank_statuses"),
                 options,
-                mapOf("account_holder_type" to "individual"),
-                appInfo
+                mapOf("account_holder_type" to "individual")
             )
         )
         return FpxBankStatuses.fromJson(response.responseJson)
@@ -809,11 +798,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         )
 
         val response = makeApiRequest(
-            ApiRequest.createPost(
+            apiRequestFactory.createPost(
                 getApiUrl("3ds2/authenticate"),
                 requestOptions,
-                authParams.toParamMap(),
-                appInfo
+                authParams.toParamMap()
             )
         )
 
@@ -835,11 +823,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         CardException::class, AuthenticationException::class)
     internal fun complete3ds2Auth(sourceId: String, requestOptions: ApiRequest.Options): Boolean {
         val response = makeApiRequest(
-            ApiRequest.createPost(
+            apiRequestFactory.createPost(
                 getApiUrl("3ds2/challenge_complete"),
                 requestOptions,
-                mapOf("source" to sourceId),
-                appInfo
+                mapOf("source" to sourceId)
             )
         )
         return response.isOk
@@ -994,7 +981,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options
     ): Token? {
         return fetchStripeModel(
-            ApiRequest.createPost(url, options, params, appInfo),
+            apiRequestFactory.createPost(url, options, params),
             TokenJsonParser()
         )
     }

@@ -15,7 +15,7 @@ internal class ApiRequestTest {
     @Test
     fun url_withCardData_createsProperQueryString() {
         val cardMap = NETWORK_UTILS.createCardTokenParams(CardFixtures.MINIMUM_CARD)
-        val url = ApiRequest.createGet(
+        val url = FACTORY.createGet(
             StripeApiRepository.sourcesUrl,
             OPTIONS,
             cardMap
@@ -27,7 +27,7 @@ internal class ApiRequestTest {
 
     @Test
     fun getContentType() {
-        val contentType = ApiRequest.createGet(
+        val contentType = FACTORY.createGet(
             StripeApiRepository.sourcesUrl,
             OPTIONS
         ).contentType
@@ -37,7 +37,7 @@ internal class ApiRequestTest {
     @Test
     fun writeBody_withEmptyBody_shouldHaveZeroLength() {
         ByteArrayOutputStream().use {
-            ApiRequest.createPost(
+            FACTORY.createPost(
                 StripeApiRepository.paymentMethodsUrl,
                 OPTIONS
             ).writeBody(it)
@@ -48,7 +48,7 @@ internal class ApiRequestTest {
     @Test
     fun writeBody_withNonEmptyBody_shouldHaveNonZeroLength() {
         ByteArrayOutputStream().use {
-            ApiRequest.createPost(
+            FACTORY.createPost(
                 StripeApiRepository.paymentMethodsUrl,
                 OPTIONS,
                 mapOf("customer" to "cus_123")
@@ -62,12 +62,12 @@ internal class ApiRequestTest {
         val params = mapOf("customer" to "cus_123")
 
         assertEquals(
-            ApiRequest.createPost(
+            FACTORY.createPost(
                 StripeApiRepository.paymentMethodsUrl,
                 OPTIONS,
                 params
             ),
-            ApiRequest.createPost(
+            FACTORY.createPost(
                 StripeApiRepository.paymentMethodsUrl,
                 OPTIONS,
                 params
@@ -75,12 +75,12 @@ internal class ApiRequestTest {
         )
 
         assertNotEquals(
-            ApiRequest.createPost(
+            FACTORY.createPost(
                 StripeApiRepository.paymentMethodsUrl,
                 OPTIONS,
                 params
             ),
-            ApiRequest.createPost(
+            FACTORY.createPost(
                 StripeApiRepository.paymentMethodsUrl,
                 ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, "acct"),
                 params
@@ -97,5 +97,7 @@ internal class ApiRequestTest {
         )
 
         private val OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+
+        private val FACTORY = ApiRequest.Factory()
     }
 }
