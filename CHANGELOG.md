@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 13.1.1 - unreleased
+## 13.1.1 - 2020-01-22
 * [#2074](https://github.com/stripe/stripe-android/pull/2074) Populate `isSelected` for selected `PaymentMethodsAdapter` item
 * [#2076](https://github.com/stripe/stripe-android/pull/2076) Announce invalid fields when validating `CardInputWidget`
 * [#2077](https://github.com/stripe/stripe-android/pull/2077) Add delete payment method accessibility action in `PaymentMethodsAdapter`
