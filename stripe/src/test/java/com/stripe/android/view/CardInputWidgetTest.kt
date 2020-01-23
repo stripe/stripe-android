@@ -4,6 +4,7 @@ import android.os.Build
 import android.text.TextPaint
 import android.view.ViewGroup
 import android.widget.ImageView
+import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.reset
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.CardNumberFixtures.VALID_AMEX_NO_SPACES
@@ -14,7 +15,6 @@ import com.stripe.android.CardNumberFixtures.VALID_VISA_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VALID_VISA_WITH_SPACES
 import com.stripe.android.R
 import com.stripe.android.model.Address
-import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -36,8 +36,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
@@ -66,14 +64,10 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
     private val postalCodeEditText: PostalCodeEditText by lazy {
         cardInputWidget.findViewById<PostalCodeEditText>(R.id.et_postal_code)
     }
-
-    @Mock
-    private lateinit var cardInputListener: CardInputListener
+    private val cardInputListener: CardInputListener = mock()
 
     @BeforeTest
     fun setup() {
-        MockitoAnnotations.initMocks(this)
-
         cardInputWidget.setCardNumberTextWatcher(object : StripeTextWatcher() {})
         cardInputWidget.setExpiryDateTextWatcher(object : StripeTextWatcher() {})
         cardInputWidget.setCvcNumberTextWatcher(object : StripeTextWatcher() {})
@@ -1227,6 +1221,70 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
     fun allFields_notEquals_standardFields_withPostalCodeEnabled() {
         cardInputWidget.postalCodeEnabled = true
         assertNotEquals(cardInputWidget.standardFields, cardInputWidget.allFields)
+    }
+
+    @Test
+    fun testCardValidCallback() {
+        var currentIsValid = false
+        var currentInvalidFields = emptySet<CardValidCallback.Fields>()
+        cardInputWidget.setCardValidCallback(object : CardValidCallback {
+            override fun onInputChanged(
+                isValid: Boolean,
+                invalidFields: Set<CardValidCallback.Fields>
+            ) {
+                currentIsValid = isValid
+                currentInvalidFields = invalidFields
+            }
+        })
+
+        assertFalse(currentIsValid)
+        assertEquals(
+            setOf(
+                CardValidCallback.Fields.Number,
+                CardValidCallback.Fields.Expiry,
+                CardValidCallback.Fields.Cvc
+            ),
+            currentInvalidFields
+        )
+
+        cardInputWidget.setCardNumber(VALID_VISA_NO_SPACES)
+        assertFalse(currentIsValid)
+        assertEquals(
+            setOf(CardValidCallback.Fields.Expiry, CardValidCallback.Fields.Cvc),
+            currentInvalidFields
+        )
+
+        expiryEditText.append("12")
+        assertFalse(currentIsValid)
+        assertEquals(
+            setOf(CardValidCallback.Fields.Expiry, CardValidCallback.Fields.Cvc),
+            currentInvalidFields
+        )
+
+        expiryEditText.append("50")
+        assertFalse(currentIsValid)
+        assertEquals(
+            setOf(CardValidCallback.Fields.Cvc),
+            currentInvalidFields
+        )
+
+        cvcEditText.append("12")
+        assertFalse(currentIsValid)
+        assertEquals(
+            setOf(CardValidCallback.Fields.Cvc),
+            currentInvalidFields
+        )
+
+        cvcEditText.append("3")
+        assertTrue(currentIsValid)
+        assertTrue(currentInvalidFields.isEmpty())
+
+        cvcEditText.setText("0")
+        assertFalse(currentIsValid)
+        assertEquals(
+            setOf(CardValidCallback.Fields.Cvc),
+            currentInvalidFields
+        )
     }
 
     private companion object {

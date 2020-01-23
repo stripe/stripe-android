@@ -24,6 +24,8 @@ internal interface CardWidget {
      */
     val paymentMethodCreateParams: PaymentMethodCreateParams?
 
+    fun setCardValidCallback(callback: CardValidCallback?)
+
     fun setCardInputListener(listener: CardInputListener?)
 
     fun setCardHint(cardHint: String)

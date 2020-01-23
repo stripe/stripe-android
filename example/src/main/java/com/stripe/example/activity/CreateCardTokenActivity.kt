@@ -20,6 +20,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.model.Card
 import com.stripe.android.model.Token
+import com.stripe.android.view.CardValidCallback
 import com.stripe.example.R
 import kotlinx.android.synthetic.main.card_token_activity.*
 
@@ -59,6 +60,15 @@ class CreateCardTokenActivity : AppCompatActivity() {
                 snackbarController.show(getString(R.string.invalid_card_details))
             }
         }
+
+        card_input_widget.setCardValidCallback(object : CardValidCallback {
+            override fun onInputChanged(
+                isValid: Boolean,
+                invalidFields: Set<CardValidCallback.Fields>
+            ) {
+                // added as an example - no-op
+            }
+        })
 
         card_input_widget.requestFocus()
     }

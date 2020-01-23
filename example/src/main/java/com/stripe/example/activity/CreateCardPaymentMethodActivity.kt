@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.view.CardValidCallback
 import com.stripe.example.R
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -39,6 +40,15 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
         rv_payment_methods.setHasFixedSize(false)
         rv_payment_methods.layoutManager = LinearLayoutManager(this)
         rv_payment_methods.adapter = adapter
+
+        card_multiline_widget.setCardValidCallback(object : CardValidCallback {
+            override fun onInputChanged(
+                isValid: Boolean,
+                invalidFields: Set<CardValidCallback.Fields>
+            ) {
+                // added as an example - no-op
+            }
+        })
 
         btn_create_payment_method.setOnClickListener { createPaymentMethod() }
     }
