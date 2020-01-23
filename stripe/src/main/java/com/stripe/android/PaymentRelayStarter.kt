@@ -1,12 +1,10 @@
 package com.stripe.android
 
-import android.os.Bundle
 import android.os.Parcelable
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.AuthActivityStarter
 import com.stripe.android.view.PaymentRelayActivity
-import com.stripe.android.view.StripeIntentResultExtras
 import kotlinx.android.parcel.Parcelize
 
 /**
@@ -22,16 +20,11 @@ internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter
         ): PaymentRelayStarter {
             return object : PaymentRelayStarter {
                 override fun start(args: Args) {
-                    val extras = Bundle()
-                    args.stripeIntent?.let {
-                        extras.putString(StripeIntentResultExtras.CLIENT_SECRET, it.clientSecret)
-                    }
-                    args.source?.let {
-                        extras.putParcelable(StripeIntentResultExtras.SOURCE, it)
-                    }
-                    args.exception?.let {
-                        extras.putSerializable(StripeIntentResultExtras.AUTH_EXCEPTION, it)
-                    }
+                    val extras = PaymentController.Result(
+                        clientSecret = args.stripeIntent?.clientSecret,
+                        source = args.source,
+                        exception = args.exception
+                    ).toBundle()
                     host.startActivityForResult(
                         PaymentRelayActivity::class.java, extras, requestCode
                     )

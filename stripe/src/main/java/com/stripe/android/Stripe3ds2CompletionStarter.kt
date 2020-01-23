@@ -1,11 +1,9 @@
 package com.stripe.android
 
-import android.os.Bundle
 import androidx.annotation.IntDef
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.AuthActivityStarter
 import com.stripe.android.view.PaymentRelayActivity
-import com.stripe.android.view.StripeIntentResultExtras
 
 internal class Stripe3ds2CompletionStarter(
     private val host: AuthActivityStarter.Host,
@@ -13,10 +11,10 @@ internal class Stripe3ds2CompletionStarter(
 ) : AuthActivityStarter<Stripe3ds2CompletionStarter.Args> {
 
     override fun start(args: Args) {
-        val extras = Bundle()
-        extras.putString(StripeIntentResultExtras.CLIENT_SECRET,
-            args.stripeIntent.clientSecret)
-        extras.putInt(StripeIntentResultExtras.FLOW_OUTCOME, args.outcome)
+        val extras = PaymentController.Result(
+            clientSecret = args.stripeIntent.clientSecret,
+            flowOutcome = args.outcome
+        ).toBundle()
         host.startActivityForResult(PaymentRelayActivity::class.java, extras, requestCode)
     }
 

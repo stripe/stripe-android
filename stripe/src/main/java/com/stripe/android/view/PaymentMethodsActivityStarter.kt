@@ -162,9 +162,9 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
         val useGooglePay: Boolean = false
     ) : ActivityStarter.Result {
         override fun toBundle(): Bundle {
-            val bundle = Bundle()
-            bundle.putParcelable(ActivityStarter.Result.EXTRA, this)
-            return bundle
+            return Bundle().also {
+                it.putParcelable(ActivityStarter.Result.EXTRA, this)
+            }
         }
 
         companion object {

@@ -28,7 +28,6 @@ import com.stripe.android.stripe3ds2.transaction.StripeChallengeStatusReceiver
 import com.stripe.android.stripe3ds2.transaction.Transaction
 import com.stripe.android.stripe3ds2.views.ChallengeProgressDialogActivity
 import com.stripe.android.view.AuthActivityStarter
-import com.stripe.android.view.StripeIntentResultExtras
 import java.security.cert.CertificateException
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
@@ -197,18 +196,16 @@ internal class StripePaymentController internal constructor(
         requestOptions: ApiRequest.Options,
         callback: ApiResultCallback<PaymentIntentResult>
     ) {
-        val authException =
-            data.getSerializableExtra(StripeIntentResultExtras.AUTH_EXCEPTION)
+        val result = PaymentController.Result.fromIntent(data) ?: PaymentController.Result()
+        val authException = result.exception
         if (authException is Exception) {
             callback.onError(authException)
             return
         }
 
-        val shouldCancelSource =
-            data.getBooleanExtra(StripeIntentResultExtras.SHOULD_CANCEL_SOURCE, false)
-        val sourceId = data.getStringExtra(StripeIntentResultExtras.SOURCE_ID).orEmpty()
-        @StripeIntentResult.Outcome val flowOutcome = data
-            .getIntExtra(StripeIntentResultExtras.FLOW_OUTCOME, StripeIntentResult.Outcome.UNKNOWN)
+        val shouldCancelSource = result.shouldCancelSource
+        val sourceId = result.sourceId.orEmpty()
+        @StripeIntentResult.Outcome val flowOutcome = result.flowOutcome
 
         stripeRepository.retrieveIntent(getClientSecret(data), requestOptions,
             createPaymentIntentCallback(
@@ -231,18 +228,16 @@ internal class StripePaymentController internal constructor(
         requestOptions: ApiRequest.Options,
         callback: ApiResultCallback<SetupIntentResult>
     ) {
-        val authException =
-            data.getSerializableExtra(StripeIntentResultExtras.AUTH_EXCEPTION)
+        val result = PaymentController.Result.fromIntent(data) ?: PaymentController.Result()
+        val authException = result.exception
         if (authException is Exception) {
             callback.onError(authException)
             return
         }
 
-        val shouldCancelSource =
-            data.getBooleanExtra(StripeIntentResultExtras.SHOULD_CANCEL_SOURCE, false)
-        val sourceId = data.getStringExtra(StripeIntentResultExtras.SOURCE_ID).orEmpty()
-        @StripeIntentResult.Outcome val flowOutcome = data
-            .getIntExtra(StripeIntentResultExtras.FLOW_OUTCOME, StripeIntentResult.Outcome.UNKNOWN)
+        val shouldCancelSource = result.shouldCancelSource
+        val sourceId = result.sourceId.orEmpty()
+        @StripeIntentResult.Outcome val flowOutcome = result.flowOutcome
 
         stripeRepository.retrieveIntent(getClientSecret(data), requestOptions,
             createSetupIntentCallback(
@@ -256,11 +251,9 @@ internal class StripePaymentController internal constructor(
         requestOptions: ApiRequest.Options,
         callback: ApiResultCallback<Source>
     ) {
-        val extras = data.extras
-        val sourceId = extras?.getString(StripeIntentResultExtras.SOURCE_ID)
-            .orEmpty()
-        val clientSecret = extras?.getString(StripeIntentResultExtras.CLIENT_SECRET)
-            .orEmpty()
+        val result = PaymentController.Result.fromIntent(data)
+        val sourceId = result?.sourceId.orEmpty()
+        val clientSecret = result?.clientSecret.orEmpty()
 
         analyticsRequestExecutor.executeAsync(
             AnalyticsRequest.create(
@@ -922,7 +915,7 @@ internal class StripePaymentController internal constructor(
 
         @JvmSynthetic
         internal fun getClientSecret(data: Intent): String {
-            return requireNotNull(data.getStringExtra(StripeIntentResultExtras.CLIENT_SECRET))
+            return requireNotNull(PaymentController.Result.fromIntent(data)?.clientSecret)
         }
     }
 }

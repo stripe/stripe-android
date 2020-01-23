@@ -50,7 +50,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         customizeToolbar()
 
         val clientSecret = args.clientSecret
-        setResult(Activity.RESULT_OK, viewModel.resultIntent)
+        setResult(Activity.RESULT_OK, Intent().putExtras(viewModel.paymentResult.toBundle()))
 
         if (clientSecret.isBlank()) {
             logger.debug("PaymentAuthWebViewActivity#onCreate() - clientSecret is blank")
