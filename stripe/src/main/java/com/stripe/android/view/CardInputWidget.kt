@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
+import android.text.Editable
 import android.text.Layout
 import android.text.TextPaint
 import android.text.TextWatcher
@@ -62,6 +63,27 @@ class CardInputWidget @JvmOverloads constructor(
     private val postalCodeEditText: PostalCodeEditText
 
     private var cardInputListener: CardInputListener? = null
+    private var cardValidCallback: CardValidCallback? = null
+    private val cardValidTextWatcher = object : StripeTextWatcher() {
+        override fun afterTextChanged(s: Editable?) {
+            super.afterTextChanged(s)
+            cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)
+        }
+    }
+    private val invalidFields: Set<CardValidCallback.Fields>
+        get() {
+            return listOfNotNull(
+                CardValidCallback.Fields.Number.takeIf {
+                    cardNumberEditText.cardNumber == null
+                },
+                CardValidCallback.Fields.Expiry.takeIf {
+                    expiryDateEditText.validDateFields == null
+                },
+                CardValidCallback.Fields.Cvc.takeIf {
+                    this.cvcValue == null
+                }
+            ).toSet()
+        }
 
     @JvmSynthetic
     internal var cardNumberIsViewed = true
@@ -250,6 +272,19 @@ class CardInputWidget @JvmOverloads constructor(
         )
 
         initView(attrs)
+    }
+
+    override fun setCardValidCallback(callback: CardValidCallback?) {
+        this.cardValidCallback = callback
+        standardFields.forEach { it.removeTextChangedListener(cardValidTextWatcher) }
+
+        // only add the TextWatcher if it will be used
+        if (callback != null) {
+            standardFields.forEach { it.addTextChangedListener(cardValidTextWatcher) }
+        }
+
+        // call immediately after setting
+        cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)
     }
 
     /**

@@ -35,9 +35,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.Mockito.reset
-import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
 /**
@@ -51,10 +49,8 @@ internal class CardMultilineWidgetTest {
     private lateinit var fullGroup: WidgetControlGroup
     private lateinit var noZipGroup: WidgetControlGroup
 
-    @Mock
-    private lateinit var fullCardListener: CardInputListener
-    @Mock
-    private lateinit var noZipCardListener: CardInputListener
+    private val fullCardListener: CardInputListener = mock()
+    private val noZipCardListener: CardInputListener = mock()
 
     private val context: Context by lazy {
         ApplicationProvider.getApplicationContext<Context>()
@@ -65,8 +61,6 @@ internal class CardMultilineWidgetTest {
 
     @BeforeTest
     fun setup() {
-        MockitoAnnotations.initMocks(this)
-
         CustomerSession.instance = mock()
 
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
@@ -696,6 +690,70 @@ internal class CardMultilineWidgetTest {
         assertTrue(fullGroup.cardNumberEditText.isEnabled)
         assertTrue(fullGroup.cvcEditText.isEnabled)
         assertTrue(fullGroup.postalCodeEditText.isEnabled)
+    }
+
+    @Test
+    fun testCardValidCallback() {
+        var currentIsValid = false
+        var currentInvalidFields = emptySet<CardValidCallback.Fields>()
+        cardMultilineWidget.setCardValidCallback(object : CardValidCallback {
+            override fun onInputChanged(
+                isValid: Boolean,
+                invalidFields: Set<CardValidCallback.Fields>
+            ) {
+                currentIsValid = isValid
+                currentInvalidFields = invalidFields
+            }
+        })
+
+        assertFalse(currentIsValid)
+        assertEquals(
+            setOf(
+                CardValidCallback.Fields.Number,
+                CardValidCallback.Fields.Expiry,
+                CardValidCallback.Fields.Cvc
+            ),
+            currentInvalidFields
+        )
+
+        cardMultilineWidget.setCardNumber(VALID_VISA_NO_SPACES)
+        assertFalse(currentIsValid)
+        assertEquals(
+            setOf(CardValidCallback.Fields.Expiry, CardValidCallback.Fields.Cvc),
+            currentInvalidFields
+        )
+
+        fullGroup.expiryDateEditText.append("12")
+        assertFalse(currentIsValid)
+        assertEquals(
+            setOf(CardValidCallback.Fields.Expiry, CardValidCallback.Fields.Cvc),
+            currentInvalidFields
+        )
+
+        fullGroup.expiryDateEditText.append("50")
+        assertFalse(currentIsValid)
+        assertEquals(
+            setOf(CardValidCallback.Fields.Cvc),
+            currentInvalidFields
+        )
+
+        fullGroup.cvcEditText.append("12")
+        assertFalse(currentIsValid)
+        assertEquals(
+            setOf(CardValidCallback.Fields.Cvc),
+            currentInvalidFields
+        )
+
+        fullGroup.cvcEditText.append("3")
+        assertTrue(currentIsValid)
+        assertTrue(currentInvalidFields.isEmpty())
+
+        fullGroup.cvcEditText.setText("0")
+        assertFalse(currentIsValid)
+        assertEquals(
+            setOf(CardValidCallback.Fields.Cvc),
+            currentInvalidFields
+        )
     }
 
     internal class WidgetControlGroup(parentWidget: CardMultilineWidget) {
