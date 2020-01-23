@@ -6,6 +6,7 @@ import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argThat
 import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
@@ -33,10 +34,8 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.times
-import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
 /**
@@ -55,10 +54,8 @@ class StripeApiRepositoryTest {
         FileFactory(context)
     }
 
-    @Mock
-    private lateinit var stripeApiRequestExecutor: ApiRequestExecutor
-    @Mock
-    private lateinit var fireAndForgetRequestExecutor: FireAndForgetRequestExecutor
+    private val stripeApiRequestExecutor: ApiRequestExecutor = mock()
+    private val fireAndForgetRequestExecutor: FireAndForgetRequestExecutor = mock()
 
     private val apiRequestArgumentCaptor: KArgumentCaptor<ApiRequest> = argumentCaptor()
     private val fileUploadRequestArgumentCaptor: KArgumentCaptor<FileUploadRequest> = argumentCaptor()
@@ -66,8 +63,6 @@ class StripeApiRepositoryTest {
 
     @BeforeTest
     fun before() {
-        MockitoAnnotations.initMocks(this)
-
         `when`(stripeApiRequestExecutor.execute(any<FileUploadRequest>()))
             .thenReturn(
                 StripeResponse(

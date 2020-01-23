@@ -1,6 +1,7 @@
 package com.stripe.android.view
 
 import com.stripe.android.PaymentAuthWebViewStarter
+import com.stripe.android.PaymentController
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 import kotlin.test.Test
@@ -23,7 +24,7 @@ class PaymentAuthWebViewActivityViewModelTest {
 
         assertEquals(
             StripeIntentResult.Outcome.CANCELED,
-            intent.getIntExtra(StripeIntentResultExtras.FLOW_OUTCOME, StripeIntentResult.Outcome.UNKNOWN)
+            PaymentController.Result.fromIntent(intent)?.flowOutcome
         )
     }
 

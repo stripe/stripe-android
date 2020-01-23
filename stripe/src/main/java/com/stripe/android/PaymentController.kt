@@ -1,10 +1,13 @@
 package com.stripe.android
 
 import android.content.Intent
+import android.os.Bundle
+import android.os.Parcelable
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.AuthActivityStarter
+import kotlinx.android.parcel.Parcelize
 
 internal interface PaymentController {
     /**
@@ -85,4 +88,33 @@ internal interface PaymentController {
         stripeIntent: StripeIntent,
         requestOptions: ApiRequest.Options
     )
+
+    /**
+     * Represents the result of a [PaymentController] operation
+     */
+    @Parcelize
+    data class Result internal constructor(
+        internal val clientSecret: String? = null,
+        @StripeIntentResult.Outcome internal val flowOutcome: Int = StripeIntentResult.Outcome.UNKNOWN,
+        internal val exception: Exception? = null,
+        internal val shouldCancelSource: Boolean = false,
+        internal val sourceId: String? = null,
+        internal val source: Source? = null
+    ) : Parcelable {
+        @JvmSynthetic
+        fun toBundle(): Bundle {
+            return Bundle().also {
+                it.putParcelable(EXTRA, this)
+            }
+        }
+
+        internal companion object {
+            private const val EXTRA = "extra_args"
+
+            @JvmSynthetic
+            internal fun fromIntent(intent: Intent): Result? {
+                return intent.getParcelableExtra(EXTRA)
+            }
+        }
+    }
 }

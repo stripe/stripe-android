@@ -2,23 +2,17 @@ package com.stripe.android
 
 import android.app.Activity
 import android.content.Intent
-import android.os.Bundle
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.exception.PermissionException
-import com.stripe.android.exception.StripeException
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.utils.ParcelUtils
 import com.stripe.android.view.AuthActivityStarter
-import com.stripe.android.view.StripeIntentResultExtras
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -37,16 +31,16 @@ class PaymentRelayStarterTest {
             PaymentRelayStarter.Args.create(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2)
         )
         verify(activity).startActivityForResult(intentArgumentCaptor.capture(), eq(500))
-        val bundle = ParcelUtils.copy(
-            intentArgumentCaptor.firstValue.extras ?: Bundle(),
-            Bundle.CREATOR
-        )
+
         assertEquals(
             PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.clientSecret,
-            bundle.getString(StripeIntentResultExtras.CLIENT_SECRET)
+            result.clientSecret
         )
-        assertFalse(bundle.containsKey(StripeIntentResultExtras.FLOW_OUTCOME))
-        assertNull(bundle.getSerializable(StripeIntentResultExtras.AUTH_EXCEPTION))
+        assertEquals(
+            StripeIntentResult.Outcome.UNKNOWN,
+            result.flowOutcome
+        )
+        assertNull(result.exception)
     }
 
     @Test
@@ -54,15 +48,13 @@ class PaymentRelayStarterTest {
         val exception = RuntimeException()
         starter.start(PaymentRelayStarter.Args.create(exception))
         verify(activity).startActivityForResult(intentArgumentCaptor.capture(), eq(500))
-        val bundle = ParcelUtils.copy(
-            intentArgumentCaptor.firstValue.extras ?: Bundle(),
-            Bundle.CREATOR
+
+        assertNull(result.clientSecret)
+        assertEquals(
+            StripeIntentResult.Outcome.UNKNOWN,
+            result.flowOutcome
         )
-        assertNull(bundle.getString(StripeIntentResultExtras.CLIENT_SECRET))
-        assertFalse(bundle.containsKey(StripeIntentResultExtras.FLOW_OUTCOME))
-        assertTrue(
-            bundle.getSerializable(StripeIntentResultExtras.AUTH_EXCEPTION) is RuntimeException
-        )
+        assertEquals(exception, result.exception)
     }
 
     @Test
@@ -72,18 +64,20 @@ class PaymentRelayStarterTest {
         )
         starter.start(PaymentRelayStarter.Args.create(exception))
         verify(activity).startActivityForResult(intentArgumentCaptor.capture(), eq(500))
-        val bundle = ParcelUtils.copy(
-            intentArgumentCaptor.firstValue.extras ?: Bundle(),
-            Bundle.CREATOR
-        )
-        assertNull(bundle.getString(StripeIntentResultExtras.CLIENT_SECRET))
-        assertFalse(bundle.containsKey(StripeIntentResultExtras.FLOW_OUTCOME))
 
-        val expectedException =
-            bundle.getSerializable(StripeIntentResultExtras.AUTH_EXCEPTION) as StripeException
+        assertNull(result.clientSecret)
         assertEquals(
-            exception.stripeError,
-            expectedException.stripeError
+            StripeIntentResult.Outcome.UNKNOWN,
+            result.flowOutcome
         )
+
+        assertEquals(exception, result.exception)
     }
+
+    private val result: PaymentController.Result
+        get() {
+            return requireNotNull(
+                PaymentController.Result.fromIntent(intentArgumentCaptor.firstValue)
+            )
+        }
 }
