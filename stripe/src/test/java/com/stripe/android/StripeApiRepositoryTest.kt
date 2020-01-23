@@ -664,7 +664,7 @@ class StripeApiRepositoryTest {
         )
     }
 
-    @Ignore("Skip failing test due to backend regression")
+    @Test
     fun apiRequest_withErrorResponse_onSupportedSdkVersion_shouldBeTranslated() {
         Locale.setDefault(Locale.JAPAN)
 
