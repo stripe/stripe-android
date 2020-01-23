@@ -256,14 +256,14 @@ class StripeApiRepositoryTest {
     fun requestData_withConnectAccount_shouldReturnCorrectResponseHeaders() {
         val connectAccountId = "acct_1Acj2PBUgO3KuWzz"
         val response = stripeApiRepository.makeApiRequest(
-            ApiRequest.createPost(
+            DEFAULT_API_REQUEST_FACTORY.createPost(
                 StripeApiRepository.sourcesUrl,
                 ApiRequest.Options(
                     ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
                     connectAccountId
                 ),
-                SourceParams.createCardParams(CARD).toParamMap(),
-                null)
+                SourceParams.createCardParams(CARD).toParamMap()
+            )
         )
         assertNotNull(response)
 
@@ -521,9 +521,10 @@ class StripeApiRepositoryTest {
         )
 
         val options = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
-        val url = ApiRequest.createGet(StripeApiRepository.paymentMethodsUrl,
-            options, queryParams, null)
-            .url
+        val url = DEFAULT_API_REQUEST_FACTORY.createGet(
+            StripeApiRepository.paymentMethodsUrl,
+            options, queryParams
+        ).url
 
         `when`(
             stripeApiRequestExecutor.execute(argThat<ApiRequest> {
@@ -566,11 +567,11 @@ class StripeApiRepositoryTest {
         )
 
         val options = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
-        val url = ApiRequest.createGet(
+        val url = DEFAULT_API_REQUEST_FACTORY.createGet(
             StripeApiRepository.paymentMethodsUrl,
             options,
-            queryParams, null)
-            .url
+            queryParams
+        ).url
 
         `when`(
             stripeApiRequestExecutor.execute(argThat<ApiRequest> {
@@ -647,6 +648,48 @@ class StripeApiRepositoryTest {
         verifyFingerprintAndAnalyticsRequests(AnalyticsEvent.FileCreate)
     }
 
+    @Test
+    fun apiRequest_withErrorResponse_onUnsupportedSdkVersion_shouldNotBeTranslated() {
+        Locale.setDefault(Locale.JAPAN)
+
+        val stripeRepository = StripeApiRepository(
+            context,
+            sdkVersion = "AndroidBindings/13.0.0"
+        )
+
+        val ex = assertFailsWith<InvalidRequestException> {
+            stripeRepository.retrieveSetupIntent(
+                "seti_1CkiBMLENEVhOs7YMtUehLau_secret_invalid",
+                DEFAULT_OPTIONS
+            )
+        }
+        assertEquals(
+            "No such setupintent: seti_1CkiBMLENEVhOs7YMtUehLau",
+            ex.stripeError?.message
+        )
+    }
+
+    @Test
+    fun apiRequest_withErrorResponse_onSupportedSdkVersion_shouldBeTranslated() {
+        Locale.setDefault(Locale.JAPAN)
+
+        val stripeRepository = StripeApiRepository(
+            context,
+            sdkVersion = "AndroidBindings/14.0.0"
+        )
+
+        val ex = assertFailsWith<InvalidRequestException> {
+            stripeRepository.retrieveSetupIntent(
+                "seti_1CkiBMLENEVhOs7YMtUehLau_secret_invalid",
+                DEFAULT_OPTIONS
+            )
+        }
+        assertEquals(
+            "そのような setupintent はありません : seti_1CkiBMLENEVhOs7YMtUehLau ",
+            ex.stripeError?.message
+        )
+    }
+
     private fun verifyFingerprintAndAnalyticsRequests(
         event: AnalyticsEvent
     ) {
@@ -682,5 +725,7 @@ class StripeApiRepositoryTest {
             Card.create("4242424242424242", 1, 2050, "123")
 
         private val DEFAULT_OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+
+        private val DEFAULT_API_REQUEST_FACTORY = ApiRequest.Factory()
     }
 }

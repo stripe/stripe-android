@@ -14,14 +14,18 @@ internal data class ApiRequest internal constructor(
     override val params: Map<String, *>? = null,
     internal val options: Options,
     private val appInfo: AppInfo? = null,
-    private val systemPropertySupplier: (String) -> String = DEFAULT_SYSTEM_PROPERTY_SUPPLIER
+    private val systemPropertySupplier: (String) -> String = DEFAULT_SYSTEM_PROPERTY_SUPPLIER,
+    private val apiVersion: String = ApiVersion.get().code,
+    private val sdkVersion: String = Stripe.VERSION
 ) : StripeRequest() {
     override val mimeType: MimeType = MimeType.Form
 
     override val headersFactory = RequestHeadersFactory.Api(
         options = options,
         appInfo = appInfo,
-        systemPropertySupplier = systemPropertySupplier
+        systemPropertySupplier = systemPropertySupplier,
+        apiVersion = apiVersion,
+        sdkVersion = sdkVersion
     )
 
     override val body: String
@@ -48,38 +52,53 @@ internal data class ApiRequest internal constructor(
         }
     }
 
+    class Factory(
+        private val appInfo: AppInfo? = null,
+        private val apiVersion: String = ApiVersion.get().code,
+        private val sdkVersion: String = Stripe.VERSION
+    ) {
+        fun createGet(
+            url: String,
+            options: Options,
+            params: Map<String, *>? = null
+        ): ApiRequest {
+            return ApiRequest(
+                Method.GET, url, params, options, appInfo,
+                apiVersion = apiVersion,
+                sdkVersion = sdkVersion
+            )
+        }
+
+        fun createPost(
+            url: String,
+            options: Options,
+            params: Map<String, *>? = null
+        ): ApiRequest {
+            return ApiRequest(
+                Method.POST, url, params, options, appInfo,
+                apiVersion = apiVersion,
+                sdkVersion = sdkVersion
+            )
+        }
+
+        fun createDelete(
+            url: String,
+            options: Options
+        ): ApiRequest {
+            return ApiRequest(
+                Method.DELETE,
+                url,
+                options = options,
+                appInfo = appInfo,
+                apiVersion = apiVersion,
+                sdkVersion = sdkVersion
+            )
+        }
+    }
+
     internal companion object {
         internal const val API_HOST = "https://api.stripe.com"
 
         internal const val HEADER_STRIPE_CLIENT_USER_AGENT = "X-Stripe-Client-User-Agent"
-
-        @JvmSynthetic
-        internal fun createGet(
-            url: String,
-            options: Options,
-            params: Map<String, *>? = null,
-            appInfo: AppInfo? = null
-        ): ApiRequest {
-            return ApiRequest(Method.GET, url, params, options, appInfo)
-        }
-
-        @JvmSynthetic
-        internal fun createPost(
-            url: String,
-            options: Options,
-            params: Map<String, *>? = null,
-            appInfo: AppInfo? = null
-        ): ApiRequest {
-            return ApiRequest(Method.POST, url, params, options, appInfo)
-        }
-
-        @JvmSynthetic
-        internal fun createDelete(
-            url: String,
-            options: Options,
-            appInfo: AppInfo? = null
-        ): ApiRequest {
-            return ApiRequest(Method.DELETE, url, null, options, appInfo)
-        }
     }
 }

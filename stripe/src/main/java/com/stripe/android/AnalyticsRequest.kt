@@ -9,6 +9,7 @@ internal object AnalyticsRequest {
         requestOptions: ApiRequest.Options,
         appInfo: AppInfo? = null
     ): ApiRequest {
-        return ApiRequest.createGet(HOST, requestOptions, params, appInfo)
+        return ApiRequest.Factory(appInfo = appInfo)
+            .createGet(HOST, requestOptions, params)
     }
 }

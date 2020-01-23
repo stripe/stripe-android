@@ -85,7 +85,7 @@ class ApiRequestHeadersFactoryTest {
     fun headers_withAppInfo() {
         val headers = createHeaders(appInfo = AppInfoTest.APP_INFO)
         assertEquals(
-            "${RequestHeadersFactory.DEFAULT_USER_AGENT} MyAwesomePlugin/1.2.34 (https://myawesomeplugin.info)",
+            "${RequestHeadersFactory.getUserAgent()} MyAwesomePlugin/1.2.34 (https://myawesomeplugin.info)",
             headers["User-Agent"]
         )
 

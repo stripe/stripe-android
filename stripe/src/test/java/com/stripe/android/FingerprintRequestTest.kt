@@ -27,7 +27,7 @@ class FingerprintRequestTest {
     fun getHeaders() {
         val headers = FingerprintRequest(emptyMap(), "guid").headers
         assertEquals(
-            RequestHeadersFactory.DEFAULT_USER_AGENT,
+            RequestHeadersFactory.getUserAgent(),
             headers["User-Agent"]
         )
         assertEquals("m=guid", headers["Cookie"])
