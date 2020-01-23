@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 13.1.2 - unreleased
+* [#2093](https://github.com/stripe/stripe-android/pull/2093) Add `CardValidCallback` and add support in card forms
+* [#2094](https://github.com/stripe/stripe-android/pull/2094) Make `StripeError` serializable
+
 ## 13.1.1 - 2020-01-22
 * [#2074](https://github.com/stripe/stripe-android/pull/2074) Populate `isSelected` for selected `PaymentMethodsAdapter` item
 * [#2076](https://github.com/stripe/stripe-android/pull/2076) Announce invalid fields when validating `CardInputWidget`
