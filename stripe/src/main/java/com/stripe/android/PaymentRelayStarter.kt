@@ -1,11 +1,13 @@
 package com.stripe.android
 
 import android.os.Bundle
+import android.os.Parcelable
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.AuthActivityStarter
 import com.stripe.android.view.PaymentRelayActivity
 import com.stripe.android.view.StripeIntentResultExtras
+import kotlinx.android.parcel.Parcelize
 
 /**
  * Starts an instance of [PaymentRelayStarter].
@@ -38,11 +40,12 @@ internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter
         }
     }
 
+    @Parcelize
     data class Args internal constructor(
         val stripeIntent: StripeIntent? = null,
         val source: Source? = null,
         val exception: Exception? = null
-    ) {
+    ) : Parcelable {
         internal companion object {
             @JvmSynthetic
             internal fun create(stripeIntent: StripeIntent): Args {
