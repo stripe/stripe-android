@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import com.stripe.android.model.StripeModel
+import java.io.Serializable
 import kotlinx.android.parcel.Parcelize
 
 /**
@@ -75,4 +76,4 @@ data class StripeError internal constructor(
      * [doc_url](https://stripe.com/docs/api/errors#errors-doc_url)
      */
     val docUrl: String? = null
-) : StripeModel
+) : StripeModel, Serializable
