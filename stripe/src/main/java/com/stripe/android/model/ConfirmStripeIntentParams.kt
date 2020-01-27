@@ -15,5 +15,6 @@ interface ConfirmStripeIntentParams : StripeParamsModel {
         internal const val PARAM_PAYMENT_METHOD_DATA: String = "payment_method_data"
         internal const val PARAM_USE_STRIPE_SDK: String = "use_stripe_sdk"
         internal const val PARAM_MANDATE_ID: String = "mandate"
+        internal const val PARAM_MANDATE_DATA = "mandate_data"
     }
 }

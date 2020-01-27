@@ -84,4 +84,35 @@ class ConfirmSetupIntentParamsTest {
         assertNull(params.paymentMethodCreateParams)
         assertNull(params.paymentMethodId)
     }
+
+    @Test
+    fun create_withSepaDebitPaymentMethodParams_shouldUseDefaultMandateDataIfNotSpecified() {
+        val params = ConfirmSetupIntentParams(
+            clientSecret = CLIENT_SECRET,
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT,
+            useStripeSdk = true
+        ).toParamMap()
+        assertEquals(
+            MandateDataParams().toParamMap(),
+            params[ConfirmStripeIntentParams.PARAM_MANDATE_DATA]
+        )
+    }
+
+    @Test
+    fun create_withSepaDebitPaymentMethodParams_shouldUseMandateDataIfSpecified() {
+        val params = ConfirmSetupIntentParams(
+            clientSecret = CLIENT_SECRET,
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT,
+            mandateData = MandateDataParamsFixtures.DEFAULT,
+            useStripeSdk = true
+        ).toParamMap()
+        assertEquals(
+            MandateDataParamsFixtures.DEFAULT.toParamMap(),
+            params[ConfirmStripeIntentParams.PARAM_MANDATE_DATA]
+        )
+    }
+
+    private companion object {
+        private const val CLIENT_SECRET = "seti_1CkiBMLENEVhOs7YMtUehLau_secret_sw1VaYPGZA"
+    }
 }

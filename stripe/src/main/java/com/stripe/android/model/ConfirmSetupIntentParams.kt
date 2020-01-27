@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
@@ -22,7 +23,14 @@ data class ConfirmSetupIntentParams internal constructor(
     /**
      * ID of the mandate to be used for this payment.
      */
-    private val mandateId: String? = null
+    private val mandateId: String? = null,
+
+    /**
+     * This hash contains details about the Mandate to create.
+     *
+     * [mandate_data](https://stripe.com/docs/api/setup_intents/confirm#confirm_setup_intent-mandate_data)
+     */
+    private val mandateData: MandateDataParams? = null
 ) : ConfirmStripeIntentParams, Parcelable {
 
     override fun shouldUseStripeSdk(): Boolean {
@@ -42,26 +50,49 @@ data class ConfirmSetupIntentParams internal constructor(
      * @return a String-keyed map
      */
     override fun toParamMap(): Map<String, Any> {
-        val params = mapOf(
+        return mapOf(
             PARAM_CLIENT_SECRET to clientSecret,
             PARAM_USE_STRIPE_SDK to useStripeSdk
         ).plus(
             returnUrl?.let { mapOf(PARAM_RETURN_URL to it) }.orEmpty()
         ).plus(
             mandateId?.let { mapOf(PARAM_MANDATE_ID to it) }.orEmpty()
-        ).toMutableMap()
+        ).plus(paymentMethodParamMap)
+    }
 
-        if (paymentMethodCreateParams != null) {
-            params[PARAM_PAYMENT_METHOD_DATA] = paymentMethodCreateParams.toParamMap()
-            if (paymentMethodCreateParams.type.hasMandate) {
-                params[MandateData.PARAM_MANDATE_DATA] = MandateData().toParamMap()
+    private val paymentMethodParamMap: Map<String, Any>
+        get() {
+            return when {
+                paymentMethodCreateParams != null -> {
+                    mapOf(
+                        PARAM_PAYMENT_METHOD_DATA to paymentMethodCreateParams.toParamMap()
+                    ).plus(
+                        mandateDataParams?.let { mapOf(PARAM_MANDATE_DATA to it) }.orEmpty()
+                    )
+                }
+                paymentMethodId != null -> {
+                    mapOf(PARAM_PAYMENT_METHOD_ID to paymentMethodId)
+                }
+                else -> {
+                    emptyMap()
+                }
             }
-        } else if (paymentMethodId != null) {
-            params[PARAM_PAYMENT_METHOD_ID] = paymentMethodId
         }
 
-        return params.toMap()
-    }
+    /**
+     * Use the user-defined [MandateDataParams] if specified, otherwise create a default
+     * [MandateDataParams] if necessary.
+     */
+    private val mandateDataParams: Map<String, Any>?
+        get() {
+            return mandateData?.toParamMap()
+                ?: if (paymentMethodCreateParams?.type?.hasMandate == true && mandateId == null) {
+                    // Populate with default "online" MandateData
+                    MandateDataParams(MandateDataParams.Type.Online).toParamMap()
+                } else {
+                    null
+                }
+        }
 
     @VisibleForTesting
     internal fun toBuilder(): Builder {
