@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -25,13 +27,17 @@
             android:padding="10dp"
             android:text="@string/sepa_debit_mandate" />
 
-        <EditText
-            android:id="@+id/iban_input"
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:hint="@string/iban_hint"
-            android:importantForAutofill="no"
-            android:inputType="text" />
+            app:helperText="@string/sepa_debit_helper">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/iban_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <Button
             android:id="@+id/create_sepa_debit_button"
