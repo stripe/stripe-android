@@ -3,6 +3,7 @@ package com.stripe.android
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.any
@@ -33,8 +34,10 @@ import com.stripe.android.stripe3ds2.transaction.ProtocolErrorEvent
 import com.stripe.android.stripe3ds2.transaction.RuntimeErrorEvent
 import com.stripe.android.stripe3ds2.transaction.Transaction
 import com.stripe.android.stripe3ds2.views.ChallengeProgressDialogActivity
+import com.stripe.android.utils.ParcelUtils
 import com.stripe.android.view.AuthActivityStarter
 import com.stripe.android.view.PaymentRelayActivity
+import java.lang.IllegalArgumentException
 import java.security.cert.CertificateException
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -678,15 +681,23 @@ class StripePaymentControllerTest {
         val expectedResult = PaymentController.Result(
             clientSecret = "client_secret",
             exception = InvalidRequestException(
-                stripeError = StripeErrorFixtures.INVALID_REQUEST_ERROR
+                stripeError = StripeErrorFixtures.INVALID_REQUEST_ERROR,
+                requestId = "req_123",
+                statusCode = 404,
+                message = "There was an exception",
+                cause = IllegalArgumentException()
             ),
             source = SourceFixtures.CARD,
             sourceId = SourceFixtures.CARD.id,
             flowOutcome = StripeIntentResult.Outcome.SUCCEEDED,
             shouldCancelSource = true
         )
+        val resultBundle = ParcelUtils.copy(
+            expectedResult.toBundle(),
+            Bundle.CREATOR
+        )
         val actualResult =
-            PaymentController.Result.fromIntent(Intent().putExtras(expectedResult.toBundle()))
+            PaymentController.Result.fromIntent(Intent().putExtras(resultBundle))
         assertEquals(expectedResult, actualResult)
     }
 
