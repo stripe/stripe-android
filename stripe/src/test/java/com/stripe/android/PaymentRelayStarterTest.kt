@@ -7,6 +7,7 @@ import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
+import com.stripe.android.exception.APIException
 import com.stripe.android.exception.PermissionException
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.view.AuthActivityStarter
@@ -45,7 +46,7 @@ class PaymentRelayStarterTest {
 
     @Test
     fun start_withException_shouldSetCorrectIntentExtras() {
-        val exception = RuntimeException()
+        val exception = APIException(RuntimeException())
         starter.start(PaymentRelayStarter.Args.create(exception))
         verify(activity).startActivityForResult(intentArgumentCaptor.capture(), eq(500))
 

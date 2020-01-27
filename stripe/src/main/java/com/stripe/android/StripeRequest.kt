@@ -69,7 +69,7 @@ internal abstract class StripeRequest {
                 throw InvalidRequestException(
                     message = "Unable to encode parameters to ${Charsets.UTF_8.name()}. " +
                         "Please contact support@stripe.com for assistance.",
-                    e = e
+                    cause = e
                 )
             }
         }

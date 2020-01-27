@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Handler
 import android.os.HandlerThread
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.exception.APIException
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -603,7 +604,12 @@ internal class StripePaymentController internal constructor(
         }
 
         override fun onError(e: Exception) {
-            paymentRelayStarter.start(PaymentRelayStarter.Args.create(e))
+            paymentRelayStarter.start(PaymentRelayStarter.Args.create(
+                when (e) {
+                    is StripeException -> e
+                    else -> APIException(e)
+                }
+            ))
         }
 
         private fun startFrictionlessFlow() {
@@ -896,7 +902,12 @@ internal class StripePaymentController internal constructor(
             exception: Exception
         ) {
             PaymentRelayStarter.create(host, requestCode)
-                .start(PaymentRelayStarter.Args.create(exception))
+                .start(PaymentRelayStarter.Args.create(
+                    when (exception) {
+                        is StripeException -> exception
+                        else -> APIException(exception)
+                    }
+                ))
         }
 
         @JvmStatic

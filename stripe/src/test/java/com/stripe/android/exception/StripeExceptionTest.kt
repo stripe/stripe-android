@@ -12,12 +12,12 @@ class StripeExceptionTest {
             InvalidRequestException(
                 stripeError = StripeErrorFixtures.INVALID_REQUEST_ERROR,
                 requestId = "req_123",
-                e = RuntimeException()
+                cause = RuntimeException()
             ),
             InvalidRequestException(
                 stripeError = StripeErrorFixtures.INVALID_REQUEST_ERROR,
                 requestId = "req_123",
-                e = RuntimeException()
+                cause = RuntimeException()
             )
         )
     }

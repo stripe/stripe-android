@@ -3,6 +3,7 @@ package com.stripe.android
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
+import com.stripe.android.exception.StripeException
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
@@ -96,7 +97,7 @@ internal interface PaymentController {
     data class Result internal constructor(
         internal val clientSecret: String? = null,
         @StripeIntentResult.Outcome internal val flowOutcome: Int = StripeIntentResult.Outcome.UNKNOWN,
-        internal val exception: Exception? = null,
+        internal val exception: StripeException? = null,
         internal val shouldCancelSource: Boolean = false,
         internal val sourceId: String? = null,
         internal val source: Source? = null
