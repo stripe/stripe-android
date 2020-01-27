@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import android.os.Parcelable
+import com.stripe.android.exception.StripeException
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.AuthActivityStarter
@@ -37,7 +38,7 @@ internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter
     data class Args internal constructor(
         val stripeIntent: StripeIntent? = null,
         val source: Source? = null,
-        val exception: Exception? = null
+        val exception: StripeException? = null
     ) : Parcelable {
         internal companion object {
             @JvmSynthetic
@@ -51,7 +52,7 @@ internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter
             }
 
             @JvmSynthetic
-            internal fun create(exception: Exception): Args {
+            internal fun create(exception: StripeException): Args {
                 return Args(exception = exception)
             }
         }

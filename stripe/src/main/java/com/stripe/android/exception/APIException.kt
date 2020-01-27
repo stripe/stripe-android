@@ -10,14 +10,19 @@ class APIException(
     requestId: String? = null,
     statusCode: Int = 0,
     message: String? = stripeError?.message,
-    e: Throwable? = null
+    cause: Throwable? = null
 ) : StripeException(
     stripeError = stripeError,
     requestId = requestId,
     statusCode = statusCode,
-    e = e,
+    cause = cause,
     message = message
 ) {
+    internal constructor(exception: Exception) : this(
+        message = exception.message,
+        cause = exception
+    )
+
     internal companion object {
         @JvmSynthetic
         internal fun create(e: CardException): APIException {
@@ -26,7 +31,7 @@ class APIException(
                 requestId = e.requestId,
                 statusCode = e.statusCode,
                 message = e.message,
-                e = e
+                cause = e
             )
         }
     }

@@ -11,12 +11,12 @@ open class InvalidRequestException(
     statusCode: Int = 0,
     message: String? = stripeError?.message,
     val param: String? = stripeError?.param,
-    e: Throwable? = null
+    cause: Throwable? = null
 ) : StripeException(
     stripeError,
     requestId,
     statusCode,
-    e,
+    cause,
     message
 ) {
     val errorCode: String? = stripeError?.code

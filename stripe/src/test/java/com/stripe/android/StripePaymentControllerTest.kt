@@ -11,6 +11,7 @@ import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
+import com.stripe.android.exception.APIException
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -448,7 +449,7 @@ class StripePaymentControllerTest {
 
     @Test
     fun handlePaymentResult_withAuthException_shouldCallCallbackOnError() {
-        val exception = RuntimeException()
+        val exception = APIException(RuntimeException())
         val intent = Intent().putExtras(
             PaymentController.Result(
                 exception = exception
@@ -463,7 +464,7 @@ class StripePaymentControllerTest {
 
     @Test
     fun handleSetupResult_withAuthException_shouldCallCallbackOnError() {
-        val exception = RuntimeException()
+        val exception = APIException(RuntimeException())
         val intent = Intent().putExtras(
             PaymentController.Result(
                 exception = exception

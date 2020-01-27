@@ -26,7 +26,7 @@ class InvalidRequestExceptionTest {
     fun toString_withRequestId() {
         val actual = InvalidRequestException(
             requestId = "req_123",
-            e = IllegalArgumentException()
+            cause = IllegalArgumentException()
         ).toString()
         val expected = """
             Request-id: req_123
@@ -38,7 +38,7 @@ class InvalidRequestExceptionTest {
     @Test
     fun toString_withoutRequestId() {
         val actual = InvalidRequestException(
-            e = IllegalArgumentException()
+            cause = IllegalArgumentException()
         ).toString()
         val expected = "com.stripe.android.exception.InvalidRequestException"
         assertEquals(expected, actual)

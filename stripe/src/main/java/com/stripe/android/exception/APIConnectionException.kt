@@ -7,9 +7,9 @@ import java.io.IOException
  */
 class APIConnectionException(
     message: String? = null,
-    e: Throwable? = null
+    cause: Throwable? = null
 ) : StripeException(
-    e = e,
+    cause = cause,
     message = message
 ) {
     internal companion object {

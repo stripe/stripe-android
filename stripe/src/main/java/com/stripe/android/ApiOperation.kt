@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import com.stripe.android.exception.APIConnectionException
+import com.stripe.android.exception.APIException
 import com.stripe.android.exception.StripeException
 import java.io.IOException
 import kotlinx.coroutines.CoroutineScope
@@ -23,7 +24,7 @@ internal abstract class ApiOperation<ResultType>(
             } catch (e: StripeException) {
                 ResultWrapper.create(e)
             } catch (e: JSONException) {
-                ResultWrapper.create(e)
+                ResultWrapper.create(APIException(e))
             } catch (e: IOException) {
                 ResultWrapper.create(APIConnectionException.create(e))
             }
@@ -38,8 +39,9 @@ internal abstract class ApiOperation<ResultType>(
         when {
             resultWrapper.result != null -> callback.onSuccess(resultWrapper.result)
             resultWrapper.error != null -> callback.onError(resultWrapper.error)
-            else -> callback.onError(RuntimeException(
-                "The API operation returned neither a result or exception"))
+            else -> callback.onError(
+                RuntimeException("The API operation returned neither a result or exception")
+            )
         }
     }
 }
