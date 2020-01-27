@@ -56,42 +56,55 @@ class FragmentExamplesActivity : AppCompatActivity() {
     }
 
     class LauncherFragment : Fragment() {
-
         private val compositeDisposable = CompositeDisposable()
 
-        private lateinit var stripe: Stripe
-        private lateinit var paymentSession: PaymentSession
-        private lateinit var backendApi: BackendApi
+        private val stripe: Stripe by lazy {
+            Stripe(
+                requireContext(),
+                PaymentConfiguration.getInstance(requireContext()).publishableKey
+            )
+        }
+        private val backendApi: BackendApi by lazy {
+            BackendApiFactory(requireContext()).create()
+        }
+        private val rootView: View by lazy { requireNotNull(view) }
 
-        private lateinit var progressBar: ProgressBar
-        private lateinit var launchPaymentSessionButton: Button
-        private lateinit var launchPaymentAuthButton: Button
-        private lateinit var launchSetupAuthButton: Button
-        private lateinit var statusTextView: TextView
+        private val progressBar: ProgressBar by lazy {
+            rootView.findViewById<ProgressBar>(R.id.progress_bar)
+        }
+        private val launchPaymentSessionButton: Button by lazy {
+            rootView.findViewById<Button>(R.id.launch_payment_session)
+        }
+        private val launchPaymentAuthButton: Button by lazy {
+            rootView.findViewById<Button>(R.id.launch_payment_auth)
+        }
+        private val launchSetupAuthButton: Button by lazy {
+            rootView.findViewById<Button>(R.id.launch_setup_auth)
+        }
+        private val statusTextView: TextView by lazy {
+            rootView.findViewById<TextView>(R.id.tv_status)
+        }
+        private val paymentSession: PaymentSession by lazy {
+            PaymentSession(
+                fragment = this,
+                config = PaymentSessionConfig.Builder()
+                    .setShippingMethodsRequired(false)
+                    .setHiddenShippingInfoFields(
+                        ShippingInfoWidget.CustomizableShippingField.PHONE_FIELD,
+                        ShippingInfoWidget.CustomizableShippingField.CITY_FIELD
+                    )
+                    .build()
+            )
+        }
 
         override fun onActivityCreated(savedInstanceState: Bundle?) {
             super.onActivityCreated(savedInstanceState)
 
-            backendApi = BackendApiFactory(requireContext()).create()
-            stripe = Stripe(
-                requireContext(),
-                PaymentConfiguration.getInstance(requireContext()).publishableKey
-            )
-            paymentSession = createPaymentSession(createCustomerSession())
-
-            val rootView = requireNotNull(view)
-            statusTextView = rootView.findViewById(R.id.tv_status)
-            progressBar = rootView.findViewById(R.id.progress_bar)
-
-            launchPaymentSessionButton = rootView.findViewById(R.id.launch_payment_session)
+            initPaymentSession(createCustomerSession())
             launchPaymentSessionButton.setOnClickListener {
                 paymentSession.presentPaymentMethodSelection()
             }
-
-            launchPaymentAuthButton = rootView.findViewById(R.id.launch_payment_auth)
             launchPaymentAuthButton.setOnClickListener { createPaymentIntent() }
-
-            launchSetupAuthButton = rootView.findViewById(R.id.launch_setup_auth)
             launchSetupAuthButton.setOnClickListener { createSetupIntent() }
         }
 
@@ -235,16 +248,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
             )
         }
 
-        private fun createPaymentSession(customerSession: CustomerSession): PaymentSession {
-            val paymentSession = PaymentSession(
-                fragment = this,
-                config = PaymentSessionConfig.Builder()
-                    .setHiddenShippingInfoFields(
-                        ShippingInfoWidget.CustomizableShippingField.PHONE_FIELD,
-                        ShippingInfoWidget.CustomizableShippingField.CITY_FIELD
-                    )
-                    .build()
-            )
+        private fun initPaymentSession(customerSession: CustomerSession) {
             val paymentSessionInitialized = paymentSession.init(
                 object : PaymentSession.PaymentSessionListener {
                     override fun onCommunicatingStateChanged(isCommunicating: Boolean) {
@@ -273,8 +277,6 @@ class FragmentExamplesActivity : AppCompatActivity() {
             if (paymentSessionInitialized) {
                 paymentSession.setCartTotal(2000L)
             }
-
-            return paymentSession
         }
 
         private fun createCustomerSession(): CustomerSession {
