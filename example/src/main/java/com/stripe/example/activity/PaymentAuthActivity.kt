@@ -36,7 +36,17 @@ class PaymentAuthActivity : AppCompatActivity() {
     private val backendApi: BackendApi by lazy {
         BackendApiFactory(this).create()
     }
-    private lateinit var stripe: Stripe
+    private val stripeAccountId: String? by lazy {
+        Settings(this).stripeAccountId
+    }
+    private val stripe: Stripe by lazy {
+        Stripe(
+            this,
+            PaymentConfiguration.getInstance(this).publishableKey,
+            stripeAccountId = stripeAccountId,
+            enableLogging = true
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,12 +66,6 @@ class PaymentAuthActivity : AppCompatActivity() {
         if (savedInstanceState != null) {
             tv_status.text = savedInstanceState.getString(STATE_STATUS)
         }
-
-        val publishableKey = PaymentConfiguration.getInstance(this).publishableKey
-        stripe = Stripe(this, publishableKey,
-            stripeAccountId = stripeAccountId,
-            enableLogging = true
-        )
 
         buy_3ds1_button.setOnClickListener {
             createPaymentIntent(stripeAccountId, AuthType.ThreeDS1)
