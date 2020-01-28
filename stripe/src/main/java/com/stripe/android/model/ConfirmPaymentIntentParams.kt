@@ -1,7 +1,5 @@
 package com.stripe.android.model
 
-import androidx.annotation.VisibleForTesting
-import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
@@ -101,9 +99,7 @@ data class ConfirmPaymentIntentParams internal constructor(
     }
 
     override fun withShouldUseStripeSdk(shouldUseStripeSdk: Boolean): ConfirmPaymentIntentParams {
-        return toBuilder()
-            .setShouldUseSdk(shouldUseStripeSdk)
-            .build()
+        return copy(useStripeSdk = shouldUseStripeSdk)
     }
 
     /**
@@ -169,132 +165,6 @@ data class ConfirmPaymentIntentParams internal constructor(
                 }
         }
 
-    @VisibleForTesting
-    internal fun toBuilder(): Builder {
-        return Builder(clientSecret)
-            .setReturnUrl(returnUrl)
-            .setSourceId(sourceId)
-            .setSavePaymentMethod(savePaymentMethod)
-            .setExtraParams(extraParams)
-            .setPaymentMethodOptions(paymentMethodOptions)
-            .also { builder ->
-                paymentMethodId?.let { builder.setPaymentMethodId(it) }
-                paymentMethodCreateParams?.let { builder.setPaymentMethodCreateParams(it) }
-                sourceParams?.let { builder.setSourceParams(sourceParams) }
-            }
-    }
-
-    /**
-     * Sets the client secret that is used to authenticate actions on this PaymentIntent
-     * @param clientSecret client secret associated with this PaymentIntent
-     */
-    @VisibleForTesting
-    internal class Builder internal constructor(
-        internal val clientSecret: String
-    ) : ObjectBuilder<ConfirmPaymentIntentParams> {
-        private var paymentMethodCreateParams: PaymentMethodCreateParams? = null
-        private var paymentMethodId: String? = null
-        private var sourceParams: SourceParams? = null
-        private var sourceId: String? = null
-
-        private var extraParams: Map<String, Any>? = null
-        private var returnUrl: String? = null
-
-        private var savePaymentMethod: Boolean = false
-        private var shouldUseSdk: Boolean = false
-        private var paymentMethodOptions: PaymentMethodOptionsParams? = null
-
-        /**
-         * Sets the PaymentMethod data that will be included with this PaymentIntent
-         *
-         * @param paymentMethodCreateParams Params for the PaymentMethod that will be attached to
-         * this PaymentIntent. Only one of PaymentMethodParam,
-         * PaymentMethodId, SourceParam, SourceId should be used
-         * at a time.
-         */
-        internal fun setPaymentMethodCreateParams(
-            paymentMethodCreateParams: PaymentMethodCreateParams
-        ): Builder = apply {
-            this.paymentMethodCreateParams = paymentMethodCreateParams
-        }
-
-        /**
-         * Sets a pre-existing PaymentMethod that will be attached to this PaymentIntent
-         *
-         * @param paymentMethodId The ID of the PaymentMethod that is being attached to this
-         * PaymentIntent. Only one of PaymentMethodParam, PaymentMethodId,
-         * SourceParam, SourceId should be used at a time.
-         */
-        internal fun setPaymentMethodId(paymentMethodId: String): Builder = apply {
-            this.paymentMethodId = paymentMethodId
-        }
-
-        /**
-         * Sets the source data that will be included with this PaymentIntent
-         *
-         * @param sourceParams params for the source that will be attached to this PaymentIntent.
-         * Only one of SourceParam and SourceId should be used at at time.
-         */
-        internal fun setSourceParams(sourceParams: SourceParams): Builder = apply {
-            this.sourceParams = sourceParams
-        }
-
-        /**
-         * Sets a pre-existing source that will be attached to this PaymentIntent
-         * @param sourceId the ID of an existing Source that is being attached to this
-         * PaymentIntent. Only one of SourceParam and SourceId should be used at a
-         * time.
-         */
-        internal fun setSourceId(sourceId: String?): Builder = apply {
-            this.sourceId = sourceId
-        }
-
-        /**
-         * @param returnUrl the URL the customer should be redirected to after the authentication
-         * process
-         */
-        internal fun setReturnUrl(returnUrl: String?): Builder = apply {
-            this.returnUrl = returnUrl
-        }
-
-        /**
-         * @param extraParams params that will be included in the request. Incorrect params may
-         * result in errors when connecting to Stripe's API.
-         */
-        internal fun setExtraParams(extraParams: Map<String, Any>?): Builder = apply {
-            this.extraParams = extraParams
-        }
-
-        internal fun setSavePaymentMethod(savePaymentMethod: Boolean): Builder = apply {
-            this.savePaymentMethod = savePaymentMethod
-        }
-
-        internal fun setShouldUseSdk(shouldUseSdk: Boolean): Builder = apply {
-            this.shouldUseSdk = shouldUseSdk
-        }
-
-        internal fun setPaymentMethodOptions(
-            paymentMethodOptions: PaymentMethodOptionsParams?
-        ): Builder = apply {
-            this.paymentMethodOptions = paymentMethodOptions
-        }
-
-        override fun build(): ConfirmPaymentIntentParams {
-            return ConfirmPaymentIntentParams(
-                clientSecret = clientSecret,
-                returnUrl = returnUrl,
-                paymentMethodId = paymentMethodId,
-                paymentMethodCreateParams = paymentMethodCreateParams,
-                sourceId = sourceId,
-                sourceParams = sourceParams,
-                savePaymentMethod = savePaymentMethod,
-                extraParams = extraParams,
-                useStripeSdk = shouldUseSdk,
-                paymentMethodOptions = paymentMethodOptions
-            )
-        }
-    }
-
     companion object {
         const val PARAM_SOURCE_DATA: String = "source_data"
 
@@ -312,10 +182,11 @@ data class ConfirmPaymentIntentParams internal constructor(
             returnUrl: String? = null,
             extraParams: Map<String, Any>? = null
         ): ConfirmPaymentIntentParams {
-            return Builder(clientSecret)
-                .setReturnUrl(returnUrl)
-                .setExtraParams(extraParams)
-                .build()
+            return ConfirmPaymentIntentParams(
+                clientSecret = clientSecret,
+                returnUrl = returnUrl,
+                extraParams = extraParams
+            )
         }
 
         /**
@@ -334,6 +205,8 @@ data class ConfirmPaymentIntentParams internal constructor(
          * PaymentIntent and must be specified again if a new payment method is
          * added.
          * @param paymentMethodOptions Optional [PaymentMethodOptionsParams]
+         * @param mandateId optional ID of the Mandate to be used for this payment.
+         * @param mandateData optional details about the Mandate to create.
          */
         @JvmOverloads
         @JvmStatic
@@ -343,7 +216,9 @@ data class ConfirmPaymentIntentParams internal constructor(
             returnUrl: String? = null,
             savePaymentMethod: Boolean = false,
             extraParams: Map<String, Any>? = null,
-            paymentMethodOptions: PaymentMethodOptionsParams? = null
+            paymentMethodOptions: PaymentMethodOptionsParams? = null,
+            mandateId: String? = null,
+            mandateData: MandateDataParams? = null
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
@@ -351,7 +226,9 @@ data class ConfirmPaymentIntentParams internal constructor(
                 returnUrl = returnUrl,
                 savePaymentMethod = savePaymentMethod,
                 extraParams = extraParams,
-                paymentMethodOptions = paymentMethodOptions
+                paymentMethodOptions = paymentMethodOptions,
+                mandateId = mandateId,
+                mandateData = mandateData
             )
         }
 
@@ -370,6 +247,8 @@ data class ConfirmPaymentIntentParams internal constructor(
          * in the same request or the current payment method attached to the
          * PaymentIntent and must be specified again if a new payment method is
          * added.
+         * @param mandateId optional ID of the Mandate to be used for this payment.
+         * @param mandateData optional details about the Mandate to create.
          */
         @JvmOverloads
         @JvmStatic
@@ -378,14 +257,18 @@ data class ConfirmPaymentIntentParams internal constructor(
             clientSecret: String,
             returnUrl: String? = null,
             savePaymentMethod: Boolean = false,
-            extraParams: Map<String, Any>? = null
+            extraParams: Map<String, Any>? = null,
+            mandateId: String? = null,
+            mandateData: MandateDataParams? = null
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
                 paymentMethodCreateParams = paymentMethodCreateParams,
                 returnUrl = returnUrl,
                 savePaymentMethod = savePaymentMethod,
-                extraParams = extraParams
+                extraParams = extraParams,
+                mandateId = mandateId,
+                mandateData = mandateData
             )
         }
 
