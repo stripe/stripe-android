@@ -196,7 +196,9 @@ class ConfirmPaymentIntentParamsTest {
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT
         ).toParamMap()
         assertEquals(
-            MandateDataParams().toParamMap(),
+            MandateDataParams(MandateDataParams.TypeData.Online(
+                inferFromClient = true
+            )).toParamMap(),
             params[ConfirmStripeIntentParams.PARAM_MANDATE_DATA]
         )
     }

@@ -88,7 +88,9 @@ data class ConfirmSetupIntentParams internal constructor(
             return mandateData?.toParamMap()
                 ?: if (paymentMethodCreateParams?.type?.hasMandate == true && mandateId == null) {
                     // Populate with default "online" MandateData
-                    MandateDataParams(MandateDataParams.Type.Online).toParamMap()
+                    MandateDataParams(MandateDataParams.TypeData.Online(
+                        inferFromClient = true
+                    )).toParamMap()
                 } else {
                     null
                 }

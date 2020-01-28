@@ -93,7 +93,9 @@ class ConfirmSetupIntentParamsTest {
             useStripeSdk = true
         ).toParamMap()
         assertEquals(
-            MandateDataParams().toParamMap(),
+            MandateDataParams(MandateDataParams.TypeData.Online(
+                inferFromClient = true
+            )).toParamMap(),
             params[ConfirmStripeIntentParams.PARAM_MANDATE_DATA]
         )
     }

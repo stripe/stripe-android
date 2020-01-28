@@ -59,26 +59,51 @@ internal data class MandateDataParams internal constructor(
          * [mandate_data.customer_acceptance.online](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-mandate_data-customer_acceptance-online)
          */
         @Parcelize
-        data class Online(
+        data class Online internal constructor(
             /**
              * The IP address from which the Mandate was accepted by the customer.
              *
              * [mandate_data.customer_acceptance.online.ip_address](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-mandate_data-customer_acceptance-online-ip_address)
              */
-            private val ipAddress: String,
+            private val ipAddress: String? = null,
 
             /**
              * The user agent of the browser from which the Mandate was accepted by the customer.
              *
              * [mandate_data.customer_acceptance.online.user_agent](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-mandate_data-customer_acceptance-online-user_agent)
              */
-            private val userAgent: String
+            private val userAgent: String? = null,
+
+            private val inferFromClient: Boolean = false
         ) : TypeData(Type.Online) {
+
+            constructor(
+                /**
+                 * The IP address from which the Mandate was accepted by the customer.
+                 *
+                 * [mandate_data.customer_acceptance.online.ip_address](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-mandate_data-customer_acceptance-online-ip_address)
+                 */
+                ipAddress: String,
+
+                /**
+                 * The user agent of the browser from which the Mandate was accepted by the customer.
+                 *
+                 * [mandate_data.customer_acceptance.online.user_agent](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-mandate_data-customer_acceptance-online-user_agent)
+                 */
+                userAgent: String
+            ) : this(
+                ipAddress,
+                userAgent,
+                inferFromClient = false
+            )
+
             override fun toParamMap(): Map<String, Any> {
                 return mapOf(
-                    PARAM_IP_ADDRESS to ipAddress,
-                    PARAM_USER_AGENT to userAgent,
-                    PARAM_INFER_FROM_CLIENT to true
+                    PARAM_INFER_FROM_CLIENT to inferFromClient
+                ).plus(
+                    ipAddress?.let { mapOf(PARAM_IP_ADDRESS to it) }.orEmpty()
+                ).plus(
+                    userAgent?.let { mapOf(PARAM_USER_AGENT to it) }.orEmpty()
                 )
             }
 
