@@ -17,7 +17,7 @@
     <string name="launch_payment_session_from_fragment">Fragment Examples</string>
     <string name="create_payment_method">Create Payment Method</string>
     <string name="create_token">Create Token</string>
-    <string name="launch_create_pm_sepa_debit">Create SEPA Debit Payment Method</string>
+    <string name="launch_confirm_pm_sepa_debit">Confirm with SEPA Debit Payment Method</string>
     <string name="fpx_payment_example">FPX Payment Example</string>
     <string name="klarna_source_example">Klarna Source Example</string>
     <string name="card_brands">Card Brands</string>
@@ -69,6 +69,6 @@
     <!-- SEPA Debit -->
     <string name="sepa_debit_mandate">By providing your IBAN and confirming this payment, you are authorizing EXAMPLE COMPANY NAME and Stripe, our payment service provider, to send instructions to your bank to debit your account and your bank to debit your account in accordance with those instructions. You are entitled to a refund from your bank under the terms and conditions of your agreement with your bank. A refund must be claimed within 8 weeks starting from the date on which your account was debited.</string>
     <string name="iban_hint">IBAN</string>
-    <string name="create_sepa_debit_button">Create SEPA Debit Payment Method</string>
+    <string name="confirm_wth_sepa_debit_button">Confirm with SEPA Debit Payment Method</string>
     <string name="sepa_debit_helper">Test account number: DE89370400440532013000</string>
 </resources>

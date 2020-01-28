@@ -40,10 +40,17 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <Button
-            android:id="@+id/create_sepa_debit_button"
+            android:id="@+id/confirm_with_sepa_debit_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/create_sepa_debit_button" />
+            android:text="@string/confirm_wth_sepa_debit_button" />
+
+        <TextView
+            android:id="@+id/tv_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:typeface="monospace"
+            android:layout_marginTop="40dp"/>
     </LinearLayout>
 
 </LinearLayout>
