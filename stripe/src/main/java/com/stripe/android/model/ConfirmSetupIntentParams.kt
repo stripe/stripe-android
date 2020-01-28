@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN_URL
@@ -16,7 +17,12 @@ data class ConfirmSetupIntentParams internal constructor(
     @get:JvmSynthetic internal val paymentMethodId: String? = null,
     @get:JvmSynthetic internal val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
     private val returnUrl: String? = null,
-    private val useStripeSdk: Boolean
+    private val useStripeSdk: Boolean,
+
+    /**
+     * ID of the mandate to be used for this payment.
+     */
+    private val mandateId: String? = null
 ) : ConfirmStripeIntentParams, Parcelable {
 
     override fun shouldUseStripeSdk(): Boolean {
@@ -41,6 +47,8 @@ data class ConfirmSetupIntentParams internal constructor(
             PARAM_USE_STRIPE_SDK to useStripeSdk
         ).plus(
             returnUrl?.let { mapOf(PARAM_RETURN_URL to it) }.orEmpty()
+        ).plus(
+            mandateId?.let { mapOf(PARAM_MANDATE_ID to it) }.orEmpty()
         ).toMutableMap()
 
         if (paymentMethodCreateParams != null) {
