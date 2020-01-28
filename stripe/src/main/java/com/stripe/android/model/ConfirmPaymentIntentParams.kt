@@ -3,6 +3,7 @@ package com.stripe.android.model
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_STRIPE_SDK
 
@@ -71,7 +72,14 @@ data class ConfirmPaymentIntentParams internal constructor(
      *
      * [payment_method_options](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-payment_method_options)
      */
-    private val paymentMethodOptions: PaymentMethodOptionsParams? = null
+    private val paymentMethodOptions: PaymentMethodOptionsParams? = null,
+
+    /**
+     * ID of the mandate to be used for this payment.
+     *
+     * [mandate](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-mandate)
+     */
+    private val mandateId: String? = null
 ) : ConfirmStripeIntentParams {
 
     fun shouldSavePaymentMethod(): Boolean {
@@ -92,11 +100,13 @@ data class ConfirmPaymentIntentParams internal constructor(
      * Create a Map representing this object that is prepared for the Stripe API.
      */
     override fun toParamMap(): Map<String, Any> {
-        val params: MutableMap<String, Any> = mutableMapOf(
+        val params: MutableMap<String, Any> = mapOf(
             PARAM_CLIENT_SECRET to clientSecret,
             PARAM_SAVE_PAYMENT_METHOD to savePaymentMethod,
             PARAM_USE_STRIPE_SDK to useStripeSdk
-        )
+        ).plus(
+            mandateId?.let { mapOf(PARAM_MANDATE_ID to it) }.orEmpty()
+        ).toMutableMap()
 
         if (paymentMethodCreateParams != null) {
             params[PARAM_PAYMENT_METHOD_DATA] = paymentMethodCreateParams.toParamMap().toMap()
