@@ -44,19 +44,22 @@ open class StripeEditText @JvmOverloads constructor(
      * the text in an error color determined by the original text color.
      */
     var shouldShowError: Boolean = false
-        set(shouldShowError) = if (errorMessage != null) {
-            val errorMessage = errorMessage.takeIf { shouldShowError }
-            errorMessageListener?.displayErrorMessage(errorMessage)
-            field = shouldShowError
-        } else {
-            field = shouldShowError
-            if (this.shouldShowError) {
-                setTextColor(errorColor ?: defaultErrorColor)
-            } else {
-                setTextColor(cachedColorStateList)
+        set(shouldShowError) {
+            errorMessage?.let {
+                errorMessageListener?.displayErrorMessage(it.takeIf { shouldShowError })
             }
 
-            refreshDrawableState()
+            if (field != shouldShowError) {
+                // only update the view's UI if the property's value is changing
+                if (shouldShowError) {
+                    setTextColor(errorColor ?: defaultErrorColor)
+                } else {
+                    setTextColor(cachedColorStateList)
+                }
+                refreshDrawableState()
+            }
+
+            field = shouldShowError
         }
 
     internal var errorMessage: String? = null

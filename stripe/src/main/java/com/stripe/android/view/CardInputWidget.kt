@@ -657,7 +657,7 @@ class CardInputWidget @JvmOverloads constructor(
             cardNumberEditText.hint = it
         }
 
-        standardFields.forEach { it.setErrorColor(errorColorInt) }
+        allFields.forEach { it.setErrorColor(errorColorInt) }
 
         cardNumberEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {

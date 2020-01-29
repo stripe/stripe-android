@@ -61,6 +61,7 @@ class CvcEditText @JvmOverloads constructor(
 
         addTextChangedListener(object : StripeTextWatcher() {
             override fun afterTextChanged(s: Editable?) {
+                shouldShowError = false
                 if (cardBrand.isMaxCvc(rawCvcValue)) {
                     completionCallback()
                 }

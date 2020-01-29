@@ -1,6 +1,7 @@
 package com.stripe.android.view
 
 import android.content.Context
+import android.text.Editable
 import android.text.InputFilter
 import android.text.InputType
 import android.text.method.DigitsKeyListener
@@ -18,6 +19,12 @@ class PostalCodeEditText @JvmOverloads constructor(
         setErrorMessage(resources.getString(R.string.invalid_zip))
         maxLines = 1
         configureForUs()
+
+        addTextChangedListener(object : StripeTextWatcher() {
+            override fun afterTextChanged(s: Editable?) {
+                shouldShowError = false
+            }
+        })
     }
 
     /**
