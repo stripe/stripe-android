@@ -85,7 +85,7 @@
             android:name=".activity.FragmentExamplesActivity" />
 
         <activity
-            android:name=".activity.CreateSepaDebitActivity" />
+            android:name=".activity.ConfirmSepaDebitActivity" />
 
         <activity
             android:name=".activity.FpxPaymentActivity" />
