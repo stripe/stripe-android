@@ -98,13 +98,14 @@ internal data class MandateDataParams internal constructor(
             )
 
             override fun toParamMap(): Map<String, Any> {
-                return mapOf(
-                    PARAM_INFER_FROM_CLIENT to inferFromClient
-                ).plus(
-                    ipAddress?.let { mapOf(PARAM_IP_ADDRESS to it) }.orEmpty()
-                ).plus(
-                    userAgent?.let { mapOf(PARAM_USER_AGENT to it) }.orEmpty()
-                )
+                return if (inferFromClient) {
+                    mapOf(PARAM_INFER_FROM_CLIENT to true)
+                } else {
+                    mapOf(
+                        PARAM_IP_ADDRESS to ipAddress.orEmpty(),
+                        PARAM_USER_AGENT to userAgent.orEmpty()
+                    )
+                }
             }
 
             private companion object {
