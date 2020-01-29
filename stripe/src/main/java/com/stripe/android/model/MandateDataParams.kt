@@ -9,48 +9,20 @@ import kotlinx.android.parcel.Parcelize
  * or [confirming a SetupIntent](https://stripe.com/docs/api/setup_intents/confirm#confirm_setup_intent-mandate_data)
  */
 @Parcelize
-data class MandateDataParams internal constructor(
-    private val type: Type = Type.Online,
-    private val typeData: TypeData? = null
+data class MandateDataParams constructor(
+    private val type: Type
 ) : StripeParamsModel, Parcelable {
-
-    /**
-     * Create [MandateDataParams] with a [Type] but without [TypeData]
-     */
-    constructor(type: Type = Type.Online) : this(
-        type = type,
-        typeData = null
-    )
-
-    /**
-     * Create [MandateDataParams] with a [Type] and [TypeData]
-     */
-    constructor(typeData: TypeData) : this(
-        type = typeData.type,
-        typeData = typeData
-    )
-
     override fun toParamMap(): Map<String, Any> {
         return mapOf(
             PARAM_CUSTOMER_ACCEPTANCE to mapOf(
-                PARAM_TYPE to type.code
-            ).plus(
-                typeData?.let {
-                    mapOf(it.type.code to it.toParamMap())
-                }.orEmpty()
+                PARAM_TYPE to type.code,
+                type.code to type.toParamMap()
             )
         )
     }
 
-    /**
-     * The type of customer acceptance information included with the Mandate.
-     */
-    enum class Type(internal val code: String) {
-        Online("online")
-    }
-
-    sealed class TypeData(
-        internal val type: Type
+    sealed class Type(
+        internal val code: String
     ) : StripeParamsModel, Parcelable {
 
         /**
@@ -75,7 +47,7 @@ data class MandateDataParams internal constructor(
             private val userAgent: String? = null,
 
             private val inferFromClient: Boolean = false
-        ) : TypeData(Type.Online) {
+        ) : Type("online") {
 
             constructor(
                 /**
@@ -108,10 +80,12 @@ data class MandateDataParams internal constructor(
                 }
             }
 
-            private companion object {
+            internal companion object {
                 private const val PARAM_IP_ADDRESS = "ip_address"
                 private const val PARAM_USER_AGENT = "user_agent"
                 private const val PARAM_INFER_FROM_CLIENT = "infer_from_client"
+
+                internal val DEFAULT = Online(inferFromClient = true)
             }
         }
     }
