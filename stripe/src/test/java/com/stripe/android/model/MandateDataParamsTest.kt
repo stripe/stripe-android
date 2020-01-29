@@ -26,9 +26,7 @@ class MandateDataParamsTest {
     @Test
     fun toParamMap_whenInferFromClient_shouldCreateExpectedObject() {
         val actualParams = MandateDataParams(
-            MandateDataParams.TypeData.Online(
-                inferFromClient = true
-            )
+            MandateDataParams.Type.Online.DEFAULT
         ).toParamMap()
 
         val expectedParams = mapOf(
