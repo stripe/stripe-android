@@ -68,6 +68,9 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
 
     @BeforeTest
     fun setup() {
+        // The input date here will be invalid after 2050. Please update the test.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
+
         cardInputWidget.setCardNumberTextWatcher(object : StripeTextWatcher() {})
         cardInputWidget.setExpiryDateTextWatcher(object : StripeTextWatcher() {})
         cardInputWidget.setCvcNumberTextWatcher(object : StripeTextWatcher() {})
@@ -107,9 +110,6 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
     fun getCard_whenInputIsValidVisa_withPostalCodeDisabled_returnsCardObjectWithLoggingToken() {
         cardInputWidget.postalCodeEnabled = false
 
-        // The input date here will be invalid after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
-
         cardNumberEditText.setText(VALID_VISA_WITH_SPACES)
         expiryEditText.append("12")
         expiryEditText.append("50")
@@ -143,9 +143,6 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
     @Test
     fun getCard_whenInputIsValidVisa_withPostalCodeEnabled_returnsCardObjectWithLoggingToken() {
         cardInputWidget.postalCodeEnabled = true
-
-        // The input date here will be invalid after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
 
         cardNumberEditText.setText(VALID_VISA_WITH_SPACES)
         expiryEditText.append("12")
@@ -185,8 +182,6 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
     @Test
     fun getCard_whenInputIsValidAmEx_withPostalCodeDisabled_createsExpectedObjects() {
         cardInputWidget.postalCodeEnabled = false
-        // The input date here will be invalid after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
 
         cardNumberEditText.setText(VALID_AMEX_WITH_SPACES)
         expiryEditText.append("12")
@@ -219,8 +214,6 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
     @Test
     fun getCard_whenInputIsValidAmEx_withPostalCodeEnabled_createsExpectedObjects() {
         cardInputWidget.postalCodeEnabled = true
-        // The input date here will be invalid after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
 
         cardNumberEditText.setText(VALID_AMEX_WITH_SPACES)
         expiryEditText.append("12")
@@ -262,9 +255,6 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
     fun getCard_whenInputIsValidDinersClub_withPostalCodeDisabled_returnsCardObjectWithLoggingToken() {
         cardInputWidget.postalCodeEnabled = false
 
-        // The input date here will be invalid after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
-
         cardNumberEditText.setText(VALID_DINERS_CLUB_WITH_SPACES)
         expiryEditText.append("12")
         expiryEditText.append("50")
@@ -296,9 +286,6 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
     fun getCard_whenInputIsValidDinersClub_withPostalCodeEnabled_returnsCardObjectWithLoggingToken() {
         cardInputWidget.postalCodeEnabled = true
 
-        // The input date here will be invalid after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
-
         cardNumberEditText.setText(VALID_DINERS_CLUB_WITH_SPACES)
         expiryEditText.append("12")
         expiryEditText.append("50")
@@ -327,10 +314,25 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
     }
 
     @Test
-    fun getCard_whenInputHasIncompleteCardNumber_returnsNull() {
-        // The test will be testing the wrong variable after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
+    fun getCard_whenPostalCodeIsEnabledAndRequired_andValueIsBlank_returnsNull() {
+        cardInputWidget.postalCodeEnabled = true
+        cardInputWidget.postalCodeRequired = true
 
+        cardNumberEditText.setText(VALID_VISA_WITH_SPACES)
+        expiryEditText.append("12")
+        expiryEditText.append("50")
+        cvcEditText.append(CVC_VALUE_COMMON)
+        postalCodeEditText.append("")
+
+        val card = cardInputWidget.card
+        assertNull(card)
+
+        val paymentMethodCard = cardInputWidget.paymentMethodCard
+        assertNull(paymentMethodCard)
+    }
+
+    @Test
+    fun getCard_whenInputHasIncompleteCardNumber_returnsNull() {
         // This will be 242 4242 4242 4242
         cardNumberEditText.setText(VALID_VISA_WITH_SPACES.substring(1))
         expiryEditText.append("12")
@@ -364,9 +366,6 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
 
     @Test
     fun getCard_whenIncompleteCvCForVisa_returnsNull() {
-        // The test will be testing the wrong variable after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
-
         cardNumberEditText.setText(VALID_VISA_WITH_SPACES)
         expiryEditText.append("12")
         expiryEditText.append("50")
@@ -382,9 +381,6 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
     @Test
     fun getCard_doesNotValidatePostalCode() {
         cardInputWidget.postalCodeEnabled = true
-
-        // The test will be testing the wrong variable after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
 
         cardNumberEditText.setText(VALID_VISA_WITH_SPACES)
         expiryEditText.append("12")
@@ -403,9 +399,6 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
     fun getCard_when3DigitCvCForAmEx_withPostalCodeDisabled_returnsCard() {
         cardInputWidget.postalCodeEnabled = false
 
-        // The test will be testing the wrong variable after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
-
         cardNumberEditText.setText(VALID_AMEX_WITH_SPACES)
         expiryEditText.append("12")
         expiryEditText.append("50")
@@ -422,9 +415,6 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
     fun getCard_when3DigitCvCForAmEx_withPostalCodeEnabled_returnsCard() {
         cardInputWidget.postalCodeEnabled = true
 
-        // The test will be testing the wrong variable after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
-
         cardNumberEditText.setText(VALID_AMEX_WITH_SPACES)
         expiryEditText.append("12")
         expiryEditText.append("50")
@@ -440,9 +430,6 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
 
     @Test
     fun getCard_whenIncompleteCvCForAmEx_returnsNull() {
-        // The test will be testing the wrong variable after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
-
         cardNumberEditText.setText(VALID_AMEX_WITH_SPACES)
         expiryEditText.append("12")
         expiryEditText.append("50")
@@ -458,9 +445,6 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
     @Test
     fun getPaymentMethodCreateParams_shouldReturnExpectedObject() {
         cardInputWidget.postalCodeEnabled = true
-
-        // The input date here will be invalid after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
 
         cardInputWidget.setCardNumber(VALID_VISA_NO_SPACES)
         cardInputWidget.setExpiryDate(12, 2030)
@@ -488,9 +472,6 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
 
     @Test
     fun getCard_whenIncompleteCvCForDiners_returnsNull() {
-        // The test will be testing the wrong variable after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
-
         cardNumberEditText.setText(VALID_DINERS_CLUB_WITH_SPACES)
         expiryEditText.append("12")
         expiryEditText.append("50")

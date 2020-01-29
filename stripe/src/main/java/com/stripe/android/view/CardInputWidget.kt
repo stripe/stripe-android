@@ -188,23 +188,17 @@ class CardInputWidget @JvmOverloads constructor(
             cardNumberEditText.shouldShowError = cardNumber == null
             expiryDateEditText.shouldShowError = cardDate == null
             cvcNumberEditText.shouldShowError = cvcValue == null
+            postalCodeEditText.shouldShowError =
+                postalCodeRequired && postalCodeEditText.fieldText.isBlank()
 
             // Announce error messages for accessibility
-            if (cardNumber == null) {
-                cardNumberEditText.errorMessage?.let {
-                    cardNumberEditText.announceForAccessibility(it)
+            allFields
+                .filter { it.shouldShowError }
+                .forEach { editText ->
+                    editText.errorMessage?.let { errorMessage ->
+                        editText.announceForAccessibility(errorMessage)
+                    }
                 }
-            }
-            if (cardDate == null) {
-                expiryDateEditText.errorMessage?.let {
-                    expiryDateEditText.announceForAccessibility(it)
-                }
-            }
-            if (cvcValue == null) {
-                cvcNumberEditText.errorMessage?.let {
-                    cvcNumberEditText.announceForAccessibility(it)
-                }
-            }
 
             when {
                 cardNumber == null -> {
@@ -215,6 +209,9 @@ class CardInputWidget @JvmOverloads constructor(
                 }
                 cvcValue == null -> {
                     cvcNumberEditText.requestFocus()
+                }
+                postalCodeEditText.shouldShowError -> {
+                    postalCodeEditText.requestFocus()
                 }
                 else -> {
                     return Card.Builder(cardNumber, cardDate.first, cardDate.second, cvcValue)
@@ -232,11 +229,27 @@ class CardInputWidget @JvmOverloads constructor(
     @JvmSynthetic
     internal var frameWidthSupplier: () -> Int
 
-    var postalCodeEnabled: Boolean = true
+    /**
+     * The postal code field is enabled by default. Disabling the postal code field may impact
+     * auth success rates, so it is discouraged to disable it unless you are collecting the postal
+     * code outside of this form.
+     */
+    var postalCodeEnabled: Boolean = CardWidget.DEFAULT_POSTAL_CODE_ENABLED
         set(value) {
             updatePostalCodeEditText(value)
             field = value
         }
+
+    /**
+     * If [postalCodeEnabled] is true and [postalCodeRequired] is true, then postal code is a
+     * required field.
+     *
+     * If [postalCodeEnabled] is false, this value is ignored.
+     *
+     * Note that some countries do not have postal codes, so requiring postal code will prevent
+     * those users from submitting this form successfully.
+     */
+    var postalCodeRequired: Boolean = CardWidget.DEFAULT_POSTAL_CODE_REQUIRED
 
     init {
         View.inflate(getContext(), R.layout.card_input_widget, this)
@@ -726,8 +739,14 @@ class CardInputWidget @JvmOverloads constructor(
         )
 
         try {
-            postalCodeEnabled =
-                typedArray.getBoolean(R.styleable.CardElement_shouldShowPostalCode, true)
+            postalCodeEnabled = typedArray.getBoolean(
+                R.styleable.CardElement_shouldShowPostalCode,
+                CardWidget.DEFAULT_POSTAL_CODE_ENABLED
+            )
+            postalCodeRequired = typedArray.getBoolean(
+                R.styleable.CardElement_shouldRequirePostalCode,
+                CardWidget.DEFAULT_POSTAL_CODE_REQUIRED
+            )
         } finally {
             typedArray.recycle()
         }

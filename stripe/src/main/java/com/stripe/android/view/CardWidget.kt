@@ -40,4 +40,9 @@ internal interface CardWidget {
     )
 
     fun setCvcCode(cvcCode: String?)
+
+    companion object {
+        internal const val DEFAULT_POSTAL_CODE_ENABLED = true
+        internal const val DEFAULT_POSTAL_CODE_REQUIRED = false
+    }
 }

@@ -61,7 +61,7 @@ open class StripeEditText @JvmOverloads constructor(
 
     internal var errorMessage: String? = null
 
-    protected val fieldText: String
+    internal val fieldText: String
         get() {
             return text?.toString().orEmpty()
         }
