@@ -12,8 +12,7 @@ class MandateDataParamsTest {
                 "type" to "online",
                 "online" to mapOf(
                     "ip_address" to "127.0.0.1",
-                    "user_agent" to "my_user_agent",
-                    "infer_from_client" to false
+                    "user_agent" to "my_user_agent"
                 )
             )
         )
