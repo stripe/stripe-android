@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 13.2.0 - unreleased
+* [#2112](https://github.com/stripe/stripe-android/pull/2112) Enable adding Mandate to confirm params
+
 ## 13.1.3 - 2020-01-27
 * [#2105](https://github.com/stripe/stripe-android/pull/2105) Fix crash when confirming a Payment Intent or Setup Intent and an error is encountered
 
