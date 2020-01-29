@@ -180,40 +180,86 @@ class ConfirmPaymentIntentParamsTest {
     }
 
     @Test
-    fun toBuilder_withPaymentMethodCreateParams_shouldCreateEqualObject() {
-        val extraParams = mapOf("key" to "value")
-        val params = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-            PaymentMethodCreateParamsFixtures.DEFAULT_CARD, CLIENT_SECRET, RETURN_URL, true, extraParams
-        )
-
-        assertEquals(params, params.toBuilder().build())
-    }
-
-    @Test
     fun create_withSepaDebitPaymentMethodParams_shouldUseDefaultMandateDataIfNotSpecified() {
-        val params = ConfirmPaymentIntentParams(
-            clientSecret = CLIENT_SECRET,
-            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT
-        ).toParamMap()
-        assertEquals(
-            MandateDataParams(MandateDataParams.TypeData.Online(
-                inferFromClient = true
-            )).toParamMap(),
-            params[ConfirmStripeIntentParams.PARAM_MANDATE_DATA]
+        val expectedParams = mapOf(
+            "client_secret" to CLIENT_SECRET,
+            "save_payment_method" to false,
+            "use_stripe_sdk" to false,
+            "mandate_data" to mapOf(
+                "customer_acceptance" to mapOf(
+                    "type" to "online",
+                    "online" to mapOf(
+                        "infer_from_client" to true
+                    )
+                )
+            ),
+            "payment_method_data" to mapOf(
+                "type" to "sepa_debit",
+                "sepa_debit" to mapOf(
+                    "iban" to "my_iban"
+                )
+            )
         )
+        val actualParams =
+            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                clientSecret = CLIENT_SECRET,
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT
+            ).toParamMap()
+        assertEquals(expectedParams, actualParams)
     }
 
     @Test
     fun create_withSepaDebitPaymentMethodParams_shouldUseMandateDataIfSpecified() {
-        val params = ConfirmPaymentIntentParams(
-            clientSecret = CLIENT_SECRET,
-            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT,
-            mandateData = MandateDataParamsFixtures.DEFAULT
-        ).toParamMap()
-        assertEquals(
-            MandateDataParamsFixtures.DEFAULT.toParamMap(),
-            params[ConfirmStripeIntentParams.PARAM_MANDATE_DATA]
+        val expectedParams = mapOf(
+            "client_secret" to CLIENT_SECRET,
+            "save_payment_method" to false,
+            "use_stripe_sdk" to false,
+            "mandate_data" to mapOf(
+                "customer_acceptance" to mapOf(
+                    "type" to "online",
+                    "online" to mapOf(
+                        "ip_address" to "127.0.0.1",
+                        "user_agent" to "my_user_agent"
+                    )
+                )
+            ),
+            "payment_method_data" to mapOf(
+                "type" to "sepa_debit",
+                "sepa_debit" to mapOf(
+                    "iban" to "my_iban"
+                )
+            )
         )
+        val actualParams =
+            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                clientSecret = CLIENT_SECRET,
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT,
+                mandateData = MandateDataParamsFixtures.DEFAULT
+            ).toParamMap()
+        assertEquals(expectedParams, actualParams)
+    }
+
+    @Test
+    fun create_withSepaDebitPaymentMethodParams_shouldUseMandateIdIfSpecified() {
+        val expectedParams = mapOf(
+            "client_secret" to CLIENT_SECRET,
+            "save_payment_method" to false,
+            "use_stripe_sdk" to false,
+            "mandate" to "mandate_123456789",
+            "payment_method_data" to mapOf(
+                "type" to "sepa_debit",
+                "sepa_debit" to mapOf(
+                    "iban" to "my_iban"
+                )
+            )
+        )
+        val actualParams =
+            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                clientSecret = CLIENT_SECRET,
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT,
+                mandateId = "mandate_123456789"
+            ).toParamMap()
+        assertEquals(expectedParams, actualParams)
     }
 
     @Test

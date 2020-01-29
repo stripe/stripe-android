@@ -9,7 +9,7 @@ import kotlinx.android.parcel.Parcelize
  * or [confirming a SetupIntent](https://stripe.com/docs/api/setup_intents/confirm#confirm_setup_intent-mandate_data)
  */
 @Parcelize
-internal data class MandateDataParams internal constructor(
+data class MandateDataParams internal constructor(
     private val type: Type = Type.Online,
     private val typeData: TypeData? = null
 ) : StripeParamsModel, Parcelable {
