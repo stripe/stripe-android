@@ -3,8 +3,11 @@ package com.stripe.android.model
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN_URL
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_STRIPE_SDK
 
 data class ConfirmPaymentIntentParams internal constructor(
@@ -79,7 +82,14 @@ data class ConfirmPaymentIntentParams internal constructor(
      *
      * [mandate](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-mandate)
      */
-    private val mandateId: String? = null
+    private val mandateId: String? = null,
+
+    /**
+     * This hash contains details about the Mandate to create.
+     *
+     * [mandate_data](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-mandate_data)
+     */
+    private val mandateData: MandateDataParams? = null
 ) : ConfirmStripeIntentParams {
 
     fun shouldSavePaymentMethod(): Boolean {
@@ -100,39 +110,64 @@ data class ConfirmPaymentIntentParams internal constructor(
      * Create a Map representing this object that is prepared for the Stripe API.
      */
     override fun toParamMap(): Map<String, Any> {
-        val params: MutableMap<String, Any> = mapOf(
+        return mapOf(
             PARAM_CLIENT_SECRET to clientSecret,
             PARAM_SAVE_PAYMENT_METHOD to savePaymentMethod,
             PARAM_USE_STRIPE_SDK to useStripeSdk
         ).plus(
             mandateId?.let { mapOf(PARAM_MANDATE_ID to it) }.orEmpty()
-        ).toMutableMap()
-
-        if (paymentMethodCreateParams != null) {
-            params[PARAM_PAYMENT_METHOD_DATA] = paymentMethodCreateParams.toParamMap().toMap()
-            if (paymentMethodCreateParams.type.hasMandate) {
-                params[MandateData.PARAM_MANDATE_DATA] = MandateData().toParamMap()
-            }
-        } else if (paymentMethodId != null) {
-            params[ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_ID] = paymentMethodId
-        } else if (sourceParams != null) {
-            params[PARAM_SOURCE_DATA] = sourceParams.toParamMap().toMap()
-        } else if (sourceId != null) {
-            params[PARAM_SOURCE_ID] = sourceId
-        }
-
-        if (returnUrl != null) {
-            params[ConfirmStripeIntentParams.PARAM_RETURN_URL] = returnUrl
-        }
-        if (extraParams != null) {
-            params.putAll(extraParams)
-        }
-        paymentMethodOptions?.let {
-            params[PARAM_PAYMENT_METHOD_OPTIONS] = it.toParamMap()
-        }
-
-        return params.toMap()
+        ).plus(
+            returnUrl?.let { mapOf(PARAM_RETURN_URL to it) }.orEmpty()
+        ).plus(
+            paymentMethodOptions?.let {
+                mapOf(PARAM_PAYMENT_METHOD_OPTIONS to it.toParamMap())
+            }.orEmpty()
+        ).plus(
+            paymentMethodParamMap
+        ).plus(
+            extraParams.orEmpty()
+        )
     }
+
+    private val paymentMethodParamMap: Map<String, Any>
+        get() {
+            return when {
+                paymentMethodCreateParams != null -> {
+                    mapOf(
+                        PARAM_PAYMENT_METHOD_DATA to paymentMethodCreateParams.toParamMap()
+                    ).plus(
+                        mandateDataParams?.let { mapOf(PARAM_MANDATE_DATA to it) }.orEmpty()
+                    )
+                }
+                paymentMethodId != null -> {
+                    mapOf(PARAM_PAYMENT_METHOD_ID to paymentMethodId)
+                }
+                sourceParams != null -> {
+                    mapOf(PARAM_SOURCE_DATA to sourceParams.toParamMap())
+                }
+                sourceId != null -> {
+                    mapOf(PARAM_SOURCE_ID to sourceId)
+                }
+                else -> emptyMap()
+            }
+        }
+
+    /**
+     * Use the user-defined [MandateDataParams] if specified, otherwise create a default
+     * [MandateDataParams] if necessary.
+     */
+    private val mandateDataParams: Map<String, Any>?
+        get() {
+            return mandateData?.toParamMap()
+                ?: if (paymentMethodCreateParams?.type?.hasMandate == true && mandateId == null) {
+                    // Populate with default "online" MandateData
+                    MandateDataParams(MandateDataParams.TypeData.Online(
+                        inferFromClient = true
+                    )).toParamMap()
+                } else {
+                    null
+                }
+        }
 
     @VisibleForTesting
     internal fun toBuilder(): Builder {

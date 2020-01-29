@@ -163,15 +163,15 @@ class ConfirmPaymentIntentParamsTest {
 
     @Test
     fun create_withClientSecret() {
-        assertEquals("client_secret",
-            ConfirmPaymentIntentParams.create("client_secret", "")
+        assertEquals(CLIENT_SECRET,
+            ConfirmPaymentIntentParams.create(CLIENT_SECRET, "")
                 .clientSecret)
     }
 
     @Test
     fun shouldUseStripeSdk() {
         val confirmPaymentIntentParams =
-            ConfirmPaymentIntentParams.create("client_secret", "return_url")
+            ConfirmPaymentIntentParams.create(CLIENT_SECRET, "return_url")
         assertFalse(confirmPaymentIntentParams.shouldUseStripeSdk())
 
         assertTrue(confirmPaymentIntentParams
@@ -190,13 +190,30 @@ class ConfirmPaymentIntentParamsTest {
     }
 
     @Test
-    fun create_withMandatePaymentMethodType_addsMandateDataToParams() {
-        val params = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-            PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT,
-            CLIENT_SECRET,
-            RETURN_URL
+    fun create_withSepaDebitPaymentMethodParams_shouldUseDefaultMandateDataIfNotSpecified() {
+        val params = ConfirmPaymentIntentParams(
+            clientSecret = CLIENT_SECRET,
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT
         ).toParamMap()
-        assertTrue(params.containsKey(MandateData.PARAM_MANDATE_DATA))
+        assertEquals(
+            MandateDataParams(MandateDataParams.TypeData.Online(
+                inferFromClient = true
+            )).toParamMap(),
+            params[ConfirmStripeIntentParams.PARAM_MANDATE_DATA]
+        )
+    }
+
+    @Test
+    fun create_withSepaDebitPaymentMethodParams_shouldUseMandateDataIfSpecified() {
+        val params = ConfirmPaymentIntentParams(
+            clientSecret = CLIENT_SECRET,
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT,
+            mandateData = MandateDataParamsFixtures.DEFAULT
+        ).toParamMap()
+        assertEquals(
+            MandateDataParamsFixtures.DEFAULT.toParamMap(),
+            params[ConfirmStripeIntentParams.PARAM_MANDATE_DATA]
+        )
     }
 
     @Test
@@ -206,14 +223,14 @@ class ConfirmPaymentIntentParamsTest {
             paymentMethodOptions = PaymentMethodOptionsParams.Card(
                 cvc = "123"
             ),
-            clientSecret = "client_secret"
+            clientSecret = CLIENT_SECRET
         ).toParamMap()
 
         assertEquals(
             mapOf(
                 PARAM_PAYMENT_METHOD_ID to "pm_123",
                 PARAM_PAYMENT_METHOD_OPTIONS to mapOf("card" to mapOf("cvc" to "123")),
-                PARAM_CLIENT_SECRET to "client_secret",
+                PARAM_CLIENT_SECRET to CLIENT_SECRET,
                 PARAM_SAVE_PAYMENT_METHOD to false,
                 PARAM_USE_STRIPE_SDK to false
             ),
