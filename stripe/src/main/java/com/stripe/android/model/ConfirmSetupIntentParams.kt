@@ -53,6 +53,8 @@ data class ConfirmSetupIntentParams internal constructor(
             returnUrl?.let { mapOf(PARAM_RETURN_URL to it) }.orEmpty()
         ).plus(
             mandateId?.let { mapOf(PARAM_MANDATE_ID to it) }.orEmpty()
+        ).plus(
+            mandateDataParams?.let { mapOf(PARAM_MANDATE_DATA to it) }.orEmpty()
         ).plus(paymentMethodParamMap)
     }
 
@@ -60,11 +62,7 @@ data class ConfirmSetupIntentParams internal constructor(
         get() {
             return when {
                 paymentMethodCreateParams != null -> {
-                    mapOf(
-                        PARAM_PAYMENT_METHOD_DATA to paymentMethodCreateParams.toParamMap()
-                    ).plus(
-                        mandateDataParams?.let { mapOf(PARAM_MANDATE_DATA to it) }.orEmpty()
-                    )
+                    mapOf(PARAM_PAYMENT_METHOD_DATA to paymentMethodCreateParams.toParamMap())
                 }
                 paymentMethodId != null -> {
                     mapOf(PARAM_PAYMENT_METHOD_ID to paymentMethodId)
