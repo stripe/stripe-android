@@ -25,7 +25,6 @@ import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_CARD
 import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_CVC
 import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_EXPIRY
 import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_POSTAL
-import com.stripe.android.view.CardMultilineWidget.Companion.CARD_MULTILINE_TOKEN
 import java.util.Calendar
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -61,6 +60,9 @@ internal class CardMultilineWidgetTest {
 
     @BeforeTest
     fun setup() {
+        // The input date here will be invalid after 2050. Please update the test.
+        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
+
         CustomerSession.instance = mock()
 
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
@@ -139,9 +141,6 @@ internal class CardMultilineWidgetTest {
 
     @Test
     fun getCard_whenInputIsValidVisaWithZip_returnsCardObjectWithLoggingToken() {
-        // The input date here will be invalid after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
-
         fullGroup.cardNumberEditText.setText(VALID_VISA_WITH_SPACES)
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
@@ -162,9 +161,6 @@ internal class CardMultilineWidgetTest {
 
     @Test
     fun getCard_whenInputIsValidVisaButInputHasNoZip_returnsValidCard() {
-        // The input date here will be invalid after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
-
         fullGroup.cardNumberEditText.setText(VALID_VISA_WITH_SPACES)
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
@@ -176,9 +172,6 @@ internal class CardMultilineWidgetTest {
 
     @Test
     fun getCard_whenInputIsValidVisaAndNoZipRequired_returnsFullCardAndExpectedLogging() {
-        // The input date here will be invalid after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
-
         noZipGroup.cardNumberEditText.setText(VALID_VISA_WITH_SPACES)
         noZipGroup.expiryDateEditText.append("12")
         noZipGroup.expiryDateEditText.append("50")
@@ -198,9 +191,6 @@ internal class CardMultilineWidgetTest {
 
     @Test
     fun getCard_whenInputIsValidAmexAndNoZipRequiredAnd4DigitCvc_returnsFullCardAndExpectedLogging() {
-        // The input date here will be invalid after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
-
         noZipGroup.cardNumberEditText.setText(VALID_AMEX_WITH_SPACES)
         noZipGroup.expiryDateEditText.append("12")
         noZipGroup.expiryDateEditText.append("50")
@@ -220,9 +210,6 @@ internal class CardMultilineWidgetTest {
 
     @Test
     fun getCard_whenInputIsValidAmexAndNoZipRequiredAnd3DigitCvc_returnsFullCardAndExpectedLogging() {
-        // The input date here will be invalid after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
-
         noZipGroup.cardNumberEditText.setText(VALID_AMEX_WITH_SPACES)
         noZipGroup.expiryDateEditText.append("12")
         noZipGroup.expiryDateEditText.append("50")
@@ -242,9 +229,6 @@ internal class CardMultilineWidgetTest {
 
     @Test
     fun getPaymentMethodCreateParams_shouldReturnExpectedObject() {
-        // The input date here will be invalid after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
-
         fullGroup.cardNumberEditText.setText(VALID_VISA_WITH_SPACES)
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
@@ -272,10 +256,7 @@ internal class CardMultilineWidgetTest {
     }
 
     @Test
-    fun getPaymentMethodCard_whenInputIsValidVisaWithZip_returnsCardAndBillingDetails() {
-        // The input date here will be invalid after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
-
+    fun paymentMethodCard_whenInputIsValidVisaWithZip_returnsCardAndBillingDetails() {
         fullGroup.cardNumberEditText.setText(VALID_VISA_WITH_SPACES)
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
@@ -300,24 +281,46 @@ internal class CardMultilineWidgetTest {
     }
 
     @Test
-    fun getPaymentMethodCard_whenInputIsValidVisaButInputHasNoZip_returnsNull() {
-        // The input date here will be invalid after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
+    fun paymentMethodCreateParams_whenPostalCodeIsRequiredAndValueIsBlank_returnsNull() {
+        cardMultilineWidget.setShouldShowPostalCode(true)
+        cardMultilineWidget.postalCodeRequired = true
 
         fullGroup.cardNumberEditText.setText(VALID_VISA_WITH_SPACES)
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
         fullGroup.cvcEditText.append("123")
 
-        val card = noZipCardMultilineWidget.paymentMethodCard
-        assertNull(card)
+        assertNull(cardMultilineWidget.paymentMethodCreateParams)
     }
 
     @Test
-    fun getPaymentMethodCard_whenInputIsValidVisaAndNoZipRequired_returnsFullCard() {
-        // The input date here will be invalid after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
+    fun paymentMethodCreateParams_whenPostalCodeIsRequiredAndValueIsNotBlank_returnsNotNull() {
+        cardMultilineWidget.setShouldShowPostalCode(true)
+        cardMultilineWidget.postalCodeRequired = false
 
+        fullGroup.cardNumberEditText.setText(VALID_VISA_WITH_SPACES)
+        fullGroup.expiryDateEditText.append("12")
+        fullGroup.expiryDateEditText.append("50")
+        fullGroup.cvcEditText.append("123")
+
+        assertNotNull(cardMultilineWidget.paymentMethodCreateParams)
+    }
+
+    @Test
+    fun paymentMethodCreateParams_whenPostalCodeIsNotRequiredAndValueIsBlank_returnsNotNull() {
+        cardMultilineWidget.setShouldShowPostalCode(true)
+        cardMultilineWidget.postalCodeRequired = false
+
+        fullGroup.cardNumberEditText.setText(VALID_VISA_WITH_SPACES)
+        fullGroup.expiryDateEditText.append("12")
+        fullGroup.expiryDateEditText.append("50")
+        fullGroup.cvcEditText.append("123")
+
+        assertNotNull(cardMultilineWidget.paymentMethodCreateParams)
+    }
+
+    @Test
+    fun paymentMethodCard_whenInputIsValidVisaAndNoZipRequired_returnsFullCard() {
         noZipGroup.cardNumberEditText.setText(VALID_VISA_WITH_SPACES)
         noZipGroup.expiryDateEditText.append("12")
         noZipGroup.expiryDateEditText.append("50")
@@ -337,10 +340,7 @@ internal class CardMultilineWidgetTest {
     }
 
     @Test
-    fun getPaymentMethodCard_whenInputIsValidAmexAndNoZipRequiredAnd4DigitCvc_returnsFullCard() {
-        // The input date here will be invalid after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
-
+    fun paymentMethodCard_whenInputIsValidAmexAndNoZipRequiredAnd4DigitCvc_returnsFullCard() {
         noZipGroup.cardNumberEditText.setText(VALID_AMEX_WITH_SPACES)
         noZipGroup.expiryDateEditText.append("12")
         noZipGroup.expiryDateEditText.append("50")
@@ -362,10 +362,7 @@ internal class CardMultilineWidgetTest {
     }
 
     @Test
-    fun getPaymentMethodCard_whenInputIsValidAmexAndNoZipRequiredAnd3DigitCvc_returnsFullCard() {
-        // The input date here will be invalid after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
-
+    fun paymentMethodCard_whenInputIsValidAmexAndNoZipRequiredAnd3DigitCvc_returnsFullCard() {
         noZipGroup.cardNumberEditText.setText(VALID_AMEX_WITH_SPACES)
         noZipGroup.expiryDateEditText.append("12")
         noZipGroup.expiryDateEditText.append("50")
@@ -394,9 +391,6 @@ internal class CardMultilineWidgetTest {
 
     @Test
     fun clear_whenZipRequiredAndAllFieldsEntered_clearsAllfields() {
-        // The input date here will be invalid after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
-
         fullGroup.cardNumberEditText.setText(VALID_VISA_WITH_SPACES)
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
@@ -413,11 +407,9 @@ internal class CardMultilineWidgetTest {
 
     @Test
     fun clear_whenFieldsInErrorState_clearsFieldsAndHidesErrors() {
-        // The input date here will be invalid after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
-
-        var badVisa = VALID_VISA_WITH_SPACES.substring(VALID_VISA_WITH_SPACES.length - 1)
-        badVisa += 3 // Makes this 4242 4242 4242 4243
+        // Makes this 4242 4242 4242 4243
+        val badVisa = VALID_VISA_WITH_SPACES
+            .substring(VALID_VISA_WITH_SPACES.length - 1) + "3"
         fullGroup.cardNumberEditText.setText(badVisa)
 
         fullGroup.expiryDateEditText.append("01")
@@ -756,30 +748,21 @@ internal class CardMultilineWidgetTest {
         )
     }
 
-    internal class WidgetControlGroup(parentWidget: CardMultilineWidget) {
-        val cardNumberEditText: CardNumberEditText =
-            parentWidget.findViewById(R.id.et_card_number)
-        val cardInputLayout: TextInputLayout =
-            parentWidget.findViewById(R.id.tl_card_number)
-        val expiryDateEditText: ExpiryDateEditText =
-            parentWidget.findViewById(R.id.et_expiry)
-        val expiryInputLayout: TextInputLayout =
-            parentWidget.findViewById(R.id.tl_expiry)
-        val cvcEditText: StripeEditText =
-            parentWidget.findViewById(R.id.et_cvc)
-        val cvcInputLayout: TextInputLayout =
-            parentWidget.findViewById(R.id.tl_cvc)
-        val postalCodeEditText: StripeEditText =
-            parentWidget.findViewById(R.id.et_postal_code)
-        val postalCodeInputLayout: TextInputLayout =
-            parentWidget.findViewById(R.id.tl_postal_code)
-        val secondRowLayout: LinearLayout =
-            parentWidget.findViewById(R.id.second_row_layout)
+    internal class WidgetControlGroup(widget: CardMultilineWidget) {
+        val cardNumberEditText: CardNumberEditText = widget.findViewById(R.id.et_card_number)
+        val cardInputLayout: TextInputLayout = widget.findViewById(R.id.tl_card_number)
+        val expiryDateEditText: ExpiryDateEditText = widget.findViewById(R.id.et_expiry)
+        val expiryInputLayout: TextInputLayout = widget.findViewById(R.id.tl_expiry)
+        val cvcEditText: StripeEditText = widget.findViewById(R.id.et_cvc)
+        val cvcInputLayout: TextInputLayout = widget.findViewById(R.id.tl_cvc)
+        val postalCodeEditText: StripeEditText = widget.findViewById(R.id.et_postal_code)
+        val postalCodeInputLayout: TextInputLayout = widget.findViewById(R.id.tl_postal_code)
+        val secondRowLayout: LinearLayout = widget.findViewById(R.id.second_row_layout)
     }
 
     private companion object {
         // Every Card made by the CardInputView should have the card widget token.
-        private val EXPECTED_LOGGING_ARRAY = arrayOf(CARD_MULTILINE_TOKEN)
+        private val EXPECTED_LOGGING_ARRAY = arrayOf("CardMultilineView")
 
         private val EMPTY_WATCHER = object : StripeTextWatcher() {}
     }

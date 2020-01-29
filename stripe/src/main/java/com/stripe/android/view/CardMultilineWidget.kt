@@ -41,7 +41,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
-    private var shouldShowPostalCode: Boolean = DEFAULT_POSTAL_CODE_ENABLED
+    private var shouldShowPostalCode: Boolean = CardWidget.DEFAULT_POSTAL_CODE_ENABLED
 ) : LinearLayout(context, attrs, defStyleAttr), CardWidget {
     private val cardNumberEditText: CardNumberEditText
     private val expiryDateEditText: ExpiryDateEditText
@@ -82,6 +82,17 @@ class CardMultilineWidget @JvmOverloads constructor(
     private val tintColorInt: Int
 
     private var cardHintText: String = resources.getString(R.string.card_number_hint)
+
+    /**
+     * If [shouldShowPostalCode] is true and [postalCodeRequired] is true, then postal code is a
+     * required field.
+     *
+     * If [shouldShowPostalCode] is false, this value is ignored.
+     *
+     * Note that some countries do not have postal codes, so requiring postal code will prevent
+     * those users from submitting this form successfully.
+     */
+    var postalCodeRequired: Boolean = CardWidget.DEFAULT_POSTAL_CODE_REQUIRED
 
     /**
      * Gets a [PaymentMethodCreateParams.Card] object from the user input, if all fields are
@@ -342,10 +353,12 @@ class CardMultilineWidget @JvmOverloads constructor(
         cardNumberEditText.shouldShowError = !cardNumberIsValid
         expiryDateEditText.shouldShowError = !expiryIsValid
         cvcEditText.shouldShowError = !cvcIsValid
+        postalCodeEditText.shouldShowError =
+            postalCodeRequired && postalCodeEditText.fieldText.isBlank()
 
         allFields.firstOrNull { it.shouldShowError }?.requestFocus()
 
-        return cardNumberIsValid && expiryIsValid && cvcIsValid
+        return cardNumberIsValid && expiryIsValid && cvcIsValid && !postalCodeEditText.shouldShowError
     }
 
     override fun onWindowFocusChanged(hasWindowFocus: Boolean) {
@@ -363,6 +376,11 @@ class CardMultilineWidget @JvmOverloads constructor(
         updateCvc()
     }
 
+    /**
+     * The postal code field is enabled by default. Disabling the postal code field may impact
+     * auth success rates, so it is discouraged to disable it unless you are collecting the postal
+     * code outside of this form.
+     */
     fun setShouldShowPostalCode(shouldShowPostalCode: Boolean) {
         this.shouldShowPostalCode = shouldShowPostalCode
         adjustViewForPostalCodeAttribute(shouldShowPostalCode)
@@ -490,7 +508,12 @@ class CardMultilineWidget @JvmOverloads constructor(
 
         try {
             shouldShowPostalCode = a.getBoolean(
-                R.styleable.CardElement_shouldShowPostalCode, DEFAULT_POSTAL_CODE_ENABLED
+                R.styleable.CardElement_shouldShowPostalCode,
+                CardWidget.DEFAULT_POSTAL_CODE_ENABLED
+            )
+            postalCodeRequired = a.getBoolean(
+                R.styleable.CardElement_shouldRequirePostalCode,
+                CardWidget.DEFAULT_POSTAL_CODE_REQUIRED
             )
         } finally {
             a.recycle()
@@ -610,11 +633,9 @@ class CardMultilineWidget @JvmOverloads constructor(
         return newBounds
     }
 
-    internal companion object {
-        internal const val CARD_MULTILINE_TOKEN = "CardMultilineView"
-        internal const val CARD_NUMBER_HINT_DELAY = 120L
-        internal const val COMMON_HINT_DELAY = 90L
-
-        private const val DEFAULT_POSTAL_CODE_ENABLED = true
+    private companion object {
+        private const val CARD_MULTILINE_TOKEN = "CardMultilineView"
+        private const val CARD_NUMBER_HINT_DELAY = 120L
+        private const val COMMON_HINT_DELAY = 90L
     }
 }
