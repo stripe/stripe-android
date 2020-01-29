@@ -263,6 +263,32 @@ class ConfirmPaymentIntentParamsTest {
     }
 
     @Test
+    fun create_withSepaDebitPaymentMethodId_shouldUseMandateDataIfSpecified() {
+        val expectedParams = mapOf(
+            "client_secret" to CLIENT_SECRET,
+            "save_payment_method" to false,
+            "use_stripe_sdk" to false,
+            "mandate_data" to mapOf(
+                "customer_acceptance" to mapOf(
+                    "type" to "online",
+                    "online" to mapOf(
+                        "ip_address" to "127.0.0.1",
+                        "user_agent" to "my_user_agent"
+                    )
+                )
+            ),
+            "payment_method" to "pm_12345"
+        )
+        val actualParams =
+            ConfirmPaymentIntentParams.createWithPaymentMethodId(
+                clientSecret = CLIENT_SECRET,
+                paymentMethodId = "pm_12345",
+                mandateData = MandateDataParamsFixtures.DEFAULT
+            ).toParamMap()
+        assertEquals(expectedParams, actualParams)
+    }
+
+    @Test
     fun create_withPaymentMethodOptions() {
         val params = ConfirmPaymentIntentParams(
             paymentMethodId = "pm_123",

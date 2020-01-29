@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
-import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
@@ -113,6 +112,10 @@ data class ConfirmPaymentIntentParams internal constructor(
         ).plus(
             mandateId?.let { mapOf(PARAM_MANDATE_ID to it) }.orEmpty()
         ).plus(
+            mandateDataParams?.let {
+                mapOf(ConfirmStripeIntentParams.PARAM_MANDATE_DATA to it)
+            }.orEmpty()
+        ).plus(
             returnUrl?.let { mapOf(PARAM_RETURN_URL to it) }.orEmpty()
         ).plus(
             paymentMethodOptions?.let {
@@ -129,11 +132,7 @@ data class ConfirmPaymentIntentParams internal constructor(
         get() {
             return when {
                 paymentMethodCreateParams != null -> {
-                    mapOf(
-                        PARAM_PAYMENT_METHOD_DATA to paymentMethodCreateParams.toParamMap()
-                    ).plus(
-                        mandateDataParams?.let { mapOf(PARAM_MANDATE_DATA to it) }.orEmpty()
-                    )
+                    mapOf(PARAM_PAYMENT_METHOD_DATA to paymentMethodCreateParams.toParamMap())
                 }
                 paymentMethodId != null -> {
                     mapOf(PARAM_PAYMENT_METHOD_ID to paymentMethodId)
