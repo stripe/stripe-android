@@ -4,7 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager.widget.ViewPager
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession.Companion.EXTRA_PAYMENT_SESSION_DATA
@@ -44,7 +44,7 @@ class PaymentFlowActivity : StripeActivity() {
         viewStub.layoutResource = R.layout.activity_shipping_flow
         viewStub.inflate()
 
-        viewModel = ViewModelProviders.of(
+        viewModel = ViewModelProvider(
             this,
             PaymentFlowViewModel.Factory(customerSession, args.paymentSessionData)
         )[PaymentFlowViewModel::class.java]

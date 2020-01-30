@@ -7,7 +7,7 @@ import android.view.View
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession.Companion.TOKEN_PAYMENT_SESSION
@@ -46,7 +46,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
     }
 
     private val viewModel: PaymentMethodsViewModel by lazy {
-        ViewModelProviders.of(
+        ViewModelProvider(
             this,
             PaymentMethodsViewModel.Factory(customerSession, args.initialPaymentMethodId)
         )[PaymentMethodsViewModel::class.java]

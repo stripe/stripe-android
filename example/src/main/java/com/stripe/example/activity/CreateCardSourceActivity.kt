@@ -6,7 +6,7 @@ import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentConfiguration
@@ -25,7 +25,7 @@ import kotlinx.android.synthetic.main.activity_card_sources.*
  */
 class CreateCardSourceActivity : AppCompatActivity() {
     private val viewModel: SourceViewModel by lazy {
-        ViewModelProviders.of(this)[SourceViewModel::class.java]
+        ViewModelProvider(this)[SourceViewModel::class.java]
     }
     private val sourcesAdapter: SourcesAdapter by lazy {
         SourcesAdapter()

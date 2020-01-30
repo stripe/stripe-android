@@ -12,7 +12,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.ApiResultCallback
@@ -41,7 +41,7 @@ class CreateCardTokenActivity : AppCompatActivity() {
                 orientation = LinearLayoutManager.VERTICAL
             }
 
-        val viewModel = ViewModelProviders.of(
+        val viewModel = ViewModelProvider(
             this
         )[CreateCardTokenViewModel::class.java]
 

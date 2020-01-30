@@ -42,8 +42,7 @@ dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
-    implementation "androidx.lifecycle:lifecycle-viewmodel:2.1.0"
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0'
+    implementation "androidx.lifecycle:lifecycle-viewmodel:$androidLifecycleVersion"
     implementation 'com.google.android.material:material:1.1.0-rc02'
 
     implementation 'com.google.android.gms:play-services-wallet:18.0.0'
