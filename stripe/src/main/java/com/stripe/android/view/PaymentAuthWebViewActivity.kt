@@ -9,7 +9,7 @@ import android.view.MenuItem
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.stripe.android.Logger
 import com.stripe.android.PaymentAuthWebViewStarter
@@ -34,7 +34,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
             return
         }
 
-        viewModel = ViewModelProviders.of(
+        viewModel = ViewModelProvider(
             this, PaymentAuthWebViewActivityViewModel.Factory(args)
         )[PaymentAuthWebViewActivityViewModel::class.java]
 

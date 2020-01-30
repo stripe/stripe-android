@@ -13,7 +13,7 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -52,7 +52,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
             itemAnimator = DefaultItemAnimator()
         }
 
-        viewModel = ViewModelProviders.of(
+        viewModel = ViewModelProvider(
             activity,
             FpxViewModel.Factory(activity.application)
         ).get(FpxViewModel::class.java)

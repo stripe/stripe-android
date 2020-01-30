@@ -6,7 +6,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.Stripe
 import com.stripe.android.model.Address
@@ -19,7 +19,7 @@ import kotlinx.android.synthetic.main.activity_klarna_source.*
 
 class KlarnaSourceActivity : AppCompatActivity() {
     private val viewModel: SourceViewModel by lazy {
-        ViewModelProviders.of(this)[SourceViewModel::class.java]
+        ViewModelProvider(this)[SourceViewModel::class.java]
     }
 
     private val stripe: Stripe by lazy {

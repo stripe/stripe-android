@@ -13,7 +13,7 @@ import androidx.annotation.StringRes
 import androidx.core.text.util.LinkifyCompat
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
@@ -60,7 +60,7 @@ class AddPaymentMethodActivity : StripeActivity() {
     }
 
     private val viewModel: AddPaymentMethodViewModel by lazy {
-        ViewModelProviders.of(this, AddPaymentMethodViewModel.Factory(
+        ViewModelProvider(this, AddPaymentMethodViewModel.Factory(
             stripe, customerSession, args
         ))[AddPaymentMethodViewModel::class.java]
     }
