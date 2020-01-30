@@ -121,7 +121,7 @@ data class KlarnaSourceParams @JvmOverloads constructor(
     }
 
     @Parcelize
-    data class LineItem(
+    data class LineItem @JvmOverloads constructor(
         /**
          * The line item's type. One of `sku` (for a product), `tax` (for taxes),
          * or `shipping` (for shipping costs).
