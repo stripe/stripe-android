@@ -17,6 +17,7 @@ import com.stripe.android.model.StripeFile
 import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
+import com.stripe.android.model.TokenParams
 
 internal abstract class AbsFakeStripeRepository : StripeRepository {
 
@@ -110,9 +111,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
     }
 
     override fun createToken(
-        tokenParams: Map<String, *>,
-        options: ApiRequest.Options,
-        tokenType: String
+        tokenParams: TokenParams,
+        options: ApiRequest.Options
     ): Token? {
         return null
     }

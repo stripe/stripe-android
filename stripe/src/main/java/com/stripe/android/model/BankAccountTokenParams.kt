@@ -1,6 +1,5 @@
 package com.stripe.android.model
 
-import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 /**
@@ -54,7 +53,7 @@ data class BankAccountTokenParams @JvmOverloads constructor(
      * [bank_account.routing_number](https://stripe.com/docs/api/tokens/create_bank_account#create_bank_account_token-bank_account-routing_number)
      */
     private val routingNumber: String? = null
-) : StripeParamsModel, Parcelable {
+) : TokenParams(Token.TokenType.BANK_ACCOUNT) {
     enum class Type(internal val code: String) {
         Individual("individual"),
         Company("company");

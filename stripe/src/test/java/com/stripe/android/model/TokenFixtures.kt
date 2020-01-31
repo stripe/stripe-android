@@ -6,7 +6,7 @@ import org.json.JSONObject
 internal object TokenFixtures {
     private val PARSER = TokenJsonParser()
 
-    val CARD_TOKEN = requireNotNull(PARSER.parse(JSONObject(
+    val CARD_TOKEN_JSON = JSONObject(
         """
         {
             "id": "tok_189fi32eZvKYlo2Ct0KZvU5Y",
@@ -41,9 +41,11 @@ internal object TokenFixtures {
             "used": false
         }
         """.trimIndent()
-    )))
+    )
 
-    val BANK_TOKEN = requireNotNull(PARSER.parse(JSONObject(
+    val CARD_TOKEN = requireNotNull(PARSER.parse(CARD_TOKEN_JSON))
+
+    val BANK_TOKEN_JSON = JSONObject(
         """
         {
             "id": "btok_9xJAbronBnS9bH",
@@ -68,5 +70,7 @@ internal object TokenFixtures {
             "used": false
         }
         """.trimIndent()
-    )))
+    )
+
+    val BANK_TOKEN = requireNotNull(PARSER.parse(BANK_TOKEN_JSON))
 }

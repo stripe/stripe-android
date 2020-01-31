@@ -28,6 +28,7 @@ import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeModel
 import com.stripe.android.model.Token
+import com.stripe.android.model.TokenParams
 import com.stripe.android.model.parsers.CustomerJsonParser
 import com.stripe.android.model.parsers.ModelJsonParser
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
@@ -439,29 +440,25 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, CardException::class, APIException::class)
     override fun createToken(
-        tokenParams: Map<String, *>,
-        options: ApiRequest.Options,
-        @Token.TokenType tokenType: String
+        tokenParams: TokenParams,
+        options: ApiRequest.Options
     ): Token? {
-        try {
-            fireFingerprintRequest()
+        fireFingerprintRequest()
 
-            fireAnalyticsRequest(
-                analyticsDataFactory.createTokenCreationParams(
-                    tokenParams[AnalyticsDataFactory.FIELD_PRODUCT_USAGE] as List<String>?,
-                    options.apiKey,
-                    tokenType
-                ),
-                options.apiKey
-            )
-        } catch (classCastEx: ClassCastException) {
-            // This can only happen if someone puts a weird object in the map.
-        }
+        fireAnalyticsRequest(
+            analyticsDataFactory.createTokenCreationParams(
+                productUsageTokens = tokenParams.attribution,
+                publishableKey = options.apiKey,
+                tokenType = tokenParams.tokenType
+            ),
+            options.apiKey
+        )
 
-        return requestToken(
-            tokensUrl,
-            tokenParams.minus(AnalyticsDataFactory.FIELD_PRODUCT_USAGE),
-            options
+        return fetchStripeModel(
+            apiRequestFactory.createPost(tokensUrl, options,
+                tokenParams.toParamMap()
+                    .plus(networkUtils.createUidParams())),
+            TokenJsonParser()
         )
     }
 
@@ -971,19 +968,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME,
                 dnsCacheData.second ?: "-1")
         }
-    }
-
-    @Throws(AuthenticationException::class, InvalidRequestException::class,
-        APIConnectionException::class, CardException::class, APIException::class)
-    private fun requestToken(
-        url: String,
-        params: Map<String, *>,
-        options: ApiRequest.Options
-    ): Token? {
-        return fetchStripeModel(
-            apiRequestFactory.createPost(url, options, params),
-            TokenJsonParser()
-        )
     }
 
     private fun fireFingerprintRequest() {

@@ -5,12 +5,10 @@ import com.stripe.android.model.CardFixtures
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
-import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
 /**
@@ -22,11 +20,6 @@ class StripeNetworkUtilsTest {
     private val networkUtils = StripeNetworkUtils(
         UidParamsFactory("com.example.app", FakeUidSupplier())
     )
-
-    @BeforeTest
-    fun setup() {
-        MockitoAnnotations.initMocks(this)
-    }
 
     @Test
     fun paramsFromCard_mapsCorrectFields() {
@@ -83,7 +76,7 @@ class StripeNetworkUtilsTest {
     }
 
     private fun getCardTokenParamData(card: Card): Map<String, Any>? {
-        val cardTokenParams = networkUtils.createCardTokenParams(card)
+        val cardTokenParams = card.toParamMap()
         return cardTokenParams["card"] as Map<String, Any>?
     }
 

@@ -178,7 +178,7 @@ class CardMultilineWidget @JvmOverloads constructor(
 
             return Card.Builder(cardNumber, cardDate.first, cardDate.second, cvcValue)
                 .addressZip(postalCode)
-                .loggingTokens(listOf(CARD_MULTILINE_TOKEN))
+                .loggingTokens(setOf(CARD_MULTILINE_TOKEN))
         }
 
     private val cardNumber: String?

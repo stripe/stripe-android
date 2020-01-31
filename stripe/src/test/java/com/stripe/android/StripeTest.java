@@ -1400,7 +1400,6 @@ public class StripeTest {
         final StripeRepository stripeRepository = createStripeRepository(fireAndForgetRequestExecutor);
         return new Stripe(
                 stripeRepository,
-                new StripeNetworkUtils(context),
                 StripePaymentController.create(context, stripeRepository),
                 publishableKey,
                 null
@@ -1413,7 +1412,6 @@ public class StripeTest {
                 new FakeFireAndForgetRequestExecutor());
         return new Stripe(
                 stripeRepository,
-                new StripeNetworkUtils(context),
                 StripePaymentController.create(context, stripeRepository),
                 NON_LOGGING_PK,
                 null,

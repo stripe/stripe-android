@@ -180,7 +180,7 @@ data class Card internal constructor(
      */
     override val id: String?,
 
-    internal val loggingTokens: MutableList<String> = mutableListOf(),
+    internal val loggingTokens: Set<String> = emptySet(),
 
     /**
      * @return If the card number is tokenized, this is the method that was used.
@@ -197,7 +197,7 @@ data class Card internal constructor(
      * [API Reference](https://stripe.com/docs/api/cards/object#card_object-metadata)
      */
     val metadata: Map<String, String>?
-) : StripeModel, StripePaymentSource, StripeParamsModel {
+) : StripeModel, StripePaymentSource, TokenParams(Token.TokenType.CARD, loggingTokens) {
 
     @Retention(AnnotationRetention.SOURCE)
     @StringDef(FundingType.CREDIT, FundingType.DEBIT, FundingType.PREPAID, FundingType.UNKNOWN)
@@ -408,7 +408,7 @@ data class Card internal constructor(
         private var id: String? = null
         private var tokenizationMethod: TokenizationMethod? = null
         private var metadata: Map<String, String>? = null
-        private var loggingTokens: List<String>? = null
+        private var loggingTokens: Set<String>? = null
 
         fun name(name: String?): Builder = apply {
             this.name = name
@@ -491,7 +491,7 @@ data class Card internal constructor(
             this.metadata = metadata
         }
 
-        fun loggingTokens(loggingTokens: List<String>): Builder = apply {
+        fun loggingTokens(loggingTokens: Set<String>): Builder = apply {
             this.loggingTokens = loggingTokens
         }
 
@@ -528,7 +528,7 @@ data class Card internal constructor(
                 id = id.takeUnless { it.isNullOrBlank() },
                 tokenizationMethod = tokenizationMethod,
                 metadata = metadata,
-                loggingTokens = loggingTokens.orEmpty().toMutableList()
+                loggingTokens = loggingTokens.orEmpty()
             )
         }
 
