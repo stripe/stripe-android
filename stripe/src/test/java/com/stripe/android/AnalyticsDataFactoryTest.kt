@@ -5,6 +5,7 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
@@ -87,19 +88,32 @@ class AnalyticsDataFactoryTest {
 
     @Test
     fun getPaymentMethodCreationParams() {
-        val loggingParams = analyticsDataFactory
-            .createPaymentMethodCreationParams(API_KEY, "pm_12345")
-        assertNotNull(loggingParams)
-        assertEquals(API_KEY,
-            loggingParams[AnalyticsDataFactory.FIELD_PUBLISHABLE_KEY])
-        assertEquals("pm_12345",
-            loggingParams[AnalyticsDataFactory.FIELD_PAYMENT_METHOD_ID])
-        assertEquals(
-            AnalyticsEvent.PaymentMethodCreate.toString(),
-            loggingParams[AnalyticsDataFactory.FIELD_EVENT]
+        val expectedParams = mapOf(
+            "analytics_ua" to "analytics.stripe_android-1.0",
+            "event" to "stripe_android.payment_method_creation",
+            "publishable_key" to "pk_abc123",
+            "os_name" to "REL",
+            "os_release" to "9",
+            "os_version" to 28,
+            "device_type" to "unknown_Android_robolectric",
+            "bindings_version" to "13.1.3",
+            "app_name" to "com.stripe.android.test",
+            "app_version" to 0,
+            "product_usage" to ATTRIBUTION.toList(),
+            "source_type" to "card",
+            "payment_method_id" to "pm_12345"
         )
-        assertEquals(AnalyticsDataFactory.ANALYTICS_UA,
-            loggingParams[AnalyticsDataFactory.FIELD_ANALYTICS_UA])
+
+        val actualParams = analyticsDataFactory
+            .createPaymentMethodCreationParams(
+                API_KEY,
+                "pm_12345",
+                PaymentMethod.Type.Card,
+                ATTRIBUTION
+            )
+
+        assertThat(actualParams)
+            .isEqualTo(expectedParams)
     }
 
     @Test

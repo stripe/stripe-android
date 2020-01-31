@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.annotation.StringDef
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
 import com.stripe.android.stripe3ds2.transaction.ProtocolErrorEvent
@@ -140,11 +141,13 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     internal fun createPaymentMethodCreationParams(
         publishableKey: String,
         paymentMethodId: String?,
-        productUsageTokens: Set<String>? = null
+        paymentMethodType: PaymentMethod.Type?,
+        productUsageTokens: Set<String>?
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.PaymentMethodCreate,
             publishableKey,
+            sourceType = paymentMethodType?.code,
             productUsageTokens = productUsageTokens,
             extraParams = paymentMethodId?.let {
                 mapOf(FIELD_PAYMENT_METHOD_ID to it)

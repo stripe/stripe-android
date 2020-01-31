@@ -418,6 +418,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 analyticsDataFactory.createPaymentMethodCreationParams(
                     options.apiKey,
                     paymentMethod?.id,
+                    paymentMethod?.type,
                     productUsageTokens = paymentMethodCreateParams.attribution
                 ),
                 options.apiKey
