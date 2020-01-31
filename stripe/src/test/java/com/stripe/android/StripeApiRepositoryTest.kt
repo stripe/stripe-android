@@ -18,7 +18,9 @@ import com.stripe.android.model.CardFixtures
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SourceFixtures
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.StripeFileFixtures
@@ -770,6 +772,49 @@ class StripeApiRepositoryTest {
 
         verifyFingerprintAndAnalyticsRequests(
             AnalyticsEvent.TokenCreate,
+            productUsage = null
+        )
+    }
+
+    @Test
+    fun createCardPaymentMethod_withAttribution_shouldPopulateProductUsage() {
+        val stripeResponse = StripeResponse(
+            200,
+            PaymentMethodFixtures.CARD_JSON.toString(),
+            emptyMap()
+        )
+        `when`(stripeApiRequestExecutor.execute(any<ApiRequest>())).thenReturn(stripeResponse)
+        create().createPaymentMethod(
+            PaymentMethodCreateParams.create(
+                PaymentMethodCreateParamsFixtures.CARD
+                    .copy(attribution = setOf("CardInputView"))
+            ),
+            DEFAULT_OPTIONS
+        )
+
+        verifyFingerprintAndAnalyticsRequests(
+            AnalyticsEvent.PaymentMethodCreate,
+            productUsage = listOf("CardInputView")
+        )
+    }
+
+    @Test
+    fun createSepaDebitPaymentMethod_shouldNotPopulateProductUsage() {
+        val stripeResponse = StripeResponse(
+            200,
+            PaymentMethodFixtures.SEPA_DEBIT_JSON.toString(),
+            emptyMap()
+        )
+        `when`(stripeApiRequestExecutor.execute(any<ApiRequest>())).thenReturn(stripeResponse)
+        create().createPaymentMethod(
+            PaymentMethodCreateParams.create(
+                PaymentMethodCreateParams.SepaDebit("my_iban")
+            ),
+            DEFAULT_OPTIONS
+        )
+
+        verifyFingerprintAndAnalyticsRequests(
+            AnalyticsEvent.PaymentMethodCreate,
             productUsage = null
         )
     }

@@ -144,7 +144,8 @@ class CardInputWidget @JvmOverloads constructor(
                     number = it.number,
                     cvc = it.cvc,
                     expiryMonth = it.expMonth,
-                    expiryYear = it.expYear
+                    expiryYear = it.expYear,
+                    attribution = it.attribution
                 )
             }
         }

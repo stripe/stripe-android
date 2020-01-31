@@ -124,7 +124,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createTokenCreationParams(
-        productUsageTokens: Collection<String>?,
+        productUsageTokens: Set<String>?,
         publishableKey: String,
         @Token.TokenType tokenType: String
     ): Map<String, Any> {
@@ -139,11 +139,13 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createPaymentMethodCreationParams(
         publishableKey: String,
-        paymentMethodId: String?
+        paymentMethodId: String?,
+        productUsageTokens: Set<String>? = null
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.PaymentMethodCreate,
             publishableKey,
+            productUsageTokens = productUsageTokens,
             extraParams = paymentMethodId?.let {
                 mapOf(FIELD_PAYMENT_METHOD_ID to it)
             }
@@ -154,7 +156,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     internal fun createSourceCreationParams(
         publishableKey: String,
         @Source.SourceType sourceType: String,
-        productUsageTokens: Collection<String>? = null
+        productUsageTokens: Set<String>? = null
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.SourceCreate,
@@ -166,7 +168,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createAddSourceParams(
-        productUsageTokens: Collection<String>? = null,
+        productUsageTokens: Set<String>? = null,
         publishableKey: String,
         @Source.SourceType sourceType: String
     ): Map<String, Any> {
@@ -180,7 +182,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createDeleteSourceParams(
-        productUsageTokens: Collection<String>?,
+        productUsageTokens: Set<String>?,
         publishableKey: String
     ): Map<String, Any> {
         return createParams(
@@ -192,7 +194,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createAttachPaymentMethodParams(
-        productUsageTokens: Collection<String>?,
+        productUsageTokens: Set<String>?,
         publishableKey: String
     ): Map<String, Any> {
         return createParams(
@@ -204,7 +206,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createDetachPaymentMethodParams(
-        productUsageTokens: Collection<String>?,
+        productUsageTokens: Set<String>?,
         publishableKey: String
     ): Map<String, Any> {
         return createParams(
@@ -272,7 +274,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     internal fun createParams(
         event: AnalyticsEvent,
         publishableKey: String,
-        productUsageTokens: Collection<String>? = null,
+        productUsageTokens: Set<String>? = null,
         @Source.SourceType sourceType: String? = null,
         @Token.TokenType tokenType: String? = null,
         extraParams: Map<String, Any>? = null

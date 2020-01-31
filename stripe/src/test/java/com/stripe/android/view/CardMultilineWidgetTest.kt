@@ -156,7 +156,7 @@ internal class CardMultilineWidgetTest {
         assertEquals("123", card.cvc)
         assertEquals("12345", card.addressZip)
         assertTrue(card.validateCard())
-        assertTrue(EXPECTED_LOGGING_ARRAY.contentEquals(card.loggingTokens.toTypedArray()))
+        assertEquals(ATTRIBUTION, card.loggingTokens)
     }
 
     @Test
@@ -186,7 +186,7 @@ internal class CardMultilineWidgetTest {
         assertEquals("123", card.cvc)
         assertNull(card.addressZip)
         assertTrue(card.validateCard())
-        assertTrue(EXPECTED_LOGGING_ARRAY.contentEquals(card.loggingTokens.toTypedArray()))
+        assertEquals(ATTRIBUTION, card.loggingTokens)
     }
 
     @Test
@@ -205,7 +205,7 @@ internal class CardMultilineWidgetTest {
         assertEquals("1234", card.cvc)
         assertNull(card.addressZip)
         assertTrue(card.validateCard())
-        assertTrue(EXPECTED_LOGGING_ARRAY.contentEquals(card.loggingTokens.toTypedArray()))
+        assertEquals(ATTRIBUTION, card.loggingTokens)
     }
 
     @Test
@@ -224,7 +224,7 @@ internal class CardMultilineWidgetTest {
         assertEquals("123", card.cvc)
         assertNull(card.addressZip)
         assertTrue(card.validateCard())
-        assertTrue(EXPECTED_LOGGING_ARRAY.contentEquals(card.loggingTokens.toTypedArray()))
+        assertEquals(ATTRIBUTION, card.loggingTokens)
     }
 
     @Test
@@ -243,7 +243,8 @@ internal class CardMultilineWidgetTest {
                 number = VALID_VISA_NO_SPACES,
                 cvc = "123",
                 expiryMonth = 12,
-                expiryYear = 2050
+                expiryYear = 2050,
+                attribution = ATTRIBUTION
             ),
             PaymentMethod.BillingDetails.Builder()
                 .setAddress(Address.Builder()
@@ -270,7 +271,8 @@ internal class CardMultilineWidgetTest {
             number = VALID_VISA_NO_SPACES,
             cvc = "123",
             expiryMonth = 12,
-            expiryYear = 2050
+            expiryYear = 2050,
+            attribution = ATTRIBUTION
         )
         assertEquals(inputCard, card)
 
@@ -332,7 +334,8 @@ internal class CardMultilineWidgetTest {
             number = VALID_VISA_NO_SPACES,
             cvc = "123",
             expiryMonth = 12,
-            expiryYear = 2050
+            expiryYear = 2050,
+            attribution = ATTRIBUTION
         )
         assertEquals(inputCard, card)
 
@@ -354,7 +357,8 @@ internal class CardMultilineWidgetTest {
             number = VALID_AMEX_NO_SPACES,
             cvc = "1234",
             expiryMonth = 12,
-            expiryYear = 2050
+            expiryYear = 2050,
+            attribution = ATTRIBUTION
         )
         assertEquals(inputCard, card)
 
@@ -374,7 +378,8 @@ internal class CardMultilineWidgetTest {
             number = VALID_AMEX_NO_SPACES,
             cvc = "123",
             expiryMonth = 12,
-            expiryYear = 2050
+            expiryYear = 2050,
+            attribution = ATTRIBUTION
         )
         assertEquals(inputCard, card)
 
@@ -762,7 +767,7 @@ internal class CardMultilineWidgetTest {
 
     private companion object {
         // Every Card made by the CardInputView should have the card widget token.
-        private val EXPECTED_LOGGING_ARRAY = arrayOf("CardMultilineView")
+        private val ATTRIBUTION = setOf("CardMultilineView")
 
         private val EMPTY_WATCHER = object : StripeTextWatcher() {}
     }

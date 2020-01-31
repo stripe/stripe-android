@@ -85,7 +85,7 @@ class PaymentMethodTest {
     @Throws(JSONException::class)
     fun fromString_shouldReturnExpectedPaymentMethod() {
         assertEquals(PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-            PaymentMethodJsonParser().parse(PM_CARD_JSON))
+            PaymentMethodJsonParser().parse(PaymentMethodFixtures.CARD_JSON))
     }
 
     @Test
@@ -137,47 +137,6 @@ class PaymentMethodTest {
     }
 
     internal companion object {
-        internal val PM_CARD_JSON: JSONObject = JSONObject(
-            """
-            {
-                "id": "pm_123456789",
-                "created": 1550757934255,
-                "customer": "cus_AQsHpvKfKwJDrF",
-                "livemode": true,
-                "metadata": {
-                    "order_id": "123456789"
-                },
-                "type": "card",
-                "billing_details": {
-                    "address": {
-                        "city": "San Francisco",
-                        "country": "USA",
-                        "line1": "510 Townsend St",
-                        "postal_code": "94103",
-                        "state": "CA"
-                    },
-                    "email": "patrick@example.com",
-                    "name": "Patrick",
-                    "phone": "123-456-7890"
-                },
-                "card": {
-                    "brand": "visa",
-                    "checks": {
-                        "address_line1_check": "unchecked",
-                        "cvc_check": "unchecked"
-                    },
-                    "country": "US",
-                    "exp_month": 8,
-                    "exp_year": 2022,
-                    "funding": "credit",
-                    "last4": "4242",
-                    "three_d_secure_usage": {
-                        "supported": true
-                    }
-                }
-            }
-            """.trimIndent()
-        )
 
         private val PM_IDEAL_JSON = JSONObject(
             """

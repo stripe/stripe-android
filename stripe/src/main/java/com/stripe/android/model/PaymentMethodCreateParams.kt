@@ -30,6 +30,15 @@ data class PaymentMethodCreateParams internal constructor(
     val typeCode: String
         get() = type.code
 
+    internal val attribution: Set<String>?
+        @JvmSynthetic
+        get() {
+            return when (type) {
+                Type.Card -> card?.attribution
+                else -> null
+            }
+        }
+
     private constructor(
         card: Card,
         billingDetails: PaymentMethod.BillingDetails?,
@@ -116,7 +125,9 @@ data class PaymentMethodCreateParams internal constructor(
         private val expiryMonth: Int? = null,
         private val expiryYear: Int? = null,
         private val cvc: String? = null,
-        private val token: String? = null
+        private val token: String? = null,
+
+        internal val attribution: Set<String>? = null
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
             return listOf(
