@@ -18,12 +18,14 @@ import java.util.HashMap
  */
 internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     private val packageManager: PackageManager?,
-    private val packageName: String?
+    private val packageName: String?,
+    private val publishableKey: String
 ) {
 
-    internal constructor(context: Context) : this(
+    internal constructor(context: Context, publishableKey: String) : this(
         context.applicationContext.packageManager,
-        context.applicationContext.packageName
+        context.applicationContext.packageName,
+        publishableKey
     )
 
     @Retention(AnnotationRetention.SOURCE)
@@ -43,12 +45,10 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createAuthParams(
         event: AnalyticsEvent,
-        intentId: String,
-        publishableKey: String
+        intentId: String
     ): Map<String, Any> {
         return createParams(
             event,
-            publishableKey,
             extraParams = createIntentParam(intentId)
         )
     }
@@ -56,12 +56,10 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createAuthSourceParams(
         event: AnalyticsEvent,
-        publishableKey: String,
         sourceId: String?
     ): Map<String, Any> {
         return createParams(
             event,
-            publishableKey,
             extraParams = sourceId?.let { mapOf(FIELD_SOURCE_ID to it) }
         )
     }
@@ -70,12 +68,10 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     internal fun create3ds2ChallengeParams(
         event: AnalyticsEvent,
         intentId: String,
-        uiTypeCode: String,
-        publishableKey: String
+        uiTypeCode: String
     ): Map<String, Any> {
         return createParams(
             event,
-            publishableKey,
             extraParams = createIntentParam(intentId)
                 .plus(FIELD_3DS2_UI_TYPE to get3ds2UiType(uiTypeCode))
         )
@@ -84,12 +80,10 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun create3ds2ChallengeErrorParams(
         intentId: String,
-        runtimeErrorEvent: RuntimeErrorEvent,
-        publishableKey: String
+        runtimeErrorEvent: RuntimeErrorEvent
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.Auth3ds2ChallengeErrored,
-            publishableKey,
             extraParams = createIntentParam(intentId)
                 .plus(FIELD_ERROR_DATA to mapOf(
                     "type" to "runtime_error_event",
@@ -102,8 +96,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun create3ds2ChallengeErrorParams(
         intentId: String,
-        protocolErrorEvent: ProtocolErrorEvent,
-        publishableKey: String
+        protocolErrorEvent: ProtocolErrorEvent
     ): Map<String, Any> {
         val errorMessage = protocolErrorEvent.errorMessage
         val errorData = mapOf(
@@ -117,7 +110,6 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
 
         return createParams(
             AnalyticsEvent.Auth3ds2ChallengeErrored,
-            publishableKey,
             extraParams = createIntentParam(intentId)
                 .plus(FIELD_ERROR_DATA to errorData)
         )
@@ -126,12 +118,10 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createTokenCreationParams(
         productUsageTokens: Set<String>?,
-        publishableKey: String,
         @Token.TokenType tokenType: String
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.TokenCreate,
-            publishableKey,
             productUsageTokens = productUsageTokens,
             tokenType = tokenType
         )
@@ -139,14 +129,12 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createPaymentMethodCreationParams(
-        publishableKey: String,
         paymentMethodId: String?,
         paymentMethodType: PaymentMethod.Type?,
         productUsageTokens: Set<String>?
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.PaymentMethodCreate,
-            publishableKey,
             sourceType = paymentMethodType?.code,
             productUsageTokens = productUsageTokens,
             extraParams = paymentMethodId?.let {
@@ -157,13 +145,11 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createSourceCreationParams(
-        publishableKey: String,
         @Source.SourceType sourceType: String,
         productUsageTokens: Set<String>? = null
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.SourceCreate,
-            publishableKey,
             productUsageTokens = productUsageTokens,
             sourceType = sourceType
         )
@@ -172,12 +158,10 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createAddSourceParams(
         productUsageTokens: Set<String>? = null,
-        publishableKey: String,
         @Source.SourceType sourceType: String
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.CustomerAddSource,
-            publishableKey,
             productUsageTokens = productUsageTokens,
             sourceType = sourceType
         )
@@ -185,73 +169,61 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createDeleteSourceParams(
-        productUsageTokens: Set<String>?,
-        publishableKey: String
+        productUsageTokens: Set<String>?
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.CustomerDeleteSource,
-            publishableKey,
             productUsageTokens = productUsageTokens
         )
     }
 
     @JvmSynthetic
     internal fun createAttachPaymentMethodParams(
-        productUsageTokens: Set<String>?,
-        publishableKey: String
+        productUsageTokens: Set<String>?
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.CustomerAttachPaymentMethod,
-            publishableKey,
             productUsageTokens = productUsageTokens
         )
     }
 
     @JvmSynthetic
     internal fun createDetachPaymentMethodParams(
-        productUsageTokens: Set<String>?,
-        publishableKey: String
+        productUsageTokens: Set<String>?
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.CustomerDetachPaymentMethod,
-            publishableKey,
             productUsageTokens = productUsageTokens
         )
     }
 
     @JvmSynthetic
     internal fun createPaymentIntentConfirmationParams(
-        publishableKey: String,
         paymentMethodType: String? = null
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.PaymentIntentConfirm,
-            publishableKey,
             sourceType = paymentMethodType
         )
     }
 
     @JvmSynthetic
     internal fun createPaymentIntentRetrieveParams(
-        publishableKey: String,
         intentId: String
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.PaymentIntentRetrieve,
-            publishableKey,
             extraParams = createIntentParam(intentId)
         )
     }
 
     @JvmSynthetic
     internal fun createSetupIntentConfirmationParams(
-        publishableKey: String,
         paymentMethodType: String?,
         intentId: String
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.SetupIntentConfirm,
-            publishableKey,
             extraParams = createIntentParam(intentId)
                 .plus(
                     paymentMethodType?.let {
@@ -263,12 +235,10 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createSetupIntentRetrieveParams(
-        publishableKey: String,
         intentId: String
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.SetupIntentRetrieve,
-            publishableKey,
             extraParams = createIntentParam(intentId)
         )
     }
@@ -276,13 +246,12 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createParams(
         event: AnalyticsEvent,
-        publishableKey: String,
         productUsageTokens: Set<String>? = null,
         @Source.SourceType sourceType: String? = null,
         @Token.TokenType tokenType: String? = null,
         extraParams: Map<String, Any>? = null
     ): Map<String, Any> {
-        return createStandardParams(event, publishableKey)
+        return createStandardParams(event)
             .plus(createNameAndVersionParams())
             .plus(
                 productUsageTokens.takeUnless { it.isNullOrEmpty() }?.let {
@@ -312,8 +281,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     }
 
     private fun createStandardParams(
-        event: AnalyticsEvent,
-        publishableKey: String
+        event: AnalyticsEvent
     ): Map<String, Any> {
         return mapOf(
             FIELD_ANALYTICS_UA to ANALYTICS_UA,

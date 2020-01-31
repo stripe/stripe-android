@@ -333,9 +333,28 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
             context: Context,
             keyProvider: EphemeralKeyProvider
         ): IssuingCardPinService {
+            return create(
+                context,
+                PaymentConfiguration.getInstance(context).publishableKey,
+                keyProvider
+            )
+        }
+
+        /**
+         * Create a [IssuingCardPinService] with the provided [EphemeralKeyProvider].
+         *
+         * @param publishableKey an API publishable key
+         * @param keyProvider an [EphemeralKeyProvider] used to obtain an [EphemeralKey]
+         */
+        @JvmStatic
+        fun create(
+            context: Context,
+            publishableKey: String,
+            keyProvider: EphemeralKeyProvider
+        ): IssuingCardPinService {
             return IssuingCardPinService(
                 keyProvider,
-                StripeApiRepository(context, appInfo),
+                StripeApiRepository(context, publishableKey, appInfo),
                 StripeOperationIdFactory()
             )
         }

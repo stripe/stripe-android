@@ -77,7 +77,7 @@ class StripePaymentControllerTest {
         createController()
     }
     private val analyticsDataFactory: AnalyticsDataFactory by lazy {
-        AnalyticsDataFactory(context)
+        AnalyticsDataFactory(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
     }
     private val host: AuthActivityStarter.Host by lazy {
         AuthActivityStarter.Host.create(activity)
@@ -700,6 +700,7 @@ class StripePaymentControllerTest {
     ): PaymentController {
         return StripePaymentController(
             context,
+            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeRepository,
             false,
             MessageVersionRegistry(),

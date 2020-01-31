@@ -1397,10 +1397,13 @@ public class StripeTest {
     private Stripe createStripe(
             @NonNull String publishableKey,
             @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor) {
-        final StripeRepository stripeRepository = createStripeRepository(fireAndForgetRequestExecutor);
+        final StripeRepository stripeRepository = createStripeRepository(
+                publishableKey,
+                fireAndForgetRequestExecutor
+        );
         return new Stripe(
                 stripeRepository,
-                StripePaymentController.create(context, stripeRepository),
+                StripePaymentController.create(context, publishableKey, stripeRepository),
                 publishableKey,
                 null
         );
@@ -1409,10 +1412,12 @@ public class StripeTest {
     @NonNull
     private Stripe createStripe(@NonNull CoroutineScope workScope) {
         final StripeRepository stripeRepository = createStripeRepository(
-                new FakeFireAndForgetRequestExecutor());
+                NON_LOGGING_PK,
+                new FakeFireAndForgetRequestExecutor()
+        );
         return new Stripe(
                 stripeRepository,
-                StripePaymentController.create(context, stripeRepository),
+                StripePaymentController.create(context, NON_LOGGING_PK, stripeRepository),
                 NON_LOGGING_PK,
                 null,
                 workScope
@@ -1421,9 +1426,12 @@ public class StripeTest {
 
     @NonNull
     private StripeRepository createStripeRepository(
-            @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor) {
+            @NonNull final String publishableKey,
+            @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor
+    ) {
         return new StripeApiRepository(
                 context,
+                publishableKey,
                 null,
                 new FakeLogger(),
                 new ApiRequestExecutor.Default(),

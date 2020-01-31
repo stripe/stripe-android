@@ -77,6 +77,7 @@ class Stripe internal constructor(
         context.applicationContext,
         StripeApiRepository(
             context.applicationContext,
+            publishableKey,
             appInfo,
             Logger.getInstance(enableLogging)
         ),
@@ -93,8 +94,9 @@ class Stripe internal constructor(
         enableLogging: Boolean
     ) : this(
         stripeRepository,
-        StripePaymentController.create(
+        StripePaymentController(
             context.applicationContext,
+            publishableKey,
             stripeRepository,
             enableLogging
         ),
