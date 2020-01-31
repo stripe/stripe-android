@@ -585,7 +585,7 @@ class CardTest {
     fun toBuilder_withLoggingToken_whenUnchanged_isEquals() {
         val card = requireNotNull(CardJsonParser().parse(JSON_CARD_USD))
         card.toBuilder()
-            .loggingTokens(listOf("hello"))
+            .loggingTokens(setOf("hello"))
 
         assertEquals(card, card.toBuilder().build())
     }

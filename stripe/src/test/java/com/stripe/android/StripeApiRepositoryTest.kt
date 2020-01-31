@@ -12,7 +12,9 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.InvalidRequestException
+import com.stripe.android.model.BankAccountTokenParamsFixtures
 import com.stripe.android.model.Card
+import com.stripe.android.model.CardFixtures
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -21,6 +23,7 @@ import com.stripe.android.model.SourceParams
 import com.stripe.android.model.StripeFileFixtures
 import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeFilePurpose
+import com.stripe.android.model.TokenFixtures
 import com.stripe.android.view.FpxBank
 import java.net.HttpURLConnection
 import java.net.UnknownHostException
@@ -541,7 +544,10 @@ class StripeApiRepositoryTest {
         assertEquals("pm_1EVNXtCRMbs6FrXfTlZGIdGq", paymentMethods[1].id)
         assertEquals("src_1EVO8DCRMbs6FrXf2Dspj49a", paymentMethods[2].id)
 
-        verifyFingerprintAndAnalyticsRequests(AnalyticsEvent.CustomerRetrievePaymentMethods)
+        verifyFingerprintAndAnalyticsRequests(
+            AnalyticsEvent.CustomerRetrievePaymentMethods,
+            emptyList()
+        )
     }
 
     @Test
@@ -685,8 +691,47 @@ class StripeApiRepositoryTest {
         )
     }
 
+    @Test
+    fun createCardToken_withAttribution_shouldPopulateProductUsage() {
+        val stripeResponse = StripeResponse(
+            200,
+            TokenFixtures.CARD_TOKEN_JSON.toString(),
+            emptyMap()
+        )
+        `when`(stripeApiRequestExecutor.execute(any<ApiRequest>())).thenReturn(stripeResponse)
+        create().createToken(
+            CardFixtures.CARD_WITH_ATTRIBUTION,
+            DEFAULT_OPTIONS
+        )
+
+        verifyFingerprintAndAnalyticsRequests(
+            AnalyticsEvent.TokenCreate,
+            listOf("CardInputView")
+        )
+    }
+
+    @Test
+    fun createBankToken_shouldNotPopulateProductUsage() {
+        val stripeResponse = StripeResponse(
+            200,
+            TokenFixtures.BANK_TOKEN_JSON.toString(),
+            emptyMap()
+        )
+        `when`(stripeApiRequestExecutor.execute(any<ApiRequest>())).thenReturn(stripeResponse)
+        create().createToken(
+            BankAccountTokenParamsFixtures.DEFAULT,
+            DEFAULT_OPTIONS
+        )
+
+        verifyFingerprintAndAnalyticsRequests(
+            AnalyticsEvent.TokenCreate,
+            productUsage = emptyList()
+        )
+    }
+
     private fun verifyFingerprintAndAnalyticsRequests(
-        event: AnalyticsEvent
+        event: AnalyticsEvent,
+        productUsage: List<String>? = null
     ) {
         verify(fireAndForgetRequestExecutor, times(2))
             .executeAsync(stripeRequestArgumentCaptor.capture())
@@ -697,9 +742,15 @@ class StripeApiRepositoryTest {
         assertNotNull(fingerprintRequest)
 
         val analyticsRequest = fireAndForgetRequests[1]
+        val analyticsParams = analyticsRequest.compactParams.orEmpty()
         assertEquals(
             event.toString(),
-            analyticsRequest.compactParams?.get("event")
+            analyticsParams["event"]
+        )
+
+        assertEquals(
+            productUsage,
+            analyticsParams["product_usage"]
         )
     }
 
@@ -709,7 +760,7 @@ class StripeApiRepositoryTest {
             stripeApiRequestExecutor = stripeApiRequestExecutor,
             fireAndForgetRequestExecutor = fireAndForgetRequestExecutor,
             networkUtils = StripeNetworkUtils(
-                UidParamsFactory("foo", FakeUidSupplier())
+                UidParamsFactory("com.stripe.example", FakeUidSupplier())
             )
         )
     }

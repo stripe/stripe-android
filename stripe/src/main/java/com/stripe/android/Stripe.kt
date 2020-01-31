@@ -31,6 +31,7 @@ import com.stripe.android.model.SourceParams
 import com.stripe.android.model.StripeFile
 import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.Token
+import com.stripe.android.model.TokenParams
 import com.stripe.android.view.AuthActivityStarter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -49,7 +50,6 @@ import kotlinx.coroutines.Dispatchers
  */
 class Stripe internal constructor(
     private val stripeRepository: StripeRepository,
-    private val stripeNetworkUtils: StripeNetworkUtils,
     private val paymentController: PaymentController,
     publishableKey: String,
     private val stripeAccountId: String? = null,
@@ -80,7 +80,6 @@ class Stripe internal constructor(
             appInfo,
             Logger.getInstance(enableLogging)
         ),
-        StripeNetworkUtils(context.applicationContext),
         ApiKeyValidator.get().requireValid(publishableKey),
         stripeAccountId,
         enableLogging
@@ -89,13 +88,11 @@ class Stripe internal constructor(
     private constructor(
         context: Context,
         stripeRepository: StripeRepository,
-        stripeNetworkUtils: StripeNetworkUtils,
         publishableKey: String,
         stripeAccountId: String?,
         enableLogging: Boolean
     ) : this(
         stripeRepository,
-        stripeNetworkUtils,
         StripePaymentController.create(
             context.applicationContext,
             stripeRepository,
@@ -107,13 +104,11 @@ class Stripe internal constructor(
 
     internal constructor(
         stripeRepository: StripeRepository,
-        stripeNetworkUtils: StripeNetworkUtils,
         paymentController: PaymentController,
         publishableKey: String,
         stripeAccountId: String?
     ) : this(
         stripeRepository,
-        stripeNetworkUtils,
         paymentController,
         publishableKey,
         stripeAccountId,
@@ -828,13 +823,10 @@ class Stripe internal constructor(
         idempotencyKey: String? = null,
         callback: ApiResultCallback<Token>
     ) {
-        val params = accountParams.toParamMap()
-            .plus(stripeNetworkUtils.createUidParams())
-        createTokenFromParams(
-            params,
-            Token.TokenType.ACCOUNT,
-            idempotencyKey,
-            callback
+        createToken(
+            tokenParams = accountParams,
+            idempotencyKey = idempotencyKey,
+            callback = callback
         )
     }
 
@@ -866,13 +858,12 @@ class Stripe internal constructor(
     ): Token? {
         return try {
             stripeRepository.createToken(
-                accountParams.toParamMap(),
+                accountParams,
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
-                ),
-                Token.TokenType.ACCOUNT
+                )
             )
         } catch (exception: CardException) {
             // Should never occur. CardException is only for card related requests.
@@ -897,11 +888,8 @@ class Stripe internal constructor(
         idempotencyKey: String? = null,
         callback: ApiResultCallback<Token>
     ) {
-        val params = bankAccountTokenParams.toParamMap()
-            .plus(stripeNetworkUtils.createUidParams())
-        createTokenFromParams(
-            params,
-            Token.TokenType.BANK_ACCOUNT,
+        createToken(
+            bankAccountTokenParams,
             idempotencyKey,
             callback
         )
@@ -935,16 +923,13 @@ class Stripe internal constructor(
         bankAccountTokenParams: BankAccountTokenParams,
         idempotencyKey: String? = null
     ): Token? {
-        val params = bankAccountTokenParams.toParamMap()
-            .plus(stripeNetworkUtils.createUidParams())
         return stripeRepository.createToken(
-            params,
+            bankAccountTokenParams,
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId,
                 idempotencyKey = idempotencyKey
-            ),
-            Token.TokenType.BANK_ACCOUNT
+            )
         )
     }
 
@@ -966,11 +951,8 @@ class Stripe internal constructor(
         idempotencyKey: String? = null,
         callback: ApiResultCallback<Token>
     ) {
-        val params = bankAccount.toParamMap()
-            .plus(stripeNetworkUtils.createUidParams())
-        createTokenFromParams(
-            params,
-            Token.TokenType.BANK_ACCOUNT,
+        createToken(
+            bankAccount,
             idempotencyKey,
             callback
         )
@@ -1005,16 +987,13 @@ class Stripe internal constructor(
         bankAccount: BankAccount,
         idempotencyKey: String? = null
     ): Token? {
-        val params = bankAccount.toParamMap()
-            .plus(stripeNetworkUtils.createUidParams())
         return stripeRepository.createToken(
-            params,
+            bankAccount,
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId,
                 idempotencyKey = idempotencyKey
-            ),
-            Token.TokenType.BANK_ACCOUNT
+            )
         )
     }
 
@@ -1035,9 +1014,8 @@ class Stripe internal constructor(
         idempotencyKey: String? = null,
         callback: ApiResultCallback<Token>
     ) {
-        createTokenFromParams(
-            PiiTokenParams(personalId).toParamMap(),
-            Token.TokenType.PII,
+        createToken(
+            PiiTokenParams(personalId),
             idempotencyKey,
             callback
         )
@@ -1070,13 +1048,12 @@ class Stripe internal constructor(
         idempotencyKey: String? = null
     ): Token? {
         return stripeRepository.createToken(
-            PiiTokenParams(personalId).toParamMap(),
+            PiiTokenParams(personalId),
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId,
                 idempotencyKey = idempotencyKey
-            ),
-            Token.TokenType.PII
+            )
         )
     }
 
@@ -1099,12 +1076,7 @@ class Stripe internal constructor(
         idempotencyKey: String? = null,
         callback: ApiResultCallback<Token>
     ) {
-        createTokenFromParams(
-            stripeNetworkUtils.createCardTokenParams(card),
-            Token.TokenType.CARD,
-            idempotencyKey,
-            callback
-        )
+        createCardToken(card, idempotencyKey, callback)
     }
 
     /**
@@ -1124,11 +1096,10 @@ class Stripe internal constructor(
         idempotencyKey: String? = null,
         callback: ApiResultCallback<Token>
     ) {
-        createTokenFromParams(
-            stripeNetworkUtils.createCardTokenParams(card),
-            Token.TokenType.CARD,
-            idempotencyKey,
-            callback
+        createToken(
+            tokenParams = card,
+            idempotencyKey = idempotencyKey,
+            callback = callback
         )
     }
 
@@ -1159,13 +1130,12 @@ class Stripe internal constructor(
         idempotencyKey: String? = null
     ): Token? {
         return stripeRepository.createToken(
-            stripeNetworkUtils.createCardTokenParams(card),
+            card,
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId,
                 idempotencyKey = idempotencyKey
-            ),
-            Token.TokenType.CARD
+            )
         )
     }
 
@@ -1185,9 +1155,8 @@ class Stripe internal constructor(
         idempotencyKey: String? = null,
         callback: ApiResultCallback<Token>
     ) {
-        createTokenFromParams(
-            CvcTokenParams(cvc).toParamMap(),
-            Token.TokenType.CVC_UPDATE,
+        createToken(
+            CvcTokenParams(cvc),
             idempotencyKey,
             callback
         )
@@ -1219,13 +1188,12 @@ class Stripe internal constructor(
         idempotencyKey: String? = null
     ): Token? {
         return stripeRepository.createToken(
-            CvcTokenParams(cvc).toParamMap(),
+            CvcTokenParams(cvc),
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId,
                 idempotencyKey = idempotencyKey
-            ),
-            Token.TokenType.CVC_UPDATE
+            )
         )
     }
 
@@ -1247,9 +1215,8 @@ class Stripe internal constructor(
         idempotencyKey: String? = null,
         callback: ApiResultCallback<Token>
     ) {
-        createTokenFromParams(
-            params.toParamMap(),
-            Token.TokenType.PERSON,
+        createToken(
+            params,
             idempotencyKey,
             callback
         )
@@ -1276,26 +1243,23 @@ class Stripe internal constructor(
         idempotencyKey: String? = null
     ): Token? {
         return stripeRepository.createToken(
-            params.toParamMap(),
+            params,
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId,
                 idempotencyKey = idempotencyKey
-            ),
-            Token.TokenType.PERSON
+            )
         )
     }
 
-    private fun createTokenFromParams(
-        tokenParams: Map<String, Any>,
-        @Token.TokenType tokenType: String,
+    private fun createToken(
+        tokenParams: TokenParams,
         idempotencyKey: String? = null,
         callback: ApiResultCallback<Token>
     ) {
         CreateTokenTask(
             stripeRepository,
             tokenParams,
-            tokenType,
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId,
@@ -1395,15 +1359,14 @@ class Stripe internal constructor(
 
     private class CreateTokenTask internal constructor(
         private val stripeRepository: StripeRepository,
-        private val tokenParams: Map<String, Any>,
-        @param:Token.TokenType @field:Token.TokenType private val tokenType: String,
+        private val tokenParams: TokenParams,
         private val options: ApiRequest.Options,
         workScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
         callback: ApiResultCallback<Token>
     ) : ApiOperation<Token>(workScope, callback) {
         @Throws(StripeException::class)
         override suspend fun getResult(): Token? {
-            return stripeRepository.createToken(tokenParams, options, tokenType)
+            return stripeRepository.createToken(tokenParams, options)
         }
     }
 

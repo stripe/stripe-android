@@ -35,7 +35,7 @@ data class AccountParams internal constructor(
      * See [BusinessTypeParams]
      */
     private val businessData: Map<String, @RawValue Any>? = null
-) : StripeParamsModel, Parcelable {
+) : TokenParams(Token.TokenType.ACCOUNT) {
 
     /**
      * Create a string-keyed map representing this object that is ready to be sent over the network.

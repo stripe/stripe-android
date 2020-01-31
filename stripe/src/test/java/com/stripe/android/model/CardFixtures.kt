@@ -126,4 +126,8 @@ object CardFixtures {
         }
         """.trimIndent()
     )))
+
+    internal val CARD_WITH_ATTRIBUTION = Card.Builder()
+        .loggingTokens(setOf("CardInputView"))
+        .build()
 }

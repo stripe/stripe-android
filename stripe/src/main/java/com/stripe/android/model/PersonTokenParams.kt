@@ -150,7 +150,7 @@ data class PersonTokenParams(
      * [person.verification](https://stripe.com/docs/api/tokens/create_person#create_person_token-person-verification)
      */
     val verification: Verification? = null
-) : StripeParamsModel, Parcelable {
+) : TokenParams(Token.TokenType.BANK_ACCOUNT) {
     override fun toParamMap(): Map<String, Any> {
         return mapOf(PARAM_PERSON to
             listOf(

@@ -216,7 +216,7 @@ class CardInputWidget @JvmOverloads constructor(
                 else -> {
                     return Card.Builder(cardNumber, cardDate.first, cardDate.second, cvcValue)
                         .addressZip(postalCodeValue)
-                        .loggingTokens(listOf(LOGGING_TOKEN))
+                        .loggingTokens(setOf(LOGGING_TOKEN))
                 }
             }
 

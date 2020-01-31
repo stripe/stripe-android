@@ -96,7 +96,7 @@ data class BankAccount internal constructor(
      * [status](https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-status)
      */
     val status: Status? = null
-) : StripeModel, StripeParamsModel {
+) : StripeModel, TokenParams(Token.TokenType.BANK_ACCOUNT) {
 
     @Retention(AnnotationRetention.SOURCE)
     @StringDef(BankAccountType.COMPANY, BankAccountType.INDIVIDUAL)

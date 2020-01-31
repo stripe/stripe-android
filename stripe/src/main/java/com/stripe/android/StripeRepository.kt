@@ -21,6 +21,7 @@ import com.stripe.android.model.StripeFile
 import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
+import com.stripe.android.model.TokenParams
 import org.json.JSONException
 
 /**
@@ -120,9 +121,8 @@ internal interface StripeRepository {
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, APIException::class, CardException::class)
     fun createToken(
-        tokenParams: Map<String, *>,
-        options: ApiRequest.Options,
-        @Token.TokenType tokenType: String
+        tokenParams: TokenParams,
+        options: ApiRequest.Options
     ): Token?
 
     @Throws(AuthenticationException::class, InvalidRequestException::class,
