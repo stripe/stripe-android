@@ -27,8 +27,6 @@ import com.stripe.android.exception.StripeException
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.model.PaymentMethodTest
-import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.view.AddPaymentMethodActivity.Companion.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY
 import java.util.Calendar
 import kotlin.test.BeforeTest
@@ -419,8 +417,7 @@ class AddPaymentMethodActivityTest {
                 .setPaymentMethodType(PaymentMethod.Type.Card)
                 .build()
 
-        private val EXPECTED_PAYMENT_METHOD =
-            requireNotNull(PaymentMethodJsonParser().parse(PaymentMethodTest.PM_CARD_JSON))
+        private val EXPECTED_PAYMENT_METHOD = PaymentMethodFixtures.CARD_PAYMENT_METHOD
 
         private fun createSuccessLiveData(
             paymentMethod: PaymentMethod

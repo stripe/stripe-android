@@ -60,7 +60,7 @@ internal object PaymentMethodFixtures {
         )
     )
 
-    val SEPA_DEBIT_PAYMENT_METHOD = PaymentMethodJsonParser().parse(JSONObject(
+    val SEPA_DEBIT_JSON = JSONObject(
         """
         {
           "id": "pm_1FSQaJCR",
@@ -92,7 +92,51 @@ internal object PaymentMethodFixtures {
           "type": "sepa_debit"
         }
         """.trimIndent()
-    ))
+    )
+
+    val SEPA_DEBIT_PAYMENT_METHOD = PaymentMethodJsonParser().parse(SEPA_DEBIT_JSON)
+
+    internal val CARD_JSON: JSONObject = JSONObject(
+        """
+            {
+                "id": "pm_123456789",
+                "created": 1550757934255,
+                "customer": "cus_AQsHpvKfKwJDrF",
+                "livemode": true,
+                "metadata": {
+                    "order_id": "123456789"
+                },
+                "type": "card",
+                "billing_details": {
+                    "address": {
+                        "city": "San Francisco",
+                        "country": "USA",
+                        "line1": "510 Townsend St",
+                        "postal_code": "94103",
+                        "state": "CA"
+                    },
+                    "email": "patrick@example.com",
+                    "name": "Patrick",
+                    "phone": "123-456-7890"
+                },
+                "card": {
+                    "brand": "visa",
+                    "checks": {
+                        "address_line1_check": "unchecked",
+                        "cvc_check": "unchecked"
+                    },
+                    "country": "US",
+                    "exp_month": 8,
+                    "exp_year": 2022,
+                    "funding": "credit",
+                    "last4": "4242",
+                    "three_d_secure_usage": {
+                        "supported": true
+                    }
+                }
+            }
+            """.trimIndent()
+    )
 
     val CARD_PAYMENT_METHODS = listOf(
         PaymentMethod(

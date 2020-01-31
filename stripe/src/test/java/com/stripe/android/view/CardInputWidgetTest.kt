@@ -124,7 +124,7 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         assertEquals(2050, card.expYear)
         assertEquals(CVC_VALUE_COMMON, card.cvc)
         assertTrue(card.validateCard())
-        assertTrue(EXPECTED_LOGGING_ARRAY.contentEquals(card.loggingTokens.toTypedArray()))
+        assertEquals(ATTRIBUTION, card.loggingTokens)
 
         val actualPaymentMethodParams =
             requireNotNull(cardInputWidget.paymentMethodCreateParams)
@@ -134,7 +134,8 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
                     number = VALID_VISA_NO_SPACES,
                     cvc = CVC_VALUE_COMMON,
                     expiryMonth = 12,
-                    expiryYear = 2050
+                    expiryYear = 2050,
+                    attribution = ATTRIBUTION
                 )
             )
         assertEquals(expectedPaymentMethodParams, actualPaymentMethodParams)
@@ -158,7 +159,7 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         assertEquals(CVC_VALUE_COMMON, card.cvc)
         assertEquals(POSTAL_CODE_VALUE, card.addressZip)
         assertTrue(card.validateCard())
-        assertTrue(EXPECTED_LOGGING_ARRAY.contentEquals(card.loggingTokens.toTypedArray()))
+        assertEquals(ATTRIBUTION, card.loggingTokens)
 
         val actualPaymentMethodParams =
             requireNotNull(cardInputWidget.paymentMethodCreateParams)
@@ -168,7 +169,8 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
                     number = VALID_VISA_NO_SPACES,
                     cvc = CVC_VALUE_COMMON,
                     expiryMonth = 12,
-                    expiryYear = 2050
+                    expiryYear = 2050,
+                    attribution = ATTRIBUTION
                 ),
                 billingDetails = PaymentMethod.BillingDetails(
                     address = Address(
@@ -196,7 +198,7 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         assertEquals(2050, card.expYear)
         assertEquals(CVC_VALUE_AMEX, card.cvc)
         assertTrue(card.validateCard())
-        assertTrue(EXPECTED_LOGGING_ARRAY.contentEquals(card.loggingTokens.toTypedArray()))
+        assertEquals(ATTRIBUTION, card.loggingTokens)
 
         val actualPaymentMethodParams =
             requireNotNull(cardInputWidget.paymentMethodCreateParams)
@@ -205,7 +207,8 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
                 number = VALID_AMEX_NO_SPACES,
                 cvc = CVC_VALUE_AMEX,
                 expiryMonth = 12,
-                expiryYear = 2050
+                expiryYear = 2050,
+                attribution = ATTRIBUTION
             )
         )
         assertEquals(expectedPaymentMethodParams, actualPaymentMethodParams)
@@ -230,7 +233,7 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         assertEquals(CVC_VALUE_AMEX, card.cvc)
         assertEquals(POSTAL_CODE_VALUE, card.addressZip)
         assertTrue(card.validateCard())
-        assertTrue(EXPECTED_LOGGING_ARRAY.contentEquals(card.loggingTokens.toTypedArray()))
+        assertEquals(ATTRIBUTION, card.loggingTokens)
 
         val actualPaymentMethodParams = cardInputWidget.paymentMethodCreateParams
         assertNotNull(actualPaymentMethodParams)
@@ -240,7 +243,8 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
                     number = VALID_AMEX_NO_SPACES,
                     cvc = CVC_VALUE_AMEX,
                     expiryYear = 2050,
-                    expiryMonth = 12
+                    expiryMonth = 12,
+                    attribution = ATTRIBUTION
                 ),
                 billingDetails = PaymentMethod.BillingDetails.Builder()
                     .setAddress(Address(
@@ -268,7 +272,7 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         assertEquals(2050, card.expYear)
         assertEquals(CVC_VALUE_COMMON, card.cvc)
         assertTrue(card.validateCard())
-        assertTrue(EXPECTED_LOGGING_ARRAY.contentEquals(card.loggingTokens.toTypedArray()))
+        assertEquals(ATTRIBUTION, card.loggingTokens)
 
         val paymentMethodCard = cardInputWidget.paymentMethodCard
         assertNotNull(paymentMethodCard)
@@ -277,7 +281,8 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
                 number = VALID_DINERS_CLUB_NO_SPACES,
                 cvc = CVC_VALUE_COMMON,
                 expiryMonth = 12,
-                expiryYear = 2050
+                expiryYear = 2050,
+                attribution = ATTRIBUTION
             )
         assertEquals(expectedPaymentMethodCard, paymentMethodCard)
     }
@@ -300,7 +305,7 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         assertEquals(2050, card.expYear)
         assertEquals(CVC_VALUE_COMMON, card.cvc)
         assertTrue(card.validateCard())
-        assertTrue(EXPECTED_LOGGING_ARRAY.contentEquals(card.loggingTokens.toTypedArray()))
+        assertEquals(ATTRIBUTION, card.loggingTokens)
 
         val paymentMethodCard = cardInputWidget.paymentMethodCard
         assertNotNull(paymentMethodCard)
@@ -308,7 +313,8 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
             number = VALID_DINERS_CLUB_NO_SPACES,
             cvc = CVC_VALUE_COMMON,
             expiryYear = 2050,
-            expiryMonth = 12
+            expiryMonth = 12,
+            attribution = ATTRIBUTION
         )
         assertEquals(expectedPaymentMethodCard, paymentMethodCard)
     }
@@ -459,7 +465,8 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
                 number = VALID_VISA_NO_SPACES,
                 cvc = CVC_VALUE_COMMON,
                 expiryMonth = 12,
-                expiryYear = 2030
+                expiryYear = 2030,
+                attribution = ATTRIBUTION
             ),
             billingDetails = PaymentMethod.BillingDetails(
                 address = Address(
@@ -1080,7 +1087,8 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
             number = VALID_AMEX_NO_SPACES,
             cvc = CVC_VALUE_AMEX,
             expiryMonth = 12,
-            expiryYear = 2079
+            expiryYear = 2079,
+            attribution = ATTRIBUTION
         )
         assertEquals(expectedPaymentMethodCard, paymentMethodCard)
     }
@@ -1110,7 +1118,8 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
             number = VALID_AMEX_NO_SPACES,
             cvc = CVC_VALUE_AMEX,
             expiryYear = 2079,
-            expiryMonth = 12
+            expiryMonth = 12,
+            attribution = ATTRIBUTION
         )
         assertEquals(expectedPaymentMethodCard, paymentMethodCard)
     }
@@ -1270,7 +1279,7 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
 
     private companion object {
         // Every Card made by the CardInputView should have the card widget token.
-        private val EXPECTED_LOGGING_ARRAY = arrayOf(LOGGING_TOKEN)
+        private val ATTRIBUTION = setOf(LOGGING_TOKEN)
 
         private const val CVC_VALUE_COMMON = "123"
         private const val CVC_VALUE_AMEX = "1234"

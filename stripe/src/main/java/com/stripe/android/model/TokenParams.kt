@@ -7,5 +7,5 @@ abstract class TokenParams(
     /**
      * The SDK components that were involved in the creation of this token
      */
-    internal val attribution: Collection<String> = emptySet()
+    internal val attribution: Set<String> = emptySet()
 ) : StripeParamsModel, Parcelable

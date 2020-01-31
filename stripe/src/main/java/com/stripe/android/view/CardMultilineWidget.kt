@@ -103,17 +103,14 @@ class CardMultilineWidget @JvmOverloads constructor(
      */
     override val paymentMethodCard: PaymentMethodCreateParams.Card?
         get() {
-            return if (validateAllFields()) {
-                expiryDateEditText.validDateFields?.let { (month, year) ->
-                    PaymentMethodCreateParams.Card(
-                        number = cardNumber,
-                        cvc = cvcEditText.text?.toString(),
-                        expiryMonth = month,
-                        expiryYear = year
-                    )
-                }
-            } else {
-                null
+            return card?.let {
+                PaymentMethodCreateParams.Card(
+                    number = it.number,
+                    cvc = it.cvc,
+                    expiryMonth = it.expMonth,
+                    expiryYear = it.expYear,
+                    attribution = it.attribution
+                )
             }
         }
 

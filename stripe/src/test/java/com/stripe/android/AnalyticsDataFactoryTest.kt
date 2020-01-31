@@ -28,12 +28,11 @@ class AnalyticsDataFactoryTest {
 
     @Test
     fun getTokenCreationParams_withValidInput_createsCorrectMap() {
-        val tokens = listOf("CardInputView")
         // Correctness of these methods will be tested elsewhere. Assume validity for this test.
         val expectedEvent = AnalyticsEvent.TokenCreate.toString()
 
         val params = analyticsDataFactory.createTokenCreationParams(
-            tokens,
+            ATTRIBUTION,
             API_KEY,
             Token.TokenType.PII
         )
@@ -48,12 +47,11 @@ class AnalyticsDataFactoryTest {
 
     @Test
     fun getCvcUpdateTokenCreationParams_withValidInput_createsCorrectMap() {
-        val tokens = listOf("CardInputView")
         // Correctness of these methods will be tested elsewhere. Assume validity for this test.
         val expectedEventName = AnalyticsEvent.TokenCreate.toString()
 
         val params = analyticsDataFactory.createTokenCreationParams(
-            tokens,
+            ATTRIBUTION,
             API_KEY,
             Token.TokenType.CVC_UPDATE
         )
@@ -70,11 +68,11 @@ class AnalyticsDataFactoryTest {
     fun getSourceCreationParams_withValidInput_createsCorrectMap() {
         // Size is SIZE-1 because tokens don't have a token_type field
         val expectedSize = AnalyticsDataFactory.VALID_PARAM_FIELDS.size - 1
-        val tokens = listOf("CardInputView")
         val loggingParams = analyticsDataFactory.createSourceCreationParams(
             API_KEY,
             Source.SourceType.SEPA_DEBIT,
-            tokens)
+            ATTRIBUTION
+        )
         assertEquals(expectedSize, loggingParams.size)
         assertEquals(Source.SourceType.SEPA_DEBIT,
             loggingParams[AnalyticsDataFactory.FIELD_SOURCE_TYPE])
@@ -152,7 +150,6 @@ class AnalyticsDataFactoryTest {
     @Test
     @Throws(PackageManager.NameNotFoundException::class)
     fun getEventLoggingParams_withProductUsage_createsAllFields() {
-        val tokens = listOf("CardInputView")
         // Correctness of these methods will be tested elsewhere. Assume validity for this test.
         val expectedEventName = AnalyticsEvent.TokenCreate.toString()
         val expectedUaName = AnalyticsDataFactory.ANALYTICS_UA
@@ -168,10 +165,14 @@ class AnalyticsDataFactoryTest {
             .thenReturn(packageInfo)
 
         val params = AnalyticsDataFactory(packageManager, packageName)
-            .createTokenCreationParams(tokens, API_KEY, Token.TokenType.CARD)
+            .createTokenCreationParams(
+                ATTRIBUTION,
+                API_KEY,
+                Token.TokenType.CARD
+            )
         assertEquals(AnalyticsDataFactory.VALID_PARAM_FIELDS.size - 1, params.size)
         assertEquals(API_KEY, params[AnalyticsDataFactory.FIELD_PUBLISHABLE_KEY])
-        assertEquals(EXPECTED_SINGLE_TOKEN_LIST, params[AnalyticsDataFactory.FIELD_PRODUCT_USAGE])
+        assertEquals(ATTRIBUTION.toList(), params[AnalyticsDataFactory.FIELD_PRODUCT_USAGE])
         assertEquals(Token.TokenType.CARD, params[AnalyticsDataFactory.FIELD_TOKEN_TYPE])
         assertEquals(Build.VERSION.SDK_INT, params[AnalyticsDataFactory.FIELD_OS_VERSION])
         assertNotNull(params[AnalyticsDataFactory.FIELD_OS_RELEASE])
@@ -253,6 +254,6 @@ class AnalyticsDataFactoryTest {
 
     private companion object {
         private const val API_KEY = "pk_abc123"
-        private val EXPECTED_SINGLE_TOKEN_LIST = listOf("CardInputView")
+        private val ATTRIBUTION = setOf("CardInputView")
     }
 }

@@ -1,9 +1,8 @@
 package com.stripe.android
 
-import com.stripe.android.model.PaymentMethodTest
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
-import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.utils.ParcelUtils
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -80,6 +79,6 @@ class PaymentSessionDataTest {
     }
 
     private companion object {
-        private val PAYMENT_METHOD = PaymentMethodJsonParser().parse(PaymentMethodTest.PM_CARD_JSON)
+        private val PAYMENT_METHOD = PaymentMethodFixtures.CARD_PAYMENT_METHOD
     }
 }

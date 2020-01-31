@@ -17,8 +17,6 @@ import com.stripe.android.model.CustomerFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.model.PaymentMethodTest
-import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.testharness.TestEphemeralKeyProvider
 import com.stripe.android.view.ActivityStarter
 import com.stripe.android.view.BillingAddressFields
@@ -396,7 +394,7 @@ class PaymentSessionTest {
             paymentMethodCreateParams: PaymentMethodCreateParams,
             options: ApiRequest.Options
         ): PaymentMethod {
-            return PaymentMethodJsonParser().parse(PaymentMethodTest.PM_CARD_JSON)
+            return PaymentMethodFixtures.CARD_PAYMENT_METHOD
         }
 
         override fun setDefaultCustomerSource(
