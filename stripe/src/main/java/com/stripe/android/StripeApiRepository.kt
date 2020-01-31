@@ -327,7 +327,11 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     ): Source? {
         fireFingerprintRequest()
         fireAnalyticsRequest(
-            analyticsDataFactory.createSourceCreationParams(options.apiKey, sourceParams.type),
+            analyticsDataFactory.createSourceCreationParams(
+                options.apiKey,
+                sourceParams.type,
+                sourceParams.attribution
+            ),
             options.apiKey
         )
 

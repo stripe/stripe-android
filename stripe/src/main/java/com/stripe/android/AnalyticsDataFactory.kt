@@ -280,7 +280,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
         return createStandardParams(event, publishableKey)
             .plus(createNameAndVersionParams())
             .plus(
-                productUsageTokens?.let {
+                productUsageTokens.takeUnless { it.isNullOrEmpty() }?.let {
                     mapOf(FIELD_PRODUCT_USAGE to it.toList())
                 }.orEmpty()
             )
