@@ -19,7 +19,10 @@ import kotlinx.android.synthetic.main.activity_klarna_source.*
 
 class KlarnaSourceActivity : AppCompatActivity() {
     private val viewModel: SourceViewModel by lazy {
-        ViewModelProvider(this)[SourceViewModel::class.java]
+        ViewModelProvider(
+            this,
+            ViewModelProvider.AndroidViewModelFactory(application)
+        )[SourceViewModel::class.java]
     }
 
     private val stripe: Stripe by lazy {
