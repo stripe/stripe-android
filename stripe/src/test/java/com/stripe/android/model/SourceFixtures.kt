@@ -91,7 +91,7 @@ internal object SourceFixtures {
         """.trimIndent()
     )))
 
-    val SOURCE_CARD = requireNotNull(PARSER.parse(JSONObject(
+    val SOURCE_CARD_JSON = JSONObject(
         """
         {
             "id": "src_19t3xKBZqEXluyI4uz2dxAfQ",
@@ -136,7 +136,9 @@ internal object SourceFixtures {
             }
         }
         """.trimIndent()
-    )))
+    )
+
+    val SOURCE_CARD = requireNotNull(PARSER.parse(SOURCE_CARD_JSON))
 
     val CARD = requireNotNull(PARSER.parse(JSONObject(
         """

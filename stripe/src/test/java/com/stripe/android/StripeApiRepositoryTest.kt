@@ -19,6 +19,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.model.SourceFixtures
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.StripeFileFixtures
 import com.stripe.android.model.StripeFileParams
@@ -178,6 +179,50 @@ class StripeApiRepositoryTest {
 
         // Check that we get a token back; we don't care about its fields for this test.
         assertNotNull(source)
+    }
+
+    @Test
+    fun createCardSource_withAttribution_shouldPopulateProductUsage() {
+        val stripeResponse = StripeResponse(
+            200,
+            SourceFixtures.SOURCE_CARD_JSON.toString(),
+            emptyMap()
+        )
+        `when`(stripeApiRequestExecutor.execute(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+        create().createSource(
+            SourceParams.createCardParams(CardFixtures.CARD_WITH_ATTRIBUTION),
+            DEFAULT_OPTIONS
+        )
+
+        verifyFingerprintAndAnalyticsRequests(
+            AnalyticsEvent.SourceCreate,
+            productUsage = listOf("CardInputView")
+        )
+    }
+
+    @Test
+    fun createAlipaySource_withAttribution_shouldPopulateProductUsage() {
+        val stripeResponse = StripeResponse(
+            200,
+            SourceFixtures.ALIPAY_JSON.toString(),
+            emptyMap()
+        )
+        `when`(stripeApiRequestExecutor.execute(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+        create().createSource(
+            SourceParams.createMultibancoParams(
+                100,
+                "return_url",
+                "jenny@example.com"
+            ),
+            DEFAULT_OPTIONS
+        )
+
+        verifyFingerprintAndAnalyticsRequests(
+            AnalyticsEvent.SourceCreate,
+            productUsage = null
+        )
     }
 
     @Test
@@ -546,7 +591,7 @@ class StripeApiRepositoryTest {
 
         verifyFingerprintAndAnalyticsRequests(
             AnalyticsEvent.CustomerRetrievePaymentMethods,
-            emptyList()
+            null
         )
     }
 
@@ -725,7 +770,7 @@ class StripeApiRepositoryTest {
 
         verifyFingerprintAndAnalyticsRequests(
             AnalyticsEvent.TokenCreate,
-            productUsage = emptyList()
+            productUsage = null
         )
     }
 

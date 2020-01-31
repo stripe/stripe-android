@@ -17,7 +17,9 @@ class SourceParams private constructor(
     /**
      * @return a custom type of this Source, if one has been set
      */
-    @SourceType val typeRaw: String
+    @SourceType val typeRaw: String,
+
+    internal val attribution: Set<String> = emptySet()
 ) : StripeParamsModel {
 
     /**
@@ -647,7 +649,7 @@ class SourceParams private constructor(
          */
         @JvmStatic
         fun createCardParams(card: Card): SourceParams {
-            return SourceParams(SourceType.CARD)
+            return SourceParams(SourceType.CARD, card.loggingTokens)
                 .setApiParameterMap(
                     mapOf(
                         PARAM_NUMBER to card.number,
