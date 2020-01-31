@@ -25,7 +25,10 @@ import kotlinx.android.synthetic.main.activity_card_sources.*
  */
 class CreateCardSourceActivity : AppCompatActivity() {
     private val viewModel: SourceViewModel by lazy {
-        ViewModelProvider(this)[SourceViewModel::class.java]
+        ViewModelProvider(
+            this,
+            ViewModelProvider.AndroidViewModelFactory(application)
+        )[SourceViewModel::class.java]
     }
     private val sourcesAdapter: SourcesAdapter by lazy {
         SourcesAdapter()

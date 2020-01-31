@@ -42,7 +42,8 @@ class CreateCardTokenActivity : AppCompatActivity() {
             }
 
         val viewModel = ViewModelProvider(
-            this
+            this,
+            ViewModelProvider.AndroidViewModelFactory(application)
         )[CreateCardTokenViewModel::class.java]
 
         create_token_button.setOnClickListener {
