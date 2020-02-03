@@ -164,7 +164,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
     @Throws(APIException::class)
     override fun getPaymentMethods(
         customerId: String,
-        paymentMethodType: String,
+        paymentMethodType: PaymentMethod.Type,
         publishableKey: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options

@@ -10,16 +10,14 @@ internal class CustomerSessionEphemeralKeyManagerListener(
 ) : EphemeralKeyManager.KeyManagerListener {
     override fun onKeyUpdate(
         ephemeralKey: EphemeralKey,
-        operationId: String,
-        action: String?,
-        arguments: Map<String, Any>?
+        operation: EphemeralOperation
     ) {
         val runnable =
-            runnableFactory.create(ephemeralKey, operationId, action, arguments)
+            runnableFactory.create(ephemeralKey, operation)
         runnable?.let {
             executor.execute(it)
 
-            if (action != null) {
+            if (operation !is EphemeralOperation.RetrieveKey) {
                 productUsage.reset()
             }
         }

@@ -169,7 +169,7 @@ internal interface StripeRepository {
         APIConnectionException::class, APIException::class, CardException::class)
     fun getPaymentMethods(
         customerId: String,
-        paymentMethodType: String,
+        paymentMethodType: PaymentMethod.Type,
         publishableKey: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options

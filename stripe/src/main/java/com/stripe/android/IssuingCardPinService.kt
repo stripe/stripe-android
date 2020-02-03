@@ -19,15 +19,58 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
     keyProvider: EphemeralKeyProvider,
     private val stripeRepository: StripeRepository,
     private val operationIdFactory: OperationIdFactory = StripeOperationIdFactory()
-) : KeyManagerListener {
-
+) {
     private val retrievalListeners: MutableMap<String?, IssuingCardPinRetrievalListener> =
         mutableMapOf()
     private val updateListeners: MutableMap<String?, IssuingCardPinUpdateListener> =
         mutableMapOf()
+
     private val ephemeralKeyManager = EphemeralKeyManager(
         keyProvider,
-        this,
+        object : KeyManagerListener {
+            override fun onKeyUpdate(
+                ephemeralKey: EphemeralKey,
+                operation: EphemeralOperation
+            ) {
+                when (operation) {
+                    is EphemeralOperation.Issuing.RetrievePin -> {
+                        retrievalListeners.remove(operation.id)?.let { listener ->
+                            fireRetrievePinRequest(
+                                ephemeralKey,
+                                operation,
+                                listener
+                            )
+                        } ?: logMissingListener()
+                    }
+                    is EphemeralOperation.Issuing.UpdatePin ->
+                        updateListeners.remove(operation.id)?.let { listener ->
+                            fireUpdatePinRequest(
+                                ephemeralKey,
+                                operation,
+                                listener
+                            )
+                        } ?: logMissingListener()
+                }
+            }
+
+            override fun onKeyError(
+                operationId: String,
+                errorCode: Int,
+                errorMessage: String
+            ) {
+                val updateListener = updateListeners.remove(operationId)
+                val retrievalListener = retrievalListeners.remove(operationId)
+                retrievalListener?.onError(
+                    CardPinActionError.EPHEMERAL_KEY_ERROR,
+                    errorMessage,
+                    null
+                ) ?: updateListener?.onError(
+                    CardPinActionError.EPHEMERAL_KEY_ERROR,
+                    errorMessage,
+                    null
+                )
+            }
+        },
         KEY_REFRESH_BUFFER_IN_SECONDS,
         null,
         operationIdFactory,
@@ -49,14 +92,16 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
         userOneTimeCode: String,
         listener: IssuingCardPinRetrievalListener
     ) {
-        val arguments = mapOf(
-            ARGUMENT_CARD_ID to cardId,
-            ARGUMENT_VERIFICATION_ID to verificationId,
-            ARGUMENT_ONE_TIME_CODE to userOneTimeCode
-        )
         val operationId = operationIdFactory.create()
         retrievalListeners[operationId] = listener
-        ephemeralKeyManager.retrieveEphemeralKey(operationId, PIN_RETRIEVE, arguments)
+        ephemeralKeyManager.retrieveEphemeralKey(
+            EphemeralOperation.Issuing.RetrievePin(
+                cardId = cardId,
+                verificationId = verificationId,
+                userOneTimeCode = userOneTimeCode,
+                id = operationId
+            )
+        )
     }
 
     /**
@@ -76,55 +121,36 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
         userOneTimeCode: String,
         listener: IssuingCardPinUpdateListener
     ) {
-        val arguments = mapOf(
-            ARGUMENT_CARD_ID to cardId,
-            ARGUMENT_NEW_PIN to newPin,
-            ARGUMENT_VERIFICATION_ID to verificationId,
-            ARGUMENT_ONE_TIME_CODE to userOneTimeCode
-        )
         val operationId = operationIdFactory.create()
         updateListeners[operationId] = listener
-        ephemeralKeyManager.retrieveEphemeralKey(operationId, PIN_UPDATE, arguments)
-    }
-
-    override fun onKeyUpdate(
-        ephemeralKey: EphemeralKey,
-        operationId: String,
-        action: String?,
-        arguments: Map<String, Any>?
-    ) {
-        when (action) {
-            PIN_RETRIEVE -> fireRetrievePinRequest(ephemeralKey, operationId, arguments)
-            PIN_UPDATE -> fireUpdatePinRequest(ephemeralKey, operationId, arguments)
-        }
+        ephemeralKeyManager.retrieveEphemeralKey(
+            EphemeralOperation.Issuing.UpdatePin(
+                cardId = cardId,
+                newPin = newPin,
+                verificationId = verificationId,
+                userOneTimeCode = userOneTimeCode,
+                id = operationId
+            )
+        )
     }
 
     private fun fireRetrievePinRequest(
         ephemeralKey: EphemeralKey,
-        operationId: String,
-        arguments: Map<String, Any>?
+        operation: EphemeralOperation.Issuing.RetrievePin,
+        listener: IssuingCardPinRetrievalListener?
     ) {
-        val listener = retrievalListeners.remove(operationId)
         if (listener == null) {
-            Log.e(TAG, IssuingCardPinService::class.java.name +
-                " was called without a listener")
+            logMissingListener()
             return
         }
-        if (arguments == null) {
-            listener.onError(
-                CardPinActionError.UNKNOWN_ERROR,
-                "Arguments were lost during the ephemeral key call, " +
-                    "this is not supposed to happen," +
-                    " please contact support@stripe.com for assistance.",
-                null)
-            return
-        }
-        val cardId = requireNotNull(arguments[ARGUMENT_CARD_ID]) as String
-        val verificationId = requireNotNull(arguments[ARGUMENT_VERIFICATION_ID]) as String
-        val userOneTimeCode = requireNotNull(arguments[ARGUMENT_ONE_TIME_CODE]) as String
+
         try {
-            val pin = stripeRepository.retrieveIssuingCardPin(cardId, verificationId,
-                userOneTimeCode, ephemeralKey.secret)
+            val pin = stripeRepository.retrieveIssuingCardPin(
+                operation.cardId,
+                operation.verificationId,
+                operation.userOneTimeCode,
+                ephemeralKey.secret
+            )
             listener.onIssuingCardPinRetrieved(pin)
         } catch (e: InvalidRequestException) {
             when (e.errorCode) {
@@ -195,32 +221,22 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
 
     private fun fireUpdatePinRequest(
         ephemeralKey: EphemeralKey,
-        operationId: String,
-        arguments: Map<String, Any>?
+        operation: EphemeralOperation.Issuing.UpdatePin,
+        listener: IssuingCardPinUpdateListener?
     ) {
-        val listener = updateListeners.remove(operationId)
         if (listener == null) {
-            Log.e(TAG, IssuingCardPinService::class.java.name +
-                " was called without a listener")
+            logMissingListener()
             return
         }
-        if (arguments == null) {
-            listener.onError(
-                CardPinActionError.UNKNOWN_ERROR,
-                "Arguments were lost during the ephemeral key call, " +
-                    "this is not supposed to happen," +
-                    " please contact support@stripe.com for assistance.",
-                null
-            )
-            return
-        }
-        val cardId = requireNotNull(arguments[ARGUMENT_CARD_ID]) as String
-        val newPin = requireNotNull(arguments[ARGUMENT_NEW_PIN]) as String
-        val verificationId = requireNotNull(arguments[ARGUMENT_VERIFICATION_ID]) as String
-        val userOneTimeCode = requireNotNull(arguments[ARGUMENT_ONE_TIME_CODE]) as String
+
         try {
-            stripeRepository.updateIssuingCardPin(cardId, newPin, verificationId,
-                userOneTimeCode, ephemeralKey.secret)
+            stripeRepository.updateIssuingCardPin(
+                operation.cardId,
+                operation.newPin,
+                operation.verificationId,
+                operation.userOneTimeCode,
+                ephemeralKey.secret
+            )
             listener.onIssuingCardPinUpdated()
         } catch (e: InvalidRequestException) {
             when (e.errorCode) {
@@ -280,22 +296,8 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
         }
     }
 
-    override fun onKeyError(
-        operationId: String,
-        errorCode: Int,
-        errorMessage: String
-    ) {
-        val updateListener = updateListeners.remove(operationId)
-        val retrievalListener = retrievalListeners.remove(operationId)
-        retrievalListener?.onError(
-            CardPinActionError.EPHEMERAL_KEY_ERROR,
-            errorMessage,
-            null
-        ) ?: updateListener?.onError(
-            CardPinActionError.EPHEMERAL_KEY_ERROR,
-            errorMessage,
-            null
-        )
+    private fun logMissingListener() {
+        Log.e(TAG, "${this::class.java.name} was called without a listener")
     }
 
     enum class CardPinActionError {
@@ -304,19 +306,15 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
         ONE_TIME_CODE_ALREADY_REDEEMED
     }
 
-    interface IssuingCardPinRetrievalListener {
+    interface IssuingCardPinRetrievalListener : Listener {
         fun onIssuingCardPinRetrieved(pin: String)
-
-        fun onError(
-            errorCode: CardPinActionError,
-            errorMessage: String?,
-            exception: Throwable?
-        )
     }
 
-    interface IssuingCardPinUpdateListener {
+    interface IssuingCardPinUpdateListener : Listener {
         fun onIssuingCardPinUpdated()
+    }
 
+    interface Listener {
         fun onError(
             errorCode: CardPinActionError,
             errorMessage: String?,
@@ -327,14 +325,6 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
     companion object {
         private val TAG = IssuingCardPinService::class.java.name
         private const val KEY_REFRESH_BUFFER_IN_SECONDS = 30L
-
-        private const val PIN_RETRIEVE = "PIN_RETRIEVE"
-        private const val PIN_UPDATE = "PIN_UPDATE"
-
-        private const val ARGUMENT_CARD_ID = "cardId"
-        private const val ARGUMENT_VERIFICATION_ID = "verificationId"
-        private const val ARGUMENT_ONE_TIME_CODE = "userOneTimeCode"
-        private const val ARGUMENT_NEW_PIN = "newPin"
 
         /**
          * Create a IssuingCardPinService with the provided [EphemeralKeyProvider].

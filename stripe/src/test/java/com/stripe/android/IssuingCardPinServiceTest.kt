@@ -3,17 +3,15 @@ package com.stripe.android
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.argThat
+import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.testharness.TestEphemeralKeyProvider
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import org.json.JSONObject
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
 /**
@@ -22,33 +20,27 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class IssuingCardPinServiceTest {
 
-    @Mock
-    private lateinit var stripeApiRequestExecutor: ApiRequestExecutor
-    @Mock
-    private lateinit var retrievalListener: IssuingCardPinService.IssuingCardPinRetrievalListener
-    @Mock
-    private lateinit var updateListener: IssuingCardPinService.IssuingCardPinUpdateListener
-
-    private lateinit var service: IssuingCardPinService
-
-    @BeforeTest
-    fun before() {
-        MockitoAnnotations.initMocks(this)
-
-        val ephemeralKeyProvider = TestEphemeralKeyProvider()
-        ephemeralKeyProvider.setNextRawEphemeralKey(EPHEMERAL_KEY.toString())
-
-        val stripeRepository = StripeApiRepository(
+    private val stripeRepository: StripeRepository by lazy {
+        StripeApiRepository(
             ApplicationProvider.getApplicationContext<Context>(),
             null,
             FakeLogger(),
             stripeApiRequestExecutor,
             FakeFireAndForgetRequestExecutor()
         )
-
-        service = IssuingCardPinService(ephemeralKeyProvider, stripeRepository,
-            OperationIdFactory.get())
     }
+
+    private val service: IssuingCardPinService by lazy {
+        val ephemeralKeyProvider = TestEphemeralKeyProvider().also {
+            it.setNextRawEphemeralKey(EPHEMERAL_KEY.toString())
+        }
+
+        IssuingCardPinService(ephemeralKeyProvider, stripeRepository, OperationIdFactory.get())
+    }
+
+    private val stripeApiRequestExecutor: ApiRequestExecutor = mock()
+    private val retrievalListener: IssuingCardPinService.IssuingCardPinRetrievalListener = mock()
+    private val updateListener: IssuingCardPinService.IssuingCardPinUpdateListener = mock()
 
     @Test
     @Throws(InvalidRequestException::class, APIConnectionException::class)

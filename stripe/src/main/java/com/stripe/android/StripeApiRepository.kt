@@ -588,7 +588,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         AuthenticationException::class, CardException::class)
     override fun getPaymentMethods(
         customerId: String,
-        paymentMethodType: String,
+        paymentMethodType: PaymentMethod.Type,
         publishableKey: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
@@ -599,7 +599,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 requestOptions,
                 mapOf(
                     "customer" to customerId,
-                    "type" to paymentMethodType
+                    "type" to paymentMethodType.code
                 )
             )
         )

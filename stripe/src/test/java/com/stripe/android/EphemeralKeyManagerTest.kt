@@ -2,29 +2,26 @@ package com.stripe.android
 
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.stripe.android.model.CustomerFixtures
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.parsers.EphemeralKeyJsonParser
 import com.stripe.android.testharness.TestEphemeralKeyProvider
 import java.net.HttpURLConnection
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
 /**
@@ -33,48 +30,48 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class EphemeralKeyManagerTest {
 
-    @Mock
-    private lateinit var keyManagerListener: EphemeralKeyManager.KeyManagerListener
+    private val keyManagerListener: EphemeralKeyManager.KeyManagerListener = mock()
 
     private val operationIdFactory = OperationIdFactory.get()
     private val customerEphemeralKey: EphemeralKey =
         EphemeralKeyJsonParser().parse(CustomerFixtures.EPHEMERAL_KEY_FIRST)
 
-    private lateinit var argCaptor: KArgumentCaptor<Map<String, Any>>
-    private lateinit var actionArgumentCaptor: KArgumentCaptor<String>
-    private lateinit var ephemeralKeyArgumentCaptor: KArgumentCaptor<EphemeralKey>
-    private lateinit var testEphemeralKeyProvider: TestEphemeralKeyProvider
-
-    @BeforeTest
-    fun setup() {
-        MockitoAnnotations.initMocks(this)
-        argCaptor = argumentCaptor()
-        actionArgumentCaptor = argumentCaptor()
-        ephemeralKeyArgumentCaptor = argumentCaptor()
-        testEphemeralKeyProvider = TestEphemeralKeyProvider()
-    }
+    private val operationCaptor: KArgumentCaptor<EphemeralOperation> = argumentCaptor()
+    private val ephemeralKeyArgumentCaptor: KArgumentCaptor<EphemeralKey> = argumentCaptor()
+    private val testEphemeralKeyProvider: TestEphemeralKeyProvider = TestEphemeralKeyProvider()
 
     @Test
     fun shouldRefreshKey_whenKeyIsNullAndTimeIsInFuture_returnsTrue() {
-        val futureCalendar = Calendar.getInstance()
-        futureCalendar.add(Calendar.YEAR, 1)
-        // If you don't call getTime or getTimeInMillis on a Calendar, none of the updates happen.
-        futureCalendar.timeInMillis
-        assertTrue(EphemeralKeyManager.shouldRefreshKey(
-            null,
-            TEST_SECONDS_BUFFER,
-            futureCalendar))
+        val futureCalendar = Calendar.getInstance().apply {
+            add(Calendar.YEAR, 1)
+        }.also {
+            // If you don't call getTime or getTimeInMillis on a Calendar, none of the updates happen.
+            it.timeInMillis
+        }
+        assertTrue(
+            EphemeralKeyManager.shouldRefreshKey(
+                null,
+                TEST_SECONDS_BUFFER,
+                futureCalendar
+            )
+        )
     }
 
     @Test
     fun shouldRefreshKey_whenKeyIsNullAndTimeIsInPast_returnsTrue() {
-        val pastCalendar = Calendar.getInstance()
-        pastCalendar.add(Calendar.YEAR, -1)
-        // If you don't call getTime or getTimeInMillis on a Calendar, none of the updates happen.
-        pastCalendar.timeInMillis
-        assertTrue(EphemeralKeyManager.shouldRefreshKey(null,
-            TEST_SECONDS_BUFFER,
-            pastCalendar))
+        val pastCalendar = Calendar.getInstance().apply {
+            add(Calendar.YEAR, -1)
+        }.also {
+            // If you don't call getTime or getTimeInMillis on a Calendar, none of the updates happen.
+            it.timeInMillis
+        }
+        assertTrue(
+            EphemeralKeyManager.shouldRefreshKey(
+                null,
+                TEST_SECONDS_BUFFER,
+                pastCalendar
+            )
+        )
     }
 
     @Test
@@ -86,9 +83,13 @@ class EphemeralKeyManagerTest {
 
         // If you don't call getTime or getTimeInMillis on a Calendar, none of the updates happen.
         assertEquals(expires, fixedCalendar.timeInMillis)
-        assertFalse(EphemeralKeyManager.shouldRefreshKey(key,
-            TEST_SECONDS_BUFFER,
-            fixedCalendar))
+        assertFalse(
+            EphemeralKeyManager.shouldRefreshKey(
+                key,
+                TEST_SECONDS_BUFFER,
+                fixedCalendar
+            )
+        )
     }
 
     @Test
@@ -97,9 +98,13 @@ class EphemeralKeyManagerTest {
         val timeAgoInMillis = fixedCalendar.timeInMillis - 100L
         val key = createEphemeralKey(
             TimeUnit.MILLISECONDS.toSeconds(timeAgoInMillis))
-        assertTrue(EphemeralKeyManager.shouldRefreshKey(key,
-            TEST_SECONDS_BUFFER,
-            fixedCalendar))
+        assertTrue(
+            EphemeralKeyManager.shouldRefreshKey(
+                key,
+                TEST_SECONDS_BUFFER,
+                fixedCalendar
+            )
+        )
     }
 
     @Test
@@ -115,9 +120,13 @@ class EphemeralKeyManagerTest {
         fixedCalendar.timeInMillis = notFarEnoughInTheFuture
         assertEquals(notFarEnoughInTheFuture, fixedCalendar.timeInMillis)
 
-        assertTrue(EphemeralKeyManager.shouldRefreshKey(customerEphemeralKey,
-            TEST_SECONDS_BUFFER,
-            fixedCalendar))
+        assertTrue(
+            EphemeralKeyManager.shouldRefreshKey(
+                customerEphemeralKey,
+                TEST_SECONDS_BUFFER,
+                fixedCalendar
+            )
+        )
     }
 
     @Test
@@ -126,13 +135,11 @@ class EphemeralKeyManagerTest {
 
         testEphemeralKeyProvider
             .setNextRawEphemeralKey(CustomerFixtures.EPHEMERAL_KEY_FIRST.toString())
-        createEphemeralKeyManager(operationIdFactory, null)
+        createEphemeralKeyManager(operationIdFactory)
 
         verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener).onKeyUpdate(
             ephemeralKeyArgumentCaptor.capture(),
-            any(),
-            anyOrNull(),
-            anyOrNull()
+            any<EphemeralOperation.RetrieveKey>()
         )
         val ephemeralKey = ephemeralKeyArgumentCaptor.firstValue
         assertNotNull(ephemeralKey)
@@ -141,53 +148,54 @@ class EphemeralKeyManagerTest {
 
     @Test
     fun retrieveEphemeralKey_whenUpdateNecessary_returnsUpdateAndArguments() {
-        val fixedCalendar = Calendar.getInstance()
         testEphemeralKeyProvider
             .setNextRawEphemeralKey(CustomerFixtures.EPHEMERAL_KEY_FIRST.toString())
 
-        val keyManager = createEphemeralKeyManager(operationIdFactory, fixedCalendar)
+        val keyManager = createEphemeralKeyManager(operationIdFactory)
 
-        val operationId = operationIdFactory.create()
-        val actionString = "action"
-        keyManager.retrieveEphemeralKey(operationId, actionString, mapOf("key" to "value"))
+        val operation = EphemeralOperation.Customer.PaymentMethods(
+            type = PaymentMethod.Type.Card,
+            id = operationIdFactory.create()
+        )
+        keyManager.retrieveEphemeralKey(operation)
 
-        verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener).onKeyUpdate(
-            ephemeralKeyArgumentCaptor.capture(),
-            eq(operationId),
-            actionArgumentCaptor.capture(),
-            argCaptor.capture())
+        verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener, times(2))
+            .onKeyUpdate(
+                ephemeralKeyArgumentCaptor.capture(),
+                operationCaptor.capture()
+            )
 
-        val capturedMap = argCaptor.firstValue
-        assertNotNull(capturedMap)
+        // first retrieve the key
         assertNotNull(ephemeralKeyArgumentCaptor.firstValue)
-        assertEquals(1, capturedMap.size)
-        assertEquals("value", capturedMap["key"])
-        assertEquals(actionString, actionArgumentCaptor.firstValue)
+        assertTrue(operationCaptor.firstValue is EphemeralOperation.RetrieveKey)
+
+        // then perform the operation
+        assertNotNull(ephemeralKeyArgumentCaptor.secondValue)
+        assertEquals(operation, operationCaptor.secondValue)
     }
 
     @Test
     fun updateKeyIfNecessary_whenReturnsError_setsExistingKeyToNull() {
         assertNotNull(customerEphemeralKey)
-
-        val proxyCalendar = Calendar.getInstance()
         val expiryTimeInMillis = TimeUnit.SECONDS.toMillis(customerEphemeralKey.expires)
-        // The time is one millisecond past the expiration date for this test.
-        proxyCalendar.timeInMillis = expiryTimeInMillis + 1L
+
+        val calendar = Calendar.getInstance().apply {
+            // The time is one millisecond past the expiration date for this test.
+            timeInMillis = expiryTimeInMillis + 1L
+        }
         // Testing this just to invoke getTime
-        assertEquals(expiryTimeInMillis + 1L, proxyCalendar.timeInMillis)
+        assertEquals(expiryTimeInMillis + 1L, calendar.timeInMillis)
 
         testEphemeralKeyProvider
             .setNextRawEphemeralKey(CustomerFixtures.EPHEMERAL_KEY_FIRST.toString())
         val keyManager =
-            createEphemeralKeyManager(operationIdFactory, proxyCalendar)
+            createEphemeralKeyManager(operationIdFactory, calendar)
 
         // Make sure we're in a good state
         verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener)
             .onKeyUpdate(
                 ephemeralKeyArgumentCaptor.capture(),
-                any(),
-                anyOrNull(),
-                anyOrNull()
+                any<EphemeralOperation.RetrieveKey>()
             )
         assertNotNull(ephemeralKeyArgumentCaptor.firstValue)
 
@@ -197,7 +205,7 @@ class EphemeralKeyManagerTest {
 
         // It should be necessary to update because the key is expired.
         val operationId = operationIdFactory.create()
-        keyManager.retrieveEphemeralKey(operationId, null, null)
+        keyManager.retrieveEphemeralKey(EphemeralOperation.RetrieveKey(operationId))
 
         verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener)
             .onKeyError(operationId, 404, errorMessage)
@@ -211,14 +219,12 @@ class EphemeralKeyManagerTest {
         `when`(operationIdFactory.create()).thenReturn(operationId)
 
         testEphemeralKeyProvider.setNextRawEphemeralKey("Not_a_JSON")
-        createEphemeralKeyManager(operationIdFactory, null)
+        createEphemeralKeyManager(operationIdFactory)
 
         verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener, never())
             .onKeyUpdate(
                 any(),
-                any(),
-                any(),
-                any()
+                any<EphemeralOperation.RetrieveKey>()
             )
         verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener)
             .onKeyError(operationId,
@@ -236,14 +242,12 @@ class EphemeralKeyManagerTest {
         `when`(operationIdFactory.create()).thenReturn(operationId)
 
         testEphemeralKeyProvider.setNextRawEphemeralKey("{}")
-        createEphemeralKeyManager(operationIdFactory, null)
+        createEphemeralKeyManager(operationIdFactory)
 
         verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener, never())
             .onKeyUpdate(
                 any(),
-                any(),
-                any(),
-                any()
+                any<EphemeralOperation.RetrieveKey>()
             )
         verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener)
             .onKeyError(operationId,
@@ -261,20 +265,20 @@ class EphemeralKeyManagerTest {
         `when`(operationIdFactory.create()).thenReturn(operationId)
 
         testEphemeralKeyProvider.setNextRawEphemeralKey("")
-        createEphemeralKeyManager(operationIdFactory, null)
+        createEphemeralKeyManager(operationIdFactory)
 
         verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener, never())
             .onKeyUpdate(
                 any(),
-                any(),
-                any(),
-                any()
+                any<EphemeralOperation.RetrieveKey>()
             )
         verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener)
             .onKeyError(
-                eq(operationId),
-                eq(HttpURLConnection.HTTP_INTERNAL_ERROR),
-                any()
+                operationId,
+                HttpURLConnection.HTTP_INTERNAL_ERROR,
+                "EphemeralKeyUpdateListener.onKeyUpdate was passed a value that " +
+                    "could not be JSON parsed: [End of input at character 0 of ]. The raw body " +
+                    "from Stripe's response should be passed."
             )
     }
 
@@ -293,7 +297,7 @@ class EphemeralKeyManagerTest {
 
     private fun createEphemeralKeyManager(
         operationIdFactory: OperationIdFactory,
-        calendar: Calendar?
+        calendar: Calendar = Calendar.getInstance()
     ): EphemeralKeyManager {
         return EphemeralKeyManager(
             testEphemeralKeyProvider,
