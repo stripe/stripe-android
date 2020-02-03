@@ -96,7 +96,7 @@ class AnalyticsDataFactoryTest {
             "os_release" to "9",
             "os_version" to 28,
             "device_type" to "unknown_Android_robolectric",
-            "bindings_version" to "13.1.3",
+            "bindings_version" to BuildConfig.VERSION_NAME,
             "app_name" to "com.stripe.android.test",
             "app_version" to 0,
             "product_usage" to ATTRIBUTION.toList(),
