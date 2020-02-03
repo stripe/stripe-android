@@ -90,7 +90,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
             adapter,
             cardDisplayTextFactory,
             customerSession
-        )
+        ) { showSnackbar(it, R.string.removed) }
 
         adapter.listener = object : PaymentMethodsAdapter.Listener {
             override fun onPaymentMethodClick(paymentMethod: PaymentMethod) {
@@ -153,8 +153,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
         }
     }
 
-    @JvmSynthetic
-    internal fun showSnackbar(paymentMethod: PaymentMethod, @StringRes stringRes: Int) {
+    private fun showSnackbar(paymentMethod: PaymentMethod, @StringRes stringRes: Int) {
         val snackbarText = paymentMethod.card?.let { paymentMethodId ->
             getString(stringRes, cardDisplayTextFactory.createUnstyled(paymentMethodId))
         }
