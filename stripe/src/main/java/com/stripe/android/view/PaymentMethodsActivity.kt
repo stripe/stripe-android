@@ -107,11 +107,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
         }
 
         payment_methods_recycler.adapter = adapter
-        payment_methods_recycler.listener = object : PaymentMethodsRecyclerView.Listener {
-            override fun onPaymentMethodSelected(paymentMethod: PaymentMethod) {
-                finishWithPaymentMethod(paymentMethod)
-            }
-        }
+        payment_methods_recycler.paymentMethodSelectedCallback = { finishWithPaymentMethod(it) }
 
         payment_methods_recycler.attachItemTouchHelper(
             PaymentMethodSwipeCallback(

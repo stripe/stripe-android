@@ -14,7 +14,7 @@ internal class PaymentMethodsRecyclerView @JvmOverloads internal constructor(
     defStyleAttr: Int = 0
 ) : RecyclerView(context, attrs, defStyleAttr) {
 
-    internal var listener: Listener? = null
+    internal var paymentMethodSelectedCallback: (PaymentMethod) -> Unit = {}
     internal var tappedPaymentMethod: PaymentMethod? = null
 
     init {
@@ -26,7 +26,7 @@ internal class PaymentMethodsRecyclerView @JvmOverloads internal constructor(
                 super.onAnimationFinished(viewHolder)
 
                 // wait until post-tap animations are completed before finishing activity
-                tappedPaymentMethod?.let { listener?.onPaymentMethodSelected(it) }
+                tappedPaymentMethod?.let { paymentMethodSelectedCallback(it) }
                 tappedPaymentMethod = null
             }
         }
@@ -35,9 +35,5 @@ internal class PaymentMethodsRecyclerView @JvmOverloads internal constructor(
     @JvmSynthetic
     internal fun attachItemTouchHelper(callback: ItemTouchHelper.SimpleCallback) {
         ItemTouchHelper(callback).attachToRecyclerView(this)
-    }
-
-    internal interface Listener {
-        fun onPaymentMethodSelected(paymentMethod: PaymentMethod)
     }
 }
