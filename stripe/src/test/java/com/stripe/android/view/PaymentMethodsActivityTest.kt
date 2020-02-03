@@ -11,6 +11,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CustomerSession
@@ -24,9 +25,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.Mockito.times
-import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 
@@ -35,10 +34,9 @@ import org.robolectric.Shadows.shadowOf
  */
 @RunWith(RobolectricTestRunner::class)
 class PaymentMethodsActivityTest {
-    @Mock
-    private lateinit var customerSession: CustomerSession
+    private val customerSession: CustomerSession = mock()
 
-    private lateinit var listenerArgumentCaptor: KArgumentCaptor<CustomerSession.PaymentMethodsRetrievalListener>
+    private val listenerArgumentCaptor: KArgumentCaptor<CustomerSession.PaymentMethodsRetrievalListener> = argumentCaptor()
 
     private val context: Context by lazy {
         ApplicationProvider.getApplicationContext<Context>()
@@ -49,9 +47,6 @@ class PaymentMethodsActivityTest {
 
     @BeforeTest
     fun setup() {
-        MockitoAnnotations.initMocks(this)
-        listenerArgumentCaptor = argumentCaptor()
-
         CustomerSession.instance = customerSession
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
     }
