@@ -1,5 +1,6 @@
 package com.stripe.android.view
 
+import android.app.Activity
 import androidx.appcompat.app.AlertDialog
 import com.stripe.android.CustomerSession
 import com.stripe.android.R
@@ -7,10 +8,11 @@ import com.stripe.android.StripeError
 import com.stripe.android.model.PaymentMethod
 
 internal class DeletePaymentMethodDialogFactory internal constructor(
-    private val activity: PaymentMethodsActivity,
+    private val activity: Activity,
     private val adapter: PaymentMethodsAdapter,
     private val cardDisplayTextFactory: CardDisplayTextFactory,
-    private val customerSession: CustomerSession
+    private val customerSession: CustomerSession,
+    private val onDeletedPaymentMethodCallback: (PaymentMethod) -> Unit
 ) {
     @JvmSynthetic
     fun create(paymentMethod: PaymentMethod): AlertDialog {
@@ -39,7 +41,7 @@ internal class DeletePaymentMethodDialogFactory internal constructor(
             customerSession.detachPaymentMethod(paymentMethodId, PaymentMethodDeleteListener())
         }
 
-        activity.showSnackbar(paymentMethod, R.string.removed)
+        onDeletedPaymentMethodCallback(paymentMethod)
     }
 
     private class PaymentMethodDeleteListener : CustomerSession.PaymentMethodRetrievalListener {
