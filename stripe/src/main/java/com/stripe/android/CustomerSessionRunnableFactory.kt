@@ -2,7 +2,6 @@ package com.stripe.android
 
 import android.os.Handler
 import android.util.Pair
-import androidx.annotation.IntDef
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
@@ -19,19 +18,13 @@ internal class CustomerSessionRunnableFactory(
     private val stripeAccountId: String?,
     private val productUsage: CustomerSessionProductUsage
 ) {
-    @IntDef(MessageCode.ERROR, MessageCode.CUSTOMER_RETRIEVED, MessageCode.SOURCE_RETRIEVED,
-        MessageCode.PAYMENT_METHOD_RETRIEVED, MessageCode.CUSTOMER_SHIPPING_INFO_SAVED,
-        MessageCode.PAYMENT_METHODS_RETRIEVED)
-    @Retention(AnnotationRetention.SOURCE)
-    annotation class MessageCode {
-        companion object {
-            const val ERROR = 1
-            const val CUSTOMER_RETRIEVED = 2
-            const val SOURCE_RETRIEVED = 3
-            const val PAYMENT_METHOD_RETRIEVED = 4
-            const val CUSTOMER_SHIPPING_INFO_SAVED = 5
-            const val PAYMENT_METHODS_RETRIEVED = 6
-        }
+    enum class ResultType {
+        Error,
+        CustomerRetrieved,
+        SourceRetrieved,
+        PaymentMethod, // single
+        PaymentMethods, // multiple
+        ShippingInfo
     }
 
     internal fun create(
@@ -108,8 +101,11 @@ internal class CustomerSessionRunnableFactory(
         sourceType: String,
         operationId: String
     ): Runnable {
-        return object : CustomerSessionRunnable<Source>(handler, MessageCode.SOURCE_RETRIEVED,
-            operationId) {
+        return object : CustomerSessionRunnable<Source>(
+            handler,
+            ResultType.SourceRetrieved,
+            operationId
+        ) {
             @Throws(StripeException::class)
             public override fun createMessageObject(): Source? {
                 return stripeRepository.addCustomerSource(
@@ -129,8 +125,11 @@ internal class CustomerSessionRunnableFactory(
         sourceId: String,
         operationId: String
     ): Runnable {
-        return object : CustomerSessionRunnable<Source>(handler, MessageCode.SOURCE_RETRIEVED,
-            operationId) {
+        return object : CustomerSessionRunnable<Source>(
+            handler,
+            ResultType.SourceRetrieved,
+            operationId
+        ) {
             @Throws(StripeException::class)
             public override fun createMessageObject(): Source? {
                 return stripeRepository.deleteCustomerSource(
@@ -149,8 +148,11 @@ internal class CustomerSessionRunnableFactory(
         paymentMethodId: String,
         operationId: String
     ): Runnable {
-        return object : CustomerSessionRunnable<PaymentMethod>(handler, MessageCode.PAYMENT_METHOD_RETRIEVED,
-            operationId) {
+        return object : CustomerSessionRunnable<PaymentMethod>(
+            handler,
+            ResultType.PaymentMethod,
+            operationId
+        ) {
             @Throws(StripeException::class)
             public override fun createMessageObject(): PaymentMethod? {
                 return stripeRepository.attachPaymentMethod(
@@ -169,8 +171,11 @@ internal class CustomerSessionRunnableFactory(
         paymentMethodId: String,
         operationId: String
     ): Runnable {
-        return object : CustomerSessionRunnable<PaymentMethod>(handler, MessageCode.PAYMENT_METHOD_RETRIEVED,
-            operationId) {
+        return object : CustomerSessionRunnable<PaymentMethod>(
+            handler,
+            ResultType.PaymentMethod,
+            operationId
+        ) {
             @Throws(StripeException::class)
             public override fun createMessageObject(): PaymentMethod? {
                 return stripeRepository.detachPaymentMethod(
@@ -188,8 +193,11 @@ internal class CustomerSessionRunnableFactory(
         paymentMethodType: String,
         operationId: String
     ): Runnable {
-        return object : CustomerSessionRunnable<List<PaymentMethod>>(handler,
-            MessageCode.PAYMENT_METHODS_RETRIEVED, operationId) {
+        return object : CustomerSessionRunnable<List<PaymentMethod>>(
+            handler,
+            ResultType.PaymentMethods,
+            operationId
+        ) {
             @Throws(StripeException::class)
             public override fun createMessageObject(): List<PaymentMethod> {
                 return stripeRepository.getPaymentMethods(
@@ -209,8 +217,11 @@ internal class CustomerSessionRunnableFactory(
         sourceType: String,
         operationId: String
     ): Runnable {
-        return object : CustomerSessionRunnable<Customer>(handler, MessageCode.CUSTOMER_RETRIEVED,
-            operationId) {
+        return object : CustomerSessionRunnable<Customer>(
+            handler,
+            ResultType.CustomerRetrieved,
+            operationId
+        ) {
             @Throws(StripeException::class)
             public override fun createMessageObject(): Customer? {
                 return stripeRepository.setDefaultCustomerSource(
@@ -230,8 +241,11 @@ internal class CustomerSessionRunnableFactory(
         shippingInformation: ShippingInformation,
         operationId: String
     ): Runnable {
-        return object : CustomerSessionRunnable<Customer>(handler, MessageCode.CUSTOMER_SHIPPING_INFO_SAVED,
-            operationId) {
+        return object : CustomerSessionRunnable<Customer>(
+            handler,
+            ResultType.ShippingInfo,
+            operationId
+        ) {
             @Throws(StripeException::class)
             public override fun createMessageObject(): Customer? {
                 return stripeRepository.setCustomerShippingInfo(
@@ -249,8 +263,11 @@ internal class CustomerSessionRunnableFactory(
         key: EphemeralKey,
         operationId: String
     ): Runnable {
-        return object : CustomerSessionRunnable<Customer>(handler, MessageCode.CUSTOMER_RETRIEVED,
-            operationId) {
+        return object : CustomerSessionRunnable<Customer>(
+            handler,
+            ResultType.CustomerRetrieved,
+            operationId
+        ) {
             @Throws(StripeException::class)
             public override fun createMessageObject(): Customer? {
                 return retrieveCustomerWithKey(key)
@@ -275,7 +292,7 @@ internal class CustomerSessionRunnableFactory(
 
     private abstract class CustomerSessionRunnable<T>(
         private val handler: Handler,
-        @param:MessageCode @field:MessageCode private val messageCode: Int,
+        private val resultType: ResultType,
         private val operationId: String
     ) : Runnable {
 
@@ -296,7 +313,7 @@ internal class CustomerSessionRunnableFactory(
         private fun sendMessage(messageObject: T?) {
             handler.sendMessage(
                 handler.obtainMessage(
-                    messageCode,
+                    resultType.ordinal,
                     Pair.create<String, T>(operationId, messageObject)
                 )
             )
@@ -305,7 +322,7 @@ internal class CustomerSessionRunnableFactory(
         private fun sendErrorMessage(stripeEx: StripeException) {
             handler.sendMessage(
                 handler.obtainMessage(
-                    MessageCode.ERROR,
+                    ResultType.Error.ordinal,
                     Pair.create(operationId, stripeEx)
                 )
             )
