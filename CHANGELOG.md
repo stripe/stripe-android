@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 13.2.0 - unreleased
+## 13.2.0 - 2020-02-03
 * [#2112](https://github.com/stripe/stripe-android/pull/2112) Enable adding Mandate to confirm params
 * [#2113](https://github.com/stripe/stripe-android/pull/2113) Enable requiring postal code in `CardInputWidget` and `CardMultilineWidget`
 * [#2114](https://github.com/stripe/stripe-android/pull/2114) Fix bug in highlighting `StripeEditText` fields with errors
