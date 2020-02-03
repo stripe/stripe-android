@@ -20,28 +20,26 @@ internal class CustomerSessionHandler(
         val operationId = messageData.first
         val obj = messageData.second
 
-        when (msg.what) {
-            CustomerSessionRunnableFactory.MessageCode.CUSTOMER_RETRIEVED -> {
+        when (CustomerSessionRunnableFactory.ResultType.values()[msg.what]) {
+            CustomerSessionRunnableFactory.ResultType.CustomerRetrieved -> {
                 listener.onCustomerRetrieved(obj as Customer, operationId)
             }
-            CustomerSessionRunnableFactory.MessageCode.SOURCE_RETRIEVED -> {
+            CustomerSessionRunnableFactory.ResultType.SourceRetrieved -> {
                 listener.onSourceRetrieved(obj as Source, operationId)
             }
-            CustomerSessionRunnableFactory.MessageCode.PAYMENT_METHOD_RETRIEVED -> {
+            CustomerSessionRunnableFactory.ResultType.PaymentMethod -> {
                 listener.onPaymentMethodRetrieved(obj as PaymentMethod, operationId)
             }
-            CustomerSessionRunnableFactory.MessageCode.CUSTOMER_SHIPPING_INFO_SAVED -> {
+            CustomerSessionRunnableFactory.ResultType.ShippingInfo -> {
                 listener.onCustomerShippingInfoSaved(obj as Customer, operationId)
             }
-            CustomerSessionRunnableFactory.MessageCode.PAYMENT_METHODS_RETRIEVED -> {
+            CustomerSessionRunnableFactory.ResultType.PaymentMethods -> {
                 listener.onPaymentMethodsRetrieved(obj as List<PaymentMethod>, operationId)
             }
-            CustomerSessionRunnableFactory.MessageCode.ERROR -> {
+            CustomerSessionRunnableFactory.ResultType.Error -> {
                 if (obj is StripeException) {
                     listener.onError(obj, operationId)
                 }
-            }
-            else -> {
             }
         }
     }
