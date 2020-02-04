@@ -22,7 +22,7 @@ dependencies {
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
 
     // Api for this import because we use reflection to alter TextInputLayout
-    api 'com.google.android.material:material:1.0.0'
+    api 'com.google.android.material:material:1.1.0'
 
     implementation "com.stripe:stripe-3ds2-android:2.2.7"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
@@ -31,7 +31,7 @@ dependencies {
 
     javadocDeps 'androidx.annotation:annotation:1.1.0'
     javadocDeps 'androidx.appcompat:appcompat:1.1.0'
-    javadocDeps 'com.google.android.material:material:1.0.0'
+    javadocDeps 'com.google.android.material:material:1.1.0'
     compileOnly "javax.annotation:jsr250-api:${rootProject.ext.javaAnnotationVersion}"
 
     testImplementation 'junit:junit:4.13'
