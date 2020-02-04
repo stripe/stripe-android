@@ -581,7 +581,7 @@ class StripeApiRepositoryTest {
         val paymentMethods = stripeApiRepository
             .getPaymentMethods(
                 "cus_123",
-                PaymentMethod.Type.Card.code,
+                PaymentMethod.Type.Card,
                 DEFAULT_OPTIONS.apiKey,
                 emptySet(),
                 ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
@@ -631,7 +631,7 @@ class StripeApiRepositoryTest {
         val paymentMethods = stripeApiRepository
             .getPaymentMethods(
                 "cus_123",
-                PaymentMethod.Type.Card.code,
+                PaymentMethod.Type.Card,
                 DEFAULT_OPTIONS.apiKey,
                 emptySet(),
                 ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)

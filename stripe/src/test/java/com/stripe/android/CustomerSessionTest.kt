@@ -5,6 +5,7 @@ import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.stripe.android.exception.APIException
@@ -33,7 +34,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.json.JSONObject
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.mock
@@ -46,10 +46,8 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class CustomerSessionTest {
 
-    @Mock
-    private lateinit var stripeRepository: StripeRepository
-    @Mock
-    private lateinit var threadPoolExecutor: ThreadPoolExecutor
+    private val stripeRepository: StripeRepository = mock()
+    private val threadPoolExecutor: ThreadPoolExecutor = mock()
 
     private val productUsageArgumentCaptor: KArgumentCaptor<Set<String>> by lazy {
         argumentCaptor<Set<String>>()
@@ -129,7 +127,7 @@ class CustomerSessionTest {
 
         `when`(stripeRepository.getPaymentMethods(
             any(),
-            eq("card"),
+            eq(PaymentMethod.Type.Card),
             eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             any(),
             any()
@@ -815,7 +813,7 @@ class CustomerSessionTest {
         assertNotNull(FIRST_CUSTOMER.id)
         verify(stripeRepository).getPaymentMethods(
             eq(FIRST_CUSTOMER.id.orEmpty()),
-            eq("card"),
+            eq(PaymentMethod.Type.Card),
             eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             productUsageArgumentCaptor.capture(),
             requestOptionsArgumentCaptor.capture()
@@ -880,7 +878,7 @@ class CustomerSessionTest {
 
         `when`(stripeRepository.getPaymentMethods(
             any(),
-            eq("card"),
+            eq(PaymentMethod.Type.Card),
             eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             any(),
             any()))

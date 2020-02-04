@@ -21,55 +21,60 @@ internal class EphemeralKeyManager(
 
     init {
         if (shouldPrefetchEphemeralKey) {
-            retrieveEphemeralKey(operationIdFactory.create(), null, null)
+            retrieveEphemeralKey(
+                EphemeralOperation.RetrieveKey(operationIdFactory.create())
+            )
         }
     }
 
-    fun retrieveEphemeralKey(
-        operationId: String,
-        actionString: String?,
-        arguments: Map<String, Any>?
+    @JvmSynthetic
+    internal fun retrieveEphemeralKey(
+        operation: EphemeralOperation
     ) {
-        val ephemeralKey = ephemeralKey
-        if (ephemeralKey == null ||
-            shouldRefreshKey(ephemeralKey, timeBufferInSeconds, overrideCalendar)) {
-            ephemeralKeyProvider.createEphemeralKey(apiVersion,
-                ClientKeyUpdateListener(this, operationId, actionString, arguments))
-        } else {
-            listener.onKeyUpdate(ephemeralKey, operationId, actionString, arguments)
-        }
+        ephemeralKey.takeUnless {
+            it == null || shouldRefreshKey(it, timeBufferInSeconds, overrideCalendar)
+        }?.let { ephemeralKey ->
+            listener.onKeyUpdate(ephemeralKey, operation)
+        } ?: ephemeralKeyProvider.createEphemeralKey(
+            apiVersion,
+            ClientKeyUpdateListener(this, operation)
+        )
     }
 
     private fun updateKey(
-        operationId: String,
-        key: String?,
-        actionString: String?,
-        arguments: Map<String, Any>?
+        operation: EphemeralOperation,
+        key: String?
     ) {
         // Key is coming from the user, so even if it's @NonNull annotated we
         // want to double check it
         if (key == null) {
-            listener.onKeyError(operationId,
+            listener.onKeyError(
+                operation.id,
                 HttpURLConnection.HTTP_INTERNAL_ERROR,
-                "EphemeralKeyUpdateListener.onKeyUpdate was called with a null value")
+                "EphemeralKeyUpdateListener.onKeyUpdate was called with a null value"
+            )
             return
         }
         try {
             val ephemeralKey = EphemeralKeyJsonParser().parse(JSONObject(key))
             this.ephemeralKey = ephemeralKey
-            listener.onKeyUpdate(ephemeralKey, operationId, actionString, arguments)
+            listener.onKeyUpdate(ephemeralKey, operation)
         } catch (e: JSONException) {
-            listener.onKeyError(operationId,
+            listener.onKeyError(
+                operation.id,
                 HttpURLConnection.HTTP_INTERNAL_ERROR,
                 "EphemeralKeyUpdateListener.onKeyUpdate was passed " +
                     "a value that could not be JSON parsed: [${e.localizedMessage}]. " +
-                    "The raw body from Stripe's response should be passed.")
+                    "The raw body from Stripe's response should be passed."
+            )
         } catch (e: Exception) {
-            listener.onKeyError(operationId,
+            listener.onKeyError(
+                operation.id,
                 HttpURLConnection.HTTP_INTERNAL_ERROR,
                 "EphemeralKeyUpdateListener.onKeyUpdate was passed " +
                     "a JSON String that was invalid: [${e.localizedMessage}]. " +
-                    "The raw body from Stripe's response should be passed.")
+                    "The raw body from Stripe's response should be passed."
+            )
         }
     }
 
@@ -81,9 +86,7 @@ internal class EphemeralKeyManager(
     internal interface KeyManagerListener {
         fun onKeyUpdate(
             ephemeralKey: EphemeralKey,
-            operationId: String,
-            action: String?,
-            arguments: Map<String, Any>?
+            operation: EphemeralOperation
         )
 
         fun onKeyError(
@@ -95,33 +98,31 @@ internal class EphemeralKeyManager(
 
     private class ClientKeyUpdateListener internal constructor(
         private val ephemeralKeyManager: EphemeralKeyManager,
-        private val operationId: String,
-        private val actionString: String?,
-        private val arguments: Map<String, Any>?
+        private val operation: EphemeralOperation
     ) : EphemeralKeyUpdateListener {
         override fun onKeyUpdate(stripeResponseJson: String) {
-            ephemeralKeyManager.updateKey(operationId, stripeResponseJson, actionString, arguments)
+            ephemeralKeyManager.updateKey(operation, stripeResponseJson)
         }
 
         override fun onKeyUpdateFailure(responseCode: Int, message: String) {
-            ephemeralKeyManager.updateKeyError(operationId, responseCode, message)
+            ephemeralKeyManager.updateKeyError(operation.id, responseCode, message)
         }
     }
 
-    companion object {
-        fun shouldRefreshKey(
-            key: EphemeralKey?,
+    internal companion object {
+        internal fun shouldRefreshKey(
+            ephemeralKey: EphemeralKey?,
             bufferInSeconds: Long,
             proxyCalendar: Calendar?
         ): Boolean {
-            if (key == null) {
+            if (ephemeralKey == null) {
                 return true
             }
 
             val now = proxyCalendar ?: Calendar.getInstance()
             val nowInSeconds = TimeUnit.MILLISECONDS.toSeconds(now.timeInMillis)
             val nowPlusBuffer = nowInSeconds + bufferInSeconds
-            return key.expires < nowPlusBuffer
+            return ephemeralKey.expires < nowPlusBuffer
         }
     }
 }

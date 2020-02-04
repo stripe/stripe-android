@@ -172,7 +172,10 @@ class CustomerSession @VisibleForTesting internal constructor(
      */
     fun updateCurrentCustomer(listener: CustomerRetrievalListener) {
         customer = null
-        startOperation(null, null, listener)
+        startOperation(
+            EphemeralOperation.RetrieveKey(operationIdFactory.create()),
+            listener
+        )
     }
 
     /**
@@ -198,11 +201,14 @@ class CustomerSession @VisibleForTesting internal constructor(
         @SourceType sourceType: String,
         listener: SourceRetrievalListener
     ) {
-        val arguments = mapOf(
-            KEY_SOURCE to sourceId,
-            KEY_SOURCE_TYPE to sourceType
+        startOperation(
+            EphemeralOperation.Customer.AddSource(
+                sourceId = sourceId,
+                sourceType = sourceType,
+                id = operationIdFactory.create()
+            ),
+            listener
         )
-        startOperation(ACTION_ADD_SOURCE, arguments, listener)
     }
 
     /**
@@ -216,10 +222,13 @@ class CustomerSession @VisibleForTesting internal constructor(
         sourceId: String,
         listener: SourceRetrievalListener
     ) {
-        val arguments = mapOf(
-            KEY_SOURCE to sourceId
+        startOperation(
+            EphemeralOperation.Customer.DeleteSource(
+                sourceId = sourceId,
+                id = operationIdFactory.create()
+            ),
+            listener
         )
-        startOperation(ACTION_DELETE_SOURCE, arguments, listener)
     }
 
     /**
@@ -233,10 +242,13 @@ class CustomerSession @VisibleForTesting internal constructor(
         paymentMethodId: String,
         listener: PaymentMethodRetrievalListener
     ) {
-        val arguments = mapOf(
-            KEY_PAYMENT_METHOD to paymentMethodId
+        startOperation(
+            EphemeralOperation.Customer.AttachPaymentMethod(
+                paymentMethodId = paymentMethodId,
+                id = operationIdFactory.create()
+            ),
+            listener
         )
-        startOperation(ACTION_ATTACH_PAYMENT_METHOD, arguments, listener)
     }
 
     /**
@@ -250,10 +262,13 @@ class CustomerSession @VisibleForTesting internal constructor(
         paymentMethodId: String,
         listener: PaymentMethodRetrievalListener
     ) {
-        val arguments = mapOf(
-            KEY_PAYMENT_METHOD to paymentMethodId
+        startOperation(
+            EphemeralOperation.Customer.DetachPaymentMethod(
+                paymentMethodId = paymentMethodId,
+                id = operationIdFactory.create()
+            ),
+            listener
         )
-        startOperation(ACTION_DETACH_PAYMENT_METHOD, arguments, listener)
     }
 
     /**
@@ -268,10 +283,13 @@ class CustomerSession @VisibleForTesting internal constructor(
         paymentMethodType: PaymentMethod.Type,
         listener: PaymentMethodsRetrievalListener
     ) {
-        val arguments = mapOf(
-            KEY_PAYMENT_METHOD_TYPE to paymentMethodType.code
+        startOperation(
+            EphemeralOperation.Customer.PaymentMethods(
+                type = paymentMethodType,
+                id = operationIdFactory.create()
+            ),
+            listener
         )
-        startOperation(ACTION_GET_PAYMENT_METHODS, arguments, listener)
     }
 
     /**
@@ -283,10 +301,13 @@ class CustomerSession @VisibleForTesting internal constructor(
         shippingInformation: ShippingInformation,
         listener: CustomerRetrievalListener
     ) {
-        val arguments = mapOf(
-            KEY_SHIPPING_INFO to shippingInformation
+        startOperation(
+            EphemeralOperation.Customer.UpdateShipping(
+                shippingInformation = shippingInformation,
+                id = operationIdFactory.create()
+            ),
+            listener
         )
-        startOperation(ACTION_SET_CUSTOMER_SHIPPING_INFO, arguments, listener)
     }
 
     /**
@@ -301,21 +322,22 @@ class CustomerSession @VisibleForTesting internal constructor(
         @SourceType sourceType: String,
         listener: CustomerRetrievalListener
     ) {
-        val arguments = mapOf(
-            KEY_SOURCE to sourceId,
-            KEY_SOURCE_TYPE to sourceType
+        startOperation(
+            EphemeralOperation.Customer.UpdateDefaultSource(
+                sourceId = sourceId,
+                sourceType = sourceType,
+                id = operationIdFactory.create()
+            ),
+            listener
         )
-        startOperation(ACTION_SET_DEFAULT_SOURCE, arguments, listener)
     }
 
     private fun startOperation(
-        action: String?,
-        arguments: Map<String, Any>?,
+        operation: EphemeralOperation,
         listener: RetrievalListener?
     ) {
-        val operationId = operationIdFactory.create()
-        listeners[operationId] = listener
-        ephemeralKeyManager.retrieveEphemeralKey(operationId, action, arguments)
+        listeners[operation.id] = listener
+        ephemeralKeyManager.retrieveEphemeralKey(operation)
     }
 
     @JvmSynthetic
@@ -410,19 +432,6 @@ class CustomerSession @VisibleForTesting internal constructor(
     }
 
     companion object {
-        internal const val ACTION_ADD_SOURCE = "add_source"
-        internal const val ACTION_DELETE_SOURCE = "delete_source"
-        internal const val ACTION_ATTACH_PAYMENT_METHOD = "attach_payment_method"
-        internal const val ACTION_DETACH_PAYMENT_METHOD = "detach_payment_method"
-        internal const val ACTION_GET_PAYMENT_METHODS = "get_payment_methods"
-        internal const val ACTION_SET_DEFAULT_SOURCE = "default_source"
-        internal const val ACTION_SET_CUSTOMER_SHIPPING_INFO = "set_shipping_info"
-        internal const val KEY_PAYMENT_METHOD = "payment_method"
-        internal const val KEY_PAYMENT_METHOD_TYPE = "payment_method_type"
-        internal const val KEY_SOURCE = "source"
-        internal const val KEY_SOURCE_TYPE = "source_type"
-        internal const val KEY_SHIPPING_INFO = "shipping_info"
-
         // The maximum number of active threads we support
         private const val THREAD_POOL_SIZE = 3
         // Sets the amount of time an idle thread waits before terminating
