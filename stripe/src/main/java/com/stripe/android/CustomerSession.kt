@@ -147,7 +147,7 @@ class CustomerSession @VisibleForTesting internal constructor(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY)
     @JvmSynthetic
-    internal fun addProductUsageTokenIfValid(token: String?) {
+    internal fun addProductUsageTokenIfValid(token: String) {
         productUsage.add(token)
     }
 

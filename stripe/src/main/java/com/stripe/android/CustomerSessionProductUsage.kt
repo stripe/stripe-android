@@ -7,8 +7,8 @@ import com.stripe.android.view.PaymentMethodsActivity
 internal class CustomerSessionProductUsage {
     private val data: MutableSet<String> = mutableSetOf()
 
-    fun add(token: String?) {
-        if (token != null && VALID_TOKENS.contains(token)) {
+    fun add(token: String) {
+        if (VALID_TOKENS.contains(token)) {
             data.add(token)
         }
     }
