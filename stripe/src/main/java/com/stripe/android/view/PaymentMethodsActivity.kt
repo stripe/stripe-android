@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -48,7 +47,11 @@ class PaymentMethodsActivity : AppCompatActivity() {
     private val viewModel: PaymentMethodsViewModel by lazy {
         ViewModelProvider(
             this,
-            PaymentMethodsViewModel.Factory(customerSession, args.initialPaymentMethodId)
+            PaymentMethodsViewModel.Factory(
+                application,
+                customerSession,
+                args.initialPaymentMethodId
+            )
         )[PaymentMethodsViewModel::class.java]
     }
 
@@ -68,6 +71,17 @@ class PaymentMethodsActivity : AppCompatActivity() {
         args.windowFlags?.let {
             window.addFlags(it)
         }
+
+        viewModel.snackbarData.observe(this, Observer {
+            Snackbar.make(coordinator, it, Snackbar.LENGTH_SHORT).show()
+        })
+        viewModel.progressData.observe(this, Observer {
+            payment_methods_progress_bar.visibility = if (it) {
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
+        })
 
         setupRecyclerView()
 
@@ -90,7 +104,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
             adapter,
             cardDisplayTextFactory,
             customerSession
-        ) { showSnackbar(it, R.string.removed) }
+        ) { viewModel.onPaymentMethodRemoved(it) }
 
         adapter.listener = object : PaymentMethodsAdapter.Listener {
             override fun onPaymentMethodClick(paymentMethod: PaymentMethod) {
@@ -131,7 +145,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
     }
 
     private fun onPaymentMethodCreated(data: Intent?) {
-        initLoggingTokens()
+        addLoggingTokens()
 
         data?.let {
             val result =
@@ -144,7 +158,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
         if (paymentMethod.type?.isReusable == true) {
             // Refresh the list of Payment Methods with the new reusable Payment Method.
             fetchCustomerPaymentMethods()
-            showSnackbar(paymentMethod, R.string.added)
+            viewModel.onPaymentMethodAdded(paymentMethod)
         } else {
             // If the added Payment Method is not reusable, it also can't be attached to a
             // customer, so immediately return to the launching host with the new
@@ -153,26 +167,11 @@ class PaymentMethodsActivity : AppCompatActivity() {
         }
     }
 
-    private fun showSnackbar(paymentMethod: PaymentMethod, @StringRes stringRes: Int) {
-        val snackbarText = paymentMethod.card?.let { paymentMethodId ->
-            getString(stringRes, cardDisplayTextFactory.createUnstyled(paymentMethodId))
-        }
-
-        if (snackbarText != null) {
-            Snackbar.make(
-                coordinator,
-                snackbarText,
-                Snackbar.LENGTH_SHORT
-            ).show()
-        }
-    }
-
     override fun onBackPressed() {
         finishWithPaymentMethod(adapter.selectedPaymentMethod, Activity.RESULT_CANCELED)
     }
 
     private fun fetchCustomerPaymentMethods() {
-        setCommunicatingProgress(true)
         viewModel.getPaymentMethods().observe(this, Observer {
             when (it) {
                 is PaymentMethodsViewModel.Result.Success -> {
@@ -185,23 +184,14 @@ class PaymentMethodsActivity : AppCompatActivity() {
                     alertDisplayer.show(displayedError)
                 }
             }
-            setCommunicatingProgress(false)
         })
     }
 
-    private fun initLoggingTokens() {
-        if (startedFromPaymentSession) {
-            customerSession.addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION)
-        }
-        customerSession.addProductUsageTokenIfValid(TOKEN_PAYMENT_METHODS_ACTIVITY)
-    }
-
-    private fun setCommunicatingProgress(communicating: Boolean) {
-        payment_methods_progress_bar.visibility = if (communicating) {
-            View.VISIBLE
-        } else {
-            View.GONE
-        }
+    private fun addLoggingTokens() {
+        listOfNotNull(
+            TOKEN_PAYMENT_SESSION.takeIf { startedFromPaymentSession },
+            TOKEN_PAYMENT_METHODS_ACTIVITY
+        ).forEach { customerSession.addProductUsageTokenIfValid(it) }
     }
 
     private fun finishWithGooglePay() {
