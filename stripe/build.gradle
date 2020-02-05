@@ -84,6 +84,7 @@ android {
 
     lintOptions {
         enable "Interoperability"
+        lintConfig file("../settings/lint.xml")
     }
 
     dokka {
