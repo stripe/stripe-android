@@ -17,7 +17,6 @@ import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.Stripe3ds2Fingerprint
 import com.stripe.android.model.Stripe3dsRedirect
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.stripe3ds2.init.StripeConfigParameters
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl
 import com.stripe.android.stripe3ds2.transaction.CompletionEvent
@@ -61,9 +60,6 @@ internal class StripePaymentController internal constructor(
 
     init {
         threeDs2Service.initialize(
-            context,
-            StripeConfigParameters(),
-            null,
             config.stripe3ds2Config.uiCustomization.uiCustomization
         )
     }
