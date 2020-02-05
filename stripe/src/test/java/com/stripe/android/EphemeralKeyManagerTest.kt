@@ -6,9 +6,7 @@ import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
-import com.stripe.android.model.CustomerFixtures
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.parsers.EphemeralKeyJsonParser
 import com.stripe.android.testharness.TestEphemeralKeyProvider
 import java.net.HttpURLConnection
 import java.util.Calendar
@@ -33,8 +31,6 @@ class EphemeralKeyManagerTest {
     private val keyManagerListener: EphemeralKeyManager.KeyManagerListener = mock()
 
     private val operationIdFactory = OperationIdFactory.get()
-    private val customerEphemeralKey: EphemeralKey =
-        EphemeralKeyJsonParser().parse(CustomerFixtures.EPHEMERAL_KEY_FIRST)
 
     private val operationCaptor: KArgumentCaptor<EphemeralOperation> = argumentCaptor()
     private val ephemeralKeyArgumentCaptor: KArgumentCaptor<EphemeralKey> = argumentCaptor()
@@ -42,99 +38,70 @@ class EphemeralKeyManagerTest {
 
     @Test
     fun shouldRefreshKey_whenKeyIsNullAndTimeIsInFuture_returnsTrue() {
-        val futureCalendar = Calendar.getInstance().apply {
+        val futureTime = Calendar.getInstance().apply {
             add(Calendar.YEAR, 1)
-        }.also {
-            // If you don't call getTime or getTimeInMillis on a Calendar, none of the updates happen.
-            it.timeInMillis
-        }
+        }.timeInMillis
         assertTrue(
-            EphemeralKeyManager.shouldRefreshKey(
-                null,
-                TEST_SECONDS_BUFFER,
-                futureCalendar
-            )
+            createEphemeralKeyManager(timeSupplier = { futureTime })
+                .shouldRefreshKey(null)
         )
     }
 
     @Test
     fun shouldRefreshKey_whenKeyIsNullAndTimeIsInPast_returnsTrue() {
-        val pastCalendar = Calendar.getInstance().apply {
+        val pastTime = Calendar.getInstance().apply {
             add(Calendar.YEAR, -1)
-        }.also {
-            // If you don't call getTime or getTimeInMillis on a Calendar, none of the updates happen.
-            it.timeInMillis
-        }
+        }.timeInMillis
         assertTrue(
-            EphemeralKeyManager.shouldRefreshKey(
-                null,
-                TEST_SECONDS_BUFFER,
-                pastCalendar
-            )
+            createEphemeralKeyManager(timeSupplier = { pastTime })
+                .shouldRefreshKey(null)
         )
     }
 
     @Test
     fun shouldRefreshKey_whenKeyExpiryIsAfterBufferFromPresent_returnsFalse() {
-        val fixedCalendar = Calendar.getInstance()
-        val expires = TimeUnit.SECONDS.toMillis(DEFAULT_EXPIRES + 2 * TEST_SECONDS_BUFFER)
-        val key = createEphemeralKey(expires)
-        fixedCalendar.timeInMillis = expires
+        val currentTime =
+            TimeUnit.SECONDS.toMillis(DEFAULT_EXPIRES + 2 * TEST_SECONDS_BUFFER)
+        val key = EphemeralKeyFixtures.FIRST.copy(expires = currentTime)
 
-        // If you don't call getTime or getTimeInMillis on a Calendar, none of the updates happen.
-        assertEquals(expires, fixedCalendar.timeInMillis)
         assertFalse(
-            EphemeralKeyManager.shouldRefreshKey(
-                key,
-                TEST_SECONDS_BUFFER,
-                fixedCalendar
-            )
+            createEphemeralKeyManager(timeSupplier = { currentTime })
+                .shouldRefreshKey(key)
         )
     }
 
     @Test
     fun shouldRefreshKey_whenKeyExpiryIsInThePast_returnsTrue() {
-        val fixedCalendar = Calendar.getInstance()
-        val timeAgoInMillis = fixedCalendar.timeInMillis - 100L
-        val key = createEphemeralKey(
-            TimeUnit.MILLISECONDS.toSeconds(timeAgoInMillis))
+        val currentTime = Calendar.getInstance().apply {
+            timeInMillis -= 100L
+        }.timeInMillis
+        val key = EphemeralKeyFixtures.FIRST.copy(
+            expires = TimeUnit.MILLISECONDS.toSeconds(currentTime)
+        )
         assertTrue(
-            EphemeralKeyManager.shouldRefreshKey(
-                key,
-                TEST_SECONDS_BUFFER,
-                fixedCalendar
-            )
+            createEphemeralKeyManager(timeSupplier = { currentTime })
+                .shouldRefreshKey(key)
         )
     }
 
     @Test
     fun shouldRefreshKey_whenKeyExpiryIsInFutureButWithinBuffer_returnsTrue() {
-        val fixedCalendar = Calendar.getInstance()
-        assertNotNull(customerEphemeralKey)
-
         val parsedExpiryTimeInMillis = TimeUnit.SECONDS
-            .toMillis(customerEphemeralKey.expires)
+            .toMillis(EphemeralKeyFixtures.FIRST.expires)
         val bufferTimeInMillis = TimeUnit.SECONDS.toMillis(TEST_SECONDS_BUFFER)
 
         val notFarEnoughInTheFuture = parsedExpiryTimeInMillis + bufferTimeInMillis / 2
-        fixedCalendar.timeInMillis = notFarEnoughInTheFuture
-        assertEquals(notFarEnoughInTheFuture, fixedCalendar.timeInMillis)
 
         assertTrue(
-            EphemeralKeyManager.shouldRefreshKey(
-                customerEphemeralKey,
-                TEST_SECONDS_BUFFER,
-                fixedCalendar
-            )
+            createEphemeralKeyManager(timeSupplier = { notFarEnoughInTheFuture })
+                .shouldRefreshKey(EphemeralKeyFixtures.FIRST)
         )
     }
 
     @Test
     fun createKeyManager_updatesEphemeralKey_notifiesListener() {
-        assertNotNull(customerEphemeralKey)
-
         testEphemeralKeyProvider
-            .setNextRawEphemeralKey(CustomerFixtures.EPHEMERAL_KEY_FIRST.toString())
+            .setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
         createEphemeralKeyManager(operationIdFactory)
 
         verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener).onKeyUpdate(
@@ -142,14 +109,13 @@ class EphemeralKeyManagerTest {
             any<EphemeralOperation.RetrieveKey>()
         )
         val ephemeralKey = ephemeralKeyArgumentCaptor.firstValue
-        assertNotNull(ephemeralKey)
-        assertEquals(customerEphemeralKey.id, ephemeralKey.id)
+        assertEquals(EphemeralKeyFixtures.FIRST.id, ephemeralKey.id)
     }
 
     @Test
     fun retrieveEphemeralKey_whenUpdateNecessary_returnsUpdateAndArguments() {
         testEphemeralKeyProvider
-            .setNextRawEphemeralKey(CustomerFixtures.EPHEMERAL_KEY_FIRST.toString())
+            .setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
 
         val keyManager = createEphemeralKeyManager(operationIdFactory)
 
@@ -176,20 +142,11 @@ class EphemeralKeyManagerTest {
 
     @Test
     fun updateKeyIfNecessary_whenReturnsError_setsExistingKeyToNull() {
-        assertNotNull(customerEphemeralKey)
-        val expiryTimeInMillis = TimeUnit.SECONDS.toMillis(customerEphemeralKey.expires)
-
-        val calendar = Calendar.getInstance().apply {
-            // The time is one millisecond past the expiration date for this test.
-            timeInMillis = expiryTimeInMillis + 1L
-        }
-        // Testing this just to invoke getTime
-        assertEquals(expiryTimeInMillis + 1L, calendar.timeInMillis)
-
         testEphemeralKeyProvider
-            .setNextRawEphemeralKey(CustomerFixtures.EPHEMERAL_KEY_FIRST.toString())
-        val keyManager =
-            createEphemeralKeyManager(operationIdFactory, calendar)
+            .setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
+        val keyManager = createEphemeralKeyManager(operationIdFactory) {
+            TimeUnit.SECONDS.toMillis(EphemeralKeyFixtures.FIRST.expires) + 1L
+        }
 
         // Make sure we're in a good state
         verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener)
@@ -288,7 +245,7 @@ class EphemeralKeyManagerTest {
         EphemeralKeyManager(
             testEphemeralKeyProvider,
             keyManagerListener,
-            TEST_SECONDS_BUFFER, null,
+            TEST_SECONDS_BUFFER,
             operationIdFactory,
             false
         )
@@ -296,22 +253,17 @@ class EphemeralKeyManagerTest {
     }
 
     private fun createEphemeralKeyManager(
-        operationIdFactory: OperationIdFactory,
-        calendar: Calendar = Calendar.getInstance()
+        operationIdFactory: OperationIdFactory = OperationIdFactory.get(),
+        timeSupplier: TimeSupplier = { Calendar.getInstance().timeInMillis }
     ): EphemeralKeyManager {
         return EphemeralKeyManager(
             testEphemeralKeyProvider,
             keyManagerListener,
             TEST_SECONDS_BUFFER,
-            calendar,
             operationIdFactory,
-            true
+            true,
+            timeSupplier
         )
-    }
-
-    private fun createEphemeralKey(expires: Long): EphemeralKey {
-        return EphemeralKey("cus_AQsHpvKfKwJDrF", 1501199335L,
-            expires, "ephkey_123", false, "customer", "", "")
     }
 
     private companion object {

@@ -15,7 +15,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceFixtures
-import com.stripe.android.model.parsers.EphemeralKeyJsonParser
 import com.stripe.android.testharness.TestEphemeralKeyProvider
 import com.stripe.android.view.ActivityScenarioFactory
 import com.stripe.android.view.AddPaymentMethodActivity
@@ -32,7 +31,6 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.doAnswer
@@ -149,7 +147,7 @@ class CustomerSessionTest {
 
     @Test
     fun addProductUsageTokenIfValid_whenValid_addsExpectedTokens() {
-        val customerSession = createCustomerSession(null)
+        val customerSession = createCustomerSession()
         customerSession.addProductUsageTokenIfValid(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
 
         val expectedTokens = listOf(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
@@ -166,32 +164,32 @@ class CustomerSessionTest {
 
     @Test
     fun addProductUsageTokenIfValid_whenNotValid_addsNoTokens() {
-        val customerSession = createCustomerSession(null)
+        val customerSession = createCustomerSession()
         customerSession.addProductUsageTokenIfValid("SomeUnknownActivity")
         assertTrue(customerSession.productUsageTokens.toList().isEmpty())
     }
 
     @Test
     fun create_withoutInvokingFunctions_fetchesKeyAndCustomer() {
-        val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
+        ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
+        val customerSession = createCustomerSession()
 
-        ephemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW)
-        val customerSession = createCustomerSession(null)
-
-        verify(stripeRepository).retrieveCustomer(eq(firstKey.objectId),
-            requestOptionsArgumentCaptor.capture())
-        assertEquals(firstKey.secret,
-            requestOptionsArgumentCaptor.firstValue.apiKey)
+        verify(stripeRepository).retrieveCustomer(
+            eq(EphemeralKeyFixtures.FIRST.objectId),
+            requestOptionsArgumentCaptor.capture()
+        )
+        assertEquals(
+            EphemeralKeyFixtures.FIRST.secret,
+            requestOptionsArgumentCaptor.firstValue.apiKey
+        )
         val customerId = customerSession.customer?.id
         assertEquals(FIRST_CUSTOMER.id, customerId)
     }
 
     @Test
     fun setCustomerShippingInfo_withValidInfo_callsWithExpectedArgs() {
-        val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
-        ephemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW)
-        val proxyCalendar = Calendar.getInstance()
-        val customerSession = createCustomerSession(proxyCalendar)
+        ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
+        val customerSession = createCustomerSession()
         customerSession.addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY)
         val shippingInformation =
             requireNotNull(CustomerFixtures.CUSTOMER_WITH_SHIPPING.shippingInformation)
@@ -215,36 +213,33 @@ class CustomerSessionTest {
             productUsageArgumentCaptor.capture(),
             eq(shippingInformation),
             requestOptionsArgumentCaptor.capture())
-        assertEquals(firstKey.secret,
-            requestOptionsArgumentCaptor.firstValue.apiKey)
+        assertEquals(
+            EphemeralKeyFixtures.FIRST.secret,
+            requestOptionsArgumentCaptor.firstValue.apiKey
+        )
         assertTrue(productUsageArgumentCaptor.firstValue.contains(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY))
     }
 
     @Test
     fun retrieveCustomer_withExpiredCache_updatesCustomer() {
-        val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
-        val secondKey = getCustomerEphemeralKey(SECOND_SAMPLE_KEY_RAW)
+        val firstKey = EphemeralKeyFixtures.FIRST
+        val secondKey = EphemeralKeyFixtures.SECOND
 
-        val proxyCalendar = Calendar.getInstance()
         val firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.expires)
-        proxyCalendar.timeInMillis = firstExpiryTimeInMillis - 100L
+        var currentTime = firstExpiryTimeInMillis - 100L
 
-        assertTrue(proxyCalendar.timeInMillis > 0)
-
-        ephemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW)
-        val customerSession = createCustomerSession(proxyCalendar)
+        ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
+        val customerSession = createCustomerSession { currentTime }
         assertEquals(firstKey.objectId, FIRST_CUSTOMER.id)
 
         val firstCustomerCacheTime = customerSession.customerCacheTime
         assertEquals(firstExpiryTimeInMillis - 100L, firstCustomerCacheTime)
         val timeForCustomerToExpire = TimeUnit.MINUTES.toMillis(2)
 
-        proxyCalendar.timeInMillis = firstCustomerCacheTime + timeForCustomerToExpire
-        assertEquals(firstCustomerCacheTime + timeForCustomerToExpire,
-            proxyCalendar.timeInMillis)
+        currentTime = firstCustomerCacheTime + timeForCustomerToExpire
 
         // We want to make sure that the next ephemeral key will be different.
-        ephemeralKeyProvider.setNextRawEphemeralKey(SECOND_SAMPLE_KEY_RAW)
+        ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.SECOND_JSON)
 
         // The key manager should think it is necessary to update the key,
         // because the first one was expired.
@@ -272,18 +267,12 @@ class CustomerSessionTest {
 
     @Test
     fun retrieveCustomer_withUnExpiredCache_returnsCustomerWithoutHittingApi() {
-        val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
+        val firstKey = EphemeralKeyFixtures.FIRST
 
-        val proxyCalendar = Calendar.getInstance()
-        val firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.expires)
-        val enoughTimeNotToBeExpired = TimeUnit.MINUTES.toMillis(2)
-        proxyCalendar.timeInMillis = firstExpiryTimeInMillis + enoughTimeNotToBeExpired
+        var currentTime = DEFAULT_CURRENT_TIME
 
-        // Make sure the calendar is set before it gets used.
-        assertTrue(proxyCalendar.timeInMillis > 0)
-
-        ephemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW)
-        val customerSession = createCustomerSession(proxyCalendar)
+        ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
+        val customerSession = createCustomerSession { currentTime }
 
         // Make sure we're in a good state and that we have the expected customer
         assertEquals(firstKey.objectId, FIRST_CUSTOMER.id)
@@ -296,10 +285,7 @@ class CustomerSessionTest {
 
         val firstCustomerCacheTime = customerSession.customerCacheTime
         val shortIntervalInMilliseconds = 10L
-
-        proxyCalendar.timeInMillis = firstCustomerCacheTime + shortIntervalInMilliseconds
-        assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
-            proxyCalendar.timeInMillis)
+        currentTime = firstCustomerCacheTime + shortIntervalInMilliseconds
 
         // The key manager should think it is necessary to update the key,
         // because the first one was expired.
@@ -317,18 +303,10 @@ class CustomerSessionTest {
 
     @Test
     fun addSourceToCustomer_withUnExpiredCustomer_returnsAddedSourceAndEmptiesLogs() {
-        val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
+        var currentTime = DEFAULT_CURRENT_TIME
+        ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
 
-        val proxyCalendar = Calendar.getInstance()
-        val firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.expires)
-        val enoughTimeNotToBeExpired = TimeUnit.MINUTES.toMillis(2)
-        proxyCalendar.timeInMillis = firstExpiryTimeInMillis + enoughTimeNotToBeExpired
-
-        // Make sure the calendar is set before it gets used.
-        assertTrue(proxyCalendar.timeInMillis > 0)
-
-        ephemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW)
-        val customerSession = createCustomerSession(proxyCalendar)
+        val customerSession = createCustomerSession { currentTime }
         customerSession.addProductUsageTokenIfValid(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
         customerSession.addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY)
 
@@ -336,9 +314,7 @@ class CustomerSessionTest {
         val shortIntervalInMilliseconds = 10L
 
         customerSession.addProductUsageTokenIfValid(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
-        proxyCalendar.timeInMillis = firstCustomerCacheTime + shortIntervalInMilliseconds
-        assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
-            proxyCalendar.timeInMillis)
+        currentTime = firstCustomerCacheTime + shortIntervalInMilliseconds
         val mockListener = mock(CustomerSession.SourceRetrievalListener::class.java)
 
         customerSession.addCustomerSource(
@@ -355,8 +331,10 @@ class CustomerSessionTest {
             eq("abc123"),
             eq(Source.SourceType.CARD),
             requestOptionsArgumentCaptor.capture())
-        assertEquals(firstKey.secret,
-            requestOptionsArgumentCaptor.firstValue.apiKey)
+        assertEquals(
+            EphemeralKeyFixtures.FIRST.secret,
+            requestOptionsArgumentCaptor.firstValue.apiKey
+        )
 
         val productUsage = productUsageArgumentCaptor.firstValue
         assertEquals(2, productUsage.size)
@@ -371,18 +349,10 @@ class CustomerSessionTest {
 
     @Test
     fun addSourceToCustomer_whenApiThrowsError_callsListenerAndEmptiesLogs() {
-        val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
+        var currentTime = DEFAULT_CURRENT_TIME
 
-        val proxyCalendar = Calendar.getInstance()
-        val firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.expires)
-        val enoughTimeNotToBeExpired = TimeUnit.MINUTES.toMillis(2)
-        proxyCalendar.timeInMillis = firstExpiryTimeInMillis + enoughTimeNotToBeExpired
-
-        // Make sure the calendar is set before it gets used.
-        assertTrue(proxyCalendar.timeInMillis > 0)
-
-        ephemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW)
-        val customerSession = createCustomerSession(proxyCalendar)
+        ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
+        val customerSession = createCustomerSession { currentTime }
         customerSession.addProductUsageTokenIfValid(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
         customerSession.addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY)
         assertFalse(customerSession.productUsageTokens.isEmpty())
@@ -390,9 +360,7 @@ class CustomerSessionTest {
         val firstCustomerCacheTime = customerSession.customerCacheTime
         val shortIntervalInMilliseconds = 10L
 
-        proxyCalendar.timeInMillis = firstCustomerCacheTime + shortIntervalInMilliseconds
-        assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
-            proxyCalendar.timeInMillis)
+        currentTime = firstCustomerCacheTime + shortIntervalInMilliseconds
         val mockListener = mock(CustomerSession.SourceRetrievalListener::class.java)
 
         setupErrorProxy()
@@ -405,18 +373,10 @@ class CustomerSessionTest {
 
     @Test
     fun removeSourceFromCustomer_withUnExpiredCustomer_returnsRemovedSourceAndEmptiesLogs() {
-        val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
+        var currentTime = DEFAULT_CURRENT_TIME
 
-        val proxyCalendar = Calendar.getInstance()
-        val firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.expires)
-        val enoughTimeNotToBeExpired = TimeUnit.MINUTES.toMillis(2)
-        proxyCalendar.timeInMillis = firstExpiryTimeInMillis + enoughTimeNotToBeExpired
-
-        // Make sure the calendar is set before it gets used.
-        assertTrue(proxyCalendar.timeInMillis > 0)
-
-        ephemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW)
-        val customerSession = createCustomerSession(proxyCalendar)
+        ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
+        val customerSession = createCustomerSession { currentTime }
         customerSession.addProductUsageTokenIfValid(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
         customerSession.addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY)
 
@@ -424,9 +384,7 @@ class CustomerSessionTest {
         val shortIntervalInMilliseconds = 10L
 
         customerSession.addProductUsageTokenIfValid(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
-        proxyCalendar.timeInMillis = firstCustomerCacheTime + shortIntervalInMilliseconds
-        assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
-            proxyCalendar.timeInMillis)
+        currentTime = firstCustomerCacheTime + shortIntervalInMilliseconds
         val mockListener = mock(CustomerSession.SourceRetrievalListener::class.java)
 
         customerSession.deleteCustomerSource(
@@ -441,8 +399,10 @@ class CustomerSessionTest {
             productUsageArgumentCaptor.capture(),
             eq("abc123"),
             requestOptionsArgumentCaptor.capture())
-        assertEquals(firstKey.secret,
-            requestOptionsArgumentCaptor.firstValue.apiKey)
+        assertEquals(
+            EphemeralKeyFixtures.FIRST.secret,
+            requestOptionsArgumentCaptor.firstValue.apiKey
+        )
 
         val productUsage = productUsageArgumentCaptor.firstValue
         assertEquals(2, productUsage.size)
@@ -457,18 +417,10 @@ class CustomerSessionTest {
 
     @Test
     fun removeSourceFromCustomer_whenApiThrowsError_callsListenerAndEmptiesLogs() {
-        val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
+        var currentTime = DEFAULT_CURRENT_TIME
 
-        val proxyCalendar = Calendar.getInstance()
-        val firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.expires)
-        val enoughTimeNotToBeExpired = TimeUnit.MINUTES.toMillis(2)
-        proxyCalendar.timeInMillis = firstExpiryTimeInMillis + enoughTimeNotToBeExpired
-
-        // Make sure the calendar is set before it gets used.
-        assertTrue(proxyCalendar.timeInMillis > 0)
-
-        ephemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW)
-        val customerSession = createCustomerSession(proxyCalendar)
+        ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
+        val customerSession = createCustomerSession { currentTime }
         customerSession.addProductUsageTokenIfValid(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
         customerSession.addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY)
         assertFalse(customerSession.productUsageTokens.isEmpty())
@@ -476,9 +428,7 @@ class CustomerSessionTest {
         val firstCustomerCacheTime = customerSession.customerCacheTime
         val shortIntervalInMilliseconds = 10L
 
-        proxyCalendar.timeInMillis = firstCustomerCacheTime + shortIntervalInMilliseconds
-        assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
-            proxyCalendar.timeInMillis)
+        currentTime = firstCustomerCacheTime + shortIntervalInMilliseconds
         val mockListener = mock(CustomerSession.SourceRetrievalListener::class.java)
 
         setupErrorProxy()
@@ -491,27 +441,17 @@ class CustomerSessionTest {
 
     @Test
     fun setDefaultSourceForCustomer_withUnExpiredCustomer_returnsCustomerAndClearsLog() {
-        val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
+        var currentTime = DEFAULT_CURRENT_TIME
 
-        val proxyCalendar = Calendar.getInstance()
-        val firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.expires)
-        val enoughTimeNotToBeExpired = TimeUnit.MINUTES.toMillis(2)
-        proxyCalendar.timeInMillis = firstExpiryTimeInMillis + enoughTimeNotToBeExpired
-
-        // Make sure the calendar is set before it gets used.
-        assertTrue(proxyCalendar.timeInMillis > 0)
-
-        ephemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW)
-        val customerSession = createCustomerSession(proxyCalendar)
+        ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
+        val customerSession = createCustomerSession { currentTime }
         customerSession.addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY)
         assertFalse(customerSession.productUsageTokens.isEmpty())
 
         val firstCustomerCacheTime = customerSession.customerCacheTime
         val shortIntervalInMilliseconds = 10L
 
-        proxyCalendar.timeInMillis = firstCustomerCacheTime + shortIntervalInMilliseconds
-        assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
-            proxyCalendar.timeInMillis)
+        currentTime = firstCustomerCacheTime + shortIntervalInMilliseconds
         val mockListener = mock(CustomerSession.CustomerRetrievalListener::class.java)
 
         customerSession.setCustomerDefaultSource(
@@ -529,8 +469,10 @@ class CustomerSessionTest {
             eq(Source.SourceType.CARD),
             requestOptionsArgumentCaptor.capture()
         )
-        assertEquals(firstKey.secret,
-            requestOptionsArgumentCaptor.firstValue.apiKey)
+        assertEquals(
+            EphemeralKeyFixtures.FIRST.secret,
+            requestOptionsArgumentCaptor.firstValue.apiKey
+        )
 
         val productUsage = productUsageArgumentCaptor.firstValue
         assertEquals(1, productUsage.size)
@@ -544,26 +486,16 @@ class CustomerSessionTest {
 
     @Test
     fun setDefaultSourceForCustomer_whenApiThrows_callsListenerAndClearsLogs() {
-        val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
+        var currentTime = DEFAULT_CURRENT_TIME
 
-        val proxyCalendar = Calendar.getInstance()
-        val firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.expires)
-        val enoughTimeNotToBeExpired = TimeUnit.MINUTES.toMillis(2)
-        proxyCalendar.timeInMillis = firstExpiryTimeInMillis + enoughTimeNotToBeExpired
-
-        // Make sure the calendar is set before it gets used.
-        assertTrue(proxyCalendar.timeInMillis > 0)
-
-        ephemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW)
-        val customerSession = createCustomerSession(proxyCalendar)
+        ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
+        val customerSession = createCustomerSession { currentTime }
         customerSession.addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY)
 
         val firstCustomerCacheTime = customerSession.customerCacheTime
         val shortIntervalInMilliseconds = 10L
 
-        proxyCalendar.timeInMillis = firstCustomerCacheTime + shortIntervalInMilliseconds
-        assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
-            proxyCalendar.timeInMillis)
+        currentTime = firstCustomerCacheTime + shortIntervalInMilliseconds
         val mockListener = mock(CustomerSession.CustomerRetrievalListener::class.java)
 
         setupErrorProxy()
@@ -577,7 +509,7 @@ class CustomerSessionTest {
 
     @Test
     fun shippingInfoScreen_whenLaunched_logs() {
-        val customerSession = createCustomerSession(null)
+        val customerSession = createCustomerSession()
         CustomerSession.instance = customerSession
 
         activityScenarioFactory.create<PaymentFlowActivity>(
@@ -591,7 +523,7 @@ class CustomerSessionTest {
 
     @Test
     fun shippingMethodScreen_whenLaunched_logs() {
-        val customerSession = createCustomerSession(null)
+        val customerSession = createCustomerSession()
         CustomerSession.instance = customerSession
 
         val config = PaymentSessionFixtures.CONFIG.copy(
@@ -611,18 +543,10 @@ class CustomerSessionTest {
 
     @Test
     fun attachPaymentMethodToCustomer_withUnExpiredCustomer_returnsAddedPaymentMethodAndEmptiesLogs() {
-        val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
+        var currentTime = DEFAULT_CURRENT_TIME
 
-        val proxyCalendar = Calendar.getInstance()
-        val firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.expires)
-        val enoughTimeNotToBeExpired = TimeUnit.MINUTES.toMillis(2)
-        proxyCalendar.timeInMillis = firstExpiryTimeInMillis + enoughTimeNotToBeExpired
-
-        // Make sure the calendar is set before it gets used.
-        assertTrue(proxyCalendar.timeInMillis > 0)
-
-        ephemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW)
-        val customerSession = createCustomerSession(proxyCalendar)
+        ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
+        val customerSession = createCustomerSession { currentTime }
         customerSession.addProductUsageTokenIfValid(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
         customerSession.addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY)
 
@@ -630,9 +554,7 @@ class CustomerSessionTest {
         val shortIntervalInMilliseconds = 10L
 
         customerSession.addProductUsageTokenIfValid(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
-        proxyCalendar.timeInMillis = firstCustomerCacheTime + shortIntervalInMilliseconds
-        assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
-            proxyCalendar.timeInMillis)
+        currentTime = firstCustomerCacheTime + shortIntervalInMilliseconds
         val mockListener = mock(CustomerSession.PaymentMethodRetrievalListener::class.java)
 
         customerSession.attachPaymentMethod("pm_abc123", mockListener)
@@ -646,8 +568,10 @@ class CustomerSessionTest {
             eq("pm_abc123"),
             requestOptionsArgumentCaptor.capture()
         )
-        assertEquals(firstKey.secret,
-            requestOptionsArgumentCaptor.firstValue.apiKey)
+        assertEquals(
+            EphemeralKeyFixtures.FIRST.secret,
+            requestOptionsArgumentCaptor.firstValue.apiKey
+        )
 
         val productUsage = productUsageArgumentCaptor.firstValue
         assertEquals(2, productUsage.size)
@@ -662,28 +586,18 @@ class CustomerSessionTest {
 
     @Test
     fun attachPaymentMethodToCustomer_whenApiThrowsError_callsListenerAndEmptiesLogs() {
-        val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
+        var currentTime = DEFAULT_CURRENT_TIME
 
-        val proxyCalendar = Calendar.getInstance()
-        val firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.expires)
-        val enoughTimeNotToBeExpired = TimeUnit.MINUTES.toMillis(2)
-        proxyCalendar.timeInMillis = firstExpiryTimeInMillis + enoughTimeNotToBeExpired
-
-        // Make sure the calendar is set before it gets used.
-        assertTrue(proxyCalendar.timeInMillis > 0)
-
-        ephemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW)
-        val customerSession = createCustomerSession(proxyCalendar)
+        ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
+        val customerSession = createCustomerSession { currentTime }
         customerSession.addProductUsageTokenIfValid(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
         customerSession.addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY)
         assertFalse(customerSession.productUsageTokens.isEmpty())
 
         val firstCustomerCacheTime = customerSession.customerCacheTime
         val shortIntervalInMilliseconds = 10L
+        currentTime = firstCustomerCacheTime + shortIntervalInMilliseconds
 
-        proxyCalendar.timeInMillis = firstCustomerCacheTime + shortIntervalInMilliseconds
-        assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
-            proxyCalendar.timeInMillis)
         val mockListener = mock(CustomerSession.PaymentMethodRetrievalListener::class.java)
 
         setupErrorProxy()
@@ -696,18 +610,10 @@ class CustomerSessionTest {
 
     @Test
     fun detachPaymentMethodFromCustomer_withUnExpiredCustomer_returnsRemovedPaymentMethodAndEmptiesLogs() {
-        val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
+        var currentTime = DEFAULT_CURRENT_TIME
 
-        val proxyCalendar = Calendar.getInstance()
-        val firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.expires)
-        val enoughTimeNotToBeExpired = TimeUnit.MINUTES.toMillis(2)
-        proxyCalendar.timeInMillis = firstExpiryTimeInMillis + enoughTimeNotToBeExpired
-
-        // Make sure the calendar is set before it gets used.
-        assertTrue(proxyCalendar.timeInMillis > 0)
-
-        ephemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW)
-        val customerSession = createCustomerSession(proxyCalendar)
+        ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
+        val customerSession = createCustomerSession { currentTime }
         customerSession.addProductUsageTokenIfValid(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
         customerSession.addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY)
 
@@ -715,9 +621,7 @@ class CustomerSessionTest {
         val shortIntervalInMilliseconds = 10L
 
         customerSession.addProductUsageTokenIfValid(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
-        proxyCalendar.timeInMillis = firstCustomerCacheTime + shortIntervalInMilliseconds
-        assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
-            proxyCalendar.timeInMillis)
+        currentTime = firstCustomerCacheTime + shortIntervalInMilliseconds
         val mockListener =
             mock(CustomerSession.PaymentMethodRetrievalListener::class.java)
 
@@ -733,8 +637,10 @@ class CustomerSessionTest {
             eq("pm_abc123"),
             requestOptionsArgumentCaptor.capture()
         )
-        assertEquals(firstKey.secret,
-            requestOptionsArgumentCaptor.firstValue.apiKey)
+        assertEquals(
+            EphemeralKeyFixtures.FIRST.secret,
+            requestOptionsArgumentCaptor.firstValue.apiKey
+        )
 
         val productUsage = productUsageArgumentCaptor.firstValue
         assertEquals(2, productUsage.size)
@@ -749,18 +655,10 @@ class CustomerSessionTest {
 
     @Test
     fun detachPaymentMethodFromCustomer_whenApiThrowsError_callsListenerAndEmptiesLogs() {
-        val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
+        var currentTime = DEFAULT_CURRENT_TIME
 
-        val proxyCalendar = Calendar.getInstance()
-        val firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.expires)
-        val enoughTimeNotToBeExpired = TimeUnit.MINUTES.toMillis(2)
-        proxyCalendar.timeInMillis = firstExpiryTimeInMillis + enoughTimeNotToBeExpired
-
-        // Make sure the calendar is set before it gets used.
-        assertTrue(proxyCalendar.timeInMillis > 0)
-
-        ephemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW)
-        val customerSession = createCustomerSession(proxyCalendar)
+        ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
+        val customerSession = createCustomerSession { currentTime }
         customerSession.addProductUsageTokenIfValid(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
         customerSession.addProductUsageTokenIfValid(PaymentMethodsActivity::class.java.simpleName)
         assertFalse(customerSession.productUsageTokens.isEmpty())
@@ -768,9 +666,7 @@ class CustomerSessionTest {
         val firstCustomerCacheTime = customerSession.customerCacheTime
         val shortIntervalInMilliseconds = 10L
 
-        proxyCalendar.timeInMillis = firstCustomerCacheTime + shortIntervalInMilliseconds
-        assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
-            proxyCalendar.timeInMillis)
+        currentTime = firstCustomerCacheTime + shortIntervalInMilliseconds
         val mockListener = mock(CustomerSession.PaymentMethodRetrievalListener::class.java)
 
         setupErrorProxy()
@@ -783,18 +679,10 @@ class CustomerSessionTest {
 
     @Test
     fun getPaymentMethods_withUnExpiredCustomer_returnsAddedPaymentMethodAndEmptiesLogs() {
-        val firstKey = getCustomerEphemeralKey(FIRST_SAMPLE_KEY_RAW)
+        var currentTime = DEFAULT_CURRENT_TIME
 
-        val proxyCalendar = Calendar.getInstance()
-        val firstExpiryTimeInMillis = TimeUnit.SECONDS.toMillis(firstKey.expires)
-        val enoughTimeNotToBeExpired = TimeUnit.MINUTES.toMillis(2)
-        proxyCalendar.timeInMillis = firstExpiryTimeInMillis + enoughTimeNotToBeExpired
-
-        // Make sure the calendar is set before it gets used.
-        assertTrue(proxyCalendar.timeInMillis > 0)
-
-        ephemeralKeyProvider.setNextRawEphemeralKey(FIRST_SAMPLE_KEY_RAW)
-        val customerSession = createCustomerSession(proxyCalendar)
+        ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
+        val customerSession = createCustomerSession { currentTime }
         customerSession.addProductUsageTokenIfValid(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
         customerSession.addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY)
 
@@ -802,9 +690,7 @@ class CustomerSessionTest {
         val shortIntervalInMilliseconds = 10L
 
         customerSession.addProductUsageTokenIfValid(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
-        proxyCalendar.timeInMillis = firstCustomerCacheTime + shortIntervalInMilliseconds
-        assertEquals(firstCustomerCacheTime + shortIntervalInMilliseconds,
-            proxyCalendar.timeInMillis)
+        currentTime = firstCustomerCacheTime + shortIntervalInMilliseconds
         val mockListener = mock(CustomerSession.PaymentMethodsRetrievalListener::class.java)
 
         customerSession.getPaymentMethods(PaymentMethod.Type.Card, mockListener)
@@ -818,8 +704,10 @@ class CustomerSessionTest {
             productUsageArgumentCaptor.capture(),
             requestOptionsArgumentCaptor.capture()
         )
-        assertEquals(firstKey.secret,
-            requestOptionsArgumentCaptor.firstValue.apiKey)
+        assertEquals(
+            EphemeralKeyFixtures.FIRST.secret,
+            requestOptionsArgumentCaptor.firstValue.apiKey
+        )
 
         val productUsage = productUsageArgumentCaptor.firstValue
         assertEquals(2, productUsage.size)
@@ -885,24 +773,29 @@ class CustomerSessionTest {
             .thenThrow(APIException(statusCode = 404, message = "The payment method does not exist"))
     }
 
-    private fun createCustomerSession(calendar: Calendar?): CustomerSession {
-        return CustomerSession(ApplicationProvider.getApplicationContext(),
-            ephemeralKeyProvider, calendar, threadPoolExecutor, stripeRepository,
+    private fun createCustomerSession(
+        timeSupplier: TimeSupplier = { Calendar.getInstance().timeInMillis }
+    ): CustomerSession {
+        return CustomerSession(
+            ApplicationProvider.getApplicationContext(),
+            ephemeralKeyProvider,
+            threadPoolExecutor,
+            stripeRepository,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            "acct_abc123", true)
+            "acct_abc123",
+            true,
+            timeSupplier
+        )
     }
 
     private companion object {
-        private val FIRST_SAMPLE_KEY_RAW = CustomerFixtures.EPHEMERAL_KEY_FIRST.toString()
-        private val SECOND_SAMPLE_KEY_RAW = CustomerFixtures.EPHEMERAL_KEY_SECOND.toString()
-
         private val FIRST_CUSTOMER = CustomerFixtures.CUSTOMER
         private val SECOND_CUSTOMER = CustomerFixtures.OTHER_CUSTOMER
 
         private val PAYMENT_METHOD = PaymentMethodFixtures.CARD_PAYMENT_METHOD
 
-        private fun getCustomerEphemeralKey(key: String): EphemeralKey {
-            return EphemeralKeyJsonParser().parse(JSONObject(key))
-        }
+        private val DEFAULT_CURRENT_TIME =
+            TimeUnit.SECONDS.toMillis(EphemeralKeyFixtures.FIRST.expires) +
+                TimeUnit.MINUTES.toMillis(2)
     }
 }

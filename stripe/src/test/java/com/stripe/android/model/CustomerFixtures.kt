@@ -73,38 +73,4 @@ internal object CustomerFixtures {
         }
         """.trimIndent()
     )))
-
-    val EPHEMERAL_KEY_FIRST = JSONObject(
-        """
-        {
-            "id": "ephkey_123",
-            "object": "ephemeral_key",
-            "secret": "ek_test_123",
-            "created": 1501179335,
-            "livemode": false,
-            "expires": 1501199335,
-            "associated_objects": [{
-                "type": "customer",
-                "id": "cus_AQsHpvKfKwJDrF"
-            }]
-        }
-        """.trimIndent()
-    )
-
-    val EPHEMERAL_KEY_SECOND = JSONObject(
-        """
-        {
-            "id": "ephkey_ABC",
-            "object": "ephemeral_key",
-            "secret": "ek_test_456",
-            "created": 1601189335,
-            "livemode": false,
-            "expires": 1601199335,
-            "associated_objects": [{
-                "type": "customer",
-                "id": "cus_abc123"
-            }]
-        }
-        """.trimIndent()
-    )
 }
