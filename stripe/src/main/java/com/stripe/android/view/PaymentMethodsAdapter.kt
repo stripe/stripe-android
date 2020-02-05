@@ -192,6 +192,7 @@ internal class PaymentMethodsAdapter constructor(
         return ViewHolder.GooglePayViewHolder(itemView)
     }
 
+    @JvmSynthetic
     internal fun deletePaymentMethod(paymentMethod: PaymentMethod) {
         val indexToDelete = paymentMethods.indexOfFirst { it.id == paymentMethod.id }
         if (indexToDelete >= 0) {
@@ -200,19 +201,36 @@ internal class PaymentMethodsAdapter constructor(
         }
     }
 
+    @JvmSynthetic
     internal fun resetPaymentMethod(paymentMethod: PaymentMethod) {
-        val indexToReset = paymentMethods.indexOfFirst { it.id == paymentMethod.id }
-        if (indexToReset >= 0) {
-            notifyItemChanged(indexToReset)
+        getPosition(paymentMethod)?.let {
+            notifyItemChanged(it)
         }
     }
 
-    private fun getPaymentMethodAtPosition(position: Int): PaymentMethod {
-        return paymentMethods[getPaymentMethodPosition(position)]
+    /**
+     * Given an adapter position, translate to a `paymentMethods` element
+     */
+    @JvmSynthetic
+    internal fun getPaymentMethodAtPosition(position: Int): PaymentMethod {
+        return paymentMethods[getPaymentMethodIndex(position)]
     }
 
-    private fun getPaymentMethodPosition(position: Int): Int {
+    /**
+     * Given an adapter position, translate to a `paymentMethods` index
+     */
+    private fun getPaymentMethodIndex(position: Int): Int {
         return position - googlePayCount
+    }
+
+    /**
+     * Given a Payment Method, get its adapter position. For example, if the Google Pay button is
+     * being shown, the 2nd element in [paymentMethods] is actually the 3rd item in the adapter.
+     */
+    internal fun getPosition(paymentMethod: PaymentMethod): Int? {
+        return paymentMethods.indexOf(paymentMethod).takeIf { it >= 0 }?.let {
+            it + googlePayCount
+        }
     }
 
     private fun getAddableTypesPosition(position: Int): Int {

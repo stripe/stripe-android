@@ -4,6 +4,7 @@ import android.content.Context
 import android.widget.FrameLayout
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
+import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -13,9 +14,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.Mockito.times
-import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
 /**
@@ -23,11 +22,8 @@ import org.robolectric.RobolectricTestRunner
  */
 @RunWith(RobolectricTestRunner::class)
 class PaymentMethodsAdapterTest {
-    @Mock
-    private lateinit var adapterDataObserver: RecyclerView.AdapterDataObserver
-
-    @Mock
-    private lateinit var listener: PaymentMethodsAdapter.Listener
+    private val adapterDataObserver: RecyclerView.AdapterDataObserver = mock()
+    private val listener: PaymentMethodsAdapter.Listener = mock()
 
     private val paymentMethodsAdapter: PaymentMethodsAdapter = PaymentMethodsAdapter(ARGS)
 
@@ -37,7 +33,6 @@ class PaymentMethodsAdapterTest {
 
     @BeforeTest
     fun setup() {
-        MockitoAnnotations.initMocks(this)
         paymentMethodsAdapter.registerAdapterDataObserver(adapterDataObserver)
     }
 
@@ -233,6 +228,25 @@ class PaymentMethodsAdapterTest {
 
         itemView.performClick()
         verify(listener).onGooglePayClick()
+    }
+
+    @Test
+    fun getPosition_withValidPaymentMethod_returnsPosition() {
+        val adapter = PaymentMethodsAdapter(ARGS, shouldShowGooglePay = true)
+        adapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
+
+        assertEquals(
+            3,
+            adapter.getPosition(PaymentMethodFixtures.CARD_PAYMENT_METHODS.last())
+        )
+    }
+
+    @Test
+    fun getPosition_withInvalidPaymentMethod_returnsNull() {
+        val adapter = PaymentMethodsAdapter(ARGS, shouldShowGooglePay = true)
+        adapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
+
+        assertNull(adapter.getPosition(PaymentMethodFixtures.FPX_PAYMENT_METHOD))
     }
 
     private companion object {
