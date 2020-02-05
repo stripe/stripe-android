@@ -72,8 +72,10 @@ class PaymentMethodsActivity : AppCompatActivity() {
             window.addFlags(it)
         }
 
-        viewModel.snackbarData.observe(this, Observer {
-            Snackbar.make(coordinator, it, Snackbar.LENGTH_SHORT).show()
+        viewModel.snackbarData.observe(this, Observer { snackbarText ->
+            snackbarText?.let {
+                Snackbar.make(coordinator, it, Snackbar.LENGTH_SHORT).show()
+            }
         })
         viewModel.progressData.observe(this, Observer {
             payment_methods_progress_bar.visibility = if (it) {

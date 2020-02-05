@@ -22,18 +22,20 @@ internal class PaymentMethodsViewModel(
     private val context = application.applicationContext
     private val cardDisplayTextFactory = CardDisplayTextFactory(context)
 
-    internal val snackbarData: MutableLiveData<String> = MutableLiveData()
+    internal val snackbarData: MutableLiveData<String?> = MutableLiveData()
     internal val progressData: MutableLiveData<Boolean> = MutableLiveData()
 
     internal fun onPaymentMethodAdded(paymentMethod: PaymentMethod) {
         createSnackbarText(paymentMethod, R.string.added)?.let {
             snackbarData.value = it
+            snackbarData.value = null
         }
     }
 
     internal fun onPaymentMethodRemoved(paymentMethod: PaymentMethod) {
         createSnackbarText(paymentMethod, R.string.removed)?.let {
             snackbarData.value = it
+            snackbarData.value = null
         }
     }
 

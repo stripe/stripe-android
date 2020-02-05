@@ -12,6 +12,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -68,13 +69,21 @@ class PaymentMethodsViewModelTest {
 
     @Test
     fun onPaymentMethodAdded_shouldUpdateSnackbarData() {
+        val values: MutableList<String?> = mutableListOf()
+        viewModel.snackbarData.observeForever { values.add(it) }
+
         viewModel.onPaymentMethodAdded(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        assertEquals("Added Visa ending in 4242", viewModel.snackbarData.value)
+        assertEquals("Added Visa ending in 4242", values[0])
+        assertNull(values[1])
     }
 
     @Test
     fun onPaymentMethodRemoved_shouldUpdateSnackbarData() {
+        val values: MutableList<String?> = mutableListOf()
+        viewModel.snackbarData.observeForever { values.add(it) }
+
         viewModel.onPaymentMethodRemoved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        assertEquals("Removed Visa ending in 4242", viewModel.snackbarData.value)
+        assertEquals("Removed Visa ending in 4242", values[0])
+        assertNull(values[1])
     }
 }
