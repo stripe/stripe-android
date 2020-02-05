@@ -11,9 +11,9 @@ internal class EphemeralKeyManager(
     private val ephemeralKeyProvider: EphemeralKeyProvider,
     private val listener: KeyManagerListener,
     private val timeBufferInSeconds: Long,
-    private val overrideCalendar: Calendar?,
     operationIdFactory: OperationIdFactory,
-    shouldPrefetchEphemeralKey: Boolean
+    shouldPrefetchEphemeralKey: Boolean,
+    private val timeSupplier: TimeSupplier = { Calendar.getInstance().timeInMillis }
 ) {
     private val apiVersion: String = ApiVersion.get().code
 
@@ -31,9 +31,7 @@ internal class EphemeralKeyManager(
     internal fun retrieveEphemeralKey(
         operation: EphemeralOperation
     ) {
-        ephemeralKey.takeUnless {
-            it == null || shouldRefreshKey(it, timeBufferInSeconds, overrideCalendar)
-        }?.let { ephemeralKey ->
+        ephemeralKey.takeUnless { it == null || shouldRefreshKey(it) }?.let { ephemeralKey ->
             listener.onKeyUpdate(ephemeralKey, operation)
         } ?: ephemeralKeyProvider.createEphemeralKey(
             apiVersion,
@@ -109,20 +107,15 @@ internal class EphemeralKeyManager(
         }
     }
 
-    internal companion object {
-        internal fun shouldRefreshKey(
-            ephemeralKey: EphemeralKey?,
-            bufferInSeconds: Long,
-            proxyCalendar: Calendar?
-        ): Boolean {
-            if (ephemeralKey == null) {
-                return true
-            }
-
-            val now = proxyCalendar ?: Calendar.getInstance()
-            val nowInSeconds = TimeUnit.MILLISECONDS.toSeconds(now.timeInMillis)
-            val nowPlusBuffer = nowInSeconds + bufferInSeconds
-            return ephemeralKey.expires < nowPlusBuffer
+    internal fun shouldRefreshKey(
+        ephemeralKey: EphemeralKey?
+    ): Boolean {
+        if (ephemeralKey == null) {
+            return true
         }
+
+        val nowInSeconds = TimeUnit.MILLISECONDS.toSeconds(timeSupplier())
+        val nowPlusBuffer = nowInSeconds + timeBufferInSeconds
+        return ephemeralKey.expires < nowPlusBuffer
     }
 }

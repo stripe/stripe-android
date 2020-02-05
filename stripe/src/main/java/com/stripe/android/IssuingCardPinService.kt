@@ -72,7 +72,6 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
             }
         },
         KEY_REFRESH_BUFFER_IN_SECONDS,
-        null,
         operationIdFactory,
         true
     )

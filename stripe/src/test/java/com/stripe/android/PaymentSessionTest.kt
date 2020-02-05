@@ -103,7 +103,7 @@ class PaymentSessionTest {
     @Test
     fun init_whenEphemeralKeyProviderContinues_fetchesCustomerAndNotifiesListener() {
         ephemeralKeyProvider
-            .setNextRawEphemeralKey(CustomerFixtures.EPHEMERAL_KEY_FIRST.toString())
+            .setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
         CustomerSession.instance = createCustomerSession()
 
         val paymentSession = PaymentSession(activity, DEFAULT_CONFIG)
@@ -311,8 +311,7 @@ class PaymentSessionTest {
 
     @Test
     fun init_withSavedState_setsPaymentSessionData() {
-        ephemeralKeyProvider
-            .setNextRawEphemeralKey(CustomerFixtures.EPHEMERAL_KEY_FIRST.toString())
+        ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
         CustomerSession.instance = createCustomerSession()
 
         val paymentSession = PaymentSession(activity, DEFAULT_CONFIG)
@@ -380,7 +379,6 @@ class PaymentSessionTest {
         return CustomerSession(
             ApplicationProvider.getApplicationContext<Context>(),
             ephemeralKeyProvider,
-            null,
             threadPoolExecutor,
             FakeStripeRepository(),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,

@@ -3,6 +3,7 @@ package com.stripe.android.testharness
 import androidx.annotation.Size
 import com.stripe.android.EphemeralKeyProvider
 import com.stripe.android.EphemeralKeyUpdateListener
+import org.json.JSONObject
 
 /**
  * An [EphemeralKeyProvider] to be used in tests that automatically returns test values.
@@ -25,6 +26,10 @@ internal class TestEphemeralKeyProvider : EphemeralKeyProvider {
             else -> // Useful to test edge cases
                 keyUpdateListener.onKeyUpdate("")
         }
+    }
+
+    fun setNextRawEphemeralKey(ephemeralKey: JSONObject) {
+        setNextRawEphemeralKey(ephemeralKey.toString())
     }
 
     fun setNextRawEphemeralKey(rawEphemeralKey: String) {

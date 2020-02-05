@@ -27,12 +27,12 @@ import java.util.concurrent.TimeUnit
 class CustomerSession @VisibleForTesting internal constructor(
     context: Context,
     keyProvider: EphemeralKeyProvider,
-    private val proxyNowCalendar: Calendar? = null,
     private val threadPoolExecutor: ThreadPoolExecutor,
     stripeRepository: StripeRepository,
     publishableKey: String,
     stripeAccountId: String?,
-    shouldPrefetchEphemeralKey: Boolean
+    shouldPrefetchEphemeralKey: Boolean,
+    private val timeSupplier: TimeSupplier = { Calendar.getInstance().timeInMillis }
 ) {
     @JvmSynthetic
     internal var customerCacheTime: Long = 0
@@ -58,9 +58,9 @@ class CustomerSession @VisibleForTesting internal constructor(
             keyProvider,
             keyManagerListener,
             KEY_REFRESH_BUFFER_IN_SECONDS,
-            proxyNowCalendar,
             operationIdFactory,
-            shouldPrefetchEphemeralKey
+            shouldPrefetchEphemeralKey,
+            timeSupplier
         )
     }
 
@@ -78,7 +78,7 @@ class CustomerSession @VisibleForTesting internal constructor(
         stripeAccountId: String?,
         shouldPrefetchEphemeralKey: Boolean
     ) : this(
-        context, keyProvider, null, createThreadPoolExecutor(),
+        context, keyProvider, createThreadPoolExecutor(),
         StripeApiRepository(context, appInfo), publishableKey, stripeAccountId,
         shouldPrefetchEphemeralKey
     )
@@ -90,7 +90,7 @@ class CustomerSession @VisibleForTesting internal constructor(
                 operationId: String
             ) {
                 this@CustomerSession.customer = customer
-                customerCacheTime = getCalendarInstance().timeInMillis
+                customerCacheTime = timeSupplier()
                 val listener: CustomerRetrievalListener? = getListener(operationId)
                 if (customer != null) {
                     listener?.onCustomerRetrieved(customer)
@@ -347,9 +347,8 @@ class CustomerSession @VisibleForTesting internal constructor(
 
     private val canUseCachedCustomer: Boolean
         get() {
-            val currentTime = getCalendarInstance().timeInMillis
             return customer != null &&
-                currentTime - customerCacheTime < CUSTOMER_CACHE_DURATION_MILLISECONDS
+                timeSupplier() - customerCacheTime < CUSTOMER_CACHE_DURATION_MILLISECONDS
         }
 
     private fun handleRetrievalError(
@@ -365,10 +364,6 @@ class CustomerSession @VisibleForTesting internal constructor(
             )
         }
         resetUsageTokens()
-    }
-
-    private fun getCalendarInstance(): Calendar {
-        return proxyNowCalendar ?: Calendar.getInstance()
     }
 
     private fun <L : RetrievalListener?> getListener(operationId: String): L? {
@@ -540,3 +535,5 @@ class CustomerSession @VisibleForTesting internal constructor(
         }
     }
 }
+
+internal typealias TimeSupplier = () -> Long
