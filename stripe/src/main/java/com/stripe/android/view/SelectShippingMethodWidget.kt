@@ -18,7 +18,7 @@ internal class SelectShippingMethodWidget @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
-    internal val shippingMethodAdapter = ShippingMethodAdapter()
+    private val shippingMethodAdapter = ShippingMethodAdapter()
 
     /**
      * @return The [ShippingMethod] selected by the customer or `null` if no option is
@@ -29,17 +29,17 @@ internal class SelectShippingMethodWidget @JvmOverloads constructor(
 
     init {
         View.inflate(context, R.layout.select_shipping_method_widget, this)
-        rv_shipping_methods_ssmw.setHasFixedSize(true)
-        rv_shipping_methods_ssmw.adapter = shippingMethodAdapter
-        rv_shipping_methods_ssmw.layoutManager = LinearLayoutManager(context)
+        shipping_methods.setHasFixedSize(true)
+        shipping_methods.adapter = shippingMethodAdapter
+        shipping_methods.layoutManager = LinearLayoutManager(context)
     }
 
     /**
      * Specify the shipping methods to show.
      */
     fun setShippingMethods(
-        shippingMethods: List<ShippingMethod>?,
-        defaultShippingMethod: ShippingMethod?
+        shippingMethods: List<ShippingMethod>,
+        defaultShippingMethod: ShippingMethod? = null
     ) {
         shippingMethodAdapter.setShippingMethods(shippingMethods, defaultShippingMethod)
     }
