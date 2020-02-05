@@ -42,7 +42,7 @@ internal class PaymentMethodSwipeCallback(
     }
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-        val paymentMethod = adapter.paymentMethods[viewHolder.adapterPosition]
+        val paymentMethod = adapter.getPaymentMethodAtPosition(viewHolder.adapterPosition)
         listener.onSwiped(paymentMethod)
     }
 
