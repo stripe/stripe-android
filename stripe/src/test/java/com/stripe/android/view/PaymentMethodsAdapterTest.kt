@@ -11,8 +11,10 @@ import com.stripe.android.model.PaymentMethodFixtures
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import org.mockito.Mockito.times
 import org.robolectric.RobolectricTestRunner
@@ -247,6 +249,22 @@ class PaymentMethodsAdapterTest {
         adapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
 
         assertNull(adapter.getPosition(PaymentMethodFixtures.FPX_PAYMENT_METHOD))
+    }
+
+    @Test
+    fun deletePaymentMethod_withValidPaymentMethod_removesPaymentMethod() {
+        val adapter = PaymentMethodsAdapter(ARGS, shouldShowGooglePay = true)
+        adapter.registerAdapterDataObserver(adapterDataObserver)
+
+        adapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
+        assertTrue(
+            adapter.paymentMethods.contains(PaymentMethodFixtures.CARD_PAYMENT_METHODS.last())
+        )
+        adapter.deletePaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHODS.last())
+        assertFalse(
+            adapter.paymentMethods.contains(PaymentMethodFixtures.CARD_PAYMENT_METHODS.last())
+        )
+        verify(adapterDataObserver).onItemRangeRemoved(3, 1)
     }
 
     private companion object {

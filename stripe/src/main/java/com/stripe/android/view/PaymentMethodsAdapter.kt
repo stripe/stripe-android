@@ -194,10 +194,9 @@ internal class PaymentMethodsAdapter constructor(
 
     @JvmSynthetic
     internal fun deletePaymentMethod(paymentMethod: PaymentMethod) {
-        val indexToDelete = paymentMethods.indexOfFirst { it.id == paymentMethod.id }
-        if (indexToDelete >= 0) {
-            paymentMethods.removeAt(indexToDelete)
-            notifyItemRemoved(indexToDelete)
+        getPosition(paymentMethod)?.let {
+            paymentMethods.remove(paymentMethod)
+            notifyItemRemoved(it)
         }
     }
 
