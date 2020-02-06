@@ -7,7 +7,7 @@
     >
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar_as"
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:layout_alignParentTop="true"
@@ -21,15 +21,15 @@
         android:id="@+id/widget_viewstub_as"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/toolbar_as"
+        android:layout_below="@+id/toolbar"
         />
 
     <ProgressBar
-        android:id="@+id/progress_bar_as"
+        android:id="@+id/progress_bar"
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/toolbar_as"
+        android:layout_below="@+id/toolbar"
         android:indeterminate="true"
         />
 

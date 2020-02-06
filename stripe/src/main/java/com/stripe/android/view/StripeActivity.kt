@@ -7,37 +7,58 @@ import android.view.View
 import android.view.ViewStub
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import com.stripe.android.R
+import kotlinx.android.synthetic.main.activity_stripe.*
 
 /**
  * Provides a toolbar, save button, and loading states for the save button.
  */
 abstract class StripeActivity : AppCompatActivity() {
 
-    lateinit var progressBar: ProgressBar
-    lateinit var viewStub: ViewStub
+    internal val progressBar: ProgressBar by lazy {
+        findViewById<ProgressBar>(R.id.progress_bar)
+    }
 
-    private var communicating: Boolean = false
+    internal val viewStub: ViewStub by lazy {
+        findViewById<ViewStub>(R.id.widget_viewstub_as)
+    }
 
-    internal lateinit var alertDisplayer: AlertDisplayer
+    protected var isProgressBarVisible: Boolean = false
+        set(value) {
+            progressBar.visibility = if (value) {
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
+            invalidateOptionsMenu()
+
+            onProgressBarVisibilityChanged(value)
+
+            field = value
+        }
+
+    private val alertDisplayer: AlertDisplayer by lazy {
+        AlertDisplayer.DefaultAlertDisplayer(this)
+    }
+
+    private val stripeColorUtils: StripeColorUtils by lazy {
+        StripeColorUtils(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_stripe)
-        progressBar = findViewById(R.id.progress_bar_as)
-        val toolbar = findViewById<Toolbar>(R.id.toolbar_as)
-        viewStub = findViewById(R.id.widget_viewstub_as)
+
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        setCommunicatingProgress(false)
-        alertDisplayer = AlertDisplayer.DefaultAlertDisplayer(this)
+
+        isProgressBarVisible = false
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.add_payment_method, menu)
-        menu.findItem(R.id.action_save).isEnabled = !communicating
+        menu.findItem(R.id.action_save).isEnabled = !isProgressBarVisible
         return true
     }
 
@@ -56,24 +77,18 @@ abstract class StripeActivity : AppCompatActivity() {
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         val saveItem = menu.findItem(R.id.action_save)
-        val tintedIcon = StripeColorUtils(this).getTintedIconWithAttribute(
+        val tintedIcon = stripeColorUtils.getTintedIconWithAttribute(
             theme,
             R.attr.titleTextColor,
-            R.drawable.stripe_ic_checkmark)
+            R.drawable.stripe_ic_checkmark
+        )
         saveItem.icon = tintedIcon
         return super.onPrepareOptionsMenu(menu)
     }
 
     protected abstract fun onActionSave()
 
-    protected open fun setCommunicatingProgress(communicating: Boolean) {
-        this.communicating = communicating
-        progressBar.visibility = if (communicating) {
-            View.VISIBLE
-        } else {
-            View.GONE
-        }
-        invalidateOptionsMenu()
+    protected open fun onProgressBarVisibilityChanged(visible: Boolean) {
     }
 
     protected fun showError(error: String) {
