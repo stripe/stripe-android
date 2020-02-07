@@ -23,10 +23,30 @@ import kotlinx.android.synthetic.main.activity_shipping_flow.*
  */
 class PaymentFlowActivity : StripeActivity() {
 
-    private lateinit var paymentFlowPagerAdapter: PaymentFlowPagerAdapter
-    private lateinit var paymentSessionConfig: PaymentSessionConfig
-    private lateinit var customerSession: CustomerSession
-    private lateinit var viewModel: PaymentFlowViewModel
+    private val customerSession: CustomerSession by lazy {
+        CustomerSession.getInstance()
+    }
+    private val args: PaymentFlowActivityStarter.Args by lazy {
+        PaymentFlowActivityStarter.Args.create(intent)
+    }
+    private val paymentSessionConfig: PaymentSessionConfig by lazy {
+        args.paymentSessionConfig
+    }
+    private val viewModel: PaymentFlowViewModel by lazy {
+        ViewModelProvider(
+            this,
+            PaymentFlowViewModel.Factory(customerSession, args.paymentSessionData)
+        )[PaymentFlowViewModel::class.java]
+    }
+
+    private val paymentFlowPagerAdapter: PaymentFlowPagerAdapter by lazy {
+        PaymentFlowPagerAdapter(
+            this,
+            paymentSessionConfig,
+            customerSession,
+            paymentSessionConfig.allowedShippingCountryCodes
+        )
+    }
 
     private val keyboardController: KeyboardController by lazy {
         KeyboardController(this)
@@ -38,31 +58,18 @@ class PaymentFlowActivity : StripeActivity() {
         val args = PaymentFlowActivityStarter.Args.create(intent)
         args.windowFlags?.let { window.addFlags(it) }
 
-        customerSession = CustomerSession.getInstance()
         customerSession.addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION)
         customerSession.addProductUsageTokenIfValid(TOKEN_PAYMENT_FLOW_ACTIVITY)
         viewStub.layoutResource = R.layout.activity_shipping_flow
         viewStub.inflate()
 
-        viewModel = ViewModelProvider(
-            this,
-            PaymentFlowViewModel.Factory(customerSession, args.paymentSessionData)
-        )[PaymentFlowViewModel::class.java]
-
-        paymentSessionConfig = args.paymentSessionConfig
-
         val shippingInformation =
             savedInstanceState?.getParcelable(STATE_SHIPPING_INFO)
                 ?: paymentSessionConfig.prepopulatedShippingInfo
 
-        paymentFlowPagerAdapter = PaymentFlowPagerAdapter(
-            this,
-            paymentSessionConfig,
-            customerSession,
-            shippingInformation,
-            savedInstanceState?.getParcelable(STATE_SHIPPING_METHOD),
-            paymentSessionConfig.allowedShippingCountryCodes
-        )
+        paymentFlowPagerAdapter.shippingInformation = shippingInformation
+        paymentFlowPagerAdapter.shippingMethod = savedInstanceState?.getParcelable(STATE_SHIPPING_METHOD)
+
         shipping_flow_viewpager.adapter = paymentFlowPagerAdapter
         shipping_flow_viewpager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageScrolled(i: Int, v: Float, i1: Int) {}

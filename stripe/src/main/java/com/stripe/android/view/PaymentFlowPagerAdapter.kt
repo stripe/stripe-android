@@ -18,11 +18,21 @@ internal class PaymentFlowPagerAdapter(
     private val context: Context,
     private val paymentSessionConfig: PaymentSessionConfig,
     private val customerSession: CustomerSession,
-    private val shippingInformation: ShippingInformation?,
-    private val shippingMethod: ShippingMethod?,
     private val allowedShippingCountryCodes: Set<String> = emptySet()
 ) : PagerAdapter() {
     private val pages: MutableList<PaymentFlowPage> = mutableListOf()
+
+    internal var shippingInformation: ShippingInformation? = null
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
+
+    internal var shippingMethod: ShippingMethod? = null
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
 
     private var shippingInfoSaved: Boolean = false
     private var shippingMethods: List<ShippingMethod> = emptyList()
