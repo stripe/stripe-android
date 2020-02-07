@@ -11,10 +11,13 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:3.5.3'
         classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.6'
-        classpath 'io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.21.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:$dokkaVersion"
     }
+}
+
+plugins {
+    id 'io.codearte.nexus-staging' version '0.21.2'
 }
 
 allprojects {
@@ -60,8 +63,6 @@ if (JavaVersion.current().isJava8Compatible()) {
         }
     }
 }
-
-apply plugin: "io.codearte.nexus-staging"
 
 nexusStaging {
     username = project.hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : ""
