@@ -165,7 +165,7 @@ class AddPaymentMethodActivity : StripeActivity() {
             return
         }
 
-        setCommunicatingProgress(true)
+        isProgressBarVisible = true
 
         viewModel.createPaymentMethod(params).observe(this, Observer {
             when (it) {
@@ -177,7 +177,7 @@ class AddPaymentMethodActivity : StripeActivity() {
                     }
                 }
                 is AddPaymentMethodViewModel.PaymentMethodResult.Error -> {
-                    setCommunicatingProgress(false)
+                    isProgressBarVisible = false
                     showError(it.errorMessage)
                 }
             }
@@ -193,7 +193,7 @@ class AddPaymentMethodActivity : StripeActivity() {
                     finishWithPaymentMethod(it.paymentMethod)
                 }
                 is AddPaymentMethodViewModel.PaymentMethodResult.Error -> {
-                    setCommunicatingProgress(false)
+                    isProgressBarVisible = false
                     showError(it.errorMessage)
                 }
             }
@@ -201,15 +201,14 @@ class AddPaymentMethodActivity : StripeActivity() {
     }
 
     private fun finishWithPaymentMethod(paymentMethod: PaymentMethod) {
-        setCommunicatingProgress(false)
+        isProgressBarVisible = false
         setResult(Activity.RESULT_OK, Intent()
             .putExtras(AddPaymentMethodActivityStarter.Result(paymentMethod).toBundle()))
         finish()
     }
 
-    override fun setCommunicatingProgress(communicating: Boolean) {
-        super.setCommunicatingProgress(communicating)
-        addPaymentMethodView.setCommunicatingProgress(communicating)
+    override fun onProgressBarVisibilityChanged(visible: Boolean) {
+        addPaymentMethodView.setCommunicatingProgress(visible)
     }
 
     internal companion object {

@@ -145,7 +145,7 @@ class PaymentFlowActivity : StripeActivity() {
     private fun onShippingMethodsReady(
         shippingMethods: List<ShippingMethod>
     ) {
-        setCommunicatingProgress(false)
+        isProgressBarVisible = false
         paymentFlowPagerAdapter.shippingMethods = shippingMethods
         paymentFlowPagerAdapter.isShippingInfoSubmitted = true
 
@@ -163,7 +163,7 @@ class PaymentFlowActivity : StripeActivity() {
             viewModel.paymentSessionData = viewModel.paymentSessionData.copy(
                 shippingInformation = shippingInfo
             )
-            setCommunicatingProgress(true)
+            isProgressBarVisible = true
 
             validateShippingInformation(
                 paymentSessionConfig.shippingInformationValidator,
@@ -232,7 +232,7 @@ class PaymentFlowActivity : StripeActivity() {
     }
 
     private fun onShippingInfoError(errorMessage: String?) {
-        setCommunicatingProgress(false)
+        isProgressBarVisible = false
         if (!errorMessage.isNullOrEmpty()) {
             showError(errorMessage)
         } else {

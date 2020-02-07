@@ -22,7 +22,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr) {
 
-    private val postalCodeValidator: PostalCodeValidator
+    private val postalCodeValidator: PostalCodeValidator = PostalCodeValidator()
     private var optionalShippingInfoFields: List<String> = emptyList()
     private var hiddenShippingInfoFields: List<String> = emptyList()
 
@@ -61,15 +61,15 @@ class ShippingInfoWidget @JvmOverloads constructor(
         get() {
             return ShippingInformation(
                 Address.Builder()
-                    .setCity(cityEditText.text?.toString())
+                    .setCity(cityEditText.fieldText)
                     .setCountry(countryAutoCompleteTextView.selectedCountry?.code)
-                    .setLine1(addressEditText.text?.toString())
-                    .setLine2(addressEditText2.text?.toString())
-                    .setPostalCode(postalCodeEditText.text?.toString())
-                    .setState(stateEditText.text?.toString())
+                    .setLine1(addressEditText.fieldText)
+                    .setLine2(addressEditText2.fieldText)
+                    .setPostalCode(postalCodeEditText.fieldText)
+                    .setState(stateEditText.fieldText)
                     .build(),
-                nameEditText.text?.toString(),
-                phoneNumberEditText.text?.toString()
+                nameEditText.fieldText,
+                phoneNumberEditText.fieldText
             )
         }
 
@@ -123,8 +123,6 @@ class ShippingInfoWidget @JvmOverloads constructor(
             phoneNumberEditText.setAutofillHints(View.AUTOFILL_HINT_PHONE)
         }
 
-        postalCodeValidator = PostalCodeValidator()
-
         initView()
     }
 
@@ -157,20 +155,22 @@ class ShippingInfoWidget @JvmOverloads constructor(
             return
         }
 
-        shippingInformation.address?.let { address ->
-            cityEditText.setText(address.city)
-            address.country?.let { country ->
-                if (country.isNotEmpty()) {
-                    countryAutoCompleteTextView.setCountrySelected(country)
-                }
-            }
-            addressEditText.setText(address.line1)
-            addressEditText2.setText(address.line2)
-            postalCodeEditText.setText(address.postalCode)
-            stateEditText.setText(address.state)
-        }
+        shippingInformation.address?.let(::populateAddressFields)
         nameEditText.setText(shippingInformation.name)
         phoneNumberEditText.setText(shippingInformation.phone)
+    }
+
+    private fun populateAddressFields(address: Address) {
+        cityEditText.setText(address.city)
+        address.country?.let { country ->
+            if (country.isNotEmpty()) {
+                countryAutoCompleteTextView.setCountrySelected(country)
+            }
+        }
+        addressEditText.setText(address.line1)
+        addressEditText2.setText(address.line2)
+        postalCodeEditText.setText(address.postalCode)
+        stateEditText.setText(address.state)
     }
 
     fun setAllowedCountryCodes(allowedCountryCodes: Set<String>) {
