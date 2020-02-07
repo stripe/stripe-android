@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.view.View
 import androidx.test.core.app.ApplicationProvider
+import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
@@ -24,20 +25,15 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentFlowActivityTest {
 
-    @Mock
-    private lateinit var ephemeralKeyProvider: EphemeralKeyProvider
-    @Mock
-    private lateinit var shippingInformationValidator: PaymentSessionConfig.ShippingInformationValidator
-    @Mock
-    private lateinit var shippingMethodsFactory: PaymentSessionConfig.ShippingMethodsFactory
+    private val ephemeralKeyProvider: EphemeralKeyProvider = mock()
+    private val shippingInformationValidator: PaymentSessionConfig.ShippingInformationValidator = mock()
+    private val shippingMethodsFactory: PaymentSessionConfig.ShippingMethodsFactory = mock()
 
     private val context: Context by lazy {
         ApplicationProvider.getApplicationContext<Context>()
@@ -48,7 +44,6 @@ class PaymentFlowActivityTest {
 
     @BeforeTest
     fun setup() {
-        MockitoAnnotations.initMocks(this)
         PaymentConfiguration.init(ApplicationProvider.getApplicationContext(),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         CustomerSession.initCustomerSession(context, ephemeralKeyProvider)
