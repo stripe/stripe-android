@@ -3,8 +3,6 @@ package com.stripe.android.view
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.model.ShippingMethod
-import java.util.Locale
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.junit.runner.RunWith
@@ -16,22 +14,18 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class SelectShippingMethodWidgetTest {
 
-    private lateinit var shippingMethodAdapter: ShippingMethodAdapter
-
-    @BeforeTest
-    fun setup() {
-        Locale.setDefault(Locale.US)
-        val selectShippingMethodWidget =
-            SelectShippingMethodWidget(ApplicationProvider.getApplicationContext<Context>())
-        selectShippingMethodWidget.setShippingMethods(listOf(UPS, FEDEX), UPS)
-        shippingMethodAdapter = selectShippingMethodWidget.shippingMethodAdapter
+    private val selectShippingMethodWidget: SelectShippingMethodWidget by lazy {
+        SelectShippingMethodWidget(ApplicationProvider.getApplicationContext<Context>())
+            .also {
+                it.setShippingMethods(listOf(UPS, FEDEX), UPS)
+            }
     }
 
     @Test
-    fun selectShippingMethodWidget_whenSelected_selectionChanges() {
-        assertEquals(shippingMethodAdapter.selectedShippingMethod, UPS)
-        shippingMethodAdapter.onShippingMethodSelected(1)
-        assertEquals(shippingMethodAdapter.selectedShippingMethod, FEDEX)
+    fun selectedShippingMethodWidget_whenSelected_selectionChanges() {
+        assertEquals(UPS, selectShippingMethodWidget.selectedShippingMethod)
+        selectShippingMethodWidget.setSelectedShippingMethod(FEDEX)
+        assertEquals(FEDEX, selectShippingMethodWidget.selectedShippingMethod)
     }
 
     private companion object {
