@@ -1,7 +1,6 @@
 package com.stripe.android.view
 
 import android.content.Context
-import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,7 +11,6 @@ import com.stripe.android.PaymentSessionConfig
 import com.stripe.android.R
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
-import kotlinx.android.parcel.Parcelize
 
 internal class PaymentFlowPagerAdapter(
     private val context: Context,
@@ -20,7 +18,18 @@ internal class PaymentFlowPagerAdapter(
     private val customerSession: CustomerSession,
     private val allowedShippingCountryCodes: Set<String> = emptySet()
 ) : PagerAdapter() {
-    private val pages: MutableList<PaymentFlowPage> = mutableListOf()
+    private val pages: List<PaymentFlowPage>
+        get() {
+            return listOfNotNull(
+                PaymentFlowPage.SHIPPING_INFO.takeIf {
+                    paymentSessionConfig.isShippingInfoRequired
+                },
+                PaymentFlowPage.SHIPPING_METHOD.takeIf {
+                    paymentSessionConfig.isShippingMethodRequired &&
+                        (!paymentSessionConfig.isShippingInfoRequired || isShippingInfoSubmitted)
+                }
+            )
+        }
 
     internal var shippingInformation: ShippingInformation? = null
         set(value) {
@@ -28,53 +37,23 @@ internal class PaymentFlowPagerAdapter(
             notifyDataSetChanged()
         }
 
-    internal var shippingMethod: ShippingMethod? = null
+    internal var isShippingInfoSubmitted: Boolean = false
         set(value) {
             field = value
             notifyDataSetChanged()
         }
 
-    private var shippingInfoSaved: Boolean = false
-    private var shippingMethods: List<ShippingMethod> = emptyList()
-    private var defaultShippingMethod: ShippingMethod? = null
-
-    init {
-        pages.addAll(listOfNotNull(
-            PaymentFlowPage.SHIPPING_INFO.takeIf {
-                paymentSessionConfig.isShippingInfoRequired
-            },
-            PaymentFlowPage.SHIPPING_METHOD.takeIf {
-                shouldAddShippingScreen()
-            }
-        ))
-    }
-
-    private fun shouldAddShippingScreen(): Boolean {
-        return paymentSessionConfig.isShippingMethodRequired &&
-            (!paymentSessionConfig.isShippingInfoRequired || shippingInfoSaved) &&
-            !pages.contains(PaymentFlowPage.SHIPPING_METHOD)
-    }
-
-    fun setShippingInfoSaved(addressSaved: Boolean) {
-        shippingInfoSaved = addressSaved
-        if (shouldAddShippingScreen()) {
-            pages.add(PaymentFlowPage.SHIPPING_METHOD)
+    internal var shippingMethods: List<ShippingMethod> = emptyList()
+        set(value) {
+            field = value
+            notifyDataSetChanged()
         }
-        notifyDataSetChanged()
-    }
 
-    fun setShippingMethods(
-        shippingMethods: List<ShippingMethod>,
-        defaultShippingMethod: ShippingMethod?
-    ) {
-        this.shippingMethods = shippingMethods
-        this.defaultShippingMethod = defaultShippingMethod
-    }
-
-    fun hideShippingPage() {
-        pages.remove(PaymentFlowPage.SHIPPING_METHOD)
-        notifyDataSetChanged()
-    }
+    internal var selectedShippingMethod: ShippingMethod? = null
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
 
     override fun instantiateItem(collection: ViewGroup, position: Int): Any {
         val paymentFlowPage = pages[position]
@@ -98,7 +77,7 @@ internal class PaymentFlowPagerAdapter(
             is PaymentFlowViewHolder.ShippingMethodViewHolder -> {
                 customerSession
                     .addProductUsageTokenIfValid(PaymentFlowActivity.TOKEN_SHIPPING_METHOD_SCREEN)
-                viewHolder.bind(shippingMethods, defaultShippingMethod, shippingMethod)
+                viewHolder.bind(shippingMethods, selectedShippingMethod)
             }
         }
         collection.addView(layout)
@@ -133,30 +112,6 @@ internal class PaymentFlowPagerAdapter(
         return context.getString(pages[position].titleResId)
     }
 
-    override fun saveState(): Parcelable? {
-        return State(pages, shippingInfoSaved, shippingMethods, defaultShippingMethod)
-    }
-
-    override fun restoreState(state: Parcelable?, loader: ClassLoader?) {
-        if (state is State) {
-            this.pages.clear()
-            this.pages.addAll(state.pages)
-            this.shippingInfoSaved = state.shippingInfoSaved
-            this.shippingMethods = state.shippingMethods
-            this.defaultShippingMethod = state.defaultShippingMethod
-
-            notifyDataSetChanged()
-        }
-    }
-
-    @Parcelize
-    internal class State(
-        internal val pages: List<PaymentFlowPage>,
-        internal val shippingInfoSaved: Boolean,
-        internal val shippingMethods: List<ShippingMethod>,
-        internal val defaultShippingMethod: ShippingMethod?
-    ) : Parcelable
-
     internal sealed class PaymentFlowViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         class ShippingInformationViewHolder(itemView: View) : PaymentFlowViewHolder(itemView) {
             private val shippingInfoWidget: ShippingInfoWidget =
@@ -184,12 +139,10 @@ internal class PaymentFlowPagerAdapter(
 
             fun bind(
                 shippingMethods: List<ShippingMethod>,
-                defaultShippingMethod: ShippingMethod?,
-                shippingMethod: ShippingMethod?
+                selectedShippingMethod: ShippingMethod?
             ) {
-                shippingMethodWidget
-                    .setShippingMethods(shippingMethods, defaultShippingMethod)
-                shippingMethod?.let {
+                shippingMethodWidget.setShippingMethods(shippingMethods)
+                selectedShippingMethod?.let {
                     shippingMethodWidget.setSelectedShippingMethod(it)
                 }
             }
