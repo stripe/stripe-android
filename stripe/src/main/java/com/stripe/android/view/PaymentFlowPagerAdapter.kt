@@ -16,7 +16,8 @@ internal class PaymentFlowPagerAdapter(
     private val context: Context,
     private val paymentSessionConfig: PaymentSessionConfig,
     private val customerSession: CustomerSession,
-    private val allowedShippingCountryCodes: Set<String> = emptySet()
+    private val allowedShippingCountryCodes: Set<String> = emptySet(),
+    private val onShippingMethodSelectedCallback: (ShippingMethod) -> Unit = {}
 ) : PagerAdapter() {
     private val pages: List<PaymentFlowPage>
         get() {
@@ -77,7 +78,7 @@ internal class PaymentFlowPagerAdapter(
             is PaymentFlowViewHolder.ShippingMethodViewHolder -> {
                 customerSession
                     .addProductUsageTokenIfValid(PaymentFlowActivity.TOKEN_SHIPPING_METHOD_SCREEN)
-                viewHolder.bind(shippingMethods, selectedShippingMethod)
+                viewHolder.bind(shippingMethods, selectedShippingMethod, onShippingMethodSelectedCallback)
             }
         }
         collection.addView(layout)
@@ -139,9 +140,13 @@ internal class PaymentFlowPagerAdapter(
 
             fun bind(
                 shippingMethods: List<ShippingMethod>,
-                selectedShippingMethod: ShippingMethod?
+                selectedShippingMethod: ShippingMethod?,
+                onShippingMethodSelectedCallback: (ShippingMethod) -> Unit
             ) {
                 shippingMethodWidget.setShippingMethods(shippingMethods)
+                shippingMethodWidget.setShippingMethodSelectedCallback(
+                    onShippingMethodSelectedCallback
+                )
                 selectedShippingMethod?.let {
                     shippingMethodWidget.setSelectedShippingMethod(it)
                 }
