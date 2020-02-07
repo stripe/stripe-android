@@ -67,8 +67,10 @@ class PaymentFlowActivity : StripeActivity() {
             savedInstanceState?.getParcelable(STATE_SHIPPING_INFO)
                 ?: paymentSessionConfig.prepopulatedShippingInfo
 
+        paymentFlowPagerAdapter.shippingMethods = viewModel.shippingMethods
+        paymentFlowPagerAdapter.isShippingInfoSubmitted = viewModel.isShippingInfoSubmitted
         paymentFlowPagerAdapter.shippingInformation = shippingInformation
-        paymentFlowPagerAdapter.shippingMethod = savedInstanceState?.getParcelable(STATE_SHIPPING_METHOD)
+        paymentFlowPagerAdapter.selectedShippingMethod = savedInstanceState?.getParcelable(STATE_SHIPPING_METHOD)
 
         shipping_flow_viewpager.adapter = paymentFlowPagerAdapter
         shipping_flow_viewpager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
@@ -77,7 +79,8 @@ class PaymentFlowActivity : StripeActivity() {
             override fun onPageSelected(i: Int) {
                 title = paymentFlowPagerAdapter.getPageTitle(i)
                 if (paymentFlowPagerAdapter.getPageAt(i) === PaymentFlowPage.SHIPPING_INFO) {
-                    paymentFlowPagerAdapter.hideShippingPage()
+                    viewModel.isShippingInfoSubmitted = false
+                    paymentFlowPagerAdapter.isShippingInfoSubmitted = false
                 }
             }
 
@@ -112,19 +115,15 @@ class PaymentFlowActivity : StripeActivity() {
     @JvmSynthetic
     internal fun onShippingInfoSaved(
         shippingInformation: ShippingInformation?,
-        shippingMethods: List<ShippingMethod> = emptyList(),
-        defaultShippingMethod: ShippingMethod? = null
+        shippingMethods: List<ShippingMethod> = emptyList()
     ) {
-        onShippingMethodsReady(shippingMethods, defaultShippingMethod)
+        onShippingMethodsReady(shippingMethods)
         viewModel.paymentSessionData = viewModel.paymentSessionData.copy(
             shippingInformation = shippingInformation
         )
     }
 
-    private fun onShippingInfoValidated(
-        shippingMethods: List<ShippingMethod>,
-        defaultShippingMethod: ShippingMethod? = null
-    ) {
+    private fun onShippingInfoValidated(shippingMethods: List<ShippingMethod>) {
         viewModel.paymentSessionData.shippingInformation?.let { shippingInfo ->
             viewModel.saveCustomerShippingInformation(shippingInfo)
                 .observe(this, Observer {
@@ -132,8 +131,7 @@ class PaymentFlowActivity : StripeActivity() {
                         is PaymentFlowViewModel.SaveCustomerShippingInfoResult.Success -> {
                             onShippingInfoSaved(
                                 it.customer.shippingInformation,
-                                shippingMethods,
-                                defaultShippingMethod
+                                shippingMethods
                             )
                         }
                         is PaymentFlowViewModel.SaveCustomerShippingInfoResult.Error -> {
@@ -145,12 +143,12 @@ class PaymentFlowActivity : StripeActivity() {
     }
 
     private fun onShippingMethodsReady(
-        shippingMethods: List<ShippingMethod>,
-        defaultShippingMethod: ShippingMethod?
+        shippingMethods: List<ShippingMethod>
     ) {
         setCommunicatingProgress(false)
-        paymentFlowPagerAdapter.setShippingMethods(shippingMethods, defaultShippingMethod)
-        paymentFlowPagerAdapter.setShippingInfoSaved(true)
+        paymentFlowPagerAdapter.shippingMethods = shippingMethods
+        paymentFlowPagerAdapter.isShippingInfoSubmitted = true
+
         if (hasNextPage()) {
             shipping_flow_viewpager.currentItem = shipping_flow_viewpager.currentItem + 1
         } else {

@@ -26,7 +26,10 @@ class PaymentFlowPagerAdapterTest {
     fun pageCount_updatesAfterSavingShippingInfo() {
         assertEquals(1, adapter.count)
 
-        adapter.setShippingInfoSaved(true)
+        adapter.isShippingInfoSubmitted = true
         assertEquals(2, adapter.count)
+
+        adapter.isShippingInfoSubmitted = false
+        assertEquals(1, adapter.count)
     }
 }

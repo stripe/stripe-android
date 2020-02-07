@@ -20,6 +20,8 @@ internal class PaymentFlowViewModel(
     internal var paymentSessionData: PaymentSessionData,
     private val workScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 ) : ViewModel() {
+    internal var shippingMethods: List<ShippingMethod> = emptyList()
+    internal var isShippingInfoSubmitted: Boolean = false
 
     @JvmSynthetic
     internal fun saveCustomerShippingInformation(
@@ -30,6 +32,7 @@ internal class PaymentFlowViewModel(
             shippingInformation,
             object : CustomerSession.CustomerRetrievalListener {
                 override fun onCustomerRetrieved(customer: Customer) {
+                    isShippingInfoSubmitted = true
                     resultData.value = SaveCustomerShippingInfoResult.Success(customer)
                 }
 
@@ -38,6 +41,7 @@ internal class PaymentFlowViewModel(
                     errorMessage: String,
                     stripeError: StripeError?
                 ) {
+                    isShippingInfoSubmitted = false
                     resultData.value = SaveCustomerShippingInfoResult.Error(errorMessage)
                 }
             }
@@ -61,9 +65,11 @@ internal class PaymentFlowViewModel(
             if (isValid) {
                 val shippingMethods =
                     shippingMethodsFactory?.create(shippingInformation).orEmpty()
+                this@PaymentFlowViewModel.shippingMethods = shippingMethods
                 resultData.postValue(ValidateShippingInfoResult.Success(shippingMethods))
             } else {
                 val errorMessage = shippingInfoValidator.getErrorMessage(shippingInformation)
+                this@PaymentFlowViewModel.shippingMethods = emptyList()
                 resultData.postValue(ValidateShippingInfoResult.Error(errorMessage))
             }
         }
