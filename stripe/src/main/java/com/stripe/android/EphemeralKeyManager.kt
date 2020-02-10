@@ -10,10 +10,10 @@ import org.json.JSONObject
 internal class EphemeralKeyManager(
     private val ephemeralKeyProvider: EphemeralKeyProvider,
     private val listener: KeyManagerListener,
-    private val timeBufferInSeconds: Long,
     operationIdFactory: OperationIdFactory,
     shouldPrefetchEphemeralKey: Boolean,
-    private val timeSupplier: TimeSupplier = { Calendar.getInstance().timeInMillis }
+    private val timeSupplier: TimeSupplier = { Calendar.getInstance().timeInMillis },
+    private val timeBufferInSeconds: Long = REFRESH_BUFFER_IN_SECONDS
 ) {
     private val apiVersion: String = ApiVersion.get().code
 
@@ -117,5 +117,9 @@ internal class EphemeralKeyManager(
         val nowInSeconds = TimeUnit.MILLISECONDS.toSeconds(timeSupplier())
         val nowPlusBuffer = nowInSeconds + timeBufferInSeconds
         return ephemeralKey.expires < nowPlusBuffer
+    }
+
+    private companion object {
+        private const val REFRESH_BUFFER_IN_SECONDS = 30L
     }
 }

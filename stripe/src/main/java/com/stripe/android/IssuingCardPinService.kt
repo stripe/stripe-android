@@ -71,7 +71,6 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
                 )
             }
         },
-        KEY_REFRESH_BUFFER_IN_SECONDS,
         operationIdFactory,
         true
     )
@@ -323,7 +322,6 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
 
     companion object {
         private val TAG = IssuingCardPinService::class.java.name
-        private const val KEY_REFRESH_BUFFER_IN_SECONDS = 30L
 
         /**
          * Create a IssuingCardPinService with the provided [EphemeralKeyProvider].
