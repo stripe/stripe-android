@@ -5,7 +5,6 @@ import android.content.Context
 import android.os.Handler
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.PaymentConfiguration.Companion.getInstance
 import com.stripe.android.Stripe.Companion.appInfo
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.Customer
@@ -26,26 +25,23 @@ import java.util.concurrent.TimeUnit
  */
 class CustomerSession @VisibleForTesting internal constructor(
     context: Context,
-    keyProvider: EphemeralKeyProvider,
-    private val threadPoolExecutor: ThreadPoolExecutor,
     stripeRepository: StripeRepository,
     publishableKey: String,
     stripeAccountId: String?,
-    shouldPrefetchEphemeralKey: Boolean,
-    private val timeSupplier: TimeSupplier = { Calendar.getInstance().timeInMillis }
+    private val threadPoolExecutor: ThreadPoolExecutor = createThreadPoolExecutor(),
+    private val operationIdFactory: OperationIdFactory = StripeOperationIdFactory(),
+    private val timeSupplier: TimeSupplier = { Calendar.getInstance().timeInMillis },
+    ephemeralKeyManagerFactory: EphemeralKeyManager.Factory
 ) {
     @JvmSynthetic
     internal var customerCacheTime: Long = 0
     @JvmSynthetic
     internal var customer: Customer? = null
 
-    private val operationIdFactory = StripeOperationIdFactory()
     private val productUsage = CustomerSessionProductUsage()
     private val listeners: MutableMap<String, RetrievalListener?> = mutableMapOf()
-    private val ephemeralKeyManager: EphemeralKeyManager
-
-    init {
-        val keyManagerListener = CustomerSessionEphemeralKeyManagerListener(
+    private val ephemeralKeyManager: EphemeralKeyManager = ephemeralKeyManagerFactory.create(
+        CustomerSessionEphemeralKeyManagerListener(
             CustomerSessionRunnableFactory(
                 stripeRepository,
                 createHandler(),
@@ -57,33 +53,13 @@ class CustomerSession @VisibleForTesting internal constructor(
             listeners,
             productUsage
         )
-        ephemeralKeyManager = EphemeralKeyManager(
-            keyProvider,
-            keyManagerListener,
-            operationIdFactory,
-            shouldPrefetchEphemeralKey,
-            timeSupplier
-        )
-    }
+    )
 
     @VisibleForTesting
     internal val productUsageTokens: Set<String>
         get() {
             return productUsage.get()
         }
-
-    private constructor(
-        context: Context,
-        keyProvider: EphemeralKeyProvider,
-        appInfo: AppInfo?,
-        publishableKey: String,
-        stripeAccountId: String?,
-        shouldPrefetchEphemeralKey: Boolean
-    ) : this(
-        context, keyProvider, createThreadPoolExecutor(),
-        StripeApiRepository(context, appInfo), publishableKey, stripeAccountId,
-        shouldPrefetchEphemeralKey
-    )
 
     private fun createHandler(): Handler {
         return CustomerSessionHandler(object : CustomerSessionHandler.Listener {
@@ -460,8 +436,25 @@ class CustomerSession @VisibleForTesting internal constructor(
             stripeAccountId: String? = null,
             shouldPrefetchEphemeralKey: Boolean = true
         ) {
-            instance = CustomerSession(context, ephemeralKeyProvider, appInfo,
-                getInstance(context).publishableKey, stripeAccountId, shouldPrefetchEphemeralKey)
+            val operationIdFactory = StripeOperationIdFactory()
+            val timeSupplier = { Calendar.getInstance().timeInMillis }
+            val ephemeralKeyManagerFactory = EphemeralKeyManager.Factory(
+                keyProvider = ephemeralKeyProvider,
+                shouldPrefetchEphemeralKey = shouldPrefetchEphemeralKey,
+                operationIdFactory = operationIdFactory,
+                timeSupplier = timeSupplier
+            )
+
+            instance = CustomerSession(
+                context,
+                StripeApiRepository(context, appInfo),
+                PaymentConfiguration.getInstance(context).publishableKey,
+                stripeAccountId,
+                createThreadPoolExecutor(),
+                operationIdFactory,
+                timeSupplier,
+                ephemeralKeyManagerFactory
+            )
         }
 
         /**

@@ -35,7 +35,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.mock
-import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
 /**
@@ -74,8 +73,6 @@ class CustomerSessionTest {
 
     @BeforeTest
     fun setup() {
-        MockitoAnnotations.initMocks(this)
-
         `when`<Customer>(stripeRepository.retrieveCustomer(any(), any()))
             .thenReturn(FIRST_CUSTOMER, SECOND_CUSTOMER)
 
@@ -778,13 +775,16 @@ class CustomerSessionTest {
     ): CustomerSession {
         return CustomerSession(
             ApplicationProvider.getApplicationContext(),
-            ephemeralKeyProvider,
-            threadPoolExecutor,
             stripeRepository,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             "acct_abc123",
-            true,
-            timeSupplier
+            timeSupplier = timeSupplier,
+            threadPoolExecutor = threadPoolExecutor,
+            ephemeralKeyManagerFactory = EphemeralKeyManager.Factory(
+                keyProvider = ephemeralKeyProvider,
+                shouldPrefetchEphemeralKey = true,
+                timeSupplier = timeSupplier
+            )
         )
     }
 

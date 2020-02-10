@@ -11,6 +11,7 @@ import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.model.Customer
 import com.stripe.android.model.CustomerFixtures
@@ -32,13 +33,11 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
-import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
 /**
@@ -49,36 +48,25 @@ class PaymentSessionTest {
 
     private val ephemeralKeyProvider = TestEphemeralKeyProvider()
 
-    @Mock
-    private lateinit var activity: Activity
-    @Mock
-    private lateinit var threadPoolExecutor: ThreadPoolExecutor
-    @Mock
-    private lateinit var paymentSessionListener: PaymentSession.PaymentSessionListener
-    @Mock
-    private lateinit var customerSession: CustomerSession
-    @Mock
-    private lateinit var paymentMethodsActivityStarter:
-        ActivityStarter<PaymentMethodsActivity, PaymentMethodsActivityStarter.Args>
-    @Mock
-    private lateinit var paymentFlowActivityStarter:
-        ActivityStarter<PaymentFlowActivity, PaymentFlowActivityStarter.Args>
-    @Mock
-    private lateinit var paymentSessionPrefs: PaymentSessionPrefs
+    private val activity: Activity = mock()
+    private val threadPoolExecutor: ThreadPoolExecutor = mock()
+    private val paymentSessionListener: PaymentSession.PaymentSessionListener = mock()
+    private val customerSession: CustomerSession = mock()
+    private val paymentMethodsActivityStarter:
+        ActivityStarter<PaymentMethodsActivity, PaymentMethodsActivityStarter.Args> = mock()
+    private val paymentFlowActivityStarter:
+        ActivityStarter<PaymentFlowActivity, PaymentFlowActivityStarter.Args> = mock()
+    private val paymentSessionPrefs: PaymentSessionPrefs = mock()
 
-    private lateinit var paymentSessionDataArgumentCaptor: KArgumentCaptor<PaymentSessionData>
-    private lateinit var intentArgumentCaptor: KArgumentCaptor<Intent>
+    private val paymentSessionDataArgumentCaptor: KArgumentCaptor<PaymentSessionData> = argumentCaptor()
+    private val intentArgumentCaptor: KArgumentCaptor<Intent> = argumentCaptor()
+
+    private val context: Context = ApplicationProvider.getApplicationContext()
 
     @BeforeTest
     fun setup() {
-        MockitoAnnotations.initMocks(this)
-        val appContext: Context = ApplicationProvider.getApplicationContext()
-        PaymentConfiguration.init(appContext, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-
-        paymentSessionDataArgumentCaptor = argumentCaptor()
-        intentArgumentCaptor = argumentCaptor()
-
-        `when`(activity.applicationContext).thenReturn(appContext)
+        PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        `when`(activity.applicationContext).thenReturn(context)
 
         doAnswer { invocation ->
             invocation.getArgument<Runnable>(0).run()
@@ -365,7 +353,7 @@ class PaymentSessionTest {
         paymentSessionData: PaymentSessionData = PaymentSessionFixtures.PAYMENT_SESSION_DATA
     ): PaymentSession {
         return PaymentSession(
-            ApplicationProvider.getApplicationContext<Context>(),
+            context,
             DEFAULT_CONFIG,
             customerSession,
             paymentMethodsActivityStarter,
@@ -377,13 +365,15 @@ class PaymentSessionTest {
 
     private fun createCustomerSession(): CustomerSession {
         return CustomerSession(
-            ApplicationProvider.getApplicationContext<Context>(),
-            ephemeralKeyProvider,
-            threadPoolExecutor,
+            context,
             FakeStripeRepository(),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             "acct_abc123",
-            true
+            threadPoolExecutor = threadPoolExecutor,
+            ephemeralKeyManagerFactory = EphemeralKeyManager.Factory(
+                keyProvider = ephemeralKeyProvider,
+                shouldPrefetchEphemeralKey = true
+            )
         )
     }
 
