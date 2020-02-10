@@ -245,9 +245,9 @@ class EphemeralKeyManagerTest {
         EphemeralKeyManager(
             testEphemeralKeyProvider,
             keyManagerListener,
-            TEST_SECONDS_BUFFER,
             operationIdFactory,
-            false
+            false,
+            timeBufferInSeconds = TEST_SECONDS_BUFFER
         )
         verify(operationIdFactory, never()).create()
     }
@@ -259,10 +259,10 @@ class EphemeralKeyManagerTest {
         return EphemeralKeyManager(
             testEphemeralKeyProvider,
             keyManagerListener,
-            TEST_SECONDS_BUFFER,
             operationIdFactory,
             true,
-            timeSupplier
+            timeSupplier,
+            TEST_SECONDS_BUFFER
         )
     }
 

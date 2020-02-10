@@ -53,11 +53,13 @@ class CustomerSession @VisibleForTesting internal constructor(
                 stripeAccountId,
                 productUsage
             ),
-            threadPoolExecutor, listeners, productUsage)
+            threadPoolExecutor,
+            listeners,
+            productUsage
+        )
         ephemeralKeyManager = EphemeralKeyManager(
             keyProvider,
             keyManagerListener,
-            KEY_REFRESH_BUFFER_IN_SECONDS,
             operationIdFactory,
             shouldPrefetchEphemeralKey,
             timeSupplier
@@ -433,7 +435,6 @@ class CustomerSession @VisibleForTesting internal constructor(
         private const val KEEP_ALIVE_TIME = 2
         // Sets the Time Unit to seconds
         private val KEEP_ALIVE_TIME_UNIT = TimeUnit.SECONDS
-        private const val KEY_REFRESH_BUFFER_IN_SECONDS = 30L
         private val CUSTOMER_CACHE_DURATION_MILLISECONDS = TimeUnit.MINUTES.toMillis(1)
 
         /**
