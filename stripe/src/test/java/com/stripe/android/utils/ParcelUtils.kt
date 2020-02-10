@@ -3,6 +3,7 @@ package com.stripe.android.utils
 import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
+import kotlin.test.assertEquals
 
 internal object ParcelUtils {
     /**
@@ -33,6 +34,17 @@ internal object ParcelUtils {
         source.writeToParcel(parcel, source.describeContents())
         parcel.setDataPosition(0)
         return creator.createFromParcel(parcel)
+    }
+
+    internal fun verifyParcelRoundtrip(expected: Parcelable) {
+        val bundle = Bundle().also {
+            it.putParcelable(KEY, expected)
+        }
+
+        val actual = copy(bundle, Bundle.CREATOR)
+            .getParcelable<Parcelable>(KEY)
+
+        assertEquals(expected, actual)
     }
 
     private const val KEY = "parcelable"
