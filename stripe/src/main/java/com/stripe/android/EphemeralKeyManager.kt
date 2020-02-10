@@ -119,21 +119,23 @@ internal class EphemeralKeyManager(
         return ephemeralKey.expires < nowPlusBuffer
     }
 
-    internal class Factory(
-        private val keyProvider: EphemeralKeyProvider,
-        private val shouldPrefetchEphemeralKey: Boolean,
-        private val operationIdFactory: OperationIdFactory = StripeOperationIdFactory(),
-        private val timeSupplier: TimeSupplier = { Calendar.getInstance().timeInMillis }
-    ) {
-        @JvmSynthetic
-        fun create(listener: KeyManagerListener): EphemeralKeyManager {
-            return EphemeralKeyManager(
-                keyProvider,
-                listener,
-                operationIdFactory,
-                shouldPrefetchEphemeralKey,
-                timeSupplier
-            )
+    internal interface Factory : Factory1<KeyManagerListener, EphemeralKeyManager> {
+        class Default(
+            private val keyProvider: EphemeralKeyProvider,
+            private val shouldPrefetchEphemeralKey: Boolean,
+            private val operationIdFactory: OperationIdFactory = StripeOperationIdFactory(),
+            private val timeSupplier: TimeSupplier = { Calendar.getInstance().timeInMillis }
+        ) : Factory {
+            @JvmSynthetic
+            override fun create(arg: KeyManagerListener): EphemeralKeyManager {
+                return EphemeralKeyManager(
+                    keyProvider,
+                    arg,
+                    operationIdFactory,
+                    shouldPrefetchEphemeralKey,
+                    timeSupplier
+                )
+            }
         }
     }
 

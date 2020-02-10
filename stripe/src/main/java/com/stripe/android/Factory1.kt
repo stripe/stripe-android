@@ -1,5 +1,5 @@
 package com.stripe.android
 
-internal interface Factory<ArgType, ReturnType> {
+internal interface Factory1<ArgType, ReturnType> {
     fun create(arg: ArgType): ReturnType
 }
