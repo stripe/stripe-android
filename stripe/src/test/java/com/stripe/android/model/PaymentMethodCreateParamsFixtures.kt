@@ -8,6 +8,14 @@ internal object PaymentMethodCreateParamsFixtures {
         cvc = "111"
     )
 
+    internal val CARD_WITH_ATTRIBUTION = PaymentMethodCreateParams.Card(
+        number = "4242424242424242",
+        expiryMonth = 1,
+        expiryYear = 2024,
+        cvc = "111",
+        attribution = setOf("CardMultilineWidget")
+    )
+
     @JvmField
     internal val BILLING_DETAILS = PaymentMethod.BillingDetails(
         name = "Home",

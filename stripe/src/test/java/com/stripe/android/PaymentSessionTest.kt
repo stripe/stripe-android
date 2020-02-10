@@ -5,7 +5,6 @@ import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
-import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -16,6 +15,7 @@ import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.model.Customer
 import com.stripe.android.model.CustomerFixtures
 import com.stripe.android.model.PaymentMethod
@@ -34,12 +34,9 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
-import org.mockito.Mockito.doAnswer
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.robolectric.RobolectricTestRunner
@@ -63,6 +60,7 @@ class PaymentSessionTest {
 
     private val paymentSessionDataArgumentCaptor: KArgumentCaptor<PaymentSessionData> = argumentCaptor()
     private val paymentMethodsActivityStarterArgsCaptor: KArgumentCaptor<PaymentMethodsActivityStarter.Args> = argumentCaptor()
+    private val productUsageArgumentCaptor: KArgumentCaptor<Set<String>> = argumentCaptor()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val activityScenarioFactory = ActivityScenarioFactory(context)
@@ -70,24 +68,29 @@ class PaymentSessionTest {
     @BeforeTest
     fun setup() {
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-
-        doAnswer { invocation ->
-            invocation.getArgument<Runnable>(0).run()
-            null
-        }.`when`<ThreadPoolExecutor>(threadPoolExecutor).execute(any())
-
+        whenever(threadPoolExecutor.execute(any())).thenAnswer {
+            it.getArgument<Runnable>(0).run()
+        }
         CustomerSession.instance = createCustomerSession()
     }
 
     @Test
     fun init_addsPaymentSessionToken_andFetchesCustomer() {
-        createActivity {
-            val paymentSession = PaymentSession(it, DEFAULT_CONFIG)
+        CustomerSession.instance = customerSession
+        createActivity { activity ->
+            val paymentSession = PaymentSession(activity, DEFAULT_CONFIG.copy(
+                shouldPrefetchCustomer = true
+            ))
             paymentSession.init(paymentSessionListener)
 
+            verify(customerSession).retrieveCurrentCustomer(
+                productUsageArgumentCaptor.capture(),
+                any()
+            )
+
             assertEquals(
-                setOf(PaymentSession.TOKEN_PAYMENT_SESSION),
-                CustomerSession.getInstance().productUsageTokens
+                setOf(PaymentSession.PRODUCT_TOKEN),
+                productUsageArgumentCaptor.firstValue
             )
 
             verify(paymentSessionListener)
@@ -254,55 +257,6 @@ class PaymentSessionTest {
     }
 
     @Test
-    fun init_withoutSavedState_clearsLoggingTokensAndStartsWithPaymentSession() {
-        val customerSession = CustomerSession.getInstance()
-        customerSession
-            .addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY)
-        assertEquals(
-            setOf(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY),
-            customerSession.productUsageTokens
-        )
-
-        createActivity {
-            val paymentSession = PaymentSession(it, DEFAULT_CONFIG)
-            paymentSession.init(paymentSessionListener)
-
-            // The init removes PaymentMethodsActivity, but then adds PaymentSession
-            assertEquals(
-                setOf(PaymentSession.TOKEN_PAYMENT_SESSION),
-                customerSession.productUsageTokens
-            )
-        }
-    }
-
-    @Test
-    fun completePayment_withLoggedActions_clearsLoggingTokensAndSetsResult() {
-        val customerSession = CustomerSession.getInstance()
-        customerSession
-            .addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY)
-        assertEquals(
-            setOf(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY),
-            customerSession.productUsageTokens
-        )
-
-        createActivity {
-            val paymentSession = PaymentSession(it, DEFAULT_CONFIG)
-            // If it is given any saved state at all, the tokens are not cleared out.
-            paymentSession.init(paymentSessionListener)
-
-            assertEquals(
-                setOf(PaymentSession.TOKEN_PAYMENT_SESSION),
-                customerSession.productUsageTokens
-            )
-
-            reset(paymentSessionListener)
-
-            paymentSession.onCompleted()
-            assertTrue(customerSession.productUsageTokens.isEmpty())
-        }
-    }
-
-    @Test
     fun init_withSavedState_setsPaymentSessionData() {
         ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
 
@@ -354,20 +308,10 @@ class PaymentSessionTest {
             val paymentSession = createPaymentSession(it)
             assertFalse(paymentSession.handlePaymentData(PaymentFlowActivityStarter.REQUEST_CODE,
                 RESULT_CANCELED, Intent()))
-            verify(customerSession).retrieveCurrentCustomer(any())
-        }
-    }
-
-    @Test
-    fun onDestroy_shouldReleaseListener() {
-        createActivityScenario { activityScenario ->
-            activityScenario.onActivity { activity ->
-                val paymentSession = createPaymentSession(activity)
-                paymentSession.init(paymentSessionListener)
-                assertNotNull(paymentSession.listener)
-                activityScenario.moveToState(Lifecycle.State.DESTROYED)
-                assertNull(paymentSession.listener)
-            }
+            verify(customerSession).retrieveCurrentCustomer(
+                eq(setOf(PaymentSession.PRODUCT_TOKEN)),
+                any()
+            )
         }
     }
 
@@ -390,10 +334,12 @@ class PaymentSessionTest {
         )
     }
 
-    private fun createCustomerSession(): CustomerSession {
+    private fun createCustomerSession(
+        stripeRepository: StripeRepository = FakeStripeRepository()
+    ): CustomerSession {
         return CustomerSession(
             context,
-            FakeStripeRepository(),
+            stripeRepository,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             "acct_abc123",
             threadPoolExecutor = threadPoolExecutor,
@@ -438,6 +384,7 @@ class PaymentSessionTest {
 
         override fun retrieveCustomer(
             customerId: String,
+            productUsageTokens: Set<String>,
             requestOptions: ApiRequest.Options
         ): Customer {
             return FIRST_CUSTOMER

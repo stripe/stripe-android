@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.CustomerSession
+import com.stripe.android.PaymentSession
 import com.stripe.android.PaymentSessionConfig
 import com.stripe.android.PaymentSessionData
 import com.stripe.android.StripeError
@@ -35,8 +36,9 @@ internal class PaymentFlowViewModel(
         submittedShippingInfo = shippingInformation
         val resultData = MutableLiveData<SaveCustomerShippingInfoResult>()
         customerSession.setCustomerShippingInformation(
-            shippingInformation,
-            object : CustomerSession.CustomerRetrievalListener {
+            shippingInformation = shippingInformation,
+            productUsage = PRODUCT_USAGE,
+            listener = object : CustomerSession.CustomerRetrievalListener {
                 override fun onCustomerRetrieved(customer: Customer) {
                     isShippingInfoSubmitted = true
                     resultData.value = SaveCustomerShippingInfoResult.Success(customer)
@@ -102,5 +104,15 @@ internal class PaymentFlowViewModel(
                 paymentSessionData
             ) as T
         }
+    }
+
+    internal companion object {
+        private const val SHIPPING_INFO_PRODUCT_TOKEN = "ShippingInfoScreen"
+
+        val PRODUCT_USAGE = setOf(
+            PaymentSession.PRODUCT_TOKEN,
+            PaymentFlowActivity.PRODUCT_TOKEN,
+            SHIPPING_INFO_PRODUCT_TOKEN
+        )
     }
 }

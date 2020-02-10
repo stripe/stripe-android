@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.CustomerSession
+import com.stripe.android.PaymentSession
 import com.stripe.android.R
 import com.stripe.android.StripeError
 import com.stripe.android.exception.APIException
@@ -17,10 +18,16 @@ import com.stripe.android.model.PaymentMethod
 internal class PaymentMethodsViewModel(
     application: Application,
     private val customerSession: CustomerSession,
-    internal var selectedPaymentMethodId: String? = null
+    internal var selectedPaymentMethodId: String? = null,
+    private val startedFromPaymentSession: Boolean
 ) : AndroidViewModel(application) {
     private val context = application.applicationContext
     private val cardDisplayTextFactory = CardDisplayTextFactory(context)
+
+    internal val productUsage: Set<String> = listOfNotNull(
+        PaymentSession.PRODUCT_TOKEN.takeIf { startedFromPaymentSession },
+        PaymentMethodsActivity.PRODUCT_TOKEN
+    ).toSet()
 
     internal val snackbarData: MutableLiveData<String?> = MutableLiveData()
     internal val progressData: MutableLiveData<Boolean> = MutableLiveData()
@@ -55,8 +62,10 @@ internal class PaymentMethodsViewModel(
     internal fun getPaymentMethods(): LiveData<Result> {
         val resultData = MutableLiveData<Result>()
         progressData.value = true
-        customerSession.getPaymentMethods(PaymentMethod.Type.Card,
-            object : CustomerSession.PaymentMethodsRetrievalListener {
+        customerSession.getPaymentMethods(
+            paymentMethodType = PaymentMethod.Type.Card,
+            productUsage = productUsage,
+            listener = object : CustomerSession.PaymentMethodsRetrievalListener {
                 override fun onPaymentMethodsRetrieved(paymentMethods: List<PaymentMethod>) {
                     resultData.value = Result.Success(paymentMethods)
                     progressData.value = false
@@ -90,13 +99,15 @@ internal class PaymentMethodsViewModel(
     internal class Factory(
         private val application: Application,
         private val customerSession: CustomerSession,
-        private val initialPaymentMethodId: String?
+        private val initialPaymentMethodId: String?,
+        private val startedFromPaymentSession: Boolean
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             return PaymentMethodsViewModel(
                 application,
                 customerSession,
-                initialPaymentMethodId
+                initialPaymentMethodId,
+                startedFromPaymentSession
             ) as T
         }
     }

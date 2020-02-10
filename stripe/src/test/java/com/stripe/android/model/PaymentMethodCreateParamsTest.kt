@@ -1,8 +1,10 @@
 package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.view.AddPaymentMethodActivity
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class PaymentMethodCreateParamsTest {
 
@@ -107,6 +109,47 @@ class PaymentMethodCreateParamsTest {
     @Test
     fun equals_withFpx() {
         assertEquals(createFpx(), createFpx())
+    }
+
+    @Test
+    fun attribution_whenFpxAndProductUsageIsEmpty_shouldBeNull() {
+        val params = createFpx()
+        assertNull(params.attribution)
+    }
+
+    @Test
+    fun attribution_whenFpxAndProductUsageIsNotEmpty_shouldBeProductUsage() {
+        val params = createFpx().copy(
+            productUsage = setOf(AddPaymentMethodActivity.PRODUCT_TOKEN)
+        )
+        assertEquals(
+            setOf(AddPaymentMethodActivity.PRODUCT_TOKEN),
+            params.attribution
+        )
+    }
+
+    @Test
+    fun attribution_whenCardAndProductUsageIsEmpty_shouldBeAttribution() {
+        val params = PaymentMethodCreateParams.create(
+            PaymentMethodCreateParamsFixtures.CARD_WITH_ATTRIBUTION
+        )
+        assertEquals(
+            setOf("CardMultilineWidget"),
+            params.attribution
+        )
+    }
+
+    @Test
+    fun attribution_whenCardAndProductUsageIsNotEmpty_shouldBeAttributionPlusProductUsage() {
+        val params = PaymentMethodCreateParams.create(
+            PaymentMethodCreateParamsFixtures.CARD_WITH_ATTRIBUTION
+        ).copy(
+            productUsage = setOf(AddPaymentMethodActivity.PRODUCT_TOKEN)
+        )
+        assertEquals(
+            setOf("CardMultilineWidget", AddPaymentMethodActivity.PRODUCT_TOKEN),
+            params.attribution
+        )
     }
 
     private fun createFpx(): PaymentMethodCreateParams {

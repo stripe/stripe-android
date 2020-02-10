@@ -3,6 +3,8 @@ package com.stripe.android.view
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
@@ -11,6 +13,8 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CustomerSession
 import com.stripe.android.Stripe
 import com.stripe.android.StripeError
+import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.view.i18n.ErrorMessageTranslator
 import com.stripe.android.view.i18n.TranslatorManager
@@ -26,12 +30,34 @@ class AddPaymentMethodViewModelTest {
         ApplicationProvider.getApplicationContext<Context>()
     }
 
-    private val stripe: Stripe by lazy {
-        Stripe(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-    }
-
     private val customerSession: CustomerSession = mock()
     private val paymentMethodRetrievalCaptor: KArgumentCaptor<CustomerSession.PaymentMethodRetrievalListener> = argumentCaptor()
+    private val paymentMethodCreateParamsCaptor: KArgumentCaptor<PaymentMethodCreateParams> = argumentCaptor()
+
+    @Test
+    fun createPaymentMethod_shouldIncludeProductUsageTokens() {
+        val stripe: Stripe = mock()
+        createViewModel(
+            stripe = stripe
+        ).createPaymentMethod(
+            PaymentMethodCreateParams.create(
+                PaymentMethodCreateParamsFixtures.CARD.copy(
+                    attribution = setOf("CardMultilineWidget")
+                )
+            )
+        )
+
+        verify(stripe).createPaymentMethod(
+            paymentMethodCreateParamsCaptor.capture(),
+            anyOrNull(),
+            any()
+        )
+
+        assertEquals(
+            setOf("CardMultilineWidget", AddPaymentMethodActivity.PRODUCT_TOKEN),
+            paymentMethodCreateParamsCaptor.firstValue.attribution
+        )
+    }
 
     @Test
     fun attachPaymentMethod_whenError_returnsError() {
@@ -40,6 +66,7 @@ class AddPaymentMethodViewModelTest {
                 .attachPaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         verify(customerSession).attachPaymentMethod(
             eq("pm_123456789"),
+            eq(EXPECTED_PRODUCT_USAGE),
             paymentMethodRetrievalCaptor.capture()
         )
 
@@ -63,10 +90,11 @@ class AddPaymentMethodViewModelTest {
     @Test
     fun attachPaymentMethod_withCustomErrorMessageTranslator_whenError_returnsLocalizedError() {
         val resultData =
-            createViewModel(TRANSLATOR)
+            createViewModel(translator = TRANSLATOR)
                 .attachPaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         verify(customerSession).attachPaymentMethod(
             eq("pm_123456789"),
+            eq(EXPECTED_PRODUCT_USAGE),
             paymentMethodRetrievalCaptor.capture()
         )
 
@@ -88,6 +116,7 @@ class AddPaymentMethodViewModelTest {
     }
 
     private fun createViewModel(
+        stripe: Stripe = Stripe(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
         translator: ErrorMessageTranslator = TranslatorManager.getErrorMessageTranslator()
     ): AddPaymentMethodViewModel {
         return AddPaymentMethodViewModel(
@@ -116,5 +145,9 @@ class AddPaymentMethodViewModelTest {
                 }
             }
         }
+
+        private val EXPECTED_PRODUCT_USAGE = setOf(
+            AddPaymentMethodActivity.PRODUCT_TOKEN
+        )
     }
 }

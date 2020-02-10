@@ -198,7 +198,11 @@ internal interface StripeRepository {
 
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, APIException::class, CardException::class)
-    fun retrieveCustomer(customerId: String, requestOptions: ApiRequest.Options): Customer?
+    fun retrieveCustomer(
+        customerId: String,
+        productUsageTokens: Set<String>,
+        requestOptions: ApiRequest.Options
+    ): Customer?
 
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, APIException::class, CardException::class,

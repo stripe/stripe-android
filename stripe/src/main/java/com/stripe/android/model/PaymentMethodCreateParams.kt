@@ -25,7 +25,8 @@ data class PaymentMethodCreateParams internal constructor(
     private val sepaDebit: SepaDebit? = null,
     private val auBecsDebit: AuBecsDebit? = null,
     private val billingDetails: PaymentMethod.BillingDetails? = null,
-    private val metadata: Map<String, String>? = null
+    private val metadata: Map<String, String>? = null,
+    private val productUsage: Set<String> = emptySet()
 ) : StripeParamsModel, Parcelable {
 
     val typeCode: String
@@ -35,8 +36,8 @@ data class PaymentMethodCreateParams internal constructor(
         @JvmSynthetic
         get() {
             return when (type) {
-                Type.Card -> card?.attribution
-                else -> null
+                Type.Card -> card?.attribution?.plus(productUsage)
+                else -> productUsage.takeIf { it.isNotEmpty() }
             }
         }
 

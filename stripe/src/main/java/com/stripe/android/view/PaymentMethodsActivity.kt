@@ -9,7 +9,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.CustomerSession
-import com.stripe.android.PaymentSession.Companion.TOKEN_PAYMENT_SESSION
 import com.stripe.android.databinding.PaymentMethodsActivityBinding
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.view.i18n.TranslatorManager
@@ -32,6 +31,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
     private val startedFromPaymentSession: Boolean by lazy {
         args.isPaymentSessionActive
     }
+
     private val customerSession: CustomerSession by lazy {
         CustomerSession.getInstance()
     }
@@ -53,7 +53,8 @@ class PaymentMethodsActivity : AppCompatActivity() {
             PaymentMethodsViewModel.Factory(
                 application,
                 customerSession,
-                args.initialPaymentMethodId
+                args.initialPaymentMethodId,
+                startedFromPaymentSession
             )
         )[PaymentMethodsViewModel::class.java]
     }
@@ -109,7 +110,8 @@ class PaymentMethodsActivity : AppCompatActivity() {
             this,
             adapter,
             cardDisplayTextFactory,
-            customerSession
+            customerSession,
+            viewModel.productUsage
         ) { viewModel.onPaymentMethodRemoved(it) }
 
         adapter.listener = object : PaymentMethodsAdapter.Listener {
@@ -150,8 +152,6 @@ class PaymentMethodsActivity : AppCompatActivity() {
     }
 
     private fun onPaymentMethodCreated(data: Intent?) {
-        addLoggingTokens()
-
         data?.let {
             val result =
                 AddPaymentMethodActivityStarter.Result.fromIntent(data)
@@ -192,13 +192,6 @@ class PaymentMethodsActivity : AppCompatActivity() {
         })
     }
 
-    private fun addLoggingTokens() {
-        listOfNotNull(
-            TOKEN_PAYMENT_SESSION.takeIf { startedFromPaymentSession },
-            TOKEN_PAYMENT_METHODS_ACTIVITY
-        ).forEach { customerSession.addProductUsageTokenIfValid(it) }
-    }
-
     private fun finishWithGooglePay() {
         setResult(Activity.RESULT_OK,
             Intent().putExtras(
@@ -232,6 +225,6 @@ class PaymentMethodsActivity : AppCompatActivity() {
     }
 
     internal companion object {
-        internal const val TOKEN_PAYMENT_METHODS_ACTIVITY: String = "PaymentMethodsActivity"
+        internal const val PRODUCT_TOKEN: String = "PaymentMethodsActivity"
     }
 }

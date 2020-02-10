@@ -22,24 +22,17 @@ internal class AddPaymentMethodViewModel(
         TranslatorManager.getErrorMessageTranslator()
 ) : ViewModel() {
 
-    @JvmSynthetic
-    internal fun logProductUsage() {
-        if (args.shouldInitCustomerSessionTokens) {
-            customerSession
-                .addProductUsageTokenIfValid(AddPaymentMethodActivity.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
-            if (args.isPaymentSessionActive) {
-                customerSession
-                    .addProductUsageTokenIfValid(PaymentSession.TOKEN_PAYMENT_SESSION)
-            }
-        }
-    }
+    private val productUsage: Set<String> = listOfNotNull(
+        AddPaymentMethodActivity.PRODUCT_TOKEN,
+        PaymentSession.PRODUCT_TOKEN.takeIf { args.isPaymentSessionActive }
+    ).toSet()
 
     internal fun createPaymentMethod(
         params: PaymentMethodCreateParams
     ): LiveData<PaymentMethodResult> {
         val resultData = MutableLiveData<PaymentMethodResult>()
         stripe.createPaymentMethod(
-            paymentMethodCreateParams = params,
+            paymentMethodCreateParams = params.copy(productUsage = productUsage),
             callback = object : ApiResultCallback<PaymentMethod> {
                 override fun onSuccess(result: PaymentMethod) {
                     resultData.value = PaymentMethodResult.Success(result)
@@ -56,8 +49,9 @@ internal class AddPaymentMethodViewModel(
     internal fun attachPaymentMethod(paymentMethod: PaymentMethod): LiveData<PaymentMethodResult> {
         val resultData = MutableLiveData<PaymentMethodResult>()
         customerSession.attachPaymentMethod(
-            paymentMethod.id.orEmpty(),
-            object : CustomerSession.PaymentMethodRetrievalListener {
+            paymentMethodId = paymentMethod.id.orEmpty(),
+            productUsage = productUsage,
+            listener = object : CustomerSession.PaymentMethodRetrievalListener {
                 override fun onPaymentMethodRetrieved(paymentMethod: PaymentMethod) {
                     resultData.value = PaymentMethodResult.Success(paymentMethod)
                 }

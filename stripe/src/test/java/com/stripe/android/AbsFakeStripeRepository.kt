@@ -196,6 +196,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
 
     override fun retrieveCustomer(
         customerId: String,
+        productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
     ): Customer? {
         return null

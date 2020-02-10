@@ -5,21 +5,14 @@ import java.util.concurrent.ThreadPoolExecutor
 internal class CustomerSessionEphemeralKeyManagerListener(
     private val runnableFactory: CustomerSessionRunnableFactory,
     private val executor: ThreadPoolExecutor,
-    private val listeners: MutableMap<String, CustomerSession.RetrievalListener?>,
-    private val productUsage: CustomerSessionProductUsage
+    private val listeners: MutableMap<String, CustomerSession.RetrievalListener?>
 ) : EphemeralKeyManager.KeyManagerListener {
     override fun onKeyUpdate(
         ephemeralKey: EphemeralKey,
         operation: EphemeralOperation
     ) {
-        val runnable =
-            runnableFactory.create(ephemeralKey, operation)
-        runnable?.let {
+        runnableFactory.create(ephemeralKey, operation)?.let {
             executor.execute(it)
-
-            if (operation !is EphemeralOperation.RetrieveKey) {
-                productUsage.reset()
-            }
         }
     }
 
@@ -28,6 +21,8 @@ internal class CustomerSessionEphemeralKeyManagerListener(
         errorCode: Int,
         errorMessage: String
     ) {
-        listeners.remove(operationId)?.onError(errorCode, errorMessage, null)
+        listeners.remove(operationId)?.onError(
+            errorCode, errorMessage, null
+        )
     }
 }

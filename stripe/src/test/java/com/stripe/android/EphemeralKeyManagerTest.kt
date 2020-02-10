@@ -121,7 +121,8 @@ class EphemeralKeyManagerTest {
 
         val operation = EphemeralOperation.Customer.GetPaymentMethods(
             type = PaymentMethod.Type.Card,
-            id = operationIdFactory.create()
+            id = operationIdFactory.create(),
+            productUsage = emptySet()
         )
         keyManager.retrieveEphemeralKey(operation)
 
@@ -162,7 +163,10 @@ class EphemeralKeyManagerTest {
 
         // It should be necessary to update because the key is expired.
         val operationId = operationIdFactory.create()
-        keyManager.retrieveEphemeralKey(EphemeralOperation.RetrieveKey(operationId))
+        keyManager.retrieveEphemeralKey(EphemeralOperation.RetrieveKey(
+            id = operationId,
+            productUsage = emptySet()
+        ))
 
         verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener)
             .onKeyError(operationId, 404, errorMessage)

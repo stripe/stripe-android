@@ -709,10 +709,14 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         AuthenticationException::class, CardException::class)
     override fun retrieveCustomer(
         customerId: String,
+        productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
     ): Customer? {
         fireAnalyticsRequest(
-            AnalyticsEvent.CustomerRetrieve,
+            analyticsDataFactory.createParams(
+                AnalyticsEvent.CustomerRetrieve,
+                productUsageTokens = productUsageTokens
+            ),
             requestOptions.apiKey
         )
 
@@ -1013,12 +1017,12 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
     @VisibleForTesting
     internal fun fireAnalyticsRequest(
-        loggingMap: Map<String, Any>,
+        params: Map<String, Any>,
         publishableKey: String
     ) {
         makeFireAndForgetRequest(
             analyticsRequestFactory.create(
-                loggingMap,
+                params,
                 ApiRequest.Options(publishableKey),
                 appInfo
             )
