@@ -34,14 +34,15 @@ internal class SelectShippingMethodWidget @JvmOverloads constructor(
         shipping_methods.layoutManager = LinearLayoutManager(context)
     }
 
+    fun setShippingMethodSelectedCallback(callback: (ShippingMethod) -> Unit) {
+        shippingMethodAdapter.onShippingMethodSelectedCallback = callback
+    }
+
     /**
      * Specify the shipping methods to show.
      */
-    fun setShippingMethods(
-        shippingMethods: List<ShippingMethod>,
-        defaultShippingMethod: ShippingMethod? = null
-    ) {
-        shippingMethodAdapter.setShippingMethods(shippingMethods, defaultShippingMethod)
+    fun setShippingMethods(shippingMethods: List<ShippingMethod>) {
+        shippingMethodAdapter.shippingMethods = shippingMethods
     }
 
     fun setSelectedShippingMethod(shippingMethod: ShippingMethod) {

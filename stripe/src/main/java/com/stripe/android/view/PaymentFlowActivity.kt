@@ -45,7 +45,9 @@ class PaymentFlowActivity : StripeActivity() {
             paymentSessionConfig,
             customerSession,
             paymentSessionConfig.allowedShippingCountryCodes
-        )
+        ) {
+            viewModel.selectedShippingMethod = it
+        }
     }
 
     private val keyboardController: KeyboardController by lazy {
@@ -64,13 +66,13 @@ class PaymentFlowActivity : StripeActivity() {
         viewStub.inflate()
 
         val shippingInformation =
-            savedInstanceState?.getParcelable(STATE_SHIPPING_INFO)
+            viewModel.submittedShippingInfo
                 ?: paymentSessionConfig.prepopulatedShippingInfo
 
         paymentFlowPagerAdapter.shippingMethods = viewModel.shippingMethods
         paymentFlowPagerAdapter.isShippingInfoSubmitted = viewModel.isShippingInfoSubmitted
         paymentFlowPagerAdapter.shippingInformation = shippingInformation
-        paymentFlowPagerAdapter.selectedShippingMethod = savedInstanceState?.getParcelable(STATE_SHIPPING_METHOD)
+        paymentFlowPagerAdapter.selectedShippingMethod = viewModel.selectedShippingMethod
 
         shipping_flow_viewpager.adapter = paymentFlowPagerAdapter
         shipping_flow_viewpager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
@@ -88,12 +90,8 @@ class PaymentFlowActivity : StripeActivity() {
             }
         })
 
+        shipping_flow_viewpager.currentItem = viewModel.currentPage
         title = paymentFlowPagerAdapter.getPageTitle(shipping_flow_viewpager.currentItem)
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        shipping_flow_viewpager.currentItem = savedInstanceState.getInt(STATE_CURRENT_ITEM, 0)
     }
 
     public override fun onActionSave() {
@@ -103,13 +101,6 @@ class PaymentFlowActivity : StripeActivity() {
         } else {
             onShippingMethodSave()
         }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putParcelable(STATE_SHIPPING_INFO, shippingInfo)
-        outState.putParcelable(STATE_SHIPPING_METHOD, selectedShippingMethod)
-        outState.putInt(STATE_CURRENT_ITEM, shipping_flow_viewpager.currentItem)
     }
 
     @JvmSynthetic
@@ -150,7 +141,8 @@ class PaymentFlowActivity : StripeActivity() {
         paymentFlowPagerAdapter.isShippingInfoSubmitted = true
 
         if (hasNextPage()) {
-            shipping_flow_viewpager.currentItem = shipping_flow_viewpager.currentItem + 1
+            viewModel.currentPage += 1
+            shipping_flow_viewpager.currentItem = viewModel.currentPage
         } else {
             finishWithData(viewModel.paymentSessionData)
         }
@@ -176,18 +168,6 @@ class PaymentFlowActivity : StripeActivity() {
     private val shippingInfo: ShippingInformation?
         get() {
             return shipping_info_widget.shippingInformation
-        }
-
-    private val selectedShippingMethod: ShippingMethod?
-        get() {
-            return if (PaymentFlowPage.SHIPPING_METHOD ==
-                paymentFlowPagerAdapter.getPageAt(shipping_flow_viewpager.currentItem)) {
-                val selectShippingMethodWidget: SelectShippingMethodWidget =
-                    findViewById(R.id.select_shipping_method_widget)
-                selectShippingMethodWidget.selectedShippingMethod
-            } else {
-                null
-            }
         }
 
     private fun hasNextPage(): Boolean {
@@ -252,7 +232,8 @@ class PaymentFlowActivity : StripeActivity() {
 
     override fun onBackPressed() {
         if (hasPreviousPage()) {
-            shipping_flow_viewpager.currentItem = shipping_flow_viewpager.currentItem - 1
+            viewModel.currentPage -= 1
+            shipping_flow_viewpager.currentItem = viewModel.currentPage
         } else {
             super.onBackPressed()
         }
@@ -262,9 +243,5 @@ class PaymentFlowActivity : StripeActivity() {
         internal const val TOKEN_PAYMENT_FLOW_ACTIVITY: String = "PaymentFlowActivity"
         internal const val TOKEN_SHIPPING_INFO_SCREEN: String = "ShippingInfoScreen"
         internal const val TOKEN_SHIPPING_METHOD_SCREEN: String = "ShippingMethodScreen"
-
-        private const val STATE_SHIPPING_INFO: String = "state_shipping_info"
-        private const val STATE_SHIPPING_METHOD: String = "state_shipping_method"
-        private const val STATE_CURRENT_ITEM: String = "state_current_item"
     }
 }

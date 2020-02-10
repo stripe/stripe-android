@@ -9,16 +9,35 @@ import com.stripe.android.model.ShippingMethod
  */
 internal class ShippingMethodAdapter :
     RecyclerView.Adapter<ShippingMethodAdapter.ShippingMethodViewHolder>() {
+    internal var onShippingMethodSelectedCallback: (ShippingMethod) -> Unit = {}
 
-    private var shippingMethods: List<ShippingMethod> = emptyList()
-    private var selectedIndex = 0
+    internal var shippingMethods: List<ShippingMethod> = emptyList()
+        set(value) {
+            // reset selected
+            selectedIndex = 0
+            field = value
+            notifyDataSetChanged()
+        }
+
+    @JvmSynthetic
+    internal var selectedIndex = 0
+        set(value) {
+            if (field != value) {
+                // only notify change if the field's value is changing
+                notifyItemChanged(field)
+                notifyItemChanged(value)
+                field = value
+
+                onShippingMethodSelectedCallback(shippingMethods[value])
+            }
+        }
 
     init {
         setHasStableIds(true)
     }
 
     val selectedShippingMethod: ShippingMethod?
-        get() = shippingMethods[selectedIndex]
+        get() = shippingMethods.getOrNull(selectedIndex)
 
     override fun getItemCount(): Int {
         return shippingMethods.size
@@ -36,34 +55,12 @@ internal class ShippingMethodAdapter :
         holder.setShippingMethod(shippingMethods[i])
         holder.setSelected(i == selectedIndex)
         holder.shippingMethodView.setOnClickListener {
-            onShippingMethodSelected(holder.adapterPosition)
+            selectedIndex = holder.adapterPosition
         }
-    }
-
-    fun setShippingMethods(
-        shippingMethods: List<ShippingMethod>,
-        defaultShippingMethod: ShippingMethod? = null
-    ) {
-        this.shippingMethods = shippingMethods
-        selectedIndex = defaultShippingMethod?.let { shippingMethods.indexOf(it) } ?: 0
-        notifyDataSetChanged()
-    }
-
-    private fun onShippingMethodSelected(selectedIndex: Int) {
-        val previousSelectedIndex = this.selectedIndex
-        this.selectedIndex = selectedIndex
-
-        notifyItemChanged(previousSelectedIndex)
-        notifyItemChanged(selectedIndex)
     }
 
     internal fun setSelected(shippingMethod: ShippingMethod) {
-        val previouslySelectedIndex = selectedIndex
         selectedIndex = shippingMethods.indexOf(shippingMethod)
-        if (previouslySelectedIndex != selectedIndex) {
-            notifyItemChanged(previouslySelectedIndex)
-            notifyItemChanged(selectedIndex)
-        }
     }
 
     internal class ShippingMethodViewHolder constructor(

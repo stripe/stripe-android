@@ -23,10 +23,16 @@ internal class PaymentFlowViewModel(
     internal var shippingMethods: List<ShippingMethod> = emptyList()
     internal var isShippingInfoSubmitted: Boolean = false
 
+    internal var selectedShippingMethod: ShippingMethod? = null
+    internal var submittedShippingInfo: ShippingInformation? = null
+
+    internal var currentPage: Int = 0
+
     @JvmSynthetic
     internal fun saveCustomerShippingInformation(
         shippingInformation: ShippingInformation
     ): LiveData<SaveCustomerShippingInfoResult> {
+        submittedShippingInfo = shippingInformation
         val resultData = MutableLiveData<SaveCustomerShippingInfoResult>()
         customerSession.setCustomerShippingInformation(
             shippingInformation,
