@@ -780,7 +780,7 @@ class CustomerSessionTest {
             "acct_abc123",
             timeSupplier = timeSupplier,
             threadPoolExecutor = threadPoolExecutor,
-            ephemeralKeyManagerFactory = EphemeralKeyManager.Factory(
+            ephemeralKeyManagerFactory = EphemeralKeyManager.Factory.Default(
                 keyProvider = ephemeralKeyProvider,
                 shouldPrefetchEphemeralKey = true,
                 timeSupplier = timeSupplier

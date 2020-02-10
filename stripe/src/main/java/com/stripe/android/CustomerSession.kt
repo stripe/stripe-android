@@ -438,7 +438,7 @@ class CustomerSession @VisibleForTesting internal constructor(
         ) {
             val operationIdFactory = StripeOperationIdFactory()
             val timeSupplier = { Calendar.getInstance().timeInMillis }
-            val ephemeralKeyManagerFactory = EphemeralKeyManager.Factory(
+            val ephemeralKeyManagerFactory = EphemeralKeyManager.Factory.Default(
                 keyProvider = ephemeralKeyProvider,
                 shouldPrefetchEphemeralKey = shouldPrefetchEphemeralKey,
                 operationIdFactory = operationIdFactory,

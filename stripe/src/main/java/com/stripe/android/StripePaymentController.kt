@@ -757,7 +757,7 @@ internal class StripePaymentController internal constructor(
         }
 
         internal interface Complete3ds2AuthCallbackFactory :
-            Factory<Stripe3ds2CompletionStarter.Args, ApiResultCallback<Boolean>>
+            Factory1<Stripe3ds2CompletionStarter.Args, ApiResultCallback<Boolean>>
 
         internal companion object {
             private const val VALUE_YES = "Y"

@@ -370,7 +370,7 @@ class PaymentSessionTest {
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             "acct_abc123",
             threadPoolExecutor = threadPoolExecutor,
-            ephemeralKeyManagerFactory = EphemeralKeyManager.Factory(
+            ephemeralKeyManagerFactory = EphemeralKeyManager.Factory.Default(
                 keyProvider = ephemeralKeyProvider,
                 shouldPrefetchEphemeralKey = true
             )
