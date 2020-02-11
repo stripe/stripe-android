@@ -72,7 +72,7 @@ class PaymentSession @VisibleForTesting internal constructor(
     /**
      * Create a PaymentSession attached to the given host Activity.
      *
-     * @param activity an `AppCompatActivity` from which to launch other Stripe Activities. This
+     * @param activity a `ComponentActivity` from which to launch other Stripe Activities. This
      * Activity will receive results in
      * `Activity#onActivityResult(int, int, Intent)` that should be
      * passed back to this session.
