@@ -95,13 +95,11 @@ class PaymentSessionActivity : AppCompatActivity() {
                 .setShouldPrefetchCustomer(shouldPrefetchCustomer)
                 .build()
         )
-        val paymentSessionInitialized = paymentSession.init(
+        paymentSession.init(
             listener = PaymentSessionListenerImpl(this, customerSession),
             savedInstanceState = savedInstanceState
         )
-        if (paymentSessionInitialized) {
-            paymentSession.setCartTotal(2000L)
-        }
+        paymentSession.setCartTotal(2000L)
 
         return paymentSession
     }

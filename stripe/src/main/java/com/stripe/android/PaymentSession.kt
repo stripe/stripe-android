@@ -162,26 +162,16 @@ class PaymentSession @VisibleForTesting internal constructor(
      * in payment session status, including networking status
      * @param savedInstanceState a `Bundle` containing the saved state of a
      * PaymentSession that was stored in [savePaymentSessionInstanceState]
-     *
-     * @return `true` if the PaymentSession is initialized, `false` if a state error
-     * occurs. Failure can only occur if there is no initialized [CustomerSession].
      */
     @JvmOverloads
     fun init(
         listener: PaymentSessionListener,
         savedInstanceState: Bundle? = null
-    ): Boolean {
-        // Checking to make sure that there is a valid CustomerSession -- the getInstance() call
-        // will throw a runtime exception if none is ready.
-        try {
-            if (savedInstanceState == null) {
-                customerSession.resetUsageTokens()
-            }
-            customerSession.addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION)
-        } catch (illegalState: IllegalStateException) {
-            paymentSessionListener = null
-            return false
+    ) {
+        if (savedInstanceState == null) {
+            customerSession.resetUsageTokens()
         }
+        customerSession.addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION)
 
         paymentSessionListener = listener
 
@@ -191,8 +181,6 @@ class PaymentSession @VisibleForTesting internal constructor(
         if (config.shouldPrefetchCustomer) {
             fetchCustomer()
         }
-
-        return true
     }
 
     /**

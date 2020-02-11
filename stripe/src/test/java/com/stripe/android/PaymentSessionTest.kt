@@ -206,7 +206,7 @@ class PaymentSessionTest {
     @Test
     fun getSelectedPaymentMethodId_whenHasPaymentSessionData_returnsExpectedId() {
         val paymentSession = createPaymentSession(
-            PaymentSessionFixtures.PAYMENT_SESSION_DATA.copy(
+            paymentSessionData = PaymentSessionFixtures.PAYMENT_SESSION_DATA.copy(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
         )
@@ -232,7 +232,7 @@ class PaymentSessionTest {
     @Test
     fun getSelectedPaymentMethodId_whenHasUserSpecifiedPaymentMethod_returnsExpectedId() {
         val paymentSession = createPaymentSession(
-            PaymentSessionFixtures.PAYMENT_SESSION_DATA.copy(
+            paymentSessionData = PaymentSessionFixtures.PAYMENT_SESSION_DATA.copy(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
         )
@@ -350,11 +350,12 @@ class PaymentSessionTest {
     }
 
     private fun createPaymentSession(
-        paymentSessionData: PaymentSessionData = PaymentSessionFixtures.PAYMENT_SESSION_DATA
+        config: PaymentSessionConfig = DEFAULT_CONFIG,
+        paymentSessionData: PaymentSessionData = PaymentSessionData(config)
     ): PaymentSession {
         return PaymentSession(
             context,
-            DEFAULT_CONFIG,
+            config,
             customerSession,
             paymentMethodsActivityStarter,
             paymentFlowActivityStarter,
