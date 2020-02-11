@@ -13,7 +13,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.CustomerSession
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.PaymentSession
 import com.stripe.android.PaymentSessionConfig
@@ -26,6 +25,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.Customer
 import com.stripe.android.view.ShippingInfoWidget
 import com.stripe.example.R
+import com.stripe.example.StripeFactory
 import com.stripe.example.module.BackendApiFactory
 import com.stripe.example.service.BackendApi
 import com.stripe.example.service.ExampleEphemeralKeyProvider
@@ -59,10 +59,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
         private val compositeDisposable = CompositeDisposable()
 
         private val stripe: Stripe by lazy {
-            Stripe(
-                requireContext(),
-                PaymentConfiguration.getInstance(requireContext()).publishableKey
-            )
+            StripeFactory(requireContext()).create()
         }
         private val backendApi: BackendApi by lazy {
             BackendApiFactory(requireContext()).create()

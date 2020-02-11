@@ -1204,7 +1204,7 @@ public class StripeTest {
         final List<StripeRequest> fireAndForgetRequests =
                 stripeRequestArgumentCaptor.getAllValues();
         final StripeRequest analyticsRequest = fireAndForgetRequests.get(1);
-        assertEquals(AnalyticsRequest.HOST, analyticsRequest.getBaseUrl());
+        assertEquals(AnalyticsRequestFactory.HOST, analyticsRequest.getBaseUrl());
         assertEquals(createdPaymentMethod.id,
                 analyticsRequest.getParams().get(AnalyticsDataFactory.FIELD_PAYMENT_METHOD_ID));
     }
@@ -1243,7 +1243,7 @@ public class StripeTest {
         final List<StripeRequest> fireAndForgetRequests =
                 stripeRequestArgumentCaptor.getAllValues();
         final StripeRequest analyticsRequest = fireAndForgetRequests.get(1);
-        assertEquals(AnalyticsRequest.HOST, analyticsRequest.getBaseUrl());
+        assertEquals(AnalyticsRequestFactory.HOST, analyticsRequest.getBaseUrl());
         assertEquals(createdPaymentMethod.id,
                 analyticsRequest.getParams().get(AnalyticsDataFactory.FIELD_PAYMENT_METHOD_ID));
     }
@@ -1288,7 +1288,7 @@ public class StripeTest {
         final List<StripeRequest> fireAndForgetRequests =
                 stripeRequestArgumentCaptor.getAllValues();
         final StripeRequest analyticsRequest = fireAndForgetRequests.get(1);
-        assertEquals(AnalyticsRequest.HOST, analyticsRequest.getBaseUrl());
+        assertEquals(AnalyticsRequestFactory.HOST, analyticsRequest.getBaseUrl());
         assertEquals(createdPaymentMethod.id,
                 analyticsRequest.getParams().get(AnalyticsDataFactory.FIELD_PAYMENT_METHOD_ID));
     }

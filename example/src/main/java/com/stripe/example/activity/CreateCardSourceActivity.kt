@@ -9,7 +9,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.ApiResultCallback
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
@@ -17,6 +16,7 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.SourceCardData
 import com.stripe.android.model.SourceParams
 import com.stripe.example.R
+import com.stripe.example.StripeFactory
 import com.stripe.example.adapter.SourcesAdapter
 import kotlinx.android.synthetic.main.activity_card_sources.*
 
@@ -34,8 +34,7 @@ class CreateCardSourceActivity : AppCompatActivity() {
         SourcesAdapter()
     }
     private val stripe: Stripe by lazy {
-        Stripe(applicationContext,
-            PaymentConfiguration.getInstance(this).publishableKey)
+        StripeFactory(this).create()
     }
     private val keyboardController: KeyboardController by lazy {
         KeyboardController(this)

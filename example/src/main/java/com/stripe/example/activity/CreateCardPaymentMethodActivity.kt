@@ -8,11 +8,11 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.view.CardValidCallback
 import com.stripe.example.R
+import com.stripe.example.StripeFactory
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -24,10 +24,7 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
 
     private val adapter: PaymentMethodsAdapter = PaymentMethodsAdapter()
     private val stripe: Stripe by lazy {
-        Stripe(
-            applicationContext,
-            PaymentConfiguration.getInstance(this).publishableKey
-        )
+        StripeFactory(this).create()
     }
     private val snackbarController: SnackbarController by lazy {
         SnackbarController(findViewById(android.R.id.content))

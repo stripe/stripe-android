@@ -57,6 +57,7 @@ internal class StripePaymentController internal constructor(
     private val workScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 ) : PaymentController {
     private val logger = Logger.getInstance(enableLogging)
+    private val analyticsRequestFactory = AnalyticsRequestFactory(logger)
 
     init {
         threeDs2Service.initialize(
@@ -104,7 +105,7 @@ internal class StripePaymentController internal constructor(
         requestOptions: ApiRequest.Options
     ) {
         analyticsRequestExecutor.executeAsync(
-            AnalyticsRequest.create(
+            analyticsRequestFactory.create(
                 analyticsDataFactory.createAuthSourceParams(
                     AnalyticsEvent.AuthSourceStart,
                     requestOptions.apiKey,
@@ -137,7 +138,7 @@ internal class StripePaymentController internal constructor(
     ) {
         if (source.flow == Source.SourceFlow.REDIRECT) {
             analyticsRequestExecutor.executeAsync(
-                AnalyticsRequest.create(
+                analyticsRequestFactory.create(
                     analyticsDataFactory.createAuthSourceParams(
                         AnalyticsEvent.AuthSourceRedirect,
                         requestOptions.apiKey,
@@ -253,7 +254,7 @@ internal class StripePaymentController internal constructor(
         val clientSecret = result?.clientSecret.orEmpty()
 
         analyticsRequestExecutor.executeAsync(
-            AnalyticsRequest.create(
+            analyticsRequestFactory.create(
                 analyticsDataFactory.createAuthSourceParams(
                     AnalyticsEvent.AuthSourceResult,
                     requestOptions.apiKey,
@@ -369,7 +370,7 @@ internal class StripePaymentController internal constructor(
                     when {
                         sdkData?.is3ds2 == true -> {
                             analyticsRequestExecutor.executeAsync(
-                                AnalyticsRequest.create(
+                                analyticsRequestFactory.create(
                                     analyticsDataFactory.createAuthParams(
                                         AnalyticsEvent.Auth3ds2Fingerprint,
                                         stripeIntent.id.orEmpty(),
@@ -388,7 +389,7 @@ internal class StripePaymentController internal constructor(
                         }
                         sdkData?.is3ds1 == true -> {
                             analyticsRequestExecutor.executeAsync(
-                                AnalyticsRequest.create(
+                                analyticsRequestFactory.create(
                                     analyticsDataFactory.createAuthParams(
                                         AnalyticsEvent.Auth3ds1Sdk,
                                         stripeIntent.id.orEmpty(),
@@ -411,7 +412,7 @@ internal class StripePaymentController internal constructor(
                 }
                 StripeIntent.NextActionType.RedirectToUrl -> {
                     analyticsRequestExecutor.executeAsync(
-                        AnalyticsRequest.create(
+                        analyticsRequestFactory.create(
                             analyticsDataFactory.createAuthParams(
                                 AnalyticsEvent.AuthRedirect,
                                 stripeIntent.id.orEmpty(),
@@ -494,7 +495,8 @@ internal class StripePaymentController internal constructor(
             authParams,
             stripeIntent.id.orEmpty(),
             requestOptions,
-            Stripe3ds2AuthCallback(host, stripeRepository, transaction, timeout,
+            Stripe3ds2AuthCallback(
+                host, stripeRepository, transaction, timeout,
                 stripeIntent, stripe3ds2Fingerprint.source, requestOptions,
                 analyticsRequestExecutor, analyticsDataFactory,
                 challengeFlowStarter, enableLogging)
@@ -542,7 +544,7 @@ internal class StripePaymentController internal constructor(
 
     internal class Stripe3ds2AuthCallback @VisibleForTesting internal constructor(
         private val host: AuthActivityStarter.Host,
-        private val stripeRepository1: StripeRepository,
+        private val stripeRepository: StripeRepository,
         private val transaction: Transaction,
         private val maxTimeout: Int,
         private val stripeIntent: StripeIntent,
@@ -556,6 +558,10 @@ internal class StripePaymentController internal constructor(
             PaymentRelayStarter.create(host, getRequestCode(stripeIntent))
     ) : ApiResultCallback<Stripe3ds2AuthResult> {
 
+        private val analyticsRequestFactory: AnalyticsRequestFactory = AnalyticsRequestFactory(
+            Logger.getInstance(enableLogging)
+        )
+
         override fun onSuccess(result: Stripe3ds2AuthResult) {
             val ares = result.ares
             if (ares != null) {
@@ -566,7 +572,7 @@ internal class StripePaymentController internal constructor(
                 }
             } else if (result.fallbackRedirectUrl != null) {
                 analyticsRequestExecutor.executeAsync(
-                    AnalyticsRequest.create(
+                    analyticsRequestFactory.create(
                         analyticsDataFactory.createAuthParams(
                             AnalyticsEvent.Auth3ds2Fallback,
                             stripeIntent.id.orEmpty(),
@@ -610,7 +616,7 @@ internal class StripePaymentController internal constructor(
 
         private fun startFrictionlessFlow() {
             analyticsRequestExecutor.executeAsync(
-                AnalyticsRequest.create(
+                analyticsRequestFactory.create(
                     analyticsDataFactory.createAuthParams(
                         AnalyticsEvent.Auth3ds2Frictionless,
                         stripeIntent.id.orEmpty(),
@@ -632,11 +638,19 @@ internal class StripePaymentController internal constructor(
                 val activity = host.activity ?: return@Runnable
                 transaction.doChallenge(activity,
                     challengeParameters,
-                    PaymentAuth3ds2ChallengeStatusReceiver.create(host, stripeRepository1,
-                        stripeIntent, sourceId, requestOptions,
-                        analyticsRequestExecutor, analyticsDataFactory,
-                        transaction),
-                    maxTimeout)
+                    PaymentAuth3ds2ChallengeStatusReceiver.create(
+                        host,
+                        stripeRepository,
+                        stripeIntent,
+                        sourceId,
+                        requestOptions,
+                        analyticsRequestExecutor,
+                        analyticsDataFactory,
+                        transaction,
+                        analyticsRequestFactory
+                    ),
+                    maxTimeout
+                )
             })
         }
     }
@@ -649,13 +663,14 @@ internal class StripePaymentController internal constructor(
         private val analyticsRequestExecutor: FireAndForgetRequestExecutor,
         private val analyticsDataFactory: AnalyticsDataFactory,
         private val transaction: Transaction,
-        private val complete3ds2AuthCallbackFactory: Complete3ds2AuthCallbackFactory
+        private val complete3ds2AuthCallbackFactory: Complete3ds2AuthCallbackFactory,
+        private val analyticsRequestFactory: AnalyticsRequestFactory
     ) : StripeChallengeStatusReceiver() {
 
         override fun completed(completionEvent: CompletionEvent, uiTypeCode: String) {
             super.completed(completionEvent, uiTypeCode)
             analyticsRequestExecutor.executeAsync(
-                AnalyticsRequest.create(
+                analyticsRequestFactory.create(
                     analyticsDataFactory.create3ds2ChallengeParams(
                         AnalyticsEvent.Auth3ds2ChallengeCompleted,
                         stripeIntent.id.orEmpty(),
@@ -676,7 +691,7 @@ internal class StripePaymentController internal constructor(
         override fun cancelled(uiTypeCode: String) {
             super.cancelled(uiTypeCode)
             analyticsRequestExecutor.executeAsync(
-                AnalyticsRequest.create(
+                analyticsRequestFactory.create(
                     analyticsDataFactory.create3ds2ChallengeParams(
                         AnalyticsEvent.Auth3ds2ChallengeCanceled,
                         stripeIntent.id.orEmpty(),
@@ -693,7 +708,7 @@ internal class StripePaymentController internal constructor(
         override fun timedout(uiTypeCode: String) {
             super.timedout(uiTypeCode)
             analyticsRequestExecutor.executeAsync(
-                AnalyticsRequest.create(
+                analyticsRequestFactory.create(
                     analyticsDataFactory.create3ds2ChallengeParams(
                         AnalyticsEvent.Auth3ds2ChallengeTimedOut,
                         stripeIntent.id.orEmpty(),
@@ -710,7 +725,7 @@ internal class StripePaymentController internal constructor(
         override fun protocolError(protocolErrorEvent: ProtocolErrorEvent) {
             super.protocolError(protocolErrorEvent)
             analyticsRequestExecutor.executeAsync(
-                AnalyticsRequest.create(
+                analyticsRequestFactory.create(
                     analyticsDataFactory.create3ds2ChallengeErrorParams(
                         stripeIntent.id.orEmpty(),
                         protocolErrorEvent,
@@ -726,7 +741,7 @@ internal class StripePaymentController internal constructor(
         override fun runtimeError(runtimeErrorEvent: RuntimeErrorEvent) {
             super.runtimeError(runtimeErrorEvent)
             analyticsRequestExecutor.executeAsync(
-                AnalyticsRequest.create(
+                analyticsRequestFactory.create(
                     analyticsDataFactory.create3ds2ChallengeErrorParams(
                         stripeIntent.id.orEmpty(),
                         runtimeErrorEvent,
@@ -741,7 +756,7 @@ internal class StripePaymentController internal constructor(
 
         private fun notifyCompletion(args: Stripe3ds2CompletionStarter.Args) {
             analyticsRequestExecutor.executeAsync(
-                AnalyticsRequest.create(
+                analyticsRequestFactory.create(
                     analyticsDataFactory.create3ds2ChallengeParams(
                         AnalyticsEvent.Auth3ds2ChallengePresented,
                         stripeIntent.id.orEmpty(),
@@ -770,7 +785,8 @@ internal class StripePaymentController internal constructor(
                 requestOptions: ApiRequest.Options,
                 analyticsRequestExecutor: FireAndForgetRequestExecutor,
                 analyticsDataFactory: AnalyticsDataFactory,
-                transaction: Transaction
+                transaction: Transaction,
+                analyticsRequestFactory: AnalyticsRequestFactory
             ): PaymentAuth3ds2ChallengeStatusReceiver {
                 return PaymentAuth3ds2ChallengeStatusReceiver(
                     stripeRepository,
@@ -784,7 +800,8 @@ internal class StripePaymentController internal constructor(
                         Stripe3ds2CompletionStarter(host, getRequestCode(stripeIntent)),
                         host,
                         stripeIntent
-                    )
+                    ),
+                    analyticsRequestFactory
                 )
             }
 

@@ -10,6 +10,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.stripe.android.exception.APIException
@@ -48,7 +49,6 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.MainScope
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
@@ -59,26 +59,16 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class StripePaymentControllerTest {
 
-    @Mock
-    private lateinit var activity: Activity
-    @Mock
-    private lateinit var threeDs2Service: StripeThreeDs2Service
-    @Mock
-    private lateinit var transaction: Transaction
-    @Mock
-    private lateinit var paymentAuthResultCallback: ApiResultCallback<PaymentIntentResult>
-    @Mock
-    private lateinit var setupAuthResultCallback: ApiResultCallback<SetupIntentResult>
-    @Mock
-    private lateinit var sourceCallback: ApiResultCallback<Source>
-    @Mock
-    private lateinit var complete3ds2AuthCallback: ApiResultCallback<Boolean>
-    @Mock
-    private lateinit var paymentRelayStarter: PaymentRelayStarter
-    @Mock
-    private lateinit var fireAndForgetRequestExecutor: FireAndForgetRequestExecutor
-    @Mock
-    private lateinit var challengeFlowStarter: StripePaymentController.ChallengeFlowStarter
+    private val activity: Activity = mock()
+    private val threeDs2Service: StripeThreeDs2Service = mock()
+    private val transaction: Transaction = mock()
+    private val paymentAuthResultCallback: ApiResultCallback<PaymentIntentResult> = mock()
+    private val setupAuthResultCallback: ApiResultCallback<SetupIntentResult> = mock()
+    private val sourceCallback: ApiResultCallback<Source> = mock()
+    private val complete3ds2AuthCallback: ApiResultCallback<Boolean> = mock()
+    private val paymentRelayStarter: PaymentRelayStarter = mock()
+    private val fireAndForgetRequestExecutor: FireAndForgetRequestExecutor = mock()
+    private val challengeFlowStarter: StripePaymentController.ChallengeFlowStarter = mock()
 
     private val context: Context by lazy {
         ApplicationProvider.getApplicationContext<Context>()
@@ -278,9 +268,12 @@ class StripePaymentControllerTest {
         `when`<String>(transaction.initialChallengeUiType).thenReturn("04")
 
         StripePaymentController.PaymentAuth3ds2ChallengeStatusReceiver(
-            FakeStripeRepository(), PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
+            FakeStripeRepository(),
+            PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
             "src_123", REQUEST_OPTIONS, fireAndForgetRequestExecutor,
-            analyticsDataFactory, transaction, complete3ds2AuthCallbackFactory)
+            analyticsDataFactory, transaction, complete3ds2AuthCallbackFactory,
+            AnalyticsRequestFactory()
+        )
             .completed(completionEvent, "01")
 
         verify(fireAndForgetRequestExecutor, times(2))
@@ -307,7 +300,8 @@ class StripePaymentControllerTest {
             FakeStripeRepository(), PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
             "src_123", ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             fireAndForgetRequestExecutor, analyticsDataFactory, transaction,
-            complete3ds2AuthCallbackFactory)
+            complete3ds2AuthCallbackFactory, AnalyticsRequestFactory()
+        )
             .timedout("01")
         verify(fireAndForgetRequestExecutor, times(2))
             .executeAsync(requestArgumentCaptor.capture())
@@ -330,7 +324,7 @@ class StripePaymentControllerTest {
             FakeStripeRepository(), PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
             "src_123", ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             fireAndForgetRequestExecutor, analyticsDataFactory, transaction,
-            complete3ds2AuthCallbackFactory)
+            complete3ds2AuthCallbackFactory, AnalyticsRequestFactory())
             .cancelled("01")
 
         verify(fireAndForgetRequestExecutor, times(2))
@@ -359,7 +353,7 @@ class StripePaymentControllerTest {
             PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2, "src_123",
             ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             fireAndForgetRequestExecutor, analyticsDataFactory, transaction,
-            complete3ds2AuthCallbackFactory)
+            complete3ds2AuthCallbackFactory, AnalyticsRequestFactory())
             .runtimeError(runtimeErrorEvent)
 
         verify(fireAndForgetRequestExecutor, times(2))
@@ -401,7 +395,7 @@ class StripePaymentControllerTest {
             PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2, "src_123",
             ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             fireAndForgetRequestExecutor, analyticsDataFactory, transaction,
-            complete3ds2AuthCallbackFactory)
+            complete3ds2AuthCallbackFactory, AnalyticsRequestFactory())
             .protocolError(protocolErrorEvent)
 
         verify(fireAndForgetRequestExecutor, times(2))
@@ -432,7 +426,7 @@ class StripePaymentControllerTest {
             PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2, "src_123",
             ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             fireAndForgetRequestExecutor, analyticsDataFactory, transaction,
-            complete3ds2AuthCallbackFactory
+            complete3ds2AuthCallbackFactory, AnalyticsRequestFactory()
         )
         receiver.cancelled("01")
         verify(complete3ds2AuthCallback).onSuccess(true)
