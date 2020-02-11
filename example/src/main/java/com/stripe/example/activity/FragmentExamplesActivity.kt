@@ -246,7 +246,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
         }
 
         private fun initPaymentSession(customerSession: CustomerSession) {
-            val paymentSessionInitialized = paymentSession.init(
+            paymentSession.init(
                 object : PaymentSession.PaymentSessionListener {
                     override fun onCommunicatingStateChanged(isCommunicating: Boolean) {
                     }
@@ -271,9 +271,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
                     }
                 }
             )
-            if (paymentSessionInitialized) {
-                paymentSession.setCartTotal(2000L)
-            }
+            paymentSession.setCartTotal(2000L)
         }
 
         private fun createCustomerSession(): CustomerSession {
