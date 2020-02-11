@@ -20,7 +20,6 @@ import com.stripe.android.view.BillingAddressFields
 import com.stripe.android.view.PaymentUtils
 import com.stripe.android.view.ShippingInfoWidget
 import com.stripe.example.R
-import com.stripe.example.service.ExampleEphemeralKeyProvider
 import kotlinx.android.synthetic.main.activity_payment_session.*
 import java.util.Currency
 import java.util.Locale
@@ -45,9 +44,7 @@ class PaymentSessionActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment_session)
 
-        progress_bar.visibility = View.VISIBLE
-
-        paymentSession = createPaymentSession(savedInstanceState)
+        paymentSession = createPaymentSession(savedInstanceState == null)
 
         btn_select_payment_method.setOnClickListener {
             paymentSession.presentPaymentMethodSelection()
@@ -57,21 +54,17 @@ class PaymentSessionActivity : AppCompatActivity() {
         }
     }
 
-    private fun createCustomerSession(): CustomerSession {
-        CustomerSession.initCustomerSession(
-            this,
-            ExampleEphemeralKeyProvider(this),
-            false
-        )
-        return CustomerSession.getInstance()
-    }
-
     private fun createPaymentSession(
-        savedInstanceState: Bundle?,
-        shouldPrefetchCustomer: Boolean = true
+        shouldPrefetchCustomer: Boolean = false
     ): PaymentSession {
+        if (shouldPrefetchCustomer) {
+            disableUi()
+        } else {
+            enableUi()
+        }
+
         // CustomerSession only needs to be initialized once per app.
-        val customerSession = createCustomerSession()
+        val customerSession = CustomerSession.getInstance()
 
         val paymentSession = PaymentSession(
             activity = this,
@@ -96,8 +89,7 @@ class PaymentSessionActivity : AppCompatActivity() {
                 .build()
         )
         paymentSession.init(
-            listener = PaymentSessionListenerImpl(this, customerSession),
-            savedInstanceState = savedInstanceState
+            listener = PaymentSessionListenerImpl(this, customerSession)
         )
         paymentSession.setCartTotal(2000L)
 
@@ -159,22 +151,12 @@ class PaymentSessionActivity : AppCompatActivity() {
         paymentSession.handlePaymentData(requestCode, resultCode, data ?: Intent())
     }
 
-    override fun onDestroy() {
-        paymentSession.onDestroy()
-        super.onDestroy()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        paymentSession.savePaymentSessionInstanceState(outState)
-    }
-
     private fun onPaymentSessionDataChanged(
         customerSession: CustomerSession,
         data: PaymentSessionData
     ) {
         paymentSessionData = data
-        progress_bar.visibility = View.VISIBLE
+        disableUi()
         customerSession.retrieveCurrentCustomer(
             PaymentSessionChangeCustomerRetrievalListener(this)
         )
@@ -184,6 +166,12 @@ class PaymentSessionActivity : AppCompatActivity() {
         progress_bar.visibility = View.INVISIBLE
         btn_select_payment_method.isEnabled = true
         btn_start_payment_flow.isEnabled = true
+    }
+
+    private fun disableUi() {
+        progress_bar.visibility = View.VISIBLE
+        btn_select_payment_method.isEnabled = false
+        btn_start_payment_flow.isEnabled = false
     }
 
     private fun onCustomerRetrieved() {
@@ -239,10 +227,10 @@ class PaymentSessionActivity : AppCompatActivity() {
                 BackgroundTaskTracker.onStart()
             }
 
-            listenerActivity?.progress_bar?.visibility = if (isCommunicating) {
-                View.VISIBLE
+            if (isCommunicating) {
+                listenerActivity?.disableUi()
             } else {
-                View.INVISIBLE
+                listenerActivity?.enableUi()
             }
         }
 

@@ -1,13 +1,20 @@
 package com.stripe.android
 
 import android.app.Activity
+import android.app.Application
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.annotation.IntRange
 import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.Fragment
-import com.stripe.android.model.Customer
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
+import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.view.ActivityStarter
 import com.stripe.android.view.PaymentFlowActivity
@@ -21,38 +28,65 @@ import java.lang.ref.WeakReference
  */
 class PaymentSession @VisibleForTesting internal constructor(
     private val context: Context,
+    application: Application,
+    viewModelStoreOwner: ViewModelStoreOwner,
+    private val lifecycleOwner: LifecycleOwner,
     private val config: PaymentSessionConfig,
-    private val customerSession: CustomerSession,
+    customerSession: CustomerSession,
     private val paymentMethodsActivityStarter:
     ActivityStarter<PaymentMethodsActivity, PaymentMethodsActivityStarter.Args>,
     private val paymentFlowActivityStarter:
     ActivityStarter<PaymentFlowActivity, PaymentFlowActivityStarter.Args>,
-    private val paymentSessionPrefs: PaymentSessionPrefs,
     paymentSessionData: PaymentSessionData = PaymentSessionData(config)
 ) {
+    internal val viewModel: PaymentSessionViewModel =
+        ViewModelProvider(
+            viewModelStoreOwner,
+            PaymentSessionViewModel.Factory(
+                application,
+                paymentSessionData,
+                customerSession
+            )
+        )[PaymentSessionViewModel::class.java]
+
     /**
      * @return the data associated with the instance of this class.
      */
-    var paymentSessionData: PaymentSessionData = paymentSessionData
-        private set
-    private var paymentSessionListener: PaymentSessionListener? = null
+    val paymentSessionData: PaymentSessionData
+        get() = viewModel.paymentSessionData
+
+    @JvmSynthetic
+    internal var listener: PaymentSessionListener? = null
+
+    private val lifecycleObserver = object : LifecycleObserver {
+        @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        fun onDestroy() {
+            listener = null
+        }
+    }
+
+    init {
+        lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
+    }
 
     /**
      * Create a PaymentSession attached to the given host Activity.
      *
-     * @param activity an `Activity` from which to launch other Stripe Activities. This
+     * @param activity an `AppCompatActivity` from which to launch other Stripe Activities. This
      * Activity will receive results in
      * `Activity#onActivityResult(int, int, Intent)` that should be
      * passed back to this session.
      * @param config a [PaymentSessionConfig] that configures this [PaymentSession] instance
      */
-    constructor(activity: Activity, config: PaymentSessionConfig) : this(
+    constructor(activity: ComponentActivity, config: PaymentSessionConfig) : this(
         activity.applicationContext,
+        activity.application,
+        activity,
+        activity,
         config,
         CustomerSession.getInstance(),
         PaymentMethodsActivityStarter(activity),
-        PaymentFlowActivityStarter(activity, config),
-        PaymentSessionPrefs.create(activity)
+        PaymentFlowActivityStarter(activity, config)
     )
 
     /**
@@ -64,19 +98,21 @@ class PaymentSession @VisibleForTesting internal constructor(
      * @param config a [PaymentSessionConfig] that configures this [PaymentSession] instance
      */
     constructor(fragment: Fragment, config: PaymentSessionConfig) : this(
-        fragment.requireContext().applicationContext,
+        fragment.requireActivity().applicationContext,
+        fragment.requireActivity().application,
+        fragment,
+        fragment,
         config,
         CustomerSession.getInstance(),
         PaymentMethodsActivityStarter(fragment),
-        PaymentFlowActivityStarter(fragment, config),
-        PaymentSessionPrefs.create(fragment.requireActivity())
+        PaymentFlowActivityStarter(fragment, config)
     )
 
     /**
      * Notify this payment session that it is complete
      */
     fun onCompleted() {
-        customerSession.resetUsageTokens()
+        viewModel.onCompleted()
     }
 
     /**
@@ -115,8 +151,8 @@ class PaymentSession @VisibleForTesting internal constructor(
                     val paymentSessionData =
                         data.getParcelableExtra(EXTRA_PAYMENT_SESSION_DATA)
                             ?: this.paymentSessionData
-                    this.paymentSessionData = paymentSessionData
-                    paymentSessionListener?.onPaymentSessionDataChanged(paymentSessionData)
+                    viewModel.paymentSessionData = paymentSessionData
+                    listener?.onPaymentSessionDataChanged(paymentSessionData)
                     return true
                 }
                 else -> {
@@ -137,49 +173,37 @@ class PaymentSession @VisibleForTesting internal constructor(
     }
 
     private fun dispatchUpdates() {
-        paymentSessionListener?.onPaymentSessionDataChanged(paymentSessionData)
-        paymentSessionListener?.onCommunicatingStateChanged(false)
+        listener?.onPaymentSessionDataChanged(paymentSessionData)
+        listener?.onCommunicatingStateChanged(false)
     }
 
     private fun persistPaymentMethodResult(
         paymentMethod: PaymentMethod?,
         useGooglePay: Boolean
     ) {
-        customerSession.cachedCustomer?.id?.let { customerId ->
-            paymentSessionPrefs.saveSelectedPaymentMethodId(customerId, paymentMethod?.id)
-        }
-        paymentSessionData = paymentSessionData.copy(
-            paymentMethod = paymentMethod,
-            useGooglePay = useGooglePay
-        )
+        viewModel.persistPaymentMethodResult(paymentMethod, useGooglePay)
     }
 
     /**
-     * Initialize the PaymentSession with a [PaymentSessionListener] to be notified of
-     * data changes.
+     * Initialize the [PaymentSession] with a [PaymentSessionListener] to be notified of
+     * data changes. The reference to the [listener] will be released when the host (i.e.
+     * `Activity` or `Fragment`) is destroyed.
      *
-     * @param listener a [PaymentSessionListener] that will receive notifications of changes
-     * in payment session status, including networking status
-     * @param savedInstanceState a `Bundle` containing the saved state of a
-     * PaymentSession that was stored in [savePaymentSessionInstanceState]
+     * If the [PaymentSessionConfig.shouldPrefetchCustomer] is true, a new Customer instance
+     * will be fetched. Otherwise, the [listener] will be immediately called with the current
+     * [paymentSessionData].
+     *
+     * @param listener a [PaymentSessionListener]
      */
-    @JvmOverloads
     fun init(
-        listener: PaymentSessionListener,
-        savedInstanceState: Bundle? = null
+        listener: PaymentSessionListener
     ) {
-        if (savedInstanceState == null) {
-            customerSession.resetUsageTokens()
-        }
-        customerSession.addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION)
-
-        paymentSessionListener = listener
-
-        paymentSessionData = savedInstanceState?.getParcelable(STATE_PAYMENT_SESSION_DATA)
-            ?: PaymentSessionData(config)
+        this.listener = listener
 
         if (config.shouldPrefetchCustomer) {
             fetchCustomer()
+        } else {
+            dispatchUpdates()
         }
     }
 
@@ -217,24 +241,7 @@ class PaymentSession @VisibleForTesting internal constructor(
 
     @VisibleForTesting
     internal fun getSelectedPaymentMethodId(userSelectedPaymentMethodId: String?): String? {
-        return userSelectedPaymentMethodId
-            ?: if (paymentSessionData.paymentMethod != null) {
-                paymentSessionData.paymentMethod?.id
-            } else {
-                customerSession.cachedCustomer?.id?.let { customerId ->
-                    paymentSessionPrefs.getSelectedPaymentMethodId(customerId)
-                }
-            }
-    }
-
-    /**
-     * Save the data associated with this PaymentSession. This should be called in the host's
-     * `onSaveInstanceState(Bundle)` method.
-     *
-     * @param outState the host activity's outgoing `Bundle`
-     */
-    fun savePaymentSessionInstanceState(outState: Bundle) {
-        outState.putParcelable(STATE_PAYMENT_SESSION_DATA, paymentSessionData)
+        return viewModel.getSelectedPaymentMethodId(userSelectedPaymentMethodId)
     }
 
     /**
@@ -244,7 +251,7 @@ class PaymentSession @VisibleForTesting internal constructor(
      * a customer's cart
      */
     fun setCartTotal(@IntRange(from = 0) cartTotal: Long) {
-        paymentSessionData = paymentSessionData.copy(cartTotal = cartTotal)
+        viewModel.updateCartTotal(cartTotal)
     }
 
     /**
@@ -261,31 +268,20 @@ class PaymentSession @VisibleForTesting internal constructor(
         )
     }
 
-    /**
-     * Should be called during the host `Activity`'s onDestroy to detach listeners.
-     */
-    fun onDestroy() {
-        paymentSessionListener = null
-    }
-
     private fun fetchCustomer() {
-        paymentSessionListener?.onCommunicatingStateChanged(true)
+        listener?.onCommunicatingStateChanged(true)
 
-        customerSession.retrieveCurrentCustomer(
-            object : CustomerSession.CustomerRetrievalListener {
-                override fun onCustomerRetrieved(customer: Customer) {
+        viewModel.fetchCustomer().observe(lifecycleOwner, Observer {
+            when (it) {
+                PaymentSessionViewModel.FetchCustomerResult.Success -> {
                     dispatchUpdates()
                 }
-
-                override fun onError(
-                    errorCode: Int,
-                    errorMessage: String,
-                    stripeError: StripeError?
-                ) {
-                    paymentSessionListener?.onError(errorCode, errorMessage)
-                    paymentSessionListener?.onCommunicatingStateChanged(false)
+                is PaymentSessionViewModel.FetchCustomerResult.Error -> {
+                    listener?.onError(it.errorCode, it.errorMessage)
+                    listener?.onCommunicatingStateChanged(false)
                 }
-            })
+            }
+        })
     }
 
     /**
@@ -333,8 +329,6 @@ class PaymentSession @VisibleForTesting internal constructor(
         internal const val TOKEN_PAYMENT_SESSION: String = "PaymentSession"
 
         internal const val EXTRA_PAYMENT_SESSION_DATA: String = "extra_payment_session_data"
-
-        private const val STATE_PAYMENT_SESSION_DATA: String = "state_payment_session_data"
 
         private val VALID_REQUEST_CODES = setOf(
             PaymentMethodsActivityStarter.REQUEST_CODE,

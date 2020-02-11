@@ -28,7 +28,6 @@ import com.stripe.example.R
 import com.stripe.example.StripeFactory
 import com.stripe.example.module.BackendApiFactory
 import com.stripe.example.service.BackendApi
-import com.stripe.example.service.ExampleEphemeralKeyProvider
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -50,8 +49,8 @@ class FragmentExamplesActivity : AppCompatActivity() {
 
         val newFragment = LauncherFragment()
 
-        val ft = supportFragmentManager.beginTransaction()
-        ft.add(R.id.root, newFragment, LauncherFragment::class.java.simpleName)
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.root, newFragment, LauncherFragment::class.java.simpleName)
             .commit()
     }
 
@@ -275,10 +274,6 @@ class FragmentExamplesActivity : AppCompatActivity() {
         }
 
         private fun createCustomerSession(): CustomerSession {
-            CustomerSession.initCustomerSession(
-                requireContext(),
-                ExampleEphemeralKeyProvider(requireContext())
-            )
             val customerSession = CustomerSession.getInstance()
             customerSession.retrieveCurrentCustomer(
                 object : CustomerSession.CustomerRetrievalListener {

@@ -11,7 +11,6 @@ import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.view.PaymentMethodsActivityStarter
 import com.stripe.example.R
-import com.stripe.example.service.ExampleEphemeralKeyProvider
 import kotlinx.android.synthetic.main.activity_customer_session.*
 
 /**
@@ -28,11 +27,6 @@ class CustomerSessionActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_customer_session)
         setTitle(R.string.customer_payment_data_example)
-        CustomerSession.initCustomerSession(
-            this,
-            ExampleEphemeralKeyProvider(this),
-            false
-        )
 
         progress_bar.visibility = View.VISIBLE
         CustomerSession.getInstance().retrieveCurrentCustomer(
