@@ -1,5 +1,22 @@
 # Migration Guide
 
+## Migrating from versions < 14.0.0
+- Changes to `PaymentSession`
+    - When instantiating a `PaymentSession()` with an `Activity`, it must now be a `ComponentActivity`
+      (e.g. `AppCompatActivity` or `FragmentActivity`)
+    - `PaymentSession#init()` no longer takes a `savedInstanceState` argument
+      ```kotlin
+      // before
+      paymentSession.init(listener, savedInstancedState)
+
+      // after
+      paymentSession.init(listener)
+      ```
+    - `PaymentSession#savePaymentSessionInstanceState()` has been removed; state management is handled
+      by `PaymentSession`
+    - `PaymentSession#onDestroy()` has been removed; the `listener` instance is now released
+      automatically when the host `Activity` or `Fragment` is destroyed
+
 ## Migrating from versions < 13.0.0
 - Changes to `Card` and `SourceCardData`
     - Change the type of `brand` property from `String?` to `CardBrand`
