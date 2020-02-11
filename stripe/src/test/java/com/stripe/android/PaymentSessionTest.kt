@@ -1,11 +1,15 @@
 package com.stripe.android
 
-import android.app.Activity
 import android.app.Activity.RESULT_CANCELED
 import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
@@ -32,10 +36,10 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
@@ -58,7 +62,6 @@ class PaymentSessionTest {
         ActivityStarter<PaymentMethodsActivity, PaymentMethodsActivityStarter.Args> = mock()
     private val paymentFlowActivityStarter:
         ActivityStarter<PaymentFlowActivity, PaymentFlowActivityStarter.Args> = mock()
-    private val paymentSessionPrefs: PaymentSessionPrefs = mock()
 
     private val paymentSessionDataArgumentCaptor: KArgumentCaptor<PaymentSessionData> = argumentCaptor()
 
@@ -73,21 +76,23 @@ class PaymentSessionTest {
             invocation.getArgument<Runnable>(0).run()
             null
         }.`when`<ThreadPoolExecutor>(threadPoolExecutor).execute(any())
+
+        CustomerSession.instance = createCustomerSession()
     }
 
     @Test
     fun init_addsPaymentSessionToken_andFetchesCustomer() {
-        val customerSession = createCustomerSession()
-        CustomerSession.instance = customerSession
-
         createActivity {
             val paymentSession = PaymentSession(it, DEFAULT_CONFIG)
             paymentSession.init(paymentSessionListener)
 
-            assertTrue(customerSession.productUsageTokens
-                .contains(PaymentSession.TOKEN_PAYMENT_SESSION))
+            assertEquals(
+                setOf(PaymentSession.TOKEN_PAYMENT_SESSION),
+                CustomerSession.getInstance().productUsageTokens
+            )
 
-            verify(paymentSessionListener).onCommunicatingStateChanged(eq(true))
+            verify(paymentSessionListener)
+                .onCommunicatingStateChanged(eq(true))
         }
     }
 
@@ -95,7 +100,6 @@ class PaymentSessionTest {
     fun init_whenEphemeralKeyProviderContinues_fetchesCustomerAndNotifiesListener() {
         ephemeralKeyProvider
             .setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
-        CustomerSession.instance = createCustomerSession()
 
         createActivity {
             val paymentSession = PaymentSession(it, DEFAULT_CONFIG)
@@ -111,8 +115,6 @@ class PaymentSessionTest {
 
     @Test
     fun handlePaymentData_whenPaymentMethodSelected_notifiesListenerAndFetchesCustomer() {
-        CustomerSession.instance = createCustomerSession()
-
         createActivity {
             val paymentSession = PaymentSession(it, DEFAULT_CONFIG)
             paymentSession.init(paymentSessionListener)
@@ -138,8 +140,6 @@ class PaymentSessionTest {
 
     @Test
     fun handlePaymentData_whenGooglePaySelected_notifiesListenerAndFetchesCustomer() {
-        CustomerSession.instance = createCustomerSession()
-
         createActivity {
             val paymentSession = PaymentSession(it, DEFAULT_CONFIG)
             paymentSession.init(paymentSessionListener)
@@ -165,8 +165,6 @@ class PaymentSessionTest {
 
     @Test
     fun selectPaymentMethod_launchesPaymentMethodsActivityWithLog() {
-        CustomerSession.instance = createCustomerSession()
-
         createActivity { activity ->
             val paymentSession = PaymentSession(activity, DEFAULT_CONFIG)
             paymentSession.init(paymentSessionListener)
@@ -189,8 +187,6 @@ class PaymentSessionTest {
 
     @Test
     fun presentPaymentMethodSelection_withShouldRequirePostalCode_shouldPassInIntent() {
-        CustomerSession.instance = createCustomerSession()
-
         createActivity { activity ->
             val paymentSession = PaymentSession(
                 activity,
@@ -219,13 +215,6 @@ class PaymentSessionTest {
     }
 
     @Test
-    fun getSelectedPaymentMethodId_whenPrefsNotSet_returnsNull() {
-        `when`<Customer>(customerSession.cachedCustomer).thenReturn(FIRST_CUSTOMER)
-        CustomerSession.instance = customerSession
-        assertNull(createPaymentSession().getSelectedPaymentMethodId(null))
-    }
-
-    @Test
     fun getSelectedPaymentMethodId_whenHasPaymentSessionData_returnsExpectedId() {
         val paymentSession = createPaymentSession(
             paymentSessionData = PaymentSessionFixtures.PAYMENT_SESSION_DATA.copy(
@@ -236,19 +225,6 @@ class PaymentSessionTest {
             "pm_123456789",
             paymentSession.getSelectedPaymentMethodId(null)
         )
-    }
-
-    @Test
-    fun getSelectedPaymentMethodId_whenHasPrefsSet_returnsExpectedId() {
-        val customerId = requireNotNull(FIRST_CUSTOMER.id)
-        `when`<String>(paymentSessionPrefs.getSelectedPaymentMethodId(customerId))
-            .thenReturn("pm_12345")
-
-        `when`<Customer>(customerSession.cachedCustomer).thenReturn(FIRST_CUSTOMER)
-        CustomerSession.instance = customerSession
-
-        assertEquals("pm_12345",
-            createPaymentSession().getSelectedPaymentMethodId(null))
     }
 
     @Test
@@ -264,59 +240,45 @@ class PaymentSessionTest {
 
     @Test
     fun init_withoutSavedState_clearsLoggingTokensAndStartsWithPaymentSession() {
-        val customerSession = createCustomerSession()
-        CustomerSession.instance = customerSession
+        val customerSession = CustomerSession.getInstance()
         customerSession
             .addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY)
-        assertEquals(1, customerSession.productUsageTokens.size)
+        assertEquals(
+            setOf(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY),
+            customerSession.productUsageTokens
+        )
 
         createActivity {
             val paymentSession = PaymentSession(it, DEFAULT_CONFIG)
             paymentSession.init(paymentSessionListener)
 
             // The init removes PaymentMethodsActivity, but then adds PaymentSession
-            val loggingTokens = customerSession.productUsageTokens
-            assertEquals(1, loggingTokens.size)
-            assertFalse(loggingTokens.contains(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY))
-            assertTrue(loggingTokens.contains(PaymentSession.TOKEN_PAYMENT_SESSION))
-        }
-    }
-
-    @Test
-    fun init_withSavedStateBundle_doesNotClearLoggingTokens() {
-        val customerSession = createCustomerSession()
-        CustomerSession.instance = customerSession
-        customerSession
-            .addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY)
-        assertEquals(1, customerSession.productUsageTokens.size)
-
-        createActivity {
-            val paymentSession = PaymentSession(it, DEFAULT_CONFIG)
-            // If it is given any saved state at all, the tokens are not cleared out.
-            paymentSession.init(paymentSessionListener, Bundle())
-
-            val loggingTokens = customerSession.productUsageTokens
-            assertEquals(2, loggingTokens.size)
-            assertTrue(loggingTokens.contains(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY))
-            assertTrue(loggingTokens.contains(PaymentSession.TOKEN_PAYMENT_SESSION))
+            assertEquals(
+                setOf(PaymentSession.TOKEN_PAYMENT_SESSION),
+                customerSession.productUsageTokens
+            )
         }
     }
 
     @Test
     fun completePayment_withLoggedActions_clearsLoggingTokensAndSetsResult() {
-        val customerSession = createCustomerSession()
-        CustomerSession.instance = customerSession
+        val customerSession = CustomerSession.getInstance()
         customerSession
             .addProductUsageTokenIfValid(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY)
-        assertEquals(1, customerSession.productUsageTokens.size)
+        assertEquals(
+            setOf(PaymentMethodsActivity.TOKEN_PAYMENT_METHODS_ACTIVITY),
+            customerSession.productUsageTokens
+        )
 
         createActivity {
             val paymentSession = PaymentSession(it, DEFAULT_CONFIG)
             // If it is given any saved state at all, the tokens are not cleared out.
-            paymentSession.init(paymentSessionListener, Bundle())
+            paymentSession.init(paymentSessionListener)
 
-            val loggingTokens = customerSession.productUsageTokens
-            assertEquals(2, loggingTokens.size)
+            assertEquals(
+                setOf(PaymentSession.TOKEN_PAYMENT_SESSION),
+                customerSession.productUsageTokens
+            )
 
             reset(paymentSessionListener)
 
@@ -328,7 +290,6 @@ class PaymentSessionTest {
     @Test
     fun init_withSavedState_setsPaymentSessionData() {
         ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
-        CustomerSession.instance = createCustomerSession()
 
         createActivity {
             val paymentSession = PaymentSession(it, DEFAULT_CONFIG)
@@ -337,14 +298,12 @@ class PaymentSessionTest {
 
             verify(paymentSessionListener)
                 .onPaymentSessionDataChanged(paymentSessionDataArgumentCaptor.capture())
-            val bundle = Bundle()
-            paymentSession.savePaymentSessionInstanceState(bundle)
             val firstPaymentSessionData = paymentSessionDataArgumentCaptor.firstValue
 
             val secondListener =
                 mock(PaymentSession.PaymentSessionListener::class.java)
 
-            paymentSession.init(secondListener, bundle)
+            paymentSession.init(secondListener)
             verify(secondListener)
                 .onPaymentSessionDataChanged(paymentSessionDataArgumentCaptor.capture())
 
@@ -358,9 +317,11 @@ class PaymentSessionTest {
 
     @Test
     fun handlePaymentData_withInvalidRequestCode_aborts() {
-        val paymentSession = createPaymentSession()
-        assertFalse(paymentSession.handlePaymentData(-1, RESULT_CANCELED, Intent()))
-        verify(customerSession, never()).retrieveCurrentCustomer(any())
+        createActivity {
+            val paymentSession = PaymentSession(it, DEFAULT_CONFIG)
+            assertFalse(paymentSession.handlePaymentData(-1, RESULT_CANCELED, Intent()))
+            verify(customerSession, never()).retrieveCurrentCustomer(any())
+        }
     }
 
     @Test
@@ -379,17 +340,32 @@ class PaymentSessionTest {
         verify(customerSession).retrieveCurrentCustomer(any())
     }
 
+    @Test
+    fun onDestroy_shouldReleaseListener() {
+        createActivityScenario { activityScenario ->
+            activityScenario.onActivity { activity ->
+                val paymentSession = PaymentSession(activity, DEFAULT_CONFIG)
+                paymentSession.init(paymentSessionListener)
+                assertNotNull(paymentSession.listener)
+                activityScenario.moveToState(Lifecycle.State.DESTROYED)
+                assertNull(paymentSession.listener)
+            }
+        }
+    }
+
     private fun createPaymentSession(
         config: PaymentSessionConfig = DEFAULT_CONFIG,
         paymentSessionData: PaymentSessionData = PaymentSessionData(config)
     ): PaymentSession {
         return PaymentSession(
             context,
+            ApplicationProvider.getApplicationContext(),
+            ViewModelStoreOwner { ViewModelStore() },
+            LifecycleOwner { mock() },
             config,
             customerSession,
             paymentMethodsActivityStarter,
             paymentFlowActivityStarter,
-            paymentSessionPrefs,
             paymentSessionData
         )
     }
@@ -408,13 +384,17 @@ class PaymentSessionTest {
         )
     }
 
-    private fun createActivity(callback: (Activity) -> Unit) {
-        // start an arbitrary Activity
+    private fun createActivity(callback: (ComponentActivity) -> Unit) {
+        // start an arbitrary ComponentActivity
+        createActivityScenario { it.onActivity(callback) }
+    }
+
+    private fun createActivityScenario(
+        callback: (ActivityScenario<out ComponentActivity>) -> Unit
+    ) {
         activityScenarioFactory.create<PaymentMethodsActivity>(
             PaymentMethodsActivityStarter.Args.DEFAULT
-        ).use { activityScenario ->
-            activityScenario.onActivity(callback)
-        }
+        ).use(callback)
     }
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {

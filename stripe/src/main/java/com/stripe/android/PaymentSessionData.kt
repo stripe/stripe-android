@@ -52,7 +52,7 @@ data class PaymentSessionData internal constructor(
      */
     val isPaymentReadyToCharge: Boolean
         get() =
-            (paymentMethod != null || useGooglePay) && config != null &&
+            (paymentMethod != null || useGooglePay) &&
                 (!config.isShippingInfoRequired || shippingInformation != null) &&
                 (!config.isShippingMethodRequired || shippingMethod != null)
 }
