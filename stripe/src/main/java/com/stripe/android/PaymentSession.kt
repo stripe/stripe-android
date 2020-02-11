@@ -15,6 +15,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.view.ActivityStarter
 import com.stripe.android.view.PaymentFlowActivity
@@ -31,6 +32,7 @@ class PaymentSession @VisibleForTesting internal constructor(
     application: Application,
     viewModelStoreOwner: ViewModelStoreOwner,
     private val lifecycleOwner: LifecycleOwner,
+    savedStateRegistryOwner: SavedStateRegistryOwner,
     private val config: PaymentSessionConfig,
     customerSession: CustomerSession,
     private val paymentMethodsActivityStarter:
@@ -44,6 +46,7 @@ class PaymentSession @VisibleForTesting internal constructor(
             viewModelStoreOwner,
             PaymentSessionViewModel.Factory(
                 application,
+                savedStateRegistryOwner,
                 paymentSessionData,
                 customerSession
             )
@@ -83,6 +86,7 @@ class PaymentSession @VisibleForTesting internal constructor(
         activity.application,
         activity,
         activity,
+        activity,
         config,
         CustomerSession.getInstance(),
         PaymentMethodsActivityStarter(activity),
@@ -100,6 +104,7 @@ class PaymentSession @VisibleForTesting internal constructor(
     constructor(fragment: Fragment, config: PaymentSessionConfig) : this(
         fragment.requireActivity().applicationContext,
         fragment.requireActivity().application,
+        fragment,
         fragment,
         fragment,
         config,

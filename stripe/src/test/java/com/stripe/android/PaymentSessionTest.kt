@@ -6,9 +6,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ViewModelStore
-import androidx.lifecycle.ViewModelStoreOwner
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -216,26 +213,36 @@ class PaymentSessionTest {
 
     @Test
     fun getSelectedPaymentMethodId_whenHasPaymentSessionData_returnsExpectedId() {
-        val paymentSession = createPaymentSession(
-            paymentSessionData = PaymentSessionFixtures.PAYMENT_SESSION_DATA.copy(
-                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        createActivity {
+            val paymentSession = createPaymentSession(
+                it,
+                DEFAULT_CONFIG,
+                PaymentSessionFixtures.PAYMENT_SESSION_DATA.copy(
+                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                )
             )
-        )
-        assertEquals(
-            "pm_123456789",
-            paymentSession.getSelectedPaymentMethodId(null)
-        )
+            assertEquals(
+                "pm_123456789",
+                paymentSession.getSelectedPaymentMethodId(null)
+            )
+        }
     }
 
     @Test
     fun getSelectedPaymentMethodId_whenHasUserSpecifiedPaymentMethod_returnsExpectedId() {
-        val paymentSession = createPaymentSession(
-            paymentSessionData = PaymentSessionFixtures.PAYMENT_SESSION_DATA.copy(
-                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        createActivity {
+            val paymentSession = createPaymentSession(
+                it,
+                DEFAULT_CONFIG,
+                PaymentSessionFixtures.PAYMENT_SESSION_DATA.copy(
+                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                )
             )
-        )
-        assertEquals("pm_987",
-            paymentSession.getSelectedPaymentMethodId("pm_987"))
+            assertEquals(
+                "pm_987",
+                paymentSession.getSelectedPaymentMethodId("pm_987")
+            )
+        }
     }
 
     @Test
@@ -318,7 +325,7 @@ class PaymentSessionTest {
     @Test
     fun handlePaymentData_withInvalidRequestCode_aborts() {
         createActivity {
-            val paymentSession = PaymentSession(it, DEFAULT_CONFIG)
+            val paymentSession = createPaymentSession(it)
             assertFalse(paymentSession.handlePaymentData(-1, RESULT_CANCELED, Intent()))
             verify(customerSession, never()).retrieveCurrentCustomer(any())
         }
@@ -326,25 +333,34 @@ class PaymentSessionTest {
 
     @Test
     fun handlePaymentData_withPaymentMethodsActivityRequestCodeAndCanceledResult_doesNotRetrieveCustomer() {
-        val paymentSession = createPaymentSession()
-        assertFalse(paymentSession.handlePaymentData(PaymentMethodsActivityStarter.REQUEST_CODE,
-            RESULT_CANCELED, Intent()))
-        verify(customerSession, never()).retrieveCurrentCustomer(any())
+        createActivity {
+            val paymentSession = createPaymentSession(it)
+            assertFalse(
+                paymentSession.handlePaymentData(
+                    PaymentMethodsActivityStarter.REQUEST_CODE,
+                    RESULT_CANCELED,
+                    Intent()
+                )
+            )
+            verify(customerSession, never()).retrieveCurrentCustomer(any())
+        }
     }
 
     @Test
     fun handlePaymentData_withPaymentFlowActivityRequestCodeAndCanceledResult_retrievesCustomer() {
-        val paymentSession = createPaymentSession()
-        assertFalse(paymentSession.handlePaymentData(PaymentFlowActivityStarter.REQUEST_CODE,
-            RESULT_CANCELED, Intent()))
-        verify(customerSession).retrieveCurrentCustomer(any())
+        createActivity {
+            val paymentSession = createPaymentSession(it)
+            assertFalse(paymentSession.handlePaymentData(PaymentFlowActivityStarter.REQUEST_CODE,
+                RESULT_CANCELED, Intent()))
+            verify(customerSession).retrieveCurrentCustomer(any())
+        }
     }
 
     @Test
     fun onDestroy_shouldReleaseListener() {
         createActivityScenario { activityScenario ->
             activityScenario.onActivity { activity ->
-                val paymentSession = PaymentSession(activity, DEFAULT_CONFIG)
+                val paymentSession = createPaymentSession(activity)
                 paymentSession.init(paymentSessionListener)
                 assertNotNull(paymentSession.listener)
                 activityScenario.moveToState(Lifecycle.State.DESTROYED)
@@ -354,14 +370,16 @@ class PaymentSessionTest {
     }
 
     private fun createPaymentSession(
+        activity: ComponentActivity,
         config: PaymentSessionConfig = DEFAULT_CONFIG,
         paymentSessionData: PaymentSessionData = PaymentSessionData(config)
     ): PaymentSession {
         return PaymentSession(
-            context,
-            ApplicationProvider.getApplicationContext(),
-            ViewModelStoreOwner { ViewModelStore() },
-            LifecycleOwner { mock() },
+            activity,
+            activity.application,
+            activity,
+            activity,
+            activity,
             config,
             customerSession,
             paymentMethodsActivityStarter,
