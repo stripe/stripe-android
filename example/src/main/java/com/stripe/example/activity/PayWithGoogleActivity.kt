@@ -17,19 +17,20 @@ import com.google.android.gms.wallet.Wallet
 import com.google.android.gms.wallet.WalletConstants
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.example.R
+import com.stripe.example.StripeFactory
 import kotlinx.android.synthetic.main.activity_pay_with_google.*
 import org.json.JSONObject
 
 class PayWithGoogleActivity : AppCompatActivity() {
 
     private val stripe: Stripe by lazy {
-        Stripe(this, PaymentConfiguration.getInstance(this).publishableKey)
+        StripeFactory(this).create()
     }
+
     private val paymentsClient: PaymentsClient by lazy {
         Wallet.getPaymentsClient(this,
             Wallet.WalletOptions.Builder()

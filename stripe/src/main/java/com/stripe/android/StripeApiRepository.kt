@@ -63,6 +63,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     apiVersion: String = ApiVersion.get().code,
     sdkVersion: String = Stripe.VERSION
 ) : StripeRepository {
+    private val analyticsRequestFactory = AnalyticsRequestFactory(logger)
     private val apiRequestFactory = ApiRequest.Factory(
         appInfo = appInfo,
         apiVersion = apiVersion,
@@ -999,7 +1000,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         publishableKey: String
     ) {
         makeFireAndForgetRequest(
-            AnalyticsRequest.create(
+            analyticsRequestFactory.create(
                 loggingMap,
                 ApiRequest.Options(publishableKey),
                 appInfo

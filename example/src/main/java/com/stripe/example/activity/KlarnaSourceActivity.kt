@@ -14,7 +14,7 @@ import com.stripe.android.model.KlarnaSourceParams
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.example.R
-import com.stripe.example.Settings
+import com.stripe.example.StripeFactory
 import kotlinx.android.synthetic.main.activity_klarna_source.*
 
 class KlarnaSourceActivity : AppCompatActivity() {
@@ -26,11 +26,7 @@ class KlarnaSourceActivity : AppCompatActivity() {
     }
 
     private val stripe: Stripe by lazy {
-        Stripe(
-            applicationContext,
-            Settings(applicationContext).publishableKey,
-            enableLogging = true
-        )
+        StripeFactory(this).create()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

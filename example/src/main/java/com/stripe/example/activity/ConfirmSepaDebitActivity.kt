@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.ApiResultCallback
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.Stripe
 import com.stripe.android.model.Address
@@ -14,6 +13,7 @@ import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.example.R
+import com.stripe.example.StripeFactory
 import com.stripe.example.module.BackendApiFactory
 import com.stripe.example.service.BackendApi
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -40,7 +40,7 @@ class ConfirmSepaDebitActivity : AppCompatActivity() {
     }
 
     private val stripe: Stripe by lazy {
-        Stripe(this, PaymentConfiguration.getInstance(this).publishableKey)
+        StripeFactory(this).create()
     }
 
     private var clientSecret: String? = null

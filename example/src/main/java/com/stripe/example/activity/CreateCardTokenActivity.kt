@@ -16,12 +16,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.ApiResultCallback
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.Stripe
 import com.stripe.android.model.Card
 import com.stripe.android.model.Token
 import com.stripe.android.view.CardValidCallback
 import com.stripe.example.R
+import com.stripe.example.StripeFactory
 import kotlinx.android.synthetic.main.card_token_activity.*
 
 class CreateCardTokenActivity : AppCompatActivity() {
@@ -123,10 +122,7 @@ class CreateCardTokenActivity : AppCompatActivity() {
         application: Application
     ) : AndroidViewModel(application) {
         private val context = application.applicationContext
-        private val stripe = Stripe(
-            context,
-            PaymentConfiguration.getInstance(context).publishableKey
-        )
+        private val stripe = StripeFactory(context).create()
 
         fun createCardToken(card: Card): LiveData<Token> {
             val data = MutableLiveData<Token>()

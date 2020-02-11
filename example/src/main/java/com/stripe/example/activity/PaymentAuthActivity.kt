@@ -6,7 +6,6 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentAuthConfig
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.Stripe
@@ -15,6 +14,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.example.R
 import com.stripe.example.Settings
+import com.stripe.example.StripeFactory
 import com.stripe.example.module.BackendApiFactory
 import com.stripe.example.service.BackendApi
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -40,12 +40,7 @@ class PaymentAuthActivity : AppCompatActivity() {
         Settings(this).stripeAccountId
     }
     private val stripe: Stripe by lazy {
-        Stripe(
-            this,
-            PaymentConfiguration.getInstance(this).publishableKey,
-            stripeAccountId = stripeAccountId,
-            enableLogging = true
-        )
+        StripeFactory(this, stripeAccountId).create()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

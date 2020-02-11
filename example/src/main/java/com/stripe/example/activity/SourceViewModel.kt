@@ -5,18 +5,14 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.stripe.android.ApiResultCallback
-import com.stripe.android.Stripe
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
-import com.stripe.example.Settings
+import com.stripe.example.StripeFactory
 
 internal class SourceViewModel(
     application: Application
 ) : AndroidViewModel(application) {
-    private val stripe = Stripe(
-        application.applicationContext,
-        Settings(application.applicationContext).publishableKey
-    )
+    private val stripe = StripeFactory(application.applicationContext).create()
 
     internal var source: Source? = null
 
