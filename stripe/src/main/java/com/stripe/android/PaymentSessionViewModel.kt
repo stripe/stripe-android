@@ -53,34 +53,25 @@ internal class PaymentSessionViewModel(
     }
 
     @JvmSynthetic
-    fun persistPaymentMethodResult(
-        paymentMethod: PaymentMethod?,
-        useGooglePay: Boolean
-    ) {
-        customerSession.cachedCustomer?.id?.let { customerId ->
-            paymentSessionPrefs.saveSelectedPaymentMethodId(customerId, paymentMethod?.id)
-        }
-        paymentSessionData = paymentSessionData.copy(
-            paymentMethod = paymentMethod,
-            useGooglePay = useGooglePay
-        )
-    }
-
-    @JvmSynthetic
     fun onCompleted() {
         customerSession.resetUsageTokens()
     }
 
     @JvmSynthetic
-    fun fetchCustomer(): LiveData<FetchCustomerResult> {
+    fun fetchCustomer(isInitialFetch: Boolean = false): LiveData<FetchCustomerResult> {
         mutableNetworkState.value = NetworkState.Active
 
         val resultData: MutableLiveData<FetchCustomerResult> = MutableLiveData()
         customerSession.retrieveCurrentCustomer(
             object : CustomerSession.CustomerRetrievalListener {
                 override fun onCustomerRetrieved(customer: Customer) {
-                    mutableNetworkState.value = NetworkState.Inactive
-                    resultData.value = FetchCustomerResult.Success
+                    onCustomerRetrieved(
+                        customer.id,
+                        isInitialFetch
+                    ) {
+                        mutableNetworkState.value = NetworkState.Inactive
+                        resultData.value = FetchCustomerResult.Success
+                    }
                 }
 
                 override fun onError(
@@ -95,7 +86,64 @@ internal class PaymentSessionViewModel(
                 }
             }
         )
+
         return resultData
+    }
+
+    @JvmSynthetic
+    internal fun onCustomerRetrieved(
+        customerId: String?,
+        isInitialFetch: Boolean = false,
+        onComplete: () -> Unit
+    ) {
+        if (isInitialFetch) {
+            fetchCustomerPaymentMethod(
+                paymentMethodId = paymentSessionPrefs.getPaymentMethodId(customerId)
+            ) { paymentMethod ->
+                paymentMethod?.let {
+                    paymentSessionData = paymentSessionData.copy(
+                        paymentMethod = it
+                    )
+                }
+                onComplete()
+            }
+        } else {
+            onComplete()
+        }
+    }
+
+    private fun fetchCustomerPaymentMethod(
+        paymentMethodId: String?,
+        onComplete: (paymentMethod: PaymentMethod?) -> Unit
+    ) {
+        if (paymentMethodId != null) {
+            // fetch the maximum number of payment methods and attempt to find the
+            // payment method id in the list
+            customerSession.getPaymentMethods(
+                paymentMethodType = PaymentMethod.Type.Card,
+                limit = MAX_PAYMENT_METHODS_LIMIT,
+                listener = object : CustomerSession.PaymentMethodsRetrievalListener {
+                    override fun onPaymentMethodsRetrieved(
+                        paymentMethods: List<PaymentMethod>
+                    ) {
+                        onComplete(
+                            paymentMethods.firstOrNull { it.id == paymentMethodId }
+                        )
+                    }
+
+                    override fun onError(
+                        errorCode: Int,
+                        errorMessage: String,
+                        stripeError: StripeError?
+                    ) {
+                        // if an error is encountered, treat it as a no-op
+                        onComplete(null)
+                    }
+                }
+            )
+        } else {
+            onComplete(null)
+        }
     }
 
     @JvmSynthetic
@@ -105,11 +153,12 @@ internal class PaymentSessionViewModel(
                 paymentSessionData.paymentMethod?.id
             } else {
                 customerSession.cachedCustomer?.id?.let { customerId ->
-                    paymentSessionPrefs.getSelectedPaymentMethodId(customerId)
+                    paymentSessionPrefs.getPaymentMethodId(customerId)
                 }
             }
     }
 
+    @JvmSynthetic
     fun onPaymentMethodResult(result: PaymentMethodsActivityStarter.Result?) {
         persistPaymentMethodResult(
             paymentMethod = result?.paymentMethod,
@@ -117,17 +166,33 @@ internal class PaymentSessionViewModel(
         )
     }
 
+    private fun persistPaymentMethodResult(
+        paymentMethod: PaymentMethod?,
+        useGooglePay: Boolean
+    ) {
+        customerSession.cachedCustomer?.id?.let { customerId ->
+            paymentSessionPrefs.savePaymentMethodId(customerId, paymentMethod?.id)
+        }
+        paymentSessionData = paymentSessionData.copy(
+            paymentMethod = paymentMethod,
+            useGooglePay = useGooglePay
+        )
+    }
+
+    @JvmSynthetic
     fun onPaymentFlowResult(paymentSessionData: PaymentSessionData) {
         this.paymentSessionData = paymentSessionData
     }
 
+    @JvmSynthetic
     fun onListenerAttached() {
         mutablePaymentSessionDataLiveData.value = paymentSessionData
     }
 
     sealed class FetchCustomerResult {
         object Success : FetchCustomerResult()
-        class Error(
+
+        data class Error(
             val errorCode: Int,
             val errorMessage: String,
             val stripeError: StripeError?
@@ -161,5 +226,7 @@ internal class PaymentSessionViewModel(
 
     internal companion object {
         internal const val KEY_PAYMENT_SESSION_DATA = "key_payment_session_data"
+
+        private const val MAX_PAYMENT_METHODS_LIMIT = 100
     }
 }

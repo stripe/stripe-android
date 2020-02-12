@@ -16,6 +16,7 @@ import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.savedstate.SavedStateRegistryOwner
+import com.stripe.android.PaymentSession.PaymentSessionListener
 import com.stripe.android.view.ActivityStarter
 import com.stripe.android.view.PaymentFlowActivity
 import com.stripe.android.view.PaymentFlowActivityStarter
@@ -25,6 +26,10 @@ import java.lang.ref.WeakReference
 
 /**
  * Represents a single start-to-finish payment operation.
+ *
+ * If [PaymentSessionConfig.shouldPrefetchCustomer] is `true`, and the customer has previously
+ * selected a payment method, [PaymentSessionData.paymentMethod] will be updated with the
+ * payment method and [PaymentSessionListener.onPaymentSessionDataChanged] will be called.
  */
 class PaymentSession @VisibleForTesting internal constructor(
     private val context: Context,
@@ -202,7 +207,7 @@ class PaymentSession @VisibleForTesting internal constructor(
         viewModel.onListenerAttached()
 
         if (config.shouldPrefetchCustomer) {
-            fetchCustomer()
+            fetchCustomer(isInitialFetch = true)
         }
     }
 
@@ -214,7 +219,7 @@ class PaymentSession @VisibleForTesting internal constructor(
      *
      *  1. If {@param userSelectedPaymentMethodId} is specified, use that
      *  2. If the instance's [PaymentSessionData.paymentMethod] is non-null, use that
-     *  3. If the instance's [PaymentSessionPrefs.getSelectedPaymentMethodId] is non-null, use that
+     *  3. If the instance's [PaymentSessionPrefs.getPaymentMethodId] is non-null, use that
      *  4. Otherwise, choose the most recently added Payment Method
      *
      * @param selectedPaymentMethodId if non-null, the ID of the Payment Method that should be
@@ -261,8 +266,8 @@ class PaymentSession @VisibleForTesting internal constructor(
         )
     }
 
-    private fun fetchCustomer() {
-        viewModel.fetchCustomer().observe(lifecycleOwner, Observer {
+    private fun fetchCustomer(isInitialFetch: Boolean = false) {
+        viewModel.fetchCustomer(isInitialFetch).observe(lifecycleOwner, Observer {
             if (it is PaymentSessionViewModel.FetchCustomerResult.Error) {
                 listener?.onError(it.errorCode, it.errorMessage)
             }

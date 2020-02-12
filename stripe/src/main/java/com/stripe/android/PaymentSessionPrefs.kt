@@ -3,13 +3,13 @@ package com.stripe.android
 import android.content.Context
 
 internal interface PaymentSessionPrefs {
-    fun getSelectedPaymentMethodId(customerId: String): String?
-    fun saveSelectedPaymentMethodId(customerId: String, paymentMethodId: String?)
+    fun getPaymentMethodId(customerId: String?): String?
+    fun savePaymentMethodId(customerId: String, paymentMethodId: String?)
 
     companion object {
         private const val PREF_FILE = "PaymentSessionPrefs"
 
-        private fun getPaymentMethodKey(customerId: String): String {
+        private fun getPaymentMethodKey(customerId: String?): String {
             return "customer[$customerId].payment_method"
         }
 
@@ -19,11 +19,15 @@ internal interface PaymentSessionPrefs {
                 PREF_FILE, Context.MODE_PRIVATE
             )
             return object : PaymentSessionPrefs {
-                override fun getSelectedPaymentMethodId(customerId: String): String? {
-                    return prefs?.getString(getPaymentMethodKey(customerId), null)
+                override fun getPaymentMethodId(customerId: String?): String? {
+                    return if (customerId != null) {
+                        prefs?.getString(getPaymentMethodKey(customerId), null)
+                    } else {
+                        null
+                    }
                 }
 
-                override fun saveSelectedPaymentMethodId(
+                override fun savePaymentMethodId(
                     customerId: String,
                     paymentMethodId: String?
                 ) {
