@@ -85,7 +85,7 @@ enum class CardBrand(
 
     MasterCard(
         "mastercard",
-        "MasterCard",
+        "Mastercard",
         R.drawable.stripe_ic_mastercard,
         prefixes = listOf(
             "2221", "2222", "2223", "2224", "2225", "2226", "2227", "2228", "2229", "223", "224",
