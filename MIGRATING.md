@@ -12,7 +12,7 @@
       // after - Japanese
       "そのような setupintent はありません : seti_invalid123"
       ```
-- Changes to Material Components
+- Changes to [Material Components](https://material.io/develop/android/docs/getting-started/)
     - `com.google.android.material:material` has been updated to `v1.1.0`
 - Changes to `PaymentSession`
     - When instantiating a `PaymentSession()` with an `Activity`, it must now be a `ComponentActivity`
