@@ -223,8 +223,6 @@ class PaymentSession @VisibleForTesting internal constructor(
      *  3. If the instance's [PaymentSessionPrefs.getSelectedPaymentMethodId] is non-null, use that
      *  4. Otherwise, choose the most recently added Payment Method
      *
-     * See [getSelectedPaymentMethodId]
-     *
      * @param selectedPaymentMethodId if non-null, the ID of the Payment Method that should be
      * initially selected on the Payment Method selection screen
      */
@@ -232,7 +230,8 @@ class PaymentSession @VisibleForTesting internal constructor(
         paymentMethodsActivityStarter.startForResult(
             PaymentMethodsActivityStarter.Args.Builder()
                 .setInitialPaymentMethodId(
-                    getSelectedPaymentMethodId(selectedPaymentMethodId))
+                    viewModel.getSelectedPaymentMethodId(selectedPaymentMethodId)
+                )
                 .setAddPaymentMethodFooter(config.addPaymentMethodFooterLayoutId)
                 .setIsPaymentSessionActive(true)
                 .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
@@ -242,11 +241,6 @@ class PaymentSession @VisibleForTesting internal constructor(
                 .setBillingAddressFields(config.billingAddressFields)
                 .build()
         )
-    }
-
-    @VisibleForTesting
-    internal fun getSelectedPaymentMethodId(userSelectedPaymentMethodId: String?): String? {
-        return viewModel.getSelectedPaymentMethodId(userSelectedPaymentMethodId)
     }
 
     /**
