@@ -119,7 +119,7 @@ class EphemeralKeyManagerTest {
 
         val keyManager = createEphemeralKeyManager(operationIdFactory)
 
-        val operation = EphemeralOperation.Customer.PaymentMethods(
+        val operation = EphemeralOperation.Customer.GetPaymentMethods(
             type = PaymentMethod.Type.Card,
             id = operationIdFactory.create()
         )

@@ -41,8 +41,11 @@ internal sealed class EphemeralOperation : Parcelable {
         ) : Customer()
 
         @Parcelize
-        data class PaymentMethods(
+        data class GetPaymentMethods(
             internal val type: PaymentMethod.Type,
+            internal val limit: Int? = null,
+            internal val endingBefore: String? = null,
+            internal val startingAfter: String? = null,
             override val id: String
         ) : Customer()
 

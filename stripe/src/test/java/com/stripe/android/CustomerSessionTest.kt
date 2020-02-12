@@ -11,6 +11,7 @@ import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.stripe.android.exception.APIException
 import com.stripe.android.model.Customer
 import com.stripe.android.model.CustomerFixtures
+import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.Source
@@ -122,7 +123,6 @@ class CustomerSessionTest {
 
         `when`(stripeRepository.getPaymentMethods(
             any(),
-            eq(PaymentMethod.Type.Card),
             eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             any(),
             any()
@@ -695,8 +695,10 @@ class CustomerSessionTest {
         assertTrue(customerSession.productUsageTokens.isEmpty())
         assertNotNull(FIRST_CUSTOMER.id)
         verify(stripeRepository).getPaymentMethods(
-            eq(FIRST_CUSTOMER.id.orEmpty()),
-            eq(PaymentMethod.Type.Card),
+            eq(ListPaymentMethodsParams(
+                customerId = FIRST_CUSTOMER.id.orEmpty(),
+                paymentMethodType = PaymentMethod.Type.Card
+            )),
             eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             productUsageArgumentCaptor.capture(),
             requestOptionsArgumentCaptor.capture()
@@ -763,7 +765,6 @@ class CustomerSessionTest {
 
         `when`(stripeRepository.getPaymentMethods(
             any(),
-            eq(PaymentMethod.Type.Card),
             eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             any(),
             any()))

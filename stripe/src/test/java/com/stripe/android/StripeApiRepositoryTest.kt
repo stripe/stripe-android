@@ -16,6 +16,7 @@ import com.stripe.android.model.BankAccountTokenParamsFixtures
 import com.stripe.android.model.Card
 import com.stripe.android.model.CardFixtures
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -580,8 +581,10 @@ class StripeApiRepositoryTest {
         val stripeApiRepository = create()
         val paymentMethods = stripeApiRepository
             .getPaymentMethods(
-                "cus_123",
-                PaymentMethod.Type.Card,
+                ListPaymentMethodsParams(
+                    "cus_123",
+                    PaymentMethod.Type.Card
+                ),
                 DEFAULT_OPTIONS.apiKey,
                 emptySet(),
                 ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
@@ -630,8 +633,10 @@ class StripeApiRepositoryTest {
         val stripeApiRepository = create()
         val paymentMethods = stripeApiRepository
             .getPaymentMethods(
-                "cus_123",
-                PaymentMethod.Type.Card,
+                ListPaymentMethodsParams(
+                    "cus_123",
+                    PaymentMethod.Type.Card
+                ),
                 DEFAULT_OPTIONS.apiKey,
                 emptySet(),
                 ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)

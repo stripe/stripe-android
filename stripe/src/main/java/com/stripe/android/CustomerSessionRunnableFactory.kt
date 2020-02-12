@@ -4,6 +4,7 @@ import android.os.Handler
 import android.util.Pair
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.Customer
+import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.Source
 
@@ -62,7 +63,7 @@ internal class CustomerSessionRunnableFactory(
                     operation
                 )
             }
-            is EphemeralOperation.Customer.PaymentMethods -> {
+            is EphemeralOperation.Customer.GetPaymentMethods -> {
                 createGetPaymentMethodsRunnable(
                     ephemeralKey,
                     operation
@@ -174,7 +175,7 @@ internal class CustomerSessionRunnableFactory(
 
     private fun createGetPaymentMethodsRunnable(
         key: EphemeralKey,
-        operation: EphemeralOperation.Customer.PaymentMethods
+        operation: EphemeralOperation.Customer.GetPaymentMethods
     ): Runnable {
         return object : CustomerSessionRunnable<List<PaymentMethod>>(
             handler,
@@ -184,8 +185,13 @@ internal class CustomerSessionRunnableFactory(
             @Throws(StripeException::class)
             public override fun createMessageObject(): List<PaymentMethod> {
                 return stripeRepository.getPaymentMethods(
-                    key.objectId,
-                    operation.type,
+                    ListPaymentMethodsParams(
+                        customerId = key.objectId,
+                        paymentMethodType = operation.type,
+                        limit = operation.limit,
+                        endingBefore = operation.endingBefore,
+                        startingAfter = operation.startingAfter
+                    ),
                     publishableKey,
                     productUsage.get(),
                     ApiRequest.Options(key.secret, stripeAccountId)

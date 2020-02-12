@@ -9,6 +9,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.Customer
 import com.stripe.android.model.FpxBankStatuses
+import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -168,8 +169,7 @@ internal interface StripeRepository {
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, APIException::class, CardException::class)
     fun getPaymentMethods(
-        customerId: String,
-        paymentMethodType: PaymentMethod.Type,
+        listPaymentMethodsParams: ListPaymentMethodsParams,
         publishableKey: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options

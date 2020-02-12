@@ -3,6 +3,7 @@ package com.stripe.android
 import android.app.Activity
 import android.content.Context
 import android.os.Handler
+import androidx.annotation.IntRange
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.Stripe.Companion.appInfo
@@ -250,23 +251,53 @@ class CustomerSession @VisibleForTesting internal constructor(
     }
 
     /**
-     * Retrieves all of the customer's PaymentMethod objects,
-     * filtered by a [PaymentMethod.Type].
+     * Retrieves all of the customer's PaymentMethod objects, filtered by a [PaymentMethod.Type].
+     *
+     * See [List a Customer's PaymentMethods](https://stripe.com/docs/api/payment_methods/list)
      *
      * @param paymentMethodType the [PaymentMethod.Type] to filter by
      * @param listener a [PaymentMethodRetrievalListener] called when the API call
      * completes with a list of [PaymentMethod] objects
+     *
+     * @param limit Optional. A limit on the number of objects to be returned. Limit can range
+     * between 1 and 100, and the default is 10.
+     * @param endingBefore Optional. A cursor for use in pagination. `ending_before` is an object
+     * ID that defines your place in the list. For instance, if you make a list request and receive
+     * 100 objects, starting with `obj_bar`, your subsequent call can include
+     * `ending_before=obj_bar` in order to fetch the previous page of the list.
+     * @param startingAfter Optional. A cursor for use in pagination. `starting_after` is an object
+     * ID that defines your place in the list. For instance, if you make a list request and receive
+     * 100 objects, ending with `obj_foo`, your subsequent call can include `starting_after=obj_foo`
+     * in order to fetch the next page of the list.
      */
+    @JvmOverloads
+    fun getPaymentMethods(
+        paymentMethodType: PaymentMethod.Type,
+        @IntRange(from = 1, to = 100) limit: Int?,
+        endingBefore: String? = null,
+        startingAfter: String? = null,
+        listener: PaymentMethodsRetrievalListener
+    ) {
+        startOperation(
+            EphemeralOperation.Customer.GetPaymentMethods(
+                type = paymentMethodType,
+                limit = limit,
+                endingBefore = endingBefore,
+                startingAfter = startingAfter,
+                id = operationIdFactory.create()
+            ),
+            listener
+        )
+    }
+
     fun getPaymentMethods(
         paymentMethodType: PaymentMethod.Type,
         listener: PaymentMethodsRetrievalListener
     ) {
-        startOperation(
-            EphemeralOperation.Customer.PaymentMethods(
-                type = paymentMethodType,
-                id = operationIdFactory.create()
-            ),
-            listener
+        getPaymentMethods(
+            paymentMethodType,
+            limit = null,
+            listener = listener
         )
     }
 
