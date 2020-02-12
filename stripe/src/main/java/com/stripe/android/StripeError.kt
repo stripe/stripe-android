@@ -33,6 +33,8 @@ data class StripeError internal constructor(
      * A human-readable message providing more details about the error. For card errors,
      * these messages can be shown to your users.
      *
+     * This will be localized based on the requesting device's Locale.
+     *
      * [message](https://stripe.com/docs/api/errors#errors-message)
      */
     val message: String? = null,
