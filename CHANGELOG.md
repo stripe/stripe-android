@@ -15,6 +15,8 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
     * `PaymentSession#init()` no longer takes a `savedInstanceState` argument
     * Remove `PaymentSession#savePaymentSessionInstanceState()`
     * Remove `PaymentSession#onDestroy()`
+* [#2171](https://github.com/stripe/stripe-android/pull/2171) Upgrade 3DS2 SDK to `2.5.2`
+    * Upgrade to `com.google.android.material:material:1.1.0`
 
 ## 13.2.0 - 2020-02-03
 * [#2112](https://github.com/stripe/stripe-android/pull/2112) Enable adding Mandate to confirm params
