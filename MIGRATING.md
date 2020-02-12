@@ -3,7 +3,9 @@
 ## Migrating from versions < 14.0.0
 - Changes to Stripe Error localization
     - All [Stripe Error messages](https://stripe.com/docs/api/errors#errors-message) are now localized
-      based on the device locale. For example, when retrieving a SetupIntent with a nonexistent `id`
+      based on the device locale.
+      
+      For example, when retrieving a SetupIntent with a nonexistent `id`
       when the device locale is set to `Locale.JAPAN`, the error message will now be localized.
       ```
       // before - English
