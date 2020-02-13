@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModel
 import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.view.PaymentMethodsActivityStarter
 
 internal class PaymentSessionViewModel(
     application: Application,
@@ -26,8 +27,12 @@ internal class PaymentSessionViewModel(
             if (value != field) {
                 field = value
                 savedStateHandle.set(KEY_PAYMENT_SESSION_DATA, value)
+                mutablePaymentSessionDataLiveData.value = value
             }
         }
+
+    private val mutablePaymentSessionDataLiveData: MutableLiveData<PaymentSessionData> = MutableLiveData()
+    val paymentSessionDataLiveData: LiveData<PaymentSessionData> = mutablePaymentSessionDataLiveData
 
     init {
         customerSession.resetUsageTokens()
@@ -103,6 +108,21 @@ internal class PaymentSessionViewModel(
                     paymentSessionPrefs.getSelectedPaymentMethodId(customerId)
                 }
             }
+    }
+
+    fun onPaymentMethodResult(result: PaymentMethodsActivityStarter.Result?) {
+        persistPaymentMethodResult(
+            paymentMethod = result?.paymentMethod,
+            useGooglePay = result?.useGooglePay ?: false
+        )
+    }
+
+    fun onPaymentFlowResult(paymentSessionData: PaymentSessionData) {
+        this.paymentSessionData = paymentSessionData
+    }
+
+    fun onListenerAttached() {
+        mutablePaymentSessionDataLiveData.value = paymentSessionData
     }
 
     sealed class FetchCustomerResult {
