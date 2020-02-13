@@ -39,6 +39,9 @@ internal class PaymentSessionViewModel(
         }
     }
 
+    private val mutableNetworkState: MutableLiveData<NetworkState> = MutableLiveData()
+    internal val networkState: LiveData<NetworkState> = mutableNetworkState
+
     @JvmSynthetic
     fun updateCartTotal(@IntRange(from = 0) cartTotal: Long) {
         paymentSessionData = paymentSessionData.copy(cartTotal = cartTotal)
@@ -65,10 +68,13 @@ internal class PaymentSessionViewModel(
 
     @JvmSynthetic
     fun fetchCustomer(): LiveData<FetchCustomerResult> {
+        mutableNetworkState.value = NetworkState.Active
+
         val resultData: MutableLiveData<FetchCustomerResult> = MutableLiveData()
         customerSession.retrieveCurrentCustomer(
             object : CustomerSession.CustomerRetrievalListener {
                 override fun onCustomerRetrieved(customer: Customer) {
+                    mutableNetworkState.value = NetworkState.Inactive
                     resultData.value = FetchCustomerResult.Success
                 }
 
@@ -77,6 +83,7 @@ internal class PaymentSessionViewModel(
                     errorMessage: String,
                     stripeError: StripeError?
                 ) {
+                    mutableNetworkState.value = NetworkState.Inactive
                     resultData.value = FetchCustomerResult.Error(
                         errorCode, errorMessage, stripeError
                     )
@@ -105,6 +112,11 @@ internal class PaymentSessionViewModel(
             val errorMessage: String,
             val stripeError: StripeError?
         ) : FetchCustomerResult()
+    }
+
+    enum class NetworkState {
+        Active,
+        Inactive
     }
 
     internal class Factory(

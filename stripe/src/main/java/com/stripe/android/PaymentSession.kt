@@ -70,6 +70,16 @@ class PaymentSession @VisibleForTesting internal constructor(
 
     init {
         lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
+        viewModel.networkState.observe(lifecycleOwner, Observer {
+            it?.let { networkState ->
+                listener?.onCommunicatingStateChanged(
+                    when (networkState) {
+                        PaymentSessionViewModel.NetworkState.Active -> true
+                        PaymentSessionViewModel.NetworkState.Inactive -> false
+                    }
+                )
+            }
+        })
     }
 
     /**
@@ -179,7 +189,6 @@ class PaymentSession @VisibleForTesting internal constructor(
 
     private fun dispatchUpdates() {
         listener?.onPaymentSessionDataChanged(paymentSessionData)
-        listener?.onCommunicatingStateChanged(false)
     }
 
     private fun persistPaymentMethodResult(
@@ -274,8 +283,6 @@ class PaymentSession @VisibleForTesting internal constructor(
     }
 
     private fun fetchCustomer() {
-        listener?.onCommunicatingStateChanged(true)
-
         viewModel.fetchCustomer().observe(lifecycleOwner, Observer {
             when (it) {
                 PaymentSessionViewModel.FetchCustomerResult.Success -> {
@@ -283,7 +290,6 @@ class PaymentSession @VisibleForTesting internal constructor(
                 }
                 is PaymentSessionViewModel.FetchCustomerResult.Error -> {
                     listener?.onError(it.errorCode, it.errorMessage)
-                    listener?.onCommunicatingStateChanged(false)
                 }
             }
         })
