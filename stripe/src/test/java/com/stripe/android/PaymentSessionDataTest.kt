@@ -35,20 +35,23 @@ class PaymentSessionDataTest {
         assertFalse(PaymentSessionData(config).isPaymentReadyToCharge)
 
         assertFalse(PaymentSessionData(
-            config,
+            isShippingInfoRequired = config.isShippingInfoRequired,
+            isShippingMethodRequired = config.isShippingMethodRequired,
             paymentMethod = PAYMENT_METHOD
         ).isPaymentReadyToCharge)
 
         assertFalse(PaymentSessionData(
-            config,
+            isShippingInfoRequired = config.isShippingInfoRequired,
+            isShippingMethodRequired = config.isShippingMethodRequired,
             paymentMethod = PAYMENT_METHOD,
-            shippingInformation = ShippingInformation(null, null, null)
+            shippingInformation = ShippingInformation()
         ).isPaymentReadyToCharge)
 
         assertTrue(PaymentSessionData(
-            config,
+            isShippingInfoRequired = config.isShippingInfoRequired,
+            isShippingMethodRequired = config.isShippingMethodRequired,
             paymentMethod = PAYMENT_METHOD,
-            shippingInformation = ShippingInformation(null, null, null),
+            shippingInformation = ShippingInformation(),
             shippingMethod = ShippingMethod("label", "id", 0, "USD")
         ).isPaymentReadyToCharge)
     }
@@ -56,7 +59,8 @@ class PaymentSessionDataTest {
     @Test
     fun writeToParcel_withNulls_readsFromParcelCorrectly() {
         val data = PaymentSessionData(
-            config = PaymentSessionFixtures.CONFIG,
+            isShippingInfoRequired = true,
+            isShippingMethodRequired = true,
             cartTotal = 100L,
             shippingTotal = 150L
         )
@@ -67,11 +71,12 @@ class PaymentSessionDataTest {
     @Test
     fun writeToParcel_withoutNulls_readsFromParcelCorrectly() {
         val data = PaymentSessionData(
-            config = PaymentSessionFixtures.CONFIG,
+            isShippingInfoRequired = true,
+            isShippingMethodRequired = true,
             cartTotal = 100L,
             shippingTotal = 150L,
             paymentMethod = PAYMENT_METHOD,
-            shippingInformation = ShippingInformation(null, null, null),
+            shippingInformation = ShippingInformation(),
             shippingMethod = ShippingMethod("UPS", "SuperFast", 10000L, "USD")
         )
 

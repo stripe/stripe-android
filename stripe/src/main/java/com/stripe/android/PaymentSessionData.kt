@@ -11,7 +11,9 @@ import kotlinx.android.parcel.Parcelize
  */
 @Parcelize
 data class PaymentSessionData internal constructor(
-    private val config: PaymentSessionConfig,
+    private val isShippingInfoRequired: Boolean,
+
+    private val isShippingMethodRequired: Boolean,
 
     /**
      * The cart total value, excluding shipping and tax items.
@@ -45,6 +47,10 @@ data class PaymentSessionData internal constructor(
      */
     val useGooglePay: Boolean = false
 ) : Parcelable {
+    internal constructor(config: PaymentSessionConfig) : this(
+        isShippingInfoRequired = config.isShippingInfoRequired,
+        isShippingMethodRequired = config.isShippingMethodRequired
+    )
 
     /**
      * Whether the payment data is ready for making a charge. This can be used to
@@ -53,6 +59,6 @@ data class PaymentSessionData internal constructor(
     val isPaymentReadyToCharge: Boolean
         get() =
             (paymentMethod != null || useGooglePay) &&
-                (!config.isShippingInfoRequired || shippingInformation != null) &&
-                (!config.isShippingMethodRequired || shippingMethod != null)
+                (!isShippingInfoRequired || shippingInformation != null) &&
+                (!isShippingMethodRequired || shippingMethod != null)
 }
