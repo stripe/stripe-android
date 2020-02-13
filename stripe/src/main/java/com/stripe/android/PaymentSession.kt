@@ -51,12 +51,6 @@ class PaymentSession @VisibleForTesting internal constructor(
             )
         )[PaymentSessionViewModel::class.java]
 
-    /**
-     * @return the data associated with the instance of this class.
-     */
-    val paymentSessionData: PaymentSessionData
-        get() = viewModel.paymentSessionData
-
     @JvmSynthetic
     internal var listener: PaymentSessionListener? = null
 
@@ -188,9 +182,10 @@ class PaymentSession @VisibleForTesting internal constructor(
      * data changes. The reference to the [listener] will be released when the host (i.e.
      * `Activity` or `Fragment`) is destroyed.
      *
-     * If the [PaymentSessionConfig.shouldPrefetchCustomer] is true, a new Customer instance
-     * will be fetched. Otherwise, the [listener] will be immediately called with the current
-     * [paymentSessionData].
+     * The [listener] will be immediately called with the current [PaymentSessionData].
+     *
+     * If the [PaymentSessionConfig.shouldPrefetchCustomer] is true, a new `Customer` instance
+     * will be fetched.
      *
      * @param listener a [PaymentSessionListener]
      */
@@ -254,7 +249,7 @@ class PaymentSession @VisibleForTesting internal constructor(
         paymentFlowActivityStarter.startForResult(
             PaymentFlowActivityStarter.Args(
                 paymentSessionConfig = config,
-                paymentSessionData = paymentSessionData,
+                paymentSessionData = viewModel.paymentSessionData,
                 isPaymentSessionActive = true,
                 windowFlags = config.windowFlags
             )
