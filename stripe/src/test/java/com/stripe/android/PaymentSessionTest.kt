@@ -14,6 +14,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.model.Customer
 import com.stripe.android.model.CustomerFixtures
@@ -103,11 +104,9 @@ class PaymentSessionTest {
             val paymentSession = PaymentSession(it, DEFAULT_CONFIG)
             paymentSession.init(paymentSessionListener)
             verify(paymentSessionListener)
-                .onCommunicatingStateChanged(eq(true))
+                .onCommunicatingStateChanged(true)
             verify(paymentSessionListener)
-                .onPaymentSessionDataChanged(any())
-            verify(paymentSessionListener)
-                .onCommunicatingStateChanged(eq(false))
+                .onCommunicatingStateChanged(false)
         }
     }
 
@@ -307,27 +306,21 @@ class PaymentSessionTest {
     fun init_withSavedState_setsPaymentSessionData() {
         ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
 
-        createActivity {
-            val paymentSession = PaymentSession(it, DEFAULT_CONFIG)
+        createActivity { activity ->
+            val paymentSession = PaymentSession(activity, DEFAULT_CONFIG).also {
+                it.setCartTotal(300L)
+                it.init(paymentSessionListener)
+            }
+
             paymentSession.init(paymentSessionListener)
-            paymentSession.setCartTotal(300L)
 
-            verify(paymentSessionListener)
-                .onPaymentSessionDataChanged(paymentSessionDataArgumentCaptor.capture())
-            val firstPaymentSessionData = paymentSessionDataArgumentCaptor.firstValue
-
-            val secondListener =
-                mock(PaymentSession.PaymentSessionListener::class.java)
-
-            paymentSession.init(secondListener)
-            verify(secondListener)
+            verify(paymentSessionListener, times(2))
                 .onPaymentSessionDataChanged(paymentSessionDataArgumentCaptor.capture())
 
-            val secondPaymentSessionData = paymentSessionDataArgumentCaptor.firstValue
-            assertEquals(firstPaymentSessionData.cartTotal,
-                secondPaymentSessionData.cartTotal)
-            assertEquals(firstPaymentSessionData.paymentMethod,
-                secondPaymentSessionData.paymentMethod)
+            assertEquals(
+                paymentSessionDataArgumentCaptor.allValues[0],
+                paymentSessionDataArgumentCaptor.allValues[1]
+            )
         }
     }
 

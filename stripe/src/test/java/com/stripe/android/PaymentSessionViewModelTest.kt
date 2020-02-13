@@ -9,9 +9,11 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.model.CustomerFixtures
+import com.stripe.android.view.PaymentMethodsActivityStarter
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -100,6 +102,24 @@ class PaymentSessionViewModelTest {
         }
         verify(savedStateHandle)
             .set(PaymentSessionViewModel.KEY_PAYMENT_SESSION_DATA, UPDATED_DATA)
+    }
+
+    @Test
+    fun settingPaymentSessionData_shouldUpdateLiveData() {
+        var liveData: PaymentSessionData? = null
+        viewModel.paymentSessionDataLiveData.observeForever { liveData = it }
+        viewModel.paymentSessionData = UPDATED_DATA
+        assertEquals(UPDATED_DATA, liveData)
+    }
+
+    @Test
+    fun onPaymentMethodResult_withGooglePay_shouldUpdateLiveData() {
+        var liveData: PaymentSessionData? = null
+        viewModel.paymentSessionDataLiveData.observeForever { liveData = it }
+        viewModel.onPaymentMethodResult(PaymentMethodsActivityStarter.Result(
+            useGooglePay = true
+        ))
+        assertTrue(liveData?.useGooglePay == true)
     }
 
     private companion object {

@@ -16,7 +16,6 @@ import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.savedstate.SavedStateRegistryOwner
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.view.ActivityStarter
 import com.stripe.android.view.PaymentFlowActivity
 import com.stripe.android.view.PaymentFlowActivityStarter
@@ -79,6 +78,10 @@ class PaymentSession @VisibleForTesting internal constructor(
                     }
                 )
             }
+        })
+
+        viewModel.paymentSessionDataLiveData.observe(lifecycleOwner, Observer {
+            listener?.onPaymentSessionDataChanged(it)
         })
     }
 
@@ -157,21 +160,19 @@ class PaymentSession @VisibleForTesting internal constructor(
                 }
                 return false
             }
-            Activity.RESULT_OK -> when (requestCode) {
+            Activity.RESULT_OK -> return when (requestCode) {
                 PaymentMethodsActivityStarter.REQUEST_CODE -> {
                     onPaymentMethodResult(data)
-                    return true
+                    true
                 }
                 PaymentFlowActivityStarter.REQUEST_CODE -> {
-                    val paymentSessionData =
-                        data.getParcelableExtra(EXTRA_PAYMENT_SESSION_DATA)
-                            ?: this.paymentSessionData
-                    viewModel.paymentSessionData = paymentSessionData
-                    listener?.onPaymentSessionDataChanged(paymentSessionData)
-                    return true
+                    data.getParcelableExtra<PaymentSessionData>(EXTRA_PAYMENT_SESSION_DATA)?.let {
+                        viewModel.onPaymentFlowResult(it)
+                    }
+                    true
                 }
                 else -> {
-                    return false
+                    false
                 }
             }
             else -> return false
@@ -179,23 +180,7 @@ class PaymentSession @VisibleForTesting internal constructor(
     }
 
     private fun onPaymentMethodResult(data: Intent) {
-        val result = PaymentMethodsActivityStarter.Result.fromIntent(data)
-        persistPaymentMethodResult(
-            paymentMethod = result?.paymentMethod,
-            useGooglePay = result?.useGooglePay ?: false
-        )
-        dispatchUpdates()
-    }
-
-    private fun dispatchUpdates() {
-        listener?.onPaymentSessionDataChanged(paymentSessionData)
-    }
-
-    private fun persistPaymentMethodResult(
-        paymentMethod: PaymentMethod?,
-        useGooglePay: Boolean
-    ) {
-        viewModel.persistPaymentMethodResult(paymentMethod, useGooglePay)
+        viewModel.onPaymentMethodResult(PaymentMethodsActivityStarter.Result.fromIntent(data))
     }
 
     /**
@@ -214,10 +199,10 @@ class PaymentSession @VisibleForTesting internal constructor(
     ) {
         this.listener = listener
 
+        viewModel.onListenerAttached()
+
         if (config.shouldPrefetchCustomer) {
             fetchCustomer()
-        } else {
-            dispatchUpdates()
         }
     }
 
@@ -278,13 +263,8 @@ class PaymentSession @VisibleForTesting internal constructor(
 
     private fun fetchCustomer() {
         viewModel.fetchCustomer().observe(lifecycleOwner, Observer {
-            when (it) {
-                PaymentSessionViewModel.FetchCustomerResult.Success -> {
-                    dispatchUpdates()
-                }
-                is PaymentSessionViewModel.FetchCustomerResult.Error -> {
-                    listener?.onError(it.errorCode, it.errorMessage)
-                }
+            if (it is PaymentSessionViewModel.FetchCustomerResult.Error) {
+                listener?.onError(it.errorCode, it.errorMessage)
             }
         })
     }
