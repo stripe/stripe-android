@@ -1,9 +1,13 @@
 package com.stripe.android.view
 
+import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.text.TextPaint
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.test.core.app.ActivityScenario
+import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.reset
 import com.nhaarman.mockitokotlin2.verify
@@ -18,6 +22,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.test.CardInputWidgetTestActivity
 import com.stripe.android.testharness.TestFocusChangeListener
 import com.stripe.android.testharness.ViewTestUtils
 import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_CARD
@@ -26,7 +31,6 @@ import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_EXPI
 import com.stripe.android.view.CardInputWidget.Companion.LOGGING_TOKEN
 import com.stripe.android.view.CardInputWidget.Companion.shouldIconShowBrand
 import java.util.Calendar
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -41,20 +45,16 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
-internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
-    CardInputTestActivity::class.java
-) {
+internal class CardInputWidgetTest {
     private val onGlobalFocusChangeListener: TestFocusChangeListener = TestFocusChangeListener()
 
-    private val activity: CardInputTestActivity by lazy {
-        createStartedActivity()
-    }
-    private val cardInputWidget: CardInputWidget by lazy {
-        activity.cardInputWidget
-    }
+    private val context: Context = ApplicationProvider.getApplicationContext<Context>()
+
+    private lateinit var cardInputWidget: CardInputWidget
     private val cardNumberEditText: CardNumberEditText by lazy {
-        activity.cardNumberEditText
+        cardInputWidget.findViewById<CardNumberEditText>(R.id.et_card_number)
     }
+
     private val expiryEditText: StripeEditText by lazy {
         cardInputWidget.findViewById<StripeEditText>(R.id.et_expiry_date)
     }
@@ -70,6 +70,10 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
     fun setup() {
         // The input date here will be invalid after 2050. Please update the test.
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
+
+        createActivity {
+            cardInputWidget = it.cardInputWidget
+        }
 
         cardInputWidget.setCardNumberTextWatcher(object : StripeTextWatcher() {})
         cardInputWidget.setExpiryDateTextWatcher(object : StripeTextWatcher() {})
@@ -96,14 +100,6 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         params.width = 48
         params.rightMargin = 12
         iconView.layoutParams = params
-
-        resumeStartedActivity(activity)
-    }
-
-    @AfterTest
-    override fun tearDown() {
-        super.tearDown()
-        activity.finish()
     }
 
     @Test
@@ -633,6 +629,8 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
 
     @Test
     fun updateToInitialSizes_returnsExpectedValues() {
+        cardInputWidget.updateSpaceSizes(true)
+
         // Initial spacing should look like
         // |img==60||---total == 500--------|
         // |(card==190)--(space==260)--(date==50)|
@@ -697,6 +695,8 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
 
     @Test
     fun getFocusRequestOnTouch_whenTouchActualCardWidget_returnsNull() {
+        cardInputWidget.updateSpaceSizes(false)
+
         // |img==60||---total == 500--------|
         // |(card==190)--(space==260)--(date==50)|
         // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
@@ -706,6 +706,8 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
 
     @Test
     fun getFocusRequestOnTouch_whenTouchInCardEditorSlop_returnsCardEditor() {
+        cardInputWidget.updateSpaceSizes(true)
+
         // |img==60||---total == 500--------|
         // |(card==190)--(space==260)--(date==50)|
         // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
@@ -717,6 +719,8 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
 
     @Test
     fun getFocusRequestOnTouch_whenTouchInDateSlop_returnsDateEditor() {
+        cardInputWidget.updateSpaceSizes(true)
+
         // |img==60||---total == 500--------|
         // |(card==190)--(space==260)--(date==50)|
         // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
@@ -1275,6 +1279,14 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
             setOf(CardValidCallback.Fields.Cvc),
             currentInvalidFields
         )
+    }
+
+    private fun createActivity(
+        onActivity: (CardInputWidgetTestActivity) -> Unit
+    ) {
+        ActivityScenario.launch<CardInputWidgetTestActivity>(
+            Intent(context, CardInputWidgetTestActivity::class.java)
+        ).use { it.onActivity(onActivity) }
     }
 
     private companion object {
