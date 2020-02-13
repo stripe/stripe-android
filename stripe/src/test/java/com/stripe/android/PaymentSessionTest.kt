@@ -61,6 +61,7 @@ class PaymentSessionTest {
         ActivityStarter<PaymentFlowActivity, PaymentFlowActivityStarter.Args> = mock()
 
     private val paymentSessionDataArgumentCaptor: KArgumentCaptor<PaymentSessionData> = argumentCaptor()
+    private val paymentMethodsActivityStarterArgsCaptor: KArgumentCaptor<PaymentMethodsActivityStarter.Args> = argumentCaptor()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val activityScenarioFactory = ActivityScenarioFactory(context)
@@ -221,9 +222,13 @@ class PaymentSessionTest {
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
                 )
             )
+            paymentSession.presentPaymentMethodSelection()
+            verify(paymentMethodsActivityStarter).startForResult(
+                paymentMethodsActivityStarterArgsCaptor.capture()
+            )
             assertEquals(
                 "pm_123456789",
-                paymentSession.getSelectedPaymentMethodId(null)
+                paymentMethodsActivityStarterArgsCaptor.firstValue.initialPaymentMethodId
             )
         }
     }
@@ -238,9 +243,13 @@ class PaymentSessionTest {
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
                 )
             )
+            paymentSession.presentPaymentMethodSelection("pm_987")
+            verify(paymentMethodsActivityStarter).startForResult(
+                paymentMethodsActivityStarterArgsCaptor.capture()
+            )
             assertEquals(
                 "pm_987",
-                paymentSession.getSelectedPaymentMethodId("pm_987")
+                paymentMethodsActivityStarterArgsCaptor.firstValue.initialPaymentMethodId
             )
         }
     }
