@@ -17,6 +17,10 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
     * Remove `PaymentSession#onDestroy()`
 * [#2171](https://github.com/stripe/stripe-android/pull/2171) Upgrade 3DS2 SDK to `2.5.2`
     * Upgrade to `com.google.android.material:material:1.1.0`
+* [#2173](https://github.com/stripe/stripe-android/pull/2173) Fix Mastercard display name
+* [#2174](https://github.com/stripe/stripe-android/pull/2174) Add optional params to `CustomerSession.getPaymentMethods()`
+    * See [List a Customer's PaymentMethods](https://stripe.com/docs/api/payment_methods/list) for more details
+* [#2180](https://github.com/stripe/stripe-android/pull/2180) Remove `PaymentSession.paymentSessionData`
 
 ## 13.2.0 - 2020-02-03
 * [#2112](https://github.com/stripe/stripe-android/pull/2112) Enable adding Mandate to confirm params
