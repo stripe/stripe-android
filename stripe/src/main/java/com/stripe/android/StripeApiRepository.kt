@@ -15,6 +15,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.Customer
 import com.stripe.android.model.FpxBankStatuses
+import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -441,7 +442,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
      * is being created
      * @param options a [ApiRequest.Options] object that contains connection data like the api
      * key, api version, etc
-     * @param tokenType the [Token.TokenType] being created
+     *
      * @return a [Token] that can be used to perform other operations with this card
      */
     @Throws(AuthenticationException::class, InvalidRequestException::class,
@@ -588,8 +589,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     @Throws(InvalidRequestException::class, APIConnectionException::class, APIException::class,
         AuthenticationException::class, CardException::class)
     override fun getPaymentMethods(
-        customerId: String,
-        paymentMethodType: PaymentMethod.Type,
+        listPaymentMethodsParams: ListPaymentMethodsParams,
         publishableKey: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
@@ -598,10 +598,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             apiRequestFactory.createGet(
                 paymentMethodsUrl,
                 requestOptions,
-                mapOf(
-                    "customer" to customerId,
-                    "type" to paymentMethodType.code
-                )
+                listPaymentMethodsParams.toParamMap()
             )
         )
 
