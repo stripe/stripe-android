@@ -2,8 +2,8 @@ package com.stripe.android.model.parsers
 
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardFunding
-import com.stripe.android.model.SourceCardData
 import com.stripe.android.model.SourceFixtures
+import com.stripe.android.model.SourceTypeModel
 import com.stripe.android.model.TokenizationMethod
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -13,15 +13,15 @@ import kotlin.test.assertNull
 class SourceCardDataJsonParserTest {
     @Test
     fun testAsThreeDSecureStatus() {
-        assertEquals(SourceCardData.ThreeDSecureStatus.REQUIRED,
+        assertEquals(SourceTypeModel.Card.ThreeDSecureStatus.REQUIRED,
             SourceCardDataJsonParser.asThreeDSecureStatus("required"))
-        assertEquals(SourceCardData.ThreeDSecureStatus.OPTIONAL,
+        assertEquals(SourceTypeModel.Card.ThreeDSecureStatus.OPTIONAL,
             SourceCardDataJsonParser.asThreeDSecureStatus("optional"))
-        assertEquals(SourceCardData.ThreeDSecureStatus.NOT_SUPPORTED,
+        assertEquals(SourceTypeModel.Card.ThreeDSecureStatus.NOT_SUPPORTED,
             SourceCardDataJsonParser.asThreeDSecureStatus("not_supported"))
-        assertEquals(SourceCardData.ThreeDSecureStatus.RECOMMENDED,
+        assertEquals(SourceTypeModel.Card.ThreeDSecureStatus.RECOMMENDED,
             SourceCardDataJsonParser.asThreeDSecureStatus("recommended"))
-        assertEquals(SourceCardData.ThreeDSecureStatus.UNKNOWN,
+        assertEquals(SourceTypeModel.Card.ThreeDSecureStatus.UNKNOWN,
             SourceCardDataJsonParser.asThreeDSecureStatus("unknown"))
         assertNull(SourceCardDataJsonParser.asThreeDSecureStatus(""))
     }

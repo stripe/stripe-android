@@ -97,7 +97,7 @@ data class Source internal constructor(
 
     val sourceTypeData: Map<String, @RawValue Any?>? = null,
 
-    val sourceTypeModel: StripeSourceTypeModel? = null,
+    val sourceTypeModel: SourceTypeModel? = null,
 
     /**
      * Gets the [SourceType] of this Source, as one of the enumerated values.

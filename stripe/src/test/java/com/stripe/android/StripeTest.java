@@ -23,9 +23,8 @@ import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures;
 import com.stripe.android.model.PersonTokenParamsFixtures;
 import com.stripe.android.model.Source;
-import com.stripe.android.model.SourceCardData;
 import com.stripe.android.model.SourceParams;
-import com.stripe.android.model.SourceSepaDebitData;
+import com.stripe.android.model.SourceTypeModel;
 import com.stripe.android.model.StripeFile;
 import com.stripe.android.model.StripeFileParams;
 import com.stripe.android.model.StripeFilePurpose;
@@ -464,7 +463,7 @@ public class StripeTest {
         assertEquals(Source.SourceType.CARD, cardSource.getType());
         assertNotNull(cardSource.getSourceTypeData());
         assertNotNull(cardSource.getSourceTypeModel());
-        assertTrue(cardSource.getSourceTypeModel() instanceof SourceCardData);
+        assertTrue(cardSource.getSourceTypeModel() instanceof SourceTypeModel.Card);
         assertNotNull(cardSource.getOwner());
         assertNotNull(cardSource.getOwner().getAddress());
         assertEquals("Sheboygan", cardSource.getOwner().getAddress().getCity());
@@ -598,7 +597,7 @@ public class StripeTest {
         assertNotNull(sepaDebitSource.getOwner());
         assertNotNull(sepaDebitSource.getOwner().getAddress());
         assertNotNull(sepaDebitSource.getSourceTypeModel());
-        assertTrue(sepaDebitSource.getSourceTypeModel() instanceof SourceSepaDebitData);
+        assertTrue(sepaDebitSource.getSourceTypeModel() instanceof SourceTypeModel.SepaDebit);
         assertEquals("eur", sepaDebitSource.getCurrency());
         assertEquals("Eureka", sepaDebitSource.getOwner().getAddress().getCity());
         assertEquals("90210", sepaDebitSource.getOwner().getAddress().getPostalCode());
@@ -665,7 +664,7 @@ public class StripeTest {
         assertNotNull(sepaDebitSource.getOwner());
         assertNotNull(sepaDebitSource.getOwner().getAddress());
         assertNotNull(sepaDebitSource.getSourceTypeModel());
-        assertTrue(sepaDebitSource.getSourceTypeModel() instanceof SourceSepaDebitData);
+        assertTrue(sepaDebitSource.getSourceTypeModel() instanceof SourceTypeModel.SepaDebit);
         assertEquals("eur", sepaDebitSource.getCurrency());
         assertEquals("Eureka", sepaDebitSource.getOwner().getAddress().getCity());
         assertEquals("90210", sepaDebitSource.getOwner().getAddress().getPostalCode());
@@ -697,7 +696,7 @@ public class StripeTest {
         assertNotNull(sepaDebitSource.getOwner());
         assertNotNull(sepaDebitSource.getOwner().getAddress());
         assertNotNull(sepaDebitSource.getSourceTypeModel());
-        assertTrue(sepaDebitSource.getSourceTypeModel() instanceof SourceSepaDebitData);
+        assertTrue(sepaDebitSource.getSourceTypeModel() instanceof SourceTypeModel.SepaDebit);
         assertEquals("eur", sepaDebitSource.getCurrency());
         assertEquals("Eureka", sepaDebitSource.getOwner().getAddress().getCity());
         assertEquals("90210", sepaDebitSource.getOwner().getAddress().getPostalCode());

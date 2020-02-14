@@ -14,8 +14,8 @@ import com.stripe.android.Stripe
 import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.Source
-import com.stripe.android.model.SourceCardData
 import com.stripe.android.model.SourceParams
+import com.stripe.android.model.SourceTypeModel
 import com.stripe.example.R
 import com.stripe.example.StripeFactory
 import com.stripe.example.adapter.SourcesAdapter
@@ -115,15 +115,14 @@ class CreateCardSourceActivity : AppCompatActivity() {
     private fun onSourceCreated(source: Source) {
         // Because we've made the mapping above, we're now subscribing
         // to the result of creating a 3DS Source
-        val cardData = source.sourceTypeModel as SourceCardData
+        val cardData = source.sourceTypeModel as SourceTypeModel.Card
 
         // Making a note of the Card Source in our list.
         sourcesAdapter.addSource(source)
 
         // If we need to get 3DS verification for this card, we first create a
         // 3DS Source.
-        if (SourceCardData.ThreeDSecureStatus.REQUIRED ==
-            cardData.threeDSecureStatus) {
+        if (SourceTypeModel.Card.ThreeDSecureStatus.REQUIRED == cardData.threeDSecureStatus) {
             // The card Source can be used to create a 3DS Source
             createThreeDSecureSource(source)
         }

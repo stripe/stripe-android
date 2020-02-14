@@ -1,6 +1,6 @@
 package com.stripe.android.model.parsers
 
-import com.stripe.android.model.SourceSepaDebitData
+import com.stripe.android.model.SourceTypeModel
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -35,7 +35,7 @@ class SourceSepaDebitDataJsonParserTest {
         )
     }
 
-    private fun parse(jsonObject: JSONObject): SourceSepaDebitData {
+    private fun parse(jsonObject: JSONObject): SourceTypeModel.SepaDebit {
         return SourceSepaDebitDataJsonParser().parse(jsonObject)
     }
 

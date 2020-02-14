@@ -16,7 +16,6 @@ import org.json.JSONObject
 class CustomerSourceTest {
 
     @Test
-    @Throws(JSONException::class)
     fun fromJson_whenCard_createsCustomerSourceData() {
         val jsonCard = JSON_CARD_USD
         val sourceData = parse(jsonCard)
