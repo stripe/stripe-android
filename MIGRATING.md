@@ -31,6 +31,8 @@
       by `PaymentSession`
     - `PaymentSession#onDestroy()` has been removed; the `listener` instance is now released
       automatically when the host `Activity` or `Fragment` is destroyed
+    - Remove `PaymentSessionData.paymentSessionData`. This data will be returned via
+      `PaymentSessionListener#onPaymentSessionDataChanged()`.
 
 ## Migrating from versions < 13.0.0
 - Changes to `Card` and `SourceCardData`
