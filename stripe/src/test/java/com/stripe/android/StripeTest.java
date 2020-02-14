@@ -17,6 +17,7 @@ import com.stripe.android.model.BankAccountTokenParamsFixtures;
 import com.stripe.android.model.Card;
 import com.stripe.android.model.CardBrand;
 import com.stripe.android.model.CardFixtures;
+import com.stripe.android.model.CardFunding;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures;
@@ -169,7 +170,7 @@ public class StripeTest {
         assertEquals(CardBrand.Visa, returnedCard.getBrand());
         assertEquals(CARD.getExpYear(), returnedCard.getExpYear());
         assertEquals(CARD.getExpMonth(), returnedCard.getExpMonth());
-        assertEquals(Card.FundingType.CREDIT, returnedCard.getFunding());
+        assertEquals(CardFunding.Credit, returnedCard.getFunding());
     }
 
     @Test
@@ -192,7 +193,7 @@ public class StripeTest {
         assertEquals(CardBrand.Visa, returnedCard.getBrand());
         assertEquals(CARD.getExpYear(), returnedCard.getExpYear());
         assertEquals(CARD.getExpMonth(), returnedCard.getExpMonth());
-        assertEquals(Card.FundingType.CREDIT, returnedCard.getFunding());
+        assertEquals(CardFunding.Credit, returnedCard.getFunding());
     }
 
     @Test

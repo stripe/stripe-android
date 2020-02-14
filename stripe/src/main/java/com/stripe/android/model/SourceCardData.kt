@@ -10,19 +10,13 @@ import kotlinx.android.parcel.Parcelize
 data class SourceCardData internal constructor(
     val addressLine1Check: String?,
     val addressZipCheck: String?,
-
     val brand: CardBrand,
-
     val country: String?,
     val cvcCheck: String?,
     val dynamicLast4: String?,
     val expiryMonth: Int?,
     val expiryYear: Int?,
-
-    @Card.FundingType
-    @get:Card.FundingType
-    val funding: String?,
-
+    val funding: CardFunding?,
     val last4: String?,
     @ThreeDSecureStatus
     @get:ThreeDSecureStatus

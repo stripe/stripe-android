@@ -69,7 +69,7 @@ class TokenTest {
             .brand(CardBrand.Visa)
             .country("US")
             .last4("4242")
-            .funding(Card.FundingType.CREDIT)
+            .funding(CardFunding.Credit)
             .metadata(emptyMap())
             .build()
 
