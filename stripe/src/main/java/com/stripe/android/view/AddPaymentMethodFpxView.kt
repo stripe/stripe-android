@@ -85,7 +85,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
         private val themeConfig: ThemeConfig
     ) : RecyclerView.Adapter<Adapter.ViewHolder>() {
         var selectedPosition = -1
-        private var fpxBankStatuses: FpxBankStatuses = FpxBankStatuses.EMPTY
+        private var fpxBankStatuses: FpxBankStatuses = FpxBankStatuses.DEFAULT
 
         internal val selectedBank: FpxBank?
             get() = if (selectedPosition == -1) {
@@ -108,7 +108,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
             viewHolder.setSelected(i == selectedPosition)
 
             val fpxBank = getItem(i)
-            viewHolder.update(fpxBank, fpxBankStatuses.isOnline(fpxBank.id))
+            viewHolder.update(fpxBank, fpxBankStatuses.isOnline(fpxBank))
             viewHolder.itemView.setOnClickListener {
                 val currentPosition = viewHolder.adapterPosition
                 if (currentPosition != selectedPosition) {
@@ -142,7 +142,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
 
             FpxBank.values().indices
                 .filterNot { position ->
-                    fpxBankStatuses.isOnline(getItem(position).id)
+                    fpxBankStatuses.isOnline(getItem(position))
                 }
                 .forEach { position ->
                     notifyItemChanged(position)

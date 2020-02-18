@@ -41,11 +41,11 @@ internal class FpxViewModel internal constructor(
                 stripeRepository.getFpxBankStatus(
                     ApiRequest.Options(paymentConfiguration.publishableKey))
             } catch (e: Exception) {
-                null
+                FpxBankStatuses.DEFAULT
             }
 
             withContext(Main) {
-                fpxBankStatuses?.let {
+                fpxBankStatuses.let {
                     this@FpxViewModel.internalFpxBankStatuses.value = it
                 }
             }

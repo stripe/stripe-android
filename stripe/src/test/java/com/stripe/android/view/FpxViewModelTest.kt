@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.model.FpxBankStatuses
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -13,19 +14,22 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class FpxViewModelTest {
-    private lateinit var context: Application
+    private val application: Application = ApplicationProvider.getApplicationContext()
 
     @BeforeTest
     fun setup() {
-        context = ApplicationProvider.getApplicationContext()
-        PaymentConfiguration.init(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        PaymentConfiguration.init(application, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
     }
 
     @Test
     fun loadFpxBankStatues_workingOnMainThread_shouldUpdateLiveData() {
-        val viewModel = FpxViewModel(context, MainScope())
+        var bankStatuses: FpxBankStatuses? = null
+        val viewModel = FpxViewModel(application, MainScope())
         viewModel.loadFpxBankStatues()
-        val fpxBankStatuses = requireNotNull(viewModel.fpxBankStatuses.value)
-        assertTrue(fpxBankStatuses.isOnline(FpxBank.Hsbc.id))
+        viewModel.fpxBankStatuses.observeForever {
+            bankStatuses = it
+        }
+
+        assertTrue(requireNotNull(bankStatuses).isOnline(FpxBank.Hsbc))
     }
 }
