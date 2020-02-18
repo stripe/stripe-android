@@ -28,6 +28,20 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 * [#2180](https://github.com/stripe/stripe-android/pull/2180) Remove `PaymentSession.paymentSessionData`
 * [#2185](https://github.com/stripe/stripe-android/pull/2185) Convert `Card.FundingType` to `CardFunding` enum
 * [#2189](https://github.com/stripe/stripe-android/pull/2189) Cleanup `StripeException` subclasses
+* [#2194](https://github.com/stripe/stripe-android/pull/2194) Upgrade 3DS2 SDK to `2.5.4`
+    * Update `com.google.android.material:material` to `1.1.0`
+    * Update 3DS2 styles for consistency
+        * Create `BaseStripe3DS2TextInputLayout` that extends `Widget.MaterialComponents.TextInputLayout.OutlinedBox`
+        * Create `Stripe3DS2TextInputLayout` that extends `BaseStripe3DS2TextInputLayout`
+        * Apply `Stripe3DS2TextInputLayout` to `TextInputLayout`
+        * Create `BaseStripe3DS2EditText` with parent `Widget.MaterialComponents.TextInputEditText.OutlinedBox`
+        * Rename `Stripe3DS2EditTextTheme` to `Stripe3DS2EditText` and change its parent to `BaseStripe3DS2EditText`
+        * Apply `Stripe3DS2EditText` to `TextInputEditText`
+* [#2195](https://github.com/stripe/stripe-android/pull/2195) Upgrade kotlin coroutines to 1.3.3
+* [#2196](https://github.com/stripe/stripe-android/pull/2196) Create `SourceTypeModel` sealed class
+    * Move `SourceCardData` subclass to `SourceTypeModel.Card`
+    * Move `SourceSepaDebitData` subclass to `SourceTypeModel.SepaDebit`
+    * Change type of `Source#sourceTypeModel` to `SourceTypeModel?`
 
 ## 13.2.0 - 2020-02-03
 * [#2112](https://github.com/stripe/stripe-android/pull/2112) Enable adding Mandate to confirm params

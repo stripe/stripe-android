@@ -33,6 +33,11 @@
       automatically when the host `Activity` or `Fragment` is destroyed
     - Remove `PaymentSessionData.paymentSessionData`; this data will be returned via
       `PaymentSessionListener#onPaymentSessionDataChanged()
+- Changes to `StripeSourceTypeModel`
+    - Rename to `SourceTypeModel` and make a sealed class
+    - Move `SourceCardData` subclass to `SourceTypeModel.Card`
+    - Move `SourceSepaDebitData` subclass to `SourceTypeModel.SepaDebit`
+    - Change type of `Source#sourceTypeModel` to `SourceTypeModel?`
 - Changes to `Card.FundingType`
     - Rename to `CardFunding` and convert to an `enum`
 - Changes to `StripeException` subclasses
@@ -51,6 +56,13 @@
       invalidRequestException.stripeError?.declineCode
       ```
     - `RateLimitException` now extends `StripeException`
+- Update 3DS2 styles
+    - Create `BaseStripe3DS2TextInputLayout` that extends `Widget.MaterialComponents.TextInputLayout.OutlinedBox`
+    - Create `Stripe3DS2TextInputLayout` that extends `BaseStripe3DS2TextInputLayout`
+    - Apply `Stripe3DS2TextInputLayout` to `TextInputLayout`
+    - Create `BaseStripe3DS2EditText` with parent `Widget.MaterialComponents.TextInputEditText.OutlinedBox`
+    - Rename `Stripe3DS2EditTextTheme` to `Stripe3DS2EditText` and change its parent to `BaseStripe3DS2EditText`
+    - Apply `Stripe3DS2EditText` to `TextInputEditText`
 
 ## Migrating from versions < 13.0.0
 - Changes to `Card` and `SourceCardData`
