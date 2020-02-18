@@ -151,7 +151,7 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
             )
             listener.onIssuingCardPinRetrieved(pin)
         } catch (e: InvalidRequestException) {
-            when (e.errorCode) {
+            when (e.stripeError?.code) {
                 "expired" -> {
                     listener.onError(
                         CardPinActionError.ONE_TIME_CODE_EXPIRED,
@@ -237,7 +237,7 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
             )
             listener.onIssuingCardPinUpdated()
         } catch (e: InvalidRequestException) {
-            when (e.errorCode) {
+            when (e.stripeError?.code) {
                 "expired" -> {
                     listener.onError(
                         CardPinActionError.ONE_TIME_CODE_EXPIRED,

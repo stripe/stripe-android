@@ -398,7 +398,7 @@ public class StripeTest {
                         stripe.createSourceSynchronous(weChatPaySourceParams);
                     }
                 });
-        assertEquals("payment_method_unactivated", ex.getErrorCode());
+        assertEquals("payment_method_unactivated", ex.getStripeError().getCode());
         assertEquals(
                 "This payment method (wechat) is not activated for your account. You can only create testmode wechat payment methods. You can learn more about this here https://support.stripe.com/questions/i-am-having-trouble-activating-a-payment-method",
                 ex.getMessage()
