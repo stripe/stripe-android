@@ -30,6 +30,7 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 * [#2189](https://github.com/stripe/stripe-android/pull/2189) Cleanup `StripeException` subclasses
 * [#2194](https://github.com/stripe/stripe-android/pull/2194) Upgrade 3DS2 SDK to `2.5.4`
     * Update `com.google.android.material:material` to `1.1.0`
+    * Fix accessibility issues on 3DS2 challenge screen
     * Update 3DS2 styles for consistency
         * Create `BaseStripe3DS2TextInputLayout` that extends `Widget.MaterialComponents.TextInputLayout.OutlinedBox`
         * Create `Stripe3DS2TextInputLayout` that extends `BaseStripe3DS2TextInputLayout`
