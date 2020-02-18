@@ -31,8 +31,26 @@
       by `PaymentSession`
     - `PaymentSession#onDestroy()` has been removed; the `listener` instance is now released
       automatically when the host `Activity` or `Fragment` is destroyed
-    - Remove `PaymentSessionData.paymentSessionData`. This data will be returned via
-      `PaymentSessionListener#onPaymentSessionDataChanged()`.
+    - Remove `PaymentSessionData.paymentSessionData`; this data will be returned via
+      `PaymentSessionListener#onPaymentSessionDataChanged()
+- Changes to `Card.FundingType`
+    - Rename to `CardFunding` and convert to an `enum`
+- Changes to `StripeException` subclasses
+    - `InvalidRequestException` is now `final`
+    - Remove `InvalidRequestException`'s `param`, `errorCode`, and `errorDeclineCode` properties;
+      these can be accessed via the `stripeError` property
+      ```kotlin
+      // before
+      invalidRequestException.param
+      invalidRequestException.errorCode
+      invalidRequestException.errorDeclineCode
+
+      // after
+      invalidRequestException.stripeError?.param
+      invalidRequestException.stripeError?.code
+      invalidRequestException.stripeError?.declineCode
+      ```
+    - `RateLimitException` now extends `StripeException`
 
 ## Migrating from versions < 13.0.0
 - Changes to `Card` and `SourceCardData`
