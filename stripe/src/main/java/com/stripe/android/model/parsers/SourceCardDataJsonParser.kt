@@ -1,8 +1,8 @@
 package com.stripe.android.model.parsers
 
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
 import com.stripe.android.model.SourceCardData
 import com.stripe.android.model.StripeJsonUtils
 import com.stripe.android.model.TokenizationMethod
@@ -20,7 +20,7 @@ internal class SourceCardDataJsonParser : ModelJsonParser<SourceCardData> {
             dynamicLast4 = StripeJsonUtils.optString(json, FIELD_DYNAMIC_LAST4),
             expiryMonth = StripeJsonUtils.optInteger(json, FIELD_EXP_MONTH),
             expiryYear = StripeJsonUtils.optInteger(json, FIELD_EXP_YEAR),
-            funding = Card.asFundingType(StripeJsonUtils.optString(json, FIELD_FUNDING)),
+            funding = CardFunding.fromCode(StripeJsonUtils.optString(json, FIELD_FUNDING)),
             last4 = StripeJsonUtils.optString(json, FIELD_LAST4),
             threeDSecureStatus = asThreeDSecureStatus(
                 StripeJsonUtils.optString(json, FIELD_THREE_D_SECURE)

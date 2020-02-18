@@ -1,8 +1,8 @@
 package com.stripe.android.model.parsers
 
 import com.stripe.android.model.Card
-import com.stripe.android.model.Card.FundingType
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
 import com.stripe.android.model.StripeJsonUtils
 import com.stripe.android.model.TokenizationMethod
 import org.json.JSONObject
@@ -36,7 +36,7 @@ internal class CardJsonParser : ModelJsonParser<Card> {
             .customer(StripeJsonUtils.optString(json, FIELD_CUSTOMER))
             .currency(StripeJsonUtils.optCurrency(json, FIELD_CURRENCY))
             .cvcCheck(StripeJsonUtils.optString(json, FIELD_CVC_CHECK))
-            .funding(asFundingType(StripeJsonUtils.optString(json, FIELD_FUNDING)))
+            .funding(CardFunding.fromCode(StripeJsonUtils.optString(json, FIELD_FUNDING)))
             .fingerprint(StripeJsonUtils.optString(json, FIELD_FINGERPRINT))
             .id(StripeJsonUtils.optString(json, FIELD_ID))
             .last4(StripeJsonUtils.optString(json, FIELD_LAST4))
@@ -77,29 +77,5 @@ internal class CardJsonParser : ModelJsonParser<Card> {
         private const val FIELD_LAST4 = "last4"
         private const val FIELD_ID = "id"
         private const val FIELD_TOKENIZATION_METHOD = "tokenization_method"
-
-        /**
-         * Converts an unchecked String value to a [FundingType] or `null`.
-         *
-         * @param possibleFundingType a String that might match a [FundingType] or be empty
-         * @return `null` if the input is blank, else the appropriate [FundingType]
-         */
-        @JvmStatic
-        @FundingType
-        fun asFundingType(possibleFundingType: String?): String? {
-            if (possibleFundingType.isNullOrBlank()) {
-                return null
-            }
-
-            return when {
-                FundingType.CREDIT.equals(possibleFundingType, ignoreCase = true) ->
-                    FundingType.CREDIT
-                FundingType.DEBIT.equals(possibleFundingType, ignoreCase = true) ->
-                    FundingType.DEBIT
-                FundingType.PREPAID.equals(possibleFundingType, ignoreCase = true) ->
-                    FundingType.PREPAID
-                else -> FundingType.UNKNOWN
-            }
-        }
     }
 }

@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import com.stripe.android.CardNumberFixtures
-import com.stripe.android.model.Card.Companion.asFundingType
 import com.stripe.android.model.parsers.CardJsonParser
 import java.util.Calendar
 import kotlin.test.BeforeTest
@@ -25,41 +24,6 @@ class CardTest {
         calendar.set(Calendar.YEAR, 1997)
         calendar.set(Calendar.MONTH, Calendar.AUGUST)
         calendar.set(Calendar.DAY_OF_MONTH, 29)
-    }
-
-    @Test
-    fun asFundingType_whenDebit_returnsDebit() {
-        assertEquals(Card.FundingType.DEBIT, asFundingType("debit"))
-    }
-
-    @Test
-    fun asFundingType_whenCredit_returnsCredit() {
-        assertEquals(Card.FundingType.CREDIT, asFundingType("credit"))
-    }
-
-    @Test
-    fun asFundingType_whenCreditAndCapitalized_returnsCredit() {
-        assertEquals(Card.FundingType.CREDIT, asFundingType("Credit"))
-    }
-
-    @Test
-    fun asFundingType_whenNull_returnsNull() {
-        assertNull(asFundingType(null))
-    }
-
-    @Test
-    fun asFundingType_whenBlank_returnsNull() {
-        assertNull(asFundingType("   \t"))
-    }
-
-    @Test
-    fun asFundingType_whenUnknown_returnsUnknown() {
-        assertEquals(Card.FundingType.UNKNOWN, asFundingType("unknown"))
-    }
-
-    @Test
-    fun asFundingType_whenGobbledegook_returnsUnkown() {
-        assertEquals(Card.FundingType.UNKNOWN, asFundingType("personal iou"))
     }
 
     @Test
@@ -652,7 +616,7 @@ class CardTest {
 
         internal val CARD_USD = Card.Builder(expMonth = 8, expYear = 2017)
             .brand(CardBrand.Visa)
-            .funding(Card.FundingType.CREDIT)
+            .funding(CardFunding.Credit)
             .last4("4242")
             .id("card_189fi32eZvKYlo2CHK8NPRME")
             .country("US")

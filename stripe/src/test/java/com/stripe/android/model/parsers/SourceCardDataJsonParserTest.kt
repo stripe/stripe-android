@@ -1,7 +1,7 @@
 package com.stripe.android.model.parsers
 
-import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
 import com.stripe.android.model.SourceCardData
 import com.stripe.android.model.SourceFixtures
 import com.stripe.android.model.TokenizationMethod
@@ -29,7 +29,7 @@ class SourceCardDataJsonParserTest {
     @Test
     fun fromExampleJsonCard_createsExpectedObject() {
         assertEquals(CardBrand.Visa, CARD_DATA.brand)
-        assertEquals(Card.FundingType.CREDIT, CARD_DATA.funding)
+        assertEquals(CardFunding.Credit, CARD_DATA.funding)
         assertEquals("4242", CARD_DATA.last4)
         assertNotNull(CARD_DATA.expiryMonth)
         assertNotNull(CARD_DATA.expiryYear)

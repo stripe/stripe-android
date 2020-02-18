@@ -2,7 +2,6 @@ package com.stripe.android.model
 
 import androidx.annotation.IntRange
 import androidx.annotation.Size
-import androidx.annotation.StringDef
 import com.stripe.android.CardUtils
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.parsers.CardJsonParser
@@ -128,9 +127,7 @@ data class Card internal constructor(
      *
      * [API Reference](https://stripe.com/docs/api/cards/object#card_object-funding)
      */
-    @FundingType
-    @get:FundingType
-    val funding: String?,
+    val funding: CardFunding?,
 
     /**
      * @return Uniquely identifies this particular card number. You can use this attribute to
@@ -198,17 +195,6 @@ data class Card internal constructor(
      */
     val metadata: Map<String, String>?
 ) : StripeModel, StripePaymentSource, TokenParams(Token.TokenType.CARD, loggingTokens) {
-
-    @Retention(AnnotationRetention.SOURCE)
-    @StringDef(FundingType.CREDIT, FundingType.DEBIT, FundingType.PREPAID, FundingType.UNKNOWN)
-    annotation class FundingType {
-        companion object {
-            const val CREDIT: String = "credit"
-            const val DEBIT: String = "debit"
-            const val PREPAID: String = "prepaid"
-            const val UNKNOWN: String = "unknown"
-        }
-    }
 
     fun toPaymentMethodsParams(): PaymentMethodCreateParams {
         return PaymentMethodCreateParams.create(
@@ -396,8 +382,7 @@ data class Card internal constructor(
         private var addressZipCheck: String? = null
         private var addressCountry: String? = null
         private var brand: CardBrand? = null
-        @FundingType
-        private var funding: String? = null
+        private var funding: CardFunding? = null
         @Size(4)
         private var last4: String? = null
         private var fingerprint: String? = null
@@ -455,7 +440,7 @@ data class Card internal constructor(
             return this
         }
 
-        fun funding(@FundingType funding: String?): Builder = apply {
+        fun funding(funding: CardFunding?): Builder = apply {
             this.funding = funding
         }
 
@@ -520,7 +505,7 @@ data class Card internal constructor(
                 last4 = last4,
                 brand = brand ?: CardUtils.getPossibleCardType(number),
                 fingerprint = fingerprint.takeUnless { it.isNullOrBlank() },
-                funding = asFundingType(funding).takeUnless { it.isNullOrBlank() },
+                funding = funding,
                 country = country.takeUnless { it.isNullOrBlank() },
                 currency = currency.takeUnless { it.isNullOrBlank() },
                 customerId = customerId.takeUnless { it.isNullOrBlank() },
@@ -547,30 +532,6 @@ data class Card internal constructor(
 
     companion object {
         internal const val OBJECT_TYPE = "card"
-
-        /**
-         * Converts an unchecked String value to a [FundingType] or `null`.
-         *
-         * @param possibleFundingType a String that might match a [FundingType] or be empty
-         * @return `null` if the input is blank, else the appropriate [FundingType]
-         */
-        @JvmStatic
-        @FundingType
-        fun asFundingType(possibleFundingType: String?): String? {
-            if (possibleFundingType.isNullOrBlank()) {
-                return null
-            }
-
-            return when {
-                FundingType.CREDIT.equals(possibleFundingType, ignoreCase = true) ->
-                    FundingType.CREDIT
-                FundingType.DEBIT.equals(possibleFundingType, ignoreCase = true) ->
-                    FundingType.DEBIT
-                FundingType.PREPAID.equals(possibleFundingType, ignoreCase = true) ->
-                    FundingType.PREPAID
-                else -> FundingType.UNKNOWN
-            }
-        }
 
         /**
          * Create a Card object from a raw JSON string.
