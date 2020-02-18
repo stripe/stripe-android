@@ -26,7 +26,7 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
       selected payment method, if it exists, and return via
       `PaymentSessionListener#onPaymentSessionDataChanged()`
 * [#2180](https://github.com/stripe/stripe-android/pull/2180) Remove `PaymentSession.paymentSessionData`
-* [#2185](https://github.com/stripe/stripe-android/pull/2189) Convert `Card.FundingType` to `CardFunding` enum
+* [#2185](https://github.com/stripe/stripe-android/pull/2185) Convert `Card.FundingType` to `CardFunding` enum
 * [#2189](https://github.com/stripe/stripe-android/pull/2189) Cleanup `StripeException` subclasses
 
 ## 13.2.0 - 2020-02-03
