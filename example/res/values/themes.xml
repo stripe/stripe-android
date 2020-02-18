@@ -53,24 +53,14 @@
         <!-- 3DS2 Processing Screen spinner color -->
         <item name="colorAccent">@color/accent</item>
         <item name="android:textColorHint">@color/textPrimary</item>
-        <item name="textInputStyle">@style/Stripe3DS2TextInput</item>
+        <item name="textInputStyle">@style/Stripe3DS2TextInputLayout</item>
         <item name="android:editTextColor">@color/textPrimary</item>
         <item name="editTextColor">@color/textPrimary</item>
     </style>
 
-    <!-- Applied to 3DS2 Challenge Screen EditText -->
-    <style name="Stripe3DS2TextInput" parent="Widget.MaterialComponents.TextInputLayout.FilledBox.Dense">
-        <!-- EditText background color -->
-        <item name="boxBackgroundColor">@android:color/transparent</item>
+    <!-- Applied to 3DS2 Challenge Screen TextInputLayout -->
+    <style name="Stripe3DS2TextInputLayout" parent="BaseStripe3DS2TextInputLayout">
         <item name="hintTextAppearance">@style/Stripe3DS2TextInputHintTextAppearance</item>
-    </style>
-
-    <!-- Applied to 3DS2 Challenge Screen EditText -->
-    <style name="Stripe3DS2EditTextTheme" parent="Stripe3DS2Theme">
-        <!-- EditText underline color when active, cursor color -->
-        <item name="colorControlActivated">@color/accent</item>
-        <!-- EditText underline color when inactive -->
-        <item name="colorControlNormal">@color/accent</item>
     </style>
 
     <!-- Applied to 3DS2 Challenge Screen EditText label/hint -->
