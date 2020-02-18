@@ -270,8 +270,8 @@ class StripeApiRepositoryTest {
                 )
             }
 
-        assertEquals("source", invalidRequestException.param)
-        assertEquals("resource_missing", invalidRequestException.errorCode)
+        assertEquals("source", invalidRequestException.stripeError?.param)
+        assertEquals("resource_missing", invalidRequestException.stripeError?.code)
     }
 
     @Test
@@ -284,8 +284,8 @@ class StripeApiRepositoryTest {
                 )
             }
         assertEquals(HttpURLConnection.HTTP_NOT_FOUND, invalidRequestException.statusCode)
-        assertEquals("source", invalidRequestException.param)
-        assertEquals("resource_missing", invalidRequestException.errorCode)
+        assertEquals("source", invalidRequestException.stripeError?.param)
+        assertEquals("resource_missing", invalidRequestException.stripeError?.code)
     }
 
     @Test
@@ -665,7 +665,7 @@ class StripeApiRepositoryTest {
             "This PaymentIntent could be not be fulfilled via this session because a different payment method was attached to it. Another session could be attempting to fulfill this PaymentIntent. Please complete that session or try again.",
             exception.message
         )
-        assertEquals("payment_intent_unexpected_state", exception.errorCode)
+        assertEquals("payment_intent_unexpected_state", exception.stripeError?.code)
     }
 
     @Test
