@@ -4,7 +4,7 @@
 This release includes several breaking changes.
 See the [migration guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) for more details.
 
-* [#2136](https://github.com/stripe/stripe-android/pull/2136) Bump com.google.android.material:material to 1.1.0
+* [#2136](https://github.com/stripe/stripe-android/pull/2136) Update `com.google.android.material:material` to `1.1.0`
 * [#2141](https://github.com/stripe/stripe-android/pull/2141) Fix crash when deleting a payment method in `PaymentMethodsActivity`
 * [#2155](https://github.com/stripe/stripe-android/pull/2155) Fix parceling of `PaymentRelayStarter.Args`
 * [#2156](https://github.com/stripe/stripe-android/pull/2156) Fix FPX bank order
