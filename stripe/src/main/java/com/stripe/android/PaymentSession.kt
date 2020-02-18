@@ -27,6 +27,9 @@ import java.lang.ref.WeakReference
 /**
  * Represents a single start-to-finish payment operation.
  *
+ * See [Using Android basic integration](https://stripe.com/docs/mobile/android/basic) for more
+ * information.
+ *
  * If [PaymentSessionConfig.shouldPrefetchCustomer] is `true`, and the customer has previously
  * selected a payment method, [PaymentSessionData.paymentMethod] will be updated with the
  * payment method and [PaymentSessionListener.onPaymentSessionDataChanged] will be called.
