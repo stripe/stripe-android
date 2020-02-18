@@ -20,7 +20,14 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 * [#2173](https://github.com/stripe/stripe-android/pull/2173) Fix Mastercard display name
 * [#2174](https://github.com/stripe/stripe-android/pull/2174) Add optional params to `CustomerSession.getPaymentMethods()`
     * See [List a Customer's PaymentMethods](https://stripe.com/docs/api/payment_methods/list) for more details
+* [#2179](https://github.com/stripe/stripe-android/pull/2179) Fetch previously used `PaymentMethod` in `PaymentSession`
+    * If `PaymentSessionConfig.shouldPrefetchCustomer == true`, when a
+      new `PaymentSession` is started, fetch the customer's previously
+      selected payment method, if it exists, and return via
+      `PaymentSessionListener#onPaymentSessionDataChanged()`
 * [#2180](https://github.com/stripe/stripe-android/pull/2180) Remove `PaymentSession.paymentSessionData`
+* [#2185](https://github.com/stripe/stripe-android/pull/2185) Convert `Card.FundingType` to `CardFunding` enum
+* [#2189](https://github.com/stripe/stripe-android/pull/2189) Cleanup `StripeException` subclasses
 
 ## 13.2.0 - 2020-02-03
 * [#2112](https://github.com/stripe/stripe-android/pull/2112) Enable adding Mandate to confirm params
