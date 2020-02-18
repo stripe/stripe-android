@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.model.Source
-import com.stripe.android.model.SourceCardData
+import com.stripe.android.model.SourceTypeModel
 import com.stripe.example.R
 
 internal class SourcesAdapter : RecyclerView.Adapter<SourcesAdapter.ViewHolder>() {
@@ -39,7 +39,7 @@ internal class SourcesAdapter : RecyclerView.Adapter<SourcesAdapter.ViewHolder>(
 
         private fun getRedirectStatus(source: Source): String? {
             return source.redirect?.status
-                ?: (source.sourceTypeModel as SourceCardData).threeDSecureStatus
+                ?: (source.sourceTypeModel as SourceTypeModel.Card).threeDSecureStatus
         }
     }
 

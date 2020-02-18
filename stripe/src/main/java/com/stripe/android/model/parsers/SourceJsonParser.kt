@@ -2,9 +2,9 @@ package com.stripe.android.model.parsers
 
 import androidx.annotation.Size
 import com.stripe.android.model.Source
+import com.stripe.android.model.SourceTypeModel
 import com.stripe.android.model.StripeJsonUtils
 import com.stripe.android.model.StripeModel
-import com.stripe.android.model.StripeSourceTypeModel
 import org.json.JSONObject
 
 internal class SourceJsonParser : ModelJsonParser<Source> {
@@ -20,7 +20,9 @@ internal class SourceJsonParser : ModelJsonParser<Source> {
         private const val VALUE_SOURCE = "source"
         private const val VALUE_CARD = "card"
 
-        private val MODELED_TYPES = setOf(Source.SourceType.CARD, Source.SourceType.SEPA_DEBIT)
+        private val MODELED_TYPES = setOf(
+            Source.SourceType.CARD, Source.SourceType.SEPA_DEBIT
+        )
 
         private const val FIELD_ID: String = "id"
         private const val FIELD_OBJECT: String = "object"
@@ -63,7 +65,7 @@ internal class SourceJsonParser : ModelJsonParser<Source> {
                 jsonObject.optJSONObject(typeRaw)
             )
             val sourceTypeModel = if (MODELED_TYPES.contains(typeRaw)) {
-                optStripeJsonModel<StripeSourceTypeModel>(jsonObject, typeRaw)
+                optStripeJsonModel<SourceTypeModel>(jsonObject, typeRaw)
             } else {
                 null
             }

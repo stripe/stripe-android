@@ -1,12 +1,12 @@
 package com.stripe.android.model.parsers
 
-import com.stripe.android.model.SourceSepaDebitData
+import com.stripe.android.model.SourceTypeModel
 import com.stripe.android.model.StripeJsonUtils
 import org.json.JSONObject
 
-internal class SourceSepaDebitDataJsonParser : ModelJsonParser<SourceSepaDebitData> {
-    override fun parse(json: JSONObject): SourceSepaDebitData {
-        return SourceSepaDebitData(
+internal class SourceSepaDebitDataJsonParser : ModelJsonParser<SourceTypeModel.SepaDebit> {
+    override fun parse(json: JSONObject): SourceTypeModel.SepaDebit {
+        return SourceTypeModel.SepaDebit(
             bankCode = StripeJsonUtils.optString(json, FIELD_BANK_CODE),
             branchCode = StripeJsonUtils.optString(json, FIELD_BRANCH_CODE),
             country = StripeJsonUtils.optString(json, FIELD_COUNTRY),

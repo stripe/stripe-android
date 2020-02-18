@@ -15,14 +15,14 @@ data class CustomerSource internal constructor(
 
     val tokenizationMethod: String?
         get() {
-            val paymentAsSource = asSource()
-            val paymentAsCard = asCard()
-            return if (paymentAsSource != null && Source.SourceType.CARD == paymentAsSource.type) {
-                val cardData = paymentAsSource.sourceTypeModel as SourceCardData?
-                cardData?.tokenizationMethod?.code
-            } else {
-                paymentAsCard?.tokenizationMethod?.code
-            }
+            return asSource()?.let { source ->
+                when (source.sourceTypeModel) {
+                    is SourceTypeModel.Card -> {
+                        source.sourceTypeModel.tokenizationMethod?.code
+                    }
+                    else -> null
+                }
+            } ?: asCard()?.tokenizationMethod?.code
         }
 
     val sourceType: String
@@ -34,14 +34,10 @@ data class CustomerSource internal constructor(
         }
 
     fun asSource(): Source? {
-        return if (stripePaymentSource is Source) {
-            stripePaymentSource
-        } else null
+        return stripePaymentSource as? Source?
     }
 
     fun asCard(): Card? {
-        return if (stripePaymentSource is Card) {
-            stripePaymentSource
-        } else null
+        return stripePaymentSource as? Card?
     }
 }
