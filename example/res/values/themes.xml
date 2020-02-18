@@ -65,14 +65,6 @@
         <item name="hintTextAppearance">@style/Stripe3DS2TextInputHintTextAppearance</item>
     </style>
 
-    <!-- Applied to 3DS2 Challenge Screen EditText -->
-    <style name="Stripe3DS2EditTextTheme" parent="Stripe3DS2Theme">
-        <!-- EditText underline color when active, cursor color -->
-        <item name="colorControlActivated">@color/accent</item>
-        <!-- EditText underline color when inactive -->
-        <item name="colorControlNormal">@color/accent</item>
-    </style>
-
     <!-- Applied to 3DS2 Challenge Screen EditText label/hint -->
     <style name="Stripe3DS2TextInputHintTextAppearance" parent="TextAppearance.Design.Hint">
         <!-- Inactive and Active label color, pointing to a selector-->
