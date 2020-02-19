@@ -1,5 +1,6 @@
 package com.stripe.android
 
+import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
@@ -12,13 +13,13 @@ import org.robolectric.RobolectricTestRunner
 class AnalyticsRequestFactoryTest {
 
     private val logger: Logger = mock()
+    private val context = ApplicationProvider.getApplicationContext<Context>()
 
     @Test
     fun create_shouldLogRequest() {
         AnalyticsRequestFactory(logger).create(
-            AnalyticsDataFactory(ApplicationProvider.getApplicationContext())
+            AnalyticsDataFactory(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
                 .createPaymentMethodCreationParams(
-                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                     "pm_12345",
                     PaymentMethod.Type.Card,
                     emptySet()

@@ -55,7 +55,7 @@ class StripeApiRepositoryTest {
         ApplicationProvider.getApplicationContext<Context>()
     }
     private val stripeApiRepository: StripeApiRepository by lazy {
-        StripeApiRepository(context)
+        StripeApiRepository(context, DEFAULT_OPTIONS.apiKey)
     }
     private val fileFactory: FileFactory by lazy {
         FileFactory(context)
@@ -404,6 +404,7 @@ class StripeApiRepositoryTest {
     fun createSource_createsObjectAndLogs() {
         val stripeApiRepository = StripeApiRepository(
             context,
+            ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
             stripeApiRequestExecutor = ApiRequestExecutor.Default(),
             fireAndForgetRequestExecutor = fireAndForgetRequestExecutor
         )
@@ -707,6 +708,7 @@ class StripeApiRepositoryTest {
 
         val stripeRepository = StripeApiRepository(
             context,
+            ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
             sdkVersion = "AndroidBindings/13.0.0"
         )
 
@@ -728,6 +730,7 @@ class StripeApiRepositoryTest {
 
         val stripeRepository = StripeApiRepository(
             context,
+            ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
             sdkVersion = "AndroidBindings/14.0.0"
         )
 
@@ -852,6 +855,7 @@ class StripeApiRepositoryTest {
     private fun create(): StripeApiRepository {
         return StripeApiRepository(
             context,
+            DEFAULT_OPTIONS.apiKey,
             stripeApiRequestExecutor = stripeApiRequestExecutor,
             fireAndForgetRequestExecutor = fireAndForgetRequestExecutor,
             networkUtils = StripeNetworkUtils(

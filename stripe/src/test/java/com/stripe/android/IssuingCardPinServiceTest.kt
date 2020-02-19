@@ -23,10 +23,9 @@ class IssuingCardPinServiceTest {
     private val stripeRepository: StripeRepository by lazy {
         StripeApiRepository(
             ApplicationProvider.getApplicationContext<Context>(),
-            null,
-            FakeLogger(),
-            stripeApiRequestExecutor,
-            FakeFireAndForgetRequestExecutor()
+            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeApiRequestExecutor = stripeApiRequestExecutor,
+            fireAndForgetRequestExecutor = FakeFireAndForgetRequestExecutor()
         )
     }
 

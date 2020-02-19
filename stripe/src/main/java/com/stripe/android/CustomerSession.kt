@@ -476,10 +476,11 @@ class CustomerSession @VisibleForTesting internal constructor(
                 timeSupplier = timeSupplier
             )
 
+            val publishableKey = PaymentConfiguration.getInstance(context).publishableKey
             instance = CustomerSession(
                 context,
-                StripeApiRepository(context, appInfo),
-                PaymentConfiguration.getInstance(context).publishableKey,
+                StripeApiRepository(context, publishableKey, appInfo),
+                publishableKey,
                 stripeAccountId,
                 createThreadPoolExecutor(),
                 operationIdFactory,

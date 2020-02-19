@@ -125,7 +125,7 @@ class StripePaymentAuthTest {
         return Stripe(
             StripeApiRepository(
                 context,
-                null,
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 stripeApiRequestExecutor = ApiRequestExecutor.Default(),
                 fireAndForgetRequestExecutor = FakeFireAndForgetRequestExecutor()
             ),
