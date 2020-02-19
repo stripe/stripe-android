@@ -513,6 +513,7 @@ data class PaymentMethod internal constructor(
         @Parcelize
         data class Networks(
             private val available: Set<String> = emptySet(),
+            private val selectionMandatory: Boolean = false,
             private val preferred: String? = null
         ) : StripeModel
     }

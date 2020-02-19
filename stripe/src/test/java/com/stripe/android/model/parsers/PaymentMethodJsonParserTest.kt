@@ -18,6 +18,7 @@ class PaymentMethodJsonParserTest {
             .isEqualTo(
                 PaymentMethod.Card.Networks(
                     available = setOf("network1", "network2"),
+                    selectionMandatory = true,
                     preferred = "network1"
                 )
             )

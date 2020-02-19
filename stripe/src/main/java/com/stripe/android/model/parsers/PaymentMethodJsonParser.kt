@@ -135,12 +135,17 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                     .toSet()
                 return PaymentMethod.Card.Networks(
                     available = available,
+                    selectionMandatory = StripeJsonUtils.optBoolean(
+                        json,
+                        FIELD_SELECTION_MANDATORY
+                    ),
                     preferred = StripeJsonUtils.optString(json, FIELD_PREFERRED)
                 )
             }
 
             private companion object {
                 private const val FIELD_AVAIABLE = "available"
+                private const val FIELD_SELECTION_MANDATORY = "selection_mandatory"
                 private const val FIELD_PREFERRED = "preferred"
             }
         }

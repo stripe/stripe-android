@@ -174,6 +174,7 @@ internal object PaymentMethodFixtures {
                         "network1",
                         "network2"
                     ],
+                    "selection_mandatory": true,
                     "preferred": "network1"
                 },
                 "three_d_secure_usage": {
