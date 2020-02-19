@@ -138,6 +138,117 @@ internal object PaymentMethodFixtures {
             """.trimIndent()
     )
 
+    internal val CARD_WITH_NETWORKS_JSON = JSONObject(
+        """
+        {
+            "id": "pm_1GDwTNAI5zDH",
+            "object": "payment_method",
+            "billing_details": {
+                "address": {
+                    "city": null,
+                    "country": null,
+                    "line1": null,
+                    "line2": null,
+                    "postal_code": null,
+                    "state": null
+                },
+                "email": null,
+                "name": null,
+                "phone": null
+            },
+            "card": {
+                "brand": "visa",
+                "checks": {
+                    "address_line1_check": null,
+                    "address_postal_code_check": null,
+                    "cvc_check": null
+                },
+                "country": "US",
+                "exp_month": 12,
+                "exp_year": 2024,
+                "funding": "credit",
+                "generated_from": null,
+                "last4": "9999",
+                "networks": {
+                    "available": [
+                        "network1",
+                        "network2"
+                    ],
+                    "preferred": "network1"
+                },
+                "three_d_secure_usage": {
+                    "supported": true
+                },
+                "wallet": null
+            },
+            "created": 15821393,
+            "customer": null,
+            "livemode": false,
+            "metadata": {},
+            "type": "card"
+        }
+        """.trimIndent()
+    )
+
+    val IDEAL_JSON = JSONObject(
+        """
+            {
+                "id": "pm_123456789",
+                "created": 1550757934255,
+                "customer": "cus_AQsHpvKfKwJDrF",
+                "livemode": true,
+                "type": "ideal",
+                "billing_details": {
+                    "address": {
+                        "city": "San Francisco",
+                        "country": "USA",
+                        "line1": "510 Townsend St",
+                        "postal_code": "94103",
+                        "state": "CA"
+                    },
+                    "email": "patrick@example.com",
+                    "name": "Patrick",
+                    "phone": "123-456-7890"
+                },
+                "ideal": {
+                    "bank": "my bank",
+                    "bic": "bank id"
+                }
+            }
+            """.trimIndent()
+    )
+
+    val FPX_JSON = JSONObject(
+        """
+            {
+                "id": "pm_1F5GlnH8dsfnfKo3gtixzcq0",
+                "object": "payment_method",
+                "billing_details": {
+                    "address": {
+                        "city": "San Francisco",
+                        "country": "USA",
+                        "line1": "510 Townsend St",
+                        "line2": null,
+                        "postal_code": "94103",
+                        "state": "CA"
+                    },
+                    "email": "patrick@example.com",
+                    "name": "Patrick",
+                    "phone": "123-456-7890"
+                },
+                "created": 1565290527,
+                "customer": null,
+                "fpx": {
+                    "account_holder_type": "individual",
+                    "bank": "hsbc"
+                },
+                "livemode": true,
+                "metadata": null,
+                "type": "fpx"
+            }
+            """.trimIndent()
+    )
+
     val CARD_PAYMENT_METHODS = listOf(
         PaymentMethod(
             type = PaymentMethod.Type.Card,

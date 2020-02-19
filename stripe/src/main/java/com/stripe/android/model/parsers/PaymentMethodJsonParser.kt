@@ -90,6 +90,9 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                 },
                 wallet = json.optJSONObject(FIELD_WALLET)?.let {
                     WalletJsonParser().parse(it)
+                },
+                networks = json.optJSONObject(FIELD_NETWORKS)?.let {
+                    NetworksJsonParser().parse(it)
                 }
             )
         }
@@ -124,6 +127,24 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
             }
         }
 
+        internal class NetworksJsonParser : ModelJsonParser<PaymentMethod.Card.Networks> {
+            override fun parse(json: JSONObject): PaymentMethod.Card.Networks? {
+                val available = StripeJsonUtils.jsonArrayToList(json.optJSONArray(FIELD_AVAIABLE))
+                    .orEmpty()
+                    .map { it.toString() }
+                    .toSet()
+                return PaymentMethod.Card.Networks(
+                    available = available,
+                    preferred = StripeJsonUtils.optString(json, FIELD_PREFERRED)
+                )
+            }
+
+            private companion object {
+                private const val FIELD_AVAIABLE = "available"
+                private const val FIELD_PREFERRED = "preferred"
+            }
+        }
+
         private companion object {
             private const val FIELD_BRAND = "brand"
             private const val FIELD_CHECKS = "checks"
@@ -134,6 +155,7 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
             private const val FIELD_LAST4 = "last4"
             private const val FIELD_THREE_D_SECURE_USAGE = "three_d_secure_usage"
             private const val FIELD_WALLET = "wallet"
+            private const val FIELD_NETWORKS = "networks"
         }
     }
 
