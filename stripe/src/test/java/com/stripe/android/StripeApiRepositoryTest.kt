@@ -2,6 +2,7 @@ package com.stripe.android
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argThat
@@ -313,22 +314,10 @@ class StripeApiRepositoryTest {
         )
         assertNotNull(response)
 
-        val responseHeaders = response.responseHeaders.orEmpty()
-
-        // the Stripe API response will either have a 'Stripe-Account' or 'stripe-account' header,
-        // so we need to check both
-        val accounts = when {
-            responseHeaders.containsKey(STRIPE_ACCOUNT_RESPONSE_HEADER) ->
-                responseHeaders[STRIPE_ACCOUNT_RESPONSE_HEADER]
-            responseHeaders.containsKey(
-                STRIPE_ACCOUNT_RESPONSE_HEADER.toLowerCase(Locale.ROOT)) ->
-                responseHeaders[STRIPE_ACCOUNT_RESPONSE_HEADER.toLowerCase(Locale.ROOT)]
-            else -> null
-        }
-
-        requireNotNull(accounts, { "Stripe API response should contain 'Stripe-Account' header" })
-        assertEquals(1, accounts.size)
-        assertEquals(connectAccountId, accounts[0])
+        val accountsHeader = response.getHeaderValue(STRIPE_ACCOUNT_RESPONSE_HEADER)
+        requireNotNull(accountsHeader, { "Stripe API response should contain 'Stripe-Account' header" })
+        assertThat(accountsHeader)
+            .containsExactly(connectAccountId)
     }
 
     @Test
@@ -561,7 +550,7 @@ class StripeApiRepositoryTest {
                 "url": "/v1/payment_methods"
             }
             """.trimIndent()
-        val stripeResponse = StripeResponse(200, responseBody, null)
+        val stripeResponse = StripeResponse(200, responseBody)
         val queryParams = mapOf(
             "customer" to "cus_123",
             "type" to PaymentMethod.Type.Card.code
@@ -612,7 +601,7 @@ class StripeApiRepositoryTest {
                 "url": "/v1/payment_methods"
             }
             """.trimIndent()
-        val stripeResponse = StripeResponse(200, responseBody, null)
+        val stripeResponse = StripeResponse(200, responseBody)
         val queryParams = mapOf(
             "customer" to "cus_123",
             "type" to PaymentMethod.Type.Card.code

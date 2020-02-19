@@ -23,13 +23,15 @@ internal data class StripeResponse internal constructor(
     /**
      * @return the response headers
      */
-    internal val responseHeaders: Map<String, List<String>>? = null
+    internal val responseHeaders: Map<String, List<String>> = emptyMap()
 ) {
     internal val isOk: Boolean
         get() = responseCode == HttpURLConnection.HTTP_OK
 
     internal val requestId: String?
-        get() = responseHeaders?.get("Request-Id")?.firstOrNull()
+        get() {
+            return getHeaderValue(REQUEST_ID_HEADER)?.firstOrNull()
+        }
 
     internal fun hasErrorCode(): Boolean {
         return responseCode < 200 || responseCode >= 300
@@ -45,5 +47,16 @@ internal data class StripeResponse internal constructor(
 
     override fun toString(): String {
         return "Request-Id: $requestId, Status Code: $responseCode"
+    }
+
+    internal fun getHeaderValue(key: String): List<String>? {
+        return responseHeaders.entries
+            .firstOrNull {
+                it.key.equals(key, ignoreCase = true)
+            }?.value
+    }
+
+    private companion object {
+        private const val REQUEST_ID_HEADER = "Request-Id"
     }
 }
