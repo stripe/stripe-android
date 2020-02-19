@@ -336,24 +336,22 @@ data class Card internal constructor(
     }
 
     override fun toParamMap(): Map<String, Any> {
-        return mapOf(Token.TokenType.CARD to createCardParams())
-    }
-
-    private fun createCardParams(): Map<String, Any?> {
-        return mapOf(
-            "number" to number.takeUnless { it.isNullOrBlank() },
-            "cvc" to cvc.takeUnless { it.isNullOrBlank() },
-            "exp_month" to expMonth,
-            "exp_year" to expYear,
-            "name" to name.takeUnless { it.isNullOrBlank() },
-            "currency" to currency.takeUnless { it.isNullOrBlank() },
-            "address_line1" to addressLine1.takeUnless { it.isNullOrBlank() },
-            "address_line2" to addressLine2.takeUnless { it.isNullOrBlank() },
-            "address_city" to addressCity.takeUnless { it.isNullOrBlank() },
-            "address_zip" to addressZip.takeUnless { it.isNullOrBlank() },
-            "address_state" to addressState.takeUnless { it.isNullOrBlank() },
-            "address_country" to addressCountry.takeUnless { it.isNullOrBlank() }
-        )
+        return CardParams(
+            number = number.orEmpty(),
+            expMonth = expMonth ?: 0,
+            expYear = expYear ?: 0,
+            cvc = cvc,
+            name = name,
+            currency = currency,
+            address = Address(
+                line1 = addressLine1,
+                line2 = addressLine2,
+                city = addressCity,
+                state = addressState,
+                postalCode = addressZip,
+                country = addressCountry
+            )
+        ).toParamMap()
     }
 
     /**

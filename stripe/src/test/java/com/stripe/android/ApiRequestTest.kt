@@ -1,5 +1,7 @@
 package com.stripe.android
 
+import android.net.Uri
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardFixtures
 import java.io.ByteArrayOutputStream
 import kotlin.test.Test
@@ -22,8 +24,8 @@ internal class ApiRequestTest {
             cardMap
         ).url
 
-        val expectedValue = "https://api.stripe.com/v1/sources?muid=BF3BF4D775100923AAAFA82884FB759001162E28&guid=6367C48DD193D56EA7B0BAAD25B19455E529F5EE&card%5Bexp_month%5D=1&card%5Bexp_year%5D=2050&card%5Bnumber%5D=4242424242424242&card%5Bcvc%5D=123"
-        assertEquals(expectedValue, url)
+        assertThat(Uri.parse(url))
+            .isEqualTo(Uri.parse("https://api.stripe.com/v1/sources?muid=BF3BF4D775100923AAAFA82884FB759001162E28&guid=6367C48DD193D56EA7B0BAAD25B19455E529F5EE&card%5Bnumber%5D=4242424242424242&card%5Bexp_month%5D=1&card%5Bcvc%5D=123&card%5Bexp_year%5D=2050"))
     }
 
     @Test
