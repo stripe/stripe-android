@@ -85,7 +85,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
         private val themeConfig: ThemeConfig
     ) : RecyclerView.Adapter<Adapter.ViewHolder>() {
         var selectedPosition = -1
-        private var fpxBankStatuses: FpxBankStatuses = FpxBankStatuses.DEFAULT
+        private var fpxBankStatuses: FpxBankStatuses = FpxBankStatuses()
 
         internal val selectedBank: FpxBank?
             get() = if (selectedPosition == -1) {

@@ -31,6 +31,7 @@ import com.stripe.android.model.StripeModel
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import com.stripe.android.model.parsers.CustomerJsonParser
+import com.stripe.android.model.parsers.FpxBankStatusesJsonParser
 import com.stripe.android.model.parsers.ModelJsonParser
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
@@ -765,7 +766,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 mapOf("account_holder_type" to "individual")
             )
         )
-        return FpxBankStatuses.fromJson(response.responseJson)
+        return FpxBankStatusesJsonParser().parse(response.responseJson)
     }
 
     /**

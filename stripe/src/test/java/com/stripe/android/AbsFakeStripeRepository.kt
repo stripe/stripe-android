@@ -220,7 +220,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
     }
 
     override fun getFpxBankStatus(options: ApiRequest.Options): FpxBankStatuses {
-        return FpxBankStatuses.DEFAULT
+        return FpxBankStatuses()
     }
 
     override fun start3ds2Auth(
