@@ -38,4 +38,30 @@ class CardParamsTest {
         assertThat(actualParams)
             .isEqualTo(expectedParams)
     }
+
+    @Test
+    fun builder_createsExpectedObject() {
+        val expected = CardParams(
+            number = CardNumberFixtures.VALID_VISA_NO_SPACES,
+            expMonth = 12,
+            expYear = 2025,
+            cvc = "123",
+            name = "Jenny Rosen",
+            address = AddressFixtures.ADDRESS,
+            currency = "usd"
+        )
+
+        val actual = CardParams.Builder()
+            .setNumber("4242424242424242")
+            .setExpMonth(12)
+            .setExpYear(2025)
+            .setCvc("123")
+            .setName("Jenny Rosen")
+            .setAddress(AddressFixtures.ADDRESS)
+            .setCurrency("usd")
+            .build()
+
+        assertThat(actual)
+            .isEqualTo(expected)
+    }
 }

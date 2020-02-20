@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
+import com.stripe.android.ObjectBuilder
 import kotlinx.android.parcel.Parcelize
 
 /**
@@ -89,6 +90,36 @@ internal data class CardParams @JvmOverloads constructor(
         }
 
         return mapOf(Token.TokenType.CARD to params)
+    }
+
+    class Builder : ObjectBuilder<CardParams> {
+        private var number: String? = null
+        private var expMonth: Int? = null
+        private var expYear: Int? = null
+        private var cvc: String? = null
+        private var name: String? = null
+        private var address: Address? = null
+        private var currency: String? = null
+
+        fun setNumber(number: String) = apply { this.number = number }
+        fun setExpMonth(expMonth: Int) = apply { this.expMonth = expMonth }
+        fun setExpYear(expYear: Int) = apply { this.expYear = expYear }
+        fun setCvc(cvc: String?) = apply { this.cvc = cvc }
+        fun setName(name: String?) = apply { this.name = name }
+        fun setAddress(address: Address?) = apply { this.address = address }
+        fun setCurrency(currency: String?) = apply { this.currency = currency }
+
+        override fun build(): CardParams {
+            return CardParams(
+                number = requireNotNull(number),
+                expMonth = requireNotNull(expMonth),
+                expYear = requireNotNull(expYear),
+                cvc = cvc,
+                name = name,
+                address = address,
+                currency = currency
+            )
+        }
     }
 
     private companion object {
