@@ -8,7 +8,9 @@ import kotlinx.android.parcel.Parcelize
  * [Create a card token](https://stripe.com/docs/api/tokens/create_card)
  */
 @Parcelize
-internal data class CardParams @JvmOverloads constructor(
+internal data class CardParams @JvmOverloads internal constructor(
+    internal var attribution: Set<String> = emptySet(),
+
     /**
      * [card.number](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-number)
      *
@@ -69,6 +71,77 @@ internal data class CardParams @JvmOverloads constructor(
      */
     private val currency: String? = null
 ) : StripeParamsModel, Parcelable {
+    constructor(
+        /**
+         * [card.number](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-number)
+         *
+         * Required
+         *
+         * The card number, as a string without any separators.
+         */
+        number: String,
+
+        /**
+         * [card.exp_month](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-exp_month)
+         *
+         * Required
+         *
+         * Two-digit number representing the card's expiration month.
+         */
+        expMonth: Int,
+
+        /**
+         * [card.exp_year](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-exp_year)
+         *
+         * Required
+         *
+         * Two- or four-digit number representing the card's expiration year.
+         */
+        expYear: Int,
+
+        /**
+         * [card.cvc](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-cvc)
+         *
+         * Usually required
+         *
+         * Card security code. Highly recommended to always include this value, but it's required only
+         * for accounts based in European countries.
+         */
+        cvc: String? = null,
+
+        /**
+         * [card.name](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-name)
+         *
+         * Optional
+         *
+         * Cardholder's full name.
+         */
+        name: String? = null,
+
+        address: Address? = null,
+
+        /**
+         * [card.currency](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-currency)
+         *
+         * Optional - Custom Connect Only
+         *
+         * Required in order to add the card to an account; in all other cases, this parameter is
+         * not used. When added to an account, the card (which must be a debit card) can be used
+         * as a transfer destination for funds in this currency. Currently, the only supported
+         * currency for debit card payouts is `usd`.
+         */
+        currency: String? = null
+    ) : this(
+        attribution = emptySet(),
+        number = number,
+        expMonth = expMonth,
+        expYear = expYear,
+        address = address,
+        cvc = cvc,
+        name = name,
+        currency = currency
+    )
+
     override fun toParamMap(): Map<String, Any> {
         val params: Map<String, Any> = listOf(
             PARAM_NUMBER to number,
@@ -100,14 +173,20 @@ internal data class CardParams @JvmOverloads constructor(
         private var name: String? = null
         private var address: Address? = null
         private var currency: String? = null
+        private var attribution: Set<String> = emptySet()
 
-        fun setNumber(number: String) = apply { this.number = number }
-        fun setExpMonth(expMonth: Int) = apply { this.expMonth = expMonth }
-        fun setExpYear(expYear: Int) = apply { this.expYear = expYear }
-        fun setCvc(cvc: String?) = apply { this.cvc = cvc }
-        fun setName(name: String?) = apply { this.name = name }
-        fun setAddress(address: Address?) = apply { this.address = address }
-        fun setCurrency(currency: String?) = apply { this.currency = currency }
+        fun setNumber(number: String): Builder = apply { this.number = number }
+        fun setExpMonth(expMonth: Int): Builder = apply { this.expMonth = expMonth }
+        fun setExpYear(expYear: Int): Builder = apply { this.expYear = expYear }
+        fun setCvc(cvc: String?): Builder = apply { this.cvc = cvc }
+        fun setName(name: String?): Builder = apply { this.name = name }
+        fun setAddress(address: Address?): Builder = apply { this.address = address }
+        fun setCurrency(currency: String?): Builder = apply { this.currency = currency }
+
+        @JvmSynthetic
+        internal fun setAttribution(attribution: Set<String>): Builder = apply {
+            this.attribution = attribution
+        }
 
         override fun build(): CardParams {
             return CardParams(
@@ -117,7 +196,8 @@ internal data class CardParams @JvmOverloads constructor(
                 cvc = cvc,
                 name = name,
                 address = address,
-                currency = currency
+                currency = currency,
+                attribution = attribution
             )
         }
     }

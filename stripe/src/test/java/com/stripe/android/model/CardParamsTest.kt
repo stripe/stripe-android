@@ -48,7 +48,8 @@ class CardParamsTest {
             cvc = "123",
             name = "Jenny Rosen",
             address = AddressFixtures.ADDRESS,
-            currency = "usd"
+            currency = "usd",
+            attribution = setOf("widget")
         )
 
         val actual = CardParams.Builder()
@@ -59,6 +60,7 @@ class CardParamsTest {
             .setName("Jenny Rosen")
             .setAddress(AddressFixtures.ADDRESS)
             .setCurrency("usd")
+            .setAttribution(setOf("widget"))
             .build()
 
         assertThat(actual)
