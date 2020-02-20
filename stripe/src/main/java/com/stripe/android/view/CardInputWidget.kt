@@ -379,24 +379,31 @@ class CardInputWidget @JvmOverloads constructor(
     }
 
     /**
-     * Expose a text watcher to receive updates when the card number is changed.
+     * Set a `TextWatcher` to receive card number changes.
      */
-    fun setCardNumberTextWatcher(cardNumberTextWatcher: TextWatcher?) {
+    override fun setCardNumberTextWatcher(cardNumberTextWatcher: TextWatcher?) {
         cardNumberEditText.addTextChangedListener(cardNumberTextWatcher)
     }
 
     /**
-     * Expose a text watcher to receive updates when the expiry date is changed.
+     * Set a `TextWatcher` to receive expiration date changes.
      */
-    fun setExpiryDateTextWatcher(expiryDateTextWatcher: TextWatcher?) {
+    override fun setExpiryDateTextWatcher(expiryDateTextWatcher: TextWatcher?) {
         expiryDateEditText.addTextChangedListener(expiryDateTextWatcher)
     }
 
     /**
-     * Expose a text watcher to receive updates when the cvc number is changed.
+     * Set a `TextWatcher` to receive CVC value changes.
      */
-    fun setCvcNumberTextWatcher(cvcNumberTextWatcher: TextWatcher?) {
+    override fun setCvcNumberTextWatcher(cvcNumberTextWatcher: TextWatcher?) {
         cvcNumberEditText.addTextChangedListener(cvcNumberTextWatcher)
+    }
+
+    /**
+     * Set a `TextWatcher` to receive postal code changes.
+     */
+    override fun setPostalCodeTextWatcher(postalCodeTextWatcher: TextWatcher?) {
+        postalCodeEditText.addTextChangedListener(postalCodeTextWatcher)
     }
 
     /**
