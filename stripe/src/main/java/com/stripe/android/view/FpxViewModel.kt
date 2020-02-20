@@ -33,6 +33,8 @@ internal class FpxViewModel internal constructor(
             return internalFpxBankStatuses
         }
 
+    internal var selectedPosition: Int? = null
+
     @JvmSynthetic
     internal fun loadFpxBankStatues() {
         val stripeRepository: StripeRepository = StripeApiRepository(context, publishableKey)
@@ -46,9 +48,7 @@ internal class FpxViewModel internal constructor(
             }
 
             withContext(Main) {
-                fpxBankStatuses.let {
-                    this@FpxViewModel.internalFpxBankStatuses.value = it
-                }
+                this@FpxViewModel.internalFpxBankStatuses.value = fpxBankStatuses
             }
         }
     }
