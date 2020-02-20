@@ -8,7 +8,7 @@ class FpxBankStatusesTest {
 
     @Test
     fun isOnline_withEmptyInstance_shouldAlwaysReturnTrue() {
-        assertThat(FpxBankStatuses.DEFAULT.isOnline(FpxBank.Hsbc))
+        assertThat(FpxBankStatuses().isOnline(FpxBank.Hsbc))
             .isTrue()
     }
 }
