@@ -43,7 +43,7 @@ class CardBrandTest {
     @Test
     fun fromCardNumber_withDinersClub16() {
         assertEquals(
-            CardBrand.DinersClub16,
+            CardBrand.DinersClub,
             CardBrand.fromCardNumber(CardNumberFixtures.DINERS_CLUB_16_NO_SPACES)
         )
     }
@@ -77,6 +77,16 @@ class CardBrandTest {
         // Adding this check to ensure the input number is correct
         assertTrue(
             CardBrand.Visa.isValidCardNumberLength(CardNumberFixtures.VISA_NO_SPACES)
+        )
+        assertTrue(
+            CardBrand.DinersClub.isValidCardNumberLength(
+                CardNumberFixtures.DINERS_CLUB_16_NO_SPACES
+            )
+        )
+        assertTrue(
+            CardBrand.DinersClub.isValidCardNumberLength(
+                CardNumberFixtures.DINERS_CLUB_14_NO_SPACES
+            )
         )
         assertFalse(
             CardBrand.Unknown.isValidCardNumberLength(CardNumberFixtures.VISA_NO_SPACES)

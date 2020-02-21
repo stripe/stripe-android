@@ -16,7 +16,7 @@ internal object CardNumberFixtures {
     const val MASTERCARD_WITH_SPACES = "5555 5555 5555 4444"
 
     const val DINERS_CLUB_14_NO_SPACES: String = "36227206271667"
-    const val DINERS_CLUB_14_WITH_SPACES: String = "3622 720627 1667"
+    const val DINERS_CLUB_14_WITH_SPACES: String = "3622 7206 2716 67"
 
     const val DINERS_CLUB_16_NO_SPACES = "3056930009020004"
     const val DINERS_CLUB_16_WITH_SPACES = "3056 9300 0902 0004"

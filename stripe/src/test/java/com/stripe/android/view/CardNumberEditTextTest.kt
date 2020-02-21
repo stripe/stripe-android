@@ -6,6 +6,7 @@ import com.stripe.android.CardNumberFixtures.AMEX_NO_SPACES
 import com.stripe.android.CardNumberFixtures.AMEX_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_14_NO_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_14_WITH_SPACES
+import com.stripe.android.CardNumberFixtures.DINERS_CLUB_16_NO_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_16_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
@@ -324,15 +325,27 @@ class CardNumberEditTextTest {
     }
 
     @Test
-    fun getCardNumber_whenValidCard_returnsCardNumberWithoutSpaces() {
+    fun getCardNumber_whenVisaWithSpaces_returnsCardNumberWithoutSpaces() {
         cardNumberEditText.setText(VISA_WITH_SPACES)
         assertEquals(VISA_NO_SPACES, cardNumberEditText.cardNumber)
+    }
 
+    @Test
+    fun getCardNumber_whenAmexWithSpaces_returnsCardNumberWithoutSpaces() {
         cardNumberEditText.setText(AMEX_WITH_SPACES)
         assertEquals(AMEX_NO_SPACES, cardNumberEditText.cardNumber)
+    }
 
+    @Test
+    fun getCardNumber_withDinersClub14WithSpaces_returnsCardNumberWithoutSpaces() {
         cardNumberEditText.setText(DINERS_CLUB_14_WITH_SPACES)
         assertEquals(DINERS_CLUB_14_NO_SPACES, cardNumberEditText.cardNumber)
+    }
+
+    @Test
+    fun getCardNumber_withDinersClub16WithSpaces_returnsCardNumberWithoutSpaces() {
+        cardNumberEditText.setText(DINERS_CLUB_16_WITH_SPACES)
+        assertEquals(DINERS_CLUB_16_NO_SPACES, cardNumberEditText.cardNumber)
     }
 
     @Test

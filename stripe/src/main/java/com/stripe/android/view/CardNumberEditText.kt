@@ -39,7 +39,7 @@ class CardNumberEditText @JvmOverloads constructor(
 
     val lengthMax: Int
         get() {
-            return cardBrand.maxLengthWithSpaces
+            return cardBrand.getMaxLengthWithSpacesForCardNumber(fieldText)
         }
 
     private var ignoreChanges = false
@@ -214,7 +214,7 @@ class CardNumberEditText @JvmOverloads constructor(
 
     @JvmSynthetic
     internal fun updateCardBrandFromNumber(partialNumber: String) {
-        updateCardBrand(CardUtils.getPossibleCardType(partialNumber))
+        updateCardBrand(CardUtils.getPossibleCardBrand(partialNumber))
     }
 
     internal companion object {

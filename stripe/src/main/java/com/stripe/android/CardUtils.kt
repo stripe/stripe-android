@@ -13,8 +13,8 @@ object CardUtils {
      * or [CardBrand.Unknown] if it can't be determined
      */
     @JvmStatic
-    fun getPossibleCardType(cardNumber: String?): CardBrand {
-        return getPossibleCardType(cardNumber, true)
+    fun getPossibleCardBrand(cardNumber: String?): CardBrand {
+        return getPossibleCardBrand(cardNumber, true)
     }
 
     /**
@@ -76,10 +76,10 @@ object CardUtils {
      */
     internal fun isValidCardLength(cardNumber: String?): Boolean {
         return cardNumber != null &&
-            getPossibleCardType(cardNumber, false).isValidCardNumberLength(cardNumber)
+            getPossibleCardBrand(cardNumber, false).isValidCardNumberLength(cardNumber)
     }
 
-    private fun getPossibleCardType(cardNumber: String?, shouldNormalize: Boolean): CardBrand {
+    private fun getPossibleCardBrand(cardNumber: String?, shouldNormalize: Boolean): CardBrand {
         if (cardNumber.isNullOrBlank()) {
             return CardBrand.Unknown
         }

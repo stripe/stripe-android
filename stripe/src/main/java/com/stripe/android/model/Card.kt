@@ -501,7 +501,7 @@ data class Card internal constructor(
                 addressZipCheck = addressZipCheck.takeUnless { it.isNullOrBlank() },
                 addressCountry = addressCountry.takeUnless { it.isNullOrBlank() },
                 last4 = last4,
-                brand = brand ?: CardUtils.getPossibleCardType(number),
+                brand = brand ?: CardUtils.getPossibleCardBrand(number),
                 fingerprint = fingerprint.takeUnless { it.isNullOrBlank() },
                 funding = funding,
                 country = country.takeUnless { it.isNullOrBlank() },
