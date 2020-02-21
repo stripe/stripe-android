@@ -325,25 +325,19 @@ class CardNumberEditTextTest {
     }
 
     @Test
-    fun getCardNumber_whenVisaWithSpaces_returnsCardNumberWithoutSpaces() {
+    fun cardNumber_withSpaces_returnsCardNumberWithoutSpaces() {
         cardNumberEditText.setText(VISA_WITH_SPACES)
         assertEquals(VISA_NO_SPACES, cardNumberEditText.cardNumber)
-    }
 
-    @Test
-    fun getCardNumber_whenAmexWithSpaces_returnsCardNumberWithoutSpaces() {
+        cardNumberEditText.setText("")
         cardNumberEditText.setText(AMEX_WITH_SPACES)
         assertEquals(AMEX_NO_SPACES, cardNumberEditText.cardNumber)
-    }
 
-    @Test
-    fun getCardNumber_withDinersClub14WithSpaces_returnsCardNumberWithoutSpaces() {
+        cardNumberEditText.setText("")
         cardNumberEditText.setText(DINERS_CLUB_14_WITH_SPACES)
         assertEquals(DINERS_CLUB_14_NO_SPACES, cardNumberEditText.cardNumber)
-    }
 
-    @Test
-    fun getCardNumber_withDinersClub16WithSpaces_returnsCardNumberWithoutSpaces() {
+        cardNumberEditText.setText("")
         cardNumberEditText.setText(DINERS_CLUB_16_WITH_SPACES)
         assertEquals(DINERS_CLUB_16_NO_SPACES, cardNumberEditText.cardNumber)
     }

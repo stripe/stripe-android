@@ -21,7 +21,14 @@ class CardNumberEditText @JvmOverloads constructor(
 
     @VisibleForTesting
     var cardBrand: CardBrand = CardBrand.Unknown
-        internal set
+        internal set(value) {
+            val prevBrand = field
+            field = value
+            if (value != prevBrand) {
+                brandChangeCallback(cardBrand)
+                updateLengthFilter()
+            }
+        }
 
     @JvmSynthetic
     internal var brandChangeCallback: (CardBrand) -> Unit = {}
@@ -198,23 +205,9 @@ class CardNumberEditText @JvmOverloads constructor(
         })
     }
 
-    private fun updateCardBrand(brand: CardBrand) {
-        if (cardBrand == brand) {
-            return
-        }
-
-        val oldLength = lengthMax
-
-        cardBrand = brand
-        brandChangeCallback(cardBrand)
-        if (oldLength != lengthMax) {
-            updateLengthFilter()
-        }
-    }
-
     @JvmSynthetic
     internal fun updateCardBrandFromNumber(partialNumber: String) {
-        updateCardBrand(CardUtils.getPossibleCardBrand(partialNumber))
+        cardBrand = CardUtils.getPossibleCardBrand(partialNumber)
     }
 
     internal companion object {
