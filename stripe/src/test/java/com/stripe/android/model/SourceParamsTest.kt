@@ -1,6 +1,6 @@
 package com.stripe.android.model
 
-import com.stripe.android.CardNumberFixtures.VALID_VISA_NO_SPACES
+import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -175,7 +175,7 @@ class SourceParamsTest {
 
         val apiMap = params.apiParameterMap
         requireNotNull(apiMap)
-        assertEquals(VALID_VISA_NO_SPACES, apiMap["number"])
+        assertEquals(VISA_NO_SPACES, apiMap["number"])
         assertEquals(12, apiMap["exp_month"])
         assertEquals(2050, apiMap["exp_year"])
         assertEquals("123", apiMap["cvc"])
@@ -203,7 +203,7 @@ class SourceParamsTest {
         val totalExpectedMap = mapOf(
             "type" to "card",
             "card" to mapOf(
-                "number" to VALID_VISA_NO_SPACES,
+                "number" to VISA_NO_SPACES,
                 "exp_month" to 12,
                 "exp_year" to 2050,
                 "cvc" to "123"
@@ -713,7 +713,7 @@ class SourceParamsTest {
         private const val RETURN_URL = "stripe://return"
 
         private val FULL_FIELDS_VISA_CARD =
-            Card.Builder(VALID_VISA_NO_SPACES, 12, 2050, "123")
+            Card.Builder(VISA_NO_SPACES, 12, 2050, "123")
                 .name("Captain Cardholder")
                 .addressLine1("1 ABC Street")
                 .addressLine2("Apt. 123")

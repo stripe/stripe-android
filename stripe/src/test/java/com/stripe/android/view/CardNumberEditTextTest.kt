@@ -2,12 +2,13 @@ package com.stripe.android.view
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import com.stripe.android.CardNumberFixtures.VALID_AMEX_NO_SPACES
-import com.stripe.android.CardNumberFixtures.VALID_AMEX_WITH_SPACES
-import com.stripe.android.CardNumberFixtures.VALID_DINERS_CLUB_NO_SPACES
-import com.stripe.android.CardNumberFixtures.VALID_DINERS_CLUB_WITH_SPACES
-import com.stripe.android.CardNumberFixtures.VALID_VISA_NO_SPACES
-import com.stripe.android.CardNumberFixtures.VALID_VISA_WITH_SPACES
+import com.stripe.android.CardNumberFixtures.AMEX_NO_SPACES
+import com.stripe.android.CardNumberFixtures.AMEX_WITH_SPACES
+import com.stripe.android.CardNumberFixtures.DINERS_CLUB_14_NO_SPACES
+import com.stripe.android.CardNumberFixtures.DINERS_CLUB_14_WITH_SPACES
+import com.stripe.android.CardNumberFixtures.DINERS_CLUB_16_WITH_SPACES
+import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
+import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
 import com.stripe.android.model.CardBrand
 import com.stripe.android.testharness.ViewTestUtils
 import kotlin.test.BeforeTest
@@ -111,7 +112,7 @@ class CardNumberEditTextTest {
 
     @Test
     fun setText_whenTextIsValidCommonLengthNumber_changesCardValidState() {
-        cardNumberEditText.setText(VALID_VISA_WITH_SPACES)
+        cardNumberEditText.setText(VISA_WITH_SPACES)
 
         assertTrue(cardNumberEditText.isCardNumberValid)
         assertEquals(1, completionCallbackInvocations)
@@ -119,7 +120,7 @@ class CardNumberEditTextTest {
 
     @Test
     fun setText_whenTextIsSpacelessValidNumber_changesToSpaceNumberAndValidates() {
-        cardNumberEditText.setText(VALID_VISA_NO_SPACES)
+        cardNumberEditText.setText(VISA_NO_SPACES)
 
         assertTrue(cardNumberEditText.isCardNumberValid)
         assertEquals(1, completionCallbackInvocations)
@@ -127,7 +128,7 @@ class CardNumberEditTextTest {
 
     @Test
     fun setText_whenTextIsValidAmExDinersClubLengthNumber_changesCardValidState() {
-        cardNumberEditText.setText(VALID_AMEX_WITH_SPACES)
+        cardNumberEditText.setText(AMEX_WITH_SPACES)
 
         assertTrue(cardNumberEditText.isCardNumberValid)
         assertEquals(1, completionCallbackInvocations)
@@ -135,7 +136,7 @@ class CardNumberEditTextTest {
 
     @Test
     fun setText_whenTextChangesFromValidToInvalid_changesCardValidState() {
-        cardNumberEditText.setText(VALID_VISA_WITH_SPACES)
+        cardNumberEditText.setText(VISA_WITH_SPACES)
         // Simply setting the value interacts with this mock once -- that is tested elsewhere
         completionCallbackInvocations = 0
 
@@ -150,7 +151,7 @@ class CardNumberEditTextTest {
     @Test
     fun setText_whenTextIsInvalidCommonLengthNumber_doesNotNotifyListener() {
         // This creates a full-length but not valid number: 4242 4242 4242 4243
-        val almostValid = VALID_VISA_WITH_SPACES.substring(0, 18) + "3"
+        val almostValid = VISA_WITH_SPACES.substring(0, 18) + "3"
         cardNumberEditText.setText(almostValid)
         assertFalse(cardNumberEditText.isCardNumberValid)
         assertEquals(0, completionCallbackInvocations)
@@ -167,7 +168,7 @@ class CardNumberEditTextTest {
 
     @Test
     fun finishTypingCommonLengthCardNumber_whenValidCard_doesNotSetErrorValue() {
-        val almostThere = VALID_VISA_WITH_SPACES.substring(0, 18)
+        val almostThere = VISA_WITH_SPACES.substring(0, 18)
         cardNumberEditText.setText(almostThere)
         assertFalse(cardNumberEditText.shouldShowError)
         // We now have the valid 4242 Visa
@@ -177,7 +178,7 @@ class CardNumberEditTextTest {
 
     @Test
     fun finishTypingCommonLengthCardNumber_whenInvalidCard_setsErrorValue() {
-        val almostThere = VALID_VISA_WITH_SPACES.substring(0, 18)
+        val almostThere = VISA_WITH_SPACES.substring(0, 18)
         cardNumberEditText.setText(almostThere)
         // This makes the number officially invalid
         cardNumberEditText.setText(cardNumberEditText.text?.toString() + "3")
@@ -186,7 +187,7 @@ class CardNumberEditTextTest {
 
     @Test
     fun finishTypingInvalidCardNumber_whenFollowedByDelete_setsErrorBackToFalse() {
-        val notQuiteValid = VALID_VISA_WITH_SPACES.substring(0, 18) + "3"
+        val notQuiteValid = VISA_WITH_SPACES.substring(0, 18) + "3"
         cardNumberEditText.setText(notQuiteValid)
         assertTrue(cardNumberEditText.shouldShowError)
 
@@ -196,8 +197,8 @@ class CardNumberEditTextTest {
     }
 
     @Test
-    fun finishTypingDinersClub_whenInvalid_setsErrorValueAndRemovesItAppropriately() {
-        val notQuiteValid = VALID_DINERS_CLUB_WITH_SPACES.substring(0, 16) + "3"
+    fun finishTypingDinersClub14_whenInvalid_setsErrorValueAndRemovesItAppropriately() {
+        val notQuiteValid = DINERS_CLUB_14_WITH_SPACES.take(DINERS_CLUB_14_WITH_SPACES.length - 1) + "3"
         cardNumberEditText.setText(notQuiteValid)
         assertTrue(cardNumberEditText.shouldShowError)
 
@@ -205,13 +206,27 @@ class CardNumberEditTextTest {
         ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
         assertFalse(cardNumberEditText.shouldShowError)
 
-        cardNumberEditText.setText(cardNumberEditText.text?.toString() + "4")
+        cardNumberEditText.setText(cardNumberEditText.text?.toString() + DINERS_CLUB_14_WITH_SPACES.last())
+        assertFalse(cardNumberEditText.shouldShowError)
+    }
+
+    @Test
+    fun finishTypingDinersClub16_whenInvalid_setsErrorValueAndRemovesItAppropriately() {
+        val notQuiteValid = DINERS_CLUB_16_WITH_SPACES.take(DINERS_CLUB_16_WITH_SPACES.length - 1) + "3"
+        cardNumberEditText.setText(notQuiteValid)
+        assertTrue(cardNumberEditText.shouldShowError)
+
+        // Now that we're in an error state, back up by one
+        ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
+        assertFalse(cardNumberEditText.shouldShowError)
+
+        cardNumberEditText.setText(cardNumberEditText.text?.toString() + DINERS_CLUB_16_WITH_SPACES.last())
         assertFalse(cardNumberEditText.shouldShowError)
     }
 
     @Test
     fun finishTypingAmEx_whenInvalid_setsErrorValueAndRemovesItAppropriately() {
-        val notQuiteValid = VALID_AMEX_WITH_SPACES.substring(0, 16) + "3"
+        val notQuiteValid = AMEX_WITH_SPACES.substring(0, 16) + "3"
         cardNumberEditText.setText(notQuiteValid)
         assertTrue(cardNumberEditText.shouldShowError)
 
@@ -267,8 +282,8 @@ class CardNumberEditTextTest {
     @Test
     fun enterCompleteNumberInParts_onlyCallsBrandListenerOnce() {
         lastBrandChangeCallbackInvocation = null
-        val prefix = VALID_AMEX_WITH_SPACES.substring(0, 2)
-        val suffix = VALID_AMEX_WITH_SPACES.substring(2)
+        val prefix = AMEX_WITH_SPACES.substring(0, 2)
+        val suffix = AMEX_WITH_SPACES.substring(2)
         cardNumberEditText.setText(cardNumberEditText.text?.toString() + prefix)
         cardNumberEditText.setText(cardNumberEditText.text?.toString() + suffix)
         assertEquals(CardBrand.AmericanExpress, lastBrandChangeCallbackInvocation)
@@ -310,27 +325,27 @@ class CardNumberEditTextTest {
 
     @Test
     fun getCardNumber_whenValidCard_returnsCardNumberWithoutSpaces() {
-        cardNumberEditText.setText(VALID_VISA_WITH_SPACES)
-        assertEquals(VALID_VISA_NO_SPACES, cardNumberEditText.cardNumber)
+        cardNumberEditText.setText(VISA_WITH_SPACES)
+        assertEquals(VISA_NO_SPACES, cardNumberEditText.cardNumber)
 
-        cardNumberEditText.setText(VALID_AMEX_WITH_SPACES)
-        assertEquals(VALID_AMEX_NO_SPACES, cardNumberEditText.cardNumber)
+        cardNumberEditText.setText(AMEX_WITH_SPACES)
+        assertEquals(AMEX_NO_SPACES, cardNumberEditText.cardNumber)
 
-        cardNumberEditText.setText(VALID_DINERS_CLUB_WITH_SPACES)
-        assertEquals(VALID_DINERS_CLUB_NO_SPACES, cardNumberEditText.cardNumber)
+        cardNumberEditText.setText(DINERS_CLUB_14_WITH_SPACES)
+        assertEquals(DINERS_CLUB_14_NO_SPACES, cardNumberEditText.cardNumber)
     }
 
     @Test
     fun getCardNumber_whenIncompleteCard_returnsNull() {
         cardNumberEditText.setText(
-            VALID_DINERS_CLUB_WITH_SPACES
-                .substring(0, VALID_DINERS_CLUB_WITH_SPACES.length - 2))
+            DINERS_CLUB_14_WITH_SPACES
+                .substring(0, DINERS_CLUB_14_WITH_SPACES.length - 2))
         assertNull(cardNumberEditText.cardNumber)
     }
 
     @Test
     fun getCardNumber_whenInvalidCardNumber_returnsNull() {
-        var almostVisa = VALID_VISA_WITH_SPACES.substring(0, VALID_VISA_WITH_SPACES.length - 1)
+        var almostVisa = VISA_WITH_SPACES.substring(0, VISA_WITH_SPACES.length - 1)
         almostVisa += "3" // creates the 4242 4242 4242 4243 bad number
         cardNumberEditText.setText(almostVisa)
         assertNull(cardNumberEditText.cardNumber)
@@ -338,7 +353,7 @@ class CardNumberEditTextTest {
 
     @Test
     fun getCardNumber_whenValidNumberIsChangedToInvalid_returnsNull() {
-        cardNumberEditText.setText(VALID_AMEX_WITH_SPACES)
+        cardNumberEditText.setText(AMEX_WITH_SPACES)
         ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
 
         assertNull(cardNumberEditText.cardNumber)
@@ -354,9 +369,9 @@ class CardNumberEditTextTest {
 
     @Test
     fun testUpdateCardBrandFromNumber() {
-        cardNumberEditText.updateCardBrandFromNumber(VALID_DINERS_CLUB_NO_SPACES)
+        cardNumberEditText.updateCardBrandFromNumber(DINERS_CLUB_14_NO_SPACES)
         assertEquals(CardBrand.DinersClub, lastBrandChangeCallbackInvocation)
-        cardNumberEditText.updateCardBrandFromNumber(VALID_AMEX_NO_SPACES)
+        cardNumberEditText.updateCardBrandFromNumber(AMEX_NO_SPACES)
         assertEquals(CardBrand.AmericanExpress, lastBrandChangeCallbackInvocation)
     }
 

@@ -28,15 +28,31 @@ class CardBrandTest {
     fun fromCardNumber_withAmericanExpress() {
         assertEquals(
             CardBrand.AmericanExpress,
-            CardBrand.fromCardNumber(CardNumberFixtures.VALID_AMEX_NO_SPACES)
+            CardBrand.fromCardNumber(CardNumberFixtures.AMEX_NO_SPACES)
         )
     }
 
     @Test
-    fun fromCardNumber_withDinersClub() {
+    fun fromCardNumber_withDinersClub14() {
         assertEquals(
             CardBrand.DinersClub,
-            CardBrand.fromCardNumber(CardNumberFixtures.VALID_DINERS_CLUB_NO_SPACES)
+            CardBrand.fromCardNumber(CardNumberFixtures.DINERS_CLUB_14_NO_SPACES)
+        )
+    }
+
+    @Test
+    fun fromCardNumber_withDinersClub16() {
+        assertEquals(
+            CardBrand.DinersClub16,
+            CardBrand.fromCardNumber(CardNumberFixtures.DINERS_CLUB_16_NO_SPACES)
+        )
+    }
+
+    @Test
+    fun fromCardNumber_withJcb() {
+        assertEquals(
+            CardBrand.JCB,
+            CardBrand.fromCardNumber(CardNumberFixtures.JCB_NO_SPACES)
         )
     }
 
@@ -44,7 +60,7 @@ class CardBrandTest {
     fun fromCardNumber_withVisa() {
         assertEquals(
             CardBrand.Visa,
-            CardBrand.fromCardNumber(CardNumberFixtures.VALID_VISA_NO_SPACES)
+            CardBrand.fromCardNumber(CardNumberFixtures.VISA_NO_SPACES)
         )
     }
 
@@ -52,7 +68,7 @@ class CardBrandTest {
     fun fromCardNumber_withInvalidVisa() {
         assertEquals(
             CardBrand.Unknown,
-            CardBrand.fromCardNumber("1" + CardNumberFixtures.VALID_VISA_NO_SPACES)
+            CardBrand.fromCardNumber("1" + CardNumberFixtures.VISA_NO_SPACES)
         )
     }
 
@@ -60,10 +76,10 @@ class CardBrandTest {
     fun isValidCardLengthWithBrand_whenBrandUnknown_alwaysReturnsFalse() {
         // Adding this check to ensure the input number is correct
         assertTrue(
-            CardBrand.Visa.isValidCardNumberLength(CardNumberFixtures.VALID_VISA_NO_SPACES)
+            CardBrand.Visa.isValidCardNumberLength(CardNumberFixtures.VISA_NO_SPACES)
         )
         assertFalse(
-            CardBrand.Unknown.isValidCardNumberLength(CardNumberFixtures.VALID_VISA_NO_SPACES)
+            CardBrand.Unknown.isValidCardNumberLength(CardNumberFixtures.VISA_NO_SPACES)
         )
     }
 

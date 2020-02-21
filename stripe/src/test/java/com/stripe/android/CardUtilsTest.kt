@@ -45,8 +45,12 @@ class CardUtilsTest {
     }
 
     @Test
-    fun getPossibleCardType_withDinersClubPrefix_returnsDinersClub() {
-        assertEquals(CardBrand.DinersClub, CardUtils.getPossibleCardType("303922 2234"))
+    fun getPossibleCardType_withDinersClub16Prefix_returnsDinersClub16() {
+        assertEquals(CardBrand.DinersClub16, CardUtils.getPossibleCardType("303922 2234"))
+    }
+
+    @Test
+    fun getPossibleCardType_withDinersClub14Prefix_returnsDinersClub() {
         assertEquals(CardBrand.DinersClub, CardUtils.getPossibleCardType("36778 9098"))
     }
 
@@ -73,7 +77,7 @@ class CardUtilsTest {
 
     @Test
     fun isValidCardLength_whenValidVisaNumber_returnsTrue() {
-        assertTrue(CardUtils.isValidCardLength("4242424242424242"))
+        assertTrue(CardUtils.isValidCardLength(CardNumberFixtures.VISA_NO_SPACES))
     }
 
     @Test
@@ -83,27 +87,27 @@ class CardUtilsTest {
 
     @Test
     fun isValidCardLength_whenValidDiscover_returnsTrue() {
-        assertTrue(CardUtils.isValidCardLength("6011000990139424"))
+        assertTrue(CardUtils.isValidCardLength(CardNumberFixtures.DISCOVER_NO_SPACES))
     }
 
     @Test
-    fun isValidCardLength_whenValidDinersClub_returnsTrue() {
-        assertTrue(CardUtils.isValidCardLength("30569309025904"))
+    fun isValidCardLength_whenValidDinersClub16_returnsTrue() {
+        assertTrue(CardUtils.isValidCardLength(CardNumberFixtures.DINERS_CLUB_16_NO_SPACES))
     }
 
     @Test
     fun isValidCardLength_whenValidMasterCard_returnsTrue() {
-        assertTrue(CardUtils.isValidCardLength("5555555555554444"))
+        assertTrue(CardUtils.isValidCardLength(CardNumberFixtures.MASTERCARD_NO_SPACES))
     }
 
     @Test
     fun isValidCardLength_whenValidAmEx_returnsTrue() {
-        assertTrue(CardUtils.isValidCardLength("378282246310005"))
+        assertTrue(CardUtils.isValidCardLength(CardNumberFixtures.AMEX_NO_SPACES))
     }
 
     @Test
     fun isValidCardLength_whenValidUnionPay_returnsTrue() {
-        assertTrue(CardUtils.isValidCardLength("6200000000000005"))
+        assertTrue(CardUtils.isValidCardLength(CardNumberFixtures.UNIONPAY_NO_SPACES))
     }
 
     @Test
@@ -132,18 +136,13 @@ class CardUtilsTest {
     }
 
     @Test
-    fun isValidCardLength_whenDinersClubStyleNumberButVisaLength_returnsFalse() {
-        assertFalse(CardUtils.isValidCardLength("3056930902590400"))
-    }
-
-    @Test
     fun isValidCardLength_whenDinersClubStyleNumberStyleNumberButAmexLength_returnsFalse() {
         assertFalse(CardUtils.isValidCardLength("305693090259040"))
     }
 
     @Test
     fun isValidLuhnNumber_whenValidVisaNumber_returnsTrue() {
-        assertTrue(CardUtils.isValidLuhnNumber("4242424242424242"))
+        assertTrue(CardUtils.isValidLuhnNumber(CardNumberFixtures.VISA_NO_SPACES))
     }
 
     @Test
@@ -153,7 +152,7 @@ class CardUtilsTest {
 
     @Test
     fun isValidLuhnNumber_whenValidDiscover_returnsTrue() {
-        assertTrue(CardUtils.isValidLuhnNumber("6011000990139424"))
+        assertTrue(CardUtils.isValidLuhnNumber(CardNumberFixtures.DISCOVER_NO_SPACES))
     }
 
     @Test
@@ -163,12 +162,12 @@ class CardUtilsTest {
 
     @Test
     fun isValidLuhnNumber_whenValidMasterCard_returnsTrue() {
-        assertTrue(CardUtils.isValidLuhnNumber("5555555555554444"))
+        assertTrue(CardUtils.isValidLuhnNumber(CardNumberFixtures.MASTERCARD_NO_SPACES))
     }
 
     @Test
     fun isValidLuhnNumber_whenValidAmEx_returnsTrue() {
-        assertTrue(CardUtils.isValidLuhnNumber("378282246310005"))
+        assertTrue(CardUtils.isValidLuhnNumber(CardNumberFixtures.AMEX_NO_SPACES))
     }
 
     @Test

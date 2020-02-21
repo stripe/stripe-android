@@ -70,7 +70,7 @@ class CardTest {
 
     @Test
     fun testTypeReturnsCorrectlyForUnionPay() {
-        val card = Card.create(number = "6200000000000005")
+        val card = Card.create(number = CardNumberFixtures.UNIONPAY_NO_SPACES)
         assertEquals(CardBrand.UnionPay, card.brand)
     }
 
@@ -132,13 +132,13 @@ class CardTest {
 
     @Test
     fun shouldPassValidateNumber() {
-        val card = Card.create(CardNumberFixtures.VALID_VISA_NO_SPACES)
+        val card = Card.create(CardNumberFixtures.VISA_NO_SPACES)
         assertTrue(card.validateNumber())
     }
 
     @Test
     fun shouldPassValidateNumberSpaces() {
-        val card = Card.create(CardNumberFixtures.VALID_VISA_WITH_SPACES)
+        val card = Card.create(CardNumberFixtures.VISA_WITH_SPACES)
         assertTrue(card.validateNumber())
     }
 

@@ -65,6 +65,7 @@ enum class CardBrand(
         prefixes = listOf("35")
     ),
 
+    // 14-digit Diners Club
     DinersClub(
         "diners",
         "Diners Club",
@@ -72,7 +73,19 @@ enum class CardBrand(
         maxLengthWithSpaces = 17,
         maxLengthWithoutSpaces = 14,
         prefixes = listOf(
-            "300", "301", "302", "303", "304", "305", "309", "36", "38", "39"
+            "36"
+        )
+    ),
+
+    // 16-digit Diners Club
+    DinersClub16(
+        "diners",
+        "Diners Club",
+        R.drawable.stripe_ic_diners,
+        maxLengthWithSpaces = 19,
+        maxLengthWithoutSpaces = 16,
+        prefixes = listOf(
+            "30", "38", "39"
         )
     ),
 
