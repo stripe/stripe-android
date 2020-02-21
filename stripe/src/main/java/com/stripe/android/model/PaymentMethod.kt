@@ -391,7 +391,10 @@ data class PaymentMethod internal constructor(
          *
          * [card.wallet](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-wallet)
          */
-        @JvmField val wallet: Wallet? = null
+        @JvmField val wallet: Wallet? = null,
+
+        @JvmField
+        internal val networks: Networks? = null
     ) : StripeModel {
 
         @Retention(AnnotationRetention.SOURCE)
@@ -505,6 +508,13 @@ data class PaymentMethod internal constructor(
              * [payment_method.card.three_d_secure_usage.supported](https://stripe.com/docs/api/errors#errors-payment_method-card-three_d_secure_usage-supported)
              */
             @JvmField val isSupported: Boolean
+        ) : StripeModel
+
+        @Parcelize
+        data class Networks(
+            private val available: Set<String> = emptySet(),
+            private val selectionMandatory: Boolean = false,
+            private val preferred: String? = null
         ) : StripeModel
     }
 
