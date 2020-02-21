@@ -367,14 +367,6 @@ class CardNumberEditTextTest {
     }
 
     @Test
-    fun createFormattedNumber_whenCardsPartsHasNull_excludesNullAndAfter() {
-        assertEquals(
-            "4242 4242",
-            CardNumberEditText.createFormattedNumber(arrayOf("4242", "4242", null, "4242"))
-        )
-    }
-
-    @Test
     fun testUpdateCardBrandFromNumber() {
         cardNumberEditText.updateCardBrandFromNumber(DINERS_CLUB_14_NO_SPACES)
         assertEquals(CardBrand.DinersClub, lastBrandChangeCallbackInvocation)

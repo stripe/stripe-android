@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -142,5 +143,166 @@ class CardBrandTest {
     @Test
     fun isMaxCvc_whenNull_returnsFalse() {
         assertFalse(CardBrand.AmericanExpress.isMaxCvc(null))
+    }
+
+    @Test
+    fun groupNumber_withVisaDebit_returnsCorrectCardGroups() {
+        assertThat(
+            CardBrand.Visa.groupNumber(CardNumberFixtures.VISA_DEBIT_NO_SPACES)
+        ).isEqualTo(
+            arrayOf("4000", "0566", "5566", "5556")
+        )
+    }
+
+    @Test
+    fun groupNumber_withAmex_returnsCorrectCardGroups() {
+        assertThat(
+            CardBrand.AmericanExpress.groupNumber(CardNumberFixtures.AMEX_NO_SPACES)
+        ).isEqualTo(
+            arrayOf("3782", "822463", "10005")
+        )
+    }
+
+    @Test
+    fun groupNumber_withDinersClub14_returnsCorrectCardGroups() {
+        assertThat(
+            CardBrand.DinersClub.groupNumber(CardNumberFixtures.DINERS_CLUB_14_NO_SPACES)
+        ).isEqualTo(
+            arrayOf("3622", "720627", "1667")
+        )
+    }
+
+    @Test
+    fun groupNumber_withDinersClub16_returnsCorrectCardGroups() {
+        assertThat(
+            CardBrand.DinersClub.groupNumber(CardNumberFixtures.DINERS_CLUB_16_NO_SPACES)
+        ).isEqualTo(
+            arrayOf("3056", "9300", "0902", "0004")
+        )
+    }
+
+    @Test
+    fun groupNumber_withInvalid_returnsCorrectCardGroups() {
+        assertThat(
+            CardBrand.Unknown.groupNumber("1234056655665556")
+        ).isEqualTo(
+            arrayOf("1234", "0566", "5566", "5556")
+        )
+    }
+
+    @Test
+    fun groupNumber_withAmexPrefix_returnsPrefixGroups() {
+        assertThat(
+            CardBrand.AmericanExpress.groupNumber(
+                CardNumberFixtures.AMEX_NO_SPACES.take(2)
+            )
+        ).isEqualTo(
+            arrayOf("37", null, null)
+        )
+
+        assertThat(
+            CardBrand.AmericanExpress.groupNumber(
+                CardNumberFixtures.AMEX_NO_SPACES.take(5)
+            )
+        ).isEqualTo(
+            arrayOf("3782", "8", null)
+        )
+
+        assertThat(
+            CardBrand.AmericanExpress.groupNumber(
+                CardNumberFixtures.AMEX_NO_SPACES.take(11)
+            )
+        ).isEqualTo(
+            arrayOf("3782", "822463", "1")
+        )
+    }
+
+    @Test
+    fun groupNumber_withVisaPrefix_returnsCorrectGroups() {
+        assertThat(
+            CardBrand.Visa.groupNumber(
+                CardNumberFixtures.VISA_DEBIT_NO_SPACES.take(2)
+            )
+        ).isEqualTo(
+            arrayOf("40", null, null, null)
+        )
+
+        assertThat(
+            CardBrand.Visa.groupNumber(
+                CardNumberFixtures.VISA_DEBIT_NO_SPACES.take(5)
+            )
+        ).isEqualTo(
+            arrayOf("4000", "0", null, null)
+        )
+
+        assertThat(
+            CardBrand.Visa.groupNumber(
+                CardNumberFixtures.VISA_DEBIT_NO_SPACES.take(9)
+            )
+        ).isEqualTo(
+            arrayOf("4000", "0566", "5", null)
+        )
+
+        assertThat(
+            CardBrand.Visa.groupNumber(
+                CardNumberFixtures.VISA_DEBIT_NO_SPACES.take(15)
+            )
+        ).isEqualTo(
+            arrayOf("4000", "0566", "5566", "555")
+        )
+    }
+
+    @Test
+    fun groupNumber_forLongInputs_doesNotCrash() {
+        assertThat(
+            CardBrand.Visa.groupNumber("1234567890123456789")
+        ).hasLength(4)
+    }
+
+    @Test
+    fun formatNumber_shouldReturnExpectedValue() {
+        assertThat(CardBrand.AmericanExpress.formatNumber(CardNumberFixtures.AMEX_NO_SPACES))
+            .isEqualTo(CardNumberFixtures.AMEX_WITH_SPACES)
+        assertThat(CardBrand.Visa.formatNumber(CardNumberFixtures.VISA_NO_SPACES))
+            .isEqualTo(CardNumberFixtures.VISA_WITH_SPACES)
+        assertThat(CardBrand.Visa.formatNumber(CardNumberFixtures.VISA_DEBIT_NO_SPACES))
+            .isEqualTo(CardNumberFixtures.VISA_DEBIT_WITH_SPACES)
+        assertThat(CardBrand.DinersClub.formatNumber(CardNumberFixtures.DINERS_CLUB_14_NO_SPACES))
+            .isEqualTo(CardNumberFixtures.DINERS_CLUB_14_WITH_SPACES)
+        assertThat(CardBrand.DinersClub.formatNumber(CardNumberFixtures.DINERS_CLUB_16_NO_SPACES))
+            .isEqualTo(CardNumberFixtures.DINERS_CLUB_16_WITH_SPACES)
+        assertThat(CardBrand.MasterCard.formatNumber(CardNumberFixtures.MASTERCARD_NO_SPACES))
+            .isEqualTo(CardNumberFixtures.MASTERCARD_WITH_SPACES)
+        assertThat(CardBrand.JCB.formatNumber(CardNumberFixtures.JCB_NO_SPACES))
+            .isEqualTo(CardNumberFixtures.JCB_WITH_SPACES)
+        assertThat(CardBrand.Discover.formatNumber(CardNumberFixtures.DISCOVER_NO_SPACES))
+            .isEqualTo(CardNumberFixtures.DISCOVER_WITH_SPACES)
+        assertThat(CardBrand.UnionPay.formatNumber(CardNumberFixtures.UNIONPAY_NO_SPACES))
+            .isEqualTo(CardNumberFixtures.UNIONPAY_WITH_SPACES)
+    }
+
+    @Test
+    fun defaultMaxLengthWithSpaces_shouldReturnExpectedValue() {
+        assertEquals(19, CardBrand.Visa.defaultMaxLengthWithSpaces)
+    }
+
+    @Test
+    fun getMaxLengthForCardNumber_for14DigitDinersClub_shouldReturn14() {
+        assertEquals(
+            14,
+            CardBrand.DinersClub.getMaxLengthForCardNumber(
+                CardNumberFixtures.DINERS_CLUB_14_NO_SPACES
+            )
+        )
+    }
+
+    @Test
+    fun getMaxLengthForCardNumber_for16DigitDinersClub_shouldReturn16() {
+        assertEquals(
+            16,
+            CardBrand.DinersClub.getMaxLengthForCardNumber(
+                CardNumberFixtures.DINERS_CLUB_16_NO_SPACES
+            )
+        )
     }
 }

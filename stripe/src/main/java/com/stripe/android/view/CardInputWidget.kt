@@ -288,7 +288,6 @@ class CardInputWidget @JvmOverloads constructor(
 
         orientation = HORIZONTAL
         minimumWidth = resources.getDimensionPixelSize(R.dimen.stripe_card_widget_min_width)
-
         frameLayout = findViewById(R.id.frame_container)
 
         cardNumberTextInputLayout = frameLayout.findViewById(R.id.tl_card_number)
@@ -750,6 +749,7 @@ class CardInputWidget @JvmOverloads constructor(
         }
 
         cardNumberEditText.brandChangeCallback = { brand ->
+            hiddenCardText = createHiddenCardText(brand)
             updateIcon()
             cvcNumberEditText.updateBrand(brand)
         }
@@ -768,6 +768,39 @@ class CardInputWidget @JvmOverloads constructor(
         allFields.forEach { it.addTextChangedListener(inputChangeTextWatcher) }
 
         cardNumberEditText.requestFocus()
+    }
+
+    /**
+     * @return a [String] that is the length of a full card number for the current [brand],
+     * without the last group of digits when the card is formatted with spaces. This is used for
+     * measuring the rendered width of the hidden portion (i.e. when the card number is "peeking")
+     * and does not have to be a valid card number.
+     *
+     * e.g. if [brand] is [CardBrand.Visa], this will generate `"0000 0000 0000 "` (including the
+     * trailing space).
+     *
+     * This should only be called when [brand] changes.
+     */
+    @VisibleForTesting
+    internal fun createHiddenCardText(
+        brand: CardBrand,
+        cardNumber: String = cardNumberEditText.fieldText
+    ): String {
+        var lastIndex = 0
+        val digits: MutableList<String> = mutableListOf()
+
+        brand.getSpacePositionsForCardNumber(cardNumber)
+            .toList()
+            .sorted()
+            .forEach {
+                repeat(it - lastIndex) {
+                    digits.add("0")
+                }
+                digits.add(" ")
+                lastIndex = it + 1
+            }
+
+        return digits.joinToString(separator = "")
     }
 
     private fun applyAttributes(attrs: AttributeSet) {
@@ -949,14 +982,7 @@ class CardInputWidget @JvmOverloads constructor(
         }
     }
 
-    private val hiddenCardText: String
-        get() {
-            return if (CardBrand.AmericanExpress == brand) {
-                HIDDEN_TEXT_AMEX
-            } else {
-                HIDDEN_TEXT_COMMON
-            }
-        }
+    private var hiddenCardText: String = createHiddenCardText(brand)
 
     private val cvcPlaceHolder: String
         get() {
@@ -1135,13 +1161,16 @@ class CardInputWidget @JvmOverloads constructor(
         override fun toString(): String {
             val touchBufferData = """
                 Touch Buffer Data:
-                "CardTouchBufferLimit = $cardTouchBufferLimit
-                "DateStartPosition = $dateStartPosition
-                "DateRightTouchBufferLimit = $dateRightTouchBufferLimit
-                "CvcStartPosition = $cvcStartPosition"
+                CardTouchBufferLimit = $cardTouchBufferLimit
+                DateStartPosition = $dateStartPosition
+                DateRightTouchBufferLimit = $dateRightTouchBufferLimit
+                CvcStartPosition = $cvcStartPosition
+                CvcRightTouchBufferLimit = $cvcRightTouchBufferLimit
+                PostalCodeStartPosition = $postalCodeStartPosition
                 """
 
             val elementSizeData = """
+                TotalLengthInPixels = $totalLengthInPixels
                 CardWidth = $cardWidth
                 HiddenCardWidth = $hiddenCardWidth
                 PeekCardWidth = $peekCardWidth
@@ -1334,10 +1363,6 @@ class CardInputWidget @JvmOverloads constructor(
 
         private const val CVC_PLACEHOLDER_COMMON = "CVC"
         private const val CVC_PLACEHOLDER_AMEX = "2345"
-
-        // These intentionally include a space at the end.
-        private const val HIDDEN_TEXT_AMEX = "3434 343434 "
-        private const val HIDDEN_TEXT_COMMON = "4242 4242 4242 "
 
         private const val FULL_SIZING_CARD_TEXT = "4242 4242 4242 4242"
         private const val FULL_SIZING_DATE_TEXT = "MM/MM"

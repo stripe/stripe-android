@@ -33,15 +33,16 @@ enum class CardBrand(
 
     /**
      * The position of spaces in a formatted card number. For example, "4242424242424242" is
-     * formatted to "4242 4242 4242 4242". The spaces in that number are at the positions
-     * specified by [spacePositions].
+     * formatted to "4242 4242 4242 4242".
      */
-    val spacePositions: Set<Int> = setOf(4, 9, 14),
+    val defaultSpacePositions: Set<Int> = setOf(4, 9, 14),
 
     /**
      * By default, a [CardBrand] does not have variants.
      */
-    private val variantMaxLength: Map<String, Int> = emptyMap()
+    private val variantMaxLength: Map<String, Int> = emptyMap(),
+
+    private val variantSpacePositions: Map<String, Set<Int>> = emptyMap()
 ) {
     AmericanExpress(
         "amex",
@@ -52,7 +53,7 @@ enum class CardBrand(
         cvcLength = setOf(3, 4),
         defaultMaxLength = 15,
         prefixes = listOf("34", "37"),
-        spacePositions = setOf(4, 11)
+        defaultSpacePositions = setOf(4, 11)
     ),
 
     Discover(
@@ -84,6 +85,9 @@ enum class CardBrand(
         ),
         variantMaxLength = mapOf(
             "36" to 14
+        ),
+        variantSpacePositions = mapOf(
+            "36" to setOf(4, 11)
         )
     ),
 
@@ -119,7 +123,7 @@ enum class CardBrand(
         cvcLength = setOf(3, 4)
     );
 
-    val defaultMaxLengthWithSpaces: Int = defaultMaxLength + spacePositions.size
+    val defaultMaxLengthWithSpaces: Int = defaultMaxLength + defaultSpacePositions.size
 
     val maxCvcLength: Int
         get() {
@@ -160,7 +164,75 @@ enum class CardBrand(
     }
 
     fun getMaxLengthWithSpacesForCardNumber(cardNumber: String): Int {
-        return getMaxLengthForCardNumber(cardNumber) + spacePositions.size
+        return getMaxLengthForCardNumber(cardNumber) +
+            getSpacePositionsForCardNumber(cardNumber).size
+    }
+
+    /**
+     * If the [CardBrand] has variants, and the [cardNumber] starts with one of the variant
+     * prefixes, return the length for that variant. Otherwise, return [defaultMaxLength].
+     *
+     * Note: currently only [CardBrand.DinersClub] has variants
+     */
+    fun getSpacePositionsForCardNumber(cardNumber: String): Set<Int> {
+        return variantSpacePositions.entries.firstOrNull { (key, _) ->
+            cardNumber.startsWith(key)
+        }?.value ?: defaultSpacePositions
+    }
+
+    /**
+     * Format a number according to brand requirements.
+     *
+     * e.g. `"4242424242424242"` will return `"4242 4242 4242 4242"`
+     */
+    fun formatNumber(cardNumber: String): String {
+        return groupNumber(cardNumber)
+            .takeWhile { it != null }
+            .joinToString(" ")
+    }
+
+    /**
+     * Separates a card number according to the brand requirements, including prefixes of card
+     * numbers, so that the groups can be easily displayed if the user is typing them in.
+     * Note that this does not verify that the card number is valid, or even that it is a number.
+     *
+     * e.g. `"4242424242424242"` will return `["4242", "4242", "4242", "4242"]`
+     *
+     * @param cardNumber the raw card number
+     *
+     * @return an array of strings with the number groups, in order. If the number is not complete,
+     * some of the array entries may be `null`.
+     */
+    fun groupNumber(cardNumber: String): Array<String?> {
+        val spacelessCardNumber = cardNumber.take(getMaxLengthForCardNumber(cardNumber))
+        val spacePositions = getSpacePositionsForCardNumber(cardNumber)
+        val groups = arrayOfNulls<String?>(spacePositions.size + 1)
+
+        val length = spacelessCardNumber.length
+        var lastUsedIndex = 0
+
+        spacePositions
+            .toList().sorted().forEachIndexed { idx, spacePosition ->
+                val adjustedSpacePosition = spacePosition - idx
+                if (length > adjustedSpacePosition) {
+                    groups[idx] = spacelessCardNumber.substring(
+                        lastUsedIndex,
+                        adjustedSpacePosition
+                    )
+                    lastUsedIndex = adjustedSpacePosition
+                }
+            }
+
+        // populate any remaining digits in the first index with a null value
+        groups
+            .indexOfFirst { it == null }
+            .takeIf {
+                it != -1
+            }?.let {
+                groups[it] = spacelessCardNumber.substring(lastUsedIndex)
+            }
+
+        return groups
     }
 
     companion object {
