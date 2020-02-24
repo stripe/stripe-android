@@ -18,14 +18,12 @@ enum class CardBrand(
     val cvcLength: Set<Int> = setOf(3),
 
     /**
-     * The max length when the card number is formatted with spaces (e.g. "4242 4242 4242 4242")
+     * The default max length when the card number is formatted without spaces (e.g. "4242424242424242")
+     *
+     * Note that [CardBrand.DinersClub]'s max length depends on the BIN (e.g. card number prefix).
+     * In the case of a [CardBrand.DinersClub] card, use [getMaxLengthForCardNumber].
      */
-    val maxLengthWithSpaces: Int = 19,
-
-    /**
-     * The max length when the card number is formatted without spaces (e.g. "4242424242424242")
-     */
-    val maxLengthWithoutSpaces: Int = 16,
+    val defaultMaxLength: Int = 16,
 
     /**
      * Based on [Issuer identification number table](http://en.wikipedia.org/wiki/Bank_card_number#Issuer_identification_number_.28IIN.29)
@@ -37,7 +35,12 @@ enum class CardBrand(
      * formatted to "4242 4242 4242 4242". The spaces in that number are at the positions
      * specified by [spacePositions].
      */
-    val spacePositions: Set<Int> = setOf(4, 9, 14)
+    val spacePositions: Set<Int> = setOf(4, 9, 14),
+
+    /**
+     * By default, a [CardBrand] does not have variants.
+     */
+    private val variantMaxLength: Map<String, Int> = emptyMap()
 ) {
     AmericanExpress(
         "amex",
@@ -45,8 +48,7 @@ enum class CardBrand(
         R.drawable.stripe_ic_amex,
         cvcIcon = R.drawable.stripe_ic_cvc_amex,
         cvcLength = setOf(3, 4),
-        maxLengthWithSpaces = 17,
-        maxLengthWithoutSpaces = 15,
+        defaultMaxLength = 15,
         prefixes = listOf("34", "37"),
         spacePositions = setOf(4, 11)
     ),
@@ -65,14 +67,21 @@ enum class CardBrand(
         prefixes = listOf("35")
     ),
 
+    // 14-digit Diners Club
     DinersClub(
         "diners",
         "Diners Club",
         R.drawable.stripe_ic_diners,
-        maxLengthWithSpaces = 17,
-        maxLengthWithoutSpaces = 14,
+        defaultMaxLength = 16,
         prefixes = listOf(
-            "300", "301", "302", "303", "304", "305", "309", "36", "38", "39"
+            // 14-digits
+            "36",
+
+            // 16-digits
+            "30", "38", "39"
+        ),
+        variantMaxLength = mapOf(
+            "36" to 14
         )
     ),
 
@@ -108,6 +117,8 @@ enum class CardBrand(
         cvcLength = setOf(3, 4)
     );
 
+    val defaultMaxLengthWithSpaces: Int = defaultMaxLength + spacePositions.size
+
     val maxCvcLength: Int
         get() {
             return cvcLength.max() ?: CVC_COMMON_LENGTH
@@ -122,7 +133,7 @@ enum class CardBrand(
      */
     fun isValidCardNumberLength(cardNumber: String?): Boolean {
         return cardNumber != null && Unknown != this &&
-            cardNumber.length == maxLengthWithoutSpaces
+            cardNumber.length == getMaxLengthForCardNumber(cardNumber)
     }
 
     fun isValidCvc(cvc: String): Boolean {
@@ -132,6 +143,22 @@ enum class CardBrand(
     fun isMaxCvc(cvcText: String?): Boolean {
         val cvcLength = cvcText?.trim()?.length ?: 0
         return maxCvcLength == cvcLength
+    }
+
+    /**
+     * If the [CardBrand] has variants, and the [cardNumber] starts with one of the variant
+     * prefixes, return the length for that variant. Otherwise, return [defaultMaxLength].
+     *
+     * Note: currently only [CardBrand.DinersClub] has variants
+     */
+    fun getMaxLengthForCardNumber(cardNumber: String): Int {
+        return variantMaxLength.entries.firstOrNull { (key, _) ->
+            cardNumber.startsWith(key)
+        }?.value ?: defaultMaxLength
+    }
+
+    fun getMaxLengthWithSpacesForCardNumber(cardNumber: String): Int {
+        return getMaxLengthForCardNumber(cardNumber) + spacePositions.size
     }
 
     companion object {

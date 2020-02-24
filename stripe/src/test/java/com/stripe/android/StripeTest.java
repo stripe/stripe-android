@@ -52,7 +52,7 @@ import org.robolectric.RobolectricTestRunner;
 
 import kotlinx.coroutines.CoroutineScope;
 
-import static com.stripe.android.CardNumberFixtures.VALID_VISA_NO_SPACES;
+import static com.stripe.android.CardNumberFixtures.VISA_NO_SPACES;
 import static kotlinx.coroutines.CoroutineScopeKt.MainScope;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -440,7 +440,7 @@ public class StripeTest {
     @Test
     public void createSourceSynchronous_withCardParams_passesIntegrationTest()
             throws StripeException {
-        final Card card = new Card.Builder(VALID_VISA_NO_SPACES, 12, 2050, "123")
+        final Card card = new Card.Builder(VISA_NO_SPACES, 12, 2050, "123")
                 .addressCity("Sheboygan")
                 .addressCountry("US")
                 .addressLine1("123 Main St")
@@ -480,7 +480,7 @@ public class StripeTest {
     public void createSourceSynchronous_with3DSParams_passesIntegrationTest()
             throws StripeException {
         final Stripe stripe = createStripe();
-        final Card card = Card.create(VALID_VISA_NO_SPACES, 12, 2050, "123");
+        final Card card = Card.create(VISA_NO_SPACES, 12, 2050, "123");
         final SourceParams params = SourceParams.createCardParams(card);
 
         final Source cardSource = stripe.createSourceSynchronous(params);
@@ -1352,7 +1352,7 @@ public class StripeTest {
     private Source createSource() throws StripeException {
         final Stripe stripe = createStripe();
         final SourceParams params = SourceParams.createCardParams(
-                Card.create(VALID_VISA_NO_SPACES, 12, 2050, "123")
+                Card.create(VISA_NO_SPACES, 12, 2050, "123")
         );
 
         final Source cardSource = stripe.createSourceSynchronous(params);

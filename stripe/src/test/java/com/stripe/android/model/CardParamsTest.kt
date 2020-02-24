@@ -9,7 +9,7 @@ class CardParamsTest {
     @Test
     fun toParamMap_shouldCreateExpectedMap() {
         val actualParams = CardParams(
-            number = CardNumberFixtures.VALID_VISA_NO_SPACES,
+            number = CardNumberFixtures.VISA_NO_SPACES,
             expMonth = 12,
             expYear = 2025,
             cvc = "123",
@@ -42,7 +42,7 @@ class CardParamsTest {
     @Test
     fun builder_createsExpectedObject() {
         val expected = CardParams(
-            number = CardNumberFixtures.VALID_VISA_NO_SPACES,
+            number = CardNumberFixtures.VISA_NO_SPACES,
             expMonth = 12,
             expYear = 2025,
             cvc = "123",

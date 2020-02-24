@@ -942,7 +942,7 @@ class CardInputWidget @JvmOverloads constructor(
         get() {
             return when (brand) {
                 CardBrand.AmericanExpress -> PEEK_TEXT_AMEX
-                CardBrand.DinersClub -> PEEK_TEXT_DINERS
+                CardBrand.DinersClub -> PEEK_TEXT_DINERS_14
                 else -> PEEK_TEXT_COMMON
             }
         }
@@ -1290,7 +1290,7 @@ class CardInputWidget @JvmOverloads constructor(
         internal const val LOGGING_TOKEN = "CardInputView"
 
         private const val PEEK_TEXT_COMMON = "4242"
-        private const val PEEK_TEXT_DINERS = "88"
+        private const val PEEK_TEXT_DINERS_14 = "88"
         private const val PEEK_TEXT_AMEX = "34343"
 
         private const val CVC_PLACEHOLDER_COMMON = "CVC"

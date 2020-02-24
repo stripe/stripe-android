@@ -1,6 +1,6 @@
 package com.stripe.android.model
 
-import com.stripe.android.CardNumberFixtures.VALID_VISA_NO_SPACES
+import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
 import com.stripe.android.model.ConfirmPaymentIntentParams.Companion.PARAM_PAYMENT_METHOD_OPTIONS
 import com.stripe.android.model.ConfirmPaymentIntentParams.Companion.PARAM_SAVE_PAYMENT_METHOD
 import com.stripe.android.model.ConfirmPaymentIntentParams.Companion.PARAM_SOURCE_ID
@@ -312,7 +312,7 @@ class ConfirmPaymentIntentParamsTest {
 
     private companion object {
         private val FULL_FIELDS_VISA_CARD =
-            Card.Builder(VALID_VISA_NO_SPACES, 12, 2050, "123")
+            Card.Builder(VISA_NO_SPACES, 12, 2050, "123")
                 .name("Captain Cardholder")
                 .addressLine1("1 ABC Street")
                 .addressLine2("Apt. 123")
