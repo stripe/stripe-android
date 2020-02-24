@@ -1,12 +1,16 @@
 package com.stripe.android.view
 
 import android.app.Activity
+import android.content.Context
+import android.content.res.ColorStateList
 import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.core.view.ViewCompat
+import androidx.core.widget.ImageViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
@@ -113,6 +117,7 @@ internal class PaymentMethodsAdapter constructor(
                 selectedPaymentMethodId = null
                 listener?.onGooglePayClick()
             }
+            holder.bind(true)
         }
     }
 
@@ -187,9 +192,7 @@ internal class PaymentMethodsAdapter constructor(
     private fun createGooglePayViewHolder(
         parent: ViewGroup
     ): ViewHolder.GooglePayViewHolder {
-        val itemView = LayoutInflater.from(parent.context)
-            .inflate(R.layout.google_pay_row, parent, false)
-        return ViewHolder.GooglePayViewHolder(itemView)
+        return ViewHolder.GooglePayViewHolder(parent.context, parent)
     }
 
     @JvmSynthetic
@@ -247,7 +250,33 @@ internal class PaymentMethodsAdapter constructor(
 
         internal class GooglePayViewHolder(
             itemView: View
-        ) : RecyclerView.ViewHolder(itemView)
+        ) : RecyclerView.ViewHolder(itemView) {
+            constructor(context: Context, parent: ViewGroup) : this(
+                LayoutInflater.from(context)
+                    .inflate(R.layout.google_pay_row, parent, false)
+            )
+
+            private val checkIcon: ImageView = itemView.findViewById(R.id.check_icon)
+
+            init {
+                ImageViewCompat.setImageTintList(
+                    checkIcon,
+                    ColorStateList.valueOf(
+                        ThemeConfig(itemView.context).getTintColor(true)
+                    )
+                )
+            }
+
+            fun bind(isChecked: Boolean) {
+                checkIcon.visibility = if (isChecked) {
+                    View.VISIBLE
+                } else {
+                    View.INVISIBLE
+                }
+
+                itemView.isSelected = isChecked
+            }
+        }
 
         internal class PaymentMethodViewHolder constructor(
             itemView: View

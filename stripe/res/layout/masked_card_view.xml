@@ -20,7 +20,7 @@
         />
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/masked_check_icon"
+        android:id="@+id/check_icon"
         android:layout_width="@dimen/stripe_masked_card_icon_width"
         android:layout_height="wrap_content"
         android:layout_gravity="center"

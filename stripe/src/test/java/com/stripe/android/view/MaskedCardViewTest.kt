@@ -24,7 +24,7 @@ import org.robolectric.RobolectricTestRunner
 class MaskedCardViewTest {
 
     private val maskedCardView = MaskedCardView(ApplicationProvider.getApplicationContext<Context>())
-    private val selectedImageView: ImageView = maskedCardView.findViewById(R.id.masked_check_icon)
+    private val selectedImageView: ImageView = maskedCardView.findViewById(R.id.check_icon)
 
     @BeforeTest
     fun setup() {
