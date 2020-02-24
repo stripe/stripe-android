@@ -47,7 +47,7 @@ internal class MaskedCardView @JvmOverloads constructor(
         View.inflate(getContext(), R.layout.masked_card_view, this)
         cardIconImageView = findViewById(R.id.masked_icon_view)
         cardInformationTextView = findViewById(R.id.masked_card_info_view)
-        checkMarkImageView = findViewById(R.id.masked_check_icon)
+        checkMarkImageView = findViewById(R.id.check_icon)
 
         initializeCheckMark()
         updateCheckMark()

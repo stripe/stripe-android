@@ -224,11 +224,12 @@ class PaymentMethodsAdapterTest {
         adapter.setPaymentMethods(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
         adapter.listener = listener
 
-        val itemView = FrameLayout(context)
-        val viewHolder = PaymentMethodsAdapter.ViewHolder.GooglePayViewHolder(itemView)
+        val viewHolder = PaymentMethodsAdapter.ViewHolder.GooglePayViewHolder(
+            context, FrameLayout(context)
+        )
         adapter.onBindViewHolder(viewHolder, 0)
 
-        itemView.performClick()
+        viewHolder.itemView.performClick()
         verify(listener).onGooglePayClick()
     }
 
