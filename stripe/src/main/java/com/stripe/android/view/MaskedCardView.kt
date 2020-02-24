@@ -34,8 +34,6 @@ internal class MaskedCardView @JvmOverloads constructor(
     var last4: String? = null
         private set
 
-    private var isSelected: Boolean = false
-
     private val cardIconImageView: ImageView
     private val cardInformationTextView: TextView
     private val checkMarkImageView: ImageView
@@ -55,12 +53,8 @@ internal class MaskedCardView @JvmOverloads constructor(
         updateCheckMark()
     }
 
-    override fun isSelected(): Boolean {
-        return isSelected
-    }
-
     override fun setSelected(selected: Boolean) {
-        isSelected = selected
+        super.setSelected(selected)
         updateCheckMark()
         updateUi()
     }
