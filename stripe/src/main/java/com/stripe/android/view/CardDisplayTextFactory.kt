@@ -9,6 +9,7 @@ import android.text.style.ForegroundColorSpan
 import android.text.style.TypefaceSpan
 import androidx.annotation.ColorInt
 import com.stripe.android.R
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 
 internal class CardDisplayTextFactory internal constructor(
@@ -19,11 +20,11 @@ internal class CardDisplayTextFactory internal constructor(
 
     @JvmSynthetic
     internal fun createStyled(
-        brand: String?,
+        brand: CardBrand,
         last4: String?,
         isSelected: Boolean
     ): SpannableString {
-        val brandText: String = resources.getString(BRAND_RESOURCE_MAP[brand] ?: R.string.unknown)
+        val brandText: String = brand.displayName
         val brandLength = brandText.length
         if (last4 == null) {
             val displayString = SpannableString(brandText)

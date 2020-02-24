@@ -6,13 +6,13 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.annotation.VisibleForTesting
-import androidx.appcompat.widget.AppCompatImageView
-import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import com.stripe.android.R
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 
 /**
@@ -27,10 +27,7 @@ internal class MaskedCardView @JvmOverloads constructor(
     defStyle: Int = 0
 ) : LinearLayout(context, attrs, defStyle) {
 
-    @PaymentMethod.Card.Brand
-    @get:PaymentMethod.Card.Brand
-    @get:VisibleForTesting
-    var cardBrand: String? = null
+    var cardBrand: CardBrand = CardBrand.Unknown
         private set
 
     @get:VisibleForTesting
@@ -39,16 +36,14 @@ internal class MaskedCardView @JvmOverloads constructor(
 
     private var isSelected: Boolean = false
 
-    private val cardIconImageView: AppCompatImageView
-    private val cardInformationTextView: AppCompatTextView
-    private val checkMarkImageView: AppCompatImageView
+    private val cardIconImageView: ImageView
+    private val cardInformationTextView: TextView
+    private val checkMarkImageView: ImageView
 
     private val themeConfig = ThemeConfig(context)
     private val cardDisplayFactory = CardDisplayTextFactory(resources, themeConfig)
 
-    val textColorValues: IntArray
-        @VisibleForTesting
-        get() = themeConfig.textColorValues
+    val textColorValues: IntArray = themeConfig.textColorValues
 
     init {
         View.inflate(getContext(), R.layout.masked_card_view, this)
@@ -71,11 +66,10 @@ internal class MaskedCardView @JvmOverloads constructor(
     }
 
     fun setPaymentMethod(paymentMethod: PaymentMethod) {
-        cardBrand = if (paymentMethod.card != null)
-            paymentMethod.card.brand
-        else
-            PaymentMethod.Card.Brand.UNKNOWN
-        last4 = if (paymentMethod.card != null) paymentMethod.card.last4 else ""
+        cardBrand = paymentMethod.card?.let {
+            CardBrand.fromCode(it.brand)
+        } ?: CardBrand.Unknown
+        last4 = paymentMethod.card?.last4
         updateUi()
     }
 
@@ -85,28 +79,39 @@ internal class MaskedCardView @JvmOverloads constructor(
     }
 
     private fun initializeCheckMark() {
-        updateDrawable(R.drawable.stripe_ic_checkmark, checkMarkImageView, true)
+        updateImageViewDrawable(R.drawable.stripe_ic_checkmark, checkMarkImageView, true)
     }
 
     private fun updateBrandIcon() {
-        @DrawableRes val brandIconResId = ICON_RESOURCE_MAP[cardBrand]
-        if (brandIconResId != null) {
-            updateDrawable(brandIconResId, cardIconImageView, false)
-        }
+        updateImageViewDrawable(
+            when (cardBrand) {
+                CardBrand.AmericanExpress -> R.drawable.stripe_ic_amex_template_32
+                CardBrand.Discover -> R.drawable.stripe_ic_discover_template_32
+                CardBrand.JCB -> R.drawable.stripe_ic_jcb_template_32
+                CardBrand.DinersClub -> R.drawable.stripe_ic_diners_template_32
+                CardBrand.Visa -> R.drawable.stripe_ic_visa_template_32
+                CardBrand.MasterCard -> R.drawable.stripe_ic_mastercard_template_32
+                CardBrand.UnionPay -> R.drawable.stripe_ic_unionpay_template_32
+                CardBrand.Unknown -> R.drawable.stripe_ic_unknown
+            },
+            cardIconImageView,
+            false
+        )
     }
 
-    private fun updateDrawable(
+    private fun updateImageViewDrawable(
         @DrawableRes resourceId: Int,
         imageView: ImageView,
         isCheckMark: Boolean
     ) {
-        val drawable = ContextCompat.getDrawable(context, resourceId) ?: return
-        val icon = DrawableCompat.wrap(drawable)
-        DrawableCompat.setTint(
-            icon.mutate(),
-            themeConfig.getTintColor(isSelected || isCheckMark)
-        )
-        imageView.setImageDrawable(icon)
+        ContextCompat.getDrawable(context, resourceId)?.let {
+            val icon = DrawableCompat.wrap(it)
+            DrawableCompat.setTint(
+                icon.mutate(),
+                themeConfig.getTintColor(isSelected || isCheckMark)
+            )
+            imageView.setImageDrawable(icon)
+        }
     }
 
     private fun createDisplayString(): SpannableString {
@@ -114,23 +119,10 @@ internal class MaskedCardView @JvmOverloads constructor(
     }
 
     private fun updateCheckMark() {
-        if (isSelected) {
-            checkMarkImageView.visibility = View.VISIBLE
+        checkMarkImageView.visibility = if (isSelected) {
+            View.VISIBLE
         } else {
-            checkMarkImageView.visibility = View.INVISIBLE
+            View.INVISIBLE
         }
-    }
-
-    private companion object {
-        private val ICON_RESOURCE_MAP = mapOf(
-            PaymentMethod.Card.Brand.AMERICAN_EXPRESS to R.drawable.stripe_ic_amex_template_32,
-            PaymentMethod.Card.Brand.DINERS_CLUB to R.drawable.stripe_ic_diners_template_32,
-            PaymentMethod.Card.Brand.DISCOVER to R.drawable.stripe_ic_discover_template_32,
-            PaymentMethod.Card.Brand.JCB to R.drawable.stripe_ic_jcb_template_32,
-            PaymentMethod.Card.Brand.MASTERCARD to R.drawable.stripe_ic_mastercard_template_32,
-            PaymentMethod.Card.Brand.VISA to R.drawable.stripe_ic_visa_template_32,
-            PaymentMethod.Card.Brand.UNIONPAY to R.drawable.stripe_ic_unionpay_template_32,
-            PaymentMethod.Card.Brand.UNKNOWN to R.drawable.stripe_ic_unknown
-        )
     }
 }

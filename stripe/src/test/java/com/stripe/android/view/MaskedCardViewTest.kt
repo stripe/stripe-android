@@ -2,18 +2,17 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.view.View
-import androidx.appcompat.widget.AppCompatImageView
+import android.widget.ImageView
 import androidx.core.graphics.ColorUtils
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.R
-import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import java.util.Calendar
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -24,17 +23,15 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class MaskedCardViewTest {
 
-    private lateinit var maskedCardView: MaskedCardView
-    private lateinit var selectedImageView: AppCompatImageView
+    private val maskedCardView = MaskedCardView(ApplicationProvider.getApplicationContext<Context>())
+    private val selectedImageView: ImageView = maskedCardView.findViewById(R.id.masked_check_icon)
 
     @BeforeTest
     fun setup() {
-        maskedCardView = MaskedCardView(ApplicationProvider.getApplicationContext<Context>())
-        selectedImageView = maskedCardView.findViewById(R.id.masked_check_icon)
-
-        val expirationCalendar = Calendar.getInstance()
-        expirationCalendar.set(Calendar.MONTH, Calendar.DECEMBER)
-        expirationCalendar.set(Calendar.YEAR, 2050)
+        val expirationCalendar = Calendar.getInstance().also {
+            it.set(Calendar.MONTH, Calendar.DECEMBER)
+            it.set(Calendar.YEAR, 2050)
+        }
         val nowCalendar = Calendar.getInstance()
 
         assertTrue(
@@ -58,17 +55,15 @@ class MaskedCardViewTest {
     @Test
     fun setPaymentMethod_setsCorrectData() {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        assertNotNull(paymentMethod)
         maskedCardView.setPaymentMethod(paymentMethod)
         assertEquals("4242", maskedCardView.last4)
-        assertEquals(PaymentMethod.Card.Brand.VISA, maskedCardView.cardBrand)
+        assertEquals(CardBrand.Visa, maskedCardView.cardBrand)
         assertFalse(maskedCardView.isSelected)
     }
 
     @Test
     fun setSelected_changesCheckMarkVisibility() {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        assertNotNull(paymentMethod)
         maskedCardView.setPaymentMethod(paymentMethod)
 
         assertFalse(maskedCardView.isSelected)

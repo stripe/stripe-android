@@ -2,6 +2,7 @@ package com.stripe.android.view
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import kotlin.test.Test
@@ -52,7 +53,7 @@ class CardDisplayTextFactoryTest {
         assertEquals(
             "Visa",
             cardDisplayTextFactory.createStyled(
-                PaymentMethod.Card.Brand.VISA,
+                CardBrand.Visa,
                 null,
                 false
             ).toString()
