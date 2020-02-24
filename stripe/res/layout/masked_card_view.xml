@@ -24,6 +24,8 @@
         android:layout_width="@dimen/stripe_masked_card_icon_width"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:src="@drawable/stripe_ic_checkmark"
+        android:visibility="invisible"
         />
 
 </merge>
