@@ -3,7 +3,6 @@ package com.stripe.android.view
 import android.content.Context
 import android.view.View
 import android.widget.ImageView
-import androidx.core.graphics.ColorUtils
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.R
 import com.stripe.android.model.CardBrand
@@ -38,18 +37,6 @@ class MaskedCardViewTest {
             expirationCalendar.after(nowCalendar),
             "These tests assume that an expiry date of December 2050 is valid."
         )
-    }
-
-    @Test
-    fun init_setsColorValuesWithAlpha() {
-        val alpha = 204 // 80% of 255
-        val colorValues = maskedCardView.textColorValues
-        // The colors are arranged [selected, selectedLowAlpha, unselected, unselectedLowAlpha
-        assertEquals(4, colorValues.size)
-        assertEquals(colorValues[1],
-            ColorUtils.setAlphaComponent(colorValues[0], alpha))
-        assertEquals(colorValues[3],
-            ColorUtils.setAlphaComponent(colorValues[2], alpha))
     }
 
     @Test
