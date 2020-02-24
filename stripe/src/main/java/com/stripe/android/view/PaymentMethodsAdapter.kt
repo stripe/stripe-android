@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.core.view.ViewCompat
 import androidx.core.widget.ImageViewCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -24,7 +25,8 @@ internal class PaymentMethodsAdapter constructor(
     private val intentArgs: PaymentMethodsActivityStarter.Args,
     private val addableTypes: List<PaymentMethod.Type> = listOf(PaymentMethod.Type.Card),
     initiallySelectedPaymentMethodId: String? = null,
-    private val shouldShowGooglePay: Boolean = false
+    private val shouldShowGooglePay: Boolean = false,
+    private val useGooglePay: Boolean = false
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     internal val paymentMethods = ArrayList<PaymentMethod>()
@@ -117,7 +119,7 @@ internal class PaymentMethodsAdapter constructor(
                 selectedPaymentMethodId = null
                 listener?.onGooglePayClick()
             }
-            holder.bind(true)
+            holder.bind(useGooglePay)
         }
     }
 
@@ -256,25 +258,29 @@ internal class PaymentMethodsAdapter constructor(
                     .inflate(R.layout.google_pay_row, parent, false)
             )
 
+            private val label: TextView = itemView.findViewById(R.id.label)
             private val checkIcon: ImageView = itemView.findViewById(R.id.check_icon)
+            private val themeConfig = ThemeConfig(itemView.context)
 
             init {
                 ImageViewCompat.setImageTintList(
                     checkIcon,
-                    ColorStateList.valueOf(
-                        ThemeConfig(itemView.context).getTintColor(true)
-                    )
+                    ColorStateList.valueOf(themeConfig.getTintColor(true))
                 )
             }
 
-            fun bind(isChecked: Boolean) {
-                checkIcon.visibility = if (isChecked) {
+            fun bind(isSelected: Boolean) {
+                label.setTextColor(
+                    ColorStateList.valueOf(themeConfig.getTextColor(isSelected))
+                )
+
+                checkIcon.visibility = if (isSelected) {
                     View.VISIBLE
                 } else {
                     View.INVISIBLE
                 }
 
-                itemView.isSelected = isChecked
+                itemView.isSelected = isSelected
             }
         }
 

@@ -148,14 +148,18 @@ internal class PaymentSessionViewModel(
 
     @JvmSynthetic
     fun getSelectedPaymentMethodId(userSelectedPaymentMethodId: String? = null): String? {
-        return userSelectedPaymentMethodId
-            ?: if (paymentSessionData.paymentMethod != null) {
-                paymentSessionData.paymentMethod?.id
-            } else {
-                customerSession.cachedCustomer?.id?.let { customerId ->
-                    paymentSessionPrefs.getPaymentMethodId(customerId)
+        return if (paymentSessionData.useGooglePay) {
+            null
+        } else {
+            userSelectedPaymentMethodId
+                ?: if (paymentSessionData.paymentMethod != null) {
+                    paymentSessionData.paymentMethod?.id
+                } else {
+                    customerSession.cachedCustomer?.id?.let { customerId ->
+                        paymentSessionPrefs.getPaymentMethodId(customerId)
+                    }
                 }
-            }
+        }
     }
 
     @JvmSynthetic

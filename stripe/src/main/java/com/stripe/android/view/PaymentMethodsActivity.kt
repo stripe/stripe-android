@@ -60,7 +60,8 @@ class PaymentMethodsActivity : AppCompatActivity() {
             args,
             addableTypes = args.paymentMethodTypes,
             initiallySelectedPaymentMethodId = viewModel.selectedPaymentMethodId,
-            shouldShowGooglePay = args.shouldShowGooglePay
+            shouldShowGooglePay = args.shouldShowGooglePay,
+            useGooglePay = args.useGooglePay
         )
     }
 
@@ -123,7 +124,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
         }
 
         payment_methods_recycler.adapter = adapter
-        payment_methods_recycler.paymentMethodSelectedCallback = { finishWithPaymentMethod(it) }
+        payment_methods_recycler.paymentMethodSelectedCallback = { finishWithResult(it) }
 
         payment_methods_recycler.attachItemTouchHelper(
             PaymentMethodSwipeCallback(
@@ -142,7 +143,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        finishWithPaymentMethod(adapter.selectedPaymentMethod, Activity.RESULT_CANCELED)
+        finishWithResult(adapter.selectedPaymentMethod, Activity.RESULT_CANCELED)
         return true
     }
 
@@ -165,12 +166,12 @@ class PaymentMethodsActivity : AppCompatActivity() {
             // If the added Payment Method is not reusable, it also can't be attached to a
             // customer, so immediately return to the launching host with the new
             // Payment Method.
-            finishWithPaymentMethod(paymentMethod)
+            finishWithResult(paymentMethod)
         }
     }
 
     override fun onBackPressed() {
-        finishWithPaymentMethod(adapter.selectedPaymentMethod, Activity.RESULT_CANCELED)
+        finishWithResult(adapter.selectedPaymentMethod, Activity.RESULT_CANCELED)
     }
 
     private fun fetchCustomerPaymentMethods() {
@@ -206,16 +207,17 @@ class PaymentMethodsActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun finishWithPaymentMethod(
+    private fun finishWithResult(
         paymentMethod: PaymentMethod?,
         resultCode: Int = Activity.RESULT_OK
     ) {
         setResult(
             resultCode,
             Intent().also {
-                if (paymentMethod != null) {
-                    it.putExtras(PaymentMethodsActivityStarter.Result(paymentMethod).toBundle())
-                }
+                it.putExtras(PaymentMethodsActivityStarter.Result(
+                    paymentMethod = paymentMethod,
+                    useGooglePay = args.useGooglePay && paymentMethod == null
+                ).toBundle())
             }
         )
 

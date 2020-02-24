@@ -2,7 +2,6 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.content.res.ColorStateList
-import android.text.SpannableString
 import android.util.AttributeSet
 import android.view.View
 import android.widget.ImageView
@@ -76,7 +75,7 @@ internal class MaskedCardView @JvmOverloads constructor(
 
     private fun updateUi() {
         updateBrandIcon()
-        cardInformationTextView.text = createDisplayString()
+        cardInformationTextView.text = cardDisplayFactory.createStyled(cardBrand, last4, isSelected)
     }
 
     private fun updateBrandIcon() {
@@ -95,10 +94,6 @@ internal class MaskedCardView @JvmOverloads constructor(
                 }
             )
         )
-    }
-
-    private fun createDisplayString(): SpannableString {
-        return cardDisplayFactory.createStyled(cardBrand, last4, isSelected)
     }
 
     private fun updateCheckMark() {
