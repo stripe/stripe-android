@@ -46,7 +46,8 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
         internal val paymentConfiguration: PaymentConfiguration?,
         internal val windowFlags: Int? = null,
         internal val billingAddressFields: BillingAddressFields,
-        internal val shouldShowGooglePay: Boolean = false
+        internal val shouldShowGooglePay: Boolean = false,
+        internal val useGooglePay: Boolean = false
     ) : ActivityStarter.Args {
         class Builder : ObjectBuilder<Args> {
             private var billingAddressFields: BillingAddressFields = BillingAddressFields.None
@@ -54,6 +55,7 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
             private var isPaymentSessionActive = false
             private var paymentMethodTypes: List<PaymentMethod.Type>? = null
             private var shouldShowGooglePay: Boolean = false
+            private var useGooglePay: Boolean = false
             private var paymentConfiguration: PaymentConfiguration? = null
             @LayoutRes
             private var addPaymentMethodFooterLayoutId: Int = 0
@@ -127,12 +129,17 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
                 this.windowFlags = windowFlags
             }
 
+            internal fun setUseGooglePay(useGooglePay: Boolean): Builder = apply {
+                this.useGooglePay = useGooglePay
+            }
+
             override fun build(): Args {
                 return Args(
                     initialPaymentMethodId = initialPaymentMethodId,
                     isPaymentSessionActive = isPaymentSessionActive,
                     paymentMethodTypes = paymentMethodTypes ?: listOf(PaymentMethod.Type.Card),
                     shouldShowGooglePay = shouldShowGooglePay,
+                    useGooglePay = useGooglePay,
                     paymentConfiguration = paymentConfiguration,
                     addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId,
                     windowFlags = windowFlags,

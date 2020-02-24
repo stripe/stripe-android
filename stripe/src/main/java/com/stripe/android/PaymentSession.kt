@@ -236,6 +236,7 @@ class PaymentSession @VisibleForTesting internal constructor(
                 .setShouldShowGooglePay(config.shouldShowGooglePay)
                 .setWindowFlags(config.windowFlags)
                 .setBillingAddressFields(config.billingAddressFields)
+                .setUseGooglePay(viewModel.paymentSessionData.useGooglePay)
                 .build()
         )
     }
