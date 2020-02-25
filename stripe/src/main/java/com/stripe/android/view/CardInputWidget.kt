@@ -70,6 +70,13 @@ class CardInputWidget @JvmOverloads constructor(
             cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)
         }
     }
+    private val inputChangeTextWatcher = object : StripeTextWatcher() {
+        override fun afterTextChanged(s: Editable?) {
+            super.afterTextChanged(s)
+            shouldShowErrorIcon = false
+        }
+    }
+
     private val invalidFields: Set<CardValidCallback.Fields>
         get() {
             return listOfNotNull(
@@ -83,6 +90,17 @@ class CardInputWidget @JvmOverloads constructor(
                     this.cvcValue == null
                 }
             ).toSet()
+        }
+
+    @VisibleForTesting
+    internal var shouldShowErrorIcon = false
+        private set(value) {
+            val isValueChange = field != value
+            field = value
+
+            if (isValueChange) {
+                updateIcon()
+            }
         }
 
     @JvmSynthetic
@@ -119,13 +137,17 @@ class CardInputWidget @JvmOverloads constructor(
 
     @VisibleForTesting
     @JvmSynthetic
-    internal val standardFields: List<StripeEditText>
+    internal val requiredFields: List<StripeEditText>
+    private val allFields: List<StripeEditText>
 
+    /**
+     * The [StripeEditText] fields that are currently enabled and active in the UI.
+     */
     @VisibleForTesting
-    internal val allFields: List<StripeEditText>
+    internal val currentFields: List<StripeEditText>
         @JvmSynthetic
         get() {
-            return standardFields
+            return requiredFields
                 .plus(postalCodeEditText.takeIf { postalCodeEnabled })
                 .filterNotNull()
         }
@@ -193,7 +215,7 @@ class CardInputWidget @JvmOverloads constructor(
                 postalCodeRequired && postalCodeEditText.fieldText.isBlank()
 
             // Announce error messages for accessibility
-            allFields
+            currentFields
                 .filter { it.shouldShowError }
                 .forEach { editText ->
                     editText.errorMessage?.let { errorMessage ->
@@ -215,11 +237,14 @@ class CardInputWidget @JvmOverloads constructor(
                     postalCodeEditText.requestFocus()
                 }
                 else -> {
+                    shouldShowErrorIcon = false
                     return Card.Builder(cardNumber, cardDate.first, cardDate.second, cvcValue)
                         .addressZip(postalCodeValue)
                         .loggingTokens(setOf(LOGGING_TOKEN))
                 }
             }
+
+            shouldShowErrorIcon = true
 
             return null
         }
@@ -237,7 +262,7 @@ class CardInputWidget @JvmOverloads constructor(
      */
     var postalCodeEnabled: Boolean = CardWidget.DEFAULT_POSTAL_CODE_ENABLED
         set(value) {
-            updatePostalCodeEditText(value)
+            onPostalCodeEnabledChanged(value)
             field = value
         }
 
@@ -275,26 +300,28 @@ class CardInputWidget @JvmOverloads constructor(
         expiryDateEditText = expiryDateTextInputLayout.findViewById(R.id.et_expiry_date)
         cvcNumberEditText = cvcNumberTextInputLayout.findViewById(R.id.et_cvc)
         postalCodeEditText = postalCodeTextInputLayout.findViewById(R.id.et_postal_code)
+
         postalCodeEditText.configureForGlobal()
 
         frameWidthSupplier = { frameLayout.width }
 
         cardIconImageView = findViewById(R.id.iv_card_icon)
 
-        standardFields = listOf(
+        requiredFields = listOf(
             cardNumberEditText, cvcNumberEditText, expiryDateEditText
         )
+        allFields = requiredFields.plus(postalCodeEditText)
 
         initView(attrs)
     }
 
     override fun setCardValidCallback(callback: CardValidCallback?) {
         this.cardValidCallback = callback
-        standardFields.forEach { it.removeTextChangedListener(cardValidTextWatcher) }
+        requiredFields.forEach { it.removeTextChangedListener(cardValidTextWatcher) }
 
         // only add the TextWatcher if it will be used
         if (callback != null) {
-            standardFields.forEach { it.addTextChangedListener(cardValidTextWatcher) }
+            requiredFields.forEach { it.addTextChangedListener(cardValidTextWatcher) }
         }
 
         // call immediately after setting
@@ -362,11 +389,11 @@ class CardInputWidget @JvmOverloads constructor(
      * Clear all text fields in the CardInputWidget.
      */
     override fun clear() {
-        if (allFields.any { it.hasFocus() } || this.hasFocus()) {
+        if (currentFields.any { it.hasFocus() } || this.hasFocus()) {
             cardNumberEditText.requestFocus()
         }
 
-        allFields.forEach { it.setText("") }
+        currentFields.forEach { it.setText("") }
     }
 
     /**
@@ -375,7 +402,7 @@ class CardInputWidget @JvmOverloads constructor(
      * @param isEnabled boolean indicating whether fields should be enabled
      */
     override fun setEnabled(isEnabled: Boolean) {
-        allFields.forEach { it.isEnabled = isEnabled }
+        currentFields.forEach { it.isEnabled = isEnabled }
     }
 
     /**
@@ -414,7 +441,7 @@ class CardInputWidget @JvmOverloads constructor(
      * `false` otherwise
      */
     override fun isEnabled(): Boolean {
-        return standardFields.all { it.isEnabled }
+        return requiredFields.all { it.isEnabled }
     }
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
@@ -489,7 +516,7 @@ class CardInputWidget @JvmOverloads constructor(
         }
     }
 
-    private fun updatePostalCodeEditText(isEnabled: Boolean) {
+    private fun onPostalCodeEnabledChanged(isEnabled: Boolean) {
         if (isEnabled) {
             postalCodeEditText.isEnabled = true
             postalCodeTextInputLayout.visibility = View.VISIBLE
@@ -678,7 +705,7 @@ class CardInputWidget @JvmOverloads constructor(
             cardNumberEditText.hint = it
         }
 
-        allFields.forEach { it.setErrorColor(errorColorInt) }
+        currentFields.forEach { it.setErrorColor(errorColorInt) }
 
         cardNumberEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
@@ -737,6 +764,8 @@ class CardInputWidget @JvmOverloads constructor(
                 postalCodeEditText.requestFocus()
             }
         }
+
+        allFields.forEach { it.addTextChangedListener(inputChangeTextWatcher) }
 
         cardNumberEditText.requestFocus()
     }
@@ -957,9 +986,13 @@ class CardInputWidget @JvmOverloads constructor(
     }
 
     private fun updateIcon() {
-        cardIconImageView.setImageResource(brand.icon)
-        if (brand == CardBrand.Unknown) {
-            applyTint(false)
+        if (shouldShowErrorIcon) {
+            cardIconImageView.setImageResource(brand.errorIcon)
+        } else {
+            cardIconImageView.setImageResource(brand.icon)
+            if (brand == CardBrand.Unknown) {
+                applyTint(false)
+            }
         }
     }
 
@@ -967,10 +1000,16 @@ class CardInputWidget @JvmOverloads constructor(
         hasFocus: Boolean,
         cvcText: String?
     ) {
-        if (shouldIconShowBrand(brand, hasFocus, cvcText)) {
-            updateIcon()
-        } else {
-            updateIconForCvcEntry()
+        when {
+            shouldShowErrorIcon -> {
+                updateIcon()
+            }
+            shouldIconShowBrand(brand, hasFocus, cvcText) -> {
+                updateIcon()
+            }
+            else -> {
+                updateIconForCvcEntry()
+            }
         }
     }
 

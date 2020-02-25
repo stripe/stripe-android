@@ -65,6 +65,9 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         cardInputWidget.findViewById<PostalCodeEditText>(R.id.et_postal_code)
     }
     private val cardInputListener: CardInputListener = mock()
+    private val cardIcon: ImageView by lazy {
+        cardInputWidget.findViewById<ImageView>(R.id.iv_card_icon)
+    }
 
     @BeforeTest
     fun setup() {
@@ -1204,13 +1207,13 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
     @Test
     fun allFields_equals_standardFields_withPostalCodeDisabled() {
         cardInputWidget.postalCodeEnabled = false
-        assertEquals(cardInputWidget.standardFields, cardInputWidget.allFields)
+        assertEquals(cardInputWidget.requiredFields, cardInputWidget.currentFields)
     }
 
     @Test
     fun allFields_notEquals_standardFields_withPostalCodeEnabled() {
         cardInputWidget.postalCodeEnabled = true
-        assertNotEquals(cardInputWidget.standardFields, cardInputWidget.allFields)
+        assertNotEquals(cardInputWidget.requiredFields, cardInputWidget.currentFields)
     }
 
     @Test
@@ -1275,6 +1278,27 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
             setOf(CardValidCallback.Fields.Cvc),
             currentInvalidFields
         )
+    }
+
+    @Test
+    fun shouldShowErrorIcon_shouldBeUpdatedCorrectly() {
+        cardInputWidget.setExpiryDate(12, 2030)
+        cardInputWidget.setCvcCode(CVC_VALUE_COMMON)
+
+        // show error icon when validating fields with invalid card number
+        cardInputWidget.setCardNumber(VISA_NO_SPACES.take(6))
+        assertNull(cardInputWidget.paymentMethodCreateParams)
+        assertTrue(cardInputWidget.shouldShowErrorIcon)
+
+        // don't show error icon after changing input
+        cardInputWidget.setCardNumber(VISA_NO_SPACES.take(7))
+        assertFalse(cardInputWidget.shouldShowErrorIcon)
+
+        // don't show error icon when validating fields with invalid card number
+        assertNull(cardInputWidget.paymentMethodCreateParams)
+        cardInputWidget.setCardNumber(VISA_NO_SPACES)
+        assertNotNull(cardInputWidget.paymentMethodCreateParams)
+        assertFalse(cardInputWidget.shouldShowErrorIcon)
     }
 
     private companion object {
