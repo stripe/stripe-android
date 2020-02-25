@@ -11,6 +11,7 @@ internal object CardNumberFixtures {
     const val VISA_WITH_SPACES: String = "4242 4242 4242 4242"
 
     const val VISA_DEBIT_NO_SPACES: String = "4000056655665556"
+    const val VISA_DEBIT_WITH_SPACES: String = "4000 0566 5566 5556"
 
     const val MASTERCARD_NO_SPACES = "5555555555554444"
     const val MASTERCARD_WITH_SPACES = "5555 5555 5555 4444"

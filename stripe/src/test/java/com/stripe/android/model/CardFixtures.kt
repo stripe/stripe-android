@@ -1,12 +1,18 @@
 package com.stripe.android.model
 
+import com.stripe.android.CardNumberFixtures
 import com.stripe.android.model.parsers.CardJsonParser
 import org.json.JSONObject
 
 object CardFixtures {
 
     @JvmField
-    val MINIMUM_CARD: Card = Card.create("4242424242424242", 1, 2050, "123")
+    val MINIMUM_CARD: Card = Card.create(
+        CardNumberFixtures.VISA_NO_SPACES,
+        1,
+        2050,
+        "123"
+    )
 
     private const val CARD_ADDRESS_L1 = "123 Main Street"
     private const val CARD_ADDRESS_L2 = "906"
