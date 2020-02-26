@@ -40,7 +40,7 @@
                 />
 
             <TextView
-                android:id="@+id/tv_selected_payment_method"
+                android:id="@+id/payment_method"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="5"
@@ -49,7 +49,7 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/btn_launch_payment_methods"
+            android:id="@+id/select_payment_method_button"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"

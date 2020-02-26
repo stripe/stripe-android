@@ -14,12 +14,12 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.example.R
 import com.stripe.example.StripeFactory
+import com.stripe.example.databinding.CreateSepaDebitActivityBinding
 import com.stripe.example.module.BackendApiFactory
 import com.stripe.example.service.BackendApi
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import kotlinx.android.synthetic.main.create_sepa_debit_pm_layout.*
 import org.json.JSONObject
 
 /**
@@ -29,6 +29,10 @@ import org.json.JSONObject
  * details.
  */
 class ConfirmSepaDebitActivity : AppCompatActivity() {
+    private val viewBinding: CreateSepaDebitActivityBinding by lazy {
+        CreateSepaDebitActivityBinding.inflate(layoutInflater)
+    }
+
     private val compositeSubscription = CompositeDisposable()
 
     private val backendApi: BackendApi by lazy {
@@ -36,7 +40,7 @@ class ConfirmSepaDebitActivity : AppCompatActivity() {
     }
 
     private val snackbarController: SnackbarController by lazy {
-        SnackbarController(findViewById(android.R.id.content))
+        SnackbarController(viewBinding.coordinator)
     }
 
     private val stripe: Stripe by lazy {
@@ -47,14 +51,14 @@ class ConfirmSepaDebitActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.create_sepa_debit_pm_layout)
+        setContentView(viewBinding.root)
         setTitle(R.string.launch_confirm_pm_sepa_debit)
 
-        iban_input.setText(TEST_ACCOUNT_NUMBER)
+        viewBinding.ibanInput.setText(TEST_ACCOUNT_NUMBER)
 
-        confirm_with_sepa_debit_button.setOnClickListener {
-            tv_status.text = ""
-            createPaymentIntent(iban_input.text.toString())
+        viewBinding.confirmButton.setOnClickListener {
+            viewBinding.status.text = ""
+            createPaymentIntent(viewBinding.ibanInput.text.toString())
         }
     }
 
@@ -68,13 +72,13 @@ class ConfirmSepaDebitActivity : AppCompatActivity() {
 
         stripe.onPaymentResult(requestCode, data, object : ApiResultCallback<PaymentIntentResult> {
             override fun onSuccess(result: PaymentIntentResult) {
-                tv_status.append("\n\nStatus after confirmation: ${result.intent.status}")
+                viewBinding.status.append("\n\nStatus after confirmation: ${result.intent.status}")
                 snackbarController.show("Status after confirmation: ${result.intent.status}")
                 enableUi()
             }
 
             override fun onError(e: Exception) {
-                tv_status.append("\n\nError during confirmation: ${e.message}")
+                viewBinding.status.append("\n\nError during confirmation: ${e.message}")
                 snackbarController.show("Error during confirmation: ${e.message}")
                 enableUi()
             }
@@ -88,7 +92,7 @@ class ConfirmSepaDebitActivity : AppCompatActivity() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe {
                     disableUi()
-                    tv_status.append(getString(R.string.creating_payment_intent))
+                    viewBinding.status.append(getString(R.string.creating_payment_intent))
                 }
                 .doFinally {
                     enableUi()
@@ -103,13 +107,13 @@ class ConfirmSepaDebitActivity : AppCompatActivity() {
     }
 
     private fun disableUi() {
-        progress_bar.visibility = View.VISIBLE
-        confirm_with_sepa_debit_button.isEnabled = false
+        viewBinding.progressBar.visibility = View.VISIBLE
+        viewBinding.confirmButton.isEnabled = false
     }
 
     private fun enableUi() {
-        progress_bar.visibility = View.INVISIBLE
-        confirm_with_sepa_debit_button.isEnabled = true
+        viewBinding.progressBar.visibility = View.INVISIBLE
+        viewBinding.confirmButton.isEnabled = true
     }
 
     private fun handleCreatePaymentIntentResponse(
@@ -121,7 +125,7 @@ class ConfirmSepaDebitActivity : AppCompatActivity() {
             this.clientSecret = it
         }
 
-        tv_status.append("\n\nCreated payment intent: $intentId")
+        viewBinding.status.append("\n\nCreated payment intent: $intentId")
 
         if (EXISTING_PAYMENT_METHOD_ID == null) {
             stripe.confirmPayment(
@@ -169,7 +173,7 @@ class ConfirmSepaDebitActivity : AppCompatActivity() {
     }
 
     private fun handleError(ex: Throwable) {
-        tv_status.append("\n\nError while creating PaymentIntent: ${ex.message}")
+        viewBinding.status.append("\n\nError while creating PaymentIntent: ${ex.message}")
     }
 
     private companion object {

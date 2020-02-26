@@ -25,11 +25,11 @@
                 android:visibility="invisible"
                 />
 
-            <include android:id="@+id/google_pay_button"
-                     android:layout_width="200dp"
-                     android:layout_height="48sp"
-                     android:layout_gravity="center_horizontal"
-                     layout="@layout/pay_with_google_button"/>
+            <com.stripe.example.activity.GooglePayButton
+                android:id="@+id/google_pay_button"
+                android:layout_width="200dp"
+                android:layout_height="48sp"
+                android:layout_gravity="center_horizontal" />
 
             <TextView
                 android:id="@+id/google_pay_result"

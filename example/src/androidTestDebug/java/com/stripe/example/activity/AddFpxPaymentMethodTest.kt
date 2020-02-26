@@ -50,7 +50,7 @@ class AddFpxPaymentMethodTest {
         )
 
         // click select payment method button
-        onView(withId(R.id.btn_select_payment_method))
+        onView(withId(R.id.select_payment_method_button))
             .perform(click())
 
         // click on first bank in the list

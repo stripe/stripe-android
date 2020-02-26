@@ -13,11 +13,14 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.KlarnaSourceParams
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
-import com.stripe.example.R
 import com.stripe.example.StripeFactory
-import kotlinx.android.synthetic.main.activity_klarna_source.*
+import com.stripe.example.databinding.KlarnaSourceActivityBinding
 
 class KlarnaSourceActivity : AppCompatActivity() {
+    private val viewBinding: KlarnaSourceActivityBinding by lazy {
+        KlarnaSourceActivityBinding.inflate(layoutInflater)
+    }
+
     private val viewModel: SourceViewModel by lazy {
         ViewModelProvider(
             this,
@@ -32,13 +35,13 @@ class KlarnaSourceActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_klarna_source)
+        setContentView(viewBinding.root)
 
-        btn_create_klarna_source.setOnClickListener {
-            source_result.text = ""
-            progress_bar.visibility = View.VISIBLE
+        viewBinding.createButton.setOnClickListener {
+            viewBinding.sourceResult.text = ""
+            viewBinding.progressBar.visibility = View.VISIBLE
             createKlarnaSource().observe(this, Observer { result ->
-                progress_bar.visibility = View.INVISIBLE
+                viewBinding.progressBar.visibility = View.INVISIBLE
                 when (result) {
                     is SourceViewModel.SourceResult.Success -> {
                         val source = result.source
@@ -46,16 +49,16 @@ class KlarnaSourceActivity : AppCompatActivity() {
                         stripe.authenticateSource(this, source)
                     }
                     is SourceViewModel.SourceResult.Error -> {
-                        source_result.text = result.e.localizedMessage
+                        viewBinding.sourceResult.text = result.e.localizedMessage
                     }
                 }
             })
         }
 
-        btn_fetch_klarna_source.setOnClickListener {
-            progress_bar.visibility = View.VISIBLE
+        viewBinding.fetchButton.setOnClickListener {
+            viewBinding.progressBar.visibility = View.VISIBLE
             viewModel.fetchSource(viewModel.source).observe(this, Observer { result ->
-                progress_bar.visibility = View.INVISIBLE
+                viewBinding.progressBar.visibility = View.INVISIBLE
                 when (result) {
                     is SourceViewModel.SourceResult.Success -> {
                         logSource(result.source)
@@ -86,7 +89,7 @@ class KlarnaSourceActivity : AppCompatActivity() {
     }
 
     private fun logSource(source: Source) {
-        source_result.text = """
+        viewBinding.sourceResult.text = """
             Source ID
             ${source.id}
             
@@ -108,7 +111,7 @@ class KlarnaSourceActivity : AppCompatActivity() {
     }
 
     private fun logException(ex: Exception) {
-        source_result.text = ex.localizedMessage
+        viewBinding.sourceResult.text = ex.localizedMessage
     }
 
     private fun createKlarnaSource(): LiveData<SourceViewModel.SourceResult> {

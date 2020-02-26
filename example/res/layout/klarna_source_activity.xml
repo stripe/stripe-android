@@ -18,7 +18,7 @@
             android:visibility="invisible" />
 
         <Button
-            android:id="@+id/btn_create_klarna_source"
+            android:id="@+id/create_button"
             android:layout_width="360dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -27,7 +27,7 @@
             />
 
         <Button
-            android:id="@+id/btn_fetch_klarna_source"
+            android:id="@+id/fetch_button"
             android:layout_width="360dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"

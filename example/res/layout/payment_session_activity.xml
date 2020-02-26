@@ -23,7 +23,7 @@
                 />
 
             <Button
-                android:id="@+id/btn_select_payment_method"
+                android:id="@+id/select_payment_method_button"
                 android:enabled="false"
                 android:layout_width="320dp"
                 android:layout_height="wrap_content"
@@ -33,7 +33,7 @@
                 />
 
             <Button
-                android:id="@+id/btn_start_payment_flow"
+                android:id="@+id/start_payment_flow_button"
                 android:enabled="false"
                 android:layout_width="320dp"
                 android:layout_height="wrap_content"
@@ -44,7 +44,7 @@
                 />
 
             <TextView
-                android:id="@+id/tv_ready_to_charge"
+                android:id="@+id/ready_to_charge"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
@@ -56,7 +56,7 @@
                 />
 
             <TextView
-                android:id="@+id/tv_payment_method"
+                android:id="@+id/payment_method"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
@@ -67,7 +67,7 @@
                 />
 
             <TextView
-                android:id="@+id/tv_shipping_info"
+                android:id="@+id/shipping_info"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
@@ -78,7 +78,7 @@
                 />
 
             <TextView
-                android:id="@+id/tv_shipping_method"
+                android:id="@+id/shipping_method"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"

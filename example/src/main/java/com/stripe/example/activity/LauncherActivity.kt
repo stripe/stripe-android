@@ -10,20 +10,22 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.example.R
-import kotlinx.android.synthetic.main.activity_launcher.*
+import com.stripe.example.databinding.LauncherActivityBinding
 
 class LauncherActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_launcher)
+
+        val viewBinding = LauncherActivityBinding.inflate(layoutInflater)
+        setContentView(viewBinding.root)
 
         val linearLayoutManager = LinearLayoutManager(this)
             .apply {
                 orientation = LinearLayoutManager.VERTICAL
             }
 
-        examples.run {
+        viewBinding.examples.run {
             setHasFixedSize(true)
             layoutManager = linearLayoutManager
             adapter = ExamplesAdapter(this@LauncherActivity)

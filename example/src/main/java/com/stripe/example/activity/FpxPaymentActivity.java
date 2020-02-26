@@ -1,10 +1,8 @@
 package com.stripe.example.activity;
 
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,27 +15,30 @@ import com.stripe.android.view.AddPaymentMethodActivityStarter;
 import com.stripe.android.view.FpxBank;
 import com.stripe.example.R;
 import com.stripe.example.Settings;
+import com.stripe.example.databinding.FpxPaymentActivityBinding;
 
 import java.util.Objects;
 
 public class FpxPaymentActivity extends AppCompatActivity {
 
-    private TextView resultView;
-    private TextView fpxBankInfo;
+    private FpxPaymentActivityBinding viewBinding;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_fpx_payment);
+        viewBinding = FpxPaymentActivityBinding.inflate(getLayoutInflater());
+
+        setContentView(viewBinding.getRoot());
         setTitle(R.string.fpx_payment_example);
 
-        PaymentConfiguration.init(this, new Settings(this).getPublishableKey());
+        PaymentConfiguration.init(
+                this,
+                new Settings(this).getPublishableKey()
+        );
 
-        findViewById(R.id.btn_select_payment_method)
+        viewBinding.selectPaymentMethodButton
                 .setOnClickListener(view -> launchAddPaymentMethod());
-        resultView = findViewById(R.id.payment_method_result);
-        fpxBankInfo = findViewById(R.id.fpx_bank_info);
     }
 
     private void launchAddPaymentMethod() {
@@ -65,16 +66,20 @@ public class FpxPaymentActivity extends AppCompatActivity {
                 "\nType: " + paymentMethod.type +
                 "\nId: " + paymentMethod.id +
                 "\nBank code: " + fpxBankCode;
-        resultView.setText(resultMessage);
+        viewBinding.paymentMethodResult.setText(resultMessage);
 
         final FpxBank fpxBank = FpxBank.get(fpxBankCode);
         if (fpxBank != null) {
-            fpxBankInfo.setVisibility(View.VISIBLE);
-            final Drawable fpxIcon = ContextCompat.getDrawable(this, fpxBank.getBrandIconResId());
-            fpxBankInfo.setCompoundDrawablesRelativeWithIntrinsicBounds(fpxIcon, null, null, null);
-            fpxBankInfo.setText(fpxBank.getDisplayName());
+            viewBinding.fpxBankInfo.setVisibility(View.VISIBLE);
+            viewBinding.fpxBankInfo.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                    ContextCompat.getDrawable(this, fpxBank.getBrandIconResId()),
+                    null,
+                    null,
+                    null
+            );
+            viewBinding.fpxBankInfo.setText(fpxBank.getDisplayName());
         } else {
-            fpxBankInfo.setVisibility(View.GONE);
+            viewBinding.fpxBankInfo.setVisibility(View.GONE);
         }
     }
 }

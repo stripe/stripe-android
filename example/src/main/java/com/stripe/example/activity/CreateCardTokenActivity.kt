@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -21,21 +20,25 @@ import com.stripe.android.model.Token
 import com.stripe.android.view.CardValidCallback
 import com.stripe.example.R
 import com.stripe.example.StripeFactory
-import kotlinx.android.synthetic.main.card_token_activity.*
+import com.stripe.example.databinding.CreateCardTokenActivityBinding
+import com.stripe.example.databinding.TokenItemBinding
 
 class CreateCardTokenActivity : AppCompatActivity() {
+    private val viewBinding: CreateCardTokenActivityBinding by lazy {
+        CreateCardTokenActivityBinding.inflate(layoutInflater)
+    }
 
     private val snackbarController: SnackbarController by lazy {
-        SnackbarController(findViewById(android.R.id.content))
+        SnackbarController(viewBinding.coordinator)
     }
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.card_token_activity)
+        setContentView(viewBinding.root)
 
         val adapter = Adapter(this)
-        tokens_list.adapter = adapter
-        tokens_list.layoutManager = LinearLayoutManager(this)
+        viewBinding.tokensList.adapter = adapter
+        viewBinding.tokensList.layoutManager = LinearLayoutManager(this)
             .apply {
                 orientation = LinearLayoutManager.VERTICAL
             }
@@ -45,10 +48,10 @@ class CreateCardTokenActivity : AppCompatActivity() {
             ViewModelProvider.AndroidViewModelFactory(application)
         )[CreateCardTokenViewModel::class.java]
 
-        create_token_button.setOnClickListener {
+        viewBinding.createTokenButton.setOnClickListener {
             BackgroundTaskTracker.onStart()
 
-            val card = card_input_widget.card
+            val card = viewBinding.cardInputWidget.card
 
             if (card != null) {
                 onRequestStart()
@@ -61,7 +64,7 @@ class CreateCardTokenActivity : AppCompatActivity() {
             }
         }
 
-        card_input_widget.setCardValidCallback(object : CardValidCallback {
+        viewBinding.cardInputWidget.setCardValidCallback(object : CardValidCallback {
             override fun onInputChanged(
                 isValid: Boolean,
                 invalidFields: Set<CardValidCallback.Fields>
@@ -70,17 +73,17 @@ class CreateCardTokenActivity : AppCompatActivity() {
             }
         })
 
-        card_input_widget.requestFocus()
+        viewBinding.cardInputWidget.requestFocus()
     }
 
     private fun onRequestStart() {
-        progress_bar.visibility = View.VISIBLE
-        create_token_button.isEnabled = false
+        viewBinding.progressBar.visibility = View.VISIBLE
+        viewBinding.createTokenButton.isEnabled = false
     }
 
     private fun onRequestEnd() {
-        progress_bar.visibility = View.INVISIBLE
-        create_token_button.isEnabled = true
+        viewBinding.progressBar.visibility = View.INVISIBLE
+        viewBinding.createTokenButton.isEnabled = true
     }
 
     internal class Adapter(
@@ -93,9 +96,13 @@ class CreateCardTokenActivity : AppCompatActivity() {
         }
 
         override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): TokenViewHolder {
-            val root = activity.layoutInflater
-                .inflate(R.layout.token_item, viewGroup, false)
-            return TokenViewHolder(root)
+            return TokenViewHolder(
+                TokenItemBinding.inflate(
+                    activity.layoutInflater,
+                    viewGroup,
+                    false
+                )
+            )
         }
 
         override fun onBindViewHolder(holder: TokenViewHolder, position: Int) {
@@ -107,13 +114,12 @@ class CreateCardTokenActivity : AppCompatActivity() {
             notifyItemInserted(0)
         }
 
-        internal class TokenViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-            private val last4TextView: TextView = itemView.findViewById(R.id.last4)
-            private val tokenIdTextView: TextView = itemView.findViewById(R.id.tokenId)
-
+        internal class TokenViewHolder(
+            private val viewBinding: TokenItemBinding
+        ) : RecyclerView.ViewHolder(viewBinding.root) {
             fun update(token: Token) {
-                last4TextView.text = token.card?.last4
-                tokenIdTextView.text = token.id
+                viewBinding.last4.text = token.card?.last4
+                viewBinding.tokenId.text = token.id
             }
         }
     }

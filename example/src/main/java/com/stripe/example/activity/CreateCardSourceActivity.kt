@@ -19,12 +19,16 @@ import com.stripe.android.model.SourceTypeModel
 import com.stripe.example.R
 import com.stripe.example.StripeFactory
 import com.stripe.example.adapter.SourcesAdapter
-import kotlinx.android.synthetic.main.activity_card_sources.*
+import com.stripe.example.databinding.CreateCardSourceActivityBinding
 
 /**
  * Activity that lets you redirect for a 3DS source verification.
  */
 class CreateCardSourceActivity : AppCompatActivity() {
+    private val viewBinding: CreateCardSourceActivityBinding by lazy {
+        CreateCardSourceActivityBinding.inflate(layoutInflater)
+    }
+
     private val viewModel: SourceViewModel by lazy {
         ViewModelProvider(
             this,
@@ -41,24 +45,24 @@ class CreateCardSourceActivity : AppCompatActivity() {
         KeyboardController(this)
     }
     private val snackbarController: SnackbarController by lazy {
-        SnackbarController(findViewById(android.R.id.content))
+        SnackbarController(viewBinding.coordinator)
     }
 
     private var alertDialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_card_sources)
+        setContentView(viewBinding.root)
 
-        btn_create_source.setOnClickListener {
-            card_widget_three_d.card?.let {
+        viewBinding.createButton.setOnClickListener {
+            viewBinding.cardWidget.card?.let {
                 createCardSource(it)
             } ?: showSnackbar("Enter a valid card.")
         }
 
-        recycler_view.setHasFixedSize(true)
-        recycler_view.layoutManager = LinearLayoutManager(this)
-        recycler_view.adapter = sourcesAdapter
+        viewBinding.recyclerView.setHasFixedSize(true)
+        viewBinding.recyclerView.layoutManager = LinearLayoutManager(this)
+        viewBinding.recyclerView.adapter = sourcesAdapter
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -91,14 +95,14 @@ class CreateCardSourceActivity : AppCompatActivity() {
     private fun createCardSource(card: Card) {
         keyboardController.hide()
 
-        btn_create_source.isEnabled = false
-        progress_bar.visibility = View.VISIBLE
+        viewBinding.createButton.isEnabled = false
+        viewBinding.progressBar.visibility = View.VISIBLE
 
         val params = SourceParams.createCardParams(card)
         viewModel.createSource(params).observe(this,
             Observer { result ->
-                btn_create_source.isEnabled = true
-                progress_bar.visibility = View.INVISIBLE
+                viewBinding.createButton.isEnabled = true
+                viewBinding.progressBar.visibility = View.INVISIBLE
 
                 when (result) {
                     is SourceViewModel.SourceResult.Success -> {
@@ -146,7 +150,7 @@ class CreateCardSourceActivity : AppCompatActivity() {
 
         viewModel.createSource(params).observe(this,
             Observer { result ->
-                progress_bar.visibility = View.INVISIBLE
+                viewBinding.progressBar.visibility = View.INVISIBLE
 
                 when (result) {
                     is SourceViewModel.SourceResult.Success -> {
