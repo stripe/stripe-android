@@ -103,7 +103,7 @@ class CardNumberEditText @JvmOverloads constructor(
         editActionAddition: Int
     ): Int {
         var gapsJumped = 0
-        val gapSet = cardBrand.spacePositions
+        val gapSet = cardBrand.getSpacePositionsForCardNumber(fieldText)
 
         var skipBack = false
         gapSet.forEach { gap ->
@@ -163,10 +163,7 @@ class CardNumberEditText @JvmOverloads constructor(
                 val spacelessNumber = StripeTextUtils.removeSpacesAndHyphens(inputText)
                     ?: return
 
-                val formattedNumber = createFormattedNumber(
-                    ViewUtils.separateCardNumberGroups(spacelessNumber, cardBrand)
-                )
-
+                val formattedNumber = cardBrand.formatNumber(spacelessNumber)
                 this.newCursorPosition = updateSelectionIndex(formattedNumber.length,
                     latestChangeStart, latestInsertionSize)
                 this.formattedNumber = formattedNumber
@@ -208,14 +205,5 @@ class CardNumberEditText @JvmOverloads constructor(
     @JvmSynthetic
     internal fun updateCardBrandFromNumber(partialNumber: String) {
         cardBrand = CardUtils.getPossibleCardBrand(partialNumber)
-    }
-
-    internal companion object {
-        @JvmSynthetic
-        internal fun createFormattedNumber(cardParts: Array<String?>): String {
-            return cardParts
-                .takeWhile { it != null }
-                .joinToString(" ")
-        }
     }
 }

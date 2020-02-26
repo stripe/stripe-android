@@ -4,6 +4,7 @@ import android.os.Build
 import android.text.TextPaint
 import android.view.ViewGroup
 import android.widget.ImageView
+import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.reset
 import com.nhaarman.mockitokotlin2.verify
@@ -11,6 +12,7 @@ import com.stripe.android.CardNumberFixtures.AMEX_NO_SPACES
 import com.stripe.android.CardNumberFixtures.AMEX_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_14_NO_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_14_WITH_SPACES
+import com.stripe.android.CardNumberFixtures.DINERS_CLUB_16_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
 import com.stripe.android.R
@@ -1299,6 +1301,16 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         cardInputWidget.setCardNumber(VISA_NO_SPACES)
         assertNotNull(cardInputWidget.paymentMethodCreateParams)
         assertFalse(cardInputWidget.shouldShowErrorIcon)
+    }
+
+    @Test
+    fun createHiddenCardText_shouldReturnExpectedValue() {
+        assertThat(cardInputWidget.createHiddenCardText(CardBrand.Visa, VISA_NO_SPACES))
+            .isEqualTo("0000 0000 0000 ")
+        assertThat(cardInputWidget.createHiddenCardText(CardBrand.DinersClub, DINERS_CLUB_14_NO_SPACES))
+            .isEqualTo("0000 000000 ")
+        assertThat(cardInputWidget.createHiddenCardText(CardBrand.DinersClub, DINERS_CLUB_16_NO_SPACES))
+            .isEqualTo("0000 0000 0000 ")
     }
 
     private companion object {
