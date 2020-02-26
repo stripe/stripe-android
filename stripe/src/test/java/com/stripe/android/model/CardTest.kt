@@ -88,7 +88,7 @@ class CardTest {
 
     @Test
     fun shouldPassValidateNumberIfLuhnNumberAmex() {
-        val card = Card.create(number = "378282246310005")
+        val card = Card.create(number = CardNumberFixtures.AMEX_NO_SPACES)
         assertEquals(CardBrand.AmericanExpress, card.brand)
         assertTrue(card.validateNumber())
     }
@@ -346,31 +346,31 @@ class CardTest {
 
     @Test
     fun shouldPassValidateCVCIfAmexAndLength2() {
-        val card = Card.create(number = "378282246310005", cvc = "12")
+        val card = Card.create(number = CardNumberFixtures.AMEX_NO_SPACES, cvc = "12")
         assertFalse(card.validateCVC())
     }
 
     @Test
     fun shouldPassValidateCVCIfAmexAndLength3() {
-        val card = Card.create(number = "378282246310005", cvc = "123")
+        val card = Card.create(number = CardNumberFixtures.AMEX_NO_SPACES, cvc = "123")
         assertTrue(card.validateCVC())
     }
 
     @Test
     fun shouldPassValidateCVCIfAmexAndLength4() {
-        val card = Card.create(number = "378282246310005", cvc = "1234")
+        val card = Card.create(number = CardNumberFixtures.AMEX_NO_SPACES, cvc = "1234")
         assertTrue(card.validateCVC())
     }
 
     @Test
     fun shouldFailValidateCVCIfAmexAndLength5() {
-        val card = Card.create(number = "378282246310005", cvc = "12345")
+        val card = Card.create(number = CardNumberFixtures.AMEX_NO_SPACES, cvc = "12345")
         assertFalse(card.validateCVC())
     }
 
     @Test
     fun shouldFailValidateCVCIfAmexAndNotNumeric() {
-        val card = Card.create(number = "378282246310005", cvc = "123d")
+        val card = Card.create(number = CardNumberFixtures.AMEX_NO_SPACES, cvc = "123d")
         assertFalse(card.validateCVC())
     }
 
@@ -448,7 +448,7 @@ class CardTest {
 
     @Test
     fun shouldPassValidateCardAmex() {
-        val card = Card.create(number = "378282246310005", expMonth = 12, expYear = 2050, cvc = "1234")
+        val card = Card.create(number = CardNumberFixtures.AMEX_NO_SPACES, expMonth = 12, expYear = 2050, cvc = "1234")
         assertTrue(card.validateCard(calendar))
         assertTrue(card.validateNumber())
         assertTrue(card.validateExpiryDate(calendar))
@@ -457,7 +457,7 @@ class CardTest {
 
     @Test
     fun shouldPassValidateCardAmexWithNullCVC() {
-        val card = Card.create(number = "378282246310005", expMonth = 12, expYear = 2050)
+        val card = Card.create(number = CardNumberFixtures.AMEX_NO_SPACES, expMonth = 12, expYear = 2050)
         assertTrue(card.validateCard(calendar))
         assertTrue(card.validateNumber())
         assertTrue(card.validateExpiryDate(calendar))
@@ -466,7 +466,7 @@ class CardTest {
 
     @Test
     fun shouldFailValidateCardAmexWithShortCVC() {
-        val card = Card.create(number = "378282246310005", expMonth = 12, expYear = 2050, cvc = "12")
+        val card = Card.create(number = CardNumberFixtures.AMEX_NO_SPACES, expMonth = 12, expYear = 2050, cvc = "12")
         assertFalse(card.validateCard(calendar))
         assertTrue(card.validateNumber())
         assertTrue(card.validateExpiryDate(calendar))
@@ -475,7 +475,7 @@ class CardTest {
 
     @Test
     fun shouldFailValidateCardAmexWithLongCVC() {
-        val card = Card.create(number = "378282246310005", expMonth = 12, expYear = 2050, cvc = "12345")
+        val card = Card.create(number = CardNumberFixtures.AMEX_NO_SPACES, expMonth = 12, expYear = 2050, cvc = "12345")
         assertFalse(card.validateCard(calendar))
         assertTrue(card.validateNumber())
         assertTrue(card.validateExpiryDate(calendar))
@@ -484,7 +484,7 @@ class CardTest {
 
     @Test
     fun shouldFailValidateCardAmexWithBadCVC() {
-        val card = Card.create(number = "378282246310005", expMonth = 12, expYear = 2050, cvc = "bad")
+        val card = Card.create(number = CardNumberFixtures.AMEX_NO_SPACES, expMonth = 12, expYear = 2050, cvc = "bad")
         assertFalse(card.validateCard(calendar))
         assertTrue(card.validateNumber())
         assertTrue(card.validateExpiryDate(calendar))
