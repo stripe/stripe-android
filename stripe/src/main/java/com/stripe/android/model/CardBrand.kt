@@ -11,6 +11,7 @@ enum class CardBrand(
     val displayName: String,
     @DrawableRes val icon: Int,
     @DrawableRes val cvcIcon: Int = R.drawable.stripe_ic_cvc,
+    @DrawableRes val errorIcon: Int = R.drawable.stripe_ic_error,
 
     /**
      * Accepted CVC lengths
@@ -47,6 +48,7 @@ enum class CardBrand(
         "American Express",
         R.drawable.stripe_ic_amex,
         cvcIcon = R.drawable.stripe_ic_cvc_amex,
+        errorIcon = R.drawable.stripe_ic_error_amex,
         cvcLength = setOf(3, 4),
         defaultMaxLength = 15,
         prefixes = listOf("34", "37"),
