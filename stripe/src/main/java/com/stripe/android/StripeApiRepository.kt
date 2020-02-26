@@ -859,7 +859,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         APIException::class)
     private fun handleApiError(response: StripeResponse) {
         val requestId = response.requestId
-        val responseCode = response.responseCode
+        val responseCode = response.code
         val stripeError = StripeErrorJsonParser().parse(response.responseJson)
         when (responseCode) {
             HttpURLConnection.HTTP_BAD_REQUEST, HttpURLConnection.HTTP_NOT_FOUND -> {
@@ -906,7 +906,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             throw APIConnectionException.create(ex, apiRequest.baseUrl)
         }
 
-        if (response.hasErrorCode()) {
+        if (response.isError) {
             handleApiError(response)
         }
 
@@ -927,7 +927,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             throw APIConnectionException.create(ex, fileUploadRequest.baseUrl)
         }
 
-        if (response.hasErrorCode()) {
+        if (response.isError) {
             handleApiError(response)
         }
 
