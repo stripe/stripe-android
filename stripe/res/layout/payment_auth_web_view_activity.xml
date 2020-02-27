@@ -5,7 +5,7 @@
     android:layout_height="match_parent">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/payment_auth_web_view_toolbar"
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
@@ -15,7 +15,7 @@
 
     <FrameLayout
         android:id="@+id/auth_web_view_container"
-        android:layout_below="@id/payment_auth_web_view_toolbar"
+        android:layout_below="@id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <com.stripe.android.view.PaymentAuthWebView

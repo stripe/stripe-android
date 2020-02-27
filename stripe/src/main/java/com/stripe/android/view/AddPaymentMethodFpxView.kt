@@ -6,8 +6,6 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Observer
@@ -16,9 +14,10 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.R
+import com.stripe.android.databinding.FpxBankItemBinding
+import com.stripe.android.databinding.FpxPaymentMethodBinding
 import com.stripe.android.model.FpxBankStatuses
 import com.stripe.android.model.PaymentMethodCreateParams
-import kotlinx.android.synthetic.main.add_payment_method_fpx_layout.view.*
 
 internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
     activity: FragmentActivity,
@@ -46,12 +45,16 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
         }
 
     init {
-        View.inflate(context, R.layout.add_payment_method_fpx_layout, this)
+        val viewBinding = FpxPaymentMethodBinding.inflate(
+            activity.layoutInflater,
+            this,
+            true
+        )
 
         // an id is required for state to be saved
         id = R.id.stripe_payment_methods_add_fpx
 
-        fpx_list.run {
+        viewBinding.fpxList.run {
             adapter = fpxAdapter
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(activity)
@@ -104,9 +107,14 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, i: Int): ViewHolder {
-            val itemView = LayoutInflater.from(parent.context)
-                .inflate(R.layout.fpx_bank, parent, false)
-            return ViewHolder(itemView, themeConfig)
+            return ViewHolder(
+                FpxBankItemBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false
+                ),
+                themeConfig
+            )
         }
 
         override fun onBindViewHolder(viewHolder: ViewHolder, i: Int) {
@@ -150,16 +158,13 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
         }
 
         private class ViewHolder constructor(
-            itemView: View,
+            private val viewBinding: FpxBankItemBinding,
             private val themeConfig: ThemeConfig
-        ) : RecyclerView.ViewHolder(itemView) {
+        ) : RecyclerView.ViewHolder(viewBinding.root) {
             private val resources: Resources = itemView.resources
-            private val name: TextView = itemView.findViewById(R.id.name)
-            private val icon: ImageView = itemView.findViewById(R.id.icon)
-            private val checkMark: ImageView = itemView.findViewById(R.id.check_icon)
 
             internal fun update(fpxBank: FpxBank, isOnline: Boolean) {
-                name.text = if (isOnline) {
+                viewBinding.name.text = if (isOnline) {
                     fpxBank.displayName
                 } else {
                     resources.getString(
@@ -167,16 +172,20 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
                         fpxBank.displayName
                     )
                 }
-                icon.setImageResource(fpxBank.brandIconResId)
+                viewBinding.icon.setImageResource(fpxBank.brandIconResId)
             }
 
             internal fun setSelected(isSelected: Boolean) {
-                name.setTextColor(themeConfig.getTextColor(isSelected))
+                viewBinding.name.setTextColor(themeConfig.getTextColor(isSelected))
                 ImageViewCompat.setImageTintList(
-                    checkMark,
+                    viewBinding.checkIcon,
                     ColorStateList.valueOf(themeConfig.getTintColor(isSelected))
                 )
-                checkMark.visibility = if (isSelected) View.VISIBLE else View.GONE
+                viewBinding.checkIcon.visibility = if (isSelected) {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
             }
         }
     }

@@ -16,7 +16,7 @@ import com.stripe.android.PaymentAuthWebViewStarter
 import com.stripe.android.R
 import com.stripe.android.stripe3ds2.utils.CustomizeUtils
 import com.ults.listeners.SdkChallengeInterface.UL_HANDLE_CHALLENGE_ACTION
-import kotlinx.android.synthetic.main.payment_auth_web_view_layout.*
+import kotlinx.android.synthetic.main.payment_auth_web_view_activity.*
 
 class PaymentAuthWebViewActivity : AppCompatActivity() {
 
@@ -44,9 +44,9 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         LocalBroadcastManager.getInstance(this)
             .sendBroadcast(Intent().setAction(UL_HANDLE_CHALLENGE_ACTION))
 
-        setContentView(R.layout.payment_auth_web_view_layout)
+        setContentView(R.layout.payment_auth_web_view_activity)
 
-        setSupportActionBar(payment_auth_web_view_toolbar)
+        setSupportActionBar(toolbar)
         customizeToolbar()
 
         val clientSecret = args.clientSecret
@@ -106,14 +106,13 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
 
         viewModel.toolbarTitle?.let {
             logger.debug("PaymentAuthWebViewActivity#customizeToolbar() - updating toolbar title")
-            payment_auth_web_view_toolbar.title =
-                CustomizeUtils.buildStyledText(this, it.text, it.toolbarCustomization)
+            toolbar.title = CustomizeUtils.buildStyledText(this, it.text, it.toolbarCustomization)
         }
 
         viewModel.toolbarBackgroundColor?.let { backgroundColor ->
             logger.debug("PaymentAuthWebViewActivity#customizeToolbar() - updating toolbar background color")
             @ColorInt val backgroundColorInt = Color.parseColor(backgroundColor)
-            payment_auth_web_view_toolbar.setBackgroundColor(backgroundColorInt)
+            toolbar.setBackgroundColor(backgroundColorInt)
             CustomizeUtils.setStatusBarColor(this, backgroundColorInt)
         }
     }
