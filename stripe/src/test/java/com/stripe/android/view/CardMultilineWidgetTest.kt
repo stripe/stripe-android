@@ -753,6 +753,27 @@ internal class CardMultilineWidgetTest {
         )
     }
 
+    @Test
+    fun shouldShowErrorIcon_shouldBeUpdatedCorrectly() {
+        cardMultilineWidget.setExpiryDate(12, 2030)
+        cardMultilineWidget.setCvcCode("123")
+
+        // show error icon when validating fields with invalid card number
+        cardMultilineWidget.setCardNumber(VISA_NO_SPACES.take(6))
+        assertNull(cardMultilineWidget.paymentMethodCreateParams)
+        assertTrue(cardMultilineWidget.shouldShowErrorIcon)
+
+        // don't show error icon after changing input
+        cardMultilineWidget.setCardNumber(VISA_NO_SPACES.take(7))
+        assertFalse(cardMultilineWidget.shouldShowErrorIcon)
+
+        // don't show error icon when validating fields with invalid card number
+        assertNull(cardMultilineWidget.paymentMethodCreateParams)
+        cardMultilineWidget.setCardNumber(VISA_NO_SPACES)
+        assertNotNull(cardMultilineWidget.paymentMethodCreateParams)
+        assertFalse(cardMultilineWidget.shouldShowErrorIcon)
+    }
+
     internal class WidgetControlGroup(widget: CardMultilineWidget) {
         val cardNumberEditText: CardNumberEditText = widget.findViewById(R.id.et_card_number)
         val cardInputLayout: TextInputLayout = widget.findViewById(R.id.tl_card_number)
