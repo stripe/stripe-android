@@ -20,7 +20,7 @@ import com.stripe.android.view.BillingAddressFields
 import com.stripe.android.view.PaymentUtils
 import com.stripe.android.view.ShippingInfoWidget
 import com.stripe.example.R
-import kotlinx.android.synthetic.main.activity_payment_session.*
+import com.stripe.example.databinding.PaymentSessionActivityBinding
 import java.util.Currency
 import java.util.Locale
 
@@ -29,27 +29,30 @@ import java.util.Locale
  * information needed to request payment for the current customer.
  */
 class PaymentSessionActivity : AppCompatActivity() {
+    private val viewBinding: PaymentSessionActivityBinding by lazy {
+        PaymentSessionActivityBinding.inflate(layoutInflater)
+    }
 
     private lateinit var paymentSession: PaymentSession
     private val notSelectedText: String by lazy {
         getString(R.string.not_selected)
     }
     private val snackbarController: SnackbarController by lazy {
-        SnackbarController(coordinator)
+        SnackbarController(viewBinding.coordinator)
     }
 
     private var paymentSessionData: PaymentSessionData? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_payment_session)
+        setContentView(viewBinding.root)
 
         paymentSession = createPaymentSession(savedInstanceState == null)
 
-        btn_select_payment_method.setOnClickListener {
+        viewBinding.selectPaymentMethodButton.setOnClickListener {
             paymentSession.presentPaymentMethodSelection()
         }
-        btn_start_payment_flow.setOnClickListener {
+        viewBinding.startPaymentFlowButton.setOnClickListener {
             paymentSession.presentShippingFlow()
         }
     }
@@ -163,22 +166,22 @@ class PaymentSessionActivity : AppCompatActivity() {
     }
 
     private fun enableUi() {
-        progress_bar.visibility = View.INVISIBLE
-        btn_select_payment_method.isEnabled = true
-        btn_start_payment_flow.isEnabled = true
+        viewBinding.progressBar.visibility = View.INVISIBLE
+        viewBinding.selectPaymentMethodButton.isEnabled = true
+        viewBinding.startPaymentFlowButton.isEnabled = true
     }
 
     private fun disableUi() {
-        progress_bar.visibility = View.VISIBLE
-        btn_select_payment_method.isEnabled = false
-        btn_start_payment_flow.isEnabled = false
+        viewBinding.progressBar.visibility = View.VISIBLE
+        viewBinding.selectPaymentMethodButton.isEnabled = false
+        viewBinding.startPaymentFlowButton.isEnabled = false
     }
 
     private fun onCustomerRetrieved() {
         enableUi()
 
         paymentSessionData?.let { paymentSessionData ->
-            tv_ready_to_charge.setCompoundDrawablesRelativeWithIntrinsicBounds(
+            viewBinding.readyToCharge.setCompoundDrawablesRelativeWithIntrinsicBounds(
                 if (paymentSessionData.isPaymentReadyToCharge) {
                     ContextCompat.getDrawable(this, R.drawable.ic_check)
                 } else {
@@ -187,12 +190,13 @@ class PaymentSessionActivity : AppCompatActivity() {
                 null, null, null
             )
 
-            tv_payment_method.text = createPaymentMethodDescription(paymentSessionData)
+            viewBinding.paymentMethod.text =
+                createPaymentMethodDescription(paymentSessionData)
 
-            tv_shipping_info.text =
+            viewBinding.shippingInfo.text =
                 createShippingInfoDescription(paymentSessionData.shippingInformation)
 
-            tv_shipping_method.text =
+            viewBinding.shippingMethod.text =
                 createShippingMethodDescription(paymentSessionData.shippingMethod)
         }
     }
@@ -245,6 +249,10 @@ class PaymentSessionActivity : AppCompatActivity() {
         }
     }
 
+    private fun onError() {
+        viewBinding.progressBar.visibility = View.INVISIBLE
+    }
+
     private class PaymentSessionChangeCustomerRetrievalListener internal constructor(
         activity: PaymentSessionActivity
     ) : CustomerSession.ActivityCustomerRetrievalListener<PaymentSessionActivity>(activity) {
@@ -260,7 +268,7 @@ class PaymentSessionActivity : AppCompatActivity() {
 
         override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
             BackgroundTaskTracker.onStop()
-            activity?.progress_bar?.visibility = View.INVISIBLE
+            activity?.onError()
         }
     }
 

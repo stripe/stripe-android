@@ -20,12 +20,14 @@ import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.Stripe
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.example.R
 import com.stripe.example.StripeFactory
-import kotlinx.android.synthetic.main.activity_pay_with_google.*
+import com.stripe.example.databinding.GooglePayActivityBinding
 import org.json.JSONObject
 
 class PayWithGoogleActivity : AppCompatActivity() {
+    private val viewBinding: GooglePayActivityBinding by lazy {
+        GooglePayActivityBinding.inflate(layoutInflater)
+    }
 
     private val stripe: Stripe by lazy {
         StripeFactory(this).create()
@@ -41,15 +43,15 @@ class PayWithGoogleActivity : AppCompatActivity() {
         GooglePayJsonFactory(this)
     }
     private val snackbarController: SnackbarController by lazy {
-        SnackbarController(coordinator)
+        SnackbarController(viewBinding.coordinator)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_pay_with_google)
+        setContentView(viewBinding.root)
 
-        google_pay_button.isEnabled = false
-        google_pay_button.setOnClickListener { payWithGoogle() }
+        viewBinding.googlePayButton.isEnabled = false
+        viewBinding.googlePayButton.setOnClickListener { payWithGoogle() }
 
         isReadyToPay()
     }
@@ -58,19 +60,19 @@ class PayWithGoogleActivity : AppCompatActivity() {
      * Check that Google Pay is available and ready
      */
     private fun isReadyToPay() {
-        progress_bar.visibility = View.VISIBLE
+        viewBinding.progressBar.visibility = View.VISIBLE
         val request = IsReadyToPayRequest.fromJson(
             googlePayJsonFactory.createIsReadyToPayRequest().toString()
         )
 
         paymentsClient.isReadyToPay(request)
             .addOnCompleteListener { task ->
-                progress_bar.visibility = View.INVISIBLE
+                viewBinding.progressBar.visibility = View.INVISIBLE
 
                 try {
                     if (task.isSuccessful) {
                         showSnackbar("Google Pay is ready")
-                        google_pay_button.isEnabled = true
+                        viewBinding.googlePayButton.isEnabled = true
                     } else {
                         showSnackbar("Google Pay is unavailable")
                     }
@@ -148,7 +150,7 @@ class PayWithGoogleActivity : AppCompatActivity() {
         val paymentData = PaymentData.getFromIntent(data) ?: return
         val paymentDataJson = JSONObject(paymentData.toJson())
 
-        google_pay_result.text = paymentDataJson.toString(2)
+        viewBinding.googlePayResult.text = paymentDataJson.toString(2)
 
         val paymentMethodCreateParams =
             PaymentMethodCreateParams.createFromGooglePay(paymentDataJson)

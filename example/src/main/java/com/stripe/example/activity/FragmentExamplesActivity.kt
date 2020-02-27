@@ -5,9 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ProgressBar
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -26,6 +23,8 @@ import com.stripe.android.model.Customer
 import com.stripe.android.view.ShippingInfoWidget
 import com.stripe.example.R
 import com.stripe.example.StripeFactory
+import com.stripe.example.databinding.FragmentsExampleActivityBinding
+import com.stripe.example.databinding.LaunchPaymentSessionFragmentBinding
 import com.stripe.example.module.BackendApiFactory
 import com.stripe.example.service.BackendApi
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -39,12 +38,13 @@ import java.lang.ref.WeakReference
 import java.util.HashMap
 
 class FragmentExamplesActivity : AppCompatActivity() {
+    private val viewBinding: FragmentsExampleActivityBinding by lazy {
+        FragmentsExampleActivityBinding.inflate(layoutInflater)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        setContentView(R.layout.fragments_example_layout)
-
+        setContentView(viewBinding.root)
         setTitle(R.string.launch_payment_session_from_fragment)
 
         val newFragment = LauncherFragment()
@@ -55,6 +55,10 @@ class FragmentExamplesActivity : AppCompatActivity() {
     }
 
     class LauncherFragment : Fragment() {
+        private val viewBinding: LaunchPaymentSessionFragmentBinding by lazy {
+            LaunchPaymentSessionFragmentBinding.inflate(layoutInflater)
+        }
+
         private val compositeDisposable = CompositeDisposable()
 
         private val stripe: Stripe by lazy {
@@ -63,23 +67,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
         private val backendApi: BackendApi by lazy {
             BackendApiFactory(requireContext()).create()
         }
-        private val rootView: View by lazy { requireNotNull(view) }
 
-        private val progressBar: ProgressBar by lazy {
-            rootView.findViewById<ProgressBar>(R.id.progress_bar)
-        }
-        private val launchPaymentSessionButton: Button by lazy {
-            rootView.findViewById<Button>(R.id.launch_payment_session)
-        }
-        private val launchPaymentAuthButton: Button by lazy {
-            rootView.findViewById<Button>(R.id.launch_payment_auth)
-        }
-        private val launchSetupAuthButton: Button by lazy {
-            rootView.findViewById<Button>(R.id.launch_setup_auth)
-        }
-        private val statusTextView: TextView by lazy {
-            rootView.findViewById<TextView>(R.id.tv_status)
-        }
         private val paymentSession: PaymentSession by lazy {
             PaymentSession(
                 fragment = this,
@@ -97,11 +85,11 @@ class FragmentExamplesActivity : AppCompatActivity() {
             super.onActivityCreated(savedInstanceState)
 
             initPaymentSession(createCustomerSession())
-            launchPaymentSessionButton.setOnClickListener {
+            viewBinding.launchPaymentSession.setOnClickListener {
                 paymentSession.presentPaymentMethodSelection()
             }
-            launchPaymentAuthButton.setOnClickListener { createPaymentIntent() }
-            launchSetupAuthButton.setOnClickListener { createSetupIntent() }
+            viewBinding.launchPaymentAuth.setOnClickListener { createPaymentIntent() }
+            viewBinding.launchSetupAuth.setOnClickListener { createSetupIntent() }
         }
 
         override fun onCreateView(
@@ -109,11 +97,11 @@ class FragmentExamplesActivity : AppCompatActivity() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
         ): View? {
-            return layoutInflater.inflate(R.layout.launch_payment_session_fragment, null)
+            return viewBinding.root
         }
 
         override fun onPause() {
-            progressBar.visibility = View.INVISIBLE
+            viewBinding.progressBar.visibility = View.INVISIBLE
             super.onPause()
         }
 
@@ -125,7 +113,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
         override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
             super.onActivityResult(requestCode, resultCode, data)
 
-            progressBar.visibility = View.VISIBLE
+            viewBinding.progressBar.visibility = View.VISIBLE
 
             val isPaymentSessionResult =
                 data != null && paymentSession.handlePaymentData(requestCode, resultCode, data)
@@ -135,6 +123,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
                     "Received PaymentSession result",
                     Toast.LENGTH_SHORT)
                     .show()
+                viewBinding.progressBar.visibility = View.INVISIBLE
                 return
             }
 
@@ -163,9 +152,9 @@ class FragmentExamplesActivity : AppCompatActivity() {
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnSubscribe {
-                        progressBar.visibility = View.VISIBLE
-                        launchPaymentAuthButton.isEnabled = false
-                        statusTextView.setText(R.string.creating_payment_intent)
+                        viewBinding.progressBar.visibility = View.VISIBLE
+                        viewBinding.launchPaymentAuth.isEnabled = false
+                        viewBinding.status.setText(R.string.creating_payment_intent)
                     }
                     .subscribe { onCreatePaymentIntentResponse(it) })
         }
@@ -176,22 +165,22 @@ class FragmentExamplesActivity : AppCompatActivity() {
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnSubscribe {
-                        progressBar.visibility = View.VISIBLE
-                        launchSetupAuthButton.isEnabled = false
-                        statusTextView.setText(R.string.creating_setup_intent)
+                        viewBinding.progressBar.visibility = View.VISIBLE
+                        viewBinding.launchSetupAuth.isEnabled = false
+                        viewBinding.status.setText(R.string.creating_setup_intent)
                     }
                     .subscribe { onCreateSetupIntentResponse(it) })
         }
 
         private fun onAuthComplete() {
-            launchPaymentAuthButton.isEnabled = true
-            progressBar.visibility = View.INVISIBLE
+            viewBinding.launchPaymentAuth.isEnabled = true
+            viewBinding.progressBar.visibility = View.INVISIBLE
         }
 
         private fun onCreatePaymentIntentResponse(responseBody: ResponseBody) {
             try {
                 val responseData = JSONObject(responseBody.string())
-                statusTextView.append("\n\n" + getString(R.string.payment_intent_status,
+                viewBinding.status.append("\n\n" + getString(R.string.payment_intent_status,
                     responseData.getString("status")))
                 val secret = responseData.getString("secret")
                 confirmPaymentIntent(secret)
@@ -205,7 +194,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
         private fun onCreateSetupIntentResponse(responseBody: ResponseBody) {
             try {
                 val responseData = JSONObject(responseBody.string())
-                statusTextView.append("\n\n" + getString(R.string.payment_intent_status,
+                viewBinding.status.append("\n\n" + getString(R.string.payment_intent_status,
                     responseData.getString("status")))
                 val secret = responseData.getString("secret")
                 confirmSetupIntent(secret)
@@ -225,7 +214,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
         }
 
         private fun confirmPaymentIntent(paymentIntentClientSecret: String) {
-            statusTextView.append("\n\nStarting payment authentication")
+            viewBinding.status.append("\n\nStarting payment authentication")
             stripe.confirmPayment(this,
                 ConfirmPaymentIntentParams.createWithPaymentMethodId(
                     PAYMENT_METHOD_3DS2_REQUIRED,
@@ -234,7 +223,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
         }
 
         private fun confirmSetupIntent(setupIntentClientSecret: String) {
-            statusTextView.append("\n\nStarting payment authentication")
+            viewBinding.status.append("\n\nStarting payment authentication")
             stripe.confirmSetupIntent(this,
                 ConfirmSetupIntentParams.create(
                     PAYMENT_METHOD_3DS2_REQUIRED,
@@ -257,7 +246,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
                         customerSession.retrieveCurrentCustomer(
                             object : CustomerSession.CustomerRetrievalListener {
                                 override fun onCustomerRetrieved(customer: Customer) {
-                                    launchPaymentSessionButton.isEnabled = true
+                                    viewBinding.launchPaymentSession.isEnabled = true
                                 }
 
                                 override fun onError(
@@ -299,7 +288,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
                 val fragment = fragmentRef.get() ?: return
 
                 val paymentIntent = result.intent
-                fragment.statusTextView.append("\n\n" +
+                fragment.viewBinding.status.append("\n\n" +
                     "Auth outcome: " + result.outcome + "\n\n" +
                     fragment.getString(R.string.payment_intent_status,
                         paymentIntent.status))
@@ -309,7 +298,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
             override fun onError(e: Exception) {
                 val fragment = fragmentRef.get() ?: return
 
-                fragment.statusTextView.append("\n\nException: " + e.message)
+                fragment.viewBinding.status.append("\n\nException: " + e.message)
                 fragment.onAuthComplete()
             }
         }
@@ -323,7 +312,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
                 val fragment = fragmentRef.get() ?: return
 
                 val paymentIntent = result.intent
-                fragment.statusTextView.append("\n\n" +
+                fragment.viewBinding.status.append("\n\n" +
                     "Outcome: " + result.outcome + "\n\n" +
                     fragment.getString(R.string.payment_intent_status,
                         paymentIntent.status))
@@ -333,7 +322,7 @@ class FragmentExamplesActivity : AppCompatActivity() {
             override fun onError(e: Exception) {
                 val fragment = fragmentRef.get() ?: return
 
-                fragment.statusTextView.append("\n\nException: " + e.message)
+                fragment.viewBinding.status.append("\n\nException: " + e.message)
                 fragment.onAuthComplete()
             }
         }

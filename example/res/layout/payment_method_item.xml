@@ -16,7 +16,7 @@
         android:paddingEnd="3dp">
 
         <TextView
-            android:id="@+id/pm_id"
+            android:id="@+id/payment_method_id"
             android:layout_width="200dp"
             android:layout_weight="6"
             android:layout_height="wrap_content"
@@ -27,7 +27,7 @@
             />
 
         <TextView
-            android:id="@+id/pm_brand"
+            android:id="@+id/brand"
             android:layout_width="0dp"
             android:layout_weight="6"
             android:layout_height="wrap_content"
@@ -37,7 +37,7 @@
             android:fontFamily="monospace"/>
 
         <TextView
-            android:id="@+id/pm_last4"
+            android:id="@+id/last_4"
             android:layout_width="0dp"
             android:layout_weight="6"
             android:layout_height="wrap_content"

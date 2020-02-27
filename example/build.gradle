@@ -168,6 +168,14 @@ android {
             setRoot('src/test')
         }
     }
+
+    viewBinding {
+        enabled = true
+    }
+}
+
+androidExtensions {
+    features = []
 }
 
 task ktlint(type: JavaExec, group: "verification") {

@@ -1,13 +1,11 @@
 package com.stripe.example.adapter
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceTypeModel
-import com.stripe.example.R
+import com.stripe.example.databinding.SourcesListItemBinding
 
 internal class SourcesAdapter : RecyclerView.Adapter<SourcesAdapter.ViewHolder>() {
     private val sources: MutableList<Source> = mutableListOf()
@@ -17,20 +15,16 @@ internal class SourcesAdapter : RecyclerView.Adapter<SourcesAdapter.ViewHolder>(
         notifyDataSetChanged()
     }
 
-    internal class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val statusView: TextView = itemView.findViewById(R.id.tv_ending_status)
-        private val redirectStatusView: TextView = itemView.findViewById(R.id.tv_redirect_status)
-        private val idView: TextView = itemView.findViewById(R.id.tv_source_id)
-        private val typeView: TextView = itemView.findViewById(R.id.tv_source_type)
-
+    internal class ViewHolder(
+        private val viewBinding: SourcesListItemBinding
+    ) : RecyclerView.ViewHolder(viewBinding.root) {
         fun bind(source: Source) {
-            statusView.text = source.status
-            redirectStatusView.text = getRedirectStatus(source)
-            idView.text = source.id?.let { sourceId ->
+            viewBinding.status.text = source.status
+            viewBinding.redirectStatus.text = getRedirectStatus(source)
+            viewBinding.sourceId.text = source.id?.let { sourceId ->
                 sourceId.substring(sourceId.length - 6)
             }
-
-            typeView.text = if (Source.SourceType.THREE_D_SECURE == source.type) {
+            viewBinding.sourceType.text = if (Source.SourceType.THREE_D_SECURE == source.type) {
                 "3DS"
             } else {
                 source.type
@@ -45,8 +39,11 @@ internal class SourcesAdapter : RecyclerView.Adapter<SourcesAdapter.ViewHolder>(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
-            LayoutInflater.from(parent.context)
-                .inflate(R.layout.sources_list_item, parent, false)
+            SourcesListItemBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            )
         )
     }
 

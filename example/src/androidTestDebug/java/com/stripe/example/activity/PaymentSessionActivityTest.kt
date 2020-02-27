@@ -45,7 +45,7 @@ class PaymentSessionActivityTest {
         )
 
         // on PaymentSessionActivity
-        Espresso.onView(ViewMatchers.withId(R.id.btn_select_payment_method))
+        Espresso.onView(ViewMatchers.withId(R.id.select_payment_method_button))
             .perform(click())
 
         // on PaymentMethodsActivity
