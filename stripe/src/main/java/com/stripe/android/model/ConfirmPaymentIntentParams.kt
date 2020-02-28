@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
@@ -86,7 +87,14 @@ data class ConfirmPaymentIntentParams internal constructor(
      *
      * [mandate_data](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-mandate_data)
      */
-    private val mandateData: MandateDataParams? = null
+    private val mandateData: MandateDataParams? = null,
+
+    /**
+     * See [SetupFutureUsage]
+     *
+     * [setup_future_usage](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-setup_future_usage)
+     */
+    private val setupFutureUsage: SetupFutureUsage? = null
 ) : ConfirmStripeIntentParams {
 
     fun shouldSavePaymentMethod(): Boolean {
@@ -120,6 +128,10 @@ data class ConfirmPaymentIntentParams internal constructor(
         ).plus(
             paymentMethodOptions?.let {
                 mapOf(PARAM_PAYMENT_METHOD_OPTIONS to it.toParamMap())
+            }.orEmpty()
+        ).plus(
+            setupFutureUsage?.let {
+                mapOf(PARAM_SETUP_FUTURE_USAGE to it.code)
             }.orEmpty()
         ).plus(
             paymentMethodParamMap
@@ -162,12 +174,45 @@ data class ConfirmPaymentIntentParams internal constructor(
                 }
         }
 
+    /**
+     * [setup_future_usage](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-setup_future_usage)
+     *
+     * Use `on_session` if you intend to only reuse the payment method when your customer is
+     * present in your checkout flow. Use `off_session` if your customer may or may not be in
+     * your checkout flow.
+     *
+     * Stripe uses `setup_future_usage` to dynamically optimize your payment flow and comply with
+     * regional legislation and network rules. For example, if your customer is impacted by
+     * [SCA](https://stripe.com/docs/strong-customer-authentication), using `off_session` will
+     * ensure that they are authenticated while processing this PaymentIntent. You will then be
+     * able to collect [off-session payments](https://stripe.com/docs/payments/cards/charging-saved-cards#off-session-payments-with-saved-cards)
+     * for this customer.
+     *
+     * If `setup_future_usage` is already set and you are performing a request using a publishable
+     * key, you may only update the value from `on_session` to `off_session`.
+     */
+    enum class SetupFutureUsage(
+        internal val code: String
+    ) {
+        /**
+         * Use `on_session` if you intend to only reuse the payment method when your customer
+         * is present in your checkout flow.
+         */
+        OnSession("on_session"),
+
+        /**
+         * Use `off_session` if your customer may or may not be in your checkout flow.
+         */
+        OffSession("off_session")
+    }
+
     companion object {
         const val PARAM_SOURCE_DATA: String = "source_data"
 
         internal const val PARAM_SOURCE_ID = "source"
         internal const val PARAM_SAVE_PAYMENT_METHOD = "save_payment_method"
         internal const val PARAM_PAYMENT_METHOD_OPTIONS = "payment_method_options"
+        private const val PARAM_SETUP_FUTURE_USAGE = "setup_future_usage"
 
         /**
          * Create a [ConfirmPaymentIntentParams] without a payment method.
@@ -215,7 +260,8 @@ data class ConfirmPaymentIntentParams internal constructor(
             extraParams: Map<String, Any>? = null,
             paymentMethodOptions: PaymentMethodOptionsParams? = null,
             mandateId: String? = null,
-            mandateData: MandateDataParams? = null
+            mandateData: MandateDataParams? = null,
+            setupFutureUsage: SetupFutureUsage? = null
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
@@ -225,7 +271,8 @@ data class ConfirmPaymentIntentParams internal constructor(
                 extraParams = extraParams,
                 paymentMethodOptions = paymentMethodOptions,
                 mandateId = mandateId,
-                mandateData = mandateData
+                mandateData = mandateData,
+                setupFutureUsage = setupFutureUsage
             )
         }
 
@@ -256,7 +303,8 @@ data class ConfirmPaymentIntentParams internal constructor(
             savePaymentMethod: Boolean = false,
             extraParams: Map<String, Any>? = null,
             mandateId: String? = null,
-            mandateData: MandateDataParams? = null
+            mandateData: MandateDataParams? = null,
+            setupFutureUsage: SetupFutureUsage? = null
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
@@ -265,7 +313,8 @@ data class ConfirmPaymentIntentParams internal constructor(
                 savePaymentMethod = savePaymentMethod,
                 extraParams = extraParams,
                 mandateId = mandateId,
-                mandateData = mandateData
+                mandateData = mandateData,
+                setupFutureUsage = setupFutureUsage
             )
         }
 
