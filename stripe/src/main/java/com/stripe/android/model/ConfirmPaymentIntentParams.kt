@@ -1,12 +1,15 @@
 package com.stripe.android.model
 
+import android.os.Parcelable
 import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage
+import com.stripe.android.model.ConfirmPaymentIntentParams.Shipping
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN_URL
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_STRIPE_SDK
+import kotlinx.android.parcel.Parcelize
 
 data class ConfirmPaymentIntentParams internal constructor(
     val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
@@ -94,7 +97,14 @@ data class ConfirmPaymentIntentParams internal constructor(
      *
      * [setup_future_usage](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-setup_future_usage)
      */
-    private val setupFutureUsage: SetupFutureUsage? = null
+    private val setupFutureUsage: SetupFutureUsage? = null,
+
+    /**
+     * See [Shipping]
+     *
+     * [shipping](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-shipping)
+     */
+    private val shipping: Shipping? = null
 ) : ConfirmStripeIntentParams {
 
     fun shouldSavePaymentMethod(): Boolean {
@@ -132,6 +142,10 @@ data class ConfirmPaymentIntentParams internal constructor(
         ).plus(
             setupFutureUsage?.let {
                 mapOf(PARAM_SETUP_FUTURE_USAGE to it.code)
+            }.orEmpty()
+        ).plus(
+            shipping?.let {
+                mapOf(PARAM_SHIPPING to shipping.toParamMap())
             }.orEmpty()
         ).plus(
             paymentMethodParamMap
@@ -206,6 +220,73 @@ data class ConfirmPaymentIntentParams internal constructor(
         OffSession("off_session")
     }
 
+    /**
+     * Shipping information for this PaymentIntent.
+     *
+     * [shipping](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-shipping)
+     */
+    @Parcelize
+    data class Shipping @JvmOverloads constructor(
+        /**
+         * [shipping.address](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-shipping-address)
+         *
+         * Shipping address.
+         */
+        internal val address: Address,
+
+        /**
+         * [shipping.name](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-shipping-name)
+         *
+         * Recipient name.
+         */
+        internal val name: String,
+
+        /**
+         * [shipping.carrier](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-shipping-carrier)
+         *
+         * The delivery service that shipped a physical product, such as Fedex, UPS, USPS, etc.
+         */
+        internal val carrier: String? = null,
+
+        /**
+         * [shipping.phone](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-shipping-phone)
+         *
+         * Recipient phone (including extension).
+         */
+        internal val phone: String? = null,
+
+        /**
+         * [shipping.tracking_number](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-shipping-tracking_number)
+         *
+         * The tracking number for a physical product, obtained from the delivery service.
+         * If multiple tracking numbers were generated for this purchase, please separate
+         * them with commas.
+         */
+        internal val trackingNumber: String? = null
+    ) : StripeParamsModel, Parcelable {
+        override fun toParamMap(): Map<String, Any> {
+            return listOf(
+                PARAM_ADDRESS to address.toParamMap(),
+                PARAM_NAME to name,
+                PARAM_CARRIER to carrier,
+                PARAM_PHONE to phone,
+                PARAM_TRACKING_NUMBER to trackingNumber
+            ).fold(emptyMap()) { acc, (key, value) ->
+                acc.plus(
+                    value?.let { mapOf(key to it) }.orEmpty()
+                )
+            }
+        }
+
+        private companion object {
+            private const val PARAM_ADDRESS = "address"
+            private const val PARAM_NAME = "name"
+            private const val PARAM_CARRIER = "carrier"
+            private const val PARAM_PHONE = "phone"
+            private const val PARAM_TRACKING_NUMBER = "tracking_number"
+        }
+    }
+
     companion object {
         const val PARAM_SOURCE_DATA: String = "source_data"
 
@@ -213,6 +294,7 @@ data class ConfirmPaymentIntentParams internal constructor(
         internal const val PARAM_SAVE_PAYMENT_METHOD = "save_payment_method"
         internal const val PARAM_PAYMENT_METHOD_OPTIONS = "payment_method_options"
         private const val PARAM_SETUP_FUTURE_USAGE = "setup_future_usage"
+        private const val PARAM_SHIPPING = "shipping"
 
         /**
          * Create a [ConfirmPaymentIntentParams] without a payment method.
@@ -222,12 +304,14 @@ data class ConfirmPaymentIntentParams internal constructor(
         fun create(
             clientSecret: String,
             returnUrl: String? = null,
-            extraParams: Map<String, Any>? = null
+            extraParams: Map<String, Any>? = null,
+            shipping: Shipping? = null
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
                 returnUrl = returnUrl,
-                extraParams = extraParams
+                extraParams = extraParams,
+                shipping = shipping
             )
         }
 
@@ -250,6 +334,7 @@ data class ConfirmPaymentIntentParams internal constructor(
          * @param mandateId Optional ID of the Mandate to be used for this payment.
          * @param mandateData Optional details about the Mandate to create.
          * @param setupFutureUsage Optional. See [SetupFutureUsage].
+         * @param shipping Optional. See [Shipping].
          */
         @JvmOverloads
         @JvmStatic
@@ -262,7 +347,8 @@ data class ConfirmPaymentIntentParams internal constructor(
             paymentMethodOptions: PaymentMethodOptionsParams? = null,
             mandateId: String? = null,
             mandateData: MandateDataParams? = null,
-            setupFutureUsage: SetupFutureUsage? = null
+            setupFutureUsage: SetupFutureUsage? = null,
+            shipping: Shipping? = null
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
@@ -273,7 +359,8 @@ data class ConfirmPaymentIntentParams internal constructor(
                 paymentMethodOptions = paymentMethodOptions,
                 mandateId = mandateId,
                 mandateData = mandateData,
-                setupFutureUsage = setupFutureUsage
+                setupFutureUsage = setupFutureUsage,
+                shipping = shipping
             )
         }
 
@@ -295,6 +382,7 @@ data class ConfirmPaymentIntentParams internal constructor(
          * @param mandateId optional ID of the Mandate to be used for this payment.
          * @param mandateData optional details about the Mandate to create.
          * @param setupFutureUsage Optional. See [SetupFutureUsage].
+         * @param shipping Optional. See [Shipping].
          */
         @JvmOverloads
         @JvmStatic
@@ -306,7 +394,8 @@ data class ConfirmPaymentIntentParams internal constructor(
             extraParams: Map<String, Any>? = null,
             mandateId: String? = null,
             mandateData: MandateDataParams? = null,
-            setupFutureUsage: SetupFutureUsage? = null
+            setupFutureUsage: SetupFutureUsage? = null,
+            shipping: Shipping? = null
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
@@ -316,7 +405,8 @@ data class ConfirmPaymentIntentParams internal constructor(
                 extraParams = extraParams,
                 mandateId = mandateId,
                 mandateData = mandateData,
-                setupFutureUsage = setupFutureUsage
+                setupFutureUsage = setupFutureUsage,
+                shipping = shipping
             )
         }
 
@@ -334,6 +424,7 @@ data class ConfirmPaymentIntentParams internal constructor(
          * This parameter only applies to the source passed in the same request
          * or the current source attached to the PaymentIntent and must be
          * specified again if a new source is added.
+         * @param shipping Optional. See [Shipping].
          */
         @JvmOverloads
         @JvmStatic
@@ -342,14 +433,16 @@ data class ConfirmPaymentIntentParams internal constructor(
             clientSecret: String,
             returnUrl: String,
             savePaymentMethod: Boolean = false,
-            extraParams: Map<String, Any>? = null
+            extraParams: Map<String, Any>? = null,
+            shipping: Shipping? = null
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
                 sourceId = sourceId,
                 returnUrl = returnUrl,
                 savePaymentMethod = savePaymentMethod,
-                extraParams = extraParams
+                extraParams = extraParams,
+                shipping = shipping
             )
         }
 
@@ -365,6 +458,7 @@ data class ConfirmPaymentIntentParams internal constructor(
          * This parameter only applies to the source passed in the same request
          * or the current source attached to the PaymentIntent and must be
          * specified again if a new source is added.
+         * @param shipping Optional. See [Shipping].
          */
         @JvmOverloads
         @JvmStatic
@@ -373,14 +467,16 @@ data class ConfirmPaymentIntentParams internal constructor(
             clientSecret: String,
             returnUrl: String,
             savePaymentMethod: Boolean = false,
-            extraParams: Map<String, Any>? = null
+            extraParams: Map<String, Any>? = null,
+            shipping: Shipping? = null
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
                 sourceParams = sourceParams,
                 returnUrl = returnUrl,
                 savePaymentMethod = savePaymentMethod,
-                extraParams = extraParams
+                extraParams = extraParams,
+                shipping = shipping
             )
         }
     }

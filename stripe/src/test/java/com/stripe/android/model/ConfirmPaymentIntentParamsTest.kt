@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
 import com.stripe.android.model.ConfirmPaymentIntentParams.Companion.PARAM_PAYMENT_METHOD_OPTIONS
 import com.stripe.android.model.ConfirmPaymentIntentParams.Companion.PARAM_SAVE_PAYMENT_METHOD
@@ -308,6 +309,39 @@ class ConfirmPaymentIntentParamsTest {
             ),
             params
         )
+    }
+
+    @Test
+    fun shipping_toParamMap_shouldReturnExpectedMap() {
+        val shipping = ConfirmPaymentIntentParams.Shipping(
+            address = Address.Builder()
+                .setCity("San Francisco")
+                .setCountry("US")
+                .setLine1("123 Market St")
+                .setLine2("#345")
+                .setPostalCode("94107")
+                .setState("CA")
+                .build(),
+            name = "Jenny Rosen",
+            carrier = "Fedex",
+            trackingNumber = "12345"
+        )
+        assertThat(shipping.toParamMap())
+            .isEqualTo(
+                mapOf(
+                    "address" to mapOf(
+                        "line1" to "123 Market St",
+                        "line2" to "#345",
+                        "city" to "San Francisco",
+                        "state" to "CA",
+                        "postal_code" to "94107",
+                        "country" to "US"
+                    ),
+                    "name" to "Jenny Rosen",
+                    "carrier" to "Fedex",
+                    "tracking_number" to "12345"
+                )
+            )
     }
 
     private companion object {
