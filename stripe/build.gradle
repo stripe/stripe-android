@@ -91,6 +91,10 @@ android {
         outputFormat = 'javadoc'
         outputDirectory = "${project.rootDir}/docs/"
     }
+
+    viewBinding {
+        enabled = true
+    }
 }
 
 androidExtensions {

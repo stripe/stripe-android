@@ -2,13 +2,14 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.RelativeLayout
 import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import com.stripe.android.R
+import com.stripe.android.databinding.ShippingMethodViewBinding
 import com.stripe.android.model.ShippingMethod
-import kotlinx.android.synthetic.main.shipping_method_view.view.*
 
 /**
  * Renders the information related to a shipping method.
@@ -27,9 +28,12 @@ internal class ShippingMethodView @JvmOverloads constructor(
     @ColorInt
     private val unselectedTextColorPrimaryInt: Int
 
-    init {
-        View.inflate(context, R.layout.shipping_method_view, this)
+    private val viewBinding = ShippingMethodViewBinding.inflate(
+        LayoutInflater.from(context),
+        this
+    )
 
+    init {
         val rawSelectedColorInt = colorUtils.getThemeAccentColor().data
         val rawUnselectedTextColorPrimaryInt = colorUtils.getThemeTextColorPrimary().data
         val rawUnselectedTextColorSecondaryInt = colorUtils.getThemeTextColorSecondary().data
@@ -58,22 +62,22 @@ internal class ShippingMethodView @JvmOverloads constructor(
 
     override fun setSelected(selected: Boolean) {
         if (selected) {
-            shipping_method_name.setTextColor(selectedColorInt)
-            shipping_method_description.setTextColor(selectedColorInt)
-            shipping_method_price.setTextColor(selectedColorInt)
-            selected_icon.visibility = View.VISIBLE
+            viewBinding.name.setTextColor(selectedColorInt)
+            viewBinding.description.setTextColor(selectedColorInt)
+            viewBinding.price.setTextColor(selectedColorInt)
+            viewBinding.selectedIcon.visibility = View.VISIBLE
         } else {
-            shipping_method_name.setTextColor(unselectedTextColorPrimaryInt)
-            shipping_method_description.setTextColor(unselectedTextColorSecondaryInt)
-            shipping_method_price.setTextColor(unselectedTextColorPrimaryInt)
-            selected_icon.visibility = View.INVISIBLE
+            viewBinding.name.setTextColor(unselectedTextColorPrimaryInt)
+            viewBinding.description.setTextColor(unselectedTextColorSecondaryInt)
+            viewBinding.price.setTextColor(unselectedTextColorPrimaryInt)
+            viewBinding.selectedIcon.visibility = View.INVISIBLE
         }
     }
 
     fun setShippingMethod(shippingMethod: ShippingMethod) {
-        shipping_method_name.text = shippingMethod.label
-        shipping_method_description.text = shippingMethod.detail
-        shipping_method_price.text = PaymentUtils.formatPriceStringUsingFree(
+        viewBinding.name.text = shippingMethod.label
+        viewBinding.description.text = shippingMethod.detail
+        viewBinding.price.text = PaymentUtils.formatPriceStringUsingFree(
             shippingMethod.amount,
             shippingMethod.currency,
             context.getString(R.string.price_free)
