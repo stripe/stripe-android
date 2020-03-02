@@ -9,6 +9,7 @@ import com.stripe.android.PaymentAuthConfig
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.Stripe
+import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -284,8 +285,21 @@ class PaymentAuthActivity : AppCompatActivity() {
                         .setCvc("123")
                         .build()
                 ),
-                paymentIntentClientSecret,
-                RETURN_URL
+                clientSecret = paymentIntentClientSecret,
+                returnUrl = RETURN_URL,
+                shipping = ConfirmPaymentIntentParams.Shipping(
+                    address = Address.Builder()
+                        .setCity("San Francisco")
+                        .setCountry("US")
+                        .setLine1("123 Market St")
+                        .setLine2("#345")
+                        .setPostalCode("94107")
+                        .setState("CA")
+                        .build(),
+                    name = "Jenny Rosen",
+                    carrier = "Fedex",
+                    trackingNumber = "12345"
+                )
             )
         }
 
