@@ -7,7 +7,7 @@
 * [#2220](https://github.com/stripe/stripe-android/pull/2220) Highlight "Google Pay" option in payment methods screen if selected
 * [#2221](https://github.com/stripe/stripe-android/pull/2221) Update 14-digit Diners Club formatting
 * [#2224](https://github.com/stripe/stripe-android/pull/2224) Change `CardInputWidget` icon to represent validity of input
-* [#2227](https://github.com/stripe/stripe-android/pull/2227) Update Android Gradle Plugin to 3.6.0
+* [#2235](https://github.com/stripe/stripe-android/pull/2235) Update Android Gradle Plugin to 3.6.1
 
 ## 14.0.0 - 2020-02-18
 This release includes several breaking changes.
