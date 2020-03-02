@@ -11,7 +11,7 @@
         android:layout_height="match_parent">
 
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/payment_methods_toolbar"
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
@@ -20,19 +20,19 @@
             android:theme="@style/StripeToolBarStyle" />
 
         <ProgressBar
-            android:id="@+id/payment_methods_progress_bar"
+            android:id="@+id/progress_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             style="@style/Widget.AppCompat.ProgressBar.Horizontal"
             android:indeterminate="true"
-            android:layout_below="@id/payment_methods_toolbar"
+            android:layout_below="@id/toolbar"
             android:visibility="gone" />
 
         <com.stripe.android.view.PaymentMethodsRecyclerView
-            android:id="@+id/payment_methods_recycler"
+            android:id="@+id/recycler"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/payment_methods_toolbar"
+            android:layout_below="@id/toolbar"
             android:layout_marginTop="@dimen/stripe_list_top_margin" />
     </RelativeLayout>
 

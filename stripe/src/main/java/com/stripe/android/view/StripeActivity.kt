@@ -8,19 +8,22 @@ import android.view.ViewStub
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.R
-import kotlinx.android.synthetic.main.activity_stripe.*
+import com.stripe.android.databinding.StripeActivityBinding
 
 /**
  * Provides a toolbar, save button, and loading states for the save button.
  */
 abstract class StripeActivity : AppCompatActivity() {
+    private val viewBinding: StripeActivityBinding by lazy {
+        StripeActivityBinding.inflate(layoutInflater)
+    }
 
     internal val progressBar: ProgressBar by lazy {
-        findViewById<ProgressBar>(R.id.progress_bar)
+        viewBinding.progressBar
     }
 
     internal val viewStub: ViewStub by lazy {
-        findViewById<ViewStub>(R.id.widget_viewstub_as)
+        viewBinding.viewStub
     }
 
     protected var isProgressBarVisible: Boolean = false
@@ -47,12 +50,10 @@ abstract class StripeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_stripe)
+        setContentView(viewBinding.root)
 
-        setSupportActionBar(toolbar)
+        setSupportActionBar(viewBinding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
-        isProgressBarVisible = false
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
