@@ -188,8 +188,8 @@ data class ConfirmPaymentIntentParams internal constructor(
      * able to collect [off-session payments](https://stripe.com/docs/payments/cards/charging-saved-cards#off-session-payments-with-saved-cards)
      * for this customer.
      *
-     * If `setup_future_usage` is already set and you are performing a request using a publishable
-     * key, you may only update the value from `on_session` to `off_session`.
+     * If `setup_future_usage` is already set, you may only update the value
+     * from `on_session` to `off_session`.
      */
     enum class SetupFutureUsage(
         internal val code: String
@@ -247,8 +247,9 @@ data class ConfirmPaymentIntentParams internal constructor(
          * PaymentIntent and must be specified again if a new payment method is
          * added.
          * @param paymentMethodOptions Optional [PaymentMethodOptionsParams]
-         * @param mandateId optional ID of the Mandate to be used for this payment.
-         * @param mandateData optional details about the Mandate to create.
+         * @param mandateId Optional ID of the Mandate to be used for this payment.
+         * @param mandateData Optional details about the Mandate to create.
+         * @param setupFutureUsage Optional. See [SetupFutureUsage].
          */
         @JvmOverloads
         @JvmStatic
@@ -293,6 +294,7 @@ data class ConfirmPaymentIntentParams internal constructor(
          * added.
          * @param mandateId optional ID of the Mandate to be used for this payment.
          * @param mandateData optional details about the Mandate to create.
+         * @param setupFutureUsage Optional. See [SetupFutureUsage].
          */
         @JvmOverloads
         @JvmStatic
