@@ -16,6 +16,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
 import androidx.annotation.IntRange
 import androidx.annotation.StringRes
+import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import com.google.android.material.textfield.TextInputLayout
@@ -164,8 +165,11 @@ class CardMultilineWidget @JvmOverloads constructor(
     override val cardBuilder: Card.Builder?
         get() {
             if (!validateAllFields()) {
+                shouldShowErrorIcon = true
                 return null
             }
+
+            shouldShowErrorIcon = false
 
             val cardNumber = cardNumber
             val cardDate = requireNotNull(expiryDateEditText.validDateFields)
@@ -215,6 +219,17 @@ class CardMultilineWidget @JvmOverloads constructor(
     private val dynamicBufferInPixels: Int = BigDecimal(pixelsToAdjust)
         .setScale(0, RoundingMode.HALF_DOWN)
         .toInt()
+
+    @VisibleForTesting
+    internal var shouldShowErrorIcon = false
+        private set(value) {
+            val isValueChange = field != value
+            field = value
+
+            if (isValueChange) {
+                updateBrandUi()
+            }
+        }
 
     init {
         orientation = VERTICAL
@@ -293,6 +308,15 @@ class CardMultilineWidget @JvmOverloads constructor(
 
         cardBrand = CardBrand.Unknown
         updateBrandUi()
+
+        allFields.forEach {
+            it.addTextChangedListener(object : StripeTextWatcher() {
+                override fun afterTextChanged(s: Editable?) {
+                    super.afterTextChanged(s)
+                    shouldShowErrorIcon = false
+                }
+            })
+        }
 
         isEnabled = true
     }
@@ -518,11 +542,21 @@ class CardMultilineWidget @JvmOverloads constructor(
     }
 
     private fun flipToCvcIconIfNotFinished() {
-        if (cardBrand.isMaxCvc(cvcEditText.text?.toString())) {
+        if (cardBrand.isMaxCvc(cvcEditText.fieldText)) {
             return
         }
 
-        updateDrawable(cardBrand.cvcIcon, true)
+        if (shouldShowErrorIcon) {
+            updateDrawable(
+                iconResourceId = cardBrand.errorIcon,
+                shouldTint = false
+            )
+        } else {
+            updateDrawable(
+                iconResourceId = cardBrand.cvcIcon,
+                shouldTint = true
+            )
+        }
     }
 
     private fun initDeleteEmptyListeners() {
@@ -595,26 +629,41 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     private fun updateBrandUi() {
         updateCvc()
-        updateDrawable(cardBrand.icon, CardBrand.Unknown == cardBrand)
+        if (shouldShowErrorIcon) {
+            updateDrawable(
+                iconResourceId = cardBrand.errorIcon,
+                shouldTint = false
+            )
+        } else {
+            updateDrawable(
+                iconResourceId = cardBrand.icon,
+                shouldTint = CardBrand.Unknown == cardBrand
+            )
+        }
     }
 
     private fun updateCvc() {
         cvcEditText.updateBrand(cardBrand, customCvcLabel, cvcTextInputLayout)
     }
 
-    private fun updateDrawable(@DrawableRes iconResourceId: Int, needsTint: Boolean) {
+    private fun updateDrawable(@DrawableRes iconResourceId: Int, shouldTint: Boolean) {
         val icon = ContextCompat.getDrawable(context, iconResourceId) ?: return
         val original = cardNumberEditText.compoundDrawablesRelative[0] ?: return
         val iconPadding = cardNumberEditText.compoundDrawablePadding
         icon.bounds = createDrawableBounds(original)
 
         val compatIcon = DrawableCompat.wrap(icon)
-        if (needsTint) {
+        if (shouldTint) {
             DrawableCompat.setTint(compatIcon.mutate(), tintColorInt)
         }
 
         cardNumberEditText.compoundDrawablePadding = iconPadding
-        cardNumberEditText.setCompoundDrawablesRelative(compatIcon, null, null, null)
+        cardNumberEditText.setCompoundDrawablesRelative(
+            compatIcon,
+            null,
+            null,
+            null
+        )
     }
 
     private fun createDrawableBounds(drawable: Drawable): Rect {
