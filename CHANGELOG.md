@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 14.1.0 - unreleased
+## 14.1.0 - 2020-03-02
 * [#2207](https://github.com/stripe/stripe-android/pull/2207) Add `CardInputWidget#setPostalCodeTextWatcher`
 * [#2211](https://github.com/stripe/stripe-android/pull/2211) Add support for 16-digit Diners Club card numbers
 * [#2215](https://github.com/stripe/stripe-android/pull/2215) Set `CardInputWidget`'s postal code field's IME action to done
