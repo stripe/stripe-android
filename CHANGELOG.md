@@ -10,6 +10,7 @@
 * [#2234](https://github.com/stripe/stripe-android/pull/2234) Add support for `setup_future_usage` in PaymentIntent confirmation
 * [#2235](https://github.com/stripe/stripe-android/pull/2235) Update Android Gradle Plugin to 3.6.1
 * [#2236](https://github.com/stripe/stripe-android/pull/2236) Change `CardMultilineWidget` icon to represent validity of input
+* [#2238](https://github.com/stripe/stripe-android/pull/2238) Add support for `shipping` in PaymentIntent confirmation
 
 ## 14.0.0 - 2020-02-18
 This release includes several breaking changes.
