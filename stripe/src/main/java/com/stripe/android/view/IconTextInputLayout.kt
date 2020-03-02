@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Rect
 import android.util.AttributeSet
 import androidx.annotation.VisibleForTesting
+import com.google.android.material.R
 import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.utils.ClassUtils
 import java.lang.reflect.Method
@@ -16,7 +17,7 @@ import java.lang.reflect.Method
 class IconTextInputLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    defStyleAttr: Int = R.attr.textInputStyle
 ) : TextInputLayout(context, attrs, defStyleAttr) {
     private val collapsingTextHelper: Any?
     private val bounds: Rect?
