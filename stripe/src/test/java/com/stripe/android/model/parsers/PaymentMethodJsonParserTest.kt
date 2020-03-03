@@ -50,6 +50,12 @@ class PaymentMethodJsonParserTest {
     }
 
     @Test
+    fun parse_withAuBecsDebit_shouldCreateExpectedObject() {
+        assertThat(PaymentMethodJsonParser().parse(PaymentMethodFixtures.AU_BECS_DEBIT_JSON))
+            .isEqualTo(PaymentMethodFixtures.AU_BCS_DEBIT_PAYMENT_METHOD)
+    }
+
+    @Test
     fun parse_withSepaDebit_shouldCreateExpectedObject() {
         assertThat(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
             .isEqualTo(
@@ -69,7 +75,8 @@ class PaymentMethodJsonParserTest {
                         name = "Jenny Rosen",
                         email = "jrosen@example.com",
                         address = Address()
-                    )
+                    ),
+                    metadata = null
                 )
             )
     }

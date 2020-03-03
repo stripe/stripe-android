@@ -105,7 +105,9 @@ data class PaymentMethod internal constructor(
      *
      * [sepa_debit](https://stripe.com/docs/api/payment_methods/object#payment_method_object-sepa_debit)
      */
-    @JvmField val sepaDebit: SepaDebit? = null
+    @JvmField val sepaDebit: SepaDebit? = null,
+
+    @JvmField val auBecsDebit: AuBecsDebit? = null
 ) : StripeModel {
 
     @Parcelize
@@ -145,6 +147,7 @@ data class PaymentMethod internal constructor(
         private var ideal: Ideal? = null
         private var fpx: Fpx? = null
         private var sepaDebit: SepaDebit? = null
+        private var auBecsDebit: AuBecsDebit? = null
 
         fun setId(id: String?): Builder = apply {
             this.id = id
@@ -194,20 +197,25 @@ data class PaymentMethod internal constructor(
             this.sepaDebit = sepaDebit
         }
 
+        fun setAuBecsDebit(auBecsDebit: AuBecsDebit?): Builder = apply {
+            this.auBecsDebit = auBecsDebit
+        }
+
         override fun build(): PaymentMethod {
             return PaymentMethod(
-                id,
-                created,
-                liveMode,
-                type,
-                billingDetails,
-                customerId,
-                metadata,
-                card,
-                cardPresent,
-                fpx,
-                ideal,
-                sepaDebit
+                id = id,
+                created = created,
+                liveMode = liveMode,
+                type = type,
+                billingDetails = billingDetails,
+                customerId = customerId,
+                metadata = metadata,
+                card = card,
+                cardPresent = cardPresent,
+                fpx = fpx,
+                ideal = ideal,
+                sepaDebit = sepaDebit,
+                auBecsDebit = auBecsDebit
             )
         }
     }
@@ -611,6 +619,13 @@ data class PaymentMethod internal constructor(
          * [sepa_debit.last4](https://stripe.com/docs/api/payment_methods/object#payment_method_object-sepa_debit-last4)
          */
         @JvmField val last4: String?
+    ) : StripeModel
+
+    @Parcelize
+    data class AuBecsDebit internal constructor(
+        val bsbNumber: String? = null,
+        val fingerprint: String? = null,
+        val last4: String? = null
     ) : StripeModel
 
     companion object {

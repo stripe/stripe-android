@@ -48,6 +48,12 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                         SepaDebitJsonParser().parse(it)
                     }
                 )
+            PaymentMethod.Type.AuBecsDebit ->
+                builder.setAuBecsDebit(
+                    json.optJSONObject(FIELD_AU_BECS_DEBIT)?.let {
+                        AuBecsDebitJsonParser().parse(it)
+                    }
+                )
         }
 
         return builder.build()
@@ -212,6 +218,22 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
         }
     }
 
+    internal class AuBecsDebitJsonParser : ModelJsonParser<PaymentMethod.AuBecsDebit> {
+        override fun parse(json: JSONObject): PaymentMethod.AuBecsDebit {
+            return PaymentMethod.AuBecsDebit(
+                bsbNumber = StripeJsonUtils.optString(json, FIELD_BSB_NUMBER),
+                fingerprint = StripeJsonUtils.optString(json, FIELD_FINGERPRINT),
+                last4 = StripeJsonUtils.optString(json, FIELD_LAST4)
+            )
+        }
+
+        private companion object {
+            private const val FIELD_BSB_NUMBER = "bsb_number"
+            private const val FIELD_FINGERPRINT = "fingerprint"
+            private const val FIELD_LAST4 = "last4"
+        }
+    }
+
     private companion object {
         private const val FIELD_ID = "id"
         private const val FIELD_BILLING_DETAILS = "billing_details"
@@ -227,5 +249,6 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
         private const val FIELD_FPX = "fpx"
         private const val FIELD_IDEAL = "ideal"
         private const val FIELD_SEPA_DEBIT = "sepa_debit"
+        private const val FIELD_AU_BECS_DEBIT = "au_becs_debit"
     }
 }

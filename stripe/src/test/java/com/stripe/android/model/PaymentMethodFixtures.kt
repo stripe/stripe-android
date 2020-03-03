@@ -30,11 +30,11 @@ internal object PaymentMethodFixtures {
             city = "San Francisco",
             state = "CA",
             postalCode = "94103",
-            country = "USA"
+            country = "US"
         ),
         email = "patrick@example.com",
         name = "Patrick",
-        phone = "123-456-7890"
+        phone = "1-800-555-1234"
     )
 
     val CARD_PAYMENT_METHOD = PaymentMethod(
@@ -57,6 +57,19 @@ internal object PaymentMethodFixtures {
         fpx = PaymentMethod.Fpx(
             bank = "hsbc",
             accountHolderType = "individual"
+        )
+    )
+
+    val AU_BCS_DEBIT_PAYMENT_METHOD = PaymentMethod(
+        id = "pm_1GIcJfABjbJy",
+        created = 1583247951L,
+        liveMode = true,
+        type = PaymentMethod.Type.AuBecsDebit,
+        billingDetails = BILLING_DETAILS,
+        auBecsDebit = PaymentMethod.AuBecsDebit(
+            bsbNumber = "000000",
+            fingerprint = "lm7qI5V7PUk",
+            last4 = "3456"
         )
     )
 
@@ -110,14 +123,14 @@ internal object PaymentMethodFixtures {
                 "billing_details": {
                     "address": {
                         "city": "San Francisco",
-                        "country": "USA",
+                        "country": "US",
                         "line1": "510 Townsend St",
                         "postal_code": "94103",
                         "state": "CA"
                     },
                     "email": "patrick@example.com",
                     "name": "Patrick",
-                    "phone": "123-456-7890"
+                    "phone": "1-800-555-1234"
                 },
                 "card": {
                     "brand": "visa",
@@ -193,61 +206,93 @@ internal object PaymentMethodFixtures {
 
     val IDEAL_JSON = JSONObject(
         """
-            {
-                "id": "pm_123456789",
-                "created": 1550757934255,
-                "customer": "cus_AQsHpvKfKwJDrF",
-                "livemode": true,
-                "type": "ideal",
-                "billing_details": {
-                    "address": {
-                        "city": "San Francisco",
-                        "country": "USA",
-                        "line1": "510 Townsend St",
-                        "postal_code": "94103",
-                        "state": "CA"
-                    },
-                    "email": "patrick@example.com",
-                    "name": "Patrick",
-                    "phone": "123-456-7890"
+        {
+            "id": "pm_123456789",
+            "created": 1550757934255,
+            "customer": "cus_AQsHpvKfKwJDrF",
+            "livemode": true,
+            "type": "ideal",
+            "billing_details": {
+                "address": {
+                    "city": "San Francisco",
+                    "country": "US",
+                    "line1": "510 Townsend St",
+                    "postal_code": "94103",
+                    "state": "CA"
                 },
-                "ideal": {
-                    "bank": "my bank",
-                    "bic": "bank id"
-                }
+                "email": "patrick@example.com",
+                "name": "Patrick",
+                "phone": "1-800-555-1234"
+            },
+            "ideal": {
+                "bank": "my bank",
+                "bic": "bank id"
             }
-            """.trimIndent()
+        }
+        """.trimIndent()
     )
 
     val FPX_JSON = JSONObject(
         """
-            {
-                "id": "pm_1F5GlnH8dsfnfKo3gtixzcq0",
-                "object": "payment_method",
-                "billing_details": {
-                    "address": {
-                        "city": "San Francisco",
-                        "country": "USA",
-                        "line1": "510 Townsend St",
-                        "line2": null,
-                        "postal_code": "94103",
-                        "state": "CA"
-                    },
-                    "email": "patrick@example.com",
-                    "name": "Patrick",
-                    "phone": "123-456-7890"
+        {
+            "id": "pm_1F5GlnH8dsfnfKo3gtixzcq0",
+            "object": "payment_method",
+            "billing_details": {
+                "address": {
+                    "city": "San Francisco",
+                    "country": "US",
+                    "line1": "510 Townsend St",
+                    "line2": null,
+                    "postal_code": "94103",
+                    "state": "CA"
                 },
-                "created": 1565290527,
-                "customer": null,
-                "fpx": {
-                    "account_holder_type": "individual",
-                    "bank": "hsbc"
+                "email": "patrick@example.com",
+                "name": "Patrick",
+                "phone": "1-800-555-1234"
+            },
+            "created": 1565290527,
+            "customer": null,
+            "fpx": {
+                "account_holder_type": "individual",
+                "bank": "hsbc"
+            },
+            "livemode": true,
+            "metadata": null,
+            "type": "fpx"
+        }
+        """.trimIndent()
+    )
+
+    val AU_BECS_DEBIT_JSON = JSONObject(
+        """
+        {
+            "id": "pm_1GIcJfABjbJy",
+            "object": "payment_method",
+            "au_becs_debit": {
+                "bsb_number": "000000",
+                "fingerprint": "lm7qI5V7PUk",
+                "last4": "3456"
+            },
+            "billing_details": {
+                "address": {
+                    "city": "San Francisco",
+                    "country": "US",
+                    "line1": "510 Townsend St",
+                    "line2": null,
+                    "postal_code": "94103",
+                    "state": "CA"
                 },
-                "livemode": true,
-                "metadata": null,
-                "type": "fpx"
-            }
-            """.trimIndent()
+                "email": "patrick@example.com",
+                "name": "Patrick",
+                "phone": "1-800-555-1234"
+            },
+            "created": 1583247951,
+            "customer": null,
+            "livemode": true,
+            "metadata": null,
+            "type": "au_becs_debit"
+        }
+        """.trimIndent()
     )
 
     val CARD_PAYMENT_METHODS = listOf(

@@ -46,5 +46,13 @@ class StripeEndToEndTest {
         requireNotNull(paymentMethod)
         assertThat(paymentMethod.type)
             .isEqualTo(PaymentMethod.Type.AuBecsDebit)
+        assertThat(paymentMethod.auBecsDebit)
+            .isEqualTo(
+                PaymentMethod.AuBecsDebit(
+                    bsbNumber = "000000",
+                    fingerprint = "lm7qI5V7PUkWUM7E",
+                    last4 = "3456"
+                )
+            )
     }
 }
