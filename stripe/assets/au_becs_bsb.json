@@ -1,0 +1,470 @@
+{
+  "10": [
+    "BSA",
+    "BankSA (division of Westpac Bank)"
+  ],
+  "11": [
+    "STG and SGP",
+    "St George Bank (division of Westpac Bank)"
+  ],
+  "12": [
+    "BQL",
+    "Bank of Queensland"
+  ],
+  "14": [
+    "PIB",
+    "Rabobank"
+  ],
+  "15": [
+    "T&C",
+    "Town & Country Bank"
+  ],
+  "18": [
+    "MBL",
+    "Macquarie Bank"
+  ],
+  "19": [
+    "BOM and BML",
+    "Bank of Melbourne (division of Westpac Bank)"
+  ],
+  "21": [
+    "CMB",
+    "JP Morgan Chase Bank"
+  ],
+  "22": [
+    "BNP",
+    "BNP Paribas"
+  ],
+  "23": [
+    "BAL",
+    "Bank of America"
+  ],
+  "24": [
+    "CTI",
+    "Citibank"
+  ],
+  "25": [
+    "BPS",
+    "BNP Paribas Securities"
+  ],
+  "26": [
+    "BTA",
+    "Bankers Trust Australia (division of Westpac Bank)"
+  ],
+  "29": [
+    "BOT",
+    "Bank of Tokyo-Mitsubishi"
+  ],
+  "30": [
+    "BWA",
+    "Bankwest (division of Commonwealth Bank)"
+  ],
+  "31": [
+    "MCU",
+    "Bankmecu"
+  ],
+  "33": [
+    "STG and SGP",
+    "St George Bank (division of Westpac Bank)"
+  ],
+  "34": [
+    "HBA and HSB",
+    "HSBC Bank Australia"
+  ],
+  "35": [
+    "BOC and BCA",
+    "Bank of China"
+  ],
+  "40": [
+    "CST",
+    "Commonwealth Bank of Australia"
+  ],
+  "41": [
+    "DBA",
+    "Deutsche Bank"
+  ],
+  "42": [
+    "TBT",
+    "Commonwealth Bank of Australia"
+  ],
+  "45": [
+    "OCB",
+    "OCBC Bank"
+  ],
+  "46": [
+    "ADV",
+    "Advance Bank (division of Westpac Bank)"
+  ],
+  "47": [
+    "CBL",
+    "Challenge Bank (division of Westpac Bank)"
+  ],
+  "48": [
+    "MET or SUN",
+    "Suncorp-Metway"
+  ],
+  "52": [
+    "TBT",
+    "Commonwealth Bank of Australia"
+  ],
+  "55": [
+    "BOM and BML",
+    "Bank of Melbourne (division of Westpac Bank)"
+  ],
+  "57": [
+    "ASL",
+    "Australian Settlements"
+  ],
+  "61": [
+    "ADL",
+    "Adelaide Bank (division of Bendigo and Adelaide Bank)"
+  ],
+  "70": [
+    "CUS",
+    "Indue"
+  ],
+  "73": [
+    "WBC",
+    "Westpac Banking Corporation"
+  ],
+  "76": [
+    "CBA",
+    "Commonwealth Bank of Australia"
+  ],
+  "78": [
+    "NAB",
+    "National Australia Bank"
+  ],
+  "80": [
+    "CRU",
+    "Cuscal"
+  ],
+  "90": [
+    "APO",
+    "Australia Post"
+  ],
+  "325": [
+    "BYB",
+    "Beyond Bank Australia"
+  ],
+  "432": [
+    "SCB",
+    "Standard Chartered Bank"
+  ],
+  "510": [
+    "CNA",
+    "Citibank N.A."
+  ],
+  "512": [
+    "CFC",
+    "Community First Credit Union"
+  ],
+  "514": [
+    "QTM",
+    "QT Mutual Bank"
+  ],
+  "517": [
+    "VOL",
+    "Australian Settlements Limited"
+  ],
+  "533": [
+    "BCC",
+    "Bananacoast Community Credit Union"
+  ],
+  "611": [
+    "SEL",
+    "Select Credit Union"
+  ],
+  "630": [
+    "ABS",
+    "ABS Building Society"
+  ],
+  "632": [
+    "BAE",
+    "B&E"
+  ],
+  "633": [
+    "BBL",
+    "Bendigo Bank"
+  ],
+  "634": [
+    "UFS",
+    "Uniting Financial Services"
+  ],
+  "636": [
+    "HAY",
+    "Cuscal Limited"
+  ],
+  "637": [
+    "GBS",
+    "Greater Building Society"
+  ],
+  "638": [
+    "HBS",
+    "Heritage Bank"
+  ],
+  "639": [
+    "HOM",
+    "Home Building Society (division of Bank of Queensland)"
+  ],
+  "640": [
+    "HUM",
+    "Hume Bank"
+  ],
+  "641": [
+    "IMB and AUB",
+    "IMB"
+  ],
+  "642": [
+    "ADC",
+    "Australian Defence Credit Union"
+  ],
+  "645": [
+    "MPB and BAY",
+    "Wide Bay Australia"
+  ],
+  "646": [
+    "MMB",
+    "Maitland Mutual Building Society"
+  ],
+  "647": [
+    "IMB and AUB",
+    "IMB"
+  ],
+  "650": [
+    "NEW",
+    "Newcastle Permanent Building Society"
+  ],
+  "653": [
+    "PPB",
+    "Pioneer Permanent Building Society (division of Bank of Queensland)"
+  ],
+  "654": [
+    "ECU",
+    "ECU Australia"
+  ],
+  "655": [
+    "ROK",
+    "The Rock Building Society"
+  ],
+  "656": [
+    "MPB and BAY",
+    "Wide Bay Australia"
+  ],
+  "657": [
+    "GBS",
+    "Greater Building Society"
+  ],
+  "659": [
+    "SGE",
+    "SGE Credit Union"
+  ],
+  "664": [
+    "MET or SUN",
+    "Suncorp-Metway"
+  ],
+  "670": [
+    "YOU",
+    "Cuscal Limited"
+  ],
+  "676": [
+    "GTW",
+    "Gateway Credit Union"
+  ],
+  "721": [
+    "HCC",
+    "Holiday Coast Credit Union"
+  ],
+  "722": [
+    "SNX",
+    "Southern Cross Credit"
+  ],
+  "723": [
+    "HIC",
+    "Heritage Isle Credit Union"
+  ],
+  "724": [
+    "RCU",
+    "Railways Credit Union"
+  ],
+  "725": [
+    "JUD",
+    "Judo Bank Pty Ltd"
+  ],
+  "728": [
+    "SCU",
+    "Summerland Credit Union"
+  ],
+  "775": [
+    "XIN",
+    "Australian Settlements Limited"
+  ],
+  "777": [
+    "PNB",
+    "Police & Nurse"
+  ],
+  "812": [
+    "TMB",
+    "Teachers Mutual Bank"
+  ],
+  "813": [
+    "CAP",
+    "Capricornian"
+  ],
+  "814": [
+    "CUA",
+    "Credit Union Australia"
+  ],
+  "815": [
+    "PCU",
+    "Police Bank"
+  ],
+  "817": [
+    "WCU",
+    "Warwick Credit Union"
+  ],
+  "818": [
+    "COM",
+    "Bank of Communications"
+  ],
+  "819": [
+    "IBK",
+    "Industrial & Commercial Bank of China"
+  ],
+  "823": [
+    "ENC",
+    "Encompass Credit Union"
+  ],
+  "824": [
+    "STH",
+    "Sutherland Credit Union"
+  ],
+  "825": [
+    "SKY",
+    "Big Sky Building Society"
+  ],
+  "833": [
+    "DBL",
+    "Defence Bank Limited"
+  ],
+  "880": [
+    "HBS",
+    "Heritage Bank"
+  ],
+  "882": [
+    "MMP",
+    "Maritime Mining & Power Credit Union"
+  ],
+  "888": [
+    "CCB",
+    "China Construction Bank Corporation"
+  ],
+  "889": [
+    "DBS",
+    "DBS Bank Ltd."
+  ],
+  "911": [
+    "SMB",
+    "Sumitomo Mitsui Banking Corporation"
+  ],
+  "913": [
+    "SSB",
+    "State Street Bank & Trust Company"
+  ],
+  "917": [
+    "ARA",
+    "Arab Bank Australia"
+  ],
+  "918": [
+    "MCB",
+    "Mizuho Bank"
+  ],
+  "922": [
+    "UOB",
+    "United Overseas Bank"
+  ],
+  "923": [
+    "ING or GNI",
+    "ING Bank"
+  ],
+  "931": [
+    "ICB",
+    "Mega International Commercial Bank"
+  ],
+  "932": [
+    "NEC",
+    "Community Mutual"
+  ],
+  "936": [
+    "ING or GNI",
+    "ING Bank"
+  ],
+  "939": [
+    "AMP",
+    "AMP Bank"
+  ],
+  "941": [
+    "BCY",
+    "Delphi Bank (division of Bendigo and Adelaide Bank)"
+  ],
+  "942": [
+    "LBA",
+    "Bank of Sydney"
+  ],
+  "943": [
+    "TBB",
+    "Taiwan Business Bank"
+  ],
+  "944": [
+    "MEB",
+    "Members Equity Bank"
+  ],
+  "946": [
+    "UBS",
+    "UBS AG"
+  ],
+  "951": [
+    "INV",
+    "BOQ Specialist Bank"
+  ],
+  "952": [
+    "RBS",
+    "Royal Bank of Scotland"
+  ],
+  "969": [
+    "MSL",
+    "Tyro Payments"
+  ],
+  "980": [
+    "BOC and BCA",
+    "Bank of China"
+  ],
+  "985": [
+    "HBA and HSB",
+    "HSBC Bank Australia"
+  ],
+  "01": [
+    "ANZ",
+    "Australia and New Zealand Banking Group"
+  ],
+  "03": [
+    "WBC",
+    "Westpac Banking Corporation"
+  ],
+  "04": [
+    "WBC",
+    "Westpac Banking Corporation"
+  ],
+  "06": [
+    "CBA",
+    "Commonwealth Bank of Australia"
+  ],
+  "08": [
+    "NAB",
+    "National Australia Bank"
+  ],
+  "09": [
+    "RBA",
+    "Reserve Bank of Australia"
+  ]
+}
