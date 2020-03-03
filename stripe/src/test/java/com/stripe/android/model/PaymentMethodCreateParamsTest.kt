@@ -88,6 +88,17 @@ class PaymentMethodCreateParamsTest {
                     "au_becs_debit" to mapOf(
                         "bsb_number" to "000000",
                         "account_number" to "000123456"
+                    ),
+                    "billing_details" to mapOf(
+                        "address" to mapOf(
+                            "city" to "Los Angeles",
+                            "country" to "US",
+                            "line1" to "123 Main St",
+                            "state" to "CA"
+                        ),
+                        "email" to "me@example.com",
+                        "name" to "Home",
+                        "phone" to "1-800-555-1234"
                     )
                 )
             )
