@@ -20,6 +20,7 @@
     <string name="launch_confirm_pm_sepa_debit">Confirm with SEPA Debit Payment Method</string>
     <string name="fpx_payment_example">FPX Payment Example</string>
     <string name="klarna_source_example">Klarna Source Example</string>
+    <string name="becs_debit_example">BECS Debit Element Example</string>
     <string name="card_brands">Card Brands</string>
 
     <string name="select_add_card">Select or add card</string>

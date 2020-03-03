@@ -8,15 +8,30 @@ import kotlinx.android.parcel.Parcelize
 import org.json.JSONObject
 
 internal class BecsDebitBanks(
-    internal val banks: List<Bank>
+    internal val banks: List<Bank>,
+    private val shouldIncludeTestBank: Boolean = true
 ) {
-    constructor(context: Context) : this(createBanksData(context))
+    constructor(
+        context: Context,
+        shouldIncludeTestBank: Boolean = true
+    ) : this(
+        createBanksData(context),
+        shouldIncludeTestBank
+    )
+
+    fun byPrefix(bsb: String): Bank? {
+        return banks
+            .plus(listOfNotNull(STRIPE_TEST_BANK.takeIf { shouldIncludeTestBank }))
+            .firstOrNull {
+                bsb.startsWith(it.prefix)
+            }
+    }
 
     @Parcelize
     data class Bank(
-        private val prefix: String,
-        private val code: String,
-        private val name: String
+        internal val prefix: String,
+        internal val code: String,
+        internal val name: String
     ) : Parcelable
 
     private companion object {
@@ -39,5 +54,11 @@ internal class BecsDebitBanks(
                 context.resources.assets.open("au_becs_bsb.json")
             ).useDelimiter("\\A").next()
         }
+
+        private val STRIPE_TEST_BANK = Bank(
+            prefix = "00",
+            code = "STRIPE",
+            name = "Stripe Test Bank"
+        )
     }
 }

@@ -293,8 +293,8 @@ data class PaymentMethodCreateParams internal constructor(
 
     @Parcelize
     data class AuBecsDebit(
-        private val bsbNumber: String,
-        private val accountNumber: String
+        var bsbNumber: String,
+        var accountNumber: String
     ) : StripeParamsModel, Parcelable {
 
         override fun toParamMap(): Map<String, Any> {

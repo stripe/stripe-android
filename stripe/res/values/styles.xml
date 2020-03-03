@@ -42,4 +42,10 @@
 
     <style name="Stripe.CardInputWidget.TextInputLayout"
         parent="Stripe.Base.CardInputWidget.TextInputLayout" />
+
+    <style name="Stripe.Base.BecsElement.EditText" parent="Widget.AppCompat.EditText">
+        <item name="android:textSize">@dimen/stripe_becs_element_edit_text_size</item>
+    </style>
+
+    <style name="Stripe.BecsElement.EditText" parent="Stripe.Base.BecsElement.EditText" />
 </resources>

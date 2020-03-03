@@ -91,6 +91,9 @@
             android:name=".activity.FpxPaymentActivity" />
 
         <activity
+            android:name=".activity.BecsDebitPaymentMethodActivity" />
+
+        <activity
             android:name=".activity.KlarnaSourceActivity" />
 
         <activity
