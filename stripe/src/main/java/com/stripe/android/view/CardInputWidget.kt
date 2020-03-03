@@ -9,6 +9,7 @@ import android.text.Layout
 import android.text.TextPaint
 import android.text.TextWatcher
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnFocusChangeListener
@@ -17,7 +18,6 @@ import android.view.animation.AnimationSet
 import android.view.animation.Transformation
 import android.view.inputmethod.EditorInfo
 import android.widget.FrameLayout
-import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.annotation.ColorInt
 import androidx.annotation.IdRes
@@ -27,8 +27,8 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.AccessibilityDelegateCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
-import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
+import com.stripe.android.databinding.CardInputWidgetBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
@@ -49,18 +49,29 @@ class CardInputWidget @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr), CardWidget {
-    private val cardIconImageView: ImageView
-    private val frameLayout: FrameLayout
+    private val viewBinding = CardInputWidgetBinding.inflate(
+        LayoutInflater.from(context),
+        this
+    )
 
-    private val cardNumberTextInputLayout: TextInputLayout
-    private val expiryDateTextInputLayout: TextInputLayout
-    private val cvcNumberTextInputLayout: TextInputLayout
-    private val postalCodeTextInputLayout: TextInputLayout
+    private val containerLayout = viewBinding.container
 
-    private val cardNumberEditText: CardNumberEditText
-    private val expiryDateEditText: ExpiryDateEditText
-    private val cvcNumberEditText: CvcEditText
-    private val postalCodeEditText: PostalCodeEditText
+    @JvmSynthetic
+    internal val cardIconImageView = viewBinding.cardIcon
+
+    private val cardNumberTextInputLayout = viewBinding.cardNumberTextInputLayout
+    private val expiryDateTextInputLayout = viewBinding.expiryDateTextInputLayout
+    private val cvcNumberTextInputLayout = viewBinding.cvcTextInputLayout
+    private val postalCodeTextInputLayout = viewBinding.postalCodeTextInputLayout
+
+    @JvmSynthetic
+    internal val cardNumberEditText = viewBinding.cardNumberEditText
+    @JvmSynthetic
+    internal val expiryDateEditText = viewBinding.expiryDateEditText
+    @JvmSynthetic
+    internal val cvcNumberEditText = viewBinding.cvcEditText
+    @JvmSynthetic
+    internal val postalCodeEditText = viewBinding.postalCodeEditText
 
     private var cardInputListener: CardInputListener? = null
     private var cardValidCallback: CardValidCallback? = null
@@ -278,8 +289,6 @@ class CardInputWidget @JvmOverloads constructor(
     var postalCodeRequired: Boolean = CardWidget.DEFAULT_POSTAL_CODE_REQUIRED
 
     init {
-        View.inflate(getContext(), R.layout.card_input_widget, this)
-
         // This ensures that onRestoreInstanceState is called
         // during rotations.
         if (id == View.NO_ID) {
@@ -288,23 +297,10 @@ class CardInputWidget @JvmOverloads constructor(
 
         orientation = HORIZONTAL
         minimumWidth = resources.getDimensionPixelSize(R.dimen.stripe_card_widget_min_width)
-        frameLayout = findViewById(R.id.frame_container)
-
-        cardNumberTextInputLayout = frameLayout.findViewById(R.id.tl_card_number)
-        expiryDateTextInputLayout = frameLayout.findViewById(R.id.tl_expiry_date)
-        cvcNumberTextInputLayout = frameLayout.findViewById(R.id.tl_cvc)
-        postalCodeTextInputLayout = frameLayout.findViewById(R.id.tl_postal_code)
-
-        cardNumberEditText = cardNumberTextInputLayout.findViewById(R.id.et_card_number)
-        expiryDateEditText = expiryDateTextInputLayout.findViewById(R.id.et_expiry_date)
-        cvcNumberEditText = cvcNumberTextInputLayout.findViewById(R.id.et_cvc)
-        postalCodeEditText = postalCodeTextInputLayout.findViewById(R.id.et_postal_code)
 
         postalCodeEditText.configureForGlobal()
 
-        frameWidthSupplier = { frameLayout.width }
-
-        cardIconImageView = findViewById(R.id.iv_card_icon)
+        frameWidthSupplier = { containerLayout.width }
 
         requiredFields = listOf(
             cardNumberEditText, cvcNumberEditText, expiryDateEditText
@@ -544,7 +540,7 @@ class CardInputWidget @JvmOverloads constructor(
      */
     @VisibleForTesting
     internal fun getFocusRequestOnTouch(touchX: Int): View? {
-        val frameStart = frameLayout.left
+        val frameStart = containerLayout.left
 
         return when {
             cardNumberIsViewed -> {
@@ -612,7 +608,7 @@ class CardInputWidget @JvmOverloads constructor(
     @VisibleForTesting
     internal fun updateSpaceSizes(isCardViewed: Boolean) {
         val frameWidth = frameWidth
-        val frameStart = frameLayout.left
+        val frameStart = containerLayout.left
         if (frameWidth == 0) {
             // This is an invalid view state.
             return
@@ -934,7 +930,7 @@ class CardInputWidget @JvmOverloads constructor(
         val animationSet = AnimationSet(true).apply {
             animations.forEach { addAnimation(it) }
         }
-        frameLayout.startAnimation(animationSet)
+        containerLayout.startAnimation(animationSet)
     }
 
     override fun onWindowFocusChanged(hasWindowFocus: Boolean) {

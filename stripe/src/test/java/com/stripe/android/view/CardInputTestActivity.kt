@@ -14,25 +14,14 @@ internal class CardInputTestActivity : AppCompatActivity() {
     val cardInputWidget: CardInputWidget by lazy {
         CardInputWidget(this)
     }
-    val cardMultilineWidget: CardMultilineWidget by lazy {
+    private val cardMultilineWidget: CardMultilineWidget by lazy {
         CardMultilineWidget(this, shouldShowPostalCode = true)
     }
-    val noZipCardMulitlineWidget: CardMultilineWidget by lazy {
+    private val noZipCardMulitlineWidget: CardMultilineWidget by lazy {
         CardMultilineWidget(this, shouldShowPostalCode = false)
     }
-    val maskedCardView: MaskedCardView by lazy {
+    private val maskedCardView: MaskedCardView by lazy {
         MaskedCardView(this)
-    }
-    val cardNumberEditText: CardNumberEditText by lazy {
-        cardInputWidget.findViewById<CardNumberEditText>(R.id.et_card_number)
-    }
-
-    val expiryDateEditText: ExpiryDateEditText by lazy {
-        cardInputWidget.findViewById<ExpiryDateEditText>(R.id.et_expiry_date)
-    }
-
-    val cvcEditText: StripeEditText by lazy {
-        cardInputWidget.findViewById<StripeEditText>(R.id.et_cvc)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
