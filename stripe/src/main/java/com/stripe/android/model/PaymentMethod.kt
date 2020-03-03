@@ -117,7 +117,8 @@ data class PaymentMethod internal constructor(
         CardPresent("card_present"),
         Fpx("fpx", false),
         Ideal("ideal"),
-        SepaDebit("sepa_debit");
+        SepaDebit("sepa_debit"),
+        AuBecsDebit("au_becs_debit");
 
         override fun toString(): String {
             return code

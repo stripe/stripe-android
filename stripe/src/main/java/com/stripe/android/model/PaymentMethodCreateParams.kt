@@ -23,6 +23,7 @@ data class PaymentMethodCreateParams internal constructor(
     private val ideal: Ideal? = null,
     private val fpx: Fpx? = null,
     private val sepaDebit: SepaDebit? = null,
+    private val auBecsDebit: AuBecsDebit? = null,
     private val billingDetails: PaymentMethod.BillingDetails? = null,
     private val metadata: Map<String, String>? = null
 ) : StripeParamsModel, Parcelable {
@@ -83,6 +84,17 @@ data class PaymentMethodCreateParams internal constructor(
         metadata = metadata
     )
 
+    private constructor(
+        auBecsDebit: AuBecsDebit,
+        billingDetails: PaymentMethod.BillingDetails,
+        metadata: Map<String, String>?
+    ) : this(
+        type = Type.AuBecsDebit,
+        auBecsDebit = auBecsDebit,
+        billingDetails = billingDetails,
+        metadata = metadata
+    )
+
     override fun toParamMap(): Map<String, Any> {
         return mapOf(
             PARAM_TYPE to type.code
@@ -104,6 +116,9 @@ data class PaymentMethodCreateParams internal constructor(
                 Type.SepaDebit -> {
                     mapOf(PARAM_SEPA_DEBIT to sepaDebit?.toParamMap().orEmpty())
                 }
+                Type.AuBecsDebit -> {
+                    mapOf(PARAM_AU_BECS_DEBIT to auBecsDebit?.toParamMap().orEmpty())
+                }
             }
         ).plus(
             metadata?.let {
@@ -116,7 +131,8 @@ data class PaymentMethodCreateParams internal constructor(
         Card("card"),
         Ideal("ideal"),
         Fpx("fpx"),
-        SepaDebit("sepa_debit", true)
+        SepaDebit("sepa_debit", true),
+        AuBecsDebit("au_becs_debit", true)
     }
 
     @Parcelize
@@ -186,6 +202,9 @@ data class PaymentMethodCreateParams internal constructor(
             private const val PARAM_CVC: String = "cvc"
             private const val PARAM_TOKEN: String = "token"
 
+            /**
+             * Create a [Card] from a Card token.
+             */
             @JvmStatic
             fun create(token: String): Card {
                 return Card(token = token, number = null)
@@ -194,7 +213,7 @@ data class PaymentMethodCreateParams internal constructor(
     }
 
     @Parcelize
-    data class Ideal constructor(
+    data class Ideal(
         private val bank: String?
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
@@ -213,13 +232,13 @@ data class PaymentMethodCreateParams internal constructor(
             }
         }
 
-        companion object {
+        private companion object {
             private const val PARAM_BANK: String = "bank"
         }
     }
 
     @Parcelize
-    data class Fpx constructor(
+    data class Fpx(
         private val bank: String?
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
@@ -240,13 +259,13 @@ data class PaymentMethodCreateParams internal constructor(
             }
         }
 
-        companion object {
+        private companion object {
             private const val PARAM_BANK: String = "bank"
         }
     }
 
     @Parcelize
-    data class SepaDebit constructor(
+    data class SepaDebit(
         private val iban: String?
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
@@ -267,8 +286,27 @@ data class PaymentMethodCreateParams internal constructor(
             }
         }
 
-        companion object {
+        private companion object {
             private const val PARAM_IBAN: String = "iban"
+        }
+    }
+
+    @Parcelize
+    data class AuBecsDebit(
+        private val bsbNumber: String,
+        private val accountNumber: String
+    ) : StripeParamsModel, Parcelable {
+
+        override fun toParamMap(): Map<String, Any> {
+            return mapOf(
+                PARAM_BSB_NUMBER to bsbNumber,
+                PARAM_ACCOUNT_NUMBER to accountNumber
+            )
+        }
+
+        private companion object {
+            private const val PARAM_BSB_NUMBER: String = "bsb_number"
+            private const val PARAM_ACCOUNT_NUMBER: String = "account_number"
         }
     }
 
@@ -278,10 +316,14 @@ data class PaymentMethodCreateParams internal constructor(
         private const val PARAM_FPX = "fpx"
         private const val PARAM_IDEAL = "ideal"
         private const val PARAM_SEPA_DEBIT = "sepa_debit"
+        private const val PARAM_AU_BECS_DEBIT = "au_becs_debit"
 
         private const val PARAM_BILLING_DETAILS = "billing_details"
         private const val PARAM_METADATA = "metadata"
 
+        /**
+         * @return params for creating a [PaymentMethod.Type.Card] payment method
+         */
         @JvmStatic
         @JvmOverloads
         fun create(
@@ -292,6 +334,9 @@ data class PaymentMethodCreateParams internal constructor(
             return PaymentMethodCreateParams(card, billingDetails, metadata)
         }
 
+        /**
+         * @return params for creating a [PaymentMethod.Type.Ideal] payment method
+         */
         @JvmStatic
         @JvmOverloads
         fun create(
@@ -302,6 +347,9 @@ data class PaymentMethodCreateParams internal constructor(
             return PaymentMethodCreateParams(ideal, billingDetails, metadata)
         }
 
+        /**
+         * @return params for creating a [PaymentMethod.Type.Fpx] payment method
+         */
         @JvmStatic
         @JvmOverloads
         fun create(
@@ -312,6 +360,9 @@ data class PaymentMethodCreateParams internal constructor(
             return PaymentMethodCreateParams(fpx, billingDetails, metadata)
         }
 
+        /**
+         * @return params for creating a [PaymentMethod.Type.SepaDebit] payment method
+         */
         @JvmStatic
         @JvmOverloads
         fun create(
@@ -320,6 +371,19 @@ data class PaymentMethodCreateParams internal constructor(
             metadata: Map<String, String>? = null
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(sepaDebit, billingDetails, metadata)
+        }
+
+        /**
+         * @return params for creating a [PaymentMethod.Type.AuBecsDebit] payment method
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun create(
+            auBecsDebit: AuBecsDebit,
+            billingDetails: PaymentMethod.BillingDetails,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(auBecsDebit, billingDetails, metadata)
         }
 
         /**
