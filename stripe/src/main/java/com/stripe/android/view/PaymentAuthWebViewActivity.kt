@@ -14,11 +14,15 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.stripe.android.Logger
 import com.stripe.android.PaymentAuthWebViewStarter
 import com.stripe.android.R
+import com.stripe.android.databinding.PaymentAuthWebViewActivityBinding
 import com.stripe.android.stripe3ds2.utils.CustomizeUtils
 import com.ults.listeners.SdkChallengeInterface.UL_HANDLE_CHALLENGE_ACTION
-import kotlinx.android.synthetic.main.payment_auth_web_view_activity.*
 
 class PaymentAuthWebViewActivity : AppCompatActivity() {
+
+    private val viewBinding: PaymentAuthWebViewActivityBinding by lazy {
+        PaymentAuthWebViewActivityBinding.inflate(layoutInflater)
+    }
 
     private lateinit var logger: Logger
     private lateinit var viewModel: PaymentAuthWebViewActivityViewModel
@@ -44,9 +48,9 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         LocalBroadcastManager.getInstance(this)
             .sendBroadcast(Intent().setAction(UL_HANDLE_CHALLENGE_ACTION))
 
-        setContentView(R.layout.payment_auth_web_view_activity)
+        setContentView(viewBinding.root)
 
-        setSupportActionBar(toolbar)
+        setSupportActionBar(viewBinding.toolbar)
         customizeToolbar()
 
         val clientSecret = args.clientSecret
@@ -59,13 +63,19 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         }
 
         logger.debug("PaymentAuthWebViewActivity#onCreate() - PaymentAuthWebView init and loadUrl")
-        auth_web_view.init(this, logger, auth_web_view_progress_bar, clientSecret, args.returnUrl)
-        auth_web_view.loadUrl(args.url)
+        viewBinding.authWebView.init(
+            this,
+            logger,
+            viewBinding.authWebViewProgressBar,
+            clientSecret,
+            args.returnUrl
+        )
+        viewBinding.authWebView.loadUrl(args.url)
     }
 
     override fun onDestroy() {
-        auth_web_view_container.removeAllViews()
-        auth_web_view.destroy()
+        viewBinding.authWebViewContainer.removeAllViews()
+        viewBinding.authWebView.destroy()
         super.onDestroy()
     }
 
@@ -106,13 +116,17 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
 
         viewModel.toolbarTitle?.let {
             logger.debug("PaymentAuthWebViewActivity#customizeToolbar() - updating toolbar title")
-            toolbar.title = CustomizeUtils.buildStyledText(this, it.text, it.toolbarCustomization)
+            viewBinding.toolbar.title = CustomizeUtils.buildStyledText(
+                this,
+                it.text,
+                it.toolbarCustomization
+            )
         }
 
         viewModel.toolbarBackgroundColor?.let { backgroundColor ->
             logger.debug("PaymentAuthWebViewActivity#customizeToolbar() - updating toolbar background color")
             @ColorInt val backgroundColorInt = Color.parseColor(backgroundColor)
-            toolbar.setBackgroundColor(backgroundColorInt)
+            viewBinding.toolbar.setBackgroundColor(backgroundColorInt)
             CustomizeUtils.setStatusBarColor(this, backgroundColorInt)
         }
     }
