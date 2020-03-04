@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -76,6 +77,31 @@ class PaymentMethodCreateParamsTest {
             expectedParams,
             PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT.toParamMap()
         )
+    }
+
+    @Test
+    fun auBecsDebit_toParamMap_shouldCreateExpectedMap() {
+        assertThat(PaymentMethodCreateParamsFixtures.AU_BECS_DEBIT.toParamMap())
+            .isEqualTo(
+                mapOf(
+                    "type" to "au_becs_debit",
+                    "au_becs_debit" to mapOf(
+                        "bsb_number" to "000000",
+                        "account_number" to "000123456"
+                    ),
+                    "billing_details" to mapOf(
+                        "address" to mapOf(
+                            "city" to "Los Angeles",
+                            "country" to "US",
+                            "line1" to "123 Main St",
+                            "state" to "CA"
+                        ),
+                        "email" to "me@example.com",
+                        "name" to "Home",
+                        "phone" to "1-800-555-1234"
+                    )
+                )
+            )
     }
 
     @Test

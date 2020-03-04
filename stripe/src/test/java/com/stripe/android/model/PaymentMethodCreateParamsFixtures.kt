@@ -37,6 +37,14 @@ internal object PaymentMethodCreateParamsFixtures {
         PaymentMethodCreateParams.SepaDebit(iban = "my_iban")
     )
 
+    internal val AU_BECS_DEBIT = PaymentMethodCreateParams.create(
+        PaymentMethodCreateParams.AuBecsDebit(
+            bsbNumber = "000000",
+            accountNumber = "000123456"
+        ),
+        BILLING_DETAILS
+    )
+
     @JvmStatic
     fun createWith(metadata: Map<String, String>): PaymentMethodCreateParams {
         return PaymentMethodCreateParams.create(

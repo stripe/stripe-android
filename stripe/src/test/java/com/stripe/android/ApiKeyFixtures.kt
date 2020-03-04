@@ -7,5 +7,6 @@ internal object ApiKeyFixtures {
     const val FAKE_EPHEMERAL_KEY = "ek_test_123"
     const val FAKE_SECRET_KEY = "sk_test_123"
     const val FPX_PUBLISHABLE_KEY = "pk_test_gQDRnExb8Jjs2Dk6RiQ09RSg007c7pKhDT"
+    const val AU_BECS_DEBIT_PUBLISHABLE_KEY = "pk_test_Bfx5IwoTeK7kUbfS15dcgTrs00beFpWwto"
     const val KLARNA_PUBLISHABLE_KEY = "pk_test_8JUGw3jTOFqWQOt5nr2pjzF9"
 }
