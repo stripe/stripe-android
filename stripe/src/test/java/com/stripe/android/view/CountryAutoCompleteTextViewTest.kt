@@ -63,7 +63,7 @@ class CountryAutoCompleteTextViewTest {
                 countryAutoCompleteTextView = it
                     .findViewById(R.id.country_autocomplete_aaw)
                 autoCompleteTextView = countryAutoCompleteTextView
-                    .findViewById(R.id.autocomplete_country_cat)
+                    .findViewById(R.id.country_autocomplete)
             }
         }
     }

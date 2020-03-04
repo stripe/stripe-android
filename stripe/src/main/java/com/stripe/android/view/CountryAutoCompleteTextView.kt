@@ -2,7 +2,7 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.View
+import android.view.LayoutInflater
 import android.view.View.OnFocusChangeListener
 import android.widget.AdapterView
 import android.widget.AutoCompleteTextView
@@ -10,16 +10,29 @@ import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.ConfigurationCompat
 import com.stripe.android.R
+import com.stripe.android.databinding.CountryAutocompleteViewBinding
 import java.util.Locale
-import kotlinx.android.synthetic.main.country_autocomplete_textview.view.*
 
 internal class CountryAutoCompleteTextView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
+    private val viewBinding =
+        CountryAutocompleteViewBinding.inflate(
+            LayoutInflater.from(context),
+            this
+        )
+
+    private val countryAdapter = CountryAdapter(
+        context,
+        CountryUtils.getOrderedCountries(
+            ConfigurationCompat.getLocales(context.resources.configuration)[0]
+        )
+    )
+
     @VisibleForTesting
-    internal val countryAutocomplete: AutoCompleteTextView
+    internal val countryAutocomplete = viewBinding.countryAutocomplete
 
     /**
      * @return 2 digit country code of the country selected by this input.
@@ -30,19 +43,7 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
     @JvmSynthetic
     internal var countryChangeCallback: (Country) -> Unit = {}
 
-    private val countryAdapter: CountryAdapter
-
     init {
-        View.inflate(getContext(), R.layout.country_autocomplete_textview, this)
-
-        countryAdapter = CountryAdapter(
-            getContext(),
-            CountryUtils.getOrderedCountries(
-                ConfigurationCompat.getLocales(context.resources.configuration)[0]
-            )
-        )
-
-        countryAutocomplete = findViewById(R.id.autocomplete_country_cat)
         countryAutocomplete.threshold = 0
         countryAutocomplete.setAdapter(countryAdapter)
         countryAutocomplete.onItemClickListener =
@@ -77,8 +78,8 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
                 if (validCountry != null) {
                     clearError()
                 } else {
-                    tl_country_cat.error = errorMessage
-                    tl_country_cat.isErrorEnabled = true
+                    viewBinding.countryTextInputLayout.error = errorMessage
+                    viewBinding.countryTextInputLayout.isErrorEnabled = true
                 }
 
                 return validCountry != null
@@ -143,7 +144,7 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
     }
 
     private fun clearError() {
-        tl_country_cat.error = null
-        tl_country_cat.isErrorEnabled = false
+        viewBinding.countryTextInputLayout.error = null
+        viewBinding.countryTextInputLayout.isErrorEnabled = false
     }
 }
