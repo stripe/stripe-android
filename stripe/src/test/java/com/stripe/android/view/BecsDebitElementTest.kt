@@ -26,7 +26,7 @@ internal class BecsDebitElementTest : BaseViewTest<BecsDebitElementTestActivity>
     private val emailEditText: StripeEditText by lazy {
         becsDebitElement.viewBinding.emailEditText
     }
-    private val bsbEditText: StripeEditText by lazy {
+    private val bsbEditText: BecsDebitBsbEditText by lazy {
         becsDebitElement.viewBinding.bsbEditText
     }
     private val accountNumberEditText: StripeEditText by lazy {
@@ -45,15 +45,6 @@ internal class BecsDebitElementTest : BaseViewTest<BecsDebitElementTestActivity>
     }
 
     @Test
-    fun testBsbError() {
-        assertThat(becsDebitElement.viewBinding.bsbTextInputLayout.isErrorEnabled)
-            .isFalse()
-        bsbEditText.setText("999")
-        assertThat(becsDebitElement.viewBinding.bsbTextInputLayout.isErrorEnabled)
-            .isTrue()
-    }
-
-    @Test
     fun testBsbHelperText() {
         assertThat(becsDebitElement.viewBinding.bsbTextInputLayout.isErrorEnabled)
             .isFalse()
@@ -62,6 +53,18 @@ internal class BecsDebitElementTest : BaseViewTest<BecsDebitElementTestActivity>
             .isFalse()
         assertThat(becsDebitElement.viewBinding.bsbTextInputLayout.isHelperTextEnabled)
             .isTrue()
+    }
+
+    @Test
+    fun params_whenBsbInvalid_enablesError() {
+        assertThat(becsDebitElement.viewBinding.bsbTextInputLayout.isErrorEnabled)
+            .isFalse()
+        bsbEditText.setText("123")
+        becsDebitElement.params
+        assertThat(becsDebitElement.viewBinding.bsbTextInputLayout.isErrorEnabled)
+            .isTrue()
+        assertThat(bsbEditText.errorMessage)
+            .isEqualTo("The BSB you entered is incomplete.")
     }
 
     @Test
@@ -81,7 +84,7 @@ internal class BecsDebitElementTest : BaseViewTest<BecsDebitElementTestActivity>
             .isEqualTo(
                 PaymentMethodCreateParams.create(
                     PaymentMethodCreateParams.AuBecsDebit(
-                        bsbNumber = "000-000",
+                        bsbNumber = "000000",
                         accountNumber = VALID_ACCOUNT_NUMBER
                     ),
                     PaymentMethod.BillingDetails.Builder()

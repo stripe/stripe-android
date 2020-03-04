@@ -153,6 +153,10 @@
     <string name="becs_element_bsb" tools:ignore="MissingTranslation">BSB</string>
     <!-- BECS Debit Element - account number field label -->
     <string name="becs_element_account_number" tools:ignore="MissingTranslation">Account number</string>
-    <!-- BECS Debit Element - BSB field error message -->
-    <string name="becs_element_bsb_error" tools:ignore="MissingTranslation">The BSB you entered is invalid.</string>
+    <!-- BECS Debit Element - BSB field invalid error message -->
+    <string name="becs_element_bsb_invalid" tools:ignore="MissingTranslation">The BSB you entered is invalid.</string>
+    <string name="becs_element_bsb_incomplete" tools:ignore="MissingTranslation">The BSB you entered is incomplete.</string>
+    <string name="becs_element_account_number_required" tools:ignore="MissingTranslation">Your account number is required.</string>
+    <string name="becs_element_name_required" tools:ignore="MissingTranslation">Your name is required.</string>
+    <string name="becs_element_email_required" tools:ignore="MissingTranslation">Your email address is required.</string>
 </resources>
