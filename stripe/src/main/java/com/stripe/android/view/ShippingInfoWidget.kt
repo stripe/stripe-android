@@ -4,11 +4,12 @@ import android.content.Context
 import android.os.Build
 import android.telephony.PhoneNumberFormattingTextWatcher
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
 import androidx.annotation.StringDef
-import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
+import com.stripe.android.databinding.AddressWidgetBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.ShippingInformation
 import java.util.Locale
@@ -22,25 +23,31 @@ class ShippingInfoWidget @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr) {
 
+    private val viewBinding: AddressWidgetBinding by lazy {
+        AddressWidgetBinding.inflate(
+            LayoutInflater.from(context),
+            this
+        )
+    }
     private val postalCodeValidator: PostalCodeValidator = PostalCodeValidator()
     private var optionalShippingInfoFields: List<String> = emptyList()
     private var hiddenShippingInfoFields: List<String> = emptyList()
 
-    private val countryAutoCompleteTextView: CountryAutoCompleteTextView
-    private val addressLine1TextInputLayout: TextInputLayout
-    private val addressLine2TextInputLayout: TextInputLayout
-    private val cityTextInputLayout: TextInputLayout
-    private val nameTextInputLayout: TextInputLayout
-    private val postalCodeTextInputLayout: TextInputLayout
-    private val stateTextInputLayout: TextInputLayout
-    private val phoneNumberTextInputLayout: TextInputLayout
-    private val addressEditText: StripeEditText
-    private val addressEditText2: StripeEditText
-    private val cityEditText: StripeEditText
-    private val nameEditText: StripeEditText
-    private val postalCodeEditText: StripeEditText
-    private val stateEditText: StripeEditText
-    private val phoneNumberEditText: StripeEditText
+    private val countryAutoCompleteTextView = viewBinding.countryAutocompleteAaw
+    private val addressLine1TextInputLayout = viewBinding.tlAddressLine1Aaw
+    private val addressLine2TextInputLayout = viewBinding.tlAddressLine2Aaw
+    private val cityTextInputLayout = viewBinding.tlCityAaw
+    private val nameTextInputLayout = viewBinding.tlNameAaw
+    private val postalCodeTextInputLayout = viewBinding.tlPostalCodeAaw
+    private val stateTextInputLayout = viewBinding.tlStateAaw
+    private val phoneNumberTextInputLayout = viewBinding.tlPhoneNumberAaw
+    private val addressEditText = viewBinding.etAddressLineOneAaw
+    private val addressEditText2 = viewBinding.etAddressLineTwoAaw
+    private val cityEditText = viewBinding.etCityAaw
+    private val nameEditText = viewBinding.etNameAaw
+    private val postalCodeEditText = viewBinding.etPostalCodeAaw
+    private val stateEditText = viewBinding.etStateAaw
+    private val phoneNumberEditText = viewBinding.etPhoneNumberAaw
 
     /**
      * Return [ShippingInformation] based on user input if valid, otherwise null.
@@ -98,23 +105,6 @@ class ShippingInfoWidget @JvmOverloads constructor(
 
     init {
         orientation = VERTICAL
-        View.inflate(context, R.layout.add_address_widget, this)
-
-        countryAutoCompleteTextView = findViewById(R.id.country_autocomplete_aaw)
-        addressLine1TextInputLayout = findViewById(R.id.tl_address_line1_aaw)
-        addressLine2TextInputLayout = findViewById(R.id.tl_address_line2_aaw)
-        cityTextInputLayout = findViewById(R.id.tl_city_aaw)
-        nameTextInputLayout = findViewById(R.id.tl_name_aaw)
-        postalCodeTextInputLayout = findViewById(R.id.tl_postal_code_aaw)
-        stateTextInputLayout = findViewById(R.id.tl_state_aaw)
-        addressEditText = findViewById(R.id.et_address_line_one_aaw)
-        addressEditText2 = findViewById(R.id.et_address_line_two_aaw)
-        cityEditText = findViewById(R.id.et_city_aaw)
-        nameEditText = findViewById(R.id.et_name_aaw)
-        postalCodeEditText = findViewById(R.id.et_postal_code_aaw)
-        stateEditText = findViewById(R.id.et_state_aaw)
-        phoneNumberEditText = findViewById(R.id.et_phone_number_aaw)
-        phoneNumberTextInputLayout = findViewById(R.id.tl_phone_number_aaw)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             nameEditText.setAutofillHints(View.AUTOFILL_HINT_NAME)
