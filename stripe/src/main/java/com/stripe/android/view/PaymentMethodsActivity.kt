@@ -10,10 +10,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession.Companion.TOKEN_PAYMENT_SESSION
-import com.stripe.android.R
+import com.stripe.android.databinding.PaymentMethodsActivityBinding
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.view.i18n.TranslatorManager
-import kotlinx.android.synthetic.main.activity_payment_methods.*
 
 /**
  * An activity that allows a customer to select from their attached payment methods,
@@ -26,6 +25,10 @@ import kotlinx.android.synthetic.main.activity_payment_methods.*
  * to retrieve the result of this activity from an intent in onActivityResult().
  */
 class PaymentMethodsActivity : AppCompatActivity() {
+    internal val viewBinding: PaymentMethodsActivityBinding by lazy {
+        PaymentMethodsActivityBinding.inflate(layoutInflater)
+    }
+
     private val startedFromPaymentSession: Boolean by lazy {
         args.isPaymentSessionActive
     }
@@ -67,7 +70,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_payment_methods)
+        setContentView(viewBinding.root)
 
         args.windowFlags?.let {
             window.addFlags(it)
@@ -75,11 +78,11 @@ class PaymentMethodsActivity : AppCompatActivity() {
 
         viewModel.snackbarData.observe(this, Observer { snackbarText ->
             snackbarText?.let {
-                Snackbar.make(coordinator, it, Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(viewBinding.coordinator, it, Snackbar.LENGTH_SHORT).show()
             }
         })
         viewModel.progressData.observe(this, Observer {
-            payment_methods_progress_bar.visibility = if (it) {
+            viewBinding.progressBar.visibility = if (it) {
                 View.VISIBLE
             } else {
                 View.GONE
@@ -88,7 +91,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
 
         setupRecyclerView()
 
-        setSupportActionBar(payment_methods_toolbar)
+        setSupportActionBar(viewBinding.toolbar)
 
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
@@ -98,7 +101,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
         fetchCustomerPaymentMethods()
 
         // This prevents the first click from being eaten by the focus.
-        payment_methods_recycler.requestFocusFromTouch()
+        viewBinding.recycler.requestFocusFromTouch()
     }
 
     private fun setupRecyclerView() {
@@ -111,7 +114,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
 
         adapter.listener = object : PaymentMethodsAdapter.Listener {
             override fun onPaymentMethodClick(paymentMethod: PaymentMethod) {
-                payment_methods_recycler.tappedPaymentMethod = paymentMethod
+                viewBinding.recycler.tappedPaymentMethod = paymentMethod
             }
 
             override fun onGooglePayClick() {
@@ -123,10 +126,9 @@ class PaymentMethodsActivity : AppCompatActivity() {
             }
         }
 
-        payment_methods_recycler.adapter = adapter
-        payment_methods_recycler.paymentMethodSelectedCallback = { finishWithResult(it) }
-
-        payment_methods_recycler.attachItemTouchHelper(
+        viewBinding.recycler.adapter = adapter
+        viewBinding.recycler.paymentMethodSelectedCallback = { finishWithResult(it) }
+        viewBinding.recycler.attachItemTouchHelper(
             PaymentMethodSwipeCallback(
                 this, adapter,
                 SwipeToDeleteCallbackListener(deletePaymentMethodDialogFactory)

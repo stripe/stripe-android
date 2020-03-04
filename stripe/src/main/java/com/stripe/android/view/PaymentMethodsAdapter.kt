@@ -8,14 +8,13 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.core.view.ViewCompat
 import androidx.core.widget.ImageViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.R
+import com.stripe.android.databinding.GooglePayRowBinding
+import com.stripe.android.databinding.MaskedCardRowBinding
 import com.stripe.android.model.PaymentMethod
-import java.util.ArrayList
 
 /**
  * A [RecyclerView.Adapter] that holds a set of [MaskedCardView] items for a given set
@@ -29,7 +28,7 @@ internal class PaymentMethodsAdapter constructor(
     private val useGooglePay: Boolean = false
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    internal val paymentMethods = ArrayList<PaymentMethod>()
+    internal val paymentMethods = mutableListOf<PaymentMethod>()
     internal var selectedPaymentMethodId: String? = initiallySelectedPaymentMethodId
     internal val selectedPaymentMethod: PaymentMethod?
         get() {
@@ -176,11 +175,9 @@ internal class PaymentMethodsAdapter constructor(
     private fun createPaymentMethodViewHolder(
         parent: ViewGroup
     ): ViewHolder.PaymentMethodViewHolder {
-        val itemView = LayoutInflater.from(parent.context)
-            .inflate(R.layout.masked_card_row, parent, false)
-        val viewHolder = ViewHolder.PaymentMethodViewHolder(itemView)
+        val viewHolder = ViewHolder.PaymentMethodViewHolder(parent)
         ViewCompat.addAccessibilityAction(
-            itemView,
+            viewHolder.itemView,
             parent.context.getString(R.string.delete_payment_method)
         ) { _, _ ->
             listener?.onDeletePaymentMethodAction(
@@ -251,30 +248,31 @@ internal class PaymentMethodsAdapter constructor(
         ) : RecyclerView.ViewHolder(itemView)
 
         internal class GooglePayViewHolder(
-            itemView: View
-        ) : RecyclerView.ViewHolder(itemView) {
+            private val viewBinding: GooglePayRowBinding
+        ) : RecyclerView.ViewHolder(viewBinding.root) {
             constructor(context: Context, parent: ViewGroup) : this(
-                LayoutInflater.from(context)
-                    .inflate(R.layout.google_pay_row, parent, false)
+                GooglePayRowBinding.inflate(
+                    LayoutInflater.from(context),
+                    parent,
+                    false
+                )
             )
 
-            private val label: TextView = itemView.findViewById(R.id.label)
-            private val checkIcon: ImageView = itemView.findViewById(R.id.check_icon)
             private val themeConfig = ThemeConfig(itemView.context)
 
             init {
                 ImageViewCompat.setImageTintList(
-                    checkIcon,
+                    viewBinding.checkIcon,
                     ColorStateList.valueOf(themeConfig.getTintColor(true))
                 )
             }
 
             fun bind(isSelected: Boolean) {
-                label.setTextColor(
+                viewBinding.label.setTextColor(
                     ColorStateList.valueOf(themeConfig.getTextColor(isSelected))
                 )
 
-                checkIcon.visibility = if (isSelected) {
+                viewBinding.checkIcon.visibility = if (isSelected) {
                     View.VISIBLE
                 } else {
                     View.INVISIBLE
@@ -285,16 +283,22 @@ internal class PaymentMethodsAdapter constructor(
         }
 
         internal class PaymentMethodViewHolder constructor(
-            itemView: View
-        ) : ViewHolder(itemView) {
-            private val cardView: MaskedCardView = itemView.findViewById(R.id.masked_card_item)
+            private val viewBinding: MaskedCardRowBinding
+        ) : ViewHolder(viewBinding.root) {
+            constructor(parent: ViewGroup) : this(
+                MaskedCardRowBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false
+                )
+            )
 
             fun setPaymentMethod(paymentMethod: PaymentMethod) {
-                cardView.setPaymentMethod(paymentMethod)
+                viewBinding.maskedCardItem.setPaymentMethod(paymentMethod)
             }
 
             fun setSelected(selected: Boolean) {
-                cardView.isSelected = selected
+                viewBinding.maskedCardItem.isSelected = selected
                 itemView.isSelected = selected
             }
         }

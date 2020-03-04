@@ -18,6 +18,7 @@ import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.Stripe
+import com.stripe.android.databinding.AddPaymentMethodActivityBinding
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 
@@ -98,17 +99,17 @@ class AddPaymentMethodActivity : StripeActivity() {
             window.addFlags(it)
         }
 
-        viewStub.layoutResource = R.layout.add_payment_method_layout
+        viewStub.layoutResource = R.layout.add_payment_method_activity
         val scrollView = viewStub.inflate() as ViewGroup
-        val contentRoot: ViewGroup =
-            scrollView.findViewById(R.id.stripe_add_payment_method_content_root)
-        contentRoot.addView(addPaymentMethodView)
-        createFooterView(contentRoot)?.let {
+        val viewBinding = AddPaymentMethodActivityBinding.bind(scrollView)
+
+        viewBinding.root.addView(addPaymentMethodView)
+        createFooterView(viewBinding.root)?.let {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
                 addPaymentMethodView.accessibilityTraversalBefore = it.id
                 it.accessibilityTraversalAfter = addPaymentMethodView.id
             }
-            contentRoot.addView(it)
+            viewBinding.root.addView(it)
         }
 
         setTitle(titleStringRes)

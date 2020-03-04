@@ -87,7 +87,7 @@ class PaymentSessionActivity : AppCompatActivity() {
                 .setShippingInformationValidator(ShippingInformationValidator())
                 .setShippingMethodsFactory(ShippingMethodsFactory())
                 .setWindowFlags(WindowManager.LayoutParams.FLAG_SECURE)
-                .setBillingAddressFields(BillingAddressFields.Full)
+                .setBillingAddressFields(BillingAddressFields.PostalCode)
                 .setShouldPrefetchCustomer(shouldPrefetchCustomer)
                 .build()
         )

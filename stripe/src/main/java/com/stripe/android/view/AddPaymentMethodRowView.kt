@@ -2,14 +2,14 @@ package com.stripe.android.view
 
 import android.app.Activity
 import android.content.Context
-import android.view.View
+import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.annotation.IdRes
 import androidx.annotation.StringRes
 import com.stripe.android.R
+import com.stripe.android.databinding.AddPaymentMethodRowBinding
 import com.stripe.android.model.PaymentMethod
-import kotlinx.android.synthetic.main.add_payment_method_row.view.*
 
 @SuppressWarnings("ViewConstructor")
 internal class AddPaymentMethodRowView private constructor(
@@ -19,8 +19,13 @@ internal class AddPaymentMethodRowView private constructor(
     private val args: AddPaymentMethodActivityStarter.Args
 ) : FrameLayout(context) {
 
+    private val viewBinding = AddPaymentMethodRowBinding.inflate(
+        LayoutInflater.from(context),
+        this,
+        true
+    )
+
     init {
-        View.inflate(context, R.layout.add_payment_method_row, this)
         id = idRes
         layoutParams = ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
 
@@ -32,7 +37,7 @@ internal class AddPaymentMethodRowView private constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        label.setText(labelRes)
+        viewBinding.label.setText(labelRes)
 
         (context as? Activity)?.let { activity ->
             setOnClickListener {

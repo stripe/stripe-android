@@ -5,8 +5,6 @@ import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
 import android.view.View
-import android.widget.ProgressBar
-import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.argumentCaptor
@@ -59,8 +57,8 @@ class PaymentMethodsActivityTest {
                 .build()
         ).use { activityScenario ->
             activityScenario.onActivity {
-                val progressBar: ProgressBar = it.findViewById(R.id.payment_methods_progress_bar)
-                val recyclerView: RecyclerView = it.findViewById(R.id.payment_methods_recycler)
+                val progressBar = it.viewBinding.progressBar
+                val recyclerView = it.viewBinding.recycler
                 val addCardView: View = it.findViewById(R.id.stripe_payment_methods_add_card)
 
                 verify(customerSession).getPaymentMethods(
@@ -91,7 +89,7 @@ class PaymentMethodsActivityTest {
                 .build()
         ).use { activityScenario ->
             activityScenario.onActivity {
-                val recyclerView: RecyclerView = it.findViewById(R.id.payment_methods_recycler)
+                val recyclerView = it.viewBinding.recycler
 
                 verify(customerSession)
                     .getPaymentMethods(
@@ -159,8 +157,8 @@ class PaymentMethodsActivityTest {
                 .build()
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
-                val progressBar: ProgressBar = activity.findViewById(R.id.payment_methods_progress_bar)
-                val recyclerView: RecyclerView = activity.findViewById(R.id.payment_methods_recycler)
+                val progressBar = activity.viewBinding.progressBar
+                val recyclerView = activity.viewBinding.recycler
 
                 val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHODS[2]
                 assertNotNull(paymentMethod)
@@ -196,12 +194,9 @@ class PaymentMethodsActivityTest {
                 .build()
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
-                val progressBar: ProgressBar =
-                    activity.findViewById(R.id.payment_methods_progress_bar)
-                val recyclerView: RecyclerView =
-                    activity.findViewById(R.id.payment_methods_recycler)
-                val addCardView: View =
-                    activity.findViewById(R.id.stripe_payment_methods_add_card)
+                val progressBar = activity.viewBinding.progressBar
+                val recyclerView = activity.viewBinding.recycler
+                val addCardView: View = activity.findViewById(R.id.stripe_payment_methods_add_card)
 
                 verify(customerSession).getPaymentMethods(
                     eq(PaymentMethod.Type.Card),
