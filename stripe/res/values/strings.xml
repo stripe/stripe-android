@@ -144,4 +144,15 @@
     https://developers.google.com/pay/api/android/guides/brand-guidelines#using-pay-in-text
     -->
     <string name="google_pay" tools:ignore="MissingTranslation">Google Pay</string>
+
+    <!-- BECS Debit Element - name field label -->
+    <string name="becs_element_name" tools:ignore="MissingTranslation">Name</string>
+    <!-- BECS Debit Element - email address field label -->
+    <string name="becs_element_email" tools:ignore="MissingTranslation">Email Address</string>
+    <!-- BECS Debit Element - BSB field label -->
+    <string name="becs_element_bsb" tools:ignore="MissingTranslation">BSB</string>
+    <!-- BECS Debit Element - account number field label -->
+    <string name="becs_element_account_number" tools:ignore="MissingTranslation">Account number</string>
+    <!-- BECS Debit Element - BSB field error message -->
+    <string name="becs_element_bsb_error" tools:ignore="MissingTranslation">The BSB you entered is invalid.</string>
 </resources>

@@ -31,4 +31,7 @@
 
     <!-- Text size of CardInputWidget EditText views -->
     <dimen name="ciw_stripe_edit_text_size">18sp</dimen>
+
+    <!-- Text size of BECS Element EditTexts -->
+    <dimen name="stripe_becs_element_edit_text_size">14sp</dimen>
 </resources>

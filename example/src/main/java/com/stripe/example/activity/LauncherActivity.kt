@@ -58,6 +58,8 @@ class LauncherActivity : AppCompatActivity() {
                 FpxPaymentActivity::class.java),
             Item(activity.getString(R.string.klarna_source_example),
                 KlarnaSourceActivity::class.java),
+            Item(activity.getString(R.string.becs_debit_example),
+                BecsDebitPaymentMethodActivity::class.java),
             Item(activity.getString(R.string.card_brands),
                 CardBrandsActivity::class.java)
         )

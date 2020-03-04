@@ -90,6 +90,7 @@ open class StripeEditText @JvmOverloads constructor(
         }
 
     init {
+        maxLines = 1
         listenForTextChanges()
         listenForDeleteEmpty()
         determineDefaultErrorColor()
