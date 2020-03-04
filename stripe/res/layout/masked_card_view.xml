@@ -2,7 +2,7 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/masked_icon_view"
+        android:id="@+id/brand_icon"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/stripe_masked_card_icon_width"
         android:src="@drawable/stripe_ic_unknown"
@@ -10,7 +10,7 @@
         />
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/masked_card_info_view"
+        android:id="@+id/details"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"

@@ -3,14 +3,15 @@ package com.stripe.android.view
 import android.content.Context
 import android.content.res.ColorStateList
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
 import com.stripe.android.R
+import com.stripe.android.databinding.MaskedCardViewBinding
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 
@@ -33,21 +34,16 @@ internal class MaskedCardView @JvmOverloads constructor(
     var last4: String? = null
         private set
 
-    private val brandImageView: ImageView
-    private val cardInformationTextView: TextView
-    private val checkImageView: ImageView
-
+    internal val viewBinding = MaskedCardViewBinding.inflate(
+        LayoutInflater.from(context),
+        this
+    )
     private val themeConfig = ThemeConfig(context)
     private val cardDisplayFactory = CardDisplayTextFactory(resources, themeConfig)
 
     init {
-        View.inflate(getContext(), R.layout.masked_card_view, this)
-        brandImageView = findViewById(R.id.masked_icon_view)
-        cardInformationTextView = findViewById(R.id.masked_card_info_view)
-        checkImageView = findViewById(R.id.check_icon)
-
-        applyTint(brandImageView)
-        applyTint(checkImageView)
+        applyTint(viewBinding.brandIcon)
+        applyTint(viewBinding.checkIcon)
     }
 
     private fun applyTint(imageView: ImageView) {
@@ -75,11 +71,11 @@ internal class MaskedCardView @JvmOverloads constructor(
 
     private fun updateUi() {
         updateBrandIcon()
-        cardInformationTextView.text = cardDisplayFactory.createStyled(cardBrand, last4, isSelected)
+        viewBinding.details.text = cardDisplayFactory.createStyled(cardBrand, last4, isSelected)
     }
 
     private fun updateBrandIcon() {
-        brandImageView.setImageDrawable(
+        viewBinding.brandIcon.setImageDrawable(
             ContextCompat.getDrawable(
                 context,
                 when (cardBrand) {
@@ -97,7 +93,7 @@ internal class MaskedCardView @JvmOverloads constructor(
     }
 
     private fun updateCheckMark() {
-        checkImageView.visibility = if (isSelected) {
+        viewBinding.checkIcon.visibility = if (isSelected) {
             View.VISIBLE
         } else {
             View.INVISIBLE
