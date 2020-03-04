@@ -60,6 +60,24 @@ internal object PaymentMethodFixtures {
         )
     )
 
+    val AU_BECS_DEBIT_PAYMENT_METHOD = PaymentMethod(
+        id = "pm_1GJ4cUABjb",
+        created = 1583356750L,
+        liveMode = false,
+        type = PaymentMethod.Type.AuBecsDebit,
+        billingDetails = PaymentMethod.BillingDetails(
+            name = "Jenny Rosen",
+            email = "jrosen@example.com",
+            address = Address()
+        ),
+        auBecsDebit = PaymentMethod.AuBecsDebit(
+            bsbNumber = "000000",
+            fingerprint = "lm7qI5V7PUkWUM7E",
+            last4 = "3456"
+        ),
+        metadata = emptyMap()
+    )
+
     val SEPA_DEBIT_JSON = JSONObject(
         """
         {
@@ -248,6 +266,38 @@ internal object PaymentMethodFixtures {
                 "type": "fpx"
             }
             """.trimIndent()
+    )
+
+    val AU_BECS_DEBIT_JSON = JSONObject(
+        """
+        {
+            "id": "pm_1GJ4cUABjb",
+            "object": "payment_method",
+            "au_becs_debit": {
+                "bsb_number": "000000",
+                "fingerprint": "lm7qI5V7PUkWUM7E",
+                "last4": "3456"
+            },
+            "billing_details": {
+                "address": {
+                    "city": null,
+                    "country": null,
+                    "line1": null,
+                    "line2": null,
+                    "postal_code": null,
+                    "state": null
+                },
+                "email": "jrosen@example.com",
+                "name": "Jenny Rosen",
+                "phone": null
+            },
+            "created": 1583356750,
+            "customer": null,
+            "livemode": false,
+            "metadata": {},
+            "type": "au_becs_debit"
+        }
+        """.trimIndent()
     )
 
     val CARD_PAYMENT_METHODS = listOf(

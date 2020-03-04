@@ -24,7 +24,7 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
         when (type) {
             PaymentMethod.Type.Card ->
                 builder.setCard(
-                    json.optJSONObject(FIELD_CARD)?.let {
+                    json.optJSONObject(type.code)?.let {
                         CardJsonParser().parse(it)
                     }
                 )
@@ -32,20 +32,26 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                 builder.setCardPresent(PaymentMethod.CardPresent.EMPTY)
             PaymentMethod.Type.Ideal ->
                 builder.setIdeal(
-                    json.optJSONObject(FIELD_IDEAL)?.let {
+                    json.optJSONObject(type.code)?.let {
                         IdealJsonParser().parse(it)
                     }
                 )
             PaymentMethod.Type.Fpx ->
                 builder.setFpx(
-                    json.optJSONObject(FIELD_FPX)?.let {
+                    json.optJSONObject(type.code)?.let {
                         FpxJsonParser().parse(it)
                     }
                 )
             PaymentMethod.Type.SepaDebit ->
                 builder.setSepaDebit(
-                    json.optJSONObject(FIELD_SEPA_DEBIT)?.let {
+                    json.optJSONObject(type.code)?.let {
                         SepaDebitJsonParser().parse(it)
+                    }
+                )
+            PaymentMethod.Type.AuBecsDebit ->
+                builder.setAuBecsDebit(
+                    json.optJSONObject(type.code)?.let {
+                        AuBecsDebitJsonParser().parse(it)
                     }
                 )
         }
@@ -212,6 +218,22 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
         }
     }
 
+    internal class AuBecsDebitJsonParser : ModelJsonParser<PaymentMethod.AuBecsDebit> {
+        override fun parse(json: JSONObject): PaymentMethod.AuBecsDebit? {
+            return PaymentMethod.AuBecsDebit(
+                bsbNumber = StripeJsonUtils.optString(json, FIELD_BSB_NUMBER),
+                fingerprint = StripeJsonUtils.optString(json, FIELD_FINGERPRINT),
+                last4 = StripeJsonUtils.optString(json, FIELD_LAST4)
+            )
+        }
+
+        private companion object {
+            private const val FIELD_BSB_NUMBER = "bsb_number"
+            private const val FIELD_FINGERPRINT = "fingerprint"
+            private const val FIELD_LAST4 = "last4"
+        }
+    }
+
     private companion object {
         private const val FIELD_ID = "id"
         private const val FIELD_BILLING_DETAILS = "billing_details"
@@ -219,13 +241,6 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
         private const val FIELD_CUSTOMER = "customer"
         private const val FIELD_LIVEMODE = "livemode"
         private const val FIELD_METADATA = "metadata"
-
-        // types
         private const val FIELD_TYPE = "type"
-        private const val FIELD_CARD = "card"
-        private const val FIELD_CARD_PRESENT = "card_present"
-        private const val FIELD_FPX = "fpx"
-        private const val FIELD_IDEAL = "ideal"
-        private const val FIELD_SEPA_DEBIT = "sepa_debit"
     }
 }
