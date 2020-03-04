@@ -46,11 +46,11 @@ class CreateCardTokenActivityTest {
         )
 
         // fill out card details
-        onView(withId(R.id.et_card_number))
+        onView(withId(R.id.card_number_edit_text))
             .perform(typeText("4242424242424242"))
-        onView(withId(R.id.et_expiry_date))
+        onView(withId(R.id.expiry_date_edit_text))
             .perform(typeText("01/25"))
-        onView(withId(R.id.et_cvc))
+        onView(withId(R.id.cvc_edit_text))
             .perform(typeText("111"))
 
         // click create card button

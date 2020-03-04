@@ -3,7 +3,6 @@ package com.stripe.android.view
 import android.os.Build
 import android.text.TextPaint
 import android.view.ViewGroup
-import android.widget.ImageView
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.reset
@@ -15,7 +14,6 @@ import com.stripe.android.CardNumberFixtures.DINERS_CLUB_14_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_16_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
-import com.stripe.android.R
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -55,21 +53,18 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         activity.cardInputWidget
     }
     private val cardNumberEditText: CardNumberEditText by lazy {
-        activity.cardNumberEditText
+        cardInputWidget.cardNumberEditText
     }
     private val expiryEditText: StripeEditText by lazy {
-        cardInputWidget.findViewById<StripeEditText>(R.id.et_expiry_date)
+        cardInputWidget.expiryDateEditText
     }
     private val cvcEditText: CvcEditText by lazy {
-        cardInputWidget.findViewById<CvcEditText>(R.id.et_cvc)
+        cardInputWidget.cvcNumberEditText
     }
     private val postalCodeEditText: PostalCodeEditText by lazy {
-        cardInputWidget.findViewById<PostalCodeEditText>(R.id.et_postal_code)
+        cardInputWidget.postalCodeEditText
     }
     private val cardInputListener: CardInputListener = mock()
-    private val cardIcon: ImageView by lazy {
-        cardInputWidget.findViewById<ImageView>(R.id.iv_card_icon)
-    }
 
     @BeforeTest
     fun setup() {
@@ -93,14 +88,13 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
 
         cardNumberEditText.setText("")
 
-        val iconView = cardInputWidget.findViewById<ImageView>(R.id.iv_card_icon)
-
         // Set the width of the icon and its margin so that test calculations have
         // an expected value that is repeatable on all systems.
-        val params = iconView.layoutParams as ViewGroup.MarginLayoutParams
-        params.width = 48
-        params.rightMargin = 12
-        iconView.layoutParams = params
+        cardInputWidget.cardIconImageView.layoutParams =
+            (cardInputWidget.cardIconImageView.layoutParams as ViewGroup.MarginLayoutParams).also {
+                it.width = 48
+                it.rightMargin = 12
+            }
 
         resumeStartedActivity(activity)
     }
@@ -504,8 +498,8 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
 
         verify(cardInputListener).onCardComplete()
         verify(cardInputListener).onFocusChange(FOCUS_EXPIRY)
-        assertEquals(R.id.et_card_number, onGlobalFocusChangeListener.oldFocusId)
-        assertEquals(R.id.et_expiry_date, onGlobalFocusChangeListener.newFocusId)
+        assertEquals(cardNumberEditText.id, onGlobalFocusChangeListener.oldFocusId)
+        assertEquals(expiryEditText.id, onGlobalFocusChangeListener.newFocusId)
     }
 
     @Test
@@ -519,8 +513,8 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
 
         ViewTestUtils.sendDeleteKeyEvent(expiryEditText)
         verify(cardInputListener).onFocusChange(FOCUS_CARD)
-        assertEquals(R.id.et_expiry_date, onGlobalFocusChangeListener.oldFocusId)
-        assertEquals(R.id.et_card_number, onGlobalFocusChangeListener.newFocusId)
+        assertEquals(expiryEditText.id, onGlobalFocusChangeListener.oldFocusId)
+        assertEquals(cardNumberEditText.id, onGlobalFocusChangeListener.newFocusId)
 
         val subString = VISA_WITH_SPACES.substring(0, VISA_WITH_SPACES.length - 1)
         assertEquals(subString, cardNumberEditText.text.toString())
@@ -562,8 +556,8 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
 
         ViewTestUtils.sendDeleteKeyEvent(cvcEditText)
         verify(cardInputListener).onFocusChange(FOCUS_EXPIRY)
-        assertEquals(R.id.et_cvc, onGlobalFocusChangeListener.oldFocusId)
-        assertEquals(R.id.et_expiry_date, onGlobalFocusChangeListener.newFocusId)
+        assertEquals(cvcEditText.id, onGlobalFocusChangeListener.oldFocusId)
+        assertEquals(expiryEditText.id, onGlobalFocusChangeListener.newFocusId)
 
         val expectedResult = "12/7"
         assertEquals(expectedResult, expiryEditText.text.toString())
@@ -618,8 +612,8 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         cvcEditText.requestFocus()
 
         ViewTestUtils.sendDeleteKeyEvent(cvcEditText)
-        assertEquals(R.id.et_cvc, onGlobalFocusChangeListener.oldFocusId)
-        assertEquals(R.id.et_expiry_date, onGlobalFocusChangeListener.newFocusId)
+        assertEquals(cvcEditText.id, onGlobalFocusChangeListener.oldFocusId)
+        assertEquals(expiryEditText.id, onGlobalFocusChangeListener.newFocusId)
     }
 
     @Test
@@ -1139,8 +1133,8 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
         assertEquals("", cardNumberEditText.text.toString())
         assertEquals("", expiryEditText.text.toString())
         assertEquals("", cvcEditText.text.toString())
-        assertEquals(R.id.et_cvc, onGlobalFocusChangeListener.oldFocusId)
-        assertEquals(R.id.et_card_number, onGlobalFocusChangeListener.newFocusId)
+        assertEquals(cvcEditText.id, onGlobalFocusChangeListener.oldFocusId)
+        assertEquals(cardNumberEditText.id, onGlobalFocusChangeListener.newFocusId)
     }
 
     @Test

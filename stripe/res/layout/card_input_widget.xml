@@ -4,7 +4,7 @@
        xmlns:tools="http://schemas.android.com/tools">
 
     <ImageView
-        android:id="@+id/iv_card_icon"
+        android:id="@+id/card_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/stripe_card_icon_padding"
@@ -14,7 +14,7 @@
         android:contentDescription="@null" />
 
     <FrameLayout
-        android:id="@+id/frame_container"
+        android:id="@+id/container"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -23,24 +23,24 @@
 
         <!-- The accessibilityTraversalBefore attribute is ignored in sdk < 22 -->
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tl_card_number"
-            android:labelFor="@id/et_card_number"
+            android:id="@+id/card_number_text_input_layout"
+            android:labelFor="@id/card_number_edit_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
             android:visibility="visible"
             android:background="@android:color/transparent"
             tools:ignore="UnusedAttribute"
-            android:accessibilityTraversalBefore="@+id/tl_expiry_date"
-            android:nextFocusRight="@+id/tl_expiry_date"
-            android:nextFocusForward="@+id/tl_expiry_date"
-            android:nextFocusDown="@+id/tl_expiry_date"
+            android:accessibilityTraversalBefore="@+id/text_input_expiry_date"
+            android:nextFocusRight="@+id/text_input_expiry_date"
+            android:nextFocusForward="@+id/text_input_expiry_date"
+            android:nextFocusDown="@+id/text_input_expiry_date"
             android:contentDescription="@string/acc_label_card_number"
             android:accessibilityLiveRegion="polite"
             app:hintEnabled="false"
             style="@style/Stripe.CardInputWidget.TextInputLayout">
             <com.stripe.android.view.CardNumberEditText
-                android:id="@+id/et_card_number"
+                android:id="@+id/card_number_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
@@ -53,8 +53,8 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tl_expiry_date"
-            android:labelFor="@id/et_expiry_date"
+            android:id="@+id/expiry_date_text_input_layout"
+            android:labelFor="@id/expiry_date_edit_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/stripe_card_expiry_initial_margin"
@@ -62,19 +62,19 @@
             android:visibility="visible"
             android:background="@android:color/transparent"
             tools:ignore="UnusedAttribute"
-            android:accessibilityTraversalBefore="@+id/tl_cvc"
-            android:accessibilityTraversalAfter="@+id/tl_card_number"
-            android:nextFocusRight="@+id/tl_cvc"
-            android:nextFocusForward="@+id/tl_cvc"
-            android:nextFocusDown="@+id/tl_cvc"
-            android:nextFocusLeft="@id/tl_card_number"
-            android:nextFocusUp="@id/tl_card_number"
+            android:accessibilityTraversalBefore="@+id/text_input_cvc"
+            android:accessibilityTraversalAfter="@+id/text_input_card_number"
+            android:nextFocusRight="@+id/text_input_cvc"
+            android:nextFocusForward="@+id/text_input_cvc"
+            android:nextFocusDown="@+id/text_input_cvc"
+            android:nextFocusLeft="@id/text_input_card_number"
+            android:nextFocusUp="@id/text_input_card_number"
             android:contentDescription="@string/acc_label_expiry_date"
             android:accessibilityLiveRegion="polite"
             app:hintEnabled="false"
             style="@style/Stripe.CardInputWidget.TextInputLayout">
             <com.stripe.android.view.ExpiryDateEditText
-                android:id="@+id/et_expiry_date"
+                android:id="@+id/expiry_date_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
@@ -87,23 +87,23 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tl_cvc"
-            android:labelFor="@id/et_cvc"
+            android:id="@+id/cvc_text_input_layout"
+            android:labelFor="@id/cvc_edit_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/stripe_card_cvc_initial_margin"
             android:layout_gravity="start"
             android:background="@android:color/transparent"
             tools:ignore="UnusedAttribute"
-            android:accessibilityTraversalAfter="@+id/tl_expiry_date"
-            android:nextFocusLeft="@id/tl_expiry_date"
-            android:nextFocusUp="@id/tl_expiry_date"
+            android:accessibilityTraversalAfter="@+id/text_input_expiry_date"
+            android:nextFocusLeft="@id/text_input_expiry_date"
+            android:nextFocusUp="@id/text_input_expiry_date"
             android:contentDescription="@string/cvc_number_hint"
             android:accessibilityLiveRegion="polite"
             app:hintEnabled="false"
             style="@style/Stripe.CardInputWidget.TextInputLayout">
             <com.stripe.android.view.CvcEditText
-                android:id="@+id/et_cvc"
+                android:id="@+id/cvc_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
@@ -113,8 +113,8 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tl_postal_code"
-            android:labelFor="@id/et_postal_code"
+            android:id="@+id/postal_code_text_input_layout"
+            android:labelFor="@id/postal_code_edit_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
@@ -122,15 +122,15 @@
             android:layout_gravity="start"
             android:background="@android:color/transparent"
             tools:ignore="UnusedAttribute"
-            android:accessibilityTraversalAfter="@+id/tl_cvc"
-            android:nextFocusLeft="@id/tl_cvc"
-            android:nextFocusUp="@id/tl_cvc"
+            android:accessibilityTraversalAfter="@+id/text_input_cvc"
+            android:nextFocusLeft="@id/text_input_cvc"
+            android:nextFocusUp="@id/text_input_cvc"
             android:contentDescription="@string/address_label_postal_code"
             android:accessibilityLiveRegion="polite"
             app:hintEnabled="false"
             style="@style/Stripe.CardInputWidget.TextInputLayout">
             <com.stripe.android.view.PostalCodeEditText
-                android:id="@+id/et_postal_code"
+                android:id="@+id/postal_code_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
