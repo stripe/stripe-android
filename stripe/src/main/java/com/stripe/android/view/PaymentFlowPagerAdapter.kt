@@ -8,7 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.PagerAdapter
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSessionConfig
-import com.stripe.android.R
+import com.stripe.android.databinding.ShippingInfoPageBinding
+import com.stripe.android.databinding.ShippingMethodPageBinding
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
 
@@ -22,10 +23,10 @@ internal class PaymentFlowPagerAdapter(
     private val pages: List<PaymentFlowPage>
         get() {
             return listOfNotNull(
-                PaymentFlowPage.SHIPPING_INFO.takeIf {
+                PaymentFlowPage.ShippingInfo.takeIf {
                     paymentSessionConfig.isShippingInfoRequired
                 },
-                PaymentFlowPage.SHIPPING_METHOD.takeIf {
+                PaymentFlowPage.ShippingMethod.takeIf {
                     paymentSessionConfig.isShippingMethodRequired &&
                         (!paymentSessionConfig.isShippingInfoRequired || isShippingInfoSubmitted)
                 }
@@ -57,14 +58,12 @@ internal class PaymentFlowPagerAdapter(
         }
 
     override fun instantiateItem(collection: ViewGroup, position: Int): Any {
-        val paymentFlowPage = pages[position]
-        val layout = createItemView(paymentFlowPage, collection)
-        val viewHolder = when (paymentFlowPage) {
-            PaymentFlowPage.SHIPPING_INFO -> {
-                PaymentFlowViewHolder.ShippingInformationViewHolder(layout)
+        val viewHolder = when (pages[position]) {
+            PaymentFlowPage.ShippingInfo -> {
+                PaymentFlowViewHolder.ShippingInformationViewHolder(collection)
             }
-            PaymentFlowPage.SHIPPING_METHOD -> {
-                PaymentFlowViewHolder.ShippingMethodViewHolder(layout)
+            PaymentFlowPage.ShippingMethod -> {
+                PaymentFlowViewHolder.ShippingMethodViewHolder(collection)
             }
         }
         when (viewHolder) {
@@ -81,16 +80,8 @@ internal class PaymentFlowPagerAdapter(
                 viewHolder.bind(shippingMethods, selectedShippingMethod, onShippingMethodSelectedCallback)
             }
         }
-        collection.addView(layout)
-        return layout
-    }
-
-    private fun createItemView(
-        paymentFlowPage: PaymentFlowPage,
-        collection: ViewGroup
-    ): View {
-        return LayoutInflater.from(context)
-            .inflate(paymentFlowPage.layoutResId, collection, false)
+        collection.addView(viewHolder.itemView)
+        return viewHolder.itemView
     }
 
     override fun destroyItem(collection: ViewGroup, position: Int, view: Any) {
@@ -114,9 +105,20 @@ internal class PaymentFlowPagerAdapter(
     }
 
     internal sealed class PaymentFlowViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        class ShippingInformationViewHolder(itemView: View) : PaymentFlowViewHolder(itemView) {
-            private val shippingInfoWidget: ShippingInfoWidget =
-                itemView.findViewById(R.id.shipping_info_widget)
+        class ShippingInformationViewHolder(
+            viewBinding: ShippingInfoPageBinding
+        ) : PaymentFlowViewHolder(viewBinding.root) {
+            constructor(
+                root: ViewGroup
+            ) : this(
+                ShippingInfoPageBinding.inflate(
+                    LayoutInflater.from(root.context),
+                    root,
+                    false
+                )
+            )
+
+            private val shippingInfoWidget = viewBinding.shippingInfoWidget
 
             fun bind(
                 paymentSessionConfig: PaymentSessionConfig,
@@ -134,9 +136,21 @@ internal class PaymentFlowPagerAdapter(
             }
         }
 
-        class ShippingMethodViewHolder(itemView: View) : PaymentFlowViewHolder(itemView) {
-            private val shippingMethodWidget: SelectShippingMethodWidget =
-                itemView.findViewById(R.id.select_shipping_method_widget)
+        class ShippingMethodViewHolder(
+            viewBinding: ShippingMethodPageBinding
+        ) : PaymentFlowViewHolder(viewBinding.root) {
+            constructor(
+                root: ViewGroup
+            ) : this(
+                ShippingMethodPageBinding.inflate(
+                    LayoutInflater.from(root.context),
+                    root,
+                    false
+                )
+            )
+
+            private val shippingMethodWidget =
+                viewBinding.selectShippingMethodWidget
 
             fun bind(
                 shippingMethods: List<ShippingMethod>,
