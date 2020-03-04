@@ -7,6 +7,7 @@ import android.os.Build
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnFocusChangeListener
 import android.view.inputmethod.EditorInfo
@@ -22,6 +23,7 @@ import androidx.core.graphics.drawable.DrawableCompat
 import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.CardUtils
 import com.stripe.android.R
+import com.stripe.android.databinding.CardMultilineWidgetBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
@@ -44,14 +46,18 @@ class CardMultilineWidget @JvmOverloads constructor(
     defStyleAttr: Int = 0,
     private var shouldShowPostalCode: Boolean = CardWidget.DEFAULT_POSTAL_CODE_ENABLED
 ) : LinearLayout(context, attrs, defStyleAttr), CardWidget {
-    private val cardNumberEditText: CardNumberEditText
-    private val expiryDateEditText: ExpiryDateEditText
-    private val cvcEditText: CvcEditText
-    private val postalCodeEditText: PostalCodeEditText
-    private val cardNumberTextInputLayout: TextInputLayout
-    private val expiryTextInputLayout: TextInputLayout
-    private val cvcTextInputLayout: TextInputLayout
-    private val postalInputLayout: TextInputLayout
+    private val viewBinding = CardMultilineWidgetBinding.inflate(
+        LayoutInflater.from(context),
+        this
+    )
+    private val cardNumberEditText = viewBinding.etCardNumber
+    private val expiryDateEditText = viewBinding.etExpiry
+    private val cvcEditText = viewBinding.etCvc
+    private val postalCodeEditText = viewBinding.etPostalCode
+    private val cardNumberTextInputLayout = viewBinding.tlCardNumber
+    private val expiryTextInputLayout = viewBinding.tlExpiry
+    private val cvcTextInputLayout = viewBinding.tlCvc
+    private val postalInputLayout = viewBinding.tlPostalCode
 
     private var cardInputListener: CardInputListener? = null
     private var cardValidCallback: CardValidCallback? = null
@@ -233,12 +239,6 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     init {
         orientation = VERTICAL
-        View.inflate(getContext(), R.layout.card_multiline_widget, this)
-
-        cardNumberEditText = findViewById(R.id.et_card_number)
-        expiryDateEditText = findViewById(R.id.et_expiry)
-        cvcEditText = findViewById(R.id.et_cvc)
-        postalCodeEditText = findViewById(R.id.et_postal_code)
 
         tintColorInt = cardNumberEditText.hintTextColors.defaultColor
 
@@ -250,12 +250,6 @@ class CardMultilineWidget @JvmOverloads constructor(
 
         // This sets the value of shouldShowPostalCode
         attrs?.let { checkAttributeSet(it) }
-
-        cardNumberTextInputLayout = findViewById(R.id.tl_card_number)
-        expiryTextInputLayout = findViewById(R.id.tl_expiry)
-        // We dynamically set the hint of the CVC field, so we need to keep a reference.
-        cvcTextInputLayout = findViewById(R.id.tl_cvc)
-        postalInputLayout = findViewById(R.id.tl_postal_code)
 
         // configure postal code
         postalCodeEditText.configureForGlobal()
