@@ -3,10 +3,11 @@ package com.stripe.android.view
 import android.content.Context
 import android.util.AttributeSet
 import android.view.KeyEvent
+import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
-import com.stripe.android.R
+import com.stripe.android.databinding.AddPaymentMethodCardViewBinding
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 
@@ -60,36 +61,40 @@ internal class AddPaymentMethodCardView @JvmOverloads internal constructor(
         }
 
     init {
-        View.inflate(getContext(), R.layout.add_payment_method_card_layout, this)
-        cardMultilineWidget = findViewById(R.id.card_multiline_widget)
+        val viewBinding = AddPaymentMethodCardViewBinding.inflate(
+            LayoutInflater.from(context),
+            this,
+            true
+        )
+        cardMultilineWidget = viewBinding.cardMultilineWidget
         cardMultilineWidget.setShouldShowPostalCode(
             billingAddressFields == BillingAddressFields.PostalCode
         )
 
-        billingAddressWidget = findViewById(R.id.billing_address_widget)
+        billingAddressWidget = viewBinding.billingAddressWidget
         if (billingAddressFields == BillingAddressFields.Full) {
             billingAddressWidget.visibility = View.VISIBLE
         }
 
-        initEnterListeners()
+        (context as? AddPaymentMethodActivity?)?.let {
+            initEnterListeners(it)
+        }
     }
 
-    private fun initEnterListeners() {
-        val activity = context as AddPaymentMethodActivity
-
+    private fun initEnterListeners(activity: AddPaymentMethodActivity) {
         val listener = OnEditorActionListenerImpl(
             activity,
             this,
             KeyboardController(activity)
         )
 
-        cardMultilineWidget.findViewById<TextView>(R.id.et_card_number)
+        cardMultilineWidget.cardNumberEditText
             .setOnEditorActionListener(listener)
-        cardMultilineWidget.findViewById<TextView>(R.id.et_expiry)
+        cardMultilineWidget.expiryDateEditText
             .setOnEditorActionListener(listener)
-        cardMultilineWidget.findViewById<TextView>(R.id.et_cvc)
+        cardMultilineWidget.cvcEditText
             .setOnEditorActionListener(listener)
-        cardMultilineWidget.findViewById<TextView>(R.id.et_postal_code)
+        cardMultilineWidget.postalCodeEditText
             .setOnEditorActionListener(listener)
     }
 
