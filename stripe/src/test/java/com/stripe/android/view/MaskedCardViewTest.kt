@@ -4,7 +4,6 @@ import android.content.Context
 import android.view.View
 import android.widget.ImageView
 import androidx.test.core.app.ApplicationProvider
-import com.stripe.android.R
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import java.util.Calendar
@@ -23,7 +22,7 @@ import org.robolectric.RobolectricTestRunner
 class MaskedCardViewTest {
 
     private val maskedCardView = MaskedCardView(ApplicationProvider.getApplicationContext<Context>())
-    private val selectedImageView: ImageView = maskedCardView.findViewById(R.id.check_icon)
+    private val selectedImageView: ImageView = maskedCardView.viewBinding.checkIcon
 
     @BeforeTest
     fun setup() {
