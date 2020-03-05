@@ -52,6 +52,10 @@ internal class PaymentSessionViewModel(
         paymentSessionData = paymentSessionData.copy(cartTotal = cartTotal)
     }
 
+    fun clearPaymentMethod() {
+        paymentSessionData = paymentSessionData.copy(paymentMethod = null)
+    }
+
     @JvmSynthetic
     fun onCompleted() {
         customerSession.resetUsageTokens()

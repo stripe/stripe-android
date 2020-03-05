@@ -265,6 +265,15 @@ class PaymentSession @VisibleForTesting internal constructor(
         )
     }
 
+    /**
+     * Clear the payment method associated with this [PaymentSession] in [PaymentSessionData].
+     *
+     * Will trigger a call to [PaymentSessionListener.onPaymentSessionDataChanged].
+     */
+    fun clearPaymentMethod() {
+        viewModel.clearPaymentMethod()
+    }
+
     private fun fetchCustomer(isInitialFetch: Boolean = false) {
         viewModel.fetchCustomer(isInitialFetch).observe(lifecycleOwner, Observer {
             if (it is PaymentSessionViewModel.FetchCustomerResult.Error) {
