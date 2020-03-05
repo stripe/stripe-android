@@ -51,7 +51,9 @@ class PayWithGoogleActivity : AppCompatActivity() {
         setContentView(viewBinding.root)
 
         viewBinding.googlePayButton.isEnabled = false
-        viewBinding.googlePayButton.setOnClickListener { payWithGoogle() }
+        viewBinding.googlePayButton.setOnClickListener {
+            payWithGoogle()
+        }
 
         isReadyToPay()
     }
