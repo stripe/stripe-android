@@ -50,10 +50,11 @@ class CardMultilineWidget @JvmOverloads constructor(
         LayoutInflater.from(context),
         this
     )
-    private val cardNumberEditText = viewBinding.etCardNumber
-    private val expiryDateEditText = viewBinding.etExpiry
-    private val cvcEditText = viewBinding.etCvc
-    private val postalCodeEditText = viewBinding.etPostalCode
+    internal val cardNumberEditText = viewBinding.etCardNumber
+    internal val expiryDateEditText = viewBinding.etExpiry
+    internal val cvcEditText = viewBinding.etCvc
+    internal val postalCodeEditText = viewBinding.etPostalCode
+
     private val cardNumberTextInputLayout = viewBinding.tlCardNumber
     private val expiryTextInputLayout = viewBinding.tlExpiry
     private val cvcTextInputLayout = viewBinding.tlCvc
