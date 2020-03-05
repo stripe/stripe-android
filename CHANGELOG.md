@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 14.1.1 - unreleased
+* [#2257](https://github.com/stripe/stripe-android/pull/2257) Disable Kotlin Synthetics and migrate to [view binding](https://developer.android.com/topic/libraries/view-binding)
+* [#2260](https://github.com/stripe/stripe-android/pull/2260) Update Kotlin Gradle Plugin to `1.3.70`
+
 ## 14.1.0 - 2020-03-02
 * [#2207](https://github.com/stripe/stripe-android/pull/2207) Add `CardInputWidget#setPostalCodeTextWatcher`
 * [#2211](https://github.com/stripe/stripe-android/pull/2211) Add support for 16-digit Diners Club card numbers
