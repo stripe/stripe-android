@@ -10,27 +10,27 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-internal class BecsDebitElementTest : BaseViewTest<BecsDebitElementTestActivity>(
-    BecsDebitElementTestActivity::class.java
+internal class BecsDebitWidgetTest : BaseViewTest<BecsDebitWidgetTestActivity>(
+    BecsDebitWidgetTestActivity::class.java
 ) {
-    private val activity: BecsDebitElementTestActivity by lazy {
+    private val activity: BecsDebitWidgetTestActivity by lazy {
         createStartedActivity()
     }
-    private val becsDebitElement: BecsDebitElement by lazy {
-        activity.becsDebitElement
+    private val becsDebitWidget: BecsDebitWidget by lazy {
+        activity.becsDebitWidget
     }
 
     private val nameEditText: StripeEditText by lazy {
-        becsDebitElement.viewBinding.nameEditText
+        becsDebitWidget.viewBinding.nameEditText
     }
     private val emailEditText: StripeEditText by lazy {
-        becsDebitElement.viewBinding.emailEditText
+        becsDebitWidget.viewBinding.emailEditText
     }
     private val bsbEditText: BecsDebitBsbEditText by lazy {
-        becsDebitElement.viewBinding.bsbEditText
+        becsDebitWidget.viewBinding.bsbEditText
     }
     private val accountNumberEditText: StripeEditText by lazy {
-        becsDebitElement.viewBinding.accountNumberEditText
+        becsDebitWidget.viewBinding.accountNumberEditText
     }
 
     @BeforeTest
@@ -46,22 +46,22 @@ internal class BecsDebitElementTest : BaseViewTest<BecsDebitElementTestActivity>
 
     @Test
     fun testBsbHelperText() {
-        assertThat(becsDebitElement.viewBinding.bsbTextInputLayout.isErrorEnabled)
+        assertThat(becsDebitWidget.viewBinding.bsbTextInputLayout.isErrorEnabled)
             .isFalse()
         bsbEditText.setText("21")
-        assertThat(becsDebitElement.viewBinding.bsbTextInputLayout.isErrorEnabled)
+        assertThat(becsDebitWidget.viewBinding.bsbTextInputLayout.isErrorEnabled)
             .isFalse()
-        assertThat(becsDebitElement.viewBinding.bsbTextInputLayout.isHelperTextEnabled)
+        assertThat(becsDebitWidget.viewBinding.bsbTextInputLayout.isHelperTextEnabled)
             .isTrue()
     }
 
     @Test
     fun params_whenBsbInvalid_enablesError() {
-        assertThat(becsDebitElement.viewBinding.bsbTextInputLayout.isErrorEnabled)
+        assertThat(becsDebitWidget.viewBinding.bsbTextInputLayout.isErrorEnabled)
             .isFalse()
         bsbEditText.setText("123")
-        becsDebitElement.params
-        assertThat(becsDebitElement.viewBinding.bsbTextInputLayout.isErrorEnabled)
+        becsDebitWidget.params
+        assertThat(becsDebitWidget.viewBinding.bsbTextInputLayout.isErrorEnabled)
             .isTrue()
         assertThat(bsbEditText.errorMessage)
             .isEqualTo("The BSB you entered is incomplete.")
@@ -69,7 +69,7 @@ internal class BecsDebitElementTest : BaseViewTest<BecsDebitElementTestActivity>
 
     @Test
     fun params_withEmptyFields_shouldReturnNull() {
-        assertThat(becsDebitElement.params)
+        assertThat(becsDebitWidget.params)
             .isNull()
     }
 
@@ -80,7 +80,7 @@ internal class BecsDebitElementTest : BaseViewTest<BecsDebitElementTestActivity>
         bsbEditText.setText(VALID_BSB_NUMBER)
         accountNumberEditText.setText(VALID_ACCOUNT_NUMBER)
 
-        assertThat(becsDebitElement.params)
+        assertThat(becsDebitWidget.params)
             .isEqualTo(
                 PaymentMethodCreateParams.create(
                     PaymentMethodCreateParams.AuBecsDebit(

@@ -8,21 +8,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import com.stripe.android.R
-import com.stripe.android.databinding.BecsDebitElementBinding
+import com.stripe.android.databinding.BecsDebitWidgetBinding
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 
 /**
  * A form for accepting a customer's BECS account information.
  */
-class BecsDebitElement @JvmOverloads constructor(
+class BecsDebitWidget @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
-    internal val viewBinding: BecsDebitElementBinding by lazy {
-        BecsDebitElementBinding.inflate(
+    internal val viewBinding: BecsDebitWidgetBinding by lazy {
+        BecsDebitWidgetBinding.inflate(
             LayoutInflater.from(context),
             this
         )
@@ -60,14 +60,14 @@ class BecsDebitElement @JvmOverloads constructor(
         )
 
         viewBinding.nameEditText.errorMessage = resources.getString(
-            R.string.becs_element_name_required
+            R.string.becs_widget_name_required
         )
         viewBinding.nameEditText.setErrorMessageListener(
             ErrorListener(viewBinding.nameTextInputLayout)
         )
 
         viewBinding.emailEditText.errorMessage = resources.getString(
-            R.string.becs_element_email_required
+            R.string.becs_widget_email_required
         )
         viewBinding.emailEditText.setErrorMessageListener(
             ErrorListener(viewBinding.emailTextInputLayout)
@@ -78,7 +78,7 @@ class BecsDebitElement @JvmOverloads constructor(
         )
 
         viewBinding.accountNumberEditText.errorMessage = resources.getString(
-            R.string.becs_element_account_number_required
+            R.string.becs_widget_account_number_required
         )
         viewBinding.accountNumberEditText.setErrorMessageListener(
             ErrorListener(viewBinding.accountNumberTextInputLayout)

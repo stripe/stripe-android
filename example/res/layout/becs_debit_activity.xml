@@ -10,7 +10,7 @@
         android:orientation="vertical"
         android:padding="12dp">
 
-        <com.stripe.android.view.BecsDebitElement
+        <com.stripe.android.view.BecsDebitWidget
             android:id="@+id/element"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />

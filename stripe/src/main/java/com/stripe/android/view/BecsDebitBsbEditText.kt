@@ -22,13 +22,13 @@ internal class BecsDebitBsbEditText @JvmOverloads constructor(
         get() {
             errorMessage = when {
                 fieldText.length < MIN_VALIDATION_THRESHOLD -> {
-                    resources.getString(R.string.becs_element_bsb_incomplete)
+                    resources.getString(R.string.becs_widget_bsb_incomplete)
                 }
                 bank == null -> {
-                    resources.getString(R.string.becs_element_bsb_invalid)
+                    resources.getString(R.string.becs_widget_bsb_invalid)
                 }
                 fieldText.length < MAX_LENGTH -> {
-                    resources.getString(R.string.becs_element_bsb_incomplete)
+                    resources.getString(R.string.becs_widget_bsb_incomplete)
                 }
                 else -> {
                     null
@@ -90,7 +90,7 @@ internal class BecsDebitBsbEditText @JvmOverloads constructor(
 
                 val isInvalid = bank == null && fieldText.length >= MIN_VALIDATION_THRESHOLD
                 errorMessage = if (isInvalid) {
-                    resources.getString(R.string.becs_element_bsb_invalid)
+                    resources.getString(R.string.becs_widget_bsb_invalid)
                 } else {
                     null
                 }

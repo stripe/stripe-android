@@ -5,17 +5,17 @@ import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.R
 
-internal class BecsDebitElementTestActivity : AppCompatActivity() {
+internal class BecsDebitWidgetTestActivity : AppCompatActivity() {
 
-    val becsDebitElement: BecsDebitElement by lazy {
-        BecsDebitElement(this)
+    val becsDebitWidget: BecsDebitWidget by lazy {
+        BecsDebitWidget(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setTheme(R.style.StripeDefaultTheme)
         setContentView(FrameLayout(this).also {
-            it.addView(becsDebitElement)
+            it.addView(becsDebitWidget)
         })
     }
 }
