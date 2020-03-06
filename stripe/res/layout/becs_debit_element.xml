@@ -67,8 +67,9 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:weightSum="2"
-            android:baselineAligned="false">
-            <com.google.android.material.textfield.TextInputLayout
+            android:baselineAligned="false"
+            android:layout_marginTop="24dp">
+            <com.stripe.android.view.IconTextInputLayout
                 android:id="@+id/bsb_text_input_layout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -91,7 +92,7 @@
                     android:imeOptions="actionNext"
                     android:drawableStart="@drawable/stripe_ic_bank"
                     style="@style/Stripe.BecsElement.EditText" />
-            </com.google.android.material.textfield.TextInputLayout>
+            </com.stripe.android.view.IconTextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/account_number_text_input_layout"

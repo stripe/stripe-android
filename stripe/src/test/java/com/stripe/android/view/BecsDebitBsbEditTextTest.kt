@@ -24,7 +24,7 @@ class BecsDebitBsbEditTextTest {
     }
 
     @Test
-    fun bsb_isFormatted() {
+    fun fieldText_isFormatted() {
         bsbEditText.append("212")
         assertThat(bsbEditText.fieldText)
             .isEqualTo("212-")
@@ -32,5 +32,34 @@ class BecsDebitBsbEditTextTest {
         bsbEditText.append("1")
         assertThat(bsbEditText.fieldText)
             .isEqualTo("212-1")
+    }
+
+    @Test
+    fun bsb_isNotFormatted() {
+        bsbEditText.setText("212121")
+        assertThat(bsbEditText.bsb)
+            .isEqualTo("212121")
+    }
+
+    @Test
+    fun bsb_whenError_updatesErrorrMessage() {
+        bsbEditText.bsb
+        assertThat(bsbEditText.errorMessage)
+            .isEqualTo("The BSB you entered is incomplete.")
+
+        bsbEditText.append("212")
+        bsbEditText.bsb
+        assertThat(bsbEditText.errorMessage)
+            .isEqualTo("The BSB you entered is incomplete.")
+
+        bsbEditText.setText("99")
+        bsbEditText.bsb
+        assertThat(bsbEditText.errorMessage)
+            .isEqualTo("The BSB you entered is invalid.")
+
+        bsbEditText.setText("212121")
+        bsbEditText.bsb
+        assertThat(bsbEditText.errorMessage)
+            .isNull()
     }
 }

@@ -2,6 +2,7 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.os.Build
+import android.text.Editable
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
@@ -14,7 +15,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 /**
  * A form for accepting a customer's BECS account information.
  */
-internal class BecsDebitElement @JvmOverloads constructor(
+class BecsDebitElement @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
@@ -43,15 +44,6 @@ internal class BecsDebitElement @JvmOverloads constructor(
             }
         }
 
-        viewBinding.bsbEditText.onInputErrorCallback = { isError ->
-            if (isError) {
-                viewBinding.bsbTextInputLayout.error = resources.getString(R.string.becs_element_bsb_error)
-            } else {
-                viewBinding.bsbTextInputLayout.error = null
-                viewBinding.bsbTextInputLayout.isErrorEnabled = false
-            }
-        }
-
         viewBinding.bsbEditText.onCompletedCallback = {
             viewBinding.accountNumberTextInputLayout.requestFocus()
         }
@@ -66,6 +58,39 @@ internal class BecsDebitElement @JvmOverloads constructor(
         viewBinding.accountNumberEditText.setDeleteEmptyListener(
             BackUpFieldDeleteListener(viewBinding.bsbEditText)
         )
+
+        viewBinding.nameEditText.errorMessage = resources.getString(
+            R.string.becs_element_name_required
+        )
+        viewBinding.nameEditText.setErrorMessageListener(
+            ErrorListener(viewBinding.nameTextInputLayout)
+        )
+
+        viewBinding.emailEditText.errorMessage = resources.getString(
+            R.string.becs_element_email_required
+        )
+        viewBinding.emailEditText.setErrorMessageListener(
+            ErrorListener(viewBinding.emailTextInputLayout)
+        )
+
+        viewBinding.bsbEditText.setErrorMessageListener(
+            ErrorListener(viewBinding.bsbTextInputLayout)
+        )
+
+        viewBinding.accountNumberEditText.errorMessage = resources.getString(
+            R.string.becs_element_account_number_required
+        )
+        viewBinding.accountNumberEditText.setErrorMessageListener(
+            ErrorListener(viewBinding.accountNumberTextInputLayout)
+        )
+
+        setOf(viewBinding.nameEditText, viewBinding.emailEditText).forEach { field ->
+            field.addTextChangedListener(object : StripeTextWatcher() {
+                override fun afterTextChanged(s: Editable?) {
+                    field.shouldShowError = false
+                }
+            })
+        }
     }
 
     /**
@@ -76,10 +101,15 @@ internal class BecsDebitElement @JvmOverloads constructor(
         get() {
             val name = viewBinding.nameEditText.fieldText
             val email = viewBinding.emailEditText.fieldText
-            val bsbNumber = viewBinding.bsbEditText.fieldText
+            val bsbNumber = viewBinding.bsbEditText.bsb
             val accountNumber = viewBinding.accountNumberEditText.fieldText
 
-            if (name.isBlank() || email.isBlank() || bsbNumber.isBlank() ||
+            viewBinding.nameEditText.shouldShowError = name.isBlank()
+            viewBinding.emailEditText.shouldShowError = email.isBlank()
+            viewBinding.bsbEditText.shouldShowError = bsbNumber.isNullOrBlank()
+            viewBinding.accountNumberEditText.shouldShowError = accountNumber.isBlank()
+
+            if (name.isBlank() || email.isBlank() || bsbNumber.isNullOrBlank() ||
                 accountNumber.isBlank()) {
                 return null
             }

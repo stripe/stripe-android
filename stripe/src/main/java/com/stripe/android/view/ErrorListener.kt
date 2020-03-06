@@ -8,6 +8,7 @@ internal class ErrorListener(
 
     override fun displayErrorMessage(message: String?) {
         if (message == null) {
+            textInputLayout.error = null
             textInputLayout.isErrorEnabled = false
         } else {
             textInputLayout.error = message

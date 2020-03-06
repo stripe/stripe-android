@@ -16,8 +16,37 @@ internal class BecsDebitBsbEditText @JvmOverloads constructor(
     private val banks = BecsDebitBanks(context)
 
     var onBankChangedCallback: (BecsDebitBanks.Bank?) -> Unit = {}
-    var onInputErrorCallback: (Boolean) -> Unit = {}
     var onCompletedCallback: () -> Unit = {}
+
+    internal val bsb: String?
+        get() {
+            errorMessage = when {
+                fieldText.length < MIN_VALIDATION_THRESHOLD -> {
+                    resources.getString(R.string.becs_element_bsb_incomplete)
+                }
+                bank == null -> {
+                    resources.getString(R.string.becs_element_bsb_invalid)
+                }
+                fieldText.length < MAX_LENGTH -> {
+                    resources.getString(R.string.becs_element_bsb_incomplete)
+                }
+                else -> {
+                    null
+                }
+            }
+
+            return fieldText.filter { it.isDigit() }.takeIf { isComplete }
+        }
+
+    private val isComplete: Boolean
+        get() {
+            return bank != null && fieldText.length == MAX_LENGTH
+        }
+
+    private val bank: BecsDebitBanks.Bank?
+        get() {
+            return banks.byPrefix(fieldText)
+        }
 
     init {
         filters = arrayOf(InputFilter.LengthFilter(MAX_LENGTH))
@@ -44,8 +73,6 @@ internal class BecsDebitBsbEditText @JvmOverloads constructor(
             }
 
             override fun afterTextChanged(s: Editable?) {
-                super.afterTextChanged(s)
-
                 if (ignoreChanges) {
                     return
                 }
@@ -61,13 +88,18 @@ internal class BecsDebitBsbEditText @JvmOverloads constructor(
                 newCursorPosition = null
                 ignoreChanges = false
 
-                val bank = banks.byPrefix(fieldText)
-                val isError = bank == null && fieldText.length >= MIN_VALIDATION_THRESHOLD
-                onBankChangedCallback(bank)
-                onInputErrorCallback(isError)
-                updateIcon(isError)
+                val isInvalid = bank == null && fieldText.length >= MIN_VALIDATION_THRESHOLD
+                errorMessage = if (isInvalid) {
+                    resources.getString(R.string.becs_element_bsb_invalid)
+                } else {
+                    null
+                }
+                shouldShowError = errorMessage != null
 
-                if (bank != null && fieldText.length == MAX_LENGTH) {
+                onBankChangedCallback(bank)
+                updateIcon(isInvalid)
+
+                if (isComplete) {
                     onCompletedCallback()
                 }
             }
