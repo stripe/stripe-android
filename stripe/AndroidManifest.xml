@@ -25,6 +25,10 @@
         <activity
             android:name=".view.PaymentRelayActivity"
             android:theme="@style/StripeDefaultTheme" />
+
+        <activity
+            android:name=".view.Stripe3ds2CompletionActivity"
+            android:theme="@style/StripeDefaultTheme" />
     </application>
 
 </manifest>

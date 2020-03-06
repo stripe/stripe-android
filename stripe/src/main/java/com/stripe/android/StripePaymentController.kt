@@ -17,6 +17,7 @@ import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.Stripe3ds2Fingerprint
 import com.stripe.android.model.Stripe3dsRedirect
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl
 import com.stripe.android.stripe3ds2.transaction.CompletionEvent
@@ -28,6 +29,7 @@ import com.stripe.android.stripe3ds2.transaction.StripeChallengeStatusReceiver
 import com.stripe.android.stripe3ds2.transaction.Transaction
 import com.stripe.android.stripe3ds2.views.ChallengeProgressDialogActivity
 import com.stripe.android.view.AuthActivityStarter
+import com.stripe.android.view.Stripe3ds2CompletionActivity
 import java.security.cert.CertificateException
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
@@ -53,8 +55,9 @@ internal class StripePaymentController internal constructor(
         StripeFireAndForgetRequestExecutor(Logger.getInstance(enableLogging)),
     private val analyticsDataFactory: AnalyticsDataFactory =
         AnalyticsDataFactory(context.applicationContext, publishableKey),
-    private val challengeFlowStarter: ChallengeFlowStarter =
-        ChallengeFlowStarterImpl(),
+    private val challengeFlowStarter: ChallengeFlowStarter = ChallengeFlowStarter.Default(),
+    private val challengeProgressDialogActivityStarter: ChallengeProgressDialogActivityStarter =
+        ChallengeProgressDialogActivityStarter.Default(),
     private val workScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 ) : PaymentController {
     private val logger = Logger.getInstance(enableLogging)
@@ -377,9 +380,12 @@ internal class StripePaymentController internal constructor(
                                 )
                             )
                             try {
-                                begin3ds2Auth(host, stripeIntent,
+                                begin3ds2Auth(
+                                    host,
+                                    stripeIntent,
                                     Stripe3ds2Fingerprint.create(sdkData),
-                                    requestOptions)
+                                    requestOptions
+                                )
                             } catch (e: CertificateException) {
                                 handleError(host, getRequestCode(stripeIntent), e)
                             }
@@ -460,10 +466,17 @@ internal class StripePaymentController internal constructor(
             stripe3ds2Fingerprint.directoryServer.networkName,
             stripe3ds2Fingerprint.directoryServerEncryption.rootCerts,
             stripe3ds2Fingerprint.directoryServerEncryption.directoryServerPublicKey,
-            stripe3ds2Fingerprint.directoryServerEncryption.keyId
+            stripe3ds2Fingerprint.directoryServerEncryption.keyId,
+            challengeCompletionIntent = Intent(activity, Stripe3ds2CompletionActivity::class.java)
+                .putExtra(
+                    Stripe3ds2CompletionActivity.EXTRA_CLIENT_SECRET,
+                    stripeIntent.clientSecret
+                )
+                .addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT),
+            challengeCompletionRequestCode = getRequestCode(stripeIntent)
         )
 
-        ChallengeProgressDialogActivity.show(
+        challengeProgressDialogActivityStarter.start(
             activity,
             stripe3ds2Fingerprint.directoryServer.networkName,
             false,
@@ -622,29 +635,31 @@ internal class StripePaymentController internal constructor(
         }
 
         private fun startChallengeFlow(ares: Stripe3ds2AuthResult.Ares) {
-            val challengeParameters = StripeChallengeParameters()
-            challengeParameters.acsSignedContent = ares.acsSignedContent
-            challengeParameters.threeDsServerTransactionId = ares.threeDSServerTransId
-            challengeParameters.acsTransactionId = ares.acsTransId
+            val challengeParameters = StripeChallengeParameters().also {
+                it.acsSignedContent = ares.acsSignedContent
+                it.threeDsServerTransactionId = ares.threeDSServerTransId
+                it.acsTransactionId = ares.acsTransId
+            }
 
-            challengeFlowStarter.start(Runnable {
-                val activity = host.activity ?: return@Runnable
-                transaction.doChallenge(activity,
-                    challengeParameters,
-                    PaymentAuth3ds2ChallengeStatusReceiver.create(
-                        host,
-                        stripeRepository,
-                        stripeIntent,
-                        sourceId,
-                        requestOptions,
-                        analyticsRequestExecutor,
-                        analyticsDataFactory,
-                        transaction,
-                        analyticsRequestFactory
-                    ),
-                    maxTimeout
-                )
-            })
+            host.activity?.let { activity ->
+                challengeFlowStarter.start(Runnable {
+                    transaction.doChallenge(
+                        activity,
+                        challengeParameters,
+                        PaymentAuth3ds2ChallengeStatusReceiver.create(
+                            stripeRepository,
+                            stripeIntent,
+                            sourceId,
+                            requestOptions,
+                            analyticsRequestExecutor,
+                            analyticsDataFactory,
+                            transaction,
+                            analyticsRequestFactory
+                        ),
+                        maxTimeout
+                    )
+                })
+            }
         }
     }
 
@@ -656,12 +671,15 @@ internal class StripePaymentController internal constructor(
         private val analyticsRequestExecutor: FireAndForgetRequestExecutor,
         private val analyticsDataFactory: AnalyticsDataFactory,
         private val transaction: Transaction,
-        private val complete3ds2AuthCallbackFactory: Complete3ds2AuthCallbackFactory,
         private val analyticsRequestFactory: AnalyticsRequestFactory
     ) : StripeChallengeStatusReceiver() {
 
-        override fun completed(completionEvent: CompletionEvent, uiTypeCode: String) {
-            super.completed(completionEvent, uiTypeCode)
+        override fun completed(
+            completionEvent: CompletionEvent,
+            uiTypeCode: String,
+            onReceiverCompleted: () -> Unit
+        ) {
+            super.completed(completionEvent, uiTypeCode, onReceiverCompleted)
             analyticsRequestExecutor.executeAsync(
                 analyticsRequestFactory.create(
                     analyticsDataFactory.create3ds2ChallengeParams(
@@ -672,16 +690,14 @@ internal class StripePaymentController internal constructor(
                     requestOptions
                 )
             )
-            notifyCompletion(Stripe3ds2CompletionStarter.Args(stripeIntent,
-                if (VALUE_YES == completionEvent.transactionStatus)
-                    Stripe3ds2CompletionStarter.ChallengeFlowOutcome.COMPLETE_SUCCESSFUL
-                else
-                    Stripe3ds2CompletionStarter.ChallengeFlowOutcome.COMPLETE_UNSUCCESSFUL
-            ))
+            notifyCompletion(onReceiverCompleted)
         }
 
-        override fun cancelled(uiTypeCode: String) {
-            super.cancelled(uiTypeCode)
+        override fun cancelled(
+            uiTypeCode: String,
+            onReceiverCompleted: () -> Unit
+        ) {
+            super.cancelled(uiTypeCode, onReceiverCompleted)
             analyticsRequestExecutor.executeAsync(
                 analyticsRequestFactory.create(
                     analyticsDataFactory.create3ds2ChallengeParams(
@@ -692,12 +708,14 @@ internal class StripePaymentController internal constructor(
                     requestOptions
                 )
             )
-            notifyCompletion(Stripe3ds2CompletionStarter.Args(stripeIntent,
-                Stripe3ds2CompletionStarter.ChallengeFlowOutcome.CANCEL))
+            notifyCompletion(onReceiverCompleted)
         }
 
-        override fun timedout(uiTypeCode: String) {
-            super.timedout(uiTypeCode)
+        override fun timedout(
+            uiTypeCode: String,
+            onReceiverCompleted: () -> Unit
+        ) {
+            super.timedout(uiTypeCode, onReceiverCompleted)
             analyticsRequestExecutor.executeAsync(
                 analyticsRequestFactory.create(
                     analyticsDataFactory.create3ds2ChallengeParams(
@@ -708,12 +726,14 @@ internal class StripePaymentController internal constructor(
                     requestOptions
                 )
             )
-            notifyCompletion(Stripe3ds2CompletionStarter.Args(stripeIntent,
-                Stripe3ds2CompletionStarter.ChallengeFlowOutcome.TIMEOUT))
+            notifyCompletion(onReceiverCompleted)
         }
 
-        override fun protocolError(protocolErrorEvent: ProtocolErrorEvent) {
-            super.protocolError(protocolErrorEvent)
+        override fun protocolError(
+            protocolErrorEvent: ProtocolErrorEvent,
+            onReceiverCompleted: () -> Unit
+        ) {
+            super.protocolError(protocolErrorEvent, onReceiverCompleted)
             analyticsRequestExecutor.executeAsync(
                 analyticsRequestFactory.create(
                     analyticsDataFactory.create3ds2ChallengeErrorParams(
@@ -723,12 +743,14 @@ internal class StripePaymentController internal constructor(
                     requestOptions
                 )
             )
-            notifyCompletion(Stripe3ds2CompletionStarter.Args(stripeIntent,
-                Stripe3ds2CompletionStarter.ChallengeFlowOutcome.PROTOCOL_ERROR))
+            notifyCompletion(onReceiverCompleted)
         }
 
-        override fun runtimeError(runtimeErrorEvent: RuntimeErrorEvent) {
-            super.runtimeError(runtimeErrorEvent)
+        override fun runtimeError(
+            runtimeErrorEvent: RuntimeErrorEvent,
+            onReceiverCompleted: () -> Unit
+        ) {
+            super.runtimeError(runtimeErrorEvent, onReceiverCompleted)
             analyticsRequestExecutor.executeAsync(
                 analyticsRequestFactory.create(
                     analyticsDataFactory.create3ds2ChallengeErrorParams(
@@ -738,11 +760,10 @@ internal class StripePaymentController internal constructor(
                     requestOptions
                 )
             )
-            notifyCompletion(Stripe3ds2CompletionStarter.Args(stripeIntent,
-                Stripe3ds2CompletionStarter.ChallengeFlowOutcome.RUNTIME_ERROR))
+            notifyCompletion(onReceiverCompleted)
         }
 
-        private fun notifyCompletion(args: Stripe3ds2CompletionStarter.Args) {
+        private fun notifyCompletion(completed3ds2Callback: () -> Unit) {
             analyticsRequestExecutor.executeAsync(
                 analyticsRequestFactory.create(
                     analyticsDataFactory.create3ds2ChallengeParams(
@@ -754,18 +775,23 @@ internal class StripePaymentController internal constructor(
                 )
             )
 
-            stripeRepository.complete3ds2Auth(sourceId, requestOptions,
-                complete3ds2AuthCallbackFactory.create(args))
+            stripeRepository.complete3ds2Auth(
+                sourceId,
+                requestOptions,
+                object : ApiResultCallback<Boolean> {
+                    override fun onSuccess(result: Boolean) {
+                        completed3ds2Callback()
+                    }
+
+                    override fun onError(e: Exception) {
+                        completed3ds2Callback()
+                    }
+                }
+            )
         }
 
-        internal interface Complete3ds2AuthCallbackFactory :
-            Factory1<Stripe3ds2CompletionStarter.Args, ApiResultCallback<Boolean>>
-
         internal companion object {
-            private const val VALUE_YES = "Y"
-
             internal fun create(
-                host: AuthActivityStarter.Host,
                 stripeRepository: StripeRepository,
                 stripeIntent: StripeIntent,
                 sourceId: String,
@@ -783,62 +809,61 @@ internal class StripePaymentController internal constructor(
                     analyticsRequestExecutor,
                     analyticsDataFactory,
                     transaction,
-                    createComplete3ds2AuthCallbackFactory(
-                        Stripe3ds2CompletionStarter(host, getRequestCode(stripeIntent)),
-                        host,
-                        stripeIntent
-                    ),
                     analyticsRequestFactory
                 )
-            }
-
-            private fun createComplete3ds2AuthCallbackFactory(
-                starter: Stripe3ds2CompletionStarter,
-                host: AuthActivityStarter.Host,
-                stripeIntent: StripeIntent
-            ): Complete3ds2AuthCallbackFactory {
-                return object : Complete3ds2AuthCallbackFactory {
-                    override fun create(arg: Stripe3ds2CompletionStarter.Args):
-                        ApiResultCallback<Boolean> {
-                        return object : ApiResultCallback<Boolean> {
-                            override fun onSuccess(result: Boolean) {
-                                starter.start(arg)
-                            }
-
-                            override fun onError(e: Exception) {
-                                handleError(host, getRequestCode(stripeIntent), e)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private class ChallengeFlowStarterImpl : ChallengeFlowStarter {
-        override fun start(runnable: Runnable) {
-            val handlerThread = HandlerThread(Stripe3ds2AuthCallback::class.java.simpleName)
-            // create Handler to notifyCompletion challenge flow on background thread
-            val handler: Handler = createHandler(handlerThread)
-
-            handler.postDelayed({
-                runnable.run()
-                handlerThread.quitSafely()
-            }, TimeUnit.SECONDS.toMillis(DELAY_SECONDS))
-        }
-
-        private companion object {
-            private const val DELAY_SECONDS = 2L
-
-            private fun createHandler(handlerThread: HandlerThread): Handler {
-                handlerThread.start()
-                return Handler(handlerThread.looper)
             }
         }
     }
 
     internal interface ChallengeFlowStarter {
         fun start(runnable: Runnable)
+
+        class Default : ChallengeFlowStarter {
+            override fun start(runnable: Runnable) {
+                val handlerThread = HandlerThread(Stripe3ds2AuthCallback::class.java.simpleName)
+                // create Handler to notifyCompletion challenge flow on background thread
+                val handler = createHandler(handlerThread)
+
+                handler.postDelayed({
+                    runnable.run()
+                    handlerThread.quitSafely()
+                }, TimeUnit.SECONDS.toMillis(DELAY_SECONDS))
+            }
+
+            private companion object {
+                private const val DELAY_SECONDS = 2L
+
+                private fun createHandler(handlerThread: HandlerThread): Handler {
+                    handlerThread.start()
+                    return Handler(handlerThread.looper)
+                }
+            }
+        }
+    }
+
+    internal interface ChallengeProgressDialogActivityStarter {
+        fun start(
+            context: Context,
+            directoryServerName: String,
+            cancelable: Boolean,
+            uiCustomization: StripeUiCustomization
+        )
+
+        class Default : ChallengeProgressDialogActivityStarter {
+            override fun start(
+                context: Context,
+                directoryServerName: String,
+                cancelable: Boolean,
+                uiCustomization: StripeUiCustomization
+            ) {
+                ChallengeProgressDialogActivity.show(
+                    context,
+                    directoryServerName,
+                    cancelable,
+                    uiCustomization
+                )
+            }
+        }
     }
 
     internal companion object {
