@@ -20,7 +20,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="@string/becs_element_name"
+                android:hint="@string/becs_widget_name"
                 android:accessibilityTraversalBefore="@+id/email_text_input_layout"
                 android:nextFocusRight="@+id/email_text_input_layout"
                 android:nextFocusForward="@+id/email_text_input_layout"
@@ -33,7 +33,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:imeOptions="actionNext"
-                    style="@style/Stripe.BecsElement.EditText" />
+                    style="@style/Stripe.BecsDebitWidget.EditText" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -41,7 +41,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="@string/becs_element_email"
+                android:hint="@string/becs_widget_email"
                 android:accessibilityTraversalBefore="@+id/bsb_text_input_layout"
                 android:accessibilityTraversalAfter="@+id/name_text_input_layout"
                 android:nextFocusRight="@+id/bsb_text_input_layout"
@@ -58,7 +58,7 @@
                     android:layout_height="wrap_content"
                     android:inputType="textEmailAddress"
                     android:imeOptions="actionNext"
-                    style="@style/Stripe.BecsElement.EditText" />
+                    style="@style/Stripe.BecsDebitWidget.EditText" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
@@ -74,7 +74,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="@string/becs_element_bsb"
+                android:hint="@string/becs_widget_bsb"
                 android:accessibilityTraversalBefore="@+id/account_number_text_input_layout"
                 android:accessibilityTraversalAfter="@+id/email_text_input_layout"
                 android:nextFocusRight="@+id/account_number_text_input_layout"
@@ -91,7 +91,7 @@
                     android:layout_height="wrap_content"
                     android:imeOptions="actionNext"
                     android:drawableStart="@drawable/stripe_ic_bank"
-                    style="@style/Stripe.BecsElement.EditText" />
+                    style="@style/Stripe.BecsDebitWidget.EditText" />
             </com.stripe.android.view.IconTextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -99,7 +99,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="@string/becs_element_account_number"
+                android:hint="@string/becs_widget_account_number"
                 android:accessibilityTraversalAfter="@+id/bsb_text_input_layout"
                 android:nextFocusLeft="@id/bsb_text_input_layout"
                 android:nextFocusUp="@id/bsb_text_input_layout"
@@ -111,7 +111,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:imeOptions="actionDone"
-                    style="@style/Stripe.BecsElement.EditText" />
+                    style="@style/Stripe.BecsDebitWidget.EditText" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
