@@ -6,9 +6,6 @@
  * https://raw.github.com/chrisbanes/gradle-mvn-push/master/gradle-mvn-push.gradle
  */
 
-apply plugin: 'maven'
-apply plugin: 'signing'
-
 def isReleaseBuild() {
     return VERSION_NAME.contains("SNAPSHOT") == false
 }
