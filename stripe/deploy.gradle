@@ -29,6 +29,31 @@ def getRepositoryPassword() {
 }
 
 afterEvaluate { project ->
+    // See https://developer.android.com/studio/build/maven-publish-plugin
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
+                // Applies the component for the release build variant.
+                from components.release
+
+                // You can then customize attributes of the publication as shown below.
+                groupId = GROUP
+                artifactId = POM_ARTIFACT_ID
+                version = VERSION_NAME
+            }
+            // Creates a Maven publication called "debug".
+            debug(MavenPublication) {
+                // Applies the component for the debug build variant.
+                from components.debug
+
+                groupId = GROUP
+                artifactId = POM_ARTIFACT_ID
+                version = VERSION_NAME
+            }
+        }
+    }
+
     uploadArchives {
         repositories {
             mavenDeployer {
