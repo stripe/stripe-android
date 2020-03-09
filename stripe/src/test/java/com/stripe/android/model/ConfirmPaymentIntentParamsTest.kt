@@ -105,7 +105,12 @@ class ConfirmPaymentIntentParamsTest {
     @Test
     fun createWithSourceId_toParamMap_createsExpectedMap() {
         val confirmPaymentIntentParams = ConfirmPaymentIntentParams
-            .createWithSourceId(SOURCE_ID, CLIENT_SECRET, RETURN_URL)
+            .createWithSourceId(
+                SOURCE_ID,
+                CLIENT_SECRET,
+                RETURN_URL,
+                savePaymentMethod = false
+            )
 
         val paramMap = confirmPaymentIntentParams.toParamMap()
         assertEquals(paramMap[PARAM_SOURCE_ID], SOURCE_ID)
@@ -205,7 +210,8 @@ class ConfirmPaymentIntentParamsTest {
         val actualParams =
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                 clientSecret = CLIENT_SECRET,
-                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT,
+                savePaymentMethod = false
             ).toParamMap()
         assertEquals(expectedParams, actualParams)
     }
@@ -236,7 +242,8 @@ class ConfirmPaymentIntentParamsTest {
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                 clientSecret = CLIENT_SECRET,
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT,
-                mandateData = MandateDataParamsFixtures.DEFAULT
+                mandateData = MandateDataParamsFixtures.DEFAULT,
+                savePaymentMethod = false
             ).toParamMap()
         assertEquals(expectedParams, actualParams)
     }
@@ -259,7 +266,8 @@ class ConfirmPaymentIntentParamsTest {
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                 clientSecret = CLIENT_SECRET,
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT,
-                mandateId = "mandate_123456789"
+                mandateId = "mandate_123456789",
+                savePaymentMethod = false
             ).toParamMap()
         assertEquals(expectedParams, actualParams)
     }
