@@ -4,6 +4,7 @@
 * [#2257](https://github.com/stripe/stripe-android/pull/2257) Disable Kotlin Synthetics and migrate to [view binding](https://developer.android.com/topic/libraries/view-binding)
 * [#2260](https://github.com/stripe/stripe-android/pull/2260) Update Kotlin Gradle Plugin to `1.3.70`
 * [#2271](https://github.com/stripe/stripe-android/pull/2271) Update Proguard rules to remove unneeded BouncyCastle class
+* [#2272](https://github.com/stripe/stripe-android/pull/2272) Update `kotlinx.coroutines` to `1.3.4`
 
 ## 14.1.0 - 2020-03-02
 * [#2207](https://github.com/stripe/stripe-android/pull/2207) Add `CardInputWidget#setPostalCodeTextWatcher`
