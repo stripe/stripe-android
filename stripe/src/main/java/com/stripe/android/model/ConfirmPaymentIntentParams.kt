@@ -52,7 +52,7 @@ data class ConfirmPaymentIntentParams internal constructor(
     val returnUrl: String? = null,
 
     /**
-     * If the PaymentIntent has a payment_method and a customer or if you’re attaching a payment
+     * If the PaymentIntent has a `payment_method` and a `customer` or if you’re attaching a payment
      * method to the PaymentIntent in this request, you can pass `save_payment_method=true` to save
      * the payment method to the customer. Defaults to `false`.
      *
@@ -61,7 +61,7 @@ data class ConfirmPaymentIntentParams internal constructor(
      *
      * [save_payment_method](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-save_payment_method)
      */
-    private val savePaymentMethod: Boolean = false,
+    private val savePaymentMethod: Boolean? = null,
 
     /**
      * Set to `true` only when using manual confirmation and the iOS or Android SDKs to handle
@@ -108,7 +108,7 @@ data class ConfirmPaymentIntentParams internal constructor(
 ) : ConfirmStripeIntentParams {
 
     fun shouldSavePaymentMethod(): Boolean {
-        return savePaymentMethod
+        return savePaymentMethod == true
     }
 
     override fun shouldUseStripeSdk(): Boolean {
@@ -125,8 +125,11 @@ data class ConfirmPaymentIntentParams internal constructor(
     override fun toParamMap(): Map<String, Any> {
         return mapOf(
             PARAM_CLIENT_SECRET to clientSecret,
-            PARAM_SAVE_PAYMENT_METHOD to savePaymentMethod,
             PARAM_USE_STRIPE_SDK to useStripeSdk
+        ).plus(
+            savePaymentMethod?.let {
+                mapOf(PARAM_SAVE_PAYMENT_METHOD to it)
+            }.orEmpty()
         ).plus(
             mandateId?.let { mapOf(PARAM_MANDATE_ID to it) }.orEmpty()
         ).plus(
@@ -342,7 +345,7 @@ data class ConfirmPaymentIntentParams internal constructor(
             paymentMethodId: String,
             clientSecret: String,
             returnUrl: String? = null,
-            savePaymentMethod: Boolean = false,
+            savePaymentMethod: Boolean? = null,
             extraParams: Map<String, Any>? = null,
             paymentMethodOptions: PaymentMethodOptionsParams? = null,
             mandateId: String? = null,
@@ -390,7 +393,7 @@ data class ConfirmPaymentIntentParams internal constructor(
             paymentMethodCreateParams: PaymentMethodCreateParams,
             clientSecret: String,
             returnUrl: String? = null,
-            savePaymentMethod: Boolean = false,
+            savePaymentMethod: Boolean? = null,
             extraParams: Map<String, Any>? = null,
             mandateId: String? = null,
             mandateData: MandateDataParams? = null,
@@ -432,7 +435,7 @@ data class ConfirmPaymentIntentParams internal constructor(
             sourceId: String,
             clientSecret: String,
             returnUrl: String,
-            savePaymentMethod: Boolean = false,
+            savePaymentMethod: Boolean? = null,
             extraParams: Map<String, Any>? = null,
             shipping: Shipping? = null
         ): ConfirmPaymentIntentParams {
@@ -466,7 +469,7 @@ data class ConfirmPaymentIntentParams internal constructor(
             sourceParams: SourceParams,
             clientSecret: String,
             returnUrl: String,
-            savePaymentMethod: Boolean = false,
+            savePaymentMethod: Boolean? = null,
             extraParams: Map<String, Any>? = null,
             shipping: Shipping? = null
         ): ConfirmPaymentIntentParams {

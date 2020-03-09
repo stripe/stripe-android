@@ -12,6 +12,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_ST
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class ConfirmPaymentIntentParamsTest {
@@ -123,7 +124,7 @@ class ConfirmPaymentIntentParamsTest {
         assertEquals(paramMap[PARAM_PAYMENT_METHOD_ID], PM_ID)
         assertEquals(paramMap[PARAM_CLIENT_SECRET], CLIENT_SECRET)
         assertFalse(paramMap.containsKey(PARAM_RETURN_URL))
-        assertEquals(false, paramMap[PARAM_SAVE_PAYMENT_METHOD])
+        assertNull(paramMap[PARAM_SAVE_PAYMENT_METHOD])
     }
 
     @Test
@@ -136,7 +137,7 @@ class ConfirmPaymentIntentParamsTest {
         assertEquals(paramMap[PARAM_PAYMENT_METHOD_ID], PM_ID)
         assertEquals(paramMap[PARAM_CLIENT_SECRET], CLIENT_SECRET)
         assertEquals(paramMap[PARAM_RETURN_URL], RETURN_URL)
-        assertEquals(false, paramMap[PARAM_SAVE_PAYMENT_METHOD])
+        assertNull(paramMap[PARAM_SAVE_PAYMENT_METHOD])
     }
 
     @Test
@@ -267,7 +268,6 @@ class ConfirmPaymentIntentParamsTest {
     fun create_withSepaDebitPaymentMethodId_shouldUseMandateDataIfSpecified() {
         val expectedParams = mapOf(
             "client_secret" to CLIENT_SECRET,
-            "save_payment_method" to false,
             "use_stripe_sdk" to false,
             "mandate_data" to mapOf(
                 "customer_acceptance" to mapOf(
@@ -304,7 +304,6 @@ class ConfirmPaymentIntentParamsTest {
                 PARAM_PAYMENT_METHOD_ID to "pm_123",
                 PARAM_PAYMENT_METHOD_OPTIONS to mapOf("card" to mapOf("cvc" to "123")),
                 PARAM_CLIENT_SECRET to CLIENT_SECRET,
-                PARAM_SAVE_PAYMENT_METHOD to false,
                 PARAM_USE_STRIPE_SDK to false
             ),
             params
