@@ -1,9 +1,11 @@
 package com.stripe.android.view
 
 import android.content.Context
+import android.os.Build
 import android.text.Editable
 import android.text.InputFilter
 import android.util.AttributeSet
+import android.view.View
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.CardUtils
 import com.stripe.android.R
@@ -74,6 +76,10 @@ class CardNumberEditText @JvmOverloads constructor(
     init {
         setErrorMessage(resources.getString(R.string.invalid_card_number))
         listenForTextChanges()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_NUMBER)
+        }
     }
 
     override val accessibilityText: String?

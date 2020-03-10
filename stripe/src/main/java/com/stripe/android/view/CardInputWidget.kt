@@ -1,7 +1,6 @@
 package com.stripe.android.view
 
 import android.content.Context
-import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.Editable
@@ -654,13 +653,6 @@ class CardInputWidget @JvmOverloads constructor(
 
     private fun initView(attrs: AttributeSet?) {
         attrs?.let { applyAttributes(it) }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            cardNumberEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_NUMBER)
-            expiryDateEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE)
-            cvcNumberEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE)
-            postalCodeEditText.setAutofillHints(View.AUTOFILL_HINT_POSTAL_CODE)
-        }
 
         ViewCompat.setAccessibilityDelegate(
             cardNumberEditText,
