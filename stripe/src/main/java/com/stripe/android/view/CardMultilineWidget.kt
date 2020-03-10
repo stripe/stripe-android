@@ -324,7 +324,7 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     override fun onFinishInflate() {
         super.onFinishInflate()
-        postalCodeEditText.config = PostalCodeEditText.Config.US
+        postalCodeEditText.config = PostalCodeEditText.Config.Global
     }
 
     /**
