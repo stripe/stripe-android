@@ -57,7 +57,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     private val cardNumberTextInputLayout = viewBinding.tlCardNumber
     private val expiryTextInputLayout = viewBinding.tlExpiry
     private val cvcTextInputLayout = viewBinding.tlCvc
-    private val postalInputLayout = viewBinding.tlPostalCode
+    internal val postalInputLayout = viewBinding.tlPostalCode
 
     private var cardInputListener: CardInputListener? = null
     private var cardValidCallback: CardValidCallback? = null
@@ -245,16 +245,12 @@ class CardMultilineWidget @JvmOverloads constructor(
         // This sets the value of shouldShowPostalCode
         attrs?.let { checkAttributeSet(it) }
 
-        // configure postal code
-        postalCodeEditText.configureForGlobal()
-        postalInputLayout.hint = postalCodeEditText.hint
-        postalCodeEditText.hint = ""
-
         initTextInputLayoutErrorHandlers(
             cardNumberTextInputLayout,
             expiryTextInputLayout,
             cvcTextInputLayout,
-            postalInputLayout)
+            postalInputLayout
+        )
 
         initFocusChangeListeners()
         initDeleteEmptyListeners()
@@ -307,6 +303,11 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
 
         isEnabled = true
+    }
+
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+        postalCodeEditText.configureForUs()
     }
 
     /**

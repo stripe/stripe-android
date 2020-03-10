@@ -9,6 +9,8 @@ import android.text.method.DigitsKeyListener
 import android.text.method.TextKeyListener
 import android.util.AttributeSet
 import android.view.View
+import androidx.annotation.StringRes
+import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
 
 class PostalCodeEditText @JvmOverloads constructor(
@@ -20,7 +22,6 @@ class PostalCodeEditText @JvmOverloads constructor(
     init {
         setErrorMessage(resources.getString(R.string.invalid_zip))
         maxLines = 1
-        configureForUs()
 
         addTextChangedListener(object : StripeTextWatcher() {
             override fun afterTextChanged(s: Editable?) {
@@ -33,12 +34,17 @@ class PostalCodeEditText @JvmOverloads constructor(
         }
     }
 
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+        configureForGlobal()
+    }
+
     /**
      * Configure the field for United States users
      */
     @JvmSynthetic
     internal fun configureForUs() {
-        setHint(R.string.address_label_zip_code)
+        updateHint(R.string.address_label_zip_code)
         filters = arrayOf(InputFilter.LengthFilter(MAX_LENGTH_US))
         keyListener = DigitsKeyListener.getInstance(false, true)
         inputType = InputType.TYPE_CLASS_NUMBER
@@ -49,10 +55,34 @@ class PostalCodeEditText @JvmOverloads constructor(
      */
     @JvmSynthetic
     internal fun configureForGlobal() {
-        setHint(R.string.address_label_postal_code)
+        updateHint(R.string.address_label_postal_code)
         filters = arrayOf(InputFilter.LengthFilter(MAX_LENGTH_GLOBAL))
         keyListener = TextKeyListener.getInstance()
         inputType = InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS
+    }
+
+    /**
+     * If a `TextInputLayout` is an ancestor of this view, set the hint on it. Otherwise, set
+     * the hint on this view.
+     */
+    private fun updateHint(@StringRes hintRes: Int) {
+        getTextInputLayout()?.let {
+            it.hint = resources.getString(hintRes)
+        } ?: setHint(hintRes)
+    }
+
+    /**
+     * Copied from `TextInputEditText`
+     */
+    private fun getTextInputLayout(): TextInputLayout? {
+        var parent = parent
+        while (parent is View) {
+            if (parent is TextInputLayout) {
+                return parent
+            }
+            parent = parent.getParent()
+        }
+        return null
     }
 
     private companion object {
