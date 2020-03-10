@@ -661,6 +661,55 @@ internal class CardMultilineWidgetTest {
     }
 
     @Test
+    fun usZipCodeRequired_whenFalse_shouldSetPostalCodeHint() {
+        cardMultilineWidget.usZipCodeRequired = false
+        assertThat(cardMultilineWidget.postalInputLayout.hint)
+            .isEqualTo("Postal code")
+
+        cardMultilineWidget.setCardNumber(VISA_WITH_SPACES)
+        fullGroup.expiryDateEditText.append("12")
+        fullGroup.expiryDateEditText.append("50")
+        fullGroup.cvcEditText.append("123")
+
+        assertThat(cardMultilineWidget.card)
+            .isNotNull()
+    }
+
+    @Test
+    fun usZipCodeRequired_whenTrue_withInvalidZipCode_shouldReturnNullCard() {
+        cardMultilineWidget.usZipCodeRequired = true
+        assertThat(cardMultilineWidget.postalInputLayout.hint)
+            .isEqualTo("ZIP code")
+
+        cardMultilineWidget.setCardNumber(VISA_WITH_SPACES)
+        fullGroup.expiryDateEditText.append("12")
+        fullGroup.expiryDateEditText.append("50")
+        fullGroup.cvcEditText.append("123")
+
+        // invalid zipcode
+        fullGroup.postalCodeEditText.setText("1234")
+        assertThat(cardMultilineWidget.card)
+            .isNull()
+    }
+
+    @Test
+    fun usZipCodeRequired_whenTrue_withValidZipCode_shouldReturnNotNullCard() {
+        cardMultilineWidget.usZipCodeRequired = true
+        assertThat(cardMultilineWidget.postalInputLayout.hint)
+            .isEqualTo("ZIP code")
+
+        cardMultilineWidget.setCardNumber(VISA_WITH_SPACES)
+        fullGroup.expiryDateEditText.append("12")
+        fullGroup.expiryDateEditText.append("50")
+        fullGroup.cvcEditText.append("123")
+
+        // valid zipcode
+        fullGroup.postalCodeEditText.setText("12345")
+        assertThat(cardMultilineWidget.card)
+            .isNotNull()
+    }
+
+    @Test
     fun setEnabled_setsEnabledPropertyOnAllChildWidgets() {
         assertTrue(cardMultilineWidget.isEnabled)
         assertTrue(fullGroup.cardInputLayout.isEnabled)

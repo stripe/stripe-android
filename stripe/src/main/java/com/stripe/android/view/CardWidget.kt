@@ -65,5 +65,6 @@ internal interface CardWidget {
     companion object {
         internal const val DEFAULT_POSTAL_CODE_ENABLED = true
         internal const val DEFAULT_POSTAL_CODE_REQUIRED = false
+        internal const val DEFAULT_US_ZIP_CODE_REQUIRED = false
     }
 }

@@ -12,12 +12,34 @@ import android.view.View
 import androidx.annotation.StringRes
 import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
+import java.util.regex.Pattern
+import kotlin.properties.Delegates
 
 class PostalCodeEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle
 ) : StripeEditText(context, attrs, defStyleAttr) {
+
+    internal var config: Config by Delegates.observable(
+        Config.Global
+    ) { _, oldValue, newValue ->
+        when (newValue) {
+            Config.Global -> configureForGlobal()
+            Config.US -> configureForUs()
+        }
+    }
+
+    internal val postalCode: String?
+        get() {
+            return if (config == Config.US) {
+                fieldText.takeIf {
+                    ZIP_CODE_PATTERN.matcher(fieldText).matches()
+                }
+            } else {
+                fieldText
+            }
+        }
 
     init {
         setErrorMessage(resources.getString(R.string.invalid_zip))
@@ -42,8 +64,7 @@ class PostalCodeEditText @JvmOverloads constructor(
     /**
      * Configure the field for United States users
      */
-    @JvmSynthetic
-    internal fun configureForUs() {
+    private fun configureForUs() {
         updateHint(R.string.address_label_zip_code)
         filters = arrayOf(InputFilter.LengthFilter(MAX_LENGTH_US))
         keyListener = DigitsKeyListener.getInstance(false, true)
@@ -53,8 +74,7 @@ class PostalCodeEditText @JvmOverloads constructor(
     /**
      * Configure the field for global users
      */
-    @JvmSynthetic
-    internal fun configureForGlobal() {
+    private fun configureForGlobal() {
         updateHint(R.string.address_label_postal_code)
         filters = arrayOf(InputFilter.LengthFilter(MAX_LENGTH_GLOBAL))
         keyListener = TextKeyListener.getInstance()
@@ -67,8 +87,12 @@ class PostalCodeEditText @JvmOverloads constructor(
      */
     private fun updateHint(@StringRes hintRes: Int) {
         getTextInputLayout()?.let {
-            it.hint = resources.getString(hintRes)
-        } ?: setHint(hintRes)
+            if (it.isHintEnabled) {
+                it.hint = resources.getString(hintRes)
+            } else {
+                setHint(hintRes)
+            }
+        }
     }
 
     /**
@@ -85,8 +109,15 @@ class PostalCodeEditText @JvmOverloads constructor(
         return null
     }
 
+    internal enum class Config {
+        Global,
+        US
+    }
+
     private companion object {
         private const val MAX_LENGTH_US = 5
         private const val MAX_LENGTH_GLOBAL = 13
+
+        private val ZIP_CODE_PATTERN = Pattern.compile("^[0-9]{5}$")
     }
 }

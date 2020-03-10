@@ -9,5 +9,6 @@
     <declare-styleable name="CardElement">
         <attr name="shouldShowPostalCode" format="boolean" />
         <attr name="shouldRequirePostalCode" format="boolean" />
+        <attr name="shouldRequireUsZipCode" format="boolean" />
     </declare-styleable>
 </resources>

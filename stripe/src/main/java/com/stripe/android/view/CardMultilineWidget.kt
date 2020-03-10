@@ -34,6 +34,7 @@ import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_EXPI
 import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_POSTAL
 import java.math.BigDecimal
 import java.math.RoundingMode
+import kotlin.properties.Delegates
 
 /**
  * A multiline card input widget using the support design library's [TextInputLayout]
@@ -102,6 +103,22 @@ class CardMultilineWidget @JvmOverloads constructor(
     var postalCodeRequired: Boolean = CardWidget.DEFAULT_POSTAL_CODE_REQUIRED
 
     /**
+     * If [shouldShowPostalCode] is true and [usZipCodeRequired] is true, then postal code is a
+     * required field and must be a 5-digit US zip code.
+     *
+     * If [shouldShowPostalCode] is false, this value is ignored.
+     */
+    var usZipCodeRequired: Boolean by Delegates.observable(
+        CardWidget.DEFAULT_US_ZIP_CODE_REQUIRED
+    ) { _, _, zipCodeRequired ->
+        if (zipCodeRequired) {
+            postalCodeEditText.config = PostalCodeEditText.Config.US
+        } else {
+            postalCodeEditText.config = PostalCodeEditText.Config.Global
+        }
+    }
+
+    /**
      * Gets a [PaymentMethodCreateParams.Card] object from the user input, if all fields are
      * valid. If not, returns `null`.
      *
@@ -149,7 +166,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         get() = if (shouldShowPostalCode && validateAllFields()) {
             PaymentMethod.BillingDetails.Builder()
                 .setAddress(Address.Builder()
-                    .setPostalCode(postalCodeEditText.text?.toString())
+                    .setPostalCode(postalCodeEditText.postalCode)
                     .build()
                 )
         } else {
@@ -307,7 +324,7 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     override fun onFinishInflate() {
         super.onFinishInflate()
-        postalCodeEditText.configureForUs()
+        postalCodeEditText.config = PostalCodeEditText.Config.US
     }
 
     /**
@@ -364,7 +381,8 @@ class CardMultilineWidget @JvmOverloads constructor(
         expiryDateEditText.shouldShowError = !expiryIsValid
         cvcEditText.shouldShowError = !cvcIsValid
         postalCodeEditText.shouldShowError =
-            postalCodeRequired && postalCodeEditText.fieldText.isBlank()
+            (postalCodeRequired || usZipCodeRequired) &&
+                postalCodeEditText.postalCode.isNullOrBlank()
 
         allFields.firstOrNull { it.shouldShowError }?.requestFocus()
 
@@ -524,6 +542,10 @@ class CardMultilineWidget @JvmOverloads constructor(
             postalCodeRequired = a.getBoolean(
                 R.styleable.CardElement_shouldRequirePostalCode,
                 CardWidget.DEFAULT_POSTAL_CODE_REQUIRED
+            )
+            usZipCodeRequired = a.getBoolean(
+                R.styleable.CardElement_shouldRequireUsZipCode,
+                CardWidget.DEFAULT_US_ZIP_CODE_REQUIRED
             )
         } finally {
             a.recycle()
