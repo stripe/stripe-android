@@ -1307,6 +1307,55 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
             .isEqualTo("0000 0000 0000 ")
     }
 
+    @Test
+    fun usZipCodeRequired_whenFalse_shouldSetPostalCodeHint() {
+        cardInputWidget.usZipCodeRequired = false
+        assertThat(cardInputWidget.postalCodeEditText.hint)
+            .isEqualTo("Postal code")
+
+        cardInputWidget.setCardNumber(VISA_WITH_SPACES)
+        cardInputWidget.expiryDateEditText.append("12")
+        cardInputWidget.expiryDateEditText.append("50")
+        cardInputWidget.cvcNumberEditText.append("123")
+
+        assertThat(cardInputWidget.card)
+            .isNotNull()
+    }
+
+    @Test
+    fun usZipCodeRequired_whenTrue_withInvalidZipCode_shouldReturnNullCard() {
+        cardInputWidget.usZipCodeRequired = true
+        assertThat(cardInputWidget.postalCodeEditText.hint)
+            .isEqualTo("ZIP code")
+
+        cardInputWidget.setCardNumber(VISA_WITH_SPACES)
+        cardInputWidget.expiryDateEditText.append("12")
+        cardInputWidget.expiryDateEditText.append("50")
+        cardInputWidget.cvcNumberEditText.append("123")
+
+        // invalid zipcode
+        cardInputWidget.postalCodeEditText.setText("1234")
+        assertThat(cardInputWidget.card)
+            .isNull()
+    }
+
+    @Test
+    fun usZipCodeRequired_whenTrue_withValidZipCode_shouldReturnNotNullCard() {
+        cardInputWidget.usZipCodeRequired = true
+        assertThat(cardInputWidget.postalCodeEditText.hint)
+            .isEqualTo("ZIP code")
+
+        cardInputWidget.setCardNumber(VISA_WITH_SPACES)
+        cardInputWidget.expiryDateEditText.append("12")
+        cardInputWidget.expiryDateEditText.append("50")
+        cardInputWidget.cvcNumberEditText.append("123")
+
+        // valid zipcode
+        cardInputWidget.postalCodeEditText.setText("12345")
+        assertThat(cardInputWidget.card)
+            .isNotNull()
+    }
+
     private companion object {
         // Every Card made by the CardInputView should have the card widget token.
         private val ATTRIBUTION = setOf(LOGGING_TOKEN)

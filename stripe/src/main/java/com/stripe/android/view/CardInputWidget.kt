@@ -62,7 +62,7 @@ class CardInputWidget @JvmOverloads constructor(
     private val cardNumberTextInputLayout = viewBinding.cardNumberTextInputLayout
     private val expiryDateTextInputLayout = viewBinding.expiryDateTextInputLayout
     private val cvcNumberTextInputLayout = viewBinding.cvcTextInputLayout
-    private val postalCodeTextInputLayout = viewBinding.postalCodeTextInputLayout
+    internal val postalCodeTextInputLayout = viewBinding.postalCodeTextInputLayout
 
     @JvmSynthetic
     internal val cardNumberEditText = viewBinding.cardNumberEditText
@@ -130,7 +130,7 @@ class CardInputWidget @JvmOverloads constructor(
     private val postalCodeValue: String?
         get() {
             return if (postalCodeEnabled) {
-                postalCodeEditText.fieldText
+                postalCodeEditText.postalCode
             } else {
                 null
             }
@@ -223,7 +223,8 @@ class CardInputWidget @JvmOverloads constructor(
             expiryDateEditText.shouldShowError = cardDate == null
             cvcNumberEditText.shouldShowError = cvcValue == null
             postalCodeEditText.shouldShowError =
-                postalCodeRequired && postalCodeEditText.fieldText.isBlank()
+                (postalCodeRequired || usZipCodeRequired) &&
+                    postalCodeEditText.postalCode.isNullOrBlank()
 
             // Announce error messages for accessibility
             currentFields
@@ -298,6 +299,22 @@ class CardInputWidget @JvmOverloads constructor(
      */
     var postalCodeRequired: Boolean = CardWidget.DEFAULT_POSTAL_CODE_REQUIRED
 
+    /**
+     * If [postalCodeEnabled] is true and [usZipCodeRequired] is true, then postal code is a
+     * required field and must be a 5-digit US zip code.
+     *
+     * If [postalCodeEnabled] is false, this value is ignored.
+     */
+    var usZipCodeRequired: Boolean by Delegates.observable(
+        CardWidget.DEFAULT_US_ZIP_CODE_REQUIRED
+    ) { _, _, zipCodeRequired ->
+        if (zipCodeRequired) {
+            postalCodeEditText.config = PostalCodeEditText.Config.US
+        } else {
+            postalCodeEditText.config = PostalCodeEditText.Config.Global
+        }
+    }
+
     init {
         // This ensures that onRestoreInstanceState is called
         // during rotations.
@@ -316,6 +333,11 @@ class CardInputWidget @JvmOverloads constructor(
         allFields = requiredFields.plus(postalCodeEditText)
 
         initView(attrs)
+    }
+
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+        postalCodeEditText.config = PostalCodeEditText.Config.Global
     }
 
     override fun setCardValidCallback(callback: CardValidCallback?) {
@@ -799,6 +821,10 @@ class CardInputWidget @JvmOverloads constructor(
             postalCodeRequired = typedArray.getBoolean(
                 R.styleable.CardElement_shouldRequirePostalCode,
                 CardWidget.DEFAULT_POSTAL_CODE_REQUIRED
+            )
+            usZipCodeRequired = typedArray.getBoolean(
+                R.styleable.CardElement_shouldRequireUsZipCode,
+                CardWidget.DEFAULT_US_ZIP_CODE_REQUIRED
             )
         } finally {
             typedArray.recycle()
