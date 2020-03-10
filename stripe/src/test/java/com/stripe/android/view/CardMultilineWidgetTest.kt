@@ -657,7 +657,7 @@ internal class CardMultilineWidgetTest {
     @Test
     fun onFinishInflate_shouldSetPostalCodeInputLayoutHint() {
         assertThat(cardMultilineWidget.postalInputLayout.hint)
-            .isEqualTo("ZIP code")
+            .isEqualTo("Postal code")
     }
 
     @Test
