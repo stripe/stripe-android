@@ -1,8 +1,10 @@
 package com.stripe.android.view
 
 import android.content.Context
+import android.os.Build
 import android.text.Editable
 import android.util.AttributeSet
+import android.view.View
 import android.widget.EditText
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.R
@@ -20,6 +22,10 @@ class ExpiryDateEditText @JvmOverloads constructor(
     init {
         setErrorMessage(resources.getString(R.string.invalid_expiry_year))
         listenForTextChanges()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE)
+        }
     }
 
     // invoked when a valid date has been entered

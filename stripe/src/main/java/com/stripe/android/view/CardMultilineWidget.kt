@@ -3,7 +3,6 @@ package com.stripe.android.view
 import android.content.Context
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
-import android.os.Build
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
@@ -242,12 +241,6 @@ class CardMultilineWidget @JvmOverloads constructor(
         orientation = VERTICAL
 
         tintColorInt = cardNumberEditText.hintTextColors.defaultColor
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            cardNumberEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_NUMBER)
-            expiryDateEditText.setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE)
-            postalCodeEditText.setAutofillHints(View.AUTOFILL_HINT_POSTAL_CODE)
-        }
 
         // This sets the value of shouldShowPostalCode
         attrs?.let { checkAttributeSet(it) }

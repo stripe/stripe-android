@@ -1,12 +1,14 @@
 package com.stripe.android.view
 
 import android.content.Context
+import android.os.Build
 import android.text.Editable
 import android.text.InputFilter
 import android.text.InputType
 import android.text.method.DigitsKeyListener
 import android.text.method.TextKeyListener
 import android.util.AttributeSet
+import android.view.View
 import com.stripe.android.R
 
 class PostalCodeEditText @JvmOverloads constructor(
@@ -25,6 +27,10 @@ class PostalCodeEditText @JvmOverloads constructor(
                 shouldShowError = false
             }
         })
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            setAutofillHints(View.AUTOFILL_HINT_POSTAL_CODE)
+        }
     }
 
     /**
