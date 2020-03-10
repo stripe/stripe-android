@@ -5,6 +5,8 @@ import android.view.View
 import android.widget.LinearLayout
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.textfield.TextInputLayout
+import com.google.common.truth.ExpectFailure.assertThat
+import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
@@ -650,6 +652,12 @@ internal class CardMultilineWidgetTest {
 
         assertFalse(isValid)
         assertTrue(shouldShowError)
+    }
+
+    @Test
+    fun onFinishInflate_shouldSetPostalCodeInputLayoutHint() {
+        assertThat(cardMultilineWidget.postalInputLayout.hint)
+            .isEqualTo("ZIP code")
     }
 
     @Test

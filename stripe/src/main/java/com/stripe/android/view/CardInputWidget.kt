@@ -36,6 +36,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_CARD
 import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_CVC
 import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_EXPIRY
+import kotlin.properties.Delegates
 
 /**
  * A card input widget that handles all animation on its own.
@@ -129,7 +130,7 @@ class CardInputWidget @JvmOverloads constructor(
     private val postalCodeValue: String?
         get() {
             return if (postalCodeEnabled) {
-                postalCodeEditText.text.toString()
+                postalCodeEditText.fieldText
             } else {
                 null
             }
@@ -270,11 +271,21 @@ class CardInputWidget @JvmOverloads constructor(
      * auth success rates, so it is discouraged to disable it unless you are collecting the postal
      * code outside of this form.
      */
-    var postalCodeEnabled: Boolean = CardWidget.DEFAULT_POSTAL_CODE_ENABLED
-        set(value) {
-            onPostalCodeEnabledChanged(value)
-            field = value
+    var postalCodeEnabled: Boolean by Delegates.observable(
+        CardWidget.DEFAULT_POSTAL_CODE_ENABLED
+    ) { _, _, isEnabled ->
+        if (isEnabled) {
+            postalCodeEditText.isEnabled = true
+            postalCodeTextInputLayout.visibility = View.VISIBLE
+
+            cvcNumberEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
+        } else {
+            postalCodeEditText.isEnabled = false
+            postalCodeTextInputLayout.visibility = View.GONE
+
+            cvcNumberEditText.imeOptions = EditorInfo.IME_ACTION_DONE
         }
+    }
 
     /**
      * If [postalCodeEnabled] is true and [postalCodeRequired] is true, then postal code is a
@@ -296,8 +307,6 @@ class CardInputWidget @JvmOverloads constructor(
 
         orientation = HORIZONTAL
         minimumWidth = resources.getDimensionPixelSize(R.dimen.stripe_card_widget_min_width)
-
-        postalCodeEditText.configureForGlobal()
 
         frameWidthSupplier = { containerLayout.width }
 
@@ -507,20 +516,6 @@ class CardInputWidget @JvmOverloads constructor(
             super.onRestoreInstanceState(state.getParcelable(STATE_SUPER_STATE))
         } else {
             super.onRestoreInstanceState(state)
-        }
-    }
-
-    private fun onPostalCodeEnabledChanged(isEnabled: Boolean) {
-        if (isEnabled) {
-            postalCodeEditText.isEnabled = true
-            postalCodeTextInputLayout.visibility = View.VISIBLE
-
-            cvcNumberEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
-        } else {
-            postalCodeEditText.isEnabled = false
-            postalCodeTextInputLayout.visibility = View.GONE
-
-            cvcNumberEditText.imeOptions = EditorInfo.IME_ACTION_DONE
         }
     }
 
