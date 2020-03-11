@@ -53,9 +53,10 @@
     <string name="payment_auth_example">Payment Intent &amp; Setup Intent Confirmation</string>
     <string name="auth_payment_intent">Authenticate PaymentIntent</string>
     <string name="auth_setup_intent">Authenticate SetupIntent</string>
-    <string name="buy_with_3ds2">Buy with 3DS2</string>
-    <string name="buy_with_3ds1">Buy with 3DS1</string>
-    <string name="setup">Buy in the Future!</string>
+    <string name="confirm_with_3ds2_button">Confirm with 3DS2</string>
+    <string name="confirm_with_3ds1_button">Confirm with 3DS1</string>
+    <string name="confirm_with_new_card_button">Confirm with new card</string>
+    <string name="confirm_setup_button">Confirm Setup</string>
     <string name="payment_intent_status">PaymentIntent status: %s</string>
     <string name="setup_intent_status">SetupIntent status: %s</string>
     <string name="payment_auth_intro">Tapping the button below will create a PaymentIntent then attempt to confirm it.</string>
