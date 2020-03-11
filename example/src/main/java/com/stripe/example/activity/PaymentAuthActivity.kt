@@ -47,6 +47,9 @@ class PaymentAuthActivity : AppCompatActivity() {
     private val stripe: Stripe by lazy {
         StripeFactory(this, stripeAccountId).create()
     }
+    private val keyboardController: KeyboardController by lazy {
+        KeyboardController(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,11 +70,22 @@ class PaymentAuthActivity : AppCompatActivity() {
             viewBinding.status.text = savedInstanceState.getString(STATE_STATUS)
         }
 
-        viewBinding.buy3ds1Button.setOnClickListener {
-            createPaymentIntent(stripeAccountId, AuthType.ThreeDS1)
+        viewBinding.confirmWith3ds1Button.setOnClickListener {
+            createPaymentIntent(stripeAccountId, ConfirmationType.ThreeDS1)
         }
-        viewBinding.buy3ds2Button.setOnClickListener {
-            createPaymentIntent(stripeAccountId, AuthType.ThreeDS2)
+        viewBinding.confirmWith3ds2Button.setOnClickListener {
+            createPaymentIntent(stripeAccountId, ConfirmationType.ThreeDS2)
+        }
+
+        viewBinding.confirmWithNewCardButton.setOnClickListener {
+            viewBinding.cardInputWidget.paymentMethodCreateParams?.let {
+                keyboardController.hide()
+
+                createPaymentIntent(
+                    stripeAccountId,
+                    ConfirmationType.NewCard
+                )
+            }
         }
 
         viewBinding.setupButton.setOnClickListener { createSetupIntent() }
@@ -79,14 +93,22 @@ class PaymentAuthActivity : AppCompatActivity() {
 
     private fun confirmPaymentIntent(
         paymentIntentClientSecret: String,
-        authType: AuthType
+        confirmationType: ConfirmationType
     ) {
         viewBinding.status.append("\n\nStarting payment authentication")
         stripe.confirmPayment(
             this,
-            when (authType) {
-                AuthType.ThreeDS1 -> create3ds1ConfirmParams(paymentIntentClientSecret)
-                AuthType.ThreeDS2 -> create3ds2ConfirmParams(paymentIntentClientSecret)
+            when (confirmationType) {
+                ConfirmationType.ThreeDS1 -> create3ds1ConfirmParams(paymentIntentClientSecret)
+                ConfirmationType.ThreeDS2 -> create3ds2ConfirmParams(paymentIntentClientSecret)
+                ConfirmationType.NewCard ->
+                    ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                        paymentMethodCreateParams = requireNotNull(
+                            viewBinding.cardInputWidget.paymentMethodCreateParams
+                        ),
+                        clientSecret = paymentIntentClientSecret,
+                        shipping = SHIPPING
+                    )
             }
         )
     }
@@ -126,23 +148,21 @@ class PaymentAuthActivity : AppCompatActivity() {
 
     private fun createPaymentIntent(
         stripeAccountId: String?,
-        authType: AuthType
+        confirmationType: ConfirmationType
     ) {
         compositeSubscription.add(
-            backendApi.createPaymentIntent(
-                createPaymentIntentParams(stripeAccountId).toMutableMap()
-            )
+            backendApi
+                .createPaymentIntent(
+                    createPaymentIntentParams(stripeAccountId).toMutableMap()
+                )
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe {
-                    viewBinding.progressBar.visibility = View.VISIBLE
-                    viewBinding.buy3ds2Button.isEnabled = false
-                    viewBinding.buy3ds1Button.isEnabled = false
-                    viewBinding.setupButton.isEnabled = false
+                    disableUi()
                     viewBinding.status.setText(R.string.creating_payment_intent)
                 }
                 .subscribe(
-                    { handleCreatePaymentIntentResponse(it, authType) },
+                    { handleCreatePaymentIntentResponse(it, confirmationType) },
                     { handleError(it) }
                 )
         )
@@ -154,10 +174,7 @@ class PaymentAuthActivity : AppCompatActivity() {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe {
-                    viewBinding.progressBar.visibility = View.VISIBLE
-                    viewBinding.buy3ds2Button.isEnabled = false
-                    viewBinding.buy3ds1Button.isEnabled = false
-                    viewBinding.setupButton.isEnabled = false
+                    disableUi()
                     viewBinding.status.setText(R.string.creating_setup_intent)
                 }
                 .subscribe(
@@ -165,6 +182,14 @@ class PaymentAuthActivity : AppCompatActivity() {
                     { handleError(it) }
                 )
         )
+    }
+
+    private fun disableUi() {
+        viewBinding.progressBar.visibility = View.VISIBLE
+        viewBinding.confirmWith3ds2Button.isEnabled = false
+        viewBinding.confirmWith3ds1Button.isEnabled = false
+        viewBinding.confirmWithNewCardButton.isEnabled = false
+        viewBinding.setupButton.isEnabled = false
     }
 
     private fun handleError(err: Throwable) {
@@ -175,14 +200,14 @@ class PaymentAuthActivity : AppCompatActivity() {
 
     private fun handleCreatePaymentIntentResponse(
         responseBody: ResponseBody,
-        authType: AuthType
+        confirmationType: ConfirmationType
     ) {
         try {
             val responseData = JSONObject(responseBody.string())
             viewBinding.status.append("\n\n" + getString(R.string.payment_intent_status,
                 responseData.getString("status")))
             val secret = responseData.getString("secret")
-            confirmPaymentIntent(secret, authType)
+            confirmPaymentIntent(secret, confirmationType)
         } catch (e: IOException) {
             e.printStackTrace()
         } catch (e: JSONException) {
@@ -204,9 +229,10 @@ class PaymentAuthActivity : AppCompatActivity() {
         }
     }
 
-    private fun onAuthComplete() {
-        viewBinding.buy3ds2Button.isEnabled = true
-        viewBinding.buy3ds1Button.isEnabled = true
+    private fun onConfirmComplete() {
+        viewBinding.confirmWith3ds2Button.isEnabled = true
+        viewBinding.confirmWith3ds1Button.isEnabled = true
+        viewBinding.confirmWithNewCardButton.isEnabled = true
         viewBinding.setupButton.isEnabled = true
         viewBinding.progressBar.visibility = View.INVISIBLE
     }
@@ -234,16 +260,17 @@ class PaymentAuthActivity : AppCompatActivity() {
 
             val paymentIntent = result.intent
             activity.viewBinding.status.append("\n\n" +
-                "Auth outcome: " + result.outcome + "\n\n" +
-                activity.getString(R.string.payment_intent_status, paymentIntent.status))
-            activity.onAuthComplete()
+                "Auth outcome: ${result.outcome}\n\n" +
+                activity.getString(R.string.payment_intent_status, paymentIntent.status)
+            )
+            activity.onConfirmComplete()
         }
 
         override fun onError(e: Exception) {
             val activity = activityRef.get() ?: return
 
             activity.viewBinding.status.append("\n\nException: " + e.message)
-            activity.onAuthComplete()
+            activity.onConfirmComplete()
         }
     }
 
@@ -257,14 +284,14 @@ class PaymentAuthActivity : AppCompatActivity() {
 
             val setupIntent = result.intent
             activity.viewBinding.status.append("\n\n" + activity.getString(R.string.setup_intent_status, setupIntent.status))
-            activity.onAuthComplete()
+            activity.onConfirmComplete()
         }
 
         override fun onError(e: Exception) {
             val activity = activityRef.get() ?: return
 
             activity.viewBinding.status.append("\n\nException: " + e.message)
-            activity.onAuthComplete()
+            activity.onConfirmComplete()
         }
     }
 
@@ -287,19 +314,7 @@ class PaymentAuthActivity : AppCompatActivity() {
                 ),
                 clientSecret = paymentIntentClientSecret,
                 returnUrl = RETURN_URL,
-                shipping = ConfirmPaymentIntentParams.Shipping(
-                    address = Address.Builder()
-                        .setCity("San Francisco")
-                        .setCountry("US")
-                        .setLine1("123 Market St")
-                        .setLine2("#345")
-                        .setPostalCode("94107")
-                        .setState("CA")
-                        .build(),
-                    name = "Jenny Rosen",
-                    carrier = "Fedex",
-                    trackingNumber = "12345"
-                )
+                shipping = SHIPPING
             )
         }
 
@@ -341,9 +356,24 @@ class PaymentAuthActivity : AppCompatActivity() {
 
         private const val STATE_STATUS = "status"
 
-        enum class AuthType {
+        enum class ConfirmationType {
             ThreeDS1,
-            ThreeDS2
+            ThreeDS2,
+            NewCard
         }
+
+        private val SHIPPING = ConfirmPaymentIntentParams.Shipping(
+            address = Address.Builder()
+                .setCity("San Francisco")
+                .setCountry("US")
+                .setLine1("123 Market St")
+                .setLine2("#345")
+                .setPostalCode("94107")
+                .setState("CA")
+                .build(),
+            name = "Jenny Rosen",
+            carrier = "Fedex",
+            trackingNumber = "12345"
+        )
     }
 }

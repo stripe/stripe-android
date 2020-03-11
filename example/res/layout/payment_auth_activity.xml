@@ -9,39 +9,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="10dp">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/payment_auth_intro" />
-
-        <Button
-            android:id="@+id/buy_3ds2_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            android:text="@string/buy_with_3ds2" />
-
-        <Button
-            android:id="@+id/buy_3ds1_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="40dp"
-            android:text="@string/buy_with_3ds1" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/setup_auth_intro" />
-
-        <Button
-            android:id="@+id/setup_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="40dp"
-            android:text="@string/setup" />
-
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="20dp">
         <ProgressBar
             android:id="@+id/progress_bar"
             android:layout_width="match_parent"
@@ -50,6 +20,60 @@
             android:visibility="invisible"
             style="?android:attr/progressBarStyleHorizontal"
             />
+
+        <TextView
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/payment_auth_intro" />
+
+        <Button
+            android:id="@+id/confirm_with_3ds2_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:text="@string/confirm_with_3ds2_button" />
+
+        <Button
+            android:id="@+id/confirm_with_3ds1_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:text="@string/confirm_with_3ds1_button" />
+
+        <View style="@style/Divider"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"/>
+
+        <com.stripe.android.view.CardInputWidget
+            android:id="@+id/card_input_widget"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/confirm_with_new_card_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:text="@string/confirm_with_new_card_button" />
+
+        <View style="@style/Divider"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/setup_auth_intro" />
+        <Button
+            android:id="@+id/setup_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:text="@string/confirm_setup_button" />
+
+        <View style="@style/Divider"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"/>
 
         <TextView
             android:id="@+id/status"
