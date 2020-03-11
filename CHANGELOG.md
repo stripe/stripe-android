@@ -7,6 +7,7 @@
     * Use view binding
     * Upgrade BouncyCastle to `1.64`
 * [#2283](https://github.com/stripe/stripe-android/pull/2283) Bump 3DS2 SDK to `2.6.0`
+* [#2285](https://github.com/stripe/stripe-android/pull/2285) Create `BecsDebitMandateAcceptanceFactory` for generating BECS Debit mandate acceptance copy
 
 ## 14.1.1 - 2020-03-09
 * [#2257](https://github.com/stripe/stripe-android/pull/2257) Disable Kotlin Synthetics and migrate to [view binding](https://developer.android.com/topic/libraries/view-binding)
