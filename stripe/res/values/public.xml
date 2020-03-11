@@ -12,4 +12,6 @@
     <public name="shouldShowPostalCode" type="attr"/>
     <public name="shouldRequirePostalCode" type="attr"/>
 
+    <public name="becs_mandate_acceptance" type="string"/>
+
 </resources>

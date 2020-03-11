@@ -15,13 +15,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+        <TextView
+            android:id="@+id/mandate_acceptance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"/>
+
         <Button
             android:id="@+id/submit"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="20dp"
-            android:text="Create BECS Debit Params" />
+            android:text="@string/create_becs_debit_params" />
 
         <TextView
             android:id="@+id/status"
