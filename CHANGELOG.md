@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 14.2.0 - unreleased
+* [#2278](https://github.com/stripe/stripe-android/pull/2278) Add ability to require US ZIP code in `CardInputWidget` and `CardMultilineWidget`
+* [#2279](https://github.com/stripe/stripe-android/pull/2279) Default `CardMultilineWidget` to global postal code configuration
+* [#2282](https://github.com/stripe/stripe-android/pull/2282) Update pinned API version to `2020-03-02`
+    * Use view binding
+    * Upgrade BouncyCastle to `1.64`
+* [#2283](https://github.com/stripe/stripe-android/pull/2283) Bump 3DS2 SDK to `2.6.0`
+
 ## 14.1.1 - 2020-03-09
 * [#2257](https://github.com/stripe/stripe-android/pull/2257) Disable Kotlin Synthetics and migrate to [view binding](https://developer.android.com/topic/libraries/view-binding)
 * [#2260](https://github.com/stripe/stripe-android/pull/2260) Update Kotlin Gradle Plugin to `1.3.70`
