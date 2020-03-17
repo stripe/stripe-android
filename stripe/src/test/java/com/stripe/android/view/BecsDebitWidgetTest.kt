@@ -29,7 +29,7 @@ internal class BecsDebitWidgetTest : BaseViewTest<BecsDebitWidgetTestActivity>(
     private val bsbEditText: BecsDebitBsbEditText by lazy {
         becsDebitWidget.viewBinding.bsbEditText
     }
-    private val accountNumberEditText: StripeEditText by lazy {
+    private val accountNumberEditText: BecsDebitAccountNumberEditText by lazy {
         becsDebitWidget.viewBinding.accountNumberEditText
     }
 
@@ -93,6 +93,23 @@ internal class BecsDebitWidgetTest : BaseViewTest<BecsDebitWidgetTestActivity>(
                         .build()
                 )
             )
+    }
+
+    @Test
+    fun bsbChange_shouldUpdateAccountNumberEditTextMinLength() {
+        // default
+        assertThat(accountNumberEditText.minLength)
+            .isEqualTo(5)
+
+        // Stripe BSB
+        bsbEditText.setText("00")
+        assertThat(accountNumberEditText.minLength)
+            .isEqualTo(9)
+
+        // Stripe BSB
+        bsbEditText.setText("80")
+        assertThat(accountNumberEditText.minLength)
+            .isEqualTo(4)
     }
 
     private companion object {

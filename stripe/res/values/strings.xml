@@ -159,6 +159,8 @@
     <string name="becs_widget_bsb_incomplete" tools:ignore="MissingTranslation">The BSB you entered is incomplete.</string>
     <!-- BECS Debit Widget - account number field - required error message -->
     <string name="becs_widget_account_number_required" tools:ignore="MissingTranslation">Your account number is required.</string>
+    <!-- BECS Debit Widget - account number field - incomplete error message -->
+    <string name="becs_widget_account_number_incomplete" tools:ignore="MissingTranslation">Your account number is incomplete.</string>
     <!-- BECS Debit Widget - name field - required error message -->
     <string name="becs_widget_name_required" tools:ignore="MissingTranslation">Your name is required.</string>
     <!-- BECS Debit Widget - email address field - required error message -->

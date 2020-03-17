@@ -44,6 +44,30 @@ class BecsDebitWidget @JvmOverloads constructor(
                 viewBinding.bsbTextInputLayout.helperText = null
                 viewBinding.bsbTextInputLayout.isHelperTextEnabled = false
             }
+
+            viewBinding.accountNumberEditText.minLength = when (bank?.prefix?.take(2)) {
+                // Stripe
+                "00" -> 9
+
+                // ANZ: 9 digits https://www.anz.com.au/support/help/
+                "01" -> 9
+
+                // NAB: 9 digits
+                // https://www.nab.com.au/business/accounts/business-accounts-online-application-help
+                "08" -> 9
+
+                // Commonwealth/CBA: 8 digits
+                // https://www.commbank.com.au/support.digital-banking.confirm-account-number-digits.html
+                "06" -> 8
+
+                // Westpac/WBC: 6 digits
+                "03", "73" -> 6
+
+                // Cuscal: 4 digits(?)
+                "80" -> 4
+
+                else -> BecsDebitAccountNumberEditText.DEFAULT_MIN_LENGTH
+            }
         }
 
         viewBinding.bsbEditText.onCompletedCallback = {
@@ -79,9 +103,6 @@ class BecsDebitWidget @JvmOverloads constructor(
             ErrorListener(viewBinding.bsbTextInputLayout)
         )
 
-        viewBinding.accountNumberEditText.errorMessage = resources.getString(
-            R.string.becs_widget_account_number_required
-        )
         viewBinding.accountNumberEditText.setErrorMessageListener(
             ErrorListener(viewBinding.accountNumberTextInputLayout)
         )
@@ -104,15 +125,15 @@ class BecsDebitWidget @JvmOverloads constructor(
             val name = viewBinding.nameEditText.fieldText
             val email = viewBinding.emailEditText.fieldText
             val bsbNumber = viewBinding.bsbEditText.bsb
-            val accountNumber = viewBinding.accountNumberEditText.fieldText
+            val accountNumber = viewBinding.accountNumberEditText.accountNumber
 
             viewBinding.nameEditText.shouldShowError = name.isBlank()
             viewBinding.emailEditText.shouldShowError = email.isBlank()
             viewBinding.bsbEditText.shouldShowError = bsbNumber.isNullOrBlank()
-            viewBinding.accountNumberEditText.shouldShowError = accountNumber.isBlank()
+            viewBinding.accountNumberEditText.shouldShowError = accountNumber.isNullOrBlank()
 
             if (name.isBlank() || email.isBlank() || bsbNumber.isNullOrBlank() ||
-                accountNumber.isBlank()) {
+                accountNumber.isNullOrBlank()) {
                 return null
             }
 
