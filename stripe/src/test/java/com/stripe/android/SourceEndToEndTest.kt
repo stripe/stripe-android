@@ -1,20 +1,16 @@
 package com.stripe.android
 
-import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.model.KlarnaSourceParams
 import com.stripe.android.model.SourceOrder
 import com.stripe.android.model.SourceParams
-import kotlin.test.Ignore
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-// TODO(mshafrir-stripe): investigate test failures - ANDROID-461
-@Ignore("Klarna end-to-end tests are currently failing")
 @RunWith(RobolectricTestRunner::class)
 class SourceEndToEndTest {
     @Test
@@ -30,14 +26,22 @@ class SourceEndToEndTest {
         val stripe = createStripe(ApiKeyFixtures.KLARNA_PUBLISHABLE_KEY)
 
         val source = requireNotNull(stripe.createSourceSynchronous(sourceParams))
-        assertEquals(RETURN_URL, source.redirect?.returnUrl)
-        assertEquals(31999, source.amount)
+        assertThat(source.redirect?.returnUrl)
+            .isEqualTo(RETURN_URL)
+        assertThat(source.amount)
+            .isEqualTo(31999)
 
         val items = requireNotNull(source.sourceOrder?.items)
-        assertEquals(4, items.size)
-
-        assertEquals("towel", items[0].description)
-        assertEquals(SourceOrder.Item.Type.Sku, items[0].type)
+        assertThat(items)
+            .hasSize(4)
+        assertThat(items.first())
+            .isEqualTo(SourceOrder.Item(
+                type = SourceOrder.Item.Type.Sku,
+                amount = 10000,
+                currency = "eur",
+                description = "towel",
+                quantity = 1
+            ))
     }
 
     @Test
@@ -64,7 +68,8 @@ class SourceEndToEndTest {
         val stripe = createStripe(ApiKeyFixtures.KLARNA_PUBLISHABLE_KEY)
 
         val source = requireNotNull(stripe.createSourceSynchronous(sourceParams))
-        assertEquals(RETURN_URL, source.redirect?.returnUrl)
+        assertThat(source.redirect?.returnUrl)
+            .isEqualTo(RETURN_URL)
     }
 
     @Test
@@ -84,7 +89,8 @@ class SourceEndToEndTest {
 
         val stripe = createStripe(ApiKeyFixtures.KLARNA_PUBLISHABLE_KEY)
         val source = requireNotNull(stripe.createSourceSynchronous(sourceParams))
-        assertEquals(RETURN_URL, source.redirect?.returnUrl)
+        assertThat(source.redirect?.returnUrl)
+            .isEqualTo(RETURN_URL)
     }
 
     @Test
@@ -103,12 +109,13 @@ class SourceEndToEndTest {
         )
         val stripe = createStripe(ApiKeyFixtures.KLARNA_PUBLISHABLE_KEY)
         val source = requireNotNull(stripe.createSourceSynchronous(sourceParams))
-        assertEquals(RETURN_URL, source.redirect?.returnUrl)
+        assertThat(source.redirect?.returnUrl)
+            .isEqualTo(RETURN_URL)
     }
 
     private fun createStripe(publishableKey: String): Stripe {
         return Stripe(
-            ApplicationProvider.getApplicationContext<Context>(),
+            ApplicationProvider.getApplicationContext(),
             publishableKey
         )
     }
