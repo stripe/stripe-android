@@ -4,11 +4,11 @@
 * [#2278](https://github.com/stripe/stripe-android/pull/2278) Add ability to require US ZIP code in `CardInputWidget` and `CardMultilineWidget`
 * [#2279](https://github.com/stripe/stripe-android/pull/2279) Default `CardMultilineWidget` to global postal code configuration
 * [#2282](https://github.com/stripe/stripe-android/pull/2282) Update pinned API version to `2020-03-02`
+* [#2285](https://github.com/stripe/stripe-android/pull/2285) Create `BecsDebitMandateAcceptanceFactory` for generating BECS Debit mandate acceptance copy
+* [#2290](https://github.com/stripe/stripe-android/pull/2290) Bump 3DS2 SDK to `2.7.2`
+    * Fix `onActivityResult()` not called after 3DS2 challenge flow when "Don't keep activities" is enabled
     * Use view binding
     * Upgrade BouncyCastle to `1.64`
-* [#2285](https://github.com/stripe/stripe-android/pull/2285) Create `BecsDebitMandateAcceptanceFactory` for generating BECS Debit mandate acceptance copy
-* [#2290](https://github.com/stripe/stripe-android/pull/2290) Fix `onActivityResult()` not called after 3DS2 challenge flow when "Don't keep activities" is enabled
-    * Bump 3DS2 SDK to `2.7.2`
 
 ## 14.1.1 - 2020-03-09
 * [#2257](https://github.com/stripe/stripe-android/pull/2257) Disable Kotlin Synthetics and migrate to [view binding](https://developer.android.com/topic/libraries/view-binding)
