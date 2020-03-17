@@ -92,9 +92,6 @@ class BecsDebitWidget @JvmOverloads constructor(
             ErrorListener(viewBinding.nameTextInputLayout)
         )
 
-        viewBinding.emailEditText.errorMessage = resources.getString(
-            R.string.becs_widget_email_required
-        )
         viewBinding.emailEditText.setErrorMessageListener(
             ErrorListener(viewBinding.emailTextInputLayout)
         )
@@ -123,16 +120,16 @@ class BecsDebitWidget @JvmOverloads constructor(
     val params: PaymentMethodCreateParams?
         get() {
             val name = viewBinding.nameEditText.fieldText
-            val email = viewBinding.emailEditText.fieldText
+            val email = viewBinding.emailEditText.email
             val bsbNumber = viewBinding.bsbEditText.bsb
             val accountNumber = viewBinding.accountNumberEditText.accountNumber
 
             viewBinding.nameEditText.shouldShowError = name.isBlank()
-            viewBinding.emailEditText.shouldShowError = email.isBlank()
+            viewBinding.emailEditText.shouldShowError = email.isNullOrBlank()
             viewBinding.bsbEditText.shouldShowError = bsbNumber.isNullOrBlank()
             viewBinding.accountNumberEditText.shouldShowError = accountNumber.isNullOrBlank()
 
-            if (name.isBlank() || email.isBlank() || bsbNumber.isNullOrBlank() ||
+            if (name.isBlank() || email.isNullOrBlank() || bsbNumber.isNullOrBlank() ||
                 accountNumber.isNullOrBlank()) {
                 return null
             }
