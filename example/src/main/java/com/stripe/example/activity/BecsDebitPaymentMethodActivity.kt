@@ -6,6 +6,7 @@ import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.view.BecsDebitWidget
 import com.stripe.example.databinding.BecsDebitActivityBinding
 
 class BecsDebitPaymentMethodActivity : AppCompatActivity() {
@@ -22,6 +23,12 @@ class BecsDebitPaymentMethodActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
+
+        viewBinding.element.validParamsCallback = object : BecsDebitWidget.ValidParamsCallback {
+            override fun onInputChanged(isValid: Boolean) {
+                viewBinding.submit.isEnabled = isValid
+            }
+        }
 
         viewBinding.mandateAcceptance.merchantName = "Rocketship Inc."
 

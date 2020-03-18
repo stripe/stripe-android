@@ -112,6 +112,48 @@ internal class BecsDebitWidgetTest : BaseViewTest<BecsDebitWidgetTestActivity>(
             .isEqualTo(4)
     }
 
+    @Test
+    fun validParamsCallback_shouldBeCalledWhenInputChanges() {
+        var isValidArg = false
+        var callbacks = 0
+        becsDebitWidget.validParamsCallback = object : BecsDebitWidget.ValidParamsCallback {
+            override fun onInputChanged(isValid: Boolean) {
+                callbacks++
+                isValidArg = isValid
+            }
+        }
+
+        assertThat(isValidArg)
+            .isFalse()
+        assertThat(callbacks)
+            .isEqualTo(0)
+
+        nameEditText.setText("Jenny Rosen")
+        assertThat(isValidArg)
+            .isFalse()
+        assertThat(callbacks)
+            .isEqualTo(1)
+
+        emailEditText.setText("jrosen@example.com")
+        assertThat(isValidArg)
+            .isFalse()
+        assertThat(callbacks)
+            .isEqualTo(2)
+
+        bsbEditText.setText("000000")
+        assertThat(isValidArg)
+            .isFalse()
+        // there is an additional callback because "000000" is formatted to "000-000"
+        assertThat(callbacks)
+            .isEqualTo(4)
+
+        accountNumberEditText.setText("000123456")
+        assertThat(isValidArg)
+            .isTrue()
+        assertThat(callbacks)
+            .isEqualTo(5)
+    }
+
     private companion object {
         private const val VALID_BSB_NUMBER = "000000"
         private const val VALID_ACCOUNT_NUMBER = "000123456"

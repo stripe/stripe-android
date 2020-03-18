@@ -30,10 +30,43 @@ class BecsDebitWidget @JvmOverloads constructor(
         )
     }
 
+    var validParamsCallback: ValidParamsCallback = object : ValidParamsCallback {
+        override fun onInputChanged(isValid: Boolean) {
+            // no-op default implementation
+        }
+    }
+
+    private val validParamsTextWatcher = object : StripeTextWatcher() {
+        override fun afterTextChanged(s: Editable?) {
+            super.afterTextChanged(s)
+            validParamsCallback.onInputChanged(isInputValid)
+        }
+    }
+
+    private val isInputValid: Boolean
+        get() {
+            val name = viewBinding.nameEditText.fieldText
+            val email = viewBinding.emailEditText.email
+            val bsbNumber = viewBinding.bsbEditText.bsb
+            val accountNumber = viewBinding.accountNumberEditText.accountNumber
+
+            return !(name.isBlank() || email.isNullOrBlank() || bsbNumber.isNullOrBlank() ||
+                accountNumber.isNullOrBlank())
+        }
+
     init {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             viewBinding.nameEditText.setAutofillHints(View.AUTOFILL_HINT_NAME)
             viewBinding.emailEditText.setAutofillHints(View.AUTOFILL_HINT_EMAIL_ADDRESS)
+        }
+
+        setOf(
+            viewBinding.nameEditText,
+            viewBinding.emailEditText,
+            viewBinding.bsbEditText,
+            viewBinding.accountNumberEditText
+        ).forEach {
+            it.addTextChangedListener(validParamsTextWatcher)
         }
 
         viewBinding.bsbEditText.onBankChangedCallback = { bank ->
@@ -145,4 +178,11 @@ class BecsDebitWidget @JvmOverloads constructor(
                 )
             )
         }
+
+    interface ValidParamsCallback {
+        /**
+         * @param isValid if the current input is valid
+         */
+        fun onInputChanged(isValid: Boolean)
+    }
 }
