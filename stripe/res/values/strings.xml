@@ -165,6 +165,8 @@
     <string name="becs_widget_name_required" tools:ignore="MissingTranslation">Your name is required.</string>
     <!-- BECS Debit Widget - email address field - required error message -->
     <string name="becs_widget_email_required" tools:ignore="MissingTranslation">Your email address is required.</string>
+    <!-- BECS Debit Widget - email address field - invalid error message -->
+    <string name="becs_widget_email_invalid" tools:ignore="MissingTranslation">Your email address is invalid.</string>
     <!-- BECS Debit Widget - mandate acceptance -->
     <string name="becs_mandate_acceptance" tools:ignore="MissingTranslation">
     By providing your bank account details and confirming this payment, you agree to this

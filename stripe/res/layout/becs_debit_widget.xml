@@ -52,7 +52,7 @@
                 tools:ignore="UnusedAttribute"
                 style="@style/Widget.Design.TextInputLayout">
 
-                <com.stripe.android.view.StripeEditText
+                <com.stripe.android.view.EmailEditText
                     android:id="@+id/email_edit_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
