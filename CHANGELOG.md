@@ -9,6 +9,9 @@
     * Fix `onActivityResult()` not called after 3DS2 challenge flow when "Don't keep activities" is enabled
     * Use view binding
     * Upgrade BouncyCastle to `1.64`
+* [#2293](https://github.com/stripe/stripe-android/pull/2293) Add min length validation to BECS account number
+* [#2295](https://github.com/stripe/stripe-android/pull/2295) Create `BecsDebitMandateAcceptanceTextView`
+* [#2297](https://github.com/stripe/stripe-android/pull/2297) Add `BecsDebitWidget.ValidParamsCallback`
 
 ## 14.1.1 - 2020-03-09
 * [#2257](https://github.com/stripe/stripe-android/pull/2257) Disable Kotlin Synthetics and migrate to [view binding](https://developer.android.com/topic/libraries/view-binding)
