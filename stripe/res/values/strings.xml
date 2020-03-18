@@ -168,8 +168,9 @@
     <!-- BECS Debit Widget - mandate acceptance -->
     <string name="becs_mandate_acceptance" tools:ignore="MissingTranslation">
     By providing your bank account details and confirming this payment, you agree to this
-    Direct Debit Request and the Direct Debit Request service agreement, and authorise
-    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156
+    Direct Debit Request and the
+    &lt;a href="https://stripe.com/au-becs-dd-service-agreement/legal"&gt;Direct Debit Request service agreement&lt;/a&gt;,
+    and authorise Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156
     (“Stripe”) to debit your account through the Bulk Electronic Clearing System (BECS) on
     behalf of %1$s (the "Merchant") for any amounts separately communicated to you
     by the Merchant. You certify that you are either an account holder or an authorised

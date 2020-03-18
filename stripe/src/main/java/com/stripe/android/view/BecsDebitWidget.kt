@@ -15,7 +15,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 /**
  * A form for accepting a customer's BECS account information.
  *
- * See [BecsDebitMandateAcceptanceFactory] for creating the mandate acceptance copy.
+ * See [BecsDebitMandateAcceptanceTextFactory] for creating the mandate acceptance copy.
  */
 class BecsDebitWidget @JvmOverloads constructor(
     context: Context,
