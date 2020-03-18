@@ -1,24 +1,6 @@
 # CHANGELOG
 
 ## 14.2.0 - 2020-03-18
-* [#2297](https://github.com/stripe/stripe-android/pull/2297) Add BecsDebitWidget.ValidParamsCallback
-* [#2295](https://github.com/stripe/stripe-android/pull/2295) Create BecsDebitMandateAcceptanceTextView
-* [#2294](https://github.com/stripe/stripe-android/pull/2294) Create EmailEditText to validate email input in BecsDebitWidget
-* [#2293](https://github.com/stripe/stripe-android/pull/2293) Add min length validation to BECS account number
-* [#2292](https://github.com/stripe/stripe-android/pull/2292) Update FragmentExamplesActivity
-* [#2291](https://github.com/stripe/stripe-android/pull/2291) Re-enable SourceEndToEndTest
-* [#2290](https://github.com/stripe/stripe-android/pull/2290) Pass Intent to start upon 3DS2 challenge flow completion to 3DS2 SDK
-* [#2289](https://github.com/stripe/stripe-android/pull/2289) Bump dependencies
-* [#2285](https://github.com/stripe/stripe-android/pull/2285) Create BecsDebitMandateAcceptanceFactory
-* [#2281](https://github.com/stripe/stripe-android/pull/2281) Add new card widget to PaymentIntent confirmation example
-* [#2284](https://github.com/stripe/stripe-android/pull/2284) Update changelog for 14.2.0
-* [#2283](https://github.com/stripe/stripe-android/pull/2283) Bump 3DS2 SDK to 2.6.0
-* [#2282](https://github.com/stripe/stripe-android/pull/2282) Update pinned API version to 2020-03-02
-* [#2279](https://github.com/stripe/stripe-android/pull/2279) Default CardMultilineWidget to global postal code configuration
-* [#2278](https://github.com/stripe/stripe-android/pull/2278) Add ability to require ZIP code in CardInputWidget and CardMultilineWidget
-* [#2277](https://github.com/stripe/stripe-android/pull/2277) Clean up PostalCodeEditText
-* [#2276](https://github.com/stripe/stripe-android/pull/2276) Move autofill rules to StripeEditTexts
-* [#2275](https://github.com/stripe/stripe-android/pull/2275) Generate docs for v14.1.1
 * [#2278](https://github.com/stripe/stripe-android/pull/2278) Add ability to require US ZIP code in `CardInputWidget` and `CardMultilineWidget`
 * [#2279](https://github.com/stripe/stripe-android/pull/2279) Default `CardMultilineWidget` to global postal code configuration
 * [#2282](https://github.com/stripe/stripe-android/pull/2282) Update pinned API version to `2020-03-02`
