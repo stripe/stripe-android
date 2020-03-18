@@ -6,7 +6,6 @@ import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.view.BecsDebitMandateAcceptanceFactory
 import com.stripe.example.databinding.BecsDebitActivityBinding
 
 class BecsDebitPaymentMethodActivity : AppCompatActivity() {
@@ -19,15 +18,12 @@ class BecsDebitPaymentMethodActivity : AppCompatActivity() {
     private val keyboardController: KeyboardController by lazy {
         KeyboardController(this)
     }
-    private val mandateAcceptanceFactory: BecsDebitMandateAcceptanceFactory by lazy {
-        BecsDebitMandateAcceptanceFactory(this)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
-        viewBinding.mandateAcceptance.text = mandateAcceptanceFactory.create("Rocketship Inc.")
+        viewBinding.mandateAcceptance.merchantName = "Rocketship Inc."
 
         viewBinding.submit.setOnClickListener {
             viewBinding.element.params?.let { params ->
