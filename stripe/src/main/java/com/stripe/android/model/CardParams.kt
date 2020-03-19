@@ -1,15 +1,14 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
-import com.stripe.android.ObjectBuilder
 import kotlinx.android.parcel.Parcelize
 
 /**
  * [Create a card token](https://stripe.com/docs/api/tokens/create_card)
  */
 @Parcelize
-internal data class CardParams @JvmOverloads internal constructor(
-    internal var attribution: Set<String> = emptySet(),
+internal data class CardParams internal constructor(
+    internal val attribution: Set<String> = emptySet(),
 
     /**
      * [card.number](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-number)
@@ -18,7 +17,7 @@ internal data class CardParams @JvmOverloads internal constructor(
      *
      * The card number, as a string without any separators.
      */
-    private val number: String,
+    var number: String,
 
     /**
      * [card.exp_month](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-exp_month)
@@ -27,7 +26,7 @@ internal data class CardParams @JvmOverloads internal constructor(
      *
      * Two-digit number representing the card's expiration month.
      */
-    private val expMonth: Int,
+    var expMonth: Int,
 
     /**
      * [card.exp_year](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-exp_year)
@@ -36,7 +35,7 @@ internal data class CardParams @JvmOverloads internal constructor(
      *
      * Two- or four-digit number representing the card's expiration year.
      */
-    private val expYear: Int,
+    var expYear: Int,
 
     /**
      * [card.cvc](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-cvc)
@@ -46,7 +45,7 @@ internal data class CardParams @JvmOverloads internal constructor(
      * Card security code. Highly recommended to always include this value, but it's required only
      * for accounts based in European countries.
      */
-    private val cvc: String? = null,
+    var cvc: String? = null,
 
     /**
      * [card.name](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-name)
@@ -55,9 +54,9 @@ internal data class CardParams @JvmOverloads internal constructor(
      *
      * Cardholder's full name.
      */
-    private val name: String? = null,
+    var name: String? = null,
 
-    private val address: Address? = null,
+    var address: Address? = null,
 
     /**
      * [card.currency](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-currency)
@@ -69,8 +68,10 @@ internal data class CardParams @JvmOverloads internal constructor(
      * as a transfer destination for funds in this currency. Currently, the only supported
      * currency for debit card payouts is `usd`.
      */
-    private val currency: String? = null
+    var currency: String? = null
 ) : StripeParamsModel, Parcelable {
+
+    @JvmOverloads
     constructor(
         /**
          * [card.number](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-number)
@@ -163,43 +164,6 @@ internal data class CardParams @JvmOverloads internal constructor(
         }
 
         return mapOf(Token.TokenType.CARD to params)
-    }
-
-    class Builder : ObjectBuilder<CardParams> {
-        private var number: String? = null
-        private var expMonth: Int? = null
-        private var expYear: Int? = null
-        private var cvc: String? = null
-        private var name: String? = null
-        private var address: Address? = null
-        private var currency: String? = null
-        private var attribution: Set<String> = emptySet()
-
-        fun setNumber(number: String): Builder = apply { this.number = number }
-        fun setExpMonth(expMonth: Int): Builder = apply { this.expMonth = expMonth }
-        fun setExpYear(expYear: Int): Builder = apply { this.expYear = expYear }
-        fun setCvc(cvc: String?): Builder = apply { this.cvc = cvc }
-        fun setName(name: String?): Builder = apply { this.name = name }
-        fun setAddress(address: Address?): Builder = apply { this.address = address }
-        fun setCurrency(currency: String?): Builder = apply { this.currency = currency }
-
-        @JvmSynthetic
-        internal fun setAttribution(attribution: Set<String>): Builder = apply {
-            this.attribution = attribution
-        }
-
-        override fun build(): CardParams {
-            return CardParams(
-                number = requireNotNull(number),
-                expMonth = requireNotNull(expMonth),
-                expYear = requireNotNull(expYear),
-                cvc = cvc,
-                name = name,
-                address = address,
-                currency = currency,
-                attribution = attribution
-            )
-        }
     }
 
     private companion object {
