@@ -307,11 +307,11 @@ class SourceParams private constructor(
      * particular source types.
      */
     @Parcelize
-    data class OwnerParams internal constructor(
-        internal val address: Address? = null,
-        internal val email: String? = null,
-        internal val name: String? = null,
-        internal val phone: String? = null
+    data class OwnerParams @JvmOverloads constructor(
+        internal var address: Address? = null,
+        internal var email: String? = null,
+        internal var name: String? = null,
+        internal var phone: String? = null
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
             return emptyMap<String, Any>()
