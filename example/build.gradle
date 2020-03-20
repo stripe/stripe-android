@@ -13,7 +13,7 @@ configurations {
 }
 
 ext {
-    retrofitVersion = '2.7.1'
+    retrofitVersion = '2.7.2'
 }
 
 // Read values from gradle.properties or system environment variable
