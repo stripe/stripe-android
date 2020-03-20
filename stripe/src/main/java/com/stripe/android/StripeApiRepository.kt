@@ -58,6 +58,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     private val stripeApiRequestExecutor: ApiRequestExecutor = ApiRequestExecutor.Default(logger),
     private val fireAndForgetRequestExecutor: FireAndForgetRequestExecutor =
         StripeFireAndForgetRequestExecutor(logger),
+    private val fingerprintRequestExecutor: FingerprintRequestExecutor =
+        FingerprintRequestExecutor.Default(),
     private val fingerprintRequestFactory: FingerprintRequestFactory =
         FingerprintRequestFactory(context),
     private val uidParamsFactory: UidParamsFactory = UidParamsFactory.create(context),
@@ -965,7 +967,9 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     private fun fireFingerprintRequest() {
-        makeFireAndForgetRequest(fingerprintRequestFactory.create())
+        fingerprintRequestExecutor.execute(fingerprintRequestFactory.create()) {
+            // TODO(mshafrir-stripe): handle fingerprint response - ANDROID-496
+        }
     }
 
     private fun fireAnalyticsRequest(

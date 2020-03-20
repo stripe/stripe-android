@@ -18,7 +18,7 @@ internal interface ApiRequestExecutor {
     class Default internal constructor(
         private val logger: Logger = Logger.noop()
     ) : ApiRequestExecutor {
-        private val connectionFactory: ConnectionFactory = ConnectionFactory()
+        private val connectionFactory = ConnectionFactory.Default()
 
         @Throws(APIConnectionException::class, InvalidRequestException::class, UnknownHostException::class)
         override fun execute(request: ApiRequest): StripeResponse {

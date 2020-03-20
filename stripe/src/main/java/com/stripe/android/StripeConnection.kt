@@ -27,7 +27,11 @@ internal class StripeConnection internal constructor(
         get() {
             // trigger the request
             val responseCode = this.responseCode
-            return StripeResponse(responseCode, responseBody, conn.headerFields)
+            return StripeResponse(
+                code = responseCode,
+                body = responseBody,
+                headers = conn.headerFields
+            )
         }
 
     private val responseBody: String?

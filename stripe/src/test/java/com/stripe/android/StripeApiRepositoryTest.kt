@@ -43,7 +43,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import org.mockito.Mockito.`when`
-import org.mockito.Mockito.times
 import org.robolectric.RobolectricTestRunner
 
 /**
@@ -64,10 +63,12 @@ class StripeApiRepositoryTest {
 
     private val stripeApiRequestExecutor: ApiRequestExecutor = mock()
     private val fireAndForgetRequestExecutor: FireAndForgetRequestExecutor = mock()
+    private val fingerprintRequestExecutor: FingerprintRequestExecutor = mock()
 
     private val apiRequestArgumentCaptor: KArgumentCaptor<ApiRequest> = argumentCaptor()
     private val fileUploadRequestArgumentCaptor: KArgumentCaptor<FileUploadRequest> = argumentCaptor()
     private val stripeRequestArgumentCaptor: KArgumentCaptor<StripeRequest> = argumentCaptor()
+    private val fingerprintRequestArgumentCaptor: KArgumentCaptor<FingerprintRequest> = argumentCaptor()
 
     @BeforeTest
     fun before() {
@@ -356,8 +357,7 @@ class StripeApiRepositoryTest {
 
         verifyFingerprintAndAnalyticsRequests(AnalyticsEvent.PaymentIntentConfirm)
 
-        val stripeRequests = stripeRequestArgumentCaptor.allValues
-        val analyticsRequest = stripeRequests[1] as ApiRequest
+        val analyticsRequest = stripeRequestArgumentCaptor.firstValue as ApiRequest
         assertEquals(PaymentMethod.Type.Card.code, analyticsRequest.params?.get("source_type"))
     }
 
@@ -393,9 +393,10 @@ class StripeApiRepositoryTest {
     fun createSource_createsObjectAndLogs() {
         val stripeApiRepository = StripeApiRepository(
             context,
-            ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            DEFAULT_OPTIONS.apiKey,
             stripeApiRequestExecutor = ApiRequestExecutor.Default(),
-            fireAndForgetRequestExecutor = fireAndForgetRequestExecutor
+            fireAndForgetRequestExecutor = fireAndForgetRequestExecutor,
+            fingerprintRequestExecutor = fingerprintRequestExecutor
         )
         val source = stripeApiRepository.createSource(
             SourceParams.createCardParams(CARD),
@@ -697,7 +698,7 @@ class StripeApiRepositoryTest {
 
         val stripeRepository = StripeApiRepository(
             context,
-            ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            DEFAULT_OPTIONS.apiKey,
             sdkVersion = "AndroidBindings/13.0.0"
         )
 
@@ -719,7 +720,7 @@ class StripeApiRepositoryTest {
 
         val stripeRepository = StripeApiRepository(
             context,
-            ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            DEFAULT_OPTIONS.apiKey,
             sdkVersion = "AndroidBindings/14.0.0"
         )
 
@@ -780,7 +781,9 @@ class StripeApiRepositoryTest {
             PaymentMethodFixtures.CARD_JSON.toString(),
             emptyMap()
         )
-        `when`(stripeApiRequestExecutor.execute(any<ApiRequest>())).thenReturn(stripeResponse)
+        `when`(stripeApiRequestExecutor.execute(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
         create().createPaymentMethod(
             PaymentMethodCreateParams.create(
                 PaymentMethodCreateParamsFixtures.CARD
@@ -820,15 +823,16 @@ class StripeApiRepositoryTest {
         event: AnalyticsEvent,
         productUsage: List<String>? = null
     ) {
-        verify(fireAndForgetRequestExecutor, times(2))
+        verify(fireAndForgetRequestExecutor)
             .executeAsync(stripeRequestArgumentCaptor.capture())
 
-        val fireAndForgetRequests = stripeRequestArgumentCaptor.allValues
+        verify(fingerprintRequestExecutor)
+            .execute(fingerprintRequestArgumentCaptor.capture(), any())
 
-        val fingerprintRequest = fireAndForgetRequests[0] as FingerprintRequest
+        val fingerprintRequest = fingerprintRequestArgumentCaptor.firstValue
         assertNotNull(fingerprintRequest)
 
-        val analyticsRequest = fireAndForgetRequests[1]
+        val analyticsRequest = stripeRequestArgumentCaptor.firstValue
         val analyticsParams = analyticsRequest.compactParams.orEmpty()
         assertEquals(
             event.toString(),
@@ -847,6 +851,7 @@ class StripeApiRepositoryTest {
             DEFAULT_OPTIONS.apiKey,
             stripeApiRequestExecutor = stripeApiRequestExecutor,
             fireAndForgetRequestExecutor = fireAndForgetRequestExecutor,
+            fingerprintRequestExecutor = fingerprintRequestExecutor,
             networkUtils = StripeNetworkUtils(
                 UidParamsFactory("com.stripe.example", FakeUidSupplier())
             )

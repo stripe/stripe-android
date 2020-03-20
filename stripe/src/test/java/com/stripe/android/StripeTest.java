@@ -34,7 +34,6 @@ import com.stripe.android.model.WeChat;
 import java.io.File;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -62,7 +61,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -85,6 +83,7 @@ public class StripeTest {
     private Context context;
 
     @Captor private ArgumentCaptor<StripeRequest> stripeRequestArgumentCaptor;
+    @Mock private FingerprintRequestExecutor fingerprintRequestExecutor;
     @Mock private FireAndForgetRequestExecutor fireAndForgetRequestExecutor;
 
     @Mock private ApiResultCallback<Token> tokenCallback;
@@ -1199,11 +1198,9 @@ public class StripeTest {
         assertEquals("4242", createdPaymentMethod.card.last4);
         assertEquals(metadata, createdPaymentMethod.metadata);
 
-        verify(fireAndForgetRequestExecutor, times(2))
+        verify(fireAndForgetRequestExecutor)
                 .executeAsync(stripeRequestArgumentCaptor.capture());
-        final List<StripeRequest> fireAndForgetRequests =
-                stripeRequestArgumentCaptor.getAllValues();
-        final StripeRequest analyticsRequest = fireAndForgetRequests.get(1);
+        final StripeRequest analyticsRequest = stripeRequestArgumentCaptor.getValue();
         assertEquals(AnalyticsRequestFactory.HOST, analyticsRequest.getBaseUrl());
         assertEquals(createdPaymentMethod.id,
                 analyticsRequest.getParams().get(AnalyticsDataFactory.FIELD_PAYMENT_METHOD_ID));
@@ -1238,11 +1235,9 @@ public class StripeTest {
         assertNull(createdPaymentMethod.card);
         assertEquals("INGBNL2A", createdPaymentMethod.ideal.bankIdentifierCode);
 
-        verify(fireAndForgetRequestExecutor, times(2))
+        verify(fireAndForgetRequestExecutor)
                 .executeAsync(stripeRequestArgumentCaptor.capture());
-        final List<StripeRequest> fireAndForgetRequests =
-                stripeRequestArgumentCaptor.getAllValues();
-        final StripeRequest analyticsRequest = fireAndForgetRequests.get(1);
+        final StripeRequest analyticsRequest = stripeRequestArgumentCaptor.getValue();
         assertEquals(AnalyticsRequestFactory.HOST, analyticsRequest.getBaseUrl());
         assertEquals(createdPaymentMethod.id,
                 analyticsRequest.getParams().get(AnalyticsDataFactory.FIELD_PAYMENT_METHOD_ID));
@@ -1283,11 +1278,9 @@ public class StripeTest {
         assertNull(createdPaymentMethod.card);
         assertEquals("hsbc", createdPaymentMethod.fpx.bank);
 
-        verify(fireAndForgetRequestExecutor, times(2))
+        verify(fireAndForgetRequestExecutor)
                 .executeAsync(stripeRequestArgumentCaptor.capture());
-        final List<StripeRequest> fireAndForgetRequests =
-                stripeRequestArgumentCaptor.getAllValues();
-        final StripeRequest analyticsRequest = fireAndForgetRequests.get(1);
+        final StripeRequest analyticsRequest = stripeRequestArgumentCaptor.getValue();
         assertEquals(AnalyticsRequestFactory.HOST, analyticsRequest.getBaseUrl());
         assertEquals(createdPaymentMethod.id,
                 analyticsRequest.getParams().get(AnalyticsDataFactory.FIELD_PAYMENT_METHOD_ID));
@@ -1436,6 +1429,7 @@ public class StripeTest {
                 new FakeLogger(),
                 new ApiRequestExecutor.Default(),
                 fireAndForgetRequestExecutor,
+                fingerprintRequestExecutor,
                 new FingerprintRequestFactory(
                         new TelemetryClientUtil(context, new FakeUidSupplier())
                 )
