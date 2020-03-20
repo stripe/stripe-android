@@ -3,6 +3,8 @@ package com.stripe.android.view
 import android.content.Context
 import android.os.Build
 import android.telephony.PhoneNumberFormattingTextWatcher
+import android.text.InputFilter
+import android.text.InputFilter.AllCaps
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
@@ -123,7 +125,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
         optionalShippingInfoFields = optionalAddressFields.orEmpty()
         renderLabels()
 
-        countryAutoCompleteTextView.selectedCountry?.let(::renderCountrySpecificLabels)
+        countryAutoCompleteTextView.selectedCountry?.let(::updateConfigForCountry)
     }
 
     /**
@@ -134,7 +136,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
         hiddenShippingInfoFields = hiddenAddressFields.orEmpty()
         renderLabels()
 
-        countryAutoCompleteTextView.selectedCountry?.let(::renderCountrySpecificLabels)
+        countryAutoCompleteTextView.selectedCountry?.let(::updateConfigForCountry)
     }
 
     /**
@@ -228,13 +230,13 @@ class ShippingInfoWidget @JvmOverloads constructor(
     }
 
     private fun initView() {
-        countryAutoCompleteTextView.countryChangeCallback = ::renderCountrySpecificLabels
+        countryAutoCompleteTextView.countryChangeCallback = ::updateConfigForCountry
 
         phoneNumberEditText.addTextChangedListener(PhoneNumberFormattingTextWatcher())
         setupErrorHandling()
         renderLabels()
 
-        countryAutoCompleteTextView.selectedCountry?.let(::renderCountrySpecificLabels)
+        countryAutoCompleteTextView.selectedCountry?.let(::updateConfigForCountry)
     }
 
     private fun setupErrorHandling() {
@@ -289,13 +291,15 @@ class ShippingInfoWidget @JvmOverloads constructor(
         }
     }
 
-    private fun renderCountrySpecificLabels(country: Country) {
+    private fun updateConfigForCountry(country: Country) {
         when (country.code) {
             Locale.US.country -> renderUSForm()
             Locale.UK.country -> renderGreatBritainForm()
             Locale.CANADA.country -> renderCanadianForm()
             else -> renderInternationalForm()
         }
+
+        updatePostalCodeInputFilter(country)
 
         postalCodeTextInputLayout.visibility =
             if (CountryUtils.doesCountryUsePostalCode(country.code) &&
@@ -304,6 +308,13 @@ class ShippingInfoWidget @JvmOverloads constructor(
             } else {
                 View.GONE
             }
+    }
+
+    private fun updatePostalCodeInputFilter(country: Country) {
+        postalCodeEditText.filters = when (country.code) {
+            Locale.CANADA.country -> arrayOf<InputFilter>(AllCaps())
+            else -> arrayOf<InputFilter>()
+        }
     }
 
     private fun renderUSForm() {
