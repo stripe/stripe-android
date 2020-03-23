@@ -22,10 +22,9 @@ class FingerprintRequestExecutorTest {
     fun execute_whenSuccessful_shouldReturnResponseWithUuid() {
         createFingerprintRequestExecutor().execute(
             request = fingerprintRequestFactory.create()
-        ) { (responseBody) ->
-            val uuid = UUID.fromString(responseBody)
-            assertThat(uuid.toString())
-                .isEqualTo(responseBody)
+        ) {
+            assertThat(UUID.fromString(it.guid))
+                .isNotNull()
         }
     }
 

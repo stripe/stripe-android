@@ -1,5 +1,6 @@
 package com.stripe.android
 
+import java.util.Calendar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -8,16 +9,20 @@ import kotlinx.coroutines.withContext
 internal interface FingerprintRequestExecutor {
     fun execute(
         request: FingerprintRequest,
-        callback: (FingerprintResponse) -> Unit
+        callback: (FingerprintData) -> Unit
     )
 
     class Default(
         private val workScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
         private val connectionFactory: ConnectionFactory = ConnectionFactory.Default()
     ) : FingerprintRequestExecutor {
+        private val timestampSupplier = {
+            Calendar.getInstance().timeInMillis
+        }
+
         override fun execute(
             request: FingerprintRequest,
-            callback: (FingerprintResponse) -> Unit
+            callback: (FingerprintData) -> Unit
         ) {
             workScope.launch {
                 val response = try {
@@ -35,12 +40,13 @@ internal interface FingerprintRequestExecutor {
             }
         }
 
-        private fun executeInternal(request: FingerprintRequest): FingerprintResponse? {
+        private fun executeInternal(request: FingerprintRequest): FingerprintData? {
             connectionFactory.create(request).use { conn ->
                 return try {
                     conn.response.takeIf { it.isOk }?.let {
-                        FingerprintResponse(
-                            body = it.body
+                        FingerprintData(
+                            guid = it.body,
+                            timestamp = timestampSupplier()
                         )
                     }
                 } catch (e: Exception) {
