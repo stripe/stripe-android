@@ -7,6 +7,6 @@ internal class FakeUidSupplier @JvmOverloads constructor(
 ) : Supplier<StripeUid> {
 
     override fun get(): StripeUid {
-        return StripeUid.create(value)
+        return StripeUid(value)
     }
 }

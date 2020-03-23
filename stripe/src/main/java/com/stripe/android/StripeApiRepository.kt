@@ -64,7 +64,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         FingerprintRequestFactory(context),
     private val fingerprintDataRepository: FingerprintDataRepository =
         FingerprintDataRepository.Default(context),
-    private val uidParamsFactory: UidParamsFactory = UidParamsFactory.create(context),
+    private val uidParamsFactory: UidParamsFactory = UidParamsFactory(context),
     private val analyticsDataFactory: AnalyticsDataFactory =
         AnalyticsDataFactory(context, publishableKey),
     private val networkUtils: StripeNetworkUtils = StripeNetworkUtils(context),

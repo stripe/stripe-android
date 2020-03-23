@@ -12,7 +12,7 @@ internal class StripeNetworkUtils @VisibleForTesting constructor(
     private val uidParamsFactory: UidParamsFactory
 ) {
     constructor(context: Context) : this(
-        UidParamsFactory.create(context)
+        UidParamsFactory(context)
     )
 
     internal fun paramsWithUid(intentParams: Map<String, *>): Map<String, *> {
