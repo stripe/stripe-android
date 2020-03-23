@@ -13,8 +13,7 @@ import kotlinx.coroutines.launch
 internal class StripeFireAndForgetRequestExecutor(
     private val logger: Logger = Logger.noop()
 ) : FireAndForgetRequestExecutor {
-
-    private val connectionFactory: ConnectionFactory = ConnectionFactory()
+    private val connectionFactory = ConnectionFactory.Default()
     private val job = SupervisorJob()
     private val scope = CoroutineScope(Dispatchers.Default + job)
 
