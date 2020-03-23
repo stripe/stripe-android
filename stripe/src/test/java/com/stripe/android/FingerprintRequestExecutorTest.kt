@@ -20,7 +20,7 @@ class FingerprintRequestExecutorTest {
 
     @Test
     fun execute_whenSuccessful_shouldReturnResponseWithUuid() {
-        create().execute(
+        createFingerprintRequestExecutor().execute(
             request = fingerprintRequestFactory.create()
         ) { (responseBody) ->
             val uuid = UUID.fromString(responseBody)
@@ -30,13 +30,20 @@ class FingerprintRequestExecutorTest {
     }
 
     @Test
-    fun execute_whenConnectionException_shouldNotInvokeCallback() {
+    fun execute_whenErrorResponse_shouldNotInvokeCallback() {
         var callbackCount = 0
 
         val request = fingerprintRequestFactory.create()
-        val connectionFactory: ConnectionFactory = mock()
-        whenever(connectionFactory.create(request)).thenThrow(IOException())
-        create(connectionFactory = connectionFactory)
+        val connection = mock<StripeConnection>().also {
+            whenever(it.responseCode).thenReturn(500)
+        }
+
+        val connectionFactory = mock<ConnectionFactory>().also {
+            whenever(it.create(request))
+                .thenReturn(connection)
+        }
+
+        createFingerprintRequestExecutor(connectionFactory = connectionFactory)
             .execute(
                 request = request,
                 callback = {
@@ -48,7 +55,27 @@ class FingerprintRequestExecutorTest {
             .isEqualTo(0)
     }
 
-    private fun create(
+    @Test
+    fun execute_whenConnectionException_shouldNotInvokeCallback() {
+        var callbackCount = 0
+
+        val request = fingerprintRequestFactory.create()
+        val connectionFactory = mock<ConnectionFactory>().also {
+            whenever(it.create(request)).thenThrow(IOException())
+        }
+        createFingerprintRequestExecutor(connectionFactory = connectionFactory)
+            .execute(
+                request = request,
+                callback = {
+                    callbackCount++
+                }
+            )
+
+        assertThat(callbackCount)
+            .isEqualTo(0)
+    }
+
+    private fun createFingerprintRequestExecutor(
         connectionFactory: ConnectionFactory = ConnectionFactory.Default()
     ) = FingerprintRequestExecutor.Default(
         workScope = MainScope(),

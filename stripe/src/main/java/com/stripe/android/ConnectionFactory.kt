@@ -33,7 +33,7 @@ internal interface ConnectionFactory {
                 }
             }
 
-            return StripeConnection(conn)
+            return StripeConnection.Default(conn)
         }
 
         private fun openConnection(requestUrl: String): HttpsURLConnection {
