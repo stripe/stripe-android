@@ -19,7 +19,7 @@ import kotlinx.android.parcel.Parcelize
  *
  * The result will be returned with request code [REQUEST_CODE].
  */
-class AddPaymentMethodActivityStarter: ActivityStarter<AddPaymentMethodActivity, Args> {
+class AddPaymentMethodActivityStarter : ActivityStarter<AddPaymentMethodActivity, Args> {
 
     constructor(activity: Activity) : super(
         activity,
