@@ -8,10 +8,14 @@ import android.provider.Settings
 internal class UidSupplier(context: Context) : Supplier<StripeUid> {
     private val contentResolver: ContentResolver = context.applicationContext.contentResolver
 
+    private val deviceId: String?
+        @SuppressLint("HardwareIds")
+        get() {
+            return Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+        }
+
     @SuppressLint("HardwareIds")
     override fun get(): StripeUid {
-        return StripeUid.create(
-            Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID) ?: ""
-        )
+        return StripeUid(deviceId.orEmpty())
     }
 }

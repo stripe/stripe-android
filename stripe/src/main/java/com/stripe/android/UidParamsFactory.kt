@@ -6,6 +6,11 @@ internal class UidParamsFactory constructor(
     private val packageName: String,
     private val uidSupplier: Supplier<StripeUid>
 ) {
+    constructor(context: Context) : this(
+        packageName = context.packageName,
+        uidSupplier = UidSupplier(context)
+    )
+
     fun createParams(): Map<String, String> {
         val guid = uidSupplier.get().value
 
@@ -35,11 +40,7 @@ internal class UidParamsFactory constructor(
         }
     }
 
-    internal companion object {
-        internal fun create(context: Context): UidParamsFactory {
-            return UidParamsFactory(context.packageName, UidSupplier(context))
-        }
-
+    private companion object {
         private const val FIELD_MUID = "muid"
         private const val FIELD_GUID = "guid"
     }
