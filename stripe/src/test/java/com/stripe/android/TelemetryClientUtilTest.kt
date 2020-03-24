@@ -4,80 +4,88 @@ import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import androidx.test.core.app.ApplicationProvider
-import kotlin.test.BeforeTest
+import com.google.common.truth.Truth.assertThat
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
+import java.util.UUID
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class TelemetryClientUtilTest {
 
-    @Mock
-    private val packageManager: PackageManager? = null
-
-    @BeforeTest
-    fun setup() {
-        MockitoAnnotations.initMocks(this)
-    }
+    private val packageManager: PackageManager = mock()
+    private val context: Context = ApplicationProvider.getApplicationContext()
+    private val clientFingerprintDataStore = FakeClientFingerprintDataStore(MUID)
 
     @Test
     fun initWithAppContext_shouldSucceed() {
-        assertFalse(TelemetryClientUtil(ApplicationProvider.getApplicationContext())
-            .createTelemetryMap()
-            .isEmpty())
+        assertThat(TelemetryClientUtil(context).createTelemetryMap())
+            .isNotEmpty()
     }
 
     @Test
     fun createTelemetryMap_returnsHasExpectedEntries() {
-        val context = ApplicationProvider.getApplicationContext<Context>()
         val telemetryMap = TelemetryClientUtil(
             FakeUidSupplier(),
             context.resources.displayMetrics,
             "package_name",
             context.packageManager,
-            "-5"
+            "-5",
+            clientFingerprintDataStore
         )
             .createTelemetryMap()
-        assertEquals(5, telemetryMap.size)
+        assertThat(telemetryMap)
+            .hasSize(5)
 
         val firstMap = telemetryMap["a"] as Map<*, *>
-        assertEquals(4, firstMap.size)
+        assertThat(firstMap)
+            .hasSize(4)
 
-        assertEquals("Android 9 REL 28", getSingleValue(firstMap, "d"))
-        assertEquals("-5", getSingleValue(firstMap, "g"))
-        assertEquals(8, (telemetryMap["b"] as Map<*, *>).size)
+        assertThat(getSingleValue(firstMap, "d"))
+            .isEqualTo("Android 9 REL 28")
+        assertThat(getSingleValue(firstMap, "g"))
+            .isEqualTo("-5")
+
+        val secondMap = telemetryMap["b"] as Map<*, *>
+        assertThat(secondMap)
+            .hasSize(8)
+        assertThat(secondMap["d"])
+            .isEqualTo(MUID.toString())
     }
 
     @Test
-    @Throws(PackageManager.NameNotFoundException::class)
     fun createTelemetryMap_withVersionName_includesVersionName() {
-        val packageInfo = PackageInfo()
-        packageInfo.versionName = "version_name"
+        val packageInfo = PackageInfo().also {
+            it.versionName = "version_name"
+        }
 
-        `when`(packageManager!!.getPackageInfo("package_name", 0))
+        whenever(packageManager.getPackageInfo("package_name", 0))
             .thenReturn(packageInfo)
 
-        val context = ApplicationProvider.getApplicationContext<Context>()
         val telemetryMap = TelemetryClientUtil(
             FakeUidSupplier(),
             context.resources.displayMetrics,
             "package_name",
             packageManager,
-            "-5"
+            "-5",
+            clientFingerprintDataStore
         )
             .createTelemetryMap()
 
         val secondMap = telemetryMap["b"] as Map<*, *>
-        assertEquals(9, secondMap.size)
-        assertEquals("version_name", secondMap["l"])
+        assertThat(secondMap)
+            .hasSize(9)
+        assertThat(secondMap["l"])
+            .isEqualTo("version_name")
     }
 
     private fun getSingleValue(map: Map<*, *>, key: String): Any? {
         return (map[key] as Map<*, *>)["v"]
+    }
+
+    private companion object {
+        private val MUID = UUID.randomUUID()
     }
 }

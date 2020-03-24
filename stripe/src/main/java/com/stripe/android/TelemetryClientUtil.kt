@@ -16,7 +16,8 @@ internal class TelemetryClientUtil @VisibleForTesting internal constructor(
     private val displayMetrics: DisplayMetrics,
     private val packageName: String,
     private val packageManager: PackageManager,
-    private val timeZone: String
+    private val timeZone: String,
+    private val clientFingerprintDataStore: ClientFingerprintDataStore
 ) {
     private val versionName: String?
         get() {
@@ -43,28 +44,28 @@ internal class TelemetryClientUtil @VisibleForTesting internal constructor(
 
     internal val hashedUid: String
         get() {
-            val uid = uidSupplier.get().value
-            return if (uid.isBlank()) {
-                ""
-            } else {
-                StripeTextUtils.shaHashInput(uid) ?: ""
-            }
+            return uidSupplier.get().value.takeUnless {
+                it.isBlank()
+            }?.let {
+                StripeTextUtils.shaHashInput(it).orEmpty()
+            }.orEmpty()
         }
 
-    private val hashedMuid: String
-        get() = StripeTextUtils.shaHashInput(packageName + hashedUid) ?: ""
-
-    internal constructor(context: Context) : this(context.applicationContext, UidSupplier(context))
+    internal constructor(context: Context) : this(
+        context = context.applicationContext,
+        uidSupplier = UidSupplier(context)
+    )
 
     internal constructor(
         context: Context,
         uidSupplier: Supplier<StripeUid> = UidSupplier(context)
     ) : this(
-        uidSupplier,
-        context.resources.displayMetrics,
-        context.packageName ?: "",
-        context.packageManager,
-        createTimezone()
+        uidSupplier = uidSupplier,
+        displayMetrics = context.resources.displayMetrics,
+        packageName = context.packageName.orEmpty(),
+        packageManager = context.packageManager,
+        timeZone = createTimezone(),
+        clientFingerprintDataStore = ClientFingerprintDataStore.Default(context)
     )
 
     internal fun createTelemetryMap(): Map<String, Any> {
@@ -88,7 +89,7 @@ internal class TelemetryClientUtil @VisibleForTesting internal constructor(
 
     private fun createSecondMap(): Map<String, Any> {
         val params = mapOf(
-            "d" to hashedMuid,
+            "d" to clientFingerprintDataStore.getMuid(),
             "k" to packageName,
             "o" to Build.VERSION.RELEASE,
             "p" to Build.VERSION.SDK_INT,

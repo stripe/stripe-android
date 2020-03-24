@@ -3,42 +3,29 @@ package com.stripe.android
 import android.content.Context
 
 internal class UidParamsFactory constructor(
-    private val packageName: String,
+    private val store: ClientFingerprintDataStore,
     private val uidSupplier: Supplier<StripeUid>
 ) {
     constructor(context: Context) : this(
-        packageName = context.packageName,
+        store = ClientFingerprintDataStore.Default(context),
         uidSupplier = UidSupplier(context)
     )
 
     fun createParams(): Map<String, String> {
-        val guid = uidSupplier.get().value
-
-        return if (guid.isNotBlank()) {
-            createGuid(guid).plus(createMuid(guid))
-        } else {
-            emptyMap()
-        }
+        return mapOf(FIELD_MUID to store.getMuid())
+            .plus(
+                guid?.let {
+                    mapOf(FIELD_GUID to it)
+                }.orEmpty()
+            )
     }
 
-    private fun createGuid(guid: String): Map<String, String> {
-        val hashGuid = StripeTextUtils.shaHashInput(guid)
-        return if (hashGuid?.isNotBlank() == true) {
-            mapOf(FIELD_GUID to hashGuid)
-        } else {
-            emptyMap()
+    private val guid: String?
+        get() {
+            return StripeTextUtils.shaHashInput(uidSupplier.get().value).takeUnless {
+                it.isNullOrBlank()
+            }
         }
-    }
-
-    private fun createMuid(guid: String): Map<String, String> {
-        val muid = packageName + guid
-        val hashMuid = StripeTextUtils.shaHashInput(muid)
-        return if (hashMuid?.isNotBlank() == true) {
-            mapOf(FIELD_MUID to hashMuid)
-        } else {
-            emptyMap()
-        }
-    }
 
     private companion object {
         private const val FIELD_MUID = "muid"

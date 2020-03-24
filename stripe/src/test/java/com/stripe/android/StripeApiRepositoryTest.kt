@@ -853,7 +853,10 @@ class StripeApiRepositoryTest {
             fireAndForgetRequestExecutor = fireAndForgetRequestExecutor,
             fingerprintRequestExecutor = fingerprintRequestExecutor,
             networkUtils = StripeNetworkUtils(
-                UidParamsFactory("com.stripe.example", FakeUidSupplier())
+                UidParamsFactory(
+                    store = FakeClientFingerprintDataStore(),
+                    uidSupplier = FakeUidSupplier()
+                )
             )
         )
     }
