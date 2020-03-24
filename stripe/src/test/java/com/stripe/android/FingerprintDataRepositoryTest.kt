@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -24,6 +25,18 @@ class FingerprintDataRepositoryTest {
         }
         assertThat(fingerprintData)
             .isEqualTo(DATA)
+    }
+
+    @Test
+    fun isExpired_whenFewerThan30MinutesElapsed_shouldReturnFalse() {
+        assertThat(DATA.isExpired(TimeUnit.MINUTES.toMillis(29L)))
+            .isFalse()
+    }
+
+    @Test
+    fun isExpired_whenGreaterThan30MinutesElapsed_shouldReturnFalse() {
+        assertThat(DATA.isExpired(TimeUnit.MINUTES.toMillis(31L)))
+            .isTrue()
     }
 
     internal companion object {
