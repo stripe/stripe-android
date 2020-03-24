@@ -22,7 +22,7 @@ internal interface FingerprintDataStore {
         override fun get(): LiveData<FingerprintData?> {
             val fingerprintData = try {
                 FingerprintData.fromJson(
-                    JSONObject(prefs.getString(KEY, null).orEmpty())
+                    JSONObject(prefs.getString(KEY_DATA, null).orEmpty())
                 ).takeUnless { it.isExpired(timestampSupplier()) }
             } catch (e: JSONException) {
                 null
@@ -33,13 +33,13 @@ internal interface FingerprintDataStore {
 
         override fun save(fingerprintData: FingerprintData) {
             prefs.edit()
-                .putString(KEY, fingerprintData.toJson().toString())
+                .putString(KEY_DATA, fingerprintData.toJson().toString())
                 .apply()
         }
 
         private companion object {
             private const val PREF_FILE = "FingerprintDataRepository"
-            private const val KEY = "key"
+            private const val KEY_DATA = "key_fingerprint_data"
         }
     }
 }
