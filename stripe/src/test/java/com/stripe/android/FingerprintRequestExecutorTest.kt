@@ -23,13 +23,13 @@ class FingerprintRequestExecutorTest {
         createFingerprintRequestExecutor().execute(
             request = fingerprintRequestFactory.create()
         ) {
-            assertThat(UUID.fromString(it.guid))
+            assertThat(UUID.fromString(it?.guid))
                 .isNotNull()
         }
     }
 
     @Test
-    fun execute_whenErrorResponse_shouldNotInvokeCallback() {
+    fun execute_whenErrorResponse_shouldInvokeCallback() {
         var callbackCount = 0
 
         val request = fingerprintRequestFactory.create()
@@ -51,11 +51,11 @@ class FingerprintRequestExecutorTest {
             )
 
         assertThat(callbackCount)
-            .isEqualTo(0)
+            .isEqualTo(1)
     }
 
     @Test
-    fun execute_whenConnectionException_shouldNotInvokeCallback() {
+    fun execute_whenConnectionException_shouldInvokeCallback() {
         var callbackCount = 0
 
         val request = fingerprintRequestFactory.create()
@@ -71,7 +71,7 @@ class FingerprintRequestExecutorTest {
             )
 
         assertThat(callbackCount)
-            .isEqualTo(0)
+            .isEqualTo(1)
     }
 
     private fun createFingerprintRequestExecutor(
