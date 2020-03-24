@@ -1422,6 +1422,7 @@ public class StripeTest {
             @NonNull final String publishableKey,
             @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor
     ) {
+        final Supplier<StripeUid> uidSupplier = new FakeUidSupplier();
         return new StripeApiRepository(
                 context,
                 publishableKey,
@@ -1431,7 +1432,8 @@ public class StripeTest {
                 fireAndForgetRequestExecutor,
                 fingerprintRequestExecutor,
                 new FingerprintRequestFactory(
-                        new TelemetryClientUtil(context, new FakeUidSupplier())
+                        new TelemetryClientUtil(context, uidSupplier),
+                        uidSupplier
                 )
         );
     }

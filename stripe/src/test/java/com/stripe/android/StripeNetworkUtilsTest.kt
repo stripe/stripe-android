@@ -18,7 +18,10 @@ import org.robolectric.RobolectricTestRunner
 class StripeNetworkUtilsTest {
 
     private val networkUtils = StripeNetworkUtils(
-        UidParamsFactory("com.example.app", FakeUidSupplier())
+        UidParamsFactory(
+            store = FakeClientFingerprintDataStore(),
+            uidSupplier = FakeUidSupplier()
+        )
     )
 
     @Test
