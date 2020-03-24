@@ -9,7 +9,7 @@ import kotlinx.coroutines.withContext
 internal interface FingerprintRequestExecutor {
     fun execute(
         request: FingerprintRequest,
-        callback: (FingerprintData) -> Unit
+        callback: (FingerprintData?) -> Unit
     )
 
     class Default(
@@ -22,10 +22,10 @@ internal interface FingerprintRequestExecutor {
 
         override fun execute(
             request: FingerprintRequest,
-            callback: (FingerprintData) -> Unit
+            callback: (FingerprintData?) -> Unit
         ) {
             workScope.launch {
-                val response = try {
+                val fingerprintData = try {
                     executeInternal(request)
                 } catch (e: Exception) {
                     null
@@ -33,9 +33,7 @@ internal interface FingerprintRequestExecutor {
 
                 withContext(Dispatchers.Main) {
                     // fingerprint request failures should be non-fatal
-                    response?.let {
-                        callback(it)
-                    }
+                    callback(fingerprintData)
                 }
             }
         }

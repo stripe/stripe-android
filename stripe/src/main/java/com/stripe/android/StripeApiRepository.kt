@@ -969,8 +969,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     private fun fireFingerprintRequest() {
-        fingerprintRequestExecutor.execute(fingerprintRequestFactory.create()) {
-            fingerprintDataRepository.save(it)
+        fingerprintRequestExecutor.execute(fingerprintRequestFactory.create()) { fingerprintData ->
+            fingerprintData?.let {
+                fingerprintDataRepository.save(it)
+            }
         }
     }
 
