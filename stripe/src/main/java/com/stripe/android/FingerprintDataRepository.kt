@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import org.json.JSONException
@@ -11,9 +12,14 @@ internal interface FingerprintDataRepository {
     fun get(): LiveData<FingerprintData?>
     fun save(fingerprintData: FingerprintData)
 
-    class Default(context: Context) : FingerprintDataRepository {
-        private val prefs = context.getSharedPreferences(
-            PREF_FILE, Context.MODE_PRIVATE
+    class Default(
+        private val prefs: SharedPreferences
+    ) : FingerprintDataRepository {
+
+        constructor(context: Context) : this(
+            prefs = context.getSharedPreferences(
+                PREF_FILE, Context.MODE_PRIVATE
+            )
         )
 
         override fun get(): LiveData<FingerprintData?> {

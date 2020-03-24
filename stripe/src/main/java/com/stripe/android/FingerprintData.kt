@@ -1,5 +1,6 @@
 package com.stripe.android
 
+import java.util.concurrent.TimeUnit
 import org.json.JSONObject
 
 internal data class FingerprintData(
@@ -10,6 +11,10 @@ internal data class FingerprintData(
         return JSONObject()
             .put(KEY_GUID, guid)
             .put(KEY_TIMESTAMP, timestamp)
+    }
+
+    fun isExpired(currentTime: Long): Boolean {
+        return (currentTime - timestamp) > TTL
     }
 
     internal companion object {
@@ -25,5 +30,7 @@ internal data class FingerprintData(
 
         private const val KEY_GUID = "guid"
         private const val KEY_TIMESTAMP = "timestamp"
+
+        private val TTL = TimeUnit.MINUTES.toMillis(30L)
     }
 }
