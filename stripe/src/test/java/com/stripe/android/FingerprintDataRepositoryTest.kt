@@ -3,6 +3,14 @@ package com.stripe.android
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.nhaarman.mockitokotlin2.KArgumentCaptor
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.doNothing
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
+import java.util.Calendar
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import org.junit.Test
@@ -12,37 +20,77 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class FingerprintDataRepositoryTest {
 
-    private val repository: FingerprintDataRepository = FingerprintDataRepository.Default(
-        ApplicationProvider.getApplicationContext<Context>()
-    )
+    private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val fingerprintRequestExecutor: FingerprintRequestExecutor = mock()
+    private val requestExecutorCallback: KArgumentCaptor<(FingerprintData?) -> Unit> = argumentCaptor()
 
     @Test
     fun roundtrip_shouldReturnOriginalObject() {
-        var fingerprintData: FingerprintData? = null
-        repository.save(DATA)
+        val expectedFingerprintData = createFingerprintData(elapsedTime = -5L)
+        val repository = FingerprintDataRepository.Default(context)
+        var actualFingerprintData: FingerprintData? = null
+        repository.save(expectedFingerprintData)
         repository.get().observeForever {
-            fingerprintData = it
+            actualFingerprintData = it
         }
-        assertThat(fingerprintData)
-            .isEqualTo(DATA)
+        assertThat(actualFingerprintData)
+            .isEqualTo(expectedFingerprintData)
+    }
+
+    @Test
+    fun get_whenFingerprintDataIsExpired_shouldRequestNewFingerprintDataRemotely() {
+        var expectedFingerprintData: FingerprintData? = null
+
+        doNothing().whenever(fingerprintRequestExecutor).execute(any(), any())
+
+        val repository = FingerprintDataRepository.Default(
+            FingerprintDataStore.Default(context),
+            FingerprintRequestFactory(context),
+            fingerprintRequestExecutor = fingerprintRequestExecutor
+        )
+        repository.save(createFingerprintData(elapsedTime = -60L))
+        repository.get().observeForever {
+            expectedFingerprintData = it
+        }
+
+        val remoteFingerprintData = createFingerprintData()
+        verify(fingerprintRequestExecutor).execute(
+            any(),
+            requestExecutorCallback.capture()
+        )
+        requestExecutorCallback.firstValue.invoke(remoteFingerprintData)
+
+        assertThat(expectedFingerprintData)
+            .isEqualTo(remoteFingerprintData)
     }
 
     @Test
     fun isExpired_whenFewerThan30MinutesElapsed_shouldReturnFalse() {
-        assertThat(DATA.isExpired(TimeUnit.MINUTES.toMillis(29L)))
-            .isFalse()
+        val fingerprintData = createFingerprintData()
+        assertThat(
+            fingerprintData.isExpired(
+                currentTime = fingerprintData.timestamp + TimeUnit.MINUTES.toMillis(29L)
+            )
+        ).isFalse()
     }
 
     @Test
     fun isExpired_whenGreaterThan30MinutesElapsed_shouldReturnFalse() {
-        assertThat(DATA.isExpired(TimeUnit.MINUTES.toMillis(31L)))
-            .isTrue()
+        val fingerprintData = createFingerprintData()
+        assertThat(
+            fingerprintData.isExpired(
+                currentTime = fingerprintData.timestamp + TimeUnit.MINUTES.toMillis(31L)
+            )
+        ).isTrue()
     }
 
     internal companion object {
-        val DATA = FingerprintData(
-            guid = UUID.randomUUID().toString(),
-            timestamp = 500
-        )
+        fun createFingerprintData(elapsedTime: Long = 0L): FingerprintData {
+            return FingerprintData(
+                guid = UUID.randomUUID().toString(),
+                timestamp = Calendar.getInstance().timeInMillis +
+                    TimeUnit.MINUTES.toMillis(elapsedTime)
+            )
+        }
     }
 }
