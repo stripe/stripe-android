@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.annotation.LayoutRes
+import androidx.fragment.app.Fragment
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentMethod
@@ -18,14 +19,22 @@ import kotlinx.android.parcel.Parcelize
  *
  * The result will be returned with request code [REQUEST_CODE].
  */
-class AddPaymentMethodActivityStarter constructor(
-    activity: Activity
-) : ActivityStarter<AddPaymentMethodActivity, Args>(
-    activity,
-    AddPaymentMethodActivity::class.java,
-    Args.DEFAULT,
-    REQUEST_CODE
-) {
+class AddPaymentMethodActivityStarter : ActivityStarter<AddPaymentMethodActivity, Args> {
+
+    constructor(activity: Activity) : super(
+        activity,
+        AddPaymentMethodActivity::class.java,
+        Args.DEFAULT,
+        REQUEST_CODE
+    )
+
+    constructor(fragment: Fragment) : super(
+        fragment,
+        AddPaymentMethodActivity::class.java,
+        Args.DEFAULT,
+        REQUEST_CODE
+    )
+
     @Parcelize
     data class Args internal constructor(
         internal val billingAddressFields: BillingAddressFields,
