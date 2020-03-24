@@ -90,6 +90,7 @@ internal class TelemetryClientUtil @VisibleForTesting internal constructor(
     private fun createSecondMap(): Map<String, Any> {
         val params = mapOf(
             "d" to clientFingerprintDataStore.getMuid(),
+            "e" to clientFingerprintDataStore.getSid(),
             "k" to packageName,
             "o" to Build.VERSION.RELEASE,
             "p" to Build.VERSION.SDK_INT,

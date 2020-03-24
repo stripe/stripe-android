@@ -17,7 +17,10 @@ class TelemetryClientUtilTest {
 
     private val packageManager: PackageManager = mock()
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val clientFingerprintDataStore = FakeClientFingerprintDataStore(MUID)
+    private val clientFingerprintDataStore = FakeClientFingerprintDataStore(
+        muid = MUID,
+        sid = SID
+    )
 
     @Test
     fun initWithAppContext_shouldSucceed() {
@@ -50,9 +53,11 @@ class TelemetryClientUtilTest {
 
         val secondMap = telemetryMap["b"] as Map<*, *>
         assertThat(secondMap)
-            .hasSize(8)
+            .hasSize(9)
         assertThat(secondMap["d"])
             .isEqualTo(MUID.toString())
+        assertThat(secondMap["e"])
+            .isEqualTo(SID.toString())
     }
 
     @Test
@@ -76,7 +81,7 @@ class TelemetryClientUtilTest {
 
         val secondMap = telemetryMap["b"] as Map<*, *>
         assertThat(secondMap)
-            .hasSize(9)
+            .hasSize(10)
         assertThat(secondMap["l"])
             .isEqualTo("version_name")
     }
@@ -87,5 +92,6 @@ class TelemetryClientUtilTest {
 
     private companion object {
         private val MUID = UUID.randomUUID()
+        private val SID = UUID.randomUUID()
     }
 }
