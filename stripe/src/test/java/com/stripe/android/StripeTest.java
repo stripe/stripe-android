@@ -1432,7 +1432,7 @@ public class StripeTest {
                 fireAndForgetRequestExecutor,
                 fingerprintRequestExecutor,
                 new FingerprintRequestFactory(
-                        new TelemetryClientUtil(context, uidSupplier),
+                        new FingerprintRequestParamsFactory(context),
                         uidSupplier
                 )
         );

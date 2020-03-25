@@ -11,8 +11,7 @@ import java.util.Locale
 import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 
-internal class TelemetryClientUtil @VisibleForTesting internal constructor(
-    private val uidSupplier: Supplier<StripeUid>,
+internal class FingerprintRequestParamsFactory @VisibleForTesting internal constructor(
     private val displayMetrics: DisplayMetrics,
     private val packageName: String,
     private val packageManager: PackageManager,
@@ -34,33 +33,13 @@ internal class TelemetryClientUtil @VisibleForTesting internal constructor(
             return null
         }
 
-    private val screen: String
-        get() =
-            "${displayMetrics.widthPixels}w_${displayMetrics.heightPixels}h_${displayMetrics.densityDpi}dpi"
+    private val screen: String =
+        "${displayMetrics.widthPixels}w_${displayMetrics.heightPixels}h_${displayMetrics.densityDpi}dpi"
 
-    private val androidVersionString: String
-        get() =
-            "Android ${Build.VERSION.RELEASE} ${Build.VERSION.CODENAME} ${Build.VERSION.SDK_INT}"
-
-    internal val hashedUid: String
-        get() {
-            return uidSupplier.get().value.takeUnless {
-                it.isBlank()
-            }?.let {
-                StripeTextUtils.shaHashInput(it).orEmpty()
-            }.orEmpty()
-        }
+    private val androidVersionString =
+        "Android ${Build.VERSION.RELEASE} ${Build.VERSION.CODENAME} ${Build.VERSION.SDK_INT}"
 
     internal constructor(context: Context) : this(
-        context = context.applicationContext,
-        uidSupplier = UidSupplier(context)
-    )
-
-    internal constructor(
-        context: Context,
-        uidSupplier: Supplier<StripeUid> = UidSupplier(context)
-    ) : this(
-        uidSupplier = uidSupplier,
         displayMetrics = context.resources.displayMetrics,
         packageName = context.packageName.orEmpty(),
         packageManager = context.packageManager,
@@ -68,7 +47,8 @@ internal class TelemetryClientUtil @VisibleForTesting internal constructor(
         clientFingerprintDataStore = ClientFingerprintDataStore.Default(context)
     )
 
-    internal fun createTelemetryMap(): Map<String, Any> {
+    @JvmSynthetic
+    internal fun createParams(): Map<String, Any> {
         return mapOf(
             "v2" to 1,
             "tag" to BuildConfig.VERSION_NAME,
@@ -88,7 +68,7 @@ internal class TelemetryClientUtil @VisibleForTesting internal constructor(
     }
 
     private fun createSecondMap(): Map<String, Any> {
-        val params = mapOf(
+        return mapOf(
             "d" to clientFingerprintDataStore.getMuid(),
             "e" to clientFingerprintDataStore.getSid(),
             "k" to packageName,
@@ -98,11 +78,9 @@ internal class TelemetryClientUtil @VisibleForTesting internal constructor(
             "r" to Build.BRAND,
             "s" to Build.MODEL,
             "t" to Build.TAGS
+        ).plus(
+            versionName?.let { mapOf("l" to it) }.orEmpty()
         )
-
-        return versionName?.let {
-            params.plus("l" to it)
-        } ?: params
     }
 
     private fun createValueMap(value: String): Map<String, Any> {
@@ -121,7 +99,8 @@ internal class TelemetryClientUtil @VisibleForTesting internal constructor(
                 .setScale(2, BigDecimal.ROUND_HALF_EVEN)
             val decHours = decimalValue.divide(
                 BigDecimal(60),
-                MathContext(2))
+                MathContext(2)
+            )
                 .setScale(2, BigDecimal.ROUND_HALF_EVEN)
             return decHours.toString()
         }
