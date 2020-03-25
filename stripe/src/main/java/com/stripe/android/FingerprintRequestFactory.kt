@@ -4,12 +4,12 @@ import android.content.Context
 import androidx.annotation.VisibleForTesting
 
 internal class FingerprintRequestFactory @VisibleForTesting internal constructor(
-    private val telemetryClientUtil: TelemetryClientUtil,
+    private val fingerprintRequestParamsFactory: FingerprintRequestParamsFactory,
     private val uidSupplier: Supplier<StripeUid>
 ) : Factory0<FingerprintRequest> {
 
     internal constructor(context: Context) : this(
-        telemetryClientUtil = TelemetryClientUtil(context),
+        fingerprintRequestParamsFactory = FingerprintRequestParamsFactory(context),
         uidSupplier = UidSupplier(context)
     )
 
@@ -21,7 +21,7 @@ internal class FingerprintRequestFactory @VisibleForTesting internal constructor
         }.orEmpty()
 
         return FingerprintRequest(
-            params = telemetryClientUtil.createTelemetryMap(),
+            params = fingerprintRequestParamsFactory.createParams(),
             guid = guid
         )
     }

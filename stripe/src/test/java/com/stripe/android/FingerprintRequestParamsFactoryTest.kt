@@ -13,7 +13,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class TelemetryClientUtilTest {
+class FingerprintRequestParamsFactoryTest {
 
     private val packageManager: PackageManager = mock()
     private val context: Context = ApplicationProvider.getApplicationContext()
@@ -24,25 +24,23 @@ class TelemetryClientUtilTest {
 
     @Test
     fun initWithAppContext_shouldSucceed() {
-        assertThat(TelemetryClientUtil(context).createTelemetryMap())
+        assertThat(FingerprintRequestParamsFactory(context).createParams())
             .isNotEmpty()
     }
 
     @Test
-    fun createTelemetryMap_returnsHasExpectedEntries() {
-        val telemetryMap = TelemetryClientUtil(
-            FakeUidSupplier(),
+    fun createParams_returnsHasExpectedEntries() {
+        val params = FingerprintRequestParamsFactory(
             context.resources.displayMetrics,
             "package_name",
             context.packageManager,
             "-5",
             clientFingerprintDataStore
-        )
-            .createTelemetryMap()
-        assertThat(telemetryMap)
+        ).createParams()
+        assertThat(params)
             .hasSize(5)
 
-        val firstMap = telemetryMap["a"] as Map<*, *>
+        val firstMap = params["a"] as Map<*, *>
         assertThat(firstMap)
             .hasSize(4)
 
@@ -51,7 +49,7 @@ class TelemetryClientUtilTest {
         assertThat(getSingleValue(firstMap, "g"))
             .isEqualTo("-5")
 
-        val secondMap = telemetryMap["b"] as Map<*, *>
+        val secondMap = params["b"] as Map<*, *>
         assertThat(secondMap)
             .hasSize(9)
         assertThat(secondMap["d"])
@@ -61,7 +59,7 @@ class TelemetryClientUtilTest {
     }
 
     @Test
-    fun createTelemetryMap_withVersionName_includesVersionName() {
+    fun createParams_withVersionName_includesVersionName() {
         val packageInfo = PackageInfo().also {
             it.versionName = "version_name"
         }
@@ -69,17 +67,16 @@ class TelemetryClientUtilTest {
         whenever(packageManager.getPackageInfo("package_name", 0))
             .thenReturn(packageInfo)
 
-        val telemetryMap = TelemetryClientUtil(
-            FakeUidSupplier(),
+        val params = FingerprintRequestParamsFactory(
             context.resources.displayMetrics,
             "package_name",
             packageManager,
             "-5",
             clientFingerprintDataStore
         )
-            .createTelemetryMap()
+            .createParams()
 
-        val secondMap = telemetryMap["b"] as Map<*, *>
+        val secondMap = params["b"] as Map<*, *>
         assertThat(secondMap)
             .hasSize(10)
         assertThat(secondMap["l"])
