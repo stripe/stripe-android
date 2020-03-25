@@ -4,25 +4,17 @@ import android.content.Context
 import androidx.annotation.VisibleForTesting
 
 internal class FingerprintRequestFactory @VisibleForTesting internal constructor(
-    private val fingerprintRequestParamsFactory: FingerprintRequestParamsFactory,
-    private val uidSupplier: Supplier<StripeUid>
-) : Factory0<FingerprintRequest> {
+    private val fingerprintRequestParamsFactory: FingerprintRequestParamsFactory
+) : Factory1<String?, FingerprintRequest> {
 
     internal constructor(context: Context) : this(
-        fingerprintRequestParamsFactory = FingerprintRequestParamsFactory(context),
-        uidSupplier = UidSupplier(context)
+        fingerprintRequestParamsFactory = FingerprintRequestParamsFactory(context)
     )
 
-    override fun create(): FingerprintRequest {
-        val guid = uidSupplier.get().value.takeUnless {
-            it.isBlank()
-        }?.let {
-            StripeTextUtils.shaHashInput(it).orEmpty()
-        }.orEmpty()
-
+    override fun create(arg: String?): FingerprintRequest {
         return FingerprintRequest(
             params = fingerprintRequestParamsFactory.createParams(),
-            guid = guid
+            guid = arg.orEmpty()
         )
     }
 }

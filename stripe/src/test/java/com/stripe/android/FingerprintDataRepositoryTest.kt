@@ -44,8 +44,8 @@ class FingerprintDataRepositoryTest {
         doNothing().whenever(fingerprintRequestExecutor).execute(any(), any())
 
         val repository = FingerprintDataRepository.Default(
-            FingerprintDataStore.Default(context),
-            FingerprintRequestFactory(context),
+            store = FingerprintDataStore.Default(context),
+            fingerprintRequestFactory = FingerprintRequestFactory(context),
             fingerprintRequestExecutor = fingerprintRequestExecutor
         )
         repository.save(createFingerprintData(elapsedTime = -60L))
@@ -84,7 +84,7 @@ class FingerprintDataRepositoryTest {
         ).isTrue()
     }
 
-    internal companion object {
+    private companion object {
         fun createFingerprintData(elapsedTime: Long = 0L): FingerprintData {
             return FingerprintData(
                 guid = UUID.randomUUID().toString(),

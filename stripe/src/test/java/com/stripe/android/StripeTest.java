@@ -83,7 +83,6 @@ public class StripeTest {
     private Context context;
 
     @Captor private ArgumentCaptor<StripeRequest> stripeRequestArgumentCaptor;
-    @Mock private FingerprintRequestExecutor fingerprintRequestExecutor;
     @Mock private FireAndForgetRequestExecutor fireAndForgetRequestExecutor;
 
     @Mock private ApiResultCallback<Token> tokenCallback;
@@ -1130,6 +1129,10 @@ public class StripeTest {
     public void createTokenSynchronousTwice_withIdempotencyKey_returnsSameToken()
             throws StripeException {
         final Stripe stripe = createStripe();
+
+        // make an initial request to ensure that a fingerprint GUID is available
+        stripe.createCardTokenSynchronous(CardFixtures.MINIMUM_CARD);
+
         final String idempotencyKey = UUID.randomUUID().toString();
         assertEquals(
                 stripe.createCardTokenSynchronous(CardFixtures.MINIMUM_CARD, idempotencyKey),
@@ -1422,19 +1425,13 @@ public class StripeTest {
             @NonNull final String publishableKey,
             @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor
     ) {
-        final Supplier<StripeUid> uidSupplier = new FakeUidSupplier();
         return new StripeApiRepository(
                 context,
                 publishableKey,
                 null,
                 new FakeLogger(),
                 new ApiRequestExecutor.Default(),
-                fireAndForgetRequestExecutor,
-                fingerprintRequestExecutor,
-                new FingerprintRequestFactory(
-                        new FingerprintRequestParamsFactory(context),
-                        uidSupplier
-                )
+                fireAndForgetRequestExecutor
         );
     }
 }

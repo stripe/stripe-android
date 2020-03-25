@@ -61,17 +61,4 @@ class StripeTextUtilsTest {
             )
         )
     }
-
-    @Test
-    fun shaHashInput_withNullInput_returnsNull() {
-        assertNull(StripeTextUtils.shaHashInput("  "))
-    }
-
-    @Test
-    fun shaHashInput_withText_returnsDifferentText() {
-        assertEquals(
-            "9D3B38F100AF0DBD0D0CB11EDF15E40BBF0820C8",
-            StripeTextUtils.shaHashInput("iamtheverymodelofamodernmajorgeneral")
-        )
-    }
 }

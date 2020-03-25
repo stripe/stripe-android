@@ -1,8 +1,11 @@
 package com.stripe.android
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Pair
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.Observer
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.AuthenticationException
@@ -58,13 +61,14 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     private val stripeApiRequestExecutor: ApiRequestExecutor = ApiRequestExecutor.Default(logger),
     private val fireAndForgetRequestExecutor: FireAndForgetRequestExecutor =
         StripeFireAndForgetRequestExecutor(logger),
-    private val fingerprintRequestExecutor: FingerprintRequestExecutor =
-        FingerprintRequestExecutor.Default(),
-    private val fingerprintRequestFactory: FingerprintRequestFactory =
-        FingerprintRequestFactory(context),
+    private val handler: Handler = Handler(Looper.getMainLooper()),
     private val fingerprintDataRepository: FingerprintDataRepository =
-        FingerprintDataRepository.Default(context),
-    private val uidParamsFactory: UidParamsFactory = UidParamsFactory(context),
+        FingerprintDataRepository.Default(
+            context = context,
+            handler = handler
+        ),
+    private val apiFingerprintParamsFactory: ApiFingerprintParamsFactory =
+        ApiFingerprintParamsFactory(context),
     private val analyticsDataFactory: AnalyticsDataFactory =
         AnalyticsDataFactory(context, publishableKey),
     private val networkUtils: StripeNetworkUtils = StripeNetworkUtils(context),
@@ -77,6 +81,12 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         apiVersion = apiVersion,
         sdkVersion = sdkVersion
     )
+
+    private var fingerprintGuid: String? = null
+
+    init {
+        fireFingerprintRequest()
+    }
 
     /**
      * Confirm a [PaymentIntent] using the provided [ConfirmPaymentIntentParams]
@@ -93,7 +103,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         options: ApiRequest.Options
     ): PaymentIntent? {
-        val params = networkUtils.paramsWithUid(confirmPaymentIntentParams.toParamMap())
+        val params = networkUtils.paramsWithUid(
+            confirmPaymentIntentParams.toParamMap(),
+            fingerprintGuid
+        )
         val apiUrl = getConfirmPaymentIntentUrl(
             PaymentIntent.ClientSecret(confirmPaymentIntentParams.clientSecret).paymentIntentId
         )
@@ -218,7 +231,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 apiRequestFactory.createPost(
                     getConfirmSetupIntentUrl(setupIntentId),
                     options,
-                    networkUtils.paramsWithUid(confirmSetupIntentParams.toParamMap())
+                    networkUtils.paramsWithUid(
+                        confirmSetupIntentParams.toParamMap(),
+                        fingerprintGuid
+                    )
                 ),
                 SetupIntentJsonParser()
             )
@@ -276,7 +292,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         sourceId: String,
         options: ApiRequest.Options
     ): SetupIntent? {
-        fireFingerprintRequest()
         fireAnalyticsRequest(AnalyticsEvent.SetupIntentCancelSource, options.apiKey)
 
         try {
@@ -343,7 +358,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     sourcesUrl,
                     options,
                     sourceParams.toParamMap()
-                        .plus(uidParamsFactory.createParams())
+                        .plus(apiFingerprintParamsFactory.createParams(fingerprintGuid))
                 ),
                 SourceJsonParser()
             )
@@ -411,7 +426,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     paymentMethodsUrl,
                     options,
                     paymentMethodCreateParams.toParamMap()
-                        .plus(uidParamsFactory.createParams())
+                        .plus(apiFingerprintParamsFactory.createParams(fingerprintGuid))
                 ),
                 PaymentMethodJsonParser()
             )
@@ -460,9 +475,16 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         )
 
         return fetchStripeModel(
-            apiRequestFactory.createPost(tokensUrl, options,
+            apiRequestFactory.createPost(
+                tokensUrl,
+                options,
                 tokenParams.toParamMap()
-                    .plus(networkUtils.createUidParams())),
+                    .plus(
+                        apiFingerprintParamsFactory.createParams(
+                            fingerprintGuid
+                        )
+                    )
+            ),
             TokenJsonParser()
         )
     }
@@ -600,7 +622,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             )
         )
 
-        fireFingerprintRequest()
         fireAnalyticsRequest(
             analyticsDataFactory.createParams(
                 AnalyticsEvent.CustomerRetrievePaymentMethods,
@@ -632,7 +653,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         @Source.SourceType sourceType: String,
         requestOptions: ApiRequest.Options
     ): Customer? {
-        fireFingerprintRequest()
         fireAnalyticsRequest(
             analyticsDataFactory.createParams(
                 event = AnalyticsEvent.CustomerSetDefaultSource,
@@ -846,7 +866,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         val response = makeFileUploadRequest(
             FileUploadRequest(fileParams, requestOptions, appInfo)
         )
-        fireFingerprintRequest()
         fireAnalyticsRequest(AnalyticsEvent.FileCreate, requestOptions.apiKey)
         return StripeFileJsonParser().parse(response.responseJson)
     }
@@ -969,9 +988,15 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     private fun fireFingerprintRequest() {
-        fingerprintRequestExecutor.execute(fingerprintRequestFactory.create()) { fingerprintData ->
-            fingerprintData?.let {
-                fingerprintDataRepository.save(it)
+        handler.post {
+            // LiveData observation must occur on the main thread
+            fingerprintDataRepository.get().let { liveData ->
+                liveData.observeForever(object : Observer<FingerprintData?> {
+                    override fun onChanged(t: FingerprintData?) {
+                        fingerprintGuid = t?.guid
+                        liveData.removeObserver(this)
+                    }
+                })
             }
         }
     }
