@@ -16,6 +16,8 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class PaymentConfigurationTest {
 
+    private val context = ApplicationProvider.getApplicationContext<Context>()
+
     @BeforeTest
     fun setup() {
         // Make sure we initialize before each test.
@@ -25,14 +27,14 @@ class PaymentConfigurationTest {
     @Test
     fun getInstance_beforeInit_throwsRuntimeException() {
         assertFailsWith<IllegalStateException> {
-            PaymentConfiguration.getInstance(ApplicationProvider.getApplicationContext<Context>())
+            PaymentConfiguration.getInstance(context)
         }
     }
 
     @Test
     fun getInstance_whenInstanceIsNull_loadsFromPrefs() {
         PaymentConfiguration.init(
-            ApplicationProvider.getApplicationContext<Context>(),
+            context,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
 
@@ -41,7 +43,7 @@ class PaymentConfigurationTest {
         assertEquals(
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             PaymentConfiguration
-                .getInstance(ApplicationProvider.getApplicationContext<Context>())
+                .getInstance(context)
                 .publishableKey
         )
     }

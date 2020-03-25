@@ -3,32 +3,28 @@ package com.stripe.android
 import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import java.util.Calendar
 import org.json.JSONException
 import org.json.JSONObject
 
 internal interface FingerprintDataStore {
-    fun get(): LiveData<FingerprintData?>
+    fun get(): LiveData<FingerprintData>
     fun save(fingerprintData: FingerprintData)
 
     class Default(context: Context) : FingerprintDataStore {
         private val prefs = context.getSharedPreferences(
             PREF_FILE, Context.MODE_PRIVATE
         )
-        private val timestampSupplier: () -> Long = {
-            Calendar.getInstance().timeInMillis
-        }
 
-        override fun get(): LiveData<FingerprintData?> {
+        override fun get(): LiveData<FingerprintData> {
             val fingerprintData = try {
                 FingerprintData.fromJson(
                     JSONObject(prefs.getString(KEY_DATA, null).orEmpty())
-                ).takeUnless { it.isExpired(timestampSupplier()) }
+                )
             } catch (e: JSONException) {
-                null
+                FingerprintData()
             }
 
-            return MutableLiveData<FingerprintData?>(fingerprintData)
+            return MutableLiveData(fingerprintData)
         }
 
         override fun save(fingerprintData: FingerprintData) {
