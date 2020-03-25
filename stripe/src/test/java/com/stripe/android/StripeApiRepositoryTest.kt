@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import android.content.Context
+import androidx.lifecycle.MutableLiveData
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
@@ -9,8 +10,10 @@ import com.nhaarman.mockitokotlin2.argThat
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
+import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
+import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.BankAccountTokenParamsFixtures
@@ -32,6 +35,7 @@ import com.stripe.android.model.TokenFixtures
 import com.stripe.android.view.FpxBank
 import java.net.HttpURLConnection
 import java.net.UnknownHostException
+import java.util.Calendar
 import java.util.Locale
 import java.util.UUID
 import kotlin.test.BeforeTest
@@ -42,7 +46,6 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
-import org.mockito.Mockito.`when`
 import org.robolectric.RobolectricTestRunner
 
 /**
@@ -51,28 +54,30 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class StripeApiRepositoryTest {
 
-    private val context: Context by lazy {
-        ApplicationProvider.getApplicationContext<Context>()
-    }
-    private val stripeApiRepository: StripeApiRepository by lazy {
-        StripeApiRepository(context, DEFAULT_OPTIONS.apiKey)
-    }
-    private val fileFactory: FileFactory by lazy {
-        FileFactory(context)
-    }
+    private val context: Context = ApplicationProvider.getApplicationContext()
+    private val stripeApiRepository = StripeApiRepository(context, DEFAULT_OPTIONS.apiKey)
+    private val fileFactory = FileFactory(context)
 
     private val stripeApiRequestExecutor: ApiRequestExecutor = mock()
     private val fireAndForgetRequestExecutor: FireAndForgetRequestExecutor = mock()
-    private val fingerprintRequestExecutor: FingerprintRequestExecutor = mock()
+    private val fingerprintDataRepository: FingerprintDataRepository = mock()
 
     private val apiRequestArgumentCaptor: KArgumentCaptor<ApiRequest> = argumentCaptor()
     private val fileUploadRequestArgumentCaptor: KArgumentCaptor<FileUploadRequest> = argumentCaptor()
     private val stripeRequestArgumentCaptor: KArgumentCaptor<StripeRequest> = argumentCaptor()
-    private val fingerprintRequestArgumentCaptor: KArgumentCaptor<FingerprintRequest> = argumentCaptor()
 
     @BeforeTest
     fun before() {
-        `when`(stripeApiRequestExecutor.execute(any<FileUploadRequest>()))
+        whenever(fingerprintDataRepository.get()).thenReturn(
+            MutableLiveData(
+                FingerprintData(
+                    guid = UUID.randomUUID().toString(),
+                    timestamp = Calendar.getInstance().timeInMillis
+                )
+            )
+        )
+
+        whenever(stripeApiRequestExecutor.execute(any<FileUploadRequest>()))
             .thenReturn(
                 StripeResponse(
                     200,
@@ -193,7 +198,7 @@ class StripeApiRepositoryTest {
             SourceFixtures.SOURCE_CARD_JSON.toString(),
             emptyMap()
         )
-        `when`(stripeApiRequestExecutor.execute(any<ApiRequest>()))
+        whenever(stripeApiRequestExecutor.execute(any<ApiRequest>()))
             .thenReturn(stripeResponse)
         create().createSource(
             SourceParams.createCardParams(CardFixtures.CARD_WITH_ATTRIBUTION),
@@ -213,7 +218,7 @@ class StripeApiRepositoryTest {
             SourceFixtures.ALIPAY_JSON.toString(),
             emptyMap()
         )
-        `when`(stripeApiRequestExecutor.execute(any<ApiRequest>()))
+        whenever(stripeApiRequestExecutor.execute(any<ApiRequest>()))
             .thenReturn(stripeResponse)
         create().createSource(
             SourceParams.createMultibancoParams(
@@ -326,7 +331,7 @@ class StripeApiRepositoryTest {
         // put a private key here to simulate the backend
         val clientSecret = "pi_12345_secret_fake"
 
-        `when`(stripeApiRequestExecutor.execute(any<ApiRequest>()))
+        whenever(stripeApiRequestExecutor.execute(any<ApiRequest>()))
             .thenReturn(
                 StripeResponse(200,
                     PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2_JSON.toString(),
@@ -396,7 +401,7 @@ class StripeApiRepositoryTest {
             DEFAULT_OPTIONS.apiKey,
             stripeApiRequestExecutor = ApiRequestExecutor.Default(),
             fireAndForgetRequestExecutor = fireAndForgetRequestExecutor,
-            fingerprintRequestExecutor = fingerprintRequestExecutor
+            fingerprintDataRepository = fingerprintDataRepository
         )
         val source = stripeApiRepository.createSource(
             SourceParams.createCardParams(CARD),
@@ -563,7 +568,7 @@ class StripeApiRepositoryTest {
             options, queryParams
         ).url
 
-        `when`(
+        whenever(
             stripeApiRequestExecutor.execute(argThat<ApiRequest> {
                 ApiRequestMatcher(StripeRequest.Method.GET, url, options, queryParams)
                     .matches(this)
@@ -585,7 +590,7 @@ class StripeApiRepositoryTest {
         assertEquals("pm_1EVNXtCRMbs6FrXfTlZGIdGq", paymentMethods[1].id)
         assertEquals("src_1EVO8DCRMbs6FrXf2Dspj49a", paymentMethods[2].id)
 
-        verifyFingerprintAndAnalyticsRequests(
+        verifyAnalyticsRequest(
             AnalyticsEvent.CustomerRetrievePaymentMethods,
             null
         )
@@ -615,7 +620,7 @@ class StripeApiRepositoryTest {
             queryParams
         ).url
 
-        `when`(
+        whenever(
             stripeApiRequestExecutor.execute(argThat<ApiRequest> {
                 ApiRequestMatcher(StripeRequest.Method.GET, url, options, queryParams)
                     .matches(this)
@@ -661,7 +666,7 @@ class StripeApiRepositoryTest {
 
     @Test
     fun createSource_whenUnknownHostExceptionThrown_convertsToAPIConnectionException() {
-        `when`(stripeApiRequestExecutor.execute(any<ApiRequest>())).thenAnswer {
+        whenever(stripeApiRequestExecutor.execute(any<ApiRequest>())).thenAnswer {
             throw UnknownHostException()
         }
 
@@ -689,7 +694,7 @@ class StripeApiRepositoryTest {
         verify(stripeApiRequestExecutor).execute(fileUploadRequestArgumentCaptor.capture())
         assertNotNull(fileUploadRequestArgumentCaptor.firstValue)
 
-        verifyFingerprintAndAnalyticsRequests(AnalyticsEvent.FileCreate)
+        verifyAnalyticsRequest(AnalyticsEvent.FileCreate)
     }
 
     @Test
@@ -743,7 +748,7 @@ class StripeApiRepositoryTest {
             TokenFixtures.CARD_TOKEN_JSON.toString(),
             emptyMap()
         )
-        `when`(stripeApiRequestExecutor.execute(any<ApiRequest>())).thenReturn(stripeResponse)
+        whenever(stripeApiRequestExecutor.execute(any<ApiRequest>())).thenReturn(stripeResponse)
         create().createToken(
             CardFixtures.CARD_WITH_ATTRIBUTION,
             DEFAULT_OPTIONS
@@ -762,7 +767,7 @@ class StripeApiRepositoryTest {
             TokenFixtures.BANK_TOKEN_JSON.toString(),
             emptyMap()
         )
-        `when`(stripeApiRequestExecutor.execute(any<ApiRequest>())).thenReturn(stripeResponse)
+        whenever(stripeApiRequestExecutor.execute(any<ApiRequest>())).thenReturn(stripeResponse)
         create().createToken(
             BankAccountTokenParamsFixtures.DEFAULT,
             DEFAULT_OPTIONS
@@ -781,7 +786,7 @@ class StripeApiRepositoryTest {
             PaymentMethodFixtures.CARD_JSON.toString(),
             emptyMap()
         )
-        `when`(stripeApiRequestExecutor.execute(any<ApiRequest>()))
+        whenever(stripeApiRequestExecutor.execute(any<ApiRequest>()))
             .thenReturn(stripeResponse)
 
         create().createPaymentMethod(
@@ -805,7 +810,7 @@ class StripeApiRepositoryTest {
             PaymentMethodFixtures.SEPA_DEBIT_JSON.toString(),
             emptyMap()
         )
-        `when`(stripeApiRequestExecutor.execute(any<ApiRequest>())).thenReturn(stripeResponse)
+        whenever(stripeApiRequestExecutor.execute(any<ApiRequest>())).thenReturn(stripeResponse)
         create().createPaymentMethod(
             PaymentMethodCreateParams.create(
                 PaymentMethodCreateParams.SepaDebit("my_iban")
@@ -823,14 +828,18 @@ class StripeApiRepositoryTest {
         event: AnalyticsEvent,
         productUsage: List<String>? = null
     ) {
+        verify(fingerprintDataRepository, times(2))
+            .get()
+
+        verifyAnalyticsRequest(event, productUsage)
+    }
+
+    private fun verifyAnalyticsRequest(
+        event: AnalyticsEvent,
+        productUsage: List<String>? = null
+    ) {
         verify(fireAndForgetRequestExecutor)
             .executeAsync(stripeRequestArgumentCaptor.capture())
-
-        verify(fingerprintRequestExecutor)
-            .execute(fingerprintRequestArgumentCaptor.capture(), any())
-
-        val fingerprintRequest = fingerprintRequestArgumentCaptor.firstValue
-        assertNotNull(fingerprintRequest)
 
         val analyticsRequest = stripeRequestArgumentCaptor.firstValue
         val analyticsParams = analyticsRequest.compactParams.orEmpty()
@@ -851,11 +860,10 @@ class StripeApiRepositoryTest {
             DEFAULT_OPTIONS.apiKey,
             stripeApiRequestExecutor = stripeApiRequestExecutor,
             fireAndForgetRequestExecutor = fireAndForgetRequestExecutor,
-            fingerprintRequestExecutor = fingerprintRequestExecutor,
+            fingerprintDataRepository = fingerprintDataRepository,
             networkUtils = StripeNetworkUtils(
-                UidParamsFactory(
-                    store = FakeClientFingerprintDataStore(),
-                    uidSupplier = FakeUidSupplier()
+                ApiFingerprintParamsFactory(
+                    store = FakeClientFingerprintDataStore()
                 )
             )
         )

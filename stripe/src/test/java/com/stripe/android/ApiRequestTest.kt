@@ -15,17 +15,14 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 internal class ApiRequestTest {
 
-    private val networkUtils = StripeNetworkUtils(
-        UidParamsFactory(
-            store = FakeClientFingerprintDataStore(MUID),
-            uidSupplier = FakeUidSupplier("abc123")
-        )
+    private val apiFingerprintParamsFactory = ApiFingerprintParamsFactory(
+        store = FakeClientFingerprintDataStore(MUID)
     )
 
     @Test
     fun url_withCardData_createsProperQueryString() {
         val cardMap = CardFixtures.MINIMUM_CARD.toParamMap()
-            .plus(networkUtils.createUidParams())
+            .plus(apiFingerprintParamsFactory.createParams(GUID.toString()))
         val url = FACTORY.createGet(
             StripeApiRepository.sourcesUrl,
             OPTIONS,
@@ -33,7 +30,7 @@ internal class ApiRequestTest {
         ).url
 
         assertThat(Uri.parse(url))
-            .isEqualTo(Uri.parse("https://api.stripe.com/v1/sources?muid=$MUID&guid=6367C48DD193D56EA7B0BAAD25B19455E529F5EE&card%5Bnumber%5D=4242424242424242&card%5Bexp_month%5D=1&card%5Bcvc%5D=123&card%5Bexp_year%5D=2050"))
+            .isEqualTo(Uri.parse("https://api.stripe.com/v1/sources?muid=$MUID&guid=$GUID&card%5Bnumber%5D=4242424242424242&card%5Bexp_month%5D=1&card%5Bcvc%5D=123&card%5Bexp_year%5D=2050"))
     }
 
     @Test
@@ -105,5 +102,6 @@ internal class ApiRequestTest {
         private val FACTORY = ApiRequest.Factory()
 
         private val MUID = UUID.randomUUID()
+        private val GUID = UUID.randomUUID()
     }
 }

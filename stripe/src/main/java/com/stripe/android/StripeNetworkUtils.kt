@@ -9,40 +9,47 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMEN
  * Utility class for static functions useful for networking and data transfer.
  */
 internal class StripeNetworkUtils @VisibleForTesting constructor(
-    private val uidParamsFactory: UidParamsFactory
+    private val apiFingerprintParamsFactory: ApiFingerprintParamsFactory
 ) {
     constructor(context: Context) : this(
-        UidParamsFactory(context)
+        ApiFingerprintParamsFactory(context)
     )
 
-    internal fun paramsWithUid(intentParams: Map<String, *>): Map<String, *> {
+    internal fun paramsWithUid(
+        params: Map<String, *>,
+        fingerprintGuid: String?
+    ): Map<String, *> {
         return when {
-            intentParams.containsKey(ConfirmPaymentIntentParams.PARAM_SOURCE_DATA) ->
+            params.containsKey(ConfirmPaymentIntentParams.PARAM_SOURCE_DATA) ->
                 paramsWithUid(
-                    intentParams,
-                    ConfirmPaymentIntentParams.PARAM_SOURCE_DATA
+                    params,
+                    ConfirmPaymentIntentParams.PARAM_SOURCE_DATA,
+                    fingerprintGuid
                 )
-            intentParams.containsKey(PARAM_PAYMENT_METHOD_DATA) ->
+            params.containsKey(PARAM_PAYMENT_METHOD_DATA) ->
                 paramsWithUid(
-                    intentParams,
-                    PARAM_PAYMENT_METHOD_DATA
+                    params,
+                    PARAM_PAYMENT_METHOD_DATA,
+                    fingerprintGuid
                 )
-            else -> intentParams
+            else -> params
         }
     }
 
-    private fun paramsWithUid(stripeIntentParams: Map<String, *>, key: String): Map<String, *> {
+    private fun paramsWithUid(
+        stripeIntentParams: Map<String, *>,
+        key: String,
+        fingerprintGuid: String?
+    ): Map<String, *> {
         val data = stripeIntentParams[key]
         return if (data is Map<*, *>) {
             val mutableParams = stripeIntentParams.toMutableMap()
-            mutableParams[key] = data.plus(uidParamsFactory.createParams())
+            mutableParams[key] = data.plus(
+                apiFingerprintParamsFactory.createParams(fingerprintGuid)
+            )
             mutableParams.toMap()
         } else {
             stripeIntentParams
         }
-    }
-
-    fun createUidParams(): Map<String, String> {
-        return uidParamsFactory.createParams()
     }
 }

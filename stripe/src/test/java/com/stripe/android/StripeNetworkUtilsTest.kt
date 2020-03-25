@@ -5,6 +5,7 @@ import com.stripe.android.model.CardFixtures
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -18,9 +19,8 @@ import org.robolectric.RobolectricTestRunner
 class StripeNetworkUtilsTest {
 
     private val networkUtils = StripeNetworkUtils(
-        UidParamsFactory(
-            store = FakeClientFingerprintDataStore(),
-            uidSupplier = FakeUidSupplier()
+        ApiFingerprintParamsFactory(
+            store = FakeClientFingerprintDataStore()
         )
     )
 
@@ -56,7 +56,8 @@ class StripeNetworkUtilsTest {
     @Test
     fun addUidParamsToPaymentIntent_withSource_addsParamsAtRightLevel() {
         val updatedParams = networkUtils.paramsWithUid(
-            mapOf(ConfirmPaymentIntentParams.PARAM_SOURCE_DATA to emptyMap<String, Any>())
+            params = mapOf(ConfirmPaymentIntentParams.PARAM_SOURCE_DATA to emptyMap<String, Any>()),
+            fingerprintGuid = GUID.toString()
         )
 
         val updatedData =
@@ -69,8 +70,11 @@ class StripeNetworkUtilsTest {
     @Test
     fun addUidParamsToPaymentIntent_withPaymentMethodParams_addsUidAtRightLevel() {
         val updatedParams = networkUtils.paramsWithUid(
-            mapOf(PARAM_PAYMENT_METHOD_DATA to
-                PaymentMethodCreateParamsFixtures.DEFAULT_CARD.toParamMap())
+            params = mapOf(
+                PARAM_PAYMENT_METHOD_DATA to
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD.toParamMap()
+            ),
+            fingerprintGuid = GUID.toString()
         )
         val updatedData = updatedParams[PARAM_PAYMENT_METHOD_DATA] as Map<String, *>
         assertEquals(1, updatedParams.size)
@@ -94,5 +98,7 @@ class StripeNetworkUtilsTest {
         private const val CARD_NUMBER = "4242424242424242"
         private const val CARD_STATE = "CA"
         private const val CARD_ZIP = "94107"
+
+        private val GUID = UUID.randomUUID()
     }
 }

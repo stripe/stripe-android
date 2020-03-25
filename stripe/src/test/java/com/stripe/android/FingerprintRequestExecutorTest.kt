@@ -1,6 +1,5 @@
 package com.stripe.android
 
-import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
@@ -15,13 +14,13 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class FingerprintRequestExecutorTest {
     private val fingerprintRequestFactory = FingerprintRequestFactory(
-        ApplicationProvider.getApplicationContext<Context>()
+        context = ApplicationProvider.getApplicationContext()
     )
 
     @Test
     fun execute_whenSuccessful_shouldReturnResponseWithUuid() {
         createFingerprintRequestExecutor().execute(
-            request = fingerprintRequestFactory.create()
+            request = fingerprintRequestFactory.create(GUID.toString())
         ) {
             assertThat(UUID.fromString(it?.guid))
                 .isNotNull()
@@ -32,7 +31,7 @@ class FingerprintRequestExecutorTest {
     fun execute_whenErrorResponse_shouldInvokeCallback() {
         var callbackCount = 0
 
-        val request = fingerprintRequestFactory.create()
+        val request = fingerprintRequestFactory.create(GUID.toString())
         val connection = mock<StripeConnection>().also {
             whenever(it.responseCode).thenReturn(500)
         }
@@ -58,7 +57,7 @@ class FingerprintRequestExecutorTest {
     fun execute_whenConnectionException_shouldInvokeCallback() {
         var callbackCount = 0
 
-        val request = fingerprintRequestFactory.create()
+        val request = fingerprintRequestFactory.create(GUID.toString())
         val connectionFactory = mock<ConnectionFactory>().also {
             whenever(it.create(request)).thenThrow(IOException())
         }
@@ -80,4 +79,8 @@ class FingerprintRequestExecutorTest {
         workScope = MainScope(),
         connectionFactory = connectionFactory
     )
+
+    private companion object {
+        private val GUID = UUID.randomUUID()
+    }
 }
