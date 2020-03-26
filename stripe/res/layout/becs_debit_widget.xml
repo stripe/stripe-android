@@ -115,5 +115,10 @@
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
+        <com.stripe.android.view.BecsDebitMandateAcceptanceTextView
+            android:id="@+id/mandate_acceptance_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/Stripe.BecsDebitWidget.MandateAcceptanceTextView"/>
     </LinearLayout>
 </merge>

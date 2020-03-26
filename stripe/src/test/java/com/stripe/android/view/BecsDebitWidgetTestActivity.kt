@@ -8,7 +8,10 @@ import com.stripe.android.R
 internal class BecsDebitWidgetTestActivity : AppCompatActivity() {
 
     val becsDebitWidget: BecsDebitWidget by lazy {
-        BecsDebitWidget(this)
+        BecsDebitWidget(
+            context = this,
+            companyName = "Rocketship Inc."
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

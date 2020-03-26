@@ -18,9 +18,18 @@ class BecsDebitMandateAcceptanceTextView @JvmOverloads constructor(
         movementMethod = LinkMovementMethod.getInstance()
     }
 
-    var merchantName: String by Delegates.observable(
+    var companyName: String by Delegates.observable(
         ""
-    ) { _, _, merchantName ->
-        text = merchantName.takeIf { it.isNotBlank() }?.let { factory.create(it) } ?: ""
+    ) { _, _, companyName ->
+        text = companyName.takeIf {
+            it.isNotBlank()
+        }?.let {
+            factory.create(it)
+        } ?: ""
     }
+
+    internal val isValid: Boolean
+        get() {
+            return !text.isNullOrBlank()
+        }
 }

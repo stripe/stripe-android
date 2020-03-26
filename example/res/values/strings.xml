@@ -73,5 +73,7 @@
     <string name="iban_hint">IBAN</string>
     <string name="confirm_wth_sepa_debit_button">Confirm with SEPA Debit Payment Method</string>
     <string name="sepa_debit_helper">Test account number: DE89370400440532013000</string>
+
     <string name="create_becs_debit_params">Create BECS Debit Params</string>
+    <string name="becs_company_name">Rocketship Inc.</string>
 </resources>

@@ -30,8 +30,6 @@ class BecsDebitPaymentMethodActivity : AppCompatActivity() {
             }
         }
 
-        viewBinding.mandateAcceptance.merchantName = "Rocketship Inc."
-
         viewBinding.submit.setOnClickListener {
             viewBinding.element.params?.let { params ->
                 keyboardController.hide()
