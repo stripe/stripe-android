@@ -6,6 +6,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertFailsWith
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -152,6 +153,28 @@ internal class BecsDebitWidgetTest : BaseViewTest<BecsDebitWidgetTestActivity>(
             .isTrue()
         assertThat(callbacks)
             .isEqualTo(5)
+    }
+
+    @Test
+    fun companyName_shouldUpdateMandateAcceptanceTextView() {
+        assertThat(becsDebitWidget.viewBinding.mandateAcceptanceTextView.text.toString())
+            .isEqualTo(
+                """
+                By providing your bank account details and confirming this payment, you agree to this Direct Debit Request and the Direct Debit Request service agreement, and authorise Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156 (“Stripe”) to debit your account through the Bulk Electronic Clearing System (BECS) on behalf of Rocketship Inc. (the Merchant) for any amounts separately communicated to you by the Merchant. You certify that you are either an account holder or an authorised signatory on the account listed above.
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun init_withBlankCompanyName_shouldThrowException() {
+        assertFailsWith<Exception>(
+            "A company name is required to render a BecsDebitWidget."
+        ) {
+            BecsDebitWidget(
+                context = activity,
+                companyName = ""
+            )
+        }
     }
 
     private companion object {

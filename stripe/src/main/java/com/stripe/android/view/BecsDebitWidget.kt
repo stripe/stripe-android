@@ -15,12 +15,22 @@ import com.stripe.android.model.PaymentMethodCreateParams
 /**
  * A form for accepting a customer's BECS account information.
  *
- * See [BecsDebitMandateAcceptanceTextFactory] for creating the mandate acceptance copy.
+ * A company name is required to render this widget. A company name can either be specified by
+ * passing it to the [BecsDebitWidget] constructor, or via XML:
+ *
+ * ```
+ * <com.stripe.android.view.BecsDebitWidget
+ *   android:id="@+id/element"
+ *   android:layout_width="match_parent"
+ *   android:layout_height="wrap_content"
+ *   app:companyName="@string/becs_company_name" />
+ * ```
  */
 class BecsDebitWidget @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    defStyleAttr: Int = 0,
+    companyName: String = ""
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
     internal val viewBinding: BecsDebitWidgetBinding by lazy {
@@ -143,6 +153,38 @@ class BecsDebitWidget @JvmOverloads constructor(
                     field.shouldShowError = false
                 }
             })
+        }
+
+        companyName.takeIf { it.isNotBlank() }?.let {
+            viewBinding.mandateAcceptanceTextView.companyName = it
+        }
+        attrs?.let { applyAttributes(it) }
+
+        verifyCompanyName()
+    }
+
+    private fun verifyCompanyName() {
+        require(viewBinding.mandateAcceptanceTextView.isValid) {
+            """
+            A company name is required to render a BecsDebitWidget.
+            """.trimIndent()
+        }
+    }
+
+    private fun applyAttributes(attrs: AttributeSet) {
+        val typedArray = context.theme.obtainStyledAttributes(
+            attrs, R.styleable.BecsDebitWidget, 0, 0
+        )
+
+        try {
+            val companyName = typedArray.getString(
+                R.styleable.BecsDebitWidget_companyName
+            )
+            companyName?.let {
+                viewBinding.mandateAcceptanceTextView.companyName = it
+            }
+        } finally {
+            typedArray.recycle()
         }
     }
 

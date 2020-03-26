@@ -48,4 +48,11 @@
     </style>
 
     <style name="Stripe.BecsDebitWidget.EditText" parent="Stripe.Base.BecsDebitWidget.EditText" />
+
+    <style name="Stripe.Base.BecsDebitWidget.MandateAcceptanceTextView" parent="Widget.AppCompat.TextView">
+        <item name="android:paddingTop">@dimen/stripe_becs_debit_widget_mandate_acceptance_padding_top</item>
+    </style>
+
+    <style name="Stripe.BecsDebitWidget.MandateAcceptanceTextView"
+        parent="Stripe.Base.BecsDebitWidget.MandateAcceptanceTextView" />
 </resources>

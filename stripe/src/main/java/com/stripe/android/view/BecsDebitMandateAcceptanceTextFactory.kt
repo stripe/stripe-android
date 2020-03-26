@@ -11,10 +11,10 @@ import com.stripe.android.R
 class BecsDebitMandateAcceptanceTextFactory(
     private val context: Context
 ) {
-    fun create(merchantName: String): CharSequence {
+    fun create(companyName: String): CharSequence {
         val mandateAcceptanceText = context.getString(
             R.string.becs_mandate_acceptance,
-            merchantName
+            companyName
         )
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Html.fromHtml(mandateAcceptanceText, Html.FROM_HTML_MODE_LEGACY)
