@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 14.2.1 - unreleased
+## 14.2.1 - 2020-03-26
 * [#2299](https://github.com/stripe/stripe-android/pull/2299) Make `SourceParams.OwnerParams` constructor public and properties mutable
 * [#2304](https://github.com/stripe/stripe-android/pull/2304) Force Canadian postal codes to be uppercase
 * [#2315](https://github.com/stripe/stripe-android/pull/2315) Add `Fragment` support to `AddPaymentMethodActivityStarter`
