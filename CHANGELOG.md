@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 14.2.1 - unreleased
+* [#2299](https://github.com/stripe/stripe-android/pull/2299) Make `SourceParams.OwnerParams` constructor public and properties mutable
+* [#2304](https://github.com/stripe/stripe-android/pull/2304) Force Canadian postal codes to be uppercase
+* [#2315](https://github.com/stripe/stripe-android/pull/2315) Add `Fragment` support to `AddPaymentMethodActivityStarter`
+* [#2325](https://github.com/stripe/stripe-android/pull/2325) Update `BecsDebitWidget`
+
 ## 14.2.0 - 2020-03-18
 * [#2278](https://github.com/stripe/stripe-android/pull/2278) Add ability to require US ZIP code in `CardInputWidget` and `CardMultilineWidget`
 * [#2279](https://github.com/stripe/stripe-android/pull/2279) Default `CardMultilineWidget` to global postal code configuration
