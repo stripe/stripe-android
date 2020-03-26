@@ -5,7 +5,7 @@ import org.json.JSONObject
 
 internal data class FingerprintData(
     internal val guid: String? = null,
-    internal val timestamp: Long
+    internal val timestamp: Long = 0L
 ) {
     fun toJson(): JSONObject {
         return JSONObject()

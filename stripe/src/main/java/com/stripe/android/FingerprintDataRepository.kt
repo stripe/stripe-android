@@ -6,6 +6,7 @@ import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import java.util.Calendar
 
 internal interface FingerprintDataRepository {
     fun get(): LiveData<FingerprintData?>
@@ -18,6 +19,10 @@ internal interface FingerprintDataRepository {
             FingerprintRequestExecutor.Default(),
         private val handler: Handler = Handler(Looper.getMainLooper())
     ) : FingerprintDataRepository {
+        private val timestampSupplier: () -> Long = {
+            Calendar.getInstance().timeInMillis
+        }
+
         constructor(
             context: Context,
             handler: Handler = Handler(Looper.getMainLooper())
@@ -33,23 +38,22 @@ internal interface FingerprintDataRepository {
             handler.post {
                 val liveData = store.get()
                 // LiveData observation must occur on the main thread
-                liveData.observeForever(object : Observer<FingerprintData?> {
-                    override fun onChanged(localFingerprintData: FingerprintData?) {
-                        if (localFingerprintData != null) {
-                            // FingerprintData was available locally
-                            resultData.value = localFingerprintData
-                            liveData.removeObserver(this)
-                        } else {
-                            // FingerprintData needs to be fetched remotely
+                liveData.observeForever(object : Observer<FingerprintData> {
+                    override fun onChanged(localFingerprintData: FingerprintData) {
+                        if (localFingerprintData.isExpired(timestampSupplier())) {
                             fingerprintRequestExecutor.execute(
-                                // TODO(mshafrir-stripe): pass in fingerprint GUID
-                                request = fingerprintRequestFactory.create(null)
+                                request = fingerprintRequestFactory.create(
+                                    localFingerprintData.guid
+                                )
                             ) { remoteFingerprintData ->
                                 resultData.value = remoteFingerprintData?.also {
                                     save(it)
                                 }
                                 liveData.removeObserver(this)
                             }
+                        } else {
+                            resultData.value = localFingerprintData
+                            liveData.removeObserver(this)
                         }
                     }
                 })
