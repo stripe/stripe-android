@@ -71,7 +71,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         ApiFingerprintParamsFactory(context),
     private val analyticsDataFactory: AnalyticsDataFactory =
         AnalyticsDataFactory(context, publishableKey),
-    private val networkUtils: StripeNetworkUtils = StripeNetworkUtils(context),
+    private val fingerprintParamsUtils: FingerprintParamsUtils = FingerprintParamsUtils(context),
     apiVersion: String = ApiVersion.get().code,
     sdkVersion: String = Stripe.VERSION
 ) : StripeRepository {
@@ -103,7 +103,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         options: ApiRequest.Options
     ): PaymentIntent? {
-        val params = networkUtils.paramsWithUid(
+        val params = fingerprintParamsUtils.addFingerprintData(
             confirmPaymentIntentParams.toParamMap(),
             fingerprintGuid
         )
@@ -231,7 +231,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 apiRequestFactory.createPost(
                     getConfirmSetupIntentUrl(setupIntentId),
                     options,
-                    networkUtils.paramsWithUid(
+                    fingerprintParamsUtils.addFingerprintData(
                         confirmSetupIntentParams.toParamMap(),
                         fingerprintGuid
                     )

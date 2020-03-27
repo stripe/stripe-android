@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.model.parsers.CardJsonParser
 import java.util.Calendar
@@ -575,6 +576,29 @@ class CardTest {
             )
         )
         assertEquals(expected, actual)
+    }
+
+    @Test
+    fun paramsFromCard_mapsCorrectFields() {
+        assertThat(CardFixtures.CARD.toParamMap())
+            .isEqualTo(
+                mapOf(
+                    "card" to mapOf(
+                        "number" to CardNumberFixtures.VISA_NO_SPACES,
+                        "exp_month" to 8,
+                        "exp_year" to 2019,
+                        "cvc" to "123",
+                        "name" to "J Q Public",
+                        "currency" to "USD",
+                        "address_line1" to "123 Main Street",
+                        "address_line2" to "906",
+                        "address_city" to "San Francisco",
+                        "address_state" to "CA",
+                        "address_zip" to "94107",
+                        "address_country" to "US"
+                    )
+                )
+            )
     }
 
     internal companion object {

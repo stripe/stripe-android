@@ -861,7 +861,7 @@ class StripeApiRepositoryTest {
             stripeApiRequestExecutor = stripeApiRequestExecutor,
             fireAndForgetRequestExecutor = fireAndForgetRequestExecutor,
             fingerprintDataRepository = fingerprintDataRepository,
-            networkUtils = StripeNetworkUtils(
+            fingerprintParamsUtils = FingerprintParamsUtils(
                 ApiFingerprintParamsFactory(
                     store = FakeClientFingerprintDataStore()
                 )
