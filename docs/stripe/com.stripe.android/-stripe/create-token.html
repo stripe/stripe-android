@@ -1,0 +1,26 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>Stripe.createToken - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android</a>&nbsp;/&nbsp;<a href="index.html">Stripe</a>&nbsp;/&nbsp;<a href="./create-token.html">createToken</a><br/>
+<br/>
+<h1>createToken</h1>
+<a name="com.stripe.android.Stripe$createToken(com.stripe.android.model.Card, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))"></a>
+<code><span class="identifier">@UiThread</span> <span class="identifier">@JvmOverloads</span> <span class="keyword">fun </span><s><span class="identifier">createToken</span></s><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$createToken(com.stripe.android.model.Card, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/card">card</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-card/index.html"><span class="identifier">Card</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createToken(com.stripe.android.model.Card, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/idempotencyKey">idempotencyKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createToken(com.stripe.android.model.Card, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/callback">callback</span><span class="symbol">:</span>&nbsp;<a href="../-api-result-callback/index.html"><span class="identifier">ApiResultCallback</span></a><span class="symbol">&lt;</span><a href="../../com.stripe.android.model/-token/index.html"><span class="identifier">Token</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code><br/>
+<strong>Deprecated:</strong> Deprecated, replace with Stripe#createCardToken()<br/>
+<br/>
+<p>Create a Card token asynchronously.</p>
+<p>See <a href="https://stripe.com/docs/api/tokens/create_card">Create a card token</a>.
+<code>POST /v1/tokens</code></p>
+<h3>Parameters</h3>
+<p><a name="card"></a>
+<code>card</code> - the <a href="../../com.stripe.android.model/-card/index.html">Card</a> used to create this payment token</p>
+<p><a name="idempotencyKey"></a>
+<code>idempotencyKey</code> - optional, see <a href="https://stripe.com/docs/api/idempotent_requests">Idempotent Requests</a></p>
+<p><a name="callback"></a>
+<code>callback</code> - a <a href="../-api-result-callback/index.html">ApiResultCallback</a> to receive the result or error</p>
+</BODY>
+</HTML>

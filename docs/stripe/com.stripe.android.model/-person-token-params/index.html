@@ -1,0 +1,263 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>PersonTokenParams - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android.model</a>&nbsp;/&nbsp;<a href="./index.html">PersonTokenParams</a><br/>
+<br/>
+<h1>PersonTokenParams</h1>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">PersonTokenParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-token-params/index.html"><span class="identifier">TokenParams</span></a></code>
+<p>Creates a single-use token that represents the details for a person. Use this when creating or
+updating persons associated with a Connect account.
+See <a href="https://stripe.com/docs/connect/account-tokens">the documentation</a> to learn more.</p>
+<p>See <a href="https://stripe.com/docs/api/tokens/create_person">Create a person token</a></p>
+<h3>Types</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-builder/index.html">Builder</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">Builder</span>&nbsp;<span class="symbol">:</span>&nbsp;<span class="identifier">ObjectBuilder</span><span class="symbol">&lt;</span><a href="./index.html"><span class="identifier">PersonTokenParams</span></a><span class="symbol">&gt;</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-document/index.html">Document</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Document</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-relationship/index.html">Relationship</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Relationship</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code>
+<p>The relationship that this person has with the account’s legal entity.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-verification/index.html">Verification</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Verification</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code>
+<p>The person’s verification status.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Constructors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-init-.html">&lt;init&gt;</a></p>
+</td>
+<td>
+<code><span class="identifier">PersonTokenParams</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.PersonTokenParams$<init>(com.stripe.android.model.Address, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.DateOfBirth, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.collections.Map((kotlin.String, )), kotlin.String, com.stripe.android.model.PersonTokenParams.Relationship, kotlin.String, com.stripe.android.model.PersonTokenParams.Verification)/address">address</span><span class="symbol">:</span>&nbsp;<a href="../-address/index.html"><span class="identifier">Address</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PersonTokenParams$<init>(com.stripe.android.model.Address, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.DateOfBirth, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.collections.Map((kotlin.String, )), kotlin.String, com.stripe.android.model.PersonTokenParams.Relationship, kotlin.String, com.stripe.android.model.PersonTokenParams.Verification)/addressKana">addressKana</span><span class="symbol">:</span>&nbsp;<a href="../-address-japan-params/index.html"><span class="identifier">AddressJapanParams</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PersonTokenParams$<init>(com.stripe.android.model.Address, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.DateOfBirth, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.collections.Map((kotlin.String, )), kotlin.String, com.stripe.android.model.PersonTokenParams.Relationship, kotlin.String, com.stripe.android.model.PersonTokenParams.Verification)/addressKanji">addressKanji</span><span class="symbol">:</span>&nbsp;<a href="../-address-japan-params/index.html"><span class="identifier">AddressJapanParams</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PersonTokenParams$<init>(com.stripe.android.model.Address, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.DateOfBirth, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.collections.Map((kotlin.String, )), kotlin.String, com.stripe.android.model.PersonTokenParams.Relationship, kotlin.String, com.stripe.android.model.PersonTokenParams.Verification)/dateOfBirth">dateOfBirth</span><span class="symbol">:</span>&nbsp;<a href="../-date-of-birth/index.html"><span class="identifier">DateOfBirth</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PersonTokenParams$<init>(com.stripe.android.model.Address, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.DateOfBirth, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.collections.Map((kotlin.String, )), kotlin.String, com.stripe.android.model.PersonTokenParams.Relationship, kotlin.String, com.stripe.android.model.PersonTokenParams.Verification)/email">email</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PersonTokenParams$<init>(com.stripe.android.model.Address, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.DateOfBirth, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.collections.Map((kotlin.String, )), kotlin.String, com.stripe.android.model.PersonTokenParams.Relationship, kotlin.String, com.stripe.android.model.PersonTokenParams.Verification)/firstName">firstName</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PersonTokenParams$<init>(com.stripe.android.model.Address, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.DateOfBirth, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.collections.Map((kotlin.String, )), kotlin.String, com.stripe.android.model.PersonTokenParams.Relationship, kotlin.String, com.stripe.android.model.PersonTokenParams.Verification)/firstNameKana">firstNameKana</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PersonTokenParams$<init>(com.stripe.android.model.Address, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.DateOfBirth, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.collections.Map((kotlin.String, )), kotlin.String, com.stripe.android.model.PersonTokenParams.Relationship, kotlin.String, com.stripe.android.model.PersonTokenParams.Verification)/firstNameKanji">firstNameKanji</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PersonTokenParams$<init>(com.stripe.android.model.Address, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.DateOfBirth, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.collections.Map((kotlin.String, )), kotlin.String, com.stripe.android.model.PersonTokenParams.Relationship, kotlin.String, com.stripe.android.model.PersonTokenParams.Verification)/gender">gender</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PersonTokenParams$<init>(com.stripe.android.model.Address, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.DateOfBirth, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.collections.Map((kotlin.String, )), kotlin.String, com.stripe.android.model.PersonTokenParams.Relationship, kotlin.String, com.stripe.android.model.PersonTokenParams.Verification)/idNumber">idNumber</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PersonTokenParams$<init>(com.stripe.android.model.Address, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.DateOfBirth, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.collections.Map((kotlin.String, )), kotlin.String, com.stripe.android.model.PersonTokenParams.Relationship, kotlin.String, com.stripe.android.model.PersonTokenParams.Verification)/lastName">lastName</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PersonTokenParams$<init>(com.stripe.android.model.Address, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.DateOfBirth, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.collections.Map((kotlin.String, )), kotlin.String, com.stripe.android.model.PersonTokenParams.Relationship, kotlin.String, com.stripe.android.model.PersonTokenParams.Verification)/lastNameKana">lastNameKana</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PersonTokenParams$<init>(com.stripe.android.model.Address, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.DateOfBirth, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.collections.Map((kotlin.String, )), kotlin.String, com.stripe.android.model.PersonTokenParams.Relationship, kotlin.String, com.stripe.android.model.PersonTokenParams.Verification)/lastNameKanji">lastNameKanji</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PersonTokenParams$<init>(com.stripe.android.model.Address, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.DateOfBirth, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.collections.Map((kotlin.String, )), kotlin.String, com.stripe.android.model.PersonTokenParams.Relationship, kotlin.String, com.stripe.android.model.PersonTokenParams.Verification)/maidenName">maidenName</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PersonTokenParams$<init>(com.stripe.android.model.Address, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.DateOfBirth, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.collections.Map((kotlin.String, )), kotlin.String, com.stripe.android.model.PersonTokenParams.Relationship, kotlin.String, com.stripe.android.model.PersonTokenParams.Verification)/metadata">metadata</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">&gt;</span><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PersonTokenParams$<init>(com.stripe.android.model.Address, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.DateOfBirth, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.collections.Map((kotlin.String, )), kotlin.String, com.stripe.android.model.PersonTokenParams.Relationship, kotlin.String, com.stripe.android.model.PersonTokenParams.Verification)/phone">phone</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PersonTokenParams$<init>(com.stripe.android.model.Address, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.DateOfBirth, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.collections.Map((kotlin.String, )), kotlin.String, com.stripe.android.model.PersonTokenParams.Relationship, kotlin.String, com.stripe.android.model.PersonTokenParams.Verification)/relationship">relationship</span><span class="symbol">:</span>&nbsp;<a href="-relationship/index.html"><span class="identifier">Relationship</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PersonTokenParams$<init>(com.stripe.android.model.Address, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.DateOfBirth, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.collections.Map((kotlin.String, )), kotlin.String, com.stripe.android.model.PersonTokenParams.Relationship, kotlin.String, com.stripe.android.model.PersonTokenParams.Verification)/ssnLast4">ssnLast4</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PersonTokenParams$<init>(com.stripe.android.model.Address, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.AddressJapanParams, com.stripe.android.model.DateOfBirth, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.collections.Map((kotlin.String, )), kotlin.String, com.stripe.android.model.PersonTokenParams.Relationship, kotlin.String, com.stripe.android.model.PersonTokenParams.Verification)/verification">verification</span><span class="symbol">:</span>&nbsp;<a href="-verification/index.html"><span class="identifier">Verification</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span></code>
+<p>Creates a single-use token that represents the details for a person. Use this when creating or
+updating persons associated with a Connect account.
+See <a href="https://stripe.com/docs/connect/account-tokens">the documentation</a> to learn more.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="address.html">address</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">address</span><span class="symbol">: </span><a href="../-address/index.html"><span class="identifier">Address</span></a><span class="symbol">?</span></code>
+<p>The person’s address.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="address-kana.html">addressKana</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">addressKana</span><span class="symbol">: </span><a href="../-address-japan-params/index.html"><span class="identifier">AddressJapanParams</span></a><span class="symbol">?</span></code>
+<p>The Kana variation of the person’s address (Japan only).</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="address-kanji.html">addressKanji</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">addressKanji</span><span class="symbol">: </span><a href="../-address-japan-params/index.html"><span class="identifier">AddressJapanParams</span></a><span class="symbol">?</span></code>
+<p>The Kanji variation of the person’s address (Japan only).</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="date-of-birth.html">dateOfBirth</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">dateOfBirth</span><span class="symbol">: </span><a href="../-date-of-birth/index.html"><span class="identifier">DateOfBirth</span></a><span class="symbol">?</span></code>
+<p>The person’s date of birth.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="email.html">email</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">email</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>The person’s email address.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="first-name.html">firstName</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">firstName</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>The person’s first name.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="first-name-kana.html">firstNameKana</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">firstNameKana</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>The Kana variation of the person’s first name (Japan only).</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="first-name-kanji.html">firstNameKanji</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">firstNameKanji</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>The Kanji variation of the person’s first name (Japan only).</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="gender.html">gender</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">gender</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>The person’s gender (International regulations require either “male” or “female”).</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="id-number.html">idNumber</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">idNumber</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>The person’s ID number, as appropriate for their country. For example, a social security
+number in the U.S., social insurance number in Canada, etc. Instead of the number itself,
+you can also provide a PII token.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="last-name.html">lastName</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">lastName</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>The person’s last name.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="last-name-kana.html">lastNameKana</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">lastNameKana</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>The Kana variation of the person’s last name (Japan only).</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="last-name-kanji.html">lastNameKanji</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">lastNameKanji</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>The Kanji variation of the person’s last name (Japan only).</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="maiden-name.html">maidenName</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">maidenName</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>The person’s maiden name.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="metadata.html">metadata</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">metadata</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">&gt;</span><span class="symbol">?</span></code>
+<p>Set of key-value pairs that you can attach to an object. This can be useful for storing
+additional information about the object in a structured format. Individual keys can be unset
+by posting an empty value to them. All keys can be unset by posting an empty value
+to <code>metadata</code>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="phone.html">phone</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">phone</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>The person’s phone number.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="relationship.html">relationship</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">relationship</span><span class="symbol">: </span><a href="-relationship/index.html"><span class="identifier">Relationship</span></a><span class="symbol">?</span></code>
+<p>The relationship that this person has with the account’s legal entity.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="ssn-last4.html">ssnLast4</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">ssnLast4</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>The last 4 digits of the person’s social security number.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="verification.html">verification</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">verification</span><span class="symbol">: </span><a href="-verification/index.html"><span class="identifier">Verification</span></a><span class="symbol">?</span></code>
+<p>The person’s verification status.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="to-param-map.html">toParamMap</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">toParamMap</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">&gt;</span></code></td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

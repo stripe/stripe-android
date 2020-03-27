@@ -1,0 +1,80 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>AddPaymentMethodActivityStarter.Args.Builder - stripe</title>
+<link rel="stylesheet" href="../../../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../../../index.html">com.stripe.android.view</a>&nbsp;/&nbsp;<a href="../../index.html">AddPaymentMethodActivityStarter</a>&nbsp;/&nbsp;<a href="../index.html">Args</a>&nbsp;/&nbsp;<a href="./index.html">Builder</a><br/>
+<br/>
+<h1>Builder</h1>
+<code><span class="keyword">class </span><span class="identifier">Builder</span>&nbsp;<span class="symbol">:</span>&nbsp;<span class="identifier">ObjectBuilder</span><span class="symbol">&lt;</span><a href="../index.html"><span class="identifier">Args</span></a><span class="symbol">&gt;</span></code>
+<h3>Constructors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-init-.html">&lt;init&gt;</a></p>
+</td>
+<td>
+<code><span class="identifier">Builder</span><span class="symbol">(</span><span class="symbol">)</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="build.html">build</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">build</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="../index.html"><span class="identifier">Args</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-add-payment-method-footer.html">setAddPaymentMethodFooter</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setAddPaymentMethodFooter</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.AddPaymentMethodActivityStarter.Args.Builder$setAddPaymentMethodFooter(kotlin.Int)/addPaymentMethodFooterLayoutId">addPaymentMethodFooterLayoutId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">Builder</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-billing-address-fields.html">setBillingAddressFields</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setBillingAddressFields</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.AddPaymentMethodActivityStarter.Args.Builder$setBillingAddressFields(com.stripe.android.view.BillingAddressFields)/billingAddressFields">billingAddressFields</span><span class="symbol">:</span>&nbsp;<a href="../../../-billing-address-fields/index.html"><span class="identifier">BillingAddressFields</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">Builder</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-payment-method-type.html">setPaymentMethodType</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setPaymentMethodType</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.AddPaymentMethodActivityStarter.Args.Builder$setPaymentMethodType(com.stripe.android.model.PaymentMethod.Type)/paymentMethodType">paymentMethodType</span><span class="symbol">:</span>&nbsp;<a href="../../../../com.stripe.android.model/-payment-method/-type/index.html"><span class="identifier">Type</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">Builder</span></a></code>
+<p>Optional: specify the <a href="../../../../com.stripe.android.model/-payment-method/-type/index.html">PaymentMethod.Type</a> of the payment method to create based on
+the customer's input (i.e. the form that will be presented to the customer).
+If unspecified, defaults to <a href="../../../../com.stripe.android.model/-payment-method/-type/-card.html">PaymentMethod.Type.Card</a>.
+Currently only <a href="../../../../com.stripe.android.model/-payment-method/-type/-card.html">PaymentMethod.Type.Card</a> and <a href="../../../../com.stripe.android.model/-payment-method/-type/-fpx.html">PaymentMethod.Type.Fpx</a> are supported.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="set-should-attach-to-customer.html">setShouldAttachToCustomer</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setShouldAttachToCustomer</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.AddPaymentMethodActivityStarter.Args.Builder$setShouldAttachToCustomer(kotlin.Boolean)/shouldAttachToCustomer">shouldAttachToCustomer</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">Builder</span></a></code>
+<p>If true, the created Payment Method will be attached to the current Customer
+using an already-initialized <a href="../../../../com.stripe.android/-customer-session/index.html">com.stripe.android.CustomerSession</a>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="set-window-flags.html">setWindowFlags</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setWindowFlags</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.AddPaymentMethodActivityStarter.Args.Builder$setWindowFlags(kotlin.Int)/windowFlags">windowFlags</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">Builder</span></a></code></td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

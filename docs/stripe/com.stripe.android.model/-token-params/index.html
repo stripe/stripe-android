@@ -1,0 +1,103 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>TokenParams - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android.model</a>&nbsp;/&nbsp;<a href="./index.html">TokenParams</a><br/>
+<br/>
+<h1>TokenParams</h1>
+<code><span class="keyword">abstract</span> <span class="keyword">class </span><span class="identifier">TokenParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code>
+<h3>Constructors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-init-.html">&lt;init&gt;</a></p>
+</td>
+<td>
+<code><span class="identifier">TokenParams</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.TokenParams$<init>(kotlin.String, kotlin.collections.Set((kotlin.String)))/tokenType">tokenType</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.TokenParams$<init>(kotlin.String, kotlin.collections.Set((kotlin.String)))/attribution">attribution</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-set/index.html"><span class="identifier">Set</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">&gt;</span>&nbsp;<span class="symbol">=</span>&nbsp;emptySet()<span class="symbol">)</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Inherited Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="../-stripe-params-model/to-param-map.html">toParamMap</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">toParamMap</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">&gt;</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Inheritors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="../-account-params/index.html">AccountParams</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">AccountParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">TokenParams</span></a></code>
+<p><a href="https://stripe.com/docs/api/tokens/create_account">Create an account token</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="../-bank-account/index.html">BankAccount</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">BankAccount</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-model/index.html"><span class="identifier">StripeModel</span></a><span class="symbol">, </span><a href="./index.html"><span class="identifier">TokenParams</span></a></code>
+<p><a href="https://stripe.com/docs/api/customer_bank_accounts/object">The bank account object</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="../-bank-account-token-params/index.html">BankAccountTokenParams</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">BankAccountTokenParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">TokenParams</span></a></code>
+<p><a href="https://stripe.com/docs/api/tokens/create_bank_account">Create a bank account token</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="../-card/index.html">Card</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Card</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-model/index.html"><span class="identifier">StripeModel</span></a><span class="symbol">, </span><a href="../-stripe-payment-source/index.html"><span class="identifier">StripePaymentSource</span></a><span class="symbol">, </span><a href="./index.html"><span class="identifier">TokenParams</span></a></code>
+<p>A representation of a <a href="https://stripe.com/docs/api/cards/object">Card API object</a>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="../-cvc-token-params/index.html">CvcTokenParams</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">CvcTokenParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">TokenParams</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="../-person-token-params/index.html">PersonTokenParams</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">PersonTokenParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">TokenParams</span></a></code>
+<p>Creates a single-use token that represents the details for a person. Use this when creating or
+updating persons associated with a Connect account.
+See <a href="https://stripe.com/docs/connect/account-tokens">the documentation</a> to learn more.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="../-pii-token-params/index.html">PiiTokenParams</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">PiiTokenParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">TokenParams</span></a></code></td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

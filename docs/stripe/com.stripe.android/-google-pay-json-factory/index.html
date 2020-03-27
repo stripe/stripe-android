@@ -1,0 +1,96 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>GooglePayJsonFactory - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android</a>&nbsp;/&nbsp;<a href="./index.html">GooglePayJsonFactory</a><br/>
+<br/>
+<h1>GooglePayJsonFactory</h1>
+<code><span class="keyword">class </span><span class="identifier">GooglePayJsonFactory</span></code>
+<p>A factory for generating <a href="https://developers.google.com/pay/api/android/reference/request-objects">Google Pay JSON request objects</a>
+for Google Pay API version 2.0.</p>
+<h3>Types</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-billing-address-parameters/index.html">BillingAddressParameters</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">BillingAddressParameters</span></code>
+<p><a href="https://developers.google.com/pay/api/android/reference/request-objects#BillingAddressParameters">BillingAddressParameters</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-merchant-info/index.html">MerchantInfo</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">MerchantInfo</span></code>
+<p><a href="https://developers.google.com/pay/api/android/reference/request-objects#MerchantInfo">MerchantInfo</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-shipping-address-parameters/index.html">ShippingAddressParameters</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">ShippingAddressParameters</span></code>
+<p><a href="https://developers.google.com/pay/api/android/reference/request-objects#ShippingAddressParameters">ShippingAddressParameters</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-transaction-info/index.html">TransactionInfo</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">TransactionInfo</span></code>
+<p><a href="https://developers.google.com/pay/api/android/reference/request-objects#TransactionInfo">TransactionInfo</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Constructors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-init-.html">&lt;init&gt;</a></p>
+</td>
+<td>
+<code><span class="identifier">GooglePayJsonFactory</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.GooglePayJsonFactory$<init>(android.content.Context)/context">context</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Context.html"><span class="identifier">Context</span></a><span class="symbol">)</span></code>
+<p><a href="../-payment-configuration/index.html">PaymentConfiguration</a> must be instantiated before calling this.</p>
+<code><span class="identifier">GooglePayJsonFactory</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.GooglePayJsonFactory$<init>(com.stripe.android.GooglePayConfig)/googlePayConfig">googlePayConfig</span><span class="symbol">:</span>&nbsp;<a href="../-google-pay-config/index.html"><span class="identifier">GooglePayConfig</span></a><span class="symbol">)</span></code>
+<p>A factory for generating <a href="https://developers.google.com/pay/api/android/reference/request-objects">Google Pay JSON request objects</a>
+for Google Pay API version 2.0.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="create-is-ready-to-pay-request.html">createIsReadyToPayRequest</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createIsReadyToPayRequest</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.GooglePayJsonFactory$createIsReadyToPayRequest(com.stripe.android.GooglePayJsonFactory.BillingAddressParameters, kotlin.Boolean)/billingAddressParameters">billingAddressParameters</span><span class="symbol">:</span>&nbsp;<a href="-billing-address-parameters/index.html"><span class="identifier">BillingAddressParameters</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.GooglePayJsonFactory$createIsReadyToPayRequest(com.stripe.android.GooglePayJsonFactory.BillingAddressParameters, kotlin.Boolean)/existingPaymentMethodRequired">existingPaymentMethodRequired</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="https://developer.android.com/reference/org/json/JSONObject.html"><span class="identifier">JSONObject</span></a></code>
+<p><a href="https://developers.google.com/pay/api/android/reference/request-objects#IsReadyToPayRequest">IsReadyToPayRequest</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-payment-data-request.html">createPaymentDataRequest</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createPaymentDataRequest</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.GooglePayJsonFactory$createPaymentDataRequest(com.stripe.android.GooglePayJsonFactory.TransactionInfo, com.stripe.android.GooglePayJsonFactory.BillingAddressParameters, com.stripe.android.GooglePayJsonFactory.ShippingAddressParameters, kotlin.Boolean, com.stripe.android.GooglePayJsonFactory.MerchantInfo)/transactionInfo">transactionInfo</span><span class="symbol">:</span>&nbsp;<a href="-transaction-info/index.html"><span class="identifier">TransactionInfo</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.GooglePayJsonFactory$createPaymentDataRequest(com.stripe.android.GooglePayJsonFactory.TransactionInfo, com.stripe.android.GooglePayJsonFactory.BillingAddressParameters, com.stripe.android.GooglePayJsonFactory.ShippingAddressParameters, kotlin.Boolean, com.stripe.android.GooglePayJsonFactory.MerchantInfo)/billingAddressParameters">billingAddressParameters</span><span class="symbol">:</span>&nbsp;<a href="-billing-address-parameters/index.html"><span class="identifier">BillingAddressParameters</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.GooglePayJsonFactory$createPaymentDataRequest(com.stripe.android.GooglePayJsonFactory.TransactionInfo, com.stripe.android.GooglePayJsonFactory.BillingAddressParameters, com.stripe.android.GooglePayJsonFactory.ShippingAddressParameters, kotlin.Boolean, com.stripe.android.GooglePayJsonFactory.MerchantInfo)/shippingAddressParameters">shippingAddressParameters</span><span class="symbol">:</span>&nbsp;<a href="-shipping-address-parameters/index.html"><span class="identifier">ShippingAddressParameters</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.GooglePayJsonFactory$createPaymentDataRequest(com.stripe.android.GooglePayJsonFactory.TransactionInfo, com.stripe.android.GooglePayJsonFactory.BillingAddressParameters, com.stripe.android.GooglePayJsonFactory.ShippingAddressParameters, kotlin.Boolean, com.stripe.android.GooglePayJsonFactory.MerchantInfo)/isEmailRequired">isEmailRequired</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a>&nbsp;<span class="symbol">=</span>&nbsp;false<span class="symbol">, </span><span class="identifier" id="com.stripe.android.GooglePayJsonFactory$createPaymentDataRequest(com.stripe.android.GooglePayJsonFactory.TransactionInfo, com.stripe.android.GooglePayJsonFactory.BillingAddressParameters, com.stripe.android.GooglePayJsonFactory.ShippingAddressParameters, kotlin.Boolean, com.stripe.android.GooglePayJsonFactory.MerchantInfo)/merchantInfo">merchantInfo</span><span class="symbol">:</span>&nbsp;<a href="-merchant-info/index.html"><span class="identifier">MerchantInfo</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="https://developer.android.com/reference/org/json/JSONObject.html"><span class="identifier">JSONObject</span></a></code>
+<p><a href="https://developers.google.com/pay/api/android/reference/request-objects#PaymentDataRequest">PaymentDataRequest</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

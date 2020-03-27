@@ -1,0 +1,27 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>Stripe.confirmSetupIntentSynchronous - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android</a>&nbsp;/&nbsp;<a href="index.html">Stripe</a>&nbsp;/&nbsp;<a href="./confirm-setup-intent-synchronous.html">confirmSetupIntentSynchronous</a><br/>
+<br/>
+<h1>confirmSetupIntentSynchronous</h1>
+<a name="com.stripe.android.Stripe$confirmSetupIntentSynchronous(com.stripe.android.model.ConfirmSetupIntentParams, kotlin.String)"></a>
+<code><span class="identifier">@WorkerThread</span> <span class="identifier">@JvmOverloads</span> <span class="keyword">fun </span><s><span class="identifier">confirmSetupIntentSynchronous</span></s><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$confirmSetupIntentSynchronous(com.stripe.android.model.ConfirmSetupIntentParams, kotlin.String)/confirmSetupIntentParams">confirmSetupIntentParams</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-confirm-setup-intent-params/index.html"><span class="identifier">ConfirmSetupIntentParams</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$confirmSetupIntentSynchronous(com.stripe.android.model.ConfirmSetupIntentParams, kotlin.String)/idempotencyKey">idempotencyKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-setup-intent/index.html"><span class="identifier">SetupIntent</span></a><span class="symbol">?</span></code><br/>
+<strong>Deprecated:</strong> use {@link #confirmSetupIntent(Activity, ConfirmSetupIntentParams)}<br/>
+<br/>
+<p>Blocking method to confirm a <a href="../../com.stripe.android.model/-setup-intent/index.html">SetupIntent</a> object.
+Do not call this on the UI thread or your app will crash.</p>
+<p>See <a href="https://stripe.com/docs/api/setup_intents/confirm">Confirm a SetupIntent</a>.
+<code>POST /v1/setup_intents/:id/confirm</code></p>
+<h3>Parameters</h3>
+<p><a name="confirmSetupIntentParams"></a>
+<code>confirmSetupIntentParams</code> - a set of params with which to confirm the Setup Intent</p>
+<p><a name="idempotencyKey"></a>
+<code>idempotencyKey</code> - optional, see <a href="https://stripe.com/docs/api/idempotent_requests">Idempotent Requests</a></p>
+<p><strong>Return</strong><br/>
+a <a href="../../com.stripe.android.model/-setup-intent/index.html">SetupIntent</a> or <code>null</code> if a problem occurred</p>
+</BODY>
+</HTML>

@@ -1,0 +1,100 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>StripeError - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android</a>&nbsp;/&nbsp;<a href="./index.html">StripeError</a><br/>
+<br/>
+<h1>StripeError</h1>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">StripeError</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-stripe-model/index.html"><span class="identifier">StripeModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/java/io/Serializable.html"><span class="identifier">Serializable</span></a></code>
+<p><a href="https://stripe.com/docs/api/errors">Errors</a></p>
+<p>Stripe uses conventional HTTP response codes to indicate the success or failure of an API
+request. In general:</p>
+<ul><li>Codes in the <code>2xx</code> range indicate success.</li>
+<li>Codes in the <code>4xx</code> range indicate an error that failed given the information provided
+(e.g. a required parameter was omitted, a charge failed, etc.).</li>
+<li>Codes in the <code>5xx</code> range indicate an error with Stripe's servers (these are rare).</li>
+</ul>
+<p>Some <code>4xx</code> errors that could be handled programmatically (e.g., a card is
+<a href="https://stripe.com/docs/declines">declined</a>) include an
+<a href="https://stripe.com/docs/error-codes">error code</a> that briefly explains the error reported.</p>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="charge.html">charge</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">charge</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>For card errors, the ID of the failed charge.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="code.html">code</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">code</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>For some errors that could be handled programmatically, a short string indicating the
+<a href="https://stripe.com/docs/error-codes">error code</a> reported.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="decline-code.html">declineCode</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">declineCode</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>For card errors resulting from a card issuer decline, a short string indicating the
+<a href="https://stripe.com/docs/declines/codes">card issuer’s reason for the decline</a>
+if they provide one.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="doc-url.html">docUrl</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">docUrl</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>A URL to more information about the
+<a href="https://stripe.com/docs/error-codes">error code</a> reported.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="message.html">message</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">message</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>A human-readable message providing more details about the error. For card errors,
+these messages can be shown to your users.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="param.html">param</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">param</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>If the error is parameter-specific, the parameter related to the error. For example, you can
+use this to display a message near the correct form field.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="type.html">type</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">type</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>The type of error returned. One of <code>api_connection_error</code>, <code>api_error</code>,
+<code>authentication_error</code>, <code>card_error</code>, <code>idempotency_error</code>, <code>invalid_request_error</code>,
+or <code>rate_limit_error</code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

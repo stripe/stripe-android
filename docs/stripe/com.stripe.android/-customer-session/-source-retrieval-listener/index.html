@@ -1,0 +1,52 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>CustomerSession.SourceRetrievalListener - stripe</title>
+<link rel="stylesheet" href="../../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../../index.html">com.stripe.android</a>&nbsp;/&nbsp;<a href="../index.html">CustomerSession</a>&nbsp;/&nbsp;<a href="./index.html">SourceRetrievalListener</a><br/>
+<br/>
+<h1>SourceRetrievalListener</h1>
+<code><span class="keyword">interface </span><span class="identifier">SourceRetrievalListener</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-retrieval-listener/index.html"><span class="identifier">RetrievalListener</span></a></code>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="on-source-retrieved.html">onSourceRetrieved</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">onSourceRetrieved</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.CustomerSession.SourceRetrievalListener$onSourceRetrieved(com.stripe.android.model.Source)/source">source</span><span class="symbol">:</span>&nbsp;<a href="../../../com.stripe.android.model/-source/index.html"><span class="identifier">Source</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Inherited Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="../-retrieval-listener/on-error.html">onError</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">onError</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.CustomerSession.RetrievalListener$onError(kotlin.Int, kotlin.String, com.stripe.android.StripeError)/errorCode">errorCode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession.RetrievalListener$onError(kotlin.Int, kotlin.String, com.stripe.android.StripeError)/errorMessage">errorMessage</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession.RetrievalListener$onError(kotlin.Int, kotlin.String, com.stripe.android.StripeError)/stripeError">stripeError</span><span class="symbol">:</span>&nbsp;<a href="../../-stripe-error/index.html"><span class="identifier">StripeError</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Inheritors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="../-activity-source-retrieval-listener/index.html">ActivitySourceRetrievalListener</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">class </span><span class="identifier">ActivitySourceRetrievalListener</span><span class="symbol">&lt;</span><span class="identifier">A</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/app/Activity.html"><span class="identifier">Activity</span></a><span class="symbol">?</span><span class="symbol">&gt;</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">SourceRetrievalListener</span></a></code>
+<p>Abstract implementation of <a href="./index.html">SourceRetrievalListener</a> that holds a
+<a href="https://developer.android.com/reference/java/lang/ref/WeakReference.html">WeakReference</a> to an <code>Activity</code> object.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

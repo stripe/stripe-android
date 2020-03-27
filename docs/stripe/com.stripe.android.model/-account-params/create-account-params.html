@@ -1,0 +1,32 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>AccountParams.createAccountParams - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android.model</a>&nbsp;/&nbsp;<a href="index.html">AccountParams</a>&nbsp;/&nbsp;<a href="./create-account-params.html">createAccountParams</a><br/>
+<br/>
+<h1>createAccountParams</h1>
+<a name="com.stripe.android.model.AccountParams.Companion$createAccountParams(kotlin.Boolean, com.stripe.android.model.AccountParams.BusinessType, kotlin.collections.Map((kotlin.String, kotlin.Any)))"></a>
+<code><span class="identifier">@JvmStatic</span> <span class="keyword">fun </span><s><span class="identifier">createAccountParams</span></s><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.AccountParams.Companion$createAccountParams(kotlin.Boolean, com.stripe.android.model.AccountParams.BusinessType, kotlin.collections.Map((kotlin.String, kotlin.Any)))/tosShownAndAccepted">tosShownAndAccepted</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.AccountParams.Companion$createAccountParams(kotlin.Boolean, com.stripe.android.model.AccountParams.BusinessType, kotlin.collections.Map((kotlin.String, kotlin.Any)))/businessType">businessType</span><span class="symbol">:</span>&nbsp;<a href="-business-type/index.html"><span class="identifier">BusinessType</span></a><span class="symbol">?</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.AccountParams.Companion$createAccountParams(kotlin.Boolean, com.stripe.android.model.AccountParams.BusinessType, kotlin.collections.Map((kotlin.String, kotlin.Any)))/businessData">businessData</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">&gt;</span><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="index.html"><span class="identifier">AccountParams</span></a></code><br/>
+<strong>Deprecated:</strong> Use a create() method<br/>
+<br/>
+<p>Create an <a href="index.html">AccountParams</a> instance for a <a href="-business-type/-individual.html">BusinessType.Individual</a> or BusinessType.Company].</p>
+<h3>Parameters</h3>
+<p><a name="tosShownAndAccepted"></a>
+<code>tosShownAndAccepted</code> - Whether the user described by the data in the token has been
+shown the
+<a href="https://stripe.com/docs/api/tokens/create_account#create_account_token-account-tos_shown_and_accepted">Stripe Connected Account Agreement</a>.
+When creating an account token to create a new Connect account, this value must be <code>true</code>.</p>
+<p><a name="businessType"></a>
+<code>businessType</code> - See <a href="-business-type/index.html">BusinessType</a></p>
+<p><a name="businessData"></a>
+<code>businessData</code> - A map of <a href="https://stripe.com/docs/api/accounts/create#create_account-company">company</a>
+or <a href="https://stripe.com/docs/api/accounts/create#create_account-individual">individual</a> params.</p>
+<p><strong>Deprecated</strong><br/>
+Use a <a href="create.html">create</a> method.</p>
+<p><strong>Return</strong><br/>
+<a href="index.html">AccountParams</a></p>
+</BODY>
+</HTML>

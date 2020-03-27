@@ -1,0 +1,312 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>Card - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android.model</a>&nbsp;/&nbsp;<a href="./index.html">Card</a><br/>
+<br/>
+<h1>Card</h1>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Card</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-model/index.html"><span class="identifier">StripeModel</span></a><span class="symbol">, </span><a href="../-stripe-payment-source/index.html"><span class="identifier">StripePaymentSource</span></a><span class="symbol">, </span><a href="../-token-params/index.html"><span class="identifier">TokenParams</span></a></code>
+<p>A representation of a <a href="https://stripe.com/docs/api/cards/object">Card API object</a>.</p>
+<h3>Types</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-builder/index.html">Builder</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">Builder</span>&nbsp;<span class="symbol">:</span>&nbsp;<span class="identifier">ObjectBuilder</span><span class="symbol">&lt;</span><a href="./index.html"><span class="identifier">Card</span></a><span class="symbol">&gt;</span></code>
+<p>Builder class for a <a href="./index.html">Card</a> model.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="address-city.html">addressCity</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">addressCity</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="address-country.html">addressCountry</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">addressCountry</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="address-line1.html">addressLine1</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">addressLine1</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="address-line1-check.html">addressLine1Check</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">addressLine1Check</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="address-line2.html">addressLine2</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">addressLine2</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="address-state.html">addressState</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">addressState</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="address-zip.html">addressZip</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">addressZip</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="address-zip-check.html">addressZipCheck</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">addressZipCheck</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="brand.html">brand</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">brand</span><span class="symbol">: </span><a href="../-card-brand/index.html"><span class="identifier">CardBrand</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="country.html">country</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">country</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="currency.html">currency</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">currency</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="customer-id.html">customerId</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">customerId</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="cvc.html">cvc</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">cvc</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="cvc-check.html">cvcCheck</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">cvcCheck</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="exp-month.html">expMonth</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">expMonth</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="exp-year.html">expYear</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">expYear</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="fingerprint.html">fingerprint</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">fingerprint</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="funding.html">funding</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">funding</span><span class="symbol">: </span><a href="../-card-funding/index.html"><span class="identifier">CardFunding</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="id.html">id</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">id</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="last4.html">last4</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">last4</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="metadata.html">metadata</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">metadata</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">&gt;</span><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="name.html">name</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">name</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="number.html">number</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">number</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="tokenization-method.html">tokenizationMethod</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">tokenizationMethod</span><span class="symbol">: </span><a href="../-tokenization-method/index.html"><span class="identifier">TokenizationMethod</span></a><span class="symbol">?</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="to-builder.html">toBuilder</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">toBuilder</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="-builder/index.html"><span class="identifier">Builder</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="to-param-map.html">toParamMap</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">toParamMap</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">&gt;</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="to-payment-method-params-card.html">toPaymentMethodParamsCard</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">toPaymentMethodParamsCard</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="../-payment-method-create-params/-card/index.html"><span class="identifier">Card</span></a></code>
+<p>Use <a href="to-payment-methods-params.html">toPaymentMethodsParams</a> to include Billing Details</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="to-payment-methods-params.html">toPaymentMethodsParams</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">toPaymentMethodsParams</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="../-payment-method-create-params/index.html"><span class="identifier">PaymentMethodCreateParams</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="validate-c-v-c.html">validateCVC</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">validateCVC</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>Checks whether or not the <a href="cvc.html">cvc</a> field is valid.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="validate-card.html">validateCard</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">validateCard</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>Checks whether <code>this</code> represents a valid card.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="validate-exp-month.html">validateExpMonth</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">validateExpMonth</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>Checks whether or not the <a href="exp-month.html">expMonth</a> field is valid.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="validate-expiry-date.html">validateExpiryDate</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">validateExpiryDate</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>Checks whether or not the <a href="exp-month.html">expMonth</a> and <a href="exp-year.html">expYear</a> fields represent a valid
+expiry date.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="validate-number.html">validateNumber</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">validateNumber</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>Checks whether or not the <a href="number.html">number</a> field is valid.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Companion Object Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="create.html">create</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">create</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.Card.Companion$create(kotlin.String, kotlin.Int, kotlin.Int, kotlin.String)/number">number</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.Card.Companion$create(kotlin.String, kotlin.Int, kotlin.Int, kotlin.String)/expMonth">expMonth</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.Card.Companion$create(kotlin.String, kotlin.Int, kotlin.Int, kotlin.String)/expYear">expYear</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.Card.Companion$create(kotlin.String, kotlin.Int, kotlin.Int, kotlin.String)/cvc">cvc</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">Card</span></a></code>
+<p>Convenience constructor for a Card object with a minimum number of inputs.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="from-json.html">fromJson</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">fromJson</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.Card.Companion$fromJson(org.json.JSONObject)/jsonObject">jsonObject</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/org/json/JSONObject.html"><span class="identifier">JSONObject</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">Card</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="from-string.html">fromString</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">fromString</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.Card.Companion$fromString(kotlin.String)/jsonString">jsonString</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">Card</span></a><span class="symbol">?</span></code>
+<p>Create a Card object from a raw JSON string.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

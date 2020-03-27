@@ -1,0 +1,30 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>SourceParams.createWeChatPayParams - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android.model</a>&nbsp;/&nbsp;<a href="index.html">SourceParams</a>&nbsp;/&nbsp;<a href="./create-we-chat-pay-params.html">createWeChatPayParams</a><br/>
+<br/>
+<h1>createWeChatPayParams</h1>
+<a name="com.stripe.android.model.SourceParams.Companion$createWeChatPayParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String)"></a>
+<code><span class="identifier">@JvmStatic</span> <span class="keyword">fun </span><span class="identifier">createWeChatPayParams</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createWeChatPayParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String)/amount">amount</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html"><span class="identifier">Long</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createWeChatPayParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String)/currency">currency</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createWeChatPayParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String)/weChatAppId">weChatAppId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createWeChatPayParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String)/statementDescriptor">statementDescriptor</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="index.html"><span class="identifier">SourceParams</span></a></code>
+<p>Create WeChat Pay Source params.</p>
+<h3>Parameters</h3>
+<p><a name="amount"></a>
+<code>amount</code> - A positive integer in the
+<a href="https://stripe.com/docs/currencies#zero-decimal">smallest currency unit</a>
+representing the amount to charge the customer (e.g., 1099 for a $10.99 payment).</p>
+<p><a name="currency"></a>
+<code>currency</code> - The currency of the payment. Must be the default currency for your
+country. Can be aud, cad, eur, gbp, hkd, jpy, sgd, or usd.</p>
+<p><a name="weChatAppId"></a>
+<code>weChatAppId</code> - Your registered WeChat Pay App ID from
+<a href="https://open.weixin.qq.com/">WeChat Open Platform</a>.</p>
+<p><a name="statementDescriptor"></a>
+<code>statementDescriptor</code> - (optional) A custom statement descriptor for the payment,
+maximum 32 characters. By default, your Stripe account’s statement descriptor is
+used (you can review this in the <a href="https://dashboard.stripe.com/account">Dashboard</a>.</p>
+</BODY>
+</HTML>

@@ -1,0 +1,51 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>ConfirmSetupIntentParams.create - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android.model</a>&nbsp;/&nbsp;<a href="index.html">ConfirmSetupIntentParams</a>&nbsp;/&nbsp;<a href="./create.html">create</a><br/>
+<br/>
+<h1>create</h1>
+<a name="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(kotlin.String, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)"></a>
+<code><span class="identifier">@JvmStatic</span> <span class="identifier">@JvmOverloads</span> <span class="keyword">fun </span><span class="identifier">create</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(kotlin.String, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/paymentMethodId">paymentMethodId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(kotlin.String, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(kotlin.String, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/returnUrl">returnUrl</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(kotlin.String, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/mandateId">mandateId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(kotlin.String, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/mandateData">mandateData</span><span class="symbol">:</span>&nbsp;<a href="../-mandate-data-params/index.html"><span class="identifier">MandateDataParams</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="index.html"><span class="identifier">ConfirmSetupIntentParams</span></a></code>
+<p>Create the parameters necessary for confirming a SetupIntent while attaching a
+PaymentMethod that already exits.</p>
+<h3>Parameters</h3>
+<p><a name="paymentMethodId"></a>
+<code>paymentMethodId</code> - ID of the payment method (a PaymentMethod, Card, BankAccount, or
+saved Source object) to attach to this SetupIntent.</p>
+<p><a name="clientSecret"></a>
+<code>clientSecret</code> - The client secret of this SetupIntent. Used for client-side retrieval using a publishable key.</p>
+<p><a name="returnUrl"></a>
+<code>returnUrl</code> - The URL to redirect your customer back to after they authenticate on the payment method’s app or site.
+If you’d prefer to redirect to a mobile application, you can alternatively supply an application URI scheme.
+This parameter is only used for cards and other redirect-based payment methods.</p>
+<p><a name="mandateId"></a>
+<code>mandateId</code> - optional ID of the Mandate to be used for this payment.</p>
+<p><a name="mandateData"></a>
+<code>mandateData</code> - optional details about the Mandate to create.</p>
+<p><strong>Return</strong><br/>
+params that can be use to confirm a SetupIntent</p>
+<a name="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)"></a>
+<code><span class="identifier">@JvmOverloads</span> <span class="identifier">@JvmStatic</span> <span class="keyword">fun </span><span class="identifier">create</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/paymentMethodCreateParams">paymentMethodCreateParams</span><span class="symbol">:</span>&nbsp;<a href="../-payment-method-create-params/index.html"><span class="identifier">PaymentMethodCreateParams</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/returnUrl">returnUrl</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/mandateId">mandateId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/mandateData">mandateData</span><span class="symbol">:</span>&nbsp;<a href="../-mandate-data-params/index.html"><span class="identifier">MandateDataParams</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="index.html"><span class="identifier">ConfirmSetupIntentParams</span></a></code>
+<p>Create the parameters necessary for confirming a SetupIntent with a new PaymentMethod</p>
+<h3>Parameters</h3>
+<p><a name="paymentMethodCreateParams"></a>
+<code>paymentMethodCreateParams</code> - the params to create a new PaymentMethod that will be
+attached to the SetupIntent being confirmed</p>
+<p><a name="clientSecret"></a>
+<code>clientSecret</code> - The client secret of this SetupIntent. Used for client-side retrieval using a publishable key.</p>
+<p><a name="returnUrl"></a>
+<code>returnUrl</code> - The URL to redirect your customer back to after they authenticate on the payment method’s app or site.
+If you’d prefer to redirect to a mobile application, you can alternatively supply an application URI scheme.
+This parameter is only used for cards and other redirect-based payment methods.</p>
+<p><a name="mandateId"></a>
+<code>mandateId</code> - optional ID of the Mandate to be used for this payment.</p>
+<p><a name="mandateData"></a>
+<code>mandateData</code> - optional details about the Mandate to create.</p>
+<p><strong>Return</strong><br/>
+params that can be use to confirm a SetupIntent</p>
+</BODY>
+</HTML>

@@ -1,0 +1,37 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>CustomerSession.getPaymentMethods - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android</a>&nbsp;/&nbsp;<a href="index.html">CustomerSession</a>&nbsp;/&nbsp;<a href="./get-payment-methods.html">getPaymentMethods</a><br/>
+<br/>
+<h1>getPaymentMethods</h1>
+<a name="com.stripe.android.CustomerSession$getPaymentMethods(com.stripe.android.model.PaymentMethod.Type, kotlin.Int, kotlin.String, kotlin.String, com.stripe.android.CustomerSession.PaymentMethodsRetrievalListener)"></a>
+<code><span class="identifier">@JvmOverloads</span> <span class="keyword">fun </span><span class="identifier">getPaymentMethods</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.CustomerSession$getPaymentMethods(com.stripe.android.model.PaymentMethod.Type, kotlin.Int, kotlin.String, kotlin.String, com.stripe.android.CustomerSession.PaymentMethodsRetrievalListener)/paymentMethodType">paymentMethodType</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-payment-method/-type/index.html"><span class="identifier">Type</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession$getPaymentMethods(com.stripe.android.model.PaymentMethod.Type, kotlin.Int, kotlin.String, kotlin.String, com.stripe.android.CustomerSession.PaymentMethodsRetrievalListener)/limit">limit</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">?</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession$getPaymentMethods(com.stripe.android.model.PaymentMethod.Type, kotlin.Int, kotlin.String, kotlin.String, com.stripe.android.CustomerSession.PaymentMethodsRetrievalListener)/endingBefore">endingBefore</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession$getPaymentMethods(com.stripe.android.model.PaymentMethod.Type, kotlin.Int, kotlin.String, kotlin.String, com.stripe.android.CustomerSession.PaymentMethodsRetrievalListener)/startingAfter">startingAfter</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession$getPaymentMethods(com.stripe.android.model.PaymentMethod.Type, kotlin.Int, kotlin.String, kotlin.String, com.stripe.android.CustomerSession.PaymentMethodsRetrievalListener)/listener">listener</span><span class="symbol">:</span>&nbsp;<a href="-payment-methods-retrieval-listener/index.html"><span class="identifier">PaymentMethodsRetrievalListener</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Retrieves all of the customer's PaymentMethod objects, filtered by a <a href="../../com.stripe.android.model/-payment-method/-type/index.html">PaymentMethod.Type</a>.</p>
+<p>See <a href="https://stripe.com/docs/api/payment_methods/list">List a Customer's PaymentMethods</a></p>
+<h3>Parameters</h3>
+<p><a name="paymentMethodType"></a>
+<code>paymentMethodType</code> - the <a href="../../com.stripe.android.model/-payment-method/-type/index.html">PaymentMethod.Type</a> to filter by</p>
+<p><a name="listener"></a>
+<code>listener</code> - a <a href="-payment-method-retrieval-listener/index.html">PaymentMethodRetrievalListener</a> called when the API call
+completes with a list of <a href="../../com.stripe.android.model/-payment-method/index.html">PaymentMethod</a> objects</p>
+<p><a name="limit"></a>
+<code>limit</code> - Optional. A limit on the number of objects to be returned. Limit can range
+between 1 and 100, and the default is 10.</p>
+<p><a name="endingBefore"></a>
+<code>endingBefore</code> - Optional. A cursor for use in pagination. <code>ending_before</code> is an object
+ID that defines your place in the list. For instance, if you make a list request and receive
+100 objects, starting with <code>obj_bar</code>, your subsequent call can include
+<code>ending_before=obj_bar</code> in order to fetch the previous page of the list.</p>
+<p><a name="startingAfter"></a>
+<code>startingAfter</code> - Optional. A cursor for use in pagination. <code>starting_after</code> is an object
+ID that defines your place in the list. For instance, if you make a list request and receive
+100 objects, ending with <code>obj_foo</code>, your subsequent call can include <code>starting_after=obj_foo</code>
+in order to fetch the next page of the list.</p>
+<a name="com.stripe.android.CustomerSession$getPaymentMethods(com.stripe.android.model.PaymentMethod.Type, com.stripe.android.CustomerSession.PaymentMethodsRetrievalListener)"></a>
+<code><span class="keyword">fun </span><span class="identifier">getPaymentMethods</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.CustomerSession$getPaymentMethods(com.stripe.android.model.PaymentMethod.Type, com.stripe.android.CustomerSession.PaymentMethodsRetrievalListener)/paymentMethodType">paymentMethodType</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-payment-method/-type/index.html"><span class="identifier">Type</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession$getPaymentMethods(com.stripe.android.model.PaymentMethod.Type, com.stripe.android.CustomerSession.PaymentMethodsRetrievalListener)/listener">listener</span><span class="symbol">:</span>&nbsp;<a href="-payment-methods-retrieval-listener/index.html"><span class="identifier">PaymentMethodsRetrievalListener</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+</BODY>
+</HTML>

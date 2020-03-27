@@ -1,0 +1,427 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>Stripe - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android</a>&nbsp;/&nbsp;<a href="./index.html">Stripe</a><br/>
+<br/>
+<h1>Stripe</h1>
+<code><span class="keyword">class </span><span class="identifier">Stripe</span></code>
+<p>Entry-point to the Stripe SDK.</p>
+<p>Supports asynchronous and synchronous methods to access the following Stripe APIs.</p>
+<ul><li><a href="../../com.stripe.android.model/-payment-intent/index.html">Payment Intent API</a> - confirm and retrieve</li>
+<li><a href="../../com.stripe.android.model/-setup-intent/index.html">Setup Intents API</a> - confirm and retrieve</li>
+<li><a href="../../com.stripe.android.model/-payment-method/index.html">Payment Methods API</a> - create</li>
+<li><a href="../../com.stripe.android.model/-source/index.html">Sources API</a> - create and retrieve</li>
+<li><a href="../../com.stripe.android.model/-token/index.html">Tokens API</a> - create tokens for <a href="../../com.stripe.android.model/-card/index.html">Card</a>, <a href="../../com.stripe.android.model/-bank-account/index.html">BankAccount</a>, <a href="../../com.stripe.android.model/-pii-token-params/index.html">PiiTokenParams</a>, and <a href="../../com.stripe.android.model/-account-params/index.html">AccountParams</a></li>
+</ul>
+<h3>Constructors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-init-.html">&lt;init&gt;</a></p>
+</td>
+<td>
+<code><span class="identifier">Stripe</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$<init>(android.content.Context, kotlin.String, kotlin.String, kotlin.Boolean)/context">context</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Context.html"><span class="identifier">Context</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$<init>(android.content.Context, kotlin.String, kotlin.String, kotlin.Boolean)/publishableKey">publishableKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$<init>(android.content.Context, kotlin.String, kotlin.String, kotlin.Boolean)/stripeAccountId">stripeAccountId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$<init>(android.content.Context, kotlin.String, kotlin.String, kotlin.Boolean)/enableLogging">enableLogging</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a>&nbsp;<span class="symbol">=</span>&nbsp;false<span class="symbol">)</span></code>
+<p>Constructor with publishable key and Stripe Connect account id.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="authenticate-payment.html">authenticatePayment</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><s><span class="identifier">authenticatePayment</span></s><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$authenticatePayment(android.app.Activity, kotlin.String)/activity">activity</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/app/Activity.html"><span class="identifier">Activity</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$authenticatePayment(android.app.Activity, kotlin.String)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Authenticate a <a href="../../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a>.
+Used for <a href="https://stripe.com/docs/payments/payment-intents/android-manual">manual confirmation</a> flow.</p>
+<code><span class="keyword">fun </span><s><span class="identifier">authenticatePayment</span></s><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$authenticatePayment(androidx.fragment.app.Fragment, kotlin.String)/fragment">fragment</span><span class="symbol">:</span>&nbsp;<span class="identifier">Fragment</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$authenticatePayment(androidx.fragment.app.Fragment, kotlin.String)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Authenticate a <a href="../../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a>.
+Used for <a href="https://stripe.com/docs/payments/payment-intents/quickstart#manual-confirmation-flow">manual confirmation</a> flow.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="authenticate-setup.html">authenticateSetup</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><s><span class="identifier">authenticateSetup</span></s><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$authenticateSetup(android.app.Activity, kotlin.String)/activity">activity</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/app/Activity.html"><span class="identifier">Activity</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$authenticateSetup(android.app.Activity, kotlin.String)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code><br/>
+<code><span class="keyword">fun </span><s><span class="identifier">authenticateSetup</span></s><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$authenticateSetup(androidx.fragment.app.Fragment, kotlin.String)/fragment">fragment</span><span class="symbol">:</span>&nbsp;<span class="identifier">Fragment</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$authenticateSetup(androidx.fragment.app.Fragment, kotlin.String)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Authenticate a <a href="../../com.stripe.android.model/-setup-intent/index.html">SetupIntent</a>. Used for manual confirmation flow.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="authenticate-source.html">authenticateSource</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">authenticateSource</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$authenticateSource(android.app.Activity, com.stripe.android.model.Source)/activity">activity</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/app/Activity.html"><span class="identifier">Activity</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$authenticateSource(android.app.Activity, com.stripe.android.model.Source)/source">source</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-source/index.html"><span class="identifier">Source</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code><br/>
+<code><span class="keyword">fun </span><span class="identifier">authenticateSource</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$authenticateSource(androidx.fragment.app.Fragment, com.stripe.android.model.Source)/fragment">fragment</span><span class="symbol">:</span>&nbsp;<span class="identifier">Fragment</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$authenticateSource(androidx.fragment.app.Fragment, com.stripe.android.model.Source)/source">source</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-source/index.html"><span class="identifier">Source</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Authenticate a <a href="../../com.stripe.android.model/-source/index.html">Source</a> that requires user action via a redirect (i.e. <a href="../../com.stripe.android.model/-source/flow.html">Source.flow</a> is
+<a href="../../com.stripe.android.model/-source/-source-flow/-r-e-d-i-r-e-c-t.html">Source.SourceFlow.REDIRECT</a>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="confirm-payment.html">confirmPayment</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">confirmPayment</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$confirmPayment(android.app.Activity, com.stripe.android.model.ConfirmPaymentIntentParams)/activity">activity</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/app/Activity.html"><span class="identifier">Activity</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$confirmPayment(android.app.Activity, com.stripe.android.model.ConfirmPaymentIntentParams)/confirmPaymentIntentParams">confirmPaymentIntentParams</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-confirm-payment-intent-params/index.html"><span class="identifier">ConfirmPaymentIntentParams</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code><br/>
+<code><span class="keyword">fun </span><span class="identifier">confirmPayment</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$confirmPayment(androidx.fragment.app.Fragment, com.stripe.android.model.ConfirmPaymentIntentParams)/fragment">fragment</span><span class="symbol">:</span>&nbsp;<span class="identifier">Fragment</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$confirmPayment(androidx.fragment.app.Fragment, com.stripe.android.model.ConfirmPaymentIntentParams)/confirmPaymentIntentParams">confirmPaymentIntentParams</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-confirm-payment-intent-params/index.html"><span class="identifier">ConfirmPaymentIntentParams</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Confirm and, if necessary, authenticate a <a href="../../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a>.
+Used for <a href="https://stripe.com/docs/payments/payment-intents/quickstart#automatic-confirmation-flow">automatic confirmation</a> flow.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="confirm-payment-intent-synchronous.html">confirmPaymentIntentSynchronous</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><s><span class="identifier">confirmPaymentIntentSynchronous</span></s><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$confirmPaymentIntentSynchronous(com.stripe.android.model.ConfirmPaymentIntentParams, kotlin.String)/confirmPaymentIntentParams">confirmPaymentIntentParams</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-confirm-payment-intent-params/index.html"><span class="identifier">ConfirmPaymentIntentParams</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$confirmPaymentIntentSynchronous(com.stripe.android.model.ConfirmPaymentIntentParams, kotlin.String)/idempotencyKey">idempotencyKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-payment-intent/index.html"><span class="identifier">PaymentIntent</span></a><span class="symbol">?</span></code>
+<p>Blocking method to confirm a <a href="../../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a> object.
+Do not call this on the UI thread or your app will crash.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="confirm-setup-intent.html">confirmSetupIntent</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">confirmSetupIntent</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$confirmSetupIntent(android.app.Activity, com.stripe.android.model.ConfirmSetupIntentParams)/activity">activity</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/app/Activity.html"><span class="identifier">Activity</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$confirmSetupIntent(android.app.Activity, com.stripe.android.model.ConfirmSetupIntentParams)/confirmSetupIntentParams">confirmSetupIntentParams</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-confirm-setup-intent-params/index.html"><span class="identifier">ConfirmSetupIntentParams</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code><br/>
+<code><span class="keyword">fun </span><span class="identifier">confirmSetupIntent</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$confirmSetupIntent(androidx.fragment.app.Fragment, com.stripe.android.model.ConfirmSetupIntentParams)/fragment">fragment</span><span class="symbol">:</span>&nbsp;<span class="identifier">Fragment</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$confirmSetupIntent(androidx.fragment.app.Fragment, com.stripe.android.model.ConfirmSetupIntentParams)/confirmSetupIntentParams">confirmSetupIntentParams</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-confirm-setup-intent-params/index.html"><span class="identifier">ConfirmSetupIntentParams</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Confirm and, if necessary, authenticate a <a href="../../com.stripe.android.model/-setup-intent/index.html">SetupIntent</a>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="confirm-setup-intent-synchronous.html">confirmSetupIntentSynchronous</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><s><span class="identifier">confirmSetupIntentSynchronous</span></s><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$confirmSetupIntentSynchronous(com.stripe.android.model.ConfirmSetupIntentParams, kotlin.String)/confirmSetupIntentParams">confirmSetupIntentParams</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-confirm-setup-intent-params/index.html"><span class="identifier">ConfirmSetupIntentParams</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$confirmSetupIntentSynchronous(com.stripe.android.model.ConfirmSetupIntentParams, kotlin.String)/idempotencyKey">idempotencyKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-setup-intent/index.html"><span class="identifier">SetupIntent</span></a><span class="symbol">?</span></code>
+<p>Blocking method to confirm a <a href="../../com.stripe.android.model/-setup-intent/index.html">SetupIntent</a> object.
+Do not call this on the UI thread or your app will crash.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-account-token.html">createAccountToken</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createAccountToken</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$createAccountToken(com.stripe.android.model.AccountParams, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/accountParams">accountParams</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-account-params/index.html"><span class="identifier">AccountParams</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createAccountToken(com.stripe.android.model.AccountParams, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/idempotencyKey">idempotencyKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createAccountToken(com.stripe.android.model.AccountParams, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/callback">callback</span><span class="symbol">:</span>&nbsp;<a href="../-api-result-callback/index.html"><span class="identifier">ApiResultCallback</span></a><span class="symbol">&lt;</span><a href="../../com.stripe.android.model/-token/index.html"><span class="identifier">Token</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Create a <a href="../../com.stripe.android.model/-token/index.html">Token</a> asynchronously.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-account-token-synchronous.html">createAccountTokenSynchronous</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createAccountTokenSynchronous</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$createAccountTokenSynchronous(com.stripe.android.model.AccountParams, kotlin.String)/accountParams">accountParams</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-account-params/index.html"><span class="identifier">AccountParams</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createAccountTokenSynchronous(com.stripe.android.model.AccountParams, kotlin.String)/idempotencyKey">idempotencyKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-token/index.html"><span class="identifier">Token</span></a><span class="symbol">?</span></code>
+<p>Blocking method to create a <a href="../../com.stripe.android.model/-token/index.html">Token</a> for a Connect Account. Do not call this on the UI
+thread or your app will crash.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-bank-account-token.html">createBankAccountToken</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createBankAccountToken</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$createBankAccountToken(com.stripe.android.model.BankAccountTokenParams, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/bankAccountTokenParams">bankAccountTokenParams</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-bank-account-token-params/index.html"><span class="identifier">BankAccountTokenParams</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createBankAccountToken(com.stripe.android.model.BankAccountTokenParams, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/idempotencyKey">idempotencyKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createBankAccountToken(com.stripe.android.model.BankAccountTokenParams, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/callback">callback</span><span class="symbol">:</span>&nbsp;<a href="../-api-result-callback/index.html"><span class="identifier">ApiResultCallback</span></a><span class="symbol">&lt;</span><a href="../../com.stripe.android.model/-token/index.html"><span class="identifier">Token</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code><br/>
+<code><span class="keyword">fun </span><s><span class="identifier">createBankAccountToken</span></s><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$createBankAccountToken(com.stripe.android.model.BankAccount, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/bankAccount">bankAccount</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-bank-account/index.html"><span class="identifier">BankAccount</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createBankAccountToken(com.stripe.android.model.BankAccount, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/idempotencyKey">idempotencyKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createBankAccountToken(com.stripe.android.model.BankAccount, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/callback">callback</span><span class="symbol">:</span>&nbsp;<a href="../-api-result-callback/index.html"><span class="identifier">ApiResultCallback</span></a><span class="symbol">&lt;</span><a href="../../com.stripe.android.model/-token/index.html"><span class="identifier">Token</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Create a <a href="../../com.stripe.android.model/-bank-account/index.html">BankAccount</a> token asynchronously.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-bank-account-token-synchronous.html">createBankAccountTokenSynchronous</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createBankAccountTokenSynchronous</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$createBankAccountTokenSynchronous(com.stripe.android.model.BankAccountTokenParams, kotlin.String)/bankAccountTokenParams">bankAccountTokenParams</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-bank-account-token-params/index.html"><span class="identifier">BankAccountTokenParams</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createBankAccountTokenSynchronous(com.stripe.android.model.BankAccountTokenParams, kotlin.String)/idempotencyKey">idempotencyKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-token/index.html"><span class="identifier">Token</span></a><span class="symbol">?</span></code><br/>
+<code><span class="keyword">fun </span><s><span class="identifier">createBankAccountTokenSynchronous</span></s><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$createBankAccountTokenSynchronous(com.stripe.android.model.BankAccount, kotlin.String)/bankAccount">bankAccount</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-bank-account/index.html"><span class="identifier">BankAccount</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createBankAccountTokenSynchronous(com.stripe.android.model.BankAccount, kotlin.String)/idempotencyKey">idempotencyKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-token/index.html"><span class="identifier">Token</span></a><span class="symbol">?</span></code>
+<p>Blocking method to create a <a href="../../com.stripe.android.model/-token/index.html">Token</a> for a <a href="../../com.stripe.android.model/-bank-account/index.html">BankAccount</a>. Do not call this on
+the UI thread or your app will crash.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-card-token.html">createCardToken</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createCardToken</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$createCardToken(com.stripe.android.model.Card, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/card">card</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-card/index.html"><span class="identifier">Card</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createCardToken(com.stripe.android.model.Card, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/idempotencyKey">idempotencyKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createCardToken(com.stripe.android.model.Card, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/callback">callback</span><span class="symbol">:</span>&nbsp;<a href="../-api-result-callback/index.html"><span class="identifier">ApiResultCallback</span></a><span class="symbol">&lt;</span><a href="../../com.stripe.android.model/-token/index.html"><span class="identifier">Token</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Create a Card token asynchronously.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-card-token-synchronous.html">createCardTokenSynchronous</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createCardTokenSynchronous</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$createCardTokenSynchronous(com.stripe.android.model.Card, kotlin.String)/card">card</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-card/index.html"><span class="identifier">Card</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createCardTokenSynchronous(com.stripe.android.model.Card, kotlin.String)/idempotencyKey">idempotencyKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-token/index.html"><span class="identifier">Token</span></a><span class="symbol">?</span></code>
+<p>Blocking method to create a <a href="../../com.stripe.android.model/-token/index.html">Token</a>. Do not call this on the UI thread or your app
+will crash.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-cvc-update-token.html">createCvcUpdateToken</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createCvcUpdateToken</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$createCvcUpdateToken(kotlin.String, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/cvc">cvc</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createCvcUpdateToken(kotlin.String, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/idempotencyKey">idempotencyKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createCvcUpdateToken(kotlin.String, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/callback">callback</span><span class="symbol">:</span>&nbsp;<a href="../-api-result-callback/index.html"><span class="identifier">ApiResultCallback</span></a><span class="symbol">&lt;</span><a href="../../com.stripe.android.model/-token/index.html"><span class="identifier">Token</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Create a CVC update token asynchronously.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-cvc-update-token-synchronous.html">createCvcUpdateTokenSynchronous</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createCvcUpdateTokenSynchronous</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$createCvcUpdateTokenSynchronous(kotlin.String, kotlin.String)/cvc">cvc</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createCvcUpdateTokenSynchronous(kotlin.String, kotlin.String)/idempotencyKey">idempotencyKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-token/index.html"><span class="identifier">Token</span></a><span class="symbol">?</span></code>
+<p>Blocking method to create a <a href="../../com.stripe.android.model/-token/index.html">Token</a> for CVC updating. Do not call this on the UI thread
+or your app will crash.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-file.html">createFile</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createFile</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$createFile(com.stripe.android.model.StripeFileParams, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.StripeFile)))/fileParams">fileParams</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-stripe-file-params/index.html"><span class="identifier">StripeFileParams</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createFile(com.stripe.android.model.StripeFileParams, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.StripeFile)))/idempotencyKey">idempotencyKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createFile(com.stripe.android.model.StripeFileParams, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.StripeFile)))/callback">callback</span><span class="symbol">:</span>&nbsp;<a href="../-api-result-callback/index.html"><span class="identifier">ApiResultCallback</span></a><span class="symbol">&lt;</span><a href="../../com.stripe.android.model/-stripe-file/index.html"><span class="identifier">StripeFile</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p><a href="https://stripe.com/docs/api/files/create">Create a file</a> asynchronously</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-file-synchronous.html">createFileSynchronous</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createFileSynchronous</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$createFileSynchronous(com.stripe.android.model.StripeFileParams, kotlin.String)/fileParams">fileParams</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-stripe-file-params/index.html"><span class="identifier">StripeFileParams</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createFileSynchronous(com.stripe.android.model.StripeFileParams, kotlin.String)/idempotencyKey">idempotencyKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-stripe-file/index.html"><span class="identifier">StripeFile</span></a></code>
+<p><a href="https://stripe.com/docs/api/files/create">Create a file</a> synchronously</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-payment-method.html">createPaymentMethod</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createPaymentMethod</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$createPaymentMethod(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.PaymentMethod)))/paymentMethodCreateParams">paymentMethodCreateParams</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-payment-method-create-params/index.html"><span class="identifier">PaymentMethodCreateParams</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createPaymentMethod(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.PaymentMethod)))/idempotencyKey">idempotencyKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createPaymentMethod(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.PaymentMethod)))/callback">callback</span><span class="symbol">:</span>&nbsp;<a href="../-api-result-callback/index.html"><span class="identifier">ApiResultCallback</span></a><span class="symbol">&lt;</span><a href="../../com.stripe.android.model/-payment-method/index.html"><span class="identifier">PaymentMethod</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Create a <a href="../../com.stripe.android.model/-payment-method/index.html">PaymentMethod</a> asynchronously.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-payment-method-synchronous.html">createPaymentMethodSynchronous</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createPaymentMethodSynchronous</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$createPaymentMethodSynchronous(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String)/paymentMethodCreateParams">paymentMethodCreateParams</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-payment-method-create-params/index.html"><span class="identifier">PaymentMethodCreateParams</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createPaymentMethodSynchronous(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String)/idempotencyKey">idempotencyKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-payment-method/index.html"><span class="identifier">PaymentMethod</span></a><span class="symbol">?</span></code>
+<p>Blocking method to create a <a href="../../com.stripe.android.model/-payment-method/index.html">PaymentMethod</a> object.
+Do not call this on the UI thread or your app will crash.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-person-token.html">createPersonToken</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createPersonToken</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$createPersonToken(com.stripe.android.model.PersonTokenParams, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/params">params</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-person-token-params/index.html"><span class="identifier">PersonTokenParams</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createPersonToken(com.stripe.android.model.PersonTokenParams, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/idempotencyKey">idempotencyKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createPersonToken(com.stripe.android.model.PersonTokenParams, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/callback">callback</span><span class="symbol">:</span>&nbsp;<a href="../-api-result-callback/index.html"><span class="identifier">ApiResultCallback</span></a><span class="symbol">&lt;</span><a href="../../com.stripe.android.model/-token/index.html"><span class="identifier">Token</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Creates a single-use token that represents the details for a person. Use this when creating or
+updating persons associated with a Connect account.
+See <a href="https://stripe.com/docs/connect/account-tokens">the documentation</a> to learn more.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-person-token-synchronous.html">createPersonTokenSynchronous</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createPersonTokenSynchronous</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$createPersonTokenSynchronous(com.stripe.android.model.PersonTokenParams, kotlin.String)/params">params</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-person-token-params/index.html"><span class="identifier">PersonTokenParams</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createPersonTokenSynchronous(com.stripe.android.model.PersonTokenParams, kotlin.String)/idempotencyKey">idempotencyKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-token/index.html"><span class="identifier">Token</span></a><span class="symbol">?</span></code>
+<p>Creates a single-use token that represents the details for a person. Use this when creating or
+updating persons associated with a Connect account.
+See <a href="https://stripe.com/docs/connect/account-tokens">the documentation</a> to learn more.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-pii-token.html">createPiiToken</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createPiiToken</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$createPiiToken(kotlin.String, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/personalId">personalId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createPiiToken(kotlin.String, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/idempotencyKey">idempotencyKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createPiiToken(kotlin.String, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/callback">callback</span><span class="symbol">:</span>&nbsp;<a href="../-api-result-callback/index.html"><span class="identifier">ApiResultCallback</span></a><span class="symbol">&lt;</span><a href="../../com.stripe.android.model/-token/index.html"><span class="identifier">Token</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Create a PII token asynchronously.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-pii-token-synchronous.html">createPiiTokenSynchronous</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createPiiTokenSynchronous</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$createPiiTokenSynchronous(kotlin.String, kotlin.String)/personalId">personalId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createPiiTokenSynchronous(kotlin.String, kotlin.String)/idempotencyKey">idempotencyKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-token/index.html"><span class="identifier">Token</span></a><span class="symbol">?</span></code>
+<p>Blocking method to create a <a href="../../com.stripe.android.model/-token/index.html">Token</a> for PII. Do not call this on the UI thread
+or your app will crash.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-source.html">createSource</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createSource</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$createSource(com.stripe.android.model.SourceParams, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Source)))/sourceParams">sourceParams</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-source-params/index.html"><span class="identifier">SourceParams</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createSource(com.stripe.android.model.SourceParams, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Source)))/idempotencyKey">idempotencyKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createSource(com.stripe.android.model.SourceParams, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Source)))/callback">callback</span><span class="symbol">:</span>&nbsp;<a href="../-api-result-callback/index.html"><span class="identifier">ApiResultCallback</span></a><span class="symbol">&lt;</span><a href="../../com.stripe.android.model/-source/index.html"><span class="identifier">Source</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Create a <a href="../../com.stripe.android.model/-source/index.html">Source</a> asynchronously.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-source-synchronous.html">createSourceSynchronous</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createSourceSynchronous</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$createSourceSynchronous(com.stripe.android.model.SourceParams, kotlin.String)/params">params</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-source-params/index.html"><span class="identifier">SourceParams</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createSourceSynchronous(com.stripe.android.model.SourceParams, kotlin.String)/idempotencyKey">idempotencyKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-source/index.html"><span class="identifier">Source</span></a><span class="symbol">?</span></code>
+<p>Blocking method to create a <a href="../../com.stripe.android.model/-source/index.html">Source</a> object.
+Do not call this on the UI thread or your app will crash.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-token.html">createToken</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><s><span class="identifier">createToken</span></s><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$createToken(com.stripe.android.model.Card, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/card">card</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-card/index.html"><span class="identifier">Card</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createToken(com.stripe.android.model.Card, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/idempotencyKey">idempotencyKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createToken(com.stripe.android.model.Card, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Token)))/callback">callback</span><span class="symbol">:</span>&nbsp;<a href="../-api-result-callback/index.html"><span class="identifier">ApiResultCallback</span></a><span class="symbol">&lt;</span><a href="../../com.stripe.android.model/-token/index.html"><span class="identifier">Token</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Create a Card token asynchronously.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="handle-next-action-for-payment.html">handleNextActionForPayment</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">handleNextActionForPayment</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$handleNextActionForPayment(android.app.Activity, kotlin.String)/activity">activity</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/app/Activity.html"><span class="identifier">Activity</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$handleNextActionForPayment(android.app.Activity, kotlin.String)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code><br/>
+<code><span class="keyword">fun </span><span class="identifier">handleNextActionForPayment</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$handleNextActionForPayment(androidx.fragment.app.Fragment, kotlin.String)/fragment">fragment</span><span class="symbol">:</span>&nbsp;<span class="identifier">Fragment</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$handleNextActionForPayment(androidx.fragment.app.Fragment, kotlin.String)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Handle the <a href="https://stripe.com/docs/api/payment_intents/object#payment_intent_object-next_action">next_action</a>
+for a previously confirmed <a href="../../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="handle-next-action-for-setup-intent.html">handleNextActionForSetupIntent</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">handleNextActionForSetupIntent</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$handleNextActionForSetupIntent(android.app.Activity, kotlin.String)/activity">activity</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/app/Activity.html"><span class="identifier">Activity</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$handleNextActionForSetupIntent(android.app.Activity, kotlin.String)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code><br/>
+<code><span class="keyword">fun </span><span class="identifier">handleNextActionForSetupIntent</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$handleNextActionForSetupIntent(androidx.fragment.app.Fragment, kotlin.String)/fragment">fragment</span><span class="symbol">:</span>&nbsp;<span class="identifier">Fragment</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$handleNextActionForSetupIntent(androidx.fragment.app.Fragment, kotlin.String)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Handle <a href="https://stripe.com/docs/api/setup_intents/object#setup_intent_object-next_action">next_action</a>
+for a previously confirmed <a href="../../com.stripe.android.model/-setup-intent/index.html">SetupIntent</a>. Used for manual confirmation flow.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="is-authenticate-source-result.html">isAuthenticateSourceResult</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">isAuthenticateSourceResult</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$isAuthenticateSourceResult(kotlin.Int, android.content.Intent)/requestCode">requestCode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$isAuthenticateSourceResult(kotlin.Int, android.content.Intent)/data">data</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Intent.html"><span class="identifier">Intent</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>Should be called in <code>onActivityResult()</code> to determine if the result is for Source authentication</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="on-authenticate-source-result.html">onAuthenticateSourceResult</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onAuthenticateSourceResult</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$onAuthenticateSourceResult(android.content.Intent, com.stripe.android.ApiResultCallback((com.stripe.android.model.Source)))/data">data</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Intent.html"><span class="identifier">Intent</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$onAuthenticateSourceResult(android.content.Intent, com.stripe.android.ApiResultCallback((com.stripe.android.model.Source)))/callback">callback</span><span class="symbol">:</span>&nbsp;<a href="../-api-result-callback/index.html"><span class="identifier">ApiResultCallback</span></a><span class="symbol">&lt;</span><a href="../../com.stripe.android.model/-source/index.html"><span class="identifier">Source</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>The result of a call to <a href="authenticate-source.html">authenticateSource</a>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="on-payment-result.html">onPaymentResult</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onPaymentResult</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$onPaymentResult(kotlin.Int, android.content.Intent, com.stripe.android.ApiResultCallback((com.stripe.android.PaymentIntentResult)))/requestCode">requestCode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$onPaymentResult(kotlin.Int, android.content.Intent, com.stripe.android.ApiResultCallback((com.stripe.android.PaymentIntentResult)))/data">data</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Intent.html"><span class="identifier">Intent</span></a><span class="symbol">?</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$onPaymentResult(kotlin.Int, android.content.Intent, com.stripe.android.ApiResultCallback((com.stripe.android.PaymentIntentResult)))/callback">callback</span><span class="symbol">:</span>&nbsp;<a href="../-api-result-callback/index.html"><span class="identifier">ApiResultCallback</span></a><span class="symbol">&lt;</span><a href="../-payment-intent-result.html"><span class="identifier">PaymentIntentResult</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>Should be called via <code>Activity#onActivityResult(int, int, Intent)}}</code> to handle the
+result of a PaymentIntent automatic confirmation (see <a href="confirm-payment.html">confirmPayment</a>) or
+manual confirmation (see <a href="handle-next-action-for-payment.html">handleNextActionForPayment</a>})</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="on-setup-result.html">onSetupResult</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onSetupResult</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$onSetupResult(kotlin.Int, android.content.Intent, com.stripe.android.ApiResultCallback((com.stripe.android.SetupIntentResult)))/requestCode">requestCode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$onSetupResult(kotlin.Int, android.content.Intent, com.stripe.android.ApiResultCallback((com.stripe.android.SetupIntentResult)))/data">data</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Intent.html"><span class="identifier">Intent</span></a><span class="symbol">?</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$onSetupResult(kotlin.Int, android.content.Intent, com.stripe.android.ApiResultCallback((com.stripe.android.SetupIntentResult)))/callback">callback</span><span class="symbol">:</span>&nbsp;<a href="../-api-result-callback/index.html"><span class="identifier">ApiResultCallback</span></a><span class="symbol">&lt;</span><a href="../-setup-intent-result.html"><span class="identifier">SetupIntentResult</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>Should be called via <code>Activity#onActivityResult(int, int, Intent)}}</code> to handle the
+result of a SetupIntent confirmation (see <a href="confirm-setup-intent.html">confirmSetupIntent</a>).</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="retrieve-payment-intent-synchronous.html">retrievePaymentIntentSynchronous</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">retrievePaymentIntentSynchronous</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$retrievePaymentIntentSynchronous(kotlin.String)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-payment-intent/index.html"><span class="identifier">PaymentIntent</span></a><span class="symbol">?</span></code>
+<p>Blocking method to retrieve a <a href="../../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a> object.
+Do not call this on the UI thread or your app will crash.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="retrieve-setup-intent-synchronous.html">retrieveSetupIntentSynchronous</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">retrieveSetupIntentSynchronous</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$retrieveSetupIntentSynchronous(kotlin.String)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-setup-intent/index.html"><span class="identifier">SetupIntent</span></a><span class="symbol">?</span></code>
+<p>Blocking method to retrieve a <a href="../../com.stripe.android.model/-setup-intent/index.html">SetupIntent</a> object.
+Do not call this on the UI thread or your app will crash.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="retrieve-source.html">retrieveSource</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">retrieveSource</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$retrieveSource(kotlin.String, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Source)))/sourceId">sourceId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$retrieveSource(kotlin.String, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Source)))/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$retrieveSource(kotlin.String, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Source)))/callback">callback</span><span class="symbol">:</span>&nbsp;<a href="../-api-result-callback/index.html"><span class="identifier">ApiResultCallback</span></a><span class="symbol">&lt;</span><a href="../../com.stripe.android.model/-source/index.html"><span class="identifier">Source</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Retrieve a <a href="../../com.stripe.android.model/-source/index.html">Source</a> asynchronously.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="retrieve-source-synchronous.html">retrieveSourceSynchronous</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">retrieveSourceSynchronous</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$retrieveSourceSynchronous(kotlin.String, kotlin.String)/sourceId">sourceId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$retrieveSourceSynchronous(kotlin.String, kotlin.String)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-source/index.html"><span class="identifier">Source</span></a><span class="symbol">?</span></code>
+<p>Retrieve an existing <a href="../../com.stripe.android.model/-source/index.html">Source</a> from the Stripe API. Do not call this on the UI thread
+or your app will crash.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Companion Object Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-a-p-i_-v-e-r-s-i-o-n.html">API_VERSION</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">API_VERSION</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-v-e-r-s-i-o-n.html">VERSION</a></p>
+</td>
+<td>
+<code><span class="keyword">const</span> <span class="keyword">val </span><span class="identifier">VERSION</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="app-info.html">appInfo</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">appInfo</span><span class="symbol">: </span><a href="../-app-info/index.html"><span class="identifier">AppInfo</span></a><span class="symbol">?</span></code>
+<p>Setter for identifying your plug-in or library.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

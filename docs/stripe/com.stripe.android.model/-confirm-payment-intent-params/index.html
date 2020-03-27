@@ -1,0 +1,201 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>ConfirmPaymentIntentParams - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android.model</a>&nbsp;/&nbsp;<a href="./index.html">ConfirmPaymentIntentParams</a><br/>
+<br/>
+<h1>ConfirmPaymentIntentParams</h1>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">ConfirmPaymentIntentParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-confirm-stripe-intent-params/index.html"><span class="identifier">ConfirmStripeIntentParams</span></a></code>
+<h3>Types</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-setup-future-usage/index.html">SetupFutureUsage</a></p>
+</td>
+<td>
+<code><span class="keyword">enum</span> <span class="keyword">class </span><span class="identifier">SetupFutureUsage</span></code>
+<p><a href="https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-setup_future_usage">setup_future_usage</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-shipping/index.html">Shipping</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Shipping</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code>
+<p>Shipping information for this PaymentIntent.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="client-secret.html">clientSecret</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">clientSecret</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a></code>
+<p>The client secret of this PaymentIntent. Used for client-side retrieval using a
+publishable key.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="extra-params.html">extraParams</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">extraParams</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">&gt;</span><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="payment-method-create-params.html">paymentMethodCreateParams</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">paymentMethodCreateParams</span><span class="symbol">: </span><a href="../-payment-method-create-params/index.html"><span class="identifier">PaymentMethodCreateParams</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="payment-method-id.html">paymentMethodId</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">paymentMethodId</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>ID of the payment method (a PaymentMethod, Card, or compatible Source object) to attach to
+this PaymentIntent.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="return-url.html">returnUrl</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">returnUrl</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>The URL to redirect your customer back to after they authenticate or cancel their payment on
+the payment method’s app or site. If you’d prefer to redirect to a mobile application, you
+can alternatively supply an application URI scheme. This parameter is only used for cards
+and other redirect-based payment methods.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="source-id.html">sourceId</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">sourceId</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="source-params.html">sourceParams</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">sourceParams</span><span class="symbol">: </span><a href="../-source-params/index.html"><span class="identifier">SourceParams</span></a><span class="symbol">?</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="should-save-payment-method.html">shouldSavePaymentMethod</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">shouldSavePaymentMethod</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="should-use-stripe-sdk.html">shouldUseStripeSdk</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">shouldUseStripeSdk</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="to-param-map.html">toParamMap</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">toParamMap</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">&gt;</span></code>
+<p>Create a Map representing this object that is prepared for the Stripe API.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="with-should-use-stripe-sdk.html">withShouldUseStripeSdk</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">withShouldUseStripeSdk</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams$withShouldUseStripeSdk(kotlin.Boolean)/shouldUseStripeSdk">shouldUseStripeSdk</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">ConfirmPaymentIntentParams</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Companion Object Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-p-a-r-a-m_-s-o-u-r-c-e_-d-a-t-a.html">PARAM_SOURCE_DATA</a></p>
+</td>
+<td>
+<code><span class="keyword">const</span> <span class="keyword">val </span><span class="identifier">PARAM_SOURCE_DATA</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Companion Object Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="create.html">create</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">create</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$create(kotlin.String, kotlin.String, kotlin.collections.Map((kotlin.String, kotlin.Any)), com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$create(kotlin.String, kotlin.String, kotlin.collections.Map((kotlin.String, kotlin.Any)), com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/returnUrl">returnUrl</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$create(kotlin.String, kotlin.String, kotlin.collections.Map((kotlin.String, kotlin.Any)), com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/extraParams">extraParams</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">&gt;</span><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$create(kotlin.String, kotlin.String, kotlin.collections.Map((kotlin.String, kotlin.Any)), com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/shipping">shipping</span><span class="symbol">:</span>&nbsp;<a href="-shipping/index.html"><span class="identifier">Shipping</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">ConfirmPaymentIntentParams</span></a></code>
+<p>Create a <a href="./index.html">ConfirmPaymentIntentParams</a> without a payment method.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-with-payment-method-create-params.html">createWithPaymentMethodCreateParams</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createWithPaymentMethodCreateParams</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithPaymentMethodCreateParams(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), kotlin.String, com.stripe.android.model.MandateDataParams, com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage, com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/paymentMethodCreateParams">paymentMethodCreateParams</span><span class="symbol">:</span>&nbsp;<a href="../-payment-method-create-params/index.html"><span class="identifier">PaymentMethodCreateParams</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithPaymentMethodCreateParams(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), kotlin.String, com.stripe.android.model.MandateDataParams, com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage, com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithPaymentMethodCreateParams(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), kotlin.String, com.stripe.android.model.MandateDataParams, com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage, com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/returnUrl">returnUrl</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithPaymentMethodCreateParams(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), kotlin.String, com.stripe.android.model.MandateDataParams, com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage, com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/savePaymentMethod">savePaymentMethod</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithPaymentMethodCreateParams(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), kotlin.String, com.stripe.android.model.MandateDataParams, com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage, com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/extraParams">extraParams</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">&gt;</span><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithPaymentMethodCreateParams(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), kotlin.String, com.stripe.android.model.MandateDataParams, com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage, com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/mandateId">mandateId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithPaymentMethodCreateParams(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), kotlin.String, com.stripe.android.model.MandateDataParams, com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage, com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/mandateData">mandateData</span><span class="symbol">:</span>&nbsp;<a href="../-mandate-data-params/index.html"><span class="identifier">MandateDataParams</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithPaymentMethodCreateParams(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), kotlin.String, com.stripe.android.model.MandateDataParams, com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage, com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/setupFutureUsage">setupFutureUsage</span><span class="symbol">:</span>&nbsp;<a href="-setup-future-usage/index.html"><span class="identifier">SetupFutureUsage</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithPaymentMethodCreateParams(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), kotlin.String, com.stripe.android.model.MandateDataParams, com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage, com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/shipping">shipping</span><span class="symbol">:</span>&nbsp;<a href="-shipping/index.html"><span class="identifier">Shipping</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">ConfirmPaymentIntentParams</span></a></code>
+<p>Create the parameters necessary for confirming a PaymentIntent while attaching
+<a href="../-payment-method-create-params/index.html">PaymentMethodCreateParams</a> data</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-with-payment-method-id.html">createWithPaymentMethodId</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createWithPaymentMethodId</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithPaymentMethodId(kotlin.String, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), com.stripe.android.model.PaymentMethodOptionsParams, kotlin.String, com.stripe.android.model.MandateDataParams, com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage, com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/paymentMethodId">paymentMethodId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithPaymentMethodId(kotlin.String, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), com.stripe.android.model.PaymentMethodOptionsParams, kotlin.String, com.stripe.android.model.MandateDataParams, com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage, com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithPaymentMethodId(kotlin.String, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), com.stripe.android.model.PaymentMethodOptionsParams, kotlin.String, com.stripe.android.model.MandateDataParams, com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage, com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/returnUrl">returnUrl</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithPaymentMethodId(kotlin.String, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), com.stripe.android.model.PaymentMethodOptionsParams, kotlin.String, com.stripe.android.model.MandateDataParams, com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage, com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/savePaymentMethod">savePaymentMethod</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithPaymentMethodId(kotlin.String, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), com.stripe.android.model.PaymentMethodOptionsParams, kotlin.String, com.stripe.android.model.MandateDataParams, com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage, com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/extraParams">extraParams</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">&gt;</span><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithPaymentMethodId(kotlin.String, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), com.stripe.android.model.PaymentMethodOptionsParams, kotlin.String, com.stripe.android.model.MandateDataParams, com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage, com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/paymentMethodOptions">paymentMethodOptions</span><span class="symbol">:</span>&nbsp;<a href="../-payment-method-options-params/index.html"><span class="identifier">PaymentMethodOptionsParams</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithPaymentMethodId(kotlin.String, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), com.stripe.android.model.PaymentMethodOptionsParams, kotlin.String, com.stripe.android.model.MandateDataParams, com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage, com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/mandateId">mandateId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithPaymentMethodId(kotlin.String, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), com.stripe.android.model.PaymentMethodOptionsParams, kotlin.String, com.stripe.android.model.MandateDataParams, com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage, com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/mandateData">mandateData</span><span class="symbol">:</span>&nbsp;<a href="../-mandate-data-params/index.html"><span class="identifier">MandateDataParams</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithPaymentMethodId(kotlin.String, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), com.stripe.android.model.PaymentMethodOptionsParams, kotlin.String, com.stripe.android.model.MandateDataParams, com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage, com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/setupFutureUsage">setupFutureUsage</span><span class="symbol">:</span>&nbsp;<a href="-setup-future-usage/index.html"><span class="identifier">SetupFutureUsage</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithPaymentMethodId(kotlin.String, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), com.stripe.android.model.PaymentMethodOptionsParams, kotlin.String, com.stripe.android.model.MandateDataParams, com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage, com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/shipping">shipping</span><span class="symbol">:</span>&nbsp;<a href="-shipping/index.html"><span class="identifier">Shipping</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">ConfirmPaymentIntentParams</span></a></code>
+<p>Create the parameters necessary for confirming a PaymentIntent while attaching a
+PaymentMethod that already exits.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-with-source-id.html">createWithSourceId</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createWithSourceId</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithSourceId(kotlin.String, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/sourceId">sourceId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithSourceId(kotlin.String, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithSourceId(kotlin.String, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/returnUrl">returnUrl</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithSourceId(kotlin.String, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/savePaymentMethod">savePaymentMethod</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithSourceId(kotlin.String, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/extraParams">extraParams</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">&gt;</span><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithSourceId(kotlin.String, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/shipping">shipping</span><span class="symbol">:</span>&nbsp;<a href="-shipping/index.html"><span class="identifier">Shipping</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">ConfirmPaymentIntentParams</span></a></code>
+<p>Create the parameters necessary for confirming a PaymentIntent with an
+existing <a href="../-source/index.html">Source</a>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-with-source-params.html">createWithSourceParams</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createWithSourceParams</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithSourceParams(com.stripe.android.model.SourceParams, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/sourceParams">sourceParams</span><span class="symbol">:</span>&nbsp;<a href="../-source-params/index.html"><span class="identifier">SourceParams</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithSourceParams(com.stripe.android.model.SourceParams, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithSourceParams(com.stripe.android.model.SourceParams, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/returnUrl">returnUrl</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithSourceParams(com.stripe.android.model.SourceParams, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/savePaymentMethod">savePaymentMethod</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithSourceParams(com.stripe.android.model.SourceParams, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/extraParams">extraParams</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">&gt;</span><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmPaymentIntentParams.Companion$createWithSourceParams(com.stripe.android.model.SourceParams, kotlin.String, kotlin.String, kotlin.Boolean, kotlin.collections.Map((kotlin.String, kotlin.Any)), com.stripe.android.model.ConfirmPaymentIntentParams.Shipping)/shipping">shipping</span><span class="symbol">:</span>&nbsp;<a href="-shipping/index.html"><span class="identifier">Shipping</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">ConfirmPaymentIntentParams</span></a></code>
+<p>Create the parameters necessary for confirming a PaymentIntent with <a href="../-source-params/index.html">SourceParams</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

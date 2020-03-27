@@ -1,0 +1,151 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>StripeException - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android.exception</a>&nbsp;/&nbsp;<a href="./index.html">StripeException</a><br/>
+<br/>
+<h1>StripeException</h1>
+<code><span class="keyword">abstract</span> <span class="keyword">class </span><span class="identifier">StripeException</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-exception/index.html"><span class="identifier">Exception</span></a></code>
+<p>A base class for Stripe-related exceptions.</p>
+<h3>Constructors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-init-.html">&lt;init&gt;</a></p>
+</td>
+<td>
+<code><span class="identifier">StripeException</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.exception.StripeException$<init>(com.stripe.android.StripeError, kotlin.String, kotlin.Int, kotlin.Throwable, kotlin.String)/stripeError">stripeError</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android/-stripe-error/index.html"><span class="identifier">StripeError</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.exception.StripeException$<init>(com.stripe.android.StripeError, kotlin.String, kotlin.Int, kotlin.Throwable, kotlin.String)/requestId">requestId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.exception.StripeException$<init>(com.stripe.android.StripeError, kotlin.String, kotlin.Int, kotlin.Throwable, kotlin.String)/statusCode">statusCode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a>&nbsp;<span class="symbol">=</span>&nbsp;0<span class="symbol">, </span><span class="identifier" id="com.stripe.android.exception.StripeException$<init>(com.stripe.android.StripeError, kotlin.String, kotlin.Int, kotlin.Throwable, kotlin.String)/cause">cause</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-throwable/index.html"><span class="identifier">Throwable</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.exception.StripeException$<init>(com.stripe.android.StripeError, kotlin.String, kotlin.Int, kotlin.Throwable, kotlin.String)/message">message</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;stripeError?.message<span class="symbol">)</span></code>
+<p>A base class for Stripe-related exceptions.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="request-id.html">requestId</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">requestId</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="status-code.html">statusCode</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">statusCode</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="stripe-error.html">stripeError</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">stripeError</span><span class="symbol">: </span><a href="../../com.stripe.android/-stripe-error/index.html"><span class="identifier">StripeError</span></a><span class="symbol">?</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="equals.html">equals</a></p>
+</td>
+<td>
+<code><span class="keyword">open</span> <span class="keyword">fun </span><span class="identifier">equals</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.exception.StripeException$equals(kotlin.Any)/other">other</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="hash-code.html">hashCode</a></p>
+</td>
+<td>
+<code><span class="keyword">open</span> <span class="keyword">fun </span><span class="identifier">hashCode</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="to-string.html">toString</a></p>
+</td>
+<td>
+<code><span class="keyword">open</span> <span class="keyword">fun </span><span class="identifier">toString</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Inheritors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="../-a-p-i-connection-exception/index.html">APIConnectionException</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">APIConnectionException</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">StripeException</span></a></code>
+<p>An <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-exception/index.html">Exception</a> that represents a failure to connect to Stripe's API.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="../-a-p-i-exception/index.html">APIException</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">APIException</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">StripeException</span></a></code>
+<p>An <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-exception/index.html">Exception</a> that represents an internal problem with Stripe's servers.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="../-authentication-exception.html">AuthenticationException</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">AuthenticationException</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">StripeException</span></a></code>
+<p>No valid API key provided.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="../-card-exception/index.html">CardException</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">CardException</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">StripeException</span></a></code>
+<p>An <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-exception/index.html">Exception</a> indicating that there is a problem with a Card used for a request.
+Card errors are the most common type of error you should expect to handle.
+They result when the user enters a card that can't be charged for some reason.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="../-invalid-request-exception/index.html">InvalidRequestException</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">InvalidRequestException</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">StripeException</span></a></code>
+<p>A <a href="./index.html">StripeException</a> indicating that invalid parameters were used in a request.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="../-permission-exception/index.html">PermissionException</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">PermissionException</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">StripeException</span></a></code>
+<p>A type of <a href="../-authentication-exception.html">AuthenticationException</a> resulting from incorrect permissions
+to perform the requested action.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="../-rate-limit-exception/index.html">RateLimitException</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">RateLimitException</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">StripeException</span></a></code>
+<p>An <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-exception/index.html">Exception</a> indicating that too many requests have hit the API too quickly.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

@@ -1,0 +1,276 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>Source - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android.model</a>&nbsp;/&nbsp;<a href="./index.html">Source</a><br/>
+<br/>
+<h1>Source</h1>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Source</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-model/index.html"><span class="identifier">StripeModel</span></a><span class="symbol">, </span><a href="../-stripe-payment-source/index.html"><span class="identifier">StripePaymentSource</span></a></code>
+<p>Model for a <a href="https://stripe.com/docs/sources">Sources API</a> object.</p>
+<p>See <a href="https://stripe.com/docs/api/sources/object">Sources API Reference</a>.</p>
+<h3>Annotations</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-source-flow/index.html">SourceFlow</a></p>
+</td>
+<td>
+<code><span class="keyword">annotation</span> <span class="keyword">class </span><span class="identifier">SourceFlow</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-source-status/index.html">SourceStatus</a></p>
+</td>
+<td>
+<code><span class="keyword">annotation</span> <span class="keyword">class </span><span class="identifier">SourceStatus</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-source-type/index.html">SourceType</a></p>
+</td>
+<td>
+<code><span class="keyword">annotation</span> <span class="keyword">class </span><span class="identifier">SourceType</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-usage/index.html">Usage</a></p>
+</td>
+<td>
+<code><span class="keyword">annotation</span> <span class="keyword">class </span><span class="identifier">Usage</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="amount.html">amount</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">amount</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html"><span class="identifier">Long</span></a><span class="symbol">?</span></code>
+<p>A positive integer in the smallest currency unit (that is, 100 cents for $1.00, or 1 for ¥1,
+Japanese Yen being a zero-decimal currency) representing the total amount associated with
+the source. This is the amount for which the source will be chargeable once ready.
+Required for <code>single_use</code> sources.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="client-secret.html">clientSecret</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">clientSecret</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>The client secret of the source. Used for client-side retrieval using a publishable key.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="code-verification.html">codeVerification</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">codeVerification</span><span class="symbol">: </span><a href="../-source-code-verification/index.html"><span class="identifier">SourceCodeVerification</span></a><span class="symbol">?</span></code>
+<p>Information related to the code verification flow. Present if the source is authenticated
+by a verification code (<code>flow</code> is <code>code_verification</code>).</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="created.html">created</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">created</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html"><span class="identifier">Long</span></a><span class="symbol">?</span></code>
+<p>Time at which the object was created. Measured in seconds since the Unix epoch.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="currency.html">currency</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">currency</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>Three-letter <a href="https://stripe.com/docs/currencies">ISO code for the currency</a> associated with
+the source. This is the currency for which the source will be chargeable once ready.
+Required for <code>single_use</code> sources.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="flow.html">flow</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">flow</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>The authentication <code>flow</code> of the source.
+<code>flow</code> is one of <code>redirect</code>, <code>receiver</code>, <code>code_verification</code>, <code>none</code>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="id.html">id</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">id</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>Unique identifier for the object.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="is-live-mode.html">isLiveMode</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">isLiveMode</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">?</span></code>
+<p>Has the value true if the object exists in live mode or the value false if the object
+exists in test mode.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="meta-data.html">metaData</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">metaData</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">&gt;</span><span class="symbol">?</span></code>
+<p>Set of key-value pairs that you can attach to an object. This can be useful for storing
+additional information about the object in a structured format.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="owner.html">owner</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">owner</span><span class="symbol">: </span><a href="../-source-owner/index.html"><span class="identifier">SourceOwner</span></a><span class="symbol">?</span></code>
+<p>Information about the owner of the payment instrument that may be used or required by
+particular source types.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="receiver.html">receiver</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">receiver</span><span class="symbol">: </span><a href="../-source-receiver/index.html"><span class="identifier">SourceReceiver</span></a><span class="symbol">?</span></code>
+<p>Information related to the receiver flow.
+Present if the source is a receiver (<a href="flow.html">flow</a> is <a href="-source-flow/-r-e-c-e-i-v-e-r.html">SourceFlow.RECEIVER</a>).</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="redirect.html">redirect</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">redirect</span><span class="symbol">: </span><a href="../-source-redirect/index.html"><span class="identifier">SourceRedirect</span></a><span class="symbol">?</span></code>
+<p>Information related to the redirect flow. Present if the source is authenticated by a
+redirect (<a href="flow.html">flow</a> is <a href="-source-flow/-r-e-d-i-r-e-c-t.html">SourceFlow.REDIRECT</a>).</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="source-order.html">sourceOrder</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">sourceOrder</span><span class="symbol">: </span><a href="../-source-order/index.html"><span class="identifier">SourceOrder</span></a><span class="symbol">?</span></code>
+<p>Information about the items and shipping associated with the source. Required for
+transactional credit (for example Klarna) sources before you can charge it.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="source-type-data.html">sourceTypeData</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">sourceTypeData</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">?</span><span class="symbol">&gt;</span><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="source-type-model.html">sourceTypeModel</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">sourceTypeModel</span><span class="symbol">: </span><a href="../-source-type-model/index.html"><span class="identifier">SourceTypeModel</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="statement-descriptor.html">statementDescriptor</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">statementDescriptor</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>Extra information about a source. This will appear on your customer’s statement
+every time you charge the source.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="status.html">status</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">status</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>The status of the source, one of <code>canceled</code>, <code>chargeable</code>, <code>consumed</code>, <code>failed</code>,
+or <code>pending</code>. Only <code>chargeable</code> sources can be used to create a charge.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="type.html">type</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">type</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a></code>
+<p>Gets the <a href="-source-type/index.html">SourceType</a> of this Source, as one of the enumerated values.
+If a custom source type has been created, this returns <a href="-source-type/-u-n-k-n-o-w-n.html">SourceType.UNKNOWN</a>. To get
+the raw value of an <a href="-source-type/-u-n-k-n-o-w-n.html">SourceType.UNKNOWN</a> type, use <a href="type-raw.html">typeRaw</a>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="type-raw.html">typeRaw</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">typeRaw</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a></code>
+<p>Gets the type of this source as a String. If it is a known type, this will return
+a string equal to the <a href="-source-type/index.html">SourceType</a> returned from <a href="type.html">type</a>. This
+method is not restricted to known types</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="usage.html">usage</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">usage</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>Either <code>reusable</code> or <code>single_use</code>. Whether this source should be reusable or not. Some source
+types may or may not be reusable by construction, while others may leave the option at
+creation. If an incompatible value is passed, an error will be returned.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="we-chat.html">weChat</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">weChat</span><span class="symbol">: </span><a href="../-we-chat/index.html"><span class="identifier">WeChat</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Companion Object Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="as-source-type.html">asSourceType</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">asSourceType</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.Source.Companion$asSourceType(kotlin.String)/sourceType">sourceType</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="from-json.html">fromJson</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">fromJson</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.Source.Companion$fromJson(org.json.JSONObject)/jsonObject">jsonObject</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/org/json/JSONObject.html"><span class="identifier">JSONObject</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">Source</span></a><span class="symbol">?</span></code></td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

@@ -1,0 +1,22 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>StripeTextUtils.removeSpacesAndHyphens - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android</a>&nbsp;/&nbsp;<a href="index.html">StripeTextUtils</a>&nbsp;/&nbsp;<a href="./remove-spaces-and-hyphens.html">removeSpacesAndHyphens</a><br/>
+<br/>
+<h1>removeSpacesAndHyphens</h1>
+<a name="com.stripe.android.StripeTextUtils$removeSpacesAndHyphens(kotlin.String)"></a>
+<code><span class="identifier">@JvmStatic</span> <span class="keyword">fun </span><span class="identifier">removeSpacesAndHyphens</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.StripeTextUtils$removeSpacesAndHyphens(kotlin.String)/cardNumberWithSpaces">cardNumberWithSpaces</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>Converts a card number that may have spaces between the numbers into one without any spaces.
+Note: method does not check that all characters are digits or spaces.</p>
+<h3>Parameters</h3>
+<p><a name="cardNumberWithSpaces"></a>
+<code>cardNumberWithSpaces</code> - a card number, for instance "4242 4242 4242 4242"</p>
+<p><strong>Return</strong><br/>
+the input number minus any spaces, for instance "4242424242424242".
+Returns <code>null</code> if the input was <code>null</code> or all spaces.</p>
+</BODY>
+</HTML>

@@ -1,0 +1,93 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>StripeFile - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android.model</a>&nbsp;/&nbsp;<a href="./index.html">StripeFile</a><br/>
+<br/>
+<h1>StripeFile</h1>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">StripeFile</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code>
+<p><a href="https://stripe.com/docs/api/files/object">The file object</a></p>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="created.html">created</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">created</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html"><span class="identifier">Long</span></a><span class="symbol">?</span></code>
+<p>Time at which the object was created. Measured in seconds since the Unix epoch.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="filename.html">filename</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">filename</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>A filename for the file, suitable for saving to a filesystem.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="id.html">id</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">id</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>Unique identifier for the object.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="purpose.html">purpose</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">purpose</span><span class="symbol">: </span><a href="../-stripe-file-purpose/index.html"><span class="identifier">StripeFilePurpose</span></a><span class="symbol">?</span></code>
+<p>The purpose of the file. Possible values are <code>business_icon</code>, <code>business_logo</code>,
+<code>customer_signature</code>, <code>dispute_evidence</code>, <code>identity_document</code>, <code>pci_document</code>,
+or <code>tax_document_user_upload</code>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="size.html">size</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">size</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">?</span></code>
+<p>The size in bytes of the file object.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="title.html">title</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">title</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>A user friendly title for the document.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="type.html">type</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">type</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>The type of the file returned (e.g., csv, pdf, jpg, or png).</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="url.html">url</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">url</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>The URL from which the file can be downloaded using your live secret API key.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

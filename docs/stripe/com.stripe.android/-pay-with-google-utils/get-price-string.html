@@ -1,0 +1,23 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>PayWithGoogleUtils.getPriceString - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android</a>&nbsp;/&nbsp;<a href="index.html">PayWithGoogleUtils</a>&nbsp;/&nbsp;<a href="./get-price-string.html">getPriceString</a><br/>
+<br/>
+<h1>getPriceString</h1>
+<a name="com.stripe.android.PayWithGoogleUtils$getPriceString(kotlin.Int, java.util.Currency)"></a>
+<code><span class="identifier">@JvmStatic</span> <span class="keyword">fun </span><span class="identifier">getPriceString</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.PayWithGoogleUtils$getPriceString(kotlin.Int, java.util.Currency)/price">price</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.PayWithGoogleUtils$getPriceString(kotlin.Int, java.util.Currency)/currency">currency</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/java/util/Currency.html"><span class="identifier">Currency</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a></code>
+<p>Converts an integer price in the lowest currency denomination to a Google string value.
+For instance: (100L, USD) -&gt; "1.00", but (100L, JPY) -&gt; "100".</p>
+<h3>Parameters</h3>
+<p><a name="price"></a>
+<code>price</code> - the price in the lowest available currency denomination</p>
+<p><a name="currency"></a>
+<code>currency</code> - the <a href="https://developer.android.com/reference/java/util/Currency.html">Currency</a> used to determine how many digits after the decimal</p>
+<p><strong>Return</strong><br/>
+a String that can be used as a Pay with Google price string</p>
+</BODY>
+</HTML>

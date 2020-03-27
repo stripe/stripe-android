@@ -1,0 +1,83 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>PaymentSessionData - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android</a>&nbsp;/&nbsp;<a href="./index.html">PaymentSessionData</a><br/>
+<br/>
+<h1>PaymentSessionData</h1>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">PaymentSessionData</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code>
+<p>A data class representing the state of the associated <a href="../-payment-session/index.html">PaymentSession</a>.</p>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="cart-total.html">cartTotal</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">cartTotal</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html"><span class="identifier">Long</span></a></code>
+<p>The cart total value, excluding shipping and tax items.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="is-payment-ready-to-charge.html">isPaymentReadyToCharge</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">isPaymentReadyToCharge</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>Whether the payment data is ready for making a charge. This can be used to
+set a buy button to enabled for prompt a user to fill in more information.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="payment-method.html">paymentMethod</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">paymentMethod</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-payment-method/index.html"><span class="identifier">PaymentMethod</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="shipping-information.html">shippingInformation</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">shippingInformation</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-shipping-information/index.html"><span class="identifier">ShippingInformation</span></a><span class="symbol">?</span></code>
+<p>Where the items being purchased should be shipped.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="shipping-method.html">shippingMethod</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">shippingMethod</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-shipping-method/index.html"><span class="identifier">ShippingMethod</span></a><span class="symbol">?</span></code>
+<p>How the items being purchased should be shipped.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="shipping-total.html">shippingTotal</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">shippingTotal</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html"><span class="identifier">Long</span></a></code>
+<p>The current value of the shipping items in the associated <a href="../-payment-session/index.html">PaymentSession</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="use-google-pay.html">useGooglePay</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">useGooglePay</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>When <code>true</code>, the customer has indicated their intent to pay with Google Pay. Use the
+<a href="https://developers.google.com/pay/api/android/overview">Google Pay API</a> to complete
+payment with Google Pay.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

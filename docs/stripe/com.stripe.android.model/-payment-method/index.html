@@ -1,0 +1,237 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>PaymentMethod - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android.model</a>&nbsp;/&nbsp;<a href="./index.html">PaymentMethod</a><br/>
+<br/>
+<h1>PaymentMethod</h1>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">PaymentMethod</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code>
+<p><a href="https://stripe.com/docs/api/payment_methods">PaymentMethod</a> objects represent your customer's
+payment instruments. They can be used with
+<a href="https://stripe.com/docs/payments/payment-intents">PaymentIntents</a> to collect payments or saved
+to Customer objects to store instrument details for future payments.</p>
+<p>Related guides: <a href="https://stripe.com/docs/payments/payment-methods">Payment Methods</a> and
+<a href="https://stripe.com/docs/payments/more-payment-scenarios">More Payment Scenarios</a>.</p>
+<p>See <a href="../-payment-method-create-params/index.html">PaymentMethodCreateParams</a> for PaymentMethod creation</p>
+<h3>Types</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-au-becs-debit/index.html">AuBecsDebit</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">AuBecsDebit</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-billing-details/index.html">BillingDetails</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">BillingDetails</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-model/index.html"><span class="identifier">StripeModel</span></a><span class="symbol">, </span><a href="../-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a></code>
+<p>Billing information associated with the PaymentMethod that may be used or required by particular types of payment methods.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-builder/index.html">Builder</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">Builder</span>&nbsp;<span class="symbol">:</span>&nbsp;<span class="identifier">ObjectBuilder</span><span class="symbol">&lt;</span><a href="./index.html"><span class="identifier">PaymentMethod</span></a><span class="symbol">&gt;</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-card/index.html">Card</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Card</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code>
+<p>If this is a <code>card</code> PaymentMethod, this hash contains details about the card.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-card-present.html">CardPresent</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">CardPresent</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code>
+<p>If this is a <code>card_present</code> PaymentMethod, this hash contains details about the Card Present payment method.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-fpx/index.html">Fpx</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Fpx</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code>
+<p>Requires the FPX payment method enabled on your account via
+https://dashboard.stripe.com/account/payments/settings.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-ideal/index.html">Ideal</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Ideal</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code>
+<p>If this is an <code>ideal</code> PaymentMethod, this hash contains details about the iDEAL payment method.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-sepa-debit/index.html">SepaDebit</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">SepaDebit</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code>
+<p>If this is a <code>sepa_debit</code> PaymentMethod, this hash contains details about the SEPA debit bank account.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-type/index.html">Type</a></p>
+</td>
+<td>
+<code><span class="keyword">enum</span> <span class="keyword">class </span><span class="identifier">Type</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="au-becs-debit.html">auBecsDebit</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">auBecsDebit</span><span class="symbol">: </span><a href="-au-becs-debit/index.html"><span class="identifier">AuBecsDebit</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="billing-details.html">billingDetails</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">billingDetails</span><span class="symbol">: </span><a href="-billing-details/index.html"><span class="identifier">BillingDetails</span></a><span class="symbol">?</span></code>
+<p>Billing information associated with the PaymentMethod that may be used or required by particular types of payment methods.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="card.html">card</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">card</span><span class="symbol">: </span><a href="-card/index.html"><span class="identifier">Card</span></a><span class="symbol">?</span></code>
+<p>If this is a <code>card</code> PaymentMethod, this hash contains details about the card.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="card-present.html">cardPresent</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">cardPresent</span><span class="symbol">: </span><a href="-card-present.html"><span class="identifier">CardPresent</span></a><span class="symbol">?</span></code>
+<p>If this is a <code>card_present</code> PaymentMethod, this hash contains details about the Card Present payment method.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="created.html">created</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">created</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html"><span class="identifier">Long</span></a><span class="symbol">?</span></code>
+<p>Time at which the object was created. Measured in seconds since the Unix epoch.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="customer-id.html">customerId</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">customerId</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>The ID of the Customer to which this PaymentMethod is saved. This will not be set when the
+PaymentMethod has not been saved to a Customer.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="fpx.html">fpx</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">fpx</span><span class="symbol">: </span><a href="-fpx/index.html"><span class="identifier">Fpx</span></a><span class="symbol">?</span></code>
+<p>If this is a <code>fpx</code> PaymentMethod, this hash contains details about the FPX payment method.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="id.html">id</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">id</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>Unique identifier for the object.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="ideal.html">ideal</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">ideal</span><span class="symbol">: </span><a href="-ideal/index.html"><span class="identifier">Ideal</span></a><span class="symbol">?</span></code>
+<p>If this is an <code>ideal</code> PaymentMethod, this hash contains details about the iDEAL payment method.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="live-mode.html">liveMode</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">liveMode</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>Has the value <code>true</code> if the object exists in live mode or the value <code>false</code> if the object exists in test mode.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="metadata.html">metadata</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">metadata</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">&gt;</span><span class="symbol">?</span></code>
+<p>Set of key-value pairs that you can attach to an object. This can be useful for storing
+additional information about the object in a structured format.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="sepa-debit.html">sepaDebit</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">sepaDebit</span><span class="symbol">: </span><a href="-sepa-debit/index.html"><span class="identifier">SepaDebit</span></a><span class="symbol">?</span></code>
+<p>If this is a <code>sepa_debit</code> PaymentMethod, this hash contains details about the SEPA debit bank account.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="type.html">type</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">type</span><span class="symbol">: </span><a href="-type/index.html"><span class="identifier">Type</span></a><span class="symbol">?</span></code>
+<p>The type of the PaymentMethod. An additional hash is included on the PaymentMethod with a
+name matching this value. It contains additional information specific to the
+PaymentMethod type.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Companion Object Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="from-json.html">fromJson</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">fromJson</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.PaymentMethod.Companion$fromJson(org.json.JSONObject)/paymentMethod">paymentMethod</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/org/json/JSONObject.html"><span class="identifier">JSONObject</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">PaymentMethod</span></a><span class="symbol">?</span></code></td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

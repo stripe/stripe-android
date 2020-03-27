@@ -1,0 +1,80 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>AccountParams - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android.model</a>&nbsp;/&nbsp;<a href="./index.html">AccountParams</a><br/>
+<br/>
+<h1>AccountParams</h1>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">AccountParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-token-params/index.html"><span class="identifier">TokenParams</span></a></code>
+<p><a href="https://stripe.com/docs/api/tokens/create_account">Create an account token</a></p>
+<p>Creates a single-use token that wraps a user’s legal entity information. Use this when creating
+or updating a Connect account. See the
+<a href="https://stripe.com/docs/connect/account-tokens">account tokens documentation</a> to learn more.</p>
+<h3>Types</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-business-type/index.html">BusinessType</a></p>
+</td>
+<td>
+<code><span class="keyword">enum</span> <span class="keyword">class </span><span class="identifier">BusinessType</span></code>
+<p>The business type.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-business-type-params/index.html">BusinessTypeParams</a></p>
+</td>
+<td>
+<code><span class="keyword">sealed</span> <span class="keyword">class </span><span class="identifier">BusinessTypeParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="to-param-map.html">toParamMap</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">toParamMap</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">&gt;</span></code>
+<p>Create a string-keyed map representing this object that is ready to be sent over the network.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Companion Object Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="create.html">create</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">create</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.AccountParams.Companion$create(kotlin.Boolean, com.stripe.android.model.AccountParams.BusinessTypeParams.Individual)/tosShownAndAccepted">tosShownAndAccepted</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.AccountParams.Companion$create(kotlin.Boolean, com.stripe.android.model.AccountParams.BusinessTypeParams.Individual)/individual">individual</span><span class="symbol">:</span>&nbsp;<a href="-business-type-params/-individual/index.html"><span class="identifier">Individual</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">AccountParams</span></a></code>
+<p>Create an <a href="./index.html">AccountParams</a> instance with information about the person represented by the account.</p>
+<code><span class="keyword">fun </span><span class="identifier">create</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.AccountParams.Companion$create(kotlin.Boolean, com.stripe.android.model.AccountParams.BusinessTypeParams.Company)/tosShownAndAccepted">tosShownAndAccepted</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.AccountParams.Companion$create(kotlin.Boolean, com.stripe.android.model.AccountParams.BusinessTypeParams.Company)/company">company</span><span class="symbol">:</span>&nbsp;<a href="-business-type-params/-company/index.html"><span class="identifier">Company</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">AccountParams</span></a></code>
+<p>Create an <a href="./index.html">AccountParams</a> instance with information about the company or business.</p>
+<code><span class="keyword">fun </span><span class="identifier">create</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.AccountParams.Companion$create(kotlin.Boolean, com.stripe.android.model.AccountParams.BusinessType)/tosShownAndAccepted">tosShownAndAccepted</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.AccountParams.Companion$create(kotlin.Boolean, com.stripe.android.model.AccountParams.BusinessType)/businessType">businessType</span><span class="symbol">:</span>&nbsp;<a href="-business-type/index.html"><span class="identifier">BusinessType</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">AccountParams</span></a></code><br/>
+<code><span class="keyword">fun </span><span class="identifier">create</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.AccountParams.Companion$create(kotlin.Boolean)/tosShownAndAccepted">tosShownAndAccepted</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">AccountParams</span></a></code>
+<p>Create an <a href="./index.html">AccountParams</a> instance.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-account-params.html">createAccountParams</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><s><span class="identifier">createAccountParams</span></s><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.AccountParams.Companion$createAccountParams(kotlin.Boolean, com.stripe.android.model.AccountParams.BusinessType, kotlin.collections.Map((kotlin.String, kotlin.Any)))/tosShownAndAccepted">tosShownAndAccepted</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.AccountParams.Companion$createAccountParams(kotlin.Boolean, com.stripe.android.model.AccountParams.BusinessType, kotlin.collections.Map((kotlin.String, kotlin.Any)))/businessType">businessType</span><span class="symbol">:</span>&nbsp;<a href="-business-type/index.html"><span class="identifier">BusinessType</span></a><span class="symbol">?</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.AccountParams.Companion$createAccountParams(kotlin.Boolean, com.stripe.android.model.AccountParams.BusinessType, kotlin.collections.Map((kotlin.String, kotlin.Any)))/businessData">businessData</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">&gt;</span><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">AccountParams</span></a></code>
+<p>Create an <a href="./index.html">AccountParams</a> instance for a <a href="-business-type/-individual.html">BusinessType.Individual</a> or BusinessType.Company].</p>
+</td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

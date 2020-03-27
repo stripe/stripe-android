@@ -1,0 +1,33 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>CustomerSession.initCustomerSession - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android</a>&nbsp;/&nbsp;<a href="index.html">CustomerSession</a>&nbsp;/&nbsp;<a href="./init-customer-session.html">initCustomerSession</a><br/>
+<br/>
+<h1>initCustomerSession</h1>
+<a name="com.stripe.android.CustomerSession.Companion$initCustomerSession(android.content.Context, com.stripe.android.EphemeralKeyProvider, kotlin.String, kotlin.Boolean)"></a>
+<code><span class="identifier">@JvmStatic</span> <span class="identifier">@JvmOverloads</span> <span class="keyword">fun </span><span class="identifier">initCustomerSession</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.CustomerSession.Companion$initCustomerSession(android.content.Context, com.stripe.android.EphemeralKeyProvider, kotlin.String, kotlin.Boolean)/context">context</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Context.html"><span class="identifier">Context</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession.Companion$initCustomerSession(android.content.Context, com.stripe.android.EphemeralKeyProvider, kotlin.String, kotlin.Boolean)/ephemeralKeyProvider">ephemeralKeyProvider</span><span class="symbol">:</span>&nbsp;<a href="../-ephemeral-key-provider/index.html"><span class="identifier">EphemeralKeyProvider</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession.Companion$initCustomerSession(android.content.Context, com.stripe.android.EphemeralKeyProvider, kotlin.String, kotlin.Boolean)/stripeAccountId">stripeAccountId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession.Companion$initCustomerSession(android.content.Context, com.stripe.android.EphemeralKeyProvider, kotlin.String, kotlin.Boolean)/shouldPrefetchEphemeralKey">shouldPrefetchEphemeralKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a>&nbsp;<span class="symbol">=</span>&nbsp;true<span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Create a CustomerSession with the provided <a href="../-ephemeral-key-provider/index.html">EphemeralKeyProvider</a>.</p>
+<p>You must call <a href="../-payment-configuration/init.html">PaymentConfiguration.init</a> with your publishable key
+before calling this method.</p>
+<h3>Parameters</h3>
+<p><a name="context"></a>
+<code>context</code> - The application context</p>
+<p><a name="ephemeralKeyProvider"></a>
+<code>ephemeralKeyProvider</code> - An <a href="../-ephemeral-key-provider/index.html">EphemeralKeyProvider</a> used to retrieve
+<a href="../-ephemeral-key/index.html">EphemeralKey</a> ephemeral keys</p>
+<p><a name="stripeAccountId"></a>
+<code>stripeAccountId</code> - An optional Stripe Connect account to associate with Customer-related
+Stripe API Requests. See <a href="../-stripe/index.html">Stripe</a>.</p>
+<p><a name="shouldPrefetchEphemeralKey"></a>
+<code>shouldPrefetchEphemeralKey</code> - If true, will immediately fetch an ephemeral key using
+{@param ephemeralKeyProvider}. Otherwise, will only fetch
+an ephemeral key when needed.</p>
+<a name="com.stripe.android.CustomerSession.Companion$initCustomerSession(android.content.Context, com.stripe.android.EphemeralKeyProvider, kotlin.Boolean)"></a>
+<code><span class="identifier">@JvmStatic</span> <span class="keyword">fun </span><span class="identifier">initCustomerSession</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.CustomerSession.Companion$initCustomerSession(android.content.Context, com.stripe.android.EphemeralKeyProvider, kotlin.Boolean)/context">context</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Context.html"><span class="identifier">Context</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession.Companion$initCustomerSession(android.content.Context, com.stripe.android.EphemeralKeyProvider, kotlin.Boolean)/ephemeralKeyProvider">ephemeralKeyProvider</span><span class="symbol">:</span>&nbsp;<a href="../-ephemeral-key-provider/index.html"><span class="identifier">EphemeralKeyProvider</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession.Companion$initCustomerSession(android.content.Context, com.stripe.android.EphemeralKeyProvider, kotlin.Boolean)/shouldPrefetchEphemeralKey">shouldPrefetchEphemeralKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>See <a href="./init-customer-session.html">initCustomerSession</a></p>
+</BODY>
+</HTML>
