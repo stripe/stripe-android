@@ -1,0 +1,33 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>Stripe.retrieveSource - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android</a>&nbsp;/&nbsp;<a href="index.html">Stripe</a>&nbsp;/&nbsp;<a href="./retrieve-source.html">retrieveSource</a><br/>
+<br/>
+<h1>retrieveSource</h1>
+<a name="com.stripe.android.Stripe$retrieveSource(kotlin.String, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Source)))"></a>
+<code><span class="identifier">@UiThread</span> <span class="keyword">fun </span><span class="identifier">retrieveSource</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$retrieveSource(kotlin.String, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Source)))/sourceId">sourceId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$retrieveSource(kotlin.String, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Source)))/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$retrieveSource(kotlin.String, kotlin.String, com.stripe.android.ApiResultCallback((com.stripe.android.model.Source)))/callback">callback</span><span class="symbol">:</span>&nbsp;<a href="../-api-result-callback/index.html"><span class="identifier">ApiResultCallback</span></a><span class="symbol">&lt;</span><a href="../../com.stripe.android.model/-source/index.html"><span class="identifier">Source</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Retrieve a <a href="../../com.stripe.android.model/-source/index.html">Source</a> asynchronously.</p>
+<p>See <a href="https://stripe.com/docs/api/sources/retrieve">Retrieve a source</a>.
+<code>GET /v1/sources/:id</code></p>
+<h3>Parameters</h3>
+<p><a name="sourceId"></a>
+<code>sourceId</code> - the <a href="../../com.stripe.android.model/-source/id.html">Source.id</a> field of the desired Source object</p>
+<p><a name="clientSecret"></a>
+<code>clientSecret</code> - the <a href="../../com.stripe.android.model/-source/client-secret.html">Source.clientSecret</a> field of the desired Source object</p>
+<p><a name="callback"></a>
+<code>callback</code> - a <a href="../-api-result-callback/index.html">ApiResultCallback</a> to receive the result or error</p>
+<h3>Exceptions</h3>
+<p><a name="AuthenticationException"></a>
+<code>AuthenticationException</code> - failure to properly authenticate yourself (check your key)</p>
+<p><a name="InvalidRequestException"></a>
+<code>InvalidRequestException</code> - your request has invalid parameters</p>
+<p><a name="APIConnectionException"></a>
+<code>APIConnectionException</code> - failure to connect to Stripe's API</p>
+<p><a name="APIException"></a>
+<code>APIException</code> - any other type of problem (for instance, a temporary issue with Stripe's servers)</p>
+</BODY>
+</HTML>

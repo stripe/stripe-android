@@ -1,0 +1,132 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>PaymentSession - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android</a>&nbsp;/&nbsp;<a href="./index.html">PaymentSession</a><br/>
+<br/>
+<h1>PaymentSession</h1>
+<code><span class="keyword">class </span><span class="identifier">PaymentSession</span></code>
+<p>Represents a single start-to-finish payment operation.</p>
+<p>See <a href="https://stripe.com/docs/mobile/android/basic">Using Android basic integration</a> for more
+information.</p>
+<p>If <a href="#">PaymentSessionConfig.shouldPrefetchCustomer</a> is <code>true</code>, and the customer has previously
+selected a payment method, <a href="../-payment-session-data/payment-method.html">PaymentSessionData.paymentMethod</a> will be updated with the
+payment method and <a href="-payment-session-listener/on-payment-session-data-changed.html">PaymentSessionListener.onPaymentSessionDataChanged</a> will be called.</p>
+<h3>Types</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-activity-payment-session-listener/index.html">ActivityPaymentSessionListener</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">class </span><span class="identifier">ActivityPaymentSessionListener</span><span class="symbol">&lt;</span><span class="identifier">A</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/app/Activity.html"><span class="identifier">Activity</span></a><span class="symbol">&gt;</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-payment-session-listener/index.html"><span class="identifier">PaymentSessionListener</span></a></code>
+<p>Abstract implementation of <a href="-payment-session-listener/index.html">PaymentSessionListener</a> that holds a
+<a href="https://developer.android.com/reference/java/lang/ref/WeakReference.html">WeakReference</a> to an <code>Activity</code> object.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-payment-session-listener/index.html">PaymentSessionListener</a></p>
+</td>
+<td>
+<code><span class="keyword">interface </span><span class="identifier">PaymentSessionListener</span></code>
+<p>Represents a listener for PaymentSession actions, used to update the host activity
+when necessary.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Constructors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-init-.html">&lt;init&gt;</a></p>
+</td>
+<td>
+<code><span class="identifier">PaymentSession</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.PaymentSession$<init>(androidx.activity.ComponentActivity, com.stripe.android.PaymentSessionConfig)/activity">activity</span><span class="symbol">:</span>&nbsp;<span class="identifier">ComponentActivity</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.PaymentSession$<init>(androidx.activity.ComponentActivity, com.stripe.android.PaymentSessionConfig)/config">config</span><span class="symbol">:</span>&nbsp;<a href="../-payment-session-config/index.html"><span class="identifier">PaymentSessionConfig</span></a><span class="symbol">)</span></code>
+<p>Create a PaymentSession attached to the given host Activity.</p>
+<code><span class="identifier">PaymentSession</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.PaymentSession$<init>(androidx.fragment.app.Fragment, com.stripe.android.PaymentSessionConfig)/fragment">fragment</span><span class="symbol">:</span>&nbsp;<span class="identifier">Fragment</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.PaymentSession$<init>(androidx.fragment.app.Fragment, com.stripe.android.PaymentSessionConfig)/config">config</span><span class="symbol">:</span>&nbsp;<a href="../-payment-session-config/index.html"><span class="identifier">PaymentSessionConfig</span></a><span class="symbol">)</span></code>
+<p>Create a PaymentSession attached to the given host Fragment.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="clear-payment-method.html">clearPaymentMethod</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">clearPaymentMethod</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Clear the payment method associated with this <a href="./index.html">PaymentSession</a> in <a href="../-payment-session-data/index.html">PaymentSessionData</a>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="handle-payment-data.html">handlePaymentData</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">handlePaymentData</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.PaymentSession$handlePaymentData(kotlin.Int, kotlin.Int, android.content.Intent)/requestCode">requestCode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.PaymentSession$handlePaymentData(kotlin.Int, kotlin.Int, android.content.Intent)/resultCode">resultCode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.PaymentSession$handlePaymentData(kotlin.Int, kotlin.Int, android.content.Intent)/data">data</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Intent.html"><span class="identifier">Intent</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>Method to handle Activity results from Stripe activities. Pass data here from your
+host's <code>#onActivityResult(int, int, Intent)</code> function.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="init.html">init</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">init</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.PaymentSession$init(com.stripe.android.PaymentSession.PaymentSessionListener)/listener">listener</span><span class="symbol">:</span>&nbsp;<a href="-payment-session-listener/index.html"><span class="identifier">PaymentSessionListener</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Initialize the <a href="./index.html">PaymentSession</a> with a <a href="-payment-session-listener/index.html">PaymentSessionListener</a> to be notified of
+data changes. The reference to the <a href="init.html#com.stripe.android.PaymentSession$init(com.stripe.android.PaymentSession.PaymentSessionListener)/listener">listener</a> will be released when the host (i.e.
+<code>Activity</code> or <code>Fragment</code>) is destroyed.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="on-completed.html">onCompleted</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onCompleted</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Notify this payment session that it is complete</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="present-payment-method-selection.html">presentPaymentMethodSelection</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">presentPaymentMethodSelection</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.PaymentSession$presentPaymentMethodSelection(kotlin.String)/selectedPaymentMethodId">selectedPaymentMethodId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Launch the <a href="../../com.stripe.android.view/-payment-methods-activity/index.html">PaymentMethodsActivity</a> to allow the user to select a payment method,
+or to add a new one.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="present-shipping-flow.html">presentShippingFlow</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">presentShippingFlow</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Launch the <a href="../../com.stripe.android.view/-payment-flow-activity/index.html">PaymentFlowActivity</a> to allow the user to fill in payment details.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="set-cart-total.html">setCartTotal</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setCartTotal</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.PaymentSession$setCartTotal(kotlin.Long)/cartTotal">cartTotal</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html"><span class="identifier">Long</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Set the cart total for this PaymentSession. This should not include shipping costs.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

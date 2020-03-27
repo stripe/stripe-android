@@ -1,0 +1,24 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>CardBrand.groupNumber - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android.model</a>&nbsp;/&nbsp;<a href="index.html">CardBrand</a>&nbsp;/&nbsp;<a href="./group-number.html">groupNumber</a><br/>
+<br/>
+<h1>groupNumber</h1>
+<a name="com.stripe.android.model.CardBrand$groupNumber(kotlin.String)"></a>
+<code><span class="keyword">fun </span><span class="identifier">groupNumber</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.CardBrand$groupNumber(kotlin.String)/cardNumber">cardNumber</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html"><span class="identifier">Array</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">&gt;</span></code>
+<p>Separates a card number according to the brand requirements, including prefixes of card
+numbers, so that the groups can be easily displayed if the user is typing them in.
+Note that this does not verify that the card number is valid, or even that it is a number.</p>
+<p>e.g. <code>"4242424242424242"</code> will return <code>["4242", "4242", "4242", "4242"]</code></p>
+<h3>Parameters</h3>
+<p><a name="cardNumber"></a>
+<code>cardNumber</code> - the raw card number</p>
+<p><strong>Return</strong><br/>
+an array of strings with the number groups, in order. If the number is not complete,
+some of the array entries may be <code>null</code>.</p>
+</BODY>
+</HTML>

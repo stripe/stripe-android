@@ -1,0 +1,74 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>PaymentMethodsActivity - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android.view</a>&nbsp;/&nbsp;<a href="./index.html">PaymentMethodsActivity</a><br/>
+<br/>
+<h1>PaymentMethodsActivity</h1>
+<code><span class="keyword">class </span><span class="identifier">PaymentMethodsActivity</span>&nbsp;<span class="symbol">:</span>&nbsp;<span class="identifier">AppCompatActivity</span></code>
+<p>An activity that allows a customer to select from their attached payment methods,
+or add a new one via <a href="../-add-payment-method-activity/index.html">AddPaymentMethodActivity</a>.</p>
+<p>This Activity is typically started through <a href="../../com.stripe.android/-payment-session/index.html">com.stripe.android.PaymentSession</a>.
+To directly start this activity, use <a href="../-activity-starter/start-for-result.html">PaymentMethodsActivityStarter.startForResult</a>.</p>
+<p>Use <a href="../-payment-methods-activity-starter/-result/from-intent.html">PaymentMethodsActivityStarter.Result.fromIntent</a>
+to retrieve the result of this activity from an intent in onActivityResult().</p>
+<h3>Constructors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-init-.html">&lt;init&gt;</a></p>
+</td>
+<td>
+<code><span class="identifier">PaymentMethodsActivity</span><span class="symbol">(</span><span class="symbol">)</span></code>
+<p>An activity that allows a customer to select from their attached payment methods,
+or add a new one via <a href="../-add-payment-method-activity/index.html">AddPaymentMethodActivity</a>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="on-activity-result.html">onActivityResult</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onActivityResult</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.PaymentMethodsActivity$onActivityResult(kotlin.Int, kotlin.Int, android.content.Intent)/requestCode">requestCode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.view.PaymentMethodsActivity$onActivityResult(kotlin.Int, kotlin.Int, android.content.Intent)/resultCode">resultCode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.view.PaymentMethodsActivity$onActivityResult(kotlin.Int, kotlin.Int, android.content.Intent)/data">data</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Intent.html"><span class="identifier">Intent</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="on-back-pressed.html">onBackPressed</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onBackPressed</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="on-create.html">onCreate</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onCreate</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.PaymentMethodsActivity$onCreate(android.os.Bundle)/savedInstanceState">savedInstanceState</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Bundle.html"><span class="identifier">Bundle</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="on-destroy.html">onDestroy</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onDestroy</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="on-support-navigate-up.html">onSupportNavigateUp</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onSupportNavigateUp</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

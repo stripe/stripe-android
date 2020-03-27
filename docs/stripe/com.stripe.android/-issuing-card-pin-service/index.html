@@ -1,0 +1,86 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>IssuingCardPinService - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android</a>&nbsp;/&nbsp;<a href="./index.html">IssuingCardPinService</a><br/>
+<br/>
+<h1>IssuingCardPinService</h1>
+<code><span class="keyword">class </span><span class="identifier">IssuingCardPinService</span></code>
+<p>Methods for retrieval / update of a Stripe Issuing card</p>
+<h3>Types</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-card-pin-action-error/index.html">CardPinActionError</a></p>
+</td>
+<td>
+<code><span class="keyword">enum</span> <span class="keyword">class </span><span class="identifier">CardPinActionError</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-issuing-card-pin-retrieval-listener/index.html">IssuingCardPinRetrievalListener</a></p>
+</td>
+<td>
+<code><span class="keyword">interface </span><span class="identifier">IssuingCardPinRetrievalListener</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-listener/index.html"><span class="identifier">Listener</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-issuing-card-pin-update-listener/index.html">IssuingCardPinUpdateListener</a></p>
+</td>
+<td>
+<code><span class="keyword">interface </span><span class="identifier">IssuingCardPinUpdateListener</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-listener/index.html"><span class="identifier">Listener</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-listener/index.html">Listener</a></p>
+</td>
+<td>
+<code><span class="keyword">interface </span><span class="identifier">Listener</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="retrieve-pin.html">retrievePin</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">retrievePin</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.IssuingCardPinService$retrievePin(kotlin.String, kotlin.String, kotlin.String, com.stripe.android.IssuingCardPinService.IssuingCardPinRetrievalListener)/cardId">cardId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.IssuingCardPinService$retrievePin(kotlin.String, kotlin.String, kotlin.String, com.stripe.android.IssuingCardPinService.IssuingCardPinRetrievalListener)/verificationId">verificationId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.IssuingCardPinService$retrievePin(kotlin.String, kotlin.String, kotlin.String, com.stripe.android.IssuingCardPinService.IssuingCardPinRetrievalListener)/userOneTimeCode">userOneTimeCode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.IssuingCardPinService$retrievePin(kotlin.String, kotlin.String, kotlin.String, com.stripe.android.IssuingCardPinService.IssuingCardPinRetrievalListener)/listener">listener</span><span class="symbol">:</span>&nbsp;<a href="-issuing-card-pin-retrieval-listener/index.html"><span class="identifier">IssuingCardPinRetrievalListener</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Retrieves a PIN for a given card</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="update-pin.html">updatePin</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">updatePin</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.IssuingCardPinService$updatePin(kotlin.String, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.IssuingCardPinService.IssuingCardPinUpdateListener)/cardId">cardId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.IssuingCardPinService$updatePin(kotlin.String, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.IssuingCardPinService.IssuingCardPinUpdateListener)/newPin">newPin</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.IssuingCardPinService$updatePin(kotlin.String, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.IssuingCardPinService.IssuingCardPinUpdateListener)/verificationId">verificationId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.IssuingCardPinService$updatePin(kotlin.String, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.IssuingCardPinService.IssuingCardPinUpdateListener)/userOneTimeCode">userOneTimeCode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.IssuingCardPinService$updatePin(kotlin.String, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.IssuingCardPinService.IssuingCardPinUpdateListener)/listener">listener</span><span class="symbol">:</span>&nbsp;<a href="-issuing-card-pin-update-listener/index.html"><span class="identifier">IssuingCardPinUpdateListener</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Retrieves a PIN for a given card</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Companion Object Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="create.html">create</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">create</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.IssuingCardPinService.Companion$create(android.content.Context, com.stripe.android.EphemeralKeyProvider)/context">context</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Context.html"><span class="identifier">Context</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.IssuingCardPinService.Companion$create(android.content.Context, com.stripe.android.EphemeralKeyProvider)/keyProvider">keyProvider</span><span class="symbol">:</span>&nbsp;<a href="../-ephemeral-key-provider/index.html"><span class="identifier">EphemeralKeyProvider</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">IssuingCardPinService</span></a></code>
+<p>Create a IssuingCardPinService with the provided <a href="../-ephemeral-key-provider/index.html">EphemeralKeyProvider</a>.</p>
+<code><span class="keyword">fun </span><span class="identifier">create</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.IssuingCardPinService.Companion$create(android.content.Context, kotlin.String, com.stripe.android.EphemeralKeyProvider)/context">context</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Context.html"><span class="identifier">Context</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.IssuingCardPinService.Companion$create(android.content.Context, kotlin.String, com.stripe.android.EphemeralKeyProvider)/publishableKey">publishableKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.IssuingCardPinService.Companion$create(android.content.Context, kotlin.String, com.stripe.android.EphemeralKeyProvider)/keyProvider">keyProvider</span><span class="symbol">:</span>&nbsp;<a href="../-ephemeral-key-provider/index.html"><span class="identifier">EphemeralKeyProvider</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">IssuingCardPinService</span></a></code>
+<p>Create a <a href="./index.html">IssuingCardPinService</a> with the provided <a href="../-ephemeral-key-provider/index.html">EphemeralKeyProvider</a>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

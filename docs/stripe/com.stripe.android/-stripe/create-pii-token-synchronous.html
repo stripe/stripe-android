@@ -1,0 +1,35 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>Stripe.createPiiTokenSynchronous - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android</a>&nbsp;/&nbsp;<a href="index.html">Stripe</a>&nbsp;/&nbsp;<a href="./create-pii-token-synchronous.html">createPiiTokenSynchronous</a><br/>
+<br/>
+<h1>createPiiTokenSynchronous</h1>
+<a name="com.stripe.android.Stripe$createPiiTokenSynchronous(kotlin.String, kotlin.String)"></a>
+<code><span class="identifier">@WorkerThread</span> <span class="identifier">@JvmOverloads</span> <span class="keyword">fun </span><span class="identifier">createPiiTokenSynchronous</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$createPiiTokenSynchronous(kotlin.String, kotlin.String)/personalId">personalId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$createPiiTokenSynchronous(kotlin.String, kotlin.String)/idempotencyKey">idempotencyKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-token/index.html"><span class="identifier">Token</span></a><span class="symbol">?</span></code>
+<p>Blocking method to create a <a href="../../com.stripe.android.model/-token/index.html">Token</a> for PII. Do not call this on the UI thread
+or your app will crash.</p>
+<p>See <a href="https://stripe.com/docs/api/tokens/create_pii">Create a PII account token</a>.
+<code>POST /v1/tokens</code></p>
+<h3>Parameters</h3>
+<p><a name="personalId"></a>
+<code>personalId</code> - the personal ID to use for this token</p>
+<p><a name="idempotencyKey"></a>
+<code>idempotencyKey</code> - optional, see <a href="https://stripe.com/docs/api/idempotent_requests">Idempotent Requests</a></p>
+<h3>Exceptions</h3>
+<p><a name="AuthenticationException"></a>
+<code>AuthenticationException</code> - failure to properly authenticate yourself (check your key)</p>
+<p><a name="InvalidRequestException"></a>
+<code>InvalidRequestException</code> - your request has invalid parameters</p>
+<p><a name="APIConnectionException"></a>
+<code>APIConnectionException</code> - failure to connect to Stripe's API</p>
+<p><a name="APIException"></a>
+<code>APIException</code> - any other type of problem (for instance, a temporary issue with
+Stripe's servers)</p>
+<p><strong>Return</strong><br/>
+a <a href="../../com.stripe.android.model/-token/index.html">Token</a> that can be used for this card</p>
+</BODY>
+</HTML>

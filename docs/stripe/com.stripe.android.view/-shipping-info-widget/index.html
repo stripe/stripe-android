@@ -1,0 +1,99 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>ShippingInfoWidget - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android.view</a>&nbsp;/&nbsp;<a href="./index.html">ShippingInfoWidget</a><br/>
+<br/>
+<h1>ShippingInfoWidget</h1>
+<code><span class="keyword">class </span><span class="identifier">ShippingInfoWidget</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/widget/LinearLayout.html"><span class="identifier">LinearLayout</span></a></code>
+<p>A widget used to collect address data from a user.</p>
+<h3>Annotations</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-customizable-shipping-field/index.html">CustomizableShippingField</a></p>
+</td>
+<td>
+<code><span class="keyword">annotation</span> <span class="keyword">class </span><span class="identifier">CustomizableShippingField</span></code>
+<p>Constants that can be used to mark fields in this widget as optional or hidden.
+Some fields cannot be hidden.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Constructors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-init-.html">&lt;init&gt;</a></p>
+</td>
+<td>
+<code><span class="identifier">ShippingInfoWidget</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.ShippingInfoWidget$<init>(android.content.Context, android.util.AttributeSet, kotlin.Int)/context">context</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Context.html"><span class="identifier">Context</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.view.ShippingInfoWidget$<init>(android.content.Context, android.util.AttributeSet, kotlin.Int)/attrs">attrs</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/util/AttributeSet.html"><span class="identifier">AttributeSet</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.view.ShippingInfoWidget$<init>(android.content.Context, android.util.AttributeSet, kotlin.Int)/defStyleAttr">defStyleAttr</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a>&nbsp;<span class="symbol">=</span>&nbsp;0<span class="symbol">)</span></code>
+<p>A widget used to collect address data from a user.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="shipping-information.html">shippingInformation</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">shippingInformation</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-shipping-information/index.html"><span class="identifier">ShippingInformation</span></a><span class="symbol">?</span></code>
+<p>Return <a href="../../com.stripe.android.model/-shipping-information/index.html">ShippingInformation</a> based on user input if valid, otherwise null.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="populate-shipping-info.html">populateShippingInfo</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">populateShippingInfo</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.ShippingInfoWidget$populateShippingInfo(com.stripe.android.model.ShippingInformation)/shippingInformation">shippingInformation</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-shipping-information/index.html"><span class="identifier">ShippingInformation</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-allowed-country-codes.html">setAllowedCountryCodes</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setAllowedCountryCodes</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.ShippingInfoWidget$setAllowedCountryCodes(kotlin.collections.Set((kotlin.String)))/allowedCountryCodes">allowedCountryCodes</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-set/index.html"><span class="identifier">Set</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-hidden-fields.html">setHiddenFields</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setHiddenFields</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.ShippingInfoWidget$setHiddenFields(kotlin.collections.List((kotlin.String)))/hiddenAddressFields">hiddenAddressFields</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html"><span class="identifier">List</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">&gt;</span><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-optional-fields.html">setOptionalFields</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setOptionalFields</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.ShippingInfoWidget$setOptionalFields(kotlin.collections.List((kotlin.String)))/optionalAddressFields">optionalAddressFields</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html"><span class="identifier">List</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">&gt;</span><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="validate-all-fields.html">validateAllFields</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">validateAllFields</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>Validates all fields and shows error messages if appropriate.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

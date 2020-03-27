@@ -1,0 +1,454 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>com.stripe.android.model - stripe</title>
+<link rel="stylesheet" href="../../style.css">
+</HEAD>
+<BODY>
+<a href="../index.html">stripe</a>&nbsp;/&nbsp;<a href="./index.html">com.stripe.android.model</a><br/>
+<br/>
+<h2>Package com.stripe.android.model</h2>
+<h3>Types</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-account-params/index.html">AccountParams</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">AccountParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-token-params/index.html"><span class="identifier">TokenParams</span></a></code>
+<p><a href="https://stripe.com/docs/api/tokens/create_account">Create an account token</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-address/index.html">Address</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Address</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-model/index.html"><span class="identifier">StripeModel</span></a><span class="symbol">, </span><a href="-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a></code>
+<p>Model for an owner <a href="https://stripe.com/docs/api#source_object-owner-address">address</a>
+object in the Source api.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-address-japan-params/index.html">AddressJapanParams</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">AddressJapanParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-bank-account/index.html">BankAccount</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">BankAccount</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-model/index.html"><span class="identifier">StripeModel</span></a><span class="symbol">, </span><a href="-token-params/index.html"><span class="identifier">TokenParams</span></a></code>
+<p><a href="https://stripe.com/docs/api/customer_bank_accounts/object">The bank account object</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-bank-account-token-params/index.html">BankAccountTokenParams</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">BankAccountTokenParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-token-params/index.html"><span class="identifier">TokenParams</span></a></code>
+<p><a href="https://stripe.com/docs/api/tokens/create_bank_account">Create a bank account token</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-bank-account-token-params-fixtures/index.html">BankAccountTokenParamsFixtures</a></p>
+</td>
+<td>
+<code><span class="keyword">object </span><span class="identifier">BankAccountTokenParamsFixtures</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-card/index.html">Card</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Card</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-model/index.html"><span class="identifier">StripeModel</span></a><span class="symbol">, </span><a href="-stripe-payment-source/index.html"><span class="identifier">StripePaymentSource</span></a><span class="symbol">, </span><a href="-token-params/index.html"><span class="identifier">TokenParams</span></a></code>
+<p>A representation of a <a href="https://stripe.com/docs/api/cards/object">Card API object</a>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-card-brand/index.html">CardBrand</a></p>
+</td>
+<td>
+<code><span class="keyword">enum</span> <span class="keyword">class </span><span class="identifier">CardBrand</span></code>
+<p>A representation of supported card brands and related data</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-card-funding/index.html">CardFunding</a></p>
+</td>
+<td>
+<code><span class="keyword">enum</span> <span class="keyword">class </span><span class="identifier">CardFunding</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-confirm-payment-intent-params/index.html">ConfirmPaymentIntentParams</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">ConfirmPaymentIntentParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-confirm-stripe-intent-params/index.html"><span class="identifier">ConfirmStripeIntentParams</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-confirm-setup-intent-params/index.html">ConfirmSetupIntentParams</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">ConfirmSetupIntentParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-confirm-stripe-intent-params/index.html"><span class="identifier">ConfirmStripeIntentParams</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-confirm-stripe-intent-params/index.html">ConfirmStripeIntentParams</a></p>
+</td>
+<td>
+<code><span class="keyword">interface </span><span class="identifier">ConfirmStripeIntentParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-customer/index.html">Customer</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Customer</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code>
+<p>Model for a Stripe Customer object</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-customer-source/index.html">CustomerSource</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">CustomerSource</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-model/index.html"><span class="identifier">StripeModel</span></a><span class="symbol">, </span><a href="-stripe-payment-source/index.html"><span class="identifier">StripePaymentSource</span></a></code>
+<p>Model of the "data" object inside a <a href="-customer/index.html">Customer</a> "source" object.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-cvc-token-params/index.html">CvcTokenParams</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">CvcTokenParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-token-params/index.html"><span class="identifier">TokenParams</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-date-of-birth/index.html">DateOfBirth</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">DateOfBirth</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-google-pay-result/index.html">GooglePayResult</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">GooglePayResult</span></code>
+<p>Result of a successful Google Pay Payment Data Request</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-klarna-source-params/index.html">KlarnaSourceParams</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">KlarnaSourceParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code>
+<p><a href="https://stripe.com/docs/sources/klarna">Klarna Payments with Sources</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-mandate-data-params/index.html">MandateDataParams</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">MandateDataParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code>
+<p>Mandate Data parameters for
+<a href="https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-mandate_data">confirming a PaymentIntent</a>
+or <a href="https://stripe.com/docs/api/setup_intents/confirm#confirm_setup_intent-mandate_data">confirming a SetupIntent</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-payment-intent/index.html">PaymentIntent</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">PaymentIntent</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-intent/index.html"><span class="identifier">StripeIntent</span></a></code>
+<p>A PaymentIntent tracks the process of collecting a payment from your customer.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-payment-method/index.html">PaymentMethod</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">PaymentMethod</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code>
+<p><a href="https://stripe.com/docs/api/payment_methods">PaymentMethod</a> objects represent your customer's
+payment instruments. They can be used with
+<a href="https://stripe.com/docs/payments/payment-intents">PaymentIntents</a> to collect payments or saved
+to Customer objects to store instrument details for future payments.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-payment-method-create-params/index.html">PaymentMethodCreateParams</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">PaymentMethodCreateParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code>
+<p>Model for PaymentMethod creation parameters.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-payment-method-options-params/index.html">PaymentMethodOptionsParams</a></p>
+</td>
+<td>
+<code><span class="keyword">sealed</span> <span class="keyword">class </span><span class="identifier">PaymentMethodOptionsParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-person-token-params/index.html">PersonTokenParams</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">PersonTokenParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-token-params/index.html"><span class="identifier">TokenParams</span></a></code>
+<p>Creates a single-use token that represents the details for a person. Use this when creating or
+updating persons associated with a Connect account.
+See <a href="https://stripe.com/docs/connect/account-tokens">the documentation</a> to learn more.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-pii-token-params/index.html">PiiTokenParams</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">PiiTokenParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-token-params/index.html"><span class="identifier">TokenParams</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-setup-intent/index.html">SetupIntent</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">SetupIntent</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-intent/index.html"><span class="identifier">StripeIntent</span></a></code>
+<p>A SetupIntent guides you through the process of setting up a customer's payment credentials for
+future payments.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-shipping-information/index.html">ShippingInformation</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">ShippingInformation</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-model/index.html"><span class="identifier">StripeModel</span></a><span class="symbol">, </span><a href="-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a></code>
+<p>Model representing a shipping address object</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-shipping-method/index.html">ShippingMethod</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">ShippingMethod</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code>
+<p>Model representing a shipping method in the Android SDK.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-source/index.html">Source</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Source</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-model/index.html"><span class="identifier">StripeModel</span></a><span class="symbol">, </span><a href="-stripe-payment-source/index.html"><span class="identifier">StripePaymentSource</span></a></code>
+<p>Model for a <a href="https://stripe.com/docs/sources">Sources API</a> object.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-source-code-verification/index.html">SourceCodeVerification</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">SourceCodeVerification</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code>
+<p>Model for a <a href="https://stripe.com/docs/api/sources/object#source_object-code_verification">code verification</a>
+object in the Sources API.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-source-order/index.html">SourceOrder</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">SourceOrder</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code>
+<p>Information about the items and shipping associated with the source.
+Required for transactional credit (for example Klarna) sources before you can charge it.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-source-order-params/index.html">SourceOrderParams</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">SourceOrderParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code>
+<p>Information about the items and shipping associated with the source. Required for transactional
+credit (for example Klarna) sources before you can charge it.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-source-owner/index.html">SourceOwner</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">SourceOwner</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code>
+<p>Model for a <a href="https://stripe.com/docs/api#source_object-owner">owner</a> object
+in the Source api.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-source-params/index.html">SourceParams</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">SourceParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a></code>
+<p>Represents a grouping of parameters needed to create a <a href="-source/index.html">Source</a> object on the server.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-source-receiver/index.html">SourceReceiver</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">SourceReceiver</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code>
+<p>Model for a
+<a href="https://stripe.com/docs/api/sources/object#source_object-receiver">receiver</a> object
+in the Sources API. Present if the <a href="-source/index.html">Source</a> is a receiver.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-source-redirect/index.html">SourceRedirect</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">SourceRedirect</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code>
+<p>Model for a <a href="https://stripe.com/docs/api/sources/object#source_object-redirect">redirect</a> object
+in the Sources API.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-source-type-model/index.html">SourceTypeModel</a></p>
+</td>
+<td>
+<code><span class="keyword">sealed</span> <span class="keyword">class </span><span class="identifier">SourceTypeModel</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code>
+<p>Models for <a href="-source/index.html">Source</a> type-specific data</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-stripe3ds-redirect/index.html">Stripe3dsRedirect</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">Stripe3dsRedirect</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-stripe-file/index.html">StripeFile</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">StripeFile</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code>
+<p><a href="https://stripe.com/docs/api/files/object">The file object</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-stripe-file-params/index.html">StripeFileParams</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">StripeFileParams</span></code>
+<p><a href="https://stripe.com/docs/api/files/create">Create a file</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-stripe-file-purpose/index.html">StripeFilePurpose</a></p>
+</td>
+<td>
+<code><span class="keyword">enum</span> <span class="keyword">class </span><span class="identifier">StripeFilePurpose</span></code>
+<p>The purpose of the uploaded file. Possible values are <code>business_icon</code>, <code>business_logo</code>,
+<code>customer_signature</code>, <code>dispute_evidence</code>, <code>identity_document</code>, <code>pci_document</code>,
+or <code>tax_document_user_upload</code>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-stripe-intent/index.html">StripeIntent</a></p>
+</td>
+<td>
+<code><span class="keyword">interface </span><span class="identifier">StripeIntent</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code>
+<p>An interface for methods available in <a href="-payment-intent/index.html">PaymentIntent</a> and <a href="-setup-intent/index.html">SetupIntent</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-stripe-model/index.html">StripeModel</a></p>
+</td>
+<td>
+<code><span class="keyword">interface </span><span class="identifier">StripeModel</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code>
+<p>Model for a Stripe API object.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-stripe-params-model/index.html">StripeParamsModel</a></p>
+</td>
+<td>
+<code><span class="keyword">interface </span><span class="identifier">StripeParamsModel</span></code>
+<p>Model for a Stripe API object creation parameters</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-stripe-payment-source/index.html">StripePaymentSource</a></p>
+</td>
+<td>
+<code><span class="keyword">interface </span><span class="identifier">StripePaymentSource</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code>
+<p>Represents an object that has an ID field that can be used to create payments with Stripe.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-token/index.html">Token</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Token</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-model/index.html"><span class="identifier">StripeModel</span></a><span class="symbol">, </span><a href="-stripe-payment-source/index.html"><span class="identifier">StripePaymentSource</span></a></code>
+<p>Tokenization is the process Stripe uses to collect sensitive card, bank account details, Stripe
+account details or personally identifiable information (PII), directly from your customers in a
+secure manner. A Token representing this information is returned to you to use.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-token-params/index.html">TokenParams</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">class </span><span class="identifier">TokenParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-tokenization-method/index.html">TokenizationMethod</a></p>
+</td>
+<td>
+<code><span class="keyword">enum</span> <span class="keyword">class </span><span class="identifier">TokenizationMethod</span></code>
+<p>If a card number is tokenized, this is the method that was used. Can be apple_pay or google_pay.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-we-chat/index.html">WeChat</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">WeChat</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code>
+<p><a href="https://stripe.com/docs/sources/wechat-pay">WeChat Pay Payments with Sources</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

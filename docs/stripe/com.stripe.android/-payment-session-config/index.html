@@ -1,0 +1,115 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>PaymentSessionConfig - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android</a>&nbsp;/&nbsp;<a href="./index.html">PaymentSessionConfig</a><br/>
+<br/>
+<h1>PaymentSessionConfig</h1>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">PaymentSessionConfig</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code>
+<p>Configuration for <a href="../-payment-session/index.html">PaymentSession</a>.</p>
+<h3>Types</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-builder/index.html">Builder</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">Builder</span>&nbsp;<span class="symbol">:</span>&nbsp;<span class="identifier">ObjectBuilder</span><span class="symbol">&lt;</span><a href="./index.html"><span class="identifier">PaymentSessionConfig</span></a><span class="symbol">&gt;</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-shipping-information-validator/index.html">ShippingInformationValidator</a></p>
+</td>
+<td>
+<code><span class="keyword">interface </span><span class="identifier">ShippingInformationValidator</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/java/io/Serializable.html"><span class="identifier">Serializable</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-shipping-methods-factory/index.html">ShippingMethodsFactory</a></p>
+</td>
+<td>
+<code><span class="keyword">interface </span><span class="identifier">ShippingMethodsFactory</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/java/io/Serializable.html"><span class="identifier">Serializable</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="add-payment-method-footer-layout-id.html">addPaymentMethodFooterLayoutId</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">addPaymentMethodFooterLayoutId</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="allowed-shipping-country-codes.html">allowedShippingCountryCodes</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">allowedShippingCountryCodes</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-set/index.html"><span class="identifier">Set</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">&gt;</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="billing-address-fields.html">billingAddressFields</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">billingAddressFields</span><span class="symbol">: </span><a href="../../com.stripe.android.view/-billing-address-fields/index.html"><span class="identifier">BillingAddressFields</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="hidden-shipping-info-fields.html">hiddenShippingInfoFields</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">hiddenShippingInfoFields</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html"><span class="identifier">List</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">&gt;</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="is-shipping-info-required.html">isShippingInfoRequired</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">isShippingInfoRequired</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="is-shipping-method-required.html">isShippingMethodRequired</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">isShippingMethodRequired</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="optional-shipping-info-fields.html">optionalShippingInfoFields</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">optionalShippingInfoFields</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html"><span class="identifier">List</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">&gt;</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="payment-method-types.html">paymentMethodTypes</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">paymentMethodTypes</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html"><span class="identifier">List</span></a><span class="symbol">&lt;</span><a href="../../com.stripe.android.model/-payment-method/-type/index.html"><span class="identifier">Type</span></a><span class="symbol">&gt;</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="prepopulated-shipping-info.html">prepopulatedShippingInfo</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">prepopulatedShippingInfo</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-shipping-information/index.html"><span class="identifier">ShippingInformation</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="should-show-google-pay.html">shouldShowGooglePay</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">shouldShowGooglePay</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

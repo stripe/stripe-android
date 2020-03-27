@@ -1,0 +1,69 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>StripePaymentSource - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android.model</a>&nbsp;/&nbsp;<a href="./index.html">StripePaymentSource</a><br/>
+<br/>
+<h1>StripePaymentSource</h1>
+<code><span class="keyword">interface </span><span class="identifier">StripePaymentSource</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code>
+<p>Represents an object that has an ID field that can be used to create payments with Stripe.</p>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="id.html">id</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">id</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Inheritors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="../-card/index.html">Card</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Card</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-model/index.html"><span class="identifier">StripeModel</span></a><span class="symbol">, </span><a href="./index.html"><span class="identifier">StripePaymentSource</span></a><span class="symbol">, </span><a href="../-token-params/index.html"><span class="identifier">TokenParams</span></a></code>
+<p>A representation of a <a href="https://stripe.com/docs/api/cards/object">Card API object</a>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="../-customer-source/index.html">CustomerSource</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">CustomerSource</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-model/index.html"><span class="identifier">StripeModel</span></a><span class="symbol">, </span><a href="./index.html"><span class="identifier">StripePaymentSource</span></a></code>
+<p>Model of the "data" object inside a <a href="../-customer/index.html">Customer</a> "source" object.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="../-source/index.html">Source</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Source</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-model/index.html"><span class="identifier">StripeModel</span></a><span class="symbol">, </span><a href="./index.html"><span class="identifier">StripePaymentSource</span></a></code>
+<p>Model for a <a href="https://stripe.com/docs/sources">Sources API</a> object.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="../-token/index.html">Token</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Token</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-model/index.html"><span class="identifier">StripeModel</span></a><span class="symbol">, </span><a href="./index.html"><span class="identifier">StripePaymentSource</span></a></code>
+<p>Tokenization is the process Stripe uses to collect sensitive card, bank account details, Stripe
+account details or personally identifiable information (PII), directly from your customers in a
+secure manner. A Token representing this information is returned to you to use.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

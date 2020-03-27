@@ -1,0 +1,23 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>Stripe.retrievePaymentIntentSynchronous - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android</a>&nbsp;/&nbsp;<a href="index.html">Stripe</a>&nbsp;/&nbsp;<a href="./retrieve-payment-intent-synchronous.html">retrievePaymentIntentSynchronous</a><br/>
+<br/>
+<h1>retrievePaymentIntentSynchronous</h1>
+<a name="com.stripe.android.Stripe$retrievePaymentIntentSynchronous(kotlin.String)"></a>
+<code><span class="identifier">@WorkerThread</span> <span class="keyword">fun </span><span class="identifier">retrievePaymentIntentSynchronous</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$retrievePaymentIntentSynchronous(kotlin.String)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-payment-intent/index.html"><span class="identifier">PaymentIntent</span></a><span class="symbol">?</span></code>
+<p>Blocking method to retrieve a <a href="../../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a> object.
+Do not call this on the UI thread or your app will crash.</p>
+<p>See <a href="https://stripe.com/docs/api/payment_intents/retrieve">Retrieve a PaymentIntent</a>.
+<code>GET /v1/payment_intents/:id</code></p>
+<h3>Parameters</h3>
+<p><a name="clientSecret"></a>
+<code>clientSecret</code> - the client_secret with which to retrieve the PaymentIntent</p>
+<p><strong>Return</strong><br/>
+a <a href="../../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a> or <code>null</code> if a problem occurred</p>
+</BODY>
+</HTML>

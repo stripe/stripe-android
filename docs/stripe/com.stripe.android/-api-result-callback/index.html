@@ -1,0 +1,34 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>ApiResultCallback - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android</a>&nbsp;/&nbsp;<a href="./index.html">ApiResultCallback</a><br/>
+<br/>
+<h1>ApiResultCallback</h1>
+<code><span class="keyword">interface </span><span class="identifier">ApiResultCallback</span><span class="symbol">&lt;</span><span class="identifier">ResultType</span><span class="symbol">&gt;</span></code>
+<p>Generic interface for an API operation callback that either returns a
+result, <a href="index.html#ResultType">ResultType</a>, or an <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-exception/index.html">Exception</a></p>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="on-error.html">onError</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">onError</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.ApiResultCallback$onError(java.lang.Exception)/e">e</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-exception/index.html"><span class="identifier">Exception</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="on-success.html">onSuccess</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">onSuccess</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.ApiResultCallback$onSuccess(com.stripe.android.ApiResultCallback.ResultType)/result">result</span><span class="symbol">:</span>&nbsp;<a href="index.html#ResultType"><span class="identifier">ResultType</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

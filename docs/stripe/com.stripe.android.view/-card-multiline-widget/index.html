@@ -1,0 +1,263 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>CardMultilineWidget - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android.view</a>&nbsp;/&nbsp;<a href="./index.html">CardMultilineWidget</a><br/>
+<br/>
+<h1>CardMultilineWidget</h1>
+<code><span class="keyword">class </span><span class="identifier">CardMultilineWidget</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/widget/LinearLayout.html"><span class="identifier">LinearLayout</span></a><span class="symbol">, </span><span class="identifier">CardWidget</span></code>
+<p>A multiline card input widget using the support design library's <a href="#">TextInputLayout</a>
+to match Material Design.</p>
+<h3>Constructors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-init-.html">&lt;init&gt;</a></p>
+</td>
+<td>
+<code><span class="identifier">CardMultilineWidget</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardMultilineWidget$<init>(android.content.Context, android.util.AttributeSet, kotlin.Int, kotlin.Boolean)/context">context</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Context.html"><span class="identifier">Context</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.view.CardMultilineWidget$<init>(android.content.Context, android.util.AttributeSet, kotlin.Int, kotlin.Boolean)/attrs">attrs</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/util/AttributeSet.html"><span class="identifier">AttributeSet</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.view.CardMultilineWidget$<init>(android.content.Context, android.util.AttributeSet, kotlin.Int, kotlin.Boolean)/defStyleAttr">defStyleAttr</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a>&nbsp;<span class="symbol">=</span>&nbsp;0<span class="symbol">, </span><span class="identifier" id="com.stripe.android.view.CardMultilineWidget$<init>(android.content.Context, android.util.AttributeSet, kotlin.Int, kotlin.Boolean)/shouldShowPostalCode">shouldShowPostalCode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a>&nbsp;<span class="symbol">=</span>&nbsp;CardWidget.DEFAULT_POSTAL_CODE_ENABLED<span class="symbol">)</span></code>
+<p>A multiline card input widget using the support design library's <a href="#">TextInputLayout</a>
+to match Material Design.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="card.html">card</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">card</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-card/index.html"><span class="identifier">Card</span></a><span class="symbol">?</span></code>
+<p>Gets a <a href="../../com.stripe.android.model/-card/index.html">Card</a> object from the user input, if all fields are valid. If not, returns
+<code>null</code>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="card-builder.html">cardBuilder</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">cardBuilder</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-card/-builder/index.html"><span class="identifier">Builder</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="payment-method-billing-details.html">paymentMethodBillingDetails</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">paymentMethodBillingDetails</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-payment-method/-billing-details/index.html"><span class="identifier">BillingDetails</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="payment-method-billing-details-builder.html">paymentMethodBillingDetailsBuilder</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">paymentMethodBillingDetailsBuilder</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-payment-method/-billing-details/-builder/index.html"><span class="identifier">Builder</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="payment-method-card.html">paymentMethodCard</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">paymentMethodCard</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-payment-method-create-params/-card/index.html"><span class="identifier">Card</span></a><span class="symbol">?</span></code>
+<p>Gets a <a href="../../com.stripe.android.model/-payment-method-create-params/-card/index.html">PaymentMethodCreateParams.Card</a> object from the user input, if all fields are
+valid. If not, returns <code>null</code>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="payment-method-create-params.html">paymentMethodCreateParams</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">paymentMethodCreateParams</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-payment-method-create-params/index.html"><span class="identifier">PaymentMethodCreateParams</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="postal-code-required.html">postalCodeRequired</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">postalCodeRequired</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>If <a href="#">shouldShowPostalCode</a> is true and <a href="postal-code-required.html">postalCodeRequired</a> is true, then postal code is a
+required field.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="us-zip-code-required.html">usZipCodeRequired</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">usZipCodeRequired</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>If <a href="#">shouldShowPostalCode</a> is true and <a href="us-zip-code-required.html">usZipCodeRequired</a> is true, then postal code is a
+required field and must be a 5-digit US zip code.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="clear.html">clear</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">clear</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Clear all entered data and hide all error messages.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="is-enabled.html">isEnabled</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">isEnabled</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="on-finish-inflate.html">onFinishInflate</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onFinishInflate</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="on-window-focus-changed.html">onWindowFocusChanged</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onWindowFocusChanged</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardMultilineWidget$onWindowFocusChanged(kotlin.Boolean)/hasWindowFocus">hasWindowFocus</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-card-hint.html">setCardHint</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setCardHint</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardMultilineWidget$setCardHint(kotlin.String)/cardHint">cardHint</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-card-input-listener.html">setCardInputListener</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setCardInputListener</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardMultilineWidget$setCardInputListener(com.stripe.android.view.CardInputListener)/listener">listener</span><span class="symbol">:</span>&nbsp;<a href="../-card-input-listener/index.html"><span class="identifier">CardInputListener</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-card-number.html">setCardNumber</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setCardNumber</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardMultilineWidget$setCardNumber(kotlin.String)/cardNumber">cardNumber</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Set the card number. Method does not change text field focus.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="set-card-number-text-watcher.html">setCardNumberTextWatcher</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setCardNumberTextWatcher</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardMultilineWidget$setCardNumberTextWatcher(android.text.TextWatcher)/cardNumberTextWatcher">cardNumberTextWatcher</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/text/TextWatcher.html"><span class="identifier">TextWatcher</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Set a <code>TextWatcher</code> to receive card number changes.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="set-card-valid-callback.html">setCardValidCallback</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setCardValidCallback</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardMultilineWidget$setCardValidCallback(com.stripe.android.view.CardValidCallback)/callback">callback</span><span class="symbol">:</span>&nbsp;<a href="../-card-valid-callback/index.html"><span class="identifier">CardValidCallback</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-cvc-code.html">setCvcCode</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setCvcCode</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardMultilineWidget$setCvcCode(kotlin.String)/cvcCode">cvcCode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-cvc-label.html">setCvcLabel</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setCvcLabel</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardMultilineWidget$setCvcLabel(kotlin.String)/cvcLabel">cvcLabel</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Set an optional CVC field label to override defaults, or <code>null</code> to use defaults.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="set-cvc-number-text-watcher.html">setCvcNumberTextWatcher</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setCvcNumberTextWatcher</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardMultilineWidget$setCvcNumberTextWatcher(android.text.TextWatcher)/cvcNumberTextWatcher">cvcNumberTextWatcher</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/text/TextWatcher.html"><span class="identifier">TextWatcher</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Set a <code>TextWatcher</code> to receive CVC value changes.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="set-enabled.html">setEnabled</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setEnabled</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardMultilineWidget$setEnabled(kotlin.Boolean)/enabled">enabled</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-expiry-date.html">setExpiryDate</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setExpiryDate</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardMultilineWidget$setExpiryDate(kotlin.Int, kotlin.Int)/month">month</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.view.CardMultilineWidget$setExpiryDate(kotlin.Int, kotlin.Int)/year">year</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-expiry-date-text-watcher.html">setExpiryDateTextWatcher</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setExpiryDateTextWatcher</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardMultilineWidget$setExpiryDateTextWatcher(android.text.TextWatcher)/expiryDateTextWatcher">expiryDateTextWatcher</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/text/TextWatcher.html"><span class="identifier">TextWatcher</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Set a <code>TextWatcher</code> to receive expiration date changes.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="set-postal-code-text-watcher.html">setPostalCodeTextWatcher</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setPostalCodeTextWatcher</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardMultilineWidget$setPostalCodeTextWatcher(android.text.TextWatcher)/postalCodeTextWatcher">postalCodeTextWatcher</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/text/TextWatcher.html"><span class="identifier">TextWatcher</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Set a <code>TextWatcher</code> to receive postal code changes.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="set-should-show-postal-code.html">setShouldShowPostalCode</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setShouldShowPostalCode</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardMultilineWidget$setShouldShowPostalCode(kotlin.Boolean)/shouldShowPostalCode">shouldShowPostalCode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>The postal code field is enabled by default. Disabling the postal code field may impact
+auth success rates, so it is discouraged to disable it unless you are collecting the postal
+code outside of this form.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="validate-all-fields.html">validateAllFields</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">validateAllFields</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>Validates all fields and shows error messages if appropriate.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="validate-card-number.html">validateCardNumber</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">validateCardNumber</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>Checks whether the current card number is valid</p>
+</td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

@@ -1,0 +1,19 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>CustomerSession.cancelCallbacks - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android</a>&nbsp;/&nbsp;<a href="index.html">CustomerSession</a>&nbsp;/&nbsp;<a href="./cancel-callbacks.html">cancelCallbacks</a><br/>
+<br/>
+<h1>cancelCallbacks</h1>
+<a name="com.stripe.android.CustomerSession.Companion$cancelCallbacks()"></a>
+<code><span class="identifier">@JvmStatic</span> <span class="keyword">fun </span><span class="identifier">cancelCallbacks</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>End any async calls in process and will not invoke callback listeners.
+It will not clear the singleton instance of a <a href="index.html">CustomerSession</a> so it can be
+safely used when a view is being removed/destroyed to avoid null pointer exceptions
+due to async operation delay.</p>
+<p>No need to call <a href="init-customer-session.html">initCustomerSession</a> again after this operation.</p>
+</BODY>
+</HTML>

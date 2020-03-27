@@ -1,0 +1,380 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>SourceParams - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android.model</a>&nbsp;/&nbsp;<a href="./index.html">SourceParams</a><br/>
+<br/>
+<h1>SourceParams</h1>
+<code><span class="keyword">class </span><span class="identifier">SourceParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a></code>
+<p>Represents a grouping of parameters needed to create a <a href="../-source/index.html">Source</a> object on the server.</p>
+<h3>Types</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-owner-params/index.html">OwnerParams</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">OwnerParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code>
+<p><a href="https://stripe.com/docs/api/sources/create#create_source-owner">owner</a> param</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="amount.html">amount</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">amount</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html"><span class="identifier">Long</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="api-parameter-map.html">apiParameterMap</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">apiParameterMap</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">?</span><span class="symbol">&gt;</span><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="currency.html">currency</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">currency</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="meta-data.html">metaData</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">metaData</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">&gt;</span><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="owner.html">owner</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">owner</span><span class="symbol">: </span><a href="-owner-params/index.html"><span class="identifier">OwnerParams</span></a><span class="symbol">?</span></code>
+<p>Information about the owner of the payment instrument that may be used or required by
+particular source types.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="return-url.html">returnUrl</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">returnUrl</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>The URL you provide to redirect the customer back to you after they authenticated their
+payment. It can use your application URI scheme in the context of a mobile application.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="type.html">type</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">type</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="type-raw.html">typeRaw</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">typeRaw</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="usage.html">usage</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">usage</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="equals.html">equals</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">equals</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams$equals(kotlin.Any)/other">other</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="hash-code.html">hashCode</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">hashCode</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-amount.html">setAmount</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setAmount</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams$setAmount(kotlin.Long)/amount">amount</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html"><span class="identifier">Long</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-api-parameter-map.html">setApiParameterMap</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setApiParameterMap</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams$setApiParameterMap(kotlin.collections.Map((kotlin.String, kotlin.Any)))/apiParameterMap">apiParameterMap</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">?</span><span class="symbol">&gt;</span><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-currency.html">setCurrency</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setCurrency</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams$setCurrency(kotlin.String)/currency">currency</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-extra-params.html">setExtraParams</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setExtraParams</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams$setExtraParams(kotlin.collections.Map((kotlin.String, kotlin.Any)))/extraParams">extraParams</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">&gt;</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code>
+<p>Sets extra params for this source object.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="set-meta-data.html">setMetaData</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setMetaData</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams$setMetaData(kotlin.collections.Map((kotlin.String, )))/metaData">metaData</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">&gt;</span><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-owner.html">setOwner</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setOwner</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams$setOwner(com.stripe.android.model.SourceParams.OwnerParams)/owner">owner</span><span class="symbol">:</span>&nbsp;<a href="-owner-params/index.html"><span class="identifier">OwnerParams</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-return-url.html">setReturnUrl</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setReturnUrl</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams$setReturnUrl(kotlin.String)/returnUrl">returnUrl</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-token.html">setToken</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setToken</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams$setToken(kotlin.String)/token">token</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-usage.html">setUsage</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setUsage</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams$setUsage(kotlin.String)/usage">usage</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="to-param-map.html">toParamMap</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">toParamMap</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">&gt;</span></code>
+<p>Create a string-keyed map representing this object that is ready to be sent over the network.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Companion Object Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="create-alipay-reusable-params.html">createAlipayReusableParams</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createAlipayReusableParams</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createAlipayReusableParams(kotlin.String, kotlin.String, kotlin.String, kotlin.String)/currency">currency</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createAlipayReusableParams(kotlin.String, kotlin.String, kotlin.String, kotlin.String)/name">name</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createAlipayReusableParams(kotlin.String, kotlin.String, kotlin.String, kotlin.String)/email">email</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createAlipayReusableParams(kotlin.String, kotlin.String, kotlin.String, kotlin.String)/returnUrl">returnUrl</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code>
+<p>Create reusable Alipay Source params.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-alipay-single-use-params.html">createAlipaySingleUseParams</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createAlipaySingleUseParams</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createAlipaySingleUseParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/amount">amount</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html"><span class="identifier">Long</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createAlipaySingleUseParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/currency">currency</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createAlipaySingleUseParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/name">name</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createAlipaySingleUseParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/email">email</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createAlipaySingleUseParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/returnUrl">returnUrl</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code>
+<p>Create single-use Alipay Source params.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-bancontact-params.html">createBancontactParams</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createBancontactParams</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createBancontactParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/amount">amount</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html"><span class="identifier">Long</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createBancontactParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/name">name</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createBancontactParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/returnUrl">returnUrl</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createBancontactParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/statementDescriptor">statementDescriptor</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createBancontactParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/preferredLanguage">preferredLanguage</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code>
+<p>Create Bancontact Source params.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-card-params.html">createCardParams</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createCardParams</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createCardParams(com.stripe.android.model.Card)/card">card</span><span class="symbol">:</span>&nbsp;<a href="../-card/index.html"><span class="identifier">Card</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code>
+<p>Create Card Source params.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-card-params-from-google-pay.html">createCardParamsFromGooglePay</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createCardParamsFromGooglePay</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createCardParamsFromGooglePay(org.json.JSONObject)/googlePayPaymentData">googlePayPaymentData</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/org/json/JSONObject.html"><span class="identifier">JSONObject</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="create-custom-params.html">createCustomParams</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createCustomParams</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createCustomParams(kotlin.String)/type">type</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code>
+<p>Create a custom <a href="./index.html">SourceParams</a> object. Incorrect attributes may result in errors
+when connecting to Stripe's API.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-e-p-s-params.html">createEPSParams</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createEPSParams</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createEPSParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String)/amount">amount</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html"><span class="identifier">Long</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createEPSParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String)/name">name</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createEPSParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String)/returnUrl">returnUrl</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createEPSParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String)/statementDescriptor">statementDescriptor</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code>
+<p>Create EPS Source params.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-giropay-params.html">createGiropayParams</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createGiropayParams</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createGiropayParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String)/amount">amount</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html"><span class="identifier">Long</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createGiropayParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String)/name">name</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createGiropayParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String)/returnUrl">returnUrl</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createGiropayParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String)/statementDescriptor">statementDescriptor</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code>
+<p>Create Giropay Source params.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-ideal-params.html">createIdealParams</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createIdealParams</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createIdealParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/amount">amount</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html"><span class="identifier">Long</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createIdealParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/name">name</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createIdealParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/returnUrl">returnUrl</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createIdealParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/statementDescriptor">statementDescriptor</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createIdealParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/bank">bank</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code>
+<p>Create iDEAL Source params.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-klarna.html">createKlarna</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createKlarna</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createKlarna(kotlin.String, kotlin.String, com.stripe.android.model.KlarnaSourceParams)/returnUrl">returnUrl</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createKlarna(kotlin.String, kotlin.String, com.stripe.android.model.KlarnaSourceParams)/currency">currency</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createKlarna(kotlin.String, kotlin.String, com.stripe.android.model.KlarnaSourceParams)/klarnaParams">klarnaParams</span><span class="symbol">:</span>&nbsp;<a href="../-klarna-source-params/index.html"><span class="identifier">KlarnaSourceParams</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code>
+<p>Create params for a Klarna Source</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-masterpass-params.html">createMasterpassParams</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createMasterpassParams</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createMasterpassParams(kotlin.String, kotlin.String)/transactionId">transactionId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createMasterpassParams(kotlin.String, kotlin.String)/cartId">cartId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code>
+<p>Create parameters needed to make a Masterpass source</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-multibanco-params.html">createMultibancoParams</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createMultibancoParams</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createMultibancoParams(kotlin.Long, kotlin.String, kotlin.String)/amount">amount</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html"><span class="identifier">Long</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createMultibancoParams(kotlin.Long, kotlin.String, kotlin.String)/returnUrl">returnUrl</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createMultibancoParams(kotlin.Long, kotlin.String, kotlin.String)/email">email</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code>
+<p>Create Multibanco Source params.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-p24-params.html">createP24Params</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createP24Params</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createP24Params(kotlin.Long, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/amount">amount</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html"><span class="identifier">Long</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createP24Params(kotlin.Long, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/currency">currency</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createP24Params(kotlin.Long, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/name">name</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createP24Params(kotlin.Long, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/email">email</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createP24Params(kotlin.Long, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/returnUrl">returnUrl</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code>
+<p>Create P24 Source params.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-retrieve-source-params.html">createRetrieveSourceParams</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createRetrieveSourceParams</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createRetrieveSourceParams(kotlin.String)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">&gt;</span></code>
+<p>Create parameters needed to retrieve a source.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-sepa-debit-params.html">createSepaDebitParams</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createSepaDebitParams</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createSepaDebitParams(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/name">name</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createSepaDebitParams(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/iban">iban</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createSepaDebitParams(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/addressLine1">addressLine1</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createSepaDebitParams(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/city">city</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createSepaDebitParams(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/postalCode">postalCode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createSepaDebitParams(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/country">country</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code><br/>
+<code><span class="keyword">fun </span><span class="identifier">createSepaDebitParams</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createSepaDebitParams(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/name">name</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createSepaDebitParams(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/iban">iban</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createSepaDebitParams(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/email">email</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createSepaDebitParams(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/addressLine1">addressLine1</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createSepaDebitParams(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/city">city</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createSepaDebitParams(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/postalCode">postalCode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createSepaDebitParams(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/country">country</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code>
+<p>Create SEPA Debit Source params.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-sofort-params.html">createSofortParams</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createSofortParams</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createSofortParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String)/amount">amount</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html"><span class="identifier">Long</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createSofortParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String)/returnUrl">returnUrl</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createSofortParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String)/country">country</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createSofortParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String)/statementDescriptor">statementDescriptor</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code>
+<p>Create SOFORT Source params.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-source-from-token-params.html">createSourceFromTokenParams</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createSourceFromTokenParams</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createSourceFromTokenParams(kotlin.String)/tokenId">tokenId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code>
+<p>Create parameters necessary for converting a token into a source</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-three-d-secure-params.html">createThreeDSecureParams</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createThreeDSecureParams</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createThreeDSecureParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String)/amount">amount</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html"><span class="identifier">Long</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createThreeDSecureParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String)/currency">currency</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createThreeDSecureParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String)/returnUrl">returnUrl</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createThreeDSecureParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String)/cardId">cardId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code>
+<p>Create 3D Secure Source params.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-visa-checkout-params.html">createVisaCheckoutParams</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createVisaCheckoutParams</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createVisaCheckoutParams(kotlin.String)/callId">callId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code>
+<p>Create parameters needed to make a Visa Checkout source.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="create-we-chat-pay-params.html">createWeChatPayParams</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createWeChatPayParams</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createWeChatPayParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String)/amount">amount</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html"><span class="identifier">Long</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createWeChatPayParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String)/currency">currency</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createWeChatPayParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String)/weChatAppId">weChatAppId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceParams.Companion$createWeChatPayParams(kotlin.Long, kotlin.String, kotlin.String, kotlin.String)/statementDescriptor">statementDescriptor</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">SourceParams</span></a></code>
+<p>Create WeChat Pay Source params.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

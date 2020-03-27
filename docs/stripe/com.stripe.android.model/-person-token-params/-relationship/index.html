@@ -1,0 +1,119 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>PersonTokenParams.Relationship - stripe</title>
+<link rel="stylesheet" href="../../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../../index.html">com.stripe.android.model</a>&nbsp;/&nbsp;<a href="../index.html">PersonTokenParams</a>&nbsp;/&nbsp;<a href="./index.html">Relationship</a><br/>
+<br/>
+<h1>Relationship</h1>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Relationship</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../../-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code>
+<p>The relationship that this person has with the account’s legal entity.</p>
+<p><a href="https://stripe.com/docs/api/tokens/create_person#create_person_token-person-relationship">person.relationship</a></p>
+<h3>Types</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-builder/index.html">Builder</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">Builder</span>&nbsp;<span class="symbol">:</span>&nbsp;<span class="identifier">ObjectBuilder</span><span class="symbol">&lt;</span><a href="./index.html"><span class="identifier">Relationship</span></a><span class="symbol">&gt;</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Constructors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-init-.html">&lt;init&gt;</a></p>
+</td>
+<td>
+<code><span class="identifier">Relationship</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.PersonTokenParams.Relationship$<init>(kotlin.Boolean, kotlin.Boolean, kotlin.Boolean, kotlin.Int, kotlin.Boolean, kotlin.String)/director">director</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PersonTokenParams.Relationship$<init>(kotlin.Boolean, kotlin.Boolean, kotlin.Boolean, kotlin.Int, kotlin.Boolean, kotlin.String)/executive">executive</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PersonTokenParams.Relationship$<init>(kotlin.Boolean, kotlin.Boolean, kotlin.Boolean, kotlin.Int, kotlin.Boolean, kotlin.String)/owner">owner</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PersonTokenParams.Relationship$<init>(kotlin.Boolean, kotlin.Boolean, kotlin.Boolean, kotlin.Int, kotlin.Boolean, kotlin.String)/percentOwnership">percentOwnership</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PersonTokenParams.Relationship$<init>(kotlin.Boolean, kotlin.Boolean, kotlin.Boolean, kotlin.Int, kotlin.Boolean, kotlin.String)/representative">representative</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PersonTokenParams.Relationship$<init>(kotlin.Boolean, kotlin.Boolean, kotlin.Boolean, kotlin.Int, kotlin.Boolean, kotlin.String)/title">title</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span></code>
+<p>The relationship that this person has with the account’s legal entity.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="director.html">director</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">director</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">?</span></code>
+<p>Whether the person is a director of the account’s legal entity. Currently only required
+for accounts in the EU. Directors are typically members of the governing board of the
+company, or responsible for ensuring the company meets its regulatory obligations.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="executive.html">executive</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">executive</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">?</span></code>
+<p>Whether the person has significant responsibility to control, manage, or direct the
+organization.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="owner.html">owner</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">owner</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">?</span></code>
+<p>Whether the person is an owner of the account’s legal entity.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="percent-ownership.html">percentOwnership</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">percentOwnership</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">?</span></code>
+<p>The percent owned by the person of the account’s legal entity.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="representative.html">representative</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">representative</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">?</span></code>
+<p>Whether the person is authorized as the primary representative of the account. This is
+the person nominated by the business to provide information about themselves, and general
+information about the account. There can only be one representative at any given time.
+At the time the account is created, this person should be set to the person responsible
+for opening the account.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="title.html">title</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">title</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>The person’s title (e.g., CEO, Support Engineer).</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="to-param-map.html">toParamMap</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">toParamMap</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">&gt;</span></code></td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

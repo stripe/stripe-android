@@ -1,0 +1,264 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>com.stripe.android.view - stripe</title>
+<link rel="stylesheet" href="../../style.css">
+</HEAD>
+<BODY>
+<a href="../index.html">stripe</a>&nbsp;/&nbsp;<a href="./index.html">com.stripe.android.view</a><br/>
+<br/>
+<h2>Package com.stripe.android.view</h2>
+<h3>Types</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-activity-starter/index.html">ActivityStarter</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">class </span><span class="identifier">ActivityStarter</span><span class="symbol">&lt;</span><span class="identifier">TargetActivityType</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/app/Activity.html"><span class="identifier">Activity</span></a><span class="symbol">, </span><span class="identifier">ArgsType</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-activity-starter/-args.html"><span class="identifier">Args</span></a><span class="symbol">&gt;</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-add-payment-method-activity/index.html">AddPaymentMethodActivity</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">AddPaymentMethodActivity</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-activity/index.html"><span class="identifier">StripeActivity</span></a></code>
+<p>Activity used to display a <a href="#">AddPaymentMethodView</a> and receive the resulting
+<a href="../com.stripe.android.model/-payment-method/index.html">PaymentMethod</a> in the <code>Activity#onActivityResult(int, int, Intent)</code> of the
+launching Activity.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-add-payment-method-activity-starter/index.html">AddPaymentMethodActivityStarter</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">AddPaymentMethodActivityStarter</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-activity-starter/index.html"><span class="identifier">ActivityStarter</span></a><span class="symbol">&lt;</span><a href="-add-payment-method-activity/index.html"><span class="identifier">AddPaymentMethodActivity</span></a><span class="symbol">,</span>&nbsp;<a href="-add-payment-method-activity-starter/-args/index.html"><span class="identifier">Args</span></a><span class="symbol">&gt;</span></code>
+<p>A class to start <a href="-add-payment-method-activity/index.html">AddPaymentMethodActivity</a>. Arguments for the activity can be
+specified with <a href="-add-payment-method-activity-starter/-args/index.html">Args</a> and constructed with <a href="-add-payment-method-activity-starter/-args/-builder/index.html">Args.Builder</a>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-becs-debit-mandate-acceptance-text-factory/index.html">BecsDebitMandateAcceptanceTextFactory</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">BecsDebitMandateAcceptanceTextFactory</span></code>
+<p>A class to create BECS Debit Mandate Agreement text for the <a href="-becs-debit-widget/index.html">BecsDebitWidget</a>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-becs-debit-mandate-acceptance-text-view/index.html">BecsDebitMandateAcceptanceTextView</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">BecsDebitMandateAcceptanceTextView</span>&nbsp;<span class="symbol">:</span>&nbsp;<span class="identifier">AppCompatTextView</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-becs-debit-widget/index.html">BecsDebitWidget</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">BecsDebitWidget</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/widget/FrameLayout.html"><span class="identifier">FrameLayout</span></a></code>
+<p>A form for accepting a customer's BECS account information.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-billing-address-fields/index.html">BillingAddressFields</a></p>
+</td>
+<td>
+<code><span class="keyword">enum</span> <span class="keyword">class </span><span class="identifier">BillingAddressFields</span></code>
+<p>Configure <a href="-add-payment-method-activity/index.html">AddPaymentMethodActivity</a>'s UI and validation logic for billing address fields</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-card-input-listener/index.html">CardInputListener</a></p>
+</td>
+<td>
+<code><span class="keyword">interface </span><span class="identifier">CardInputListener</span></code>
+<p>Represents a listener for card input events. Note that events are
+not one-time events. For instance, a user can "complete" the CVC many times
+by deleting and re-entering the value.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-card-input-widget/index.html">CardInputWidget</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">CardInputWidget</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/widget/LinearLayout.html"><span class="identifier">LinearLayout</span></a><span class="symbol">, </span><span class="identifier">CardWidget</span></code>
+<p>A card input widget that handles all animation on its own.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-card-multiline-widget/index.html">CardMultilineWidget</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">CardMultilineWidget</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/widget/LinearLayout.html"><span class="identifier">LinearLayout</span></a><span class="symbol">, </span><span class="identifier">CardWidget</span></code>
+<p>A multiline card input widget using the support design library's <a href="#">TextInputLayout</a>
+to match Material Design.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-card-number-edit-text/index.html">CardNumberEditText</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">CardNumberEditText</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-edit-text/index.html"><span class="identifier">StripeEditText</span></a></code>
+<p>A <a href="-stripe-edit-text/index.html">StripeEditText</a> that handles spacing out the digits of a credit card.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-card-valid-callback/index.html">CardValidCallback</a></p>
+</td>
+<td>
+<code><span class="keyword">interface </span><span class="identifier">CardValidCallback</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-cvc-edit-text/index.html">CvcEditText</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">CvcEditText</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-edit-text/index.html"><span class="identifier">StripeEditText</span></a></code>
+<p>A <a href="-stripe-edit-text/index.html">StripeEditText</a> for CVC input.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-expiry-date-edit-text/index.html">ExpiryDateEditText</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">ExpiryDateEditText</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-edit-text/index.html"><span class="identifier">StripeEditText</span></a></code>
+<p>An <a href="https://developer.android.com/reference/android/widget/EditText.html">EditText</a> that handles putting numbers around a central divider character.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-fpx-bank/index.html">FpxBank</a></p>
+</td>
+<td>
+<code><span class="keyword">enum</span> <span class="keyword">class </span><span class="identifier">FpxBank</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-icon-text-input-layout/index.html">IconTextInputLayout</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">IconTextInputLayout</span>&nbsp;<span class="symbol">:</span>&nbsp;<span class="identifier">TextInputLayout</span></code>
+<p>This class uses Reflection to make the Material Component's floating hint text move above
+a DrawableLeft, instead of just straight up beside it. If the Material Components library ever
+officially support this behavior, this class should be removed to avoid Reflection.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-payment-auth-web-view-activity/index.html">PaymentAuthWebViewActivity</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">PaymentAuthWebViewActivity</span>&nbsp;<span class="symbol">:</span>&nbsp;<span class="identifier">AppCompatActivity</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-payment-flow-activity/index.html">PaymentFlowActivity</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">PaymentFlowActivity</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-activity/index.html"><span class="identifier">StripeActivity</span></a></code>
+<p>Activity containing a two-part payment flow that allows users to provide a shipping address
+as well as select a shipping method.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-payment-flow-activity-starter/index.html">PaymentFlowActivityStarter</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">PaymentFlowActivityStarter</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-activity-starter/index.html"><span class="identifier">ActivityStarter</span></a><span class="symbol">&lt;</span><a href="-payment-flow-activity/index.html"><span class="identifier">PaymentFlowActivity</span></a><span class="symbol">,</span>&nbsp;<a href="-payment-flow-activity-starter/-args/index.html"><span class="identifier">Args</span></a><span class="symbol">&gt;</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-payment-flow-view-pager/index.html">PaymentFlowViewPager</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">PaymentFlowViewPager</span>&nbsp;<span class="symbol">:</span>&nbsp;<span class="identifier">ViewPager</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-payment-methods-activity/index.html">PaymentMethodsActivity</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">PaymentMethodsActivity</span>&nbsp;<span class="symbol">:</span>&nbsp;<span class="identifier">AppCompatActivity</span></code>
+<p>An activity that allows a customer to select from their attached payment methods,
+or add a new one via <a href="-add-payment-method-activity/index.html">AddPaymentMethodActivity</a>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-payment-methods-activity-starter/index.html">PaymentMethodsActivityStarter</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">PaymentMethodsActivityStarter</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-activity-starter/index.html"><span class="identifier">ActivityStarter</span></a><span class="symbol">&lt;</span><a href="-payment-methods-activity/index.html"><span class="identifier">PaymentMethodsActivity</span></a><span class="symbol">,</span>&nbsp;<a href="-payment-methods-activity-starter/-args/index.html"><span class="identifier">Args</span></a><span class="symbol">&gt;</span></code>
+<p>A class to start <a href="-payment-methods-activity/index.html">PaymentMethodsActivity</a>. Arguments for the activity can be specified
+with <a href="-payment-methods-activity-starter/-args/index.html">Args</a> and constructed with <a href="-payment-methods-activity-starter/-args/-builder/index.html">Args.Builder</a>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-payment-utils/index.html">PaymentUtils</a></p>
+</td>
+<td>
+<code><span class="keyword">object </span><span class="identifier">PaymentUtils</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-postal-code-edit-text/index.html">PostalCodeEditText</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">PostalCodeEditText</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-edit-text/index.html"><span class="identifier">StripeEditText</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-shipping-info-widget/index.html">ShippingInfoWidget</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">ShippingInfoWidget</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/widget/LinearLayout.html"><span class="identifier">LinearLayout</span></a></code>
+<p>A widget used to collect address data from a user.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-stripe3ds2-completion-activity/index.html">Stripe3ds2CompletionActivity</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">Stripe3ds2CompletionActivity</span>&nbsp;<span class="symbol">:</span>&nbsp;<span class="identifier">AppCompatActivity</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-stripe-activity/index.html">StripeActivity</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">class </span><span class="identifier">StripeActivity</span>&nbsp;<span class="symbol">:</span>&nbsp;<span class="identifier">AppCompatActivity</span></code>
+<p>Provides a toolbar, save button, and loading states for the save button.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-stripe-edit-text/index.html">StripeEditText</a></p>
+</td>
+<td>
+<code><span class="keyword">open</span> <span class="keyword">class </span><span class="identifier">StripeEditText</span>&nbsp;<span class="symbol">:</span>&nbsp;<span class="identifier">TextInputEditText</span></code>
+<p>Extension of <a href="#">TextInputEditText</a> that listens for users pressing the delete key when
+there is no text present. Google has actually made this
+<a href="https://code.google.com/p/android/issues/detail?id=42904">somewhat difficult</a>,
+but we listen here for hardware key presses, older Android soft keyboard delete presses,
+and modern Google Keyboard delete key presses.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

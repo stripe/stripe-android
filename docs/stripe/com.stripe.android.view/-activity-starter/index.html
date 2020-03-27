@@ -1,0 +1,76 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>ActivityStarter - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android.view</a>&nbsp;/&nbsp;<a href="./index.html">ActivityStarter</a><br/>
+<br/>
+<h1>ActivityStarter</h1>
+<code><span class="keyword">abstract</span> <span class="keyword">class </span><span class="identifier">ActivityStarter</span><span class="symbol">&lt;</span><span class="identifier">TargetActivityType</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/app/Activity.html"><span class="identifier">Activity</span></a><span class="symbol">, </span><span class="identifier">ArgsType</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-args.html"><span class="identifier">Args</span></a><span class="symbol">&gt;</span></code>
+<h3>Types</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-args.html">Args</a></p>
+</td>
+<td>
+<code><span class="keyword">interface </span><span class="identifier">Args</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-result/index.html">Result</a></p>
+</td>
+<td>
+<code><span class="keyword">interface </span><span class="identifier">Result</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="start-for-result.html">startForResult</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">startForResult</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.ActivityStarter$startForResult(com.stripe.android.view.ActivityStarter.ArgsType)/args">args</span><span class="symbol">:</span>&nbsp;<a href="index.html#ArgsType"><span class="identifier">ArgsType</span></a>&nbsp;<span class="symbol">=</span>&nbsp;defaultArgs<span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Inheritors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="../-add-payment-method-activity-starter/index.html">AddPaymentMethodActivityStarter</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">AddPaymentMethodActivityStarter</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">ActivityStarter</span></a><span class="symbol">&lt;</span><a href="../-add-payment-method-activity/index.html"><span class="identifier">AddPaymentMethodActivity</span></a><span class="symbol">,</span>&nbsp;<a href="../-add-payment-method-activity-starter/-args/index.html"><span class="identifier">Args</span></a><span class="symbol">&gt;</span></code>
+<p>A class to start <a href="../-add-payment-method-activity/index.html">AddPaymentMethodActivity</a>. Arguments for the activity can be
+specified with <a href="../-add-payment-method-activity-starter/-args/index.html">Args</a> and constructed with <a href="../-add-payment-method-activity-starter/-args/-builder/index.html">Args.Builder</a>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="../-payment-flow-activity-starter/index.html">PaymentFlowActivityStarter</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">PaymentFlowActivityStarter</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">ActivityStarter</span></a><span class="symbol">&lt;</span><a href="../-payment-flow-activity/index.html"><span class="identifier">PaymentFlowActivity</span></a><span class="symbol">,</span>&nbsp;<a href="../-payment-flow-activity-starter/-args/index.html"><span class="identifier">Args</span></a><span class="symbol">&gt;</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="../-payment-methods-activity-starter/index.html">PaymentMethodsActivityStarter</a></p>
+</td>
+<td>
+<code><span class="keyword">class </span><span class="identifier">PaymentMethodsActivityStarter</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">ActivityStarter</span></a><span class="symbol">&lt;</span><a href="../-payment-methods-activity/index.html"><span class="identifier">PaymentMethodsActivity</span></a><span class="symbol">,</span>&nbsp;<a href="../-payment-methods-activity-starter/-args/index.html"><span class="identifier">Args</span></a><span class="symbol">&gt;</span></code>
+<p>A class to start <a href="../-payment-methods-activity/index.html">PaymentMethodsActivity</a>. Arguments for the activity can be specified
+with <a href="../-payment-methods-activity-starter/-args/index.html">Args</a> and constructed with <a href="../-payment-methods-activity-starter/-args/-builder/index.html">Args.Builder</a>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

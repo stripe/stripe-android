@@ -1,0 +1,263 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>CardInputWidget - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android.view</a>&nbsp;/&nbsp;<a href="./index.html">CardInputWidget</a><br/>
+<br/>
+<h1>CardInputWidget</h1>
+<code><span class="keyword">class </span><span class="identifier">CardInputWidget</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/widget/LinearLayout.html"><span class="identifier">LinearLayout</span></a><span class="symbol">, </span><span class="identifier">CardWidget</span></code>
+<p>A card input widget that handles all animation on its own.</p>
+<p>The individual <code>EditText</code> views of this widget can be styled by defining a style
+<code>Stripe.CardInputWidget.EditText</code> that extends <code>Stripe.Base.CardInputWidget.EditText</code>.</p>
+<h3>Constructors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-init-.html">&lt;init&gt;</a></p>
+</td>
+<td>
+<code><span class="identifier">CardInputWidget</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardInputWidget$<init>(android.content.Context, android.util.AttributeSet, kotlin.Int)/context">context</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Context.html"><span class="identifier">Context</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.view.CardInputWidget$<init>(android.content.Context, android.util.AttributeSet, kotlin.Int)/attrs">attrs</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/util/AttributeSet.html"><span class="identifier">AttributeSet</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.view.CardInputWidget$<init>(android.content.Context, android.util.AttributeSet, kotlin.Int)/defStyleAttr">defStyleAttr</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a>&nbsp;<span class="symbol">=</span>&nbsp;0<span class="symbol">)</span></code>
+<p>A card input widget that handles all animation on its own.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="card.html">card</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">card</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-card/index.html"><span class="identifier">Card</span></a><span class="symbol">?</span></code>
+<p>Gets a <a href="../../com.stripe.android.model/-card/index.html">Card</a> object from the user input, if all fields are valid. If not, returns
+<code>null</code>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="card-builder.html">cardBuilder</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">cardBuilder</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-card/-builder/index.html"><span class="identifier">Builder</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="payment-method-card.html">paymentMethodCard</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">paymentMethodCard</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-payment-method-create-params/-card/index.html"><span class="identifier">Card</span></a><span class="symbol">?</span></code>
+<p>Gets a <a href="../../com.stripe.android.model/-payment-method-create-params/-card/index.html">PaymentMethodCreateParams.Card</a> object from the user input, if all fields are
+valid. If not, returns <code>null</code>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="payment-method-create-params.html">paymentMethodCreateParams</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">paymentMethodCreateParams</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-payment-method-create-params/index.html"><span class="identifier">PaymentMethodCreateParams</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="postal-code-enabled.html">postalCodeEnabled</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">postalCodeEnabled</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>The postal code field is enabled by default. Disabling the postal code field may impact
+auth success rates, so it is discouraged to disable it unless you are collecting the postal
+code outside of this form.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="postal-code-required.html">postalCodeRequired</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">postalCodeRequired</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>If <a href="postal-code-enabled.html">postalCodeEnabled</a> is true and <a href="postal-code-required.html">postalCodeRequired</a> is true, then postal code is a
+required field.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="us-zip-code-required.html">usZipCodeRequired</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">usZipCodeRequired</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>If <a href="postal-code-enabled.html">postalCodeEnabled</a> is true and <a href="us-zip-code-required.html">usZipCodeRequired</a> is true, then postal code is a
+required field and must be a 5-digit US zip code.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="clear.html">clear</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">clear</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Clear all text fields in the CardInputWidget.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="is-enabled.html">isEnabled</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">isEnabled</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>Override of <a href="https://developer.android.com/reference/android/view/View.html#isEnabled()">View.isEnabled</a> that returns <code>true</code> only
+if all three sub-controls are enabled.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="on-finish-inflate.html">onFinishInflate</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onFinishInflate</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="on-intercept-touch-event.html">onInterceptTouchEvent</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onInterceptTouchEvent</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardInputWidget$onInterceptTouchEvent(android.view.MotionEvent)/ev">ev</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/view/MotionEvent.html"><span class="identifier">MotionEvent</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="on-layout.html">onLayout</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onLayout</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardInputWidget$onLayout(kotlin.Boolean, kotlin.Int, kotlin.Int, kotlin.Int, kotlin.Int)/changed">changed</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.view.CardInputWidget$onLayout(kotlin.Boolean, kotlin.Int, kotlin.Int, kotlin.Int, kotlin.Int)/l">l</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.view.CardInputWidget$onLayout(kotlin.Boolean, kotlin.Int, kotlin.Int, kotlin.Int, kotlin.Int)/t">t</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.view.CardInputWidget$onLayout(kotlin.Boolean, kotlin.Int, kotlin.Int, kotlin.Int, kotlin.Int)/r">r</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.view.CardInputWidget$onLayout(kotlin.Boolean, kotlin.Int, kotlin.Int, kotlin.Int, kotlin.Int)/b">b</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="on-restore-instance-state.html">onRestoreInstanceState</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onRestoreInstanceState</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardInputWidget$onRestoreInstanceState(android.os.Parcelable)/state">state</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="on-save-instance-state.html">onSaveInstanceState</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onSaveInstanceState</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="on-window-focus-changed.html">onWindowFocusChanged</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onWindowFocusChanged</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardInputWidget$onWindowFocusChanged(kotlin.Boolean)/hasWindowFocus">hasWindowFocus</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-card-hint.html">setCardHint</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setCardHint</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardInputWidget$setCardHint(kotlin.String)/cardHint">cardHint</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-card-input-listener.html">setCardInputListener</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setCardInputListener</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardInputWidget$setCardInputListener(com.stripe.android.view.CardInputListener)/listener">listener</span><span class="symbol">:</span>&nbsp;<a href="../-card-input-listener/index.html"><span class="identifier">CardInputListener</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Set a <a href="../-card-input-listener/index.html">CardInputListener</a> to be notified of card input events.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="set-card-number.html">setCardNumber</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setCardNumber</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardInputWidget$setCardNumber(kotlin.String)/cardNumber">cardNumber</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Set the card number. Method does not change text field focus.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="set-card-number-text-watcher.html">setCardNumberTextWatcher</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setCardNumberTextWatcher</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardInputWidget$setCardNumberTextWatcher(android.text.TextWatcher)/cardNumberTextWatcher">cardNumberTextWatcher</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/text/TextWatcher.html"><span class="identifier">TextWatcher</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Set a <code>TextWatcher</code> to receive card number changes.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="set-card-valid-callback.html">setCardValidCallback</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setCardValidCallback</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardInputWidget$setCardValidCallback(com.stripe.android.view.CardValidCallback)/callback">callback</span><span class="symbol">:</span>&nbsp;<a href="../-card-valid-callback/index.html"><span class="identifier">CardValidCallback</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-cvc-code.html">setCvcCode</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setCvcCode</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardInputWidget$setCvcCode(kotlin.String)/cvcCode">cvcCode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Set the CVC value for the card. Note that the maximum length is assumed to
+be 3, unless the brand of the card has already been set (by setting the card number).</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="set-cvc-number-text-watcher.html">setCvcNumberTextWatcher</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setCvcNumberTextWatcher</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardInputWidget$setCvcNumberTextWatcher(android.text.TextWatcher)/cvcNumberTextWatcher">cvcNumberTextWatcher</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/text/TextWatcher.html"><span class="identifier">TextWatcher</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Set a <code>TextWatcher</code> to receive CVC value changes.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="set-enabled.html">setEnabled</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setEnabled</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardInputWidget$setEnabled(kotlin.Boolean)/isEnabled">isEnabled</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Enable or disable text fields</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="set-expiry-date.html">setExpiryDate</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setExpiryDate</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardInputWidget$setExpiryDate(kotlin.Int, kotlin.Int)/month">month</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.view.CardInputWidget$setExpiryDate(kotlin.Int, kotlin.Int)/year">year</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Set the expiration date. Method invokes completion listener and changes focus
+to the CVC field if a valid date is entered.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="set-expiry-date-text-watcher.html">setExpiryDateTextWatcher</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setExpiryDateTextWatcher</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardInputWidget$setExpiryDateTextWatcher(android.text.TextWatcher)/expiryDateTextWatcher">expiryDateTextWatcher</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/text/TextWatcher.html"><span class="identifier">TextWatcher</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Set a <code>TextWatcher</code> to receive expiration date changes.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="set-postal-code-text-watcher.html">setPostalCodeTextWatcher</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setPostalCodeTextWatcher</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardInputWidget$setPostalCodeTextWatcher(android.text.TextWatcher)/postalCodeTextWatcher">postalCodeTextWatcher</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/text/TextWatcher.html"><span class="identifier">TextWatcher</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Set a <code>TextWatcher</code> to receive postal code changes.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

@@ -1,0 +1,178 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>BankAccount - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android.model</a>&nbsp;/&nbsp;<a href="./index.html">BankAccount</a><br/>
+<br/>
+<h1>BankAccount</h1>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">BankAccount</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-model/index.html"><span class="identifier">StripeModel</span></a><span class="symbol">, </span><a href="../-token-params/index.html"><span class="identifier">TokenParams</span></a></code>
+<p><a href="https://stripe.com/docs/api/customer_bank_accounts/object">The bank account object</a></p>
+<h3>Types</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-status/index.html">Status</a></p>
+</td>
+<td>
+<code><span class="keyword">enum</span> <span class="keyword">class </span><span class="identifier">Status</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Annotations</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-bank-account-type/index.html">BankAccountType</a></p>
+</td>
+<td>
+<code><span class="keyword">annotation</span> <span class="keyword">class </span><span class="identifier">BankAccountType</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Constructors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-init-.html">&lt;init&gt;</a></p>
+</td>
+<td>
+<code><span class="identifier">BankAccount</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.BankAccount$<init>(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/accountNumber">accountNumber</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.BankAccount$<init>(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/countryCode">countryCode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.BankAccount$<init>(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/currency">currency</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.BankAccount$<init>(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/routingNumber">routingNumber</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.BankAccount$<init>(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/accountHolderName">accountHolderName</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.BankAccount$<init>(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/accountHolderType">accountHolderType</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span></code>
+<p><a href="https://stripe.com/docs/api/tokens/create_bank_account">Create a bank account token</a></p>
+<code><span class="identifier">BankAccount</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.BankAccount$<init>(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/accountHolderName">accountHolderName</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.BankAccount$<init>(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/accountHolderType">accountHolderType</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.BankAccount$<init>(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/bankName">bankName</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.BankAccount$<init>(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/countryCode">countryCode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.BankAccount$<init>(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/currency">currency</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.BankAccount$<init>(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/fingerprint">fingerprint</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.BankAccount$<init>(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/last4">last4</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.BankAccount$<init>(kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String, kotlin.String)/routingNumber">routingNumber</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">)</span></code>
+<p>Constructor with no account number used internally to initialize an object
+from JSON returned from the server.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="account-holder-name.html">accountHolderName</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">accountHolderName</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>The name of the person or business that owns the bank account.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="account-holder-type.html">accountHolderType</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">accountHolderType</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>The type of entity that holds the account. This can be either individual or company.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="account-number.html">accountNumber</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><s><span class="identifier">accountNumber</span></s><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="bank-name.html">bankName</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">bankName</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>Name of the bank associated with the routing number (e.g., WELLS FARGO).</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="country-code.html">countryCode</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">countryCode</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>Two-letter ISO code representing the country the bank account is located in.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="currency.html">currency</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">currency</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>Three-letter ISO code for the currency paid out to the bank account.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="fingerprint.html">fingerprint</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">fingerprint</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>Uniquely identifies this particular bank account. You can use this attribute to check
+whether two bank accounts are the same.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="id.html">id</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">id</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>Unique identifier for the object.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="last4.html">last4</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">last4</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p><a href="https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-last4">last4</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="routing-number.html">routingNumber</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">routingNumber</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
+<p>The routing transit number for the bank account.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="status.html">status</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">status</span><span class="symbol">: </span><a href="-status/index.html"><span class="identifier">Status</span></a><span class="symbol">?</span></code>
+<p>For bank accounts, possible values are <code>new</code>, <code>validated</code>, <code>verified</code>, <code>verification_failed</code>,
+or <code>errored</code>. A bank account that hasn’t had any activity or validation performed is new.
+If Stripe can determine that the bank account exists, its status will be <code>validated</code>. Note
+that there often isn’t enough information to know (e.g., for smaller credit unions), and
+the validation is not always run. If customer bank account verification has succeeded,
+the bank account status will be <code>verified</code>. If the verification failed for any reason,
+such as microdeposit failure, the status will be <code>verification_failed</code>. If a transfer sent
+to this bank account fails, we’ll set the status to <code>errored</code> and will not continue to send
+transfers until the bank details are updated.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="to-param-map.html">toParamMap</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">toParamMap</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">&gt;</span></code></td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

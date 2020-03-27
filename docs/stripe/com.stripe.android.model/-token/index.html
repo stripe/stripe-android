@@ -1,0 +1,103 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>Token - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android.model</a>&nbsp;/&nbsp;<a href="./index.html">Token</a><br/>
+<br/>
+<h1>Token</h1>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Token</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-model/index.html"><span class="identifier">StripeModel</span></a><span class="symbol">, </span><a href="../-stripe-payment-source/index.html"><span class="identifier">StripePaymentSource</span></a></code>
+<p>Tokenization is the process Stripe uses to collect sensitive card, bank account details, Stripe
+account details or personally identifiable information (PII), directly from your customers in a
+secure manner. A Token representing this information is returned to you to use.</p>
+<h3>Annotations</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-token-type/index.html">TokenType</a></p>
+</td>
+<td>
+<code><span class="keyword">annotation</span> <span class="keyword">class </span><span class="identifier">TokenType</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="bank-account.html">bankAccount</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">bankAccount</span><span class="symbol">: </span><a href="../-bank-account/index.html"><span class="identifier">BankAccount</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="card.html">card</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">card</span><span class="symbol">: </span><a href="../-card/index.html"><span class="identifier">Card</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="created.html">created</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">created</span><span class="symbol">: </span><a href="https://developer.android.com/reference/java/util/Date.html"><span class="identifier">Date</span></a></code><ul><li></li>
+</ul>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="id.html">id</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">id</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="livemode.html">livemode</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">livemode</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="type.html">type</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">type</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="used.html">used</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">used</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Companion Object Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="from-json.html">fromJson</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">fromJson</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.Token.Companion$fromJson(org.json.JSONObject)/jsonObject">jsonObject</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/org/json/JSONObject.html"><span class="identifier">JSONObject</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">Token</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="from-string.html">fromString</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">fromString</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.Token.Companion$fromString(kotlin.String)/jsonString">jsonString</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">Token</span></a><span class="symbol">?</span></code></td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

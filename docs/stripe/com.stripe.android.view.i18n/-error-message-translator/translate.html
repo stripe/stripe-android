@@ -1,0 +1,28 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>ErrorMessageTranslator.translate - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android.view.i18n</a>&nbsp;/&nbsp;<a href="index.html">ErrorMessageTranslator</a>&nbsp;/&nbsp;<a href="./translate.html">translate</a><br/>
+<br/>
+<h1>translate</h1>
+<a name="com.stripe.android.view.i18n.ErrorMessageTranslator$translate(kotlin.Int, kotlin.String, com.stripe.android.StripeError)"></a>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">translate</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.i18n.ErrorMessageTranslator$translate(kotlin.Int, kotlin.String, com.stripe.android.StripeError)/httpCode">httpCode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.view.i18n.ErrorMessageTranslator$translate(kotlin.Int, kotlin.String, com.stripe.android.StripeError)/errorMessage">errorMessage</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.view.i18n.ErrorMessageTranslator$translate(kotlin.Int, kotlin.String, com.stripe.android.StripeError)/stripeError">stripeError</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android/-stripe-error/index.html"><span class="identifier">StripeError</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a></code>
+<p>See <a href="https://stripe.com/docs/api/errors">Stripe API Errors</a> for a list of error
+codes and associated messages.</p>
+<h3>Parameters</h3>
+<p><a name="httpCode"></a>
+<code>httpCode</code> - The HTTP code associated with the error response.</p>
+<p><a name="errorMessage"></a>
+<code>errorMessage</code> - A human-readable message providing more details about the error.
+For card errors, these messages can be shown to your users.</p>
+<p><a name="stripeError"></a>
+<code>stripeError</code> - The <a href="../../com.stripe.android/-stripe-error/index.html">StripeError</a> that represents detailed information about the
+error. Specifically, <a href="../../com.stripe.android/-stripe-error/code.html">StripeError.code</a> is useful for understanding
+the underlying error (e.g. "payment_method_unactivated").</p>
+<p><strong>Return</strong><br/>
+a non-null error message</p>
+</BODY>
+</HTML>

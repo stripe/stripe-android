@@ -1,0 +1,243 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>CustomerSession - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android</a>&nbsp;/&nbsp;<a href="./index.html">CustomerSession</a><br/>
+<br/>
+<h1>CustomerSession</h1>
+<code><span class="keyword">class </span><span class="identifier">CustomerSession</span></code>
+<p>Represents a logged-in session of a single Customer.</p>
+<p>See <a href="https://stripe.com/docs/mobile/android/standard#creating-ephemeral-keys">Creating ephemeral keys</a></p>
+<h3>Types</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-activity-customer-retrieval-listener/index.html">ActivityCustomerRetrievalListener</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">class </span><span class="identifier">ActivityCustomerRetrievalListener</span><span class="symbol">&lt;</span><span class="identifier">A</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/app/Activity.html"><span class="identifier">Activity</span></a><span class="symbol">?</span><span class="symbol">&gt;</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-customer-retrieval-listener/index.html"><span class="identifier">CustomerRetrievalListener</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-activity-payment-method-retrieval-listener/index.html">ActivityPaymentMethodRetrievalListener</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">class </span><span class="identifier">ActivityPaymentMethodRetrievalListener</span><span class="symbol">&lt;</span><span class="identifier">A</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/app/Activity.html"><span class="identifier">Activity</span></a><span class="symbol">?</span><span class="symbol">&gt;</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-payment-method-retrieval-listener/index.html"><span class="identifier">PaymentMethodRetrievalListener</span></a></code>
+<p>Abstract implementation of <a href="-payment-method-retrieval-listener/index.html">PaymentMethodRetrievalListener</a> that holds a
+<a href="https://developer.android.com/reference/java/lang/ref/WeakReference.html">WeakReference</a> to an <code>Activity</code> object.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-activity-payment-methods-retrieval-listener/index.html">ActivityPaymentMethodsRetrievalListener</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">class </span><span class="identifier">ActivityPaymentMethodsRetrievalListener</span><span class="symbol">&lt;</span><span class="identifier">A</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/app/Activity.html"><span class="identifier">Activity</span></a><span class="symbol">?</span><span class="symbol">&gt;</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-payment-methods-retrieval-listener/index.html"><span class="identifier">PaymentMethodsRetrievalListener</span></a></code>
+<p>Abstract implementation of <a href="-payment-methods-retrieval-listener/index.html">PaymentMethodsRetrievalListener</a> that holds a
+<a href="https://developer.android.com/reference/java/lang/ref/WeakReference.html">WeakReference</a> to an <code>Activity</code> object.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-activity-source-retrieval-listener/index.html">ActivitySourceRetrievalListener</a></p>
+</td>
+<td>
+<code><span class="keyword">abstract</span> <span class="keyword">class </span><span class="identifier">ActivitySourceRetrievalListener</span><span class="symbol">&lt;</span><span class="identifier">A</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/app/Activity.html"><span class="identifier">Activity</span></a><span class="symbol">?</span><span class="symbol">&gt;</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-source-retrieval-listener/index.html"><span class="identifier">SourceRetrievalListener</span></a></code>
+<p>Abstract implementation of <a href="-source-retrieval-listener/index.html">SourceRetrievalListener</a> that holds a
+<a href="https://developer.android.com/reference/java/lang/ref/WeakReference.html">WeakReference</a> to an <code>Activity</code> object.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="-customer-retrieval-listener/index.html">CustomerRetrievalListener</a></p>
+</td>
+<td>
+<code><span class="keyword">interface </span><span class="identifier">CustomerRetrievalListener</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-retrieval-listener/index.html"><span class="identifier">RetrievalListener</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-payment-method-retrieval-listener/index.html">PaymentMethodRetrievalListener</a></p>
+</td>
+<td>
+<code><span class="keyword">interface </span><span class="identifier">PaymentMethodRetrievalListener</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-retrieval-listener/index.html"><span class="identifier">RetrievalListener</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-payment-methods-retrieval-listener/index.html">PaymentMethodsRetrievalListener</a></p>
+</td>
+<td>
+<code><span class="keyword">interface </span><span class="identifier">PaymentMethodsRetrievalListener</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-retrieval-listener/index.html"><span class="identifier">RetrievalListener</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-retrieval-listener/index.html">RetrievalListener</a></p>
+</td>
+<td>
+<code><span class="keyword">interface </span><span class="identifier">RetrievalListener</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-source-retrieval-listener/index.html">SourceRetrievalListener</a></p>
+</td>
+<td>
+<code><span class="keyword">interface </span><span class="identifier">SourceRetrievalListener</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-retrieval-listener/index.html"><span class="identifier">RetrievalListener</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="cached-customer.html">cachedCustomer</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">cachedCustomer</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-customer/index.html"><span class="identifier">Customer</span></a><span class="symbol">?</span></code>
+<p>Gets a cached customer, or <code>null</code> if the current customer has expired.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="add-customer-source.html">addCustomerSource</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">addCustomerSource</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.CustomerSession$addCustomerSource(kotlin.String, kotlin.String, com.stripe.android.CustomerSession.SourceRetrievalListener)/sourceId">sourceId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession$addCustomerSource(kotlin.String, kotlin.String, com.stripe.android.CustomerSession.SourceRetrievalListener)/sourceType">sourceType</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession$addCustomerSource(kotlin.String, kotlin.String, com.stripe.android.CustomerSession.SourceRetrievalListener)/listener">listener</span><span class="symbol">:</span>&nbsp;<a href="-source-retrieval-listener/index.html"><span class="identifier">SourceRetrievalListener</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Add the Source to the current customer.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="attach-payment-method.html">attachPaymentMethod</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">attachPaymentMethod</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.CustomerSession$attachPaymentMethod(kotlin.String, com.stripe.android.CustomerSession.PaymentMethodRetrievalListener)/paymentMethodId">paymentMethodId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession$attachPaymentMethod(kotlin.String, com.stripe.android.CustomerSession.PaymentMethodRetrievalListener)/listener">listener</span><span class="symbol">:</span>&nbsp;<a href="-payment-method-retrieval-listener/index.html"><span class="identifier">PaymentMethodRetrievalListener</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Attaches a PaymentMethod to a customer.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="delete-customer-source.html">deleteCustomerSource</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">deleteCustomerSource</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.CustomerSession$deleteCustomerSource(kotlin.String, com.stripe.android.CustomerSession.SourceRetrievalListener)/sourceId">sourceId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession$deleteCustomerSource(kotlin.String, com.stripe.android.CustomerSession.SourceRetrievalListener)/listener">listener</span><span class="symbol">:</span>&nbsp;<a href="-source-retrieval-listener/index.html"><span class="identifier">SourceRetrievalListener</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Delete the Source from the current customer.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="detach-payment-method.html">detachPaymentMethod</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">detachPaymentMethod</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.CustomerSession$detachPaymentMethod(kotlin.String, com.stripe.android.CustomerSession.PaymentMethodRetrievalListener)/paymentMethodId">paymentMethodId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession$detachPaymentMethod(kotlin.String, com.stripe.android.CustomerSession.PaymentMethodRetrievalListener)/listener">listener</span><span class="symbol">:</span>&nbsp;<a href="-payment-method-retrieval-listener/index.html"><span class="identifier">PaymentMethodRetrievalListener</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Detaches a PaymentMethod from a customer.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="get-payment-methods.html">getPaymentMethods</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">getPaymentMethods</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.CustomerSession$getPaymentMethods(com.stripe.android.model.PaymentMethod.Type, kotlin.Int, kotlin.String, kotlin.String, com.stripe.android.CustomerSession.PaymentMethodsRetrievalListener)/paymentMethodType">paymentMethodType</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-payment-method/-type/index.html"><span class="identifier">Type</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession$getPaymentMethods(com.stripe.android.model.PaymentMethod.Type, kotlin.Int, kotlin.String, kotlin.String, com.stripe.android.CustomerSession.PaymentMethodsRetrievalListener)/limit">limit</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">?</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession$getPaymentMethods(com.stripe.android.model.PaymentMethod.Type, kotlin.Int, kotlin.String, kotlin.String, com.stripe.android.CustomerSession.PaymentMethodsRetrievalListener)/endingBefore">endingBefore</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession$getPaymentMethods(com.stripe.android.model.PaymentMethod.Type, kotlin.Int, kotlin.String, kotlin.String, com.stripe.android.CustomerSession.PaymentMethodsRetrievalListener)/startingAfter">startingAfter</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession$getPaymentMethods(com.stripe.android.model.PaymentMethod.Type, kotlin.Int, kotlin.String, kotlin.String, com.stripe.android.CustomerSession.PaymentMethodsRetrievalListener)/listener">listener</span><span class="symbol">:</span>&nbsp;<a href="-payment-methods-retrieval-listener/index.html"><span class="identifier">PaymentMethodsRetrievalListener</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Retrieves all of the customer's PaymentMethod objects, filtered by a <a href="../../com.stripe.android.model/-payment-method/-type/index.html">PaymentMethod.Type</a>.</p>
+<code><span class="keyword">fun </span><span class="identifier">getPaymentMethods</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.CustomerSession$getPaymentMethods(com.stripe.android.model.PaymentMethod.Type, com.stripe.android.CustomerSession.PaymentMethodsRetrievalListener)/paymentMethodType">paymentMethodType</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-payment-method/-type/index.html"><span class="identifier">Type</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession$getPaymentMethods(com.stripe.android.model.PaymentMethod.Type, com.stripe.android.CustomerSession.PaymentMethodsRetrievalListener)/listener">listener</span><span class="symbol">:</span>&nbsp;<a href="-payment-methods-retrieval-listener/index.html"><span class="identifier">PaymentMethodsRetrievalListener</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="retrieve-current-customer.html">retrieveCurrentCustomer</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">retrieveCurrentCustomer</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.CustomerSession$retrieveCurrentCustomer(com.stripe.android.CustomerSession.CustomerRetrievalListener)/listener">listener</span><span class="symbol">:</span>&nbsp;<a href="-customer-retrieval-listener/index.html"><span class="identifier">CustomerRetrievalListener</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Retrieve the current <a href="../../com.stripe.android.model/-customer/index.html">Customer</a>. If <a href="#">customer</a> is not stale, this returns immediately with
+the cache. If not, it fetches a new value and returns that to the listener.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="set-customer-default-source.html">setCustomerDefaultSource</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setCustomerDefaultSource</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.CustomerSession$setCustomerDefaultSource(kotlin.String, kotlin.String, com.stripe.android.CustomerSession.CustomerRetrievalListener)/sourceId">sourceId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession$setCustomerDefaultSource(kotlin.String, kotlin.String, com.stripe.android.CustomerSession.CustomerRetrievalListener)/sourceType">sourceType</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession$setCustomerDefaultSource(kotlin.String, kotlin.String, com.stripe.android.CustomerSession.CustomerRetrievalListener)/listener">listener</span><span class="symbol">:</span>&nbsp;<a href="-customer-retrieval-listener/index.html"><span class="identifier">CustomerRetrievalListener</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Set the default Source of the current customer.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="set-customer-shipping-information.html">setCustomerShippingInformation</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setCustomerShippingInformation</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.CustomerSession$setCustomerShippingInformation(com.stripe.android.model.ShippingInformation, com.stripe.android.CustomerSession.CustomerRetrievalListener)/shippingInformation">shippingInformation</span><span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-shipping-information/index.html"><span class="identifier">ShippingInformation</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession$setCustomerShippingInformation(com.stripe.android.model.ShippingInformation, com.stripe.android.CustomerSession.CustomerRetrievalListener)/listener">listener</span><span class="symbol">:</span>&nbsp;<a href="-customer-retrieval-listener/index.html"><span class="identifier">CustomerRetrievalListener</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Set the shipping information on the current customer.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="update-current-customer.html">updateCurrentCustomer</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">updateCurrentCustomer</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.CustomerSession$updateCurrentCustomer(com.stripe.android.CustomerSession.CustomerRetrievalListener)/listener">listener</span><span class="symbol">:</span>&nbsp;<a href="-customer-retrieval-listener/index.html"><span class="identifier">CustomerRetrievalListener</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Force an update of the current customer, regardless of how much time has passed.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Companion Object Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="cancel-callbacks.html">cancelCallbacks</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">cancelCallbacks</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>End any async calls in process and will not invoke callback listeners.
+It will not clear the singleton instance of a <a href="./index.html">CustomerSession</a> so it can be
+safely used when a view is being removed/destroyed to avoid null pointer exceptions
+due to async operation delay.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="end-customer-session.html">endCustomerSession</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">endCustomerSession</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>End the singleton instance of a <a href="./index.html">CustomerSession</a>.
+Calls to <a href="get-instance.html">getInstance</a> will throw an <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-illegal-state-exception/index.html">IllegalStateException</a>
+after this call, until the user calls
+<a href="init-customer-session.html">initCustomerSession</a> again.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="get-instance.html">getInstance</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">getInstance</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">CustomerSession</span></a></code>
+<p>Gets the singleton instance of <a href="./index.html">CustomerSession</a>. If the session has not been
+initialized, this will throw a <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-runtime-exception/index.html">RuntimeException</a>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="init-customer-session.html">initCustomerSession</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">initCustomerSession</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.CustomerSession.Companion$initCustomerSession(android.content.Context, com.stripe.android.EphemeralKeyProvider, kotlin.String, kotlin.Boolean)/context">context</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Context.html"><span class="identifier">Context</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession.Companion$initCustomerSession(android.content.Context, com.stripe.android.EphemeralKeyProvider, kotlin.String, kotlin.Boolean)/ephemeralKeyProvider">ephemeralKeyProvider</span><span class="symbol">:</span>&nbsp;<a href="../-ephemeral-key-provider/index.html"><span class="identifier">EphemeralKeyProvider</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession.Companion$initCustomerSession(android.content.Context, com.stripe.android.EphemeralKeyProvider, kotlin.String, kotlin.Boolean)/stripeAccountId">stripeAccountId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession.Companion$initCustomerSession(android.content.Context, com.stripe.android.EphemeralKeyProvider, kotlin.String, kotlin.Boolean)/shouldPrefetchEphemeralKey">shouldPrefetchEphemeralKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a>&nbsp;<span class="symbol">=</span>&nbsp;true<span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Create a CustomerSession with the provided <a href="../-ephemeral-key-provider/index.html">EphemeralKeyProvider</a>.</p>
+<code><span class="keyword">fun </span><span class="identifier">initCustomerSession</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.CustomerSession.Companion$initCustomerSession(android.content.Context, com.stripe.android.EphemeralKeyProvider, kotlin.Boolean)/context">context</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Context.html"><span class="identifier">Context</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession.Companion$initCustomerSession(android.content.Context, com.stripe.android.EphemeralKeyProvider, kotlin.Boolean)/ephemeralKeyProvider">ephemeralKeyProvider</span><span class="symbol">:</span>&nbsp;<a href="../-ephemeral-key-provider/index.html"><span class="identifier">EphemeralKeyProvider</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.CustomerSession.Companion$initCustomerSession(android.content.Context, com.stripe.android.EphemeralKeyProvider, kotlin.Boolean)/shouldPrefetchEphemeralKey">shouldPrefetchEphemeralKey</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>See <a href="init-customer-session.html">initCustomerSession</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

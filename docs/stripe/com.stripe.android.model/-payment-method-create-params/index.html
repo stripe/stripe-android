@@ -1,0 +1,104 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>PaymentMethodCreateParams - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android.model</a>&nbsp;/&nbsp;<a href="./index.html">PaymentMethodCreateParams</a><br/>
+<br/>
+<h1>PaymentMethodCreateParams</h1>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">PaymentMethodCreateParams</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code>
+<p>Model for PaymentMethod creation parameters.</p>
+<p>Used by <a href="../../com.stripe.android/-stripe/create-payment-method-synchronous.html">Stripe.createPaymentMethodSynchronous</a></p>
+<p>See <a href="https://stripe.com/docs/api/payment_methods/create">Create a PaymentMethod</a>.</p>
+<p>See <a href="../-payment-method/index.html">PaymentMethod</a> for API object.</p>
+<h3>Types</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-au-becs-debit/index.html">AuBecsDebit</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">AuBecsDebit</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-card/index.html">Card</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Card</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-fpx/index.html">Fpx</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Fpx</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-ideal/index.html">Ideal</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Ideal</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="-sepa-debit/index.html">SepaDebit</a></p>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">SepaDebit</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="type-code.html">typeCode</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">typeCode</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="to-param-map.html">toParamMap</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">toParamMap</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">&gt;</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Companion Object Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="create.html">create</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">create</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.PaymentMethodCreateParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams.Card, com.stripe.android.model.PaymentMethod.BillingDetails, kotlin.collections.Map((kotlin.String, )))/card">card</span><span class="symbol">:</span>&nbsp;<a href="-card/index.html"><span class="identifier">Card</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PaymentMethodCreateParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams.Card, com.stripe.android.model.PaymentMethod.BillingDetails, kotlin.collections.Map((kotlin.String, )))/billingDetails">billingDetails</span><span class="symbol">:</span>&nbsp;<a href="../-payment-method/-billing-details/index.html"><span class="identifier">BillingDetails</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PaymentMethodCreateParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams.Card, com.stripe.android.model.PaymentMethod.BillingDetails, kotlin.collections.Map((kotlin.String, )))/metadata">metadata</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">&gt;</span><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">PaymentMethodCreateParams</span></a></code><br/>
+<code><span class="keyword">fun </span><span class="identifier">create</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.PaymentMethodCreateParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams.Ideal, com.stripe.android.model.PaymentMethod.BillingDetails, kotlin.collections.Map((kotlin.String, )))/ideal">ideal</span><span class="symbol">:</span>&nbsp;<a href="-ideal/index.html"><span class="identifier">Ideal</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PaymentMethodCreateParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams.Ideal, com.stripe.android.model.PaymentMethod.BillingDetails, kotlin.collections.Map((kotlin.String, )))/billingDetails">billingDetails</span><span class="symbol">:</span>&nbsp;<a href="../-payment-method/-billing-details/index.html"><span class="identifier">BillingDetails</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PaymentMethodCreateParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams.Ideal, com.stripe.android.model.PaymentMethod.BillingDetails, kotlin.collections.Map((kotlin.String, )))/metadata">metadata</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">&gt;</span><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">PaymentMethodCreateParams</span></a></code><br/>
+<code><span class="keyword">fun </span><span class="identifier">create</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.PaymentMethodCreateParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams.Fpx, com.stripe.android.model.PaymentMethod.BillingDetails, kotlin.collections.Map((kotlin.String, )))/fpx">fpx</span><span class="symbol">:</span>&nbsp;<a href="-fpx/index.html"><span class="identifier">Fpx</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PaymentMethodCreateParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams.Fpx, com.stripe.android.model.PaymentMethod.BillingDetails, kotlin.collections.Map((kotlin.String, )))/billingDetails">billingDetails</span><span class="symbol">:</span>&nbsp;<a href="../-payment-method/-billing-details/index.html"><span class="identifier">BillingDetails</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PaymentMethodCreateParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams.Fpx, com.stripe.android.model.PaymentMethod.BillingDetails, kotlin.collections.Map((kotlin.String, )))/metadata">metadata</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">&gt;</span><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">PaymentMethodCreateParams</span></a></code><br/>
+<code><span class="keyword">fun </span><span class="identifier">create</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.PaymentMethodCreateParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams.SepaDebit, com.stripe.android.model.PaymentMethod.BillingDetails, kotlin.collections.Map((kotlin.String, )))/sepaDebit">sepaDebit</span><span class="symbol">:</span>&nbsp;<a href="-sepa-debit/index.html"><span class="identifier">SepaDebit</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PaymentMethodCreateParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams.SepaDebit, com.stripe.android.model.PaymentMethod.BillingDetails, kotlin.collections.Map((kotlin.String, )))/billingDetails">billingDetails</span><span class="symbol">:</span>&nbsp;<a href="../-payment-method/-billing-details/index.html"><span class="identifier">BillingDetails</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PaymentMethodCreateParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams.SepaDebit, com.stripe.android.model.PaymentMethod.BillingDetails, kotlin.collections.Map((kotlin.String, )))/metadata">metadata</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">&gt;</span><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">PaymentMethodCreateParams</span></a></code><br/>
+<code><span class="keyword">fun </span><span class="identifier">create</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.PaymentMethodCreateParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams.AuBecsDebit, com.stripe.android.model.PaymentMethod.BillingDetails, kotlin.collections.Map((kotlin.String, )))/auBecsDebit">auBecsDebit</span><span class="symbol">:</span>&nbsp;<a href="-au-becs-debit/index.html"><span class="identifier">AuBecsDebit</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PaymentMethodCreateParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams.AuBecsDebit, com.stripe.android.model.PaymentMethod.BillingDetails, kotlin.collections.Map((kotlin.String, )))/billingDetails">billingDetails</span><span class="symbol">:</span>&nbsp;<a href="../-payment-method/-billing-details/index.html"><span class="identifier">BillingDetails</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.PaymentMethodCreateParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams.AuBecsDebit, com.stripe.android.model.PaymentMethod.BillingDetails, kotlin.collections.Map((kotlin.String, )))/metadata">metadata</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">&gt;</span><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">PaymentMethodCreateParams</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="create-from-google-pay.html">createFromGooglePay</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">createFromGooglePay</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.PaymentMethodCreateParams.Companion$createFromGooglePay(org.json.JSONObject)/googlePayPaymentData">googlePayPaymentData</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/org/json/JSONObject.html"><span class="identifier">JSONObject</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">PaymentMethodCreateParams</span></a></code></td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

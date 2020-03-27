@@ -1,0 +1,25 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>IssuingCardPinService.retrievePin - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android</a>&nbsp;/&nbsp;<a href="index.html">IssuingCardPinService</a>&nbsp;/&nbsp;<a href="./retrieve-pin.html">retrievePin</a><br/>
+<br/>
+<h1>retrievePin</h1>
+<a name="com.stripe.android.IssuingCardPinService$retrievePin(kotlin.String, kotlin.String, kotlin.String, com.stripe.android.IssuingCardPinService.IssuingCardPinRetrievalListener)"></a>
+<code><span class="keyword">fun </span><span class="identifier">retrievePin</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.IssuingCardPinService$retrievePin(kotlin.String, kotlin.String, kotlin.String, com.stripe.android.IssuingCardPinService.IssuingCardPinRetrievalListener)/cardId">cardId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.IssuingCardPinService$retrievePin(kotlin.String, kotlin.String, kotlin.String, com.stripe.android.IssuingCardPinService.IssuingCardPinRetrievalListener)/verificationId">verificationId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.IssuingCardPinService$retrievePin(kotlin.String, kotlin.String, kotlin.String, com.stripe.android.IssuingCardPinService.IssuingCardPinRetrievalListener)/userOneTimeCode">userOneTimeCode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.IssuingCardPinService$retrievePin(kotlin.String, kotlin.String, kotlin.String, com.stripe.android.IssuingCardPinService.IssuingCardPinRetrievalListener)/listener">listener</span><span class="symbol">:</span>&nbsp;<a href="-issuing-card-pin-retrieval-listener/index.html"><span class="identifier">IssuingCardPinRetrievalListener</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Retrieves a PIN for a given card</p>
+<h3>Parameters</h3>
+<p><a name="cardId"></a>
+<code>cardId</code> - the ID of the card (looks like ic_abcdef1234)</p>
+<p><a name="verificationId"></a>
+<code>verificationId</code> - the ID of the verification that was sent to the cardholder
+(typically server-side, through /v1/issuing/verifications)</p>
+<p><a name="userOneTimeCode"></a>
+<code>userOneTimeCode</code> - the one-time code that was sent to the cardholder through sms or email</p>
+<p><a name="listener"></a>
+<code>listener</code> - a listener for either the PIN, or any error that can occur</p>
+</BODY>
+</HTML>

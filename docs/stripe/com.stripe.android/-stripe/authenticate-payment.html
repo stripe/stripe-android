@@ -1,0 +1,36 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>Stripe.authenticatePayment - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android</a>&nbsp;/&nbsp;<a href="index.html">Stripe</a>&nbsp;/&nbsp;<a href="./authenticate-payment.html">authenticatePayment</a><br/>
+<br/>
+<h1>authenticatePayment</h1>
+<a name="com.stripe.android.Stripe$authenticatePayment(android.app.Activity, kotlin.String)"></a>
+<code><span class="identifier">@UiThread</span> <span class="keyword">fun </span><s><span class="identifier">authenticatePayment</span></s><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$authenticatePayment(android.app.Activity, kotlin.String)/activity">activity</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/app/Activity.html"><span class="identifier">Activity</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$authenticatePayment(android.app.Activity, kotlin.String)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code><br/>
+<strong>Deprecated:</strong> Rename to better reflect behavior and match iOS naming.<br/>
+<br/>
+<p>Authenticate a <a href="../../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a>.
+Used for <a href="https://stripe.com/docs/payments/payment-intents/android-manual">manual confirmation</a> flow.</p>
+<h3>Parameters</h3>
+<p><a name="activity"></a>
+<code>activity</code> - the <code>Activity</code> that is launching the payment authentication flow</p>
+<p><a name="clientSecret"></a>
+<code>clientSecret</code> - the <a href="https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret">client_secret</a>
+property of a confirmed <a href="../../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a> object</p>
+<a name="com.stripe.android.Stripe$authenticatePayment(androidx.fragment.app.Fragment, kotlin.String)"></a>
+<code><span class="identifier">@UiThread</span> <span class="keyword">fun </span><s><span class="identifier">authenticatePayment</span></s><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$authenticatePayment(androidx.fragment.app.Fragment, kotlin.String)/fragment">fragment</span><span class="symbol">:</span>&nbsp;<span class="identifier">Fragment</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$authenticatePayment(androidx.fragment.app.Fragment, kotlin.String)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code><br/>
+<strong>Deprecated:</strong> Rename to better reflect behavior and match iOS naming.<br/>
+<br/>
+<p>Authenticate a <a href="../../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a>.
+Used for <a href="https://stripe.com/docs/payments/payment-intents/quickstart#manual-confirmation-flow">manual confirmation</a> flow.</p>
+<h3>Parameters</h3>
+<p><a name="fragment"></a>
+<code>fragment</code> - the <code>Fragment</code> that is launching the payment authentication flow</p>
+<p><a name="clientSecret"></a>
+<code>clientSecret</code> - the <a href="https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret">client_secret</a>
+property of a confirmed <a href="../../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a> object</p>
+</BODY>
+</HTML>
