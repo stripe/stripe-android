@@ -324,7 +324,7 @@ class PaymentSession @VisibleForTesting internal constructor(
     }
 
     internal companion object {
-        internal const val TOKEN_PAYMENT_SESSION: String = "PaymentSession"
+        internal const val PRODUCT_TOKEN: String = "PaymentSession"
 
         internal const val EXTRA_PAYMENT_SESSION_DATA: String = "extra_payment_session_data"
 

@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.PagerAdapter
-import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSessionConfig
 import com.stripe.android.databinding.ShippingInfoPageBinding
 import com.stripe.android.databinding.ShippingMethodPageBinding
@@ -16,7 +15,6 @@ import com.stripe.android.model.ShippingMethod
 internal class PaymentFlowPagerAdapter(
     private val context: Context,
     private val paymentSessionConfig: PaymentSessionConfig,
-    private val customerSession: CustomerSession,
     private val allowedShippingCountryCodes: Set<String> = emptySet(),
     private val onShippingMethodSelectedCallback: (ShippingMethod) -> Unit = {}
 ) : PagerAdapter() {
@@ -68,16 +66,16 @@ internal class PaymentFlowPagerAdapter(
         }
         when (viewHolder) {
             is PaymentFlowViewHolder.ShippingInformationViewHolder -> {
-                customerSession
-                    .addProductUsageTokenIfValid(PaymentFlowActivity.TOKEN_SHIPPING_INFO_SCREEN)
                 viewHolder.bind(
                     paymentSessionConfig, shippingInformation, allowedShippingCountryCodes
                 )
             }
             is PaymentFlowViewHolder.ShippingMethodViewHolder -> {
-                customerSession
-                    .addProductUsageTokenIfValid(PaymentFlowActivity.TOKEN_SHIPPING_METHOD_SCREEN)
-                viewHolder.bind(shippingMethods, selectedShippingMethod, onShippingMethodSelectedCallback)
+                viewHolder.bind(
+                    shippingMethods,
+                    selectedShippingMethod,
+                    onShippingMethodSelectedCallback
+                )
             }
         }
         collection.addView(viewHolder.itemView)

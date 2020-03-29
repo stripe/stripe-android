@@ -4,9 +4,11 @@ import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.isNull
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.CustomerSession
+import com.stripe.android.PaymentSession
 import com.stripe.android.exception.APIException
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -22,12 +24,11 @@ class PaymentMethodsViewModelTest {
 
     private val customerSession: CustomerSession = mock()
     private val listenerArgumentCaptor: KArgumentCaptor<CustomerSession.PaymentMethodsRetrievalListener> = argumentCaptor()
-    private val viewModel: PaymentMethodsViewModel by lazy {
-        PaymentMethodsViewModel(
-            application = ApplicationProvider.getApplicationContext(),
-            customerSession = customerSession
-        )
-    }
+    private val viewModel = PaymentMethodsViewModel(
+        application = ApplicationProvider.getApplicationContext(),
+        customerSession = customerSession,
+        startedFromPaymentSession = true
+    )
 
     @Test
     fun getPaymentMethods_whenSuccess_returnsExpectedPaymentMethods() {
@@ -37,6 +38,10 @@ class PaymentMethodsViewModelTest {
 
         verify(customerSession).getPaymentMethods(
             eq(PaymentMethod.Type.Card),
+            isNull(),
+            isNull(),
+            isNull(),
+            eq(EXPECTED_PRODUCT_USAGE),
             listenerArgumentCaptor.capture()
         )
 
@@ -55,6 +60,10 @@ class PaymentMethodsViewModelTest {
 
         verify(customerSession).getPaymentMethods(
             eq(PaymentMethod.Type.Card),
+            isNull(),
+            isNull(),
+            isNull(),
+            eq(EXPECTED_PRODUCT_USAGE),
             listenerArgumentCaptor.capture()
         )
 
@@ -85,5 +94,12 @@ class PaymentMethodsViewModelTest {
         viewModel.onPaymentMethodRemoved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         assertEquals("Removed Visa ending in 4242", values[0])
         assertNull(values[1])
+    }
+
+    private companion object {
+        private val EXPECTED_PRODUCT_USAGE = setOf(
+            PaymentSession.PRODUCT_TOKEN,
+            PaymentMethodsActivity.PRODUCT_TOKEN
+        )
     }
 }

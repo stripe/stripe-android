@@ -45,6 +45,7 @@ class PaymentFlowViewModelTest {
             viewModel.saveCustomerShippingInformation(ShippingInfoFixtures.DEFAULT)
         verify(customerSession).setCustomerShippingInformation(
             eq(ShippingInfoFixtures.DEFAULT),
+            eq(PaymentFlowViewModel.PRODUCT_USAGE),
             customerRetrievalListener.capture()
         )
 

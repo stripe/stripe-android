@@ -48,16 +48,6 @@ class PaymentSessionViewModelTest {
     }
 
     @Test
-    fun init_shouldUpdateProductUsage() {
-        viewModel.paymentSessionData
-
-        verify(customerSession).resetUsageTokens()
-        verify(customerSession).addProductUsageTokenIfValid(
-            PaymentSession.TOKEN_PAYMENT_SESSION
-        )
-    }
-
-    @Test
     fun init_shouldGetButNotSetPaymentSessionDataFromSavedStateHandle() {
         viewModel.paymentSessionData
 
@@ -256,6 +246,7 @@ class PaymentSessionViewModelTest {
         }
 
         verify(customerSession).retrieveCurrentCustomer(
+            eq(setOf(PaymentSession.PRODUCT_TOKEN)),
             customerRetrievalListenerCaptor.capture()
         )
         customerRetrievalListenerCaptor.firstValue
@@ -280,6 +271,7 @@ class PaymentSessionViewModelTest {
         }
 
         verify(customerSession).retrieveCurrentCustomer(
+            eq(setOf(PaymentSession.PRODUCT_TOKEN)),
             customerRetrievalListenerCaptor.capture()
         )
         customerRetrievalListenerCaptor.firstValue

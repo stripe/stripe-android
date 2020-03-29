@@ -86,7 +86,6 @@ class AddPaymentMethodActivity : StripeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         configureView(args)
-        viewModel.logProductUsage()
     }
 
     override fun onResume() {
@@ -213,6 +212,6 @@ class AddPaymentMethodActivity : StripeActivity() {
     }
 
     internal companion object {
-        internal const val TOKEN_ADD_PAYMENT_METHOD_ACTIVITY: String = "AddPaymentMethodActivity"
+        internal const val PRODUCT_TOKEN: String = "AddPaymentMethodActivity"
     }
 }

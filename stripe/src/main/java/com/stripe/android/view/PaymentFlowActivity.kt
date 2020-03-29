@@ -9,7 +9,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager.widget.ViewPager
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession.Companion.EXTRA_PAYMENT_SESSION_DATA
-import com.stripe.android.PaymentSession.Companion.TOKEN_PAYMENT_SESSION
 import com.stripe.android.PaymentSessionConfig
 import com.stripe.android.PaymentSessionData
 import com.stripe.android.R
@@ -53,7 +52,6 @@ class PaymentFlowActivity : StripeActivity() {
         PaymentFlowPagerAdapter(
             this,
             paymentSessionConfig,
-            customerSession,
             paymentSessionConfig.allowedShippingCountryCodes
         ) {
             viewModel.selectedShippingMethod = it
@@ -69,9 +67,6 @@ class PaymentFlowActivity : StripeActivity() {
 
         val args = PaymentFlowActivityStarter.Args.create(intent)
         args.windowFlags?.let { window.addFlags(it) }
-
-        customerSession.addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION)
-        customerSession.addProductUsageTokenIfValid(TOKEN_PAYMENT_FLOW_ACTIVITY)
 
         val shippingInformation =
             viewModel.submittedShippingInfo
@@ -250,8 +245,6 @@ class PaymentFlowActivity : StripeActivity() {
     }
 
     internal companion object {
-        internal const val TOKEN_PAYMENT_FLOW_ACTIVITY: String = "PaymentFlowActivity"
-        internal const val TOKEN_SHIPPING_INFO_SCREEN: String = "ShippingInfoScreen"
-        internal const val TOKEN_SHIPPING_METHOD_SCREEN: String = "ShippingMethodScreen"
+        internal const val PRODUCT_TOKEN: String = "PaymentFlowActivity"
     }
 }

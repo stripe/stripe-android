@@ -1,6 +1,5 @@
 package com.stripe.android
 
-import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
@@ -24,7 +23,7 @@ import org.robolectric.RobolectricTestRunner
 class AnalyticsDataFactoryTest {
 
     private val analyticsDataFactory = AnalyticsDataFactory(
-        ApplicationProvider.getApplicationContext<Context>(),
+        ApplicationProvider.getApplicationContext(),
         API_KEY
     )
 

@@ -9,6 +9,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.isNull
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
@@ -36,9 +37,7 @@ class PaymentMethodsActivityTest {
 
     private val listenerArgumentCaptor: KArgumentCaptor<CustomerSession.PaymentMethodsRetrievalListener> = argumentCaptor()
 
-    private val context: Context by lazy {
-        ApplicationProvider.getApplicationContext<Context>()
-    }
+    private val context = ApplicationProvider.getApplicationContext<Context>()
     private val activityScenarioFactory: ActivityScenarioFactory by lazy {
         ActivityScenarioFactory(context)
     }
@@ -63,6 +62,10 @@ class PaymentMethodsActivityTest {
 
                 verify(customerSession).getPaymentMethods(
                     eq(PaymentMethod.Type.Card),
+                    isNull(),
+                    isNull(),
+                    isNull(),
+                    eq(setOf(PaymentMethodsActivity.PRODUCT_TOKEN)),
                     listenerArgumentCaptor.capture()
                 )
 
@@ -94,6 +97,10 @@ class PaymentMethodsActivityTest {
                 verify(customerSession)
                     .getPaymentMethods(
                         eq(PaymentMethod.Type.Card),
+                        isNull(),
+                        isNull(),
+                        isNull(),
+                        eq(setOf(PaymentMethodsActivity.PRODUCT_TOKEN)),
                         listenerArgumentCaptor.capture()
                     )
 
@@ -170,7 +177,14 @@ class PaymentMethodsActivityTest {
                 )
                 assertEquals(View.VISIBLE, progressBar.visibility)
                 verify(customerSession, times(2))
-                    .getPaymentMethods(eq(PaymentMethod.Type.Card), listenerArgumentCaptor.capture())
+                    .getPaymentMethods(
+                        eq(PaymentMethod.Type.Card),
+                        isNull(),
+                        isNull(),
+                        isNull(),
+                        eq(setOf(PaymentMethodsActivity.PRODUCT_TOKEN)),
+                        listenerArgumentCaptor.capture()
+                    )
 
                 listenerArgumentCaptor.firstValue
                     .onPaymentMethodsRetrieved(PaymentMethodFixtures.CARD_PAYMENT_METHODS)
@@ -200,6 +214,10 @@ class PaymentMethodsActivityTest {
 
                 verify(customerSession).getPaymentMethods(
                     eq(PaymentMethod.Type.Card),
+                    isNull(),
+                    isNull(),
+                    isNull(),
+                    eq(setOf(PaymentMethodsActivity.PRODUCT_TOKEN)),
                     listenerArgumentCaptor.capture()
                 )
 

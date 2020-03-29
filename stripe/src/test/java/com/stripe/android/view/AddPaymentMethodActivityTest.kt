@@ -18,7 +18,7 @@ import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.PaymentSession.Companion.TOKEN_PAYMENT_SESSION
+import com.stripe.android.PaymentSession
 import com.stripe.android.R
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
@@ -28,7 +28,6 @@ import com.stripe.android.exception.StripeException
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.view.AddPaymentMethodActivity.Companion.TOKEN_ADD_PAYMENT_METHOD_ACTIVITY
 import java.util.Calendar
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -52,16 +51,11 @@ class AddPaymentMethodActivityTest {
     private val customerSession: CustomerSession = mock()
     private val viewModel: AddPaymentMethodViewModel = mock()
 
-    private val paymentMethodIdCaptor: KArgumentCaptor<String> by lazy {
-        argumentCaptor<String>()
-    }
-    private val listenerArgumentCaptor: KArgumentCaptor<CustomerSession.PaymentMethodRetrievalListener> by lazy {
-        argumentCaptor<CustomerSession.PaymentMethodRetrievalListener>()
-    }
+    private val paymentMethodIdCaptor: KArgumentCaptor<String> = argumentCaptor()
+    private val listenerArgumentCaptor: KArgumentCaptor<CustomerSession.PaymentMethodRetrievalListener> = argumentCaptor()
+    private val productUsageArgumentCaptor: KArgumentCaptor<Set<String>> = argumentCaptor()
 
-    private val context: Context by lazy {
-        ApplicationProvider.getApplicationContext<Context>()
-    }
+    private val context: Context = ApplicationProvider.getApplicationContext<Context>()
     private val activityScenarioFactory: ActivityScenarioFactory by lazy {
         ActivityScenarioFactory(ApplicationProvider.getApplicationContext())
     }
@@ -158,12 +152,10 @@ class AddPaymentMethodActivityTest {
 
                 val expectedPaymentMethod = PaymentMethodFixtures.FPX_PAYMENT_METHOD
 
-                verify(customerSession)
-                    .addProductUsageTokenIfValid(TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
-                verify(customerSession)
-                    .addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION)
                 verify(customerSession, never()).attachPaymentMethod(
-                    any(), any()
+                    any(),
+                    any(),
+                    any()
                 )
 
                 assertEquals(RESULT_OK, activityScenario.result.resultCode)
@@ -271,13 +263,18 @@ class AddPaymentMethodActivityTest {
                 assertEquals(View.VISIBLE, progressBar.visibility)
                 assertFalse(cardMultilineWidget.isEnabled)
 
-                verify(customerSession)
-                    .addProductUsageTokenIfValid(TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
-                verify(customerSession)
-                    .addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION)
                 verify(customerSession).attachPaymentMethod(
                     paymentMethodIdCaptor.capture(),
+                    productUsageArgumentCaptor.capture(),
                     listenerArgumentCaptor.capture()
+                )
+
+                assertEquals(
+                    setOf(
+                        AddPaymentMethodActivity.PRODUCT_TOKEN,
+                        PaymentSession.PRODUCT_TOKEN
+                    ),
+                    productUsageArgumentCaptor.firstValue
                 )
 
                 assertEquals(EXPECTED_PAYMENT_METHOD.id, paymentMethodIdCaptor.firstValue)
@@ -334,13 +331,18 @@ class AddPaymentMethodActivityTest {
                 assertEquals(View.VISIBLE, progressBar.visibility)
                 assertFalse(cardMultilineWidget.isEnabled)
 
-                verify(customerSession)
-                    .addProductUsageTokenIfValid(TOKEN_ADD_PAYMENT_METHOD_ACTIVITY)
-                verify(customerSession)
-                    .addProductUsageTokenIfValid(TOKEN_PAYMENT_SESSION)
                 verify(customerSession).attachPaymentMethod(
                     paymentMethodIdCaptor.capture(),
+                    productUsageArgumentCaptor.capture(),
                     listenerArgumentCaptor.capture()
+                )
+
+                assertEquals(
+                    setOf(
+                        AddPaymentMethodActivity.PRODUCT_TOKEN,
+                        PaymentSession.PRODUCT_TOKEN
+                    ),
+                    productUsageArgumentCaptor.firstValue
                 )
 
                 assertEquals(EXPECTED_PAYMENT_METHOD.id, paymentMethodIdCaptor.firstValue)
@@ -356,18 +358,6 @@ class AddPaymentMethodActivityTest {
 
                 verifyDialogWithMessage(ERROR_MESSAGE)
             }
-        }
-    }
-
-    @Test
-    fun logProductUsage_whenInitCustomerSessionTokensIsFalse_shouldNotLog() {
-        activityScenarioFactory.create<AddPaymentMethodActivity>(
-            createArgs(
-                PaymentMethod.Type.Fpx
-            )
-        ).use {
-            verify(customerSession, never())
-                .addProductUsageTokenIfValid(any())
         }
     }
 

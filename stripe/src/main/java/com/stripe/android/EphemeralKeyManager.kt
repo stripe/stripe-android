@@ -10,19 +10,23 @@ import org.json.JSONObject
 internal class EphemeralKeyManager(
     private val ephemeralKeyProvider: EphemeralKeyProvider,
     private val listener: KeyManagerListener,
-    operationIdFactory: OperationIdFactory,
-    shouldPrefetchEphemeralKey: Boolean,
+    operationIdFactory: OperationIdFactory = StripeOperationIdFactory(),
+    shouldPrefetchEphemeralKey: Boolean = true,
     private val timeSupplier: TimeSupplier = { Calendar.getInstance().timeInMillis },
     private val timeBufferInSeconds: Long = REFRESH_BUFFER_IN_SECONDS
 ) {
     private val apiVersion: String = ApiVersion.get().code
 
-    private var ephemeralKey: EphemeralKey? = null
+    @JvmSynthetic
+    internal var ephemeralKey: EphemeralKey? = null
 
     init {
         if (shouldPrefetchEphemeralKey) {
             retrieveEphemeralKey(
-                EphemeralOperation.RetrieveKey(operationIdFactory.create())
+                EphemeralOperation.RetrieveKey(
+                    id = operationIdFactory.create(),
+                    productUsage = emptySet()
+                )
             )
         }
     }

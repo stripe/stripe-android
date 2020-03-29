@@ -40,4 +40,12 @@ internal object EphemeralKeyFixtures {
 
     val FIRST = EphemeralKeyJsonParser().parse(FIRST_JSON)
     val SECOND = EphemeralKeyJsonParser().parse(SECOND_JSON)
+
+    fun create(
+        expires: Long
+    ): EphemeralKey {
+        return FIRST.copy(
+            expires = expires
+        )
+    }
 }

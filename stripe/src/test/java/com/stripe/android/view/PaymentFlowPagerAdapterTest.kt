@@ -17,8 +17,7 @@ class PaymentFlowPagerAdapterTest {
     private val adapter: PaymentFlowPagerAdapter by lazy {
         PaymentFlowPagerAdapter(
             ApplicationProvider.getApplicationContext(),
-            PaymentSessionFixtures.CONFIG,
-            customerSession
+            PaymentSessionFixtures.CONFIG
         )
     }
 

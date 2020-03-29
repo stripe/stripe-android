@@ -35,9 +35,6 @@ internal class PaymentSessionViewModel(
     val paymentSessionDataLiveData: LiveData<PaymentSessionData> = mutablePaymentSessionDataLiveData
 
     init {
-        customerSession.resetUsageTokens()
-        customerSession.addProductUsageTokenIfValid(PaymentSession.TOKEN_PAYMENT_SESSION)
-
         // read from saved state handle
         savedStateHandle.get<PaymentSessionData>(KEY_PAYMENT_SESSION_DATA)?.let {
             this.paymentSessionData = it
@@ -58,7 +55,6 @@ internal class PaymentSessionViewModel(
 
     @JvmSynthetic
     fun onCompleted() {
-        customerSession.resetUsageTokens()
     }
 
     @JvmSynthetic
@@ -67,7 +63,8 @@ internal class PaymentSessionViewModel(
 
         val resultData: MutableLiveData<FetchCustomerResult> = MutableLiveData()
         customerSession.retrieveCurrentCustomer(
-            object : CustomerSession.CustomerRetrievalListener {
+            productUsage = setOf(PaymentSession.PRODUCT_TOKEN),
+            listener = object : CustomerSession.CustomerRetrievalListener {
                 override fun onCustomerRetrieved(customer: Customer) {
                     onCustomerRetrieved(
                         customer.id,

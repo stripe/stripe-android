@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.os.Handler
 import androidx.annotation.IntRange
-import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.Stripe.Companion.appInfo
 import com.stripe.android.exception.StripeException
@@ -39,7 +38,6 @@ class CustomerSession @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal var customer: Customer? = null
 
-    private val productUsage = CustomerSessionProductUsage()
     private val listeners: MutableMap<String, RetrievalListener?> = mutableMapOf()
     private val ephemeralKeyManager: EphemeralKeyManager = ephemeralKeyManagerFactory.create(
         CustomerSessionEphemeralKeyManagerListener(
@@ -47,20 +45,12 @@ class CustomerSession @VisibleForTesting internal constructor(
                 stripeRepository,
                 createHandler(),
                 publishableKey,
-                stripeAccountId,
-                productUsage
+                stripeAccountId
             ),
             threadPoolExecutor,
-            listeners,
-            productUsage
+            listeners
         )
     )
-
-    @VisibleForTesting
-    internal val productUsageTokens: Set<String>
-        get() {
-            return productUsage.get()
-        }
 
     private fun createHandler(): Handler {
         return CustomerSessionHandler(object : CustomerSessionHandler.Listener {
@@ -124,12 +114,6 @@ class CustomerSession @VisibleForTesting internal constructor(
         })
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY)
-    @JvmSynthetic
-    internal fun addProductUsageTokenIfValid(token: String) {
-        productUsage.add(token)
-    }
-
     /**
      * Retrieve the current [Customer]. If [customer] is not stale, this returns immediately with
      * the cache. If not, it fetches a new value and returns that to the listener.
@@ -138,9 +122,17 @@ class CustomerSession @VisibleForTesting internal constructor(
      * customer, either from the cache or from the server
      */
     fun retrieveCurrentCustomer(listener: CustomerRetrievalListener) {
+        retrieveCurrentCustomer(emptySet(), listener)
+    }
+
+    @JvmSynthetic
+    internal fun retrieveCurrentCustomer(
+        productUsage: Set<String>,
+        listener: CustomerRetrievalListener
+    ) {
         cachedCustomer?.let {
             listener.onCustomerRetrieved(it)
-        } ?: updateCurrentCustomer(listener)
+        } ?: updateCurrentCustomer(productUsage, listener)
     }
 
     /**
@@ -150,9 +142,20 @@ class CustomerSession @VisibleForTesting internal constructor(
      * the customer from the server
      */
     fun updateCurrentCustomer(listener: CustomerRetrievalListener) {
+        updateCurrentCustomer(emptySet(), listener)
+    }
+
+    @JvmSynthetic
+    internal fun updateCurrentCustomer(
+        productUsage: Set<String>,
+        listener: CustomerRetrievalListener
+    ) {
         customer = null
         startOperation(
-            EphemeralOperation.RetrieveKey(operationIdFactory.create()),
+            EphemeralOperation.RetrieveKey(
+                id = operationIdFactory.create(),
+                productUsage = productUsage
+            ),
             listener
         )
     }
@@ -180,11 +183,22 @@ class CustomerSession @VisibleForTesting internal constructor(
         @SourceType sourceType: String,
         listener: SourceRetrievalListener
     ) {
+        addCustomerSource(sourceId, sourceType, emptySet(), listener)
+    }
+
+    @JvmSynthetic
+    internal fun addCustomerSource(
+        sourceId: String,
+        @SourceType sourceType: String,
+        productUsage: Set<String>,
+        listener: SourceRetrievalListener
+    ) {
         startOperation(
             EphemeralOperation.Customer.AddSource(
                 sourceId = sourceId,
                 sourceType = sourceType,
-                id = operationIdFactory.create()
+                id = operationIdFactory.create(),
+                productUsage = productUsage
             ),
             listener
         )
@@ -201,10 +215,20 @@ class CustomerSession @VisibleForTesting internal constructor(
         sourceId: String,
         listener: SourceRetrievalListener
     ) {
+        deleteCustomerSource(sourceId, emptySet(), listener)
+    }
+
+    @JvmSynthetic
+    internal fun deleteCustomerSource(
+        sourceId: String,
+        productUsage: Set<String>,
+        listener: SourceRetrievalListener
+    ) {
         startOperation(
             EphemeralOperation.Customer.DeleteSource(
                 sourceId = sourceId,
-                id = operationIdFactory.create()
+                id = operationIdFactory.create(),
+                productUsage = productUsage
             ),
             listener
         )
@@ -221,10 +245,20 @@ class CustomerSession @VisibleForTesting internal constructor(
         paymentMethodId: String,
         listener: PaymentMethodRetrievalListener
     ) {
+        attachPaymentMethod(paymentMethodId, emptySet(), listener)
+    }
+
+    @JvmSynthetic
+    internal fun attachPaymentMethod(
+        paymentMethodId: String,
+        productUsage: Set<String>,
+        listener: PaymentMethodRetrievalListener
+    ) {
         startOperation(
             EphemeralOperation.Customer.AttachPaymentMethod(
                 paymentMethodId = paymentMethodId,
-                id = operationIdFactory.create()
+                id = operationIdFactory.create(),
+                productUsage = productUsage
             ),
             listener
         )
@@ -241,10 +275,20 @@ class CustomerSession @VisibleForTesting internal constructor(
         paymentMethodId: String,
         listener: PaymentMethodRetrievalListener
     ) {
+        detachPaymentMethod(paymentMethodId, emptySet(), listener)
+    }
+
+    @JvmSynthetic
+    internal fun detachPaymentMethod(
+        paymentMethodId: String,
+        productUsage: Set<String>,
+        listener: PaymentMethodRetrievalListener
+    ) {
         startOperation(
             EphemeralOperation.Customer.DetachPaymentMethod(
                 paymentMethodId = paymentMethodId,
-                id = operationIdFactory.create()
+                id = operationIdFactory.create(),
+                productUsage = productUsage
             ),
             listener
         )
@@ -278,13 +322,33 @@ class CustomerSession @VisibleForTesting internal constructor(
         startingAfter: String? = null,
         listener: PaymentMethodsRetrievalListener
     ) {
+        getPaymentMethods(
+            paymentMethodType = paymentMethodType,
+            limit = limit,
+            endingBefore = endingBefore,
+            startingAfter = startingAfter,
+            productUsage = emptySet(),
+            listener = listener
+        )
+    }
+
+    @JvmSynthetic
+    internal fun getPaymentMethods(
+        paymentMethodType: PaymentMethod.Type,
+        @IntRange(from = 1, to = 100) limit: Int? = null,
+        endingBefore: String? = null,
+        startingAfter: String? = null,
+        productUsage: Set<String>,
+        listener: PaymentMethodsRetrievalListener
+    ) {
         startOperation(
             EphemeralOperation.Customer.GetPaymentMethods(
                 type = paymentMethodType,
                 limit = limit,
                 endingBefore = endingBefore,
                 startingAfter = startingAfter,
-                id = operationIdFactory.create()
+                id = operationIdFactory.create(),
+                productUsage = productUsage
             ),
             listener
         )
@@ -295,8 +359,8 @@ class CustomerSession @VisibleForTesting internal constructor(
         listener: PaymentMethodsRetrievalListener
     ) {
         getPaymentMethods(
-            paymentMethodType,
-            limit = null,
+            paymentMethodType = paymentMethodType,
+            productUsage = emptySet(),
             listener = listener
         )
     }
@@ -310,10 +374,20 @@ class CustomerSession @VisibleForTesting internal constructor(
         shippingInformation: ShippingInformation,
         listener: CustomerRetrievalListener
     ) {
+        setCustomerShippingInformation(shippingInformation, emptySet(), listener)
+    }
+
+    @JvmSynthetic
+    internal fun setCustomerShippingInformation(
+        shippingInformation: ShippingInformation,
+        productUsage: Set<String>,
+        listener: CustomerRetrievalListener
+    ) {
         startOperation(
             EphemeralOperation.Customer.UpdateShipping(
                 shippingInformation = shippingInformation,
-                id = operationIdFactory.create()
+                id = operationIdFactory.create(),
+                productUsage = productUsage
             ),
             listener
         )
@@ -331,11 +405,22 @@ class CustomerSession @VisibleForTesting internal constructor(
         @SourceType sourceType: String,
         listener: CustomerRetrievalListener
     ) {
+        setCustomerDefaultSource(sourceId, sourceType, emptySet(), listener)
+    }
+
+    @JvmSynthetic
+    internal fun setCustomerDefaultSource(
+        sourceId: String,
+        @SourceType sourceType: String,
+        productUsage: Set<String>,
+        listener: CustomerRetrievalListener
+    ) {
         startOperation(
             EphemeralOperation.Customer.UpdateDefaultSource(
                 sourceId = sourceId,
                 sourceType = sourceType,
-                id = operationIdFactory.create()
+                id = operationIdFactory.create(),
+                productUsage = productUsage
             ),
             listener
         )
@@ -347,11 +432,6 @@ class CustomerSession @VisibleForTesting internal constructor(
     ) {
         listeners[operation.id] = listener
         ephemeralKeyManager.retrieveEphemeralKey(operation)
-    }
-
-    @JvmSynthetic
-    internal fun resetUsageTokens() {
-        productUsage.reset()
     }
 
     private val canUseCachedCustomer: Boolean
@@ -372,7 +452,6 @@ class CustomerSession @VisibleForTesting internal constructor(
                 exception.stripeError
             )
         }
-        resetUsageTokens()
     }
 
     private fun <L : RetrievalListener?> getListener(operationId: String): L? {

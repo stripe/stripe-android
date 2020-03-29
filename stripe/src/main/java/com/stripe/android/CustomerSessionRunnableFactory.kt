@@ -15,8 +15,7 @@ internal class CustomerSessionRunnableFactory(
     private val stripeRepository: StripeRepository,
     private val handler: Handler,
     private val publishableKey: String,
-    private val stripeAccountId: String?,
-    private val productUsage: CustomerSessionProductUsage
+    private val stripeAccountId: String?
 ) {
     enum class ResultType {
         Error,
@@ -99,7 +98,7 @@ internal class CustomerSessionRunnableFactory(
                 return stripeRepository.addCustomerSource(
                     key.objectId,
                     publishableKey,
-                    productUsage.get(),
+                    operation.productUsage,
                     operation.sourceId,
                     operation.sourceType,
                     ApiRequest.Options(key.secret, stripeAccountId)
@@ -122,7 +121,7 @@ internal class CustomerSessionRunnableFactory(
                 return stripeRepository.deleteCustomerSource(
                     key.objectId,
                     publishableKey,
-                    productUsage.get(),
+                    operation.productUsage,
                     operation.sourceId,
                     ApiRequest.Options(key.secret, stripeAccountId)
                 )
@@ -144,7 +143,7 @@ internal class CustomerSessionRunnableFactory(
                 return stripeRepository.attachPaymentMethod(
                     key.objectId,
                     publishableKey,
-                    productUsage.get(),
+                    operation.productUsage,
                     operation.paymentMethodId,
                     ApiRequest.Options(key.secret, stripeAccountId)
                 )
@@ -165,7 +164,7 @@ internal class CustomerSessionRunnableFactory(
             public override fun createMessageObject(): PaymentMethod? {
                 return stripeRepository.detachPaymentMethod(
                     publishableKey,
-                    productUsage.get(),
+                    operation.productUsage,
                     operation.paymentMethodId,
                     ApiRequest.Options(key.secret, stripeAccountId)
                 )
@@ -193,7 +192,7 @@ internal class CustomerSessionRunnableFactory(
                         startingAfter = operation.startingAfter
                     ),
                     publishableKey,
-                    productUsage.get(),
+                    operation.productUsage,
                     ApiRequest.Options(key.secret, stripeAccountId)
                 )
             }
@@ -214,7 +213,7 @@ internal class CustomerSessionRunnableFactory(
                 return stripeRepository.setDefaultCustomerSource(
                     key.objectId,
                     publishableKey,
-                    productUsage.get(),
+                    operation.productUsage,
                     operation.sourceId,
                     operation.sourceType,
                     ApiRequest.Options(key.secret, stripeAccountId)
@@ -237,7 +236,7 @@ internal class CustomerSessionRunnableFactory(
                 return stripeRepository.setCustomerShippingInfo(
                     key.objectId,
                     publishableKey,
-                    productUsage.get(),
+                    operation.productUsage,
                     operation.shippingInformation,
                     ApiRequest.Options(key.secret, stripeAccountId)
                 )
@@ -256,7 +255,7 @@ internal class CustomerSessionRunnableFactory(
         ) {
             @Throws(StripeException::class)
             public override fun createMessageObject(): Customer? {
-                return retrieveCustomerWithKey(key)
+                return retrieveCustomerWithKey(key, operation.productUsage)
             }
         }
     }
@@ -269,9 +268,13 @@ internal class CustomerSessionRunnableFactory(
      * @return a [Customer] if one can be found with this key, or `null` if one cannot.
      */
     @Throws(StripeException::class)
-    private fun retrieveCustomerWithKey(key: EphemeralKey): Customer? {
+    private fun retrieveCustomerWithKey(
+        key: EphemeralKey,
+        productUsage: Set<String>
+    ): Customer? {
         return stripeRepository.retrieveCustomer(
             key.objectId,
+            productUsage,
             ApiRequest.Options(key.secret, stripeAccountId)
         )
     }
