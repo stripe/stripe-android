@@ -109,6 +109,8 @@ data class PaymentIntent internal constructor(
      */
     val nextAction: Map<String, @RawValue Any?>? = null,
 
+    override val paymentMethod: PaymentMethod? = null,
+
     /**
      * @return ID of the payment method (a PaymentMethod, Card, BankAccount, or saved Source object)
      * to attach to this PaymentIntent.

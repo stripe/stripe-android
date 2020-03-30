@@ -29,6 +29,8 @@ interface StripeIntent : StripeModel {
      */
     val isLiveMode: Boolean
 
+    val paymentMethod: PaymentMethod?
+
     /**
      * ID of the payment method used in this PaymentIntent.
      */

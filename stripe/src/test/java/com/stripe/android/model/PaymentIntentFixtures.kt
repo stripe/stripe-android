@@ -481,4 +481,83 @@ internal object PaymentIntentFixtures {
         }
         """.trimIndent()
     ))
+
+    val EXPANDED_PAYMENT_METHOD = JSONObject(
+        """
+        {
+            "id": "pi_1GSTxJCRMbs",
+            "object": "payment_intent",
+            "amount": 1099,
+            "canceled_at": null,
+            "cancellation_reason": null,
+            "capture_method": "automatic",
+            "client_secret": "pi_1GSTxJCRMbs_secret_NqmhRfE9f",
+            "confirmation_method": "automatic",
+            "created": 1585599093,
+            "currency": "usd",
+            "description": "Example PaymentIntent",
+            "last_payment_error": null,
+            "livemode": false,
+            "payment_method": {
+                "id": "pm_1GSTxOCRMbs6FrXfYCosDqyr",
+                "object": "payment_method",
+                "billing_details": {
+                    "address": {
+                        "city": null,
+                        "country": null,
+                        "line1": null,
+                        "line2": null,
+                        "postal_code": null,
+                        "state": null
+                    },
+                    "email": null,
+                    "name": null,
+                    "phone": null
+                },
+                "card": {
+                    "brand": "visa",
+                    "checks": {
+                        "address_line1_check": null,
+                        "address_postal_code_check": null,
+                        "cvc_check": null
+                    },
+                    "country": "IE",
+                    "exp_month": 1,
+                    "exp_year": 2025,
+                    "funding": "credit",
+                    "generated_from": null,
+                    "last4": "3238",
+                    "three_d_secure_usage": {
+                        "supported": true
+                    },
+                    "wallet": null
+                },
+                "created": 1585599098,
+                "customer": null,
+                "livemode": false,
+                "metadata": {},
+                "type": "card"
+            },
+            "payment_method_types": ["card"],
+            "receipt_email": null,
+            "setup_future_usage": null,
+            "shipping": {
+                "address": {
+                    "city": "San Francisco",
+                    "country": "US",
+                    "line1": "123 Market St",
+                    "line2": "#345",
+                    "postal_code": "94107",
+                    "state": "CA"
+                },
+                "carrier": "Fedex",
+                "name": "Jenny Rosen",
+                "phone": null,
+                "tracking_number": "12345"
+            },
+            "source": null,
+            "status": "requires_action"
+        }
+        """.trimIndent()
+    )
 }
