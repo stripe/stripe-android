@@ -24,6 +24,7 @@ data class PaymentMethodCreateParams internal constructor(
     private val fpx: Fpx? = null,
     private val sepaDebit: SepaDebit? = null,
     private val auBecsDebit: AuBecsDebit? = null,
+    private val bacsDebit: BacsDebit? = null,
     private val billingDetails: PaymentMethod.BillingDetails? = null,
     private val metadata: Map<String, String>? = null,
     private val productUsage: Set<String> = emptySet()
@@ -96,6 +97,17 @@ data class PaymentMethodCreateParams internal constructor(
         metadata = metadata
     )
 
+    private constructor(
+        bacsDebit: BacsDebit,
+        billingDetails: PaymentMethod.BillingDetails,
+        metadata: Map<String, String>?
+    ) : this(
+        type = Type.BacsDebit,
+        bacsDebit = bacsDebit,
+        billingDetails = billingDetails,
+        metadata = metadata
+    )
+
     override fun toParamMap(): Map<String, Any> {
         return mapOf(
             PARAM_TYPE to type.code
@@ -104,23 +116,16 @@ data class PaymentMethodCreateParams internal constructor(
                 mapOf(PARAM_BILLING_DETAILS to it.toParamMap())
             }.orEmpty()
         ).plus(
-            when (type) {
-                Type.Card -> {
-                    mapOf(PARAM_CARD to card?.toParamMap().orEmpty())
+            mapOf(type.code to
+                when (type) {
+                    Type.Card -> card?.toParamMap().orEmpty()
+                    Type.Ideal -> ideal?.toParamMap().orEmpty()
+                    Type.Fpx -> fpx?.toParamMap().orEmpty()
+                    Type.SepaDebit -> sepaDebit?.toParamMap().orEmpty()
+                    Type.AuBecsDebit -> auBecsDebit?.toParamMap().orEmpty()
+                    Type.BacsDebit -> bacsDebit?.toParamMap().orEmpty()
                 }
-                Type.Ideal -> {
-                    mapOf(PARAM_IDEAL to ideal?.toParamMap().orEmpty())
-                }
-                Type.Fpx -> {
-                    mapOf(PARAM_FPX to fpx?.toParamMap().orEmpty())
-                }
-                Type.SepaDebit -> {
-                    mapOf(PARAM_SEPA_DEBIT to sepaDebit?.toParamMap().orEmpty())
-                }
-                Type.AuBecsDebit -> {
-                    mapOf(PARAM_AU_BECS_DEBIT to auBecsDebit?.toParamMap().orEmpty())
-                }
-            }
+            )
         ).plus(
             metadata?.let {
                 mapOf(PARAM_METADATA to it)
@@ -133,7 +138,8 @@ data class PaymentMethodCreateParams internal constructor(
         Ideal("ideal"),
         Fpx("fpx"),
         SepaDebit("sepa_debit", true),
-        AuBecsDebit("au_becs_debit", true)
+        AuBecsDebit("au_becs_debit", true),
+        BacsDebit("bacs_debit", true)
     }
 
     @Parcelize
@@ -311,14 +317,38 @@ data class PaymentMethodCreateParams internal constructor(
         }
     }
 
+    /**
+     * BACS bank account details
+     *
+     * See [https://stripe.com/docs/api/payment_methods/create#create_payment_method-bacs_debit](https://stripe.com/docs/api/payment_methods/create#create_payment_method-bacs_debit)
+     */
+    @Parcelize
+    data class BacsDebit(
+        /**
+         * The bank account number (e.g. 00012345)
+         */
+        var accountNumber: String,
+
+        /**
+         * The sort code of the bank account (e.g. 10-88-00)
+         */
+        var sortCode: String
+    ) : StripeParamsModel, Parcelable {
+        override fun toParamMap(): Map<String, Any> {
+            return mapOf(
+                PARAM_ACCOUNT_NUMBER to accountNumber,
+                PARAM_SORT_CODE to sortCode
+            )
+        }
+
+        private companion object {
+            private const val PARAM_ACCOUNT_NUMBER: String = "account_number"
+            private const val PARAM_SORT_CODE: String = "sort_code"
+        }
+    }
+
     companion object {
         private const val PARAM_TYPE = "type"
-        private const val PARAM_CARD = "card"
-        private const val PARAM_FPX = "fpx"
-        private const val PARAM_IDEAL = "ideal"
-        private const val PARAM_SEPA_DEBIT = "sepa_debit"
-        private const val PARAM_AU_BECS_DEBIT = "au_becs_debit"
-
         private const val PARAM_BILLING_DETAILS = "billing_details"
         private const val PARAM_METADATA = "metadata"
 
@@ -385,6 +415,19 @@ data class PaymentMethodCreateParams internal constructor(
             metadata: Map<String, String>? = null
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(auBecsDebit, billingDetails, metadata)
+        }
+
+        /**
+         * @return params for creating a `PaymentMethod.Type.BacsDebit` payment method
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun create(
+            bacsDebit: BacsDebit,
+            billingDetails: PaymentMethod.BillingDetails,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(bacsDebit, billingDetails, metadata)
         }
 
         /**

@@ -96,7 +96,34 @@ class PaymentMethodCreateParamsTest {
                             "city" to "Los Angeles",
                             "country" to "US",
                             "line1" to "123 Main St",
-                            "state" to "CA"
+                            "state" to "CA",
+                            "postal_code" to "90012"
+                        ),
+                        "email" to "me@example.com",
+                        "name" to "Home",
+                        "phone" to "1-800-555-1234"
+                    )
+                )
+            )
+    }
+
+    @Test
+    fun bacsDebit_toParamMap_shouldCreateExpectedMap() {
+        assertThat(PaymentMethodCreateParamsFixtures.BACS_DEBIT.toParamMap())
+            .isEqualTo(
+                mapOf(
+                    "type" to "bacs_debit",
+                    "bacs_debit" to mapOf(
+                        "account_number" to "00012345",
+                        "sort_code" to "108800"
+                    ),
+                    "billing_details" to mapOf(
+                        "address" to mapOf(
+                            "city" to "Los Angeles",
+                            "country" to "US",
+                            "line1" to "123 Main St",
+                            "state" to "CA",
+                            "postal_code" to "90012"
                         ),
                         "email" to "me@example.com",
                         "name" to "Home",

@@ -75,7 +75,8 @@ class FingerprintParamsUtilsTest {
                             "city" to "Los Angeles",
                             "country" to "US",
                             "line1" to "123 Main St",
-                            "state" to "CA"
+                            "state" to "CA",
+                            "postal_code" to "90012"
                         ),
                         "email" to "me@example.com",
                         "name" to "Home",
