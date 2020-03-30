@@ -18,7 +18,6 @@ import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
 import com.stripe.android.view.BillingAddressFields
 import com.stripe.android.view.PaymentUtils
-import com.stripe.android.view.ShippingInfoWidget
 import com.stripe.example.R
 import com.stripe.example.databinding.PaymentSessionActivityBinding
 import java.util.Currency
@@ -74,11 +73,7 @@ class PaymentSessionActivity : AppCompatActivity() {
             config = PaymentSessionConfig.Builder()
                 .setAddPaymentMethodFooter(R.layout.add_payment_method_footer)
                 .setPrepopulatedShippingInfo(EXAMPLE_SHIPPING_INFO)
-                .setHiddenShippingInfoFields(
-                    ShippingInfoWidget.CustomizableShippingField.PHONE_FIELD,
-                    ShippingInfoWidget.CustomizableShippingField.CITY_FIELD
-                )
-
+                .setHiddenShippingInfoFields()
                 // Optionally specify the `PaymentMethod.Type` values to use.
                 // Defaults to `PaymentMethod.Type.Card`
                 .setPaymentMethodTypes(listOf(PaymentMethod.Type.Card))
