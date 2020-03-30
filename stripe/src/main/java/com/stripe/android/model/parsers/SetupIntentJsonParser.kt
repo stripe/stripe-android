@@ -20,8 +20,9 @@ internal class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
         val paymentMethod = json.optJSONObject(FIELD_PAYMENT_METHOD)?.let {
             PaymentMethodJsonParser().parse(it)
         }
-        val paymentMethodId = StripeJsonUtils.optString(json, FIELD_PAYMENT_METHOD_ID)
-            ?: paymentMethod?.id
+        val paymentMethodId =
+            StripeJsonUtils.optString(json, FIELD_PAYMENT_METHOD).takeIf { paymentMethod == null }
+                ?: paymentMethod?.id
 
         return SetupIntent(
             id = StripeJsonUtils.optString(json, FIELD_ID),
@@ -90,7 +91,6 @@ internal class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
         private const val FIELD_STATUS = "status"
         private const val FIELD_USAGE = "usage"
         private const val FIELD_PAYMENT_METHOD = "payment_method"
-        private const val FIELD_PAYMENT_METHOD_ID = "payment_method_id"
 
         private const val FIELD_NEXT_ACTION_TYPE = "type"
     }
