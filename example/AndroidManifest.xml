@@ -80,22 +80,18 @@
 
         <activity
             android:name=".activity.PaymentAuthActivity" />
-
         <activity
             android:name=".activity.FragmentExamplesActivity" />
-
         <activity
             android:name=".activity.ConfirmSepaDebitActivity" />
-
         <activity
             android:name=".activity.FpxPaymentActivity" />
-
         <activity
             android:name=".activity.BecsDebitPaymentMethodActivity" />
-
+        <activity
+            android:name=".activity.BacsDebitPaymentMethodActivity" />
         <activity
             android:name=".activity.KlarnaSourceActivity" />
-
         <activity
             android:name=".activity.CardBrandsActivity" />
     </application>
