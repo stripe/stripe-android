@@ -30,7 +30,7 @@ internal object PaymentMethodFixtures {
             city = "San Francisco",
             state = "CA",
             postalCode = "94103",
-            country = "USA"
+            country = "US"
         ),
         email = "patrick@example.com",
         name = "Patrick",
@@ -128,7 +128,7 @@ internal object PaymentMethodFixtures {
                 "billing_details": {
                     "address": {
                         "city": "San Francisco",
-                        "country": "USA",
+                        "country": "US",
                         "line1": "510 Townsend St",
                         "postal_code": "94103",
                         "state": "CA"
@@ -220,7 +220,7 @@ internal object PaymentMethodFixtures {
                 "billing_details": {
                     "address": {
                         "city": "San Francisco",
-                        "country": "USA",
+                        "country": "US",
                         "line1": "510 Townsend St",
                         "postal_code": "94103",
                         "state": "CA"
@@ -245,7 +245,7 @@ internal object PaymentMethodFixtures {
                 "billing_details": {
                     "address": {
                         "city": "San Francisco",
-                        "country": "USA",
+                        "country": "US",
                         "line1": "510 Townsend St",
                         "line2": null,
                         "postal_code": "94103",

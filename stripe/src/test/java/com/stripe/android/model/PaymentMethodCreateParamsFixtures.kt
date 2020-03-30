@@ -25,7 +25,8 @@ internal object PaymentMethodCreateParamsFixtures {
             line1 = "123 Main St",
             city = "Los Angeles",
             state = "CA",
-            country = "US"
+            country = "US",
+            postalCode = "90012"
         )
     )
 
@@ -51,6 +52,14 @@ internal object PaymentMethodCreateParamsFixtures {
             accountNumber = "000123456"
         ),
         BILLING_DETAILS
+    )
+
+    internal val BACS_DEBIT = PaymentMethodCreateParams.create(
+        bacsDebit = PaymentMethodCreateParams.BacsDebit(
+            accountNumber = "00012345",
+            sortCode = "108800"
+        ),
+        billingDetails = BILLING_DETAILS
     )
 
     @JvmStatic
