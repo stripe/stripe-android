@@ -526,9 +526,17 @@ internal class StripePaymentController internal constructor(
         override suspend fun getResult(): StripeIntent? {
             return when (params) {
                 is ConfirmPaymentIntentParams ->
-                    stripeRepository.confirmPaymentIntent(params, requestOptions)
+                    stripeRepository.confirmPaymentIntent(
+                        params,
+                        requestOptions,
+                        expandFields = listOf("payment_method")
+                    )
                 is ConfirmSetupIntentParams ->
-                    stripeRepository.confirmSetupIntent(params, requestOptions)
+                    stripeRepository.confirmSetupIntent(
+                        params,
+                        requestOptions,
+                        expandFields = listOf("payment_method")
+                    )
                 else -> null
             }
         }

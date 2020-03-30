@@ -34,7 +34,8 @@ internal interface StripeRepository {
         APIConnectionException::class, APIException::class)
     fun confirmPaymentIntent(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
-        options: ApiRequest.Options
+        options: ApiRequest.Options,
+        expandFields: List<String> = emptyList()
     ): PaymentIntent?
 
     @Throws(AuthenticationException::class, InvalidRequestException::class,
@@ -56,7 +57,8 @@ internal interface StripeRepository {
         APIConnectionException::class, APIException::class)
     fun confirmSetupIntent(
         confirmSetupIntentParams: ConfirmSetupIntentParams,
-        options: ApiRequest.Options
+        options: ApiRequest.Options,
+        expandFields: List<String> = emptyList()
     ): SetupIntent?
 
     @Throws(AuthenticationException::class, InvalidRequestException::class,

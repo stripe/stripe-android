@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import androidx.annotation.IntDef
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import java.util.Objects
 
@@ -40,7 +41,11 @@ abstract class StripeIntentResult<T : StripeIntent> internal constructor(
                 return Outcome.SUCCEEDED
             }
             StripeIntent.Status.Processing -> {
-                return Outcome.UNKNOWN
+                return if (PROCESSING_IS_SUCCESS.contains(intent.paymentMethod?.type)) {
+                    Outcome.SUCCEEDED
+                } else {
+                    Outcome.UNKNOWN
+                }
             }
             else -> {
                 return Outcome.UNKNOWN
@@ -93,5 +98,12 @@ abstract class StripeIntentResult<T : StripeIntent> internal constructor(
              */
             const val TIMEDOUT: Int = 4
         }
+    }
+
+    private companion object {
+        private val PROCESSING_IS_SUCCESS = setOf(
+            PaymentMethod.Type.SepaDebit,
+            PaymentMethod.Type.BacsDebit
+        )
     }
 }

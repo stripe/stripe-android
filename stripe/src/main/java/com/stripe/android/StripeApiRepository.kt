@@ -101,10 +101,12 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         APIConnectionException::class, APIException::class)
     override fun confirmPaymentIntent(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
-        options: ApiRequest.Options
+        options: ApiRequest.Options,
+        expandFields: List<String>
     ): PaymentIntent? {
         val params = fingerprintParamsUtils.addFingerprintData(
-            confirmPaymentIntentParams.toParamMap(),
+            confirmPaymentIntentParams.toParamMap()
+                .plus(createExpandParam(expandFields)),
             fingerprintGuid
         )
         val apiUrl = getConfirmPaymentIntentUrl(
@@ -212,7 +214,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         APIConnectionException::class, APIException::class)
     override fun confirmSetupIntent(
         confirmSetupIntentParams: ConfirmSetupIntentParams,
-        options: ApiRequest.Options
+        options: ApiRequest.Options,
+        expandFields: List<String>
     ): SetupIntent? {
         val setupIntentId =
             SetupIntent.ClientSecret(confirmSetupIntentParams.clientSecret).setupIntentId
@@ -232,7 +235,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     getConfirmSetupIntentUrl(setupIntentId),
                     options,
                     fingerprintParamsUtils.addFingerprintData(
-                        confirmSetupIntentParams.toParamMap(),
+                        confirmSetupIntentParams.toParamMap()
+                            .plus(createExpandParam(expandFields)),
                         fingerprintGuid
                     )
                 ),
@@ -1272,6 +1276,12 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
         private fun getApiUrl(path: String): String {
             return "${ApiRequest.API_HOST}/v1/$path"
+        }
+
+        private fun createExpandParam(expandFields: List<String>): Map<String, List<String>> {
+            return expandFields.takeIf { it.isNotEmpty() }?.let {
+                mapOf("expand" to it)
+            }.orEmpty()
         }
     }
 }
