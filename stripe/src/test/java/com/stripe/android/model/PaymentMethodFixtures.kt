@@ -78,6 +78,20 @@ internal object PaymentMethodFixtures {
         metadata = emptyMap()
     )
 
+    val BACS_DEBIT_PAYMENT_METHOD = PaymentMethod(
+        id = "pm_1GSREqL6pqDH",
+        created = 1585588648L,
+        liveMode = false,
+        type = PaymentMethod.Type.BacsDebit,
+        billingDetails = BILLING_DETAILS,
+        bacsDebit = PaymentMethod.BacsDebit(
+            fingerprint = "UkSG0Hf",
+            last4 = "2345",
+            sortCode = "108800"
+        ),
+        metadata = emptyMap()
+    )
+
     val SEPA_DEBIT_JSON = JSONObject(
         """
         {
@@ -296,6 +310,38 @@ internal object PaymentMethodFixtures {
             "livemode": false,
             "metadata": {},
             "type": "au_becs_debit"
+        }
+        """.trimIndent()
+    )
+
+    val BACS_DEBIT_JSON = JSONObject(
+        """
+        {
+            "id": "pm_1GSREqL6pqDH",
+            "object": "payment_method",
+            "bacs_debit": {
+                "fingerprint": "UkSG0Hf",
+                "last4": "2345",
+                "sort_code": "108800"
+            },
+            "billing_details": {
+                "address": {
+                    "city": "San Francisco",
+                    "country": "US",
+                    "line1": "510 Townsend St",
+                    "line2": null,
+                    "postal_code": "94103",
+                    "state": "CA"
+                },
+                "email": "patrick@example.com",
+                "name": "Patrick",
+                "phone": "123-456-7890"
+            },
+            "created": 1585588648,
+            "customer": null,
+            "livemode": false,
+            "metadata": {},
+            "type": "bacs_debit"
         }
         """.trimIndent()
     )
