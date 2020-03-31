@@ -27,7 +27,14 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
         val currency = StripeJsonUtils.optCurrency(json, FIELD_CURRENCY)
         val description = StripeJsonUtils.optString(json, FIELD_DESCRIPTION)
         val livemode = StripeJsonUtils.optBoolean(json, FIELD_LIVEMODE)
-        val paymentMethodId = StripeJsonUtils.optString(json, FIELD_PAYMENT_METHOD_ID)
+
+        val paymentMethod = json.optJSONObject(FIELD_PAYMENT_METHOD)?.let {
+            PaymentMethodJsonParser().parse(it)
+        }
+        val paymentMethodId =
+            StripeJsonUtils.optString(json, FIELD_PAYMENT_METHOD).takeIf { paymentMethod == null }
+                ?: paymentMethod?.id
+
         val receiptEmail = StripeJsonUtils.optString(json, FIELD_RECEIPT_EMAIL)
         val status = StripeIntent.Status.fromCode(
             StripeJsonUtils.optString(json, FIELD_STATUS)
@@ -56,6 +63,7 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
             description = description,
             isLiveMode = livemode,
             nextAction = nextAction,
+            paymentMethod = paymentMethod,
             paymentMethodId = paymentMethodId,
             receiptEmail = receiptEmail,
             status = status,
@@ -111,7 +119,7 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
         private const val FIELD_LAST_PAYMENT_ERROR = "last_payment_error"
         private const val FIELD_LIVEMODE = "livemode"
         private const val FIELD_NEXT_ACTION = "next_action"
-        private const val FIELD_PAYMENT_METHOD_ID = "payment_method_id"
+        private const val FIELD_PAYMENT_METHOD = "payment_method"
         private const val FIELD_PAYMENT_METHOD_TYPES = "payment_method_types"
         private const val FIELD_RECEIPT_EMAIL = "receipt_email"
         private const val FIELD_STATUS = "status"

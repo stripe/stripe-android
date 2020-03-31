@@ -56,6 +56,8 @@ data class SetupIntent internal constructor(
 
     override val nextActionType: StripeIntent.NextActionType? = null,
 
+    override val paymentMethod: PaymentMethod? = null,
+
     /**
      * @return ID of the payment method used with this SetupIntent.
      */

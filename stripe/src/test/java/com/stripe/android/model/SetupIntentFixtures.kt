@@ -6,7 +6,7 @@ import org.json.JSONObject
 internal object SetupIntentFixtures {
     private val PARSER = SetupIntentJsonParser()
 
-    private val SI_NEXT_ACTION_REDIRECT_JSON = JSONObject(
+    internal val SI_NEXT_ACTION_REDIRECT_JSON = JSONObject(
         """
         {
             "id": "seti_1EqTSZGMT9dGPIDGVzCUs6dV",
@@ -137,6 +137,64 @@ internal object SetupIntentFixtures {
         }
         """.trimIndent()
     )))
+
+    internal val EXPANDED_PAYMENT_METHOD = JSONObject(
+        """
+        {
+            "id": "seti_1GSmaFCRMbs",
+            "object": "setup_intent",
+            "cancellation_reason": null,
+            "client_secret": "seti_1GSmaFCRMbs6FrXfmjThcHan_secret_H0oC2iSB4FtW4d",
+            "created": 1585670699,
+            "description": null,
+            "last_setup_error": null,
+            "livemode": false,
+            "payment_method": {
+                "id": "pm_1GSmaGCRMbs6F",
+                "object": "payment_method",
+                "billing_details": {
+                    "address": {
+                        "city": null,
+                        "country": null,
+                        "line1": null,
+                        "line2": null,
+                        "postal_code": null,
+                        "state": null
+                    },
+                    "email": null,
+                    "name": null,
+                    "phone": null
+                },
+                "card": {
+                    "brand": "visa",
+                    "checks": {
+                        "address_line1_check": null,
+                        "address_postal_code_check": null,
+                        "cvc_check": null
+                    },
+                    "country": "IE",
+                    "exp_month": 1,
+                    "exp_year": 2025,
+                    "funding": "credit",
+                    "generated_from": null,
+                    "last4": "3238",
+                    "three_d_secure_usage": {
+                        "supported": true
+                    },
+                    "wallet": null
+                },
+                "created": 1585670700,
+                "customer": null,
+                "livemode": false,
+                "metadata": {},
+                "type": "card"
+            },
+            "payment_method_types": ["card"],
+            "status": "requires_action",
+            "usage": "off_session"
+        }
+        """.trimIndent()
+    )
 
     val SI_NEXT_ACTION_REDIRECT = requireNotNull(
         PARSER.parse(SI_NEXT_ACTION_REDIRECT_JSON)
