@@ -20,6 +20,7 @@
     <string name="launch_confirm_pm_sepa_debit">Confirm with SEPA Debit Payment Method</string>
     <string name="fpx_payment_example">FPX Payment Example</string>
     <string name="klarna_source_example">Klarna Source Example</string>
+    <string name="bacs_debit_example">BACS Debit Element Example</string>
     <string name="becs_debit_example">BECS Debit Element Example</string>
     <string name="card_brands">Card Brands</string>
 
@@ -74,6 +75,9 @@
     <string name="confirm_wth_sepa_debit_button">Confirm with SEPA Debit Payment Method</string>
     <string name="sepa_debit_helper">Test account number: DE89370400440532013000</string>
 
-    <string name="create_becs_debit_params">Create BECS Debit Params</string>
+    <string name="confirm_with_becs_debit">Confirm with BECS Debit</string>
     <string name="becs_company_name">Rocketship Inc.</string>
+
+    <string name="confirm_with_bacs_debit">Confirm with BACS Debit</string>
+
 </resources>
