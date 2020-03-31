@@ -103,7 +103,8 @@ abstract class StripeIntentResult<T : StripeIntent> internal constructor(
     private companion object {
         private val PROCESSING_IS_SUCCESS = setOf(
             PaymentMethod.Type.SepaDebit,
-            PaymentMethod.Type.BacsDebit
+            PaymentMethod.Type.BacsDebit,
+            PaymentMethod.Type.AuBecsDebit
         )
     }
 }
