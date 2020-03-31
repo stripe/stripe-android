@@ -107,7 +107,9 @@ data class PaymentMethod internal constructor(
      */
     @JvmField val sepaDebit: SepaDebit? = null,
 
-    @JvmField val auBecsDebit: AuBecsDebit? = null
+    @JvmField val auBecsDebit: AuBecsDebit? = null,
+
+    @JvmField val bacsDebit: BacsDebit? = null
 ) : StripeModel {
 
     @Parcelize
@@ -120,7 +122,8 @@ data class PaymentMethod internal constructor(
         Fpx("fpx", false),
         Ideal("ideal"),
         SepaDebit("sepa_debit"),
-        AuBecsDebit("au_becs_debit");
+        AuBecsDebit("au_becs_debit"),
+        BacsDebit("bacs_debit");
 
         override fun toString(): String {
             return code
@@ -148,6 +151,7 @@ data class PaymentMethod internal constructor(
         private var fpx: Fpx? = null
         private var sepaDebit: SepaDebit? = null
         private var auBecsDebit: AuBecsDebit? = null
+        private var bacsDebit: BacsDebit? = null
 
         fun setId(id: String?): Builder = apply {
             this.id = id
@@ -201,6 +205,10 @@ data class PaymentMethod internal constructor(
             this.auBecsDebit = auBecsDebit
         }
 
+        fun setBacsDebit(bacsDebit: BacsDebit?): Builder = apply {
+            this.bacsDebit = bacsDebit
+        }
+
         override fun build(): PaymentMethod {
             return PaymentMethod(
                 id = id,
@@ -215,7 +223,8 @@ data class PaymentMethod internal constructor(
                 fpx = fpx,
                 ideal = ideal,
                 sepaDebit = sepaDebit,
-                auBecsDebit = auBecsDebit
+                auBecsDebit = auBecsDebit,
+                bacsDebit = bacsDebit
             )
         }
     }
@@ -626,6 +635,13 @@ data class PaymentMethod internal constructor(
         @JvmField val bsbNumber: String?,
         @JvmField val fingerprint: String?,
         @JvmField val last4: String?
+    ) : StripeModel
+
+    @Parcelize
+    data class BacsDebit internal constructor(
+        @JvmField val fingerprint: String?,
+        @JvmField val last4: String?,
+        @JvmField val sortCode: String?
     ) : StripeModel
 
     companion object {

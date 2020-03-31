@@ -56,6 +56,12 @@ class PaymentMethodJsonParserTest {
     }
 
     @Test
+    fun parse_withBacsDebit_shouldCreateExpectedObject() {
+        assertThat(PaymentMethodJsonParser().parse(PaymentMethodFixtures.BACS_DEBIT_JSON))
+            .isEqualTo(PaymentMethodFixtures.BACS_DEBIT_PAYMENT_METHOD)
+    }
+
+    @Test
     fun parse_withSepaDebit_shouldCreateExpectedObject() {
         assertThat(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
             .isEqualTo(
