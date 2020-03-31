@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import androidx.annotation.DrawableRes
 import com.stripe.android.R
+import java.util.regex.Pattern
 
 /**
  * A representation of supported card brands and related data
@@ -29,7 +30,7 @@ enum class CardBrand(
     /**
      * Based on [Issuer identification number table](http://en.wikipedia.org/wiki/Bank_card_number#Issuer_identification_number_.28IIN.29)
      */
-    val prefixes: List<String> = emptyList(),
+    val pattern: Pattern? = null,
 
     /**
      * The position of spaces in a formatted card number. For example, "4242424242424242" is
@@ -40,9 +41,9 @@ enum class CardBrand(
     /**
      * By default, a [CardBrand] does not have variants.
      */
-    private val variantMaxLength: Map<String, Int> = emptyMap(),
+    private val variantMaxLength: Map<Pattern, Int> = emptyMap(),
 
-    private val variantSpacePositions: Map<String, Set<Int>> = emptyMap()
+    private val variantSpacePositions: Map<Pattern, Set<Int>> = emptyMap()
 ) {
     AmericanExpress(
         "amex",
@@ -52,7 +53,7 @@ enum class CardBrand(
         errorIcon = R.drawable.stripe_ic_error_amex,
         cvcLength = setOf(3, 4),
         defaultMaxLength = 15,
-        prefixes = listOf("34", "37"),
+        pattern = Pattern.compile("^(34|37)[0-9]*$"),
         defaultSpacePositions = setOf(4, 11)
     ),
 
@@ -60,34 +61,38 @@ enum class CardBrand(
         "discover",
         "Discover",
         R.drawable.stripe_ic_discover,
-        prefixes = listOf("60", "64", "65")
+        pattern = Pattern.compile("^(60|64|65)[0-9]*$")
     ),
 
+    /**
+     * JCB
+     *
+     * BIN range: 352800 to 358999
+     */
     JCB(
         "jcb",
         "JCB",
         R.drawable.stripe_ic_jcb,
-        prefixes = listOf("35")
+        pattern = Pattern.compile("^(35)[0-9]*$")
     ),
 
-    // 14-digit Diners Club
+    /**
+     * Diners Club
+     *
+     * 14-digits: BINs starting with 36
+     * 16-digits: BINs starting with 30, 38, 39
+     */
     DinersClub(
         "diners",
         "Diners Club",
         R.drawable.stripe_ic_diners,
         defaultMaxLength = 16,
-        prefixes = listOf(
-            // 14-digits
-            "36",
-
-            // 16-digits
-            "30", "38", "39"
-        ),
+        pattern = Pattern.compile("^(36|30|38|39)[0-9]*$"),
         variantMaxLength = mapOf(
-            "36" to 14
+            Pattern.compile("^(36)[0-9]*$") to 14
         ),
         variantSpacePositions = mapOf(
-            "36" to setOf(4, 11)
+            Pattern.compile("^(36)[0-9]*$") to setOf(4, 11)
         )
     ),
 
@@ -95,25 +100,21 @@ enum class CardBrand(
         "visa",
         "Visa",
         R.drawable.stripe_ic_visa,
-        prefixes = listOf("4")
+        pattern = Pattern.compile("^(4)[0-9]*$")
     ),
 
     MasterCard(
         "mastercard",
         "Mastercard",
         R.drawable.stripe_ic_mastercard,
-        prefixes = listOf(
-            "2221", "2222", "2223", "2224", "2225", "2226", "2227", "2228", "2229", "223", "224",
-            "225", "226", "227", "228", "229", "23", "24", "25", "26", "270", "271", "2720",
-            "50", "51", "52", "53", "54", "55", "67"
-        )
+        pattern = Pattern.compile("^(2221|2222|2223|2224|2225|2226|2227|2228|2229|223|224|225|226|227|228|229|23|24|25|26|270|271|2720|50|51|52|53|54|55|67)[0-9]*$")
     ),
 
     UnionPay(
         "unionpay",
         "UnionPay",
         R.drawable.stripe_ic_unionpay,
-        prefixes = listOf("62")
+        pattern = Pattern.compile("^(62|81)[0-9]*$")
     ),
 
     Unknown(
@@ -158,8 +159,8 @@ enum class CardBrand(
      * Note: currently only [CardBrand.DinersClub] has variants
      */
     fun getMaxLengthForCardNumber(cardNumber: String): Int {
-        return variantMaxLength.entries.firstOrNull { (key, _) ->
-            cardNumber.startsWith(key)
+        return variantMaxLength.entries.firstOrNull { (pattern, _) ->
+            pattern.matcher(cardNumber).matches()
         }?.value ?: defaultMaxLength
     }
 
@@ -175,8 +176,8 @@ enum class CardBrand(
      * Note: currently only [CardBrand.DinersClub] has variants
      */
     fun getSpacePositionsForCardNumber(cardNumber: String): Set<Int> {
-        return variantSpacePositions.entries.firstOrNull { (key, _) ->
-            cardNumber.startsWith(key)
+        return variantSpacePositions.entries.firstOrNull { (pattern, _) ->
+            pattern.matcher(cardNumber).matches()
         }?.value ?: defaultSpacePositions
     }
 
@@ -242,14 +243,13 @@ enum class CardBrand(
          * otherwise, [CardBrand.Unknown]
          */
         fun fromCardNumber(cardNumber: String?): CardBrand {
+            if (cardNumber.isNullOrBlank()) {
+                return Unknown
+            }
+
             return values()
                 .firstOrNull { cardBrand ->
-                    cardBrand.prefixes
-                        .takeIf {
-                            it.isNotEmpty()
-                        }?.any {
-                            cardNumber?.startsWith(it) == true
-                        } == true
+                    cardBrand.pattern?.matcher(cardNumber)?.matches() == true
                 } ?: Unknown
         }
 

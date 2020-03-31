@@ -35,42 +35,32 @@ class CardBrandTest {
 
     @Test
     fun fromCardNumber_withDinersClub14() {
-        assertEquals(
-            CardBrand.DinersClub,
-            CardBrand.fromCardNumber(CardNumberFixtures.DINERS_CLUB_14_NO_SPACES)
-        )
+        assertThat(CardBrand.fromCardNumber(CardNumberFixtures.DINERS_CLUB_14_NO_SPACES))
+            .isEqualTo(CardBrand.DinersClub)
     }
 
     @Test
     fun fromCardNumber_withDinersClub16() {
-        assertEquals(
-            CardBrand.DinersClub,
-            CardBrand.fromCardNumber(CardNumberFixtures.DINERS_CLUB_16_NO_SPACES)
-        )
+        assertThat(CardBrand.fromCardNumber(CardNumberFixtures.DINERS_CLUB_16_NO_SPACES))
+            .isEqualTo(CardBrand.DinersClub)
     }
 
     @Test
     fun fromCardNumber_withJcb() {
-        assertEquals(
-            CardBrand.JCB,
-            CardBrand.fromCardNumber(CardNumberFixtures.JCB_NO_SPACES)
-        )
+        assertThat(CardBrand.fromCardNumber(CardNumberFixtures.JCB_NO_SPACES))
+            .isEqualTo(CardBrand.JCB)
     }
 
     @Test
     fun fromCardNumber_withVisa() {
-        assertEquals(
-            CardBrand.Visa,
-            CardBrand.fromCardNumber(CardNumberFixtures.VISA_NO_SPACES)
-        )
+        assertThat(CardBrand.fromCardNumber(CardNumberFixtures.VISA_NO_SPACES))
+            .isEqualTo(CardBrand.Visa)
     }
 
     @Test
     fun fromCardNumber_withInvalidVisa() {
-        assertEquals(
-            CardBrand.Unknown,
-            CardBrand.fromCardNumber("1" + CardNumberFixtures.VISA_NO_SPACES)
-        )
+        assertThat(CardBrand.fromCardNumber("1" + CardNumberFixtures.VISA_NO_SPACES))
+            .isEqualTo(CardBrand.Unknown)
     }
 
     @Test

@@ -249,35 +249,34 @@ class CardNumberEditTextTest {
         // We reset because just attaching the listener calls the method once.
         lastBrandChangeCallbackInvocation = null
         // There is only one Visa Prefix.
-        cardNumberEditText.setText(cardNumberEditText.text?.toString() + CardBrand.Visa.prefixes[0])
+        cardNumberEditText.setText(cardNumberEditText.text?.toString() + "4")
         assertEquals(CardBrand.Visa, lastBrandChangeCallbackInvocation)
     }
 
     @Test
     fun addAmExPrefix_callsBrandListener() {
-        CardBrand.AmericanExpress.prefixes.forEach(
-            verifyCardBrandPrefix(CardBrand.AmericanExpress)
-        )
+        verifyCardBrandPrefix(CardBrand.AmericanExpress, "34")
     }
 
     @Test
     fun addDinersClubPrefix_callsBrandListener() {
-        CardBrand.DinersClub.prefixes.forEach(verifyCardBrandPrefix(CardBrand.DinersClub))
+        verifyCardBrandPrefix(CardBrand.DinersClub, "36")
+        verifyCardBrandPrefix(CardBrand.DinersClub, "30")
     }
 
     @Test
     fun addDiscoverPrefix_callsBrandListener() {
-        CardBrand.Discover.prefixes.forEach(verifyCardBrandPrefix(CardBrand.Discover))
+        verifyCardBrandPrefix(CardBrand.Discover, "60")
     }
 
     @Test
     fun addMasterCardPrefix_callsBrandListener() {
-        CardBrand.MasterCard.prefixes.forEach(verifyCardBrandPrefix(CardBrand.MasterCard))
+        verifyCardBrandPrefix(CardBrand.MasterCard, "2222")
     }
 
     @Test
     fun addJCBPrefix_callsBrandListener() {
-        CardBrand.JCB.prefixes.forEach(verifyCardBrandPrefix(CardBrand.JCB))
+        verifyCardBrandPrefix(CardBrand.JCB, "35")
     }
 
     @Test
@@ -293,7 +292,7 @@ class CardNumberEditTextTest {
     @Test
     fun enterBrandPrefix_thenDelete_callsUpdateWithUnknown() {
         lastBrandChangeCallbackInvocation = null
-        val dinersPrefix = CardBrand.DinersClub.prefixes[0]
+        val dinersPrefix = "36"
         // All the Diners Club prefixes are longer than one character, but I specifically want
         // to test that a nonempty string still triggers this action, so this test will fail if
         // the Diners Club prefixes are ever changed.
@@ -309,7 +308,7 @@ class CardNumberEditTextTest {
     @Test
     fun enterBrandPrefix_thenClearAllText_callsUpdateWithUnknown() {
         lastBrandChangeCallbackInvocation = null
-        val prefixVisa = CardBrand.Visa.prefixes[0]
+        val prefixVisa = "4"
         cardNumberEditText.setText(cardNumberEditText.text?.toString() + prefixVisa)
         assertEquals(CardBrand.Visa, lastBrandChangeCallbackInvocation)
 
@@ -374,13 +373,14 @@ class CardNumberEditTextTest {
         assertEquals(CardBrand.AmericanExpress, lastBrandChangeCallbackInvocation)
     }
 
-    private fun verifyCardBrandPrefix(cardBrand: CardBrand): (String) -> Unit {
-        return { prefix ->
-            // Reset inside the loop so we don't count each prefix
-            lastBrandChangeCallbackInvocation = null
-            cardNumberEditText.setText(cardNumberEditText.text?.toString() + prefix)
-            assertEquals(cardBrand, lastBrandChangeCallbackInvocation)
-            cardNumberEditText.setText("")
-        }
+    private fun verifyCardBrandPrefix(
+        cardBrand: CardBrand,
+        prefix: String
+    ) {
+        // Reset inside the loop so we don't count each prefix
+        lastBrandChangeCallbackInvocation = null
+        cardNumberEditText.setText(cardNumberEditText.text?.toString() + prefix)
+        assertEquals(cardBrand, lastBrandChangeCallbackInvocation)
+        cardNumberEditText.setText("")
     }
 }
