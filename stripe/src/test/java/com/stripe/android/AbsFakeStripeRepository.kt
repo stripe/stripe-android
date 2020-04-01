@@ -24,7 +24,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
 
     override fun confirmPaymentIntent(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
-        options: ApiRequest.Options
+        options: ApiRequest.Options,
+        expandFields: List<String>
     ): PaymentIntent? {
         return null
     }
@@ -46,7 +47,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
 
     override fun confirmSetupIntent(
         confirmSetupIntentParams: ConfirmSetupIntentParams,
-        options: ApiRequest.Options
+        options: ApiRequest.Options,
+        expandFields: List<String>
     ): SetupIntent? {
         return null
     }

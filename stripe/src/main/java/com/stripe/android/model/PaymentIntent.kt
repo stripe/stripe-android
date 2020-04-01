@@ -42,7 +42,7 @@ data class PaymentIntent internal constructor(
      * @return Populated when `status` is `canceled`, this is the time at which the PaymentIntent
      * was canceled. Measured in seconds since the Unix epoch. If unavailable, will return 0.
      */
-    val canceledAt: Long,
+    val canceledAt: Long = 0L,
 
     /**
      * @return Reason for cancellation of this PaymentIntent
@@ -80,7 +80,7 @@ data class PaymentIntent internal constructor(
      * state after handling `next_action`s, and requires your server to initiate each
      * payment attempt with an explicit confirmation.
      */
-    val confirmationMethod: String?,
+    val confirmationMethod: String? = null,
 
     /**
      * @return Time at which the object was created. Measured in seconds since the Unix epoch.
@@ -125,14 +125,14 @@ data class PaymentIntent internal constructor(
     /**
      * @return Status of this PaymentIntent.
      */
-    override val status: StripeIntent.Status?,
+    override val status: StripeIntent.Status? = null,
 
-    private val setupFutureUsage: StripeIntent.Usage?,
+    private val setupFutureUsage: StripeIntent.Usage? = null,
 
     /**
      * @return The payment error encountered in the previous PaymentIntent confirmation.
      */
-    val lastPaymentError: Error?
+    val lastPaymentError: Error? = null
 ) : StripeIntent {
     @IgnoredOnParcel
     override val nextActionType: StripeIntent.NextActionType? = nextAction?.let {
