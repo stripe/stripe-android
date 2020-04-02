@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import androidx.annotation.DrawableRes
 import com.stripe.android.R
+import com.stripe.android.StripeTextUtils
 import java.util.regex.Pattern
 
 /**
@@ -159,8 +160,10 @@ enum class CardBrand(
      * Note: currently only [CardBrand.DinersClub] has variants
      */
     fun getMaxLengthForCardNumber(cardNumber: String): Int {
+        val normalizedCardNumber =
+            StripeTextUtils.removeSpacesAndHyphens(cardNumber).orEmpty()
         return variantMaxLength.entries.firstOrNull { (pattern, _) ->
-            pattern.matcher(cardNumber).matches()
+            pattern.matcher(normalizedCardNumber).matches()
         }?.value ?: defaultMaxLength
     }
 
@@ -176,8 +179,10 @@ enum class CardBrand(
      * Note: currently only [CardBrand.DinersClub] has variants
      */
     fun getSpacePositionsForCardNumber(cardNumber: String): Set<Int> {
+        val normalizedCardNumber =
+            StripeTextUtils.removeSpacesAndHyphens(cardNumber).orEmpty()
         return variantSpacePositions.entries.firstOrNull { (pattern, _) ->
-            pattern.matcher(cardNumber).matches()
+            pattern.matcher(normalizedCardNumber).matches()
         }?.value ?: defaultSpacePositions
     }
 
