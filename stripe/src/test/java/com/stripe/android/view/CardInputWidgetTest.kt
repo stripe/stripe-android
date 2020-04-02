@@ -620,13 +620,13 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
     fun onUpdateIcon_forCommonLengthBrand_setsLengthOnCvc() {
         // This should set the brand to Visa. Note that more extensive brand checking occurs
         // in CardNumberEditTextTest.
-        cardNumberEditText.append(CardBrand.Visa.prefixes.first())
+        cardNumberEditText.append("4")
         assertTrue(ViewTestUtils.hasMaxLength(cvcEditText, 3))
     }
 
     @Test
     fun onUpdateText_forAmExPrefix_setsLengthOnCvc() {
-        cardNumberEditText.append(CardBrand.AmericanExpress.prefixes.first())
+        cardNumberEditText.append("34")
         assertTrue(ViewTestUtils.hasMaxLength(cvcEditText, 4))
     }
 
