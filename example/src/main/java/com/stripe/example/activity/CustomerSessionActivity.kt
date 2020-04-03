@@ -9,6 +9,7 @@ import com.stripe.android.CustomerSession
 import com.stripe.android.StripeError
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.view.PaymentMethodsActivity
 import com.stripe.android.view.PaymentMethodsActivityStarter
 import com.stripe.example.R
 import com.stripe.example.databinding.CustomerSessionActivityBinding
@@ -26,6 +27,8 @@ class CustomerSessionActivity : AppCompatActivity() {
         SnackbarController(viewBinding.coordinator)
     }
 
+    private var selectedPaymentMethodID: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
@@ -40,7 +43,8 @@ class CustomerSessionActivity : AppCompatActivity() {
     }
 
     private fun launchWithCustomer() {
-        PaymentMethodsActivityStarter(this).startForResult()
+        val args = PaymentMethodsActivityStarter.Args.Builder().setInitialPaymentMethodId(selectedPaymentMethodID).build()
+        PaymentMethodsActivityStarter(this, args).startForResult()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -51,6 +55,7 @@ class CustomerSessionActivity : AppCompatActivity() {
                 PaymentMethodsActivityStarter.Result.fromIntent(data)?.paymentMethod
             paymentMethod?.card?.let { card ->
                 viewBinding.paymentMethod.text = buildCardString(card)
+                selectedPaymentMethodID = paymentMethod?.id
             }
         }
     }

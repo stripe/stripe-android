@@ -23,13 +23,12 @@ import com.stripe.android.model.PaymentMethod
 internal class PaymentMethodsAdapter constructor(
     private val intentArgs: PaymentMethodsActivityStarter.Args,
     private val addableTypes: List<PaymentMethod.Type> = listOf(PaymentMethod.Type.Card),
-    initiallySelectedPaymentMethodId: String? = null,
     private val shouldShowGooglePay: Boolean = false,
     private val useGooglePay: Boolean = false
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     internal val paymentMethods = mutableListOf<PaymentMethod>()
-    internal var selectedPaymentMethodId: String? = initiallySelectedPaymentMethodId
+    internal var selectedPaymentMethodId: String? = null
     internal val selectedPaymentMethod: PaymentMethod?
         get() {
             return selectedPaymentMethodId?.let { selectedPaymentMethodId ->
@@ -46,9 +45,10 @@ internal class PaymentMethodsAdapter constructor(
     }
 
     @JvmSynthetic
-    internal fun setPaymentMethods(paymentMethods: List<PaymentMethod>) {
+    internal fun setPaymentMethods(paymentMethods: List<PaymentMethod>, selected: String?) {
         this.paymentMethods.clear()
         this.paymentMethods.addAll(paymentMethods)
+        this.selectedPaymentMethodId = selected
         notifyDataSetChanged()
     }
 

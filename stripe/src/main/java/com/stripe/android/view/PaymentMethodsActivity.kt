@@ -63,7 +63,6 @@ class PaymentMethodsActivity : AppCompatActivity() {
         PaymentMethodsAdapter(
             args,
             addableTypes = args.paymentMethodTypes,
-            initiallySelectedPaymentMethodId = viewModel.selectedPaymentMethodId,
             shouldShowGooglePay = args.shouldShowGooglePay,
             useGooglePay = args.useGooglePay
         )
@@ -180,7 +179,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
         viewModel.getPaymentMethods().observe(this, Observer {
             when (it) {
                 is PaymentMethodsViewModel.Result.Success -> {
-                    adapter.setPaymentMethods(it.paymentMethods)
+                    adapter.setPaymentMethods(it.paymentMethods, viewModel.selectedPaymentMethodId)
                 }
                 is PaymentMethodsViewModel.Result.Error -> {
                     val exception = it.exception

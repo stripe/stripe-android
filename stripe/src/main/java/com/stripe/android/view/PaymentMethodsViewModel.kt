@@ -37,12 +37,17 @@ internal class PaymentMethodsViewModel(
             snackbarData.value = it
             snackbarData.value = null
         }
+        // auto-select newly added PaymentMethod
+        selectedPaymentMethodId = paymentMethod.id
     }
 
     internal fun onPaymentMethodRemoved(paymentMethod: PaymentMethod) {
         createSnackbarText(paymentMethod, R.string.removed)?.let {
             snackbarData.value = it
             snackbarData.value = null
+        }
+        if (paymentMethod.id == selectedPaymentMethodId) {
+            selectedPaymentMethodId = null
         }
     }
 
