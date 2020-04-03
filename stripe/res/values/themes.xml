@@ -24,6 +24,8 @@
 
     <style name="StripePaymentSheetDefaultTheme" parent="StripePaymentSheetBaseTheme" />
 
+    <style name="StripeGooglePayDefaultTheme" parent="StripePaymentSheetBaseTheme" />
+
     <!-- Required so that keyboard does not cover bottom sheet -->
     <style name="StripePaymentSheetAddCardTheme">
         <item name="android:windowIsFloating">false</item>
