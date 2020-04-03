@@ -79,12 +79,10 @@ enum class CardBrand(
         "jcb",
         "JCB",
         R.drawable.stripe_ic_jcb,
-        pattern = Pattern.compile("^(35)[0-9]*$"),
+        pattern = Pattern.compile("^(352[89]|35[3-8][0-9])[0-9]*$"),
         partialPatterns = mapOf(
             2 to Pattern.compile("^(35)$"),
-            3 to Pattern.compile("^(35[2-8])$"),
-            4 to Pattern.compile("^(352[89]|35[3-8][0-9])$"),
-            5 to Pattern.compile("^(3528[0-9]|3529[0-9]|35[3-8][0-9]{2})$")
+            3 to Pattern.compile("^(35[2-8])$")
         )
     ),
 
