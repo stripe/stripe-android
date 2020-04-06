@@ -90,8 +90,8 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
 
         // Set the width of the icon and its margin so that test calculations have
         // an expected value that is repeatable on all systems.
-        cardInputWidget.cardIconImageView.layoutParams =
-            (cardInputWidget.cardIconImageView.layoutParams as ViewGroup.MarginLayoutParams).also {
+        cardInputWidget.cardBrandView.layoutParams =
+            (cardInputWidget.cardBrandView.layoutParams as ViewGroup.MarginLayoutParams).also {
                 it.width = 48
                 it.rightMargin = 12
             }
