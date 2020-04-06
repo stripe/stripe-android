@@ -47,7 +47,7 @@ class CardTest {
 
     @Test
     fun testTypeReturnsCorrectlyForJCBCard() {
-        val card = Card.create(number = "3512123412341234")
+        val card = Card.create(number = CardNumberFixtures.JCB_NO_SPACES)
         assertEquals(CardBrand.JCB, card.brand)
     }
 

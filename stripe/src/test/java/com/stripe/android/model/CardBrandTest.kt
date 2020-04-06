@@ -295,4 +295,20 @@ class CardBrandTest {
             )
         )
     }
+
+    @Test
+    fun fromCardNumber_shouldUsePartialPatternsIfAvailable() {
+        assertThat(CardBrand.fromCardNumber("3"))
+            .isEqualTo(CardBrand.Unknown)
+        assertThat(CardBrand.fromCardNumber("35"))
+            .isEqualTo(CardBrand.JCB)
+        assertThat(CardBrand.fromCardNumber("352"))
+            .isEqualTo(CardBrand.JCB)
+        assertThat(CardBrand.fromCardNumber("3527"))
+            .isEqualTo(CardBrand.Unknown)
+        assertThat(CardBrand.fromCardNumber("3528"))
+            .isEqualTo(CardBrand.JCB)
+        assertThat(CardBrand.fromCardNumber("352800"))
+            .isEqualTo(CardBrand.JCB)
+    }
 }
