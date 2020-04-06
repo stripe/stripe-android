@@ -3,15 +3,14 @@
        xmlns:app="http://schemas.android.com/apk/res-auto"
        xmlns:tools="http://schemas.android.com/tools">
 
-    <ImageView
-        android:id="@+id/card_icon"
+    <com.stripe.android.view.CardBrandView
+        android:id="@+id/card_brand_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/stripe_card_icon_padding"
         android:layout_marginBottom="@dimen/stripe_card_icon_padding"
         android:layout_marginEnd="@dimen/stripe_card_icon_padding"
-        android:src="@drawable/stripe_ic_unknown"
-        android:contentDescription="@null" />
+        />
 
     <FrameLayout
         android:id="@+id/container"
