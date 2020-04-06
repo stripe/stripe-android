@@ -27,7 +27,7 @@ class CustomerSessionActivity : AppCompatActivity() {
         SnackbarController(viewBinding.coordinator)
     }
 
-    private var selectedPaymentMethodID: String? = null
+    private var selectedPaymentMethodId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,8 +43,8 @@ class CustomerSessionActivity : AppCompatActivity() {
     }
 
     private fun launchWithCustomer() {
-        val args = PaymentMethodsActivityStarter.Args.Builder().setInitialPaymentMethodId(selectedPaymentMethodID).build()
-        PaymentMethodsActivityStarter(this, args).startForResult()
+        val args = PaymentMethodsActivityStarter.Args.Builder().setInitialPaymentMethodId(selectedPaymentMethodId).build()
+        PaymentMethodsActivityStarter(this).startForResult(args)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -55,7 +55,7 @@ class CustomerSessionActivity : AppCompatActivity() {
                 PaymentMethodsActivityStarter.Result.fromIntent(data)?.paymentMethod
             paymentMethod?.card?.let { card ->
                 viewBinding.paymentMethod.text = buildCardString(card)
-                selectedPaymentMethodID = paymentMethod?.id
+                selectedPaymentMethodId = paymentMethod.id
             }
         }
     }

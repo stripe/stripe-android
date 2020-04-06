@@ -37,13 +37,6 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
         REQUEST_CODE
     )
 
-    constructor(activity: Activity, args: Args) : super (
-            activity,
-            PaymentMethodsActivity::class.java,
-            args,
-            REQUEST_CODE
-    )
-
     @Parcelize
     data class Args internal constructor(
         internal val initialPaymentMethodId: String?,

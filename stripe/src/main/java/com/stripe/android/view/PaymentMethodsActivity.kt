@@ -163,6 +163,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
             // Refresh the list of Payment Methods with the new reusable Payment Method.
             fetchCustomerPaymentMethods()
             viewModel.onPaymentMethodAdded(paymentMethod)
+            adapter.selectedPaymentMethodId = viewModel.selectedPaymentMethodId
         } else {
             // If the added Payment Method is not reusable, it also can't be attached to a
             // customer, so immediately return to the launching host with the new
@@ -179,7 +180,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
         viewModel.getPaymentMethods().observe(this, Observer {
             when (it) {
                 is PaymentMethodsViewModel.Result.Success -> {
-                    adapter.setPaymentMethods(it.paymentMethods, viewModel.selectedPaymentMethodId)
+                    adapter.setPaymentMethods(it.paymentMethods)
                 }
                 is PaymentMethodsViewModel.Result.Error -> {
                     val exception = it.exception
