@@ -36,6 +36,10 @@
     <dimen name="stripe_becs_debit_widget_edit_text_size">14sp</dimen>
     <dimen name="stripe_becs_debit_widget_mandate_acceptance_padding_top">12dp</dimen>
 
+    <!-- CardBrandView -->
+    <dimen name="card_brand_view_width">32dp</dimen>
+    <dimen name="card_brand_view_height">21dp</dimen>
+
     <!-- Card Brand Spinner -->
     <dimen name="card_brand_spinner_dropdown_width">200dp</dimen>
     <dimen name="card_brand_spinner_image_width">32dp</dimen>
