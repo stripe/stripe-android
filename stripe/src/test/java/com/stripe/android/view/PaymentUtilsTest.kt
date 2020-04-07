@@ -35,29 +35,31 @@ class PaymentUtilsTest {
         assertThat(PaymentUtils.formatPriceString(12300.0, USD))
             .isEqualTo("$123.00")
 
-        assertThat(PaymentUtils.formatPriceString(12300.0, EURO))
-            .isEqualTo("EUR123.00")
+        assertThat(
+            PaymentUtils.formatPriceString(
+                12300.0,
+                EURO,
+                locale = Locale.ENGLISH
+            )
+        ).isEqualTo("${EURO.symbol}123.00")
 
-        val canadianDollar = Currency.getInstance(Locale.CANADA)
-        assertThat(PaymentUtils.formatPriceString(12300.0, canadianDollar))
-            .isEqualTo("CAD123.00")
+        assertThat(PaymentUtils.formatPriceString(12300.0, CAD))
+            .isEqualTo("${CAD.symbol}123.00")
 
-        val britishPound = Currency.getInstance(Locale.UK)
-        assertThat(PaymentUtils.formatPriceString(10000.0, britishPound))
-            .isEqualTo("GBP100.00")
+        assertThat(PaymentUtils.formatPriceString(10000.0, GBP))
+            .isEqualTo("${GBP.symbol}100.00")
     }
 
     @Test
     fun formatPriceString_whenInternationalLocale_rendersCorrectSymbols() {
         Locale.setDefault(Locale.GERMANY)
         assertThat(PaymentUtils.formatPriceString(10000.0, EURO))
-            .isEqualTo("100,00 €")
+            .isEqualTo("100,00 ${EURO.symbol}")
 
         Locale.setDefault(Locale.JAPAN)
-        val yen = Currency.getInstance(Locale.JAPAN)
         // Japan's native local uses narrow yen symbol (there is also a wide yen symbol)
-        assertThat(PaymentUtils.formatPriceString(100.0, yen))
-            .isEqualTo("￥100")
+        assertThat(PaymentUtils.formatPriceString(100.0, YEN))
+            .isEqualTo("${YEN.symbol}100")
 
         Locale.setDefault(Locale("ar", "JO")) // Jordan
         val jordanianDinar = Currency.getInstance("JOD")
@@ -65,14 +67,12 @@ class PaymentUtilsTest {
             .isEqualTo("${jordanianDinar.symbol} 100.123")
 
         Locale.setDefault(Locale.UK)
-        val britishPound = Currency.getInstance(Locale.UK)
-        assertThat(PaymentUtils.formatPriceString(10000.0, britishPound))
-            .isEqualTo("£100.00")
+        assertThat(PaymentUtils.formatPriceString(10000.0, GBP))
+            .isEqualTo("${GBP.symbol}100.00")
 
         Locale.setDefault(Locale.CANADA)
-        val canadianDollar = Currency.getInstance(Locale.CANADA)
-        assertThat(PaymentUtils.formatPriceString(12300.0, canadianDollar))
-            .isEqualTo("$123.00")
+        assertThat(PaymentUtils.formatPriceString(12300.0, CAD))
+            .isEqualTo("${CAD.symbol}123.00")
     }
 
     @Test
@@ -86,5 +86,8 @@ class PaymentUtilsTest {
     private companion object {
         private val USD = Currency.getInstance("USD")
         private val EURO = Currency.getInstance(Locale.GERMANY)
+        private val YEN = Currency.getInstance(Locale.JAPAN)
+        private val GBP = Currency.getInstance(Locale.UK)
+        private val CAD = Currency.getInstance(Locale.CANADA)
     }
 }

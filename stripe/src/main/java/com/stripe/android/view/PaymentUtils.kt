@@ -35,13 +35,17 @@ object PaymentUtils {
      * Formats a monetary amount into a human friendly string.
      */
     @JvmSynthetic
-    internal fun formatPriceString(amount: Double, currency: Currency): String {
+    internal fun formatPriceString(
+        amount: Double,
+        currency: Currency,
+        locale: Locale = Locale.getDefault(Locale.Category.DISPLAY)
+    ): String {
         val majorUnitAmount = amount / 10.0.pow(currency.defaultFractionDigits.toDouble())
         val currencyFormat = NumberFormat.getCurrencyInstance()
         return try {
             val decimalFormatSymbols = (currencyFormat as DecimalFormat)
                 .decimalFormatSymbols
-            decimalFormatSymbols.currencySymbol = currency.getSymbol(Locale.getDefault())
+            decimalFormatSymbols.currencySymbol = currency.getSymbol(locale)
             currencyFormat.decimalFormatSymbols = decimalFormatSymbols
             currencyFormat.format(majorUnitAmount)
         } catch (e: ClassCastException) {
