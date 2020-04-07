@@ -1,11 +1,8 @@
 package com.stripe.android
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.util.Pair
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.Observer
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.AuthenticationException
@@ -61,12 +58,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     private val stripeApiRequestExecutor: ApiRequestExecutor = ApiRequestExecutor.Default(logger),
     private val fireAndForgetRequestExecutor: FireAndForgetRequestExecutor =
         StripeFireAndForgetRequestExecutor(logger),
-    private val handler: Handler = Handler(Looper.getMainLooper()),
     private val fingerprintDataRepository: FingerprintDataRepository =
-        FingerprintDataRepository.Default(
-            context = context,
-            handler = handler
-        ),
+        FingerprintDataRepository.Default(context),
     private val apiFingerprintParamsFactory: ApiFingerprintParamsFactory =
         ApiFingerprintParamsFactory(context),
     private val analyticsDataFactory: AnalyticsDataFactory =
@@ -82,7 +75,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         sdkVersion = sdkVersion
     )
 
-    private var fingerprintGuid: String? = null
+    private val fingerprintGuid: String?
+        get() {
+            return fingerprintDataRepository.get()?.guid
+        }
 
     init {
         fireFingerprintRequest()
@@ -996,17 +992,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     private fun fireFingerprintRequest() {
-        handler.post {
-            // LiveData observation must occur on the main thread
-            fingerprintDataRepository.get().let { liveData ->
-                liveData.observeForever(object : Observer<FingerprintData?> {
-                    override fun onChanged(t: FingerprintData?) {
-                        fingerprintGuid = t?.guid
-                        liveData.removeObserver(this)
-                    }
-                })
-            }
-        }
+        fingerprintDataRepository.refresh()
     }
 
     private fun fireAnalyticsRequest(
