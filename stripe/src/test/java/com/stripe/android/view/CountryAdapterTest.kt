@@ -53,15 +53,13 @@ class CountryAdapterTest {
 
     @Test
     fun filter_whenCountryInputMatches_filters() {
-        countryAdapter.filter.filter("An")
+        countryAdapter.filter.filter("Ar")
         assertThat(suggestions.map { it.name })
             .isEqualTo(
                 listOf(
-                    "Andorra",
-                    "Angola",
-                    "Anguilla",
-                    "Antarctica",
-                    "Antigua and Barbuda"
+                    "Argentina",
+                    "Armenia",
+                    "Aruba"
                 )
             )
     }
@@ -95,25 +93,22 @@ class CountryAdapterTest {
 
     @Test
     fun updateUnfilteredCountries_shouldUpdateFilter() {
-        countryAdapter.filter.filter("An")
+        countryAdapter.filter.filter("Ar")
         assertThat(suggestions.map { it.name })
             .isEqualTo(
                 listOf(
-                    "Andorra",
-                    "Angola",
-                    "Anguilla",
-                    "Antarctica",
-                    "Antigua and Barbuda"
+                    "Argentina",
+                    "Armenia",
+                    "Aruba"
                 )
             )
 
-        countryAdapter.updateUnfilteredCountries(setOf("ao", "ad"))
-        countryAdapter.filter.filter("An")
+        countryAdapter.updateUnfilteredCountries(setOf("ar"))
+        countryAdapter.filter.filter("Ar")
         assertThat(suggestions.map { it.name })
             .isEqualTo(
                 listOf(
-                    "Andorra",
-                    "Angola"
+                    "Argentina"
                 )
             )
     }
