@@ -15,6 +15,10 @@ jobs:
             - uses: actions/setup-java@v1
               with:
                   java-version: 11
-            - name: Check style
+            - name: Ktlint
               run: ./gradlew ktlint
+            - name: Checkstyle
+              run: ./gradlew checkstyle
+            - name: Lint
+              run: ./gradlew lintRelease
 
