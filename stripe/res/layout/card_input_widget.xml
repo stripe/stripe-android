@@ -5,8 +5,8 @@
 
     <com.stripe.android.view.CardBrandView
         android:id="@+id/card_brand_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/card_brand_view_width"
+        android:layout_height="@dimen/card_brand_view_height"
         android:layout_marginTop="@dimen/stripe_card_icon_padding"
         android:layout_marginBottom="@dimen/stripe_card_icon_padding"
         android:layout_marginEnd="@dimen/stripe_card_icon_padding"
