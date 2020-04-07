@@ -32,5 +32,7 @@ jobs:
             - uses: actions/setup-java@v1
               with:
                   java-version: 11
-            - name: Unit tests
-              run: ./gradlew testDebugUnitTest --info
+            - name: CountryAdapterTest tests
+              run: ./gradlew :stripe:testDebugUnitTest --tests "com.stripe.android.view.CountryAdapterTest" --info
+            - name: PaymentUtilsTest tests
+              run: ./gradlew :stripe:testDebugUnitTest --tests "com.stripe.android.view.PaymentUtilsTest" --info
