@@ -1,7 +1,6 @@
 package com.stripe.android
 
 import android.content.Context
-import androidx.lifecycle.MutableLiveData
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
@@ -69,11 +68,9 @@ class StripeApiRepositoryTest {
     @BeforeTest
     fun before() {
         whenever(fingerprintDataRepository.get()).thenReturn(
-            MutableLiveData(
-                FingerprintData(
-                    guid = UUID.randomUUID().toString(),
-                    timestamp = Calendar.getInstance().timeInMillis
-                )
+            FingerprintData(
+                guid = UUID.randomUUID().toString(),
+                timestamp = Calendar.getInstance().timeInMillis
             )
         )
 
@@ -829,7 +826,7 @@ class StripeApiRepositoryTest {
         productUsage: List<String>? = null
     ) {
         verify(fingerprintDataRepository, times(2))
-            .get()
+            .refresh()
 
         verifyAnalyticsRequest(event, productUsage)
     }

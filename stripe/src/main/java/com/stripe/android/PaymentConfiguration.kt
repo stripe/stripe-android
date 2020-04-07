@@ -72,7 +72,7 @@ data class PaymentConfiguration internal constructor(val publishableKey: String)
             instance = PaymentConfiguration(publishableKey)
             Store(context).save(publishableKey)
 
-            FingerprintDataRepository.Default(context).get()
+            FingerprintDataRepository.Default(context).refresh()
         }
 
         @JvmSynthetic
