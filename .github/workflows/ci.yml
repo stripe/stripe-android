@@ -33,6 +33,6 @@ jobs:
               with:
                   java-version: 11
             - name: CountryAdapterTest tests
-              run: ./gradlew :stripe:testDebugUnitTest --tests "com.stripe.android.view.CountryAdapterTest" --info
+              run: ./gradlew :stripe:testDebugUnitTest --tests "com.stripe.android.view.CountryAdapterTest"
             - name: PaymentUtilsTest tests
               run: ./gradlew :stripe:testDebugUnitTest --tests "com.stripe.android.view.PaymentUtilsTest" --info

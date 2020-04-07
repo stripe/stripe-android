@@ -1,6 +1,5 @@
 package com.stripe.android.view
 
-import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import java.util.Locale
@@ -15,15 +14,12 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class CountryAdapterTest {
 
-    private val countryAdapter: CountryAdapter by lazy {
+    private val orderedCountries = CountryUtils.getOrderedCountries(Locale.US)
+    private val countryAdapter =
         CountryAdapter(
-            ApplicationProvider.getApplicationContext<Context>(),
+            ApplicationProvider.getApplicationContext(),
             orderedCountries
         )
-    }
-    private val orderedCountries: List<Country> by lazy {
-        CountryUtils.getOrderedCountries(Locale.getDefault())
-    }
 
     private val suggestions: List<Country>
         get() {
