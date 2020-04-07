@@ -53,8 +53,8 @@ class PaymentUtilsTest {
     @Test
     fun formatPriceString_whenInternationalLocale_rendersCorrectSymbols() {
         Locale.setDefault(Locale.GERMANY)
-        assertThat(PaymentUtils.formatPriceString(10000.0, EURO))
-            .isEqualTo("100,00 ${EURO.symbol}")
+        assertThat("[" + PaymentUtils.formatPriceString(10000.0, EURO) + "]")
+            .isEqualTo("[100,00 ${EURO.symbol}]")
 
         Locale.setDefault(Locale.JAPAN)
         // Japan's native local uses narrow yen symbol (there is also a wide yen symbol)
