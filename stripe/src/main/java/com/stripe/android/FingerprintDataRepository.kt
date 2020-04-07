@@ -25,12 +25,10 @@ internal interface FingerprintDataRepository {
         }
 
         constructor(
-            context: Context,
-            handler: Handler = Handler(Looper.getMainLooper())
+            context: Context
         ) : this(
             store = FingerprintDataStore.Default(context),
-            fingerprintRequestFactory = FingerprintRequestFactory(context),
-            handler = handler
+            fingerprintRequestFactory = FingerprintRequestFactory(context)
         )
 
         override fun refresh() {
@@ -46,7 +44,6 @@ internal interface FingerprintDataRepository {
                                 )
                             ) { remoteFingerprintData ->
                                 remoteFingerprintData?.let {
-                                    cachedFingerprintData = it
                                     save(it)
                                 }
                                 liveData.removeObserver(this)
@@ -65,6 +62,7 @@ internal interface FingerprintDataRepository {
         }
 
         override fun save(fingerprintData: FingerprintData) {
+            cachedFingerprintData = fingerprintData
             store.save(fingerprintData)
         }
     }

@@ -1,8 +1,6 @@
 package com.stripe.android
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.util.Pair
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.exception.APIConnectionException
@@ -60,12 +58,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     private val stripeApiRequestExecutor: ApiRequestExecutor = ApiRequestExecutor.Default(logger),
     private val fireAndForgetRequestExecutor: FireAndForgetRequestExecutor =
         StripeFireAndForgetRequestExecutor(logger),
-    private val handler: Handler = Handler(Looper.getMainLooper()),
     private val fingerprintDataRepository: FingerprintDataRepository =
-        FingerprintDataRepository.Default(
-            context = context,
-            handler = handler
-        ),
+        FingerprintDataRepository.Default(context),
     private val apiFingerprintParamsFactory: ApiFingerprintParamsFactory =
         ApiFingerprintParamsFactory(context),
     private val analyticsDataFactory: AnalyticsDataFactory =
