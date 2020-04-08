@@ -45,6 +45,4 @@ jobs:
     - stage: "Testing"
       name: "Testing"
       script:
-        - ./gradlew clean ktlint
-        - ./gradlew checkstyle lintRelease
-        - ./gradlew testRelease
+        - ./gradlew clean testRelease
