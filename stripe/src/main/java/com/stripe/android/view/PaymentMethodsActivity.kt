@@ -63,6 +63,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
         PaymentMethodsAdapter(
             args,
             addableTypes = args.paymentMethodTypes,
+            initiallySelectedPaymentMethodId = viewModel.selectedPaymentMethodId,
             shouldShowGooglePay = args.shouldShowGooglePay,
             useGooglePay = args.useGooglePay
         )
@@ -160,10 +161,11 @@ class PaymentMethodsActivity : AppCompatActivity() {
 
     private fun onAddedPaymentMethod(paymentMethod: PaymentMethod) {
         if (paymentMethod.type?.isReusable == true) {
+            // Select the newly added Payment Method
+            adapter.selectedPaymentMethodId = paymentMethod.id
             // Refresh the list of Payment Methods with the new reusable Payment Method.
             fetchCustomerPaymentMethods()
             viewModel.onPaymentMethodAdded(paymentMethod)
-            adapter.selectedPaymentMethodId = viewModel.selectedPaymentMethodId
         } else {
             // If the added Payment Method is not reusable, it also can't be attached to a
             // customer, so immediately return to the launching host with the new
