@@ -29,7 +29,7 @@ jobs:
     unit-tests:
         name: Unit tests
         runs-on: ubuntu-latest
-        timeout-minutes: 10
+        timeout-minutes: 15
         steps:
             - uses: actions/checkout@v2
             - uses: gradle/wrapper-validation-action@v1
@@ -42,4 +42,4 @@ jobs:
                 path: ~/.gradle/caches
                 key: gradle-${{ runner.os }}-${{ hashFiles('**/build.gradle') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
             - name: Unit tests
-              run: ./gradlew testDebugUnitTest --info
+              run: ./gradlew testDebugUnitTest
