@@ -1,8 +1,10 @@
 package com.stripe.android
 
 import android.content.Context
+import android.os.Parcelable
 import java.util.Currency
 import java.util.Locale
+import kotlinx.android.parcel.Parcelize
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -180,6 +182,7 @@ class GooglePayJsonFactory constructor(
      *
      * Configure additional fields to be returned for a requested billing address.
      */
+    @Parcelize
     data class BillingAddressParameters @JvmOverloads constructor(
         internal val isRequired: Boolean = false,
 
@@ -192,7 +195,7 @@ class GooglePayJsonFactory constructor(
          * Set to true if a phone number is required to process the transaction.
          */
         internal val isPhoneNumberRequired: Boolean = false
-    ) {
+    ) : Parcelable {
         /**
          * Billing address format required to complete the transaction.
          */
@@ -212,6 +215,7 @@ class GooglePayJsonFactory constructor(
     /**
      * [TransactionInfo](https://developers.google.com/pay/api/android/reference/request-objects#TransactionInfo)
      */
+    @Parcelize
     data class TransactionInfo @JvmOverloads constructor(
         /**
          * ISO 4217 alphabetic currency code.
@@ -254,7 +258,7 @@ class GooglePayJsonFactory constructor(
          * Affects the submit button text displayed in the Google Pay payment sheet.
          */
         internal val checkoutOption: CheckoutOption? = null
-    ) {
+    ) : Parcelable {
         /**
          * The status of the total price used.
          */
@@ -297,6 +301,7 @@ class GooglePayJsonFactory constructor(
     /**
      * [ShippingAddressParameters](https://developers.google.com/pay/api/android/reference/request-objects#ShippingAddressParameters)
      */
+    @Parcelize
     data class ShippingAddressParameters @JvmOverloads constructor(
         /**
          * Set to true to request a full shipping address.
@@ -313,7 +318,7 @@ class GooglePayJsonFactory constructor(
          * Set to true if a phone number is required for the provided shipping address.
          */
         internal val phoneNumberRequired: Boolean = false
-    ) {
+    ) : Parcelable {
         init {
             val countryCodes = Locale.getISOCountries()
             allowedCountryCodes.forEach { allowedShippingCountryCode ->
@@ -329,6 +334,7 @@ class GooglePayJsonFactory constructor(
     /**
      * [MerchantInfo](https://developers.google.com/pay/api/android/reference/request-objects#MerchantInfo)
      */
+    @Parcelize
     data class MerchantInfo(
         /**
          * Merchant name encoded as UTF-8. Merchant name is rendered in the payment sheet.
@@ -336,7 +342,7 @@ class GooglePayJsonFactory constructor(
          * message is displayed in the payment sheet.
          */
         internal val merchantName: String? = null
-    )
+    ) : Parcelable
 
     companion object {
         private const val API_VERSION = 2
