@@ -1,9 +1,14 @@
 package com.stripe.android.view
 
+import android.content.Context
+import android.view.ViewGroup
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
@@ -11,16 +16,11 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-internal class BecsDebitWidgetTest : BaseViewTest<BecsDebitWidgetTestActivity>(
-    BecsDebitWidgetTestActivity::class.java
-) {
-    private val activity: BecsDebitWidgetTestActivity by lazy {
-        createStartedActivity()
-    }
-    private val becsDebitWidget: BecsDebitWidget by lazy {
-        activity.becsDebitWidget
-    }
+internal class BecsDebitWidgetTest {
+    private val context: Context = ApplicationProvider.getApplicationContext()
+    private val activityScenarioFactory = ActivityScenarioFactory(context)
 
+    private lateinit var becsDebitWidget: BecsDebitWidget
     private val nameEditText: StripeEditText by lazy {
         becsDebitWidget.viewBinding.nameEditText
     }
@@ -36,13 +36,25 @@ internal class BecsDebitWidgetTest : BaseViewTest<BecsDebitWidgetTestActivity>(
 
     @BeforeTest
     fun setup() {
-        resumeStartedActivity(activity)
-    }
-
-    @AfterTest
-    override fun tearDown() {
-        super.tearDown()
-        activity.finish()
+        PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        activityScenarioFactory.create<AddPaymentMethodActivity>(
+            AddPaymentMethodActivityStarter.Args.Builder()
+                .setPaymentMethodType(PaymentMethod.Type.Card)
+                .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
+                .setBillingAddressFields(BillingAddressFields.PostalCode)
+                .build()
+        ).use { activityScenario ->
+            activityScenario.onActivity { activity ->
+                activity.findViewById<ViewGroup>(R.id.add_payment_method_card).let { root ->
+                    root.removeAllViews()
+                    becsDebitWidget = BecsDebitWidget(
+                        activity,
+                        companyName = COMPANY_NAME
+                    )
+                    root.addView(becsDebitWidget)
+                }
+            }
+        }
     }
 
     @Test
@@ -171,7 +183,7 @@ internal class BecsDebitWidgetTest : BaseViewTest<BecsDebitWidgetTestActivity>(
             "A company name is required to render a BecsDebitWidget."
         ) {
             BecsDebitWidget(
-                context = activity,
+                context = becsDebitWidget.context,
                 companyName = ""
             )
         }
@@ -180,5 +192,6 @@ internal class BecsDebitWidgetTest : BaseViewTest<BecsDebitWidgetTestActivity>(
     private companion object {
         private const val VALID_BSB_NUMBER = "000000"
         private const val VALID_ACCOUNT_NUMBER = "000123456"
+        private const val COMPANY_NAME = "Rocketship Inc."
     }
 }
