@@ -1,12 +1,15 @@
 package com.stripe.android.view
 
-import android.os.Build
+import android.app.Activity
+import android.content.Context
 import android.text.TextPaint
 import android.view.ViewGroup
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.reset
 import com.nhaarman.mockitokotlin2.verify
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures.AMEX_NO_SPACES
 import com.stripe.android.CardNumberFixtures.AMEX_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_14_NO_SPACES
@@ -14,6 +17,8 @@ import com.stripe.android.CardNumberFixtures.DINERS_CLUB_14_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_16_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.R
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -26,7 +31,6 @@ import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_EXPI
 import com.stripe.android.view.CardInputWidget.Companion.LOGGING_TOKEN
 import com.stripe.android.view.CardInputWidget.Companion.shouldIconShowBrand
 import java.util.Calendar
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -37,21 +41,13 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [Build.VERSION_CODES.O_MR1])
-internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
-    CardInputTestActivity::class.java
-) {
-    private val onGlobalFocusChangeListener: TestFocusChangeListener = TestFocusChangeListener()
+internal class CardInputWidgetTest {
+    private val context: Context = ApplicationProvider.getApplicationContext()
+    private val activityScenarioFactory = ActivityScenarioFactory(context)
 
-    private val activity: CardInputTestActivity by lazy {
-        createStartedActivity()
-    }
-    private val cardInputWidget: CardInputWidget by lazy {
-        activity.cardInputWidget
-    }
+    private lateinit var cardInputWidget: CardInputWidget
     private val cardNumberEditText: CardNumberEditText by lazy {
         cardInputWidget.cardNumberEditText
     }
@@ -64,45 +60,57 @@ internal class CardInputWidgetTest : BaseViewTest<CardInputTestActivity>(
     private val postalCodeEditText: PostalCodeEditText by lazy {
         cardInputWidget.postalCodeEditText
     }
+
+    private val onGlobalFocusChangeListener: TestFocusChangeListener = TestFocusChangeListener()
     private val cardInputListener: CardInputListener = mock()
 
     @BeforeTest
     fun setup() {
         // The input date here will be invalid after 2050. Please update the test.
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
+        PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
-        cardInputWidget.setCardNumberTextWatcher(object : StripeTextWatcher() {})
-        cardInputWidget.setExpiryDateTextWatcher(object : StripeTextWatcher() {})
-        cardInputWidget.setCvcNumberTextWatcher(object : StripeTextWatcher() {})
-
-        cardInputWidget.layoutWidthCalculator = object : CardInputWidget.LayoutWidthCalculator {
-            override fun calculate(text: String, paint: TextPaint): Int {
-                return text.length * 10
+        activityScenarioFactory.create<AddPaymentMethodActivity>(
+            AddPaymentMethodActivityStarter.Args.Builder()
+                .setPaymentMethodType(PaymentMethod.Type.Card)
+                .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
+                .setBillingAddressFields(BillingAddressFields.PostalCode)
+                .build()
+        ).use { activityScenario ->
+            activityScenario.onActivity { activity ->
+                activity.findViewById<ViewGroup>(R.id.add_payment_method_card).let { root ->
+                    root.removeAllViews()
+                    cardInputWidget = createCardInputWidget(activity)
+                    root.addView(cardInputWidget)
+                }
             }
         }
-        cardInputWidget.frameWidthSupplier = {
-            500 // That's a pretty small screen, but one that we theoretically support.
-        }
-        cardInputWidget.viewTreeObserver
-            .addOnGlobalFocusChangeListener(onGlobalFocusChangeListener)
-
-        cardNumberEditText.setText("")
-
-        // Set the width of the icon and its margin so that test calculations have
-        // an expected value that is repeatable on all systems.
-        cardInputWidget.cardBrandView.layoutParams =
-            (cardInputWidget.cardBrandView.layoutParams as ViewGroup.MarginLayoutParams).also {
-                it.width = 48
-                it.rightMargin = 12
-            }
-
-        resumeStartedActivity(activity)
     }
 
-    @AfterTest
-    override fun tearDown() {
-        super.tearDown()
-        activity.finish()
+    private fun createCardInputWidget(activity: Activity): CardInputWidget {
+        return CardInputWidget(activity).also {
+            it.layoutWidthCalculator = object : CardInputWidget.LayoutWidthCalculator {
+                override fun calculate(text: String, paint: TextPaint): Int {
+                    return text.length * 10
+                }
+            }
+
+            it.frameWidthSupplier = {
+                500 // That's a pretty small screen, but one that we theoretically support.
+            }
+
+            // Set the width of the icon and its margin so that test calculations have
+            // an expected value that is repeatable on all systems.
+            it.cardBrandView.layoutParams =
+                (it.cardBrandView.layoutParams as ViewGroup.MarginLayoutParams)
+                    .also { params ->
+                        params.width = 48
+                        params.rightMargin = 12
+                    }
+
+            it.viewTreeObserver
+                .addOnGlobalFocusChangeListener(onGlobalFocusChangeListener)
+        }
     }
 
     @Test

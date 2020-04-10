@@ -55,10 +55,8 @@ class AddPaymentMethodActivityTest {
     private val listenerArgumentCaptor: KArgumentCaptor<CustomerSession.PaymentMethodRetrievalListener> = argumentCaptor()
     private val productUsageArgumentCaptor: KArgumentCaptor<Set<String>> = argumentCaptor()
 
-    private val context: Context = ApplicationProvider.getApplicationContext<Context>()
-    private val activityScenarioFactory: ActivityScenarioFactory by lazy {
-        ActivityScenarioFactory(ApplicationProvider.getApplicationContext())
-    }
+    private val context: Context = ApplicationProvider.getApplicationContext()
+    private val activityScenarioFactory = ActivityScenarioFactory(context)
 
     @BeforeTest
     fun setup() {
