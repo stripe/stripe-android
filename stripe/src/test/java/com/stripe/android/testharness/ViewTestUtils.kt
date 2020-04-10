@@ -9,14 +9,13 @@ import androidx.annotation.IntRange
 /**
  * Utility class for common actions to perform on Views under test.
  */
-object ViewTestUtils {
+internal object ViewTestUtils {
 
     /**
      * Send an action down call on the delete key.
      *
      * @param editText the [EditText] to which to dispatch the key press.
      */
-    @JvmStatic
     fun sendDeleteKeyEvent(editText: EditText) {
         editText.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL))
         editText.dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DEL))
@@ -34,7 +33,6 @@ object ViewTestUtils {
      * [EditText] has a "max" value equal to the input value.
      * @throws UnsupportedOperationException if this method is run for SDK < 21
      */
-    @JvmStatic
     fun hasMaxLength(editText: EditText, @IntRange(from = 0) max: Int): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             throw UnsupportedOperationException(
