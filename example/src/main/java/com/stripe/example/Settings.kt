@@ -39,7 +39,7 @@ class Settings(context: Context) {
     private companion object {
         /**
          * Set to the base URL of your test backend. If you are using
-         * [example-ios-backend](https://github.com/stripe/example-ios-backend),
+         * [example-mobile-backend](https://github.com/stripe/example-mobile-backend),
          * the URL will be something like `https://hidden-beach-12345.herokuapp.com/`.
          */
         private const val BASE_URL = "put your base url here"
