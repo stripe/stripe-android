@@ -6,7 +6,7 @@
 * [#2336](https://github.com/stripe/stripe-android/pull/2336) Improve `ShippingInfoWidget`
     * Make postal code and phone number fields single line
     * Make phone number field use `inputType="phone"`
-* [#2342](https://github.com/stripe/stripe-android/pull/2342) Covert `CardBrand` prefixes to regex
+* [#2342](https://github.com/stripe/stripe-android/pull/2342) Convert `CardBrand` prefixes to regex
     * Add `^81` as a pattern for `CardBrand.UnionPay`
 * [#2343](https://github.com/stripe/stripe-android/pull/2343) Update `CardBrand.JCB` regex
 * [#2362](https://github.com/stripe/stripe-android/pull/2362) Add support for parsing `shippingInformation` in `GooglePayResult`
