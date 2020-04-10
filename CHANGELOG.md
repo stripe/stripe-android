@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 14.3.0 - unreleased
+* [#2334](https://github.com/stripe/stripe-android/pull/2334) Add support for BACS Debit in `PaymentMethodCreateParams`
+* [#2335](https://github.com/stripe/stripe-android/pull/2335) Add support for BACS Debit Payment Method
+* [#2336](https://github.com/stripe/stripe-android/pull/2336) Improve `ShippingInfoWidget`
+    * Make postal code and phone number fields single line
+    * Make phone number field use `inputType="phone"`
+* [#2342](https://github.com/stripe/stripe-android/pull/2342) Covert `CardBrand` prefixes to regex
+    * Add `^81` as a pattern for `CardBrand.UnionPay`
+* [#2343](https://github.com/stripe/stripe-android/pull/2343) Update `CardBrand.JCB` regex
+* [#2362](https://github.com/stripe/stripe-android/pull/2362) Add support for parsing `shippingInformation` in `GooglePayResult`
+* [#2365](https://github.com/stripe/stripe-android/pull/2365) Convert png assets to webp to reduce asset size
+
 ## 14.2.1 - 2020-03-26
 * [#2299](https://github.com/stripe/stripe-android/pull/2299) Make `SourceParams.OwnerParams` constructor public and properties mutable
 * [#2304](https://github.com/stripe/stripe-android/pull/2304) Force Canadian postal codes to be uppercase
