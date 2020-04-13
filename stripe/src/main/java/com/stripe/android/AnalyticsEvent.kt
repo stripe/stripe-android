@@ -23,6 +23,7 @@ internal enum class AnalyticsEvent(internal val code: String) {
 
     // Source
     SourceCreate("source_creation"),
+    SourceRetrieve("source_retrieve"),
 
     // Payment Intents
     PaymentIntentConfirm("payment_intent_confirmation"),
