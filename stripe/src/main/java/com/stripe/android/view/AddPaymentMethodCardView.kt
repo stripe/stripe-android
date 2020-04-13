@@ -20,7 +20,7 @@ internal class AddPaymentMethodCardView @JvmOverloads internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
-    private val billingAddressFields: BillingAddressFields
+    private val billingAddressFields: BillingAddressFields = BillingAddressFields.PostalCode
 ) : AddPaymentMethodView(context, attrs, defStyleAttr) {
     private val cardMultilineWidget: CardMultilineWidget
     private val billingAddressWidget: ShippingInfoWidget
