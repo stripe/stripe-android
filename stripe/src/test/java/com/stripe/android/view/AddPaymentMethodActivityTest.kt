@@ -76,7 +76,7 @@ class AddPaymentMethodActivityTest {
                     it.findViewById(R.id.card_multiline_widget)
                 val widgetControlGroup =
                     CardMultilineWidgetTest.WidgetControlGroup(cardMultilineWidget)
-                assertEquals(View.GONE, widgetControlGroup.postalCodeInputLayout.visibility)
+                assertEquals(View.VISIBLE, widgetControlGroup.postalCodeInputLayout.visibility)
             }
         }
     }
@@ -408,15 +408,15 @@ class AddPaymentMethodActivityTest {
         private fun createSuccessLiveData(
             paymentMethod: PaymentMethod
         ): LiveData<AddPaymentMethodViewModel.PaymentMethodResult> {
-            return MutableLiveData<AddPaymentMethodViewModel.PaymentMethodResult>().apply {
-                value = AddPaymentMethodViewModel.PaymentMethodResult.Success(paymentMethod)
-            }
+            return MutableLiveData(
+                AddPaymentMethodViewModel.PaymentMethodResult.Success(paymentMethod)
+            )
         }
 
         private fun createErrorLiveData(): LiveData<AddPaymentMethodViewModel.PaymentMethodResult> {
-            return MutableLiveData<AddPaymentMethodViewModel.PaymentMethodResult>().apply {
-                value = AddPaymentMethodViewModel.PaymentMethodResult.Error(ERROR_MESSAGE)
-            }
+            return MutableLiveData(
+                AddPaymentMethodViewModel.PaymentMethodResult.Error(ERROR_MESSAGE)
+            )
         }
     }
 }

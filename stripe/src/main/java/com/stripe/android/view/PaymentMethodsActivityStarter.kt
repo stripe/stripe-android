@@ -50,16 +50,17 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
         internal val useGooglePay: Boolean = false
     ) : ActivityStarter.Args {
         class Builder : ObjectBuilder<Args> {
-            private var billingAddressFields: BillingAddressFields = BillingAddressFields.None
+            private var billingAddressFields: BillingAddressFields = BillingAddressFields.PostalCode
             private var initialPaymentMethodId: String? = null
             private var isPaymentSessionActive = false
             private var paymentMethodTypes: List<PaymentMethod.Type>? = null
             private var shouldShowGooglePay: Boolean = false
             private var useGooglePay: Boolean = false
             private var paymentConfiguration: PaymentConfiguration? = null
+            private var windowFlags: Int? = null
+
             @LayoutRes
             private var addPaymentMethodFooterLayoutId: Int = 0
-            private var windowFlags: Int? = null
 
             /**
              * @param billingAddressFields the billing address fields to require on [AddPaymentMethodActivity]
