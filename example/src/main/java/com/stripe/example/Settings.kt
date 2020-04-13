@@ -4,8 +4,8 @@ import android.content.Context
 import android.content.pm.PackageManager
 
 /**
- * See [Configuring the example app](https://github.com/stripe/stripe-android#building-the-example-project)
- * for instructions on how to configure the app before running it.
+ * See [Configure the app](https://github.com/stripe/stripe-android/tree/master/example#configure-the-app)
+ * for instructions on how to configure the example app before running it.
  */
 class Settings(context: Context) {
     private val appContext = context.applicationContext
@@ -38,6 +38,8 @@ class Settings(context: Context) {
 
     private companion object {
         /**
+         * Note: only necessary if not configured via `gradle.properties`.
+         *
          * Set to the base URL of your test backend. If you are using
          * [example-mobile-backend](https://github.com/stripe/example-mobile-backend),
          * the URL will be something like `https://hidden-beach-12345.herokuapp.com/`.
@@ -45,11 +47,15 @@ class Settings(context: Context) {
         private const val BASE_URL = "put your base url here"
 
         /**
+         * Note: only necessary if not configured via `gradle.properties`.
+         *
          * Set to publishable key from https://dashboard.stripe.com/test/apikeys
          */
         private const val PUBLISHABLE_KEY = "pk_test_your_key_goes_here"
 
         /**
+         * Note: only necessary if not configured via `gradle.properties`.
+         *
          * Optionally, set to a Connect Account id to use for API requests to test Connect
          *
          * See https://dashboard.stripe.com/test/connect/accounts/overview
