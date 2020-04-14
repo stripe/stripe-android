@@ -243,6 +243,32 @@ class StripeApiRepositoryTest {
     }
 
     @Test
+    fun retrieveSource_shouldFireAnalytics_andReturnSource() {
+        val stripeResponse = StripeResponse(
+                200,
+                SourceFixtures.SOURCE_CARD_JSON.toString(),
+                emptyMap()
+        )
+        whenever(stripeApiRequestExecutor.execute(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+        val sourceId = "src_19t3xKBZqEXluyI4uz2dxAfQ"
+        val source = create().retrieveSource(
+                sourceId,
+                "mocked",
+                DEFAULT_OPTIONS
+        )
+
+        assertNotNull(source)
+        assertThat(source.id).isEqualTo(sourceId)
+
+        verifyAnalyticsRequest(
+            AnalyticsEvent.SourceRetrieve,
+            sourceId = sourceId
+        )
+    }
+
+    @Test
     fun start3ds2Auth_withInvalidSource_shouldThrowInvalidRequestException() {
         val authParams = Stripe3ds2AuthParams(
             "src_invalid",
@@ -833,7 +859,8 @@ class StripeApiRepositoryTest {
 
     private fun verifyAnalyticsRequest(
         event: AnalyticsEvent,
-        productUsage: List<String>? = null
+        productUsage: List<String>? = null,
+        sourceId: String? = null
     ) {
         verify(fireAndForgetRequestExecutor)
             .executeAsync(stripeRequestArgumentCaptor.capture())
@@ -848,6 +875,11 @@ class StripeApiRepositoryTest {
         assertEquals(
             productUsage,
             analyticsParams["product_usage"]
+        )
+
+        assertEquals(
+            sourceId,
+            analyticsParams["source_id"]
         )
     }
 

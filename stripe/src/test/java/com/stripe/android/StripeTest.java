@@ -849,36 +849,23 @@ public class StripeTest {
         );
     }
 
-  @Test
-  public void retrieveSourceSynchronous_withValidData_passesIntegrationTest()
-      throws StripeException {
-    final Source source = createSource();
+    @Test
+    public void retrieveSourceSynchronous_withValidData_passesIntegrationTest()
+            throws StripeException {
+        final Source source = createSource();
 
-    final String sourceId = source.getId();
-    final String clientSecret = source.getClientSecret();
-    assertNotNull(sourceId);
-    assertNotNull(clientSecret);
+        final String sourceId = source.getId();
+        final String clientSecret = source.getClientSecret();
+        assertNotNull(sourceId);
+        assertNotNull(clientSecret);
 
-    final Source retrievedSource =
-        createStripe(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, fireAndForgetRequestExecutor)
-            .retrieveSourceSynchronous(sourceId, clientSecret);
+        final Source retrievedSource = createStripe()
+                .retrieveSourceSynchronous(sourceId, clientSecret);
 
-    // We aren't actually updating the source on the server, so the two sources should
-    // be identical.
-    assertEquals(source, retrievedSource);
-
-    verify(fireAndForgetRequestExecutor).executeAsync(stripeRequestArgumentCaptor.capture());
-    final StripeRequest analyticsRequest = stripeRequestArgumentCaptor.getValue();
-    assertEquals(AnalyticsRequestFactory.HOST, analyticsRequest.getBaseUrl());
-
-    assertEquals(
-        AnalyticsEvent.SourceRetrieve.toString(),
-        Objects.requireNonNull(analyticsRequest.getParams()).get(AnalyticsDataFactory.FIELD_EVENT));
-    assertEquals(
-        sourceId,
-        Objects.requireNonNull(analyticsRequest.getParams())
-            .get(AnalyticsDataFactory.FIELD_SOURCE_ID));
-  }
+        // We aren't actually updating the source on the server, so the two sources should
+        // be identical.
+        assertEquals(source, retrievedSource);
+    }
 
     @Test
     public void createSourceFromTokenParams_withExtraParams_succeeds()
