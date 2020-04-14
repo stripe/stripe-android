@@ -245,18 +245,18 @@ class StripeApiRepositoryTest {
     @Test
     fun retrieveSource_shouldFireAnalytics_andReturnSource() {
         val stripeResponse = StripeResponse(
-                200,
-                SourceFixtures.SOURCE_CARD_JSON.toString(),
-                emptyMap()
+            200,
+            SourceFixtures.SOURCE_CARD_JSON.toString(),
+            emptyMap()
         )
         whenever(stripeApiRequestExecutor.execute(any<ApiRequest>()))
-                .thenReturn(stripeResponse)
+            .thenReturn(stripeResponse)
 
         val sourceId = "src_19t3xKBZqEXluyI4uz2dxAfQ"
         val source = create().retrieveSource(
-                sourceId,
-                "mocked",
-                DEFAULT_OPTIONS
+            sourceId,
+            "mocked",
+            DEFAULT_OPTIONS
         )
 
         assertNotNull(source)
