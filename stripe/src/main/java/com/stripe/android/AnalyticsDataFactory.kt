@@ -158,8 +158,8 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createSourceRetrieveParams(sourceId: String): Map<String, Any> {
         return createParams(
-                AnalyticsEvent.SourceRetrieve,
-                extraParams = mapOf(FIELD_SOURCE_ID to sourceId)
+            AnalyticsEvent.SourceRetrieve,
+            extraParams = mapOf(FIELD_SOURCE_ID to sourceId)
         )
     }
 
