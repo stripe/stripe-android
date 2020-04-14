@@ -6,13 +6,10 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.matcher.ViewMatchers
-import androidx.test.ext.junit.rules.ActivityScenarioRule
-import androidx.test.ext.junit.rules.activityScenarioRule
 import com.stripe.example.R
 import org.junit.After
 import org.junit.Before
 import org.junit.Ignore
-import org.junit.Rule
 import org.junit.Test
 
 // @RunWith(AndroidJUnit4::class)
@@ -20,11 +17,11 @@ import org.junit.Test
 @Ignore("Disable until test is passing")
 class PaymentSessionActivityTest {
 
-    @get:Rule
-    val activityScenarioRule: ActivityScenarioRule<LauncherActivity> = activityScenarioRule()
-
-    @get:Rule
-    val idlingResourceRule: IdlingResourceRule = IdlingResourceRule("PaymentSessionActivityTest")
+//    @get:Rule
+//    val activityScenarioRule: ActivityScenarioRule<LauncherActivity> = activityScenarioRule()
+//
+//    @get:Rule
+//    val idlingResourceRule: IdlingResourceRule = IdlingResourceRule("PaymentSessionActivityTest")
 
     @Before
     fun setup() {

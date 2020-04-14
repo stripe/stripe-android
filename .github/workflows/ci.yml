@@ -50,7 +50,7 @@ jobs:
     timeout-minutes: 60
     strategy:
       matrix:
-        api-level: [29]
+        api-level: [21]
     steps:
       - uses: actions/checkout@v2
       - uses: gradle/wrapper-validation-action@v1
@@ -76,4 +76,4 @@ jobs:
         with:
           api-level: ${{ matrix.api-level }}
           arch: x86
-          script: ./gradlew :example:connectedDebugAndroidTest
+          script: ./gradlew :example:connectedDebugAndroidTest --info
