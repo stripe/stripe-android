@@ -386,8 +386,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         val apiUrl = getRetrieveSourceApiUrl(sourceId)
 
         fireAnalyticsRequest(
-                analyticsDataFactory.createSourceRetrieveParams(sourceId),
-                options.apiKey
+            analyticsDataFactory.createSourceRetrieveParams(sourceId),
+            options.apiKey
         )
 
         try {
