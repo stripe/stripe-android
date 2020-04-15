@@ -367,7 +367,6 @@ class Stripe internal constructor(
      *
      * @param activity the `Activity` that is launching the payment authentication flow
      */
-    @JvmOverloads
     fun confirmSetupIntent(
         activity: Activity,
         confirmSetupIntentParams: ConfirmSetupIntentParams
