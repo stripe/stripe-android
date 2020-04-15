@@ -128,7 +128,8 @@ class Stripe internal constructor(
      * @param activity the `Activity` that is launching the payment authentication flow
      * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
      * [PaymentIntent]
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      */
     @UiThread
     fun confirmPayment(
@@ -152,7 +153,8 @@ class Stripe internal constructor(
      *
      * @param fragment the `Fragment` that is launching the payment authentication flow
      * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the [PaymentIntent]
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      */
     @UiThread
     fun confirmPayment(
@@ -201,7 +203,8 @@ class Stripe internal constructor(
      * @param activity the `Activity` that is launching the payment authentication flow
      * @param clientSecret the [client_secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret)
      * property of a confirmed [PaymentIntent] object
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      */
     @UiThread
     fun handleNextActionForPayment(
@@ -250,7 +253,8 @@ class Stripe internal constructor(
      * @param fragment the `Fragment` that is launching the payment authentication flow
      * @param clientSecret the [client_secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret)
      * property of a confirmed [PaymentIntent] object
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      */
     @UiThread
     fun handleNextActionForPayment(
@@ -306,7 +310,8 @@ class Stripe internal constructor(
      * `GET /v1/payment_intents/:id`
      *
      * @param clientSecret the client_secret with which to retrieve the PaymentIntent
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      * @return a [PaymentIntent] or `null` if a problem occurred
      */
     @Throws(APIException::class, AuthenticationException::class,
@@ -365,7 +370,8 @@ class Stripe internal constructor(
      * Confirm and, if necessary, authenticate a [SetupIntent].
      *
      * @param activity the `Activity` that is launching the payment authentication flow
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      */
     @UiThread
     @JvmOverloads
@@ -388,7 +394,8 @@ class Stripe internal constructor(
      * Confirm and, if necessary, authenticate a [SetupIntent].
      *
      * @param fragment the `Fragment` that is launching the payment authentication flow
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      */
     @UiThread
     @JvmOverloads
@@ -435,7 +442,8 @@ class Stripe internal constructor(
      * @param activity the `Activity` that is launching the payment authentication flow
      * @param clientSecret the [client_secret](https://stripe.com/docs/api/setup_intents/object#setup_intent_object-client_secret)
      * property of a confirmed [SetupIntent] object
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      */
     @UiThread
     @JvmOverloads
@@ -482,7 +490,8 @@ class Stripe internal constructor(
      * @param fragment the `Fragment` launching the payment authentication flow
      * @param clientSecret the [client_secret](https://stripe.com/docs/api/setup_intents/object#setup_intent_object-client_secret)
      * property of a confirmed [SetupIntent] object
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      */
     @UiThread
     @JvmOverloads
@@ -538,7 +547,8 @@ class Stripe internal constructor(
      * `GET /v1/setup_intents/:id`
      *
      * @param clientSecret client_secret of the SetupIntent to retrieve
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      * @return a [SetupIntent] or `null` if a problem occurred
      */
     @Throws(APIException::class, AuthenticationException::class, InvalidRequestException::class,
@@ -601,7 +611,8 @@ class Stripe internal constructor(
      *
      * @param paymentMethodCreateParams the [PaymentMethodCreateParams] to be used
      * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @UiThread
@@ -634,7 +645,8 @@ class Stripe internal constructor(
      *
      * @param paymentMethodCreateParams params with which to create the PaymentMethod
      * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      *
      * @return a [PaymentMethod] or `null` if a problem occurred
      */
@@ -669,7 +681,8 @@ class Stripe internal constructor(
      *
      * @param activity the `Activity` that is launching the [Source] authentication flow
      * @param source the [Source] to confirm
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      */
     @JvmOverloads
     fun authenticateSource(
@@ -692,7 +705,8 @@ class Stripe internal constructor(
      *
      * @param fragment the `Fragment` that is launching the [Source] authentication flow
      * @param source the [Source] to confirm
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      */
     @JvmOverloads
     fun authenticateSource(
@@ -745,7 +759,8 @@ class Stripe internal constructor(
      *
      * @param sourceParams the [SourceParams] to be used
      * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @UiThread
@@ -778,7 +793,8 @@ class Stripe internal constructor(
      *
      * @param params a set of [SourceParams] with which to create the source
      * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      *
      * @return a [Source], or `null` if a problem occurred
      *
@@ -815,7 +831,8 @@ class Stripe internal constructor(
      *
      * @param sourceId the [Source.id] field of the desired Source object
      * @param clientSecret the [Source.clientSecret] field of the desired Source object
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      * @param callback a [ApiResultCallback] to receive the result or error
      *
      * @throws AuthenticationException failure to properly authenticate yourself (check your key)
@@ -851,7 +868,8 @@ class Stripe internal constructor(
      *
      * @param sourceId the [Source.id] field of the desired Source object
      * @param clientSecret the [Source.clientSecret] field of the desired Source object
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      *
      * @return a [Source] if one could be found based on the input params, or `null` if
      * no such Source could be found.
@@ -891,7 +909,8 @@ class Stripe internal constructor(
      *
      * @param accountParams the [AccountParams] used to create this token
      * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @UiThread
@@ -919,7 +938,8 @@ class Stripe internal constructor(
      *
      * @param accountParams params to use for this token.
      * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      *
      * @return a [Token] that can be used for this account.
      *
@@ -961,7 +981,8 @@ class Stripe internal constructor(
      *
      * @param bankAccountTokenParams the [BankAccountTokenParams] used to create this token
      * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @UiThread
@@ -989,7 +1010,8 @@ class Stripe internal constructor(
      *
      * @param bankAccountTokenParams the [BankAccountTokenParams] to use for this token
      * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      *
      * @return a [Token] that can be used for this [BankAccount]
      *
@@ -1028,7 +1050,8 @@ class Stripe internal constructor(
      *
      * @param bankAccount the [BankAccount] used to create this token
      * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @Deprecated("Use BankAccountTokenParams")
@@ -1122,7 +1145,8 @@ class Stripe internal constructor(
      *
      * @param personalId the personal ID to use for this token
      * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      *
      * @return a [Token] that can be used for this card
      *
@@ -1181,7 +1205,8 @@ class Stripe internal constructor(
      *
      * @param card the [Card] used to create this payment token
      * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @UiThread
@@ -1209,7 +1234,8 @@ class Stripe internal constructor(
      *
      * @param card the [Card] to use for this token
      * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      *
      * @return a [Token] that can be used for this card
      * @throws AuthenticationException failure to properly authenticate yourself (check your key)
@@ -1245,7 +1271,8 @@ class Stripe internal constructor(
      *
      * @param cvc the CVC used to create this token
      * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @UiThread
@@ -1272,7 +1299,8 @@ class Stripe internal constructor(
      *
      * @param cvc the CVC to use for this token
      * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      *
      * @return a [Token] that can be used for this card
      *
@@ -1310,7 +1338,8 @@ class Stripe internal constructor(
      *
      * @param params the person token creation params
      * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @UiThread
@@ -1338,7 +1367,8 @@ class Stripe internal constructor(
      *
      * @param params the person token creation params
      * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      *
      * @return a [Token] representing the person
      */
@@ -1385,7 +1415,8 @@ class Stripe internal constructor(
      *
      * @param fileParams the [StripeFileParams] used to create the [StripeFile]
      * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @JvmOverloads
@@ -1413,7 +1444,8 @@ class Stripe internal constructor(
      *
      * @param fileParams the [StripeFileParams] used to create the [StripeFile]
      * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
-     * @param stripeAccountId the Connect account to execute this request as
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      */
     @JvmOverloads
     fun createFileSynchronous(
