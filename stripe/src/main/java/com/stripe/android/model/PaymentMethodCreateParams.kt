@@ -482,7 +482,7 @@ data class PaymentMethodCreateParams internal constructor(
         }
 
         /**
-         * @return params for creating a `P24` payment method
+         * @return params for creating a [PaymentMethod.Type.P24] payment method
          */
         @JvmStatic
         @JvmOverloads
