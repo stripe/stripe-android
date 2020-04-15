@@ -141,15 +141,15 @@ data class PaymentMethodCreateParams internal constructor(
     private val typeParams: Map<String, Any>
         get() {
             return when (type) {
-                Type.Card -> card?.toParamMap().orEmpty()
-                Type.Ideal -> ideal?.toParamMap().orEmpty()
-                Type.Fpx -> fpx?.toParamMap().orEmpty()
-                Type.SepaDebit -> sepaDebit?.toParamMap().orEmpty()
-                Type.AuBecsDebit -> auBecsDebit?.toParamMap().orEmpty()
-                Type.BacsDebit -> bacsDebit?.toParamMap().orEmpty()
-                Type.Sofort -> sofort?.toParamMap().orEmpty()
-                Type.P24 -> emptyMap()
-            }.takeIf { it.isNotEmpty() }?.let {
+                Type.Card -> card?.toParamMap()
+                Type.Ideal -> ideal?.toParamMap()
+                Type.Fpx -> fpx?.toParamMap()
+                Type.SepaDebit -> sepaDebit?.toParamMap()
+                Type.AuBecsDebit -> auBecsDebit?.toParamMap()
+                Type.BacsDebit -> bacsDebit?.toParamMap()
+                Type.Sofort -> sofort?.toParamMap()
+                Type.P24 -> null
+            }.takeUnless { it.isNullOrEmpty() }?.let {
                 mapOf(type.code to it)
             }.orEmpty()
         }
