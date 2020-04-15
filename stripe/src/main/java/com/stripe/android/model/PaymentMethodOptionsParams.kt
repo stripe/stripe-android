@@ -24,11 +24,10 @@ sealed class PaymentMethodOptionsParams(
         }
     }
 
-    // TODO(mshafrir-stripe): extend `PaymentMethodOptionsParams` once PaymentMethod.Type is created
     @Parcelize
     data class Sofort(
         var preferredLanguage: String? = null
-    ) : StripeParamsModel, Parcelable {
+    ) : PaymentMethodOptionsParams(PaymentMethod.Type.Sofort) {
         override fun toParamMap(): Map<String, Any> {
             return preferredLanguage?.let {
                 mapOf(PARAM_PREFERRED_LANGUAGE to it)
