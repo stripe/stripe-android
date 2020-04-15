@@ -15,6 +15,7 @@ import com.stripe.android.CustomerSession
 import com.stripe.android.EphemeralKeyProvider
 import com.stripe.android.EphemeralKeyUpdateListener
 import com.stripe.example.R
+import junit.framework.TestCase
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -22,11 +23,9 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class AddFpxPaymentMethodTest {
+class AddFpxPaymentMethodTest : TestCase() {
 
-    private val context: Context by lazy {
-        ApplicationProvider.getApplicationContext<Context>()
-    }
+    private val context = ApplicationProvider.getApplicationContext<Context>()
 
     @get:Rule
     val activityScenarioRule: ActivityScenarioRule<LauncherActivity> = activityScenarioRule()

@@ -12,6 +12,7 @@ import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.stripe.example.R
+import junit.framework.TestCase
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -20,7 +21,7 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class CreateCardTokenActivityTest {
+class CreateCardTokenActivityTest : TestCase() {
 
     @get:Rule
     val activityScenarioRule: ActivityScenarioRule<LauncherActivity> = activityScenarioRule()
