@@ -2,7 +2,7 @@
 
 # Stripe Android SDK
 
-[![Build Status](https://api.travis-ci.org/stripe/stripe-android.svg?branch=master)](https://travis-ci.org/stripe/stripe-android)
+[![CI](https://github.com/stripe/stripe-android/workflows/CI/badge.svg)](https://github.com/stripe/stripe-android/actions?query=workflow%3ACI)
 [![GitHub release](https://img.shields.io/github/release/stripe/stripe-android.svg?maxAge=60)](https://github.com/stripe/stripe-android/releases)
 [![License](https://img.shields.io/github/license/stripe/stripe-android)](https://github.com/stripe/stripe-android/blob/master/LICENSE)
 
