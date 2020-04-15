@@ -149,6 +149,7 @@ data class PaymentMethodCreateParams internal constructor(
                 Type.BacsDebit -> bacsDebit?.toParamMap()
                 Type.Sofort -> sofort?.toParamMap()
                 Type.P24 -> null
+                Type.Bancontact -> null
             }.takeUnless { it.isNullOrEmpty() }?.let {
                 mapOf(type.code to it)
             }.orEmpty()
@@ -162,7 +163,8 @@ data class PaymentMethodCreateParams internal constructor(
         AuBecsDebit("au_becs_debit", true),
         BacsDebit("bacs_debit", true),
         Sofort("sofort"),
-        P24("p24")
+        P24("p24"),
+        Bancontact("bancontact")
     }
 
     @Parcelize
@@ -492,6 +494,19 @@ data class PaymentMethodCreateParams internal constructor(
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = Type.P24,
+                billingDetails = billingDetails,
+                metadata = metadata
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        internal fun createBancontact(
+            billingDetails: PaymentMethod.BillingDetails,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = Type.Bancontact,
                 billingDetails = billingDetails,
                 metadata = metadata
             )
