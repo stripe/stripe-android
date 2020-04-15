@@ -168,7 +168,7 @@ android {
             assets.srcDirs = ['assets']
         }
         androidTest {
-            setRoot('src/test')
+            setRoot('androidTestDebug')
         }
     }
 
