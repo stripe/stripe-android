@@ -62,6 +62,8 @@ class LauncherActivity : AppCompatActivity() {
                 BecsDebitPaymentMethodActivity::class.java),
             Item(activity.getString(R.string.bacs_debit_example),
                 BacsDebitPaymentMethodActivity::class.java),
+            Item(activity.getString(R.string.sofort_example),
+                SofortPaymentMethodActivity::class.java),
             Item(activity.getString(R.string.card_brands),
                 CardBrandsActivity::class.java)
         )

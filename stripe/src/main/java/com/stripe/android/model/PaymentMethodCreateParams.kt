@@ -473,7 +473,7 @@ data class PaymentMethodCreateParams internal constructor(
          */
         @JvmStatic
         @JvmOverloads
-        internal fun create(
+        fun create(
             sofort: Sofort,
             billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null
