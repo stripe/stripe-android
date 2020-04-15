@@ -62,6 +62,13 @@ internal object PaymentMethodCreateParamsFixtures {
         billingDetails = BILLING_DETAILS
     )
 
+    internal val SOFORT = PaymentMethodCreateParams.create(
+        sofort = PaymentMethodCreateParams.Sofort(
+            country = "de"
+        ),
+        billingDetails = BILLING_DETAILS
+    )
+
     @JvmStatic
     fun createWith(metadata: Map<String, String>): PaymentMethodCreateParams {
         return PaymentMethodCreateParams.create(
