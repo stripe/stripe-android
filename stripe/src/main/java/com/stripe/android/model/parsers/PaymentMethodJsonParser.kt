@@ -66,6 +66,9 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                         SofortJsonParser().parse(it)
                     }
                 )
+            PaymentMethod.Type.P24 -> {
+                // no-op
+            }
         }
 
         return builder.build()

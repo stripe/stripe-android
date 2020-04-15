@@ -47,4 +47,14 @@ class PaymentMethodEndToEndTest {
                 )
             )
     }
+
+    @Test
+    fun createPaymentMethod_withP24_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.P24
+        val paymentMethod =
+            Stripe(context, ApiKeyFixtures.P24_PUBLISHABLE_KEY)
+                .createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod?.type)
+            .isEqualTo(PaymentMethod.Type.P24)
+    }
 }

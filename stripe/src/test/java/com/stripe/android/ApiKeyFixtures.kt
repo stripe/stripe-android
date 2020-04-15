@@ -11,4 +11,5 @@ internal object ApiKeyFixtures {
     const val KLARNA_PUBLISHABLE_KEY = "pk_test_8JUGw3jTOFqWQOt5nr2pjzF9"
     const val BACS_PUBLISHABLE_KEY = "pk_test_z6Ct4bpx0NUjHii0rsi4XZBf00jmM8qA28"
     const val SOFORT_PUBLISHABLE_KEY = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
+    const val P24_PUBLISHABLE_KEY = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
 }
