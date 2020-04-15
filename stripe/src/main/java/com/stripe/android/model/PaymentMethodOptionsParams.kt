@@ -9,7 +9,7 @@ sealed class PaymentMethodOptionsParams(
 
     @Parcelize
     data class Card(
-        val cvc: String? = null
+        var cvc: String? = null
     ) : PaymentMethodOptionsParams(PaymentMethod.Type.Card) {
         override fun toParamMap(): Map<String, Any> {
             return mapOf(type.code to
@@ -21,6 +21,22 @@ sealed class PaymentMethodOptionsParams(
 
         private companion object {
             private const val PARAM_CVC = "cvc"
+        }
+    }
+
+    // TODO(mshafrir-stripe): extend `PaymentMethodOptionsParams` once PaymentMethod.Type is created
+    @Parcelize
+    data class Sofort(
+        var preferredLanguage: String? = null
+    ) : StripeParamsModel, Parcelable {
+        override fun toParamMap(): Map<String, Any> {
+            return preferredLanguage?.let {
+                mapOf(PARAM_PREFERRED_LANGUAGE to it)
+            }.orEmpty()
+        }
+
+        private companion object {
+            private const val PARAM_PREFERRED_LANGUAGE = "preferred_language"
         }
     }
 }
