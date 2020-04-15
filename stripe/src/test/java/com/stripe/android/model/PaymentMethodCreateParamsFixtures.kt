@@ -74,7 +74,7 @@ internal object PaymentMethodCreateParamsFixtures {
     )
 
     internal val BANCONTACT = PaymentMethodCreateParams.createBancontact(
-        billingDetails =  BILLING_DETAILS
+        billingDetails = BILLING_DETAILS
     )
 
     @JvmStatic
