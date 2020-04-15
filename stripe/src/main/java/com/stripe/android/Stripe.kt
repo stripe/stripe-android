@@ -128,15 +128,11 @@ class Stripe internal constructor(
      * @param activity the `Activity` that is launching the payment authentication flow
      * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
      * [PaymentIntent]
-     * @param stripeAccountId Optional, the Connect account to associate with this request.
-     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      */
-    @JvmOverloads
     @UiThread
     fun confirmPayment(
         activity: Activity,
-        confirmPaymentIntentParams: ConfirmPaymentIntentParams,
-        stripeAccountId: String? = this.stripeAccountId
+        confirmPaymentIntentParams: ConfirmPaymentIntentParams
     ) {
         paymentController.startConfirmAndAuth(
             AuthActivityStarter.Host.create(activity),
@@ -280,15 +276,11 @@ class Stripe internal constructor(
      * Should be called via `Activity#onActivityResult(int, int, Intent)}}` to handle the
      * result of a PaymentIntent automatic confirmation (see [confirmPayment]) or
      * manual confirmation (see [handleNextActionForPayment]})
-     *
-     * TODO(smaskell): figure out if we can get account id from the intent
      */
-    @JvmOverloads
     @UiThread
     fun onPaymentResult(
         requestCode: Int,
         data: Intent?,
-        stripeAccountId: String? = this.stripeAccountId,
         callback: ApiResultCallback<PaymentIntentResult>
     ): Boolean {
         return if (data != null && paymentController.shouldHandlePaymentResult(requestCode, data)) {
@@ -374,15 +366,11 @@ class Stripe internal constructor(
      * Confirm and, if necessary, authenticate a [SetupIntent].
      *
      * @param activity the `Activity` that is launching the payment authentication flow
-     * @param stripeAccountId Optional, the Connect account to associate with this request.
-     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      */
-    @UiThread
     @JvmOverloads
     fun confirmSetupIntent(
         activity: Activity,
-        confirmSetupIntentParams: ConfirmSetupIntentParams,
-        stripeAccountId: String? = this.stripeAccountId
+        confirmSetupIntentParams: ConfirmSetupIntentParams
     ) {
         paymentController.startConfirmAndAuth(
             AuthActivityStarter.Host.create(activity),
@@ -517,15 +505,11 @@ class Stripe internal constructor(
     /**
      * Should be called via `Activity#onActivityResult(int, int, Intent)}}` to handle the
      * result of a SetupIntent confirmation (see [confirmSetupIntent]).
-     *
-     * TODO(smaskell): figure out if we can get account id from the intent
      */
-    @JvmOverloads
     @UiThread
     fun onSetupResult(
         requestCode: Int,
         data: Intent?,
-        stripeAccountId: String? = this.stripeAccountId,
         callback: ApiResultCallback<SetupIntentResult>
     ): Boolean {
         return if (data != null && paymentController.shouldHandleSetupResult(requestCode, data)) {
@@ -685,14 +669,10 @@ class Stripe internal constructor(
      *
      * @param activity the `Activity` that is launching the [Source] authentication flow
      * @param source the [Source] to confirm
-     * @param stripeAccountId Optional, the Connect account to associate with this request.
-     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      */
-    @JvmOverloads
     fun authenticateSource(
         activity: Activity,
-        source: Source,
-        stripeAccountId: String? = this.stripeAccountId
+        source: Source
     ) {
         paymentController.startAuthenticateSource(
             AuthActivityStarter.Host.create(activity),
@@ -709,14 +689,10 @@ class Stripe internal constructor(
      *
      * @param fragment the `Fragment` that is launching the [Source] authentication flow
      * @param source the [Source] to confirm
-     * @param stripeAccountId Optional, the Connect account to associate with this request.
-     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      */
-    @JvmOverloads
     fun authenticateSource(
         fragment: Fragment,
-        source: Source,
-        stripeAccountId: String? = this.stripeAccountId
+        source: Source
     ) {
         paymentController.startAuthenticateSource(
             AuthActivityStarter.Host.create(fragment),
@@ -739,13 +715,9 @@ class Stripe internal constructor(
      * The result of a call to [authenticateSource].
      *
      * Use [isAuthenticateSourceResult] before calling this method.
-     *
-     * TODO(smaskell): Figure out if we can get account id from the intent
      */
-    @JvmOverloads
     fun onAuthenticateSourceResult(
         data: Intent,
-        stripeAccountId: String? = this.stripeAccountId,
         callback: ApiResultCallback<Source>
     ) {
         paymentController.handleSourceResult(

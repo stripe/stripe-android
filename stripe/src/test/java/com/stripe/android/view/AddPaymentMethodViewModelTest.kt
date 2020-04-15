@@ -50,7 +50,7 @@ class AddPaymentMethodViewModelTest {
         verify(stripe).createPaymentMethod(
             paymentMethodCreateParamsCaptor.capture(),
             anyOrNull(),
-            any()
+            callback = any()
         )
 
         assertEquals(
