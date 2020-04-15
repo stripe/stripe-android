@@ -69,6 +69,10 @@ internal object PaymentMethodCreateParamsFixtures {
         billingDetails = BILLING_DETAILS
     )
 
+    internal val P24 = PaymentMethodCreateParams.createP24(
+        billingDetails = BILLING_DETAILS
+    )
+
     @JvmStatic
     fun createWith(metadata: Map<String, String>): PaymentMethodCreateParams {
         return PaymentMethodCreateParams.create(

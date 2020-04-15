@@ -131,24 +131,28 @@ data class PaymentMethodCreateParams internal constructor(
             billingDetails?.let {
                 mapOf(PARAM_BILLING_DETAILS to it.toParamMap())
             }.orEmpty()
-        ).plus(
-            mapOf(type.code to
-                when (type) {
-                    Type.Card -> card?.toParamMap().orEmpty()
-                    Type.Ideal -> ideal?.toParamMap().orEmpty()
-                    Type.Fpx -> fpx?.toParamMap().orEmpty()
-                    Type.SepaDebit -> sepaDebit?.toParamMap().orEmpty()
-                    Type.AuBecsDebit -> auBecsDebit?.toParamMap().orEmpty()
-                    Type.BacsDebit -> bacsDebit?.toParamMap().orEmpty()
-                    Type.Sofort -> sofort?.toParamMap().orEmpty()
-                }
-            )
-        ).plus(
+        ).plus(typeParams).plus(
             metadata?.let {
                 mapOf(PARAM_METADATA to it)
             }.orEmpty()
         )
     }
+
+    private val typeParams: Map<String, Any>
+        get() {
+            return when (type) {
+                Type.Card -> card?.toParamMap().orEmpty()
+                Type.Ideal -> ideal?.toParamMap().orEmpty()
+                Type.Fpx -> fpx?.toParamMap().orEmpty()
+                Type.SepaDebit -> sepaDebit?.toParamMap().orEmpty()
+                Type.AuBecsDebit -> auBecsDebit?.toParamMap().orEmpty()
+                Type.BacsDebit -> bacsDebit?.toParamMap().orEmpty()
+                Type.Sofort -> sofort?.toParamMap().orEmpty()
+                Type.P24 -> emptyMap()
+            }.takeIf { it.isNotEmpty() }?.let {
+                mapOf(type.code to it)
+            }.orEmpty()
+        }
 
     internal enum class Type(internal val code: String, val hasMandate: Boolean = false) {
         Card("card"),
@@ -157,7 +161,8 @@ data class PaymentMethodCreateParams internal constructor(
         SepaDebit("sepa_debit", true),
         AuBecsDebit("au_becs_debit", true),
         BacsDebit("bacs_debit", true),
-        Sofort("sofort")
+        Sofort("sofort"),
+        P24("p24")
     }
 
     @Parcelize
@@ -464,7 +469,7 @@ data class PaymentMethodCreateParams internal constructor(
         }
 
         /**
-         * @return params for creating a `SOFORT` payment method
+         * @return params for creating a [PaymentMethod.Type.Sofort] payment method
          */
         @JvmStatic
         @JvmOverloads
@@ -474,6 +479,22 @@ data class PaymentMethodCreateParams internal constructor(
             metadata: Map<String, String>? = null
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(sofort, billingDetails, metadata)
+        }
+
+        /**
+         * @return params for creating a `P24` payment method
+         */
+        @JvmStatic
+        @JvmOverloads
+        internal fun createP24(
+            billingDetails: PaymentMethod.BillingDetails,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = Type.P24,
+                billingDetails = billingDetails,
+                metadata = metadata
+            )
         }
 
         /**
