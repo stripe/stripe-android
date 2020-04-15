@@ -31,4 +31,14 @@ class PaymentMethodEndToEndTest {
                 )
             )
     }
+
+    @Test
+    fun createPaymentMethod_withSofort_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.SOFORT
+        val paymentMethod =
+            Stripe(context, ApiKeyFixtures.SOFORT_PUBLISHABLE_KEY)
+                .createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod)
+            .isNotNull()
+    }
 }
