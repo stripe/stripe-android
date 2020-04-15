@@ -23,19 +23,4 @@ sealed class PaymentMethodOptionsParams(
             private const val PARAM_CVC = "cvc"
         }
     }
-
-    @Parcelize
-    data class Sofort(
-        var preferredLanguage: String? = null
-    ) : PaymentMethodOptionsParams(PaymentMethod.Type.Sofort) {
-        override fun toParamMap(): Map<String, Any> {
-            return preferredLanguage?.let {
-                mapOf(PARAM_PREFERRED_LANGUAGE to it)
-            }.orEmpty()
-        }
-
-        private companion object {
-            private const val PARAM_PREFERRED_LANGUAGE = "preferred_language"
-        }
-    }
 }
