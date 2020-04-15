@@ -9,7 +9,6 @@ import com.stripe.android.CustomerSession
 import com.stripe.android.StripeError
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.view.PaymentMethodsActivity
 import com.stripe.android.view.PaymentMethodsActivityStarter
 import com.stripe.example.R
 import com.stripe.example.databinding.CustomerSessionActivityBinding
@@ -43,8 +42,11 @@ class CustomerSessionActivity : AppCompatActivity() {
     }
 
     private fun launchWithCustomer() {
-        val args = PaymentMethodsActivityStarter.Args.Builder().setInitialPaymentMethodId(selectedPaymentMethodId).build()
-        PaymentMethodsActivityStarter(this).startForResult(args)
+        PaymentMethodsActivityStarter(this).startForResult(
+            PaymentMethodsActivityStarter.Args.Builder()
+                .setInitialPaymentMethodId(selectedPaymentMethodId)
+                .build()
+        )
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
