@@ -127,7 +127,8 @@ data class PaymentMethod internal constructor(
         AuBecsDebit("au_becs_debit"),
         BacsDebit("bacs_debit"),
         Sofort("sofort", isReusable = false),
-        P24("p24", isReusable = false);
+        P24("p24", isReusable = false),
+        Bancontact("bancontact", isReusable = false);
 
         override fun toString(): String {
             return code
