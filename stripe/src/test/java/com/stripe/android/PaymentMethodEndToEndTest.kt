@@ -38,7 +38,13 @@ class PaymentMethodEndToEndTest {
         val paymentMethod =
             Stripe(context, ApiKeyFixtures.SOFORT_PUBLISHABLE_KEY)
                 .createPaymentMethodSynchronous(params)
-        assertThat(paymentMethod)
-            .isNotNull()
+        assertThat(paymentMethod?.type)
+            .isEqualTo(PaymentMethod.Type.Sofort)
+        assertThat(paymentMethod?.sofort)
+            .isEqualTo(
+                PaymentMethod.Sofort(
+                    country = "DE"
+                )
+            )
     }
 }
