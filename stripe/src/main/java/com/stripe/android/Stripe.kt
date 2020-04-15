@@ -1198,7 +1198,11 @@ class Stripe internal constructor(
         idempotencyKey: String? = null,
         callback: ApiResultCallback<Token>
     ) {
-        createCardToken(card, idempotencyKey, callback)
+        createCardToken(
+            card,
+            idempotencyKey = idempotencyKey,
+            callback = callback
+        )
     }
 
     /**

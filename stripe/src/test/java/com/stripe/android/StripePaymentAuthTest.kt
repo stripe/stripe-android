@@ -100,7 +100,8 @@ class StripePaymentAuthTest {
             StripePaymentController.PAYMENT_REQUEST_CODE, data))
             .thenReturn(true)
         val stripe = createStripe()
-        stripe.onPaymentResult(StripePaymentController.PAYMENT_REQUEST_CODE, data, paymentCallback)
+        stripe.onPaymentResult(StripePaymentController.PAYMENT_REQUEST_CODE, data,
+            callback = paymentCallback)
 
         verify(paymentController).handlePaymentResult(data,
             ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
@@ -114,7 +115,8 @@ class StripePaymentAuthTest {
             StripePaymentController.SETUP_REQUEST_CODE, data))
             .thenReturn(true)
         val stripe = createStripe()
-        stripe.onSetupResult(StripePaymentController.SETUP_REQUEST_CODE, data, setupCallback)
+        stripe.onSetupResult(StripePaymentController.SETUP_REQUEST_CODE, data,
+            callback = setupCallback)
 
         verify(paymentController).handleSetupResult(data,
             ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
