@@ -1,0 +1,16 @@
+#!/bin/sh
+
+echo "Running static analysis with checkstyle and ktlint..."
+
+./gradlew checkstyle ktlint --daemon
+
+status=$?
+
+if [ "$status" = 0 ] ; then
+    echo "Static analysis ran successfully."
+    exit 0
+else
+    echo "Static analysis failed. Formatting with ktlint..."
+    ./gradlew :stripe:ktlintFormat
+    exit 1
+fi

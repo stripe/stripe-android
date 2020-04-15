@@ -9,7 +9,7 @@ sealed class PaymentMethodOptionsParams(
 
     @Parcelize
     data class Card(
-        val cvc: String? = null
+        var cvc: String? = null
     ) : PaymentMethodOptionsParams(PaymentMethod.Type.Card) {
         override fun toParamMap(): Map<String, Any> {
             return mapOf(type.code to

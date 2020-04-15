@@ -4,37 +4,26 @@ import android.app.Activity
 import android.content.Intent
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 import com.stripe.android.view.AuthActivityStarter
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentAuthWebViewStarterTest {
 
-    @Mock
-    private lateinit var activity: Activity
+    private val activity: Activity = mock()
 
-    private lateinit var intentArgumentCaptor: KArgumentCaptor<Intent>
-    private lateinit var requestCodeCaptor: KArgumentCaptor<Int>
+    private val intentArgumentCaptor: KArgumentCaptor<Intent> = argumentCaptor()
+    private val requestCodeCaptor: KArgumentCaptor<Int> = argumentCaptor()
 
-    private lateinit var host: AuthActivityStarter.Host
-
-    @BeforeTest
-    fun setup() {
-        MockitoAnnotations.initMocks(this)
-        intentArgumentCaptor = argumentCaptor()
-        requestCodeCaptor = argumentCaptor()
-        host = AuthActivityStarter.Host.create(activity)
-    }
+    private val host: AuthActivityStarter.Host = AuthActivityStarter.Host.create(activity)
 
     @Test
     fun start_startsWithCorrectIntentAndRequestCode() {

@@ -32,7 +32,6 @@ import com.stripe.android.model.Token;
 import com.stripe.android.model.WeChat;
 
 import java.io.File;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -51,7 +50,6 @@ import org.robolectric.RobolectricTestRunner;
 
 import kotlinx.coroutines.CoroutineScope;
 
-import static com.stripe.android.CardNumberFixtures.VISA_NO_SPACES;
 import static kotlinx.coroutines.CoroutineScopeKt.MainScope;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -60,43 +58,44 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
- * Run integration tests on Stripe. Fires real API requests but does not make logging requests.
+ * Run integration tests on Stripe.
  */
-@SuppressWarnings({"ConstantConditions"})
 @RunWith(RobolectricTestRunner.class)
 public class StripeTest {
-    // publishable keys
-    private static final String NON_LOGGING_PK = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY;
-    private static final String DEFAULT_SECRET_KEY = "sk_default";
+    private static final Card CARD = CardFixtures.MINIMUM_CARD;
 
-    private static final String TEST_CARD_NUMBER = "4242424242424242";
+    @NonNull
+    private final Context context = ApplicationProvider.getApplicationContext();
+    @NonNull
+    private final FingerprintDataRepository defaultFingerprintDataRepository =
+            new FingerprintDataRepository.Default(context);
+    @NonNull
+    private final Stripe defaultStripe = createStripe();
 
-    private static final int YEAR = Calendar.getInstance().get(Calendar.YEAR) + 1;
-    private static final Card CARD = Card.create(TEST_CARD_NUMBER, 12, YEAR, "123");
+    @Mock
+    private FireAndForgetRequestExecutor fireAndForgetRequestExecutor;
+    @Mock
+    private ApiResultCallback<Token> tokenCallback;
+    @Mock
+    private ApiResultCallback<Source> sourceCallback;
+    @Mock
+    private ApiResultCallback<StripeFile> stripeFileCallback;
 
-    private static final SourceParams CARD_SOURCE_PARAMS = SourceParams.createCardParams(CARD);
-
-    private Context context;
-
-    @Captor private ArgumentCaptor<StripeRequest> stripeRequestArgumentCaptor;
-    @Mock private FireAndForgetRequestExecutor fireAndForgetRequestExecutor;
-
-    @Mock private ApiResultCallback<Token> tokenCallback;
-    @Mock private ApiResultCallback<Source> sourceCallback;
-    @Mock private ApiResultCallback<StripeFile> stripeFileCallback;
-
-    @Captor private ArgumentCaptor<Token> tokenArgumentCaptor;
-    @Captor private ArgumentCaptor<Source> sourceArgumentCaptor;
-    @Captor private ArgumentCaptor<StripeFile> stripeFileArgumentCaptor;
+    @Captor
+    private ArgumentCaptor<StripeRequest> stripeRequestArgumentCaptor;
+    @Captor
+    private ArgumentCaptor<Token> tokenArgumentCaptor;
+    @Captor
+    private ArgumentCaptor<Source> sourceArgumentCaptor;
+    @Captor
+    private ArgumentCaptor<StripeFile> stripeFileArgumentCaptor;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        context = ApplicationProvider.getApplicationContext();
     }
 
     @Test
@@ -117,6 +116,7 @@ public class StripeTest {
         assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
             @Override
             public void run() {
+                //noinspection ConstantConditions
                 new Stripe(context, null);
             }
         });
@@ -137,7 +137,7 @@ public class StripeTest {
         assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
             @Override
             public void run() {
-                new Stripe(context, DEFAULT_SECRET_KEY);
+                new Stripe(context, ApiKeyFixtures.FAKE_SECRET_KEY);
             }
         });
     }
@@ -155,8 +155,7 @@ public class StripeTest {
     @Test
     public void createCardTokenSynchronous_withValidData_returnsToken()
             throws StripeException {
-        final Stripe stripe = createStripe();
-        final Token token = stripe.createCardTokenSynchronous(CARD);
+        final Token token = defaultStripe.createCardTokenSynchronous(CARD);
 
         assertNotNull(token);
         Card returnedCard = token.getCard();
@@ -196,7 +195,7 @@ public class StripeTest {
     @Test
     public void createToken_createSource_returnsSource()
             throws StripeException {
-        final Stripe stripe = createStripe();
+        final Stripe stripe = defaultStripe;
         final Token token = stripe.createCardTokenSynchronous(CARD);
         assertNotNull(token);
 
@@ -208,7 +207,7 @@ public class StripeTest {
     @Test
     public void createToken_createSourceWithTokenToSourceParams_returnsSource()
             throws StripeException {
-        final Stripe stripe = createStripe();
+        final Stripe stripe = defaultStripe;
         final Token token = stripe.createCardTokenSynchronous(CARD);
         assertNotNull(token);
 
@@ -252,7 +251,8 @@ public class StripeTest {
 
     @Test
     public void testCreateSource() {
-        createStripe().createSource(CARD_SOURCE_PARAMS,
+        createStripe().createSource(
+                SourceParams.createCardParams(CARD),
                 new ApiResultCallback<Source>() {
                     @Override
                     public void onSuccess(@NonNull Source result) {
@@ -285,9 +285,7 @@ public class StripeTest {
     @Test
     public void createBankAccountTokenSynchronous_withValidBankAccount_returnsToken()
             throws StripeException {
-        final Stripe stripe = createStripe();
-
-        final Token token = stripe.createBankAccountTokenSynchronous(
+        final Token token = defaultStripe.createBankAccountTokenSynchronous(
                 BankAccountTokenParamsFixtures.DEFAULT
         );
         assertNotNull(token);
@@ -299,7 +297,10 @@ public class StripeTest {
         final String bankAccountId = Objects.requireNonNull(returnedBankAccount.getId());
         assertTrue(bankAccountId.startsWith("ba_"));
         assertEquals("Jenny Rosen", returnedBankAccount.getAccountHolderName());
-        assertEquals(BankAccount.BankAccountType.INDIVIDUAL, returnedBankAccount.getAccountHolderType());
+        assertEquals(
+                BankAccount.BankAccountType.INDIVIDUAL,
+                returnedBankAccount.getAccountHolderType()
+        );
         assertEquals("US", returnedBankAccount.getCountryCode());
         assertEquals("usd", returnedBankAccount.getCurrency());
         assertNull(returnedBankAccount.getFingerprint());
@@ -311,14 +312,13 @@ public class StripeTest {
     @Test
     public void createSourceSynchronous_withAlipayReusableParams_passesIntegrationTest()
             throws StripeException {
-        final Stripe stripe = createStripe();
-        SourceParams alipayParams = SourceParams.createAlipayReusableParams(
+        final SourceParams alipayParams = SourceParams.createAlipayReusableParams(
                 "usd",
                 "Example Payer",
                 "abc@def.com",
                 "stripe://start");
 
-        final Source alipaySource = stripe.createSourceSynchronous(alipayParams);
+        final Source alipaySource = defaultStripe.createSourceSynchronous(alipayParams);
         assertNotNull(alipaySource);
         assertNotNull(alipaySource.getId());
         assertNotNull(alipaySource.getClientSecret());
@@ -336,7 +336,6 @@ public class StripeTest {
     @Test
     public void createSourceSynchronous_withAlipaySingleUseParams_passesIntegrationTest()
             throws StripeException {
-        final Stripe stripe = createStripe();
         final SourceParams alipayParams = SourceParams.createAlipaySingleUseParams(
                 1000L,
                 "usd",
@@ -344,7 +343,7 @@ public class StripeTest {
                 "abc@def.com",
                 "stripe://start");
 
-        final Source alipaySource = stripe.createSourceSynchronous(alipayParams);
+        final Source alipaySource = defaultStripe.createSourceSynchronous(alipayParams);
         assertNotNull(alipaySource);
         assertNotNull(alipaySource.getId());
         assertNotNull(alipaySource.getClientSecret());
@@ -381,7 +380,9 @@ public class StripeTest {
 
     @Test
     public void createSourceSynchronous_withWeChatPayParams_onUnactivatedAccount_throwsException() {
-        final Stripe stripe = createStripe("pk_live_8fFXnTeQrVqExmub4gQPOzgG001iJLyZwl");
+        final Stripe stripe = createStripe(
+                "pk_live_8fFXnTeQrVqExmub4gQPOzgG001iJLyZwl"
+        );
         final SourceParams weChatPaySourceParams = SourceParams.createWeChatPayParams(
                 1000L,
                 "USD",
@@ -395,7 +396,10 @@ public class StripeTest {
                         stripe.createSourceSynchronous(weChatPaySourceParams);
                     }
                 });
-        assertEquals("payment_method_unactivated", ex.getStripeError().getCode());
+        assertEquals(
+                "payment_method_unactivated",
+                Objects.requireNonNull(ex.getStripeError()).getCode()
+        );
         assertEquals(
                 "This payment method (wechat) is not activated for your account. You can only create testmode wechat payment methods. You can learn more about this here https://support.stripe.com/questions/i-am-having-trouble-activating-a-payment-method",
                 ex.getMessage()
@@ -405,7 +409,6 @@ public class StripeTest {
     @Test
     public void createSourceSynchronous_withBancontactParams_passesIntegrationTest()
             throws StripeException {
-        final Stripe stripe = createStripe();
         final SourceParams bancontactParams = SourceParams.createBancontactParams(
                 1000L,
                 "John Doe",
@@ -419,7 +422,7 @@ public class StripeTest {
         }};
         bancontactParams.setMetaData(metamap);
 
-        final Source bancontactSource = stripe.createSourceSynchronous(bancontactParams);
+        final Source bancontactSource = defaultStripe.createSourceSynchronous(bancontactParams);
         assertNotNull(bancontactSource);
         assertNotNull(bancontactSource.getId());
         assertNotNull(bancontactSource.getClientSecret());
@@ -438,7 +441,7 @@ public class StripeTest {
     @Test
     public void createSourceSynchronous_withCardParams_passesIntegrationTest()
             throws StripeException {
-        final Card card = new Card.Builder(VISA_NO_SPACES, 12, 2050, "123")
+        final Card card = new Card.Builder(CardNumberFixtures.VISA_NO_SPACES, 12, 2050, "123")
                 .addressCity("Sheboygan")
                 .addressCountry("US")
                 .addressLine1("123 Main St")
@@ -477,9 +480,8 @@ public class StripeTest {
     @Test
     public void createSourceSynchronous_with3DSParams_passesIntegrationTest()
             throws StripeException {
-        final Stripe stripe = createStripe();
-        final Card card = Card.create(VISA_NO_SPACES, 12, 2050, "123");
-        final SourceParams params = SourceParams.createCardParams(card);
+        final Stripe stripe = defaultStripe;
+        final SourceParams params = SourceParams.createCardParams(CARD);
 
         final Source cardSource = stripe.createSourceSynchronous(params);
         assertNotNull(cardSource);
@@ -511,7 +513,6 @@ public class StripeTest {
     @Test
     public void createSourceSynchronous_withGiropayParams_passesIntegrationTest()
             throws StripeException {
-        final Stripe stripe = createStripe();
         final SourceParams params = SourceParams.createGiropayParams(
                 2000L,
                 "Mr. X",
@@ -523,7 +524,7 @@ public class StripeTest {
         }};
         params.setMetaData(metamap);
 
-        final Source giropaySource = stripe.createSourceSynchronous(params);
+        final Source giropaySource = defaultStripe.createSourceSynchronous(params);
         assertNotNull(giropaySource);
         assertNotNull(giropaySource.getClientSecret());
         assertNotNull(giropaySource.getId());
@@ -543,7 +544,6 @@ public class StripeTest {
     @Test
     public void createSourceSynchronous_withP24Params_passesIntegrationTest()
             throws StripeException {
-        final Stripe stripe = createStripe();
         final SourceParams p24Params = SourceParams.createP24Params(
                 100,
                 "eur",
@@ -551,7 +551,7 @@ public class StripeTest {
                 "abc@def.com",
                 "stripe://start");
 
-        final Source p24Source = stripe.createSourceSynchronous(p24Params);
+        final Source p24Source = defaultStripe.createSourceSynchronous(p24Params);
         assertNotNull(p24Source);
         assertNotNull(p24Source.getId());
         assertNotNull(p24Source.getClientSecret());
@@ -569,7 +569,6 @@ public class StripeTest {
     @Test
     public void createSourceSynchronous_withSepaDebitParams_passesIntegrationTest()
             throws StripeException {
-        final Stripe stripe = createStripe();
         final String validIban = "DE89370400440532013000";
         final SourceParams params = SourceParams.createSepaDebitParams(
                 "Sepa Account Holder",
@@ -586,7 +585,7 @@ public class StripeTest {
         }};
         params.setMetaData(metamap);
 
-        final Source sepaDebitSource = stripe.createSourceSynchronous(params);
+        final Source sepaDebitSource = defaultStripe.createSourceSynchronous(params);
         assertNotNull(sepaDebitSource);
         assertNotNull(sepaDebitSource.getClientSecret());
         assertNotNull(sepaDebitSource.getId());
@@ -609,7 +608,6 @@ public class StripeTest {
     @Test
     public void createSourceSynchronous_withSepaDebitParamsWithMinimalValues_passesIntegrationTest()
             throws StripeException {
-        final Stripe stripe = createStripe();
         final String validIban = "DE89370400440532013000";
         final SourceParams params = SourceParams.createSepaDebitParams(
                 "Sepa Account Holder",
@@ -625,7 +623,7 @@ public class StripeTest {
             put("value", "100000");
         }};
         params.setMetaData(metamap);
-        final Source sepaDebitSource = stripe.createSourceSynchronous(params);
+        final Source sepaDebitSource = defaultStripe.createSourceSynchronous(params);
         assertNotNull(sepaDebitSource);
         assertNotNull(sepaDebitSource.getClientSecret());
         assertNotNull(sepaDebitSource.getId());
@@ -636,7 +634,6 @@ public class StripeTest {
     @Test
     public void createSourceSynchronous_withNoEmail_passesIntegrationTest()
             throws StripeException {
-        final Stripe stripe = createStripe();
         String validIban = "DE89370400440532013000";
         SourceParams params = SourceParams.createSepaDebitParams(
                 "Sepa Account Holder",
@@ -653,7 +650,7 @@ public class StripeTest {
         }};
         params.setMetaData(metamap);
 
-        final Source sepaDebitSource = stripe.createSourceSynchronous(params);
+        final Source sepaDebitSource = defaultStripe.createSourceSynchronous(params);
         assertNotNull(sepaDebitSource);
         assertNotNull(sepaDebitSource.getClientSecret());
         assertNotNull(sepaDebitSource.getId());
@@ -674,7 +671,6 @@ public class StripeTest {
 
     @Test
     public void createSepaDebitSource_withNoAddress_passesIntegrationTest() throws StripeException {
-        final Stripe stripe = createStripe();
         String validIban = "DE89370400440532013000";
         SourceParams params = SourceParams.createSepaDebitParams(
                 "Sepa Account Holder",
@@ -685,7 +681,7 @@ public class StripeTest {
                 "90210",
                 "EI");
 
-        final Source sepaDebitSource = stripe.createSourceSynchronous(params);
+        final Source sepaDebitSource = defaultStripe.createSourceSynchronous(params);
         assertNotNull(sepaDebitSource);
         assertNotNull(sepaDebitSource.getClientSecret());
         assertNotNull(sepaDebitSource.getId());
@@ -705,7 +701,6 @@ public class StripeTest {
     @Test
     public void createSourceSynchronous_withiDEALParams_passesIntegrationTest()
             throws StripeException {
-        final Stripe stripe = createStripe();
         final SourceParams params = SourceParams.createIdealParams(
                 5500L,
                 "Bond",
@@ -719,7 +714,7 @@ public class StripeTest {
         }};
         params.setMetaData(metamap);
 
-        final Source idealSource = stripe.createSourceSynchronous(params);
+        final Source idealSource = defaultStripe.createSourceSynchronous(params);
         assertNotNull(idealSource);
         assertNotNull(idealSource.getClientSecret());
         assertNotNull(idealSource.getId());
@@ -739,7 +734,6 @@ public class StripeTest {
     @Test
     public void createSourceSynchronous_withiDEALParamsNoStatement_doesNotIgnoreBank()
             throws StripeException {
-        final Stripe stripe = createStripe();
         final String bankName = "rabobank";
         final SourceParams params = SourceParams.createIdealParams(
                 5500L,
@@ -754,7 +748,7 @@ public class StripeTest {
         }};
         params.setMetaData(metamap);
 
-        final Source idealSource = stripe.createSourceSynchronous(params);
+        final Source idealSource = defaultStripe.createSourceSynchronous(params);
         assertNotNull(idealSource);
         assertNotNull(idealSource.getClientSecret());
         assertNotNull(idealSource.getId());
@@ -775,7 +769,6 @@ public class StripeTest {
     @Test
     public void createSourceSynchronous_withiDEALParamsNoName_passesIntegrationTest()
             throws StripeException {
-        final Stripe stripe = createStripe();
         final String bankName = "rabobank";
         final SourceParams params = SourceParams.createIdealParams(
                 5500L,
@@ -790,7 +783,7 @@ public class StripeTest {
         }};
         params.setMetaData(metamap);
 
-        final Source idealSource = stripe.createSourceSynchronous(params);
+        final Source idealSource = defaultStripe.createSourceSynchronous(params);
         assertNotNull(idealSource);
         assertNotNull(idealSource.getClientSecret());
         assertNotNull(idealSource.getId());
@@ -811,7 +804,6 @@ public class StripeTest {
     @Test
     public void createSourceSynchronous_withSofortParams_passesIntegrationTest()
             throws StripeException {
-        final Stripe stripe = createStripe();
         SourceParams params = SourceParams.createSofortParams(
                 70000L,
                 "example://return",
@@ -823,7 +815,7 @@ public class StripeTest {
         }};
         params.setMetaData(metamap);
 
-        final Source sofortSource = stripe.createSourceSynchronous(params);
+        final Source sofortSource = defaultStripe.createSourceSynchronous(params);
         assertNotNull(sofortSource);
         assertNotNull(sofortSource.getClientSecret());
         assertNotNull(sofortSource.getId());
@@ -843,7 +835,11 @@ public class StripeTest {
         final Source source = createSource();
 
         final Stripe stripe = createStripe(MainScope());
-        stripe.retrieveSource(source.getId(), source.getClientSecret(), sourceCallback);
+        stripe.retrieveSource(
+                Objects.requireNonNull(source.getId()),
+                Objects.requireNonNull(source.getClientSecret()),
+                sourceCallback
+        );
         verify(sourceCallback).onSuccess(sourceArgumentCaptor.capture());
 
         final Source capturedSource = sourceArgumentCaptor.getValue();
@@ -874,7 +870,7 @@ public class StripeTest {
     @Test
     public void createSourceFromTokenParams_withExtraParams_succeeds()
             throws StripeException {
-        final Stripe stripe = createStripe();
+        final Stripe stripe = defaultStripe;
         final Token token = stripe.createCardTokenSynchronous(CARD);
         assertNotNull(token);
 
@@ -890,7 +886,6 @@ public class StripeTest {
 
     @Test
     public void createVisaCheckoutParams_whenUnactivated_throwsException() {
-        final Stripe stripe = createStripe();
         final SourceParams sourceParams = SourceParams.createVisaCheckoutParams(
                 UUID.randomUUID().toString()
         );
@@ -898,7 +893,7 @@ public class StripeTest {
                 new ThrowingRunnable() {
                     @Override
                     public void run() throws Throwable {
-                        stripe.createSourceSynchronous(sourceParams);
+                        defaultStripe.createSourceSynchronous(sourceParams);
                     }
                 }
         );
@@ -907,7 +902,6 @@ public class StripeTest {
 
     @Test
     public void createMasterpassParams_whenUnactivated_throwsException() {
-        final Stripe stripe = createStripe();
         final SourceParams sourceParams = SourceParams.createMasterpassParams(
                 UUID.randomUUID().toString(),
                 UUID.randomUUID().toString()
@@ -916,7 +910,7 @@ public class StripeTest {
                 new ThrowingRunnable() {
                     @Override
                     public void run() throws Throwable {
-                        stripe.createSourceSynchronous(sourceParams);
+                        defaultStripe.createSourceSynchronous(sourceParams);
                     }
                 }
         );
@@ -926,8 +920,7 @@ public class StripeTest {
     @Test
     public void createTokenSynchronous_withValidPersonalId_passesIntegrationTest()
             throws StripeException {
-        final Stripe stripe = createStripe();
-        final Token token = stripe.createPiiTokenSynchronous("0123456789");
+        final Token token = defaultStripe.createPiiTokenSynchronous("0123456789");
         assertNotNull(token);
         assertEquals(Token.TokenType.PII, token.getType());
         assertFalse(token.getLivemode());
@@ -938,9 +931,8 @@ public class StripeTest {
     @Test
     public void createTokenSynchronous_withValidCvc_passesIntegrationTest()
             throws StripeException {
-        final Stripe stripe = createStripe();
 
-        final Token token = stripe.createCvcUpdateTokenSynchronous("1234");
+        final Token token = defaultStripe.createCvcUpdateTokenSynchronous("1234");
         assertNotNull(token);
         assertEquals(Token.TokenType.CVC_UPDATE, token.getType());
         assertFalse(token.getLivemode());
@@ -961,8 +953,8 @@ public class StripeTest {
 
     @Test
     public void testCreatePersonTokenSynchronous() throws StripeException {
-        final Stripe stripe = createStripe();
-        final Token token = stripe.createPersonTokenSynchronous(PersonTokenParamsFixtures.PARAMS);
+        final Token token =
+                defaultStripe.createPersonTokenSynchronous(PersonTokenParamsFixtures.PARAMS);
         assertEquals(Token.TokenType.PERSON, Objects.requireNonNull(token).getType());
         assertTrue(token.getId().startsWith("cpt_"));
     }
@@ -970,8 +962,7 @@ public class StripeTest {
     @Test
     public void createAccountTokenSynchronous_withIndividualEntity_passesIntegrationTest()
             throws StripeException {
-        final Stripe stripe = createStripe();
-        final Token token = stripe.createAccountTokenSynchronous(
+        final Token token = defaultStripe.createAccountTokenSynchronous(
                 AccountParams.create(
                         true,
                         new AccountParams.BusinessTypeParams.Individual.Builder()
@@ -992,8 +983,7 @@ public class StripeTest {
     @Test
     public void createAccountTokenSynchronous_withCompanyEntity_isSuccessful()
             throws StripeException {
-        final Stripe stripe = createStripe();
-        final Token token = stripe.createAccountTokenSynchronous(
+        final Token token = defaultStripe.createAccountTokenSynchronous(
                 AccountParams.create(
                         true,
                         new AccountParams.BusinessTypeParams.Company.Builder()
@@ -1013,8 +1003,7 @@ public class StripeTest {
     @Test
     public void createAccountTokenSynchronous_withoutTosShown_isSuccessful()
             throws StripeException {
-        final Stripe stripe = createStripe();
-        final Token token = stripe.createAccountTokenSynchronous(
+        final Token token = defaultStripe.createAccountTokenSynchronous(
                 AccountParams.create(false,
                         new AccountParams.BusinessTypeParams.Individual.Builder()
                                 .setAddress(AddressFixtures.ADDRESS)
@@ -1034,8 +1023,7 @@ public class StripeTest {
     @Test
     public void createAccountTokenSynchronous_withoutBusinessData_isValid()
             throws StripeException {
-        final Stripe stripe = createStripe();
-        final Token token = stripe.createAccountTokenSynchronous(
+        final Token token = defaultStripe.createAccountTokenSynchronous(
                 AccountParams.create(
                         false,
                         AccountParams.BusinessType.Individual
@@ -1051,8 +1039,7 @@ public class StripeTest {
     @Test
     public void createAccountTokenSynchronous_withoutBusinessType_isValid()
             throws StripeException {
-        final Stripe stripe = createStripe();
-        final Token token = stripe.createAccountTokenSynchronous(AccountParams.create(false));
+        final Token token = defaultStripe.createAccountTokenSynchronous(AccountParams.create(false));
         assertNotNull(token);
         assertEquals(Token.TokenType.ACCOUNT, token.getType());
         assertFalse(token.getLivemode());
@@ -1080,14 +1067,13 @@ public class StripeTest {
     @Test
     public void createTokenSynchronous_withInvalidCardNumber_throwsCardException() {
         // This card is missing quite a few numbers.
-        final Card card = Card.create("42424242", 12, YEAR, "123");
-        final Stripe stripe = createStripe();
+        final Card card = Card.create("42424242", 12, 2050, "123");
         final CardException cardException = assertThrows(
                 CardException.class,
                 new ThrowingRunnable() {
                     @Override
                     public void run() throws Throwable {
-                        stripe.createCardTokenSynchronous(card);
+                        defaultStripe.createCardTokenSynchronous(card);
                     }
                 }
         );
@@ -1098,11 +1084,10 @@ public class StripeTest {
     public void retrievePaymentIntent_withInvalidClientSecret_shouldThrowException() {
         Locale.setDefault(Locale.GERMANY);
 
-        final Stripe stripe = createStripe();
         assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
             @Override
             public void run() throws Throwable {
-                stripe.retrievePaymentIntentSynchronous("invalid");
+                defaultStripe.retrievePaymentIntentSynchronous("invalid");
             }
         });
     }
@@ -1111,13 +1096,12 @@ public class StripeTest {
     public void createTokenSynchronous_withExpiredCard_throwsCardException() {
         // This card is missing quite a few numbers.
         final Card card = Card.create("4242424242424242", 11, 2015, "123");
-        final Stripe stripe = createStripe();
         final CardException cardException = assertThrows(
                 CardException.class,
                 new ThrowingRunnable() {
                     @Override
                     public void run() throws Throwable {
-                        stripe.createCardTokenSynchronous(card);
+                        defaultStripe.createCardTokenSynchronous(card);
                     }
                 }
         );
@@ -1128,10 +1112,11 @@ public class StripeTest {
     @Test
     public void createTokenSynchronousTwice_withIdempotencyKey_returnsSameToken()
             throws StripeException {
-        final Stripe stripe = createStripe();
-
-        // make an initial request to ensure that a fingerprint GUID is available
-        stripe.createCardTokenSynchronous(CardFixtures.MINIMUM_CARD);
+        final Stripe stripe = createStripe(
+                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                new FakeFireAndForgetRequestExecutor(),
+                new FakeFingerprintDataRepository()
+        );
 
         final String idempotencyKey = UUID.randomUUID().toString();
         assertEquals(
@@ -1143,7 +1128,7 @@ public class StripeTest {
     @Test
     public void createTokenSynchronousTwice_withoutIdempotencyKey_returnsDifferentToken()
             throws StripeException {
-        final Stripe stripe = createStripe();
+        final Stripe stripe = defaultStripe;
         assertNotEquals(
                 stripe.createCardTokenSynchronous(CardFixtures.MINIMUM_CARD),
                 stripe.createCardTokenSynchronous(CardFixtures.MINIMUM_CARD)
@@ -1155,8 +1140,7 @@ public class StripeTest {
             throws StripeException {
         final PaymentMethodCreateParams paymentMethodCreateParams =
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD;
-        final Stripe stripe = createStripe();
-        final PaymentMethod createdPaymentMethod = stripe.createPaymentMethodSynchronous(
+        final PaymentMethod createdPaymentMethod = defaultStripe.createPaymentMethodSynchronous(
                 paymentMethodCreateParams);
         assertNotNull(createdPaymentMethod);
         assertEquals(PaymentMethodCreateParamsFixtures.BILLING_DETAILS,
@@ -1168,13 +1152,14 @@ public class StripeTest {
     @Test
     public void createPaymentMethod_withCardToken()
             throws StripeException {
-        final Stripe stripe = createStripe();
-        final Token token = stripe.createCardTokenSynchronous(CARD);
+        final Stripe stripe = defaultStripe;
+        final Token token = Objects.requireNonNull(stripe.createCardTokenSynchronous(CARD));
 
         final PaymentMethodCreateParams paymentMethodCreateParams =
                 PaymentMethodCreateParams.create(
                         PaymentMethodCreateParams.Card.create(token.getId()),
-                        null);
+                        null
+                );
         final PaymentMethod createdPaymentMethod = stripe.createPaymentMethodSynchronous(
                 paymentMethodCreateParams);
         assertNotNull(createdPaymentMethod);
@@ -1191,7 +1176,10 @@ public class StripeTest {
 
         final PaymentMethodCreateParams paymentMethodCreateParams =
                 PaymentMethodCreateParamsFixtures.createWith(metadata);
-        final Stripe stripe = createStripe(fireAndForgetRequestExecutor);
+        final Stripe stripe = createStripe(
+                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                fireAndForgetRequestExecutor
+        );
         final PaymentMethod createdPaymentMethod = stripe.createPaymentMethodSynchronous(
                 paymentMethodCreateParams);
         assertNotNull(createdPaymentMethod);
@@ -1205,8 +1193,11 @@ public class StripeTest {
                 .executeAsync(stripeRequestArgumentCaptor.capture());
         final StripeRequest analyticsRequest = stripeRequestArgumentCaptor.getValue();
         assertEquals(AnalyticsRequestFactory.HOST, analyticsRequest.getBaseUrl());
-        assertEquals(createdPaymentMethod.id,
-                analyticsRequest.getParams().get(AnalyticsDataFactory.FIELD_PAYMENT_METHOD_ID));
+        assertEquals(
+                createdPaymentMethod.id,
+                Objects.requireNonNull(analyticsRequest.getParams())
+                        .get(AnalyticsDataFactory.FIELD_PAYMENT_METHOD_ID)
+        );
     }
 
     @Test
@@ -1230,28 +1221,34 @@ public class StripeTest {
                         new PaymentMethodCreateParams.Ideal("ing"),
                         expectedBillingDetails
                 );
-        final Stripe stripe = createStripe(fireAndForgetRequestExecutor);
+        final Stripe stripe = createStripe(
+                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                fireAndForgetRequestExecutor
+        );
         final PaymentMethod createdPaymentMethod = stripe.createPaymentMethodSynchronous(
                 paymentMethodCreateParams);
         assertNotNull(createdPaymentMethod);
         assertEquals(expectedBillingDetails, createdPaymentMethod.billingDetails);
         assertNull(createdPaymentMethod.card);
-        assertEquals("INGBNL2A", createdPaymentMethod.ideal.bankIdentifierCode);
+        assertEquals(
+                "INGBNL2A",
+                Objects.requireNonNull(createdPaymentMethod.ideal).bankIdentifierCode
+        );
 
         verify(fireAndForgetRequestExecutor)
                 .executeAsync(stripeRequestArgumentCaptor.capture());
         final StripeRequest analyticsRequest = stripeRequestArgumentCaptor.getValue();
         assertEquals(AnalyticsRequestFactory.HOST, analyticsRequest.getBaseUrl());
-        assertEquals(createdPaymentMethod.id,
-                analyticsRequest.getParams().get(AnalyticsDataFactory.FIELD_PAYMENT_METHOD_ID));
+        assertEquals(
+                createdPaymentMethod.id,
+                Objects.requireNonNull(analyticsRequest.getParams())
+                        .get(AnalyticsDataFactory.FIELD_PAYMENT_METHOD_ID)
+        );
     }
 
     @Test
     public void createPaymentMethodSynchronous_withFpx()
             throws StripeException {
-        final FireAndForgetRequestExecutor fireAndForgetRequestExecutor =
-                mock(FireAndForgetRequestExecutor.class);
-
         final PaymentMethod.BillingDetails expectedBillingDetails =
                 new PaymentMethod.BillingDetails.Builder()
                         .setName("Home")
@@ -1279,14 +1276,17 @@ public class StripeTest {
         assertNotNull(createdPaymentMethod);
         assertEquals(expectedBillingDetails, createdPaymentMethod.billingDetails);
         assertNull(createdPaymentMethod.card);
-        assertEquals("hsbc", createdPaymentMethod.fpx.bank);
+        assertEquals("hsbc", Objects.requireNonNull(createdPaymentMethod.fpx).bank);
 
         verify(fireAndForgetRequestExecutor)
                 .executeAsync(stripeRequestArgumentCaptor.capture());
         final StripeRequest analyticsRequest = stripeRequestArgumentCaptor.getValue();
         assertEquals(AnalyticsRequestFactory.HOST, analyticsRequest.getBaseUrl());
-        assertEquals(createdPaymentMethod.id,
-                analyticsRequest.getParams().get(AnalyticsDataFactory.FIELD_PAYMENT_METHOD_ID));
+        assertEquals(
+                createdPaymentMethod.id,
+                Objects.requireNonNull(analyticsRequest.getParams())
+                        .get(AnalyticsDataFactory.FIELD_PAYMENT_METHOD_ID)
+        );
     }
 
     @Test
@@ -1317,7 +1317,7 @@ public class StripeTest {
         assertEquals(StripeFilePurpose.BusinessIcon, stripeFile.getPurpose());
         assertEquals("png", stripeFile.getType());
         assertEquals("example.png", stripeFile.getFilename());
-        assertEquals(976L, (int) stripeFile.getSize());
+        assertEquals(976L, Objects.requireNonNull(stripeFile.getSize()).intValue());
 
         final String url = stripeFile.getUrl();
         assertNotNull(url);
@@ -1337,7 +1337,7 @@ public class StripeTest {
         assertEquals(StripeFilePurpose.BusinessIcon, stripeFile.getPurpose());
         assertEquals("png", stripeFile.getType());
         assertEquals("example.png", stripeFile.getFilename());
-        assertEquals(976L, (int) stripeFile.getSize());
+        assertEquals(976L, Objects.requireNonNull(stripeFile.getSize()).intValue());
 
         final String url = stripeFile.getUrl();
         assertNotNull(url);
@@ -1346,10 +1346,8 @@ public class StripeTest {
 
     @NonNull
     private Source createSource() throws StripeException {
-        final Stripe stripe = createStripe();
-        final SourceParams params = SourceParams.createCardParams(
-                Card.create(VISA_NO_SPACES, 12, 2050, "123")
-        );
+        final Stripe stripe = defaultStripe;
+        final SourceParams params = SourceParams.createCardParams(CARD);
 
         final Source cardSource = stripe.createSourceSynchronous(params);
 
@@ -1375,27 +1373,40 @@ public class StripeTest {
 
     @NonNull
     private Stripe createStripe() {
-        return createStripe(NON_LOGGING_PK);
-    }
-
-    @NonNull
-    private Stripe createStripe(
-            @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor) {
-        return createStripe(NON_LOGGING_PK, fireAndForgetRequestExecutor);
+        return createStripe(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY);
     }
 
     @NonNull
     private Stripe createStripe(@NonNull String publishableKey) {
-        return createStripe(publishableKey, new FakeFireAndForgetRequestExecutor());
+        return createStripe(
+                publishableKey,
+                new FakeFireAndForgetRequestExecutor(),
+                defaultFingerprintDataRepository
+        );
     }
 
     @NonNull
     private Stripe createStripe(
             @NonNull String publishableKey,
-            @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor) {
+            @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor
+    ) {
+        return createStripe(
+                publishableKey,
+                fireAndForgetRequestExecutor,
+                defaultFingerprintDataRepository
+        );
+    }
+
+    @NonNull
+    private Stripe createStripe(
+            @NonNull String publishableKey,
+            @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor,
+            @NonNull FingerprintDataRepository fingerprintDataRepository
+    ) {
         final StripeRepository stripeRepository = createStripeRepository(
                 publishableKey,
-                fireAndForgetRequestExecutor
+                fireAndForgetRequestExecutor,
+                fingerprintDataRepository
         );
         return new Stripe(
                 stripeRepository,
@@ -1408,13 +1419,18 @@ public class StripeTest {
     @NonNull
     private Stripe createStripe(@NonNull CoroutineScope workScope) {
         final StripeRepository stripeRepository = createStripeRepository(
-                NON_LOGGING_PK,
-                new FakeFireAndForgetRequestExecutor()
+                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                new FakeFireAndForgetRequestExecutor(),
+                defaultFingerprintDataRepository
         );
         return new Stripe(
                 stripeRepository,
-                StripePaymentController.create(context, NON_LOGGING_PK, stripeRepository),
-                NON_LOGGING_PK,
+                StripePaymentController.create(
+                        context,
+                        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                        stripeRepository
+                ),
+                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
                 null,
                 workScope
         );
@@ -1423,7 +1439,8 @@ public class StripeTest {
     @NonNull
     private StripeRepository createStripeRepository(
             @NonNull final String publishableKey,
-            @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor
+            @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor,
+            @NonNull FingerprintDataRepository fingerprintDataRepository
     ) {
         return new StripeApiRepository(
                 context,
@@ -1431,7 +1448,8 @@ public class StripeTest {
                 null,
                 new FakeLogger(),
                 new ApiRequestExecutor.Default(),
-                fireAndForgetRequestExecutor
+                fireAndForgetRequestExecutor,
+                fingerprintDataRepository
         );
     }
 }

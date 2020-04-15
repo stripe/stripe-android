@@ -5,7 +5,6 @@ import android.view.View
 import android.widget.LinearLayout
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.textfield.TextInputLayout
-import com.google.common.truth.ExpectFailure.assertThat
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
@@ -53,12 +52,8 @@ internal class CardMultilineWidgetTest {
     private val fullCardListener: CardInputListener = mock()
     private val noZipCardListener: CardInputListener = mock()
 
-    private val context: Context by lazy {
-        ApplicationProvider.getApplicationContext<Context>()
-    }
-    private val activityScenarioFactory: ActivityScenarioFactory by lazy {
-        ActivityScenarioFactory(context)
-    }
+    private val context: Context = ApplicationProvider.getApplicationContext()
+    private val activityScenarioFactory = ActivityScenarioFactory(context)
 
     @BeforeTest
     fun setup() {
@@ -544,7 +539,7 @@ internal class CardMultilineWidgetTest {
             .substring(0, VISA_WITH_SPACES.length - 1)
         fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
 
-        reset<CardInputListener>(fullCardListener)
+        reset(fullCardListener)
         assertTrue(fullGroup.expiryDateEditText.hasFocus())
         ViewTestUtils.sendDeleteKeyEvent(fullGroup.expiryDateEditText)
 
@@ -554,7 +549,7 @@ internal class CardMultilineWidgetTest {
 
         noZipGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
 
-        reset<CardInputListener>(noZipCardListener)
+        reset(noZipCardListener)
         assertTrue(noZipGroup.expiryDateEditText.hasFocus())
         ViewTestUtils.sendDeleteKeyEvent(noZipGroup.expiryDateEditText)
 
@@ -571,7 +566,7 @@ internal class CardMultilineWidgetTest {
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
 
-        reset<CardInputListener>(fullCardListener)
+        reset(fullCardListener)
         assertTrue(fullGroup.cvcEditText.hasFocus())
         ViewTestUtils.sendDeleteKeyEvent(fullGroup.cvcEditText)
 
@@ -582,7 +577,7 @@ internal class CardMultilineWidgetTest {
         noZipGroup.expiryDateEditText.append("12")
         noZipGroup.expiryDateEditText.append("50")
 
-        reset<CardInputListener>(noZipCardListener)
+        reset(noZipCardListener)
         assertTrue(noZipGroup.cvcEditText.hasFocus())
         ViewTestUtils.sendDeleteKeyEvent(noZipGroup.cvcEditText)
 
@@ -600,7 +595,7 @@ internal class CardMultilineWidgetTest {
         fullGroup.expiryDateEditText.append("50")
         fullGroup.cvcEditText.append("123")
 
-        reset<CardInputListener>(fullCardListener)
+        reset(fullCardListener)
         ViewTestUtils.sendDeleteKeyEvent(fullGroup.postalCodeEditText)
 
         verify(fullCardListener).onFocusChange(FOCUS_CVC)

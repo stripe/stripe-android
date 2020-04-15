@@ -1,7 +1,6 @@
 package com.stripe.android
 
 import android.content.Context
-import androidx.lifecycle.MutableLiveData
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
@@ -69,11 +68,9 @@ class StripeApiRepositoryTest {
     @BeforeTest
     fun before() {
         whenever(fingerprintDataRepository.get()).thenReturn(
-            MutableLiveData(
-                FingerprintData(
-                    guid = UUID.randomUUID().toString(),
-                    timestamp = Calendar.getInstance().timeInMillis
-                )
+            FingerprintData(
+                guid = UUID.randomUUID().toString(),
+                timestamp = Calendar.getInstance().timeInMillis
             )
         )
 
@@ -243,6 +240,32 @@ class StripeApiRepositoryTest {
 
         // Check that we get a source back; we don't care about its fields for this test.
         assertNotNull(source)
+    }
+
+    @Test
+    fun retrieveSource_shouldFireAnalytics_andReturnSource() {
+        val stripeResponse = StripeResponse(
+            200,
+            SourceFixtures.SOURCE_CARD_JSON.toString(),
+            emptyMap()
+        )
+        whenever(stripeApiRequestExecutor.execute(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        val sourceId = "src_19t3xKBZqEXluyI4uz2dxAfQ"
+        val source = create().retrieveSource(
+            sourceId,
+            "mocked",
+            DEFAULT_OPTIONS
+        )
+
+        assertNotNull(source)
+        assertThat(source.id).isEqualTo(sourceId)
+
+        verifyAnalyticsRequest(
+            AnalyticsEvent.SourceRetrieve,
+            sourceId = sourceId
+        )
     }
 
     @Test
@@ -829,14 +852,15 @@ class StripeApiRepositoryTest {
         productUsage: List<String>? = null
     ) {
         verify(fingerprintDataRepository, times(2))
-            .get()
+            .refresh()
 
         verifyAnalyticsRequest(event, productUsage)
     }
 
     private fun verifyAnalyticsRequest(
         event: AnalyticsEvent,
-        productUsage: List<String>? = null
+        productUsage: List<String>? = null,
+        sourceId: String? = null
     ) {
         verify(fireAndForgetRequestExecutor)
             .executeAsync(stripeRequestArgumentCaptor.capture())
@@ -851,6 +875,11 @@ class StripeApiRepositoryTest {
         assertEquals(
             productUsage,
             analyticsParams["product_usage"]
+        )
+
+        assertEquals(
+            sourceId,
+            analyticsParams["source_id"]
         )
     }
 

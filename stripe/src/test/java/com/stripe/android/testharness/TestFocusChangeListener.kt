@@ -13,13 +13,13 @@ class TestFocusChangeListener : ViewTreeObserver.OnGlobalFocusChangeListener {
 
     val oldFocusId: Int
         @IdRes
-        get() = oldFocus!!.id
+        get() = oldFocus?.id ?: 0
 
     val newFocusId: Int
         @IdRes
-        get() = newFocus!!.id
+        get() = newFocus?.id ?: 0
 
-    override fun onGlobalFocusChanged(oldFocus: View, newFocus: View) {
+    override fun onGlobalFocusChanged(oldFocus: View?, newFocus: View?) {
         this.oldFocus = oldFocus
         this.newFocus = newFocus
     }

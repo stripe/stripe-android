@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="@dimen/card_brand_view_width"
+        android:layout_height="@dimen/card_brand_view_height"
+        android:src="@drawable/stripe_ic_unknown"
+        android:contentDescription="@null" />
+</merge>

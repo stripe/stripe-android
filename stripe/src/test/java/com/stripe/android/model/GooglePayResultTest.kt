@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -41,5 +42,27 @@ class GooglePayResultTest {
         assertNull(result.name)
         assertNull(result.email)
         assertNull(result.phoneNumber)
+    }
+
+    @Test
+    fun fromJson_withShippingAddress() {
+        val result = GooglePayResult.fromJson(
+            GooglePayFixtures.RESULT_WITH_SHIPPING_ADDRESS
+        )
+
+        assertThat(result.shippingInformation)
+            .isEqualTo(
+                ShippingInformation(
+                    name = "Jenny Rosen",
+                    phone = "1-800-555-1234",
+                    address = Address(
+                        line1 = "510 Townsend St",
+                        city = "San Francisco",
+                        state = "CA",
+                        postalCode = "94103",
+                        country = "US"
+                    )
+                )
+            )
     }
 }

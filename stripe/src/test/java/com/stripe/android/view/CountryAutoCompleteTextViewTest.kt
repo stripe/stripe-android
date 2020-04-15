@@ -3,6 +3,7 @@ package com.stripe.android.view
 import android.content.Context
 import android.widget.AutoCompleteTextView
 import androidx.test.core.app.ApplicationProvider
+import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CustomerSession
 import com.stripe.android.EphemeralKeyProvider
@@ -21,8 +22,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
 /**
@@ -33,8 +32,7 @@ class CountryAutoCompleteTextViewTest {
     private lateinit var countryAutoCompleteTextView: CountryAutoCompleteTextView
     private lateinit var autoCompleteTextView: AutoCompleteTextView
 
-    @Mock
-    private lateinit var ephemeralKeyProvider: EphemeralKeyProvider
+    private val ephemeralKeyProvider: EphemeralKeyProvider = mock()
 
     private val activityScenarioFactory: ActivityScenarioFactory by lazy {
         ActivityScenarioFactory(ApplicationProvider.getApplicationContext())
@@ -42,7 +40,6 @@ class CountryAutoCompleteTextViewTest {
 
     @BeforeTest
     fun setup() {
-        MockitoAnnotations.initMocks(this)
         Locale.setDefault(Locale.US)
 
         val context: Context = ApplicationProvider.getApplicationContext()

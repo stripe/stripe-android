@@ -109,7 +109,9 @@ data class PaymentMethod internal constructor(
 
     @JvmField val auBecsDebit: AuBecsDebit? = null,
 
-    @JvmField val bacsDebit: BacsDebit? = null
+    @JvmField val bacsDebit: BacsDebit? = null,
+
+    @JvmField val sofort: Sofort? = null
 ) : StripeModel {
 
     @Parcelize
@@ -119,11 +121,13 @@ data class PaymentMethod internal constructor(
     ) : Parcelable {
         Card("card"),
         CardPresent("card_present"),
-        Fpx("fpx", false),
+        Fpx("fpx", isReusable = false),
         Ideal("ideal"),
         SepaDebit("sepa_debit"),
         AuBecsDebit("au_becs_debit"),
-        BacsDebit("bacs_debit");
+        BacsDebit("bacs_debit"),
+        Sofort("sofort", isReusable = false),
+        P24("p24", isReusable = false);
 
         override fun toString(): String {
             return code
@@ -152,6 +156,7 @@ data class PaymentMethod internal constructor(
         private var sepaDebit: SepaDebit? = null
         private var auBecsDebit: AuBecsDebit? = null
         private var bacsDebit: BacsDebit? = null
+        private var sofort: Sofort? = null
 
         fun setId(id: String?): Builder = apply {
             this.id = id
@@ -209,6 +214,10 @@ data class PaymentMethod internal constructor(
             this.bacsDebit = bacsDebit
         }
 
+        fun setSofort(sofort: Sofort?): Builder = apply {
+            this.sofort = sofort
+        }
+
         override fun build(): PaymentMethod {
             return PaymentMethod(
                 id = id,
@@ -224,7 +233,8 @@ data class PaymentMethod internal constructor(
                 ideal = ideal,
                 sepaDebit = sepaDebit,
                 auBecsDebit = auBecsDebit,
-                bacsDebit = bacsDebit
+                bacsDebit = bacsDebit,
+                sofort = sofort
             )
         }
     }
@@ -642,6 +652,11 @@ data class PaymentMethod internal constructor(
         @JvmField val fingerprint: String?,
         @JvmField val last4: String?,
         @JvmField val sortCode: String?
+    ) : StripeModel
+
+    @Parcelize
+    data class Sofort internal constructor(
+        @JvmField val country: String?
     ) : StripeModel
 
     companion object {

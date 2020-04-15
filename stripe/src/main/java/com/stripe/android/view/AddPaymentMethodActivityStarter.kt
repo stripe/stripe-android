@@ -48,15 +48,16 @@ class AddPaymentMethodActivityStarter : ActivityStarter<AddPaymentMethodActivity
     ) : ActivityStarter.Args {
 
         class Builder : ObjectBuilder<Args> {
-            private var billingAddressFields: BillingAddressFields = BillingAddressFields.None
+            private var billingAddressFields: BillingAddressFields = BillingAddressFields.PostalCode
             private var shouldAttachToCustomer: Boolean = false
             private var isPaymentSessionActive = false
             private var shouldInitCustomerSessionTokens = true
             private var paymentMethodType: PaymentMethod.Type? = PaymentMethod.Type.Card
             private var paymentConfiguration: PaymentConfiguration? = null
+            private var windowFlags: Int? = null
+
             @LayoutRes
             private var addPaymentMethodFooterLayoutId: Int = 0
-            private var windowFlags: Int? = null
 
             /**
              * If true, the created Payment Method will be attached to the current Customer

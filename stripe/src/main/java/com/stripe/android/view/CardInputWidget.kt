@@ -22,7 +22,6 @@ import androidx.annotation.ColorInt
 import androidx.annotation.IdRes
 import androidx.annotation.IntRange
 import androidx.annotation.VisibleForTesting
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.AccessibilityDelegateCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
@@ -57,7 +56,7 @@ class CardInputWidget @JvmOverloads constructor(
     private val containerLayout = viewBinding.container
 
     @JvmSynthetic
-    internal val cardIconImageView = viewBinding.cardIcon
+    internal val cardBrandView = viewBinding.cardBrandView
 
     private val cardNumberTextInputLayout = viewBinding.cardNumberTextInputLayout
     private val expiryDateTextInputLayout = viewBinding.expiryDateTextInputLayout
@@ -116,9 +115,6 @@ class CardInputWidget @JvmOverloads constructor(
 
     @JvmSynthetic
     internal var cardNumberIsViewed = true
-
-    @ColorInt
-    private var tintColorInt: Int = 0
 
     private var initFlag: Boolean = false
 
@@ -688,7 +684,7 @@ class CardInputWidget @JvmOverloads constructor(
         cardNumberIsViewed = true
 
         @ColorInt var errorColorInt = cardNumberEditText.defaultErrorColorInt
-        tintColorInt = cardNumberEditText.hintTextColors.defaultColor
+        cardBrandView.tintColorInt = cardNumberEditText.hintTextColors.defaultColor
         var cardHintText: String? = null
         if (attrs != null) {
             val a = context.theme.obtainStyledAttributes(
@@ -697,7 +693,10 @@ class CardInputWidget @JvmOverloads constructor(
                 0, 0)
 
             try {
-                tintColorInt = a.getColor(R.styleable.CardInputView_cardTint, tintColorInt)
+                cardBrandView.tintColorInt = a.getColor(
+                    R.styleable.CardInputView_cardTint,
+                    cardBrandView.tintColorInt
+                )
                 errorColorInt = a.getColor(R.styleable.CardInputView_cardTextErrorColor, errorColorInt)
                 cardHintText = a.getString(R.styleable.CardInputView_cardHintText)
             } finally {
@@ -948,8 +947,8 @@ class CardInputWidget @JvmOverloads constructor(
 
     override fun onWindowFocusChanged(hasWindowFocus: Boolean) {
         super.onWindowFocusChanged(hasWindowFocus)
-        if (hasWindowFocus) {
-            applyTint(false)
+        if (hasWindowFocus && CardBrand.Unknown == brand) {
+            cardBrandView.applyTint()
         }
     }
 
@@ -1011,24 +1010,8 @@ class CardInputWidget @JvmOverloads constructor(
             }
         }
 
-    private fun applyTint(isCvc: Boolean) {
-        if (isCvc || CardBrand.Unknown == brand) {
-            val icon = cardIconImageView.drawable
-            val compatIcon = DrawableCompat.wrap(icon)
-            DrawableCompat.setTint(compatIcon.mutate(), tintColorInt)
-            cardIconImageView.setImageDrawable(DrawableCompat.unwrap(compatIcon))
-        }
-    }
-
     private fun updateIcon() {
-        if (shouldShowErrorIcon) {
-            cardIconImageView.setImageResource(brand.errorIcon)
-        } else {
-            cardIconImageView.setImageResource(brand.icon)
-            if (brand == CardBrand.Unknown) {
-                applyTint(false)
-            }
-        }
+        cardBrandView.showBrandIcon(brand, shouldShowErrorIcon)
     }
 
     private fun updateIconCvc(
@@ -1049,8 +1032,7 @@ class CardInputWidget @JvmOverloads constructor(
     }
 
     private fun updateIconForCvcEntry() {
-        cardIconImageView.setImageResource(brand.cvcIcon)
-        applyTint(true)
+        cardBrandView.showCvcIcon(brand)
     }
 
     /**

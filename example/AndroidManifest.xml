@@ -91,6 +91,8 @@
         <activity
             android:name=".activity.BacsDebitPaymentMethodActivity" />
         <activity
+            android:name=".activity.SofortPaymentMethodActivity" />
+        <activity
             android:name=".activity.KlarnaSourceActivity" />
         <activity
             android:name=".activity.CardBrandsActivity" />

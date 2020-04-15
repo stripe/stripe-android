@@ -3,13 +3,12 @@ package com.stripe.android
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import java.util.Calendar
 
 internal interface FingerprintDataRepository {
-    fun get(): LiveData<FingerprintData?>
+    fun refresh()
+    fun get(): FingerprintData?
     fun save(fingerprintData: FingerprintData)
 
     class Default(
@@ -19,22 +18,20 @@ internal interface FingerprintDataRepository {
             FingerprintRequestExecutor.Default(),
         private val handler: Handler = Handler(Looper.getMainLooper())
     ) : FingerprintDataRepository {
+        private var cachedFingerprintData: FingerprintData? = null
+
         private val timestampSupplier: () -> Long = {
             Calendar.getInstance().timeInMillis
         }
 
         constructor(
-            context: Context,
-            handler: Handler = Handler(Looper.getMainLooper())
+            context: Context
         ) : this(
             store = FingerprintDataStore.Default(context),
-            fingerprintRequestFactory = FingerprintRequestFactory(context),
-            handler = handler
+            fingerprintRequestFactory = FingerprintRequestFactory(context)
         )
 
-        override fun get(): LiveData<FingerprintData?> {
-            val resultData = MutableLiveData<FingerprintData?>()
-
+        override fun refresh() {
             handler.post {
                 val liveData = store.get()
                 // LiveData observation must occur on the main thread
@@ -46,23 +43,26 @@ internal interface FingerprintDataRepository {
                                     localFingerprintData.guid
                                 )
                             ) { remoteFingerprintData ->
-                                resultData.value = remoteFingerprintData?.also {
+                                remoteFingerprintData?.let {
                                     save(it)
                                 }
                                 liveData.removeObserver(this)
                             }
                         } else {
-                            resultData.value = localFingerprintData
+                            cachedFingerprintData = localFingerprintData
                             liveData.removeObserver(this)
                         }
                     }
                 })
             }
+        }
 
-            return resultData
+        override fun get(): FingerprintData? {
+            return cachedFingerprintData
         }
 
         override fun save(fingerprintData: FingerprintData) {
+            cachedFingerprintData = fingerprintData
             store.save(fingerprintData)
         }
     }

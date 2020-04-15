@@ -31,4 +31,30 @@ class PaymentMethodEndToEndTest {
                 )
             )
     }
+
+    @Test
+    fun createPaymentMethod_withSofort_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.SOFORT
+        val paymentMethod =
+            Stripe(context, ApiKeyFixtures.SOFORT_PUBLISHABLE_KEY)
+                .createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod?.type)
+            .isEqualTo(PaymentMethod.Type.Sofort)
+        assertThat(paymentMethod?.sofort)
+            .isEqualTo(
+                PaymentMethod.Sofort(
+                    country = "DE"
+                )
+            )
+    }
+
+    @Test
+    fun createPaymentMethod_withP24_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.P24
+        val paymentMethod =
+            Stripe(context, ApiKeyFixtures.P24_PUBLISHABLE_KEY)
+                .createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod?.type)
+            .isEqualTo(PaymentMethod.Type.P24)
+    }
 }

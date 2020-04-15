@@ -28,19 +28,14 @@ class FingerprintDataRepositoryTest {
     fun roundtrip_shouldReturnOriginalObject() {
         val expectedFingerprintData = createFingerprintData(elapsedTime = -5L)
         val repository = FingerprintDataRepository.Default(context)
-        var actualFingerprintData: FingerprintData? = null
         repository.save(expectedFingerprintData)
-        repository.get().observeForever {
-            actualFingerprintData = it
-        }
-        assertThat(actualFingerprintData)
+        repository.refresh()
+        assertThat(repository.get())
             .isEqualTo(expectedFingerprintData)
     }
 
     @Test
     fun get_whenFingerprintDataIsExpired_shouldRequestNewFingerprintDataRemotely() {
-        var expectedFingerprintData: FingerprintData? = null
-
         doNothing().whenever(fingerprintRequestExecutor).execute(any(), any())
 
         val repository = FingerprintDataRepository.Default(
@@ -49,9 +44,7 @@ class FingerprintDataRepositoryTest {
             fingerprintRequestExecutor = fingerprintRequestExecutor
         )
         repository.save(createFingerprintData(elapsedTime = -60L))
-        repository.get().observeForever {
-            expectedFingerprintData = it
-        }
+        repository.refresh()
 
         val remoteFingerprintData = createFingerprintData()
         verify(fingerprintRequestExecutor).execute(
@@ -60,7 +53,7 @@ class FingerprintDataRepositoryTest {
         )
         requestExecutorCallback.firstValue.invoke(remoteFingerprintData)
 
-        assertThat(expectedFingerprintData)
+        assertThat(repository.get())
             .isEqualTo(remoteFingerprintData)
     }
 

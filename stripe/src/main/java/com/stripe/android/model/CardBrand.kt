@@ -34,6 +34,11 @@ enum class CardBrand(
     val pattern: Pattern? = null,
 
     /**
+     * Patterns for discrete lengths
+     */
+    private val partialPatterns: Map<Int, Pattern> = emptyMap(),
+
+    /**
      * The position of spaces in a formatted card number. For example, "4242424242424242" is
      * formatted to "4242 4242 4242 4242".
      */
@@ -74,7 +79,11 @@ enum class CardBrand(
         "jcb",
         "JCB",
         R.drawable.stripe_ic_jcb,
-        pattern = Pattern.compile("^(35)[0-9]*$")
+        pattern = Pattern.compile("^(352[89]|35[3-8][0-9])[0-9]*$"),
+        partialPatterns = mapOf(
+            2 to Pattern.compile("^(35)$"),
+            3 to Pattern.compile("^(35[2-8])$")
+        )
     ),
 
     /**
@@ -241,6 +250,10 @@ enum class CardBrand(
         return groups
     }
 
+    private fun getPatternForLength(cardNumber: String): Pattern? {
+        return partialPatterns[cardNumber.length] ?: pattern
+    }
+
     companion object {
         /**
          * @param cardNumber a card number
@@ -254,7 +267,7 @@ enum class CardBrand(
 
             return values()
                 .firstOrNull { cardBrand ->
-                    cardBrand.pattern?.matcher(cardNumber)?.matches() == true
+                    cardBrand.getPatternForLength(cardNumber)?.matcher(cardNumber)?.matches() == true
                 } ?: Unknown
         }
 

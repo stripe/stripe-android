@@ -60,6 +60,15 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                         BacsDebitJsonParser().parse(it)
                     }
                 )
+            PaymentMethod.Type.Sofort ->
+                builder.setSofort(
+                    json.optJSONObject(type.code)?.let {
+                        SofortJsonParser().parse(it)
+                    }
+                )
+            PaymentMethod.Type.P24 -> {
+                // no-op
+            }
         }
 
         return builder.build()
@@ -253,6 +262,18 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
             private const val FIELD_FINGERPRINT = "fingerprint"
             private const val FIELD_LAST4 = "last4"
             private const val FIELD_SORT_CODE = "sort_code"
+        }
+    }
+
+    internal class SofortJsonParser : ModelJsonParser<PaymentMethod.Sofort> {
+        override fun parse(json: JSONObject): PaymentMethod.Sofort {
+            return PaymentMethod.Sofort(
+                country = StripeJsonUtils.optString(json, FIELD_COUNTRY)
+            )
+        }
+
+        private companion object {
+            private const val FIELD_COUNTRY = "country"
         }
     }
 

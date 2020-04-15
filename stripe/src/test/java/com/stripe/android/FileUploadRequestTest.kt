@@ -12,12 +12,8 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class FileUploadRequestTest {
-    private val context: Context by lazy {
-        ApplicationProvider.getApplicationContext<Context>()
-    }
-    private val fileFactory: FileFactory by lazy {
-        FileFactory(context)
-    }
+    private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val fileFactory = FileFactory(context)
 
     @Test
     fun writeBody_shouldWriteExpectedNumberOfBytes() {

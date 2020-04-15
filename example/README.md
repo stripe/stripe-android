@@ -16,7 +16,7 @@
 
 ### Deploy the example backend to Heroku
 1. [Create a Heroku account](https://signup.heroku.com/) if you don't have one.
-2. Navigate to the [example mobile backend repo](https://github.com/stripe/example-ios-backend/tree/v16.0.0)
+2. Navigate to the [example mobile backend repo](https://github.com/stripe/example-mobile-backend/tree/v18.1.0)
    and click "Deploy to Heroku".
 3. Set an _App Name_ of your choice (e.g. Stripe Example Mobile Backend).
 4. Under _Config Vars_, set your [Stripe testmode secret key](https://dashboard.stripe.com/test/apikeys)
@@ -26,21 +26,21 @@
 <img width="700" height="793" src="https://raw.githubusercontent.com/stripe/stripe-android/master/example/images/heroku.png" />
 
 ### Configure the app
-1. Set [Settings.PUBLISHABLE_KEY](example/src/main/java/com/stripe/example/Settings.kt)
-   to your [test publishable key](https://dashboard.stripe.com/test/apikeys). 
+1. If it doesn't exist, create a `gradle.properties` in a location defined in the
+   [Gradle Build Environment docs](https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_configuration_properties).
+   For example, the default location on macOS is `~/.gradle/gradle.properties`.
+2. Append the following entries to `gradle.properties`.
 
-   For example,
-   ```
-   const val PUBLISHABLE_KEY = "pk_test_12345"
-   ```
+```
+# Set to example backend deployed to Heroku
+STRIPE_EXAMPLE_BACKEND_URL=https://my-backend.herokuapp.com/
 
-2. Set [Settings.BASE_URL](example/src/main/java/com/stripe/example/Settings.kt)
-   to the URL of the [example backend deployed to Heroku](#deploy-example-backend-to-heroku).
+# Set to a test publishable key from https://dashboard.stripe.com/test/apikeys
+STRIPE_EXAMPLE_PUBLISHABLE_KEY=pk_test_mykey
 
-   For example,
-   ```
-   const val BASE_URL = "https://my-example-app.herokuapp.com"
-   ```
+# Optionally, set to a Connect Account id to test Connect
+STRIPE_ACCOUNT_ID=
+```
 
 ## Examples
 

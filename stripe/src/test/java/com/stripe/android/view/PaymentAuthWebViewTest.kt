@@ -8,37 +8,25 @@ import android.widget.ProgressBar
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.FakeLogger
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.Mockito.never
-import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentAuthWebViewTest {
 
-    @Mock
-    private lateinit var activity: Activity
-    @Mock
-    private lateinit var progressBar: ProgressBar
-    @Mock
-    private lateinit var webView: WebView
-    @Mock
-    private lateinit var packageManager: PackageManager
+    private val activity: Activity = mock()
+    private val progressBar: ProgressBar = mock()
+    private val webView: WebView = mock()
+    private val packageManager: PackageManager = mock()
 
-    private lateinit var intentArgumentCaptor: KArgumentCaptor<Intent>
-
-    @BeforeTest
-    fun setup() {
-        MockitoAnnotations.initMocks(this)
-        intentArgumentCaptor = argumentCaptor()
-    }
+    private val intentArgumentCaptor: KArgumentCaptor<Intent> = argumentCaptor()
 
     @Test
     fun shouldOverrideUrlLoading_withPaymentIntent_shouldSetResult() {
