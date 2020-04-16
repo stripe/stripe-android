@@ -86,12 +86,12 @@ class PaymentMethodEndToEndTest {
 
     @Test
     fun createPaymentMethod_withGiropay_shouldCreateObject() {
-        val params = PaymentMethodCreateParamsFixtures.BANCONTACT
+        val params = PaymentMethodCreateParamsFixtures.GIROPAY
         val paymentMethod =
-            Stripe(context, ApiKeyFixtures.BANCONTACT_PUBLISHABLE_KEY)
+            Stripe(context, ApiKeyFixtures.GIROPAY_PUBLISHABLE_KEY)
                 .createPaymentMethodSynchronous(params)
         assertThat(paymentMethod?.type)
-            .isEqualTo(PaymentMethod.Type.Bancontact)
+            .isEqualTo(PaymentMethod.Type.Giropay)
     }
 
     @Test
@@ -102,7 +102,7 @@ class PaymentMethodEndToEndTest {
         assertFailsWith<InvalidRequestException>(
             "A name is required to create a Giropay payment method"
         ) {
-            Stripe(context, ApiKeyFixtures.BANCONTACT_PUBLISHABLE_KEY)
+            Stripe(context, ApiKeyFixtures.GIROPAY_PUBLISHABLE_KEY)
                 .createPaymentMethodSynchronous(params)
         }
     }
