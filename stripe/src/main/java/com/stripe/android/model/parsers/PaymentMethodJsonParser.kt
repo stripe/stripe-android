@@ -66,7 +66,10 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                         SofortJsonParser().parse(it)
                     }
                 )
-            PaymentMethod.Type.P24, PaymentMethod.Type.Bancontact, PaymentMethod.Type.Giropay -> {
+            PaymentMethod.Type.P24,
+            PaymentMethod.Type.Bancontact,
+            PaymentMethod.Type.Giropay,
+            PaymentMethod.Type.EPS -> {
                 // no-op
             }
         }

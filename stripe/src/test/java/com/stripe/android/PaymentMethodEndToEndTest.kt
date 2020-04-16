@@ -106,4 +106,27 @@ class PaymentMethodEndToEndTest {
                 .createPaymentMethodSynchronous(params)
         }
     }
+
+    @Test
+    fun createPaymentMethod_withEPS_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.EPS
+        val paymentMethod =
+            Stripe(context, ApiKeyFixtures.EPS_PUBLISHABLE_KEY)
+                .createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod?.type)
+            .isEqualTo(PaymentMethod.Type.EPS)
+    }
+
+    @Test
+    fun createPaymentMethod_withEPS_missingName_shouldFail() {
+        val params = PaymentMethodCreateParams.createEPS(
+            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(name = null)
+        )
+        assertFailsWith<InvalidRequestException>(
+            "A name is required to create a EPS payment method"
+        ) {
+            Stripe(context, ApiKeyFixtures.EPS_PUBLISHABLE_KEY)
+                .createPaymentMethodSynchronous(params)
+        }
+    }
 }
