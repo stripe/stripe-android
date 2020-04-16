@@ -32,7 +32,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
 
     override fun retrievePaymentIntent(
         clientSecret: String,
-        options: ApiRequest.Options
+        options: ApiRequest.Options,
+        expandFields: List<String>
     ): PaymentIntent? {
         return null
     }
@@ -55,7 +56,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
 
     override fun retrieveSetupIntent(
         clientSecret: String,
-        options: ApiRequest.Options
+        options: ApiRequest.Options,
+        expandFields: List<String>
     ): SetupIntent? {
         return null
     }
@@ -71,6 +73,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
     override fun retrieveIntent(
         clientSecret: String,
         options: ApiRequest.Options,
+        expandFields: List<String>,
         callback: ApiResultCallback<StripeIntent>
     ) {
     }

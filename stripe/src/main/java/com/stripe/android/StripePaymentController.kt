@@ -90,8 +90,10 @@ internal class StripePaymentController internal constructor(
         clientSecret: String,
         requestOptions: ApiRequest.Options
     ) {
-        stripeRepository.retrieveIntent(clientSecret, requestOptions,
-            object : ApiResultCallback<StripeIntent> {
+        stripeRepository.retrieveIntent(
+            clientSecret,
+            requestOptions,
+            callback = object : ApiResultCallback<StripeIntent> {
                 override fun onSuccess(result: StripeIntent) {
                     handleNextAction(host, result, requestOptions)
                 }
@@ -207,8 +209,11 @@ internal class StripePaymentController internal constructor(
         val sourceId = result.sourceId.orEmpty()
         @StripeIntentResult.Outcome val flowOutcome = result.flowOutcome
 
-        stripeRepository.retrieveIntent(getClientSecret(data), requestOptions,
-            createPaymentIntentCallback(
+        stripeRepository.retrieveIntent(
+            getClientSecret(data),
+            requestOptions,
+            expandFields = EXPAND_PAYMENT_METHOD,
+            callback = createPaymentIntentCallback(
                 requestOptions, flowOutcome, sourceId, shouldCancelSource, callback
             )
         )
@@ -239,8 +244,11 @@ internal class StripePaymentController internal constructor(
         val sourceId = result.sourceId.orEmpty()
         @StripeIntentResult.Outcome val flowOutcome = result.flowOutcome
 
-        stripeRepository.retrieveIntent(getClientSecret(data), requestOptions,
-            createSetupIntentCallback(
+        stripeRepository.retrieveIntent(
+            getClientSecret(data),
+            requestOptions,
+            expandFields = EXPAND_PAYMENT_METHOD,
+            callback = createSetupIntentCallback(
                 requestOptions, flowOutcome, sourceId, shouldCancelSource, callback
             )
         )
@@ -529,13 +537,13 @@ internal class StripePaymentController internal constructor(
                     stripeRepository.confirmPaymentIntent(
                         params,
                         requestOptions,
-                        expandFields = listOf("payment_method")
+                        expandFields = EXPAND_PAYMENT_METHOD
                     )
                 is ConfirmSetupIntentParams ->
                     stripeRepository.confirmSetupIntent(
                         params,
                         requestOptions,
-                        expandFields = listOf("payment_method")
+                        expandFields = EXPAND_PAYMENT_METHOD
                     )
                 else -> null
             }
@@ -963,5 +971,7 @@ internal class StripePaymentController internal constructor(
         internal fun getClientSecret(data: Intent): String {
             return requireNotNull(PaymentController.Result.fromIntent(data)?.clientSecret)
         }
+
+        private val EXPAND_PAYMENT_METHOD = listOf("payment_method")
     }
 }
