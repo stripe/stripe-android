@@ -482,7 +482,7 @@ internal object PaymentIntentFixtures {
         """.trimIndent()
     ))
 
-    val EXPANDED_PAYMENT_METHOD = JSONObject(
+    val EXPANDED_PAYMENT_METHOD_JSON = JSONObject(
         """
         {
             "id": "pi_1GSTxJCRMbs",
@@ -557,6 +557,90 @@ internal object PaymentIntentFixtures {
             },
             "source": null,
             "status": "requires_action"
+        }
+        """.trimIndent()
+    )
+
+    val PI_WITH_SHIPPING_JSON = JSONObject(
+        """
+        {
+            "id": "pi_1GYda2CRMbs",
+            "object": "payment_intent",
+            "amount": 1099,
+            "canceled_at": null,
+            "cancellation_reason": null,
+            "capture_method": "automatic",
+            "client_secret": "pi_1GYda2CRMbs_secret_Z2zduomY0",
+            "confirmation_method": "automatic",
+            "created": 1587066058,
+            "currency": "usd",
+            "description": "Example PaymentIntent",
+            "last_payment_error": null,
+            "livemode": false,
+            "next_action": null,
+            "payment_method": {
+                "id": "pm_1GYda7CRMbs6FrX",
+                "object": "payment_method",
+                "billing_details": {
+                    "address": {
+                        "city": "San Francisco",
+                        "country": "US",
+                        "line1": "123 Market St",
+                        "line2": "#345",
+                        "postal_code": "94107",
+                        "state": "CA"
+                    },
+                    "email": null,
+                    "name": "Jenny Rosen",
+                    "phone": null
+                },
+                "card": {
+                    "brand": "visa",
+                    "checks": {
+                        "address_line1_check": null,
+                        "address_postal_code_check": null,
+                        "cvc_check": null
+                    },
+                    "country": "US",
+                    "exp_month": 12,
+                    "exp_year": 2025,
+                    "funding": "credit",
+                    "generated_from": null,
+                    "last4": "4242",
+                    "three_d_secure_usage": {
+                        "supported": true
+                    },
+                    "wallet": {
+                        "dynamic_last4": "4242",
+                        "google_pay": {},
+                        "type": "google_pay"
+                    }
+                },
+                "created": 1587066063,
+                "customer": null,
+                "livemode": false,
+                "metadata": {},
+                "type": "card"
+            },
+            "payment_method_types": ["card"],
+            "receipt_email": null,
+            "setup_future_usage": null,
+            "shipping": {
+                "address": {
+                    "city": "San Francisco",
+                    "country": "US",
+                    "line1": "123 Market St",
+                    "line2": "#345",
+                    "postal_code": "94107",
+                    "state": "CA"
+                },
+                "carrier": "UPS",
+                "name": "Jenny Rosen",
+                "phone": "1-800-555-1234",
+                "tracking_number": "12345"
+            },
+            "source": null,
+            "status": "succeeded"
         }
         """.trimIndent()
     )

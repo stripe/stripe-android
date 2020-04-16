@@ -1,5 +1,6 @@
 package com.stripe.android.model.parsers
 
+import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeJsonUtils
@@ -48,6 +49,10 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
                 ErrorJsonParser().parse(it)
             }
 
+        val shipping = json.optJSONObject(FIELD_SHIPPING)?.let {
+            ShippingJsonParser().parse(it)
+        }
+
         return PaymentIntent(
             id = id,
             objectType = objectType,
@@ -68,7 +73,8 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
             receiptEmail = receiptEmail,
             status = status,
             setupFutureUsage = setupFutureUsage,
-            lastPaymentError = lastPaymentError
+            lastPaymentError = lastPaymentError,
+            shipping = shipping
         )
     }
 
@@ -102,6 +108,28 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
         }
     }
 
+    internal class ShippingJsonParser : ModelJsonParser<PaymentIntent.Shipping> {
+        override fun parse(json: JSONObject): PaymentIntent.Shipping? {
+            return PaymentIntent.Shipping(
+                address = json.optJSONObject(FIELD_ADDRESS)?.let {
+                    AddressJsonParser().parse(it)
+                } ?: Address(),
+                carrier = StripeJsonUtils.optString(json, FIELD_CARRIER),
+                name = StripeJsonUtils.optString(json, FIELD_NAME),
+                phone = StripeJsonUtils.optString(json, FIELD_PHONE),
+                trackingNumber = StripeJsonUtils.optString(json, FIELD_TRACKING_NUMBER)
+            )
+        }
+
+        private companion object {
+            private const val FIELD_ADDRESS = "address"
+            private const val FIELD_CARRIER = "carrier"
+            private const val FIELD_NAME = "name"
+            private const val FIELD_PHONE = "phone"
+            private const val FIELD_TRACKING_NUMBER = "tracking_number"
+        }
+    }
+
     private companion object {
         private const val OBJECT_TYPE = "payment_intent"
 
@@ -122,6 +150,7 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
         private const val FIELD_PAYMENT_METHOD = "payment_method"
         private const val FIELD_PAYMENT_METHOD_TYPES = "payment_method_types"
         private const val FIELD_RECEIPT_EMAIL = "receipt_email"
+        private const val FIELD_SHIPPING = "shipping"
         private const val FIELD_STATUS = "status"
         private const val FIELD_SETUP_FUTURE_USAGE = "setup_future_usage"
     }

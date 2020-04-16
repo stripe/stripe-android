@@ -132,7 +132,12 @@ data class PaymentIntent internal constructor(
     /**
      * @return The payment error encountered in the previous PaymentIntent confirmation.
      */
-    val lastPaymentError: Error? = null
+    val lastPaymentError: Error? = null,
+
+    /**
+     * @return Shipping information for this PaymentIntent.
+     */
+    val shipping: Shipping? = null
 ) : StripeIntent {
     @IgnoredOnParcel
     override val nextActionType: StripeIntent.NextActionType? = nextAction?.let {
@@ -258,6 +263,51 @@ data class PaymentIntent internal constructor(
             }
         }
     }
+
+    /**
+     * Shipping information for this PaymentIntent.
+     *
+     * See [shipping](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-shipping)
+     */
+    @Parcelize
+    data class Shipping(
+        /**
+         * Shipping address.
+         *
+         * See [shipping.address](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-shipping-address)
+         */
+        val address: Address,
+
+        /**
+         * The delivery service that shipped a physical product, such as Fedex, UPS, USPS, etc.
+         *
+         * See [shipping.carrier](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-shipping-carrier)
+         */
+        val carrier: String? = null,
+
+        /**
+         * Recipient name.
+         *
+         * See [shipping.name](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-shipping-name)
+         */
+        val name: String? = null,
+
+        /**
+         * Recipient phone (including extension).
+         *
+         * See [shipping.phone](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-shipping-phone)
+         */
+        val phone: String? = null,
+
+        /**
+         * The tracking number for a physical product, obtained from the delivery service.
+         * If multiple tracking numbers were generated for this purchase, please separate them
+         * with commas.
+         *
+         * See [shipping.tracking_number](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-shipping-tracking_number)
+         */
+        val trackingNumber: String? = null
+    ) : StripeModel
 
     internal data class ClientSecret(internal val value: String) {
         internal val paymentIntentId: String =
