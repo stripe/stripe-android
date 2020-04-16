@@ -128,7 +128,8 @@ data class PaymentMethod internal constructor(
         BacsDebit("bacs_debit"),
         Sofort("sofort", isReusable = false),
         P24("p24", isReusable = false),
-        Bancontact("bancontact", isReusable = false);
+        Bancontact("bancontact", isReusable = false),
+        Giropay("giropay", isReusable = false);
 
         override fun toString(): String {
             return code

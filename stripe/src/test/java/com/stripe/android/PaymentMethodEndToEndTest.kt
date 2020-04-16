@@ -83,4 +83,27 @@ class PaymentMethodEndToEndTest {
             .createPaymentMethodSynchronous(params)
         }
     }
+
+    @Test
+    fun createPaymentMethod_withGiropay_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.BANCONTACT
+        val paymentMethod =
+            Stripe(context, ApiKeyFixtures.BANCONTACT_PUBLISHABLE_KEY)
+                .createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod?.type)
+            .isEqualTo(PaymentMethod.Type.Bancontact)
+    }
+
+    @Test
+    fun createPaymentMethod_withGiropay_missingName_shouldFail() {
+        val params = PaymentMethodCreateParams.createGiropay(
+            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(name = null)
+        )
+        assertFailsWith<InvalidRequestException>(
+            "A name is required to create a Giropay payment method"
+        ) {
+            Stripe(context, ApiKeyFixtures.BANCONTACT_PUBLISHABLE_KEY)
+                .createPaymentMethodSynchronous(params)
+        }
+    }
 }

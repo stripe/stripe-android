@@ -77,6 +77,10 @@ internal object PaymentMethodCreateParamsFixtures {
         billingDetails = BILLING_DETAILS
     )
 
+    internal val GIROPAY = PaymentMethodCreateParams.createGiropay(
+        billingDetails = BILLING_DETAILS
+    )
+
     @JvmStatic
     fun createWith(metadata: Map<String, String>): PaymentMethodCreateParams {
         return PaymentMethodCreateParams.create(
