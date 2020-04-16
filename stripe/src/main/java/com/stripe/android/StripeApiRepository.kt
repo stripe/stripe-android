@@ -144,7 +144,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         APIConnectionException::class, APIException::class)
     override fun retrievePaymentIntent(
         clientSecret: String,
-        options: ApiRequest.Options
+        options: ApiRequest.Options,
+        expandFields: List<String>
     ): PaymentIntent? {
         val paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId
 
@@ -159,7 +160,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 apiRequestFactory.createGet(
                     getRetrievePaymentIntentUrl(paymentIntentId),
                     options,
-                    createClientSecretParam(clientSecret)
+                    createClientSecretParam(clientSecret, expandFields)
                 ),
                 PaymentIntentJsonParser()
             )
@@ -255,7 +256,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         APIConnectionException::class, APIException::class)
     override fun retrieveSetupIntent(
         clientSecret: String,
-        options: ApiRequest.Options
+        options: ApiRequest.Options,
+        expandFields: List<String>
     ): SetupIntent? {
         val setupIntentId = SetupIntent.ClientSecret(clientSecret).setupIntentId
 
@@ -272,7 +274,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 apiRequestFactory.createGet(
                     getRetrieveSetupIntentUrl(setupIntentId),
                     options,
-                    createClientSecretParam(clientSecret)
+                    createClientSecretParam(clientSecret, expandFields)
                 ),
                 SetupIntentJsonParser()
             )
@@ -312,10 +314,16 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     override fun retrieveIntent(
         clientSecret: String,
         options: ApiRequest.Options,
+        expandFields: List<String>,
         callback: ApiResultCallback<StripeIntent>
     ) {
-        RetrieveIntentTask(this, clientSecret, options, callback)
-            .execute()
+        RetrieveIntentTask(
+            this,
+            clientSecret,
+            options,
+            expandFields,
+            callback
+        ).execute()
     }
 
     override fun cancelIntent(
@@ -1024,8 +1032,12 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         )
     }
 
-    private fun createClientSecretParam(clientSecret: String): Map<String, String> {
+    private fun createClientSecretParam(
+        clientSecret: String,
+        expandFields: List<String>
+    ): Map<String, Any> {
         return mapOf("client_secret" to clientSecret)
+            .plus(createExpandParam(expandFields))
     }
 
     private class Start3ds2AuthTask constructor(
@@ -1057,6 +1069,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         private val stripeRepository: StripeRepository,
         private val clientSecret: String,
         private val requestOptions: ApiRequest.Options,
+        private val expandFields: List<String>,
         callback: ApiResultCallback<StripeIntent>
     ) : ApiOperation<StripeIntent>(callback = callback) {
 
@@ -1064,9 +1077,17 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         override suspend fun getResult(): StripeIntent? {
             return when {
                 clientSecret.startsWith("pi_") ->
-                    stripeRepository.retrievePaymentIntent(clientSecret, requestOptions)
+                    stripeRepository.retrievePaymentIntent(
+                        clientSecret,
+                        requestOptions,
+                        expandFields
+                    )
                 clientSecret.startsWith("seti_") ->
-                    stripeRepository.retrieveSetupIntent(clientSecret, requestOptions)
+                    stripeRepository.retrieveSetupIntent(
+                        clientSecret,
+                        requestOptions,
+                        expandFields
+                    )
                 else -> null
             }
         }

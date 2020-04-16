@@ -662,6 +662,7 @@ class StripePaymentControllerTest {
         verify(stripeRepository).retrieveIntent(
             eq(clientSecret),
             eq(REQUEST_OPTIONS),
+            eq(listOf("payment_method")),
             apiResultStripeIntentArgumentCaptor.capture()
         )
         // return a PaymentIntent in `requires_action` state
@@ -777,7 +778,8 @@ class StripePaymentControllerTest {
     private class FakeStripeRepository : AbsFakeStripeRepository() {
         override fun retrieveSetupIntent(
             clientSecret: String,
-            options: ApiRequest.Options
+            options: ApiRequest.Options,
+            expandFields: List<String>
         ): SetupIntent {
             return SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT
         }
@@ -802,9 +804,10 @@ class StripePaymentControllerTest {
         override fun retrieveIntent(
             clientSecret: String,
             options: ApiRequest.Options,
+            expandFields: List<String>,
             callback: ApiResultCallback<StripeIntent>
         ) {
-            super.retrieveIntent(clientSecret, options, callback)
+            super.retrieveIntent(clientSecret, options, expandFields, callback)
             callback.onSuccess(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT)
         }
 

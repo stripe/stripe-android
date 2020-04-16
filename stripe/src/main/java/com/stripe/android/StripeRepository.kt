@@ -42,7 +42,8 @@ internal interface StripeRepository {
         APIConnectionException::class, APIException::class)
     fun retrievePaymentIntent(
         clientSecret: String,
-        options: ApiRequest.Options
+        options: ApiRequest.Options,
+        expandFields: List<String> = emptyList()
     ): PaymentIntent?
 
     @Throws(AuthenticationException::class, InvalidRequestException::class,
@@ -65,7 +66,8 @@ internal interface StripeRepository {
         APIConnectionException::class, APIException::class)
     fun retrieveSetupIntent(
         clientSecret: String,
-        options: ApiRequest.Options
+        options: ApiRequest.Options,
+        expandFields: List<String> = emptyList()
     ): SetupIntent?
 
     @Throws(AuthenticationException::class, InvalidRequestException::class,
@@ -79,6 +81,7 @@ internal interface StripeRepository {
     fun retrieveIntent(
         clientSecret: String,
         options: ApiRequest.Options,
+        expandFields: List<String> = emptyList(),
         callback: ApiResultCallback<StripeIntent>
     )
 
