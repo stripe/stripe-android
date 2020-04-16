@@ -471,4 +471,39 @@ internal object SourceFixtures {
             }
             """.trimIndent()
     )
+
+    internal val KLARNA = requireNotNull(PARSER.parse(JSONObject(
+        """
+        {
+            "id": "src_1FfB6GKmrohBAXC",
+            "object": "source",
+            "amount": 1000,
+            "created": 1573848540,
+            "currency": "eur",
+            "flow": "redirect",
+            "livemode": false,
+            "metadata": {},
+            "source_order": $SOURCE_ORDER_JSON,
+            "statement_descriptor": "WIDGET FACTORY",
+            "status": "pending",
+            "type": "klarna",
+            "usage": "single_use",
+            "klarna": {
+                "first_name": "Arthur",
+                "last_name": "Dent",
+                "purchase_country": "UK",
+                "client_token": "CLIENT_TOKEN",
+                "pay_later_asset_urls_descriptive": "https:\/\/x.klarnacdn.net\/payment-method\/assets\/badges\/generic\/klarna.svg",
+                "pay_later_asset_urls_standard": "https:\/\/x.klarnacdn.net\/payment-method\/assets\/badges\/generic\/klarna.svg",
+                "pay_later_name": "Pay later in 14 days",
+                "pay_later_redirect_url": "https:\/\/payment-eu.playground.klarna.com\/8b45xe2",
+                "pay_over_time_asset_urls_descriptive": "https:\/\/x.klarnacdn.net\/payment-method\/assets\/badges\/generic\/klarna.svg",
+                "pay_over_time_asset_urls_standard": "https:\/\/x.klarnacdn.net\/payment-method\/assets\/badges\/generic\/klarna.svg",
+                "pay_over_time_name": "3 interest-free instalments",
+                "pay_over_time_redirect_url": "https:\/\/payment-eu.playground.klarna.com\/8DA6imn",
+                "payment_method_categories": "pay_later,pay_over_time"
+            }
+        }
+        """.trimIndent()
+    )))
 }

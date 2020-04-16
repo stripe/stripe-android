@@ -121,6 +121,10 @@ class KlarnaSourceActivity : AppCompatActivity() {
             klarnaParams = KlarnaSourceParams(
                 purchaseCountry = "UK",
                 lineItems = LINE_ITEMS,
+                customPaymentMethods = setOf(
+                    KlarnaSourceParams.CustomPaymentMethods.Installments,
+                    KlarnaSourceParams.CustomPaymentMethods.PayIn4
+                ),
                 billingFirstName = "Arthur",
                 billingLastName = "Dent",
                 billingAddress = Address.Builder()
