@@ -126,7 +126,9 @@ data class Source internal constructor(
     @param:Usage @field:Usage @get:Usage
     val usage: String? = null,
 
-    private val weChatParam: WeChat? = null,
+    private val _weChat: WeChat? = null,
+
+    private val _klarna: Klarna? = null,
 
     /**
      * Information about the items and shipping associated with the source. Required for
@@ -147,7 +149,16 @@ data class Source internal constructor(
                 "Source type must be '${SourceType.WECHAT}'"
             }
 
-            return requireNotNull(weChatParam)
+            return requireNotNull(_weChat)
+        }
+
+    val klarna: Klarna
+        get() {
+            check(SourceType.KLARNA == type) {
+                "Source type must be '${SourceType.KLARNA}'"
+            }
+
+            return requireNotNull(_klarna)
         }
 
     @Retention(AnnotationRetention.SOURCE)
@@ -207,6 +218,28 @@ data class Source internal constructor(
             const val NONE: String = "none"
         }
     }
+
+    @Parcelize
+    data class Klarna(
+        val firstName: String?,
+        val lastName: String?,
+        val purchaseCountry: String?,
+        val clientToken: String?,
+        val payNowAssetUrlsDescriptive: String?,
+        val payNowAssetUrlsStandard: String?,
+        val payNowName: String?,
+        val payNowRedirectUrl: String?,
+        val payLaterAssetUrlsDescriptive: String?,
+        val payLaterAssetUrlsStandard: String?,
+        val payLaterName: String?,
+        val payLaterRedirectUrl: String?,
+        val payOverTimeAssetUrlsDescriptive: String?,
+        val payOverTimeAssetUrlsStandard: String?,
+        val payOverTimeName: String?,
+        val payOverTimeRedirectUrl: String?,
+        val paymentMethodCategories: Set<String>,
+        val customPaymentMethods: Set<String>
+    ) : StripeModel
 
     companion object {
         internal const val OBJECT_TYPE = "source"
