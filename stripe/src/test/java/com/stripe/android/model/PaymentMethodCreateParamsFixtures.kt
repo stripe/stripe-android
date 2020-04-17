@@ -81,7 +81,7 @@ internal object PaymentMethodCreateParamsFixtures {
         billingDetails = BILLING_DETAILS
     )
 
-    internal val EPS = PaymentMethodCreateParams.createEPS(
+    internal val EPS = PaymentMethodCreateParams.createEps(
         billingDetails = BILLING_DETAILS
     )
 

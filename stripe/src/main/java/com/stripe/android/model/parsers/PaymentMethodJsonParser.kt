@@ -69,7 +69,7 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
             PaymentMethod.Type.P24,
             PaymentMethod.Type.Bancontact,
             PaymentMethod.Type.Giropay,
-            PaymentMethod.Type.EPS -> {
+            PaymentMethod.Type.Eps -> {
                 // no-op
             }
         }
