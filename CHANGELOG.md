@@ -11,6 +11,13 @@
 * [#2343](https://github.com/stripe/stripe-android/pull/2343) Update `CardBrand.JCB` regex
 * [#2362](https://github.com/stripe/stripe-android/pull/2362) Add support for parsing `shippingInformation` in `GooglePayResult`
 * [#2365](https://github.com/stripe/stripe-android/pull/2365) Convert png assets to webp to reduce asset size
+* [#2373](https://github.com/stripe/stripe-android/pull/2373) Set default `billingAddressFields` to `BillingAddressFields.PostalCode`
+* [#2381](https://github.com/stripe/stripe-android/pull/2381) Add support for SOFORT PaymentMethod
+* [#2384](https://github.com/stripe/stripe-android/pull/2384) Add support for P24 PaymentMethod
+* [#2389](https://github.com/stripe/stripe-android/pull/2389) Add support for Bancontact PaymentMethod
+* [#2390](https://github.com/stripe/stripe-android/pull/2390) Bump Kotlin version to `1.3.72`
+* [#2391](https://github.com/stripe/stripe-android/pull/2391) Bump 3DS2 SDK to `2.7.3`
+* [#2392](https://github.com/stripe/stripe-android/pull/2392) Add `shipping` property to `PaymentIntent`
 
 ## 14.2.1 - 2020-03-26
 * [#2299](https://github.com/stripe/stripe-android/pull/2299) Make `SourceParams.OwnerParams` constructor public and properties mutable
