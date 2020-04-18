@@ -128,11 +128,15 @@ class Stripe internal constructor(
      * @param activity the `Activity` that is launching the payment authentication flow
      * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
      * [PaymentIntent]
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      */
+    @JvmOverloads
     @UiThread
     fun confirmPayment(
         activity: Activity,
-        confirmPaymentIntentParams: ConfirmPaymentIntentParams
+        confirmPaymentIntentParams: ConfirmPaymentIntentParams,
+        stripeAccountId: String? = this.stripeAccountId
     ) {
         paymentController.startConfirmAndAuth(
             AuthActivityStarter.Host.create(activity),
@@ -288,7 +292,7 @@ class Stripe internal constructor(
                 data,
                 ApiRequest.Options(
                     apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    stripeAccount = PaymentController.Result.fromIntent(data)?.stripeAccountId
                 ),
                 callback
             )

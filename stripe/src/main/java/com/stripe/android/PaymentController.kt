@@ -107,7 +107,8 @@ internal interface PaymentController {
         internal val exception: StripeException? = null,
         internal val shouldCancelSource: Boolean = false,
         internal val sourceId: String? = null,
-        internal val source: Source? = null
+        internal val source: Source? = null,
+        internal val stripeAccountId: String? = null
     ) : Parcelable {
         @JvmSynthetic
         fun toBundle(): Bundle {
@@ -124,7 +125,8 @@ internal interface PaymentController {
                     exception = parcel.readSerializable() as? StripeException?,
                     shouldCancelSource = parcel.readInt() == 1,
                     sourceId = parcel.readString(),
-                    source = parcel.readParcelable(Source::class.java.classLoader)
+                    source = parcel.readParcelable(Source::class.java.classLoader),
+                    stripeAccountId = parcel.readString()
                 )
             }
 
@@ -135,6 +137,7 @@ internal interface PaymentController {
                 parcel.writeInt(1.takeIf { shouldCancelSource } ?: 0)
                 parcel.writeString(sourceId)
                 parcel.writeParcelable(source, flags)
+                parcel.writeString(stripeAccountId)
             }
 
             private const val EXTRA = "extra_args"

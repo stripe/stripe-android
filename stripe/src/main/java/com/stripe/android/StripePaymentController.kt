@@ -413,11 +413,12 @@ internal class StripePaymentController internal constructor(
                                 getRequestCode(stripeIntent),
                                 stripeIntent.clientSecret.orEmpty(),
                                 Stripe3dsRedirect.create(sdkData).url,
+                                requestOptions.stripeAccount,
                                 enableLogging = enableLogging
                             )
                         }
                         else -> // authentication type is not supported
-                            bypassAuth(host, stripeIntent)
+                            bypassAuth(host, stripeIntent, requestOptions.stripeAccount)
                     }
                 }
                 StripeIntent.NextActionType.RedirectToUrl -> {
@@ -437,22 +438,27 @@ internal class StripePaymentController internal constructor(
                         getRequestCode(stripeIntent),
                         stripeIntent.clientSecret.orEmpty(),
                         redirectData?.url.toString(),
+                        requestOptions.stripeAccount,
                         redirectData?.returnUrl,
                         enableLogging = enableLogging
                     )
                 }
                 else -> // next action type is not supported, so bypass authentication
-                    bypassAuth(host, stripeIntent)
+                    bypassAuth(host, stripeIntent, requestOptions.stripeAccount)
             }
         } else {
             // no action required, so bypass authentication
-            bypassAuth(host, stripeIntent)
+            bypassAuth(host, stripeIntent, requestOptions.stripeAccount)
         }
     }
 
-    private fun bypassAuth(host: AuthActivityStarter.Host, stripeIntent: StripeIntent) {
+    private fun bypassAuth(
+        host: AuthActivityStarter.Host,
+        stripeIntent: StripeIntent,
+        stripeAccountId: String?
+    ) {
         PaymentRelayStarter.create(host, getRequestCode(stripeIntent))
-            .start(PaymentRelayStarter.Args.create(stripeIntent))
+            .start(PaymentRelayStarter.Args.create(stripeIntent, stripeAccountId))
     }
 
     private fun bypassAuth(host: AuthActivityStarter.Host, source: Source) {
@@ -479,6 +485,10 @@ internal class StripePaymentController internal constructor(
                 .putExtra(
                     Stripe3ds2CompletionActivity.EXTRA_CLIENT_SECRET,
                     stripeIntent.clientSecret
+                )
+                .putExtra(
+                    Stripe3ds2CompletionActivity.EXTRA_STRIPE_ACCOUNT,
+                    requestOptions.stripeAccount
                 )
                 .addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT),
             challengeCompletionRequestCode = getRequestCode(stripeIntent)
@@ -609,6 +619,7 @@ internal class StripePaymentController internal constructor(
                     getRequestCode(stripeIntent),
                     stripeIntent.clientSecret.orEmpty(),
                     result.fallbackRedirectUrl,
+                    requestOptions.stripeAccount,
                     enableLogging = enableLogging
                 )
             } else {
@@ -927,13 +938,14 @@ internal class StripePaymentController internal constructor(
             requestCode: Int,
             clientSecret: String,
             authUrl: String,
+            stripeAccount: String?,
             returnUrl: String? = null,
             enableLogging: Boolean = false
         ) {
             Logger.getInstance(enableLogging).debug("PaymentAuthWebViewStarter#start()")
             val starter = PaymentAuthWebViewStarter(host, requestCode)
             starter.start(
-                PaymentAuthWebViewStarter.Args(clientSecret, authUrl, returnUrl, enableLogging)
+                PaymentAuthWebViewStarter.Args(clientSecret, authUrl, returnUrl, enableLogging, stripeAccountId = stripeAccount)
             )
         }
 

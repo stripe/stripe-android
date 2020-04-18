@@ -34,7 +34,8 @@ internal class PaymentAuthWebViewActivityViewModel(
         get() {
             return PaymentController.Result(
                 clientSecret = args.clientSecret,
-                sourceId = Uri.parse(args.url).lastPathSegment.orEmpty()
+                sourceId = Uri.parse(args.url).lastPathSegment.orEmpty(),
+                stripeAccountId = args.stripeAccountId
             )
         }
 

@@ -29,7 +29,8 @@ internal class PaymentAuthWebViewStarter internal constructor(
         val url: String,
         val returnUrl: String? = null,
         val enableLogging: Boolean = false,
-        val toolbarCustomization: StripeToolbarCustomization? = null
+        val toolbarCustomization: StripeToolbarCustomization? = null,
+        val stripeAccountId: String? = null
     ) : Parcelable
 
     internal companion object {
