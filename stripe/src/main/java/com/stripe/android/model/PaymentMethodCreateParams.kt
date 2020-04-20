@@ -489,7 +489,7 @@ data class PaymentMethodCreateParams internal constructor(
          */
         @JvmStatic
         @JvmOverloads
-        internal fun createP24(
+        fun createP24(
             billingDetails: PaymentMethod.BillingDetails,
             metadata: Map<String, String>? = null
         ): PaymentMethodCreateParams {
@@ -500,9 +500,12 @@ data class PaymentMethodCreateParams internal constructor(
             )
         }
 
+        /**
+         * @return params for creating a [PaymentMethod.Type.Bancontact] payment method
+         */
         @JvmStatic
         @JvmOverloads
-        internal fun createBancontact(
+        fun createBancontact(
             billingDetails: PaymentMethod.BillingDetails,
             metadata: Map<String, String>? = null
         ): PaymentMethodCreateParams {
@@ -513,9 +516,12 @@ data class PaymentMethodCreateParams internal constructor(
             )
         }
 
+        /**
+         * @return params for creating a [PaymentMethod.Type.Giropay] payment method
+         */
         @JvmStatic
         @JvmOverloads
-        internal fun createGiropay(
+        fun createGiropay(
             billingDetails: PaymentMethod.BillingDetails,
             metadata: Map<String, String>? = null
         ): PaymentMethodCreateParams {
@@ -526,9 +532,12 @@ data class PaymentMethodCreateParams internal constructor(
             )
         }
 
+        /**
+         * @return params for creating a [PaymentMethod.Type.Eps] payment method
+         */
         @JvmStatic
         @JvmOverloads
-        internal fun createEps(
+        fun createEps(
             billingDetails: PaymentMethod.BillingDetails,
             metadata: Map<String, String>? = null
         ): PaymentMethodCreateParams {
