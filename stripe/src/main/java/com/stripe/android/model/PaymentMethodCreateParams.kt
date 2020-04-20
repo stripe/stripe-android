@@ -148,7 +148,7 @@ data class PaymentMethodCreateParams internal constructor(
                 Type.AuBecsDebit -> auBecsDebit?.toParamMap()
                 Type.BacsDebit -> bacsDebit?.toParamMap()
                 Type.Sofort -> sofort?.toParamMap()
-                Type.P24, Type.Bancontact, Type.Giropay, Type.Eps -> null
+                else -> null
             }.takeUnless { it.isNullOrEmpty() }?.let {
                 mapOf(type.code to it)
             }.orEmpty()
@@ -165,7 +165,8 @@ data class PaymentMethodCreateParams internal constructor(
         P24("p24"),
         Bancontact("bancontact"),
         Giropay("giropay"),
-        Eps("eps")
+        Eps("eps"),
+        Oxxo("oxxo")
     }
 
     @Parcelize
@@ -534,6 +535,19 @@ data class PaymentMethodCreateParams internal constructor(
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = Type.Eps,
+                billingDetails = billingDetails,
+                metadata = metadata
+            )
+        }
+
+        @JvmSynthetic
+        @JvmOverloads
+        internal fun createOxxo(
+            billingDetails: PaymentMethod.BillingDetails,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = Type.Oxxo,
                 billingDetails = billingDetails,
                 metadata = metadata
             )

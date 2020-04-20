@@ -76,12 +76,15 @@ class PaymentMethodEndToEndTest {
         val params = PaymentMethodCreateParams.createBancontact(
             billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(name = null)
         )
-        assertFailsWith<InvalidRequestException>(
+
+        val exception = assertFailsWith<InvalidRequestException>(
             "A name is required to create a Bancontact payment method"
         ) {
             Stripe(context, ApiKeyFixtures.BANCONTACT_PUBLISHABLE_KEY)
-            .createPaymentMethodSynchronous(params)
+                .createPaymentMethodSynchronous(params)
         }
+        assertThat(exception.message)
+            .isEqualTo("Missing required param: billing_details[name].")
     }
 
     @Test
@@ -99,12 +102,14 @@ class PaymentMethodEndToEndTest {
         val params = PaymentMethodCreateParams.createGiropay(
             billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(name = null)
         )
-        assertFailsWith<InvalidRequestException>(
+        val exception = assertFailsWith<InvalidRequestException>(
             "A name is required to create a Giropay payment method"
         ) {
             Stripe(context, ApiKeyFixtures.GIROPAY_PUBLISHABLE_KEY)
                 .createPaymentMethodSynchronous(params)
         }
+        assertThat(exception.message)
+            .isEqualTo("Missing required param: billing_details[name].")
     }
 
     @Test
@@ -122,11 +127,75 @@ class PaymentMethodEndToEndTest {
         val params = PaymentMethodCreateParams.createEps(
             billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(name = null)
         )
-        assertFailsWith<InvalidRequestException>(
+        val exception = assertFailsWith<InvalidRequestException>(
             "A name is required to create a EPS payment method"
         ) {
             Stripe(context, ApiKeyFixtures.EPS_PUBLISHABLE_KEY)
                 .createPaymentMethodSynchronous(params)
         }
+        assertThat(exception.message)
+            .isEqualTo("Missing required param: billing_details[name].")
+    }
+
+    @Test
+    fun createPaymentMethod_withOxxo_shouldCreatePaymentMethodWithOxxoType() {
+        val repository = StripeApiRepository(
+            context,
+            ApiKeyFixtures.OXXO_PUBLISHABLE_KEY,
+            apiVersion = "2020-03-02;oxxo_beta=v1"
+        )
+        val paymentMethod = repository.createPaymentMethod(
+            PaymentMethodCreateParams.createOxxo(
+                billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS
+            ),
+            ApiRequest.Options(
+                ApiKeyFixtures.OXXO_PUBLISHABLE_KEY
+            )
+        )
+        assertThat(paymentMethod?.type)
+            .isEqualTo(PaymentMethod.Type.Oxxo)
+    }
+
+    @Test
+    fun createPaymentMethod_withOxxo_shouldRequireNameAndEmail() {
+        val repository = StripeApiRepository(
+            context,
+            ApiKeyFixtures.OXXO_PUBLISHABLE_KEY,
+            apiVersion = "2020-03-02;oxxo_beta=v1"
+        )
+
+        val missingNameException = assertFailsWith<InvalidRequestException>(
+            "A name is required to create an OXXO payment method."
+        ) {
+            repository.createPaymentMethod(
+                PaymentMethodCreateParams.createOxxo(
+                    billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(
+                        name = null
+                    )
+                ),
+                ApiRequest.Options(
+                    ApiKeyFixtures.OXXO_PUBLISHABLE_KEY
+                )
+            )
+        }
+        assertThat(missingNameException.message)
+            .isEqualTo("Missing required param: billing_details[name].")
+
+        val missingEmailException = assertFailsWith<InvalidRequestException>(
+            "An email is required to create an OXXO payment method."
+        ) {
+            repository.createPaymentMethod(
+                PaymentMethodCreateParams.createOxxo(
+                    billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(
+                        email = null
+                    )
+                ),
+                ApiRequest.Options(
+                    ApiKeyFixtures.OXXO_PUBLISHABLE_KEY
+                )
+            )
+        }
+        assertThat(missingEmailException.message)
+            .isEqualTo("Missing required param: billing_details[email].")
     }
 }
