@@ -71,10 +71,10 @@ class PaymentAuthActivity : AppCompatActivity() {
         }
 
         viewBinding.confirmWith3ds1Button.setOnClickListener {
-            createPaymentIntent(getAccount(), ConfirmationType.ThreeDS1)
+            createPaymentIntent(account, ConfirmationType.ThreeDS1)
         }
         viewBinding.confirmWith3ds2Button.setOnClickListener {
-            createPaymentIntent(getAccount(), ConfirmationType.ThreeDS2)
+            createPaymentIntent(account, ConfirmationType.ThreeDS2)
         }
 
         viewBinding.confirmWithNewCardButton.setOnClickListener {
@@ -82,7 +82,7 @@ class PaymentAuthActivity : AppCompatActivity() {
                 keyboardController.hide()
 
                 createPaymentIntent(
-                    getAccount(),
+                    account,
                     ConfirmationType.NewCard
                 )
             }
@@ -91,14 +91,15 @@ class PaymentAuthActivity : AppCompatActivity() {
         viewBinding.setupButton.setOnClickListener { createSetupIntent() }
     }
 
-    private fun getAccount(): String? {
-        val connectAccount = viewBinding.stripeAccount.text.toString()
-        return if (connectAccount.isNotBlank()) {
-            connectAccount
-        } else {
-            Settings(this).stripeAccountId
+    private val account: String?
+        get() {
+            val connectAccount = viewBinding.stripeAccount.text.toString()
+            return if (connectAccount.isNotBlank()) {
+                connectAccount
+            } else {
+                Settings(this).stripeAccountId
+            }
         }
-    }
 
     private fun confirmPaymentIntent(
         paymentIntentClientSecret: String,
