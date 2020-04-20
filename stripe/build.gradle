@@ -96,7 +96,7 @@ android {
     }
 
     dokka {
-        outputFormat = 'html'
+        outputFormat = 'javadoc'
         outputDirectory = "${project.rootDir}/docs/"
     }
 
