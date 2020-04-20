@@ -23,6 +23,7 @@
 * [#2401](https://github.com/stripe/stripe-android/pull/2401) Bump 3DS2 SDK to `2.7.4`
     * Add new translations for 3DS2 SDK strings
     * Upgrade BouncyCastle to `1.65`
+* [#2395](https://github.com/stripe/stripe-android/pull/2395) Add support for EPS PaymentMethod
 
 ## 14.2.1 - 2020-03-26
 * [#2299](https://github.com/stripe/stripe-android/pull/2299) Make `SourceParams.OwnerParams` constructor public and properties mutable
