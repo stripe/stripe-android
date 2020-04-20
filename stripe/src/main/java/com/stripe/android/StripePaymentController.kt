@@ -42,7 +42,7 @@ import kotlinx.coroutines.Dispatchers
  */
 internal class StripePaymentController internal constructor(
     context: Context,
-    publishableKey: String,
+    private val publishableKey: String,
     private val stripeRepository: StripeRepository,
     private val enableLogging: Boolean = false,
     private val messageVersionRegistry: MessageVersionRegistry =
@@ -195,7 +195,6 @@ internal class StripePaymentController internal constructor(
      */
     override fun handlePaymentResult(
         data: Intent,
-        requestOptions: ApiRequest.Options,
         callback: ApiResultCallback<PaymentIntentResult>
     ) {
         val result = PaymentController.Result.fromIntent(data) ?: PaymentController.Result()
@@ -208,6 +207,11 @@ internal class StripePaymentController internal constructor(
         val shouldCancelSource = result.shouldCancelSource
         val sourceId = result.sourceId.orEmpty()
         @StripeIntentResult.Outcome val flowOutcome = result.flowOutcome
+
+        val requestOptions = ApiRequest.Options(
+            apiKey = publishableKey,
+            stripeAccount = result.stripeAccountId
+        )
 
         stripeRepository.retrieveIntent(
             getClientSecret(data),

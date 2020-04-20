@@ -288,14 +288,7 @@ class Stripe internal constructor(
         callback: ApiResultCallback<PaymentIntentResult>
     ): Boolean {
         return if (data != null && paymentController.shouldHandlePaymentResult(requestCode, data)) {
-            paymentController.handlePaymentResult(
-                data,
-                ApiRequest.Options(
-                    apiKey = publishableKey,
-                    stripeAccount = PaymentController.Result.fromIntent(data)?.stripeAccountId
-                ),
-                callback
-            )
+            paymentController.handlePaymentResult(data, callback)
             true
         } else {
             false
