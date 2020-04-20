@@ -106,7 +106,7 @@ class PaymentAuthActivity : AppCompatActivity() {
         confirmationType: ConfirmationType,
         stripeAccountId: String?
     ) {
-        viewBinding.status.append("\n\nStarting payment authentication")
+        viewBinding.status.append("\n\nStarting payment authentication for $stripeAccountId")
         stripe.confirmPayment(
             this,
             when (confirmationType) {
@@ -126,8 +126,8 @@ class PaymentAuthActivity : AppCompatActivity() {
     }
 
     private fun confirmSetupIntent(setupIntentClientSecret: String) {
-        viewBinding.status.append("\n\nStarting setup intent authentication")
-        stripe.confirmSetupIntent(this, create3ds2SetupIntentParams(setupIntentClientSecret))
+        viewBinding.status.append("\n\nStarting setup intent authentication for $account")
+        stripe.confirmSetupIntent(this, create3ds2SetupIntentParams(setupIntentClientSecret), account)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

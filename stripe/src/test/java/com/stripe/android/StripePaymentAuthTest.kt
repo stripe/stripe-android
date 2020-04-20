@@ -116,9 +116,7 @@ class StripePaymentAuthTest {
         stripe.onSetupResult(StripePaymentController.SETUP_REQUEST_CODE, data,
             callback = setupCallback)
 
-        verify(paymentController).handleSetupResult(data,
-            ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-            setupCallback)
+        verify(paymentController).handleSetupResult(data, setupCallback)
     }
 
     private fun createStripe(): Stripe {

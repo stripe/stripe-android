@@ -234,7 +234,6 @@ internal class StripePaymentController internal constructor(
      */
     override fun handleSetupResult(
         data: Intent,
-        requestOptions: ApiRequest.Options,
         callback: ApiResultCallback<SetupIntentResult>
     ) {
         val result = PaymentController.Result.fromIntent(data) ?: PaymentController.Result()
@@ -247,6 +246,11 @@ internal class StripePaymentController internal constructor(
         val shouldCancelSource = result.shouldCancelSource
         val sourceId = result.sourceId.orEmpty()
         @StripeIntentResult.Outcome val flowOutcome = result.flowOutcome
+
+        val requestOptions = ApiRequest.Options(
+            apiKey = publishableKey,
+            stripeAccount = result.stripeAccountId
+        )
 
         stripeRepository.retrieveIntent(
             getClientSecret(data),
