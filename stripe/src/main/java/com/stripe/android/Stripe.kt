@@ -662,10 +662,14 @@ class Stripe internal constructor(
      *
      * @param activity the `Activity` that is launching the [Source] authentication flow
      * @param source the [Source] to confirm
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      */
+    @JvmOverloads
     fun authenticateSource(
         activity: Activity,
-        source: Source
+        source: Source,
+        stripeAccountId: String? = this.stripeAccountId
     ) {
         paymentController.startAuthenticateSource(
             AuthActivityStarter.Host.create(activity),
@@ -682,10 +686,14 @@ class Stripe internal constructor(
      *
      * @param fragment the `Fragment` that is launching the [Source] authentication flow
      * @param source the [Source] to confirm
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      */
+    @JvmOverloads
     fun authenticateSource(
         fragment: Fragment,
-        source: Source
+        source: Source,
+        stripeAccountId: String? = this.stripeAccountId
     ) {
         paymentController.startAuthenticateSource(
             AuthActivityStarter.Host.create(fragment),
@@ -715,7 +723,6 @@ class Stripe internal constructor(
     ) {
         paymentController.handleSourceResult(
             data,
-            ApiRequest.Options(publishableKey, stripeAccountId),
             callback
         )
     }

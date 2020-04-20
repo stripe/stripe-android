@@ -700,7 +700,6 @@ class StripePaymentControllerTest {
                     clientSecret = "src_123_secret_abc"
                 ).toBundle()
             ),
-            requestOptions = REQUEST_OPTIONS,
             callback = sourceCallback
         )
         verify(sourceCallback).onSuccess(sourceArgumentCaptor.capture())

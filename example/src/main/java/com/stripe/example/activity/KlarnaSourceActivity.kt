@@ -42,11 +42,20 @@ class KlarnaSourceActivity : AppCompatActivity() {
             viewBinding.progressBar.visibility = View.VISIBLE
             createKlarnaSource().observe(this, Observer { result ->
                 viewBinding.progressBar.visibility = View.INVISIBLE
+                val stripeAccount = viewBinding.stripeAccount.text
                 when (result) {
                     is SourceViewModel.SourceResult.Success -> {
                         val source = result.source
                         logSource(source)
-                        stripe.authenticateSource(this, source)
+                        stripe.authenticateSource(
+                            this,
+                            source,
+                            stripeAccountId = if (stripeAccount.isNotBlank()) {
+                                stripeAccount.toString()
+                            } else {
+                                null
+                            }
+                        )
                     }
                     is SourceViewModel.SourceResult.Error -> {
                         viewBinding.sourceResult.text = result.e.localizedMessage

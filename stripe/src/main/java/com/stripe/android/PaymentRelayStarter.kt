@@ -53,8 +53,8 @@ internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter
             }
 
             @JvmSynthetic
-            internal fun create(source: Source): Args {
-                return Args(source = source)
+            internal fun create(source: Source, stripeAccountId: String? = null): Args {
+                return Args(source = source, stripeAccountId = stripeAccountId)
             }
 
             @JvmSynthetic

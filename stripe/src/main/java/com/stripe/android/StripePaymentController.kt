@@ -159,10 +159,11 @@ internal class StripePaymentController internal constructor(
                 clientSecret = source.clientSecret.orEmpty(),
                 url = source.redirect?.url.orEmpty(),
                 returnUrl = source.redirect?.returnUrl,
-                enableLogging = enableLogging
+                enableLogging = enableLogging,
+                stripeAccountId = requestOptions.stripeAccount
             ))
         } else {
-            bypassAuth(host, source)
+            bypassAuth(host, source, requestOptions.stripeAccount)
         }
     }
 
@@ -264,12 +265,16 @@ internal class StripePaymentController internal constructor(
 
     override fun handleSourceResult(
         data: Intent,
-        requestOptions: ApiRequest.Options,
         callback: ApiResultCallback<Source>
     ) {
         val result = PaymentController.Result.fromIntent(data)
         val sourceId = result?.sourceId.orEmpty()
         val clientSecret = result?.clientSecret.orEmpty()
+
+        val requestOptions = ApiRequest.Options(
+            apiKey = publishableKey,
+            stripeAccount = result?.stripeAccountId
+        )
 
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.create(
@@ -469,9 +474,13 @@ internal class StripePaymentController internal constructor(
             .start(PaymentRelayStarter.Args.create(stripeIntent, stripeAccountId))
     }
 
-    private fun bypassAuth(host: AuthActivityStarter.Host, source: Source) {
+    private fun bypassAuth(
+        host: AuthActivityStarter.Host,
+        source: Source,
+        stripeAccountId: String?
+    ) {
         PaymentRelayStarter.create(host, SOURCE_REQUEST_CODE)
-            .start(PaymentRelayStarter.Args.create(source))
+            .start(PaymentRelayStarter.Args.create(source, stripeAccountId))
     }
 
     private fun begin3ds2Auth(
