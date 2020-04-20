@@ -150,15 +150,11 @@ class Stripe internal constructor(
      *
      * @param fragment the `Fragment` that is launching the payment authentication flow
      * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the [PaymentIntent]
-     * @param stripeAccountId Optional, the Connect account to associate with this request.
-     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      */
-    @JvmOverloads
     @UiThread
     fun confirmPayment(
         fragment: Fragment,
-        confirmPaymentIntentParams: ConfirmPaymentIntentParams,
-        stripeAccountId: String? = this.stripeAccountId
+        confirmPaymentIntentParams: ConfirmPaymentIntentParams
     ) {
         paymentController.startConfirmAndAuth(
             AuthActivityStarter.Host.create(fragment),
