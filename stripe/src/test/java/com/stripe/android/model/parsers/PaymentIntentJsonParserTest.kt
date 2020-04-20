@@ -45,4 +45,18 @@ class PaymentIntentJsonParserTest {
                 )
             )
     }
+
+    @Test
+    fun parse_withOxxo_shouldCreateExpectedNextActionData() {
+        val paymentIntent = PaymentIntentJsonParser().parse(
+            PaymentIntentFixtures.OXXO_REQUIRES_ACTION
+        )
+        assertThat(paymentIntent?.nextActionData)
+            .isEqualTo(
+                PaymentIntent.NextActionData.DisplayOxxoDetails(
+                    expiresAfter = 1587704399,
+                    number = "12345678901234657890123456789012"
+                )
+            )
+    }
 }

@@ -4,6 +4,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeJsonUtils
+import com.stripe.android.model.StripeJsonUtils.optString
 import org.json.JSONObject
 
 internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
@@ -12,36 +13,36 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
             return null
         }
 
-        val id = StripeJsonUtils.optString(json, FIELD_ID)
-        val objectType = StripeJsonUtils.optString(json, FIELD_OBJECT)
+        val id = optString(json, FIELD_ID)
+        val objectType = optString(json, FIELD_OBJECT)
         val paymentMethodTypes = ModelJsonParser.jsonArrayToList(
             json.optJSONArray(FIELD_PAYMENT_METHOD_TYPES))
         val amount = StripeJsonUtils.optLong(json, FIELD_AMOUNT)
         val canceledAt = json.optLong(FIELD_CANCELED_AT)
         val cancellationReason = PaymentIntent.CancellationReason.fromCode(
-            StripeJsonUtils.optString(json, FIELD_CANCELLATION_REASON)
+            optString(json, FIELD_CANCELLATION_REASON)
         )
-        val captureMethod = StripeJsonUtils.optString(json, FIELD_CAPTURE_METHOD)
-        val clientSecret = StripeJsonUtils.optString(json, FIELD_CLIENT_SECRET)
-        val confirmationMethod = StripeJsonUtils.optString(json, FIELD_CONFIRMATION_METHOD)
+        val captureMethod = optString(json, FIELD_CAPTURE_METHOD)
+        val clientSecret = optString(json, FIELD_CLIENT_SECRET)
+        val confirmationMethod = optString(json, FIELD_CONFIRMATION_METHOD)
         val created = json.optLong(FIELD_CREATED)
         val currency = StripeJsonUtils.optCurrency(json, FIELD_CURRENCY)
-        val description = StripeJsonUtils.optString(json, FIELD_DESCRIPTION)
+        val description = optString(json, FIELD_DESCRIPTION)
         val livemode = StripeJsonUtils.optBoolean(json, FIELD_LIVEMODE)
 
         val paymentMethod = json.optJSONObject(FIELD_PAYMENT_METHOD)?.let {
             PaymentMethodJsonParser().parse(it)
         }
         val paymentMethodId =
-            StripeJsonUtils.optString(json, FIELD_PAYMENT_METHOD).takeIf { paymentMethod == null }
+            optString(json, FIELD_PAYMENT_METHOD).takeIf { paymentMethod == null }
                 ?: paymentMethod?.id
 
-        val receiptEmail = StripeJsonUtils.optString(json, FIELD_RECEIPT_EMAIL)
+        val receiptEmail = optString(json, FIELD_RECEIPT_EMAIL)
         val status = StripeIntent.Status.fromCode(
-            StripeJsonUtils.optString(json, FIELD_STATUS)
+            optString(json, FIELD_STATUS)
         )
         val setupFutureUsage = StripeIntent.Usage.fromCode(
-            StripeJsonUtils.optString(json, FIELD_SETUP_FUTURE_USAGE)
+            optString(json, FIELD_SETUP_FUTURE_USAGE)
         )
         val nextAction = StripeJsonUtils.optMap(json, FIELD_NEXT_ACTION)
         val lastPaymentError =
@@ -51,6 +52,9 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
 
         val shipping = json.optJSONObject(FIELD_SHIPPING)?.let {
             ShippingJsonParser().parse(it)
+        }
+        val nextActionData = json.optJSONObject(FIELD_NEXT_ACTION)?.let {
+            NextActionDataParser().parse(it)
         }
 
         return PaymentIntent(
@@ -74,24 +78,25 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
             status = status,
             setupFutureUsage = setupFutureUsage,
             lastPaymentError = lastPaymentError,
-            shipping = shipping
+            shipping = shipping,
+            nextActionData = nextActionData
         )
     }
 
     internal class ErrorJsonParser : ModelJsonParser<PaymentIntent.Error> {
         override fun parse(json: JSONObject): PaymentIntent.Error {
             return PaymentIntent.Error(
-                charge = StripeJsonUtils.optString(json, FIELD_CHARGE),
-                code = StripeJsonUtils.optString(json, FIELD_CODE),
-                declineCode = StripeJsonUtils.optString(json, FIELD_DECLINE_CODE),
-                docUrl = StripeJsonUtils.optString(json, FIELD_DOC_URL),
-                message = StripeJsonUtils.optString(json, FIELD_MESSAGE),
-                param = StripeJsonUtils.optString(json, FIELD_PARAM),
+                charge = optString(json, FIELD_CHARGE),
+                code = optString(json, FIELD_CODE),
+                declineCode = optString(json, FIELD_DECLINE_CODE),
+                docUrl = optString(json, FIELD_DOC_URL),
+                message = optString(json, FIELD_MESSAGE),
+                param = optString(json, FIELD_PARAM),
                 paymentMethod = json.optJSONObject(FIELD_PAYMENT_METHOD)?.let {
                     PaymentMethodJsonParser().parse(it)
                 },
                 type = PaymentIntent.Error.Type.fromCode(
-                    StripeJsonUtils.optString(json, FIELD_TYPE)
+                    optString(json, FIELD_TYPE)
                 )
             )
         }
@@ -114,10 +119,10 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
                 address = json.optJSONObject(FIELD_ADDRESS)?.let {
                     AddressJsonParser().parse(it)
                 } ?: Address(),
-                carrier = StripeJsonUtils.optString(json, FIELD_CARRIER),
-                name = StripeJsonUtils.optString(json, FIELD_NAME),
-                phone = StripeJsonUtils.optString(json, FIELD_PHONE),
-                trackingNumber = StripeJsonUtils.optString(json, FIELD_TRACKING_NUMBER)
+                carrier = optString(json, FIELD_CARRIER),
+                name = optString(json, FIELD_NAME),
+                phone = optString(json, FIELD_PHONE),
+                trackingNumber = optString(json, FIELD_TRACKING_NUMBER)
             )
         }
 
@@ -127,6 +132,36 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
             private const val FIELD_NAME = "name"
             private const val FIELD_PHONE = "phone"
             private const val FIELD_TRACKING_NUMBER = "tracking_number"
+        }
+    }
+
+    internal class NextActionDataParser : ModelJsonParser<PaymentIntent.NextActionData> {
+        override fun parse(json: JSONObject): PaymentIntent.NextActionData? {
+            return when {
+                json.has(FIELD_DISPLAY_OXXO_DETAILS) ->
+                    DisplayOxxoDetailsJsonParser().parse(
+                        json.optJSONObject(FIELD_DISPLAY_OXXO_DETAILS) ?: JSONObject()
+                    )
+                else -> null
+            }
+        }
+
+        private class DisplayOxxoDetailsJsonParser : ModelJsonParser<PaymentIntent.NextActionData.DisplayOxxoDetails> {
+            override fun parse(json: JSONObject): PaymentIntent.NextActionData.DisplayOxxoDetails? {
+                return PaymentIntent.NextActionData.DisplayOxxoDetails(
+                    expiresAfter = json.optInt(FIELD_EXPIRES_AFTER),
+                    number = optString(json, FIELD_NUMBER)
+                )
+            }
+
+            private companion object {
+                private const val FIELD_EXPIRES_AFTER = "expires_after"
+                private const val FIELD_NUMBER = "number"
+            }
+        }
+
+        private companion object {
+            private const val FIELD_DISPLAY_OXXO_DETAILS = "display_oxxo_details"
         }
     }
 

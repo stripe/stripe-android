@@ -137,7 +137,9 @@ data class PaymentIntent internal constructor(
     /**
      * @return Shipping information for this PaymentIntent.
      */
-    val shipping: Shipping? = null
+    val shipping: Shipping? = null,
+
+    internal val nextActionData: NextActionData? = null
 ) : StripeIntent {
     @IgnoredOnParcel
     override val nextActionType: StripeIntent.NextActionType? = nextAction?.let {
@@ -344,6 +346,14 @@ data class PaymentIntent internal constructor(
                 return values().firstOrNull { it.code == code }
             }
         }
+    }
+
+    internal sealed class NextActionData : StripeModel {
+        @Parcelize
+        internal data class DisplayOxxoDetails(
+            val expiresAfter: Int = 0,
+            val number: String? = null
+        ) : NextActionData()
     }
 
     companion object {
