@@ -8,8 +8,8 @@
 <a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android</a>&nbsp;/&nbsp;<a href="index.html">Stripe</a>&nbsp;/&nbsp;<a href="./retrieve-source-synchronous.html">retrieveSourceSynchronous</a><br/>
 <br/>
 <h1>retrieveSourceSynchronous</h1>
-<a name="com.stripe.android.Stripe$retrieveSourceSynchronous(kotlin.String, kotlin.String)"></a>
-<code><span class="identifier">@WorkerThread</span> <span class="keyword">fun </span><span class="identifier">retrieveSourceSynchronous</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$retrieveSourceSynchronous(kotlin.String, kotlin.String)/sourceId">sourceId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$retrieveSourceSynchronous(kotlin.String, kotlin.String)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-source/index.html"><span class="identifier">Source</span></a><span class="symbol">?</span></code>
+<a name="com.stripe.android.Stripe$retrieveSourceSynchronous(kotlin.String, kotlin.String, kotlin.String)"></a>
+<code><span class="identifier">@WorkerThread</span> <span class="identifier">@JvmOverloads</span> <span class="keyword">fun </span><span class="identifier">retrieveSourceSynchronous</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.Stripe$retrieveSourceSynchronous(kotlin.String, kotlin.String, kotlin.String)/sourceId">sourceId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$retrieveSourceSynchronous(kotlin.String, kotlin.String, kotlin.String)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.Stripe$retrieveSourceSynchronous(kotlin.String, kotlin.String, kotlin.String)/stripeAccountId">stripeAccountId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;this.stripeAccountId<span class="symbol">)</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-source/index.html"><span class="identifier">Source</span></a><span class="symbol">?</span></code>
 <p>Retrieve an existing <a href="../../com.stripe.android.model/-source/index.html">Source</a> from the Stripe API. Do not call this on the UI thread
 or your app will crash.</p>
 <p>See <a href="https://stripe.com/docs/api/sources/retrieve">Retrieve a source</a>.
@@ -19,6 +19,9 @@ or your app will crash.</p>
 <code>sourceId</code> - the <a href="../../com.stripe.android.model/-source/id.html">Source.id</a> field of the desired Source object</p>
 <p><a name="clientSecret"></a>
 <code>clientSecret</code> - the <a href="../../com.stripe.android.model/-source/client-secret.html">Source.clientSecret</a> field of the desired Source object</p>
+<p><a name="stripeAccountId"></a>
+<code>stripeAccountId</code> - Optional, the Connect account to associate with this request.
+By default, will use the Connect account that was used to instantiate the <code>Stripe</code> object, if specified.</p>
 <h3>Exceptions</h3>
 <p><a name="AuthenticationException"></a>
 <code>AuthenticationException</code> - failure to properly authenticate yourself (check your key)</p>
