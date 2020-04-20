@@ -18,12 +18,11 @@
 * [#2390](https://github.com/stripe/stripe-android/pull/2390) Bump Kotlin version to `1.3.72`
 * [#2392](https://github.com/stripe/stripe-android/pull/2392) Add `shipping` property to `PaymentIntent`
 * [#2394](https://github.com/stripe/stripe-android/pull/2394) Add support for Giropay PaymentMethod
-* [#2395](https://github.com/stripe/stripe-android/pull/2395) Add support for Bancontact PaymentMethod
+* [#2395](https://github.com/stripe/stripe-android/pull/2395) Add support for EPS PaymentMethod
 * [#2396](https://github.com/stripe/stripe-android/pull/2396) Expose `klarna` property on `Source`
 * [#2401](https://github.com/stripe/stripe-android/pull/2401) Bump 3DS2 SDK to `2.7.4`
     * Add new translations for 3DS2 SDK strings
     * Upgrade BouncyCastle to `1.65`
-* [#2395](https://github.com/stripe/stripe-android/pull/2395) Add support for EPS PaymentMethod
 
 ## 14.2.1 - 2020-03-26
 * [#2299](https://github.com/stripe/stripe-android/pull/2299) Make `SourceParams.OwnerParams` constructor public and properties mutable
