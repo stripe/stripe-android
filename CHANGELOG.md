@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 14.3.0 - unreleased
+## 14.3.0 - 2020-04-20
 * [#2334](https://github.com/stripe/stripe-android/pull/2334) Add support for BACS Debit in `PaymentMethodCreateParams`
 * [#2335](https://github.com/stripe/stripe-android/pull/2335) Add support for BACS Debit Payment Method
 * [#2336](https://github.com/stripe/stripe-android/pull/2336) Improve `ShippingInfoWidget`
