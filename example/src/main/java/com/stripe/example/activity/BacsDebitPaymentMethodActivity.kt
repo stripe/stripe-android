@@ -86,7 +86,6 @@ class BacsDebitPaymentMethodActivity : AppCompatActivity() {
             backendApi
                 .createPaymentIntent(
                     mapOf(
-                        "payment_method_types[]" to "bacs_debit",
                         "amount" to 1000,
                         "country" to "gb"
                     ).toMutableMap()

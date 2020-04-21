@@ -85,7 +85,6 @@ class SofortPaymentMethodActivity : AppCompatActivity() {
             backendApi
                 .createPaymentIntent(
                     mapOf(
-                        "payment_method_types[]" to "sofort",
                         "amount" to 1000,
                         "country" to "de"
                     ).toMutableMap()

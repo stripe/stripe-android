@@ -170,7 +170,7 @@ class PaymentAuthActivity : AppCompatActivity() {
 
     private fun createSetupIntent() {
         compositeSubscription.add(
-            backendApi.createSetupIntent(hashMapOf("country" to "us"))
+            backendApi.createSetupIntent(mutableMapOf("country" to "us"))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe {
@@ -239,7 +239,6 @@ class PaymentAuthActivity : AppCompatActivity() {
 
     private fun createPaymentIntentParams(stripeAccountId: String?): Map<String, Any> {
         return mapOf(
-            "payment_method_types[]" to "card",
             "amount" to 1000,
             "country" to "us"
         )
