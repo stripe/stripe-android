@@ -96,6 +96,8 @@
             android:name=".activity.KlarnaSourceActivity" />
         <activity
             android:name=".activity.CardBrandsActivity" />
+
+        <activity android:name=".activity.SimpleRedirectPaymentMethodActivity" />
     </application>
 
 </manifest>
