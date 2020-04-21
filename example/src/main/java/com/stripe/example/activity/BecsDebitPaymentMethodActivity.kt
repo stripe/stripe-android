@@ -6,8 +6,10 @@ import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
+import com.stripe.android.SetupIntentResult
 import com.stripe.android.Stripe
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.view.BecsDebitWidget
 import com.stripe.example.R
@@ -44,15 +46,24 @@ class BecsDebitPaymentMethodActivity : AppCompatActivity() {
 
         viewBinding.element.validParamsCallback = object : BecsDebitWidget.ValidParamsCallback {
             override fun onInputChanged(isValid: Boolean) {
-                viewBinding.submit.isEnabled = isValid
+                viewBinding.payButton.isEnabled = isValid
+                viewBinding.saveButton.isEnabled = isValid
             }
         }
 
-        viewBinding.submit.setOnClickListener {
+        viewBinding.payButton.setOnClickListener {
             viewBinding.element.params?.let { params ->
                 keyboardController.hide()
 
                 createPaymentIntent(params)
+            }
+        }
+
+        viewBinding.saveButton.setOnClickListener {
+            viewBinding.element.params?.let { params ->
+                keyboardController.hide()
+
+                createSetupIntent(params)
             }
         }
     }
@@ -64,7 +75,12 @@ class BecsDebitPaymentMethodActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        stripe.onPaymentResult(requestCode, data, PaymentIntentResultCallback(this))
+        val isPaymentIntentConfirmationResult = stripe.onPaymentResult(
+            requestCode, data, PaymentIntentResultCallback(this)
+        )
+        if (!isPaymentIntentConfirmationResult) {
+            stripe.onSetupResult(requestCode, data, SetupIntentResultCallback(this))
+        }
     }
 
     private fun createPaymentIntent(params: PaymentMethodCreateParams) {
@@ -72,7 +88,6 @@ class BecsDebitPaymentMethodActivity : AppCompatActivity() {
             backendApi
                 .createPaymentIntent(
                     mapOf(
-                        "payment_method_types[]" to "au_becs_debit",
                         "amount" to 1000,
                         "country" to "au"
                     ).toMutableMap()
@@ -85,18 +100,35 @@ class BecsDebitPaymentMethodActivity : AppCompatActivity() {
                 }
                 .subscribe(
                     { handleCreatePaymentIntentResponse(it, params) },
-                    { handleError(it) }
+                    { onError(it) }
+                )
+        )
+    }
+
+    private fun createSetupIntent(params: PaymentMethodCreateParams) {
+        compositeSubscription.add(
+            backendApi
+                .createSetupIntent(
+                    mapOf(
+                        "country" to "au"
+                    ).toMutableMap()
+                )
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe {
+                    disableUi()
+                    viewBinding.status.setText(R.string.creating_setup_intent)
+                }
+                .subscribe(
+                    { onCreateSetupIntentResponse(it, params) },
+                    { onError(it) }
                 )
         )
     }
 
     private fun disableUi() {
-        viewBinding.submit.isEnabled = false
-    }
-
-    private fun handleError(err: Throwable) {
-        viewBinding.submit.isEnabled = true
-        viewBinding.status.append("\n\n" + err.message)
+        viewBinding.payButton.isEnabled = false
+        viewBinding.saveButton.isEnabled = false
     }
 
     private fun handleCreatePaymentIntentResponse(
@@ -110,9 +142,26 @@ class BecsDebitPaymentMethodActivity : AppCompatActivity() {
             val secret = responseData.getString("secret")
             confirmPaymentIntent(secret, params)
         } catch (e: IOException) {
-            e.printStackTrace()
+            onError(e)
         } catch (e: JSONException) {
-            e.printStackTrace()
+            onError(e)
+        }
+    }
+
+    private fun onCreateSetupIntentResponse(
+        responseBody: ResponseBody,
+        params: PaymentMethodCreateParams
+    ) {
+        try {
+            val responseData = JSONObject(responseBody.string())
+            viewBinding.status.append("\n\n" + getString(R.string.setup_intent_status,
+                responseData.getString("status")))
+            val secret = responseData.getString("secret")
+            confirmSetupIntent(secret, params)
+        } catch (e: IOException) {
+            onError(e)
+        } catch (e: JSONException) {
+            onError(e)
         }
     }
 
@@ -120,7 +169,7 @@ class BecsDebitPaymentMethodActivity : AppCompatActivity() {
         paymentIntentClientSecret: String,
         params: PaymentMethodCreateParams
     ) {
-        viewBinding.status.append("\n\nStarting payment authentication")
+        viewBinding.status.append("\n\nConfirming PaymentIntent")
         stripe.confirmPayment(
             this,
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
@@ -130,18 +179,44 @@ class BecsDebitPaymentMethodActivity : AppCompatActivity() {
         )
     }
 
-    private fun onConfirmSuccess(result: PaymentIntentResult) {
-        val paymentIntent = result.intent
-        viewBinding.status.append("\n\n" +
-            "Auth outcome: ${result.outcome}\n\n" +
-            getString(R.string.payment_intent_status, paymentIntent.status)
+    private fun confirmSetupIntent(
+        setupIntentClientSecret: String,
+        params: PaymentMethodCreateParams
+    ) {
+        viewBinding.status.append("\n\nConfirming SetupIntent")
+        stripe.confirmSetupIntent(
+            this,
+            ConfirmSetupIntentParams.create(
+                paymentMethodCreateParams = params,
+                clientSecret = setupIntentClientSecret
+            )
         )
-        viewBinding.submit.isEnabled = true
     }
 
-    private fun onConfirmError(e: Exception) {
+    private fun onPaymentConfirmSuccess(result: PaymentIntentResult) {
+        val paymentIntent = result.intent
+        viewBinding.status.append("\n\n" +
+            "PaymentIntent confirmation outcome: ${result.outcome}\n\n" +
+            getString(R.string.payment_intent_status, paymentIntent.status)
+        )
+        viewBinding.payButton.isEnabled = true
+        viewBinding.saveButton.isEnabled = true
+    }
+
+    private fun onSetupConfirmSuccess(result: SetupIntentResult) {
+        val paymentIntent = result.intent
+        viewBinding.status.append("\n\n" +
+            "SetupIntent confirmation outcome: ${result.outcome}\n\n" +
+            getString(R.string.payment_intent_status, paymentIntent.status)
+        )
+        viewBinding.payButton.isEnabled = true
+        viewBinding.saveButton.isEnabled = true
+    }
+
+    private fun onError(e: Throwable) {
         viewBinding.status.append("\n\nException: " + e.message)
-        viewBinding.submit.isEnabled = true
+        viewBinding.payButton.isEnabled = true
+        viewBinding.saveButton.isEnabled = true
     }
 
     private class PaymentIntentResultCallback(
@@ -151,11 +226,26 @@ class BecsDebitPaymentMethodActivity : AppCompatActivity() {
         private val activityRef = WeakReference(activity)
 
         override fun onSuccess(result: PaymentIntentResult) {
-            activityRef.get()?.onConfirmSuccess(result)
+            activityRef.get()?.onPaymentConfirmSuccess(result)
         }
 
         override fun onError(e: Exception) {
-            activityRef.get()?.onConfirmError(e)
+            activityRef.get()?.onError(e)
+        }
+    }
+
+    private class SetupIntentResultCallback(
+        activity: BecsDebitPaymentMethodActivity
+    ) : ApiResultCallback<SetupIntentResult> {
+
+        private val activityRef = WeakReference(activity)
+
+        override fun onSuccess(result: SetupIntentResult) {
+            activityRef.get()?.onSetupConfirmSuccess(result)
+        }
+
+        override fun onError(e: Exception) {
+            activityRef.get()?.onError(e)
         }
     }
 }

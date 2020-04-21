@@ -21,5 +21,5 @@ interface BackendApi {
 
     @FormUrlEncoded
     @POST("create_setup_intent")
-    fun createSetupIntent(@FieldMap params: HashMap<String, Any>): Observable<ResponseBody>
+    fun createSetupIntent(@FieldMap params: MutableMap<String, Any>): Observable<ResponseBody>
 }
