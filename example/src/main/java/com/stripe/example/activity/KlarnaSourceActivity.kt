@@ -50,10 +50,8 @@ class KlarnaSourceActivity : AppCompatActivity() {
                         stripe.authenticateSource(
                             this,
                             source,
-                            stripeAccountId = if (stripeAccount.isNotBlank()) {
-                                stripeAccount.toString()
-                            } else {
-                                null
+                            stripeAccountId = viewBinding.stripeAccount.text.toString().takeIf {
+                                it.isNotBlank()
                             }
                         )
                     }
