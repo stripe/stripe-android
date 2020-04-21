@@ -117,15 +117,15 @@ data class PaymentMethod internal constructor(
     @Parcelize
     enum class Type constructor(
         @JvmField val code: String,
-        @JvmField val isReusable: Boolean = true
+        @JvmField val isReusable: Boolean
     ) : Parcelable {
-        Card("card"),
-        CardPresent("card_present"),
+        Card("card", isReusable = true),
+        CardPresent("card_present", isReusable = false),
         Fpx("fpx", isReusable = false),
-        Ideal("ideal"),
-        SepaDebit("sepa_debit"),
-        AuBecsDebit("au_becs_debit"),
-        BacsDebit("bacs_debit"),
+        Ideal("ideal", isReusable = false),
+        SepaDebit("sepa_debit", isReusable = false),
+        AuBecsDebit("au_becs_debit", isReusable = true),
+        BacsDebit("bacs_debit", isReusable = true),
         Sofort("sofort", isReusable = false),
         P24("p24", isReusable = false),
         Bancontact("bancontact", isReusable = false),
