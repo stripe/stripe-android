@@ -351,7 +351,14 @@ data class PaymentIntent internal constructor(
     internal sealed class NextActionData : StripeModel {
         @Parcelize
         internal data class DisplayOxxoDetails(
+            /**
+             * The timestamp after which the OXXO expires.
+             */
             val expiresAfter: Int = 0,
+
+            /**
+             * The OXXO number.
+             */
             val number: String? = null
         ) : NextActionData()
     }
