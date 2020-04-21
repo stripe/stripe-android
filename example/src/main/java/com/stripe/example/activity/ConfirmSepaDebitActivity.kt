@@ -180,7 +180,6 @@ class ConfirmSepaDebitActivity : AppCompatActivity() {
         private const val TEST_ACCOUNT_NUMBER = "DE89370400440532013000"
 
         private val PAYMENT_INTENT_PARAMAS = mapOf(
-            "payment_method_types[]" to "sepa_debit",
             "amount" to 1000,
             "country" to "nl"
         )
