@@ -71,10 +71,10 @@ class PaymentAuthActivity : AppCompatActivity() {
         }
 
         viewBinding.confirmWith3ds1Button.setOnClickListener {
-            createPaymentIntent(account, ConfirmationType.ThreeDS1)
+            createPaymentIntent(stripeAccountId, ConfirmationType.ThreeDS1)
         }
         viewBinding.confirmWith3ds2Button.setOnClickListener {
-            createPaymentIntent(account, ConfirmationType.ThreeDS2)
+            createPaymentIntent(stripeAccountId, ConfirmationType.ThreeDS2)
         }
 
         viewBinding.confirmWithNewCardButton.setOnClickListener {
@@ -82,7 +82,7 @@ class PaymentAuthActivity : AppCompatActivity() {
                 keyboardController.hide()
 
                 createPaymentIntent(
-                    account,
+                    stripeAccountId,
                     ConfirmationType.NewCard
                 )
             }
@@ -91,20 +91,9 @@ class PaymentAuthActivity : AppCompatActivity() {
         viewBinding.setupButton.setOnClickListener { createSetupIntent() }
     }
 
-    private val account: String?
-        get() {
-            val connectAccount = viewBinding.stripeAccount.text.toString()
-            return if (connectAccount.isNotBlank()) {
-                connectAccount
-            } else {
-                Settings(this).stripeAccountId
-            }
-        }
-
     private fun confirmPaymentIntent(
         paymentIntentClientSecret: String,
-        confirmationType: ConfirmationType,
-        stripeAccountId: String?
+        confirmationType: ConfirmationType
     ) {
         viewBinding.status.append("\n\nStarting payment authentication")
         stripe.confirmPayment(
@@ -120,8 +109,7 @@ class PaymentAuthActivity : AppCompatActivity() {
                         clientSecret = paymentIntentClientSecret,
                         shipping = SHIPPING
                     )
-            },
-            stripeAccountId
+            }
         )
     }
 
@@ -174,7 +162,7 @@ class PaymentAuthActivity : AppCompatActivity() {
                     viewBinding.status.setText(R.string.creating_payment_intent)
                 }
                 .subscribe(
-                    { handleCreatePaymentIntentResponse(it, confirmationType, stripeAccountId) },
+                    { handleCreatePaymentIntentResponse(it, confirmationType) },
                     { handleError(it) }
                 )
         )
@@ -212,15 +200,14 @@ class PaymentAuthActivity : AppCompatActivity() {
 
     private fun handleCreatePaymentIntentResponse(
         responseBody: ResponseBody,
-        confirmationType: ConfirmationType,
-        stripeAccountId: String?
+        confirmationType: ConfirmationType
     ) {
         try {
             val responseData = JSONObject(responseBody.string())
             viewBinding.status.append("\n\n" + getString(R.string.payment_intent_status,
                 responseData.getString("status")))
             val secret = responseData.getString("secret")
-            confirmPaymentIntent(secret, confirmationType, stripeAccountId)
+            confirmPaymentIntent(secret, confirmationType)
         } catch (e: IOException) {
             e.printStackTrace()
         } catch (e: JSONException) {
