@@ -35,18 +35,6 @@
             android:text="@string/fetch_klarna_source"
             />
 
-        <EditText
-            android:id="@+id/stripe_account"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/stripe_account_hint"
-            android:layout_marginTop="12dp"
-            />
-
-        <View style="@style/Divider"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="12dp"/>
-
         <TextView
             android:id="@+id/source_result"
             android:layout_width="match_parent"
