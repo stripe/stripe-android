@@ -644,4 +644,40 @@ internal object PaymentIntentFixtures {
         }
         """.trimIndent()
     )
+
+    val OXXO_REQUIRES_ACTION = JSONObject(
+        """
+        {
+            "id": "pi_1Ga0nFLYnbCF8",
+            "object": "payment_intent",
+            "amount": 1000,
+            "canceled_at": null,
+            "cancellation_reason": null,
+            "capture_method": "automatic",
+            "client_secret": "pi_1Ga0nFLYnbCF8_secret_Vd75bObmsTyGR4k",
+            "confirmation_method": "automatic",
+            "created": 1587393617,
+            "currency": "mxn",
+            "description": null,
+            "last_payment_error": null,
+            "livemode": false,
+            "next_action": {
+                "display_oxxo_details": {
+                    "expires_after": 1587704399,
+                    "number": "12345678901234657890123456789012"
+                },
+                "type": "display_oxxo_details"
+            },
+            "payment_method": "pm_1Ga11MLYnbC",
+            "payment_method_types": [
+                "oxxo"
+            ],
+            "receipt_email": null,
+            "setup_future_usage": null,
+            "shipping": null,
+            "source": null,
+            "status": "requires_action"
+        }
+        """.trimIndent()
+    )
 }
