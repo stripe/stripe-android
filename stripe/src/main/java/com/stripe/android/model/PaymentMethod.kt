@@ -130,7 +130,8 @@ data class PaymentMethod internal constructor(
         P24("p24", isReusable = false),
         Bancontact("bancontact", isReusable = false),
         Giropay("giropay", isReusable = false),
-        Eps("eps", isReusable = false);
+        Eps("eps", isReusable = false),
+        Oxxo("oxxo", isReusable = false);
 
         override fun toString(): String {
             return code
