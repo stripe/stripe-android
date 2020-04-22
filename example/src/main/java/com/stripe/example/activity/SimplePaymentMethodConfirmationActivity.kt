@@ -20,7 +20,6 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.example.R
 import com.stripe.example.databinding.SimplePaymentMethodActivityBinding
 import com.stripe.example.module.BackendApiFactory
-import com.stripe.example.service.BackendApi
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -38,11 +37,6 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
     private val keyboardController: KeyboardController by lazy {
         KeyboardController(this)
     }
-    private val compositeSubscription = CompositeDisposable()
-    private val backendApi: BackendApi by lazy {
-        BackendApiFactory(this).create()
-    }
-
     private val viewModel: SimplePaymentMethodConfirmationViewModel by lazy {
         ViewModelProvider(this,
             ViewModelProvider.AndroidViewModelFactory(application)
@@ -60,13 +54,7 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
-        viewModel.inProgress.observe(this, Observer {
-            if (it) {
-                disableUi()
-            } else {
-                enableUi()
-            }
-        })
+        viewModel.inProgress.observe(this, Observer { enableUi(!it) })
         viewModel.status.observe(this, Observer(viewBinding.status::setText))
 
         val adapter: ArrayAdapter<String> = ArrayAdapter<String>(
@@ -120,11 +108,6 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
         }
     }
 
-    override fun onDestroy() {
-        compositeSubscription.dispose()
-        super.onDestroy()
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         stripe.onPaymentResult(requestCode, data, PaymentIntentResultCallback(this))
@@ -137,18 +120,11 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
         }
     }
 
-    private fun disableUi() {
-        viewBinding.submit.isEnabled = false
-        viewBinding.name.isEnabled = false
-        viewBinding.email.isEnabled = false
-        viewBinding.progressBar.visibility = View.VISIBLE
-    }
-
-    private fun enableUi() {
-        viewBinding.submit.isEnabled = true
-        viewBinding.name.isEnabled = true
-        viewBinding.email.isEnabled = true
-        viewBinding.progressBar.visibility = View.INVISIBLE
+    private fun enableUi(enabled: Boolean) {
+        viewBinding.submit.isEnabled = enabled
+        viewBinding.name.isEnabled = enabled
+        viewBinding.email.isEnabled = enabled
+        viewBinding.progressBar.visibility = if (enabled) View.INVISIBLE else View.VISIBLE
     }
 
     private fun handleCreatePaymentIntentResponse(
