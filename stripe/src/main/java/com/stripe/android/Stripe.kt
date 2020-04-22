@@ -363,10 +363,14 @@ class Stripe internal constructor(
      * Confirm and, if necessary, authenticate a [SetupIntent].
      *
      * @param activity the `Activity` that is launching the payment authentication flow
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      */
+    @JvmOverloads
     fun confirmSetupIntent(
         activity: Activity,
-        confirmSetupIntentParams: ConfirmSetupIntentParams
+        confirmSetupIntentParams: ConfirmSetupIntentParams,
+        stripeAccountId: String? = this.stripeAccountId
     ) {
         paymentController.startConfirmAndAuth(
             AuthActivityStarter.Host.create(activity),
@@ -509,14 +513,7 @@ class Stripe internal constructor(
         callback: ApiResultCallback<SetupIntentResult>
     ): Boolean {
         return if (data != null && paymentController.shouldHandleSetupResult(requestCode, data)) {
-            paymentController.handleSetupResult(
-                data,
-                ApiRequest.Options(
-                    apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
-                ),
-                callback
-            )
+            paymentController.handleSetupResult(data, callback)
             true
         } else {
             false

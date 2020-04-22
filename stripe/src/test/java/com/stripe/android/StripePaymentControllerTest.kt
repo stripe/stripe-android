@@ -528,7 +528,7 @@ class StripePaymentControllerTest {
             ).toBundle()
         )
 
-        controller.handleSetupResult(intent, REQUEST_OPTIONS, setupAuthResultCallback)
+        controller.handleSetupResult(intent, setupAuthResultCallback)
 
         verify(setupAuthResultCallback).onError(exception)
         verify(setupAuthResultCallback, never())
@@ -546,7 +546,7 @@ class StripePaymentControllerTest {
             ).toBundle()
         )
 
-        controller.handleSetupResult(intent, REQUEST_OPTIONS, setupAuthResultCallback)
+        controller.handleSetupResult(intent, setupAuthResultCallback)
 
         verify(setupAuthResultCallback).onSuccess(setupIntentResultArgumentCaptor.capture())
         val result = setupIntentResultArgumentCaptor.firstValue
