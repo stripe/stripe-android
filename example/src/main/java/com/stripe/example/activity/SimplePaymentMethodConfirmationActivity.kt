@@ -63,7 +63,7 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
             DropdownItem.values().map { it.name })
         viewBinding.paymentMethod.setAdapter(adapter)
         viewBinding.paymentMethod.setOnItemClickListener { _, _, _, _ ->
-            viewBinding.status.text = ""
+            viewModel.status.value = ""
             onDropdownItemSelected()
         }
         viewBinding.paymentMethod.setText(DropdownItem.P24.name, false)
