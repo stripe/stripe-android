@@ -5,6 +5,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.utils.ParcelUtils
 import kotlin.test.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -38,5 +39,15 @@ class PaymentIntentResultTest {
         )
         assertThat(result.outcome)
             .isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
+    }
+
+    @Test
+    fun shouldImplementParcelableCorrectly() {
+        ParcelUtils.verifyParcelRoundtrip(
+            PaymentIntentResult(
+                paymentIntent = PaymentIntentFixtures.PI_REQUIRES_AMEX_3DS2,
+                outcome = StripeIntentResult.Outcome.CANCELED
+            )
+        )
     }
 }
