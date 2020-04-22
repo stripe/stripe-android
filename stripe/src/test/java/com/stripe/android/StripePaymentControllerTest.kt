@@ -513,7 +513,7 @@ class StripePaymentControllerTest {
             ).toBundle()
         )
 
-        controller.handlePaymentResult(intent, REQUEST_OPTIONS, paymentAuthResultCallback)
+        controller.handlePaymentResult(intent, paymentAuthResultCallback)
         verify(paymentAuthResultCallback).onError(exception)
         verify(paymentAuthResultCallback, never())
             .onSuccess(anyOrNull())
@@ -657,7 +657,7 @@ class StripePaymentControllerTest {
         )
 
         createController(stripeRepository)
-            .handlePaymentResult(intent, REQUEST_OPTIONS, paymentAuthResultCallback)
+            .handlePaymentResult(intent, paymentAuthResultCallback)
 
         verify(stripeRepository).retrieveIntent(
             eq(clientSecret),

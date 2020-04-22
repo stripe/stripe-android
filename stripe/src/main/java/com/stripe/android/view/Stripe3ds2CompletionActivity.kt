@@ -41,7 +41,8 @@ class Stripe3ds2CompletionActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val result = PaymentController.Result(
             clientSecret = intent.getStringExtra(EXTRA_CLIENT_SECRET),
-            flowOutcome = flowOutcome
+            flowOutcome = flowOutcome,
+            stripeAccountId = intent.getStringExtra(EXTRA_STRIPE_ACCOUNT)
         )
 
         LocalBroadcastManager.getInstance(this)
@@ -56,6 +57,7 @@ class Stripe3ds2CompletionActivity : AppCompatActivity() {
 
     internal companion object {
         const val EXTRA_CLIENT_SECRET = "extra_client_secret"
+        const val EXTRA_STRIPE_ACCOUNT = "extra_stripe_account"
         private const val UNKNOWN_FLOW_OUTCOME = -1
     }
 }

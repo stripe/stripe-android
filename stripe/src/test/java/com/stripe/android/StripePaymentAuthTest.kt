@@ -103,9 +103,7 @@ class StripePaymentAuthTest {
         stripe.onPaymentResult(StripePaymentController.PAYMENT_REQUEST_CODE, data,
             callback = paymentCallback)
 
-        verify(paymentController).handlePaymentResult(data,
-            ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-            paymentCallback)
+        verify(paymentController).handlePaymentResult(data, paymentCallback)
     }
 
     @Test

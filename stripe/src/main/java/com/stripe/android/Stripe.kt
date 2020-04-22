@@ -128,11 +128,15 @@ class Stripe internal constructor(
      * @param activity the `Activity` that is launching the payment authentication flow
      * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
      * [PaymentIntent]
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      */
+    @JvmOverloads
     @UiThread
     fun confirmPayment(
         activity: Activity,
-        confirmPaymentIntentParams: ConfirmPaymentIntentParams
+        confirmPaymentIntentParams: ConfirmPaymentIntentParams,
+        stripeAccountId: String? = this.stripeAccountId
     ) {
         paymentController.startConfirmAndAuth(
             AuthActivityStarter.Host.create(activity),
@@ -150,11 +154,15 @@ class Stripe internal constructor(
      *
      * @param fragment the `Fragment` that is launching the payment authentication flow
      * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the [PaymentIntent]
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      */
+    @JvmOverloads
     @UiThread
     fun confirmPayment(
         fragment: Fragment,
-        confirmPaymentIntentParams: ConfirmPaymentIntentParams
+        confirmPaymentIntentParams: ConfirmPaymentIntentParams,
+        stripeAccountId: String? = this.stripeAccountId
     ) {
         paymentController.startConfirmAndAuth(
             AuthActivityStarter.Host.create(fragment),
@@ -280,14 +288,7 @@ class Stripe internal constructor(
         callback: ApiResultCallback<PaymentIntentResult>
     ): Boolean {
         return if (data != null && paymentController.shouldHandlePaymentResult(requestCode, data)) {
-            paymentController.handlePaymentResult(
-                data,
-                ApiRequest.Options(
-                    apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
-                ),
-                callback
-            )
+            paymentController.handlePaymentResult(data, callback)
             true
         } else {
             false
