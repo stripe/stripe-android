@@ -1,10 +1,15 @@
 package com.stripe.example.activity
 
+import android.app.Application
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
@@ -19,13 +24,11 @@ import com.stripe.example.service.BackendApi
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import okhttp3.ResponseBody
-import org.json.JSONException
 import org.json.JSONObject
-import java.io.IOException
 import java.lang.ref.WeakReference
 
 class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
+
     private val stripe: Stripe by lazy {
         Stripe(this, PaymentConfiguration.getInstance(this).publishableKey)
     }
@@ -40,6 +43,12 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
         BackendApiFactory(this).create()
     }
 
+    private val viewModel: SimplePaymentMethodConfirmationViewModel by lazy {
+        ViewModelProvider(this,
+            ViewModelProvider.AndroidViewModelFactory(application)
+        )[SimplePaymentMethodConfirmationViewModel::class.java]
+    }
+
     private val dropdownItem: DropdownItem
         get() {
             return DropdownItem.valueOf(
@@ -51,6 +60,15 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
+        viewModel.inProgress.observe(this, Observer {
+            if (it) {
+                disableUi()
+            } else {
+                enableUi()
+            }
+        })
+        viewModel.status.observe(this, Observer(viewBinding.status::setText))
+
         val adapter: ArrayAdapter<String> = ArrayAdapter<String>(
             this.applicationContext,
             R.layout.dropdown_menu_popup_item,
@@ -58,10 +76,7 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
         viewBinding.paymentMethod.setAdapter(adapter)
         viewBinding.paymentMethod.setOnItemClickListener { _, _, _, _ ->
             viewBinding.status.text = ""
-            val dropdownItem = this.dropdownItem
-            viewBinding.nameLayout.visibility = if (dropdownItem.requiresName) View.VISIBLE else View.GONE
-
-            viewBinding.emailLayout.visibility = if (dropdownItem.requiresEmail) View.VISIBLE else View.GONE
+            onDropdownItemSelected()
         }
         viewBinding.paymentMethod.setText(DropdownItem.P24.name, false)
 
@@ -81,6 +96,30 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
         }
     }
 
+    private fun onDropdownItemSelected() {
+        val dropdownItem = this.dropdownItem
+        viewBinding.nameLayout.visibility = if (dropdownItem.requiresName) View.VISIBLE else View.GONE
+
+        viewBinding.emailLayout.visibility = if (dropdownItem.requiresEmail) View.VISIBLE else View.GONE
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(STATE_EMAIL, viewBinding.email.text.toString())
+        outState.putString(STATE_NAME, viewBinding.name.text.toString())
+        outState.putString(STATE_DROPDOWN_ITEM, viewBinding.paymentMethod.text.toString())
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        savedInstanceState.getString(STATE_EMAIL)?.let(viewBinding.email::setText)
+        savedInstanceState.getString(STATE_NAME)?.let(viewBinding.name::setText)
+        savedInstanceState.getString(STATE_DROPDOWN_ITEM)?.let {
+            viewBinding.paymentMethod.setText(it)
+            onDropdownItemSelected()
+        }
+    }
+
     override fun onDestroy() {
         compositeSubscription.dispose()
         super.onDestroy()
@@ -92,25 +131,10 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
     }
 
     private fun createPaymentIntent(country: String, params: PaymentMethodCreateParams) {
-        compositeSubscription.add(
-            backendApi
-                .createPaymentIntent(
-                    mutableMapOf(
-                        "amount" to 1000,
-                        "country" to country
-                    )
-                )
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnSubscribe {
-                    disableUi()
-                    viewBinding.status.setText(R.string.creating_payment_intent)
-                }
-                .subscribe(
-                    { handleCreatePaymentIntentResponse(it, params) },
-                    { handleError(it) }
-                )
-        )
+        viewModel.createPaymentIntent(country
+        ) {
+            handleCreatePaymentIntentResponse(it, params)
+        }
     }
 
     private fun disableUi() {
@@ -120,36 +144,26 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
         viewBinding.progressBar.visibility = View.VISIBLE
     }
 
-    private fun handleError(err: Throwable) {
+    private fun enableUi() {
         viewBinding.submit.isEnabled = true
         viewBinding.name.isEnabled = true
         viewBinding.email.isEnabled = true
         viewBinding.progressBar.visibility = View.INVISIBLE
-        viewBinding.status.append("\n\n" + err.message)
     }
 
     private fun handleCreatePaymentIntentResponse(
-        responseBody: ResponseBody,
+        responseData: JSONObject,
         params: PaymentMethodCreateParams
     ) {
-        try {
-            val responseData = JSONObject(responseBody.string())
-            viewBinding.status.append("\n\n" + getString(R.string.payment_intent_status,
-                responseData.getString("status")))
-            val secret = responseData.getString("secret")
-            confirmPaymentIntent(secret, params)
-        } catch (e: IOException) {
-            handleError(e)
-        } catch (e: JSONException) {
-            handleError(e)
-        }
+        val secret = responseData.getString("secret")
+        confirmPaymentIntent(secret, params)
     }
 
     private fun confirmPaymentIntent(
         paymentIntentClientSecret: String,
         params: PaymentMethodCreateParams
     ) {
-        viewBinding.status.append("\n\nStarting payment authentication")
+        viewModel.status.value += "\n\nStarting payment authentication"
         stripe.confirmPayment(
             this,
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
@@ -162,44 +176,92 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
 
     private fun onConfirmSuccess(result: PaymentIntentResult) {
         val paymentIntent = result.intent
-        viewBinding.status.append("\n\n" +
+        viewModel.status.value += "\n\n" +
             "Auth outcome: ${result.outcome}\n\n" +
             getString(R.string.payment_intent_status, paymentIntent.status)
-        )
-        viewBinding.submit.isEnabled = true
-        viewBinding.progressBar.visibility = View.INVISIBLE
+        viewModel.inProgress.value = false
     }
 
     private fun onConfirmError(e: Exception) {
-        viewBinding.status.append("\n\nException: " + e.message)
-        viewBinding.submit.isEnabled = true
-        viewBinding.progressBar.visibility = View.INVISIBLE
+        viewModel.status.value += "\n\nException: " + e.message
+        viewModel.inProgress.value = false
     }
 
-    private class PaymentIntentResultCallback(
-        activity: SimplePaymentMethodConfirmationActivity
-    ) : ApiResultCallback<PaymentIntentResult> {
+    companion object {
+        private const val STATE_NAME = "name"
+        private const val STATE_EMAIL = "email"
+        private const val STATE_DROPDOWN_ITEM = "dropdown_item"
 
-        private val activityRef = WeakReference(activity)
-
-        override fun onSuccess(result: PaymentIntentResult) {
-            activityRef.get()?.onConfirmSuccess(result)
+        private enum class DropdownItem(
+            val country: String,
+            val createParams: (PaymentMethod.BillingDetails, Map<String, String>?) -> PaymentMethodCreateParams,
+            val requiresName: Boolean = true,
+            val requiresEmail: Boolean = false
+        ) {
+            P24("pl", PaymentMethodCreateParams.Companion::createP24, requiresName = false, requiresEmail = true),
+            Bancontact("be", PaymentMethodCreateParams.Companion::createBancontact),
+            EPS("at", PaymentMethodCreateParams.Companion::createEps),
+            Giropay("de", PaymentMethodCreateParams.Companion::createGiropay);
         }
 
-        override fun onError(e: Exception) {
-            activityRef.get()?.onConfirmError(e)
+        private class PaymentIntentResultCallback(
+            activity: SimplePaymentMethodConfirmationActivity
+        ) : ApiResultCallback<PaymentIntentResult> {
+
+            private val activityRef = WeakReference(activity)
+
+            override fun onSuccess(result: PaymentIntentResult) {
+                activityRef.get()?.onConfirmSuccess(result)
+            }
+
+            override fun onError(e: Exception) {
+                activityRef.get()?.onConfirmError(e)
+            }
         }
     }
 
-    private enum class DropdownItem(
-        val country: String,
-        val createParams: (PaymentMethod.BillingDetails, Map<String, String>?) -> PaymentMethodCreateParams,
-        val requiresName: Boolean = true,
-        val requiresEmail: Boolean = false
-    ) {
-        P24("pl", PaymentMethodCreateParams.Companion::createP24, requiresName = false, requiresEmail = true),
-        Bancontact("be", PaymentMethodCreateParams.Companion::createBancontact),
-        EPS("at", PaymentMethodCreateParams.Companion::createEps),
-        Giropay("de", PaymentMethodCreateParams.Companion::createGiropay);
+    internal class SimplePaymentMethodConfirmationViewModel(
+        application: Application
+    ) : AndroidViewModel(application) {
+        val inProgress = MutableLiveData<Boolean>()
+        val status = MutableLiveData<String>()
+
+        private val context = application.applicationContext
+        private val backendApi = BackendApiFactory(context).create()
+        private val compositeSubscription = CompositeDisposable()
+
+        fun createPaymentIntent(country: String, callback: (JSONObject) -> Unit) {
+            compositeSubscription.add(backendApi
+                .createPaymentIntent(
+                    mutableMapOf(
+                        "country" to country
+                    )
+                )
+                .doOnSubscribe {
+                    inProgress.postValue(true)
+                    status.postValue(context.getString(R.string.creating_payment_intent))
+                }
+                .map {
+                    JSONObject(it.string())
+                }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    {
+                        inProgress.postValue(false)
+                        status.postValue(status.value + "\n\n" + context.getString(R.string.payment_intent_status,
+                            it.getString("status")))
+                        callback(it)
+                    },
+                    {
+                        status.postValue(status.value + "\n\n${it.message}")
+                    }
+                ))
+        }
+
+        override fun onCleared() {
+            super.onCleared()
+            compositeSubscription.dispose()
+        }
     }
 }
