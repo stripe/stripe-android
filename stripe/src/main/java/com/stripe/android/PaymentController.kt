@@ -76,7 +76,6 @@ internal interface PaymentController {
 
     fun handleSourceResult(
         data: Intent,
-        requestOptions: ApiRequest.Options,
         callback: ApiResultCallback<Source>
     )
 
