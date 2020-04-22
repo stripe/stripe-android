@@ -68,7 +68,7 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
         }
         viewBinding.paymentMethod.setText(DropdownItem.P24.name, false)
 
-        viewBinding.submit.setOnClickListener {
+        viewBinding.payNow.setOnClickListener {
             keyboardController.hide()
 
             val dropdownItem = this.dropdownItem
@@ -121,7 +121,7 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
     }
 
     private fun enableUi(enabled: Boolean) {
-        viewBinding.submit.isEnabled = enabled
+        viewBinding.payNow.isEnabled = enabled
         viewBinding.name.isEnabled = enabled
         viewBinding.email.isEnabled = enabled
         viewBinding.progressBar.visibility = if (enabled) View.INVISIBLE else View.VISIBLE
@@ -139,7 +139,7 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
         paymentIntentClientSecret: String,
         params: PaymentMethodCreateParams
     ) {
-        viewModel.status.value += "\n\nStarting payment authentication"
+        viewModel.status.value += "\n\nStarting PaymentIntent confirmation"
         stripe.confirmPayment(
             this,
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
@@ -153,7 +153,7 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
     private fun onConfirmSuccess(result: PaymentIntentResult) {
         val paymentIntent = result.intent
         viewModel.status.value += "\n\n" +
-            "Auth outcome: ${result.outcome}\n\n" +
+            "PaymentIntent confirmation outcome: ${result.outcome}\n\n" +
             getString(R.string.payment_intent_status, paymentIntent.status)
         viewModel.inProgress.value = false
     }
@@ -225,7 +225,8 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
                 .subscribe(
                     {
                         inProgress.postValue(false)
-                        status.postValue(status.value + "\n\n" + context.getString(R.string.payment_intent_status,
+                        status.postValue(status.value + "\n\n" +
+                            context.getString(R.string.payment_intent_status,
                             it.getString("status")))
                         callback(it)
                     },
