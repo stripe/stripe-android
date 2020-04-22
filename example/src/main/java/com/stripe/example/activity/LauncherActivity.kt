@@ -66,8 +66,8 @@ class LauncherActivity : AppCompatActivity() {
                 SofortPaymentMethodActivity::class.java),
             Item(activity.getString(R.string.card_brands),
                 CardBrandsActivity::class.java),
-            Item("Simple Redirect PaymentMethod Confirmation Example",
-                SimpleRedirectPaymentMethodActivity::class.java)
+            Item("Simple PaymentMethod Confirmation Example",
+                SimplePaymentMethodConfirmationActivity::class.java)
         )
 
         override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): ExamplesViewHolder {

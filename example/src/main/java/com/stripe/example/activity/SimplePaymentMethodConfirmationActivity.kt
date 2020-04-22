@@ -13,7 +13,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.example.R
-import com.stripe.example.databinding.SimpleRedirectActivityBinding
+import com.stripe.example.databinding.SimplePaymentMethodActivityBinding
 import com.stripe.example.module.BackendApiFactory
 import com.stripe.example.service.BackendApi
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -25,12 +25,12 @@ import org.json.JSONObject
 import java.io.IOException
 import java.lang.ref.WeakReference
 
-class SimpleRedirectPaymentMethodActivity : AppCompatActivity() {
+class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
     private val stripe: Stripe by lazy {
         Stripe(this, PaymentConfiguration.getInstance(this).publishableKey)
     }
-    private val viewBinding: SimpleRedirectActivityBinding by lazy {
-        SimpleRedirectActivityBinding.inflate(layoutInflater)
+    private val viewBinding: SimplePaymentMethodActivityBinding by lazy {
+        SimplePaymentMethodActivityBinding.inflate(layoutInflater)
     }
     private val keyboardController: KeyboardController by lazy {
         KeyboardController(this)
@@ -177,7 +177,7 @@ class SimpleRedirectPaymentMethodActivity : AppCompatActivity() {
     }
 
     private class PaymentIntentResultCallback(
-        activity: SimpleRedirectPaymentMethodActivity
+        activity: SimplePaymentMethodConfirmationActivity
     ) : ApiResultCallback<PaymentIntentResult> {
 
         private val activityRef = WeakReference(activity)

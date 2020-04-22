@@ -97,7 +97,7 @@
         <activity
             android:name=".activity.CardBrandsActivity" />
 
-        <activity android:name=".activity.SimpleRedirectPaymentMethodActivity" />
+        <activity android:name=".activity.SimplePaymentMethodConfirmationActivity" />
     </application>
 
 </manifest>
