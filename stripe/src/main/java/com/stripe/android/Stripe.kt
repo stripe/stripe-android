@@ -296,13 +296,45 @@ class Stripe internal constructor(
     }
 
     /**
+     * Retrieve a [PaymentIntent] asynchronously.
+     *
+     * See [Retrieve a PaymentIntent](https://stripe.com/docs/api/payment_intents/retrieve).
+     * `GET /v1/payment_intents/:id`
+     *
+     * @param clientSecret the client_secret with which to retrieve the [PaymentIntent]
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+     * @param callback a [ApiResultCallback] to receive the result or error
+     */
+    @Throws(APIException::class, AuthenticationException::class,
+        InvalidRequestException::class, APIConnectionException::class)
+    @WorkerThread
+    @JvmOverloads
+    fun retrievePaymentIntent(
+        clientSecret: String,
+        stripeAccountId: String? = this.stripeAccountId,
+        callback: ApiResultCallback<PaymentIntent>
+    ) {
+        RetrievePaymentIntentTask(
+            stripeRepository,
+            clientSecret,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            ),
+            workScope,
+            callback
+        ).execute()
+    }
+
+    /**
      * Blocking method to retrieve a [PaymentIntent] object.
      * Do not call this on the UI thread or your app will crash.
      *
      * See [Retrieve a PaymentIntent](https://stripe.com/docs/api/payment_intents/retrieve).
      * `GET /v1/payment_intents/:id`
      *
-     * @param clientSecret the client_secret with which to retrieve the PaymentIntent
+     * @param clientSecret the client_secret with which to retrieve the [PaymentIntent]
      * @param stripeAccountId Optional, the Connect account to associate with this request.
      * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      * @return a [PaymentIntent] or `null` if a problem occurred
@@ -521,13 +553,45 @@ class Stripe internal constructor(
     }
 
     /**
+     * Retrieve a [SetupIntent] asynchronously.
+     *
+     * See [Retrieve a SetupIntent](https://stripe.com/docs/api/setup_intents/retrieve).
+     * `GET /v1/setup_intents/:id`
+     *
+     * @param clientSecret the client_secret with which to retrieve the [SetupIntent]
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+     * @param callback a [ApiResultCallback] to receive the result or error
+     */
+    @Throws(APIException::class, AuthenticationException::class,
+        InvalidRequestException::class, APIConnectionException::class)
+    @WorkerThread
+    @JvmOverloads
+    fun retrieveSetupIntent(
+        clientSecret: String,
+        stripeAccountId: String? = this.stripeAccountId,
+        callback: ApiResultCallback<SetupIntent>
+    ) {
+        RetrieveSetupIntentTask(
+            stripeRepository,
+            clientSecret,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            ),
+            workScope,
+            callback
+        ).execute()
+    }
+
+    /**
      * Blocking method to retrieve a [SetupIntent] object.
      * Do not call this on the UI thread or your app will crash.
      *
      * See [Retrieve a SetupIntent](https://stripe.com/docs/api/setup_intents/retrieve).
      * `GET /v1/setup_intents/:id`
      *
-     * @param clientSecret client_secret of the SetupIntent to retrieve
+     * @param clientSecret client_secret of the [SetupIntent] to retrieve
      * @param stripeAccountId Optional, the Connect account to associate with this request.
      * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      * @return a [SetupIntent] or `null` if a problem occurred
@@ -1506,6 +1570,32 @@ class Stripe internal constructor(
         @Throws(StripeException::class)
         override suspend fun getResult(): StripeFile {
             return stripeRepository.createFile(fileParams, options)
+        }
+    }
+
+    private class RetrievePaymentIntentTask internal constructor(
+        private val stripeRepository: StripeRepository,
+        private val clientSecret: String,
+        private val options: ApiRequest.Options,
+        workScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
+        callback: ApiResultCallback<PaymentIntent>
+    ) : ApiOperation<PaymentIntent>(workScope, callback) {
+        @Throws(StripeException::class)
+        override suspend fun getResult(): PaymentIntent? {
+            return stripeRepository.retrievePaymentIntent(clientSecret, options)
+        }
+    }
+
+    private class RetrieveSetupIntentTask internal constructor(
+        private val stripeRepository: StripeRepository,
+        private val clientSecret: String,
+        private val options: ApiRequest.Options,
+        workScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
+        callback: ApiResultCallback<SetupIntent>
+    ) : ApiOperation<SetupIntent>(workScope, callback) {
+        @Throws(StripeException::class)
+        override suspend fun getResult(): SetupIntent? {
+            return stripeRepository.retrieveSetupIntent(clientSecret, options)
         }
     }
 
