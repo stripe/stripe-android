@@ -83,5 +83,7 @@
     <string name="confirm_with_bacs_debit">Confirm with BACS Debit</string>
 
     <string name="confirm_with_sofort">Confirm with SOFORT</string>
+    <string name="connect_example">Connect Example</string>
+    <string name="simple_payment_method_example">Simple PaymentMethod Confirmation Example</string>
 
 </resources>
