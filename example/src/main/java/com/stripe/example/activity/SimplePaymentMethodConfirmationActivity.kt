@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.Filter
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -212,7 +213,17 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
             private val layoutInflater = LayoutInflater.from(context)
 
             init {
-                addAll(DropdownItem.values().toList())
+                addAll(*DropdownItem.values())
+            }
+
+            /*
+            The material ExposedDropdownMenu abuses an AutocompleteTextView as a Spinner.
+            When we want to set the selected item, the AutocompleteTextView tries to
+            filter the results to only those that start with that item.
+            We do not want this behaviour so we ignore AutocompleteTextView's filtering logic.
+             */
+            override fun getFilter(): Filter {
+                return NullFilter
             }
 
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -231,6 +242,17 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
                 viewBinding.name.text = dropdownItem.name
 
                 return viewBinding.root
+            }
+
+            private object NullFilter : Filter() {
+                private val emptyResult = FilterResults()
+
+                override fun performFiltering(prefix: CharSequence?): FilterResults {
+                    return emptyResult
+                }
+
+                override fun publishResults(p0: CharSequence?, p1: FilterResults?) {
+                }
             }
         }
 
