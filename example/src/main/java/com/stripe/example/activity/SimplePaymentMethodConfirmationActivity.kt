@@ -134,7 +134,7 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
         viewBinding.payNow.isEnabled = enabled
         viewBinding.name.isEnabled = enabled
         viewBinding.email.isEnabled = enabled
-        viewBinding.progressBar.visibility = viewVisibility(!enabled)
+        viewBinding.progressBar.visibility = if (enabled) View.INVISIBLE else View.VISIBLE
     }
 
     private fun handleCreatePaymentIntentResponse(
