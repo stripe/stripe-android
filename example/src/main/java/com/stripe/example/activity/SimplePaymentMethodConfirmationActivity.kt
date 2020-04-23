@@ -62,6 +62,30 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
             )
         }
 
+    private val paymentMethodCreateParams: PaymentMethodCreateParams
+        get() {
+            val dropdownItem = this.dropdownItem
+            val billingDetails = PaymentMethod.BillingDetails(
+                name = viewBinding.name.text.toString().takeIf { dropdownItem.requiresName },
+                email = viewBinding.email.text.toString().takeIf { dropdownItem.requiresEmail }
+            )
+            return dropdownItem.createParams(billingDetails, null)
+        }
+
+    private fun onDropdownItemSelected() {
+        val dropdownItem = this.dropdownItem
+        viewBinding.nameLayout.visibility = viewVisibility(dropdownItem.requiresName)
+        viewBinding.emailLayout.visibility = viewVisibility(dropdownItem.requiresEmail)
+    }
+
+    private fun viewVisibility(visible: Boolean): Int {
+        return if (visible) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
@@ -69,10 +93,6 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
         viewModel.inProgress.observe(this, Observer { enableUi(!it) })
         viewModel.status.observe(this, Observer(viewBinding.status::setText))
 
-//        val adapter: ArrayAdapter<String> = ArrayAdapter<String>(
-//            this.applicationContext,
-//            R.layout.dropdown_menu_popup_item,
-//            DropdownItem.values().map { it.name })
         val adapter = DropdownItemAdapter(this)
         viewBinding.paymentMethod.setAdapter(adapter)
         viewBinding.paymentMethod.setOnItemClickListener { _, _, _, _ ->
@@ -80,48 +100,22 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
             onDropdownItemSelected()
         }
         viewBinding.paymentMethod.setText(DropdownItem.P24.name, false)
+        onDropdownItemSelected()
 
         viewBinding.payNow.setOnClickListener {
             keyboardController.hide()
 
-            val dropdownItem = this.dropdownItem
-            val billingDetails = PaymentMethod.BillingDetails(
-                name = viewBinding.name.text.toString().takeIf { dropdownItem.requiresName },
-                email = viewBinding.email.text.toString().takeIf { dropdownItem.requiresEmail }
-            )
-
-            val country = dropdownItem.country
-            val params = dropdownItem.createParams(billingDetails, null)
-
-            viewModel.createPaymentIntent(country
-            ) {
-                handleCreatePaymentIntentResponse(it, params)
+            viewModel.createPaymentIntent(dropdownItem.country) {
+                handleCreatePaymentIntentResponse(it, paymentMethodCreateParams)
             }
         }
         viewBinding.saveForLater.setOnClickListener {
             keyboardController.hide()
 
-            val dropdownItem = this.dropdownItem
-            val billingDetails = PaymentMethod.BillingDetails(
-                name = viewBinding.name.text.toString().takeIf { dropdownItem.requiresName },
-                email = viewBinding.email.text.toString().takeIf { dropdownItem.requiresEmail }
-            )
-
-            val country = dropdownItem.country
-            val params = dropdownItem.createParams(billingDetails, null)
-
-            viewModel.createSetupIntent(country
-            ) {
-                handleCreateSetupIntentResponse(it, params)
+            viewModel.createSetupIntent(dropdownItem.country) {
+                handleCreateSetupIntentResponse(it, paymentMethodCreateParams)
             }
         }
-    }
-
-    private fun onDropdownItemSelected() {
-        val dropdownItem = this.dropdownItem
-        viewBinding.nameLayout.visibility = if (dropdownItem.requiresName) View.VISIBLE else View.GONE
-
-        viewBinding.emailLayout.visibility = if (dropdownItem.requiresEmail) View.VISIBLE else View.GONE
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -155,7 +149,7 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
         viewBinding.saveForLater.isEnabled = enabled
         viewBinding.name.isEnabled = enabled
         viewBinding.email.isEnabled = enabled
-        viewBinding.progressBar.visibility = if (enabled) View.INVISIBLE else View.VISIBLE
+        viewBinding.progressBar.visibility = viewVisibility(!enabled)
     }
 
     private fun handleCreatePaymentIntentResponse(
@@ -163,41 +157,28 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
         params: PaymentMethodCreateParams
     ) {
         val secret = responseData.getString("secret")
-        confirmPaymentIntent(secret, params)
-    }
-
-    private fun handleCreateSetupIntentResponse(
-        responseData: JSONObject,
-        params: PaymentMethodCreateParams) {
-        val secret = responseData.getString("secret")
-        confirmSetupIntent(secret, params)
-    }
-
-    private fun confirmPaymentIntent(
-        paymentIntentClientSecret: String,
-        params: PaymentMethodCreateParams
-    ) {
         viewModel.status.value += "\n\nStarting PaymentIntent confirmation"
         stripe.confirmPayment(
             this,
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                 paymentMethodCreateParams = params,
-                clientSecret = paymentIntentClientSecret,
+                clientSecret = secret,
                 returnUrl = "example://return_url"
             )
         )
     }
 
-    private fun confirmSetupIntent(
-        setupIntentClientSecret: String,
+    private fun handleCreateSetupIntentResponse(
+        responseData: JSONObject,
         params: PaymentMethodCreateParams
     ) {
+        val secret = responseData.getString("secret")
         viewModel.status.value += "\n\nStarting SetupIntent confirmation"
         stripe.confirmSetupIntent(
             this,
             ConfirmSetupIntentParams.create(
                 paymentMethodCreateParams = params,
-                clientSecret = setupIntentClientSecret,
+                clientSecret = secret,
                 returnUrl = "example://return_url"
             )
         )
@@ -277,99 +258,101 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
                 activityRef.get()?.onConfirmError(e)
             }
         }
-    }
 
-    private class DropdownItemAdapter(
-        context: Context
-    ) : ArrayAdapter<DropdownItem>(
-        context,
-        0
-    ) {
-        private val layoutInflater = LayoutInflater.from(context)
+        private class DropdownItemAdapter(
+            context: Context
+        ) : ArrayAdapter<DropdownItem>(
+            context,
+            0
+        ) {
+            private val layoutInflater = LayoutInflater.from(context)
 
-        init {
-            addAll(DropdownItem.values().toList())
-        }
-
-        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-            val viewBinding = convertView?.let {
-                DropdownMenuPopupItemBinding.bind(convertView)
-            } ?: DropdownMenuPopupItemBinding.inflate(layoutInflater, parent, false)
-
-            val dropdownItem = requireNotNull(getItem(position))
-            viewBinding.image.also {
-                val drawable = requireNotNull(
-                    ContextCompat.getDrawable(context, dropdownItem.icon)
-                )
-                it.setImageDrawable(drawable)
-                it.contentDescription = dropdownItem.name
+            init {
+                addAll(DropdownItem.values().toList())
             }
-            viewBinding.name.text = dropdownItem.name
 
-            return viewBinding.root
-        }
-    }
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val viewBinding = convertView?.let {
+                    DropdownMenuPopupItemBinding.bind(convertView)
+                } ?: DropdownMenuPopupItemBinding.inflate(layoutInflater, parent, false)
 
-    internal class SimplePaymentMethodConfirmationViewModel(
-        application: Application
-    ) : AndroidViewModel(application) {
-        val inProgress = MutableLiveData<Boolean>()
-        val status = MutableLiveData<String>()
-
-        private val context = application.applicationContext
-        private val backendApi = BackendApiFactory(context).create()
-        private val compositeSubscription = CompositeDisposable()
-
-        fun createPaymentIntent(country: String, callback: (JSONObject) -> Unit) {
-            callApi(country, R.string.creating_payment_intent, R.string.payment_intent_status,
-                backendApi::createPaymentIntent, callback)
-        }
-
-        fun createSetupIntent(country: String, callback: (JSONObject) -> Unit) {
-            callApi(country, R.string.creating_setup_intent, R.string.setup_intent_status,
-                backendApi::createSetupIntent, callback)
-        }
-
-        private fun callApi(country: String,
-                            @StringRes startString: Int,
-                            @StringRes statusString: Int,
-                            apiMethod: (MutableMap<String, Any>) -> Observable<ResponseBody>,
-                            callback: (JSONObject) -> Unit) {
-            compositeSubscription.add(
-                apiMethod(
-                    mutableMapOf(
-                        "country" to country
+                val dropdownItem = requireNotNull(getItem(position))
+                viewBinding.image.also {
+                    val drawable = requireNotNull(
+                        ContextCompat.getDrawable(context, dropdownItem.icon)
                     )
-                )
-                    .doOnSubscribe {
-                        inProgress.postValue(true)
-                        status.postValue(context.getString(startString))
-                    }
-                    .map {
-                        JSONObject(it.string())
-                    }
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(
-                        {
-                            status.postValue(status.value + "\n\n" +
-                                context.getString(statusString,
-                                    it.getString("status")))
-                            callback(it)
-                        },
-                        {
-                            val errorMessage =
-                                (it as? HttpException)?.response()?.errorBody()?.string()
-                                    ?: it.message
-                            status.postValue(status.value + "\n\n${errorMessage}")
-                            inProgress.postValue(false)
-                        }
-                    ))
+                    it.setImageDrawable(drawable)
+                    it.contentDescription = dropdownItem.name
+                }
+                viewBinding.name.text = dropdownItem.name
+
+                return viewBinding.root
+            }
         }
 
-        override fun onCleared() {
-            super.onCleared()
-            compositeSubscription.dispose()
+        internal class SimplePaymentMethodConfirmationViewModel(
+            application: Application
+        ) : AndroidViewModel(application) {
+            val inProgress = MutableLiveData<Boolean>()
+            val status = MutableLiveData<String>()
+
+            private val context = application.applicationContext
+            private val backendApi = BackendApiFactory(context).create()
+            private val compositeSubscription = CompositeDisposable()
+
+            fun createPaymentIntent(country: String, callback: (JSONObject) -> Unit) {
+                callApi(country, R.string.creating_payment_intent, R.string.payment_intent_status,
+                    backendApi::createPaymentIntent, callback)
+            }
+
+            fun createSetupIntent(country: String, callback: (JSONObject) -> Unit) {
+                callApi(country, R.string.creating_setup_intent, R.string.setup_intent_status,
+                    backendApi::createSetupIntent, callback)
+            }
+
+            private fun callApi(
+                country: String,
+                @StringRes startString: Int,
+                @StringRes statusString: Int,
+                apiMethod: (MutableMap<String, Any>) -> Observable<ResponseBody>,
+                callback: (JSONObject) -> Unit
+            ) {
+                compositeSubscription.add(
+                    apiMethod(
+                        mutableMapOf(
+                            "country" to country
+                        )
+                    )
+                        .doOnSubscribe {
+                            inProgress.postValue(true)
+                            status.postValue(context.getString(startString))
+                        }
+                        .map {
+                            JSONObject(it.string())
+                        }
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                            {
+                                status.postValue(status.value + "\n\n" +
+                                    context.getString(statusString,
+                                        it.getString("status")))
+                                callback(it)
+                            },
+                            {
+                                val errorMessage =
+                                    (it as? HttpException)?.response()?.errorBody()?.string()
+                                        ?: it.message
+                                status.postValue(status.value + "\n\n$errorMessage")
+                                inProgress.postValue(false)
+                            }
+                        ))
+            }
+
+            override fun onCleared() {
+                super.onCleared()
+                compositeSubscription.dispose()
+            }
         }
     }
 }
