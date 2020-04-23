@@ -32,33 +32,37 @@ internal interface FingerprintDataRepository {
         )
 
         override fun refresh() {
-            handler.post {
-                val liveData = store.get()
-                // LiveData observation must occur on the main thread
-                liveData.observeForever(object : Observer<FingerprintData> {
-                    override fun onChanged(localFingerprintData: FingerprintData) {
-                        if (localFingerprintData.isExpired(timestampSupplier())) {
-                            fingerprintRequestExecutor.execute(
-                                request = fingerprintRequestFactory.create(
-                                    localFingerprintData.guid
-                                )
-                            ) { remoteFingerprintData ->
-                                remoteFingerprintData?.let {
-                                    save(it)
+            if (Stripe.advancedFraudSignalsEnabled) {
+                handler.post {
+                    val liveData = store.get()
+                    // LiveData observation must occur on the main thread
+                    liveData.observeForever(object : Observer<FingerprintData> {
+                        override fun onChanged(localFingerprintData: FingerprintData) {
+                            if (localFingerprintData.isExpired(timestampSupplier())) {
+                                fingerprintRequestExecutor.execute(
+                                    request = fingerprintRequestFactory.create(
+                                        localFingerprintData.guid
+                                    )
+                                ) { remoteFingerprintData ->
+                                    remoteFingerprintData?.let {
+                                        save(it)
+                                    }
+                                    liveData.removeObserver(this)
                                 }
+                            } else {
+                                cachedFingerprintData = localFingerprintData
                                 liveData.removeObserver(this)
                             }
-                        } else {
-                            cachedFingerprintData = localFingerprintData
-                            liveData.removeObserver(this)
                         }
-                    }
-                })
+                    })
+                }
             }
         }
 
         override fun get(): FingerprintData? {
-            return cachedFingerprintData
+            return cachedFingerprintData.takeIf {
+                Stripe.advancedFraudSignalsEnabled
+            }
         }
 
         override fun save(fingerprintData: FingerprintData) {
