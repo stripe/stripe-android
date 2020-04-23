@@ -20,7 +20,10 @@ internal class PaymentIntentViewModel(
     private val backendApi = BackendApiFactory(context).create()
     private val compositeSubscription = CompositeDisposable()
 
-    fun createPaymentIntent(country: String, callback: (JSONObject) -> Unit) {
+    fun createPaymentIntent(
+        country: String,
+        callback: (JSONObject) -> Unit
+    ) {
         compositeSubscription.add(
             backendApi.createPaymentIntent(
                 mutableMapOf(

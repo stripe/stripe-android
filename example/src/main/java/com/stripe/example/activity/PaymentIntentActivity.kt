@@ -34,28 +34,35 @@ abstract class PaymentIntentActivity : AppCompatActivity() {
 
     protected fun createAndConfirmPaymentIntent(
         country: String,
-        paymentMethodCreateParams: PaymentMethodCreateParams
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        stripeAccountId: String? = null
     ) {
         keyboardController.hide()
 
         viewModel.createPaymentIntent(country) {
-            handleCreatePaymentIntentResponse(it, paymentMethodCreateParams)
+            handleCreatePaymentIntentResponse(it, paymentMethodCreateParams, stripeAccountId)
         }
     }
 
     private fun handleCreatePaymentIntentResponse(
         responseData: JSONObject,
-        params: PaymentMethodCreateParams
+        params: PaymentMethodCreateParams,
+        stripeAccountId: String?
     ) {
         val secret = responseData.getString("secret")
-        viewModel.status.value += "\n\nStarting PaymentIntent confirmation"
+        viewModel.status.postValue(
+            viewModel.status.value +
+            "\n\nStarting PaymentIntent confirmation" + (stripeAccountId?.let {
+            " for $it"
+        } ?: ""))
         stripe.confirmPayment(
             this,
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                 paymentMethodCreateParams = params,
                 clientSecret = secret,
                 returnUrl = "example://return_url"
-            )
+            ),
+            stripeAccountId
         )
     }
 

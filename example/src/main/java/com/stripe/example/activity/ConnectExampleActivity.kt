@@ -20,11 +20,11 @@ class ConnectExampleActivity : PaymentIntentActivity() {
         viewModel.inProgress.observe(this, Observer { enableUi(!it) })
         viewModel.status.observe(this, Observer(viewBinding.status::setText))
 
-        viewBinding.cardWidget.card
-
         viewBinding.payNow.setOnClickListener {
             viewBinding.cardWidget.paymentMethodCreateParams?.let {
-                createAndConfirmPaymentIntent("us", it)
+                createAndConfirmPaymentIntent("us", it,
+                    viewBinding.connectAccount.text.toString().takeIf(String::isNotBlank)
+                )
             } ?: showSnackbar("Missing card details")
         }
     }
