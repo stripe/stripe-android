@@ -98,6 +98,7 @@
             android:name=".activity.CardBrandsActivity" />
 
         <activity android:name=".activity.SimplePaymentMethodConfirmationActivity" />
+        <activity android:name=".activity.ConnectExampleActivity" />
     </application>
 
 </manifest>
