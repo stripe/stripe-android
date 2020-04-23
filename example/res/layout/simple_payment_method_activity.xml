@@ -71,15 +71,6 @@
             android:enabled="true"
             android:text="Pay now" />
 
-        <Button
-            android:id="@+id/save_for_later"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="20dp"
-            android:enabled="true"
-            android:text="Save for later" />
-
         <TextView
             android:id="@+id/status"
             android:layout_width="match_parent"

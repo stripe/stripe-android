@@ -9,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
@@ -19,21 +18,17 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
-import com.stripe.android.SetupIntentResult
 import com.stripe.android.Stripe
 import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.example.R
 import com.stripe.example.databinding.DropdownMenuPopupItemBinding
 import com.stripe.example.databinding.SimplePaymentMethodActivityBinding
 import com.stripe.example.module.BackendApiFactory
-import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import okhttp3.ResponseBody
 import org.json.JSONObject
 import retrofit2.HttpException
 import java.lang.ref.WeakReference
@@ -109,13 +104,6 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
                 handleCreatePaymentIntentResponse(it, paymentMethodCreateParams)
             }
         }
-        viewBinding.saveForLater.setOnClickListener {
-            keyboardController.hide()
-
-            viewModel.createSetupIntent(dropdownItem.country) {
-                handleCreateSetupIntentResponse(it, paymentMethodCreateParams)
-            }
-        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -137,16 +125,11 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        val isPaymentResult =
-            stripe.onPaymentResult(requestCode, data, PaymentIntentResultCallback(this))
-        if (!isPaymentResult) {
-            stripe.onSetupResult(requestCode, data, SetupIntentResultCallback(this))
-        }
+        stripe.onPaymentResult(requestCode, data, PaymentIntentResultCallback(this))
     }
 
     private fun enableUi(enabled: Boolean) {
         viewBinding.payNow.isEnabled = enabled
-        viewBinding.saveForLater.isEnabled = enabled
         viewBinding.name.isEnabled = enabled
         viewBinding.email.isEnabled = enabled
         viewBinding.progressBar.visibility = viewVisibility(!enabled)
@@ -168,35 +151,11 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
         )
     }
 
-    private fun handleCreateSetupIntentResponse(
-        responseData: JSONObject,
-        params: PaymentMethodCreateParams
-    ) {
-        val secret = responseData.getString("secret")
-        viewModel.status.value += "\n\nStarting SetupIntent confirmation"
-        stripe.confirmSetupIntent(
-            this,
-            ConfirmSetupIntentParams.create(
-                paymentMethodCreateParams = params,
-                clientSecret = secret,
-                returnUrl = "example://return_url"
-            )
-        )
-    }
-
     private fun onConfirmSuccess(result: PaymentIntentResult) {
         val paymentIntent = result.intent
         viewModel.status.value += "\n\n" +
             "PaymentIntent confirmation outcome: ${result.outcome}\n\n" +
             getString(R.string.payment_intent_status, paymentIntent.status)
-        viewModel.inProgress.value = false
-    }
-
-    private fun onConfirmSuccess(result: SetupIntentResult) {
-        val setupIntent = result.intent
-        viewModel.status.value += "\n\n" +
-            "SetupIntent confirmation outcome: ${result.outcome}\n\n" +
-            getString(R.string.setup_intent_status, setupIntent.status)
         viewModel.inProgress.value = false
     }
 
@@ -236,21 +195,6 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
             private val activityRef = WeakReference(activity)
 
             override fun onSuccess(result: PaymentIntentResult) {
-                activityRef.get()?.onConfirmSuccess(result)
-            }
-
-            override fun onError(e: Exception) {
-                activityRef.get()?.onConfirmError(e)
-            }
-        }
-
-        private class SetupIntentResultCallback(
-            activity: SimplePaymentMethodConfirmationActivity
-        ) : ApiResultCallback<SetupIntentResult> {
-
-            private val activityRef = WeakReference(activity)
-
-            override fun onSuccess(result: SetupIntentResult) {
                 activityRef.get()?.onConfirmSuccess(result)
             }
 
@@ -301,31 +245,15 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
             private val compositeSubscription = CompositeDisposable()
 
             fun createPaymentIntent(country: String, callback: (JSONObject) -> Unit) {
-                callApi(country, R.string.creating_payment_intent, R.string.payment_intent_status,
-                    backendApi::createPaymentIntent, callback)
-            }
-
-            fun createSetupIntent(country: String, callback: (JSONObject) -> Unit) {
-                callApi(country, R.string.creating_setup_intent, R.string.setup_intent_status,
-                    backendApi::createSetupIntent, callback)
-            }
-
-            private fun callApi(
-                country: String,
-                @StringRes startString: Int,
-                @StringRes statusString: Int,
-                apiMethod: (MutableMap<String, Any>) -> Observable<ResponseBody>,
-                callback: (JSONObject) -> Unit
-            ) {
                 compositeSubscription.add(
-                    apiMethod(
+                    backendApi.createPaymentIntent(
                         mutableMapOf(
                             "country" to country
                         )
                     )
                         .doOnSubscribe {
                             inProgress.postValue(true)
-                            status.postValue(context.getString(startString))
+                            status.postValue(context.getString(R.string.creating_payment_intent))
                         }
                         .map {
                             JSONObject(it.string())
@@ -335,7 +263,7 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
                         .subscribe(
                             {
                                 status.postValue(status.value + "\n\n" +
-                                    context.getString(statusString,
+                                    context.getString(R.string.payment_intent_status,
                                         it.getString("status")))
                                 callback(it)
                             },
