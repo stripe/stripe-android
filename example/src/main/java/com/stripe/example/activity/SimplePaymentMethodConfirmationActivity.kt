@@ -11,7 +11,6 @@ import android.widget.ArrayAdapter
 import android.widget.Filter
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
@@ -72,6 +71,8 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
         val dropdownItem = this.dropdownItem
         viewBinding.nameLayout.visibility = viewVisibility(dropdownItem.requiresName)
         viewBinding.emailLayout.visibility = viewVisibility(dropdownItem.requiresEmail)
+        viewBinding.paymentMethod.setCompoundDrawablesRelativeWithIntrinsicBounds(
+            dropdownItem.icon, 0, 0, 0)
     }
 
     private fun viewVisibility(visible: Boolean): Int {
@@ -232,14 +233,9 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
                 } ?: DropdownMenuPopupItemBinding.inflate(layoutInflater, parent, false)
 
                 val dropdownItem = requireNotNull(getItem(position))
-                viewBinding.image.also {
-                    val drawable = requireNotNull(
-                        ContextCompat.getDrawable(context, dropdownItem.icon)
-                    )
-                    it.setImageDrawable(drawable)
-                    it.contentDescription = dropdownItem.name
-                }
-                viewBinding.name.text = dropdownItem.name
+                viewBinding.text.text = dropdownItem.name
+                viewBinding.text.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                    dropdownItem.icon, 0, 0, 0)
 
                 return viewBinding.root
             }
