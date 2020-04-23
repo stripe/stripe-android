@@ -1,12 +1,17 @@
 package com.stripe.example.activity
 
 import android.app.Application
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
@@ -21,6 +26,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.example.R
+import com.stripe.example.databinding.DropdownMenuPopupItemBinding
 import com.stripe.example.databinding.SimplePaymentMethodActivityBinding
 import com.stripe.example.module.BackendApiFactory
 import io.reactivex.Observable
@@ -63,10 +69,11 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
         viewModel.inProgress.observe(this, Observer { enableUi(!it) })
         viewModel.status.observe(this, Observer(viewBinding.status::setText))
 
-        val adapter: ArrayAdapter<String> = ArrayAdapter<String>(
-            this.applicationContext,
-            R.layout.dropdown_menu_popup_item,
-            DropdownItem.values().map { it.name })
+//        val adapter: ArrayAdapter<String> = ArrayAdapter<String>(
+//            this.applicationContext,
+//            R.layout.dropdown_menu_popup_item,
+//            DropdownItem.values().map { it.name })
+        val adapter = DropdownItemAdapter(this)
         viewBinding.paymentMethod.setAdapter(adapter)
         viewBinding.paymentMethod.setOnItemClickListener { _, _, _, _ ->
             viewModel.status.value = ""
@@ -224,14 +231,21 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
 
         private enum class DropdownItem(
             val country: String,
+            @DrawableRes val icon: Int,
             val createParams: (PaymentMethod.BillingDetails, Map<String, String>?) -> PaymentMethodCreateParams,
             val requiresName: Boolean = true,
             val requiresEmail: Boolean = false
         ) {
-            P24("pl", PaymentMethodCreateParams.Companion::createP24, requiresName = false, requiresEmail = true),
-            Bancontact("be", PaymentMethodCreateParams.Companion::createBancontact),
-            EPS("at", PaymentMethodCreateParams.Companion::createEps),
-            Giropay("de", PaymentMethodCreateParams.Companion::createGiropay);
+            P24("pl",
+                R.drawable.ic_brandicon__p24,
+                PaymentMethodCreateParams.Companion::createP24,
+                requiresName = false, requiresEmail = true),
+            Bancontact("be", R.drawable.ic_brandicon__bancontact,
+                PaymentMethodCreateParams.Companion::createBancontact),
+            EPS("at", R.drawable.ic_brandicon__eps,
+                PaymentMethodCreateParams.Companion::createEps),
+            Giropay("de", R.drawable.ic_brandicon__giropay,
+                PaymentMethodCreateParams.Companion::createGiropay);
         }
 
         private class PaymentIntentResultCallback(
@@ -262,6 +276,37 @@ class SimplePaymentMethodConfirmationActivity : AppCompatActivity() {
             override fun onError(e: Exception) {
                 activityRef.get()?.onConfirmError(e)
             }
+        }
+    }
+
+    private class DropdownItemAdapter(
+        context: Context
+    ) : ArrayAdapter<DropdownItem>(
+        context,
+        0
+    ) {
+        private val layoutInflater = LayoutInflater.from(context)
+
+        init {
+            addAll(DropdownItem.values().toList())
+        }
+
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+            val viewBinding = convertView?.let {
+                DropdownMenuPopupItemBinding.bind(convertView)
+            } ?: DropdownMenuPopupItemBinding.inflate(layoutInflater, parent, false)
+
+            val dropdownItem = requireNotNull(getItem(position))
+            viewBinding.image.also {
+                val drawable = requireNotNull(
+                    ContextCompat.getDrawable(context, dropdownItem.icon)
+                )
+                it.setImageDrawable(drawable)
+                it.contentDescription = dropdownItem.name
+            }
+            viewBinding.name.text = dropdownItem.name
+
+            return viewBinding.root
         }
     }
 
