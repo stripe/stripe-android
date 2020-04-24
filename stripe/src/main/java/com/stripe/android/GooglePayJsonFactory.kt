@@ -114,7 +114,7 @@ class GooglePayJsonFactory constructor(
             .put("totalPriceStatus", transactionInfo.totalPriceStatus.code)
             .apply {
                 transactionInfo.countryCode?.let {
-                    put("countryCode", it)
+                    put("countryCode", it.toUpperCase(Locale.ROOT))
                 }
 
                 transactionInfo.transactionId?.let {

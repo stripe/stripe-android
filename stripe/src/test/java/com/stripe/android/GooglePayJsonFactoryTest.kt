@@ -1,5 +1,6 @@
 package com.stripe.android
 
+import com.google.common.truth.Truth.assertThat
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -77,7 +78,8 @@ class GooglePayJsonFactoryTest {
                 "existingPaymentMethodRequired": true
             }
         """.trimIndent())
-        assertEquals(expectedJson.toString(), isReadyToPayRequestJson.toString())
+        assertThat(isReadyToPayRequestJson.toString())
+            .isEqualTo(expectedJson.toString())
     }
 
     @Test
@@ -154,5 +156,21 @@ class GooglePayJsonFactoryTest {
         )
 
         assertEquals(expectedJson.toString(), createPaymentDataRequestJson.toString())
+    }
+
+    @Test
+    fun countryCode_shouldBeCapitalized() {
+        val createPaymentDataRequestJson = factory.createPaymentDataRequest(
+            transactionInfo = GooglePayJsonFactory.TransactionInfo(
+                currencyCode = "USD",
+                totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
+                countryCode = "us"
+            )
+        )
+        val countryCode = createPaymentDataRequestJson
+            .getJSONObject("transactionInfo")
+            .getString("countryCode")
+        assertThat(countryCode)
+            .isEqualTo("US")
     }
 }
