@@ -22,9 +22,9 @@ class ConnectExampleActivity : PaymentIntentActivity() {
 
         viewBinding.payNow.setOnClickListener {
             viewBinding.cardWidget.paymentMethodCreateParams?.let {
-                createAndConfirmPaymentIntent("us", it,
+                val connectAccount =
                     viewBinding.connectAccount.text.toString().takeIf(String::isNotBlank)
-                )
+                createAndConfirmPaymentIntent("us", it, stripeAccountId = connectAccount)
             } ?: showSnackbar("Missing card details")
         }
     }
