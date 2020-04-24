@@ -13,25 +13,25 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.example.R
 import com.stripe.example.Settings
 import com.stripe.example.StripeFactory
-import com.stripe.example.module.PaymentIntentViewModel
+import com.stripe.example.module.StripeIntentViewModel
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 
 /**
  * Base class for Activity's that wish to create and confirm payment methods.
- * Subclasses should observe on the [PaymentIntentViewModel]'s LiveData properties
+ * Subclasses should observe on the [StripeIntentViewModel]'s LiveData properties
  * in order to display state of the interaction.
  */
-abstract class PaymentIntentActivity : AppCompatActivity() {
-    internal val viewModel: PaymentIntentViewModel by lazy {
+abstract class StripeIntentActivity : AppCompatActivity() {
+    internal val viewModel: StripeIntentViewModel by lazy {
         ViewModelProvider(this,
             ViewModelProvider.AndroidViewModelFactory(application)
-        )[PaymentIntentViewModel::class.java]
+        )[StripeIntentViewModel::class.java]
     }
-    protected val stripeAccountId: String? by lazy {
+    private val stripeAccountId: String? by lazy {
         Settings(this).stripeAccountId
     }
-    protected val stripe: Stripe by lazy {
+    private val stripe: Stripe by lazy {
         StripeFactory(this, stripeAccountId).create()
     }
     private val keyboardController: KeyboardController by lazy {
@@ -148,7 +148,7 @@ abstract class PaymentIntentActivity : AppCompatActivity() {
     }
 
     internal class PaymentIntentResultCallback(
-        activity: PaymentIntentActivity
+        activity: StripeIntentActivity
     ) : ApiResultCallback<PaymentIntentResult> {
 
         private val activityRef = WeakReference(activity)
@@ -163,7 +163,7 @@ abstract class PaymentIntentActivity : AppCompatActivity() {
     }
 
     internal class SetupIntentResultCallback(
-        activity: PaymentIntentActivity
+        activity: StripeIntentActivity
     ) : ApiResultCallback<SetupIntentResult> {
 
         private val activityRef = WeakReference(activity)

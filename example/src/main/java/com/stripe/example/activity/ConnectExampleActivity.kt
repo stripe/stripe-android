@@ -5,7 +5,7 @@ import android.view.View
 import androidx.lifecycle.Observer
 import com.stripe.example.databinding.ConnectExampleActivityBinding
 
-class ConnectExampleActivity : PaymentIntentActivity() {
+class ConnectExampleActivity : StripeIntentActivity() {
     private val viewBinding: ConnectExampleActivityBinding by lazy {
         ConnectExampleActivityBinding.inflate(layoutInflater)
     }

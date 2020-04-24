@@ -13,7 +13,7 @@ import okhttp3.ResponseBody
 import org.json.JSONObject
 import retrofit2.HttpException
 
-internal class PaymentIntentViewModel(
+internal class StripeIntentViewModel(
     application: Application
 ) : AndroidViewModel(application) {
     val inProgress = MutableLiveData<Boolean>()

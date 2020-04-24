@@ -14,7 +14,7 @@ import com.stripe.example.databinding.PaymentAuthActivityBinding
 /**
  * An example of creating a PaymentIntent, then confirming it with [Stripe.confirmPayment]
  */
-class PaymentAuthActivity : PaymentIntentActivity() {
+class PaymentAuthActivity : StripeIntentActivity() {
 
     private val viewBinding: PaymentAuthActivityBinding by lazy {
         PaymentAuthActivityBinding.inflate(layoutInflater)
