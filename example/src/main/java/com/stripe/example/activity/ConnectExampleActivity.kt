@@ -5,7 +5,7 @@ import android.view.View
 import androidx.lifecycle.Observer
 import com.stripe.example.databinding.ConnectExampleActivityBinding
 
-class ConnectExampleActivity : PaymentIntentActivity() {
+class ConnectExampleActivity : StripeIntentActivity() {
     private val viewBinding: ConnectExampleActivityBinding by lazy {
         ConnectExampleActivityBinding.inflate(layoutInflater)
     }
@@ -22,9 +22,9 @@ class ConnectExampleActivity : PaymentIntentActivity() {
 
         viewBinding.payNow.setOnClickListener {
             viewBinding.cardWidget.paymentMethodCreateParams?.let {
-                createAndConfirmPaymentIntent("us", it,
+                val connectAccount =
                     viewBinding.connectAccount.text.toString().takeIf(String::isNotBlank)
-                )
+                createAndConfirmPaymentIntent("us", it, stripeAccountId = connectAccount)
             } ?: showSnackbar("Missing card details")
         }
     }

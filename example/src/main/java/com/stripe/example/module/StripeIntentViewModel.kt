@@ -1,16 +1,19 @@
 package com.stripe.example.module
 
 import android.app.Application
+import androidx.annotation.StringRes
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.stripe.example.R
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import okhttp3.ResponseBody
 import org.json.JSONObject
 import retrofit2.HttpException
 
-internal class PaymentIntentViewModel(
+internal class StripeIntentViewModel(
     application: Application
 ) : AndroidViewModel(application) {
     val inProgress = MutableLiveData<Boolean>()
@@ -24,15 +27,44 @@ internal class PaymentIntentViewModel(
         country: String,
         callback: (JSONObject) -> Unit
     ) {
+        makeBackendRequest(
+            backendApi::createPaymentIntent,
+            R.string.creating_payment_intent,
+            R.string.payment_intent_status,
+            country,
+            callback
+        )
+    }
+
+    fun createSetupIntent(
+        country: String,
+        callback: (JSONObject) -> Unit
+    ) {
+        makeBackendRequest(
+            backendApi::createSetupIntent,
+            R.string.creating_setup_intent,
+            R.string.setup_intent_status,
+            country,
+            callback
+        )
+    }
+
+    private fun makeBackendRequest(
+        apiMethod: (MutableMap<String, Any>) -> Observable<ResponseBody>,
+        @StringRes creating: Int,
+        @StringRes result: Int,
+        country: String,
+        callback: (JSONObject) -> Unit
+    ) {
         compositeSubscription.add(
-            backendApi.createPaymentIntent(
+            apiMethod(
                 mutableMapOf(
                     "country" to country
                 )
             )
                 .doOnSubscribe {
                     inProgress.postValue(true)
-                    status.postValue(context.getString(R.string.creating_payment_intent))
+                    status.postValue(context.getString(creating))
                 }
                 .map {
                     JSONObject(it.string())
@@ -42,7 +74,7 @@ internal class PaymentIntentViewModel(
                 .subscribe(
                     {
                         status.postValue(status.value + "\n\n" +
-                            context.getString(R.string.payment_intent_status,
+                            context.getString(result,
                                 it.getString("status")))
                         callback(it)
                     },

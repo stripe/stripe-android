@@ -8,7 +8,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.example.databinding.SofortActivityBinding
 
-class SofortPaymentMethodActivity : PaymentIntentActivity() {
+class SofortPaymentMethodActivity : StripeIntentActivity() {
     private val viewBinding: SofortActivityBinding by lazy {
         SofortActivityBinding.inflate(layoutInflater)
     }

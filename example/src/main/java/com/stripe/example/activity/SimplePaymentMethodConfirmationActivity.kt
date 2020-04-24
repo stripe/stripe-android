@@ -15,7 +15,7 @@ import com.stripe.example.R
 import com.stripe.example.databinding.DropdownMenuPopupItemBinding
 import com.stripe.example.databinding.SimplePaymentMethodActivityBinding
 
-class SimplePaymentMethodConfirmationActivity : PaymentIntentActivity() {
+class SimplePaymentMethodConfirmationActivity : StripeIntentActivity() {
 
     private val viewBinding: SimplePaymentMethodActivityBinding by lazy {
         SimplePaymentMethodActivityBinding.inflate(layoutInflater)
