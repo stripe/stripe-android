@@ -27,7 +27,7 @@ internal class StripeIntentViewModel(
         country: String,
         callback: (JSONObject) -> Unit
     ) {
-        callApi(
+        makeBackendRequest(
             backendApi::createPaymentIntent,
             R.string.creating_payment_intent,
             R.string.payment_intent_status,
@@ -40,7 +40,7 @@ internal class StripeIntentViewModel(
         country: String,
         callback: (JSONObject) -> Unit
     ) {
-        callApi(
+        makeBackendRequest(
             backendApi::createSetupIntent,
             R.string.creating_setup_intent,
             R.string.setup_intent_status,
@@ -49,7 +49,7 @@ internal class StripeIntentViewModel(
         )
     }
 
-    private fun callApi(
+    private fun makeBackendRequest(
         apiMethod: (MutableMap<String, Any>) -> Observable<ResponseBody>,
         @StringRes creating: Int,
         @StringRes result: Int,
