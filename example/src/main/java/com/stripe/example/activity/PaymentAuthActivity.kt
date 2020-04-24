@@ -55,9 +55,7 @@ class PaymentAuthActivity : PaymentIntentActivity() {
         viewBinding.confirmWithNewCardButton.setOnClickListener {
             viewBinding.cardInputWidget.paymentMethodCreateParams?.let {
                 createAndConfirmPaymentIntent("us",
-                    requireNotNull(
-                        viewBinding.cardInputWidget.paymentMethodCreateParams
-                    ),
+                    it,
                     stripeAccountId = stripeAccountId,
                     shippingDetails = SHIPPING)
             }
