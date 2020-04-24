@@ -125,7 +125,7 @@ class StripePaymentAuthTest {
                 context,
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 stripeApiRequestExecutor = ApiRequestExecutor.Default(),
-                fireAndForgetRequestExecutor = FakeFireAndForgetRequestExecutor()
+                analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
             ),
             paymentController,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, null

@@ -25,7 +25,7 @@ class IssuingCardPinServiceTest {
             ApplicationProvider.getApplicationContext<Context>(),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeApiRequestExecutor = stripeApiRequestExecutor,
-            fireAndForgetRequestExecutor = FakeFireAndForgetRequestExecutor()
+            analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
         )
     }
 
