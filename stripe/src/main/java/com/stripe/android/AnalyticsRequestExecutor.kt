@@ -48,7 +48,7 @@ internal interface AnalyticsRequestExecutor {
                         execute(request)
                     }
                 } catch (e: Exception) {
-                    logger.error("Exception while making fire-and-forget request", e)
+                    logger.error("Exception while making analytics request", e)
                 }
             }
         }
