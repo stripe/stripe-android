@@ -507,7 +507,7 @@ class CardTest {
     @Test
     fun getLast4_whenNumberIsNullButLast4IsSet_returnsCorrectValue() {
         val card = Card.Builder(null, 2, 2020, "123")
-            .name("John Q Public")
+            .name("Jenny Rosen")
             .last4("1234")
             .build()
         assertEquals("1234", card.last4)
@@ -516,7 +516,7 @@ class CardTest {
     @Test
     fun getBrand_whenNumberIsNullButBrandIsSet_returnsCorrectValue() {
         val card = Card.Builder(null, 2, 2020, "123")
-            .name("John Q Public")
+            .name("Jenny Rosen")
             .brand(CardBrand.AmericanExpress)
             .build()
         assertEquals(CardBrand.AmericanExpress, card.brand)
@@ -588,13 +588,13 @@ class CardTest {
                         "exp_month" to 8,
                         "exp_year" to 2019,
                         "cvc" to "123",
-                        "name" to "J Q Public",
+                        "name" to "Jenny Rosen",
                         "currency" to "USD",
-                        "address_line1" to "123 Main Street",
+                        "address_line1" to "1234 Main Street",
                         "address_line2" to "906",
                         "address_city" to "San Francisco",
                         "address_state" to "CA",
-                        "address_zip" to "94107",
+                        "address_zip" to "94111",
                         "address_country" to "US"
                     )
                 )

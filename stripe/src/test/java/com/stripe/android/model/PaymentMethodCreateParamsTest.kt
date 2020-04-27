@@ -93,14 +93,14 @@ class PaymentMethodCreateParamsTest {
                     ),
                     "billing_details" to mapOf(
                         "address" to mapOf(
-                            "city" to "Los Angeles",
+                            "city" to "San Francisco",
                             "country" to "US",
-                            "line1" to "123 Main St",
+                            "line1" to "1234 Main St",
                             "state" to "CA",
-                            "postal_code" to "90012"
+                            "postal_code" to "94111"
                         ),
-                        "email" to "me@example.com",
-                        "name" to "Home",
+                        "email" to "jenny.rosen@example.com",
+                        "name" to "Jenny Rosen",
                         "phone" to "1-800-555-1234"
                     )
                 )
@@ -119,14 +119,14 @@ class PaymentMethodCreateParamsTest {
                     ),
                     "billing_details" to mapOf(
                         "address" to mapOf(
-                            "city" to "Los Angeles",
+                            "city" to "San Francisco",
                             "country" to "US",
-                            "line1" to "123 Main St",
+                            "line1" to "1234 Main St",
                             "state" to "CA",
-                            "postal_code" to "90012"
+                            "postal_code" to "94111"
                         ),
-                        "email" to "me@example.com",
-                        "name" to "Home",
+                        "email" to "jenny.rosen@example.com",
+                        "name" to "Jenny Rosen",
                         "phone" to "1-800-555-1234"
                     )
                 )

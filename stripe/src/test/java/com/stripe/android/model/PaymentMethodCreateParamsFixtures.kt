@@ -18,15 +18,15 @@ internal object PaymentMethodCreateParamsFixtures {
 
     @JvmField
     internal val BILLING_DETAILS = PaymentMethod.BillingDetails(
-        name = "Home",
-        email = "me@example.com",
+        name = "Jenny Rosen",
+        email = "jenny.rosen@example.com",
         phone = "1-800-555-1234",
         address = Address(
-            line1 = "123 Main St",
-            city = "Los Angeles",
+            line1 = "1234 Main St",
+            city = "San Francisco",
             state = "CA",
             country = "US",
-            postalCode = "90012"
+            postalCode = "94111"
         )
     )
 
