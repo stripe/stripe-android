@@ -21,6 +21,7 @@ import com.stripe.android.model.CardFunding;
 import com.stripe.android.model.PaymentMethod;
 import com.stripe.android.model.PaymentMethodCreateParams;
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures;
+import com.stripe.android.model.PaymentMethodFixtures;
 import com.stripe.android.model.PersonTokenParamsFixtures;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
@@ -1203,23 +1204,10 @@ public class StripeTest {
     @Test
     public void createPaymentMethodSynchronous_withIdeal()
             throws StripeException {
-        final PaymentMethod.BillingDetails expectedBillingDetails =
-                new PaymentMethod.BillingDetails.Builder()
-                        .setName("Home")
-                        .setEmail("me@example.com")
-                        .setPhone("1-800-555-1234")
-                        .setAddress(new Address.Builder()
-                                .setLine1("123 Main St")
-                                .setCity("Los Angeles")
-                                .setState("CA")
-                                .setCountry("US")
-                                .build())
-                        .build();
-
         final PaymentMethodCreateParams paymentMethodCreateParams =
                 PaymentMethodCreateParams.create(
                         new PaymentMethodCreateParams.Ideal("ing"),
-                        expectedBillingDetails
+                        PaymentMethodFixtures.BILLING_DETAILS
                 );
         final Stripe stripe = createStripe(
                 ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
@@ -1228,7 +1216,7 @@ public class StripeTest {
         final PaymentMethod createdPaymentMethod = stripe.createPaymentMethodSynchronous(
                 paymentMethodCreateParams);
         assertNotNull(createdPaymentMethod);
-        assertEquals(expectedBillingDetails, createdPaymentMethod.billingDetails);
+        assertEquals(PaymentMethodFixtures.BILLING_DETAILS, createdPaymentMethod.billingDetails);
         assertNull(createdPaymentMethod.card);
         assertEquals(
                 "INGBNL2A",
@@ -1249,23 +1237,10 @@ public class StripeTest {
     @Test
     public void createPaymentMethodSynchronous_withFpx()
             throws StripeException {
-        final PaymentMethod.BillingDetails expectedBillingDetails =
-                new PaymentMethod.BillingDetails.Builder()
-                        .setName("Home")
-                        .setEmail("me@example.com")
-                        .setPhone("1-800-555-1234")
-                        .setAddress(new Address.Builder()
-                                .setLine1("123 Main St")
-                                .setCity("Los Angeles")
-                                .setState("CA")
-                                .setCountry("US")
-                                .build())
-                        .build();
-
         final PaymentMethodCreateParams paymentMethodCreateParams =
                 PaymentMethodCreateParams.create(
                         new PaymentMethodCreateParams.Fpx("hsbc"),
-                        expectedBillingDetails
+                        PaymentMethodFixtures.BILLING_DETAILS
                 );
         final Stripe stripe = createStripe(
                 ApiKeyFixtures.FPX_PUBLISHABLE_KEY,
@@ -1274,7 +1249,7 @@ public class StripeTest {
         final PaymentMethod createdPaymentMethod = stripe.createPaymentMethodSynchronous(
                 paymentMethodCreateParams);
         assertNotNull(createdPaymentMethod);
-        assertEquals(expectedBillingDetails, createdPaymentMethod.billingDetails);
+        assertEquals(PaymentMethodFixtures.BILLING_DETAILS, createdPaymentMethod.billingDetails);
         assertNull(createdPaymentMethod.card);
         assertEquals("hsbc", Objects.requireNonNull(createdPaymentMethod.fpx).bank);
 

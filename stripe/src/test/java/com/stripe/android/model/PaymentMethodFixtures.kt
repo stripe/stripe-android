@@ -24,16 +24,17 @@ internal object PaymentMethodFixtures {
         wallet = null
     )
 
+    @JvmField
     val BILLING_DETAILS = PaymentMethod.BillingDetails(
         address = Address(
-            line1 = "510 Townsend St",
+            line1 = "1234 Main Street",
             city = "San Francisco",
             state = "CA",
-            postalCode = "94103",
+            postalCode = "94111",
             country = "US"
         ),
-        email = "patrick@example.com",
-        name = "Patrick",
+        email = "jenny.rosen@example.com",
+        name = "Jenny Rosen",
         phone = "123-456-7890"
     )
 
@@ -67,7 +68,7 @@ internal object PaymentMethodFixtures {
         type = PaymentMethod.Type.AuBecsDebit,
         billingDetails = PaymentMethod.BillingDetails(
             name = "Jenny Rosen",
-            email = "jrosen@example.com",
+            email = "jenny.rosen@example.com",
             address = Address()
         ),
         auBecsDebit = PaymentMethod.AuBecsDebit(
@@ -106,7 +107,7 @@ internal object PaymentMethodFixtures {
               "postal_code": null,
               "state": null
             },
-            "email": "jrosen@example.com",
+            "email": "jenny.rosen@example.com",
             "name": "Jenny Rosen",
             "phone": null
           },
@@ -143,12 +144,12 @@ internal object PaymentMethodFixtures {
                     "address": {
                         "city": "San Francisco",
                         "country": "US",
-                        "line1": "510 Townsend St",
-                        "postal_code": "94103",
+                        "line1": "1234 Main Street",
+                        "postal_code": "94111",
                         "state": "CA"
                     },
-                    "email": "patrick@example.com",
-                    "name": "Patrick",
+                    "email": "jenny.rosen@example.com",
+                    "name": "Jenny Rosen",
                     "phone": "123-456-7890"
                 },
                 "card": {
@@ -235,12 +236,12 @@ internal object PaymentMethodFixtures {
                     "address": {
                         "city": "San Francisco",
                         "country": "US",
-                        "line1": "510 Townsend St",
-                        "postal_code": "94103",
+                        "line1": "1234 Main Street",
+                        "postal_code": "94111",
                         "state": "CA"
                     },
-                    "email": "patrick@example.com",
-                    "name": "Patrick",
+                    "email": "jenny.rosen@example.com",
+                    "name": "Jenny Rosen",
                     "phone": "123-456-7890"
                 },
                 "ideal": {
@@ -260,13 +261,13 @@ internal object PaymentMethodFixtures {
                     "address": {
                         "city": "San Francisco",
                         "country": "US",
-                        "line1": "510 Townsend St",
+                        "line1": "1234 Main Street",
                         "line2": null,
-                        "postal_code": "94103",
+                        "postal_code": "94111",
                         "state": "CA"
                     },
-                    "email": "patrick@example.com",
-                    "name": "Patrick",
+                    "email": "jenny.rosen@example.com",
+                    "name": "Jenny Rosen",
                     "phone": "123-456-7890"
                 },
                 "created": 1565290527,
@@ -301,7 +302,7 @@ internal object PaymentMethodFixtures {
                     "postal_code": null,
                     "state": null
                 },
-                "email": "jrosen@example.com",
+                "email": "jenny.rosen@example.com",
                 "name": "Jenny Rosen",
                 "phone": null
             },
@@ -328,13 +329,13 @@ internal object PaymentMethodFixtures {
                 "address": {
                     "city": "San Francisco",
                     "country": "US",
-                    "line1": "510 Townsend St",
+                    "line1": "1234 Main Street",
                     "line2": null,
-                    "postal_code": "94103",
+                    "postal_code": "94111",
                     "state": "CA"
                 },
-                "email": "patrick@example.com",
-                "name": "Patrick",
+                "email": "jenny.rosen@example.com",
+                "name": "Jenny Rosen",
                 "phone": "123-456-7890"
             },
             "created": 1585588648,
