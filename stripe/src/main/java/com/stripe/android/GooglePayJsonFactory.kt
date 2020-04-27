@@ -16,7 +16,7 @@ class GooglePayJsonFactory constructor(
     private val googlePayConfig: GooglePayConfig,
 
     /**
-     * Enable JCB as a payment method. By default, JCB is disabled.
+     * Enable JCB as an allowed card network. By default, JCB is disabled.
      *
      * JCB currently can only be accepted in Japan.
      */
@@ -29,7 +29,7 @@ class GooglePayJsonFactory constructor(
         context: Context,
 
         /**
-         * Enable JCB as a payment method. By default, JCB is disabled.
+         * Enable JCB as an allowed card network. By default, JCB is disabled.
          *
          * JCB currently can only be accepted in Japan.
          */
