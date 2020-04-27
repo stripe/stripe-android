@@ -58,12 +58,12 @@ class StripeApiRepositoryTest {
     private val fileFactory = FileFactory(context)
 
     private val stripeApiRequestExecutor: ApiRequestExecutor = mock()
-    private val fireAndForgetRequestExecutor: FireAndForgetRequestExecutor = mock()
+    private val analyticsRequestExecutor: AnalyticsRequestExecutor = mock()
     private val fingerprintDataRepository: FingerprintDataRepository = mock()
 
     private val apiRequestArgumentCaptor: KArgumentCaptor<ApiRequest> = argumentCaptor()
     private val fileUploadRequestArgumentCaptor: KArgumentCaptor<FileUploadRequest> = argumentCaptor()
-    private val stripeRequestArgumentCaptor: KArgumentCaptor<StripeRequest> = argumentCaptor()
+    private val analyticsRequestArgumentCaptor: KArgumentCaptor<AnalyticsRequest> = argumentCaptor()
 
     @BeforeTest
     fun before() {
@@ -385,7 +385,7 @@ class StripeApiRepositoryTest {
 
         verifyFingerprintAndAnalyticsRequests(AnalyticsEvent.PaymentIntentConfirm)
 
-        val analyticsRequest = stripeRequestArgumentCaptor.firstValue as ApiRequest
+        val analyticsRequest = analyticsRequestArgumentCaptor.firstValue
         assertEquals(PaymentMethod.Type.Card.code, analyticsRequest.params?.get("source_type"))
     }
 
@@ -423,7 +423,7 @@ class StripeApiRepositoryTest {
             context,
             DEFAULT_OPTIONS.apiKey,
             stripeApiRequestExecutor = ApiRequestExecutor.Default(),
-            fireAndForgetRequestExecutor = fireAndForgetRequestExecutor,
+            analyticsRequestExecutor = analyticsRequestExecutor,
             fingerprintDataRepository = fingerprintDataRepository
         )
         val source = stripeApiRepository.createSource(
@@ -862,10 +862,10 @@ class StripeApiRepositoryTest {
         productUsage: List<String>? = null,
         sourceId: String? = null
     ) {
-        verify(fireAndForgetRequestExecutor)
-            .executeAsync(stripeRequestArgumentCaptor.capture())
+        verify(analyticsRequestExecutor)
+            .executeAsync(analyticsRequestArgumentCaptor.capture())
 
-        val analyticsRequest = stripeRequestArgumentCaptor.firstValue
+        val analyticsRequest = analyticsRequestArgumentCaptor.firstValue
         val analyticsParams = analyticsRequest.compactParams.orEmpty()
         assertEquals(
             event.toString(),
@@ -888,7 +888,7 @@ class StripeApiRepositoryTest {
             context,
             DEFAULT_OPTIONS.apiKey,
             stripeApiRequestExecutor = stripeApiRequestExecutor,
-            fireAndForgetRequestExecutor = fireAndForgetRequestExecutor,
+            analyticsRequestExecutor = analyticsRequestExecutor,
             fingerprintDataRepository = fingerprintDataRepository,
             fingerprintParamsUtils = FingerprintParamsUtils(
                 ApiFingerprintParamsFactory(

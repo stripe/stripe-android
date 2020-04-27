@@ -77,7 +77,7 @@ public class StripeTest {
     private final Stripe defaultStripe = createStripe();
 
     @Mock
-    private FireAndForgetRequestExecutor fireAndForgetRequestExecutor;
+    private AnalyticsRequestExecutor analyticsRequestExecutor;
     @Mock
     private ApiResultCallback<Token> tokenCallback;
     @Mock
@@ -86,7 +86,7 @@ public class StripeTest {
     private ApiResultCallback<StripeFile> stripeFileCallback;
 
     @Captor
-    private ArgumentCaptor<StripeRequest> stripeRequestArgumentCaptor;
+    private ArgumentCaptor<AnalyticsRequest> analyticsRequestArgumentCaptor;
     @Captor
     private ArgumentCaptor<Token> tokenArgumentCaptor;
     @Captor
@@ -1115,7 +1115,7 @@ public class StripeTest {
             throws StripeException {
         final Stripe stripe = createStripe(
                 ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
-                new FakeFireAndForgetRequestExecutor(),
+                new FakeAnalyticsRequestExecutor(),
                 new FakeFingerprintDataRepository()
         );
 
@@ -1179,7 +1179,7 @@ public class StripeTest {
                 PaymentMethodCreateParamsFixtures.createWith(metadata);
         final Stripe stripe = createStripe(
                 ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
-                fireAndForgetRequestExecutor
+                analyticsRequestExecutor
         );
         final PaymentMethod createdPaymentMethod = stripe.createPaymentMethodSynchronous(
                 paymentMethodCreateParams);
@@ -1190,10 +1190,10 @@ public class StripeTest {
         assertEquals("4242", createdPaymentMethod.card.last4);
         assertEquals(metadata, createdPaymentMethod.metadata);
 
-        verify(fireAndForgetRequestExecutor)
-                .executeAsync(stripeRequestArgumentCaptor.capture());
-        final StripeRequest analyticsRequest = stripeRequestArgumentCaptor.getValue();
-        assertEquals(AnalyticsRequestFactory.HOST, analyticsRequest.getBaseUrl());
+        verify(analyticsRequestExecutor)
+                .executeAsync(analyticsRequestArgumentCaptor.capture());
+        final StripeRequest analyticsRequest = analyticsRequestArgumentCaptor.getValue();
+        assertEquals(AnalyticsRequest.HOST, analyticsRequest.getBaseUrl());
         assertEquals(
                 createdPaymentMethod.id,
                 Objects.requireNonNull(analyticsRequest.getParams())
@@ -1211,7 +1211,7 @@ public class StripeTest {
                 );
         final Stripe stripe = createStripe(
                 ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
-                fireAndForgetRequestExecutor
+                analyticsRequestExecutor
         );
         final PaymentMethod createdPaymentMethod = stripe.createPaymentMethodSynchronous(
                 paymentMethodCreateParams);
@@ -1223,10 +1223,10 @@ public class StripeTest {
                 Objects.requireNonNull(createdPaymentMethod.ideal).bankIdentifierCode
         );
 
-        verify(fireAndForgetRequestExecutor)
-                .executeAsync(stripeRequestArgumentCaptor.capture());
-        final StripeRequest analyticsRequest = stripeRequestArgumentCaptor.getValue();
-        assertEquals(AnalyticsRequestFactory.HOST, analyticsRequest.getBaseUrl());
+        verify(analyticsRequestExecutor)
+                .executeAsync(analyticsRequestArgumentCaptor.capture());
+        final StripeRequest analyticsRequest = analyticsRequestArgumentCaptor.getValue();
+        assertEquals(AnalyticsRequest.HOST, analyticsRequest.getBaseUrl());
         assertEquals(
                 createdPaymentMethod.id,
                 Objects.requireNonNull(analyticsRequest.getParams())
@@ -1244,7 +1244,7 @@ public class StripeTest {
                 );
         final Stripe stripe = createStripe(
                 ApiKeyFixtures.FPX_PUBLISHABLE_KEY,
-                fireAndForgetRequestExecutor
+                analyticsRequestExecutor
         );
         final PaymentMethod createdPaymentMethod = stripe.createPaymentMethodSynchronous(
                 paymentMethodCreateParams);
@@ -1253,10 +1253,10 @@ public class StripeTest {
         assertNull(createdPaymentMethod.card);
         assertEquals("hsbc", Objects.requireNonNull(createdPaymentMethod.fpx).bank);
 
-        verify(fireAndForgetRequestExecutor)
-                .executeAsync(stripeRequestArgumentCaptor.capture());
-        final StripeRequest analyticsRequest = stripeRequestArgumentCaptor.getValue();
-        assertEquals(AnalyticsRequestFactory.HOST, analyticsRequest.getBaseUrl());
+        verify(analyticsRequestExecutor)
+                .executeAsync(analyticsRequestArgumentCaptor.capture());
+        final StripeRequest analyticsRequest = analyticsRequestArgumentCaptor.getValue();
+        assertEquals(AnalyticsRequest.HOST, analyticsRequest.getBaseUrl());
         assertEquals(
                 createdPaymentMethod.id,
                 Objects.requireNonNull(analyticsRequest.getParams())
@@ -1355,7 +1355,7 @@ public class StripeTest {
     private Stripe createStripe(@NonNull String publishableKey) {
         return createStripe(
                 publishableKey,
-                new FakeFireAndForgetRequestExecutor(),
+                new FakeAnalyticsRequestExecutor(),
                 defaultFingerprintDataRepository
         );
     }
@@ -1363,11 +1363,11 @@ public class StripeTest {
     @NonNull
     private Stripe createStripe(
             @NonNull String publishableKey,
-            @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor
+            @NonNull AnalyticsRequestExecutor analyticsRequestExecutor
     ) {
         return createStripe(
                 publishableKey,
-                fireAndForgetRequestExecutor,
+                analyticsRequestExecutor,
                 defaultFingerprintDataRepository
         );
     }
@@ -1375,12 +1375,12 @@ public class StripeTest {
     @NonNull
     private Stripe createStripe(
             @NonNull String publishableKey,
-            @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor,
+            @NonNull AnalyticsRequestExecutor analyticsRequestExecutor,
             @NonNull FingerprintDataRepository fingerprintDataRepository
     ) {
         final StripeRepository stripeRepository = createStripeRepository(
                 publishableKey,
-                fireAndForgetRequestExecutor,
+                analyticsRequestExecutor,
                 fingerprintDataRepository
         );
         return new Stripe(
@@ -1395,7 +1395,7 @@ public class StripeTest {
     private Stripe createStripe(@NonNull CoroutineScope workScope) {
         final StripeRepository stripeRepository = createStripeRepository(
                 ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
-                new FakeFireAndForgetRequestExecutor(),
+                new FakeAnalyticsRequestExecutor(),
                 defaultFingerprintDataRepository
         );
         return new Stripe(
@@ -1414,7 +1414,7 @@ public class StripeTest {
     @NonNull
     private StripeRepository createStripeRepository(
             @NonNull final String publishableKey,
-            @NonNull FireAndForgetRequestExecutor fireAndForgetRequestExecutor,
+            @NonNull AnalyticsRequestExecutor analyticsRequestExecutor,
             @NonNull FingerprintDataRepository fingerprintDataRepository
     ) {
         return new StripeApiRepository(
@@ -1423,7 +1423,7 @@ public class StripeTest {
                 null,
                 new FakeLogger(),
                 new ApiRequestExecutor.Default(),
-                fireAndForgetRequestExecutor,
+                analyticsRequestExecutor,
                 fingerprintDataRepository
         );
     }

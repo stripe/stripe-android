@@ -56,8 +56,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     private val appInfo: AppInfo? = null,
     private val logger: Logger = Logger.noop(),
     private val stripeApiRequestExecutor: ApiRequestExecutor = ApiRequestExecutor.Default(logger),
-    private val fireAndForgetRequestExecutor: FireAndForgetRequestExecutor =
-        StripeFireAndForgetRequestExecutor(logger),
+    private val analyticsRequestExecutor: AnalyticsRequestExecutor =
+        AnalyticsRequestExecutor.Default(logger),
     private val fingerprintDataRepository: FingerprintDataRepository =
         FingerprintDataRepository.Default(context),
     private val apiFingerprintParamsFactory: ApiFingerprintParamsFactory =
@@ -68,7 +68,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     apiVersion: String = ApiVersion.get().code,
     sdkVersion: String = Stripe.VERSION
 ) : StripeRepository {
-    private val analyticsRequestFactory = AnalyticsRequestFactory(logger)
+    private val analyticsRequestFactory = AnalyticsRequest.Factory(logger)
     private val apiRequestFactory = ApiRequest.Factory(
         appInfo = appInfo,
         apiVersion = apiVersion,
@@ -976,8 +976,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         return response
     }
 
-    private fun makeFireAndForgetRequest(request: StripeRequest) {
-        fireAndForgetRequestExecutor.executeAsync(request)
+    private fun makeAnalyticsRequest(request: AnalyticsRequest) {
+        analyticsRequestExecutor.executeAsync(request)
     }
 
     private fun disableDnsCache(): Pair<Boolean, String> {
@@ -1023,7 +1023,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         params: Map<String, Any>,
         publishableKey: String
     ) {
-        makeFireAndForgetRequest(
+        makeAnalyticsRequest(
             analyticsRequestFactory.create(
                 params,
                 ApiRequest.Options(publishableKey),

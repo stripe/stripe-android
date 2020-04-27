@@ -51,8 +51,8 @@ internal class StripePaymentController internal constructor(
         PaymentAuthConfig.get(),
     private val threeDs2Service: StripeThreeDs2Service =
         StripeThreeDs2ServiceImpl(context, StripeSSLSocketFactory(), enableLogging),
-    private val analyticsRequestExecutor: FireAndForgetRequestExecutor =
-        StripeFireAndForgetRequestExecutor(Logger.getInstance(enableLogging)),
+    private val analyticsRequestExecutor: AnalyticsRequestExecutor =
+        AnalyticsRequestExecutor.Default(Logger.getInstance(enableLogging)),
     private val analyticsDataFactory: AnalyticsDataFactory =
         AnalyticsDataFactory(context.applicationContext, publishableKey),
     private val challengeFlowStarter: ChallengeFlowStarter = ChallengeFlowStarter.Default(),
@@ -61,7 +61,7 @@ internal class StripePaymentController internal constructor(
     private val workScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 ) : PaymentController {
     private val logger = Logger.getInstance(enableLogging)
-    private val analyticsRequestFactory = AnalyticsRequestFactory(logger)
+    private val analyticsRequestFactory = AnalyticsRequest.Factory(logger)
 
     init {
         threeDs2Service.initialize(
@@ -601,7 +601,7 @@ internal class StripePaymentController internal constructor(
         private val stripeIntent: StripeIntent,
         private val sourceId: String,
         private val requestOptions: ApiRequest.Options,
-        private val analyticsRequestExecutor: FireAndForgetRequestExecutor,
+        private val analyticsRequestExecutor: AnalyticsRequestExecutor,
         private val analyticsDataFactory: AnalyticsDataFactory,
         private val challengeFlowStarter: ChallengeFlowStarter,
         private val enableLogging: Boolean = false,
@@ -609,7 +609,7 @@ internal class StripePaymentController internal constructor(
             PaymentRelayStarter.create(host, getRequestCode(stripeIntent))
     ) : ApiResultCallback<Stripe3ds2AuthResult> {
 
-        private val analyticsRequestFactory: AnalyticsRequestFactory = AnalyticsRequestFactory(
+        private val analyticsRequestFactory = AnalyticsRequest.Factory(
             Logger.getInstance(enableLogging)
         )
 
@@ -712,10 +712,10 @@ internal class StripePaymentController internal constructor(
         private val stripeIntent: StripeIntent,
         private val sourceId: String,
         private val requestOptions: ApiRequest.Options,
-        private val analyticsRequestExecutor: FireAndForgetRequestExecutor,
+        private val analyticsRequestExecutor: AnalyticsRequestExecutor,
         private val analyticsDataFactory: AnalyticsDataFactory,
         private val transaction: Transaction,
-        private val analyticsRequestFactory: AnalyticsRequestFactory
+        private val analyticsRequestFactory: AnalyticsRequest.Factory
     ) : StripeChallengeStatusReceiver() {
 
         override fun completed(
@@ -840,10 +840,10 @@ internal class StripePaymentController internal constructor(
                 stripeIntent: StripeIntent,
                 sourceId: String,
                 requestOptions: ApiRequest.Options,
-                analyticsRequestExecutor: FireAndForgetRequestExecutor,
+                analyticsRequestExecutor: AnalyticsRequestExecutor,
                 analyticsDataFactory: AnalyticsDataFactory,
                 transaction: Transaction,
-                analyticsRequestFactory: AnalyticsRequestFactory
+                analyticsRequestFactory: AnalyticsRequest.Factory
             ): PaymentAuth3ds2ChallengeStatusReceiver {
                 return PaymentAuth3ds2ChallengeStatusReceiver(
                     stripeRepository,
