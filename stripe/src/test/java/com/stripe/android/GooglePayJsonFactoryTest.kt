@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.StripeJsonUtils
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -25,7 +26,7 @@ class GooglePayJsonFactoryTest {
                     "type": "CARD",
                     "parameters": {
                         "allowedAuthMethods": ["PAN_ONLY", "CRYPTOGRAM_3DS"],
-                        "allowedCardNetworks": ["AMEX", "DISCOVER", "INTERAC", "JCB", "MASTERCARD", "VISA"]
+                        "allowedCardNetworks": ["AMEX", "DISCOVER", "INTERAC", "MASTERCARD", "VISA"]
                     },
                     "tokenizationSpecification": {
                         "type": "PAYMENT_GATEWAY",
@@ -59,7 +60,7 @@ class GooglePayJsonFactoryTest {
                     "type": "CARD",
                     "parameters": {
                         "allowedAuthMethods": ["PAN_ONLY", "CRYPTOGRAM_3DS"],
-                        "allowedCardNetworks": ["AMEX", "DISCOVER", "INTERAC", "JCB", "MASTERCARD", "VISA"],
+                        "allowedCardNetworks": ["AMEX", "DISCOVER", "INTERAC", "MASTERCARD", "VISA"],
                         "billingAddressRequired": true,
                         "billingAddressParameters": {
                             "phoneNumberRequired": true,
@@ -93,7 +94,7 @@ class GooglePayJsonFactoryTest {
                     "type": "CARD",
                     "parameters": {
                         "allowedAuthMethods": ["PAN_ONLY", "CRYPTOGRAM_3DS"],
-                        "allowedCardNetworks": ["AMEX", "DISCOVER", "INTERAC", "JCB", "MASTERCARD", "VISA"],
+                        "allowedCardNetworks": ["AMEX", "DISCOVER", "INTERAC", "MASTERCARD", "VISA"],
                         "billingAddressRequired": true,
                         "billingAddressParameters": {
                             "phoneNumberRequired": true,
@@ -172,5 +173,37 @@ class GooglePayJsonFactoryTest {
             .getString("countryCode")
         assertThat(countryCode)
             .isEqualTo("US")
+    }
+
+    @Test
+    fun allowedCardNetworks_whenJcbDisabled_shouldNotIncludeJcb() {
+        val allowedCardNetworks = factory.createIsReadyToPayRequest()
+            .getJSONArray("allowedPaymentMethods")
+            .getJSONObject(0)
+            .getJSONObject("parameters")
+            .getJSONArray("allowedCardNetworks")
+            .let {
+                StripeJsonUtils.jsonArrayToList(it)
+            }
+
+        assertThat(allowedCardNetworks)
+            .isEqualTo(listOf("AMEX", "DISCOVER", "INTERAC", "MASTERCARD", "VISA"))
+    }
+
+    @Test
+    fun allowedCardNetworks_whenJcbEnabled_shouldIncludeJcb() {
+        val allowedCardNetworks =
+            GooglePayJsonFactory(googlePayConfig, isJcbEnabled = true)
+                .createIsReadyToPayRequest()
+                .getJSONArray("allowedPaymentMethods")
+                .getJSONObject(0)
+                .getJSONObject("parameters")
+                .getJSONArray("allowedCardNetworks")
+                .let {
+                    StripeJsonUtils.jsonArrayToList(it)
+                }
+
+        assertThat(allowedCardNetworks)
+            .isEqualTo(listOf("AMEX", "DISCOVER", "INTERAC", "MASTERCARD", "VISA", "JCB"))
     }
 }
