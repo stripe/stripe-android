@@ -9,6 +9,7 @@ import com.stripe.android.SetupIntentResult
 import com.stripe.android.Stripe
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.example.R
 import com.stripe.example.Settings
@@ -40,15 +41,20 @@ abstract class StripeIntentActivity : AppCompatActivity() {
 
     protected fun createAndConfirmPaymentIntent(
         country: String,
-        paymentMethodCreateParams: PaymentMethodCreateParams,
+        paymentMethodCreateParams: PaymentMethodCreateParams?,
         shippingDetails: ConfirmPaymentIntentParams.Shipping? = null,
         stripeAccountId: String? = null,
+        existingPaymentMethodId: String? = null,
+        mandateDataParams: MandateDataParams? = null,
         returnUrl: String = "example://return_url"
     ) {
+        requireNotNull(paymentMethodCreateParams ?: existingPaymentMethodId)
+
         keyboardController.hide()
 
         viewModel.createPaymentIntent(country) {
-            handleCreatePaymentIntentResponse(it, paymentMethodCreateParams, shippingDetails, stripeAccountId, returnUrl)
+            handleCreatePaymentIntentResponse(it, paymentMethodCreateParams, shippingDetails,
+                stripeAccountId, existingPaymentMethodId, mandateDataParams, returnUrl)
         }
     }
 
@@ -67,9 +73,11 @@ abstract class StripeIntentActivity : AppCompatActivity() {
 
     private fun handleCreatePaymentIntentResponse(
         responseData: JSONObject,
-        params: PaymentMethodCreateParams,
+        params: PaymentMethodCreateParams?,
         shippingDetails: ConfirmPaymentIntentParams.Shipping?,
         stripeAccountId: String?,
+        existingPaymentMethodId: String?,
+        mandateDataParams: MandateDataParams?,
         returnUrl: String
     ) {
         val secret = responseData.getString("secret")
@@ -78,16 +86,21 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                 "\n\nStarting PaymentIntent confirmation" + (stripeAccountId?.let {
                 " for $it"
             } ?: ""))
-        stripe.confirmPayment(
-            this,
+        val confirmPaymentIntentParams = if (existingPaymentMethodId == null) {
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-                paymentMethodCreateParams = params,
+                paymentMethodCreateParams = requireNotNull(params),
                 clientSecret = secret,
                 shipping = shippingDetails,
                 returnUrl = returnUrl
-            ),
-            stripeAccountId
-        )
+            )
+        } else {
+            ConfirmPaymentIntentParams.createWithPaymentMethodId(
+                paymentMethodId = existingPaymentMethodId,
+                clientSecret = secret,
+                mandateData = mandateDataParams
+            )
+        }
+        stripe.confirmPayment(this, confirmPaymentIntentParams, stripeAccountId)
     }
 
     fun handleCreateSetupIntentResponse(
@@ -126,7 +139,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         }
     }
 
-    protected fun onConfirmSuccess(result: PaymentIntentResult) {
+    protected open fun onConfirmSuccess(result: PaymentIntentResult) {
         val paymentIntent = result.intent
         viewModel.status.value += "\n\n" +
             "PaymentIntent confirmation outcome: ${result.outcome}\n\n" +
@@ -134,7 +147,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         viewModel.inProgress.value = false
     }
 
-    protected fun onConfirmSuccess(result: SetupIntentResult) {
+    protected open fun onConfirmSuccess(result: SetupIntentResult) {
         val setupIntentResult = result.intent
         viewModel.status.value += "\n\n" +
             "SetupIntent confirmation outcome: ${result.outcome}\n\n" +
@@ -142,7 +155,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         viewModel.inProgress.value = false
     }
 
-    protected fun onConfirmError(e: Exception) {
+    protected open fun onConfirmError(e: Exception) {
         viewModel.status.value += "\n\nException: " + e.message
         viewModel.inProgress.value = false
     }
