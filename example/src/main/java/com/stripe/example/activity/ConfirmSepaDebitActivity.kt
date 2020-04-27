@@ -40,7 +40,9 @@ class ConfirmSepaDebitActivity : StripeIntentActivity() {
             val params =
                 createPaymentMethodParams(viewBinding.ibanInput.text.toString())
                     .takeIf { EXISTING_PAYMENT_METHOD_ID == null }
-            createAndConfirmPaymentIntent("nl", params,
+            createAndConfirmPaymentIntent(
+                "nl",
+                params,
                 existingPaymentMethodId = EXISTING_PAYMENT_METHOD_ID,
                 mandateDataParams = mandateData
             )
