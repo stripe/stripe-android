@@ -13,12 +13,31 @@ import org.json.JSONObject
  * for Google Pay API version 2.0.
  */
 class GooglePayJsonFactory constructor(
-    private val googlePayConfig: GooglePayConfig
+    private val googlePayConfig: GooglePayConfig,
+
+    /**
+     * Enable JCB as an allowed card network. By default, JCB is disabled.
+     *
+     * JCB currently can only be accepted in Japan.
+     */
+    private val isJcbEnabled: Boolean = false
 ) {
     /**
      * [PaymentConfiguration] must be instantiated before calling this.
      */
-    constructor(context: Context) : this(GooglePayConfig(context))
+    constructor(
+        context: Context,
+
+        /**
+         * Enable JCB as an allowed card network. By default, JCB is disabled.
+         *
+         * JCB currently can only be accepted in Japan.
+         */
+        isJcbEnabled: Boolean = false
+    ) : this(
+        googlePayConfig = GooglePayConfig(context),
+        isJcbEnabled = isJcbEnabled
+    )
 
     /**
      * [IsReadyToPayRequest](https://developers.google.com/pay/api/android/reference/request-objects#IsReadyToPayRequest)
@@ -174,7 +193,11 @@ class GooglePayJsonFactory constructor(
     private fun createBaseCardPaymentMethodParams(): JSONObject {
         return JSONObject()
             .put("allowedAuthMethods", JSONArray(ALLOWED_AUTH_METHODS))
-            .put("allowedCardNetworks", JSONArray(ALLOWED_CARD_NETWORKS))
+            .put("allowedCardNetworks", JSONArray(
+                DEFAULT_CARD_NETWORKS.plus(
+                    listOf(JCB_CARD_NETWORK).takeIf { isJcbEnabled } ?: emptyList()
+                )
+            ))
     }
 
     /**
@@ -351,7 +374,8 @@ class GooglePayJsonFactory constructor(
         private const val CARD_PAYMENT_METHOD = "CARD"
 
         private val ALLOWED_AUTH_METHODS = listOf("PAN_ONLY", "CRYPTOGRAM_3DS")
-        private val ALLOWED_CARD_NETWORKS =
-            listOf("AMEX", "DISCOVER", "INTERAC", "JCB", "MASTERCARD", "VISA")
+        private val DEFAULT_CARD_NETWORKS =
+            listOf("AMEX", "DISCOVER", "INTERAC", "MASTERCARD", "VISA")
+        private const val JCB_CARD_NETWORK = "JCB"
     }
 }
