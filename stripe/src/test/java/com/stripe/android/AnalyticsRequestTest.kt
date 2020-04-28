@@ -19,6 +19,7 @@ class AnalyticsRequestTest {
 
     @Test
     fun factoryCreate_createsExpectedObject() {
+        val sdkVersion = BuildConfig.VERSION_NAME
         val javaVersion = System.getProperty("java.version").orEmpty()
         val analyticsRequest = factory.create(
             params = AnalyticsDataFactory(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
@@ -35,18 +36,18 @@ class AnalyticsRequestTest {
                 "Accept" to "application/json",
                 "X-Stripe-Client-User-Agent" to
                     """
-                    {"os.name":"android","os.version":"28","bindings.version":"14.3.0","lang":"Java","publisher":"Stripe","java.version":"$javaVersion","http.agent":"","application":{"name":"MyAwesomePlugin","version":"1.2.34","url":"https:\/\/myawesomeplugin.info","partner_id":"pp_partner_1234"}}
+                    {"os.name":"android","os.version":"28","bindings.version":"$sdkVersion","lang":"Java","publisher":"Stripe","java.version":"$javaVersion","http.agent":"","application":{"name":"MyAwesomePlugin","version":"1.2.34","url":"https:\/\/myawesomeplugin.info","partner_id":"pp_partner_1234"}}
                     """.trimIndent(),
                 "Stripe-Version" to "2020-03-02",
                 "Authorization" to "Bearer pk_test_123",
                 "Accept-Language" to "en-US",
-                "User-Agent" to "Stripe/v1 AndroidBindings/14.3.0 MyAwesomePlugin/1.2.34 (https://myawesomeplugin.info)",
+                "User-Agent" to "Stripe/v1 AndroidBindings/$sdkVersion MyAwesomePlugin/1.2.34 (https://myawesomeplugin.info)",
                 "Accept-Charset" to "UTF-8"
             ))
         val requestUrl = analyticsRequest.url
 
         assertThat(requestUrl)
-            .isEqualTo("https://q.stripe.com?publishable_key=pk_test_123&app_version=0&bindings_version=14.3.0&os_version=28&os_release=9&device_type=unknown_Android_robolectric&source_type=card&app_name=com.stripe.android.test&payment_method_id=pm_12345&analytics_ua=analytics.stripe_android-1.0&os_name=REL&event=stripe_android.payment_method_creation")
+            .isEqualTo("https://q.stripe.com?publishable_key=pk_test_123&app_version=0&bindings_version=$sdkVersion&os_version=28&os_release=9&device_type=unknown_Android_robolectric&source_type=card&app_name=com.stripe.android.test&payment_method_id=pm_12345&analytics_ua=analytics.stripe_android-1.0&os_name=REL&event=stripe_android.payment_method_creation")
     }
 
     @Test

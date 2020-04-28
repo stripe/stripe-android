@@ -8,7 +8,7 @@
 <a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android</a>&nbsp;/&nbsp;<a href="./index.html">StripeIntentResult</a><br/>
 <br/>
 <h1>StripeIntentResult</h1>
-<code><span class="keyword">abstract</span> <span class="keyword">class </span><span class="identifier">StripeIntentResult</span><span class="symbol">&lt;</span><span class="identifier">T</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-stripe-intent/index.html"><span class="identifier">StripeIntent</span></a><span class="symbol">&gt;</span></code>
+<code><span class="keyword">abstract</span> <span class="keyword">class </span><span class="identifier">StripeIntentResult</span><span class="symbol">&lt;</span><span class="identifier">T</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-stripe-intent/index.html"><span class="identifier">StripeIntent</span></a><span class="symbol">&gt;</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../../com.stripe.android.model/-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code>
 <p>A model representing the result of a <a href="../../com.stripe.android.model/-stripe-intent/index.html">StripeIntent</a> confirmation or authentication attempt
 via <a href="../-stripe/confirm-payment.html">Stripe.confirmPayment</a> or <a href="../-stripe/handle-next-action-for-payment.html">Stripe.handleNextActionForPayment</a></p>
 <p><a href="intent.html">intent</a> is a <a href="../../com.stripe.android.model/-stripe-intent/index.html">StripeIntent</a> retrieved after confirmation/authentication succeeded or failed.</p>
@@ -50,6 +50,13 @@ via <a href="../-stripe/confirm-payment.html">Stripe.confirmPayment</a> or <a hr
 <tbody>
 <tr>
 <td>
+<p><a href="describe-contents.html">describeContents</a></p>
+</td>
+<td>
+<code><span class="keyword">open</span> <span class="keyword">fun </span><span class="identifier">describeContents</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a></code></td>
+</tr>
+<tr>
+<td>
 <p><a href="equals.html">equals</a></p>
 </td>
 <td>
@@ -62,6 +69,13 @@ via <a href="../-stripe/confirm-payment.html">Stripe.confirmPayment</a> or <a hr
 <td>
 <code><span class="keyword">open</span> <span class="keyword">fun </span><span class="identifier">hashCode</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a></code></td>
 </tr>
+<tr>
+<td>
+<p><a href="write-to-parcel.html">writeToParcel</a></p>
+</td>
+<td>
+<code><span class="keyword">open</span> <span class="keyword">fun </span><span class="identifier">writeToParcel</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.StripeIntentResult$writeToParcel(android.os.Parcel, kotlin.Int)/dest">dest</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Parcel.html"><span class="identifier">Parcel</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.StripeIntentResult$writeToParcel(android.os.Parcel, kotlin.Int)/flags">flags</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
 </tbody>
 </table>
 <h3>Inheritors</h3>
@@ -69,14 +83,14 @@ via <a href="../-stripe/confirm-payment.html">Stripe.confirmPayment</a> or <a hr
 <tbody>
 <tr>
 <td>
-<p><a href="../-payment-intent-result.html">PaymentIntentResult</a></p>
+<p><a href="../-payment-intent-result/index.html">PaymentIntentResult</a></p>
 </td>
 <td>
 <code><span class="keyword">class </span><span class="identifier">PaymentIntentResult</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">StripeIntentResult</span></a><span class="symbol">&lt;</span><a href="../../com.stripe.android.model/-payment-intent/index.html"><span class="identifier">PaymentIntent</span></a><span class="symbol">&gt;</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="../-setup-intent-result.html">SetupIntentResult</a></p>
+<p><a href="../-setup-intent-result/index.html">SetupIntentResult</a></p>
 </td>
 <td>
 <code><span class="keyword">class </span><span class="identifier">SetupIntentResult</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">StripeIntentResult</span></a><span class="symbol">&lt;</span><a href="../../com.stripe.android.model/-setup-intent/index.html"><span class="identifier">SetupIntent</span></a><span class="symbol">&gt;</span></code></td>
