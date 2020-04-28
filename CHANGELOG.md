@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 14.4.0 - unreleased
+## 14.4.0 - 2020-04-28
 * [#2379](https://github.com/stripe/stripe-android/pull/2379) Add optional `stripeAccountId` param to most `Stripe` methods
     * This enables passing a `Stripe-Account` header on a per-request basis
 * [#2398](https://github.com/stripe/stripe-android/pull/2398) Add optional `stripeAccountId` param to `Stripe#confirmPayment()`
