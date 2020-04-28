@@ -9,12 +9,12 @@
 * [#2408](https://github.com/stripe/stripe-android/pull/2408) Update `PaymentMethod.Type#isReusable` values
 * [#2412](https://github.com/stripe/stripe-android/pull/2412) Make `StripeIntentResult` implement `Parcelable`
 * [#2413](https://github.com/stripe/stripe-android/pull/2413) Create `Stripe#retrievePaymentIntent()` and `Stripe#retrieveSetupIntent()` async methods
-* [#2414](https://github.com/stripe/stripe-android/pull/2414) Bump 3DS2 SDK to `2.7.5`
-    * On 3DS2 challenge screen, handle system back button tap as cancel button tap
 * [#2421](https://github.com/stripe/stripe-android/pull/2421) Capitalize `countryCode` in `GooglePayJsonFactory`
 * [#2429](https://github.com/stripe/stripe-android/pull/2429) Fix SDK source paths and source publishing
 * [#2430](https://github.com/stripe/stripe-android/pull/2430) Add `GooglePayJsonFactory.isJcbEnabled`
     * Enables JCB as an allowed card network. By default, JCB is disabled.
+* [#2414](https://github.com/stripe/stripe-android/pull/2435) Bump 3DS2 SDK to `2.7.7`
+    * On 3DS2 challenge screen, handle system back button tap as cancel button tap
 
 ## 14.3.0 - 2020-04-20
 * [#2334](https://github.com/stripe/stripe-android/pull/2334) Add support for BACS Debit in `PaymentMethodCreateParams`
