@@ -13,8 +13,9 @@
 * [#2429](https://github.com/stripe/stripe-android/pull/2429) Fix SDK source paths and source publishing
 * [#2430](https://github.com/stripe/stripe-android/pull/2430) Add `GooglePayJsonFactory.isJcbEnabled`
     * Enables JCB as an allowed card network. By default, JCB is disabled.
-* [#2414](https://github.com/stripe/stripe-android/pull/2435) Bump 3DS2 SDK to `2.7.7`
+* [#2435](https://github.com/stripe/stripe-android/pull/2435) Bump 3DS2 SDK to `2.7.7`
     * On 3DS2 challenge screen, handle system back button tap as cancel button tap
+* [#2436](https://github.com/stripe/stripe-android/pull/2436) Add `advancedFraudSignalsEnabled` property
 
 ## 14.3.0 - 2020-04-20
 * [#2334](https://github.com/stripe/stripe-android/pull/2334) Add support for BACS Debit in `PaymentMethodCreateParams`
