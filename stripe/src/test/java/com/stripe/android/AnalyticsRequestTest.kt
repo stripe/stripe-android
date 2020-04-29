@@ -20,7 +20,6 @@ class AnalyticsRequestTest {
     @Test
     fun factoryCreate_createsExpectedObject() {
         val sdkVersion = BuildConfig.VERSION_NAME
-        val javaVersion = System.getProperty("java.version").orEmpty()
         val analyticsRequest = factory.create(
             params = AnalyticsDataFactory(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
                 .createPaymentMethodCreationParams(
@@ -36,7 +35,7 @@ class AnalyticsRequestTest {
                 "Accept" to "application/json",
                 "X-Stripe-Client-User-Agent" to
                     """
-                    {"os.name":"android","os.version":"28","bindings.version":"$sdkVersion","lang":"Java","publisher":"Stripe","java.version":"$javaVersion","http.agent":"","application":{"name":"MyAwesomePlugin","version":"1.2.34","url":"https:\/\/myawesomeplugin.info","partner_id":"pp_partner_1234"}}
+                    {"os.name":"android","os.version":"28","bindings.version":"$sdkVersion","lang":"Java","publisher":"Stripe","http.agent":"","application":{"name":"MyAwesomePlugin","version":"1.2.34","url":"https:\/\/myawesomeplugin.info","partner_id":"pp_partner_1234"}}
                     """.trimIndent(),
                 "Stripe-Version" to "2020-03-02",
                 "Authorization" to "Bearer pk_test_123",

@@ -67,7 +67,6 @@ internal sealed class RequestHeadersFactory {
                     "bindings.version" to BuildConfig.VERSION_NAME,
                     "lang" to "Java",
                     "publisher" to "Stripe",
-                    "java.version" to systemPropertySupplier("java.version"),
                     "http.agent" to systemPropertySupplier(PROP_USER_AGENT)
                 ).plus(
                     appInfo?.createClientHeaders().orEmpty()
