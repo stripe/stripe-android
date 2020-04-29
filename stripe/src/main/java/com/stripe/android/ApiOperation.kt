@@ -2,8 +2,10 @@ package com.stripe.android
 
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
+import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.exception.StripeException
 import java.io.IOException
+import java.lang.IllegalArgumentException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
@@ -27,6 +29,13 @@ internal abstract class ApiOperation<ResultType>(
                 ResultWrapper.create(APIException(e))
             } catch (e: IOException) {
                 ResultWrapper.create(APIConnectionException.create(e))
+            } catch (e: IllegalArgumentException) {
+                ResultWrapper.create(
+                    InvalidRequestException(
+                        message = e.message,
+                        cause = e
+                    )
+                )
             }
 
             withContext(Main) {
