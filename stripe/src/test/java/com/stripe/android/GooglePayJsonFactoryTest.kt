@@ -176,6 +176,33 @@ class GooglePayJsonFactoryTest {
     }
 
     @Test
+    fun shippingAddressAllowedCountryCodes_shouldBeCapitalized() {
+        val createPaymentDataRequestJson = factory.createPaymentDataRequest(
+            transactionInfo = GooglePayJsonFactory.TransactionInfo(
+                currencyCode = "USD",
+                totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
+                totalPrice = 500,
+                countryCode = "US",
+                totalPriceLabel = "Your total price"
+            ),
+            shippingAddressParameters = GooglePayJsonFactory.ShippingAddressParameters(
+                isRequired = true,
+                allowedCountryCodes = setOf("us", "de")
+            )
+        )
+
+        val allowedCountryCodes = createPaymentDataRequestJson
+            .getJSONObject("shippingAddressParameters")
+            .getJSONArray("allowedCountryCodes")
+            .let {
+                StripeJsonUtils.jsonArrayToList(it)
+            }
+
+        assertThat(allowedCountryCodes)
+            .containsExactly("US", "DE")
+    }
+
+    @Test
     fun allowedCardNetworks_whenJcbDisabled_shouldNotIncludeJcb() {
         val allowedCardNetworks = factory.createIsReadyToPayRequest()
             .getJSONArray("allowedPaymentMethods")
