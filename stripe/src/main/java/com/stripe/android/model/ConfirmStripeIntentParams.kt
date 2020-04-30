@@ -1,5 +1,10 @@
 package com.stripe.android.model
 
+/**
+ * Interface for params for confirming a [PaymentIntent] or [SetupIntent].
+ *
+ * See [ConfirmPaymentIntentParams] and [ConfirmSetupIntentParams]
+ */
 interface ConfirmStripeIntentParams : StripeParamsModel {
 
     val clientSecret: String

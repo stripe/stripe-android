@@ -4,6 +4,10 @@ import android.os.Parcel
 import android.os.Parcelable
 import com.stripe.android.model.SetupIntent
 
+/**
+ * A model representing the result of a [SetupIntent] confirmation via [Stripe.confirmSetupIntent]
+ * or handling of next actions via [Stripe.handleNextActionForSetupIntent].
+ */
 class SetupIntentResult internal constructor(
     setupIntent: SetupIntent,
     @Outcome outcome: Int = 0

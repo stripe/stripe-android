@@ -5,7 +5,9 @@ import com.stripe.android.model.KlarnaSourceParams.LineItem
 import kotlinx.android.parcel.Parcelize
 
 /**
- * [Klarna Payments with Sources](https://stripe.com/docs/sources/klarna)
+ * Model representing parameters for creating a Klarna Source.
+ *
+ * See [Klarna Payments with Sources](https://stripe.com/docs/sources/klarna)
  *
  * Note:
  * The optional fields [billingEmail], [billingPhone], [billingAddress], [billingFirstName],

@@ -4,6 +4,9 @@ import android.content.Context
 import org.json.JSONException
 import org.json.JSONObject
 
+/**
+ * Configuration settings for Google Pay's `TokenizationSpecification`.
+ */
 class GooglePayConfig @JvmOverloads constructor(
     publishableKey: String,
     private val connectedAccountId: String? = null

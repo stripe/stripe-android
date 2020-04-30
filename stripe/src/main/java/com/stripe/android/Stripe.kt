@@ -1621,7 +1621,7 @@ class Stripe internal constructor(
          * fraudulent payments.
          *
          * For more details on the information we collect, visit
-         * https://stripe.com/docs/disputes/prevention/advanced-fraud-detection
+         * [https://stripe.com/docs/disputes/prevention/advanced-fraud-detection](https://stripe.com/docs/disputes/prevention/advanced-fraud-detection)
          */
         @JvmStatic
         var advancedFraudSignalsEnabled: Boolean = true
