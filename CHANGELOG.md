@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 14.4.1 - unreleased
+## 14.4.1 - 2020-04-30
 * [#2441](https://github.com/stripe/stripe-android/pull/2441) Catch `IllegalArgumentException` in `ApiOperation`
 * [#2442](https://github.com/stripe/stripe-android/pull/2442) Capitalize `GooglePayJsonFactory`'s `allowedCountryCodes`
 * [#2445](https://github.com/stripe/stripe-android/pull/2445) Bump 3DS2 SDK to `2.7.8`
