@@ -10,6 +10,9 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_STRIPE_SDK
 import kotlinx.android.parcel.Parcelize
 
+/**
+ * Model representing parameters for [confirming a SetupIntent](https://stripe.com/docs/api/setup_intents/confirm).
+ */
 @Parcelize
 data class ConfirmSetupIntentParams internal constructor(
     @get:JvmSynthetic override val clientSecret: String,

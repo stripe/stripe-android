@@ -5,7 +5,7 @@ import java.io.Serializable
 import kotlinx.android.parcel.Parcelize
 
 /**
- * [Errors](https://stripe.com/docs/api/errors)
+ * A model representing a Stripe [Errors](https://stripe.com/docs/api/errors) object.
  *
  * Stripe uses conventional HTTP response codes to indicate the success or failure of an API
  * request. In general:
