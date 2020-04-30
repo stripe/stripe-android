@@ -3,6 +3,8 @@
 ## 14.4.1 - unreleased
 * [#2441](https://github.com/stripe/stripe-android/pull/2441) Catch `IllegalArgumentException` in `ApiOperation`
 * [#2442](https://github.com/stripe/stripe-android/pull/2442) Capitalize `GooglePayJsonFactory`'s `allowedCountryCodes`
+* [#2445](https://github.com/stripe/stripe-android/pull/2445) Bump 3DS2 SDK to `2.7.8`
+    * Downgrade BouncyCastle to `1.64`
 
 ## 14.4.0 - 2020-04-28
 * [#2379](https://github.com/stripe/stripe-android/pull/2379) Add optional `stripeAccountId` param to most `Stripe` methods
