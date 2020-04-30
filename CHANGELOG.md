@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 14.4.1 - 2020-04-30
+## 14.4.1 - unreleased
 * [#2441](https://github.com/stripe/stripe-android/pull/2441) Catch `IllegalArgumentException` in `ApiOperation`
 * [#2442](https://github.com/stripe/stripe-android/pull/2442) Capitalize `GooglePayJsonFactory`'s `allowedCountryCodes`
 
