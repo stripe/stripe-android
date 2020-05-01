@@ -41,15 +41,13 @@ class PaymentAuthActivity : StripeIntentActivity() {
         viewBinding.confirmWith3ds1Button.setOnClickListener {
             createAndConfirmPaymentIntent("us",
                 confirmParams3ds1,
-                stripeAccountId = stripeAccountId,
-                returnUrl = RETURN_URL)
+                stripeAccountId = stripeAccountId)
         }
         viewBinding.confirmWith3ds2Button.setOnClickListener {
             createAndConfirmPaymentIntent("us",
                 confirmParams3ds2,
                 stripeAccountId = stripeAccountId,
-                shippingDetails = SHIPPING,
-                returnUrl = RETURN_URL)
+                shippingDetails = SHIPPING)
         }
 
         viewBinding.confirmWithNewCardButton.setOnClickListener {
@@ -64,8 +62,7 @@ class PaymentAuthActivity : StripeIntentActivity() {
         viewBinding.setupButton.setOnClickListener {
             createAndConfirmSetupIntent("us",
                 confirmParams3ds2,
-                stripeAccountId = stripeAccountId,
-                returnUrl = RETURN_URL)
+                stripeAccountId = stripeAccountId)
         }
     }
 
@@ -101,8 +98,6 @@ class PaymentAuthActivity : StripeIntentActivity() {
                     .setCvc("123")
                     .build()
             )
-
-        private const val RETURN_URL = "stripe://payment_auth"
 
         private val SHIPPING = ConfirmPaymentIntentParams.Shipping(
             address = Address.Builder()

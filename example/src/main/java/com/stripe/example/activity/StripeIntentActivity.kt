@@ -54,20 +54,19 @@ abstract class StripeIntentActivity : AppCompatActivity() {
 
         viewModel.createPaymentIntent(country) {
             handleCreatePaymentIntentResponse(it, paymentMethodCreateParams, shippingDetails,
-                stripeAccountId, existingPaymentMethodId, mandateDataParams, returnUrl)
+                stripeAccountId, existingPaymentMethodId, mandateDataParams)
         }
     }
 
     protected fun createAndConfirmSetupIntent(
         country: String,
         params: PaymentMethodCreateParams,
-        stripeAccountId: String? = null,
-        returnUrl: String = "example://return_url"
+        stripeAccountId: String? = null
     ) {
         keyboardController.hide()
 
         viewModel.createSetupIntent(country) {
-            handleCreateSetupIntentResponse(it, params, stripeAccountId, returnUrl)
+            handleCreateSetupIntentResponse(it, params, stripeAccountId)
         }
     }
 
@@ -77,8 +76,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         shippingDetails: ConfirmPaymentIntentParams.Shipping?,
         stripeAccountId: String?,
         existingPaymentMethodId: String?,
-        mandateDataParams: MandateDataParams?,
-        returnUrl: String
+        mandateDataParams: MandateDataParams?
     ) {
         val secret = responseData.getString("secret")
         viewModel.status.postValue(
@@ -90,8 +88,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                 paymentMethodCreateParams = requireNotNull(params),
                 clientSecret = secret,
-                shipping = shippingDetails,
-                returnUrl = returnUrl
+                shipping = shippingDetails
             )
         } else {
             ConfirmPaymentIntentParams.createWithPaymentMethodId(
@@ -103,11 +100,10 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         stripe.confirmPayment(this, confirmPaymentIntentParams, stripeAccountId)
     }
 
-    fun handleCreateSetupIntentResponse(
+    private fun handleCreateSetupIntentResponse(
         responseData: JSONObject,
         params: PaymentMethodCreateParams,
-        stripeAccountId: String?,
-        returnUrl: String
+        stripeAccountId: String?
     ) {
         val secret = responseData.getString("secret")
         viewModel.status.postValue(
@@ -119,8 +115,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
             this,
             ConfirmSetupIntentParams.create(
                 paymentMethodCreateParams = params,
-                clientSecret = secret,
-                returnUrl = returnUrl
+                clientSecret = secret
             ),
             stripeAccountId
         )
