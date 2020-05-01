@@ -1,5 +1,7 @@
 package com.stripe.android.view
 
+import android.content.Intent
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentAuthWebViewStarter
 import com.stripe.android.PaymentController
 import com.stripe.android.StripeIntentResult
@@ -20,12 +22,14 @@ class PaymentAuthWebViewActivityViewModelTest {
             )
         )
 
-        val intent = requireNotNull(viewModel.cancelIntentSource().value)
+        var intent: Intent? = null
+        viewModel.cancelIntentSource().observeForever {
+            intent = it
+        }
 
-        assertEquals(
-            StripeIntentResult.Outcome.CANCELED,
-            PaymentController.Result.fromIntent(intent)?.flowOutcome
-        )
+        assertThat(
+            PaymentController.Result.fromIntent(requireNotNull(intent))?.flowOutcome
+        ).isEqualTo(StripeIntentResult.Outcome.CANCELED)
     }
 
     @Test

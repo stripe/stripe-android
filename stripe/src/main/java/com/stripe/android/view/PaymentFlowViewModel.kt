@@ -12,6 +12,7 @@ import com.stripe.android.StripeError
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
+import java.lang.RuntimeException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -32,16 +33,16 @@ internal class PaymentFlowViewModel(
     @JvmSynthetic
     internal fun saveCustomerShippingInformation(
         shippingInformation: ShippingInformation
-    ): LiveData<SaveCustomerShippingInfoResult> {
+    ): LiveData<Result<Customer>> {
         submittedShippingInfo = shippingInformation
-        val resultData = MutableLiveData<SaveCustomerShippingInfoResult>()
+        val resultData = MutableLiveData<Result<Customer>>()
         customerSession.setCustomerShippingInformation(
             shippingInformation = shippingInformation,
             productUsage = PRODUCT_USAGE,
             listener = object : CustomerSession.CustomerRetrievalListener {
                 override fun onCustomerRetrieved(customer: Customer) {
                     isShippingInfoSubmitted = true
-                    resultData.value = SaveCustomerShippingInfoResult.Success(customer)
+                    resultData.value = Result.success(customer)
                 }
 
                 override fun onError(
@@ -50,7 +51,7 @@ internal class PaymentFlowViewModel(
                     stripeError: StripeError?
                 ) {
                     isShippingInfoSubmitted = false
-                    resultData.value = SaveCustomerShippingInfoResult.Error(errorMessage)
+                    resultData.value = Result.failure(RuntimeException(errorMessage))
                 }
             }
         )
@@ -66,32 +67,22 @@ internal class PaymentFlowViewModel(
         shippingInfoValidator: PaymentSessionConfig.ShippingInformationValidator,
         shippingMethodsFactory: PaymentSessionConfig.ShippingMethodsFactory?,
         shippingInformation: ShippingInformation
-    ): LiveData<ValidateShippingInfoResult> {
-        val resultData = MutableLiveData<ValidateShippingInfoResult>()
+    ): LiveData<Result<List<ShippingMethod>>> {
+        val resultData = MutableLiveData<Result<List<ShippingMethod>>>()
         workScope.launch {
             val isValid = shippingInfoValidator.isValid(shippingInformation)
             if (isValid) {
                 val shippingMethods =
                     shippingMethodsFactory?.create(shippingInformation).orEmpty()
                 this@PaymentFlowViewModel.shippingMethods = shippingMethods
-                resultData.postValue(ValidateShippingInfoResult.Success(shippingMethods))
+                resultData.postValue(Result.success(shippingMethods))
             } else {
                 val errorMessage = shippingInfoValidator.getErrorMessage(shippingInformation)
                 this@PaymentFlowViewModel.shippingMethods = emptyList()
-                resultData.postValue(ValidateShippingInfoResult.Error(errorMessage))
+                resultData.postValue(Result.failure(RuntimeException(errorMessage)))
             }
         }
         return resultData
-    }
-
-    internal sealed class SaveCustomerShippingInfoResult {
-        data class Success(val customer: Customer) : SaveCustomerShippingInfoResult()
-        data class Error(val errorMessage: String) : SaveCustomerShippingInfoResult()
-    }
-
-    internal sealed class ValidateShippingInfoResult {
-        data class Success(val shippingMethods: List<ShippingMethod>) : ValidateShippingInfoResult()
-        data class Error(val errorMessage: String) : ValidateShippingInfoResult()
     }
 
     internal class Factory(

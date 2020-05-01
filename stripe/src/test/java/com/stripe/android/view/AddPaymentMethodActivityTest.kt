@@ -407,15 +407,13 @@ class AddPaymentMethodActivityTest {
 
         private fun createSuccessLiveData(
             paymentMethod: PaymentMethod
-        ): LiveData<AddPaymentMethodViewModel.PaymentMethodResult> {
-            return MutableLiveData(
-                AddPaymentMethodViewModel.PaymentMethodResult.Success(paymentMethod)
-            )
+        ): LiveData<Result<PaymentMethod>> {
+            return MutableLiveData(Result.success(paymentMethod))
         }
 
-        private fun createErrorLiveData(): LiveData<AddPaymentMethodViewModel.PaymentMethodResult> {
+        private fun createErrorLiveData(): LiveData<Result<PaymentMethod>> {
             return MutableLiveData(
-                AddPaymentMethodViewModel.PaymentMethodResult.Error(ERROR_MESSAGE)
+                Result.failure(RuntimeException(ERROR_MESSAGE))
             )
         }
     }
