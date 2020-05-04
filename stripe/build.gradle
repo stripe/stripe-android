@@ -3,7 +3,7 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-android-extensions'
     id 'checkstyle'
-    id 'org.jetbrains.dokka-android'
+    id 'org.jetbrains.dokka'
 
     id 'maven'
     id 'signing'
