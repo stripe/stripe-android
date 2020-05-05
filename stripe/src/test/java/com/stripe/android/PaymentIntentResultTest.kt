@@ -30,7 +30,6 @@ class PaymentIntentResultTest {
             isLiveMode = false,
             id = "pi_12345",
             currency = "usd",
-            objectType = "payment_intent",
             paymentMethodTypes = listOf("card"),
             status = StripeIntent.Status.Processing
         )

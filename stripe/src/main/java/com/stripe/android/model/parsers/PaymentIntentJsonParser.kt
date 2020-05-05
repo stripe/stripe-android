@@ -9,12 +9,12 @@ import org.json.JSONObject
 
 internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
     override fun parse(json: JSONObject): PaymentIntent? {
-        if (OBJECT_TYPE != json.optString(FIELD_OBJECT)) {
+        val objectType = optString(json, FIELD_OBJECT)
+        if (OBJECT_TYPE != objectType) {
             return null
         }
 
         val id = optString(json, FIELD_ID)
-        val objectType = optString(json, FIELD_OBJECT)
         val paymentMethodTypes = ModelJsonParser.jsonArrayToList(
             json.optJSONArray(FIELD_PAYMENT_METHOD_TYPES))
         val amount = StripeJsonUtils.optLong(json, FIELD_AMOUNT)
@@ -59,7 +59,6 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
 
         return PaymentIntent(
             id = id,
-            objectType = objectType,
             paymentMethodTypes = paymentMethodTypes,
             amount = amount,
             canceledAt = canceledAt,
