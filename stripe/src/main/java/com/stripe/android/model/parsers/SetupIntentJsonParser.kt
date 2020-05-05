@@ -26,7 +26,6 @@ internal class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
 
         return SetupIntent(
             id = StripeJsonUtils.optString(json, FIELD_ID),
-            objectType = objectType,
             created = json.optLong(FIELD_CREATED),
             clientSecret = StripeJsonUtils.optString(json, FIELD_CLIENT_SECRET),
             cancellationReason = SetupIntent.CancellationReason.fromCode(

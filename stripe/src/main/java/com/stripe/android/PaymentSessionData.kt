@@ -36,7 +36,7 @@ data class PaymentSessionData internal constructor(
     val shippingMethod: ShippingMethod? = null,
 
     /**
-     * @return the selected payment method for the associated [PaymentSession]
+     * The selected payment method for the associated [PaymentSession].
      */
     val paymentMethod: PaymentMethod? = null,
 
