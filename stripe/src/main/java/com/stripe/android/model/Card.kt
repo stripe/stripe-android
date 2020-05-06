@@ -15,183 +15,181 @@ import org.json.JSONObject
  */
 @Parcelize
 data class Card internal constructor(
-
     /**
-     * @return the [number] of this card
+     * the [number] of this card
      */
     val number: String?,
 
     /**
-     * @return the [cvc] for this card
+     * the [cvc] for this card
      */
     val cvc: String?,
 
     /**
-     * @return Two-digit number representing the card’s expiration month.
+     * Two-digit number representing the card’s expiration month.
      *
-     * [API Reference](https://stripe.com/docs/api/cards/object#card_object-exp_month)
+     * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-exp_month).
      */
     @get:IntRange(from = 1, to = 12)
     val expMonth: Int?,
 
     /**
-     * @return Four-digit number representing the card’s expiration year.
+     * Four-digit number representing the card’s expiration year.
      *
-     * [API Reference](https://stripe.com/docs/api/cards/object#card_object-exp_year)
+     * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-exp_year).
      */
     val expYear: Int?,
 
     /**
-     * @return Cardholder name.
+     * Cardholder name.
      *
-     * [API Reference](https://stripe.com/docs/api/cards/object#card_object-name)
+     * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-name).
      */
     val name: String?,
 
     /**
-     * @return Address line 1 (Street address/PO Box/Company name).
+     * Address line 1 (Street address/PO Box/Company name).
      *
-     * [API Reference](https://stripe.com/docs/api/cards/object#card_object-address_line1)
+     * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-address_line1).
      */
     val addressLine1: String?,
 
     /**
-     * @return If address_line1 was provided, results of the check: `pass`, `fail`, `unavailable`,
+     * If address_line1 was provided, results of the check: `pass`, `fail`, `unavailable`,
      * or `unchecked`.
      *
-     * [API Reference](https://stripe.com/docs/api/cards/object#card_object-address_line1_check)
+     * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-address_line1_check).
      */
     val addressLine1Check: String?,
 
     /**
-     * @return Address line 2 (Apartment/Suite/Unit/Building).
+     * Address line 2 (Apartment/Suite/Unit/Building).
      *
-     * [API Reference](https://stripe.com/docs/api/cards/object#card_object-address_line2)
+     * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-address_line2).
      */
     val addressLine2: String?,
 
     /**
-     * @return City/District/Suburb/Town/Village.
+     * City/District/Suburb/Town/Village.
      *
-     * [API Reference](https://stripe.com/docs/api/cards/object#card_object-address_city)
+     * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-address_city).
      */
     val addressCity: String?,
 
     /**
-     * @return State/County/Province/Region.
+     * State/County/Province/Region.
      *
-     * [API Reference](https://stripe.com/docs/api/cards/object#card_object-address_state)
+     * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-address_state).
      */
     val addressState: String?,
 
     /**
-     * @return ZIP or postal code.
+     * ZIP or postal code.
      *
-     * [API Reference](https://stripe.com/docs/api/cards/object#card_object-address_zip)
+     * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-address_zip).
      */
     val addressZip: String?,
 
     /**
-     * @return If `address_zip` was provided, results of the check: `pass`, `fail`, `unavailable`,
+     * If `address_zip` was provided, results of the check: `pass`, `fail`, `unavailable`,
      * or `unchecked`.
      *
-     * [API Reference](https://stripe.com/docs/api/cards/object#card_object-address_zip_check)
+     * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-address_zip_check).
      */
     val addressZipCheck: String?,
 
     /**
-     * @return Billing address country, if provided when creating card.
+     * Billing address country, if provided when creating card.
      *
-     * [API Reference](https://stripe.com/docs/api/cards/object#card_object-address_country)
+     * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-address_country).
      */
     val addressCountry: String?,
 
     /**
-     * @return The last four digits of the card.
+     * The last four digits of the card.
      *
-     * [API Reference](https://stripe.com/docs/api/cards/object#card_object-last4)
+     * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-last4).
      */
     @Size(4)
     val last4: String?,
 
     /**
-     * @return Card brand. Can be `"American Express"`, `"Diners Club"`, `"Discover"`, `"JCB"`,
-     * `"MasterCard"`, `"UnionPay"`, `"Visa"`, or `"Unknown"`.
+     * Card brand. See [CardBrand].
      *
-     * [API Reference](https://stripe.com/docs/api/cards/object#card_object-brand)
+     * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-brand).
      */
     val brand: CardBrand,
 
     /**
-     * @return Card funding type. Can be `credit`, `debit`, `prepaid`, or `unknown`.
+     * Card funding type. See [CardFunding].
      *
-     * [API Reference](https://stripe.com/docs/api/cards/object#card_object-funding)
+     * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-funding).
      */
     val funding: CardFunding?,
 
     /**
-     * @return Uniquely identifies this particular card number. You can use this attribute to
-     * check whether two customers who’ve signed up with you are using the same card number,
-     * for example.
+     * Uniquely identifies this particular card number. You can use this attribute to check whether
+     * two customers who’ve signed up with you are using the same card number, for example.
+     * For payment methods that tokenize card information (Apple Pay, Google Pay), the tokenized
+     * number might be provided instead of the underlying card number.
      *
-     * [API Reference](https://stripe.com/docs/api/cards/object#card_object-fingerprint)
+     * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-fingerprint).
      */
     val fingerprint: String?,
 
     /**
-     * @return Two-letter ISO code representing the country of the card. You could use this
+     * Two-letter ISO code representing the country of the card. You could use this
      * attribute to get a sense of the international breakdown of cards you’ve collected.
      *
-     * [API Reference](https://stripe.com/docs/api/cards/object#card_object-country)
+     * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-country).
      */
     val country: String?,
 
     /**
-     * @return Three-letter [ISO code for currency](https://stripe.com/docs/payouts). Only
+     * Three-letter [ISO code for currency](https://stripe.com/docs/payouts). Only
      * applicable on accounts (not customers or recipients). The card can be used as a transfer
      * destination for funds in this currency.
      *
-     * [API Reference](https://stripe.com/docs/api/cards/object#card_object-currency)
+     * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-currency).
      */
     val currency: String?,
 
     /**
-     * @return The ID of the customer that this card belongs to.
+     * The ID of the customer that this card belongs to.
      *
-     * [API Reference](https://stripe.com/docs/api/cards/object#card_object-customer)
+     * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-customer).
      */
     val customerId: String?,
 
     /**
-     * @return If a CVC was provided, results of the check: `pass`, `fail`, `unavailable`,
+     * If a CVC was provided, results of the check: `pass`, `fail`, `unavailable`,
      * or `unchecked`.
      *
-     * [API Reference](https://stripe.com/docs/api/cards/object#card_object-cvc_check)
+     * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-cvc_check).
      */
     val cvcCheck: String?,
 
     /**
-     * @return Unique identifier for the object.
+     * Unique identifier for the object.
      *
-     * [API Reference](https://stripe.com/docs/api/cards/object#card_object-id)
+     * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-id).
      */
     override val id: String?,
 
     internal val loggingTokens: Set<String> = emptySet(),
 
     /**
-     * @return If the card number is tokenized, this is the method that was used.
-     * Can be `apple_pay` or `google_pay`.
+     * If the card number is tokenized, this is the method that was used. See [TokenizationMethod].
      *
-     * [API Reference](https://stripe.com/docs/api/cards/object#card_object-tokenization_method)
+     * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-tokenization_method).
      */
     val tokenizationMethod: TokenizationMethod? = null,
 
     /**
-     * @return Set of key-value pairs that you can attach to an object. This can be useful fo
+     * Set of key-value pairs that you can attach to an object. This can be useful fo
      * storing additional information about the object in a structured format.
      *
-     * [API Reference](https://stripe.com/docs/api/cards/object#card_object-metadata)
+     * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-metadata).
      */
     val metadata: Map<String, String>?
 ) : StripeModel, StripePaymentSource, TokenParams(Token.TokenType.CARD, loggingTokens) {
