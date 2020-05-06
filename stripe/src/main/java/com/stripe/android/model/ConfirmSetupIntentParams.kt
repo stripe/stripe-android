@@ -16,22 +16,36 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 data class ConfirmSetupIntentParams internal constructor(
     @get:JvmSynthetic override val clientSecret: String,
+
+    /**
+     * ID of the payment method (a PaymentMethod, Card, or saved Source object) to attach to this
+     * SetupIntent.
+     */
     @get:JvmSynthetic internal val paymentMethodId: String? = null,
+
     @get:JvmSynthetic internal val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
-    private val returnUrl: String? = null,
+
+    /**
+     * The URL to redirect your customer back to after they authenticate on the payment method’s
+     * app or site. If you’d prefer to redirect to a mobile application, you can alternatively
+     * supply an application URI scheme. This parameter is only used for cards and other
+     * redirect-based payment methods.
+     */
+    var returnUrl: String? = null,
+
     private val useStripeSdk: Boolean = false,
 
     /**
      * ID of the mandate to be used for this payment.
      */
-    private val mandateId: String? = null,
+    var mandateId: String? = null,
 
     /**
      * This hash contains details about the Mandate to create.
      *
-     * [mandate_data](https://stripe.com/docs/api/setup_intents/confirm#confirm_setup_intent-mandate_data)
+     * See [mandate_data](https://stripe.com/docs/api/setup_intents/confirm#confirm_setup_intent-mandate_data).
      */
-    private val mandateData: MandateDataParams? = null
+    var mandateData: MandateDataParams? = null
 ) : ConfirmStripeIntentParams, Parcelable {
 
     override fun shouldUseStripeSdk(): Boolean {
@@ -42,22 +56,22 @@ data class ConfirmSetupIntentParams internal constructor(
         return copy(useStripeSdk = shouldUseStripeSdk)
     }
 
-    /**
-     * Create a string-keyed map representing this object that is
-     * ready to be sent over the network.
-     *
-     * @return a String-keyed map
-     */
     override fun toParamMap(): Map<String, Any> {
         return mapOf(
             PARAM_CLIENT_SECRET to clientSecret,
             PARAM_USE_STRIPE_SDK to useStripeSdk
         ).plus(
-            returnUrl?.let { mapOf(PARAM_RETURN_URL to it) }.orEmpty()
+            returnUrl?.let {
+                mapOf(PARAM_RETURN_URL to it)
+            }.orEmpty()
         ).plus(
-            mandateId?.let { mapOf(PARAM_MANDATE_ID to it) }.orEmpty()
+            mandateId?.let {
+                mapOf(PARAM_MANDATE_ID to it)
+            }.orEmpty()
         ).plus(
-            mandateDataParams?.let { mapOf(PARAM_MANDATE_DATA to it) }.orEmpty()
+            mandateDataParams?.let {
+                mapOf(PARAM_MANDATE_DATA to it)
+            }.orEmpty()
         ).plus(paymentMethodParamMap)
     }
 
