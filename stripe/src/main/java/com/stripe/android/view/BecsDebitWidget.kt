@@ -40,6 +40,9 @@ class BecsDebitWidget @JvmOverloads constructor(
         )
     }
 
+    /**
+     * See [ValidParamsCallback].
+     */
     var validParamsCallback: ValidParamsCallback = object : ValidParamsCallback {
         override fun onInputChanged(isValid: Boolean) {
             // no-op default implementation
@@ -189,8 +192,8 @@ class BecsDebitWidget @JvmOverloads constructor(
     }
 
     /**
-     * @return if the customer's input is valid, will return a [PaymentMethodCreateParams] instance;
-     * otherwise, will return `null`
+     * If the input is valid, will return a [PaymentMethodCreateParams] instance;
+     * otherwise, will return `null`.
      */
     val params: PaymentMethodCreateParams?
         get() {
@@ -221,6 +224,9 @@ class BecsDebitWidget @JvmOverloads constructor(
             )
         }
 
+    /**
+     * An interface for a callback object that will be called when the user's input changes.
+     */
     interface ValidParamsCallback {
         /**
          * @param isValid if the current input is valid
