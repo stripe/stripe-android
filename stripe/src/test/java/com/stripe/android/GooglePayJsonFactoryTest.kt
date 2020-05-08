@@ -176,6 +176,21 @@ class GooglePayJsonFactoryTest {
     }
 
     @Test
+    fun currencyCode_shouldBeCapitalized() {
+        val createPaymentDataRequestJson = factory.createPaymentDataRequest(
+            transactionInfo = GooglePayJsonFactory.TransactionInfo(
+                currencyCode = "usd",
+                totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final
+            )
+        )
+        val currencyCode = createPaymentDataRequestJson
+            .getJSONObject("transactionInfo")
+            .getString("currencyCode")
+        assertThat(currencyCode)
+            .isEqualTo("USD")
+    }
+
+    @Test
     fun shippingAddressAllowedCountryCodes_shouldBeCapitalized() {
         val createPaymentDataRequestJson = factory.createPaymentDataRequest(
             transactionInfo = GooglePayJsonFactory.TransactionInfo(
