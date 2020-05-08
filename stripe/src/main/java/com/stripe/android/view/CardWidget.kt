@@ -11,17 +11,14 @@ internal interface CardWidget {
     val cardBuilder: Card.Builder?
 
     /**
-     * Gets a [PaymentMethodCreateParams.Card] object from the user input, if all fields are
-     * valid. If not, returns `null`.
-     *
-     * @return a valid [PaymentMethodCreateParams.Card] object based on user input, or
-     * `null` if any field is invalid
+     * A [PaymentMethodCreateParams.Card] object from the user input, if all fields are valid.
+     * If not, returns `null`.
      */
     val paymentMethodCard: PaymentMethodCreateParams.Card?
 
     /**
-     * @return a valid [PaymentMethodCreateParams] object based on user input, or `null` if any
-     * field is invalid. The object will include any billing details that the user entered.
+     * A [PaymentMethodCreateParams] object from the user input,if all fields are valid.
+     * If not, returns `null`. The object will include any billing details that the user entered.
      */
     val paymentMethodCreateParams: PaymentMethodCreateParams?
 

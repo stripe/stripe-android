@@ -161,10 +161,7 @@ class CustomerSession @VisibleForTesting internal constructor(
     }
 
     /**
-     * Gets a cached customer, or `null` if the current customer has expired.
-     *
-     * @return the current value of [customer], or `null` if the customer object is
-     * expired.
+     * A cached [Customer], or `null` if the current customer has expired.
      */
     val cachedCustomer: Customer?
         get() {
