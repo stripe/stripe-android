@@ -22,7 +22,7 @@ class CvcEditText @JvmOverloads constructor(
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     /**
-     * @return the inputted CVC value if valid; otherwise, null
+     * The inputted CVC value if valid; otherwise, `null`.
      */
     val cvcValue: String?
         get() {

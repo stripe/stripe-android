@@ -10,7 +10,6 @@ import com.stripe.android.exception.CardException;
 import com.stripe.android.exception.InvalidRequestException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.AccountParams;
-import com.stripe.android.model.Address;
 import com.stripe.android.model.AddressFixtures;
 import com.stripe.android.model.BankAccount;
 import com.stripe.android.model.BankAccountTokenParamsFixtures;

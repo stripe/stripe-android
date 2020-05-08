@@ -20,8 +20,7 @@ internal class SelectShippingMethodWidget @JvmOverloads constructor(
     private val shippingMethodAdapter = ShippingMethodAdapter()
 
     /**
-     * @return The [ShippingMethod] selected by the customer or `null` if no option is
-     * selected.
+     * The [ShippingMethod] selected by the customer or `null` if no option is selected.
      */
     val selectedShippingMethod: ShippingMethod?
         get() = shippingMethodAdapter.selectedShippingMethod

@@ -95,7 +95,7 @@ internal class StripeColorUtils(private val context: Context) {
         }
 
         /**
-         * A crude mechanism by which we check whether or not a color is "dark."
+         * A crude mechanism by which we check whether or not a color is "dark".
          * This is subject to much interpretation, but we attempt to follow traditional
          * design standards.
          *
@@ -107,13 +107,13 @@ internal class StripeColorUtils(private val context: Context) {
          * and [RGB colour space](http://paulbourke.net/miscellaneous/colourspace/) for further reading.
          *
          * @param color an integer representation of a color
-         * @return `true` if the color is "dark," else [false]
+         * @return `true` if the color is "dark", else `false`
          */
         @JvmStatic
         fun isColorDark(@ColorInt color: Int): Boolean {
             val luminescence = 0.299 * Color.red(color) +
-                    0.587 * Color.green(color) +
-                    0.114 * Color.blue(color)
+                0.587 * Color.green(color) +
+                0.114 * Color.blue(color)
 
             // Because the colors are all hex integers.
             val luminescencePercentage = luminescence / 255

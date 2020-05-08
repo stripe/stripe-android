@@ -100,11 +100,9 @@ data class Source internal constructor(
     val sourceTypeModel: SourceTypeModel? = null,
 
     /**
-     * Gets the [SourceType] of this Source, as one of the enumerated values.
+     * The [SourceType] of this Source, as one of the enumerated values.
      * If a custom source type has been created, this returns [SourceType.UNKNOWN]. To get
      * the raw value of an [SourceType.UNKNOWN] type, use [typeRaw].
-     *
-     * @return the [SourceType] of this Source
      */
     @param:SourceType @field:SourceType @get:SourceType
     val type: String,

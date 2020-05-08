@@ -35,7 +35,7 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
     internal val countryAutocomplete = viewBinding.countryAutocomplete
 
     /**
-     * @return 2 digit country code of the country selected by this input.
+     * The 2 digit country code of the country selected by this input.
      */
     @VisibleForTesting
     var selectedCountry: Country?

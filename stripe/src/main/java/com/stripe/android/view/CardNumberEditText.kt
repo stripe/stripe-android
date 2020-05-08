@@ -60,11 +60,8 @@ class CardNumberEditText @JvmOverloads constructor(
         private set
 
     /**
-     * Gets a usable form of the card number. If the text is "4242 4242 4242 4242", this
-     * method will return "4242424242424242". If the card number is invalid, this returns
-     * `null`.
-     *
-     * @return a space-free version of the card number, or `null` if the number is invalid
+     * A normalized form of the card number. If the entered card number is "4242 4242 4242 4242",
+     * this will be "4242424242424242". If the entered card number is invalid, this is `null`.
      */
     val cardNumber: String?
         get() = if (isCardNumberValid) {

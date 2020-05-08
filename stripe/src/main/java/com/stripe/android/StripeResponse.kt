@@ -14,15 +14,15 @@ import org.json.JSONObject
  */
 internal data class StripeResponse internal constructor(
     /**
-     * @return the response code
+     * the response code
      */
     internal val code: Int,
     /**
-     * @return the response body
+     * the response body
      */
     internal val body: String?,
     /**
-     * @return the response headers
+     * the response headers
      */
     internal val headers: Map<String, List<String>> = emptyMap()
 ) {

@@ -23,8 +23,8 @@ internal abstract class StripeRequest {
         }
 
     /**
-     * @return if the HTTP method is [Method.GET], return URL with query string;
-     * otherwise, return the URL
+     * If the HTTP method is [Method.GET], this is the URL with query string;
+     * otherwise, just the URL.
      */
     internal val url: String
         @Throws(UnsupportedEncodingException::class, InvalidRequestException::class)

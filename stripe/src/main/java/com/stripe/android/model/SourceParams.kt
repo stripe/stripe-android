@@ -15,22 +15,25 @@ import org.json.JSONObject
  */
 class SourceParams private constructor(
     /**
-     * @return a custom type of this Source, if one has been set
+     * The type of the source to create.
      */
     @SourceType val typeRaw: String,
 
+    /**
+     * A set of identifiers representing the component that created this instance.
+     */
     internal val attribution: Set<String> = emptySet()
 ) : StripeParamsModel {
 
     /**
-     * @return The type of the source to create.
+     * The type of the source to create.
      */
     @get:SourceType
     @SourceType
     val type: String = asSourceType(typeRaw)
 
     /**
-     * @return Amount associated with the source. This is the amount for which the source will
+     * Amount associated with the source. This is the amount for which the source will
      * be chargeable once ready. Required for `single_use` sources. Not supported for `receiver`
      * type sources, where charge amount may not be specified until funds land.
      *
@@ -41,13 +44,13 @@ class SourceParams private constructor(
         private set
 
     /**
-     * @return a [Map] of the parameters specific to this type of source
+     * A [Map] of the parameters specific to the Source type.
      */
     var apiParameterMap: Map<String, Any?>? = null
         private set
 
     /**
-     * @return Three-letter ISO code for the currency associated with the source.
+     * Three-letter ISO code for the currency associated with the source.
      * This is the currency for which the source will be chargeable once ready.
      *
      * See [currency](https://stripe.com/docs/api/sources/create#create_source-currency)
@@ -70,7 +73,8 @@ class SourceParams private constructor(
         private set
 
     /**
-     * @return the custom metadata set on these params
+     * Set of key-value pairs that you can attach to an object. This can be useful for storing
+     * additional information about the object in a structured format.
      */
     var metaData: Map<String, String>? = null
         private set
@@ -78,7 +82,7 @@ class SourceParams private constructor(
     private var extraParams: Map<String, Any> = emptyMap()
 
     /**
-     * @return An optional token used to create the source. When passed, token properties will
+     * An optional token used to create the source. When passed, token properties will
      * override source parameters.
      *
      * See [token](https://stripe.com/docs/api/sources/create#create_source-token)
@@ -86,7 +90,7 @@ class SourceParams private constructor(
     private var token: String? = null
 
     /**
-     * @return Either `reusable` or `single_use`. Whether this source should be reusable or not.
+     * Either `reusable` or `single_use`. Whether this source should be reusable or not.
      * Some source types may or may not be reusable by construction, while others may leave the
      * option at creation. If an incompatible value is passed, an error will be returned.
      *
@@ -301,10 +305,10 @@ class SourceParams private constructor(
     }
 
     /**
-     * [owner](https://stripe.com/docs/api/sources/create#create_source-owner) param
-     *
      * Information about the owner of the payment instrument that may be used or required by
      * particular source types.
+     *
+     * See [owner](https://stripe.com/docs/api/sources/create#create_source-owner).
      */
     @Parcelize
     data class OwnerParams @JvmOverloads constructor(

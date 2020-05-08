@@ -78,7 +78,7 @@ open class StripeEditText @JvmOverloads constructor(
     private var errorMessageListener: ErrorMessageListener? = null
 
     /**
-     * @return the color used for error text.
+     * The color used for error text.
      */
     // It's possible that we need to verify this value again
     // in case the user programmatically changes the text color.
