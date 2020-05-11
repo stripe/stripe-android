@@ -45,8 +45,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         shippingDetails: ConfirmPaymentIntentParams.Shipping? = null,
         stripeAccountId: String? = null,
         existingPaymentMethodId: String? = null,
-        mandateDataParams: MandateDataParams? = null,
-        returnUrl: String = "example://return_url"
+        mandateDataParams: MandateDataParams? = null
     ) {
         requireNotNull(paymentMethodCreateParams ?: existingPaymentMethodId)
 
