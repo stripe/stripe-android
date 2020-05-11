@@ -2,7 +2,6 @@ package com.stripe.android.model
 
 import com.stripe.android.model.parsers.CustomerJsonParser
 import kotlinx.android.parcel.Parcelize
-import org.json.JSONException
 import org.json.JSONObject
 
 /**
@@ -30,11 +29,10 @@ data class Customer internal constructor(
                 return null
             }
 
-            return try {
-                fromJson(JSONObject(jsonString))
-            } catch (ignored: JSONException) {
-                null
-            }
+            return runCatching { JSONObject(jsonString) }
+                .getOrNull()?.let {
+                    fromJson(it)
+                }
         }
 
         @JvmStatic

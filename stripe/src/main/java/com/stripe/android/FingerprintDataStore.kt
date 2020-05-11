@@ -3,7 +3,6 @@ package com.stripe.android
 import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import org.json.JSONException
 import org.json.JSONObject
 
 internal interface FingerprintDataStore {
@@ -16,15 +15,13 @@ internal interface FingerprintDataStore {
         )
 
         override fun get(): LiveData<FingerprintData> {
-            val fingerprintData = try {
-                FingerprintData.fromJson(
-                    JSONObject(prefs.getString(KEY_DATA, null).orEmpty())
-                )
-            } catch (e: JSONException) {
-                FingerprintData()
-            }
-
-            return MutableLiveData(fingerprintData)
+            return MutableLiveData(
+                runCatching {
+                    FingerprintData.fromJson(
+                        JSONObject(prefs.getString(KEY_DATA, null).orEmpty())
+                    )
+                }.getOrDefault(FingerprintData())
+            )
         }
 
         override fun save(fingerprintData: FingerprintData) {

@@ -3,13 +3,12 @@ package com.stripe.android
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.StripeJsonUtils.optString
 import com.stripe.android.model.parsers.ModelJsonParser
-import org.json.JSONException
 import org.json.JSONObject
 
 internal class StripeErrorJsonParser : ModelJsonParser<StripeError> {
 
     override fun parse(json: JSONObject): StripeError {
-        return try {
+        return runCatching {
             json.getJSONObject(FIELD_ERROR).let { errorObject ->
                 StripeError(
                     charge = optString(errorObject, FIELD_CHARGE),
@@ -21,11 +20,11 @@ internal class StripeErrorJsonParser : ModelJsonParser<StripeError> {
                     docUrl = optString(errorObject, FIELD_DOC_URL)
                 )
             }
-        } catch (jsonException: JSONException) {
+        }.getOrDefault(
             StripeError(
                 message = MALFORMED_RESPONSE_MESSAGE
             )
-        }
+        )
     }
 
     internal companion object {
