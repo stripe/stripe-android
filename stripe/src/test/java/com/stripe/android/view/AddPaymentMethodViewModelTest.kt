@@ -26,9 +26,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class AddPaymentMethodViewModelTest {
 
-    private val context: Context by lazy {
-        ApplicationProvider.getApplicationContext<Context>()
-    }
+    private val context = ApplicationProvider.getApplicationContext<Context>()
 
     private val customerSession: CustomerSession = mock()
     private val paymentMethodRetrievalCaptor: KArgumentCaptor<CustomerSession.PaymentMethodRetrievalListener> = argumentCaptor()
@@ -123,7 +121,7 @@ class AddPaymentMethodViewModelTest {
         return AddPaymentMethodViewModel(
             stripe,
             customerSession,
-            AddPaymentMethodActivityStarter.Args.DEFAULT,
+            AddPaymentMethodActivityStarter.Args.Builder().build(),
             translator
         )
     }

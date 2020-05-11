@@ -47,13 +47,8 @@ class ShippingInfoWidgetTest {
 
     private val ephemeralKeyProvider: EphemeralKeyProvider = mock()
 
-    private val context: Context by lazy {
-        ApplicationProvider.getApplicationContext<Context>()
-    }
-
-    private val activityScenarioFactory: ActivityScenarioFactory by lazy {
-        ActivityScenarioFactory(context)
-    }
+    private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val activityScenarioFactory = ActivityScenarioFactory(context)
 
     @BeforeTest
     fun setup() {

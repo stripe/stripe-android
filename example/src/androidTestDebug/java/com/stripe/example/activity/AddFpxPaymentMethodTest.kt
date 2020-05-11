@@ -23,10 +23,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class AddFpxPaymentMethodTest {
-
-    private val context: Context by lazy {
-        ApplicationProvider.getApplicationContext<Context>()
-    }
+    private val context = ApplicationProvider.getApplicationContext<Context>()
 
     @get:Rule
     val activityScenarioRule: ActivityScenarioRule<LauncherActivity> = activityScenarioRule()

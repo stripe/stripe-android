@@ -35,12 +35,8 @@ class PaymentFlowActivityTest {
     private val shippingInformationValidator: PaymentSessionConfig.ShippingInformationValidator = mock()
     private val shippingMethodsFactory: PaymentSessionConfig.ShippingMethodsFactory = mock()
 
-    private val context: Context by lazy {
-        ApplicationProvider.getApplicationContext<Context>()
-    }
-    private val activityScenarioFactory: ActivityScenarioFactory by lazy {
-        ActivityScenarioFactory(ApplicationProvider.getApplicationContext())
-    }
+    private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val activityScenarioFactory = ActivityScenarioFactory(context)
 
     @BeforeTest
     fun setup() {

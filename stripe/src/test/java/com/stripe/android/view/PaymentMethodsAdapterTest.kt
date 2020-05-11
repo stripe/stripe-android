@@ -29,9 +29,7 @@ class PaymentMethodsAdapterTest {
 
     private val paymentMethodsAdapter: PaymentMethodsAdapter = PaymentMethodsAdapter(ARGS)
 
-    private val context: Context by lazy {
-        ApplicationProvider.getApplicationContext<Context>()
-    }
+    private val context = ApplicationProvider.getApplicationContext<Context>()
 
     @BeforeTest
     fun setup() {
