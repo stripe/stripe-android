@@ -160,11 +160,8 @@ class CardInputWidget @JvmOverloads constructor(
         }
 
     /**
-     * Gets a [PaymentMethodCreateParams.Card] object from the user input, if all fields are
-     * valid. If not, returns `null`.
-     *
-     * @return a valid [PaymentMethodCreateParams.Card] object based on user input, or
-     * `null` if any field is invalid
+     * A [PaymentMethodCreateParams.Card] representing the card details if all fields are valid;
+     * otherwise `null`
      */
     override val paymentMethodCard: PaymentMethodCreateParams.Card?
         get() {
@@ -190,6 +187,10 @@ class CardInputWidget @JvmOverloads constructor(
             }
         }
 
+    /**
+     * A [PaymentMethodCreateParams] representing the card details and postal code if all fields
+     * are valid; otherwise `null`
+     */
     override val paymentMethodCreateParams: PaymentMethodCreateParams?
         get() {
             return paymentMethodCard?.let { card ->
@@ -198,17 +199,18 @@ class CardInputWidget @JvmOverloads constructor(
         }
 
     /**
-     * Gets a [Card] object from the user input, if all fields are valid. If not, returns
-     * `null`.
-     *
-     * @return a valid [Card] object based on user input, or `null` if any field is
-     * invalid
+     * A [Card] representing the card details and postal code if all fields are valid;
+     * otherwise `null`
      */
     override val card: Card?
         get() {
             return cardBuilder?.build()
         }
 
+    /**
+     * A [Card.Builder] representing the card details and postal code if all fields are valid;
+     * otherwise `null`
+     */
     override val cardBuilder: Card.Builder?
         get() {
             val cardNumber = cardNumberEditText.cardNumber

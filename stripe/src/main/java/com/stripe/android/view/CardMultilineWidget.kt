@@ -119,11 +119,8 @@ class CardMultilineWidget @JvmOverloads constructor(
     }
 
     /**
-     * Gets a [PaymentMethodCreateParams.Card] object from the user input, if all fields are
-     * valid. If not, returns `null`.
-     *
-     * @return a valid [PaymentMethodCreateParams.Card] object based on user input, or
-     * `null` if any field is invalid
+     * A [PaymentMethodCreateParams.Card] representing the card details if all fields are valid;
+     * otherwise `null`
      */
     override val paymentMethodCard: PaymentMethodCreateParams.Card?
         get() {
@@ -139,8 +136,8 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
 
     /**
-     * @return a valid [PaymentMethodCreateParams] object based on user input, or `null` if
-     * any field is invalid. The object will include any billing details that the user entered.
+     * A [PaymentMethodCreateParams] representing the card details and postal code if all fields
+     * are valid; otherwise `null`
      */
     override val paymentMethodCreateParams: PaymentMethodCreateParams?
         get() {
@@ -159,8 +156,8 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
 
     /**
-     * @return a valid [PaymentMethod.BillingDetails.Builder] object based on user input, or
-     * `null` if any field is invalid
+     * A [PaymentMethod.BillingDetails.Builder] representing the card details and postal code if all fields are valid;
+     * otherwise `null`
      */
     val paymentMethodBillingDetailsBuilder: PaymentMethod.BillingDetails.Builder?
         get() = if (shouldShowPostalCode && validateAllFields()) {
@@ -174,17 +171,18 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
 
     /**
-     * Gets a [Card] object from the user input, if all fields are valid. If not, returns
-     * `null`.
-     *
-     * @return a valid [Card] object based on user input, or `null` if any field is
-     * invalid
+     * A [Card] representing the card details and postal code if all fields are valid;
+     * otherwise `null`
      */
     override val card: Card?
         get() {
             return cardBuilder?.build()
         }
 
+    /**
+     * A [Card.Builder] representing the card details and postal code if all fields are valid;
+     * otherwise `null`
+     */
     override val cardBuilder: Card.Builder?
         get() {
             if (!validateAllFields()) {

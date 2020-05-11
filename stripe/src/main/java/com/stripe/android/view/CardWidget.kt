@@ -6,19 +6,27 @@ import com.stripe.android.model.Card
 import com.stripe.android.model.PaymentMethodCreateParams
 
 internal interface CardWidget {
+    /**
+     * A [Card] representing the card details and postal code if all fields are valid;
+     * otherwise `null`
+     */
     val card: Card?
 
+    /**
+     * A [Card.Builder] representing the card details and postal code if all fields are valid;
+     * otherwise `null`
+     */
     val cardBuilder: Card.Builder?
 
     /**
-     * A [PaymentMethodCreateParams.Card] object from the user input, if all fields are valid.
-     * If not, returns `null`.
+     * A [PaymentMethodCreateParams.Card] representing the card details if all fields are valid;
+     * otherwise `null`
      */
     val paymentMethodCard: PaymentMethodCreateParams.Card?
 
     /**
-     * A [PaymentMethodCreateParams] object from the user input,if all fields are valid.
-     * If not, returns `null`. The object will include any billing details that the user entered.
+     * A [PaymentMethodCreateParams] representing the card details and postal code if all fields
+     * are valid; otherwise `null`
      */
     val paymentMethodCreateParams: PaymentMethodCreateParams?
 
