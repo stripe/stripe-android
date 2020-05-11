@@ -304,21 +304,16 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     }
 
     internal fun createNameAndVersionParams(): Map<String, Any> {
-        return if (packageManager != null) {
-            try {
-                createNameAndVersionParams(packageManager)
-            } catch (nameNotFound: PackageManager.NameNotFoundException) {
+        return packageManager?.let {
+            runCatching {
+                createNameAndVersionParams(it)
+            }.getOrDefault(
                 mapOf(
                     FIELD_APP_NAME to UNKNOWN,
                     FIELD_APP_VERSION to UNKNOWN
                 )
-            }
-        } else {
-            mapOf(
-                FIELD_APP_NAME to NO_CONTEXT,
-                FIELD_APP_VERSION to NO_CONTEXT
             )
-        }
+        } ?: DEFAULT_APP_DATA
     }
 
     private fun createNameAndVersionParams(packageManager: PackageManager): Map<String, Any> {
@@ -398,5 +393,10 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
                 FIELD_INTENT_ID to intentId
             )
         }
+
+        private val DEFAULT_APP_DATA = mapOf(
+            FIELD_APP_NAME to NO_CONTEXT,
+            FIELD_APP_VERSION to NO_CONTEXT
+        )
     }
 }

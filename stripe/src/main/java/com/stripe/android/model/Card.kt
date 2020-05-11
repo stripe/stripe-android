@@ -7,7 +7,6 @@ import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.parsers.CardJsonParser
 import java.util.Calendar
 import kotlinx.android.parcel.Parcelize
-import org.json.JSONException
 import org.json.JSONObject
 
 /**
@@ -538,11 +537,10 @@ data class Card internal constructor(
          */
         @JvmStatic
         fun fromString(jsonString: String): Card? {
-            return try {
-                val jsonObject = JSONObject(jsonString)
-                fromJson(jsonObject)
-            } catch (ignored: JSONException) {
-                null
+            return runCatching {
+                JSONObject(jsonString)
+            }.getOrNull()?.let {
+                fromJson(it)
             }
         }
 

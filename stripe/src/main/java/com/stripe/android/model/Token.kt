@@ -5,7 +5,6 @@ import com.stripe.android.model.Token.TokenType
 import com.stripe.android.model.parsers.TokenJsonParser
 import java.util.Date
 import kotlinx.android.parcel.Parcelize
-import org.json.JSONException
 import org.json.JSONObject
 
 /**
@@ -73,10 +72,11 @@ data class Token internal constructor(
             if (jsonString == null) {
                 return null
             }
-            return try {
-                fromJson(JSONObject(jsonString))
-            } catch (exception: JSONException) {
-                null
+
+            return runCatching {
+                JSONObject(jsonString)
+            }.getOrNull()?.let {
+                fromJson(it)
             }
         }
 
