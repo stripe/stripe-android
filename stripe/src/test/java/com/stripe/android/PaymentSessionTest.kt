@@ -359,7 +359,7 @@ class PaymentSessionTest {
         callback: (ActivityScenario<out ComponentActivity>) -> Unit
     ) {
         activityScenarioFactory.create<PaymentMethodsActivity>(
-            PaymentMethodsActivityStarter.Args.DEFAULT
+            PaymentMethodsActivityStarter.Args.Builder().build()
         ).use(callback)
     }
 
