@@ -129,7 +129,7 @@ class GooglePayJsonFactory constructor(
         transactionInfo: TransactionInfo
     ): JSONObject {
         return JSONObject()
-            .put("currencyCode", transactionInfo.currencyCode)
+            .put("currencyCode", transactionInfo.currencyCode.toUpperCase(Locale.ROOT))
             .put("totalPriceStatus", transactionInfo.totalPriceStatus.code)
             .apply {
                 transactionInfo.countryCode?.let {
@@ -381,7 +381,7 @@ class GooglePayJsonFactory constructor(
         internal val merchantName: String? = null
     ) : Parcelable
 
-    companion object {
+    private companion object {
         private const val API_VERSION = 2
         private const val API_VERSION_MINOR = 0
 
