@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 14.4.2 - unreleased
+* [#2475](https://github.com/stripe/stripe-android/pull/2475) Support focusedByDefault in CardInputWidget
+    * Fixes #2463 on Android API level 26 and above
+
 ## 14.4.1 - 2020-04-30
 * [#2441](https://github.com/stripe/stripe-android/pull/2441) Catch `IllegalArgumentException` in `ApiOperation`
 * [#2442](https://github.com/stripe/stripe-android/pull/2442) Capitalize `GooglePayJsonFactory`'s `allowedCountryCodes`
