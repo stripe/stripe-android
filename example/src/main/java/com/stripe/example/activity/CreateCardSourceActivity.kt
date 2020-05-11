@@ -104,14 +104,12 @@ class CreateCardSourceActivity : AppCompatActivity() {
                 viewBinding.createButton.isEnabled = true
                 viewBinding.progressBar.visibility = View.INVISIBLE
 
-                when (result) {
-                    is SourceViewModel.SourceResult.Success -> {
-                        onSourceCreated(result.source)
+                result.fold(
+                    onSuccess = ::onSourceCreated,
+                    onFailure = {
+                        showSnackbar(it.message.orEmpty())
                     }
-                    is SourceViewModel.SourceResult.Error -> {
-                        showSnackbar(result.e.message.orEmpty())
-                    }
-                }
+                )
             }
         )
     }
@@ -152,14 +150,12 @@ class CreateCardSourceActivity : AppCompatActivity() {
             Observer { result ->
                 viewBinding.progressBar.visibility = View.INVISIBLE
 
-                when (result) {
-                    is SourceViewModel.SourceResult.Success -> {
-                        authenticateSource(result.source)
+                result.fold(
+                    onSuccess = ::authenticateSource,
+                    onFailure = {
+                        showSnackbar(it.message.orEmpty())
                     }
-                    is SourceViewModel.SourceResult.Error -> {
-                        showSnackbar(result.e.message.orEmpty())
-                    }
-                }
+                )
             }
         )
     }
@@ -181,7 +177,7 @@ class CreateCardSourceActivity : AppCompatActivity() {
         val cardBrand = CardBrand.fromCode(typeData["brand"] as String?)
         return MaterialAlertDialogBuilder(this)
             .setTitle(this.getString(R.string.authentication_dialog_title))
-            .setMessage(this.getString(
+            .setMessage(getString(
                 R.string.authentication_dialog_message, cardBrand.displayName, typeData["last4"]
             ))
             .setIcon(cardBrand.icon)

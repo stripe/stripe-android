@@ -42,16 +42,15 @@ class KlarnaSourceActivity : AppCompatActivity() {
             viewBinding.progressBar.visibility = View.VISIBLE
             createKlarnaSource().observe(this, Observer { result ->
                 viewBinding.progressBar.visibility = View.INVISIBLE
-                when (result) {
-                    is SourceViewModel.SourceResult.Success -> {
-                        val source = result.source
+                result.fold(
+                    onSuccess = { source ->
                         logSource(source)
                         stripe.authenticateSource(this, source)
+                    },
+                    onFailure = {
+                        viewBinding.sourceResult.text = it.localizedMessage
                     }
-                    is SourceViewModel.SourceResult.Error -> {
-                        viewBinding.sourceResult.text = result.e.localizedMessage
-                    }
-                }
+                )
             })
         }
 
@@ -59,14 +58,7 @@ class KlarnaSourceActivity : AppCompatActivity() {
             viewBinding.progressBar.visibility = View.VISIBLE
             viewModel.fetchSource(viewModel.source).observe(this, Observer { result ->
                 viewBinding.progressBar.visibility = View.INVISIBLE
-                when (result) {
-                    is SourceViewModel.SourceResult.Success -> {
-                        logSource(result.source)
-                    }
-                    is SourceViewModel.SourceResult.Error -> {
-                        logException(result.e)
-                    }
-                }
+                result.fold(::logSource, ::logException)
             })
         }
     }
@@ -110,11 +102,11 @@ class KlarnaSourceActivity : AppCompatActivity() {
         """.trimIndent()
     }
 
-    private fun logException(ex: Exception) {
-        viewBinding.sourceResult.text = ex.localizedMessage
+    private fun logException(throwable: Throwable) {
+        viewBinding.sourceResult.text = throwable.localizedMessage
     }
 
-    private fun createKlarnaSource(): LiveData<SourceViewModel.SourceResult> {
+    private fun createKlarnaSource(): LiveData<Result<Source>> {
         return viewModel.createSource(SourceParams.createKlarna(
             returnUrl = RETURN_URL,
             currency = "gbp",
