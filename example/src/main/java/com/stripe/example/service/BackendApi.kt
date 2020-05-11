@@ -1,6 +1,6 @@
 package com.stripe.example.service
 
-import io.reactivex.Observable
+import io.reactivex.Single
 import okhttp3.ResponseBody
 import retrofit2.http.FieldMap
 import retrofit2.http.FormUrlEncoded
@@ -13,13 +13,13 @@ interface BackendApi {
 
     @FormUrlEncoded
     @POST("ephemeral_keys")
-    fun createEphemeralKey(@FieldMap apiVersionMap: HashMap<String, String>): Observable<ResponseBody>
+    fun createEphemeralKey(@FieldMap apiVersionMap: HashMap<String, String>): Single<ResponseBody>
 
     @FormUrlEncoded
     @POST("create_payment_intent")
-    fun createPaymentIntent(@FieldMap params: MutableMap<String, Any>): Observable<ResponseBody>
+    fun createPaymentIntent(@FieldMap params: MutableMap<String, String>): Single<ResponseBody>
 
     @FormUrlEncoded
     @POST("create_setup_intent")
-    fun createSetupIntent(@FieldMap params: MutableMap<String, Any>): Observable<ResponseBody>
+    fun createSetupIntent(@FieldMap params: MutableMap<String, String>): Single<ResponseBody>
 }
