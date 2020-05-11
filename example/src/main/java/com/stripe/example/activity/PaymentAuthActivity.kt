@@ -46,16 +46,16 @@ class PaymentAuthActivity : StripeIntentActivity() {
         viewBinding.confirmWith3ds2Button.setOnClickListener {
             createAndConfirmPaymentIntent("us",
                 confirmParams3ds2,
-                stripeAccountId = stripeAccountId,
-                shippingDetails = SHIPPING)
+                shippingDetails = SHIPPING,
+                stripeAccountId = stripeAccountId)
         }
 
         viewBinding.confirmWithNewCardButton.setOnClickListener {
             viewBinding.cardInputWidget.paymentMethodCreateParams?.let {
                 createAndConfirmPaymentIntent("us",
                     it,
-                    stripeAccountId = stripeAccountId,
-                    shippingDetails = SHIPPING)
+                    shippingDetails = SHIPPING,
+                    stripeAccountId = stripeAccountId)
             }
         }
 
