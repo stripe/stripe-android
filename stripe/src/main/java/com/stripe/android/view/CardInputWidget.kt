@@ -707,7 +707,7 @@ class CardInputWidget @JvmOverloads constructor(
                 a.recycle()
             }
         } else {
-            shouldRequestFocus = false
+            shouldRequestFocus = true
         }
 
         cardHintText?.let {
