@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import android.content.Context
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.annotation.StringDef
@@ -10,7 +11,6 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.Token
 import com.stripe.android.stripe3ds2.transaction.ProtocolErrorEvent
 import com.stripe.android.stripe3ds2.transaction.RuntimeErrorEvent
-import java.util.HashMap
 
 /**
  * Util class to create logging items, which are fed as [Map][java.util.Map] objects in
@@ -18,13 +18,13 @@ import java.util.HashMap
  */
 internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     private val packageManager: PackageManager?,
-    private val packageName: String?,
+    private val packageName: String,
     private val publishableKey: String
 ) {
 
     internal constructor(context: Context, publishableKey: String) : this(
         context.applicationContext.packageManager,
-        context.applicationContext.packageName,
+        context.applicationContext.packageName.orEmpty(),
         publishableKey
     )
 
@@ -260,7 +260,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
         extraParams: Map<String, Any>? = null
     ): Map<String, Any> {
         return createStandardParams(event)
-            .plus(createNameAndVersionParams())
+            .plus(createAppDataParams())
             .plus(
                 productUsageTokens.takeUnless { it.isNullOrEmpty() }?.let {
                     mapOf(FIELD_PRODUCT_USAGE to it.toList())
@@ -303,44 +303,28 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
         )
     }
 
-    internal fun createNameAndVersionParams(): Map<String, Any> {
-        return packageManager?.let {
+    internal fun createAppDataParams(): Map<String, Any> {
+        return packageManager?.let { packageManager ->
             runCatching {
-                createNameAndVersionParams(it)
-            }.getOrDefault(
+                val packageInfo = packageManager.getPackageInfo(packageName, 0)
                 mapOf(
-                    FIELD_APP_NAME to UNKNOWN,
-                    FIELD_APP_VERSION to UNKNOWN
+                    FIELD_APP_NAME to getAppName(packageInfo, packageManager),
+                    FIELD_APP_VERSION to packageInfo.versionCode
                 )
-            )
-        } ?: DEFAULT_APP_DATA
+            }.getOrNull()
+        }.orEmpty()
     }
 
-    private fun createNameAndVersionParams(packageManager: PackageManager): Map<String, Any> {
-        val paramsObject = HashMap<String, Any>(2)
-        val info = packageManager.getPackageInfo(packageName, 0)
-
-        val nameString: String?
-        if (info.applicationInfo != null) {
-            val name = info.applicationInfo.loadLabel(packageManager)
-            nameString = name.toString()
-            paramsObject[FIELD_APP_NAME] = nameString
-        } else {
-            nameString = null
-        }
-
-        if (nameString.isNullOrBlank()) {
-            paramsObject[FIELD_APP_NAME] = info.packageName
-        }
-
-        return paramsObject
-            .plus(FIELD_APP_VERSION to info.versionCode)
+    private fun getAppName(
+        packageInfo: PackageInfo,
+        packageManager: PackageManager
+    ): CharSequence {
+        return packageInfo.applicationInfo?.loadLabel(packageManager).takeUnless {
+            it.isNullOrBlank()
+        } ?: packageInfo.packageName
     }
 
     internal companion object {
-        internal const val UNKNOWN = "unknown"
-        internal const val NO_CONTEXT = "no_context"
-
         internal const val FIELD_PRODUCT_USAGE = "product_usage"
         internal const val FIELD_ANALYTICS_UA = "analytics_ua"
         internal const val FIELD_APP_NAME = "app_name"
@@ -393,10 +377,5 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
                 FIELD_INTENT_ID to intentId
             )
         }
-
-        private val DEFAULT_APP_DATA = mapOf(
-            FIELD_APP_NAME to NO_CONTEXT,
-            FIELD_APP_VERSION to NO_CONTEXT
-        )
     }
 }
