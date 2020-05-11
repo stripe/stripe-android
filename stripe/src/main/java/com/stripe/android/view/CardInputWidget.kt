@@ -688,6 +688,7 @@ class CardInputWidget @JvmOverloads constructor(
         @ColorInt var errorColorInt = cardNumberEditText.defaultErrorColorInt
         cardBrandView.tintColorInt = cardNumberEditText.hintTextColors.defaultColor
         var cardHintText: String? = null
+        val shouldRequestFocus: Boolean
         if (attrs != null) {
             val a = context.theme.obtainStyledAttributes(
                 attrs,
@@ -701,9 +702,12 @@ class CardInputWidget @JvmOverloads constructor(
                 )
                 errorColorInt = a.getColor(R.styleable.CardInputView_cardTextErrorColor, errorColorInt)
                 cardHintText = a.getString(R.styleable.CardInputView_cardHintText)
+                shouldRequestFocus = a.getBoolean(R.styleable.CardInputView_android_focusedByDefault, true)
             } finally {
                 a.recycle()
             }
+        } else {
+            shouldRequestFocus = true
         }
 
         cardHintText?.let {
@@ -773,7 +777,9 @@ class CardInputWidget @JvmOverloads constructor(
 
         allFields.forEach { it.addTextChangedListener(inputChangeTextWatcher) }
 
-        cardNumberEditText.requestFocus()
+        if (shouldRequestFocus) {
+            cardNumberEditText.requestFocus()
+        }
     }
 
     /**
