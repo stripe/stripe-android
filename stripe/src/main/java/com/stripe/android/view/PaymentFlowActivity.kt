@@ -120,18 +120,18 @@ class PaymentFlowActivity : StripeActivity() {
     private fun onShippingInfoValidated(shippingMethods: List<ShippingMethod>) {
         viewModel.paymentSessionData.shippingInformation?.let { shippingInfo ->
             viewModel.saveCustomerShippingInformation(shippingInfo)
-                .observe(this, Observer {
-                    when (it) {
-                        is PaymentFlowViewModel.SaveCustomerShippingInfoResult.Success -> {
+                .observe(this, Observer { result ->
+                    result.fold(
+                        onSuccess = {
                             onShippingInfoSaved(
-                                it.customer.shippingInformation,
+                                it.shippingInformation,
                                 shippingMethods
                             )
+                        },
+                        onFailure = {
+                            showError(it.message.orEmpty())
                         }
-                        is PaymentFlowViewModel.SaveCustomerShippingInfoResult.Error -> {
-                            showError(it.errorMessage)
-                        }
-                    }
+                    )
                 })
         }
     }
@@ -203,16 +203,15 @@ class PaymentFlowActivity : StripeActivity() {
             shippingMethodsFactory,
             shippingInformation
         ).observe(this, Observer {
-            when (it) {
-                is PaymentFlowViewModel.ValidateShippingInfoResult.Success -> {
-                    // show shipping methods screen
-                    onShippingInfoValidated(it.shippingMethods)
-                }
-                is PaymentFlowViewModel.ValidateShippingInfoResult.Error -> {
+            it.fold(
+                // show shipping methods screen
+                onSuccess = ::onShippingInfoValidated,
+
+                onFailure = { t ->
                     // show error on current screen
-                    onShippingInfoError(it.errorMessage)
+                    onShippingInfoError(t.message)
                 }
-            }
+            )
         })
     }
 

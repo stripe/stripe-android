@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.CustomerSession
 import com.stripe.android.databinding.PaymentMethodsActivityBinding
+import com.stripe.android.exception.StripeException
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.view.i18n.TranslatorManager
 
@@ -177,18 +178,23 @@ class PaymentMethodsActivity : AppCompatActivity() {
     }
 
     private fun fetchCustomerPaymentMethods() {
-        viewModel.getPaymentMethods().observe(this, Observer {
-            when (it) {
-                is PaymentMethodsViewModel.Result.Success -> {
-                    adapter.setPaymentMethods(it.paymentMethods)
+        viewModel.getPaymentMethods().observe(this, Observer { result ->
+            result.fold(
+                onSuccess = { adapter.setPaymentMethods(it) },
+                onFailure = {
+                    alertDisplayer.show(
+                        when (it) {
+                            is StripeException -> {
+                                TranslatorManager.getErrorMessageTranslator()
+                                    .translate(it.statusCode, it.message, it.stripeError)
+                            }
+                            else -> {
+                                it.message.orEmpty()
+                            }
+                        }
+                    )
                 }
-                is PaymentMethodsViewModel.Result.Error -> {
-                    val exception = it.exception
-                    val displayedError = TranslatorManager.getErrorMessageTranslator()
-                        .translate(exception.statusCode, exception.message, exception.stripeError)
-                    alertDisplayer.show(displayedError)
-                }
-            }
+            )
         })
     }
 
