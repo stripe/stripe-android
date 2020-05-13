@@ -24,6 +24,7 @@ import com.stripe.android.stripe3ds2.transaction.CompletionEvent
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.ProtocolErrorEvent
 import com.stripe.android.stripe3ds2.transaction.RuntimeErrorEvent
+import com.stripe.android.stripe3ds2.transaction.Stripe3ds2ActivityStarterHost
 import com.stripe.android.stripe3ds2.transaction.StripeChallengeParameters
 import com.stripe.android.stripe3ds2.transaction.StripeChallengeStatusReceiver
 import com.stripe.android.stripe3ds2.transaction.Transaction
@@ -685,10 +686,16 @@ internal class StripePaymentController internal constructor(
                 it.acsTransactionId = ares.acsTransId
             }
 
-            host.activity?.let { activity ->
+            val host = host.fragment?.let { fragment ->
+                Stripe3ds2ActivityStarterHost(fragment)
+            } ?: host.activity?.let { activity ->
+                Stripe3ds2ActivityStarterHost(activity)
+            }
+
+            host?.let {
                 challengeFlowStarter.start(Runnable {
                     transaction.doChallenge(
-                        activity,
+                        it,
                         challengeParameters,
                         PaymentAuth3ds2ChallengeStatusReceiver.create(
                             stripeRepository,

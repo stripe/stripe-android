@@ -1,6 +1,5 @@
 package com.stripe.example.activity
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.stripe.example.R
@@ -42,11 +41,6 @@ class FragmentExamplesActivity : AppCompatActivity() {
         fragment?.let {
             supportFragmentManager.putFragment(outState, STATE_FRAGMENT, it)
         }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        fragment?.onActivityResult(requestCode, resultCode, data)
     }
 
     private companion object {
