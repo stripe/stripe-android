@@ -131,7 +131,8 @@ data class PaymentMethod internal constructor(
         Bancontact("bancontact", isReusable = false),
         Giropay("giropay", isReusable = false),
         Eps("eps", isReusable = false),
-        Oxxo("oxxo", isReusable = false);
+        Oxxo("oxxo", isReusable = false),
+        Alipay("alipay", isReusable = false);
 
         override fun toString(): String {
             return code
