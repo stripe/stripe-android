@@ -1,7 +1,9 @@
 package com.stripe.android.model
 
 import android.net.Uri
+import android.os.Parcelable
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
+import com.stripe.android.utils.Either
 import java.util.regex.Pattern
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.parcel.RawValue
@@ -140,11 +142,12 @@ data class PaymentIntent internal constructor(
     internal val nextActionData: NextActionData? = null
 ) : StripeIntent {
     override val nextActionType: StripeIntent.NextActionType?
-        get() {
-            return nextAction?.let {
-                StripeIntent.NextActionType.fromCode(it[FIELD_NEXT_ACTION_TYPE] as String?)
+        get() = when (nextActionData) {
+                is NextActionData.SdkData -> StripeIntent.NextActionType.UseStripeSdk
+                is NextActionData.RedirectToUrl -> StripeIntent.NextActionType.RedirectToUrl
+                is NextActionData.DisplayOxxoDetails -> StripeIntent.NextActionType.DisplayOxxoDetails
+                else -> null
             }
-        }
 
     /**
      * The URL you must redirect your customer to in order to authenticate the payment.
@@ -155,40 +158,18 @@ data class PaymentIntent internal constructor(
         }
 
     override val stripeSdkData: StripeIntent.SdkData?
-        get() = if (nextAction == null || StripeIntent.NextActionType.UseStripeSdk !== nextActionType) {
-            null
-        } else {
-            StripeIntent.SdkData(
-                nextAction[StripeIntent.NextActionType.UseStripeSdk.code] as Map<String, *>
-            )
+        get() = when (nextActionData) {
+            is NextActionData.SdkData.`3DS1` -> StripeIntent.SdkData(true, false, Either.Right(nextActionData))
+            is NextActionData.SdkData.`3DS2` -> StripeIntent.SdkData(false, true, Either.Right(nextActionData))
+            else -> null
         }
 
     override val redirectData: StripeIntent.RedirectData?
-        get() {
-            if (StripeIntent.NextActionType.RedirectToUrl !== nextActionType) {
-                return null
+        get() = when (nextActionData) {
+                is NextActionData.RedirectToUrl ->
+                    StripeIntent.RedirectData(nextActionData.url, nextActionData.returnUrl)
+                else -> null
             }
-
-            val nextAction: Map<String, Any?> = (if (StripeIntent.Status.RequiresAction === status) {
-                this.nextAction
-            } else {
-                null
-            })
-                ?: return null
-
-            val nextActionType = StripeIntent.NextActionType
-                .fromCode(nextAction[FIELD_NEXT_ACTION_TYPE] as String?)
-            return if (StripeIntent.NextActionType.RedirectToUrl !== nextActionType) {
-                null
-            } else {
-                val redirectToUrl = nextAction[nextActionType.code]
-                if (redirectToUrl is Map<*, *>) {
-                    StripeIntent.RedirectData.create((redirectToUrl as Map<*, *>?)!!)
-                } else {
-                    null
-                }
-            }
-        }
 
     override fun requiresAction(): Boolean {
         return status === StripeIntent.Status.RequiresAction
@@ -363,6 +344,35 @@ data class PaymentIntent internal constructor(
              */
             val number: String? = null
         ) : NextActionData()
+
+        @Parcelize
+        internal data class RedirectToUrl(
+            val url: Uri,
+            val returnUrl: String?
+        ) : NextActionData()
+
+        internal sealed class SdkData : NextActionData() {
+            @Parcelize
+            internal data class `3DS1`(
+                val url: String
+            ) : SdkData()
+
+            @Parcelize
+            internal data class `3DS2`(
+                val source: String,
+                val serverName: String,
+                val transactionId: String,
+                val serverEncryption: DirectoryServerEncryption
+            ) : SdkData() {
+                @Parcelize
+                internal data class DirectoryServerEncryption(
+                    val directoryServerId: String,
+                    val dsCertificateData: String,
+                    val rootCertsData: List<String>,
+                    val keyId: String?
+                ) : Parcelable
+            }
+        }
     }
 
     companion object {
