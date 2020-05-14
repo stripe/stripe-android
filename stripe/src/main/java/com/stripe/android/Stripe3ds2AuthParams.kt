@@ -1,8 +1,8 @@
 package com.stripe.android
 
 import android.os.Parcelable
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.StripeParamsModel
-import java.text.DecimalFormat
 import kotlinx.android.parcel.Parcelize
 import org.json.JSONArray
 import org.json.JSONObject
@@ -23,7 +23,7 @@ internal data class Stripe3ds2AuthParams(
     override fun toParamMap(): Map<String, Any> {
         return mapOf(
             FIELD_SOURCE to sourceId,
-            FIELD_APP to createAppParams().toString()
+            FIELD_APP to appParams.toString()
         ).plus(
             returnUrl?.let {
                 mapOf(FIELD_FALLBACK_RETURN_URL to it)
@@ -31,27 +31,27 @@ internal data class Stripe3ds2AuthParams(
         )
     }
 
-    private fun createAppParams(): JSONObject {
-        return runCatching {
+    internal val appParams: JSONObject
+        @JvmSynthetic
+        @VisibleForTesting
+        get() = runCatching {
             JSONObject()
                 .put(FIELD_SDK_APP_ID, sdkAppId)
                 .put(FIELD_SDK_TRANS_ID, sdkTransactionId)
                 .put(FIELD_SDK_ENC_DATA, deviceData)
                 .put(FIELD_SDK_EPHEM_PUB_KEY, JSONObject(sdkEphemeralPublicKey))
-                .put(FIELD_SDK_MAX_TIMEOUT, MAX_TIMEOUT_FORMATTER.format(maxTimeout.toLong()))
+                .put(FIELD_SDK_MAX_TIMEOUT, maxTimeout.toString().padStart(2, '0'))
                 .put(FIELD_SDK_REFERENCE_NUMBER, sdkReferenceNumber)
                 .put(FIELD_MESSAGE_VERSION, messageVersion)
-                .put(FIELD_DEVICE_RENDER_OPTIONS, createDeviceRenderOptions())
+                .put(FIELD_DEVICE_RENDER_OPTIONS, deviceRenderOptions)
         }.getOrDefault(JSONObject())
-    }
 
-    private fun createDeviceRenderOptions(): JSONObject {
-        return runCatching {
+    private val deviceRenderOptions: JSONObject
+        get() = runCatching {
             JSONObject()
                 .put(FIELD_SDK_INTERFACE, "03")
                 .put(FIELD_SDK_UI_TYPE, JSONArray(listOf("01", "02", "03", "04", "05")))
         }.getOrDefault(JSONObject())
-    }
 
     internal companion object {
         internal const val FIELD_APP = "app"
@@ -69,7 +69,5 @@ internal data class Stripe3ds2AuthParams(
 
         private const val FIELD_SDK_INTERFACE = "sdkInterface"
         private const val FIELD_SDK_UI_TYPE = "sdkUiType"
-
-        private val MAX_TIMEOUT_FORMATTER = DecimalFormat("00")
     }
 }
