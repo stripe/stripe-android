@@ -1,8 +1,15 @@
 # CHANGELOG
 
 ## 14.4.2 - unreleased
-* [#2475](https://github.com/stripe/stripe-android/pull/2475) Support focusedByDefault in CardInputWidget
+* [#2453](https://github.com/stripe/stripe-android/pull/2453) Add `ConfirmPaymentIntentParams#receiptEmail`
+* [#2455](https://github.com/stripe/stripe-android/pull/2455) Update Gradle to 6.4
+* [#2458](https://github.com/stripe/stripe-android/pull/2458) Remove INTERAC from `GooglePayJsonFactory.DEFAULT_CARD_NETWORKS`
+* [#2462](https://github.com/stripe/stripe-android/pull/2462) Capitalize currency code in `GooglePayJsonFactory`
+* [#2466](https://github.com/stripe/stripe-android/pull/2466) Deprecate `ActivityStarter.startForResult()` with no args
+* [#2467](https://github.com/stripe/stripe-android/pull/2467) Update `CardBrand.MasterCard` regex
+* [#2475](https://github.com/stripe/stripe-android/pull/2475) Support `android:focusedByDefault` in `CardInputWidget`
     * Fixes #2463 on Android API level 26 and above
+* [#2483](https://github.com/stripe/stripe-android/pull/2483) Fix formatting of `maxTimeout` value in `Stripe3ds2AuthParams`
 
 ## 14.4.1 - 2020-04-30
 * [#2441](https://github.com/stripe/stripe-android/pull/2441) Catch `IllegalArgumentException` in `ApiOperation`
