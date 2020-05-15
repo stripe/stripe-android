@@ -1,13 +1,12 @@
 package com.stripe.android.model.parsers
 
 import android.net.Uri
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeJsonUtils
 import org.json.JSONObject
 
-internal class NextActionDataParser : ModelJsonParser<PaymentIntent.NextActionData> {
-    override fun parse(json: JSONObject): PaymentIntent.NextActionData? {
+internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionData> {
+    override fun parse(json: JSONObject): StripeIntent.NextActionData? {
         val nextActionType = StripeIntent.NextActionType.fromCode(json.optString(FIELD_NEXT_ACTION_TYPE))
         val parser = when (nextActionType) {
             StripeIntent.NextActionType.DisplayOxxoDetails -> DisplayOxxoDetailsJsonParser()
@@ -18,9 +17,9 @@ internal class NextActionDataParser : ModelJsonParser<PaymentIntent.NextActionDa
         return parser.parse(json.optJSONObject(nextActionType.code) ?: JSONObject())
     }
 
-    private class DisplayOxxoDetailsJsonParser : ModelJsonParser<PaymentIntent.NextActionData.DisplayOxxoDetails> {
-        override fun parse(json: JSONObject): PaymentIntent.NextActionData.DisplayOxxoDetails? {
-            return PaymentIntent.NextActionData.DisplayOxxoDetails(
+    private class DisplayOxxoDetailsJsonParser : ModelJsonParser<StripeIntent.NextActionData.DisplayOxxoDetails> {
+        override fun parse(json: JSONObject): StripeIntent.NextActionData.DisplayOxxoDetails? {
+            return StripeIntent.NextActionData.DisplayOxxoDetails(
                 expiresAfter = json.optInt(FIELD_EXPIRES_AFTER),
                 number = StripeJsonUtils.optString(json, FIELD_NUMBER)
             )
@@ -32,11 +31,11 @@ internal class NextActionDataParser : ModelJsonParser<PaymentIntent.NextActionDa
         }
     }
 
-    internal class RedirectToUrlParser : ModelJsonParser<PaymentIntent.NextActionData.RedirectToUrl> {
-        override fun parse(json: JSONObject): PaymentIntent.NextActionData.RedirectToUrl? {
+    internal class RedirectToUrlParser : ModelJsonParser<StripeIntent.NextActionData.RedirectToUrl> {
+        override fun parse(json: JSONObject): StripeIntent.NextActionData.RedirectToUrl? {
             return when {
                 json.has(FIELD_URL) ->
-                    PaymentIntent.NextActionData.RedirectToUrl(
+                    StripeIntent.NextActionData.RedirectToUrl(
                         Uri.parse(json.getString(FIELD_URL)),
                         json.optString(FIELD_RETURN_URL)
                     )
@@ -50,13 +49,13 @@ internal class NextActionDataParser : ModelJsonParser<PaymentIntent.NextActionDa
         }
     }
 
-    private class SdkDataJsonParser : ModelJsonParser<PaymentIntent.NextActionData.SdkData> {
-        override fun parse(json: JSONObject): PaymentIntent.NextActionData.SdkData? {
+    private class SdkDataJsonParser : ModelJsonParser<StripeIntent.NextActionData.SdkData> {
+        override fun parse(json: JSONObject): StripeIntent.NextActionData.SdkData? {
             return when (StripeJsonUtils.optString(json, FIELD_TYPE)) {
-                TYPE_3DS1 -> PaymentIntent.NextActionData.SdkData.`3DS1`(
+                TYPE_3DS1 -> StripeIntent.NextActionData.SdkData.`3DS1`(
                     json.optString(FIELD_STRIPE_JS)
                 )
-                TYPE_3DS2 -> PaymentIntent.NextActionData.SdkData.`3DS2`(
+                TYPE_3DS2 -> StripeIntent.NextActionData.SdkData.`3DS2`(
                     json.optString(FIELD_THREE_D_SECURE_2_SOURCE),
                     json.optString(FIELD_DIRECTORY_SERVER_NAME),
                     json.optString(FIELD_SERVER_TRANSACTION_ID),
@@ -69,7 +68,7 @@ internal class NextActionDataParser : ModelJsonParser<PaymentIntent.NextActionDa
         }
 
         private fun parseDirectoryServerEncryption(json: JSONObject):
-            PaymentIntent.NextActionData.SdkData.`3DS2`.DirectoryServerEncryption {
+            StripeIntent.NextActionData.SdkData.`3DS2`.DirectoryServerEncryption {
             val rootCert =
                 StripeJsonUtils.jsonArrayToList(json.optJSONArray(FIELD_ROOT_CAS))
                     ?.fold(emptyList<String>()) { acc, entry ->
@@ -80,7 +79,7 @@ internal class NextActionDataParser : ModelJsonParser<PaymentIntent.NextActionDa
                         }
                     } ?: emptyList()
 
-            return PaymentIntent.NextActionData.SdkData.`3DS2`.DirectoryServerEncryption(
+            return StripeIntent.NextActionData.SdkData.`3DS2`.DirectoryServerEncryption(
                 json.optString(FIELD_DIRECTORY_SERVER_ID),
                 json.optString(FIELD_CERTIFICATE),
                 rootCert,

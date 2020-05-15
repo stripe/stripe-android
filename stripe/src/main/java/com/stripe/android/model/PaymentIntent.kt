@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import android.net.Uri
-import android.os.Parcelable
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import com.stripe.android.utils.Either
 import java.util.regex.Pattern
@@ -139,13 +138,13 @@ data class PaymentIntent internal constructor(
      */
     val shipping: Shipping? = null,
 
-    internal val nextActionData: NextActionData? = null
+    internal val nextActionData: StripeIntent.NextActionData? = null
 ) : StripeIntent {
     override val nextActionType: StripeIntent.NextActionType?
         get() = when (nextActionData) {
-                is NextActionData.SdkData -> StripeIntent.NextActionType.UseStripeSdk
-                is NextActionData.RedirectToUrl -> StripeIntent.NextActionType.RedirectToUrl
-                is NextActionData.DisplayOxxoDetails -> StripeIntent.NextActionType.DisplayOxxoDetails
+                is StripeIntent.NextActionData.SdkData -> StripeIntent.NextActionType.UseStripeSdk
+                is StripeIntent.NextActionData.RedirectToUrl -> StripeIntent.NextActionType.RedirectToUrl
+                is StripeIntent.NextActionData.DisplayOxxoDetails -> StripeIntent.NextActionType.DisplayOxxoDetails
                 else -> null
             }
 
@@ -159,14 +158,14 @@ data class PaymentIntent internal constructor(
 
     override val stripeSdkData: StripeIntent.SdkData?
         get() = when (nextActionData) {
-            is NextActionData.SdkData.`3DS1` -> StripeIntent.SdkData(true, false, Either.Right(nextActionData))
-            is NextActionData.SdkData.`3DS2` -> StripeIntent.SdkData(false, true, Either.Right(nextActionData))
+            is StripeIntent.NextActionData.SdkData.`3DS1` -> StripeIntent.SdkData(true, false, Either.Right(nextActionData))
+            is StripeIntent.NextActionData.SdkData.`3DS2` -> StripeIntent.SdkData(false, true, Either.Right(nextActionData))
             else -> null
         }
 
     override val redirectData: StripeIntent.RedirectData?
         get() = when (nextActionData) {
-                is NextActionData.RedirectToUrl ->
+                is StripeIntent.NextActionData.RedirectToUrl ->
                     StripeIntent.RedirectData(nextActionData.url, nextActionData.returnUrl)
                 else -> null
             }
@@ -327,50 +326,6 @@ data class PaymentIntent internal constructor(
         internal companion object {
             internal fun fromCode(code: String?): CancellationReason? {
                 return values().firstOrNull { it.code == code }
-            }
-        }
-    }
-
-    internal sealed class NextActionData : StripeModel {
-        @Parcelize
-        internal data class DisplayOxxoDetails(
-            /**
-             * The timestamp after which the OXXO expires.
-             */
-            val expiresAfter: Int = 0,
-
-            /**
-             * The OXXO number.
-             */
-            val number: String? = null
-        ) : NextActionData()
-
-        @Parcelize
-        internal data class RedirectToUrl(
-            val url: Uri,
-            val returnUrl: String?
-        ) : NextActionData()
-
-        internal sealed class SdkData : NextActionData() {
-            @Parcelize
-            internal data class `3DS1`(
-                val url: String
-            ) : SdkData()
-
-            @Parcelize
-            internal data class `3DS2`(
-                val source: String,
-                val serverName: String,
-                val transactionId: String,
-                val serverEncryption: DirectoryServerEncryption
-            ) : SdkData() {
-                @Parcelize
-                internal data class DirectoryServerEncryption(
-                    val directoryServerId: String,
-                    val dsCertificateData: String,
-                    val rootCertsData: List<String>,
-                    val keyId: String?
-                ) : Parcelable
             }
         }
     }
