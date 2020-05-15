@@ -148,7 +148,7 @@ interface StripeIntent : StripeModel {
     data class SdkData internal constructor(
         val is3ds1: Boolean,
         val is3ds2: Boolean,
-        internal val data: Either<Map<String, *>, NextActionData.SdkData>
+        internal val data: NextActionData.SdkData
     )
 
     /**

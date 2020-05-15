@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
-import com.stripe.android.utils.Either
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -76,10 +75,8 @@ class PaymentIntentTest {
         val sdkData = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.stripeSdkData
         assertNotNull(sdkData)
         assertTrue(sdkData.is3ds2)
-        assertTrue(sdkData.data is Either.Right)
-        assertTrue(sdkData.data.right is StripeIntent.Companion.NextActionData.SdkData.`3DS2`)
-        val data = sdkData.data.right as StripeIntent.Companion.NextActionData.SdkData.`3DS2`
-        assertEquals("mastercard", data.serverName)
+        assertTrue(sdkData.data is StripeIntent.Companion.NextActionData.SdkData.`3DS2`)
+        assertEquals("mastercard", sdkData.data.serverName)
     }
 
     @Test
@@ -88,10 +85,8 @@ class PaymentIntentTest {
         assertEquals(StripeIntent.NextActionType.UseStripeSdk, paymentIntent.nextActionType)
         val sdkData = requireNotNull(paymentIntent.stripeSdkData)
         assertTrue(sdkData.is3ds1)
-        assertTrue(sdkData.data is Either.Right)
-        assertTrue(sdkData.data.right is StripeIntent.Companion.NextActionData.SdkData.`3DS1`)
-        val data = sdkData.data.right as StripeIntent.Companion.NextActionData.SdkData.`3DS1`
-        assertTrue(data.url.isNotEmpty())
+        assertTrue(sdkData.data is StripeIntent.Companion.NextActionData.SdkData.`3DS1`)
+        assertTrue(sdkData.data.url.isNotEmpty())
     }
 
     @Test
