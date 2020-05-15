@@ -158,8 +158,8 @@ data class PaymentIntent internal constructor(
 
     override val stripeSdkData: StripeIntent.SdkData?
         get() = when (nextActionData) {
-            is StripeIntent.NextActionData.SdkData.`3DS1` -> StripeIntent.SdkData(true, false, nextActionData)
-            is StripeIntent.NextActionData.SdkData.`3DS2` -> StripeIntent.SdkData(false, true, nextActionData)
+            is StripeIntent.NextActionData.SdkData.`3DS1` -> StripeIntent.SdkData(true, false)
+            is StripeIntent.NextActionData.SdkData.`3DS2` -> StripeIntent.SdkData(false, true)
             else -> null
         }
 

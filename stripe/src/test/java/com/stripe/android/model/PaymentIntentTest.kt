@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import android.net.Uri
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -69,31 +70,29 @@ class PaymentIntentTest {
     }
 
     @Test
-    fun getNextActionTypeAndStripeSdkData_whenUseStripeSdkWith3ds2() {
-        assertEquals(StripeIntent.NextActionType.UseStripeSdk,
-            PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.nextActionType)
-        val sdkData = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.stripeSdkData
-        assertNotNull(sdkData)
-        assertTrue(sdkData.is3ds2)
-        assertTrue(sdkData.data is StripeIntent.NextActionData.SdkData.`3DS2`)
-        assertEquals("mastercard", sdkData.data.serverName)
+    fun getNextActionData_whenUseStripeSdkWith3ds2() {
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
+        assertTrue(paymentIntent.nextActionData is StripeIntent.NextActionData.SdkData.`3DS2`)
+        val sdkData = paymentIntent.nextActionData as StripeIntent.NextActionData.SdkData.`3DS2`
+        assertEquals("mastercard", sdkData.serverName)
     }
 
     @Test
-    fun getNextActionTypeAndStripeSdkData_whenUseStripeSdkWith3ds1() {
+    fun getNextActionData_whenUseStripeSdkWith3ds1() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_3DS1
-        assertEquals(StripeIntent.NextActionType.UseStripeSdk, paymentIntent.nextActionType)
-        val sdkData = requireNotNull(paymentIntent.stripeSdkData)
-        assertTrue(sdkData.is3ds1)
-        assertTrue(sdkData.data is StripeIntent.NextActionData.SdkData.`3DS1`)
-        assertTrue(sdkData.data.url.isNotEmpty())
+        assertTrue(paymentIntent.nextActionData is StripeIntent.NextActionData.SdkData.`3DS1`)
+        val sdkData = paymentIntent.nextActionData as StripeIntent.NextActionData.SdkData.`3DS1`
+        assertTrue(sdkData.url.isNotEmpty())
     }
 
     @Test
-    fun getNextActionTypeAndStripeSdkData_whenRedirectToUrl() {
-        assertEquals(StripeIntent.NextActionType.RedirectToUrl,
-            PaymentIntentFixtures.PI_REQUIRES_REDIRECT.nextActionType)
-        assertNull(PaymentIntentFixtures.PI_REQUIRES_REDIRECT.stripeSdkData)
+    fun getNextActionData_whenRedirectToUrl() {
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_REDIRECT
+        assertTrue(paymentIntent.nextActionData is StripeIntent.NextActionData.RedirectToUrl)
+        val redirectData = paymentIntent.nextActionData as StripeIntent.NextActionData.RedirectToUrl
+        assertEquals(Uri.parse("https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecaz6CRMbs6FrXfuYKBRSUG/src_client_secret_F6octeOshkgxT47dr0ZxSZiv"),
+            redirectData.url)
+        assertEquals(redirectData.returnUrl, "stripe://deeplink")
     }
 
     @Test
