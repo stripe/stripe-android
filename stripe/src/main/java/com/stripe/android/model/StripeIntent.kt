@@ -2,7 +2,6 @@ package com.stripe.android.model
 
 import android.net.Uri
 import android.os.Parcelable
-import com.stripe.android.utils.Either
 import kotlinx.android.parcel.Parcelize
 
 /**
@@ -60,6 +59,8 @@ interface StripeIntent : StripeModel {
     val stripeSdkData: SdkData?
 
     val status: Status?
+
+    val nextActionData: NextActionData?
 
     fun requiresAction(): Boolean
 
@@ -192,7 +193,7 @@ interface StripeIntent : StripeModel {
     }
 
     companion object {
-        internal sealed class NextActionData : StripeModel {
+        sealed class NextActionData : StripeModel {
             @Parcelize
             internal data class DisplayOxxoDetails(
                 /**

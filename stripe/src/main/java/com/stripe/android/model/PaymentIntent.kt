@@ -2,7 +2,6 @@ package com.stripe.android.model
 
 import android.net.Uri
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
-import com.stripe.android.utils.Either
 import java.util.regex.Pattern
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.parcel.RawValue
@@ -138,7 +137,7 @@ data class PaymentIntent internal constructor(
      */
     val shipping: Shipping? = null,
 
-    internal val nextActionData: StripeIntent.Companion.NextActionData? = null
+    override val nextActionData: StripeIntent.Companion.NextActionData? = null
 ) : StripeIntent {
     override val nextActionType: StripeIntent.NextActionType?
         get() = when (nextActionData) {

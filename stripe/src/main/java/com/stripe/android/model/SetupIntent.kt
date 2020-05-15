@@ -2,7 +2,6 @@ package com.stripe.android.model
 
 import android.net.Uri
 import com.stripe.android.model.parsers.SetupIntentJsonParser
-import com.stripe.android.utils.Either
 import java.util.regex.Pattern
 import kotlinx.android.parcel.Parcelize
 import org.json.JSONObject
@@ -87,7 +86,7 @@ data class SetupIntent internal constructor(
      */
     val lastSetupError: Error? = null,
 
-    internal val nextActionData: StripeIntent.Companion.NextActionData?
+    override val nextActionData: StripeIntent.Companion.NextActionData?
 ) : StripeIntent {
 
     override val nextActionType: StripeIntent.NextActionType?
