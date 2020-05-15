@@ -78,20 +78,16 @@ internal class Stripe3ds2Fingerprint private constructor(
 
         @JvmSynthetic
         @Throws(CertificateException::class)
-        internal fun create(sdkData: StripeIntent.SdkData): Stripe3ds2Fingerprint {
-            require(sdkData.data is StripeIntent.NextActionData.SdkData.`3DS2`) {
-                "Expected SdkData with type='stripe_3ds2_fingerprint'."
-            }
-
+        internal fun create(sdkData: StripeIntent.NextActionData.SdkData.`3DS2`): Stripe3ds2Fingerprint {
             return Stripe3ds2Fingerprint(
-                sdkData.data.source,
-                DirectoryServer.lookup(sdkData.data.serverName),
-                sdkData.data.transactionId,
+                sdkData.source,
+                DirectoryServer.lookup(sdkData.serverName),
+                sdkData.transactionId,
                 DirectoryServerEncryption(
-                    sdkData.data.serverEncryption.directoryServerId,
-                    sdkData.data.serverEncryption.dsCertificateData,
-                    sdkData.data.serverEncryption.rootCertsData,
-                    sdkData.data.serverEncryption.keyId
+                    sdkData.serverEncryption.directoryServerId,
+                    sdkData.serverEncryption.dsCertificateData,
+                    sdkData.serverEncryption.rootCertsData,
+                    sdkData.serverEncryption.keyId
                 )
             )
         }

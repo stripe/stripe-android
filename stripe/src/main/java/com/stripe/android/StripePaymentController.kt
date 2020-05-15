@@ -387,6 +387,7 @@ internal class StripePaymentController internal constructor(
         if (stripeIntent.requiresAction()) {
             when (stripeIntent.nextActionData) {
                 is StripeIntent.NextActionData.SdkData.`3DS2` -> {
+                    val sdkData = stripeIntent.nextActionData as StripeIntent.NextActionData.SdkData.`3DS2`
                     analyticsRequestExecutor.executeAsync(
                         analyticsRequestFactory.create(
                             analyticsDataFactory.createAuthParams(
@@ -400,7 +401,7 @@ internal class StripePaymentController internal constructor(
                         begin3ds2Auth(
                             host,
                             stripeIntent,
-                            Stripe3ds2Fingerprint.create(stripeIntent.stripeSdkData!!),
+                            Stripe3ds2Fingerprint.create(sdkData),
                             requestOptions
                         )
                     } catch (e: CertificateException) {

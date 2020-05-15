@@ -94,7 +94,7 @@ class StripePaymentControllerTest {
     fun handleNextAction_withMastercardAnd3ds2_shouldStart3ds2ChallengeFlow() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
         val dsPublicKey = Stripe3ds2Fingerprint.create(
-            requireNotNull(paymentIntent.stripeSdkData)
+            paymentIntent.nextActionData as StripeIntent.NextActionData.SdkData.`3DS2`
         )
             .directoryServerEncryption
             .directoryServerPublicKey

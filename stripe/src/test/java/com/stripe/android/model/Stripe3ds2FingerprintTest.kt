@@ -7,7 +7,6 @@ import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -19,7 +18,7 @@ class Stripe3ds2FingerprintTest {
     @Throws(CertificateException::class)
     fun create_with3ds2SdkData_shouldCreateObject() {
         val sdkData = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
-            .stripeSdkData
+            .nextActionData as StripeIntent.NextActionData.SdkData.`3DS2`
         assertNotNull(sdkData)
         val stripe3ds2Fingerprint = Stripe3ds2Fingerprint.create(sdkData)
         assertEquals("src_1ExkUeAWhjPjYwPiLWUvXrSA", stripe3ds2Fingerprint.source)
@@ -43,7 +42,7 @@ class Stripe3ds2FingerprintTest {
     @Throws(CertificateException::class)
     fun create_with3ds2AmexSdkData_shouldCreateObject() {
         val sdkData = PaymentIntentFixtures.PI_REQUIRES_AMEX_3DS2
-            .stripeSdkData
+            .nextActionData as StripeIntent.NextActionData.SdkData.`3DS2`
         assertNotNull(sdkData)
         val stripe3ds2Fingerprint = Stripe3ds2Fingerprint.create(sdkData)
         assertEquals("src_1EceOlCRMbs6FrXf2hqrI1g5", stripe3ds2Fingerprint.source)
@@ -59,14 +58,6 @@ class Stripe3ds2FingerprintTest {
             stripe3ds2Fingerprint.directoryServerEncryption.directoryServerPublicKey)
         assertEquals("7c4debe3f4af7f9d1569a2ffea4343c2566826ee",
             stripe3ds2Fingerprint.directoryServerEncryption.keyId)
-    }
-
-    @Test
-    fun create_with3ds1SdkData_shouldThrowException() {
-        val sdkData = PaymentIntentFixtures.PI_REQUIRES_3DS1
-            .stripeSdkData
-        assertNotNull(sdkData)
-        assertFailsWith<IllegalArgumentException> { Stripe3ds2Fingerprint.create(sdkData) }
     }
 
     internal companion object {
