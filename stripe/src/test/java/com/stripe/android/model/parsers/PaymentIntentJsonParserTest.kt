@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.StripeIntent
 import kotlin.test.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -53,7 +54,7 @@ class PaymentIntentJsonParserTest {
         )
         assertThat(paymentIntent?.nextActionData)
             .isEqualTo(
-                PaymentIntent.NextActionData.DisplayOxxoDetails(
+                StripeIntent.Companion.NextActionData.DisplayOxxoDetails(
                     expiresAfter = 1587704399,
                     number = "12345678901234657890123456789012"
                 )
