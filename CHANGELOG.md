@@ -10,6 +10,7 @@
 * [#2475](https://github.com/stripe/stripe-android/pull/2475) Support `android:focusedByDefault` in `CardInputWidget`
     * Fixes #2463 on Android API level 26 and above
 * [#2483](https://github.com/stripe/stripe-android/pull/2483) Fix formatting of `maxTimeout` value in `Stripe3ds2AuthParams`
+* [#2494](https://github.com/stripe/stripe-android/pull/2494) Support starting 3DS2 challenge flow from a Fragment
 
 ## 14.4.1 - 2020-04-30
 * [#2441](https://github.com/stripe/stripe-android/pull/2441) Catch `IllegalArgumentException` in `ApiOperation`
