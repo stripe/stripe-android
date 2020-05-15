@@ -19,6 +19,9 @@ internal interface AuthActivityStarter<ArgsType> {
         internal val activity: Activity?
             get() = activityRef.get()
 
+        internal val fragment: Fragment?
+            get() = fragmentRef?.get()
+
         internal fun startActivityForResult(target: Class<*>, extras: Bundle, requestCode: Int) {
             val activity = activityRef.get() ?: return
 
