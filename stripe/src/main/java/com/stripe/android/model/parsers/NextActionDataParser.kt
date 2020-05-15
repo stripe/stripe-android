@@ -3,6 +3,7 @@ package com.stripe.android.model.parsers
 import android.net.Uri
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeJsonUtils
+import com.stripe.android.model.StripeJsonUtils.optString
 import org.json.JSONObject
 
 internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionData> {
@@ -37,15 +38,37 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
                 json.has(FIELD_URL) ->
                     StripeIntent.NextActionData.RedirectToUrl(
                         Uri.parse(json.getString(FIELD_URL)),
-                        json.optString(FIELD_RETURN_URL)
+                        json.optString(FIELD_RETURN_URL),
+                        MobileDataParser().parse(json.optJSONObject(FIELD_MOBILE) ?: JSONObject())
                     )
                 else -> null
+            }
+        }
+
+        internal class MobileDataParser : ModelJsonParser<StripeIntent.NextActionData.RedirectToUrl.MobileData> {
+            override fun parse(json: JSONObject): StripeIntent.NextActionData.RedirectToUrl.MobileData? {
+                val type = StripeIntent.NextActionData.RedirectToUrl.MobileData.Type.fromCode(optString(json, FIELD_TYPE))
+                val obj = type?.let { json.optJSONObject(it.code) }
+                return when (type) {
+                    StripeIntent.NextActionData.RedirectToUrl.MobileData.Type.Alipay -> obj?.let {
+                        StripeIntent.NextActionData.RedirectToUrl.MobileData.Alipay(
+                            it.optString(FIELD_DATA)
+                        )
+                    }
+                    else -> null
+                }
+            }
+
+            private companion object {
+                internal const val FIELD_TYPE = "type"
+                internal const val FIELD_DATA = "data"
             }
         }
 
         private companion object {
             internal const val FIELD_URL = "url"
             internal const val FIELD_RETURN_URL = "return_url"
+            internal const val FIELD_MOBILE = "mobile"
         }
     }
 

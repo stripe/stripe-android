@@ -1,5 +1,6 @@
 package com.stripe.android.model.parsers
 
+import android.net.Uri
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentIntent
@@ -57,6 +58,21 @@ class PaymentIntentJsonParserTest {
                 StripeIntent.NextActionData.DisplayOxxoDetails(
                     expiresAfter = 1587704399,
                     number = "12345678901234657890123456789012"
+                )
+            )
+    }
+
+    @Test
+    fun parse_withAlipayAction_shoulddCreateExpectedNextActionData() {
+        val paymentIntent = PaymentIntentJsonParser().parse(
+            PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION
+        )
+        assertThat(paymentIntent?.nextActionData)
+            .isEqualTo(
+                StripeIntent.NextActionData.RedirectToUrl(
+                    Uri.parse("https://hooks.stripe.com/redirect/authenticate/src_1GiUlyHSL10J9wqvLZKrtWo3?client_secret=src_client_secret_JjkxntbeO885UyGjnwqjVDwI"),
+                    "example://return_url",
+                    StripeIntent.NextActionData.RedirectToUrl.MobileData.Alipay("alipay_sdk_data")
                 )
             )
     }

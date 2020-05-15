@@ -212,8 +212,29 @@ interface StripeIntent : StripeModel {
         @Parcelize
         internal data class RedirectToUrl(
             val url: Uri,
-            val returnUrl: String?
-        ) : NextActionData()
+            val returnUrl: String?,
+            val mobileData: MobileData?
+        ) : NextActionData() {
+
+            internal sealed class MobileData : StripeModel {
+                @Parcelize
+                internal data class Alipay(
+                    val data: String
+                ) : MobileData()
+
+                internal enum class Type(
+                    internal val code: String
+                ) {
+                    Alipay("alipay");
+
+                    internal companion object {
+                        internal fun fromCode(code: String?): Type? {
+                            return values().firstOrNull { it.code == code }
+                        }
+                    }
+                }
+            }
+        }
 
         internal sealed class SdkData : NextActionData() {
             @Parcelize

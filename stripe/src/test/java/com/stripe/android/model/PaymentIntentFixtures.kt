@@ -680,4 +680,70 @@ internal object PaymentIntentFixtures {
         }
         """.trimIndent()
     )
+
+    val ALIPAY_REQUIRES_ACTION = JSONObject(
+        """
+        {
+          "id": "pi_1GiUlYHSL10J9wqv4ZXqstCu",
+          "object": "payment_intent",
+          "amount": 1099,
+          "canceled_at": null,
+          "cancellation_reason": null,
+          "capture_method": "automatic",
+          "client_secret": "pi_1GiUlYHSL10J9wqv4ZXqstCu_secret_m8KioBxOULjcOevkIuihrYxXI",
+          "confirmation_method": "automatic",
+          "created": 1589415456,
+          "currency": "usd",
+          "description": "Example PaymentIntent",
+          "last_payment_error": null,
+          "livemode": false,
+          "next_action": {
+            "redirect_to_url": {
+              "mobile": {
+                "alipay": {
+                  "data": "alipay_sdk_data"
+                },
+                "native_url": null,
+                "type": "alipay"
+              },
+              "return_url": "example://return_url",
+              "url": "https://hooks.stripe.com/redirect/authenticate/src_1GiUlyHSL10J9wqvLZKrtWo3?client_secret=src_client_secret_JjkxntbeO885UyGjnwqjVDwI"
+            },
+            "type": "redirect_to_url"
+          },
+          "payment_method": {
+            "id": "pm_1GiUlyHSL10J9wqv0SUGxiGi",
+            "object": "payment_method",
+            "alipay": {},
+            "billing_details": {
+              "address": {
+                "city": null,
+                "country": null,
+                "line1": null,
+                "line2": null,
+                "postal_code": null,
+                "state": null
+              },
+              "email": null,
+              "name": null,
+              "phone": null
+            },
+            "created": 1589415482,
+            "customer": null,
+            "livemode": false,
+            "metadata": {},
+            "type": "alipay"
+          },
+          "payment_method_types": [
+            "card",
+            "alipay"
+          ],
+          "receipt_email": null,
+          "setup_future_usage": null,
+          "shipping": null,
+          "source": null,
+          "status": "requires_action"
+        }
+        """.trimIndent()
+    )
 }
