@@ -47,6 +47,7 @@ interface StripeIntent : StripeModel {
      * Contains instructions for authenticating by redirecting your customer to another page
      * or application.
      */
+    @Deprecated("use {@link #nextActionData}")
     val redirectData: RedirectData?
 
     val clientSecret: String?

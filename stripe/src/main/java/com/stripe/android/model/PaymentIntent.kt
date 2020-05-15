@@ -150,6 +150,7 @@ data class PaymentIntent internal constructor(
     /**
      * The URL you must redirect your customer to in order to authenticate the payment.
      */
+    @Deprecated("use {@link #nextActionData}")
     val redirectUrl: Uri?
         get() {
             return redirectData?.url

@@ -439,14 +439,14 @@ internal class StripePaymentController internal constructor(
                         )
                     )
 
-                    val redirectData = stripeIntent.redirectData
+                    val redirectData = stripeIntent.nextActionData as StripeIntent.NextActionData.RedirectToUrl
                     beginWebAuth(
                         host,
                         getRequestCode(stripeIntent),
                         stripeIntent.clientSecret.orEmpty(),
-                        redirectData?.url.toString(),
+                        redirectData.url.toString(),
                         requestOptions.stripeAccount,
-                        redirectData?.returnUrl,
+                        redirectData.returnUrl,
                         enableLogging = enableLogging
                     )
                 }
@@ -511,9 +511,6 @@ internal class StripePaymentController internal constructor(
             config.stripe3ds2Config.uiCustomization.uiCustomization
         )
 
-        val redirectData = stripeIntent.redirectData
-        val returnUrl = redirectData?.returnUrl
-
         val areqParams = transaction.authenticationRequestParameters
         val timeout = config.stripe3ds2Config.timeout
         val authParams = Stripe3ds2AuthParams(
@@ -525,7 +522,7 @@ internal class StripePaymentController internal constructor(
             areqParams.sdkEphemeralPublicKey,
             areqParams.messageVersion,
             timeout,
-            returnUrl
+            null
         )
         stripeRepository.start3ds2Auth(
             authParams,
