@@ -2,7 +2,6 @@ package com.stripe.android.model
 
 import android.net.Uri
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
-import com.stripe.android.utils.Either
 import java.util.regex.Pattern
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.parcel.RawValue

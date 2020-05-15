@@ -2,7 +2,6 @@ package com.stripe.android.model
 
 import android.net.Uri
 import android.os.Parcelable
-import com.stripe.android.utils.Either
 import kotlinx.android.parcel.Parcelize
 
 /**
