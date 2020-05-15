@@ -54,7 +54,7 @@ class PaymentIntentJsonParserTest {
         )
         assertThat(paymentIntent?.nextActionData)
             .isEqualTo(
-                StripeIntent.Companion.NextActionData.DisplayOxxoDetails(
+                StripeIntent.NextActionData.DisplayOxxoDetails(
                     expiresAfter = 1587704399,
                     number = "12345678901234657890123456789012"
                 )

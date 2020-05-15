@@ -192,48 +192,46 @@ interface StripeIntent : StripeModel {
         }
     }
 
-    companion object {
-        sealed class NextActionData : StripeModel {
+    sealed class NextActionData : StripeModel {
+        @Parcelize
+        internal data class DisplayOxxoDetails(
+            /**
+             * The timestamp after which the OXXO expires.
+             */
+            val expiresAfter: Int = 0,
+
+            /**
+             * The OXXO number.
+             */
+            val number: String? = null
+        ) : NextActionData()
+
+        @Parcelize
+        internal data class RedirectToUrl(
+            val url: Uri,
+            val returnUrl: String?
+        ) : NextActionData()
+
+        internal sealed class SdkData : NextActionData() {
             @Parcelize
-            internal data class DisplayOxxoDetails(
-                /**
-                 * The timestamp after which the OXXO expires.
-                 */
-                val expiresAfter: Int = 0,
-
-                /**
-                 * The OXXO number.
-                 */
-                val number: String? = null
-            ) : NextActionData()
+            internal data class `3DS1`(
+                val url: String
+            ) : SdkData()
 
             @Parcelize
-            internal data class RedirectToUrl(
-                val url: Uri,
-                val returnUrl: String?
-            ) : NextActionData()
-
-            internal sealed class SdkData : NextActionData() {
+            internal data class `3DS2`(
+                val source: String,
+                val serverName: String,
+                val transactionId: String,
+                val serverEncryption: DirectoryServerEncryption
+            ) : SdkData() {
                 @Parcelize
-                internal data class `3DS1`(
-                    val url: String
-                ) : SdkData()
-
-                @Parcelize
-                internal data class `3DS2`(
-                    val source: String,
-                    val serverName: String,
-                    val transactionId: String,
-                    val serverEncryption: DirectoryServerEncryption
-                ) : SdkData() {
-                    @Parcelize
-                    internal data class DirectoryServerEncryption(
-                        val directoryServerId: String,
-                        val dsCertificateData: String,
-                        val rootCertsData: List<String>,
-                        val keyId: String?
-                    ) : Parcelable
-                }
+                internal data class DirectoryServerEncryption(
+                    val directoryServerId: String,
+                    val dsCertificateData: String,
+                    val rootCertsData: List<String>,
+                    val keyId: String?
+                ) : Parcelable
             }
         }
     }
