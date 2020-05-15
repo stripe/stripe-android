@@ -148,6 +148,7 @@ interface StripeIntent : StripeModel {
      * depends on this property to invoke authentication flows. The shape of the contents is subject
      * to change and is only intended to be used by the Stripe SDK.
      */
+    @Deprecated("use {@link StripeIntent.NextActionData.SdkData}")
     data class SdkData internal constructor(
         val is3ds1: Boolean,
         val is3ds2: Boolean,
