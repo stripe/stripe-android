@@ -2,9 +2,9 @@ package com.stripe.android.model
 
 import android.net.Uri
 import com.stripe.android.model.parsers.SetupIntentJsonParser
+import com.stripe.android.utils.Either
 import java.util.regex.Pattern
 import kotlinx.android.parcel.Parcelize
-import kotlinx.android.parcel.RawValue
 import org.json.JSONObject
 
 /**
@@ -53,14 +53,6 @@ data class SetupIntent internal constructor(
     override val isLiveMode: Boolean,
 
     /**
-     * If present, this property tells you what actions you need to take in order for your customer
-     * to continue payment setup.
-     */
-    private val nextAction: Map<String, @RawValue Any?>?,
-
-    override val nextActionType: StripeIntent.NextActionType? = null,
-
-    /**
      * The expanded [PaymentMethod] represented by [paymentMethodId].
      */
     override val paymentMethod: PaymentMethod? = null,
@@ -93,31 +85,24 @@ data class SetupIntent internal constructor(
     /**
      * The error encountered in the previous [SetupIntent] confirmation.
      */
-    val lastSetupError: Error? = null
+    val lastSetupError: Error? = null,
+
+    internal val nextActionData: StripeIntent.Companion.NextActionData?
 ) : StripeIntent {
 
+    override val nextActionType: StripeIntent.NextActionType?
+        get() = when (nextActionData) {
+            is StripeIntent.Companion.NextActionData.SdkData -> StripeIntent.NextActionType.UseStripeSdk
+            is StripeIntent.Companion.NextActionData.RedirectToUrl -> StripeIntent.NextActionType.RedirectToUrl
+            is StripeIntent.Companion.NextActionData.DisplayOxxoDetails -> StripeIntent.NextActionType.DisplayOxxoDetails
+            else -> null
+        }
+
     override val redirectData: StripeIntent.RedirectData?
-        get() {
-            if (StripeIntent.NextActionType.RedirectToUrl !== nextActionType) {
-                return null
-            }
-
-            val nextAction: Map<String, Any?> = this.nextAction.takeIf {
-                StripeIntent.Status.RequiresAction === status
-            } ?: return null
-
-            val nextActionType = StripeIntent.NextActionType
-                .fromCode(nextAction[FIELD_NEXT_ACTION_TYPE] as String?)
-            return if (StripeIntent.NextActionType.RedirectToUrl === nextActionType) {
-                val redirectToUrl = nextAction[nextActionType.code]
-                if (redirectToUrl is Map<*, *>) {
-                    StripeIntent.RedirectData.create(redirectToUrl)
-                } else {
-                    null
-                }
-            } else {
-                null
-            }
+        get() = when (nextActionData) {
+            is StripeIntent.Companion.NextActionData.RedirectToUrl ->
+                StripeIntent.RedirectData(nextActionData.url, nextActionData.returnUrl)
+            else -> null
         }
 
     val redirectUrl: Uri?
@@ -126,12 +111,10 @@ data class SetupIntent internal constructor(
         }
 
     override val stripeSdkData: StripeIntent.SdkData?
-        get() = nextAction?.takeIf {
-            StripeIntent.NextActionType.UseStripeSdk == nextActionType
-        }?.let {
-            StripeIntent.SdkData.fromMap(
-                it[StripeIntent.NextActionType.UseStripeSdk.code] as Map<String, *>
-            )
+        get() = when (nextActionData) {
+            is StripeIntent.Companion.NextActionData.SdkData.`3DS1` -> StripeIntent.SdkData(true, false, Either.Right(nextActionData))
+            is StripeIntent.Companion.NextActionData.SdkData.`3DS2` -> StripeIntent.SdkData(false, true, Either.Right(nextActionData))
+            else -> null
         }
 
     override fun requiresAction(): Boolean {
