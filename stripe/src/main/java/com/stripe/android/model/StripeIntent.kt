@@ -159,6 +159,7 @@ interface StripeIntent : StripeModel {
      * Contains instructions for authenticating by redirecting your customer to another
      * page or application.
      */
+    @Deprecated("use {@link StripeIntent.NextActionData.RedirectToUrl}")
     @Parcelize
     data class RedirectData internal constructor(
         /**
