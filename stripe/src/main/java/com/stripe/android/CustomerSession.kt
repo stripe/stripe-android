@@ -30,7 +30,7 @@ class CustomerSession @VisibleForTesting internal constructor(
     context: Context,
     stripeRepository: StripeRepository,
     publishableKey: String,
-    stripeAccountId: String?,
+    internal val stripeAccountId: String?,
     private val workDispatcher: CoroutineDispatcher = createCoroutineDispatcher(),
     private val operationIdFactory: OperationIdFactory = StripeOperationIdFactory(),
     private val timeSupplier: TimeSupplier = { Calendar.getInstance().timeInMillis },
