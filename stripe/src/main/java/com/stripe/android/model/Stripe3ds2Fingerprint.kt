@@ -88,7 +88,7 @@ internal class Stripe3ds2Fingerprint private constructor(
 
             when (sdkData.data) {
                 is Either.Left -> {
-                    val (data: Map<String, *>) = sdkData.data
+                    val data = sdkData.data.left
                     return Stripe3ds2Fingerprint(
                         (data[FIELD_THREE_D_SECURE_2_SOURCE] as String),
                         DirectoryServer.lookup((data[FIELD_DIRECTORY_SERVER_NAME] as String)),
@@ -99,8 +99,8 @@ internal class Stripe3ds2Fingerprint private constructor(
                     )
                 }
                 is Either.Right -> {
-                    val (data: StripeIntent.Companion.NextActionData.SdkData) = sdkData.data
-                    require(data is StripeIntent.Companion.NextActionData.SdkData.Use3DS2) {
+                    val data = sdkData.data.right
+                    require(data is StripeIntent.NextActionData.SdkData.Use3DS2) {
                         "Expected SdkData with type='stripe_3ds2_fingerprint'."
                     }
                     return Stripe3ds2Fingerprint(
