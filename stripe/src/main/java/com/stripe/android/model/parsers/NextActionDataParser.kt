@@ -52,7 +52,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.Companion.Nex
     private class SdkDataJsonParser : ModelJsonParser<StripeIntent.Companion.NextActionData.SdkData> {
         override fun parse(json: JSONObject): StripeIntent.Companion.NextActionData.SdkData? {
             return when (StripeJsonUtils.optString(json, FIELD_TYPE)) {
-                TYPE_3DS1 -> StripeIntent.Companion.NextActionData.SdkData.Use3D1(
+                TYPE_3DS1 -> StripeIntent.Companion.NextActionData.SdkData.Use3DS1(
                     json.optString(FIELD_STRIPE_JS)
                 )
                 TYPE_3DS2 -> StripeIntent.Companion.NextActionData.SdkData.Use3DS2(
