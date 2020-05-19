@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.annotation.StringRes
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
+import com.stripe.android.PaymentIntentResult
+import com.stripe.android.SetupIntentResult
 import com.stripe.example.R
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -18,6 +20,9 @@ internal class StripeIntentViewModel(
 ) : AndroidViewModel(application) {
     val inProgress = MutableLiveData<Boolean>()
     val status = MutableLiveData<String>()
+
+    val paymentIntentResultLiveData = MutableLiveData<Result<PaymentIntentResult>>()
+    val setupIntentResultLiveData = MutableLiveData<Result<SetupIntentResult>>()
 
     private val context = application.applicationContext
     private val backendApi = BackendApiFactory(context).create()
