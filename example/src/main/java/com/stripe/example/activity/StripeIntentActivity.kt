@@ -103,7 +103,8 @@ abstract class StripeIntentActivity : AppCompatActivity() {
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                 paymentMethodCreateParams = requireNotNull(params),
                 clientSecret = secret,
-                shipping = shippingDetails
+                shipping = shippingDetails,
+                returnUrl = "example://return_url"
             )
         } else {
             ConfirmPaymentIntentParams.createWithPaymentMethodId(
