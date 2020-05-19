@@ -129,7 +129,7 @@ data class SetupIntent internal constructor(
         get() = nextAction?.takeIf {
             StripeIntent.NextActionType.UseStripeSdk == nextActionType
         }?.let {
-            StripeIntent.SdkData(
+            StripeIntent.SdkData.fromMap(
                 it[StripeIntent.NextActionType.UseStripeSdk.code] as Map<String, *>
             )
         }

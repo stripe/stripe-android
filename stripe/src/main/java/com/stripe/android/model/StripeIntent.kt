@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import android.net.Uri
 import android.os.Parcelable
+import com.stripe.android.utils.Either
 import kotlinx.android.parcel.Parcelize
 
 /**
@@ -69,7 +70,8 @@ interface StripeIntent : StripeModel {
      */
     enum class NextActionType(val code: String) {
         RedirectToUrl("redirect_to_url"),
-        UseStripeSdk("use_stripe_sdk");
+        UseStripeSdk("use_stripe_sdk"),
+        DisplayOxxoDetails("display_oxxo_details");
 
         override fun toString(): String {
             return code
@@ -143,14 +145,21 @@ interface StripeIntent : StripeModel {
      * depends on this property to invoke authentication flows. The shape of the contents is subject
      * to change and is only intended to be used by the Stripe SDK.
      */
-    data class SdkData internal constructor(internal val data: Map<String, *>) {
-        internal val type: String = data[FIELD_TYPE] as String
+    data class SdkData internal constructor(
+        val is3ds1: Boolean,
+        val is3ds2: Boolean,
+        internal val data: Either<Map<String, *>, PaymentIntent.NextActionData.SdkData>
+    ) {
 
-        val is3ds2: Boolean = TYPE_3DS2 == type
+        internal companion object {
+            internal fun fromMap(data: Map<String, *>): SdkData {
+                val type: String = data[FIELD_TYPE] as String
+                val is3ds2: Boolean = TYPE_3DS2 == type
+                val is3ds1: Boolean = TYPE_3DS1 == type
 
-        val is3ds1: Boolean = TYPE_3DS1 == type
+                return SdkData(is3ds1, is3ds2, Either.Left(data))
+            }
 
-        private companion object {
             private const val FIELD_TYPE = "type"
 
             private const val TYPE_3DS2 = "stripe_3ds2_fingerprint"

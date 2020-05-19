@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.utils.Either
 import java.io.ByteArrayInputStream
 import java.security.PublicKey
 import java.security.cert.CertificateException
@@ -85,14 +86,36 @@ internal class Stripe3ds2Fingerprint private constructor(
         internal fun create(sdkData: StripeIntent.SdkData): Stripe3ds2Fingerprint {
             require(sdkData.is3ds2) { "Expected SdkData with type='stripe_3ds2_fingerprint'." }
 
-            return Stripe3ds2Fingerprint(
-                (sdkData.data[FIELD_THREE_D_SECURE_2_SOURCE] as String),
-                DirectoryServer.lookup((sdkData.data[FIELD_DIRECTORY_SERVER_NAME] as String)),
-                (sdkData.data[FIELD_SERVER_TRANSACTION_ID] as String),
-                DirectoryServerEncryption.create(
-                    (sdkData.data[FIELD_DIRECTORY_SERVER_ENCRYPTION] as Map<String, *>)
-                )
-            )
+            when (sdkData.data) {
+                is Either.Left -> {
+                    val data = sdkData.data.left
+                    return Stripe3ds2Fingerprint(
+                        (data[FIELD_THREE_D_SECURE_2_SOURCE] as String),
+                        DirectoryServer.lookup((data[FIELD_DIRECTORY_SERVER_NAME] as String)),
+                        (data[FIELD_SERVER_TRANSACTION_ID] as String),
+                        DirectoryServerEncryption.create(
+                            (data[FIELD_DIRECTORY_SERVER_ENCRYPTION] as Map<String, *>)
+                        )
+                    )
+                }
+                is Either.Right -> {
+                    val data = sdkData.data.right
+                    require(data is PaymentIntent.NextActionData.SdkData.Use3DS2) {
+                        "Expected SdkData with type='stripe_3ds2_fingerprint'."
+                    }
+                    return Stripe3ds2Fingerprint(
+                        data.source,
+                        DirectoryServer.lookup(data.serverName),
+                        data.transactionId,
+                        DirectoryServerEncryption(
+                            data.serverEncryption.directoryServerId,
+                            data.serverEncryption.dsCertificateData,
+                            data.serverEncryption.rootCertsData,
+                            data.serverEncryption.keyId
+                        )
+                    )
+                }
+            }
         }
     }
 }
