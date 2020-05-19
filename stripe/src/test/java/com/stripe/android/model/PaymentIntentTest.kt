@@ -77,8 +77,8 @@ class PaymentIntentTest {
         assertNotNull(sdkData)
         assertTrue(sdkData.is3ds2)
         assertTrue(sdkData.data is Either.Right)
-        assertTrue(sdkData.data.right is StripeIntent.Companion.NextActionData.SdkData.`3DS2`)
-        val data = sdkData.data.right as StripeIntent.Companion.NextActionData.SdkData.`3DS2`
+        assertTrue(sdkData.data.right is PaymentIntent.NextActionData.SdkData.Use3DS2)
+        val data = sdkData.data.right as PaymentIntent.NextActionData.SdkData.Use3DS2
         assertEquals("mastercard", data.serverName)
     }
 
@@ -89,8 +89,8 @@ class PaymentIntentTest {
         val sdkData = requireNotNull(paymentIntent.stripeSdkData)
         assertTrue(sdkData.is3ds1)
         assertTrue(sdkData.data is Either.Right)
-        assertTrue(sdkData.data.right is StripeIntent.Companion.NextActionData.SdkData.`3DS1`)
-        val data = sdkData.data.right as StripeIntent.Companion.NextActionData.SdkData.`3DS1`
+        assertTrue(sdkData.data.right is PaymentIntent.NextActionData.SdkData.Use3D1)
+        val data = sdkData.data.right as PaymentIntent.NextActionData.SdkData.Use3D1
         assertTrue(data.url.isNotEmpty())
     }
 

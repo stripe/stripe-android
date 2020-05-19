@@ -100,7 +100,7 @@ internal class Stripe3ds2Fingerprint private constructor(
                 }
                 is Either.Right -> {
                     val (data: StripeIntent.Companion.NextActionData.SdkData) = sdkData.data
-                    require(data is StripeIntent.Companion.NextActionData.SdkData.`3DS2`) {
+                    require(data is StripeIntent.Companion.NextActionData.SdkData.Use3DS2) {
                         "Expected SdkData with type='stripe_3ds2_fingerprint'."
                     }
                     return Stripe3ds2Fingerprint(
