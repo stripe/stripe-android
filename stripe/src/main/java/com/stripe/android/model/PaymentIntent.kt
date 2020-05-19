@@ -159,8 +159,8 @@ data class PaymentIntent internal constructor(
 
     override val stripeSdkData: StripeIntent.SdkData?
         get() = when (nextActionData) {
-            is NextActionData.SdkData.`3DS1` -> StripeIntent.SdkData(true, false, Either.Right(nextActionData))
-            is NextActionData.SdkData.`3DS2` -> StripeIntent.SdkData(false, true, Either.Right(nextActionData))
+            is NextActionData.SdkData.Use3D1 -> StripeIntent.SdkData(true, false, Either.Right(nextActionData))
+            is NextActionData.SdkData.Use3DS2 -> StripeIntent.SdkData(false, true, Either.Right(nextActionData))
             else -> null
         }
 
@@ -353,12 +353,12 @@ data class PaymentIntent internal constructor(
 
         internal sealed class SdkData : NextActionData() {
             @Parcelize
-            internal data class `3DS1`(
+            internal data class Use3D1(
                 val url: String
             ) : SdkData()
 
             @Parcelize
-            internal data class `3DS2`(
+            internal data class Use3DS2(
                 val source: String,
                 val serverName: String,
                 val transactionId: String,
@@ -376,8 +376,6 @@ data class PaymentIntent internal constructor(
     }
 
     companion object {
-        private const val FIELD_NEXT_ACTION_TYPE = "type"
-
         fun fromJson(jsonObject: JSONObject?): PaymentIntent? {
             return jsonObject?.let {
                 PaymentIntentJsonParser().parse(it)

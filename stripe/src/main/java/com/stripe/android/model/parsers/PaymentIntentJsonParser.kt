@@ -185,10 +185,10 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
         private class SdkDataJsonParser : ModelJsonParser<PaymentIntent.NextActionData.SdkData> {
             override fun parse(json: JSONObject): PaymentIntent.NextActionData.SdkData? {
                 return when (optString(json, FIELD_TYPE)) {
-                    TYPE_3DS1 -> PaymentIntent.NextActionData.SdkData.`3DS1`(
+                    TYPE_3DS1 -> PaymentIntent.NextActionData.SdkData.Use3D1(
                         json.optString(FIELD_STRIPE_JS)
                     )
-                    TYPE_3DS2 -> PaymentIntent.NextActionData.SdkData.`3DS2`(
+                    TYPE_3DS2 -> PaymentIntent.NextActionData.SdkData.Use3DS2(
                         json.optString(FIELD_THREE_D_SECURE_2_SOURCE),
                         json.optString(FIELD_DIRECTORY_SERVER_NAME),
                         json.optString(FIELD_SERVER_TRANSACTION_ID),
@@ -201,7 +201,7 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
             }
 
             private fun parseDirectoryServerEncryption(json: JSONObject):
-                PaymentIntent.NextActionData.SdkData.`3DS2`.DirectoryServerEncryption {
+                PaymentIntent.NextActionData.SdkData.Use3DS2.DirectoryServerEncryption {
                 val rootCert =
                     jsonArrayToList(json.optJSONArray(FIELD_ROOT_CAS))
                         ?.fold(emptyList<String>()) { acc, entry ->
@@ -212,7 +212,7 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
                             }
                         } ?: emptyList()
 
-                return PaymentIntent.NextActionData.SdkData.`3DS2`.DirectoryServerEncryption(
+                return PaymentIntent.NextActionData.SdkData.Use3DS2.DirectoryServerEncryption(
                     json.optString(FIELD_DIRECTORY_SERVER_ID),
                     json.optString(FIELD_CERTIFICATE),
                     rootCert,
