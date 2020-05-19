@@ -40,12 +40,10 @@ internal class FpxViewModel internal constructor(
         val stripeRepository: StripeRepository = StripeApiRepository(context, publishableKey)
         val paymentConfiguration = PaymentConfiguration.getInstance(context)
         workScope.launch {
-            val fpxBankStatuses = try {
+            val fpxBankStatuses = runCatching {
                 stripeRepository.getFpxBankStatus(
                     ApiRequest.Options(paymentConfiguration.publishableKey))
-            } catch (e: Exception) {
-                FpxBankStatuses()
-            }
+            }.getOrDefault(FpxBankStatuses())
 
             withContext(Main) {
                 this@FpxViewModel.internalFpxBankStatuses.value = fpxBankStatuses

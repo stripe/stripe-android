@@ -2,10 +2,13 @@ package com.stripe.android
 
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.argWhere
 import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
+import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.testharness.TestEphemeralKeyProvider
 import java.net.HttpURLConnection
@@ -17,7 +20,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.robolectric.RobolectricTestRunner
@@ -104,7 +106,7 @@ class EphemeralKeyManagerTest {
             .setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
         createEphemeralKeyManager(operationIdFactory)
 
-        verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener).onKeyUpdate(
+        verify(keyManagerListener).onKeyUpdate(
             ephemeralKeyArgumentCaptor.capture(),
             any<EphemeralOperation.RetrieveKey>()
         )
@@ -126,7 +128,7 @@ class EphemeralKeyManagerTest {
         )
         keyManager.retrieveEphemeralKey(operation)
 
-        verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener, times(2))
+        verify(keyManagerListener, times(2))
             .onKeyUpdate(
                 ephemeralKeyArgumentCaptor.capture(),
                 operationCaptor.capture()
@@ -150,7 +152,7 @@ class EphemeralKeyManagerTest {
         }
 
         // Make sure we're in a good state
-        verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener)
+        verify(keyManagerListener)
             .onKeyUpdate(
                 ephemeralKeyArgumentCaptor.capture(),
                 any<EphemeralOperation.RetrieveKey>()
@@ -168,7 +170,7 @@ class EphemeralKeyManagerTest {
             productUsage = emptySet()
         ))
 
-        verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener)
+        verify(keyManagerListener)
             .onKeyError(operationId, 404, errorMessage)
         verifyNoMoreInteractions(keyManagerListener)
     }
@@ -177,70 +179,75 @@ class EphemeralKeyManagerTest {
     fun triggerCorrectErrorOnInvalidRawKey() {
         val operationId = "12345"
         val operationIdFactory: OperationIdFactory = mock()
-        `when`(operationIdFactory.create()).thenReturn(operationId)
+        whenever(operationIdFactory.create()).thenReturn(operationId)
 
         testEphemeralKeyProvider.setNextRawEphemeralKey("Not_a_JSON")
         createEphemeralKeyManager(operationIdFactory)
 
-        verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener, never())
+        verify(keyManagerListener, never())
             .onKeyUpdate(
                 any(),
                 any<EphemeralOperation.RetrieveKey>()
             )
-        verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener)
-            .onKeyError(operationId,
-                HttpURLConnection.HTTP_INTERNAL_ERROR,
-                "EphemeralKeyUpdateListener.onKeyUpdate was passed a value that " +
-                    "could not be JSON parsed: [Value Not_a_JSON of type java.lang.String " +
-                    "cannot be converted to JSONObject]. The raw body from Stripe's " +
-                    "response should be passed.")
+        verify(keyManagerListener).onKeyError(
+            eq(operationId),
+            eq(HttpURLConnection.HTTP_INTERNAL_ERROR),
+            argWhere { errorMessage ->
+                errorMessage.startsWith(
+                    "Received an ephemeral key that could not be parsed. See https://stripe.com/docs/mobile/android/basic for more details."
+                )
+            }
+        )
     }
 
     @Test
     fun triggerCorrectErrorOnInvalidJsonKey() {
         val operationId = "12345"
         val operationIdFactory: OperationIdFactory = mock()
-        `when`(operationIdFactory.create()).thenReturn(operationId)
+        whenever(operationIdFactory.create()).thenReturn(operationId)
 
         testEphemeralKeyProvider.setNextRawEphemeralKey("{}")
         createEphemeralKeyManager(operationIdFactory)
 
-        verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener, never())
+        verify(keyManagerListener, never())
             .onKeyUpdate(
                 any(),
                 any<EphemeralOperation.RetrieveKey>()
             )
-        verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener)
-            .onKeyError(operationId,
-                HttpURLConnection.HTTP_INTERNAL_ERROR,
-                "EphemeralKeyUpdateListener.onKeyUpdate was passed a value that " +
-                    "could not be JSON parsed: [No value for created]. The raw body from " +
-                    "Stripe's response should be passed."
-            )
+        verify(keyManagerListener).onKeyError(
+            eq(operationId),
+            eq(HttpURLConnection.HTTP_INTERNAL_ERROR),
+            argWhere { errorMessage ->
+                errorMessage.startsWith(
+                    "Received an ephemeral key that could not be parsed. See https://stripe.com/docs/mobile/android/basic for more details."
+                )
+            }
+        )
     }
 
     @Test
     fun triggerCorrectErrorOnEmptyKey() {
         val operationId = "12345"
         val operationIdFactory: OperationIdFactory = mock()
-        `when`(operationIdFactory.create()).thenReturn(operationId)
+        whenever(operationIdFactory.create()).thenReturn(operationId)
 
         testEphemeralKeyProvider.setNextRawEphemeralKey("")
         createEphemeralKeyManager(operationIdFactory)
 
-        verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener, never())
+        verify(keyManagerListener, never())
             .onKeyUpdate(
                 any(),
                 any<EphemeralOperation.RetrieveKey>()
             )
-        verify<EphemeralKeyManager.KeyManagerListener>(keyManagerListener)
-            .onKeyError(
-                operationId,
-                HttpURLConnection.HTTP_INTERNAL_ERROR,
-                "EphemeralKeyUpdateListener.onKeyUpdate was passed a value that " +
-                    "could not be JSON parsed: [End of input at character 0 of ]. The raw body " +
-                    "from Stripe's response should be passed."
-            )
+        verify(keyManagerListener).onKeyError(
+            eq(operationId),
+            eq(HttpURLConnection.HTTP_INTERNAL_ERROR),
+            argWhere { errorMessage ->
+                errorMessage.startsWith(
+                    "Received an ephemeral key that could not be parsed. See https://stripe.com/docs/mobile/android/basic for more details."
+                )
+            }
+        )
     }
 
     @Test
