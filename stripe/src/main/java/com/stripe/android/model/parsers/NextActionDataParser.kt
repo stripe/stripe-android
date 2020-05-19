@@ -52,10 +52,10 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.Companion.Nex
     private class SdkDataJsonParser : ModelJsonParser<StripeIntent.Companion.NextActionData.SdkData> {
         override fun parse(json: JSONObject): StripeIntent.Companion.NextActionData.SdkData? {
             return when (StripeJsonUtils.optString(json, FIELD_TYPE)) {
-                TYPE_3DS1 -> StripeIntent.Companion.NextActionData.SdkData.`3DS1`(
+                TYPE_3DS1 -> StripeIntent.Companion.NextActionData.SdkData.Use3D1(
                     json.optString(FIELD_STRIPE_JS)
                 )
-                TYPE_3DS2 -> StripeIntent.Companion.NextActionData.SdkData.`3DS2`(
+                TYPE_3DS2 -> StripeIntent.Companion.NextActionData.SdkData.Use3DS2(
                     json.optString(FIELD_THREE_D_SECURE_2_SOURCE),
                     json.optString(FIELD_DIRECTORY_SERVER_NAME),
                     json.optString(FIELD_SERVER_TRANSACTION_ID),
@@ -68,7 +68,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.Companion.Nex
         }
 
         private fun parseDirectoryServerEncryption(json: JSONObject):
-            StripeIntent.Companion.NextActionData.SdkData.`3DS2`.DirectoryServerEncryption {
+            StripeIntent.Companion.NextActionData.SdkData.Use3DS2.DirectoryServerEncryption {
             val rootCert =
                 StripeJsonUtils.jsonArrayToList(json.optJSONArray(FIELD_ROOT_CAS))
                     ?.fold(emptyList<String>()) { acc, entry ->
@@ -79,7 +79,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.Companion.Nex
                         }
                     } ?: emptyList()
 
-            return StripeIntent.Companion.NextActionData.SdkData.`3DS2`.DirectoryServerEncryption(
+            return StripeIntent.Companion.NextActionData.SdkData.Use3DS2.DirectoryServerEncryption(
                 json.optString(FIELD_DIRECTORY_SERVER_ID),
                 json.optString(FIELD_CERTIFICATE),
                 rootCert,

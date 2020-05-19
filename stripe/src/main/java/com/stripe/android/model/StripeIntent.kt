@@ -214,12 +214,12 @@ interface StripeIntent : StripeModel {
 
             internal sealed class SdkData : NextActionData() {
                 @Parcelize
-                internal data class `3DS1`(
+                internal data class Use3DS1(
                     val url: String
                 ) : SdkData()
 
                 @Parcelize
-                internal data class `3DS2`(
+                internal data class Use3DS2(
                     val source: String,
                     val serverName: String,
                     val transactionId: String,
