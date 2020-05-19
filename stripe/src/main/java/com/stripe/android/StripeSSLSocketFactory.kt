@@ -3,7 +3,6 @@ package com.stripe.android
 import java.io.IOException
 import java.net.InetAddress
 import java.net.Socket
-import java.security.NoSuchAlgorithmException
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSocket
@@ -19,7 +18,7 @@ internal class StripeSSLSocketFactory constructor(
 ) : SSLSocketFactory() {
     private val internalFactory: SSLSocketFactory = HttpsURLConnection.getDefaultSSLSocketFactory()
 
-    internal constructor() : this(getSupportedProtocols())
+    internal constructor() : this(supportedProtocols = SUPPORTED_PROTOCOLS)
 
     private constructor(supportedProtocols: Array<String>) : this(
         tlsv11Supported = supportedProtocols.any { it == TLS_V11_PROTO },
@@ -85,24 +84,23 @@ internal class StripeSSLSocketFactory constructor(
     fun getEnabledProtocols(
         enabledProtocols: Array<String>
     ): Array<String?> {
-        return setOf(
+        return listOfNotNull(
             *enabledProtocols,
-            if (tlsv11Supported) TLS_V11_PROTO else null,
-            if (tlsv12Supported) TLS_V12_PROTO else null
-        ).filterNotNull().toTypedArray()
+            TLS_V11_PROTO.takeIf { tlsv11Supported },
+            TLS_V12_PROTO.takeIf { tlsv12Supported }
+        ).toSet().toTypedArray()
     }
 
-    internal companion object {
+    private companion object {
         private const val TLS_V11_PROTO = "TLSv1.1"
         private const val TLS_V12_PROTO = "TLSv1.2"
 
         // For Android prior to 4.1, TLSv1.1 and TLSv1.2 might not be supported
-        internal fun getSupportedProtocols(): Array<String> {
-            return try {
-                SSLContext.getDefault().supportedSSLParameters.protocols
-            } catch (e: NoSuchAlgorithmException) {
-                emptyArray()
+        private val SUPPORTED_PROTOCOLS: Array<String>
+            get() {
+                return runCatching {
+                    SSLContext.getDefault().supportedSSLParameters.protocols
+                }.getOrDefault(emptyArray())
             }
-        }
     }
 }

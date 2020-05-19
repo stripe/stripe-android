@@ -105,14 +105,10 @@ class Stripe3ds2FingerprintTest {
         internal val DS_RSA_PUBLIC_KEY: PublicKey = generateCertificate(DS_CERT_DATA_RSA).publicKey
 
         private fun generateCertificate(certificateData: String): X509Certificate {
-            try {
-                val factory = CertificateFactory.getInstance("X.509")
-                return factory.generateCertificate(
-                    ByteArrayInputStream(certificateData.toByteArray())
-                ) as X509Certificate
-            } catch (e: CertificateException) {
-                throw RuntimeException(e)
-            }
+            val factory = CertificateFactory.getInstance("X.509")
+            return factory.generateCertificate(
+                ByteArrayInputStream(certificateData.toByteArray())
+            ) as X509Certificate
         }
     }
 }

@@ -18,11 +18,9 @@ internal object DateUtils {
      */
     @JvmStatic
     fun isValidMonth(monthString: String?): Boolean {
-        return try {
+        return runCatching {
             monthString?.toInt() in 1..12
-        } catch (numEx: NumberFormatException) {
-            false
-        }
+        }.getOrDefault(false)
     }
 
     /**

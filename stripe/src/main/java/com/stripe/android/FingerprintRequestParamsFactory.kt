@@ -21,12 +21,9 @@ internal class FingerprintRequestParamsFactory @VisibleForTesting internal const
     private val versionName: String?
         get() {
             if (packageName.isNotBlank()) {
-                try {
+                runCatching {
                     val packageInfo = packageManager.getPackageInfo(packageName, 0)
-                    if (packageInfo?.versionName != null) {
-                        return packageInfo.versionName
-                    }
-                } catch (ignored: PackageManager.NameNotFoundException) {
+                    return packageInfo?.versionName
                 }
             }
 

@@ -17,15 +17,11 @@ internal object ClassUtils {
         whitelist: Set<String>,
         obj: Any
     ): Any? {
-        val field = findField(clazz, whitelist) ?: return null
-
-        try {
-            return field.get(obj)
-        } catch (e: IllegalAccessException) {
-            e.printStackTrace()
+        return findField(clazz, whitelist)?.let { field ->
+            runCatching {
+                field.get(obj)
+            }.getOrNull()
         }
-
-        return null
     }
 
     /**
@@ -36,13 +32,12 @@ internal object ClassUtils {
     @JvmStatic
     fun findField(clazz: Class<*>, whitelist: Collection<String>): Field? {
         val fields = clazz.declaredFields
-        for (field in fields) {
-            if (whitelist.contains(field.name)) {
-                field.isAccessible = true
-                return field
-            }
+
+        return fields.first {
+            whitelist.contains(it.name)
+        }?.also {
+            it.isAccessible = true
         }
-        return null
     }
 
     /**
@@ -52,12 +47,8 @@ internal object ClassUtils {
      */
     @JvmStatic
     fun findMethod(clazz: Class<*>, whitelist: Collection<String>): Method? {
-        val methods = clazz.declaredMethods
-        for (method in methods) {
-            if (whitelist.contains(method.name)) {
-                return method
-            }
+        return clazz.declaredMethods.first {
+            whitelist.contains(it.name)
         }
-        return null
     }
 }
