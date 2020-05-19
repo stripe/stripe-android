@@ -66,7 +66,8 @@ class PaymentMethodsActivity : AppCompatActivity() {
             addableTypes = args.paymentMethodTypes,
             initiallySelectedPaymentMethodId = viewModel.selectedPaymentMethodId,
             shouldShowGooglePay = args.shouldShowGooglePay,
-            useGooglePay = args.useGooglePay
+            useGooglePay = args.useGooglePay,
+            canDeletePaymentOptions = args.canDeletePaymentOptions
         )
     }
 
@@ -131,12 +132,15 @@ class PaymentMethodsActivity : AppCompatActivity() {
 
         viewBinding.recycler.adapter = adapter
         viewBinding.recycler.paymentMethodSelectedCallback = { finishWithResult(it) }
-        viewBinding.recycler.attachItemTouchHelper(
-            PaymentMethodSwipeCallback(
-                this, adapter,
-                SwipeToDeleteCallbackListener(deletePaymentMethodDialogFactory)
+
+        if (args.canDeletePaymentOptions) {
+            viewBinding.recycler.attachItemTouchHelper(
+                PaymentMethodSwipeCallback(
+                    this, adapter,
+                    SwipeToDeleteCallbackListener(deletePaymentMethodDialogFactory)
+                )
             )
-        )
+        }
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
