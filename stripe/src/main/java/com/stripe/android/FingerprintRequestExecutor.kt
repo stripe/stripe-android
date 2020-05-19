@@ -25,11 +25,9 @@ internal interface FingerprintRequestExecutor {
             callback: (FingerprintData?) -> Unit
         ) {
             workScope.launch {
-                val fingerprintData = try {
+                val fingerprintData = runCatching {
                     executeInternal(request)
-                } catch (e: Exception) {
-                    null
-                }
+                }.getOrNull()
 
                 withContext(Dispatchers.Main) {
                     // fingerprint request failures should be non-fatal
@@ -40,16 +38,14 @@ internal interface FingerprintRequestExecutor {
 
         private fun executeInternal(request: FingerprintRequest): FingerprintData? {
             connectionFactory.create(request).use { conn ->
-                return try {
+                return runCatching {
                     conn.response.takeIf { it.isOk }?.let {
                         FingerprintData(
                             guid = it.body,
                             timestamp = timestampSupplier()
                         )
                     }
-                } catch (e: Exception) {
-                    null
-                }
+                }.getOrNull()
             }
         }
     }

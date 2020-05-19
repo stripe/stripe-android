@@ -28,7 +28,6 @@ import com.stripe.example.databinding.LaunchPaymentSessionFragmentBinding
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
-import java.lang.ref.WeakReference
 
 class FragmentExamplesFragment : Fragment() {
     private val viewBinding: LaunchPaymentSessionFragmentBinding by lazy {
@@ -68,6 +67,68 @@ class FragmentExamplesFragment : Fragment() {
         }
         viewBinding.launchPaymentAuth.setOnClickListener { createPaymentIntent() }
         viewBinding.launchSetupAuth.setOnClickListener { createSetupIntent() }
+
+        viewModel.paymentIntentResultLiveData.observe(this, Observer { result ->
+            result.fold(
+                onSuccess = {
+                    val paymentIntent = it.intent
+                    val status = getString(
+                        R.string.payment_intent_status,
+                        paymentIntent.status
+                    )
+                    viewBinding.status.append(
+                        """
+
+
+                        Outcome: ${it.outcome}
+                        
+                        $status
+                        """.trimIndent()
+                    )
+                },
+                onFailure = {
+                    viewBinding.status.append(
+                        """
+
+                  
+                        Exception: ${it.message}
+                        """.trimIndent()
+                    )
+                }
+            )
+            onConfirmationComplete()
+        })
+
+        viewModel.setupIntentResultLiveData.observe(this, Observer { result ->
+            result.fold(
+                onSuccess = {
+                    val paymentIntent = it.intent
+                    val status = getString(
+                        R.string.setup_intent_status,
+                        paymentIntent.status
+                    )
+                    viewBinding.status.append(
+                        """
+
+
+                        Outcome: ${it.outcome}
+                        
+                        $status
+                        """.trimIndent()
+                    )
+                },
+                onFailure = {
+                    viewBinding.status.append(
+                        """
+
+                  
+                        Exception: ${it.message}
+                        """.trimIndent()
+                    )
+                }
+            )
+            onConfirmationComplete()
+        })
     }
 
     override fun onCreateView(
@@ -97,11 +158,10 @@ class FragmentExamplesFragment : Fragment() {
             data != null && paymentSession.handlePaymentData(requestCode, resultCode, data)
         if (isPaymentSessionResult) {
             Toast.makeText(
-                    requireActivity(),
-                    "Received PaymentSession result",
-                    Toast.LENGTH_SHORT
-                )
-                .show()
+                requireActivity(),
+                "Received PaymentSession result",
+                Toast.LENGTH_SHORT
+            ).show()
             viewBinding.progressBar.visibility = View.INVISIBLE
             return
         }
@@ -109,7 +169,15 @@ class FragmentExamplesFragment : Fragment() {
         val isPaymentResult = stripe.onPaymentResult(
             requestCode,
             data,
-            PaymentAuthResultListener(this)
+            callback = object : ApiResultCallback<PaymentIntentResult> {
+                override fun onSuccess(result: PaymentIntentResult) {
+                    viewModel.paymentIntentResultLiveData.value = Result.success(result)
+                }
+
+                override fun onError(e: Exception) {
+                    viewModel.paymentIntentResultLiveData.value = Result.failure(e)
+                }
+            }
         )
         if (isPaymentResult) {
             return
@@ -118,7 +186,15 @@ class FragmentExamplesFragment : Fragment() {
         val isSetupResult = stripe.onSetupResult(
             requestCode,
             data,
-            SetupAuthResultListener(this)
+            callback = object : ApiResultCallback<SetupIntentResult> {
+                override fun onSuccess(result: SetupIntentResult) {
+                    viewModel.setupIntentResultLiveData.value = Result.success(result)
+                }
+
+                override fun onError(e: Exception) {
+                    viewModel.setupIntentResultLiveData.value = Result.failure(e)
+                }
+            }
         )
         if (isSetupResult) {
             return
@@ -151,7 +227,7 @@ class FragmentExamplesFragment : Fragment() {
         )
     }
 
-    private fun onAuthComplete() {
+    private fun onConfirmationComplete() {
         viewBinding.launchPaymentAuth.isEnabled = true
         viewBinding.progressBar.visibility = View.INVISIBLE
     }
@@ -275,84 +351,6 @@ class FragmentExamplesFragment : Fragment() {
             }
         )
         return customerSession
-    }
-
-    private class PaymentAuthResultListener internal constructor(
-        fragment: FragmentExamplesFragment
-    ) : ApiResultCallback<PaymentIntentResult> {
-        private val fragmentRef: WeakReference<FragmentExamplesFragment> = WeakReference(fragment)
-
-        override fun onSuccess(result: PaymentIntentResult) {
-            fragmentRef.get()?.let { fragment ->
-                val paymentIntent = result.intent
-                val status = fragment.getString(
-                    R.string.payment_intent_status,
-                    paymentIntent.status
-                )
-                fragment.viewBinding.status.append(
-                    """
-
-
-                    Outcome: ${result.outcome}
-                    
-                    $status
-                    """.trimIndent()
-                )
-                fragment.onAuthComplete()
-            }
-        }
-
-        override fun onError(e: Exception) {
-            fragmentRef.get()?.let { fragment ->
-                fragment.viewBinding.status.append(
-                    """
-
-                  
-                    Exception: ${e.message}
-                    """.trimIndent()
-                )
-                fragment.onAuthComplete()
-            }
-        }
-    }
-
-    private class SetupAuthResultListener internal constructor(
-        fragment: FragmentExamplesFragment
-    ) : ApiResultCallback<SetupIntentResult> {
-        private val fragmentRef: WeakReference<FragmentExamplesFragment> = WeakReference(fragment)
-
-        override fun onSuccess(result: SetupIntentResult) {
-            fragmentRef.get()?.let { fragment ->
-                val paymentIntent = result.intent
-                val status = fragment.getString(
-                    R.string.setup_intent_status,
-                    paymentIntent.status
-                )
-                fragment.viewBinding.status.append(
-                    """
-
-
-                    Outcome: ${result.outcome}
-                    
-                    $status
-                    """.trimIndent()
-                )
-                fragment.onAuthComplete()
-            }
-        }
-
-        override fun onError(e: Exception) {
-            fragmentRef.get()?.let { fragment ->
-                fragment.viewBinding.status.append(
-                    """
-
-                  
-                    Exception: ${e.message}
-                    """.trimIndent()
-                )
-                fragment.onAuthComplete()
-            }
-        }
     }
 
     private companion object {
