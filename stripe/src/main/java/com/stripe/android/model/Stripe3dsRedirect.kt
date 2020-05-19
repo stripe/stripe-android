@@ -13,13 +13,13 @@ internal data class Stripe3dsRedirect internal constructor(val url: String) {
 
             return when (sdkData.data) {
                 is Either.Left -> {
-                    val (data: Map<String, *>) = sdkData.data
+                    val data = sdkData.data.left
                     Stripe3dsRedirect(
                         data[FIELD_STRIPE_JS] as String
                     )
                 }
                 is Either.Right -> {
-                    val (data: PaymentIntent.NextActionData.SdkData) = sdkData.data
+                    val data = sdkData.data.right
                     require(data is PaymentIntent.NextActionData.SdkData.Use3D1) {
                         "Expected SdkData with type='three_d_secure_redirect'."
                     }
