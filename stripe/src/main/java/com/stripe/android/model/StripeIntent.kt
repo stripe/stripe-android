@@ -44,20 +44,26 @@ interface StripeIntent : StripeModel {
     val nextActionType: NextActionType?
 
     /**
+     * @deprecated use {@link #nextActionData} instead
+     *
      * Contains instructions for authenticating by redirecting your customer to another page
      * or application.
      */
+    @Deprecated("use {@link #nextActionData}",
+        replaceWith = ReplaceWith("nextActionData as? StripeIntent.NextActionData.RedirectToUrl"))
     val redirectData: RedirectData?
 
     val clientSecret: String?
 
     /**
+     * @deprecated use {@link #nextActionData} instead
+     *
      * When confirming a PaymentIntent with the Stripe SDK, the Stripe SDK depends on this property
      * to invoke authentication flows. The shape of the contents is subject to change and is only
      * intended to be used by the Stripe SDK.
      */
     @Deprecated("use {@link #nextActionData}",
-        replaceWith = ReplaceWith("nextActionData as? StripeIntent.NextAction.SdkData"))
+        replaceWith = ReplaceWith("nextActionData as? StripeIntent.NextActionData.SdkData"))
     val stripeSdkData: SdkData?
 
     val status: Status?
@@ -144,11 +150,13 @@ interface StripeIntent : StripeModel {
     }
 
     /**
+     * @deprecated use {@link StripeIntent.NextActionData.SdkData} instead
+     *
      * When confirming a [PaymentIntent] or [SetupIntent] with the Stripe SDK, the Stripe SDK
      * depends on this property to invoke authentication flows. The shape of the contents is subject
      * to change and is only intended to be used by the Stripe SDK.
      */
-    @Deprecated("use {@link StripeIntent.NextActionData.SdkData}")
+    @Deprecated("use [StripeIntent.NextActionData.SdkData]")
     data class SdkData internal constructor(
         val is3ds1: Boolean,
         val is3ds2: Boolean,
@@ -156,9 +164,12 @@ interface StripeIntent : StripeModel {
     )
 
     /**
+     * @deprecated use {@link StripeIntent.NextActionData.RedirectToUrl} instead
+     *
      * Contains instructions for authenticating by redirecting your customer to another
      * page or application.
      */
+    @Deprecated("use {@link StripeIntent.NextActionData.RedirectToUrl}")
     @Parcelize
     data class RedirectData internal constructor(
         /**
@@ -209,12 +220,28 @@ interface StripeIntent : StripeModel {
             val number: String? = null
         ) : NextActionData()
 
+        /**
+         * Contains instructions for authenticating by redirecting your customer to another
+         * page or application.
+         */
         @Parcelize
         data class RedirectToUrl(
+            /**
+             * The URL you must redirect your customer to in order to authenticate.
+             */
             val url: Uri,
+            /**
+             * If the customer does not exit their browser while authenticating, they will be redirected
+             * to this specified URL after completion.
+             */
             val returnUrl: String?
         ) : NextActionData()
 
+        /**
+         * When confirming a [PaymentIntent] or [SetupIntent] with the Stripe SDK, the Stripe SDK
+         * depends on this property to invoke authentication flows. The shape of the contents is subject
+         * to change and is only intended to be used by the Stripe SDK.
+         */
         sealed class SdkData : NextActionData() {
             @Parcelize
             data class Use3DS1(
