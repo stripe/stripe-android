@@ -212,12 +212,28 @@ interface StripeIntent : StripeModel {
             val number: String? = null
         ) : NextActionData()
 
+        /**
+         * Contains instructions for authenticating by redirecting your customer to another
+         * page or application.
+         */
         @Parcelize
         data class RedirectToUrl(
+            /**
+             * The URL you must redirect your customer to in order to authenticate.
+             */
             val url: Uri,
+            /**
+             * If the customer does not exit their browser while authenticating, they will be redirected
+             * to this specified URL after completion.
+             */
             val returnUrl: String?
         ) : NextActionData()
 
+        /**
+         * When confirming a [PaymentIntent] or [SetupIntent] with the Stripe SDK, the Stripe SDK
+         * depends on this property to invoke authentication flows. The shape of the contents is subject
+         * to change and is only intended to be used by the Stripe SDK.
+         */
         sealed class SdkData : NextActionData() {
             @Parcelize
             data class Use3DS1(
