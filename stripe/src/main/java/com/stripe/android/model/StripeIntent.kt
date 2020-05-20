@@ -56,7 +56,8 @@ interface StripeIntent : StripeModel {
      * to invoke authentication flows. The shape of the contents is subject to change and is only
      * intended to be used by the Stripe SDK.
      */
-    @Deprecated("use {@link #nextActionData}")
+    @Deprecated("use {@link #nextActionData}",
+        replaceWith = ReplaceWith("nextActionData as? StripeIntent.NextAction.SdkData"))
     val stripeSdkData: SdkData?
 
     val status: Status?

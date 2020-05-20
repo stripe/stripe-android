@@ -155,6 +155,8 @@ data class PaymentIntent internal constructor(
             return redirectData?.url
         }
 
+    @Deprecated("use {@link #nextActionData}",
+        replaceWith = ReplaceWith("nextActionData as? StripeIntent.NextActionData.SdkData"))
     override val stripeSdkData: StripeIntent.SdkData?
         get() = when (nextActionData) {
             is StripeIntent.NextActionData.SdkData.Use3DS1 -> StripeIntent.SdkData(true, false, nextActionData)
