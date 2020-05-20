@@ -86,7 +86,7 @@ data class SetupIntent internal constructor(
      */
     val lastSetupError: Error? = null,
 
-    internal val nextActionData: StripeIntent.NextActionData?
+    override val nextActionData: StripeIntent.NextActionData?
 ) : StripeIntent {
 
     override val nextActionType: StripeIntent.NextActionType?

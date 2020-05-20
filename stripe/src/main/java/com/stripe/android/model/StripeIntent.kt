@@ -60,6 +60,8 @@ interface StripeIntent : StripeModel {
 
     val status: Status?
 
+    val nextActionData: NextActionData?
+
     fun requiresAction(): Boolean
 
     fun requiresConfirmation(): Boolean

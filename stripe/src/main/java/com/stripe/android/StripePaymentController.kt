@@ -15,7 +15,6 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.Source
 import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.Stripe3ds2Fingerprint
-import com.stripe.android.model.Stripe3dsRedirect
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
@@ -387,55 +386,48 @@ internal class StripePaymentController internal constructor(
         requestOptions: ApiRequest.Options
     ) {
         if (stripeIntent.requiresAction()) {
-            when (stripeIntent.nextActionType) {
-                StripeIntent.NextActionType.UseStripeSdk -> {
-                    val sdkData = stripeIntent.stripeSdkData
-                    when {
-                        sdkData?.is3ds2 == true -> {
-                            analyticsRequestExecutor.executeAsync(
-                                analyticsRequestFactory.create(
-                                    analyticsDataFactory.createAuthParams(
-                                        AnalyticsEvent.Auth3ds2Fingerprint,
-                                        stripeIntent.id.orEmpty()
-                                    ),
-                                    requestOptions
-                                )
-                            )
-                            try {
-                                begin3ds2Auth(
-                                    host,
-                                    stripeIntent,
-                                    Stripe3ds2Fingerprint.create(sdkData),
-                                    requestOptions
-                                )
-                            } catch (e: CertificateException) {
-                                handleError(host, getRequestCode(stripeIntent), e)
-                            }
-                        }
-                        sdkData?.is3ds1 == true -> {
-                            analyticsRequestExecutor.executeAsync(
-                                analyticsRequestFactory.create(
-                                    analyticsDataFactory.createAuthParams(
-                                        AnalyticsEvent.Auth3ds1Sdk,
-                                        stripeIntent.id.orEmpty()
-                                    ),
-                                    requestOptions
-                                )
-                            )
-                            beginWebAuth(
-                                host,
-                                getRequestCode(stripeIntent),
-                                stripeIntent.clientSecret.orEmpty(),
-                                Stripe3dsRedirect.create(sdkData).url,
-                                requestOptions.stripeAccount,
-                                enableLogging = enableLogging
-                            )
-                        }
-                        else -> // authentication type is not supported
-                            bypassAuth(host, stripeIntent, requestOptions.stripeAccount)
+            when (val nextActionData = stripeIntent.nextActionData) {
+                is StripeIntent.NextActionData.SdkData.Use3DS2 -> {
+                    analyticsRequestExecutor.executeAsync(
+                        analyticsRequestFactory.create(
+                            analyticsDataFactory.createAuthParams(
+                                AnalyticsEvent.Auth3ds2Fingerprint,
+                                stripeIntent.id.orEmpty()
+                            ),
+                            requestOptions
+                        )
+                    )
+                    try {
+                        begin3ds2Auth(
+                            host,
+                            stripeIntent,
+                            Stripe3ds2Fingerprint.create(stripeIntent.stripeSdkData!!),
+                            requestOptions
+                        )
+                    } catch (e: CertificateException) {
+                        handleError(host, getRequestCode(stripeIntent), e)
                     }
                 }
-                StripeIntent.NextActionType.RedirectToUrl -> {
+                is StripeIntent.NextActionData.SdkData.Use3DS1 -> {
+                    analyticsRequestExecutor.executeAsync(
+                        analyticsRequestFactory.create(
+                            analyticsDataFactory.createAuthParams(
+                                AnalyticsEvent.Auth3ds1Sdk,
+                                stripeIntent.id.orEmpty()
+                            ),
+                            requestOptions
+                        )
+                    )
+                    beginWebAuth(
+                        host,
+                        getRequestCode(stripeIntent),
+                        stripeIntent.clientSecret.orEmpty(),
+                        nextActionData.url,
+                        requestOptions.stripeAccount,
+                        enableLogging = enableLogging
+                    )
+                }
+                is StripeIntent.NextActionData.RedirectToUrl -> {
                     analyticsRequestExecutor.executeAsync(
                         analyticsRequestFactory.create(
                             analyticsDataFactory.createAuthParams(
@@ -457,8 +449,7 @@ internal class StripePaymentController internal constructor(
                         enableLogging = enableLogging
                     )
                 }
-                else -> // next action type is not supported, so bypass authentication
-                    bypassAuth(host, stripeIntent, requestOptions.stripeAccount)
+                else -> bypassAuth(host, stripeIntent, requestOptions.stripeAccount)
             }
         } else {
             // no action required, so bypass authentication
