@@ -1,7 +1,5 @@
 package com.stripe.android
 
-import com.stripe.android.exception.InvalidRequestException
-import java.io.UnsupportedEncodingException
 import org.mockito.ArgumentMatcher
 
 internal class ApiRequestMatcher @JvmOverloads constructor(
@@ -12,17 +10,12 @@ internal class ApiRequestMatcher @JvmOverloads constructor(
 ) : ArgumentMatcher<ApiRequest> {
 
     override fun matches(request: ApiRequest): Boolean {
-        val url: String
-        try {
-            url = request.url
-        } catch (e: UnsupportedEncodingException) {
-            return false
-        } catch (e: InvalidRequestException) {
-            return false
-        }
+        val url = runCatching {
+            request.url
+        }.getOrNull()
 
-        return method == request.method &&
-            this.url == url &&
+        return this.url == url &&
+            method == request.method &&
             options == request.options &&
             (params == null || params == request.params)
     }

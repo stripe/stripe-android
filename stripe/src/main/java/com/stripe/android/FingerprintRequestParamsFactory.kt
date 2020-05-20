@@ -18,20 +18,9 @@ internal class FingerprintRequestParamsFactory @VisibleForTesting internal const
     private val timeZone: String,
     private val clientFingerprintDataStore: ClientFingerprintDataStore
 ) {
-    private val versionName: String?
-        get() {
-            if (packageName.isNotBlank()) {
-                try {
-                    val packageInfo = packageManager.getPackageInfo(packageName, 0)
-                    if (packageInfo?.versionName != null) {
-                        return packageInfo.versionName
-                    }
-                } catch (ignored: PackageManager.NameNotFoundException) {
-                }
-            }
-
-            return null
-        }
+    private val versionName = runCatching {
+        packageManager.getPackageInfo(packageName, 0).versionName
+    }.getOrNull()
 
     private val screen: String =
         "${displayMetrics.widthPixels}w_${displayMetrics.heightPixels}h_${displayMetrics.densityDpi}dpi"

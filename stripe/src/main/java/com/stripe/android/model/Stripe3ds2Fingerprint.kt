@@ -13,6 +13,21 @@ internal class Stripe3ds2Fingerprint private constructor(
     val serverTransactionId: String,
     val directoryServerEncryption: DirectoryServerEncryption
 ) {
+
+    @Throws(CertificateException::class)
+    internal constructor(sdkData: StripeIntent.NextActionData.SdkData.Use3DS2) :
+        this(
+            sdkData.source,
+            DirectoryServer.lookup(sdkData.serverName),
+            sdkData.transactionId,
+            DirectoryServerEncryption(
+                sdkData.serverEncryption.directoryServerId,
+                sdkData.serverEncryption.dsCertificateData,
+                sdkData.serverEncryption.rootCertsData,
+                sdkData.serverEncryption.keyId
+            )
+        )
+
     class DirectoryServerEncryption @VisibleForTesting
     @Throws(CertificateException::class)
     internal constructor(
@@ -71,25 +86,6 @@ internal class Stripe3ds2Fingerprint private constructor(
                 return values().find { it.networkName == networkName }
                     ?: error("Invalid directory server networkName: '$networkName'")
             }
-        }
-    }
-
-    internal companion object {
-
-        @JvmSynthetic
-        @Throws(CertificateException::class)
-        internal fun create(sdkData: StripeIntent.NextActionData.SdkData.`3DS2`): Stripe3ds2Fingerprint {
-            return Stripe3ds2Fingerprint(
-                sdkData.source,
-                DirectoryServer.lookup(sdkData.serverName),
-                sdkData.transactionId,
-                DirectoryServerEncryption(
-                    sdkData.serverEncryption.directoryServerId,
-                    sdkData.serverEncryption.dsCertificateData,
-                    sdkData.serverEncryption.rootCertsData,
-                    sdkData.serverEncryption.keyId
-                )
-            )
         }
     }
 }

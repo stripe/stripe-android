@@ -23,6 +23,7 @@ import com.stripe.android.stripe3ds2.transaction.CompletionEvent
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.ProtocolErrorEvent
 import com.stripe.android.stripe3ds2.transaction.RuntimeErrorEvent
+import com.stripe.android.stripe3ds2.transaction.Stripe3ds2ActivityStarterHost
 import com.stripe.android.stripe3ds2.transaction.StripeChallengeParameters
 import com.stripe.android.stripe3ds2.transaction.StripeChallengeStatusReceiver
 import com.stripe.android.stripe3ds2.transaction.Transaction
@@ -385,9 +386,8 @@ internal class StripePaymentController internal constructor(
         requestOptions: ApiRequest.Options
     ) {
         if (stripeIntent.requiresAction()) {
-            when (stripeIntent.nextActionData) {
-                is StripeIntent.NextActionData.SdkData.`3DS2` -> {
-                    val sdkData = stripeIntent.nextActionData as StripeIntent.NextActionData.SdkData.`3DS2`
+            when (val nextActionData = stripeIntent.nextActionData) {
+                is StripeIntent.NextActionData.SdkData.Use3DS2 -> {
                     analyticsRequestExecutor.executeAsync(
                         analyticsRequestFactory.create(
                             analyticsDataFactory.createAuthParams(
@@ -401,15 +401,14 @@ internal class StripePaymentController internal constructor(
                         begin3ds2Auth(
                             host,
                             stripeIntent,
-                            Stripe3ds2Fingerprint.create(sdkData),
+                            Stripe3ds2Fingerprint(nextActionData),
                             requestOptions
                         )
                     } catch (e: CertificateException) {
                         handleError(host, getRequestCode(stripeIntent), e)
                     }
                 }
-                is StripeIntent.NextActionData.SdkData.`3DS1` -> {
-                    val sdkData = stripeIntent.nextActionData as StripeIntent.NextActionData.SdkData.`3DS1`
+                is StripeIntent.NextActionData.SdkData.Use3DS1 -> {
                     analyticsRequestExecutor.executeAsync(
                         analyticsRequestFactory.create(
                             analyticsDataFactory.createAuthParams(
@@ -423,7 +422,7 @@ internal class StripePaymentController internal constructor(
                         host,
                         getRequestCode(stripeIntent),
                         stripeIntent.clientSecret.orEmpty(),
-                        sdkData.url,
+                        nextActionData.url,
                         requestOptions.stripeAccount,
                         enableLogging = enableLogging
                     )
@@ -439,14 +438,13 @@ internal class StripePaymentController internal constructor(
                         )
                     )
 
-                    val redirectData = stripeIntent.nextActionData as StripeIntent.NextActionData.RedirectToUrl
                     beginWebAuth(
                         host,
                         getRequestCode(stripeIntent),
                         stripeIntent.clientSecret.orEmpty(),
-                        redirectData.url.toString(),
+                        nextActionData.url.toString(),
                         requestOptions.stripeAccount,
-                        redirectData.returnUrl,
+                        nextActionData.returnUrl,
                         enableLogging = enableLogging
                     )
                 }
@@ -522,7 +520,9 @@ internal class StripePaymentController internal constructor(
             areqParams.sdkEphemeralPublicKey,
             areqParams.messageVersion,
             timeout,
-            null
+            // We do not currently have a fallback url
+            // TODO(smaskell-stripe): Investigate more robust error handling
+            returnUrl = null
         )
         stripeRepository.start3ds2Auth(
             authParams,
@@ -675,10 +675,16 @@ internal class StripePaymentController internal constructor(
                 it.acsTransactionId = ares.acsTransId
             }
 
-            host.activity?.let { activity ->
+            val host = host.fragment?.let { fragment ->
+                Stripe3ds2ActivityStarterHost(fragment)
+            } ?: host.activity?.let { activity ->
+                Stripe3ds2ActivityStarterHost(activity)
+            }
+
+            host?.let {
                 challengeFlowStarter.start(Runnable {
                     transaction.doChallenge(
-                        activity,
+                        it,
                         challengeParameters,
                         PaymentAuth3ds2ChallengeStatusReceiver.create(
                             stripeRepository,
