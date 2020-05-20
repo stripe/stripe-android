@@ -39,11 +39,7 @@ class AddPaymentMethodActivity : StripeActivity() {
     private val stripe: Stripe by lazy {
         val paymentConfiguration = args.paymentConfiguration
             ?: PaymentConfiguration.getInstance(this)
-        Stripe(
-            applicationContext,
-            publishableKey = paymentConfiguration.publishableKey,
-            stripeAccountId = customerSession.stripeAccountId
-        )
+        Stripe(applicationContext, paymentConfiguration.publishableKey)
     }
 
     private val paymentMethodType: PaymentMethod.Type by lazy {
