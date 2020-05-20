@@ -1,9 +1,21 @@
 package com.stripe.android.model
 
+import android.content.Context
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
+import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import com.google.common.truth.Truth.assertThat
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.spy
+import com.nhaarman.mockitokotlin2.whenever
 import kotlin.test.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class ConfirmPaymentIntentParamsTest {
+
+    private val packageManager: PackageManager = mock()
 
     @Test
     fun toParamMap_withSourceParams_shouldCreateExpectedMap() {
@@ -373,6 +385,39 @@ class ConfirmPaymentIntentParamsTest {
                     "tracking_number" to "12345"
                 )
             )
+    }
+
+    @Test
+    fun toParamMap_withAlipay_shouldCreateExpectedMap() {
+        val context = spy(getApplicationContext<Context>())
+
+        val packageInfo = PackageInfo().also {
+            it.versionName = "version_name"
+        }
+        whenever(packageManager.getPackageInfo(context.packageName, 0))
+            .thenReturn(packageInfo)
+
+        whenever(context.packageManager).thenReturn(packageManager)
+
+        assertThat(ConfirmPaymentIntentParams.createAlipay(
+            context,
+            CLIENT_SECRET,
+            RETURN_URL
+        ).toParamMap())
+            .isEqualTo(mapOf(
+                "client_secret" to CLIENT_SECRET,
+                "use_stripe_sdk" to false,
+                "return_url" to RETURN_URL,
+                "payment_method_options" to mapOf(
+                    "alipay" to mapOf(
+                        "app_bundle_id" to context.packageName,
+                        "app_version_key" to "version_name"
+                    )
+                ),
+                "payment_method_data" to mapOf(
+                    "type" to "alipay"
+                )
+            ))
     }
 
     private companion object {

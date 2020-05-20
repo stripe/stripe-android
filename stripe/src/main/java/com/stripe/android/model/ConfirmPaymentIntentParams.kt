@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import android.content.Context
 import android.os.Parcelable
 import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage
 import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
@@ -499,6 +500,27 @@ data class ConfirmPaymentIntentParams internal constructor(
                 savePaymentMethod = savePaymentMethod,
                 extraParams = extraParams,
                 shipping = shipping
+            )
+        }
+
+        @JvmStatic
+        internal fun createAlipay(
+            context: Context,
+            clientSecret: String,
+            returnUrl: String
+        ): ConfirmPaymentIntentParams {
+            val packageName = context.packageName
+            // TODO(smaskell-stripe): Confirm error handling
+            val version = kotlin.runCatching {
+                context.packageManager.getPackageInfo(packageName, 0).versionName
+            }.getOrDefault("1.0")
+
+            val options = PaymentMethodOptionsParams.Alipay(packageName, version)
+            return ConfirmPaymentIntentParams(
+                clientSecret = clientSecret,
+                paymentMethodCreateParams = PaymentMethodCreateParams.createAlipay(),
+                paymentMethodOptions = options,
+                returnUrl = returnUrl
             )
         }
     }
