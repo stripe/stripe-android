@@ -59,9 +59,9 @@ class ConfirmSepaDebitActivity : StripeIntentActivity() {
         snackbarController.show("Status after confirmation: ${result.intent.status}")
     }
 
-    override fun onConfirmError(e: Exception) {
-        super.onConfirmError(e)
-        snackbarController.show("Error during confirmation: ${e.message}")
+    override fun onConfirmError(throwable: Throwable) {
+        super.onConfirmError(throwable)
+        snackbarController.show("Error during confirmation: ${throwable.message}")
     }
 
     private fun createPaymentMethodParams(iban: String): PaymentMethodCreateParams {

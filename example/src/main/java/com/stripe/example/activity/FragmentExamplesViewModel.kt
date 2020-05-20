@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.stripe.android.PaymentIntentResult
+import com.stripe.android.SetupIntentResult
 import com.stripe.example.module.BackendApiFactory
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -15,6 +17,9 @@ import org.json.JSONObject
 class FragmentExamplesViewModel(
     application: Application
 ) : AndroidViewModel(application) {
+    val paymentIntentResultLiveData = MutableLiveData<Result<PaymentIntentResult>>()
+    val setupIntentResultLiveData = MutableLiveData<Result<SetupIntentResult>>()
+
     private val compositeDisposable = CompositeDisposable()
     private val backendApi = BackendApiFactory(application.applicationContext).create()
 

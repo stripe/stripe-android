@@ -4,6 +4,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeJsonUtils
+import com.stripe.android.model.StripeJsonUtils.jsonArrayToList
 import com.stripe.android.model.StripeJsonUtils.optString
 import org.json.JSONObject
 

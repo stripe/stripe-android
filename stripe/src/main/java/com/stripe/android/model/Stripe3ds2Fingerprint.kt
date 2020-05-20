@@ -78,7 +78,7 @@ internal class Stripe3ds2Fingerprint private constructor(
 
         @JvmSynthetic
         @Throws(CertificateException::class)
-        internal fun create(sdkData: StripeIntent.NextActionData.SdkData.`3DS2`): Stripe3ds2Fingerprint {
+        internal fun create(sdkData: StripeIntent.NextActionData.SdkData.Use3DS2): Stripe3ds2Fingerprint {
             return Stripe3ds2Fingerprint(
                 sdkData.source,
                 DirectoryServer.lookup(sdkData.serverName),

@@ -157,8 +157,8 @@ data class PaymentIntent internal constructor(
 
     override val stripeSdkData: StripeIntent.SdkData?
         get() = when (nextActionData) {
-            is StripeIntent.NextActionData.SdkData.`3DS1` -> StripeIntent.SdkData(true, false, nextActionData)
-            is StripeIntent.NextActionData.SdkData.`3DS2` -> StripeIntent.SdkData(false, true, nextActionData)
+            is StripeIntent.NextActionData.SdkData.Use3DS1 -> StripeIntent.SdkData(true, false, nextActionData)
+            is StripeIntent.NextActionData.SdkData.Use3DS2 -> StripeIntent.SdkData(false, true, nextActionData)
             else -> null
         }
 
@@ -330,8 +330,6 @@ data class PaymentIntent internal constructor(
     }
 
     companion object {
-        private const val FIELD_NEXT_ACTION_TYPE = "type"
-
         fun fromJson(jsonObject: JSONObject?): PaymentIntent? {
             return jsonObject?.let {
                 PaymentIntentJsonParser().parse(it)
