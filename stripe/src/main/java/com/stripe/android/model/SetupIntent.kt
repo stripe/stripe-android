@@ -117,8 +117,8 @@ data class SetupIntent internal constructor(
         replaceWith = ReplaceWith("nextActionData as? StripeIntent.NextActionData.SdkData"))
     override val stripeSdkData: StripeIntent.SdkData?
         get() = when (nextActionData) {
-            is StripeIntent.NextActionData.SdkData.Use3DS1 -> StripeIntent.SdkData(true, false)
-            is StripeIntent.NextActionData.SdkData.Use3DS2 -> StripeIntent.SdkData(false, true)
+            is StripeIntent.NextActionData.SdkData.Use3DS1 -> StripeIntent.SdkData(is3ds1 = true, is3ds2 = false)
+            is StripeIntent.NextActionData.SdkData.Use3DS2 -> StripeIntent.SdkData(is3ds1 = false, is3ds2 = true)
             else -> null
         }
 
