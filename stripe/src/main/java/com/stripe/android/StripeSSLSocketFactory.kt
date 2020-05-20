@@ -71,7 +71,8 @@ internal class StripeSSLSocketFactory constructor(
         localPort: Int
     ): Socket? {
         return fixupSocket(
-            internalFactory.createSocket(address, port, localAddress, localPort))
+            internalFactory.createSocket(address, port, localAddress, localPort)
+        )
     }
 
     private fun fixupSocket(sock: Socket): Socket {
@@ -81,15 +82,12 @@ internal class StripeSSLSocketFactory constructor(
         return sock
     }
 
-    fun getEnabledProtocols(
-        enabledProtocols: Array<String>
-    ): Array<String?> {
-        return listOfNotNull(
+    fun getEnabledProtocols(enabledProtocols: Array<String>) =
+        listOfNotNull(
             *enabledProtocols,
             TLS_V11_PROTO.takeIf { tlsv11Supported },
             TLS_V12_PROTO.takeIf { tlsv12Supported }
         ).toSet().toTypedArray()
-    }
 
     private companion object {
         private const val TLS_V11_PROTO = "TLSv1.1"
