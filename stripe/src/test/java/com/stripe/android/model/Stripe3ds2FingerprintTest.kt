@@ -18,7 +18,7 @@ class Stripe3ds2FingerprintTest {
     @Throws(CertificateException::class)
     fun create_with3ds2SdkData_shouldCreateObject() {
         val sdkData = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
-            .nextActionData as StripeIntent.NextActionData.SdkData.`3DS2`
+            .nextActionData as StripeIntent.NextActionData.SdkData.Use3DS2
         assertNotNull(sdkData)
         val stripe3ds2Fingerprint = Stripe3ds2Fingerprint(sdkData)
         assertEquals("src_1ExkUeAWhjPjYwPiLWUvXrSA", stripe3ds2Fingerprint.source)
@@ -42,7 +42,7 @@ class Stripe3ds2FingerprintTest {
     @Throws(CertificateException::class)
     fun create_with3ds2AmexSdkData_shouldCreateObject() {
         val sdkData = PaymentIntentFixtures.PI_REQUIRES_AMEX_3DS2
-            .nextActionData as StripeIntent.NextActionData.SdkData.`3DS2`
+            .nextActionData as StripeIntent.NextActionData.SdkData.Use3DS2
         assertNotNull(sdkData)
         val stripe3ds2Fingerprint = Stripe3ds2Fingerprint(sdkData)
         assertEquals("src_1EceOlCRMbs6FrXf2hqrI1g5", stripe3ds2Fingerprint.source)
