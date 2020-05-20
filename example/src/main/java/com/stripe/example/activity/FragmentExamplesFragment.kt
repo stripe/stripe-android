@@ -144,11 +144,6 @@ class FragmentExamplesFragment : Fragment() {
         super.onPause()
     }
 
-    override fun onDestroy() {
-        viewModel.dispose()
-        super.onDestroy()
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -209,7 +204,10 @@ class FragmentExamplesFragment : Fragment() {
         viewModel.createPaymentIntent().observe(
             viewLifecycleOwner,
             Observer {
-                onCreatePaymentIntentResponse(it)
+                it.fold(
+                    onSuccess = ::onCreatePaymentIntentResponse,
+                    onFailure = ::onError
+                )
             }
         )
     }
@@ -222,7 +220,10 @@ class FragmentExamplesFragment : Fragment() {
         viewModel.createSetupIntent().observe(
             viewLifecycleOwner,
             Observer {
-                onCreateSetupIntentResponse(it)
+                it.fold(
+                    onSuccess = ::onCreateSetupIntentResponse,
+                    onFailure = ::onError
+                )
             }
         )
     }
@@ -247,9 +248,9 @@ class FragmentExamplesFragment : Fragment() {
             )
             confirmPaymentIntent(response.getString("secret"))
         } catch (e: IOException) {
-            viewBinding.status.append(e.message)
+            onError(e)
         } catch (e: JSONException) {
-            viewBinding.status.append(e.message)
+            onError(e)
         }
     }
 
@@ -268,9 +269,9 @@ class FragmentExamplesFragment : Fragment() {
             )
             confirmSetupIntent(response.getString("secret"))
         } catch (e: IOException) {
-            viewBinding.status.append(e.message)
+            onError(e)
         } catch (e: JSONException) {
-            viewBinding.status.append(e.message)
+            onError(e)
         }
     }
 
@@ -351,6 +352,10 @@ class FragmentExamplesFragment : Fragment() {
             }
         )
         return customerSession
+    }
+
+    private fun onError(throwable: Throwable) {
+        viewBinding.status.append(throwable.message)
     }
 
     private companion object {
