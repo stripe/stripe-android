@@ -57,7 +57,8 @@ interface StripeIntent : StripeModel {
      * to invoke authentication flows. The shape of the contents is subject to change and is only
      * intended to be used by the Stripe SDK.
      */
-    @Deprecated("use {@link #nextActionData}")
+    @Deprecated("use {@link #nextActionData}",
+        replaceWith = ReplaceWith("nextActionData as? StripeIntent.NextAction.SdkData"))
     val stripeSdkData: SdkData?
 
     val status: Status?
@@ -198,7 +199,7 @@ interface StripeIntent : StripeModel {
 
     sealed class NextActionData : StripeModel {
         @Parcelize
-        internal data class DisplayOxxoDetails(
+        data class DisplayOxxoDetails(
             /**
              * The timestamp after which the OXXO expires.
              */
@@ -211,26 +212,26 @@ interface StripeIntent : StripeModel {
         ) : NextActionData()
 
         @Parcelize
-        internal data class RedirectToUrl(
+        data class RedirectToUrl(
             val url: Uri,
             val returnUrl: String?
         ) : NextActionData()
 
-        internal sealed class SdkData : NextActionData() {
+        sealed class SdkData : NextActionData() {
             @Parcelize
-            internal data class `3DS1`(
+            data class Use3DS1(
                 val url: String
             ) : SdkData()
 
             @Parcelize
-            internal data class `3DS2`(
+            data class Use3DS2(
                 val source: String,
                 val serverName: String,
                 val transactionId: String,
                 val serverEncryption: DirectoryServerEncryption
             ) : SdkData() {
                 @Parcelize
-                internal data class DirectoryServerEncryption(
+                data class DirectoryServerEncryption(
                     val directoryServerId: String,
                     val dsCertificateData: String,
                     val rootCertsData: List<String>,
