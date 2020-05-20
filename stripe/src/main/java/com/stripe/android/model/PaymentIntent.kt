@@ -2,7 +2,6 @@ package com.stripe.android.model
 
 import android.net.Uri
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
-import com.stripe.android.utils.Either
 import java.util.regex.Pattern
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.parcel.RawValue
@@ -158,8 +157,8 @@ data class PaymentIntent internal constructor(
 
     override val stripeSdkData: StripeIntent.SdkData?
         get() = when (nextActionData) {
-            is StripeIntent.NextActionData.SdkData.Use3DS1 -> StripeIntent.SdkData(true, false, Either.Right(nextActionData))
-            is StripeIntent.NextActionData.SdkData.Use3DS2 -> StripeIntent.SdkData(false, true, Either.Right(nextActionData))
+            is StripeIntent.NextActionData.SdkData.Use3DS1 -> StripeIntent.SdkData(true, false, nextActionData)
+            is StripeIntent.NextActionData.SdkData.Use3DS2 -> StripeIntent.SdkData(false, true, nextActionData)
             else -> null
         }
 

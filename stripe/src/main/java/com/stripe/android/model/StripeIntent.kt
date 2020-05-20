@@ -2,7 +2,6 @@ package com.stripe.android.model
 
 import android.net.Uri
 import android.os.Parcelable
-import com.stripe.android.utils.Either
 import kotlinx.android.parcel.Parcelize
 
 /**
@@ -148,24 +147,8 @@ interface StripeIntent : StripeModel {
     data class SdkData internal constructor(
         val is3ds1: Boolean,
         val is3ds2: Boolean,
-        internal val data: Either<Map<String, *>, NextActionData.SdkData>
-    ) {
-
-        internal companion object {
-            internal fun fromMap(data: Map<String, *>): SdkData {
-                val type: String = data[FIELD_TYPE] as String
-                val is3ds2: Boolean = TYPE_3DS2 == type
-                val is3ds1: Boolean = TYPE_3DS1 == type
-
-                return SdkData(is3ds1, is3ds2, Either.Left(data))
-            }
-
-            private const val FIELD_TYPE = "type"
-
-            private const val TYPE_3DS2 = "stripe_3ds2_fingerprint"
-            private const val TYPE_3DS1 = "three_d_secure_redirect"
-        }
-    }
+        internal val data: NextActionData.SdkData
+    )
 
     /**
      * Contains instructions for authenticating by redirecting your customer to another

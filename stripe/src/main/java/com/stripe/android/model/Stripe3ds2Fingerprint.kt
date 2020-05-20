@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.utils.Either
 import java.io.ByteArrayInputStream
 import java.security.PublicKey
 import java.security.cert.CertificateException
@@ -76,46 +75,25 @@ internal class Stripe3ds2Fingerprint private constructor(
     }
 
     internal companion object {
-        private const val FIELD_THREE_D_SECURE_2_SOURCE = "three_d_secure_2_source"
-        private const val FIELD_DIRECTORY_SERVER_NAME = "directory_server_name"
-        private const val FIELD_SERVER_TRANSACTION_ID = "server_transaction_id"
-        private const val FIELD_DIRECTORY_SERVER_ENCRYPTION = "directory_server_encryption"
 
         @JvmSynthetic
         @Throws(CertificateException::class)
         internal fun create(sdkData: StripeIntent.SdkData): Stripe3ds2Fingerprint {
-            require(sdkData.is3ds2) { "Expected SdkData with type='stripe_3ds2_fingerprint'." }
-
-            when (sdkData.data) {
-                is Either.Left -> {
-                    val data = sdkData.data.left
-                    return Stripe3ds2Fingerprint(
-                        (data[FIELD_THREE_D_SECURE_2_SOURCE] as String),
-                        DirectoryServer.lookup((data[FIELD_DIRECTORY_SERVER_NAME] as String)),
-                        (data[FIELD_SERVER_TRANSACTION_ID] as String),
-                        DirectoryServerEncryption.create(
-                            (data[FIELD_DIRECTORY_SERVER_ENCRYPTION] as Map<String, *>)
-                        )
-                    )
-                }
-                is Either.Right -> {
-                    val data = sdkData.data.right
-                    require(data is StripeIntent.NextActionData.SdkData.Use3DS2) {
-                        "Expected SdkData with type='stripe_3ds2_fingerprint'."
-                    }
-                    return Stripe3ds2Fingerprint(
-                        data.source,
-                        DirectoryServer.lookup(data.serverName),
-                        data.transactionId,
-                        DirectoryServerEncryption(
-                            data.serverEncryption.directoryServerId,
-                            data.serverEncryption.dsCertificateData,
-                            data.serverEncryption.rootCertsData,
-                            data.serverEncryption.keyId
-                        )
-                    )
-                }
+            require(sdkData.data is StripeIntent.NextActionData.SdkData.Use3DS2) {
+                "Expected SdkData with type='stripe_3ds2_fingerprint'."
             }
+
+            return Stripe3ds2Fingerprint(
+                sdkData.data.source,
+                DirectoryServer.lookup(sdkData.data.serverName),
+                sdkData.data.transactionId,
+                DirectoryServerEncryption(
+                    sdkData.data.serverEncryption.directoryServerId,
+                    sdkData.data.serverEncryption.dsCertificateData,
+                    sdkData.data.serverEncryption.rootCertsData,
+                    sdkData.data.serverEncryption.keyId
+                )
+            )
         }
     }
 }
