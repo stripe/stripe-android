@@ -14,7 +14,6 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.view.CardValidCallback
 import com.stripe.example.databinding.CreateCardPaymentMethodActivityBinding
 import com.stripe.example.databinding.PaymentMethodItemBinding
-import io.reactivex.disposables.CompositeDisposable
 
 class CreateCardPaymentMethodActivity : AppCompatActivity() {
     private val viewBinding: CreateCardPaymentMethodActivityBinding by lazy {
@@ -27,8 +26,6 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
             ViewModelProvider.AndroidViewModelFactory(application)
         )[PaymentMethodViewModel::class.java]
     }
-
-    private val compositeDisposable = CompositeDisposable()
 
     private val adapter: PaymentMethodsAdapter = PaymentMethodsAdapter()
     private val snackbarController: SnackbarController by lazy {
@@ -98,11 +95,6 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
         } else {
             showSnackbar("Created null PaymentMethod")
         }
-    }
-
-    override fun onDestroy() {
-        compositeDisposable.dispose()
-        super.onDestroy()
     }
 
     private class PaymentMethodsAdapter :

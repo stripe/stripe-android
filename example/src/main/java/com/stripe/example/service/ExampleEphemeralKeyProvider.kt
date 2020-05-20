@@ -1,49 +1,52 @@
 package com.stripe.example.service
 
 import android.content.Context
-import android.util.Log
 import androidx.annotation.Size
 import com.stripe.android.EphemeralKeyProvider
 import com.stripe.android.EphemeralKeyUpdateListener
 import com.stripe.example.Settings
 import com.stripe.example.module.BackendApiFactory
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
-import java.io.IOException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * An implementation of [EphemeralKeyProvider] that can be used to generate
  * ephemeral keys on the backend.
  */
-internal class ExampleEphemeralKeyProvider constructor(
+internal class ExampleEphemeralKeyProvider(
     backendUrl: String
 ) : EphemeralKeyProvider {
-
     constructor(context: Context) : this(Settings(context).backendUrl)
 
-    private val compositeDisposable: CompositeDisposable = CompositeDisposable()
-    private val backendApi: BackendApi = BackendApiFactory(backendUrl).create()
+    private val workScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val backendApi = BackendApiFactory(backendUrl).create()
 
     override fun createEphemeralKey(
         @Size(min = 4) apiVersion: String,
         keyUpdateListener: EphemeralKeyUpdateListener
     ) {
-        compositeDisposable.add(
-            backendApi.createEphemeralKey(hashMapOf("api_version" to apiVersion))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ responseBody ->
-                    try {
-                        val ephemeralKeyJson = responseBody.string()
-                        keyUpdateListener.onKeyUpdate(ephemeralKeyJson)
-                    } catch (e: IOException) {
+        workScope.launch {
+            val response =
+                kotlin.runCatching {
+                    backendApi
+                        .createEphemeralKey(hashMapOf("api_version" to apiVersion))
+                        .string()
+                }
+
+            withContext(Dispatchers.Main) {
+                response.fold(
+                    onSuccess = {
+                        keyUpdateListener.onKeyUpdate(it)
+                    },
+                    onFailure = {
                         keyUpdateListener
-                            .onKeyUpdateFailure(0, e.message ?: "")
+                            .onKeyUpdateFailure(0, it.message.orEmpty())
                     }
-                }, {
-                    Log.e("StripeExample", "Exception in ExampleEphemeralKeyProvider", it)
-                })
-        )
+                )
+            }
+        }
     }
 }
