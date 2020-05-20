@@ -27,7 +27,7 @@ class CustomerSession @VisibleForTesting internal constructor(
     context: Context,
     stripeRepository: StripeRepository,
     publishableKey: String,
-    internal val stripeAccountId: String?,
+    stripeAccountId: String?,
     private val threadPoolExecutor: ThreadPoolExecutor = createThreadPoolExecutor(),
     private val operationIdFactory: OperationIdFactory = StripeOperationIdFactory(),
     private val timeSupplier: TimeSupplier = { Calendar.getInstance().timeInMillis },
