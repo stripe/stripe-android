@@ -199,7 +199,7 @@ data class PaymentSessionConfig internal constructor(
         }
 
         /**
-         * @param canDeletePaymentMethods canDeletePaymentMethods controls whether the user can
+         * @param canDeletePaymentMethods controls whether the user can
          * delete a payment method by swiping on it in [PaymentMethodsActivity]. Defaults to true.
          */
         fun setCanDeletePaymentMethods(canDeletePaymentMethods: Boolean): Builder = apply {
