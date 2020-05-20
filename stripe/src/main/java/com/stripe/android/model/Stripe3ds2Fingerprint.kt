@@ -100,7 +100,7 @@ internal class Stripe3ds2Fingerprint private constructor(
                 }
                 is Either.Right -> {
                     val data = sdkData.data.right
-                    require(data is PaymentIntent.NextActionData.SdkData.Use3DS2) {
+                    require(data is StripeIntent.NextActionData.SdkData.Use3DS2) {
                         "Expected SdkData with type='stripe_3ds2_fingerprint'."
                     }
                     return Stripe3ds2Fingerprint(

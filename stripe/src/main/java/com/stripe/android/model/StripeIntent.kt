@@ -148,7 +148,7 @@ interface StripeIntent : StripeModel {
     data class SdkData internal constructor(
         val is3ds1: Boolean,
         val is3ds2: Boolean,
-        internal val data: Either<Map<String, *>, PaymentIntent.NextActionData.SdkData>
+        internal val data: Either<Map<String, *>, NextActionData.SdkData>
     ) {
 
         internal companion object {
@@ -203,6 +203,50 @@ interface StripeIntent : StripeModel {
                     null
                 }
                 return url?.let { RedirectData(Uri.parse(it), returnUrl) }
+            }
+        }
+    }
+
+    sealed class NextActionData : StripeModel {
+        @Parcelize
+        data class DisplayOxxoDetails(
+            /**
+             * The timestamp after which the OXXO expires.
+             */
+            val expiresAfter: Int = 0,
+
+            /**
+             * The OXXO number.
+             */
+            val number: String? = null
+        ) : NextActionData()
+
+        @Parcelize
+        data class RedirectToUrl(
+            val url: Uri,
+            val returnUrl: String?
+        ) : NextActionData()
+
+        sealed class SdkData : NextActionData() {
+            @Parcelize
+            data class Use3DS1(
+                val url: String
+            ) : SdkData()
+
+            @Parcelize
+            data class Use3DS2(
+                val source: String,
+                val serverName: String,
+                val transactionId: String,
+                val serverEncryption: DirectoryServerEncryption
+            ) : SdkData() {
+                @Parcelize
+                data class DirectoryServerEncryption(
+                    val directoryServerId: String,
+                    val dsCertificateData: String,
+                    val rootCertsData: List<String>,
+                    val keyId: String?
+                ) : Parcelable
             }
         }
     }
