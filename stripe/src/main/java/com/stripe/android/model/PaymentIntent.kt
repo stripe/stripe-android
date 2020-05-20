@@ -148,6 +148,8 @@ data class PaymentIntent internal constructor(
             }
 
     /**
+     * @deprecated use {@link #nextActionData} instead
+     *
      * The URL you must redirect your customer to in order to authenticate the payment.
      */
     @Deprecated("use {@link #nextActionData}",
