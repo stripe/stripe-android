@@ -26,7 +26,7 @@ internal class PaymentMethodsAdapter constructor(
     initiallySelectedPaymentMethodId: String? = null,
     private val shouldShowGooglePay: Boolean = false,
     private val useGooglePay: Boolean = false,
-    private val canDeletePaymentOptions: Boolean = true
+    private val canDeletePaymentMethods: Boolean = true
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     internal val paymentMethods = mutableListOf<PaymentMethod>()
@@ -178,7 +178,7 @@ internal class PaymentMethodsAdapter constructor(
     ): ViewHolder.PaymentMethodViewHolder {
         val viewHolder = ViewHolder.PaymentMethodViewHolder(parent)
 
-        if (this.canDeletePaymentOptions) {
+        if (canDeletePaymentMethods) {
             ViewCompat.addAccessibilityAction(
                 viewHolder.itemView,
                 parent.context.getString(R.string.delete_payment_method)

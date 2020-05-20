@@ -53,6 +53,10 @@ internal object PaymentSessionFixtures {
         .setBillingAddressFields(BillingAddressFields.Full)
         .setShouldPrefetchCustomer(true)
 
+        // Enable PaymentMethod Deletion from PaymentMethodActivity
+        // This is default behavior
+        .setCanDeletePaymentMethods(true)
+
         .setShippingInformationValidator(FakeShippingInformationValidator())
         .setShippingMethodsFactory(FakeShippingMethodsFactory())
         .build()

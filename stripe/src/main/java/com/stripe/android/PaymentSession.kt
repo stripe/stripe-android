@@ -237,7 +237,7 @@ class PaymentSession @VisibleForTesting internal constructor(
                 .setWindowFlags(config.windowFlags)
                 .setBillingAddressFields(config.billingAddressFields)
                 .setUseGooglePay(viewModel.paymentSessionData.useGooglePay)
-                .setCanDeletePaymentOptions(config.canDeletePaymentOptions)
+                .setCanDeletePaymentMethods(config.canDeletePaymentMethods)
                 .build()
         )
     }

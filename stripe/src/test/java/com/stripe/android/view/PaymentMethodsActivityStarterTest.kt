@@ -12,6 +12,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.assertFalse
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentMethodsActivityStarterTest {
@@ -49,6 +50,16 @@ class PaymentMethodsActivityStarterTest {
             PaymentMethodsActivityStarter.Args.Builder()
                 .build()
                 .paymentMethodTypes
+        )
+    }
+
+    @Test
+    fun testDisableDeletePaymentMethods() {
+        assertFalse (
+            PaymentMethodsActivityStarter.Args.Builder()
+                .setCanDeletePaymentMethods(false)
+                .build()
+                .canDeletePaymentMethods
         )
     }
 }

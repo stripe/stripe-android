@@ -67,7 +67,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
             initiallySelectedPaymentMethodId = viewModel.selectedPaymentMethodId,
             shouldShowGooglePay = args.shouldShowGooglePay,
             useGooglePay = args.useGooglePay,
-            canDeletePaymentOptions = args.canDeletePaymentOptions
+            canDeletePaymentMethods = args.canDeletePaymentMethods
         )
     }
 
@@ -133,7 +133,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
         viewBinding.recycler.adapter = adapter
         viewBinding.recycler.paymentMethodSelectedCallback = { finishWithResult(it) }
 
-        if (args.canDeletePaymentOptions) {
+        if (args.canDeletePaymentMethods) {
             viewBinding.recycler.attachItemTouchHelper(
                 PaymentMethodSwipeCallback(
                     this, adapter,

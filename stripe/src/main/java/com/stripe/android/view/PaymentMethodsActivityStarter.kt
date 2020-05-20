@@ -48,7 +48,7 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
         internal val billingAddressFields: BillingAddressFields,
         internal val shouldShowGooglePay: Boolean = false,
         internal val useGooglePay: Boolean = false,
-        internal val canDeletePaymentOptions: Boolean = true
+        internal val canDeletePaymentMethods: Boolean = true
 
     ) : ActivityStarter.Args {
         class Builder : ObjectBuilder<Args> {
@@ -58,7 +58,7 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
             private var paymentMethodTypes: List<PaymentMethod.Type>? = null
             private var shouldShowGooglePay: Boolean = false
             private var useGooglePay: Boolean = false
-            private var canDeletePaymentOptions: Boolean = true
+            private var canDeletePaymentMethods: Boolean = true
             private var paymentConfiguration: PaymentConfiguration? = null
             private var windowFlags: Int? = null
 
@@ -137,8 +137,8 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
                 this.useGooglePay = useGooglePay
             }
 
-            fun setCanDeletePaymentOptions(canDeletePaymentOptions: Boolean): Builder = apply {
-                this.canDeletePaymentOptions = canDeletePaymentOptions
+            fun setCanDeletePaymentMethods(canDeletePaymentMethods: Boolean): Builder = apply {
+                this.canDeletePaymentMethods = canDeletePaymentMethods
             }
 
             override fun build(): Args {
@@ -152,7 +152,7 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
                     addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId,
                     windowFlags = windowFlags,
                     billingAddressFields = billingAddressFields,
-                    canDeletePaymentOptions = canDeletePaymentOptions
+                    canDeletePaymentMethods = canDeletePaymentMethods
                 )
             }
         }
