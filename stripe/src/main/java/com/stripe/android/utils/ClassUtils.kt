@@ -33,7 +33,7 @@ internal object ClassUtils {
     fun findField(clazz: Class<*>, whitelist: Collection<String>): Field? {
         val fields = clazz.declaredFields
 
-        return fields.first {
+        return fields.firstOrNull {
             whitelist.contains(it.name)
         }?.also {
             it.isAccessible = true
@@ -47,7 +47,7 @@ internal object ClassUtils {
      */
     @JvmStatic
     fun findMethod(clazz: Class<*>, whitelist: Collection<String>): Method? {
-        return clazz.declaredMethods.first {
+        return clazz.declaredMethods.firstOrNull {
             whitelist.contains(it.name)
         }
     }
