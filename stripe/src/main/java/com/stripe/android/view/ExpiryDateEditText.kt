@@ -237,24 +237,20 @@ class ExpiryDateEditText @JvmOverloads constructor(
     }
 
     private fun updateInputValues(month: String, year: String) {
-        val inputMonth: Int = if (month.length != 2) {
+        val inputMonth = if (month.length != 2) {
             INVALID_INPUT
         } else {
-            try {
+            runCatching {
                 month.toInt()
-            } catch (numEx: NumberFormatException) {
-                INVALID_INPUT
-            }
+            }.getOrDefault(INVALID_INPUT)
         }
 
-        val inputYear: Int = if (year.length != 2) {
+        val inputYear = if (year.length != 2) {
             INVALID_INPUT
         } else {
-            try {
+            runCatching {
                 DateUtils.convertTwoDigitYearToFour(year.toInt())
-            } catch (numEx: NumberFormatException) {
-                INVALID_INPUT
-            }
+            }.getOrDefault(INVALID_INPUT)
         }
 
         isDateValid = DateUtils.isExpiryDataValid(inputMonth, inputYear)

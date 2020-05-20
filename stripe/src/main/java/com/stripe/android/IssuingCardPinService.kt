@@ -5,12 +5,7 @@ import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.EphemeralKeyManager.KeyManagerListener
 import com.stripe.android.Stripe.Companion.appInfo
-import com.stripe.android.exception.APIConnectionException
-import com.stripe.android.exception.APIException
-import com.stripe.android.exception.AuthenticationException
-import com.stripe.android.exception.CardException
 import com.stripe.android.exception.InvalidRequestException
-import org.json.JSONException
 
 /**
  * Methods for retrieval / update of a Stripe Issuing card
@@ -20,10 +15,8 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
     private val stripeRepository: StripeRepository,
     private val operationIdFactory: OperationIdFactory = StripeOperationIdFactory()
 ) {
-    private val retrievalListeners: MutableMap<String?, IssuingCardPinRetrievalListener> =
-        mutableMapOf()
-    private val updateListeners: MutableMap<String?, IssuingCardPinUpdateListener> =
-        mutableMapOf()
+    private val retrievalListeners = mutableMapOf<String, IssuingCardPinRetrievalListener>()
+    private val updateListeners = mutableMapOf<String, IssuingCardPinUpdateListener>()
 
     private val ephemeralKeyManager = EphemeralKeyManager(
         keyProvider,
@@ -135,14 +128,9 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
     private fun fireRetrievePinRequest(
         ephemeralKey: EphemeralKey,
         operation: EphemeralOperation.Issuing.RetrievePin,
-        listener: IssuingCardPinRetrievalListener?
+        listener: IssuingCardPinRetrievalListener
     ) {
-        if (listener == null) {
-            logMissingListener()
-            return
-        }
-
-        try {
+        runCatching {
             val pin = stripeRepository.retrieveIssuingCardPin(
                 operation.cardId,
                 operation.verificationId,
@@ -150,84 +138,71 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
                 ephemeralKey.secret
             )
             listener.onIssuingCardPinRetrieved(pin)
-        } catch (e: InvalidRequestException) {
-            when (e.stripeError?.code) {
-                "expired" -> {
-                    listener.onError(
-                        CardPinActionError.ONE_TIME_CODE_EXPIRED,
-                        "The one-time code has expired",
-                        null)
-                }
-                "incorrect_code" -> {
-                    listener.onError(
-                        CardPinActionError.ONE_TIME_CODE_INCORRECT,
-                        "The one-time code was incorrect",
-                        null)
-                }
-                "too_many_attempts" -> {
-                    listener.onError(
-                        CardPinActionError.ONE_TIME_CODE_TOO_MANY_ATTEMPTS,
-                        "The verification challenge was attempted too many times",
-                        null)
-                }
-                "already_redeemed" -> {
-                    listener.onError(
-                        CardPinActionError.ONE_TIME_CODE_ALREADY_REDEEMED,
-                        "The verification challenge was already redeemed",
-                        null)
-                }
-                else -> {
-                    listener.onError(
-                        CardPinActionError.UNKNOWN_ERROR,
-                        "The call to retrieve the PIN failed, possibly an error " +
-                            "with the verification. Please check the exception.",
-                        e)
+        }.recover {
+            onRetrievePinError(it, listener)
+        }
+    }
+
+    private fun onRetrievePinError(
+        throwable: Throwable,
+        listener: IssuingCardPinRetrievalListener
+    ) {
+        when (throwable) {
+            is InvalidRequestException -> {
+                when (throwable.stripeError?.code) {
+                    "expired" -> {
+                        listener.onError(
+                            CardPinActionError.ONE_TIME_CODE_EXPIRED,
+                            "The one-time code has expired",
+                            null
+                        )
+                    }
+                    "incorrect_code" -> {
+                        listener.onError(
+                            CardPinActionError.ONE_TIME_CODE_INCORRECT,
+                            "The one-time code was incorrect.",
+                            null
+                        )
+                    }
+                    "too_many_attempts" -> {
+                        listener.onError(
+                            CardPinActionError.ONE_TIME_CODE_TOO_MANY_ATTEMPTS,
+                            "The verification challenge was attempted too many times.",
+                            null
+                        )
+                    }
+                    "already_redeemed" -> {
+                        listener.onError(
+                            CardPinActionError.ONE_TIME_CODE_ALREADY_REDEEMED,
+                            "The verification challenge was already redeemed.",
+                            null
+                        )
+                    }
+                    else -> {
+                        listener.onError(
+                            CardPinActionError.UNKNOWN_ERROR,
+                            "The call to retrieve the PIN failed, possibly an error with the verification.",
+                            throwable
+                        )
+                    }
                 }
             }
-        } catch (e: APIConnectionException) {
-            listener.onError(
-                CardPinActionError.UNKNOWN_ERROR,
-                "An error occurred retrieving the PIN, " +
-                    "please check the exception",
-                e)
-        } catch (e: APIException) {
-            listener.onError(
-                CardPinActionError.UNKNOWN_ERROR,
-                "An error occurred retrieving the PIN, " +
-                    "please check the exception",
-                e)
-        } catch (e: AuthenticationException) {
-            listener.onError(
-                CardPinActionError.UNKNOWN_ERROR,
-                "An error occurred retrieving the PIN, " +
-                    "please check the exception",
-                e)
-        } catch (e: JSONException) {
-            listener.onError(
-                CardPinActionError.UNKNOWN_ERROR,
-                "An error occurred retrieving the PIN, " +
-                    "please check the exception",
-                e)
-        } catch (e: CardException) {
-            listener.onError(
-                CardPinActionError.UNKNOWN_ERROR,
-                "An error occurred retrieving the PIN, " +
-                    "please check the exception",
-                e)
+            else -> {
+                listener.onError(
+                    CardPinActionError.UNKNOWN_ERROR,
+                    "An error occurred while retrieving the PIN.",
+                    throwable
+                )
+            }
         }
     }
 
     private fun fireUpdatePinRequest(
         ephemeralKey: EphemeralKey,
         operation: EphemeralOperation.Issuing.UpdatePin,
-        listener: IssuingCardPinUpdateListener?
+        listener: IssuingCardPinUpdateListener
     ) {
-        if (listener == null) {
-            logMissingListener()
-            return
-        }
-
-        try {
+        runCatching {
             stripeRepository.updateIssuingCardPin(
                 operation.cardId,
                 operation.newPin,
@@ -236,61 +211,58 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
                 ephemeralKey.secret
             )
             listener.onIssuingCardPinUpdated()
-        } catch (e: InvalidRequestException) {
-            when (e.stripeError?.code) {
-                "expired" -> {
-                    listener.onError(
-                        CardPinActionError.ONE_TIME_CODE_EXPIRED,
-                        "The one-time code has expired",
-                        null)
-                }
-                "incorrect_code" -> {
-                    listener.onError(
-                        CardPinActionError.ONE_TIME_CODE_INCORRECT,
-                        "The one-time code was incorrect",
-                        null)
-                }
-                "too_many_attempts" -> {
-                    listener.onError(
-                        CardPinActionError.ONE_TIME_CODE_TOO_MANY_ATTEMPTS,
-                        "The verification challenge was attempted too many times",
-                        null)
-                }
-                "already_redeemed" -> {
-                    listener.onError(
-                        CardPinActionError.ONE_TIME_CODE_ALREADY_REDEEMED,
-                        "The verification challenge was already redeemed",
-                        null)
-                }
-                else -> {
-                    listener.onError(
-                        CardPinActionError.UNKNOWN_ERROR,
-                        "The call to update the PIN failed, possibly an error " +
-                            "with the verification. Please check the exception.",
-                        e)
+        }.recover {
+            onUpdatePinError(it, listener)
+        }
+    }
+
+    private fun onUpdatePinError(throwable: Throwable, listener: IssuingCardPinUpdateListener) {
+        when (throwable) {
+            is InvalidRequestException -> {
+                when (throwable.stripeError?.code) {
+                    "expired" -> {
+                        listener.onError(
+                            CardPinActionError.ONE_TIME_CODE_EXPIRED,
+                            "The one-time code has expired.",
+                            null
+                        )
+                    }
+                    "incorrect_code" -> {
+                        listener.onError(
+                            CardPinActionError.ONE_TIME_CODE_INCORRECT,
+                            "The one-time code was incorrect.",
+                            null)
+                    }
+                    "too_many_attempts" -> {
+                        listener.onError(
+                            CardPinActionError.ONE_TIME_CODE_TOO_MANY_ATTEMPTS,
+                            "The verification challenge was attempted too many times.",
+                            null
+                        )
+                    }
+                    "already_redeemed" -> {
+                        listener.onError(
+                            CardPinActionError.ONE_TIME_CODE_ALREADY_REDEEMED,
+                            "The verification challenge was already redeemed.",
+                            null
+                        )
+                    }
+                    else -> {
+                        listener.onError(
+                            CardPinActionError.UNKNOWN_ERROR,
+                            "The call to update the PIN failed, possibly an error with the verification.",
+                            throwable
+                        )
+                    }
                 }
             }
-        } catch (e: APIConnectionException) {
-            listener.onError(
-                CardPinActionError.UNKNOWN_ERROR,
-                "An error occurred retrieving the PIN please check the exception",
-                e
-            )
-        } catch (e: APIException) {
-            listener.onError(
-                CardPinActionError.UNKNOWN_ERROR,
-                "An error occurred retrieving the PIN please check the exception",
-                e)
-        } catch (e: AuthenticationException) {
-            listener.onError(
-                CardPinActionError.UNKNOWN_ERROR,
-                "An error occurred retrieving the PIN please check the exception",
-                e)
-        } catch (e: CardException) {
-            listener.onError(
-                CardPinActionError.UNKNOWN_ERROR,
-                "An error occurred retrieving the PIN please check the exception",
-                e)
+            else -> {
+                listener.onError(
+                    CardPinActionError.UNKNOWN_ERROR,
+                    "An error occurred while updating the PIN.",
+                    throwable
+                )
+            }
         }
     }
 

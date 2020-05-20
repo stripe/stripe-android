@@ -18,9 +18,9 @@ class Stripe3ds2FingerprintTest {
     @Throws(CertificateException::class)
     fun create_with3ds2SdkData_shouldCreateObject() {
         val sdkData = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
-            .nextActionData as StripeIntent.NextActionData.SdkData.`3DS2`
+            .nextActionData as StripeIntent.NextActionData.SdkData.Use3DS2
         assertNotNull(sdkData)
-        val stripe3ds2Fingerprint = Stripe3ds2Fingerprint.create(sdkData)
+        val stripe3ds2Fingerprint = Stripe3ds2Fingerprint(sdkData)
         assertEquals("src_1ExkUeAWhjPjYwPiLWUvXrSA", stripe3ds2Fingerprint.source)
         assertEquals(Stripe3ds2Fingerprint.DirectoryServer.Mastercard,
             stripe3ds2Fingerprint.directoryServer)
@@ -42,9 +42,9 @@ class Stripe3ds2FingerprintTest {
     @Throws(CertificateException::class)
     fun create_with3ds2AmexSdkData_shouldCreateObject() {
         val sdkData = PaymentIntentFixtures.PI_REQUIRES_AMEX_3DS2
-            .nextActionData as StripeIntent.NextActionData.SdkData.`3DS2`
+            .nextActionData as StripeIntent.NextActionData.SdkData.Use3DS2
         assertNotNull(sdkData)
-        val stripe3ds2Fingerprint = Stripe3ds2Fingerprint.create(sdkData)
+        val stripe3ds2Fingerprint = Stripe3ds2Fingerprint(sdkData)
         assertEquals("src_1EceOlCRMbs6FrXf2hqrI1g5", stripe3ds2Fingerprint.source)
         assertEquals(Stripe3ds2Fingerprint.DirectoryServer.Amex,
             stripe3ds2Fingerprint.directoryServer)
@@ -96,14 +96,10 @@ class Stripe3ds2FingerprintTest {
         internal val DS_RSA_PUBLIC_KEY: PublicKey = generateCertificate(DS_CERT_DATA_RSA).publicKey
 
         private fun generateCertificate(certificateData: String): X509Certificate {
-            try {
-                val factory = CertificateFactory.getInstance("X.509")
-                return factory.generateCertificate(
-                    ByteArrayInputStream(certificateData.toByteArray())
-                ) as X509Certificate
-            } catch (e: CertificateException) {
-                throw RuntimeException(e)
-            }
+            val factory = CertificateFactory.getInstance("X.509")
+            return factory.generateCertificate(
+                ByteArrayInputStream(certificateData.toByteArray())
+            ) as X509Certificate
         }
     }
 }

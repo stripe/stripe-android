@@ -148,21 +148,28 @@ data class PaymentIntent internal constructor(
             }
 
     /**
+     * @deprecated use {@link #nextActionData} instead
+     *
      * The URL you must redirect your customer to in order to authenticate the payment.
      */
-    @Deprecated("use {@link #nextActionData}")
+    @Deprecated("use {@link #nextActionData}",
+        replaceWith = ReplaceWith("(nextActionData as? StripeIntent.NextActionData.RedirectToUrl)?.url"))
     val redirectUrl: Uri?
         get() {
             return redirectData?.url
         }
 
+    @Deprecated("use {@link #nextActionData}",
+        replaceWith = ReplaceWith("nextActionData as? StripeIntent.NextActionData.SdkData"))
     override val stripeSdkData: StripeIntent.SdkData?
         get() = when (nextActionData) {
-            is StripeIntent.NextActionData.SdkData.`3DS1` -> StripeIntent.SdkData(true, false)
-            is StripeIntent.NextActionData.SdkData.`3DS2` -> StripeIntent.SdkData(false, true)
+            is StripeIntent.NextActionData.SdkData.Use3DS1 -> StripeIntent.SdkData(true, false, nextActionData)
+            is StripeIntent.NextActionData.SdkData.Use3DS2 -> StripeIntent.SdkData(false, true, nextActionData)
             else -> null
         }
 
+    @Deprecated("use {@link #nextActionData}",
+        replaceWith = ReplaceWith("nextActionData as? StripeIntent.NextActionData.RedirectToUrl"))
     override val redirectData: StripeIntent.RedirectData?
         get() = when (nextActionData) {
                 is StripeIntent.NextActionData.RedirectToUrl ->
@@ -331,8 +338,6 @@ data class PaymentIntent internal constructor(
     }
 
     companion object {
-        private const val FIELD_NEXT_ACTION_TYPE = "type"
-
         fun fromJson(jsonObject: JSONObject?): PaymentIntent? {
             return jsonObject?.let {
                 PaymentIntentJsonParser().parse(it)
