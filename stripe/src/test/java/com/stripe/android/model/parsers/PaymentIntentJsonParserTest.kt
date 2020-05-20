@@ -69,7 +69,8 @@ class PaymentIntentJsonParserTest {
             .isEqualTo(
                 StripeIntent.NextActionData.RedirectToUrl(
                     Uri.parse("https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecaz6CRMbs6FrXfuYKBRSUG/src_client_secret_F6octeOshkgxT47dr0ZxSZiv"),
-                    "stripe://deeplink"
+                    returnUrl = "stripe://deeplink",
+                    mobileData = null
                 )
             )
     }
