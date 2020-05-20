@@ -681,7 +681,7 @@ internal object PaymentIntentFixtures {
         """.trimIndent()
     )
 
-    val ALIPAY_REQUIRES_ACTION = JSONObject(
+    val ALIPAY_REQUIRES_ACTION_JSON = JSONObject(
         """
         {
           "id": "pi_1GiUlYHSL10J9wqv4ZXqstCu",

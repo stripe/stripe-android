@@ -108,7 +108,7 @@ class PaymentIntentJsonParserTest {
     @Test
     fun parse_withAlipayAction_shoulddCreateExpectedNextActionData() {
         val paymentIntent = PaymentIntentJsonParser().parse(
-            PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION
+            PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION_JSON
         )
         assertThat(paymentIntent?.nextActionData)
             .isEqualTo(
