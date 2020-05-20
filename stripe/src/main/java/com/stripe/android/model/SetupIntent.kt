@@ -86,20 +86,20 @@ data class SetupIntent internal constructor(
      */
     val lastSetupError: Error? = null,
 
-    internal val nextActionData: StripeIntent.Companion.NextActionData?
+    internal val nextActionData: StripeIntent.NextActionData?
 ) : StripeIntent {
 
     override val nextActionType: StripeIntent.NextActionType?
         get() = when (nextActionData) {
-            is StripeIntent.Companion.NextActionData.SdkData -> StripeIntent.NextActionType.UseStripeSdk
-            is StripeIntent.Companion.NextActionData.RedirectToUrl -> StripeIntent.NextActionType.RedirectToUrl
-            is StripeIntent.Companion.NextActionData.DisplayOxxoDetails -> StripeIntent.NextActionType.DisplayOxxoDetails
+            is StripeIntent.NextActionData.SdkData -> StripeIntent.NextActionType.UseStripeSdk
+            is StripeIntent.NextActionData.RedirectToUrl -> StripeIntent.NextActionType.RedirectToUrl
+            is StripeIntent.NextActionData.DisplayOxxoDetails -> StripeIntent.NextActionType.DisplayOxxoDetails
             else -> null
         }
 
     override val redirectData: StripeIntent.RedirectData?
         get() = when (nextActionData) {
-            is StripeIntent.Companion.NextActionData.RedirectToUrl ->
+            is StripeIntent.NextActionData.RedirectToUrl ->
                 StripeIntent.RedirectData(nextActionData.url, nextActionData.returnUrl)
             else -> null
         }
@@ -111,8 +111,8 @@ data class SetupIntent internal constructor(
 
     override val stripeSdkData: StripeIntent.SdkData?
         get() = when (nextActionData) {
-            is StripeIntent.Companion.NextActionData.SdkData.`3DS1` -> StripeIntent.SdkData(true, false, nextActionData)
-            is StripeIntent.Companion.NextActionData.SdkData.`3DS2` -> StripeIntent.SdkData(false, true, nextActionData)
+            is StripeIntent.NextActionData.SdkData.Use3DS1 -> StripeIntent.SdkData(true, false, nextActionData)
+            is StripeIntent.NextActionData.SdkData.Use3DS2 -> StripeIntent.SdkData(false, true, nextActionData)
             else -> null
         }
 
@@ -222,7 +222,6 @@ data class SetupIntent internal constructor(
     }
 
     companion object {
-        private const val FIELD_NEXT_ACTION_TYPE = "type"
 
         @JvmStatic
         fun fromJson(jsonObject: JSONObject?): SetupIntent? {

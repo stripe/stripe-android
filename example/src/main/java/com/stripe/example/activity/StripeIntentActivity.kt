@@ -2,6 +2,7 @@ package com.stripe.example.activity
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentIntentResult
@@ -16,7 +17,6 @@ import com.stripe.example.Settings
 import com.stripe.example.StripeFactory
 import com.stripe.example.module.StripeIntentViewModel
 import org.json.JSONObject
-import java.lang.ref.WeakReference
 
 /**
  * Base class for Activity's that wish to create and confirm payment methods.
@@ -55,6 +55,22 @@ abstract class StripeIntentActivity : AppCompatActivity() {
             handleCreatePaymentIntentResponse(it, paymentMethodCreateParams, shippingDetails,
                 stripeAccountId, existingPaymentMethodId, mandateDataParams)
         }
+
+        viewModel.paymentIntentResultLiveData
+            .observe(this, Observer {
+                it.fold(
+                    onSuccess = ::onConfirmSuccess,
+                    onFailure = ::onConfirmError
+                )
+            })
+
+        viewModel.setupIntentResultLiveData
+            .observe(this, Observer {
+                it.fold(
+                    onSuccess = ::onConfirmSuccess,
+                    onFailure = ::onConfirmError
+                )
+            })
     }
 
     protected fun createAndConfirmSetupIntent(
@@ -87,7 +103,8 @@ abstract class StripeIntentActivity : AppCompatActivity() {
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                 paymentMethodCreateParams = requireNotNull(params),
                 clientSecret = secret,
-                shipping = shippingDetails
+                shipping = shippingDetails,
+                returnUrl = "example://return_url"
             )
         } else {
             ConfirmPaymentIntentParams.createWithPaymentMethodId(
@@ -127,9 +144,33 @@ abstract class StripeIntentActivity : AppCompatActivity() {
 
         viewModel.status.value += "\n\nPayment authentication completed, getting result"
         val isPaymentResult =
-            stripe.onPaymentResult(requestCode, data, PaymentIntentResultCallback(this))
+            stripe.onPaymentResult(
+                requestCode,
+                data,
+                object : ApiResultCallback<PaymentIntentResult> {
+                    override fun onSuccess(result: PaymentIntentResult) {
+                        viewModel.paymentIntentResultLiveData.value = Result.success(result)
+                    }
+
+                    override fun onError(e: Exception) {
+                        viewModel.paymentIntentResultLiveData.value = Result.failure(e)
+                    }
+                }
+            )
         if (!isPaymentResult) {
-            stripe.onSetupResult(requestCode, data, SetupIntentResultCallback(this))
+            stripe.onSetupResult(
+                requestCode,
+                data,
+                object : ApiResultCallback<SetupIntentResult> {
+                    override fun onSuccess(result: SetupIntentResult) {
+                        viewModel.setupIntentResultLiveData.value = Result.success(result)
+                    }
+
+                    override fun onError(e: Exception) {
+                        viewModel.setupIntentResultLiveData.value = Result.failure(e)
+                    }
+                }
+            )
         }
     }
 
@@ -149,38 +190,8 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         viewModel.inProgress.value = false
     }
 
-    protected open fun onConfirmError(e: Exception) {
-        viewModel.status.value += "\n\nException: " + e.message
+    protected open fun onConfirmError(throwable: Throwable) {
+        viewModel.status.value += "\n\nException: " + throwable.message
         viewModel.inProgress.value = false
-    }
-
-    internal class PaymentIntentResultCallback(
-        activity: StripeIntentActivity
-    ) : ApiResultCallback<PaymentIntentResult> {
-
-        private val activityRef = WeakReference(activity)
-
-        override fun onSuccess(result: PaymentIntentResult) {
-            activityRef.get()?.onConfirmSuccess(result)
-        }
-
-        override fun onError(e: Exception) {
-            activityRef.get()?.onConfirmError(e)
-        }
-    }
-
-    internal class SetupIntentResultCallback(
-        activity: StripeIntentActivity
-    ) : ApiResultCallback<SetupIntentResult> {
-
-        private val activityRef = WeakReference(activity)
-
-        override fun onSuccess(result: SetupIntentResult) {
-            activityRef.get()?.onConfirmSuccess(result)
-        }
-
-        override fun onError(e: Exception) {
-            activityRef.get()?.onConfirmError(e)
-        }
     }
 }

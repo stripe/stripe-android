@@ -43,12 +43,12 @@ internal interface AnalyticsRequestExecutor {
 
         override fun executeAsync(request: AnalyticsRequest) {
             scope.launch {
-                try {
+                runCatching {
                     coroutineScope {
                         execute(request)
                     }
-                } catch (e: Exception) {
-                    logger.error("Exception while making analytics request", e)
+                }.recover {
+                    logger.error("Exception while making analytics request", it)
                 }
             }
         }
