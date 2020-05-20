@@ -520,7 +520,9 @@ internal class StripePaymentController internal constructor(
             areqParams.sdkEphemeralPublicKey,
             areqParams.messageVersion,
             timeout,
-            null
+            // We do not currently have a fallback url
+            // TODO(smaskell-stripe): Investigate more robust error handling
+            returnUrl = null
         )
         stripeRepository.start3ds2Auth(
             authParams,
