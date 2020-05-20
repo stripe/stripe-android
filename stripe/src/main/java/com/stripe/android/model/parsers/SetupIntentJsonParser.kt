@@ -13,9 +13,6 @@ internal class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
         }
 
         val nextAction = StripeJsonUtils.optMap(json, FIELD_NEXT_ACTION)
-        val nextActionType = nextAction?.let {
-            StripeIntent.NextActionType.fromCode(it[FIELD_NEXT_ACTION_TYPE] as String?)
-        }
 
         val paymentMethod = json.optJSONObject(FIELD_PAYMENT_METHOD)?.let {
             PaymentMethodJsonParser().parse(it)
@@ -23,6 +20,10 @@ internal class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
         val paymentMethodId =
             StripeJsonUtils.optString(json, FIELD_PAYMENT_METHOD).takeIf { paymentMethod == null }
                 ?: paymentMethod?.id
+
+        val nextActionData = json.optJSONObject(FIELD_NEXT_ACTION)?.let {
+            NextActionDataParser().parse(it)
+        }
 
         return SetupIntent(
             id = StripeJsonUtils.optString(json, FIELD_ID),
@@ -40,11 +41,10 @@ internal class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
             ),
             status = StripeIntent.Status.fromCode(StripeJsonUtils.optString(json, FIELD_STATUS)),
             usage = StripeIntent.Usage.fromCode(StripeJsonUtils.optString(json, FIELD_USAGE)),
-            nextAction = nextAction,
-            nextActionType = nextActionType,
             lastSetupError = json.optJSONObject(FIELD_LAST_SETUP_ERROR)?.let {
                 ErrorJsonParser().parse(it)
-            }
+            },
+            nextActionData = nextActionData
         )
     }
 
