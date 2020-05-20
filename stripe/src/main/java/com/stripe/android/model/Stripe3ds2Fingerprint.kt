@@ -79,7 +79,7 @@ internal class Stripe3ds2Fingerprint private constructor(
         @JvmSynthetic
         @Throws(CertificateException::class)
         internal fun create(sdkData: StripeIntent.SdkData): Stripe3ds2Fingerprint {
-            require(sdkData.data is StripeIntent.NextActionData.SdkData.`3DS2`) {
+            require(sdkData.data is StripeIntent.NextActionData.SdkData.Use3DS2) {
                 "Expected SdkData with type='stripe_3ds2_fingerprint'."
             }
 

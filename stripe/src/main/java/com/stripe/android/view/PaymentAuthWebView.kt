@@ -193,9 +193,9 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
 
         private fun openIntentScheme(uri: Uri) {
             logger.debug("PaymentAuthWebViewClient#openIntentScheme()")
-            try {
+            runCatching {
                 openIntent(Intent.parseUri(uri.toString(), Intent.URI_INTENT_SCHEME))
-            } catch (e: Exception) {
+            }.recover {
                 onAuthCompleted()
             }
         }
