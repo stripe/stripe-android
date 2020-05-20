@@ -401,7 +401,7 @@ internal class StripePaymentController internal constructor(
                         begin3ds2Auth(
                             host,
                             stripeIntent,
-                            Stripe3ds2Fingerprint.create(nextActionData),
+                            Stripe3ds2Fingerprint(nextActionData),
                             requestOptions
                         )
                     } catch (e: CertificateException) {
