@@ -150,7 +150,8 @@ data class PaymentIntent internal constructor(
     /**
      * The URL you must redirect your customer to in order to authenticate the payment.
      */
-    @Deprecated("use {@link #nextActionData}")
+    @Deprecated("use {@link #nextActionData}",
+        replaceWith = ReplaceWith("(nextActionData as? StripeIntent.NextActionData.RedirectToUrl)?.url"))
     val redirectUrl: Uri?
         get() {
             return redirectData?.url
@@ -165,6 +166,8 @@ data class PaymentIntent internal constructor(
             else -> null
         }
 
+    @Deprecated("use {@link #nextActionData}",
+        replaceWith = ReplaceWith("nextActionData as? StripeIntent.NextActionData.RedirectToUrl"))
     override val redirectData: StripeIntent.RedirectData?
         get() = when (nextActionData) {
                 is StripeIntent.NextActionData.RedirectToUrl ->

@@ -47,7 +47,8 @@ interface StripeIntent : StripeModel {
      * Contains instructions for authenticating by redirecting your customer to another page
      * or application.
      */
-    @Deprecated("use {@link #nextActionData}")
+    @Deprecated("use {@link #nextActionData}",
+        replaceWith = ReplaceWith("nextActionData as? StripeIntent.NextActionData.RedirectToUrl"))
     val redirectData: RedirectData?
 
     val clientSecret: String?
@@ -58,7 +59,7 @@ interface StripeIntent : StripeModel {
      * intended to be used by the Stripe SDK.
      */
     @Deprecated("use {@link #nextActionData}",
-        replaceWith = ReplaceWith("nextActionData as? StripeIntent.NextAction.SdkData"))
+        replaceWith = ReplaceWith("nextActionData as? StripeIntent.NextActionData.SdkData"))
     val stripeSdkData: SdkData?
 
     val status: Status?
