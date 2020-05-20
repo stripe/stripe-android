@@ -1,7 +1,7 @@
 package com.stripe.android
 
+import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
-import kotlin.test.assertTrue
 
 class StripeSSLSocketFactoryTest {
 
@@ -9,20 +9,25 @@ class StripeSSLSocketFactoryTest {
     fun getEnabledProtocols() {
         val defaultProtocols = arrayOf("protocol")
 
-        assertTrue(
+        assertThat(
             StripeSSLSocketFactory(tlsv11Supported = false, tlsv12Supported = false)
                 .getEnabledProtocols(defaultProtocols)
-                .contentEquals(arrayOf("protocol"))
+        ).isEqualTo(
+            arrayOf("protocol")
         )
-        assertTrue(
+
+        assertThat(
             StripeSSLSocketFactory(tlsv11Supported = false, tlsv12Supported = true)
                 .getEnabledProtocols(defaultProtocols)
-                .contentEquals(arrayOf("protocol", "TLSv1.2"))
+        ).isEqualTo(
+            arrayOf("protocol", "TLSv1.2")
         )
-        assertTrue(
+
+        assertThat(
             StripeSSLSocketFactory(tlsv11Supported = true, tlsv12Supported = true)
                 .getEnabledProtocols(defaultProtocols)
-                .contentEquals(arrayOf("protocol", "TLSv1.1", "TLSv1.2"))
+        ).isEqualTo(
+            arrayOf("protocol", "TLSv1.1", "TLSv1.2")
         )
     }
 }
