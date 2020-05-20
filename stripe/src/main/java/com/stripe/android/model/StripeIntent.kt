@@ -242,18 +242,6 @@ interface StripeIntent : StripeModel {
                 data class Alipay(
                     val data: String
                 ) : MobileData()
-
-                internal enum class Type(
-                    internal val code: String
-                ) {
-                    Alipay("alipay");
-
-                    internal companion object {
-                        internal fun fromCode(code: String?): Type? {
-                            return values().firstOrNull { it.code == code }
-                        }
-                    }
-                }
             }
         }
 

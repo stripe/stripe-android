@@ -47,10 +47,10 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
 
         internal class MobileDataParser : ModelJsonParser<StripeIntent.NextActionData.RedirectToUrl.MobileData> {
             override fun parse(json: JSONObject): StripeIntent.NextActionData.RedirectToUrl.MobileData? {
-                val type = StripeIntent.NextActionData.RedirectToUrl.MobileData.Type.fromCode(optString(json, FIELD_TYPE))
+                val type = Type.fromCode(optString(json, FIELD_TYPE))
                 val obj = type?.let { json.optJSONObject(it.code) }
                 return when (type) {
-                    StripeIntent.NextActionData.RedirectToUrl.MobileData.Type.Alipay -> obj?.let {
+                    Type.Alipay -> obj?.let {
                         StripeIntent.NextActionData.RedirectToUrl.MobileData.Alipay(
                             it.optString(FIELD_DATA)
                         )
@@ -62,6 +62,18 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             private companion object {
                 internal const val FIELD_TYPE = "type"
                 internal const val FIELD_DATA = "data"
+
+                internal enum class Type(
+                    internal val code: String
+                ) {
+                    Alipay("alipay");
+
+                    internal companion object {
+                        internal fun fromCode(code: String?): Type? {
+                            return values().firstOrNull { it.code == code }
+                        }
+                    }
+                }
             }
         }
 
