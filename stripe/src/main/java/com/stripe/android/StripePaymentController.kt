@@ -386,7 +386,7 @@ internal class StripePaymentController internal constructor(
         requestOptions: ApiRequest.Options
     ) {
         if (stripeIntent.requiresAction()) {
-            when (stripeIntent.nextActionData) {
+            when (val nextActionData = stripeIntent.nextActionData) {
                 is StripeIntent.NextActionData.SdkData.Use3DS2 -> {
                     analyticsRequestExecutor.executeAsync(
                         analyticsRequestFactory.create(
@@ -409,7 +409,6 @@ internal class StripePaymentController internal constructor(
                     }
                 }
                 is StripeIntent.NextActionData.SdkData.Use3DS1 -> {
-                    val sdkData = stripeIntent.nextActionData as StripeIntent.NextActionData.SdkData.Use3DS1
                     analyticsRequestExecutor.executeAsync(
                         analyticsRequestFactory.create(
                             analyticsDataFactory.createAuthParams(
@@ -423,7 +422,7 @@ internal class StripePaymentController internal constructor(
                         host,
                         getRequestCode(stripeIntent),
                         stripeIntent.clientSecret.orEmpty(),
-                        sdkData.url,
+                        nextActionData.url,
                         requestOptions.stripeAccount,
                         enableLogging = enableLogging
                     )
