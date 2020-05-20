@@ -51,10 +51,12 @@ abstract class StripeIntentActivity : AppCompatActivity() {
 
         keyboardController.hide()
 
-        viewModel.createPaymentIntent(country) {
-            handleCreatePaymentIntentResponse(it, paymentMethodCreateParams, shippingDetails,
-                stripeAccountId, existingPaymentMethodId, mandateDataParams)
-        }
+        viewModel.createPaymentIntent(country).observe(this, Observer { result ->
+            result.onSuccess {
+                handleCreatePaymentIntentResponse(it, paymentMethodCreateParams, shippingDetails,
+                    stripeAccountId, existingPaymentMethodId, mandateDataParams)
+            }
+        })
 
         viewModel.paymentIntentResultLiveData
             .observe(this, Observer {
@@ -80,9 +82,11 @@ abstract class StripeIntentActivity : AppCompatActivity() {
     ) {
         keyboardController.hide()
 
-        viewModel.createSetupIntent(country) {
-            handleCreateSetupIntentResponse(it, params, stripeAccountId)
-        }
+        viewModel.createSetupIntent(country).observe(this, Observer { result ->
+            result.onSuccess {
+                handleCreateSetupIntentResponse(it, params, stripeAccountId)
+            }
+        })
     }
 
     private fun handleCreatePaymentIntentResponse(
