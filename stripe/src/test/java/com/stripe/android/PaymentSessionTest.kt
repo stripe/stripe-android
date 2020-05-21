@@ -15,7 +15,6 @@ import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.model.Customer
 import com.stripe.android.model.CustomerFixtures
 import com.stripe.android.model.PaymentMethod
@@ -29,13 +28,13 @@ import com.stripe.android.view.PaymentFlowActivity
 import com.stripe.android.view.PaymentFlowActivityStarter
 import com.stripe.android.view.PaymentMethodsActivity
 import com.stripe.android.view.PaymentMethodsActivityStarter
-import java.util.concurrent.ThreadPoolExecutor
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.Dispatchers
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
@@ -50,7 +49,6 @@ class PaymentSessionTest {
 
     private val ephemeralKeyProvider = TestEphemeralKeyProvider()
 
-    private val threadPoolExecutor: ThreadPoolExecutor = mock()
     private val paymentSessionListener: PaymentSession.PaymentSessionListener = mock()
     private val customerSession: CustomerSession = mock()
     private val paymentMethodsActivityStarter:
@@ -68,9 +66,6 @@ class PaymentSessionTest {
     @BeforeTest
     fun setup() {
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-        whenever(threadPoolExecutor.execute(any())).thenAnswer {
-            it.getArgument<Runnable>(0).run()
-        }
         CustomerSession.instance = createCustomerSession()
     }
 
@@ -342,7 +337,7 @@ class PaymentSessionTest {
             stripeRepository,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             "acct_abc123",
-            threadPoolExecutor = threadPoolExecutor,
+            workDispatcher = Dispatchers.Main,
             ephemeralKeyManagerFactory = EphemeralKeyManager.Factory.Default(
                 keyProvider = ephemeralKeyProvider,
                 shouldPrefetchEphemeralKey = true

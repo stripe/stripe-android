@@ -20,16 +20,15 @@ import com.stripe.android.testharness.TestEphemeralKeyProvider
 import com.stripe.android.view.AddPaymentMethodActivity
 import com.stripe.android.view.PaymentMethodsActivity
 import java.util.Calendar
-import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
+import kotlinx.coroutines.Dispatchers
 import org.junit.runner.RunWith
 import org.mockito.Mockito.`when`
-import org.mockito.Mockito.doAnswer
 import org.robolectric.RobolectricTestRunner
 
 /**
@@ -37,9 +36,7 @@ import org.robolectric.RobolectricTestRunner
  */
 @RunWith(RobolectricTestRunner::class)
 class CustomerSessionTest {
-
     private val stripeRepository: StripeRepository = mock()
-    private val threadPoolExecutor: ThreadPoolExecutor = mock()
 
     private val paymentMethodRetrievalListener: CustomerSession.PaymentMethodRetrievalListener = mock()
     private val paymentMethodsRetrievalListener: CustomerSession.PaymentMethodsRetrievalListener = mock()
@@ -111,11 +108,6 @@ class CustomerSessionTest {
             any()
         ))
             .thenReturn(listOf(PAYMENT_METHOD))
-
-        doAnswer { invocation ->
-            invocation.getArgument<Runnable>(0).run()
-            null
-        }.`when`<ThreadPoolExecutor>(threadPoolExecutor).execute(any())
     }
 
     @Test
@@ -736,7 +728,7 @@ class CustomerSessionTest {
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             "acct_abc123",
             timeSupplier = timeSupplier,
-            threadPoolExecutor = threadPoolExecutor,
+            workDispatcher = Dispatchers.Main,
             ephemeralKeyManagerFactory = ephemeralKeyManagerFactory
         )
     }
