@@ -159,8 +159,7 @@ interface StripeIntent : StripeModel {
     @Deprecated("use [StripeIntent.NextActionData.SdkData]")
     data class SdkData internal constructor(
         val is3ds1: Boolean,
-        val is3ds2: Boolean,
-        internal val data: NextActionData.SdkData
+        val is3ds2: Boolean
     )
 
     /**
