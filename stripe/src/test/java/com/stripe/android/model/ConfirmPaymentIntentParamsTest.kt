@@ -3,10 +3,8 @@ package com.stripe.android.model
 import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
-import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.whenever
 import kotlin.test.Test
 import org.junit.runner.RunWith
@@ -14,8 +12,6 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class ConfirmPaymentIntentParamsTest {
-
-    private val packageManager: PackageManager = mock()
 
     @Test
     fun toParamMap_withSourceParams_shouldCreateExpectedMap() {
@@ -389,15 +385,17 @@ class ConfirmPaymentIntentParamsTest {
 
     @Test
     fun toParamMap_withAlipay_shouldCreateExpectedMap() {
-        val context = spy(getApplicationContext<Context>())
-
         val packageInfo = PackageInfo().also {
+            it.packageName = "package_name"
             it.versionName = "version_name"
         }
-        whenever(packageManager.getPackageInfo(context.packageName, 0))
-            .thenReturn(packageInfo)
-
-        whenever(context.packageManager).thenReturn(packageManager)
+        val packageManager = mock<PackageManager>().also {
+            whenever(it.getPackageInfo("package_name", 0)).thenReturn(packageInfo)
+        }
+        val context = mock<Context>().also {
+            whenever(it.packageName).thenReturn("package_name")
+            whenever(it.packageManager).thenReturn(packageManager)
+        }
 
         assertThat(ConfirmPaymentIntentParams.createAlipay(
             context,

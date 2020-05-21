@@ -12,7 +12,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import org.junit.runner.RunWith
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import org.robolectric.RobolectricTestRunner
 
@@ -167,10 +166,8 @@ class AnalyticsDataFactoryTest {
             it.versionCode = versionCode
             it.packageName = BuildConfig.LIBRARY_PACKAGE_NAME
         }
-        `when`(packageManager.getPackageInfo(packageName, 0))
-            .thenReturn(packageInfo)
 
-        val params = AnalyticsDataFactory(packageManager, packageName, API_KEY)
+        val params = AnalyticsDataFactory(packageManager, packageInfo, packageName, API_KEY)
             .createTokenCreationParams(
                 ATTRIBUTION,
                 Token.TokenType.CARD
@@ -220,7 +217,7 @@ class AnalyticsDataFactoryTest {
     @Test
     fun createAppDataParams_whenPackageNameIsEmpty_returnsEmptyMap() {
         assertThat(
-            AnalyticsDataFactory(null, "", API_KEY)
+            AnalyticsDataFactory(null, null, "", API_KEY)
                 .createAppDataParams()
         ).isEmpty()
     }
@@ -230,11 +227,8 @@ class AnalyticsDataFactoryTest {
         val packageName = "dummy_name"
         val manager = mock(PackageManager::class.java)
 
-        `when`(manager.getPackageInfo(packageName, 0))
-            .thenThrow(PackageManager.NameNotFoundException())
-
         assertThat(
-            AnalyticsDataFactory(manager, packageName, API_KEY)
+            AnalyticsDataFactory(manager, null, packageName, API_KEY)
                 .createAppDataParams()
         ).isEmpty()
     }

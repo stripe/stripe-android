@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.annotation.StringDef
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.model.ContextUtils.packageInfo
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
@@ -18,12 +19,14 @@ import com.stripe.android.stripe3ds2.transaction.RuntimeErrorEvent
  */
 internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     private val packageManager: PackageManager?,
+    private val packageInfo: PackageInfo?,
     private val packageName: String,
     private val publishableKey: String
 ) {
 
     internal constructor(context: Context, publishableKey: String) : this(
         context.applicationContext.packageManager,
+        context.applicationContext.packageInfo,
         context.applicationContext.packageName.orEmpty(),
         publishableKey
     )
@@ -304,24 +307,24 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     }
 
     internal fun createAppDataParams(): Map<String, Any> {
-        return packageManager?.let { packageManager ->
-            runCatching {
-                val packageInfo = packageManager.getPackageInfo(packageName, 0)
+        return when {
+            packageManager != null && packageInfo != null -> {
                 mapOf(
                     FIELD_APP_NAME to getAppName(packageInfo, packageManager),
                     FIELD_APP_VERSION to packageInfo.versionCode
                 )
-            }.getOrNull()
-        }.orEmpty()
+            }
+            else -> emptyMap()
+        }
     }
 
     private fun getAppName(
-        packageInfo: PackageInfo,
+        packageInfo: PackageInfo?,
         packageManager: PackageManager
     ): CharSequence {
-        return packageInfo.applicationInfo?.loadLabel(packageManager).takeUnless {
+        return packageInfo?.applicationInfo?.loadLabel(packageManager).takeUnless {
             it.isNullOrBlank()
-        } ?: packageInfo.packageName
+        } ?: packageName
     }
 
     internal companion object {

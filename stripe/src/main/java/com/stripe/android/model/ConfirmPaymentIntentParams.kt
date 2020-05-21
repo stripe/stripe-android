@@ -11,6 +11,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMEN
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN_URL
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_STRIPE_SDK
+import com.stripe.android.model.ContextUtils.packageInfo
 import kotlinx.android.parcel.Parcelize
 
 /**
@@ -509,13 +510,12 @@ data class ConfirmPaymentIntentParams internal constructor(
             clientSecret: String,
             returnUrl: String
         ): ConfirmPaymentIntentParams {
-            val packageName = context.packageName
-            // TODO(smaskell-stripe): Confirm error handling
-            val version = kotlin.runCatching {
-                context.packageManager.getPackageInfo(packageName, 0).versionName
-            }.getOrDefault("1.0")
-
-            val options = PaymentMethodOptionsParams.Alipay(packageName, version)
+            val options = context.packageInfo?.let {
+                PaymentMethodOptionsParams.Alipay(
+                    it.packageName,
+                    it.versionName
+                )
+            }
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
                 paymentMethodCreateParams = PaymentMethodCreateParams.createAlipay(),
