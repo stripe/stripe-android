@@ -10,6 +10,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.utils.ParcelUtils
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -49,6 +50,16 @@ class PaymentMethodsActivityStarterTest {
             PaymentMethodsActivityStarter.Args.Builder()
                 .build()
                 .paymentMethodTypes
+        )
+    }
+
+    @Test
+    fun testDisableDeletePaymentMethods() {
+        assertFalse(
+            PaymentMethodsActivityStarter.Args.Builder()
+                .setCanDeletePaymentMethods(false)
+                .build()
+                .canDeletePaymentMethods
         )
     }
 }

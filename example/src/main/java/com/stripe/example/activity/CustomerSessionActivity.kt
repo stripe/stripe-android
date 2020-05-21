@@ -41,7 +41,9 @@ class CustomerSessionActivity : AppCompatActivity() {
 
     private fun launchWithCustomer() {
         PaymentMethodsActivityStarter(this)
-            .startForResult(PaymentMethodsActivityStarter.Args.Builder().build())
+            .startForResult(PaymentMethodsActivityStarter.Args.Builder()
+                .setCanDeletePaymentMethods(true)
+                .build())
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
