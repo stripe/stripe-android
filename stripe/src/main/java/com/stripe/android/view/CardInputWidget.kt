@@ -113,10 +113,14 @@ class CardInputWidget @JvmOverloads constructor(
             }
         }
 
+    /**
+     * If `true`, the full card number is being shown. This is the initial view.
+     * If `false`, the peek card number is being shown.
+     */
     @JvmSynthetic
-    internal var cardNumberIsViewed = true
+    internal var isShowingFullCard = true
 
-    private var initFlag: Boolean = false
+    private var isViewInitialized: Boolean = false
 
     @JvmSynthetic
     internal var layoutWidthCalculator: LayoutWidthCalculator = DefaultLayoutWidthCalculator()
@@ -367,7 +371,7 @@ class CardInputWidget @JvmOverloads constructor(
      */
     override fun setCardNumber(cardNumber: String?) {
         cardNumberEditText.setText(cardNumber)
-        this.cardNumberIsViewed = !cardNumberEditText.isCardNumberValid
+        this.isShowingFullCard = !cardNumberEditText.isCardNumberValid
     }
 
     override fun setCardHint(cardHint: String) {
@@ -481,7 +485,7 @@ class CardInputWidget @JvmOverloads constructor(
     override fun onSaveInstanceState(): Parcelable {
         return Bundle().apply {
             putParcelable(STATE_SUPER_STATE, super.onSaveInstanceState())
-            putBoolean(STATE_CARD_VIEWED, cardNumberIsViewed)
+            putBoolean(STATE_CARD_VIEWED, isShowingFullCard)
             putBoolean(STATE_POSTAL_CODE_ENABLED, postalCodeEnabled)
         }
     }
@@ -489,14 +493,14 @@ class CardInputWidget @JvmOverloads constructor(
     override fun onRestoreInstanceState(state: Parcelable) {
         if (state is Bundle) {
             postalCodeEnabled = state.getBoolean(STATE_POSTAL_CODE_ENABLED, true)
-            cardNumberIsViewed = state.getBoolean(STATE_CARD_VIEWED, true)
-            updateSpaceSizes(cardNumberIsViewed)
+            isShowingFullCard = state.getBoolean(STATE_CARD_VIEWED, true)
+            updateSpaceSizes(isShowingFullCard)
             placementParameters.totalLengthInPixels = frameWidth
             val cardLeftMargin: Int
             val dateLeftMargin: Int
             val cvcLeftMargin: Int
             val postalCodeLeftMargin: Int
-            if (cardNumberIsViewed) {
+            if (isShowingFullCard) {
                 cardLeftMargin = 0
                 dateLeftMargin = placementParameters.getDateLeftMargin(isFullCard = true)
                 cvcLeftMargin = placementParameters.getCvcLeftMargin(isFullCard = true)
@@ -557,9 +561,9 @@ class CardInputWidget @JvmOverloads constructor(
         val frameStart = containerLayout.left
 
         return when {
-            cardNumberIsViewed -> {
+            isShowingFullCard -> {
                 // Then our view is
-                // |CARDVIEW||space||DATEVIEW|
+                // |full card||space||date|
 
                 when {
                     touchX < frameStart + placementParameters.cardWidth -> // Then the card edit view will already handle this touch.
@@ -574,7 +578,7 @@ class CardInputWidget @JvmOverloads constructor(
             }
             postalCodeEnabled -> {
                 // Our view is
-                // |PEEK||space||DATE||space||CVC||space||POSTAL|
+                // |peek card||space||date||space||cvc||space||postal code|
                 when {
                     touchX < frameStart + placementParameters.peekCardWidth -> // This was a touch on the card number editor, so we don't need to handle it.
                         null
@@ -599,7 +603,7 @@ class CardInputWidget @JvmOverloads constructor(
             }
             else -> {
                 // Our view is
-                // |PEEK||space||DATE||space||CVC|
+                // |peek card||space||date||space||cvc|
                 when {
                     touchX < frameStart + placementParameters.peekCardWidth -> // This was a touch on the card number editor, so we don't need to handle it.
                         null
@@ -620,7 +624,7 @@ class CardInputWidget @JvmOverloads constructor(
     }
 
     @VisibleForTesting
-    internal fun updateSpaceSizes(isCardViewed: Boolean) {
+    internal fun updateSpaceSizes(isShowingFullCard: Boolean) {
         val frameWidth = frameWidth
         val frameStart = containerLayout.left
         if (frameWidth == 0) {
@@ -652,7 +656,7 @@ class CardInputWidget @JvmOverloads constructor(
             peekCardText, cardNumberEditText
         )
 
-        placementParameters.updateSpacing(isCardViewed, postalCodeEnabled, frameStart, frameWidth)
+        placementParameters.updateSpacing(isShowingFullCard, postalCodeEnabled, frameStart, frameWidth)
     }
 
     private fun updateFieldLayout(view: View, width: Int, leftMargin: Int) {
@@ -683,7 +687,7 @@ class CardInputWidget @JvmOverloads constructor(
                 }
             })
 
-        cardNumberIsViewed = true
+        isShowingFullCard = true
 
         @ColorInt var errorColorInt = cardNumberEditText.defaultErrorColorInt
         cardBrandView.tintColorInt = cardNumberEditText.hintTextColors.defaultColor
@@ -840,7 +844,7 @@ class CardInputWidget @JvmOverloads constructor(
 
     // reveal the full card number field
     private fun scrollLeft() {
-        if (cardNumberIsViewed || !initFlag) {
+        if (isShowingFullCard || !isViewInitialized) {
             return
         }
 
@@ -848,7 +852,7 @@ class CardInputWidget @JvmOverloads constructor(
         val cvcStartPosition = placementParameters.getCvcLeftMargin(isFullCard = false)
         val postalCodeStartPosition = placementParameters.getPostalCodeLeftMargin(isFullCard = false)
 
-        updateSpaceSizes(isCardViewed = true)
+        updateSpaceSizes(isShowingFullCard = true)
 
         val slideCardLeftAnimation = CardNumberSlideLeftAnimation(
             view = cardNumberTextInputLayout
@@ -888,18 +892,18 @@ class CardInputWidget @JvmOverloads constructor(
             slidePostalCodeLeftAnimation
         ))
 
-        cardNumberIsViewed = true
+        isShowingFullCard = true
     }
 
     // reveal the secondary fields
     private fun scrollRight() {
-        if (!cardNumberIsViewed || !initFlag) {
+        if (!isShowingFullCard || !isViewInitialized) {
             return
         }
 
         val dateStartMargin = placementParameters.getDateLeftMargin(isFullCard = true)
 
-        updateSpaceSizes(isCardViewed = false)
+        updateSpaceSizes(isShowingFullCard = false)
 
         val slideCardRightAnimation = CardNumberSlideRightAnimation(
             view = cardNumberTextInputLayout,
@@ -943,7 +947,7 @@ class CardInputWidget @JvmOverloads constructor(
             slidePostalCodeRightAnimation
         ))
 
-        cardNumberIsViewed = false
+        isShowingFullCard = false
     }
 
     private fun startSlideAnimation(animations: List<Animation>) {
@@ -962,16 +966,16 @@ class CardInputWidget @JvmOverloads constructor(
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         super.onLayout(changed, l, t, r, b)
-        if (!initFlag && width != 0) {
-            initFlag = true
+        if (!isViewInitialized && width != 0) {
+            isViewInitialized = true
             placementParameters.totalLengthInPixels = frameWidth
 
-            updateSpaceSizes(cardNumberIsViewed)
+            updateSpaceSizes(isShowingFullCard)
 
             updateFieldLayout(
                 view = cardNumberTextInputLayout,
                 width = placementParameters.cardWidth,
-                leftMargin = if (cardNumberIsViewed) {
+                leftMargin = if (isShowingFullCard) {
                     0
                 } else {
                     -1 * placementParameters.hiddenCardWidth
@@ -981,19 +985,19 @@ class CardInputWidget @JvmOverloads constructor(
             updateFieldLayout(
                 view = expiryDateTextInputLayout,
                 width = placementParameters.dateWidth,
-                leftMargin = placementParameters.getDateLeftMargin(cardNumberIsViewed)
+                leftMargin = placementParameters.getDateLeftMargin(isShowingFullCard)
             )
 
             updateFieldLayout(
                 view = cvcNumberTextInputLayout,
                 width = placementParameters.cvcWidth,
-                leftMargin = placementParameters.getCvcLeftMargin(cardNumberIsViewed)
+                leftMargin = placementParameters.getCvcLeftMargin(isShowingFullCard)
             )
 
             updateFieldLayout(
                 view = postalCodeTextInputLayout,
                 width = placementParameters.postalCodeWidth,
-                leftMargin = placementParameters.getPostalCodeLeftMargin(cardNumberIsViewed)
+                leftMargin = placementParameters.getPostalCodeLeftMargin(isShowingFullCard)
             )
         }
     }
@@ -1113,13 +1117,13 @@ class CardInputWidget @JvmOverloads constructor(
 
         @JvmSynthetic
         internal fun updateSpacing(
-            isCardViewed: Boolean,
+            isShowingFullCard: Boolean,
             postalCodeEnabled: Boolean,
             frameStart: Int,
             frameWidth: Int
         ) {
             when {
-                isCardViewed -> {
+                isShowingFullCard -> {
                     cardDateSeparation = frameWidth - cardWidth - dateWidth
                     cardTouchBufferLimit = frameStart + cardWidth + cardDateSeparation / 2
                     dateStartPosition = frameStart + cardWidth + cardDateSeparation

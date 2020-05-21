@@ -748,7 +748,7 @@ internal class CardInputWidgetTest {
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch between 60 and 100 does nothing
-        cardInputWidget.cardNumberIsViewed = false
+        cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
         assertNull(cardInputWidget.getFocusRequestOnTouch(75))
     }
@@ -761,7 +761,7 @@ internal class CardInputWidgetTest {
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch between 100 and 192 returns the card editor
-        cardInputWidget.cardNumberIsViewed = false
+        cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
         val focusRequester = cardInputWidget.getFocusRequestOnTouch(150)
         assertNotNull(focusRequester)
@@ -776,7 +776,7 @@ internal class CardInputWidgetTest {
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch between 192 and 285 returns the date editor
-        cardInputWidget.cardNumberIsViewed = false
+        cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
         val focusRequester = cardInputWidget.getFocusRequestOnTouch(200)
         assertNotNull(focusRequester)
@@ -791,7 +791,7 @@ internal class CardInputWidgetTest {
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch between 192 and 285 returns the date editor
-        cardInputWidget.cardNumberIsViewed = false
+        cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
         val focusRequester = cardInputWidget.getFocusRequestOnTouch(170)
         assertNotNull(focusRequester)
@@ -806,7 +806,7 @@ internal class CardInputWidgetTest {
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch between 285 and 335 does nothing
-        cardInputWidget.cardNumberIsViewed = false
+        cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
         assertNull(cardInputWidget.getFocusRequestOnTouch(300))
     }
@@ -819,7 +819,7 @@ internal class CardInputWidgetTest {
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch between 285 and 335 does nothing
-        cardInputWidget.cardNumberIsViewed = false
+        cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
         assertNull(cardInputWidget.getFocusRequestOnTouch(200))
     }
@@ -832,7 +832,7 @@ internal class CardInputWidgetTest {
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch between 335 and 432 returns the date editor
-        cardInputWidget.cardNumberIsViewed = false
+        cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
         val focusRequester = cardInputWidget.getFocusRequestOnTouch(400)
         assertNotNull(focusRequester)
@@ -847,7 +847,7 @@ internal class CardInputWidgetTest {
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch between 335 and 432 returns the date editor
-        cardInputWidget.cardNumberIsViewed = false
+        cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
         val focusRequester = cardInputWidget.getFocusRequestOnTouch(185)
         assertNotNull(focusRequester)
@@ -862,7 +862,7 @@ internal class CardInputWidgetTest {
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch between 432 and 530 returns the date editor
-        cardInputWidget.cardNumberIsViewed = false
+        cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
         val focusRequester = cardInputWidget.getFocusRequestOnTouch(485)
         assertNotNull(focusRequester)
@@ -877,7 +877,7 @@ internal class CardInputWidgetTest {
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch between 432 and 530 returns the date editor
-        cardInputWidget.cardNumberIsViewed = false
+        cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
         val focusRequester = cardInputWidget.getFocusRequestOnTouch(300)
         assertNotNull(focusRequester)
@@ -890,7 +890,7 @@ internal class CardInputWidgetTest {
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch over 530 does nothing
-        cardInputWidget.cardNumberIsViewed = false
+        cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
         assertNull(cardInputWidget.getFocusRequestOnTouch(545))
     }
