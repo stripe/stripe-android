@@ -84,6 +84,7 @@ class PaymentSessionActivity : AppCompatActivity() {
                 .setWindowFlags(WindowManager.LayoutParams.FLAG_SECURE)
                 .setBillingAddressFields(BillingAddressFields.PostalCode)
                 .setShouldPrefetchCustomer(shouldPrefetchCustomer)
+                .setCanDeletePaymentMethods(true)
                 .build()
         )
         paymentSession.init(

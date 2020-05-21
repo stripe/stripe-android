@@ -47,7 +47,9 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
         internal val windowFlags: Int? = null,
         internal val billingAddressFields: BillingAddressFields,
         internal val shouldShowGooglePay: Boolean = false,
-        internal val useGooglePay: Boolean = false
+        internal val useGooglePay: Boolean = false,
+        internal val canDeletePaymentMethods: Boolean = true
+
     ) : ActivityStarter.Args {
         class Builder : ObjectBuilder<Args> {
             private var billingAddressFields: BillingAddressFields = BillingAddressFields.PostalCode
@@ -56,6 +58,7 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
             private var paymentMethodTypes: List<PaymentMethod.Type>? = null
             private var shouldShowGooglePay: Boolean = false
             private var useGooglePay: Boolean = false
+            private var canDeletePaymentMethods: Boolean = true
             private var paymentConfiguration: PaymentConfiguration? = null
             private var windowFlags: Int? = null
 
@@ -134,6 +137,10 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
                 this.useGooglePay = useGooglePay
             }
 
+            fun setCanDeletePaymentMethods(canDeletePaymentMethods: Boolean): Builder = apply {
+                this.canDeletePaymentMethods = canDeletePaymentMethods
+            }
+
             override fun build(): Args {
                 return Args(
                     initialPaymentMethodId = initialPaymentMethodId,
@@ -144,7 +151,8 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
                     paymentConfiguration = paymentConfiguration,
                     addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId,
                     windowFlags = windowFlags,
-                    billingAddressFields = billingAddressFields
+                    billingAddressFields = billingAddressFields,
+                    canDeletePaymentMethods = canDeletePaymentMethods
                 )
             }
         }

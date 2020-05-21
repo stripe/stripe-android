@@ -25,7 +25,8 @@ internal class PaymentMethodsAdapter constructor(
     private val addableTypes: List<PaymentMethod.Type> = listOf(PaymentMethod.Type.Card),
     initiallySelectedPaymentMethodId: String? = null,
     private val shouldShowGooglePay: Boolean = false,
-    private val useGooglePay: Boolean = false
+    private val useGooglePay: Boolean = false,
+    private val canDeletePaymentMethods: Boolean = true
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     internal val paymentMethods = mutableListOf<PaymentMethod>()
@@ -176,14 +177,17 @@ internal class PaymentMethodsAdapter constructor(
         parent: ViewGroup
     ): ViewHolder.PaymentMethodViewHolder {
         val viewHolder = ViewHolder.PaymentMethodViewHolder(parent)
-        ViewCompat.addAccessibilityAction(
-            viewHolder.itemView,
-            parent.context.getString(R.string.delete_payment_method)
-        ) { _, _ ->
-            listener?.onDeletePaymentMethodAction(
-                paymentMethod = getPaymentMethodAtPosition(viewHolder.adapterPosition)
-            )
-            true
+
+        if (canDeletePaymentMethods) {
+            ViewCompat.addAccessibilityAction(
+                viewHolder.itemView,
+                parent.context.getString(R.string.delete_payment_method)
+            ) { _, _ ->
+                listener?.onDeletePaymentMethodAction(
+                    paymentMethod = getPaymentMethodAtPosition(viewHolder.adapterPosition)
+                )
+                true
+            }
         }
         return viewHolder
     }
