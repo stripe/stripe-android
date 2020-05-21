@@ -233,8 +233,17 @@ interface StripeIntent : StripeModel {
              * If the customer does not exit their browser while authenticating, they will be redirected
              * to this specified URL after completion.
              */
-            val returnUrl: String?
-        ) : NextActionData()
+            val returnUrl: String?,
+            val mobileData: MobileData?
+        ) : NextActionData() {
+
+            sealed class MobileData : StripeModel {
+                @Parcelize
+                data class Alipay(
+                    val data: String
+                ) : MobileData()
+            }
+        }
 
         /**
          * When confirming a [PaymentIntent] or [SetupIntent] with the Stripe SDK, the Stripe SDK

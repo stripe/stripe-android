@@ -69,7 +69,8 @@ class PaymentIntentJsonParserTest {
             .isEqualTo(
                 StripeIntent.NextActionData.RedirectToUrl(
                     Uri.parse("https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecaz6CRMbs6FrXfuYKBRSUG/src_client_secret_F6octeOshkgxT47dr0ZxSZiv"),
-                    "stripe://deeplink"
+                    returnUrl = "stripe://deeplink",
+                    mobileData = null
                 )
             )
     }
@@ -101,6 +102,21 @@ class PaymentIntentJsonParserTest {
                         "7c4debe3f4af7f9d1569a2ffea4343c2566826ee"
 
                     )
+                )
+            )
+    }
+
+    @Test
+    fun parse_withAlipayAction_shoulddCreateExpectedNextActionData() {
+        val paymentIntent = PaymentIntentJsonParser().parse(
+            PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION_JSON
+        )
+        assertThat(paymentIntent?.nextActionData)
+            .isEqualTo(
+                StripeIntent.NextActionData.RedirectToUrl(
+                    Uri.parse("https://hooks.stripe.com/redirect/authenticate/src_1GiUlyHSL10J9wqvLZKrtWo3?client_secret=src_client_secret_JjkxntbeO885UyGjnwqjVDwI"),
+                    "example://return_url",
+                    StripeIntent.NextActionData.RedirectToUrl.MobileData.Alipay("alipay_sdk_data")
                 )
             )
     }
