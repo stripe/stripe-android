@@ -62,7 +62,11 @@ class StripeApiRepositoryTest {
     private val testScope = TestCoroutineScope(testDispatcher)
 
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val stripeApiRepository = StripeApiRepository(context, DEFAULT_OPTIONS.apiKey)
+    private val stripeApiRepository = StripeApiRepository(
+        context,
+        DEFAULT_OPTIONS.apiKey,
+        workContext = testDispatcher
+    )
     private val fileFactory = FileFactory(context)
 
     private val stripeApiRequestExecutor: ApiRequestExecutor = mock()

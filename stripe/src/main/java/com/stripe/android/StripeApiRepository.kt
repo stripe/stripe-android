@@ -45,6 +45,7 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import java.security.Security
 import java.util.Locale
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.Dispatchers
 import org.json.JSONArray
 import org.json.JSONException
@@ -67,6 +68,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     private val analyticsDataFactory: AnalyticsDataFactory =
         AnalyticsDataFactory(context, publishableKey),
     private val fingerprintParamsUtils: FingerprintParamsUtils = FingerprintParamsUtils(context),
+    private val workContext: CoroutineContext = Dispatchers.IO,
     apiVersion: String = ApiVersion.get().code,
     sdkVersion: String = Stripe.VERSION
 ) : StripeRepository {
@@ -801,7 +803,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
     override suspend fun getFpxBankStatus(
         options: ApiRequest.Options
-    ) = liveData<FpxBankStatuses>(Dispatchers.IO) {
+    ) = liveData<FpxBankStatuses>(workContext) {
         makeApiRequest(
             apiRequestFactory.createGet(
                 getApiUrl("fpx/bank_statuses"),
