@@ -1,4 +1,4 @@
-package com.stripe.android.model
+package com.stripe.android.utils
 
 import android.content.Context
 import android.content.pm.PackageInfo

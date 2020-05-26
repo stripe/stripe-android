@@ -11,7 +11,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMEN
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN_URL
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_STRIPE_SDK
-import com.stripe.android.model.ContextUtils.packageInfo
+import com.stripe.android.utils.ContextUtils.packageInfo
 import kotlinx.android.parcel.Parcelize
 
 /**

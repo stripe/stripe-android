@@ -4,7 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.util.DisplayMetrics
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.model.ContextUtils.packageInfo
+import com.stripe.android.utils.ContextUtils.packageInfo
 import java.math.BigDecimal
 import java.math.MathContext
 import java.util.Locale

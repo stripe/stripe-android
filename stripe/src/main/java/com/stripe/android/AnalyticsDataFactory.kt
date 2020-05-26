@@ -6,12 +6,12 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.annotation.StringDef
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.model.ContextUtils.packageInfo
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
 import com.stripe.android.stripe3ds2.transaction.ProtocolErrorEvent
 import com.stripe.android.stripe3ds2.transaction.RuntimeErrorEvent
+import com.stripe.android.utils.ContextUtils.packageInfo
 
 /**
  * Util class to create logging items, which are fed as [Map][java.util.Map] objects in
