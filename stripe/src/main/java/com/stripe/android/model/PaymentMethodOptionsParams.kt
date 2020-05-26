@@ -39,4 +39,22 @@ sealed class PaymentMethodOptionsParams(
             private const val PARAM_NETWORK = "network"
         }
     }
+
+    @Parcelize
+    internal data class Alipay(
+        val appBundleId: String,
+        val appVersionKey: String
+    ) : PaymentMethodOptionsParams(PaymentMethod.Type.Alipay) {
+        override fun createTypeParams(): List<Pair<String, Any?>> {
+            return listOf(
+                PARAM_APP_BUNDLE_ID to appBundleId,
+                PARAM_APP_VERSION_KEY to appVersionKey
+            )
+        }
+
+        private companion object {
+            private const val PARAM_APP_BUNDLE_ID = "app_bundle_id"
+            private const val PARAM_APP_VERSION_KEY = "app_version_key"
+        }
+    }
 }

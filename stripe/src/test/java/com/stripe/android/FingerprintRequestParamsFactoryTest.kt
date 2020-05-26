@@ -1,12 +1,8 @@
 package com.stripe.android
 
 import android.content.Context
-import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
 import java.util.UUID
 import kotlin.test.Test
 import org.junit.runner.RunWith
@@ -15,7 +11,6 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class FingerprintRequestParamsFactoryTest {
 
-    private val packageManager: PackageManager = mock()
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val clientFingerprintDataStore = FakeClientFingerprintDataStore(
         muid = MUID,
@@ -33,7 +28,7 @@ class FingerprintRequestParamsFactoryTest {
         val params = FingerprintRequestParamsFactory(
             context.resources.displayMetrics,
             "package_name",
-            context.packageManager,
+            null,
             "-5",
             clientFingerprintDataStore
         ).createParams()
@@ -60,17 +55,10 @@ class FingerprintRequestParamsFactoryTest {
 
     @Test
     fun createParams_withVersionName_includesVersionName() {
-        val packageInfo = PackageInfo().also {
-            it.versionName = "version_name"
-        }
-
-        whenever(packageManager.getPackageInfo("package_name", 0))
-            .thenReturn(packageInfo)
-
         val params = FingerprintRequestParamsFactory(
             context.resources.displayMetrics,
             "package_name",
-            packageManager,
+            "version_name",
             "-5",
             clientFingerprintDataStore
         )
