@@ -7,12 +7,17 @@ import com.nhaarman.mockitokotlin2.whenever
 import java.io.IOException
 import java.util.UUID
 import kotlin.test.Test
-import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
+@ExperimentalCoroutinesApi
 class FingerprintRequestExecutorTest {
+    private val testScope = TestCoroutineScope(TestCoroutineDispatcher())
+
     private val fingerprintRequestFactory = FingerprintRequestFactory(
         context = ApplicationProvider.getApplicationContext()
     )
@@ -76,7 +81,7 @@ class FingerprintRequestExecutorTest {
     private fun createFingerprintRequestExecutor(
         connectionFactory: ConnectionFactory = ConnectionFactory.Default()
     ) = FingerprintRequestExecutor.Default(
-        workScope = MainScope(),
+        workScope = testScope,
         connectionFactory = connectionFactory
     )
 

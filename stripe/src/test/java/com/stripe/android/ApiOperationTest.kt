@@ -9,16 +9,17 @@ import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.exception.RateLimitException
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
-import java.lang.RuntimeException
 import kotlin.test.Test
-import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.TestCoroutineScope
 import org.json.JSONException
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
+@ExperimentalCoroutinesApi
 class ApiOperationTest {
-
     private val callback: ApiResultCallback<PaymentIntent> = mock()
 
     @Test
@@ -89,7 +90,7 @@ class ApiOperationTest {
         private val resultSupplier: () -> PaymentIntent?,
         callback: ApiResultCallback<PaymentIntent>
     ) : ApiOperation<PaymentIntent>(
-        workScope = MainScope(),
+        workScope = TestCoroutineScope(TestCoroutineDispatcher()),
         callback = callback
     ) {
         override suspend fun getResult(): PaymentIntent? = resultSupplier()

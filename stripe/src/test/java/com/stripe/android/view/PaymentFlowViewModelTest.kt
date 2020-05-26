@@ -18,21 +18,26 @@ import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
+@ExperimentalCoroutinesApi
 class PaymentFlowViewModelTest {
     private val customerSession: CustomerSession = mock()
 
     private val customerRetrievalListener: KArgumentCaptor<CustomerSession.CustomerRetrievalListener> = argumentCaptor()
 
+    private val testScope = TestCoroutineScope(TestCoroutineDispatcher())
+
     private val viewModel: PaymentFlowViewModel by lazy {
         PaymentFlowViewModel(
             customerSession = customerSession,
             paymentSessionData = PaymentSessionData(PaymentSessionFixtures.CONFIG),
-            workScope = MainScope()
+            workScope = testScope
         )
     }
 

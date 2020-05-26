@@ -27,7 +27,7 @@ class FpxViewModelTest {
     }
 
     @Test
-    fun loadFpxBankStatues_workingOnMainThread_shouldUpdateLiveData() {
+    fun `getFpxBankStatues should update LiveData`() {
         val viewModel = FpxViewModel(application, workContext = testDispatcher)
         testDispatcher.runBlockingTest {
             var bankStatuses: FpxBankStatuses? = null

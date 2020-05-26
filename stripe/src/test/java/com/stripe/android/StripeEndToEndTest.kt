@@ -16,15 +16,19 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.Token
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
+@ExperimentalCoroutinesApi
 class StripeEndToEndTest {
-
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val defaultStripe = Stripe(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+
+    private val testScope = TestCoroutineScope(TestCoroutineDispatcher())
 
     @Test
     fun testCreateAccountToken() {
@@ -56,7 +60,7 @@ class StripeEndToEndTest {
     @Test
     fun retrievePaymentIntentAsync_withInvalidClientSecret_shouldReturnInvalidRequestException() {
         val paymentIntentCallback: ApiResultCallback<PaymentIntent> = mock()
-        createStripeWithMainScope().retrievePaymentIntent(
+        createStripeWithTestScope().retrievePaymentIntent(
             clientSecret = "pi_abc_secret_invalid",
             callback = paymentIntentCallback
         )
@@ -72,7 +76,7 @@ class StripeEndToEndTest {
     fun retrieveSetupIntentAsync_withInvalidClientSecret_shouldReturnInvalidRequestException() {
         val setupIntentCallback: ApiResultCallback<SetupIntent> = mock()
 
-        createStripeWithMainScope().retrieveSetupIntent(
+        createStripeWithTestScope().retrieveSetupIntent(
             clientSecret = "seti_abc_secret_invalid",
             callback = setupIntentCallback
         )
@@ -84,7 +88,7 @@ class StripeEndToEndTest {
         )
     }
 
-    private fun createStripeWithMainScope(
+    private fun createStripeWithTestScope(
         publishableKey: String = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     ): Stripe {
         val stripeRepository = StripeApiRepository(context, publishableKey)
@@ -96,7 +100,7 @@ class StripeEndToEndTest {
                 stripeRepository
             ),
             publishableKey = publishableKey,
-            workScope = MainScope()
+            workScope = testScope
         )
     }
 }
