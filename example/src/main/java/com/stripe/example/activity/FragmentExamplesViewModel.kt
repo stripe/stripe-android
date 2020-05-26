@@ -1,11 +1,10 @@
 package com.stripe.example.activity
 
 import android.app.Application
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.liveData
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
-import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
 import org.json.JSONObject
 
@@ -15,24 +14,16 @@ internal class FragmentExamplesViewModel(
     val paymentIntentResultLiveData = MutableLiveData<Result<PaymentIntentResult>>()
     val setupIntentResultLiveData = MutableLiveData<Result<SetupIntentResult>>()
 
-    fun createPaymentIntent(): LiveData<Result<JSONObject>> {
-        return createIntent { backendApi.createPaymentIntent(PARAMS) }
-    }
+    fun createPaymentIntent() = createIntent { backendApi.createPaymentIntent(PARAMS) }
 
-    fun createSetupIntent(): LiveData<Result<JSONObject>> {
-        return createIntent { backendApi.createSetupIntent(PARAMS) }
-    }
+    fun createSetupIntent() = createIntent { backendApi.createSetupIntent(PARAMS) }
 
     private fun createIntent(
         apiMethod: suspend () -> ResponseBody
-    ): LiveData<Result<JSONObject>> {
-        val result = MutableLiveData<Result<JSONObject>>()
-        workScope.launch {
-            result.postValue(runCatching {
-                JSONObject(apiMethod().string())
-            })
-        }
-        return result
+    ) = liveData<Result<JSONObject>>(workContext) {
+        emit(runCatching {
+            JSONObject(apiMethod().string())
+        })
     }
 
     private companion object {
