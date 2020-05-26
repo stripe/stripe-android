@@ -19,6 +19,7 @@ import com.stripe.android.model.BankAccountTokenParamsFixtures
 import com.stripe.android.model.Card
 import com.stripe.android.model.CardFixtures
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.FpxBankStatuses
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -44,6 +45,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -51,7 +56,10 @@ import org.robolectric.RobolectricTestRunner
  * Test class for [StripeApiRepository].
  */
 @RunWith(RobolectricTestRunner::class)
+@ExperimentalCoroutinesApi
 class StripeApiRepositoryTest {
+    private val testDispatcher = TestCoroutineDispatcher()
+    private val testScope = TestCoroutineScope(testDispatcher)
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val stripeApiRepository = StripeApiRepository(context, DEFAULT_OPTIONS.apiKey)
@@ -386,7 +394,7 @@ class StripeApiRepositoryTest {
         verifyFingerprintAndAnalyticsRequests(AnalyticsEvent.PaymentIntentConfirm)
 
         val analyticsRequest = analyticsRequestArgumentCaptor.firstValue
-        assertEquals(PaymentMethod.Type.Card.code, analyticsRequest.params?.get("source_type"))
+        assertEquals(PaymentMethod.Type.Card.code, analyticsRequest.params.get("source_type"))
     }
 
     @Ignore("requires a secret key")
@@ -665,10 +673,16 @@ class StripeApiRepositoryTest {
 
     @Test
     fun getFpxBankStatus_withFpxKey() {
-        val fpxBankStatuses = stripeApiRepository.getFpxBankStatus(
-            ApiRequest.Options(ApiKeyFixtures.FPX_PUBLISHABLE_KEY)
-        )
-        assertTrue(fpxBankStatuses.isOnline(FpxBank.Hsbc))
+        testScope.runBlockingTest {
+            var fpxBankStatuses: FpxBankStatuses? = null
+            stripeApiRepository.getFpxBankStatus(
+                ApiRequest.Options(ApiKeyFixtures.FPX_PUBLISHABLE_KEY)
+            ).observeForever {
+                fpxBankStatuses = it
+            }
+            assertThat(fpxBankStatuses?.isOnline(FpxBank.Hsbc))
+                .isTrue()
+        }
     }
 
     @Test

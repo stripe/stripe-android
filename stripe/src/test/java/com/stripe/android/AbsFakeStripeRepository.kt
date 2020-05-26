@@ -225,7 +225,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
     ) {
     }
 
-    override fun getFpxBankStatus(options: ApiRequest.Options): FpxBankStatuses {
+    override suspend fun getFpxBankStatus(options: ApiRequest.Options): FpxBankStatuses {
         return FpxBankStatuses()
     }
 

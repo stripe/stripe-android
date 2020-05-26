@@ -3,6 +3,7 @@ package com.stripe.android
 import android.content.Context
 import android.util.Pair
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.liveData
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.AuthenticationException
@@ -44,6 +45,7 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import java.security.Security
 import java.util.Locale
+import kotlinx.coroutines.Dispatchers
 import org.json.JSONArray
 import org.json.JSONException
 
@@ -797,17 +799,18 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         )
     }
 
-    @Throws(AuthenticationException::class, InvalidRequestException::class,
-        APIConnectionException::class, APIException::class, CardException::class)
-    override fun getFpxBankStatus(options: ApiRequest.Options): FpxBankStatuses {
-        val response = makeApiRequest(
+    override suspend fun getFpxBankStatus(
+        options: ApiRequest.Options
+    ) = liveData<FpxBankStatuses>(Dispatchers.IO) {
+        makeApiRequest(
             apiRequestFactory.createGet(
                 getApiUrl("fpx/bank_statuses"),
                 options,
                 mapOf("account_holder_type" to "individual")
             )
-        )
-        return FpxBankStatusesJsonParser().parse(response.responseJson)
+        ).let {
+            emit(FpxBankStatusesJsonParser().parse(it.responseJson))
+        }
     }
 
     /**
