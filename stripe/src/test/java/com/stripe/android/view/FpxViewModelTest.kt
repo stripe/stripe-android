@@ -10,7 +10,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -21,7 +20,6 @@ class FpxViewModelTest {
     private val application: Application = ApplicationProvider.getApplicationContext()
 
     private val testDispatcher = TestCoroutineDispatcher()
-    private val testScope = TestCoroutineScope(testDispatcher)
 
     @BeforeTest
     fun setup() {
@@ -30,9 +28,9 @@ class FpxViewModelTest {
 
     @Test
     fun loadFpxBankStatues_workingOnMainThread_shouldUpdateLiveData() {
-        testScope.runBlockingTest {
+        val viewModel = FpxViewModel(application, workContext = testDispatcher)
+        testDispatcher.runBlockingTest {
             var bankStatuses: FpxBankStatuses? = null
-            val viewModel = FpxViewModel(application, workContext = coroutineContext)
             viewModel.getFpxBankStatues().observeForever {
                 bankStatuses = it
             }

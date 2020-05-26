@@ -19,7 +19,11 @@ internal class FpxViewModel @JvmOverloads internal constructor(
 
     private val context = application.applicationContext
     private val publishableKey = PaymentConfiguration.getInstance(context).publishableKey
-    private val stripeRepository = StripeApiRepository(context, publishableKey)
+    private val stripeRepository = StripeApiRepository(
+        context,
+        publishableKey,
+        workContext = workContext
+    )
 
     internal var selectedPosition: Int? = null
 
