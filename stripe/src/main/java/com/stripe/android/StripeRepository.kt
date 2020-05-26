@@ -1,5 +1,6 @@
 package com.stripe.android
 
+import androidx.lifecycle.LiveData
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.AuthenticationException
@@ -229,9 +230,7 @@ internal interface StripeRepository {
         ephemeralKeySecret: String
     )
 
-    @Throws(AuthenticationException::class, InvalidRequestException::class,
-        APIConnectionException::class, APIException::class, CardException::class)
-    fun getFpxBankStatus(options: ApiRequest.Options): FpxBankStatuses
+    suspend fun getFpxBankStatus(options: ApiRequest.Options): LiveData<FpxBankStatuses>
 
     fun start3ds2Auth(
         authParams: Stripe3ds2AuthParams,

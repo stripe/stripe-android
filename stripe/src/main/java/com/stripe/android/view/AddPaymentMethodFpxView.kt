@@ -31,7 +31,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
     private val viewModel: FpxViewModel by lazy {
         ViewModelProvider(
             activity,
-            FpxViewModel.Factory(activity.application)
+            ViewModelProvider.AndroidViewModelFactory(activity.application)
         ).get(FpxViewModel::class.java)
     }
 
@@ -61,10 +61,8 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
             itemAnimator = DefaultItemAnimator()
         }
 
-        viewModel.fpxBankStatuses.observe(activity, Observer {
-            onFpxBankStatusesUpdated(it)
-        })
-        viewModel.loadFpxBankStatues()
+        viewModel.getFpxBankStatues()
+            .observe(activity, Observer(::onFpxBankStatusesUpdated))
 
         viewModel.selectedPosition?.let {
             fpxAdapter.updateSelected(it)
