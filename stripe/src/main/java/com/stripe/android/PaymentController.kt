@@ -95,6 +95,14 @@ internal interface PaymentController {
         requestOptions: ApiRequest.Options
     )
 
+    fun authenticateAlipay(
+        intent: StripeIntent,
+        clientSecret: String,
+        stripeAccountId: String?,
+        authenticationHandler: AlipayAuthenticationHandler,
+        callback: ApiResultCallback<PaymentIntentResult>
+    )
+
     /**
      * Represents the result of a [PaymentController] operation.
      *
