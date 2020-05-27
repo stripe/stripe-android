@@ -47,11 +47,14 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
+@ExperimentalCoroutinesApi
 class StripePaymentControllerTest {
 
     private val activity: Activity = mock()
@@ -68,12 +71,9 @@ class StripePaymentControllerTest {
     private val controller: PaymentController by lazy {
         createController()
     }
-    private val analyticsDataFactory: AnalyticsDataFactory by lazy {
-        AnalyticsDataFactory(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-    }
-    private val host: AuthActivityStarter.Host by lazy {
-        AuthActivityStarter.Host.create(activity)
-    }
+    private val analyticsDataFactory = AnalyticsDataFactory(
+        context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+    private val host = AuthActivityStarter.Host.create(activity)
 
     private val relayStarterArgsArgumentCaptor: KArgumentCaptor<PaymentRelayStarter.Args> = argumentCaptor()
     private val intentArgumentCaptor: KArgumentCaptor<Intent> = argumentCaptor()
@@ -81,6 +81,8 @@ class StripePaymentControllerTest {
     private val setupIntentResultArgumentCaptor: KArgumentCaptor<SetupIntentResult> = argumentCaptor()
     private val apiResultStripeIntentArgumentCaptor: KArgumentCaptor<ApiResultCallback<StripeIntent>> = argumentCaptor()
     private val sourceArgumentCaptor: KArgumentCaptor<Source> = argumentCaptor()
+
+    private val testScope = TestCoroutineScope(TestCoroutineDispatcher())
 
     @BeforeTest
     fun setup() {
@@ -410,11 +412,14 @@ class StripePaymentControllerTest {
             analyticsParamsFirst[AnalyticsDataFactory.FIELD_EVENT]
         )
 
-        val errorData =
-            analyticsParamsFirst[AnalyticsDataFactory.FIELD_ERROR_DATA] as Map<String, String>
-
-        assertEquals("404", errorData["error_code"])
-        assertEquals("Resource not found", errorData["error_message"])
+        assertThat(analyticsParamsFirst[AnalyticsDataFactory.FIELD_ERROR_DATA])
+            .isEqualTo(
+                mapOf(
+                    "type" to "runtime_error_event",
+                    "error_code" to "404",
+                    "error_message" to "Resource not found"
+                )
+            )
 
         assertEquals(
             AnalyticsEvent.Auth3ds2ChallengePresented.toString(),
@@ -457,15 +462,20 @@ class StripePaymentControllerTest {
             analyticsParamsFirst[AnalyticsDataFactory.FIELD_EVENT]
         )
 
-        val errorData =
-            analyticsParamsFirst[AnalyticsDataFactory.FIELD_ERROR_DATA] as Map<String, String>
+        assertThat(analyticsParamsFirst[AnalyticsDataFactory.FIELD_ERROR_DATA])
+            .isEqualTo(
+                mapOf(
+                    "type" to "protocol_error_event",
+                    "error_code" to "201",
+                    "sdk_trans_id" to "8dd3413f-0b45-4234-bc45-6cc40fb1b0f1",
+                    "error_description" to "Required element missing",
+                    "error_details" to "eci",
+                    "trans_id" to "047f76a6-d1d4-48a2-aa65-786abb6f7f46"
+                )
+            )
 
-        assertEquals("201", errorData["error_code"])
-
-        assertEquals(
-            AnalyticsEvent.Auth3ds2ChallengePresented.toString(),
-            requireNotNull(analyticsRequests[1].params)[AnalyticsDataFactory.FIELD_EVENT]
-        )
+        assertThat(requireNotNull(analyticsRequests[1].params)[AnalyticsDataFactory.FIELD_EVENT])
+            .isEqualTo(AnalyticsEvent.Auth3ds2ChallengePresented.toString())
     }
 
     @Test
@@ -725,7 +735,8 @@ class StripePaymentControllerTest {
             eq(StripePaymentController.SOURCE_REQUEST_CODE)
         )
         val intent = intentArgumentCaptor.firstValue
-        assertEquals(PaymentRelayActivity::class.java.name, intent.component?.className)
+        assertThat(intent.component?.className)
+            .isEqualTo(PaymentRelayActivity::class.java.name)
 
         verifyAnalytics(AnalyticsEvent.AuthSourceStart)
     }
@@ -770,7 +781,7 @@ class StripePaymentControllerTest {
             analyticsDataFactory,
             challengeFlowStarter,
             challengeProgressDialogActivityStarter,
-            MainScope()
+            testScope
         )
     }
 
