@@ -1,10 +1,14 @@
 package com.stripe.android
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import androidx.lifecycle.Transformations
 import java.util.Calendar
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 internal interface FingerprintDataRepository {
     fun refresh()
@@ -16,7 +20,7 @@ internal interface FingerprintDataRepository {
         private val fingerprintRequestFactory: FingerprintRequestFactory,
         private val fingerprintRequestExecutor: FingerprintRequestExecutor =
             FingerprintRequestExecutor.Default(),
-        private val handler: Handler = Handler(Looper.getMainLooper())
+        private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     ) : FingerprintDataRepository {
         private var cachedFingerprintData: FingerprintData? = null
 
@@ -33,28 +37,29 @@ internal interface FingerprintDataRepository {
 
         override fun refresh() {
             if (Stripe.advancedFraudSignalsEnabled) {
-                handler.post {
-                    val liveData = store.get()
-                    // LiveData observation must occur on the main thread
-                    liveData.observeForever(object : Observer<FingerprintData> {
-                        override fun onChanged(localFingerprintData: FingerprintData) {
-                            if (localFingerprintData.isExpired(timestampSupplier())) {
-                                fingerprintRequestExecutor.execute(
-                                    request = fingerprintRequestFactory.create(
-                                        localFingerprintData.guid
-                                    )
-                                ) { remoteFingerprintData ->
-                                    remoteFingerprintData?.let {
+                coroutineScope.launch {
+                    Transformations.switchMap(store.get()) { localFingerprintData ->
+                        if (localFingerprintData.isExpired(timestampSupplier())) {
+                            fingerprintRequestExecutor.execute(
+                                request = fingerprintRequestFactory.create(
+                                    localFingerprintData.guid
+                                )
+                            )
+                        } else {
+                            MutableLiveData(localFingerprintData)
+                        }
+                    }.let { liveData ->
+                        liveData.observeForever(object : Observer<FingerprintData?> {
+                            override fun onChanged(fingerprintData: FingerprintData?) {
+                                if (cachedFingerprintData != fingerprintData) {
+                                    fingerprintData?.let {
                                         save(it)
                                     }
-                                    liveData.removeObserver(this)
                                 }
-                            } else {
-                                cachedFingerprintData = localFingerprintData
                                 liveData.removeObserver(this)
                             }
-                        }
-                    })
+                        })
+                    }
                 }
             }
         }
