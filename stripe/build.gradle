@@ -105,8 +105,8 @@ android {
         outputDirectory = "${project.rootDir}/docs/"
     }
 
-    viewBinding {
-        enabled = true
+    buildFeatures {
+        viewBinding true
     }
 }
 
