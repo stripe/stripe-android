@@ -1,5 +1,6 @@
 package com.stripe.android
 
+import android.annotation.SuppressLint
 import android.os.Parcelable
 import androidx.annotation.LayoutRes
 import androidx.annotation.WorkerThread
@@ -121,6 +122,7 @@ data class PaymentSessionConfig internal constructor(
          * hidden in the shipping information screen. All fields will be shown if this list is
          * empty. Note that not all fields can be hidden, such as country or name.
          */
+        @SuppressLint("WrongConstant")
         fun setHiddenShippingInfoFields(
             @CustomizableShippingField vararg hiddenShippingInfoFields: String
         ): Builder = apply {
@@ -131,6 +133,7 @@ data class PaymentSessionConfig internal constructor(
          * @param optionalShippingInfoFields [CustomizableShippingField] fields that should be
          * optional in the [ShippingInfoWidget]
          */
+        @SuppressLint("WrongConstant")
         fun setOptionalShippingInfoFields(
             @CustomizableShippingField vararg optionalShippingInfoFields: String
         ): Builder = apply {
