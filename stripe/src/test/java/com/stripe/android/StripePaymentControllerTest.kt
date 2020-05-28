@@ -286,11 +286,10 @@ class StripePaymentControllerTest {
 
     @Test
     fun test3ds2Receiver_whenCompleted_shouldFireAnalyticsRequest() {
-        val completionEvent = object : CompletionEvent {
-            override val sdkTransactionId: String = "8dd3413f-0b45-4234-bc45-6cc40fb1b0f1"
-
-            override val transactionStatus: String = "C"
-        }
+        val completionEvent = CompletionEvent(
+            sdkTransactionId = "8dd3413f-0b45-4234-bc45-6cc40fb1b0f1",
+            transactionStatus = "C"
+        )
 
         whenever(transaction.initialChallengeUiType).thenReturn("04")
 
@@ -385,10 +384,10 @@ class StripePaymentControllerTest {
 
     @Test
     fun test3ds2Receiver_whenRuntimeErrorError_shouldFireAnalyticsRequest() {
-        val runtimeErrorEvent = object : RuntimeErrorEvent {
-            override val errorCode: String = "404"
-            override val errorMessage: String = "Resource not found"
-        }
+        val runtimeErrorEvent = RuntimeErrorEvent(
+            errorCode = "404",
+            errorMessage = "Resource not found"
+        )
 
         val receiver = StripePaymentController.PaymentAuth3ds2ChallengeStatusReceiver(
             FakeStripeRepository(),
@@ -429,16 +428,15 @@ class StripePaymentControllerTest {
 
     @Test
     fun test3ds2Receiver_whenProtocolError_shouldFireAnalyticsRequest() {
-        val protocolErrorEvent = object : ProtocolErrorEvent {
-            override val sdkTransactionId: String = "8dd3413f-0b45-4234-bc45-6cc40fb1b0f1"
-
-            override val errorMessage: ErrorMessage = object : ErrorMessage {
-                override val errorCode: String = "201"
-                override val errorDescription: String = "Required element missing"
-                override val errorDetails: String = "eci"
-                override val transactionId: String = "047f76a6-d1d4-48a2-aa65-786abb6f7f46"
-            }
-        }
+        val protocolErrorEvent = ProtocolErrorEvent(
+            sdkTransactionId = "8dd3413f-0b45-4234-bc45-6cc40fb1b0f1",
+            errorMessage = ErrorMessage(
+                errorCode = "201",
+                errorDescription = "Required element missing",
+                errorDetails = "eci",
+                transactionId = "047f76a6-d1d4-48a2-aa65-786abb6f7f46"
+            )
+        )
 
         val receiver = StripePaymentController.PaymentAuth3ds2ChallengeStatusReceiver(
             FakeStripeRepository(),

@@ -19,12 +19,12 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl
+import com.stripe.android.stripe3ds2.transaction.ChallengeParameters
 import com.stripe.android.stripe3ds2.transaction.CompletionEvent
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.ProtocolErrorEvent
 import com.stripe.android.stripe3ds2.transaction.RuntimeErrorEvent
 import com.stripe.android.stripe3ds2.transaction.Stripe3ds2ActivityStarterHost
-import com.stripe.android.stripe3ds2.transaction.StripeChallengeParameters
 import com.stripe.android.stripe3ds2.transaction.StripeChallengeStatusReceiver
 import com.stripe.android.stripe3ds2.transaction.Transaction
 import com.stripe.android.stripe3ds2.views.ChallengeProgressDialogActivity
@@ -669,11 +669,12 @@ internal class StripePaymentController internal constructor(
         }
 
         private fun startChallengeFlow(ares: Stripe3ds2AuthResult.Ares) {
-            val challengeParameters = StripeChallengeParameters().also {
-                it.acsSignedContent = ares.acsSignedContent
-                it.threeDsServerTransactionId = ares.threeDSServerTransId
-                it.acsTransactionId = ares.acsTransId
-            }
+            val challengeParameters = ChallengeParameters(
+                acsSignedContent = ares.acsSignedContent,
+                threeDsServerTransactionId = ares.threeDSServerTransId,
+                acsTransactionId = ares.acsTransId,
+                acsRefNumber = null
+            )
 
             val host = host.fragment?.let { fragment ->
                 Stripe3ds2ActivityStarterHost(fragment)

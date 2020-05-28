@@ -12,12 +12,12 @@ internal object Stripe3ds2Fixtures {
     private const val SDK_REFERENCE_NUMBER = "3DS_LOA_SDK_STIN_12345"
     private const val SDK_EPHEMERAL_PUBLIC_KEY = "{\"kty\":\"EC\",\"use\":\"sig\",\"crv\":\"P-256\",\"kid\":\"b23da28b-d611-46a8-93af-44ad57ce9c9d\",\"x\":\"hSwyaaAp3ppSGkpt7d9G8wnp3aIXelsZVo05EPpqetg\",\"y\":\"OUVOv9xPh5RYWapla0oz3vCJWRRXlDmppy5BGNeSl-A\"}"
 
-    val AREQ_PARAMS: AuthenticationRequestParameters = object : AuthenticationRequestParameters {
-        override val deviceData: String = DEVICE_DATA
-        override val messageVersion: String = MESSAGE_VERSION
-        override val sdkAppId: String = SDK_APP_ID
-        override val sdkEphemeralPublicKey: String = SDK_EPHEMERAL_PUBLIC_KEY
-        override val sdkReferenceNumber: String = SDK_REFERENCE_NUMBER
-        override val sdkTransactionId: String = SDK_TRANSACTION_ID
-    }
+    val AREQ_PARAMS = AuthenticationRequestParameters(
+        deviceData = DEVICE_DATA,
+        messageVersion = MESSAGE_VERSION,
+        sdkAppId = SDK_APP_ID,
+        sdkEphemeralPublicKey = SDK_EPHEMERAL_PUBLIC_KEY,
+        sdkReferenceNumber = SDK_REFERENCE_NUMBER,
+        sdkTransactionId = SDK_TRANSACTION_ID
+    )
 }
