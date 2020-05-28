@@ -9,33 +9,33 @@ import java.util.UUID
 import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
 class FingerprintRequestExecutorTest {
-    private val testScope = TestCoroutineScope(TestCoroutineDispatcher())
+    private val testDispatcher = TestCoroutineDispatcher()
 
     private val fingerprintRequestFactory = FingerprintRequestFactory(
         context = ApplicationProvider.getApplicationContext()
     )
 
     @Test
-    fun execute_whenSuccessful_shouldReturnResponseWithUuid() {
+    fun `execute() when successful should return response with UUID`() {
+        var remoteFingerprintData: FingerprintData? = null
         createFingerprintRequestExecutor().execute(
             request = fingerprintRequestFactory.create(GUID.toString())
-        ) {
-            assertThat(UUID.fromString(it?.guid))
-                .isNotNull()
+        ).observeForever {
+            remoteFingerprintData = it
         }
+
+        assertThat(UUID.fromString(remoteFingerprintData?.guid))
+            .isNotNull()
     }
 
     @Test
-    fun execute_whenErrorResponse_shouldInvokeCallback() {
-        var callbackCount = 0
-
+    fun `execute() when successful should return null`() {
         val request = fingerprintRequestFactory.create(GUID.toString())
         val connection = mock<StripeConnection>().also {
             whenever(it.responseCode).thenReturn(500)
@@ -46,42 +46,47 @@ class FingerprintRequestExecutorTest {
                 .thenReturn(connection)
         }
 
+        var callbackCount = 0
+        var remoteFingerprintData: FingerprintData? = null
         createFingerprintRequestExecutor(connectionFactory = connectionFactory)
-            .execute(
-                request = request,
-                callback = {
-                    callbackCount++
-                }
-            )
+            .execute(request = request)
+            .observeForever {
+                callbackCount++
+                remoteFingerprintData = it
+            }
 
         assertThat(callbackCount)
             .isEqualTo(1)
+        assertThat(remoteFingerprintData)
+            .isNull()
     }
 
     @Test
-    fun execute_whenConnectionException_shouldInvokeCallback() {
-        var callbackCount = 0
-
+    fun `execute() when connection exception should return null`() {
         val request = fingerprintRequestFactory.create(GUID.toString())
         val connectionFactory = mock<ConnectionFactory>().also {
             whenever(it.create(request)).thenThrow(IOException())
         }
+
+        var callbackCount = 0
+        var remoteFingerprintData: FingerprintData? = null
         createFingerprintRequestExecutor(connectionFactory = connectionFactory)
-            .execute(
-                request = request,
-                callback = {
-                    callbackCount++
-                }
-            )
+            .execute(request = request)
+            .observeForever {
+                callbackCount++
+                remoteFingerprintData = it
+            }
 
         assertThat(callbackCount)
             .isEqualTo(1)
+        assertThat(remoteFingerprintData)
+            .isNull()
     }
 
     private fun createFingerprintRequestExecutor(
         connectionFactory: ConnectionFactory = ConnectionFactory.Default()
     ) = FingerprintRequestExecutor.Default(
-        workScope = testScope,
+        dispatcher = testDispatcher,
         connectionFactory = connectionFactory
     )
 
