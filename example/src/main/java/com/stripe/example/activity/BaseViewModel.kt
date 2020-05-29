@@ -1,7 +1,7 @@
 package com.stripe.example.activity
 
 import android.app.Application
-import android.content.Context
+import android.content.res.Resources
 import androidx.lifecycle.AndroidViewModel
 import com.stripe.example.module.BackendApiFactory
 import com.stripe.example.service.BackendApi
@@ -13,9 +13,9 @@ import kotlin.coroutines.CoroutineContext
 abstract class BaseViewModel(
     application: Application
 ) : AndroidViewModel(application) {
-    protected val context: Context = application.applicationContext
+    protected val resources: Resources = application.resources
     protected val workContext: CoroutineContext = Dispatchers.IO + SupervisorJob()
-    protected val backendApi: BackendApi = BackendApiFactory(application.applicationContext).create()
+    protected val backendApi: BackendApi = BackendApiFactory(application).create()
 
     override fun onCleared() {
         super.onCleared()
