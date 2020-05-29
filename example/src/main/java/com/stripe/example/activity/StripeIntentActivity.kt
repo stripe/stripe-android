@@ -1,6 +1,7 @@
 package com.stripe.example.activity
 
 import android.content.Intent
+import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -39,6 +40,26 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         KeyboardController(this)
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        viewModel.paymentIntentResultLiveData
+            .observe(this, Observer {
+                it.fold(
+                    onSuccess = ::onConfirmSuccess,
+                    onFailure = ::onConfirmError
+                )
+            })
+
+        viewModel.setupIntentResultLiveData
+            .observe(this, Observer {
+                it.fold(
+                    onSuccess = ::onConfirmSuccess,
+                    onFailure = ::onConfirmError
+                )
+            })
+    }
+
     protected fun createAndConfirmPaymentIntent(
         country: String,
         paymentMethodCreateParams: PaymentMethodCreateParams?,
@@ -57,22 +78,6 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                     stripeAccountId, existingPaymentMethodId, mandateDataParams)
             }
         })
-
-        viewModel.paymentIntentResultLiveData
-            .observe(this, Observer {
-                it.fold(
-                    onSuccess = ::onConfirmSuccess,
-                    onFailure = ::onConfirmError
-                )
-            })
-
-        viewModel.setupIntentResultLiveData
-            .observe(this, Observer {
-                it.fold(
-                    onSuccess = ::onConfirmSuccess,
-                    onFailure = ::onConfirmError
-                )
-            })
     }
 
     protected fun createAndConfirmSetupIntent(
