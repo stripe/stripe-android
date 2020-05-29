@@ -16,11 +16,9 @@ internal class FpxViewModel @JvmOverloads internal constructor(
     application: Application,
     private val workContext: CoroutineContext = Dispatchers.IO
 ) : AndroidViewModel(application) {
-
-    private val context = application.applicationContext
-    private val publishableKey = PaymentConfiguration.getInstance(context).publishableKey
+    private val publishableKey = PaymentConfiguration.getInstance(application).publishableKey
     private val stripeRepository = StripeApiRepository(
-        context,
+        application,
         publishableKey,
         workContext = workContext
     )

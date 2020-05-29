@@ -20,8 +20,8 @@ internal class PaymentMethodsViewModel(
     internal var selectedPaymentMethodId: String? = null,
     private val startedFromPaymentSession: Boolean
 ) : AndroidViewModel(application) {
-    private val context = application.applicationContext
-    private val cardDisplayTextFactory = CardDisplayTextFactory(context)
+    private val resources = application.resources
+    private val cardDisplayTextFactory = CardDisplayTextFactory(application)
 
     internal val productUsage: Set<String> = listOfNotNull(
         PaymentSession.PRODUCT_TOKEN.takeIf { startedFromPaymentSession },
@@ -50,7 +50,7 @@ internal class PaymentMethodsViewModel(
         @StringRes stringRes: Int
     ): String? {
         return paymentMethod.card?.let { paymentMethodId ->
-            context.getString(
+            resources.getString(
                 stringRes,
                 cardDisplayTextFactory.createUnstyled(paymentMethodId)
             )

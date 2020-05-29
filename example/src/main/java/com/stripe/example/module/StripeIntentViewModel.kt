@@ -49,7 +49,7 @@ internal class StripeIntentViewModel(
         apiMethod: suspend () -> ResponseBody
     ) = liveData<Result<JSONObject>>(workContext) {
         inProgress.postValue(true)
-        status.postValue(context.getString(creatingStringRes))
+        status.postValue(resources.getString(creatingStringRes))
 
         val result = runCatching {
             JSONObject(apiMethod().string())
@@ -57,7 +57,7 @@ internal class StripeIntentViewModel(
 
         result.fold(
             onSuccess = {
-                val intentStatus = context.getString(
+                val intentStatus = resources.getString(
                     resultStringRes,
                     it.getString("status")
                 )
