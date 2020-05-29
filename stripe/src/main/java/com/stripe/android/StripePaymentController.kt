@@ -77,11 +77,22 @@ internal class StripePaymentController internal constructor(
         confirmStripeIntentParams: ConfirmStripeIntentParams,
         requestOptions: ApiRequest.Options
     ) {
-        ConfirmStripeIntentTask(
-            stripeRepository, confirmStripeIntentParams, requestOptions, workScope,
+        startConfirm(
+            confirmStripeIntentParams,
+            requestOptions,
             ConfirmStripeIntentCallback(
                 host, requestOptions, this, getRequestCode(confirmStripeIntentParams)
             )
+        )
+    }
+
+    override fun startConfirm(
+        confirmStripeIntentParams: ConfirmStripeIntentParams,
+        requestOptions: ApiRequest.Options,
+        callback: ApiResultCallback<StripeIntent>
+    ) {
+        ConfirmStripeIntentTask(
+            stripeRepository, confirmStripeIntentParams, requestOptions, workScope, callback
         ).execute()
     }
 
