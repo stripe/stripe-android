@@ -19,6 +19,9 @@ class PaymentAuthActivity : StripeIntentActivity() {
     private val viewBinding: PaymentAuthActivityBinding by lazy {
         PaymentAuthActivityBinding.inflate(layoutInflater)
     }
+    private val keyboardController: KeyboardController by lazy {
+        KeyboardController(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +54,7 @@ class PaymentAuthActivity : StripeIntentActivity() {
         }
 
         viewBinding.confirmWithNewCardButton.setOnClickListener {
+            keyboardController.hide()
             viewBinding.cardInputWidget.paymentMethodCreateParams?.let {
                 createAndConfirmPaymentIntent("us",
                     it,
