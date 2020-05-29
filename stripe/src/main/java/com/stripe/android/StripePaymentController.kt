@@ -683,8 +683,7 @@ internal class StripePaymentController internal constructor(
             val challengeParameters = ChallengeParameters(
                 acsSignedContent = ares.acsSignedContent,
                 threeDsServerTransactionId = ares.threeDSServerTransId,
-                acsTransactionId = ares.acsTransId,
-                acsRefNumber = null
+                acsTransactionId = ares.acsTransId
             )
 
             val host = host.fragment?.let { fragment ->
