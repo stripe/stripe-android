@@ -135,7 +135,6 @@ class StripePaymentAuthTest {
         }
         stripe.confirmAlipayPayment(
             confirmPaymentIntentParams,
-            clientSecret = "client_secret",
             authenticationHandler = authenticationHandler,
             callback = paymentCallback
         )
@@ -157,7 +156,6 @@ class StripePaymentAuthTest {
         authenticationCallback.onSuccess(confirmedIntent)
         verify(paymentController).authenticateAlipay(
             confirmedIntent,
-            "client_secret",
             null,
             authenticationHandler,
             paymentCallback

@@ -163,7 +163,6 @@ class Stripe internal constructor(
      */
     internal fun confirmAlipayPayment(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
-        clientSecret: String,
         authenticationHandler: AlipayAuthenticationHandler,
         stripeAccountId: String? = this.stripeAccountId,
         callback: ApiResultCallback<PaymentIntentResult>
@@ -178,7 +177,6 @@ class Stripe internal constructor(
                 override fun onSuccess(result: StripeIntent) {
                     paymentController.authenticateAlipay(
                         result,
-                        clientSecret,
                         stripeAccountId,
                         authenticationHandler,
                         callback

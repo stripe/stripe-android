@@ -304,7 +304,6 @@ internal class StripePaymentController internal constructor(
 
     override fun authenticateAlipay(
         intent: StripeIntent,
-        clientSecret: String,
         stripeAccountId: String?,
         authenticationHandler: AlipayAuthenticationHandler,
         callback: ApiResultCallback<PaymentIntentResult>
@@ -320,7 +319,7 @@ internal class StripePaymentController internal constructor(
                     )
 
                     stripeRepository.retrieveIntent(
-                        clientSecret,
+                        intent.clientSecret.orEmpty(),
                         requestOptions,
                         expandFields = EXPAND_PAYMENT_METHOD,
                         callback = createPaymentIntentCallback(
