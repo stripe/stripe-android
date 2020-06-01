@@ -12,13 +12,13 @@ import com.stripe.android.model.PaymentIntent
  * new AlipayAuthenticationHandler() {
  *  @NotNull
  *  @Override
- *  Map<String, String> authenticate(@NotNull String data) {
+ *  Map<String, String> onAuthenticationRequest(@NotNull String data) {
  *      return new PayTask(this).payV2(data, true)
  *  }
  * }
  * </pre>
  */
-interface AlipayAuthenticationHandler {
+interface AlipayAuthenticator {
     @WorkerThread
-    fun authenticate(data: String): Map<String, String>
+    fun onAuthenticationRequest(data: String): Map<String, String>
 }

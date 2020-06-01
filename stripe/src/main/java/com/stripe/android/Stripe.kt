@@ -156,14 +156,14 @@ class Stripe internal constructor(
      * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
      * [PaymentIntent]
      * @param clientSecret the [client_secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret)
-     * @param authenticationHandler a [AlipayAuthenticationHandler] used to interface with the Alipay SDK
+     * @param authenticator a [AlipayAuthenticator] used to interface with the Alipay SDK
      * @param stripeAccountId Optional, the Connect account to associate with this request.
      * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     internal fun confirmAlipayPayment(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
-        authenticationHandler: AlipayAuthenticationHandler,
+        authenticator: AlipayAuthenticator,
         stripeAccountId: String? = this.stripeAccountId,
         callback: ApiResultCallback<PaymentIntentResult>
     ) {
@@ -178,7 +178,7 @@ class Stripe internal constructor(
                     paymentController.authenticateAlipay(
                         result,
                         stripeAccountId,
-                        authenticationHandler,
+                        authenticator,
                         callback
                     )
                 }

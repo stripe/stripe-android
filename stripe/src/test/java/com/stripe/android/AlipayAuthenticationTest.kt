@@ -94,8 +94,8 @@ class AlipayAuthenticationTest {
         }
     }
 
-    private fun createHandler(resultCode: String?) = object : AlipayAuthenticationHandler {
-        override fun authenticate(data: String): Map<String, String> {
+    private fun createHandler(resultCode: String?) = object : AlipayAuthenticator {
+        override fun onAuthenticationRequest(data: String): Map<String, String> {
             return resultCode?.let { mapOf("resultStatus" to it) }.orEmpty()
         }
     }

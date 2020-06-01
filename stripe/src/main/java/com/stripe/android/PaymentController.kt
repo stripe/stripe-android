@@ -98,7 +98,7 @@ internal interface PaymentController {
     fun authenticateAlipay(
         intent: StripeIntent,
         stripeAccountId: String?,
-        authenticationHandler: AlipayAuthenticationHandler,
+        authenticator: AlipayAuthenticator,
         callback: ApiResultCallback<PaymentIntentResult>
     )
 
