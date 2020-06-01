@@ -17,6 +17,8 @@
 * [#2525](https://github.com/stripe/stripe-android/pull/2525) Upgrade Android Gradle Plugin to 4.0.0
 * [#2531](https://github.com/stripe/stripe-android/pull/2531) Update 3DS2 SDK to 3.0.2
     * Fix bug in 3DS2 SDK where multi-screen challenges were not correctly returning result to starting Activity/Fragment
+* [#2496](https://github.com/stripe/stripe-android/pull/2496) Deprecate StripeIntent.stripeSdkData
+* [#2497](https://github.com/stripe/stripe-android/pull/2497) Deprecate StripeIntent.redirectData
 
 ## 14.4.1 - 2020-04-30
 * [#2441](https://github.com/stripe/stripe-android/pull/2441) Catch `IllegalArgumentException` in `ApiOperation`
