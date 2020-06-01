@@ -1,6 +1,5 @@
 package com.stripe.android.model
 
-import android.content.Context
 import android.os.Parcelable
 import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage
 import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
@@ -11,7 +10,6 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMEN
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN_URL
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_STRIPE_SDK
-import com.stripe.android.utils.ContextUtils.packageInfo
 import kotlinx.android.parcel.Parcelize
 
 /**
@@ -504,22 +502,21 @@ data class ConfirmPaymentIntentParams internal constructor(
             )
         }
 
+        /**
+         * Create the parameters necessary for confirming a [PaymentIntent] with Alipay
+         *
+         * @param clientSecret client secret from the PaymentIntent that is to be confirmed
+         * @param returnUrl the URL the customer should be redirected to after the authorization
+         * process
+         */
         @JvmStatic
         internal fun createAlipay(
-            context: Context,
             clientSecret: String,
             returnUrl: String
         ): ConfirmPaymentIntentParams {
-            val options = context.packageInfo?.let {
-                PaymentMethodOptionsParams.Alipay(
-                    it.packageName,
-                    it.versionName
-                )
-            }
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
                 paymentMethodCreateParams = PaymentMethodCreateParams.createAlipay(),
-                paymentMethodOptions = options,
                 returnUrl = returnUrl
             )
         }
