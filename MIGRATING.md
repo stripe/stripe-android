@@ -4,11 +4,11 @@
 - Changes to `StripeIntent`
     - `redirectData` is now deprecated.
 
-        If an `PaymentIntent` or `SetupIntent` requires a redirect to authenticate, this information will be in `nextActionData`.
+        If a `PaymentIntent` or `SetupIntent` requires a redirect to authenticate, this information will be in `nextActionData`.
         However, as before, this action will be handled by the SDK in `Stripe.confirmPayment`/`Stripe.confirmSetupIntent`.
-    - `sdkData` is now deprecated.
+    - `stripeSdkData` is now deprecated.
 
-        If an `PaymentIntent` or `SetupIntent` requires 3DS1 or 3DS2 authentication, this information will be in `nextActionData`.
+        If a `PaymentIntent` or `SetupIntent` requires 3DS1 or 3DS2 authentication, this information will be in `nextActionData`.
         However, as before, this action will be handled by the SDK in `Stripe.confirmPayment`/`Stripe.confirmSetupIntent`.
 
 ## Migrating from versions < 14.0.0
