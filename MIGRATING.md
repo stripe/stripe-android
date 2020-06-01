@@ -1,5 +1,40 @@
 # Migration Guide
 
+## Migrating from versions < 14.5.0
+- Changes to `StripeIntent`
+    - `redirectData` is now deprecated.
+
+        If a `PaymentIntent` or `SetupIntent` requires a redirect to authenticate, this information will be in `nextActionData`.
+        However, as before, this action will be handled by the SDK in `Stripe.confirmPayment`/`Stripe.confirmSetupIntent`.
+
+        ```kotlin
+        // before
+        if (intent.redirectData != null) {
+            // requires redirect
+        }
+
+        // after
+        when (intent.nextActionData) {
+            is StripeIntent.RedirectData.RedirectToUrl -> // requires redirect
+        }
+        ```
+    - `stripeSdkData` is now deprecated.
+
+        If a `PaymentIntent` or `SetupIntent` requires 3DS1 or 3DS2 authentication, this information will be in `nextActionData`.
+        However, as before, this action will be handled by the SDK in `Stripe.confirmPayment`/`Stripe.confirmSetupIntent`.
+
+        ```kotlin
+        // before
+        if (intent.stripeSdkData != null) {
+            // requires 3D Secure auth
+        }
+
+        // after
+        when (intent.nextActionData) {
+            is StripeIntent.RedirectData.SdkData -> // requires 3D Secure auth
+        }
+        ```
+
 ## Migrating from versions < 14.0.0
 - Changes to Stripe Error localization
     - All [Stripe Error messages](https://stripe.com/docs/api/errors#errors-message) are now localized
