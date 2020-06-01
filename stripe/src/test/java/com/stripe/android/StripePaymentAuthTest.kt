@@ -16,6 +16,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import com.stripe.android.view.AuthActivityStarter
 import java.lang.RuntimeException
 import kotlin.test.Test
@@ -152,7 +153,9 @@ class StripePaymentAuthTest {
         verify(paymentCallback).onError(e)
 
         // handles authentication
-        val confirmedIntent: StripeIntent = mock()
+        val confirmedIntent = PaymentIntentJsonParser().parse(
+            PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION_JSON
+        )!!
         authenticationCallback.onSuccess(confirmedIntent)
         verify(paymentController).authenticateAlipay(
             confirmedIntent,
