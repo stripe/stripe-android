@@ -111,6 +111,14 @@ class PaymentAuthWebViewTest {
     }
 
     @Test
+    fun shouldOverloadUrlLoading_withAlipayDeeplink_shouldNotFinishActivity() {
+        val url = "alipays://link"
+        val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, url)
+        verify(activity, never()).finish()
+    }
+
+    @Test
     fun shouldOverrideUrlLoading_withIntentUri_shouldParseUri() {
         val deepLink = "intent://example.com/#Intent;scheme=https;action=android.intent.action.VIEW;end"
         val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
