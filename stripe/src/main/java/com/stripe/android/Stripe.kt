@@ -30,6 +30,7 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.StripeFile
 import com.stripe.android.model.StripeFileParams
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import com.stripe.android.view.AuthActivityStarter
@@ -145,6 +146,45 @@ class Stripe internal constructor(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId
             )
+        )
+    }
+
+    /**
+     * Confirm and authenticate a [PaymentIntent] using the Alipay SDK
+     * @see <a href="https://intl.alipay.com/docs/ac/app/sdk_integration">Alipay Documentation</a>
+     *
+     * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
+     * [PaymentIntent]
+     * @param clientSecret the [client_secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret)
+     * @param authenticator a [AlipayAuthenticator] used to interface with the Alipay SDK
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+     * @param callback a [ApiResultCallback] to receive the result or error
+     */
+    internal fun confirmAlipayPayment(
+        confirmPaymentIntentParams: ConfirmPaymentIntentParams,
+        authenticator: AlipayAuthenticator,
+        stripeAccountId: String? = this.stripeAccountId,
+        callback: ApiResultCallback<PaymentIntentResult>
+    ) {
+        paymentController.startConfirm(
+            confirmPaymentIntentParams,
+            ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            ),
+            object : ApiResultCallback<StripeIntent> {
+                override fun onSuccess(result: StripeIntent) {
+                    paymentController.authenticateAlipay(
+                        result,
+                        stripeAccountId,
+                        authenticator,
+                        callback
+                    )
+                }
+
+                override fun onError(e: Exception) = callback.onError(e)
+            }
         )
     }
 

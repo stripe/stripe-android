@@ -746,4 +746,6 @@ internal object PaymentIntentFixtures {
         }
         """.trimIndent()
     )
+
+    val ALIPAY_REQUIRES_ACTION = PARSER.parse(ALIPAY_REQUIRES_ACTION_JSON)!!
 }
