@@ -11,6 +11,8 @@
     * Fixes #2463 on Android API level 26 and above
 * [#2483](https://github.com/stripe/stripe-android/pull/2483) Fix formatting of `maxTimeout` value in `Stripe3ds2AuthParams`
 * [#2494](https://github.com/stripe/stripe-android/pull/2494) Support starting 3DS2 challenge flow from a Fragment
+* [#2496](https://github.com/stripe/stripe-android/pull/2496) Deprecate `StripeIntent.stripeSdkData`
+* [#2497](https://github.com/stripe/stripe-android/pull/2497) Deprecate `StripeIntent.redirectData`
 * [#2513](https://github.com/stripe/stripe-android/pull/2513) Add `canDeletePaymentMethods` to `PaymentSessionConfig`
     * `canDeletePaymentMethods` controls whether the user can delete a payment method
       by swiping on it in `PaymentMethodsActivity`
