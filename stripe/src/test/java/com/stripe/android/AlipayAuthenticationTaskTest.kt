@@ -3,11 +3,11 @@ package com.stripe.android
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.model.PaymentIntentFixtures
+import kotlin.test.assertFailsWith
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 class AlipayAuthenticationTaskTest {

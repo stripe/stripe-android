@@ -16,7 +16,6 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import com.stripe.android.view.AuthActivityStarter
 import java.lang.RuntimeException
 import kotlin.test.Test
