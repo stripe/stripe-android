@@ -31,7 +31,7 @@ class AlipayAuthenticationTest {
     fun `AlipayAuthenticationTask should handle success`() {
         val task = StripePaymentController.AlipayAuthenticationTask(
             intent,
-            createHandler("9000"),
+            createAuthenticator("9000"),
             callback
         )
         val result = runBlocking { task.getResult() }
@@ -42,7 +42,7 @@ class AlipayAuthenticationTest {
     fun `AlipayAuthenticationTask should handle cancelation`() {
         val task = StripePaymentController.AlipayAuthenticationTask(
             intent,
-            createHandler("6001"),
+            createAuthenticator("6001"),
             callback
         )
         val result = runBlocking { task.getResult() }
@@ -53,7 +53,7 @@ class AlipayAuthenticationTest {
     fun `AlipayAuthenticationTask should handle failure`() {
         val task = StripePaymentController.AlipayAuthenticationTask(
             intent,
-            createHandler("4000"),
+            createAuthenticator("4000"),
             callback
         )
         val result = runBlocking { task.getResult() }
@@ -64,7 +64,7 @@ class AlipayAuthenticationTest {
     fun `AlipayAuthenticationTask should handle unknown codes`() {
         val task = StripePaymentController.AlipayAuthenticationTask(
             intent,
-            createHandler("unknown"),
+            createAuthenticator("unknown"),
             callback
         )
         val result = runBlocking { task.getResult() }
@@ -75,7 +75,7 @@ class AlipayAuthenticationTest {
     fun `AlipayAuthenticationTask should handle missing results`() {
         val task = StripePaymentController.AlipayAuthenticationTask(
             intent,
-            createHandler(null),
+            createAuthenticator(null),
             callback
         )
         val result = runBlocking { task.getResult() }
@@ -86,7 +86,7 @@ class AlipayAuthenticationTest {
     fun `AlipayAuthenticationTask should throw exception when alipay data missing`() {
         val task = StripePaymentController.AlipayAuthenticationTask(
             mock(),
-            createHandler("9000"),
+            createAuthenticator("9000"),
             callback
         )
         assertFailsWith<RuntimeException> {
@@ -94,7 +94,7 @@ class AlipayAuthenticationTest {
         }
     }
 
-    private fun createHandler(resultCode: String?) = object : AlipayAuthenticator {
+    private fun createAuthenticator(resultCode: String?) = object : AlipayAuthenticator {
         override fun onAuthenticationRequest(data: String): Map<String, String> {
             return resultCode?.let { mapOf("resultStatus" to it) }.orEmpty()
         }

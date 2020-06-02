@@ -9,7 +9,7 @@ import com.stripe.android.model.PaymentIntent
  *
  * To authenticate using the Alipay SDK, pass the data String to PayTask#payV2
  * <pre>
- * new AlipayAuthenticationHandler() {
+ * new AlipayAuthenticator() {
  *  @NotNull
  *  @Override
  *  Map<String, String> onAuthenticationRequest(@NotNull String data) {
@@ -18,7 +18,7 @@ import com.stripe.android.model.PaymentIntent
  * }
  * </pre>
  */
-interface AlipayAuthenticator {
+internal interface AlipayAuthenticator {
     @WorkerThread
     fun onAuthenticationRequest(data: String): Map<String, String>
 }
