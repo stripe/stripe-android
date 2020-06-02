@@ -72,7 +72,7 @@ class AlipayAuthenticationTaskTest {
     @Test
     fun `AlipayAuthenticationTask should throw exception when alipay data missing`() {
         val task = StripePaymentController.AlipayAuthenticationTask(
-            mock(),
+            PaymentIntentFixtures.PI_REQUIRES_REDIRECT,
             createAuthenticator("9000"),
             callback
         )
