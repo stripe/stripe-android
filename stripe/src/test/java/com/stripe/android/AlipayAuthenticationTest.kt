@@ -1,30 +1,17 @@
 package com.stripe.android
 
-import android.net.Uri
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
-import com.stripe.android.model.StripeIntent
-import java.lang.RuntimeException
-import kotlin.test.assertFailsWith
+import com.stripe.android.model.PaymentIntentFixtures
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 class AlipayAuthenticationTest {
-    private val intent = mock<StripeIntent>().also {
-        whenever(it.nextActionData).thenReturn(
-            StripeIntent.NextActionData.RedirectToUrl(
-                Uri.parse("https://stripe.com/some/redirect/url"),
-                returnUrl = "example://return_url",
-                mobileData = StripeIntent.NextActionData.RedirectToUrl.MobileData.Alipay(
-                    "alipay_data"
-                )
-            )
-        )
-    }
+    private val intent = PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION
     private val callback: ApiResultCallback<Int> = mock()
 
     @Test
