@@ -153,9 +153,7 @@ class StripePaymentAuthTest {
         verify(paymentCallback).onError(e)
 
         // handles authentication
-        val confirmedIntent = PaymentIntentJsonParser().parse(
-            PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION_JSON
-        )!!
+        val confirmedIntent = PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION
         authenticationCallback.onSuccess(confirmedIntent)
         verify(paymentController).authenticateAlipay(
             confirmedIntent,
