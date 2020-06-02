@@ -10,7 +10,7 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
-class AlipayAuthenticationTest {
+class AlipayAuthenticationTaskTest {
     private val intent = PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION
     private val callback: ApiResultCallback<Int> = mock()
 
