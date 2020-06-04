@@ -2,14 +2,12 @@ package com.stripe.android.model
 
 import android.net.Uri
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -119,5 +117,4 @@ class PaymentIntentTest {
             PaymentIntent.ClientSecret("pi_a1b2c3_secret_x7y8z9").value
         )
     }
-    
 }
