@@ -1,0 +1,44 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>StripeIntent.NextActionData - stripe</title>
+<link rel="stylesheet" href="../../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../../index.html">com.stripe.android.model</a>&nbsp;/&nbsp;<a href="../index.html">StripeIntent</a>&nbsp;/&nbsp;<a href="./index.html">NextActionData</a><br/>
+<br/>
+<h1>NextActionData</h1>
+<code><span class="keyword">sealed</span> <span class="keyword">class </span><span class="identifier">NextActionData</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../../-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code>
+<h3>Types</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<h4><a href="-display-oxxo-details/index.html">DisplayOxxoDetails</a></h4>
+</td>
+<td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">DisplayOxxoDetails</span>&nbsp;<span class="symbol">:</span>&nbsp;<span class="identifier">NextActionData</span></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="-redirect-to-url/index.html">RedirectToUrl</a></h4>
+</td>
+<td>
+<p>Contains instructions for authenticating by redirecting your customer to another
+page or application.</p>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">RedirectToUrl</span>&nbsp;<span class="symbol">:</span>&nbsp;<span class="identifier">NextActionData</span></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="-sdk-data/index.html">SdkData</a></h4>
+</td>
+<td>
+<p>When confirming a <a href="../../-payment-intent/index.html">PaymentIntent</a> or <a href="../../-setup-intent/index.html">SetupIntent</a> with the Stripe SDK, the Stripe SDK
+depends on this property to invoke authentication flows. The shape of the contents is subject
+to change and is only intended to be used by the Stripe SDK.</p>
+<code><span class="keyword">sealed</span> <span class="keyword">class </span><span class="identifier">SdkData</span>&nbsp;<span class="symbol">:</span>&nbsp;<span class="identifier">NextActionData</span></code></td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

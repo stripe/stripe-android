@@ -15,10 +15,37 @@
 <tbody>
 <tr>
 <td>
-<p><a href="client-secret.html">clientSecret</a></p>
+<h4><a href="client-secret.html">clientSecret</a></h4>
 </td>
 <td>
 <code><span class="keyword">val </span><span class="identifier">clientSecret</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="mandate-data.html">mandateData</a></h4>
+</td>
+<td>
+<p>This hash contains details about the Mandate to create.</p>
+<code><span class="keyword">var </span><span class="identifier">mandateData</span><span class="symbol">: </span><a href="../-mandate-data-params/index.html"><span class="identifier">MandateDataParams</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="mandate-id.html">mandateId</a></h4>
+</td>
+<td>
+<p>ID of the mandate to be used for this payment.</p>
+<code><span class="keyword">var </span><span class="identifier">mandateId</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="return-url.html">returnUrl</a></h4>
+</td>
+<td>
+<p>The URL to redirect your customer back to after they authenticate on the payment method’s
+app or site. If you’d prefer to redirect to a mobile application, you can alternatively
+supply an application URI scheme. This parameter is only used for cards and other
+redirect-based payment methods.</p>
+<code><span class="keyword">var </span><span class="identifier">returnUrl</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -27,24 +54,21 @@
 <tbody>
 <tr>
 <td>
-<p><a href="should-use-stripe-sdk.html">shouldUseStripeSdk</a></p>
+<h4><a href="should-use-stripe-sdk.html">shouldUseStripeSdk</a></h4>
 </td>
 <td>
 <code><span class="keyword">fun </span><span class="identifier">shouldUseStripeSdk</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="to-param-map.html">toParamMap</a></p>
+<h4><a href="to-param-map.html">toParamMap</a></h4>
 </td>
 <td>
-<code><span class="keyword">fun </span><span class="identifier">toParamMap</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">&gt;</span></code>
-<p>Create a string-keyed map representing this object that is
-ready to be sent over the network.</p>
-</td>
+<code><span class="keyword">fun </span><span class="identifier">toParamMap</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">&gt;</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="with-should-use-stripe-sdk.html">withShouldUseStripeSdk</a></p>
+<h4><a href="with-should-use-stripe-sdk.html">withShouldUseStripeSdk</a></h4>
 </td>
 <td>
 <code><span class="keyword">fun </span><span class="identifier">withShouldUseStripeSdk</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams$withShouldUseStripeSdk(kotlin.Boolean)/shouldUseStripeSdk">shouldUseStripeSdk</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">ConfirmSetupIntentParams</span></a></code></td>
@@ -56,26 +80,24 @@ ready to be sent over the network.</p>
 <tbody>
 <tr>
 <td>
-<p><a href="create.html">create</a></p>
+<h4><a href="create.html">create</a></h4>
 </td>
 <td>
-<code><span class="keyword">fun </span><span class="identifier">create</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(kotlin.String, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/paymentMethodId">paymentMethodId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(kotlin.String, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(kotlin.String, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/returnUrl">returnUrl</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(kotlin.String, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/mandateId">mandateId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(kotlin.String, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/mandateData">mandateData</span><span class="symbol">:</span>&nbsp;<a href="../-mandate-data-params/index.html"><span class="identifier">MandateDataParams</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">ConfirmSetupIntentParams</span></a></code>
 <p>Create the parameters necessary for confirming a SetupIntent while attaching a
 PaymentMethod that already exits.</p>
-<code><span class="keyword">fun </span><span class="identifier">create</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/paymentMethodCreateParams">paymentMethodCreateParams</span><span class="symbol">:</span>&nbsp;<a href="../-payment-method-create-params/index.html"><span class="identifier">PaymentMethodCreateParams</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/returnUrl">returnUrl</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/mandateId">mandateId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/mandateData">mandateData</span><span class="symbol">:</span>&nbsp;<a href="../-mandate-data-params/index.html"><span class="identifier">MandateDataParams</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">ConfirmSetupIntentParams</span></a></code>
+<code><span class="keyword">fun </span><span class="identifier">create</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(kotlin.String, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/paymentMethodId">paymentMethodId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(kotlin.String, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(kotlin.String, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/returnUrl">returnUrl</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(kotlin.String, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/mandateId">mandateId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(kotlin.String, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/mandateData">mandateData</span><span class="symbol">:</span>&nbsp;<a href="../-mandate-data-params/index.html"><span class="identifier">MandateDataParams</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">ConfirmSetupIntentParams</span></a></code>
 <p>Create the parameters necessary for confirming a SetupIntent with a new PaymentMethod</p>
-</td>
+<code><span class="keyword">fun </span><span class="identifier">create</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/paymentMethodCreateParams">paymentMethodCreateParams</span><span class="symbol">:</span>&nbsp;<a href="../-payment-method-create-params/index.html"><span class="identifier">PaymentMethodCreateParams</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/returnUrl">returnUrl</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/mandateId">mandateId</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$create(com.stripe.android.model.PaymentMethodCreateParams, kotlin.String, kotlin.String, kotlin.String, com.stripe.android.model.MandateDataParams)/mandateData">mandateData</span><span class="symbol">:</span>&nbsp;<a href="../-mandate-data-params/index.html"><span class="identifier">MandateDataParams</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">ConfirmSetupIntentParams</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="create-without-payment-method.html">createWithoutPaymentMethod</a></p>
+<h4><a href="create-without-payment-method.html">createWithoutPaymentMethod</a></h4>
 </td>
 <td>
-<code><span class="keyword">fun </span><span class="identifier">createWithoutPaymentMethod</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$createWithoutPaymentMethod(kotlin.String, kotlin.String)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$createWithoutPaymentMethod(kotlin.String, kotlin.String)/returnUrl">returnUrl</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">ConfirmSetupIntentParams</span></a></code>
 <p>Create the parameters necessary for confirming a SetupIntent, without specifying a payment method
 to attach to the SetupIntent. Only use this if a payment method has already been attached
 to the SetupIntent.</p>
-</td>
+<code><span class="keyword">fun </span><span class="identifier">createWithoutPaymentMethod</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$createWithoutPaymentMethod(kotlin.String, kotlin.String)/clientSecret">clientSecret</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.ConfirmSetupIntentParams.Companion$createWithoutPaymentMethod(kotlin.String, kotlin.String)/returnUrl">returnUrl</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">ConfirmSetupIntentParams</span></a></code></td>
 </tr>
 </tbody>
 </table>

@@ -16,35 +16,33 @@
 <tbody>
 <tr>
 <td>
-<p><a href="-builder/index.html">Builder</a></p>
+<h4><a href="-builder/index.html">Builder</a></h4>
 </td>
 <td>
-<code><span class="keyword">class </span><span class="identifier">Builder</span>&nbsp;<span class="symbol">:</span>&nbsp;<span class="identifier">ObjectBuilder</span><span class="symbol">&lt;</span><a href="./index.html"><span class="identifier">Card</span></a><span class="symbol">&gt;</span></code></td>
+<code><span class="keyword">class </span><span class="identifier">Builder</span>&nbsp;<span class="symbol">:</span>&nbsp;<span class="identifier">ObjectBuilder</span><span class="symbol">&lt;</span><span class="identifier">Card</span><span class="symbol">&gt;</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-checks/index.html">Checks</a></p>
+<h4><a href="-checks/index.html">Checks</a></h4>
 </td>
 <td>
-<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Checks</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../../-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code>
 <p>Checks on Card address and CVC if provided</p>
-</td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Checks</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../../-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-networks/index.html">Networks</a></p>
+<h4><a href="-networks/index.html">Networks</a></h4>
 </td>
 <td>
 <code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Networks</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../../-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-three-d-secure-usage/index.html">ThreeDSecureUsage</a></p>
+<h4><a href="-three-d-secure-usage/index.html">ThreeDSecureUsage</a></h4>
 </td>
 <td>
-<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">ThreeDSecureUsage</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../../-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code>
 <p>Contains details on how this Card maybe be used for 3D Secure authentication.</p>
-</td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">ThreeDSecureUsage</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../../-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code></td>
 </tr>
 </tbody>
 </table>
@@ -53,7 +51,7 @@
 <tbody>
 <tr>
 <td>
-<p><a href="-brand/index.html">Brand</a></p>
+<h4><a href="-brand/index.html">Brand</a></h4>
 </td>
 <td>
 <code><span class="keyword">annotation</span> <span class="keyword">class </span><span class="identifier">Brand</span></code></td>
@@ -65,85 +63,76 @@
 <tbody>
 <tr>
 <td>
-<p><a href="brand.html">brand</a></p>
+<h4><a href="brand.html">brand</a></h4>
 </td>
 <td>
-<code><span class="keyword">val </span><span class="identifier">brand</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
 <p>Card brand. Can be <code>amex</code>, <code>diners</code>, <code>discover</code>, <code>jcb</code>, <code>mastercard</code>, <code>unionpay</code>,
 <code>visa</code>, or <code>unknown</code>.</p>
-</td>
+<code><span class="keyword">val </span><span class="identifier">brand</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="checks.html">checks</a></p>
+<h4><a href="checks.html">checks</a></h4>
 </td>
 <td>
-<code><span class="keyword">val </span><span class="identifier">checks</span><span class="symbol">: </span><a href="-checks/index.html"><span class="identifier">Checks</span></a><span class="symbol">?</span></code>
 <p>Checks on Card address and CVC if provided</p>
-</td>
+<code><span class="keyword">val </span><span class="identifier">checks</span><span class="symbol">: </span><span class="identifier">Checks</span><span class="symbol">?</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="country.html">country</a></p>
+<h4><a href="country.html">country</a></h4>
 </td>
 <td>
-<code><span class="keyword">val </span><span class="identifier">country</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
 <p>Two-letter ISO code representing the country of the card. You could use this attribute to get a sense of the international breakdown of cards you’ve collected.</p>
-</td>
+<code><span class="keyword">val </span><span class="identifier">country</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="expiry-month.html">expiryMonth</a></p>
+<h4><a href="expiry-month.html">expiryMonth</a></h4>
 </td>
 <td>
-<code><span class="keyword">val </span><span class="identifier">expiryMonth</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">?</span></code>
 <p>Two-digit number representing the card’s expiration month.</p>
-</td>
+<code><span class="keyword">val </span><span class="identifier">expiryMonth</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">?</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="expiry-year.html">expiryYear</a></p>
+<h4><a href="expiry-year.html">expiryYear</a></h4>
 </td>
 <td>
-<code><span class="keyword">val </span><span class="identifier">expiryYear</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">?</span></code>
 <p>Four-digit number representing the card’s expiration year.</p>
-</td>
+<code><span class="keyword">val </span><span class="identifier">expiryYear</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">?</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="funding.html">funding</a></p>
+<h4><a href="funding.html">funding</a></h4>
 </td>
 <td>
-<code><span class="keyword">val </span><span class="identifier">funding</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
 <p>Card funding type. Can be <code>credit</code>, <code>debit, </code>prepaid<code>, or </code>unknown`.</p>
-</td>
+<code><span class="keyword">val </span><span class="identifier">funding</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="last4.html">last4</a></p>
+<h4><a href="last4.html">last4</a></h4>
 </td>
 <td>
-<code><span class="keyword">val </span><span class="identifier">last4</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
 <p>The last four digits of the card.</p>
-</td>
+<code><span class="keyword">val </span><span class="identifier">last4</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="three-d-secure-usage.html">threeDSecureUsage</a></p>
+<h4><a href="three-d-secure-usage.html">threeDSecureUsage</a></h4>
 </td>
 <td>
-<code><span class="keyword">val </span><span class="identifier">threeDSecureUsage</span><span class="symbol">: </span><a href="-three-d-secure-usage/index.html"><span class="identifier">ThreeDSecureUsage</span></a><span class="symbol">?</span></code>
 <p>Contains details on how this Card maybe be used for 3D Secure authentication.</p>
-</td>
+<code><span class="keyword">val </span><span class="identifier">threeDSecureUsage</span><span class="symbol">: </span><span class="identifier">ThreeDSecureUsage</span><span class="symbol">?</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="wallet.html">wallet</a></p>
+<h4><a href="wallet.html">wallet</a></h4>
 </td>
 <td>
-<code><span class="keyword">val </span><span class="identifier">wallet</span><span class="symbol">: </span><a href="../../../com.stripe.android.model.wallets/-wallet/index.html"><span class="identifier">Wallet</span></a><span class="symbol">?</span></code>
 <p>If this Card is part of a card wallet, this contains the details of the card wallet.</p>
-</td>
+<code><span class="keyword">val </span><span class="identifier">wallet</span><span class="symbol">: </span><a href="../../../com.stripe.android.model.wallets/-wallet/index.html"><span class="identifier">Wallet</span></a><span class="symbol">?</span></code></td>
 </tr>
 </tbody>
 </table>

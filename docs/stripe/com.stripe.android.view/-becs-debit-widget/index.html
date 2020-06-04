@@ -23,9 +23,10 @@ passing it to the <a href="./index.html">BecsDebitWidget</a> constructor, or via
 <tbody>
 <tr>
 <td>
-<p><a href="-valid-params-callback/index.html">ValidParamsCallback</a></p>
+<h4><a href="-valid-params-callback/index.html">ValidParamsCallback</a></h4>
 </td>
 <td>
+<p>An interface for a callback object that will be called when the user's input changes.</p>
 <code><span class="keyword">interface </span><span class="identifier">ValidParamsCallback</span></code></td>
 </tr>
 </tbody>
@@ -35,12 +36,11 @@ passing it to the <a href="./index.html">BecsDebitWidget</a> constructor, or via
 <tbody>
 <tr>
 <td>
-<p><a href="-init-.html">&lt;init&gt;</a></p>
+<h4><a href="-init-.html">&lt;init&gt;</a></h4>
 </td>
 <td>
-<code><span class="identifier">BecsDebitWidget</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.BecsDebitWidget$<init>(android.content.Context, android.util.AttributeSet, kotlin.Int, kotlin.String)/context">context</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Context.html"><span class="identifier">Context</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.view.BecsDebitWidget$<init>(android.content.Context, android.util.AttributeSet, kotlin.Int, kotlin.String)/attrs">attrs</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/util/AttributeSet.html"><span class="identifier">AttributeSet</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.view.BecsDebitWidget$<init>(android.content.Context, android.util.AttributeSet, kotlin.Int, kotlin.String)/defStyleAttr">defStyleAttr</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a>&nbsp;<span class="symbol">=</span>&nbsp;0<span class="symbol">, </span><span class="identifier" id="com.stripe.android.view.BecsDebitWidget$<init>(android.content.Context, android.util.AttributeSet, kotlin.Int, kotlin.String)/companyName">companyName</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a>&nbsp;<span class="symbol">=</span>&nbsp;""<span class="symbol">)</span></code>
 <p>A form for accepting a customer's BECS account information.</p>
-</td>
+<code><span class="identifier">BecsDebitWidget</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.BecsDebitWidget$<init>(android.content.Context, android.util.AttributeSet, kotlin.Int, kotlin.String)/context">context</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Context.html"><span class="identifier">Context</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.view.BecsDebitWidget$<init>(android.content.Context, android.util.AttributeSet, kotlin.Int, kotlin.String)/attrs">attrs</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/util/AttributeSet.html"><span class="identifier">AttributeSet</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.view.BecsDebitWidget$<init>(android.content.Context, android.util.AttributeSet, kotlin.Int, kotlin.String)/defStyleAttr">defStyleAttr</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a>&nbsp;<span class="symbol">=</span>&nbsp;0<span class="symbol">, </span><span class="identifier" id="com.stripe.android.view.BecsDebitWidget$<init>(android.content.Context, android.util.AttributeSet, kotlin.Int, kotlin.String)/companyName">companyName</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a>&nbsp;<span class="symbol">=</span>&nbsp;""<span class="symbol">)</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -49,17 +49,20 @@ passing it to the <a href="./index.html">BecsDebitWidget</a> constructor, or via
 <tbody>
 <tr>
 <td>
-<p><a href="params.html">params</a></p>
+<h4><a href="params.html">params</a></h4>
 </td>
 <td>
+<p>If the input is valid, will return a <a href="../../com.stripe.android.model/-payment-method-create-params/index.html">PaymentMethodCreateParams</a> instance;
+otherwise, will return <code>null</code>.</p>
 <code><span class="keyword">val </span><span class="identifier">params</span><span class="symbol">: </span><a href="../../com.stripe.android.model/-payment-method-create-params/index.html"><span class="identifier">PaymentMethodCreateParams</span></a><span class="symbol">?</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="valid-params-callback.html">validParamsCallback</a></p>
+<h4><a href="valid-params-callback.html">validParamsCallback</a></h4>
 </td>
 <td>
-<code><span class="keyword">var </span><span class="identifier">validParamsCallback</span><span class="symbol">: </span><a href="-valid-params-callback/index.html"><span class="identifier">ValidParamsCallback</span></a></code></td>
+<p>See <a href="-valid-params-callback/index.html">ValidParamsCallback</a>.</p>
+<code><span class="keyword">var </span><span class="identifier">validParamsCallback</span><span class="symbol">: </span><span class="identifier">ValidParamsCallback</span></code></td>
 </tr>
 </tbody>
 </table>

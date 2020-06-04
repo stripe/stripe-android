@@ -1,0 +1,70 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>StripeIntent.NextActionData.RedirectToUrl - stripe</title>
+<link rel="stylesheet" href="../../../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../../../index.html">com.stripe.android.model</a>&nbsp;/&nbsp;<a href="../../index.html">StripeIntent</a>&nbsp;/&nbsp;<a href="../index.html">NextActionData</a>&nbsp;/&nbsp;<a href="./index.html">RedirectToUrl</a><br/>
+<br/>
+<h1>RedirectToUrl</h1>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">RedirectToUrl</span>&nbsp;<span class="symbol">:</span>&nbsp;<span class="identifier">NextActionData</span></code>
+<p>Contains instructions for authenticating by redirecting your customer to another
+page or application.</p>
+<h3>Types</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<h4><a href="-mobile-data/index.html">MobileData</a></h4>
+</td>
+<td>
+<code><span class="keyword">sealed</span> <span class="keyword">class </span><span class="identifier">MobileData</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../../../-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Constructors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<h4><a href="-init-.html">&lt;init&gt;</a></h4>
+</td>
+<td>
+<p>Contains instructions for authenticating by redirecting your customer to another
+page or application.</p>
+<code><span class="identifier">RedirectToUrl</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.StripeIntent.NextActionData.RedirectToUrl$<init>(android.net.Uri, kotlin.String, com.stripe.android.model.StripeIntent.NextActionData.RedirectToUrl.MobileData)/url">url</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/net/Uri.html"><span class="identifier">Uri</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.StripeIntent.NextActionData.RedirectToUrl$<init>(android.net.Uri, kotlin.String, com.stripe.android.model.StripeIntent.NextActionData.RedirectToUrl.MobileData)/returnUrl">returnUrl</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.StripeIntent.NextActionData.RedirectToUrl$<init>(android.net.Uri, kotlin.String, com.stripe.android.model.StripeIntent.NextActionData.RedirectToUrl.MobileData)/mobileData">mobileData</span><span class="symbol">:</span>&nbsp;<span class="identifier">MobileData</span><span class="symbol">?</span><span class="symbol">)</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<h4><a href="mobile-data.html">mobileData</a></h4>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">mobileData</span><span class="symbol">: </span><span class="identifier">MobileData</span><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="return-url.html">returnUrl</a></h4>
+</td>
+<td>
+<p>If the customer does not exit their browser while authenticating, they will be redirected
+to this specified URL after completion.</p>
+<code><span class="keyword">val </span><span class="identifier">returnUrl</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="url.html">url</a></h4>
+</td>
+<td>
+<p>The URL you must redirect your customer to in order to authenticate.</p>
+<code><span class="keyword">val </span><span class="identifier">url</span><span class="symbol">: </span><a href="https://developer.android.com/reference/android/net/Uri.html"><span class="identifier">Uri</span></a></code></td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

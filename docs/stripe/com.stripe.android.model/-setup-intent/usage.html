@@ -9,15 +9,11 @@
 <br/>
 <h1>usage</h1>
 <a name="com.stripe.android.model.SetupIntent$usage"></a>
-<code><span class="keyword">val </span><span class="identifier">usage</span><span class="symbol">: </span><a href="../-stripe-intent/-usage/index.html"><span class="identifier">Usage</span></a><span class="symbol">?</span></code>
-<p><strong>Return</strong><br/>
+<code><span class="keyword">val </span><span class="identifier">usage</span><span class="symbol">: </span><span class="identifier">Usage</span><span class="symbol">?</span></code>
 <p>Indicates how the payment method is intended to be used in the future.</p>
-
-
-<p>Use <code>on_session</code> if you intend to only reuse the payment method when the
-customer is in your checkout flow. Use <code>off_session</code> if your customer may or
-may not be in your checkout flow. If not provided, this value defaults to
-<code>off_session</code>.</p>
-</p>
+<p>Use <a href="../-stripe-intent/-usage/-on-session.html">StripeIntent.Usage.OnSession</a> if you intend to only reuse the payment method when the
+customer is in your checkout flow. Use <a href="../-stripe-intent/-usage/-off-session.html">StripeIntent.Usage.OffSession</a> if your customer may
+or may not be in your checkout flow. If not provided, this value defaults to
+<a href="../-stripe-intent/-usage/-off-session.html">StripeIntent.Usage.OffSession</a>.</p>
 </BODY>
 </HTML>

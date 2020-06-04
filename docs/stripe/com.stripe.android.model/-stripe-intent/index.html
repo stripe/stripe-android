@@ -15,47 +15,52 @@
 <tbody>
 <tr>
 <td>
-<p><a href="-next-action-type/index.html">NextActionType</a></p>
+<h4><a href="-next-action-data/index.html">NextActionData</a></h4>
 </td>
 <td>
-<code><span class="keyword">enum</span> <span class="keyword">class </span><span class="identifier">NextActionType</span></code>
-<p>See <a href="https://stripe.com/docs/api/payment_intents/object#payment_intent_object-next_action-type">payment_intent.next_action_type</a></p>
-</td>
+<code><span class="keyword">sealed</span> <span class="keyword">class </span><span class="identifier">NextActionData</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-redirect-data/index.html">RedirectData</a></p>
+<h4><a href="-next-action-type/index.html">NextActionType</a></h4>
 </td>
 <td>
-<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">RedirectData</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code></td>
+<p>Type of the next action to perform.</p>
+<code><span class="keyword">enum</span> <span class="keyword">class </span><span class="identifier">NextActionType</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-sdk-data/index.html">SdkData</a></p>
+<h4><a href="-redirect-data/index.html">RedirectData</a></h4>
 </td>
 <td>
-<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">SdkData</span></code></td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><s><span class="identifier">RedirectData</span></s>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-status/index.html">Status</a></p>
+<h4><a href="-sdk-data/index.html">SdkData</a></h4>
 </td>
 <td>
-<code><span class="keyword">enum</span> <span class="keyword">class </span><span class="identifier">Status</span></code><ul><li><a href="https://stripe.com/docs/payments/intents#intent-statuses">The Intent State Machine - Intent statuses</a></li>
+<code><span class="keyword">data</span> <span class="keyword">class </span><s><span class="identifier">SdkData</span></s></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="-status/index.html">Status</a></h4>
+</td>
+<td>
+<ul><li><a href="https://stripe.com/docs/payments/intents#intent-statuses">The Intent State Machine - Intent statuses</a></li>
 <li><a href="https://stripe.com/docs/api/payment_intents/object#payment_intent_object-status">PaymentIntent.status API reference</a></li>
 <li><a href="https://stripe.com/docs/api/setup_intents/object#setup_intent_object-status">SetupIntent.status API reference</a></li>
 </ul>
-</td>
+<code><span class="keyword">enum</span> <span class="keyword">class </span><span class="identifier">Status</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-usage/index.html">Usage</a></p>
+<h4><a href="-usage/index.html">Usage</a></h4>
 </td>
 <td>
-<code><span class="keyword">enum</span> <span class="keyword">class </span><span class="identifier">Usage</span></code>
 <p>See <a href="https://stripe.com/docs/api/setup_intents/object#setup_intent_object-usage">setup_intent.usage</a> and
 <a href="https://stripe.com/docs/payments/cards/reusing-cards">Reusing Cards</a>.</p>
-</td>
+<code><span class="keyword">enum</span> <span class="keyword">class </span><span class="identifier">Usage</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -64,103 +69,101 @@
 <tbody>
 <tr>
 <td>
-<p><a href="client-secret.html">clientSecret</a></p>
+<h4><a href="client-secret.html">clientSecret</a></h4>
 </td>
 <td>
-<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">clientSecret</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
-<p>The client secret of this PaymentIntent. Used for client-side retrieval using a
-publishable key.</p>
-</td>
+<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">clientSecret</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="created.html">created</a></p>
+<h4><a href="created.html">created</a></h4>
 </td>
 <td>
-<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">created</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html"><span class="identifier">Long</span></a></code>
 <p>Time at which the object was created. Measured in seconds since the Unix epoch.</p>
-</td>
+<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">created</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html"><span class="identifier">Long</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="description.html">description</a></p>
+<h4><a href="description.html">description</a></h4>
 </td>
 <td>
-<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">description</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
 <p>An arbitrary string attached to the object. Often useful for displaying to users.</p>
-</td>
+<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">description</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="id.html">id</a></p>
+<h4><a href="id.html">id</a></h4>
 </td>
 <td>
-<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">id</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
 <p>Unique identifier for the object.</p>
-</td>
+<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">id</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="is-live-mode.html">isLiveMode</a></p>
+<h4><a href="is-live-mode.html">isLiveMode</a></h4>
 </td>
 <td>
-<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">isLiveMode</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
 <p>Has the value true if the object exists in live mode or the value false if the object exists
 in test mode.</p>
-</td>
+<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">isLiveMode</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="next-action-type.html">nextActionType</a></p>
+<h4><a href="next-action-data.html">nextActionData</a></h4>
 </td>
 <td>
-<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">nextActionType</span><span class="symbol">: </span><a href="-next-action-type/index.html"><span class="identifier">NextActionType</span></a><span class="symbol">?</span></code></td>
+<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">nextActionData</span><span class="symbol">: </span><span class="identifier">NextActionData</span><span class="symbol">?</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="payment-method.html">paymentMethod</a></p>
+<h4><a href="next-action-type.html">nextActionType</a></h4>
 </td>
 <td>
+<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">nextActionType</span><span class="symbol">: </span><span class="identifier">NextActionType</span><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="payment-method.html">paymentMethod</a></h4>
+</td>
+<td>
+<p>The expanded <a href="../-payment-method/index.html">PaymentMethod</a> represented by <a href="payment-method-id.html">paymentMethodId</a>.</p>
 <code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">paymentMethod</span><span class="symbol">: </span><a href="../-payment-method/index.html"><span class="identifier">PaymentMethod</span></a><span class="symbol">?</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="payment-method-id.html">paymentMethodId</a></p>
+<h4><a href="payment-method-id.html">paymentMethodId</a></h4>
 </td>
 <td>
-<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">paymentMethodId</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code>
-<p>ID of the payment method used in this PaymentIntent.</p>
-</td>
+<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">paymentMethodId</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="payment-method-types.html">paymentMethodTypes</a></p>
+<h4><a href="payment-method-types.html">paymentMethodTypes</a></h4>
 </td>
 <td>
-<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">paymentMethodTypes</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html"><span class="identifier">List</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">&gt;</span></code>
 <p>The list of payment method types (e.g. card) that this PaymentIntent is allowed to use.</p>
-</td>
+<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">paymentMethodTypes</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html"><span class="identifier">List</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">&gt;</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="redirect-data.html">redirectData</a></p>
+<h4><a href="redirect-data.html">redirectData</a></h4>
 </td>
 <td>
-<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">redirectData</span><span class="symbol">: </span><a href="-redirect-data/index.html"><span class="identifier">RedirectData</span></a><span class="symbol">?</span></code></td>
+<code><span class="keyword">abstract</span> <span class="keyword">val </span><s><span class="identifier">redirectData</span></s><span class="symbol">: </span><span class="identifier">RedirectData</span><span class="symbol">?</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="status.html">status</a></p>
+<h4><a href="status.html">status</a></h4>
 </td>
 <td>
-<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">status</span><span class="symbol">: </span><a href="-status/index.html"><span class="identifier">Status</span></a><span class="symbol">?</span></code></td>
+<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">status</span><span class="symbol">: </span><span class="identifier">Status</span><span class="symbol">?</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="stripe-sdk-data.html">stripeSdkData</a></p>
+<h4><a href="stripe-sdk-data.html">stripeSdkData</a></h4>
 </td>
 <td>
-<code><span class="keyword">abstract</span> <span class="keyword">val </span><span class="identifier">stripeSdkData</span><span class="symbol">: </span><a href="-sdk-data/index.html"><span class="identifier">SdkData</span></a><span class="symbol">?</span></code></td>
+<code><span class="keyword">abstract</span> <span class="keyword">val </span><s><span class="identifier">stripeSdkData</span></s><span class="symbol">: </span><span class="identifier">SdkData</span><span class="symbol">?</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -169,36 +172,17 @@ in test mode.</p>
 <tbody>
 <tr>
 <td>
-<p><a href="requires-action.html">requiresAction</a></p>
+<h4><a href="requires-action.html">requiresAction</a></h4>
 </td>
 <td>
 <code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">requiresAction</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="requires-confirmation.html">requiresConfirmation</a></p>
+<h4><a href="requires-confirmation.html">requiresConfirmation</a></h4>
 </td>
 <td>
 <code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">requiresConfirmation</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
-</tr>
-</tbody>
-</table>
-<h3>Inherited Functions</h3>
-<table>
-<tbody>
-<tr>
-<td>
-<p><a href="../-stripe-model/equals.html">equals</a></p>
-</td>
-<td>
-<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">equals</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.StripeModel$equals(kotlin.Any)/other">other</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
-</tr>
-<tr>
-<td>
-<p><a href="../-stripe-model/hash-code.html">hashCode</a></p>
-</td>
-<td>
-<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">hashCode</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a></code></td>
 </tr>
 </tbody>
 </table>
@@ -207,22 +191,20 @@ in test mode.</p>
 <tbody>
 <tr>
 <td>
-<p><a href="../-payment-intent/index.html">PaymentIntent</a></p>
+<h4><a href="../-payment-intent/index.html">PaymentIntent</a></h4>
 </td>
 <td>
-<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">PaymentIntent</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">StripeIntent</span></a></code>
 <p>A PaymentIntent tracks the process of collecting a payment from your customer.</p>
-</td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">PaymentIntent</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">StripeIntent</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="../-setup-intent/index.html">SetupIntent</a></p>
+<h4><a href="../-setup-intent/index.html">SetupIntent</a></h4>
 </td>
 <td>
-<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">SetupIntent</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">StripeIntent</span></a></code>
-<p>A SetupIntent guides you through the process of setting up a customer's payment credentials for
+<p>A <a href="../-setup-intent/index.html">SetupIntent</a> guides you through the process of setting up a customer's payment credentials for
 future payments.</p>
-</td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">SetupIntent</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">StripeIntent</span></a></code></td>
 </tr>
 </tbody>
 </table>

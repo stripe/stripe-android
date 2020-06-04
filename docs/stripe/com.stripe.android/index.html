@@ -13,206 +13,185 @@
 <tbody>
 <tr>
 <td>
-<p><a href="-api-result-callback/index.html">ApiResultCallback</a></p>
+<h4><a href="-api-result-callback/index.html">ApiResultCallback</a></h4>
 </td>
 <td>
-<code><span class="keyword">interface </span><span class="identifier">ApiResultCallback</span><span class="symbol">&lt;</span><span class="identifier">ResultType</span><span class="symbol">&gt;</span></code>
 <p>Generic interface for an API operation callback that either returns a
 result, <a href="-api-result-callback/index.html#ResultType">ResultType</a>, or an <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-exception/index.html">Exception</a></p>
-</td>
+<code><span class="keyword">interface </span><span class="identifier">ApiResultCallback</span><span class="symbol">&lt;</span><span class="identifier">ResultType</span><span class="symbol">&gt;</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-app-info/index.html">AppInfo</a></p>
+<h4><a href="-app-info/index.html">AppInfo</a></h4>
 </td>
 <td>
-<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">AppInfo</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code>
 <p>Data for identifying your plug-in or library.</p>
-</td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">AppInfo</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-card-utils/index.html">CardUtils</a></p>
+<h4><a href="-card-utils/index.html">CardUtils</a></h4>
 </td>
 <td>
-<code><span class="keyword">object </span><span class="identifier">CardUtils</span></code>
 <p>Utility class for functions to do with cards.</p>
-</td>
+<code><span class="keyword">object </span><span class="identifier">CardUtils</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-customer-session/index.html">CustomerSession</a></p>
+<h4><a href="-customer-session/index.html">CustomerSession</a></h4>
 </td>
 <td>
-<code><span class="keyword">class </span><span class="identifier">CustomerSession</span></code>
 <p>Represents a logged-in session of a single Customer.</p>
-</td>
+<code><span class="keyword">class </span><span class="identifier">CustomerSession</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-ephemeral-key/index.html">EphemeralKey</a></p>
+<h4><a href="-ephemeral-key/index.html">EphemeralKey</a></h4>
 </td>
 <td>
-<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">EphemeralKey</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../com.stripe.android.model/-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code>
 <p>Represents an Ephemeral Key that can be used temporarily for API operations that typically
 require a secret key.</p>
-</td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">EphemeralKey</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../com.stripe.android.model/-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-ephemeral-key-provider/index.html">EphemeralKeyProvider</a></p>
+<h4><a href="-ephemeral-key-provider/index.html">EphemeralKeyProvider</a></h4>
 </td>
 <td>
-<code><span class="keyword">interface </span><span class="identifier">EphemeralKeyProvider</span></code>
 <p>Represents an object that can call to a server and create
 <a href="-ephemeral-key/index.html">EphemeralKeys</a>.</p>
-</td>
+<code><span class="keyword">interface </span><span class="identifier">EphemeralKeyProvider</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-ephemeral-key-update-listener/index.html">EphemeralKeyUpdateListener</a></p>
+<h4><a href="-ephemeral-key-update-listener/index.html">EphemeralKeyUpdateListener</a></h4>
 </td>
 <td>
-<code><span class="keyword">interface </span><span class="identifier">EphemeralKeyUpdateListener</span></code>
 <p>Represents a listener for Ephemeral Key Update events.</p>
-</td>
+<code><span class="keyword">interface </span><span class="identifier">EphemeralKeyUpdateListener</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-google-pay-config/index.html">GooglePayConfig</a></p>
+<h4><a href="-google-pay-config/index.html">GooglePayConfig</a></h4>
 </td>
 <td>
-<code><span class="keyword">class </span><span class="identifier">GooglePayConfig</span></code>
 <p>Configuration settings for Google Pay's <code>TokenizationSpecification</code>.</p>
-</td>
+<code><span class="keyword">class </span><span class="identifier">GooglePayConfig</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-google-pay-json-factory/index.html">GooglePayJsonFactory</a></p>
+<h4><a href="-google-pay-json-factory/index.html">GooglePayJsonFactory</a></h4>
 </td>
 <td>
-<code><span class="keyword">class </span><span class="identifier">GooglePayJsonFactory</span></code>
 <p>A factory for generating <a href="https://developers.google.com/pay/api/android/reference/request-objects">Google Pay JSON request objects</a>
 for Google Pay API version 2.0.</p>
-</td>
+<code><span class="keyword">class </span><span class="identifier">GooglePayJsonFactory</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-issuing-card-pin-service/index.html">IssuingCardPinService</a></p>
+<h4><a href="-issuing-card-pin-service/index.html">IssuingCardPinService</a></h4>
 </td>
 <td>
-<code><span class="keyword">class </span><span class="identifier">IssuingCardPinService</span></code>
 <p>Methods for retrieval / update of a Stripe Issuing card</p>
-</td>
+<code><span class="keyword">class </span><span class="identifier">IssuingCardPinService</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-pay-with-google-utils/index.html">PayWithGoogleUtils</a></p>
+<h4><a href="-payment-auth-config/index.html">PaymentAuthConfig</a></h4>
 </td>
 <td>
-<code><span class="keyword">object </span><span class="identifier">PayWithGoogleUtils</span></code>
-<p>Public utility class for common Pay with Google-related tasks.</p>
-</td>
-</tr>
-<tr>
-<td>
-<p><a href="-payment-auth-config/index.html">PaymentAuthConfig</a></p>
-</td>
-<td>
-<code><span class="keyword">class </span><span class="identifier">PaymentAuthConfig</span></code>
 <p>Configuration for authentication mechanisms via <a href="#">StripePaymentController</a></p>
-</td>
+<code><span class="keyword">class </span><span class="identifier">PaymentAuthConfig</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-payment-configuration/index.html">PaymentConfiguration</a></p>
+<h4><a href="-payment-configuration/index.html">PaymentConfiguration</a></h4>
 </td>
 <td>
 <code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">PaymentConfiguration</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-payment-intent-result/index.html">PaymentIntentResult</a></p>
+<h4><a href="-payment-intent-result/index.html">PaymentIntentResult</a></h4>
 </td>
 <td>
-<code><span class="keyword">class </span><span class="identifier">PaymentIntentResult</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-intent-result/index.html"><span class="identifier">StripeIntentResult</span></a><span class="symbol">&lt;</span><a href="../com.stripe.android.model/-payment-intent/index.html"><span class="identifier">PaymentIntent</span></a><span class="symbol">&gt;</span></code>
 <p>A model representing the result of a <a href="../com.stripe.android.model/-payment-intent/index.html">PaymentIntent</a> confirmation via <a href="-stripe/confirm-payment.html">Stripe.confirmPayment</a>
 or handling of next actions via <a href="-stripe/handle-next-action-for-payment.html">Stripe.handleNextActionForPayment</a>.</p>
-</td>
+<code><span class="keyword">class </span><span class="identifier">PaymentIntentResult</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-intent-result/index.html"><span class="identifier">StripeIntentResult</span></a><span class="symbol">&lt;</span><a href="../com.stripe.android.model/-payment-intent/index.html"><span class="identifier">PaymentIntent</span></a><span class="symbol">&gt;</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-payment-session/index.html">PaymentSession</a></p>
+<h4><a href="-payment-session/index.html">PaymentSession</a></h4>
 </td>
 <td>
-<code><span class="keyword">class </span><span class="identifier">PaymentSession</span></code>
 <p>Represents a single start-to-finish payment operation.</p>
-</td>
+<code><span class="keyword">class </span><span class="identifier">PaymentSession</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-payment-session-config/index.html">PaymentSessionConfig</a></p>
+<h4><a href="-payment-session-config/index.html">PaymentSessionConfig</a></h4>
 </td>
 <td>
-<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">PaymentSessionConfig</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code>
 <p>Configuration for <a href="-payment-session/index.html">PaymentSession</a>.</p>
-</td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">PaymentSessionConfig</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-payment-session-data/index.html">PaymentSessionData</a></p>
+<h4><a href="-payment-session-data/index.html">PaymentSessionData</a></h4>
 </td>
 <td>
-<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">PaymentSessionData</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code>
 <p>A data class representing the state of the associated <a href="-payment-session/index.html">PaymentSession</a>.</p>
-</td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">PaymentSessionData</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-setup-intent-result/index.html">SetupIntentResult</a></p>
+<h4><a href="-pay-with-google-utils/index.html">PayWithGoogleUtils</a></h4>
 </td>
 <td>
-<code><span class="keyword">class </span><span class="identifier">SetupIntentResult</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-intent-result/index.html"><span class="identifier">StripeIntentResult</span></a><span class="symbol">&lt;</span><a href="../com.stripe.android.model/-setup-intent/index.html"><span class="identifier">SetupIntent</span></a><span class="symbol">&gt;</span></code>
+<p>Public utility class for common Pay with Google-related tasks.</p>
+<code><span class="keyword">object </span><span class="identifier">PayWithGoogleUtils</span></code></td>
+</tr>
+<tr>
+<td>
+<h4><a href="-setup-intent-result/index.html">SetupIntentResult</a></h4>
+</td>
+<td>
 <p>A model representing the result of a <a href="../com.stripe.android.model/-setup-intent/index.html">SetupIntent</a> confirmation via <a href="-stripe/confirm-setup-intent.html">Stripe.confirmSetupIntent</a>
 or handling of next actions via <a href="-stripe/handle-next-action-for-setup-intent.html">Stripe.handleNextActionForSetupIntent</a>.</p>
-</td>
+<code><span class="keyword">class </span><span class="identifier">SetupIntentResult</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="-stripe-intent-result/index.html"><span class="identifier">StripeIntentResult</span></a><span class="symbol">&lt;</span><a href="../com.stripe.android.model/-setup-intent/index.html"><span class="identifier">SetupIntent</span></a><span class="symbol">&gt;</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-stripe/index.html">Stripe</a></p>
+<h4><a href="-stripe/index.html">Stripe</a></h4>
 </td>
 <td>
-<code><span class="keyword">class </span><span class="identifier">Stripe</span></code>
 <p>Entry-point to the Stripe SDK.</p>
-</td>
+<code><span class="keyword">class </span><span class="identifier">Stripe</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-stripe-error/index.html">StripeError</a></p>
+<h4><a href="-stripe-error/index.html">StripeError</a></h4>
 </td>
 <td>
-<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">StripeError</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../com.stripe.android.model/-stripe-model/index.html"><span class="identifier">StripeModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/java/io/Serializable.html"><span class="identifier">Serializable</span></a></code>
 <p>A model representing a Stripe <a href="https://stripe.com/docs/api/errors">Errors</a> object.</p>
-</td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">StripeError</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../com.stripe.android.model/-stripe-model/index.html"><span class="identifier">StripeModel</span></a><span class="symbol">, </span><a href="https://docs.oracle.com/javase/6/docs/api/java/io/Serializable.html"><span class="identifier">Serializable</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-stripe-intent-result/index.html">StripeIntentResult</a></p>
+<h4><a href="-stripe-intent-result/index.html">StripeIntentResult</a></h4>
 </td>
 <td>
-<code><span class="keyword">abstract</span> <span class="keyword">class </span><span class="identifier">StripeIntentResult</span><span class="symbol">&lt;</span><span class="identifier">T</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../com.stripe.android.model/-stripe-intent/index.html"><span class="identifier">StripeIntent</span></a><span class="symbol">&gt;</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../com.stripe.android.model/-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code>
 <p>A model representing the result of a <a href="../com.stripe.android.model/-stripe-intent/index.html">StripeIntent</a> confirmation or authentication attempt
 via <a href="-stripe/confirm-payment.html">Stripe.confirmPayment</a> or <a href="-stripe/handle-next-action-for-payment.html">Stripe.handleNextActionForPayment</a></p>
-</td>
+<code><span class="keyword">abstract</span> <span class="keyword">class </span><span class="identifier">StripeIntentResult</span><span class="symbol">&lt;</span><span class="identifier">T</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../com.stripe.android.model/-stripe-intent/index.html"><span class="identifier">StripeIntent</span></a><span class="symbol">&gt;</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../com.stripe.android.model/-stripe-model/index.html"><span class="identifier">StripeModel</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-stripe-text-utils/index.html">StripeTextUtils</a></p>
+<h4><a href="-stripe-text-utils/index.html">StripeTextUtils</a></h4>
 </td>
 <td>
-<code><span class="keyword">object </span><span class="identifier">StripeTextUtils</span></code>
 <p>Utility class for common text-related operations on Stripe data coming from the server.</p>
-</td>
+<code><span class="keyword">object </span><span class="identifier">StripeTextUtils</span></code></td>
 </tr>
 </tbody>
 </table>

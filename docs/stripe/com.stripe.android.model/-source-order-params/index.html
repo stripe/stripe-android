@@ -17,22 +17,20 @@ credit (for example Klarna) sources before you can charge it.</p>
 <tbody>
 <tr>
 <td>
-<p><a href="-item/index.html">Item</a></p>
+<h4><a href="-item/index.html">Item</a></h4>
 </td>
 <td>
-<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Item</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code>
 <p>List of items constituting the order.</p>
-</td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Item</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="-shipping/index.html">Shipping</a></p>
+<h4><a href="-shipping/index.html">Shipping</a></h4>
 </td>
 <td>
-<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Shipping</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code>
 <p>Shipping address for the order.
 Required if any of the SKUs are for products that have <code>shippable</code> set to true.</p>
-</td>
+<code><span class="keyword">data</span> <span class="keyword">class </span><span class="identifier">Shipping</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-stripe-params-model/index.html"><span class="identifier">StripeParamsModel</span></a><span class="symbol">, </span><a href="https://developer.android.com/reference/android/os/Parcelable.html"><span class="identifier">Parcelable</span></a></code></td>
 </tr>
 </tbody>
 </table>
@@ -41,13 +39,12 @@ Required if any of the SKUs are for products that have <code>shippable</code> se
 <tbody>
 <tr>
 <td>
-<p><a href="-init-.html">&lt;init&gt;</a></p>
+<h4><a href="-init-.html">&lt;init&gt;</a></h4>
 </td>
 <td>
-<code><span class="identifier">SourceOrderParams</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceOrderParams$<init>(kotlin.collections.List((com.stripe.android.model.SourceOrderParams.Item)), com.stripe.android.model.SourceOrderParams.Shipping)/items">items</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html"><span class="identifier">List</span></a><span class="symbol">&lt;</span><a href="-item/index.html"><span class="identifier">Item</span></a><span class="symbol">&gt;</span><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceOrderParams$<init>(kotlin.collections.List((com.stripe.android.model.SourceOrderParams.Item)), com.stripe.android.model.SourceOrderParams.Shipping)/shipping">shipping</span><span class="symbol">:</span>&nbsp;<a href="-shipping/index.html"><span class="identifier">Shipping</span></a><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span></code>
 <p>Information about the items and shipping associated with the source. Required for transactional
 credit (for example Klarna) sources before you can charge it.</p>
-</td>
+<code><span class="identifier">SourceOrderParams</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.model.SourceOrderParams$<init>(kotlin.collections.List((com.stripe.android.model.SourceOrderParams.Item)), com.stripe.android.model.SourceOrderParams.Shipping)/items">items</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html"><span class="identifier">List</span></a><span class="symbol">&lt;</span><span class="identifier">Item</span><span class="symbol">&gt;</span><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">, </span><span class="identifier" id="com.stripe.android.model.SourceOrderParams$<init>(kotlin.collections.List((com.stripe.android.model.SourceOrderParams.Item)), com.stripe.android.model.SourceOrderParams.Shipping)/shipping">shipping</span><span class="symbol">:</span>&nbsp;<span class="identifier">Shipping</span><span class="symbol">?</span>&nbsp;<span class="symbol">=</span>&nbsp;null<span class="symbol">)</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -56,22 +53,20 @@ credit (for example Klarna) sources before you can charge it.</p>
 <tbody>
 <tr>
 <td>
-<p><a href="items.html">items</a></p>
+<h4><a href="items.html">items</a></h4>
 </td>
 <td>
-<code><span class="keyword">val </span><span class="identifier">items</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html"><span class="identifier">List</span></a><span class="symbol">&lt;</span><a href="-item/index.html"><span class="identifier">Item</span></a><span class="symbol">&gt;</span><span class="symbol">?</span></code>
 <p>List of items constituting the order.</p>
-</td>
+<code><span class="keyword">val </span><span class="identifier">items</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html"><span class="identifier">List</span></a><span class="symbol">&lt;</span><span class="identifier">Item</span><span class="symbol">&gt;</span><span class="symbol">?</span></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="shipping.html">shipping</a></p>
+<h4><a href="shipping.html">shipping</a></h4>
 </td>
 <td>
-<code><span class="keyword">val </span><span class="identifier">shipping</span><span class="symbol">: </span><a href="-shipping/index.html"><span class="identifier">Shipping</span></a><span class="symbol">?</span></code>
 <p>Shipping address for the order. Required if any of the SKUs are for products that have
 <code>shippable</code> set to true.</p>
-</td>
+<code><span class="keyword">val </span><span class="identifier">shipping</span><span class="symbol">: </span><span class="identifier">Shipping</span><span class="symbol">?</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -80,7 +75,7 @@ credit (for example Klarna) sources before you can charge it.</p>
 <tbody>
 <tr>
 <td>
-<p><a href="to-param-map.html">toParamMap</a></p>
+<h4><a href="to-param-map.html">toParamMap</a></h4>
 </td>
 <td>
 <code><span class="keyword">fun </span><span class="identifier">toParamMap</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html"><span class="identifier">Map</span></a><span class="symbol">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">,</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html"><span class="identifier">Any</span></a><span class="symbol">&gt;</span></code></td>
