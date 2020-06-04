@@ -287,7 +287,7 @@ public class StripeTest {
         assertTrue(bankAccountId.startsWith("ba_"));
         assertEquals("Jenny Rosen", returnedBankAccount.getAccountHolderName());
         assertEquals(
-                BankAccount.BankAccountType.INDIVIDUAL,
+                BankAccount.Type.Individual,
                 returnedBankAccount.getAccountHolderType()
         );
         assertEquals("US", returnedBankAccount.getCountryCode());

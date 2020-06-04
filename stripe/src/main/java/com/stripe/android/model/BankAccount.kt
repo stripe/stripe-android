@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import androidx.annotation.Size
-import androidx.annotation.StringDef
 import kotlinx.android.parcel.Parcelize
 
 /**
@@ -28,8 +27,7 @@ data class BankAccount internal constructor(
      *
      * [account_holder_type](https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-account_holder_type)
      */
-    @param:BankAccountType @field:BankAccountType @get:BankAccountType
-    val accountHolderType: String? = null,
+    val accountHolderType: Type? = null,
 
     /**
      * Name of the bank associated with the routing number (e.g., WELLS FARGO).
@@ -95,12 +93,12 @@ data class BankAccount internal constructor(
     val status: Status? = null
 ) : StripeModel {
 
-    @Retention(AnnotationRetention.SOURCE)
-    @StringDef(BankAccountType.COMPANY, BankAccountType.INDIVIDUAL)
-    annotation class BankAccountType {
-        companion object {
-            const val COMPANY: String = "company"
-            const val INDIVIDUAL: String = "individual"
+    enum class Type(internal val code: String) {
+        Company("company"),
+        Individual("individual");
+
+        internal companion object {
+            internal fun fromCode(code: String?) = values().firstOrNull { it.code == code }
         }
     }
 
