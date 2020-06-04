@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import android.net.Uri
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -34,14 +35,14 @@ class SetupIntentTest {
         assertEquals(StripeIntent.Status.RequiresAction, setupIntent.status)
         assertEquals(StripeIntent.Usage.OffSession, setupIntent.usage)
 
-        val redirectData = setupIntent.redirectData
-        assertNotNull(redirectData)
-        assertNotNull(redirectData.returnUrl)
-        assertNotNull(setupIntent.redirectUrl)
-        assertEquals("stripe://setup_intent_return", redirectData.returnUrl)
-        assertEquals("https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B" + "?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02", redirectData.url.toString())
-        assertEquals("https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B" + "?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02",
-            setupIntent.redirectUrl?.toString())
+        assertEquals(
+            StripeIntent.NextActionData.RedirectToUrl(
+                Uri.parse("https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B" + "?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02"),
+                returnUrl = "stripe://setup_intent_return",
+                mobileData = null
+            ),
+            setupIntent.nextActionData
+        )
     }
 
     @Test
