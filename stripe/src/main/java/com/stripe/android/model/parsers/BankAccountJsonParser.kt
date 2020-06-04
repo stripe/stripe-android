@@ -9,7 +9,6 @@ internal class BankAccountJsonParser : ModelJsonParser<BankAccount> {
     override fun parse(json: JSONObject): BankAccount {
         return BankAccount(
             id = StripeJsonUtils.optString(json, FIELD_ID),
-            accountNumber = null,
             accountHolderName = StripeJsonUtils.optString(json, FIELD_ACCOUNT_HOLDER_NAME),
             accountHolderType = asBankAccountType(
                 StripeJsonUtils.optString(json, FIELD_ACCOUNT_HOLDER_TYPE)

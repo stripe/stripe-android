@@ -45,11 +45,6 @@ abstract class ActivityStarter<TargetActivityType : Activity, ArgsType : Activit
         requestCode = requestCode
     )
 
-    @Deprecated("startForResult() requires an args parameter")
-    fun startForResult() {
-        startForResult(defaultArgs)
-    }
-
     fun startForResult(args: ArgsType) {
         val intent = Intent(activity, targetClass)
             .putExtra(Args.EXTRA, args)
