@@ -2,7 +2,6 @@
 
 ## 14.5.0 - unreleased
 * [#2453](https://github.com/stripe/stripe-android/pull/2453) Add `ConfirmPaymentIntentParams#receiptEmail`
-* [#2455](https://github.com/stripe/stripe-android/pull/2455) Update Gradle to 6.4.1
 * [#2458](https://github.com/stripe/stripe-android/pull/2458) Remove INTERAC from `GooglePayJsonFactory.DEFAULT_CARD_NETWORKS`
 * [#2462](https://github.com/stripe/stripe-android/pull/2462) Capitalize currency code in `GooglePayJsonFactory`
 * [#2466](https://github.com/stripe/stripe-android/pull/2466) Deprecate `ActivityStarter.startForResult()` with no args
@@ -19,6 +18,7 @@
 * [#2525](https://github.com/stripe/stripe-android/pull/2525) Upgrade Android Gradle Plugin to 4.0.0
 * [#2531](https://github.com/stripe/stripe-android/pull/2531) Update 3DS2 SDK to 3.0.2
     * Fix bug in 3DS2 SDK where multi-screen challenges were not correctly returning result to starting Activity/Fragment
+* [#2536](https://github.com/stripe/stripe-android/pull/2536) Update Gradle to 6.5
 
 ## 14.4.1 - 2020-04-30
 * [#2441](https://github.com/stripe/stripe-android/pull/2441) Catch `IllegalArgumentException` in `ApiOperation`
