@@ -17,7 +17,7 @@ by deleting and re-entering the value.</p>
 <tbody>
 <tr>
 <td>
-<p><a href="-focus-field/index.html">FocusField</a></p>
+<h4><a href="-focus-field/index.html">FocusField</a></h4>
 </td>
 <td>
 <code><span class="keyword">annotation</span> <span class="keyword">class </span><span class="identifier">FocusField</span></code></td>
@@ -29,44 +29,40 @@ by deleting and re-entering the value.</p>
 <tbody>
 <tr>
 <td>
-<p><a href="on-card-complete.html">onCardComplete</a></p>
+<h4><a href="on-card-complete.html">onCardComplete</a></h4>
 </td>
 <td>
-<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">onCardComplete</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
 <p>Called when a potentially valid card number has been completed in the
 <a href="../-card-number-edit-text/index.html">CardNumberEditText</a>. May be called multiple times if the user edits
 the field.</p>
-</td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">onCardComplete</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="on-cvc-complete.html">onCvcComplete</a></p>
+<h4><a href="on-cvc-complete.html">onCvcComplete</a></h4>
 </td>
 <td>
-<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">onCvcComplete</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
 <p>Called when a potentially valid CVC has been entered. The only verification performed
 on the number is that it is the correct length. May be called multiple times, if
 the user edits the CVC.</p>
-</td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">onCvcComplete</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="on-expiration-complete.html">onExpirationComplete</a></p>
+<h4><a href="on-expiration-complete.html">onExpirationComplete</a></h4>
 </td>
 <td>
-<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">onExpirationComplete</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
 <p>Called when a expiration date (one that has not yet passed) has been entered.
 May be called multiple times, if the user edits the date.</p>
-</td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">onExpirationComplete</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="on-focus-change.html">onFocusChange</a></p>
+<h4><a href="on-focus-change.html">onFocusChange</a></h4>
 </td>
 <td>
-<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">onFocusChange</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardInputListener$onFocusChange(kotlin.String)/focusField">focusField</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
 <p>Called whenever the field of focus within the widget changes.</p>
-</td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">onFocusChange</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.view.CardInputListener$onFocusChange(kotlin.String)/focusField">focusField</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
 </tr>
 </tbody>
 </table>

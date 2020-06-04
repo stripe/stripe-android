@@ -16,45 +16,27 @@ when necessary.</p>
 <tbody>
 <tr>
 <td>
-<p><a href="on-communicating-state-changed.html">onCommunicatingStateChanged</a></p>
+<h4><a href="on-communicating-state-changed.html">onCommunicatingStateChanged</a></h4>
 </td>
 <td>
-<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">onCommunicatingStateChanged</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.PaymentSession.PaymentSessionListener$onCommunicatingStateChanged(kotlin.Boolean)/isCommunicating">isCommunicating</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
 <p>Notification method called when network communication is beginning or ending.</p>
-</td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">onCommunicatingStateChanged</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.PaymentSession.PaymentSessionListener$onCommunicatingStateChanged(kotlin.Boolean)/isCommunicating">isCommunicating</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="on-error.html">onError</a></p>
+<h4><a href="on-error.html">onError</a></h4>
 </td>
 <td>
-<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">onError</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.PaymentSession.PaymentSessionListener$onError(kotlin.Int, kotlin.String)/errorCode">errorCode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.PaymentSession.PaymentSessionListener$onError(kotlin.Int, kotlin.String)/errorMessage">errorMessage</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
 <p>Notification method called when an error has occurred.</p>
-</td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">onError</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.PaymentSession.PaymentSessionListener$onError(kotlin.Int, kotlin.String)/errorCode">errorCode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">, </span><span class="identifier" id="com.stripe.android.PaymentSession.PaymentSessionListener$onError(kotlin.Int, kotlin.String)/errorMessage">errorMessage</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="on-payment-session-data-changed.html">onPaymentSessionDataChanged</a></p>
+<h4><a href="on-payment-session-data-changed.html">onPaymentSessionDataChanged</a></h4>
 </td>
 <td>
-<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">onPaymentSessionDataChanged</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.PaymentSession.PaymentSessionListener$onPaymentSessionDataChanged(com.stripe.android.PaymentSessionData)/data">data</span><span class="symbol">:</span>&nbsp;<a href="../../-payment-session-data/index.html"><span class="identifier">PaymentSessionData</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
 <p>Notification method called when the <a href="../../-payment-session-data/index.html">PaymentSessionData</a> for this session has changed.</p>
-</td>
-</tr>
-</tbody>
-</table>
-<h3>Inheritors</h3>
-<table>
-<tbody>
-<tr>
-<td>
-<p><a href="../-activity-payment-session-listener/index.html">ActivityPaymentSessionListener</a></p>
-</td>
-<td>
-<code><span class="keyword">abstract</span> <span class="keyword">class </span><span class="identifier">ActivityPaymentSessionListener</span><span class="symbol">&lt;</span><span class="identifier">A</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/app/Activity.html"><span class="identifier">Activity</span></a><span class="symbol">&gt;</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">PaymentSessionListener</span></a></code>
-<p>Abstract implementation of <a href="./index.html">PaymentSessionListener</a> that holds a
-<a href="https://developer.android.com/reference/java/lang/ref/WeakReference.html">WeakReference</a> to an <code>Activity</code> object.</p>
-</td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">onPaymentSessionDataChanged</span><span class="symbol">(</span><span class="identifier" id="com.stripe.android.PaymentSession.PaymentSessionListener$onPaymentSessionDataChanged(com.stripe.android.PaymentSessionData)/data">data</span><span class="symbol">:</span>&nbsp;<a href="../../-payment-session-data/index.html"><span class="identifier">PaymentSessionData</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
 </tr>
 </tbody>
 </table>

@@ -1,0 +1,20 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>ConfirmPaymentIntentParams.savePaymentMethod - stripe</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">stripe</a>&nbsp;/&nbsp;<a href="../index.html">com.stripe.android.model</a>&nbsp;/&nbsp;<a href="index.html">ConfirmPaymentIntentParams</a>&nbsp;/&nbsp;<a href="./save-payment-method.html">savePaymentMethod</a><br/>
+<br/>
+<h1>savePaymentMethod</h1>
+<a name="com.stripe.android.model.ConfirmPaymentIntentParams$savePaymentMethod"></a>
+<code><span class="keyword">var </span><span class="identifier">savePaymentMethod</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">?</span></code>
+<p>If the PaymentIntent has a <code>payment_method</code> and a <code>customer</code> or if you’re attaching a payment
+method to the PaymentIntent in this request, you can pass <code>save_payment_method=true</code> to save
+the payment method to the customer. Defaults to <code>false</code>.</p>
+<p>If the payment method is already saved to a customer, this does nothing. If this type of
+payment method cannot be saved to a customer, the request will error.</p>
+<p>See <a href="https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-save_payment_method">save_payment_method</a>.</p>
+</BODY>
+</HTML>
