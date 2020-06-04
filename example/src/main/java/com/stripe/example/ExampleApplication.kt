@@ -21,7 +21,8 @@ class ExampleApplication : MultiDexApplication() {
                 .detectDiskWrites()
                 .detectAll()
                 .penaltyLog()
-                .build())
+                .build()
+        )
 
         StrictMode.setVmPolicy(
             StrictMode.VmPolicy.Builder()
@@ -29,7 +30,8 @@ class ExampleApplication : MultiDexApplication() {
                 .detectLeakedClosableObjects()
                 .penaltyLog()
                 .penaltyDeath()
-                .build())
+                .build()
+        )
 
         super.onCreate()
 

@@ -68,14 +68,15 @@ class ConfirmSepaDebitActivity : StripeIntentActivity() {
         return PaymentMethodCreateParams.create(
             PaymentMethodCreateParams.SepaDebit(iban),
             PaymentMethod.BillingDetails.Builder()
-                .setAddress(Address.Builder()
-                    .setCity("San Francisco")
-                    .setCountry("US")
-                    .setLine1("123 Market St")
-                    .setLine2("#345")
-                    .setPostalCode("94107")
-                    .setState("CA")
-                    .build()
+                .setAddress(
+                    Address.Builder()
+                        .setCity("San Francisco")
+                        .setCountry("US")
+                        .setLine1("123 Market St")
+                        .setLine2("#345")
+                        .setPostalCode("94107")
+                        .setState("CA")
+                        .build()
                 )
                 .setEmail("jenny@example.com")
                 .setName("Jenny Rosen")

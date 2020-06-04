@@ -34,10 +34,12 @@ class PayWithGoogleActivity : AppCompatActivity() {
     }
 
     private val paymentsClient: PaymentsClient by lazy {
-        Wallet.getPaymentsClient(this,
+        Wallet.getPaymentsClient(
+            this,
             Wallet.WalletOptions.Builder()
                 .setEnvironment(WalletConstants.ENVIRONMENT_TEST)
-                .build())
+                .build()
+        )
     }
     private val googlePayJsonFactory: GooglePayJsonFactory by lazy {
         GooglePayJsonFactory(this)
@@ -134,9 +136,11 @@ class PayWithGoogleActivity : AppCompatActivity() {
                 AutoResolveHelper.RESULT_ERROR -> {
                     val status = AutoResolveHelper.getStatusFromIntent(data)
                     val statusMessage = status?.statusMessage ?: "unknown"
-                    Toast.makeText(this@PayWithGoogleActivity,
+                    Toast.makeText(
+                        this@PayWithGoogleActivity,
                         "Got error: $statusMessage",
-                        Toast.LENGTH_SHORT).show()
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
 
                 // Log the status for debugging

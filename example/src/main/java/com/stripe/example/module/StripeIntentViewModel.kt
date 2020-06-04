@@ -63,11 +63,11 @@ internal class StripeIntentViewModel(
                 )
                 status.postValue(
                     """
-                        ${status.value}
-                        
-                        
-                        $intentStatus
-                        """.trimIndent()
+                    ${status.value}
+                    
+                    
+                    $intentStatus
+                    """.trimIndent()
                 )
             },
             onFailure = {
@@ -76,11 +76,11 @@ internal class StripeIntentViewModel(
                         ?: it.message
                 status.postValue(
                     """
-                        ${status.value}
-                        
-                        
-                        $errorMessage
-                        """.trimIndent()
+                    ${status.value}
+                    
+                    
+                    $errorMessage
+                    """.trimIndent()
                 )
                 inProgress.value = false
             }

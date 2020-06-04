@@ -21,9 +21,11 @@ internal class FragmentExamplesViewModel(
     private fun createIntent(
         apiMethod: suspend () -> ResponseBody
     ) = liveData<Result<JSONObject>>(workContext) {
-        emit(runCatching {
-            JSONObject(apiMethod().string())
-        })
+        emit(
+            runCatching {
+                JSONObject(apiMethod().string())
+            }
+        )
     }
 
     private companion object {

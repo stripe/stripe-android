@@ -69,15 +69,18 @@ class CreateCardSourceActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (data != null && stripe.isAuthenticateSourceResult(requestCode, data)) {
-            stripe.onAuthenticateSourceResult(data, object : ApiResultCallback<Source> {
-                override fun onSuccess(result: Source) {
-                    sourcesAdapter.addSource(result)
-                }
+            stripe.onAuthenticateSourceResult(
+                data,
+                object : ApiResultCallback<Source> {
+                    override fun onSuccess(result: Source) {
+                        sourcesAdapter.addSource(result)
+                    }
 
-                override fun onError(e: Exception) {
-                    showSnackbar(e.message.orEmpty())
+                    override fun onError(e: Exception) {
+                        showSnackbar(e.message.orEmpty())
+                    }
                 }
-            })
+            )
         }
     }
 
@@ -99,7 +102,8 @@ class CreateCardSourceActivity : AppCompatActivity() {
         viewBinding.progressBar.visibility = View.VISIBLE
 
         val params = SourceParams.createCardParams(card)
-        viewModel.createSource(params).observe(this,
+        viewModel.createSource(params).observe(
+            this,
             Observer { result ->
                 viewBinding.createButton.isEnabled = true
                 viewBinding.progressBar.visibility = View.INVISIBLE
@@ -146,7 +150,8 @@ class CreateCardSourceActivity : AppCompatActivity() {
             cardId = source.id.orEmpty()
         )
 
-        viewModel.createSource(params).observe(this,
+        viewModel.createSource(params).observe(
+            this,
             Observer { result ->
                 viewBinding.progressBar.visibility = View.INVISIBLE
 
@@ -177,9 +182,11 @@ class CreateCardSourceActivity : AppCompatActivity() {
         val cardBrand = CardBrand.fromCode(typeData["brand"] as String?)
         return MaterialAlertDialogBuilder(this)
             .setTitle(this.getString(R.string.authentication_dialog_title))
-            .setMessage(getString(
-                R.string.authentication_dialog_message, cardBrand.displayName, typeData["last4"]
-            ))
+            .setMessage(
+                getString(
+                    R.string.authentication_dialog_message, cardBrand.displayName, typeData["last4"]
+                )
+            )
             .setIcon(cardBrand.icon)
             .setPositiveButton(android.R.string.yes) { _, _ ->
                 stripe.authenticateSource(this, source)

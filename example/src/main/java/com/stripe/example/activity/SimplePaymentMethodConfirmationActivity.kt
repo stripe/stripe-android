@@ -43,7 +43,8 @@ class SimplePaymentMethodConfirmationActivity : StripeIntentActivity() {
         viewBinding.nameLayout.visibility = viewVisibility(dropdownItem.requiresName)
         viewBinding.emailLayout.visibility = viewVisibility(dropdownItem.requiresEmail)
         viewBinding.paymentMethod.setCompoundDrawablesRelativeWithIntrinsicBounds(
-            dropdownItem.icon, 0, 0, 0)
+            dropdownItem.icon, 0, 0, 0
+        )
     }
 
     private fun viewVisibility(visible: Boolean): Int {
@@ -111,16 +112,24 @@ class SimplePaymentMethodConfirmationActivity : StripeIntentActivity() {
             val requiresName: Boolean = true,
             val requiresEmail: Boolean = false
         ) {
-            P24("pl",
+            P24(
+                "pl",
                 R.drawable.ic_brandicon__p24,
                 PaymentMethodCreateParams.Companion::createP24,
-                requiresName = false, requiresEmail = true),
-            Bancontact("be", R.drawable.ic_brandicon__bancontact,
-                PaymentMethodCreateParams.Companion::createBancontact),
-            EPS("at", R.drawable.ic_brandicon__eps,
-                PaymentMethodCreateParams.Companion::createEps),
-            Giropay("de", R.drawable.ic_brandicon__giropay,
-                PaymentMethodCreateParams.Companion::createGiropay);
+                requiresName = false, requiresEmail = true
+            ),
+            Bancontact(
+                "be", R.drawable.ic_brandicon__bancontact,
+                PaymentMethodCreateParams.Companion::createBancontact
+            ),
+            EPS(
+                "at", R.drawable.ic_brandicon__eps,
+                PaymentMethodCreateParams.Companion::createEps
+            ),
+            Giropay(
+                "de", R.drawable.ic_brandicon__giropay,
+                PaymentMethodCreateParams.Companion::createGiropay
+            );
         }
 
         private class DropdownItemAdapter(
@@ -153,7 +162,8 @@ class SimplePaymentMethodConfirmationActivity : StripeIntentActivity() {
                 val dropdownItem = requireNotNull(getItem(position))
                 viewBinding.text.text = dropdownItem.name
                 viewBinding.text.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                    dropdownItem.icon, 0, 0, 0)
+                    dropdownItem.icon, 0, 0, 0
+                )
 
                 return viewBinding.root
             }

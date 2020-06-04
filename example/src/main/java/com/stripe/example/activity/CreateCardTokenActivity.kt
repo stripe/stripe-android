@@ -55,10 +55,13 @@ class CreateCardTokenActivity : AppCompatActivity() {
 
             if (card != null) {
                 onRequestStart()
-                viewModel.createCardToken(card).observe(this, Observer {
-                    onRequestEnd()
-                    adapter.addToken(it)
-                })
+                viewModel.createCardToken(card).observe(
+                    this,
+                    Observer {
+                        onRequestEnd()
+                        adapter.addToken(it)
+                    }
+                )
             } else {
                 snackbarController.show(getString(R.string.invalid_card_details))
             }
@@ -133,17 +136,20 @@ class CreateCardTokenActivity : AppCompatActivity() {
         fun createCardToken(card: Card): LiveData<Token> {
             val data = MutableLiveData<Token>()
 
-            stripe.createCardToken(card, callback = object : ApiResultCallback<Token> {
-                override fun onSuccess(result: Token) {
-                    BackgroundTaskTracker.onStop()
-                    data.value = result
-                }
+            stripe.createCardToken(
+                card,
+                callback = object : ApiResultCallback<Token> {
+                    override fun onSuccess(result: Token) {
+                        BackgroundTaskTracker.onStop()
+                        data.value = result
+                    }
 
-                override fun onError(e: Exception) {
-                    BackgroundTaskTracker.onStop()
-                    Log.e("StripeExample", "Error while creating card token", e)
+                    override fun onError(e: Exception) {
+                        BackgroundTaskTracker.onStop()
+                        Log.e("StripeExample", "Error while creating card token", e)
+                    }
                 }
-            })
+            )
 
             return data
         }
