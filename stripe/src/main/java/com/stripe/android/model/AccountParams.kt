@@ -936,31 +936,6 @@ data class AccountParams internal constructor(
         internal const val PARAM_TOS_SHOWN_AND_ACCEPTED = "tos_shown_and_accepted"
 
         /**
-         * Create an [AccountParams] instance for a [BusinessType.Individual] or BusinessType.Company].
-         *
-         * @param tosShownAndAccepted Whether the user described by the data in the token has been
-         * shown the
-         * [Stripe Connected Account Agreement](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-tos_shown_and_accepted).
-         * When creating an account token to create a new Connect account, this value must be `true`.
-         * @param businessType See [BusinessType]
-         * @param businessData A map of [company](https://stripe.com/docs/api/accounts/create#create_account-company)
-         * or [individual](https://stripe.com/docs/api/accounts/create#create_account-individual) params.
-         *
-         * @deprecated Use a [create] method.
-         *
-         * @return [AccountParams]
-         */
-        @Deprecated("Use a create() method", ReplaceWith("create()"))
-        @JvmStatic
-        fun createAccountParams(
-            tosShownAndAccepted: Boolean,
-            businessType: BusinessType?,
-            businessData: Map<String, Any>?
-        ): AccountParams {
-            return AccountParams(tosShownAndAccepted, businessType, businessData)
-        }
-
-        /**
          * Create an [AccountParams] instance with information about the person represented by the account.
          *
          * @param tosShownAndAccepted Whether the user described by the data in the token has been
