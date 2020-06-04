@@ -17,40 +17,6 @@ import org.robolectric.RobolectricTestRunner
 class PaymentIntentTest {
 
     @Test
-    fun getAuthorizationUrl_whenProvidedBadUrl_doesNotCrash() {
-        val paymentIntent = requireNotNull(PARSER.parse(
-            PAYMENT_INTENT_WITH_SOURCE_WITH_BAD_AUTH_URL_JSON
-        ))
-
-        val authUrl = paymentIntent.redirectUrl
-        assertNotNull(authUrl)
-        assertEquals(BAD_URL, authUrl.encodedPath)
-    }
-
-    @Test
-    fun getRedirectUrl_withRedirectToUrlPopulate_returnsRedirectUrl() {
-        val paymentIntent = requireNotNull(
-            PARSER.parse(PARTIAL_PAYMENT_INTENT_WITH_REDIRECT_URL_JSON)
-        )
-        assertTrue(paymentIntent.requiresAction())
-        assertEquals(StripeIntent.NextActionType.RedirectToUrl, paymentIntent.nextActionType)
-        val redirectUrl = paymentIntent.redirectUrl
-        assertNotNull(redirectUrl)
-        assertEquals("https://example.com/redirect", redirectUrl.toString())
-    }
-
-    @Test
-    fun getRedirectUrl_withAuthorizeWithUrlPopulated_returnsRedirectUrl() {
-        val paymentIntent = requireNotNull(
-            PARSER.parse(PARTIAL_PAYMENT_INTENT_WITH_AUTHORIZE_WITH_URL_JSON)
-        )
-        assertEquals(StripeIntent.NextActionType.RedirectToUrl, paymentIntent.nextActionType)
-        val redirectUrl = paymentIntent.redirectUrl
-        assertNotNull(redirectUrl)
-        assertEquals("https://example.com/redirect", redirectUrl.toString())
-    }
-
-    @Test
     fun parseIdFromClientSecret_parsesCorrectly() {
         val clientSecret = "pi_1CkiBMLENEVhOs7YMtUehLau_secret_s4O8SDh7s6spSmHDw1VaYPGZA"
         val paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId

@@ -1,6 +1,5 @@
 package com.stripe.android.model
 
-import android.net.Uri
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import java.util.regex.Pattern
 import kotlinx.android.parcel.Parcelize
@@ -144,36 +143,6 @@ data class PaymentIntent internal constructor(
                 is StripeIntent.NextActionData.SdkData -> StripeIntent.NextActionType.UseStripeSdk
                 is StripeIntent.NextActionData.RedirectToUrl -> StripeIntent.NextActionType.RedirectToUrl
                 is StripeIntent.NextActionData.DisplayOxxoDetails -> StripeIntent.NextActionType.DisplayOxxoDetails
-                else -> null
-            }
-
-    /**
-     * @deprecated use {@link #nextActionData} instead
-     *
-     * The URL you must redirect your customer to in order to authenticate the payment.
-     */
-    @Deprecated("use {@link #nextActionData}",
-        replaceWith = ReplaceWith("(nextActionData as? StripeIntent.NextActionData.RedirectToUrl)?.url"))
-    val redirectUrl: Uri?
-        get() {
-            return redirectData?.url
-        }
-
-    @Deprecated("use {@link #nextActionData}",
-        replaceWith = ReplaceWith("nextActionData as? StripeIntent.NextActionData.SdkData"))
-    override val stripeSdkData: StripeIntent.SdkData?
-        get() = when (nextActionData) {
-            is StripeIntent.NextActionData.SdkData.Use3DS1 -> StripeIntent.SdkData(is3ds1 = true, is3ds2 = false)
-            is StripeIntent.NextActionData.SdkData.Use3DS2 -> StripeIntent.SdkData(is3ds1 = false, is3ds2 = true)
-            else -> null
-        }
-
-    @Deprecated("use {@link #nextActionData}",
-        replaceWith = ReplaceWith("nextActionData as? StripeIntent.NextActionData.RedirectToUrl"))
-    override val redirectData: StripeIntent.RedirectData?
-        get() = when (nextActionData) {
-                is StripeIntent.NextActionData.RedirectToUrl ->
-                    StripeIntent.RedirectData(nextActionData.url, nextActionData.returnUrl)
                 else -> null
             }
 
