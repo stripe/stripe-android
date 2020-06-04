@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.stripe.android"
-          android:versionCode="103"
-          android:versionName="14.4.1"
+          android:versionCode="104"
+          android:versionName="14.5.0"
     >
 
     <application>

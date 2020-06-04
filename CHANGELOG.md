@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 14.5.0 - unreleased
+## 14.5.0 - 2020-06-04
 * [#2453](https://github.com/stripe/stripe-android/pull/2453) Add `ConfirmPaymentIntentParams#receiptEmail`
 * [#2458](https://github.com/stripe/stripe-android/pull/2458) Remove INTERAC from `GooglePayJsonFactory.DEFAULT_CARD_NETWORKS`
 * [#2462](https://github.com/stripe/stripe-android/pull/2462) Capitalize currency code in `GooglePayJsonFactory`
