@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 15.0.0 - unreleased
+* [#2542](https://github.com/stripe/stripe-android/pull/2542) Use `CustomerSession.stripeAccountId` in `AddPaymentMethodActivity`
+* [#2543](https://github.com/stripe/stripe-android/pull/2543) Target JVM 1.8
+* [#2544](https://github.com/stripe/stripe-android/pull/2544) Remove deprecated code related to `BankAccount` and `ActivityStarter`
+* [#2545](https://github.com/stripe/stripe-android/pull/2545) Remove deprecated `AccountParams.create()` method
+* [#2546](https://github.com/stripe/stripe-android/pull/2546) Remove deprecated `next_action` data objects from `PaymentIntent` and `SetupIntent`
+
 ## 14.5.0 - 2020-06-04
 * [#2453](https://github.com/stripe/stripe-android/pull/2453) Add `ConfirmPaymentIntentParams#receiptEmail`
 * [#2458](https://github.com/stripe/stripe-android/pull/2458) Remove INTERAC from `GooglePayJsonFactory.DEFAULT_CARD_NETWORKS`
