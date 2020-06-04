@@ -18,7 +18,8 @@ class PaymentAuthWebViewActivityViewModelTest {
         val viewModel = PaymentAuthWebViewActivityViewModel(
             PaymentAuthWebViewStarter.Args(
                 clientSecret = "client_secret",
-                url = "https://example.com"
+                url = "https://example.com",
+                shouldCancelSource = true
             )
         )
 
@@ -27,9 +28,11 @@ class PaymentAuthWebViewActivityViewModelTest {
             intent = it
         }
 
+        val resultIntent = PaymentController.Result.fromIntent(requireNotNull(intent))
         assertThat(
-            PaymentController.Result.fromIntent(requireNotNull(intent))?.flowOutcome
+            resultIntent?.flowOutcome
         ).isEqualTo(StripeIntentResult.Outcome.CANCELED)
+        assertThat(resultIntent?.shouldCancelSource).isTrue()
     }
 
     @Test

@@ -45,7 +45,7 @@ internal class PaymentAuthWebViewActivityViewModel(
         resultData.value = Intent().putExtras(
             paymentResult.copy(
                 flowOutcome = StripeIntentResult.Outcome.CANCELED,
-                shouldCancelSource = true
+                shouldCancelSource = args.shouldCancelSource
             ).toBundle()
         )
         return resultData

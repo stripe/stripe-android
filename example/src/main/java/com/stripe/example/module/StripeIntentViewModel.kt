@@ -82,7 +82,7 @@ internal class StripeIntentViewModel(
                     $errorMessage
                     """.trimIndent()
                 )
-                inProgress.value = false
+                inProgress.postValue(false)
             }
         )
 
