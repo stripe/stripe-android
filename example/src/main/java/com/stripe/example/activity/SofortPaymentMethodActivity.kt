@@ -46,7 +46,8 @@ class SofortPaymentMethodActivity : StripeIntentActivity() {
                             .setState("CA")
                             .build()
                     )
-                ))
+                )
+            )
         }
     }
 

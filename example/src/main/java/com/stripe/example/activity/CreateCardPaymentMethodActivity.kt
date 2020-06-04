@@ -63,15 +63,18 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
 
     private fun createPaymentMethod(params: PaymentMethodCreateParams) {
         onCreatePaymentMethodStart()
-        viewModel.createPaymentMethod(params).observe(this, Observer { result ->
-            onCreatePaymentMethodCompleted()
-            result.fold(
-                onSuccess = ::onCreatedPaymentMethod,
-                onFailure = {
-                    showSnackbar(it.message.orEmpty())
-                }
-            )
-        })
+        viewModel.createPaymentMethod(params).observe(
+            this,
+            Observer { result ->
+                onCreatePaymentMethodCompleted()
+                result.fold(
+                    onSuccess = ::onCreatedPaymentMethod,
+                    onFailure = {
+                        showSnackbar(it.message.orEmpty())
+                    }
+                )
+            }
+        )
     }
 
     private fun showSnackbar(message: String) {

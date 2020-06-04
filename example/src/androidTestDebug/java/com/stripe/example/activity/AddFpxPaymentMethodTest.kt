@@ -30,13 +30,16 @@ class AddFpxPaymentMethodTest {
 
     @Before
     fun setup() {
-        CustomerSession.initCustomerSession(context, object : EphemeralKeyProvider {
-            override fun createEphemeralKey(
-                apiVersion: String,
-                keyUpdateListener: EphemeralKeyUpdateListener
-            ) {
+        CustomerSession.initCustomerSession(
+            context,
+            object : EphemeralKeyProvider {
+                override fun createEphemeralKey(
+                    apiVersion: String,
+                    keyUpdateListener: EphemeralKeyUpdateListener
+                ) {
+                }
             }
-        })
+        )
     }
 
     @Test

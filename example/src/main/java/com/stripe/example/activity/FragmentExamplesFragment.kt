@@ -68,67 +68,40 @@ class FragmentExamplesFragment : Fragment() {
         viewBinding.launchPaymentAuth.setOnClickListener { createPaymentIntent() }
         viewBinding.launchSetupAuth.setOnClickListener { createSetupIntent() }
 
-        viewModel.paymentIntentResultLiveData.observe(this, Observer { result ->
-            result.fold(
-                onSuccess = {
-                    val paymentIntent = it.intent
-                    val status = getString(
-                        R.string.payment_intent_status,
-                        paymentIntent.status
-                    )
-                    viewBinding.status.append(
-                        """
+        viewModel.paymentIntentResultLiveData.observe(
+            this,
+            Observer { result ->
+                result.fold(
+                    onSuccess = {
+                        val status = getString(
+                            R.string.payment_intent_status,
+                            it.intent.status
+                        )
+                        updateStatus("$status; Outcome: ${it.outcome}")
+                    },
+                    onFailure = ::onError
+                )
+                onConfirmationComplete()
+            }
+        )
 
-
-                        Outcome: ${it.outcome}
-                        
-                        $status
-                        """.trimIndent()
-                    )
-                },
-                onFailure = {
-                    viewBinding.status.append(
-                        """
-
-                  
-                        Exception: ${it.message}
-                        """.trimIndent()
-                    )
-                }
-            )
-            onConfirmationComplete()
-        })
-
-        viewModel.setupIntentResultLiveData.observe(this, Observer { result ->
-            result.fold(
-                onSuccess = {
-                    val paymentIntent = it.intent
-                    val status = getString(
-                        R.string.setup_intent_status,
-                        paymentIntent.status
-                    )
-                    viewBinding.status.append(
-                        """
-
-
-                        Outcome: ${it.outcome}
-                        
-                        $status
-                        """.trimIndent()
-                    )
-                },
-                onFailure = {
-                    viewBinding.status.append(
-                        """
-
-                  
-                        Exception: ${it.message}
-                        """.trimIndent()
-                    )
-                }
-            )
-            onConfirmationComplete()
-        })
+        viewModel.setupIntentResultLiveData.observe(
+            this,
+            Observer { result ->
+                result.fold(
+                    onSuccess = {
+                        val paymentIntent = it.intent
+                        val status = getString(
+                            R.string.setup_intent_status,
+                            paymentIntent.status
+                        )
+                        updateStatus("$status; Outcome: ${it.outcome}")
+                    },
+                    onFailure = ::onError
+                )
+                onConfirmationComplete()
+            }
+        )
     }
 
     override fun onCreateView(
@@ -235,16 +208,11 @@ class FragmentExamplesFragment : Fragment() {
 
     private fun onCreatePaymentIntentResponse(response: JSONObject) {
         try {
-            val status = getString(
-                R.string.payment_intent_status,
-                response.getString("status")
-            )
-            viewBinding.status.append(
-                """
-
-
-                $status
-                """.trimIndent()
+            updateStatus(
+                getString(
+                    R.string.payment_intent_status,
+                    response.getString("status")
+                )
             )
             confirmPaymentIntent(response.getString("secret"))
         } catch (e: IOException) {
@@ -256,16 +224,11 @@ class FragmentExamplesFragment : Fragment() {
 
     private fun onCreateSetupIntentResponse(response: JSONObject) {
         try {
-            val status = getString(
-                R.string.setup_intent_status,
-                response.getString("status")
-            )
-            viewBinding.status.append(
-                """
-
-
-                $status
-                """.trimIndent()
+            updateStatus(
+                getString(
+                    R.string.setup_intent_status,
+                    response.getString("status")
+                )
             )
             confirmSetupIntent(response.getString("secret"))
         } catch (e: IOException) {
@@ -276,28 +239,19 @@ class FragmentExamplesFragment : Fragment() {
     }
 
     private fun confirmPaymentIntent(paymentIntentClientSecret: String) {
-        viewBinding.status.append(
-            """
-
-
-            Starting payment authentication
-            """.trimIndent()
-        )
-        stripe.confirmPayment(this,
+        updateStatus("Starting payment authentication")
+        stripe.confirmPayment(
+            this,
             ConfirmPaymentIntentParams.createWithPaymentMethodId(
                 PAYMENT_METHOD_3DS2_REQUIRED,
                 paymentIntentClientSecret,
-                RETURN_URL))
+                RETURN_URL
+            )
+        )
     }
 
     private fun confirmSetupIntent(setupIntentClientSecret: String) {
-        viewBinding.status.append(
-            """
-
-
-            Starting payment authentication
-            """.trimIndent()
-        )
+        updateStatus("Starting payment setup authentication")
         stripe.confirmSetupIntent(
             this,
             ConfirmSetupIntentParams.create(
@@ -355,7 +309,11 @@ class FragmentExamplesFragment : Fragment() {
     }
 
     private fun onError(throwable: Throwable) {
-        viewBinding.status.append(throwable.message)
+        updateStatus(throwable.message.orEmpty())
+    }
+
+    private fun updateStatus(message: String) {
+        viewBinding.status.append("\n\n\n$message")
     }
 
     private companion object {
