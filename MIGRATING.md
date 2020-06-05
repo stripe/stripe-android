@@ -1,5 +1,21 @@
 # Migration Guide
 
+## Migrating from versions < 15.0.0
+- The SDK now targets JVM 1.8
+- Changes to `AddPaymentMethodActivity`
+    - When `CustomerSession` is instantiated with a `stripeAccountId`, it will be used in `AddPaymentMethodActivity`
+      when creating a payment method
+- Changes to `BankAccount`
+    - public constructors have been removed
+    - `BankAccount#accountNumber` has been removed
+    - `Stripe#createBankAccountToken()` no longer accepts a `BankAccount` instance;
+      instead, use `BankAccountTokenParams`
+    - `Stripe#createBankAccountTokenSynchronous()` no longer accepts a `BankAccount` instance;
+      instead, use `BankAccountTokenParams`
+- Changes to `AccountParams`
+    - Remove `AccountParams.create()` that takes a raw map; instead, use `create()` method that takes a
+      `AccountParams.BusinessTypeParams.Individual` or `AccountParams.BusinessTypeParams.Company`
+
 ## Migrating from versions < 14.5.0
 - Changes to `StripeIntent`
     - `redirectData` is now deprecated.
