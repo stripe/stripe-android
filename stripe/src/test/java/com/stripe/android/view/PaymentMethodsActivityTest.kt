@@ -38,9 +38,7 @@ class PaymentMethodsActivityTest {
     private val listenerArgumentCaptor: KArgumentCaptor<CustomerSession.PaymentMethodsRetrievalListener> = argumentCaptor()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val activityScenarioFactory: ActivityScenarioFactory by lazy {
-        ActivityScenarioFactory(context)
-    }
+    private val activityScenarioFactory = ActivityScenarioFactory(context)
 
     @BeforeTest
     fun setup() {
