@@ -18,7 +18,7 @@ internal class PaymentSessionViewModel(
     private val savedStateHandle: SavedStateHandle,
     paymentSessionData: PaymentSessionData,
     private val customerSession: CustomerSession,
-    private val paymentSessionPrefs: PaymentSessionPrefs = PaymentSessionPrefs.create(application)
+    private val paymentSessionPrefs: PaymentSessionPrefs = PaymentSessionPrefs.Default(application)
 ) : AndroidViewModel(application) {
 
     var paymentSessionData: PaymentSessionData = paymentSessionData
