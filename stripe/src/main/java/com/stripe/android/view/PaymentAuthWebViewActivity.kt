@@ -101,7 +101,11 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        cancelIntentSource()
+        if (viewBinding.authWebView.canGoBack()) {
+            viewBinding.authWebView.goBack()
+        } else {
+            cancelIntentSource()
+        }
     }
 
     private fun cancelIntentSource() {
