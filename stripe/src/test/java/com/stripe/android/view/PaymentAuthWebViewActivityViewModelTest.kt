@@ -1,6 +1,5 @@
 package com.stripe.android.view
 
-import android.content.Intent
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentAuthWebViewStarter
 import com.stripe.android.PaymentController
@@ -14,7 +13,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class PaymentAuthWebViewActivityViewModelTest {
     @Test
-    fun cancelIntentSource() {
+    fun cancellationResult() {
         val viewModel = PaymentAuthWebViewActivityViewModel(
             PaymentAuthWebViewStarter.Args(
                 clientSecret = "client_secret",
@@ -23,11 +22,7 @@ class PaymentAuthWebViewActivityViewModelTest {
             )
         )
 
-        var intent: Intent? = null
-        viewModel.cancelIntentSource().observeForever {
-            intent = it
-        }
-
+        val intent = viewModel.cancellationResult
         val resultIntent = PaymentController.Result.fromIntent(requireNotNull(intent))
         assertThat(
             resultIntent?.flowOutcome

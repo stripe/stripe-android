@@ -2,8 +2,6 @@ package com.stripe.android.view
 
 import android.content.Intent
 import android.net.Uri
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.PaymentAuthWebViewStarter
@@ -39,17 +37,16 @@ internal class PaymentAuthWebViewActivityViewModel(
             )
         }
 
-    @JvmSynthetic
-    internal fun cancelIntentSource(): LiveData<Intent> {
-        val resultData = MutableLiveData<Intent>()
-        resultData.value = Intent().putExtras(
-            paymentResult.copy(
-                flowOutcome = StripeIntentResult.Outcome.CANCELED,
-                shouldCancelSource = args.shouldCancelSource
-            ).toBundle()
-        )
-        return resultData
-    }
+    internal val cancellationResult: Intent
+        @JvmSynthetic
+        get() {
+            return Intent().putExtras(
+                paymentResult.copy(
+                    flowOutcome = StripeIntentResult.Outcome.CANCELED,
+                    shouldCancelSource = args.shouldCancelSource
+                ).toBundle()
+            )
+        }
 
     internal data class ToolbarTitleData(
         internal val text: String,
