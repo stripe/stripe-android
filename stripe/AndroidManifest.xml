@@ -20,6 +20,7 @@
 
         <activity
             android:name=".view.PaymentAuthWebViewActivity"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/StripeDefaultTheme" />
 
         <activity
