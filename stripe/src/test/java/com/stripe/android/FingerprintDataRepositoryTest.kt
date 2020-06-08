@@ -23,7 +23,8 @@ import org.robolectric.RobolectricTestRunner
 @ExperimentalCoroutinesApi
 class FingerprintDataRepositoryTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val testScope = TestCoroutineScope(TestCoroutineDispatcher())
+    private val testDispatcher = TestCoroutineDispatcher()
+    private val testScope = TestCoroutineScope(testDispatcher)
     private val fingerprintRequestExecutor: FingerprintRequestExecutor = mock()
 
     @AfterTest
@@ -45,7 +46,10 @@ class FingerprintDataRepositoryTest {
     fun `get() when FingerprintData is expired should request new remote FingerprintData`() {
         val expectedFingerprintData = createFingerprintData()
         val repository = FingerprintDataRepository.Default(
-            store = FingerprintDataStore.Default(context),
+            store = FingerprintDataStore.Default(
+                context,
+                testDispatcher
+            ),
             fingerprintRequestFactory = FingerprintRequestFactory(context),
             fingerprintRequestExecutor = object : FingerprintRequestExecutor {
                 override fun execute(

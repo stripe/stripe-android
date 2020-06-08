@@ -21,6 +21,11 @@ class ExampleApplication : MultiDexApplication() {
                 .detectDiskWrites()
                 .detectAll()
                 .penaltyLog()
+                .also {
+                    if (IS_PENALTY_DEATH_ENABLED) {
+                        it.penaltyDeath()
+                    }
+                }
                 .build()
         )
 
@@ -44,5 +49,9 @@ class ExampleApplication : MultiDexApplication() {
             ExampleEphemeralKeyProvider(this),
             false
         )
+    }
+
+    private companion object {
+        private val IS_PENALTY_DEATH_ENABLED = true
     }
 }

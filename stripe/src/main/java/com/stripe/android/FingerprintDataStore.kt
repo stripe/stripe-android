@@ -2,20 +2,27 @@ package com.stripe.android
 
 import android.content.Context
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.liveData
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import org.json.JSONObject
 
 internal interface FingerprintDataStore {
     fun get(): LiveData<FingerprintData>
     fun save(fingerprintData: FingerprintData)
 
-    class Default(context: Context) : FingerprintDataStore {
-        private val prefs = context.getSharedPreferences(
-            PREF_FILE, Context.MODE_PRIVATE
-        )
+    class Default(
+        context: Context,
+        private val coroutineDispatcher: CoroutineDispatcher = Dispatchers.IO
+    ) : FingerprintDataStore {
+        private val prefs by lazy {
+            context.getSharedPreferences(
+                PREF_FILE, Context.MODE_PRIVATE
+            )
+        }
 
-        override fun get(): LiveData<FingerprintData> {
-            return MutableLiveData(
+        override fun get() = liveData<FingerprintData>(coroutineDispatcher) {
+            emit(
                 runCatching {
                     FingerprintData.fromJson(
                         JSONObject(prefs.getString(KEY_DATA, null).orEmpty())
