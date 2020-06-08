@@ -62,19 +62,19 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         }
 
         logger.debug("PaymentAuthWebViewActivity#onCreate() - PaymentAuthWebView init and loadUrl")
-        viewBinding.authWebView.init(
+        viewBinding.webView.init(
             this,
             logger,
-            viewBinding.authWebViewProgressBar,
+            viewBinding.progressBar,
             clientSecret,
             args.returnUrl
         )
-        viewBinding.authWebView.loadUrl(args.url)
+        viewBinding.webView.loadUrl(args.url)
     }
 
     override fun onDestroy() {
-        viewBinding.authWebViewContainer.removeAllViews()
-        viewBinding.authWebView.destroy()
+        viewBinding.webViewContainer.removeAllViews()
+        viewBinding.webView.destroy()
         super.onDestroy()
     }
 
@@ -100,8 +100,8 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (viewBinding.authWebView.canGoBack()) {
-            viewBinding.authWebView.goBack()
+        if (viewBinding.webView.canGoBack()) {
+            viewBinding.webView.goBack()
         } else {
             cancelIntentSource()
         }

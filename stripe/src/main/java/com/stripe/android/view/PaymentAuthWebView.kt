@@ -45,8 +45,14 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
         clientSecret: String,
         returnUrl: String? = null
     ) {
-        val webViewClient = PaymentAuthWebViewClient(activity, activity.packageManager, logger,
-            progressBar, clientSecret, returnUrl)
+        val webViewClient = PaymentAuthWebViewClient(
+            activity,
+            activity.packageManager,
+            logger,
+            progressBar,
+            clientSecret,
+            returnUrl
+        )
         setWebViewClient(webViewClient)
         this.webViewClient = webViewClient
 
@@ -128,7 +134,7 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
         returnUrl: String?
     ) : WebViewClient() {
         // user-specified return URL
-        private val userReturnUri: Uri? = if (returnUrl != null) Uri.parse(returnUrl) else null
+        private val userReturnUri: Uri? = returnUrl?.let { Uri.parse(it) }
 
         var completionUrlParam: String? = null
             private set
