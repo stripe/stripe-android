@@ -8,7 +8,6 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.stripe.android.Logger
@@ -109,10 +108,8 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
     }
 
     private fun cancelIntentSource() {
-        viewModel.cancelIntentSource().observe(this, Observer { intent ->
-            setResult(Activity.RESULT_OK, intent)
-            finish()
-        })
+        setResult(Activity.RESULT_OK, viewModel.cancellationResult)
+        finish()
     }
 
     private fun customizeToolbar() {

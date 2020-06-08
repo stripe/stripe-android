@@ -499,10 +499,12 @@ internal class StripePaymentController internal constructor(
                         stripeIntent.clientSecret.orEmpty(),
                         nextActionData.url,
                         requestOptions.stripeAccount,
-                        enableLogging = enableLogging
+                        enableLogging = enableLogging,
+                        // 3D-Secure requires cancelling the source when the user cancels auth (AUTHN-47)
+                        shouldCancelSource = true
                     )
                 }
-                is StripeIntent.NextActionData.RedirectToUrl -> {
+                is RedirectToUrl -> {
                     analyticsRequestExecutor.executeAsync(
                         analyticsRequestFactory.create(
                             analyticsDataFactory.createAuthParams(
@@ -702,7 +704,9 @@ internal class StripePaymentController internal constructor(
                     stripeIntent.clientSecret.orEmpty(),
                     result.fallbackRedirectUrl,
                     requestOptions.stripeAccount,
-                    enableLogging = enableLogging
+                    enableLogging = enableLogging,
+                    // 3D-Secure requires cancelling the source when the user cancels auth (AUTHN-47)
+                    shouldCancelSource = true
                 )
             } else {
                 val error = result.error
@@ -1028,12 +1032,14 @@ internal class StripePaymentController internal constructor(
             authUrl: String,
             stripeAccount: String?,
             returnUrl: String? = null,
-            enableLogging: Boolean = false
+            enableLogging: Boolean = false,
+            shouldCancelSource: Boolean = false
         ) {
             Logger.getInstance(enableLogging).debug("PaymentAuthWebViewStarter#start()")
             val starter = PaymentAuthWebViewStarter(host, requestCode)
             starter.start(
-                PaymentAuthWebViewStarter.Args(clientSecret, authUrl, returnUrl, enableLogging, stripeAccountId = stripeAccount)
+                PaymentAuthWebViewStarter.Args(clientSecret, authUrl, returnUrl, enableLogging,
+                    stripeAccountId = stripeAccount, shouldCancelSource = shouldCancelSource)
             )
         }
 
