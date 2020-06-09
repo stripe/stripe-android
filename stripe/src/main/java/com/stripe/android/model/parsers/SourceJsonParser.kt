@@ -17,6 +17,85 @@ internal class SourceJsonParser : ModelJsonParser<Source> {
         }
     }
 
+    internal class RedirectJsonParser : ModelJsonParser<Source.Redirect> {
+        override fun parse(json: JSONObject): Source.Redirect {
+            return Source.Redirect(
+                returnUrl = optString(json, FIELD_RETURN_URL),
+                status = Source.Redirect.Status.fromCode(optString(json, FIELD_STATUS)),
+                url = optString(json, FIELD_URL)
+            )
+        }
+
+        internal companion object {
+            private const val FIELD_RETURN_URL = "return_url"
+            private const val FIELD_STATUS = "status"
+            private const val FIELD_URL = "url"
+        }
+    }
+
+    internal class CodeVerificationJsonParser : ModelJsonParser<Source.CodeVerification> {
+        override fun parse(json: JSONObject): Source.CodeVerification {
+            return Source.CodeVerification(
+                attemptsRemaining = json.optInt(FIELD_ATTEMPTS_REMAINING, INVALID_ATTEMPTS_REMAINING),
+                status = Source.CodeVerification.Status.fromCode(optString(json, FIELD_STATUS))
+            )
+        }
+
+        private companion object {
+            private const val FIELD_ATTEMPTS_REMAINING = "attempts_remaining"
+            private const val FIELD_STATUS = "status"
+            private const val INVALID_ATTEMPTS_REMAINING = -1
+        }
+    }
+
+    internal class ReceiverJsonParser : ModelJsonParser<Source.Receiver> {
+        override fun parse(json: JSONObject): Source.Receiver {
+            return Source.Receiver(
+                optString(json, FIELD_ADDRESS),
+                json.optLong(FIELD_AMOUNT_CHARGED),
+                json.optLong(FIELD_AMOUNT_RECEIVED),
+                json.optLong(FIELD_AMOUNT_RETURNED)
+            )
+        }
+
+        private companion object {
+            private const val FIELD_ADDRESS = "address"
+            private const val FIELD_AMOUNT_CHARGED = "amount_charged"
+            private const val FIELD_AMOUNT_RECEIVED = "amount_received"
+            private const val FIELD_AMOUNT_RETURNED = "amount_returned"
+        }
+    }
+
+    internal class OwnerJsonParser : ModelJsonParser<Source.Owner> {
+        override fun parse(json: JSONObject): Source.Owner {
+            return Source.Owner(
+                address = json.optJSONObject(FIELD_ADDRESS)?.let {
+                    AddressJsonParser().parse(it)
+                },
+                email = StripeJsonUtils.optString(json, FIELD_EMAIL),
+                name = StripeJsonUtils.optString(json, FIELD_NAME),
+                phone = StripeJsonUtils.optString(json, FIELD_PHONE),
+                verifiedAddress = json.optJSONObject(FIELD_VERIFIED_ADDRESS)?.let {
+                    AddressJsonParser().parse(it)
+                },
+                verifiedEmail = StripeJsonUtils.optString(json, FIELD_VERIFIED_EMAIL),
+                verifiedName = StripeJsonUtils.optString(json, FIELD_VERIFIED_NAME),
+                verifiedPhone = StripeJsonUtils.optString(json, FIELD_VERIFIED_PHONE)
+            )
+        }
+
+        private companion object {
+            private const val FIELD_ADDRESS = "address"
+            private const val FIELD_EMAIL = "email"
+            private const val FIELD_NAME = "name"
+            private const val FIELD_PHONE = "phone"
+            private const val FIELD_VERIFIED_ADDRESS = "verified_address"
+            private const val FIELD_VERIFIED_EMAIL = "verified_email"
+            private const val FIELD_VERIFIED_NAME = "verified_name"
+            private const val FIELD_VERIFIED_PHONE = "verified_phone"
+        }
+    }
+
     internal class KlarnaJsonParser : ModelJsonParser<Source.Klarna> {
         override fun parse(json: JSONObject): Source.Klarna {
             return Source.Klarna(
@@ -132,7 +211,7 @@ internal class SourceJsonParser : ModelJsonParser<Source> {
                 ),
                 created = StripeJsonUtils.optLong(jsonObject, FIELD_CREATED),
                 currency = optString(jsonObject, FIELD_CURRENCY),
-                flow = asSourceFlow(optString(jsonObject, FIELD_FLOW)),
+                flow = Source.Flow.fromCode(optString(jsonObject, FIELD_FLOW)),
                 isLiveMode = jsonObject.optBoolean(FIELD_LIVEMODE),
                 metaData = StripeJsonUtils.jsonObjectToStringMap(
                     jsonObject.optJSONObject(FIELD_METADATA)
@@ -144,12 +223,12 @@ internal class SourceJsonParser : ModelJsonParser<Source> {
                     SourceOrderJsonParser().parse(it)
                 },
                 statementDescriptor = optString(jsonObject, FIELD_STATEMENT_DESCRIPTOR),
-                status = asSourceStatus(optString(jsonObject, FIELD_STATUS)),
+                status = Source.Status.fromCode(optString(jsonObject, FIELD_STATUS)),
                 sourceTypeData = sourceTypeData,
                 sourceTypeModel = sourceTypeModel,
                 type = type,
                 typeRaw = typeRaw,
-                usage = asUsage(optString(jsonObject, FIELD_USAGE)),
+                usage = Source.Usage.fromCode(optString(jsonObject, FIELD_USAGE)),
                 _weChat = if (Source.SourceType.WECHAT == type) {
                     WeChatJsonParser().parse(
                         jsonObject.optJSONObject(FIELD_WECHAT) ?: JSONObject()
@@ -178,22 +257,22 @@ internal class SourceJsonParser : ModelJsonParser<Source> {
             val model: StripeModel? = when (key) {
                 FIELD_CODE_VERIFICATION -> {
                     jsonObject.optJSONObject(FIELD_CODE_VERIFICATION)?.let {
-                        SourceCodeVerificationJsonParser().parse(it)
+                        CodeVerificationJsonParser().parse(it)
                     }
                 }
                 FIELD_OWNER -> {
                     jsonObject.optJSONObject(FIELD_OWNER)?.let {
-                        SourceOwnerJsonParser().parse(it)
+                        OwnerJsonParser().parse(it)
                     }
                 }
                 FIELD_RECEIVER -> {
                     jsonObject.optJSONObject(FIELD_RECEIVER)?.let {
-                        SourceReceiverJsonParser().parse(it)
+                        ReceiverJsonParser().parse(it)
                     }
                 }
                 FIELD_REDIRECT -> {
                     jsonObject.optJSONObject(FIELD_REDIRECT)?.let {
-                        SourceRedirectJsonParser().parse(it)
+                        RedirectJsonParser().parse(it)
                     }
                 }
                 Source.SourceType.CARD -> {
@@ -212,18 +291,6 @@ internal class SourceJsonParser : ModelJsonParser<Source> {
             }
 
             return model as? T
-        }
-
-        @Source.SourceStatus
-        private fun asSourceStatus(sourceStatus: String?): String? {
-            return when (sourceStatus) {
-                Source.SourceStatus.PENDING -> Source.SourceStatus.PENDING
-                Source.SourceStatus.CHARGEABLE -> Source.SourceStatus.CHARGEABLE
-                Source.SourceStatus.CONSUMED -> Source.SourceStatus.CONSUMED
-                Source.SourceStatus.CANCELED -> Source.SourceStatus.CANCELED
-                Source.SourceStatus.FAILED -> Source.SourceStatus.FAILED
-                else -> null
-            }
         }
 
         @Source.SourceType
@@ -245,26 +312,6 @@ internal class SourceJsonParser : ModelJsonParser<Source> {
                 Source.SourceType.UNKNOWN -> Source.SourceType.UNKNOWN
                 Source.SourceType.KLARNA -> Source.SourceType.KLARNA
                 else -> Source.SourceType.UNKNOWN
-            }
-        }
-
-        @Source.Usage
-        private fun asUsage(usage: String?): String? {
-            return when (usage) {
-                Source.Usage.REUSABLE -> Source.Usage.REUSABLE
-                Source.Usage.SINGLE_USE -> Source.Usage.SINGLE_USE
-                else -> null
-            }
-        }
-
-        @Source.SourceFlow
-        private fun asSourceFlow(sourceFlow: String?): String? {
-            return when (sourceFlow) {
-                Source.SourceFlow.REDIRECT -> Source.SourceFlow.REDIRECT
-                Source.SourceFlow.RECEIVER -> Source.SourceFlow.RECEIVER
-                Source.SourceFlow.CODE_VERIFICATION -> Source.SourceFlow.CODE_VERIFICATION
-                Source.SourceFlow.NONE -> Source.SourceFlow.NONE
-                else -> null
             }
         }
     }

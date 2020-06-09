@@ -21,7 +21,7 @@ class SourceParamsTest {
         )
 
         assertEquals(Source.SourceType.ALIPAY, params.type)
-        assertEquals(Source.Usage.REUSABLE, params.usage)
+        assertEquals(Source.Usage.Reusable, params.usage)
         assertNull(params.amount)
         assertEquals("usd", params.currency)
         assertEquals(RETURN_URL, params.returnUrl)
@@ -40,7 +40,7 @@ class SourceParamsTest {
         )
 
         assertEquals(Source.SourceType.ALIPAY, params.type)
-        assertEquals(Source.Usage.REUSABLE, params.usage)
+        assertEquals(Source.Usage.Reusable, params.usage)
         assertNull(params.amount)
         assertEquals("cad", params.currency)
         assertEquals(RETURN_URL, params.returnUrl)

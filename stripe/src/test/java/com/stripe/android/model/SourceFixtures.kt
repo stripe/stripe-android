@@ -2,10 +2,7 @@ package com.stripe.android.model
 
 import com.stripe.android.model.SourceOrderFixtures.SOURCE_ORDER_JSON
 import com.stripe.android.model.parsers.CustomerSourceJsonParser
-import com.stripe.android.model.parsers.SourceCodeVerificationJsonParser
 import com.stripe.android.model.parsers.SourceJsonParser
-import com.stripe.android.model.parsers.SourceReceiverJsonParser
-import com.stripe.android.model.parsers.SourceRedirectJsonParser
 import org.json.JSONObject
 
 internal object SourceFixtures {
@@ -208,7 +205,8 @@ internal object SourceFixtures {
         """.trimIndent()
     )
 
-    val SOURCE_REDIRECT = SourceRedirectJsonParser().parse(SOURCE_REDIRECT_JSON)
+    val REDIRECT = SourceJsonParser.RedirectJsonParser()
+        .parse(SOURCE_REDIRECT_JSON)
 
     private val SOURCE_CODE_VERIFICATION_JSON = JSONObject(
         """
@@ -220,7 +218,7 @@ internal object SourceFixtures {
     )
 
     val SOURCE_CODE_VERIFICATION =
-        SourceCodeVerificationJsonParser().parse(SOURCE_CODE_VERIFICATION_JSON)
+        SourceJsonParser.CodeVerificationJsonParser().parse(SOURCE_CODE_VERIFICATION_JSON)
 
     private val SOURCE_RECEIVER_JSON = JSONObject(
         """
@@ -233,7 +231,8 @@ internal object SourceFixtures {
         """.trimIndent()
     )
 
-    val SOURCE_RECEIVER = SourceReceiverJsonParser().parse(SOURCE_RECEIVER_JSON)
+    val SOURCE_RECEIVER = SourceJsonParser.ReceiverJsonParser()
+        .parse(SOURCE_RECEIVER_JSON)
 
     val SOURCE_OWNER_WITH_NULLS = JSONObject(
         """

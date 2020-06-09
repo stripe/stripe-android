@@ -96,9 +96,7 @@ class SourceParams private constructor(
      *
      * See [usage](https://stripe.com/docs/api/sources/create#create_source-usage)
      */
-    @get:Source.Usage
-    @Source.Usage
-    var usage: String? = null
+    var usage: Source.Usage? = null
         private set
 
     private var weChatParams: WeChatParams? = null
@@ -189,7 +187,7 @@ class SourceParams private constructor(
      *
      * See [usage](https://stripe.com/docs/api/sources/create#create_source-usage)
      */
-    fun setUsage(@Source.Usage usage: String): SourceParams = apply {
+    fun setUsage(usage: Source.Usage): SourceParams = apply {
         this.usage = usage
     }
 
@@ -240,7 +238,7 @@ class SourceParams private constructor(
             )
             .plus(
                 usage?.let {
-                    mapOf(PARAM_USAGE to it)
+                    mapOf(PARAM_USAGE to it.code)
                 }.orEmpty()
             )
             .plus(extraParams)
@@ -440,7 +438,7 @@ class SourceParams private constructor(
             return SourceParams(SourceType.ALIPAY)
                 .setCurrency(currency)
                 .setReturnUrl(returnUrl)
-                .setUsage(Source.Usage.REUSABLE)
+                .setUsage(Source.Usage.Reusable)
                 .setOwner(
                     OwnerParams(
                         email = email,
@@ -564,7 +562,7 @@ class SourceParams private constructor(
                 .setExtraParams(
                     mapOf(
                         PARAM_KLARNA to klarnaParams.toParamMap(),
-                        PARAM_FLOW to Source.SourceFlow.REDIRECT,
+                        PARAM_FLOW to Source.Flow.Redirect.code,
                         PARAM_SOURCE_ORDER to sourceOrderParams.toParamMap()
                     )
                 )

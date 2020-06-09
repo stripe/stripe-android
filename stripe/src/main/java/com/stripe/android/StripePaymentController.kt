@@ -156,7 +156,7 @@ internal class StripePaymentController internal constructor(
         source: Source,
         requestOptions: ApiRequest.Options
     ) {
-        if (source.flow == Source.SourceFlow.REDIRECT) {
+        if (source.flow == Source.Flow.Redirect) {
             analyticsRequestExecutor.executeAsync(
                 analyticsRequestFactory.create(
                     analyticsDataFactory.createAuthSourceParams(

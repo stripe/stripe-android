@@ -760,7 +760,7 @@ class Stripe internal constructor(
 
     /**
      * Authenticate a [Source] that requires user action via a redirect (i.e. [Source.flow] is
-     * [Source.SourceFlow.REDIRECT].
+     * [Source.Flow.Redirect].
      *
      * The result of this operation will be returned via `Activity#onActivityResult(int, int, Intent)}}`
      *
@@ -784,7 +784,7 @@ class Stripe internal constructor(
 
     /**
      * Authenticate a [Source] that requires user action via a redirect (i.e. [Source.flow] is
-     * [Source.SourceFlow.REDIRECT].
+     * [Source.Flow.Redirect].
      *
      * The result of this operation will be returned via `Activity#onActivityResult(int, int, Intent)}}`
      *

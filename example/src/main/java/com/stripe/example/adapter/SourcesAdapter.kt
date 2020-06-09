@@ -19,7 +19,7 @@ internal class SourcesAdapter : RecyclerView.Adapter<SourcesAdapter.ViewHolder>(
         private val viewBinding: SourcesListItemBinding
     ) : RecyclerView.ViewHolder(viewBinding.root) {
         fun bind(source: Source) {
-            viewBinding.status.text = source.status
+            viewBinding.status.text = source.status?.toString()
             viewBinding.redirectStatus.text = getRedirectStatus(source)
             viewBinding.sourceId.text = source.id?.let { sourceId ->
                 sourceId.substring(sourceId.length - 6)
@@ -32,7 +32,7 @@ internal class SourcesAdapter : RecyclerView.Adapter<SourcesAdapter.ViewHolder>(
         }
 
         private fun getRedirectStatus(source: Source): String? {
-            return source.redirect?.status
+            return source.redirect?.status?.toString()
                 ?: (source.sourceTypeModel as SourceTypeModel.Card).threeDSecureStatus.toString()
         }
     }
