@@ -12,6 +12,7 @@ import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.exception.PermissionException
 import com.stripe.android.exception.RateLimitException
 import com.stripe.android.exception.StripeException
+import com.stripe.android.model.Complete3ds2Result
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.Customer
@@ -858,7 +859,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     @VisibleForTesting
     @Throws(InvalidRequestException::class, APIConnectionException::class, APIException::class,
         CardException::class, AuthenticationException::class)
-    internal fun complete3ds2Auth(sourceId: String, requestOptions: ApiRequest.Options): Boolean {
+    internal fun complete3ds2Auth(
+        sourceId: String,
+        requestOptions: ApiRequest.Options
+    ): Complete3ds2Result {
         val response = makeApiRequest(
             apiRequestFactory.createPost(
                 getApiUrl("3ds2/challenge_complete"),
@@ -866,13 +870,13 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 mapOf("source" to sourceId)
             )
         )
-        return response.isOk
+        return Complete3ds2Result(response.isOk)
     }
 
     override fun complete3ds2Auth(
         sourceId: String,
         requestOptions: ApiRequest.Options,
-        callback: ApiResultCallback<Boolean>
+        callback: ApiResultCallback<Complete3ds2Result>
     ) {
         Complete3ds2AuthTask(this, sourceId, requestOptions, callback)
             .execute()
@@ -1062,10 +1066,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         private val stripeApiRepository: StripeApiRepository,
         private val sourceId: String,
         private val requestOptions: ApiRequest.Options,
-        callback: ApiResultCallback<Boolean>
-    ) : ApiOperation<Boolean>(callback = callback) {
+        callback: ApiResultCallback<Complete3ds2Result>
+    ) : ApiOperation<Complete3ds2Result>(callback = callback) {
         @Throws(StripeException::class)
-        override suspend fun getResult(): Boolean {
+        override suspend fun getResult(): Complete3ds2Result {
             return stripeApiRepository.complete3ds2Auth(sourceId, requestOptions)
         }
     }
