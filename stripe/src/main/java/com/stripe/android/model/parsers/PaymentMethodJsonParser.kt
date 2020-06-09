@@ -1,5 +1,6 @@
 package com.stripe.android.model.parsers
 
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeJsonUtils
 import org.json.JSONObject
@@ -97,7 +98,7 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
     internal class CardJsonParser : ModelJsonParser<PaymentMethod.Card> {
         override fun parse(json: JSONObject): PaymentMethod.Card {
             return PaymentMethod.Card(
-                brand = StripeJsonUtils.optString(json, FIELD_BRAND),
+                brand = CardBrand.fromCode(StripeJsonUtils.optString(json, FIELD_BRAND)),
                 checks = json.optJSONObject(FIELD_CHECKS)?.let {
                     ChecksJsonParser().parse(it)
                 },
