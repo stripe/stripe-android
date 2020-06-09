@@ -28,10 +28,6 @@ import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_CARD
-import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_CVC
-import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_EXPIRY
-import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_POSTAL
 import java.math.BigDecimal
 import java.math.RoundingMode
 import kotlin.properties.Delegates
@@ -585,7 +581,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         cardNumberEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 cardNumberEditText.setHintDelayed(cardHintText, CARD_NUMBER_HINT_DELAY)
-                cardInputListener?.onFocusChange(FOCUS_CARD)
+                cardInputListener?.onFocusChange(CardInputListener.FocusField.CardNumber)
             } else {
                 cardNumberEditText.hint = ""
             }
@@ -594,7 +590,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         expiryDateEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 expiryDateEditText.setHintDelayed(R.string.expiry_date_hint, COMMON_HINT_DELAY)
-                cardInputListener?.onFocusChange(FOCUS_EXPIRY)
+                cardInputListener?.onFocusChange(CardInputListener.FocusField.ExpiryDate)
             } else {
                 expiryDateEditText.hint = ""
             }
@@ -604,7 +600,7 @@ class CardMultilineWidget @JvmOverloads constructor(
             if (hasFocus) {
                 flipToCvcIconIfNotFinished()
                 cvcEditText.setHintDelayed(cvcHelperText, COMMON_HINT_DELAY)
-                cardInputListener?.onFocusChange(FOCUS_CVC)
+                cardInputListener?.onFocusChange(CardInputListener.FocusField.Cvc)
             } else {
                 updateBrandUi()
                 cvcEditText.hint = ""
@@ -617,7 +613,7 @@ class CardMultilineWidget @JvmOverloads constructor(
             }
             if (hasFocus) {
                 postalCodeEditText.setHintDelayed(R.string.zip_helper, COMMON_HINT_DELAY)
-                cardInputListener?.onFocusChange(FOCUS_POSTAL)
+                cardInputListener?.onFocusChange(CardInputListener.FocusField.PostalCode)
             } else {
                 postalCodeEditText.hint = ""
             }
