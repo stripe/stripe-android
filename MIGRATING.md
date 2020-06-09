@@ -33,6 +33,23 @@
             PaymentIntent.ConfirmationMethod.Manual -> {}
         }
         ```
+- Changes to `PaymentMethod`
+    - `PaymentMethod.Card#brand` is now a `CardBrand`
+        ```kotlin
+        // before
+        when (paymentMethod.card?.brand) {
+            "visa" -> {}
+            "mastercard" -> {}
+            else -> {}
+        }
+
+        // after
+        when (paymentMethod.card?.brand) {
+            CardBrand.Visa -> {}
+            CardBrand.MasterCard -> {}
+            else -> {}
+        }
+        ```
 - Changes to `AddPaymentMethodActivity`
     - When `CustomerSession` is instantiated with a `stripeAccountId`, it will be used in `AddPaymentMethodActivity`
       when creating a payment method

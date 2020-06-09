@@ -7,7 +7,7 @@ import org.json.JSONObject
 
 internal object PaymentMethodFixtures {
     val CARD = PaymentMethod.Card(
-        brand = PaymentMethod.Card.Brand.VISA,
+        brand = CardBrand.Visa,
         checks = PaymentMethod.Card.Checks(
             addressLine1Check = "unchecked",
             addressPostalCodeCheck = null,
@@ -354,7 +354,7 @@ internal object PaymentMethodFixtures {
             created = 1000L,
             id = "pm_1000",
             card = PaymentMethod.Card(
-                brand = "visa",
+                brand = CardBrand.Visa,
                 last4 = "4242"
             )
         ),
@@ -364,7 +364,7 @@ internal object PaymentMethodFixtures {
             created = 2000L,
             id = "pm_2000",
             card = PaymentMethod.Card(
-                brand = "visa",
+                brand = CardBrand.Visa,
                 last4 = "3063"
             )
         ),
@@ -374,7 +374,7 @@ internal object PaymentMethodFixtures {
             created = 3000L,
             id = "pm_3000",
             card = PaymentMethod.Card(
-                brand = "visa",
+                brand = CardBrand.Visa,
                 last4 = "3220"
             )
         )
@@ -393,7 +393,7 @@ internal object PaymentMethodFixtures {
             ),
             id = id,
             card = PaymentMethod.Card(
-                brand = "visa",
+                brand = CardBrand.Visa,
                 last4 = createLast4()
             )
         )

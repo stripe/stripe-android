@@ -136,7 +136,7 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
             internal fun setPaymentMethod(paymentMethod: PaymentMethod) {
                 val card = paymentMethod.card
                 viewBinding.paymentMethodId.text = paymentMethod.id
-                viewBinding.brand.text = card?.brand.orEmpty()
+                viewBinding.brand.text = card?.brand?.displayName.orEmpty()
                 viewBinding.last4.text = card?.last4.orEmpty()
             }
         }

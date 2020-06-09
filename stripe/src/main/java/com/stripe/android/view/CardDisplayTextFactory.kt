@@ -89,7 +89,7 @@ internal class CardDisplayTextFactory internal constructor(
     internal fun createUnstyled(card: PaymentMethod.Card): String {
         return resources.getString(
             R.string.ending_in,
-            resources.getString(BRAND_RESOURCE_MAP[card.brand] ?: R.string.unknown),
+            card.brand.displayName,
             card.last4
         )
     }
@@ -105,19 +105,6 @@ internal class CardDisplayTextFactory internal constructor(
             start,
             end,
             Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-        )
-    }
-
-    private companion object {
-        private val BRAND_RESOURCE_MAP = mapOf(
-            PaymentMethod.Card.Brand.AMERICAN_EXPRESS to R.string.amex_short,
-            PaymentMethod.Card.Brand.DINERS_CLUB to R.string.diners_club,
-            PaymentMethod.Card.Brand.DISCOVER to R.string.discover,
-            PaymentMethod.Card.Brand.JCB to R.string.jcb,
-            PaymentMethod.Card.Brand.MASTERCARD to R.string.mastercard,
-            PaymentMethod.Card.Brand.VISA to R.string.visa,
-            PaymentMethod.Card.Brand.UNIONPAY to R.string.unionpay,
-            PaymentMethod.Card.Brand.UNKNOWN to R.string.unknown
         )
     }
 }
