@@ -23,9 +23,13 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
         val cancellationReason = PaymentIntent.CancellationReason.fromCode(
             optString(json, FIELD_CANCELLATION_REASON)
         )
-        val captureMethod = optString(json, FIELD_CAPTURE_METHOD)
+        val captureMethod = PaymentIntent.CaptureMethod.fromCode(
+            optString(json, FIELD_CAPTURE_METHOD)
+        )
         val clientSecret = optString(json, FIELD_CLIENT_SECRET)
-        val confirmationMethod = optString(json, FIELD_CONFIRMATION_METHOD)
+        val confirmationMethod = PaymentIntent.ConfirmationMethod.fromCode(
+            optString(json, FIELD_CONFIRMATION_METHOD)
+        )
         val created = json.optLong(FIELD_CREATED)
         val currency = StripeJsonUtils.optCurrency(json, FIELD_CURRENCY)
         val description = optString(json, FIELD_DESCRIPTION)

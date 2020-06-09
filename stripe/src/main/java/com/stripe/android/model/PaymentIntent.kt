@@ -46,12 +46,10 @@ data class PaymentIntent internal constructor(
     val cancellationReason: CancellationReason? = null,
 
     /**
-     * One of `automatic` (default) or `manual`.
-     *
-     * When the capture method is `automatic`,
-     * Stripe automatically captures funds when the customer authorizes the payment.
+     * Controls when the funds will be captured from the customer’s account.
+     * See [CaptureMethod].
      */
-    val captureMethod: String?,
+    val captureMethod: CaptureMethod = CaptureMethod.Automatic,
 
     /**
      * The client secret of this [PaymentIntent]. Used for client-side retrieval using a
@@ -65,7 +63,7 @@ data class PaymentIntent internal constructor(
     override val clientSecret: String?,
 
     /**
-     * One of automatic (default) or manual.
+     * One of automatic (default) or manual. See [ConfirmationMethod].
      *
      * When [confirmationMethod] is `automatic`, a [PaymentIntent] can be confirmed
      * using a publishable key. After `next_action`s are handled, no additional
@@ -77,7 +75,7 @@ data class PaymentIntent internal constructor(
      * state after handling `next_action`s, and requires your server to initiate each
      * payment attempt with an explicit confirmation.
      */
-    val confirmationMethod: String? = null,
+    val confirmationMethod: ConfirmationMethod = ConfirmationMethod.Automatic,
 
     /**
      * Time at which the object was created. Measured in seconds since the Unix epoch.
@@ -140,11 +138,11 @@ data class PaymentIntent internal constructor(
 ) : StripeIntent {
     override val nextActionType: StripeIntent.NextActionType?
         get() = when (nextActionData) {
-                is StripeIntent.NextActionData.SdkData -> StripeIntent.NextActionType.UseStripeSdk
-                is StripeIntent.NextActionData.RedirectToUrl -> StripeIntent.NextActionType.RedirectToUrl
-                is StripeIntent.NextActionData.DisplayOxxoDetails -> StripeIntent.NextActionType.DisplayOxxoDetails
-                else -> null
-            }
+            is StripeIntent.NextActionData.SdkData -> StripeIntent.NextActionType.UseStripeSdk
+            is StripeIntent.NextActionData.RedirectToUrl -> StripeIntent.NextActionType.RedirectToUrl
+            is StripeIntent.NextActionData.DisplayOxxoDetails -> StripeIntent.NextActionType.DisplayOxxoDetails
+            else -> null
+        }
 
     override fun requiresAction(): Boolean {
         return status === StripeIntent.Status.RequiresAction
@@ -217,9 +215,7 @@ data class PaymentIntent internal constructor(
             RateLimitError("rate_limit_error");
 
             internal companion object {
-                internal fun fromCode(typeCode: String?): Type? {
-                    return values().firstOrNull { it.code == typeCode }
-                }
+                fun fromCode(typeCode: String?) = values().firstOrNull { it.code == typeCode }
             }
         }
     }
@@ -300,9 +296,46 @@ data class PaymentIntent internal constructor(
         Automatic("automatic");
 
         internal companion object {
-            internal fun fromCode(code: String?): CancellationReason? {
-                return values().firstOrNull { it.code == code }
-            }
+            fun fromCode(code: String?) = values().firstOrNull { it.code == code }
+        }
+    }
+
+    /**
+     * Controls when the funds will be captured from the customer’s account.
+     */
+    enum class CaptureMethod(private val code: String) {
+        /**
+         * (Default) Stripe automatically captures funds when the customer authorizes the payment.
+         */
+        Automatic("automatic"),
+
+        /**
+         * Place a hold on the funds when the customer authorizes the payment, but don’t capture
+         * the funds until later. (Not all payment methods support this.)
+         */
+        Manual("manual");
+
+        internal companion object {
+            fun fromCode(code: String?) = values().firstOrNull { it.code == code } ?: Automatic
+        }
+    }
+
+    enum class ConfirmationMethod(private val code: String) {
+        /**
+         * (Default) PaymentIntent can be confirmed using a publishable key. After `next_action`s
+         * are handled, no additional confirmation is required to complete the payment.
+         */
+        Automatic("automatic"),
+
+        /**
+         * All payment attempts must be made using a secret key. The PaymentIntent returns to the
+         * `requires_confirmation` state after handling `next_action`s, and requires your server to
+         * initiate each payment attempt with an explicit confirmation.
+         */
+        Manual("manual");
+
+        internal companion object {
+            fun fromCode(code: String?) = values().firstOrNull { it.code == code } ?: Automatic
         }
     }
 
