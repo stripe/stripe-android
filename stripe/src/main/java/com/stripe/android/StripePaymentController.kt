@@ -7,6 +7,8 @@ import android.os.HandlerThread
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.StripeException
+import com.stripe.android.model.AlipayAuthResult
+import com.stripe.android.model.Complete3ds2Result
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -311,8 +313,8 @@ internal class StripePaymentController internal constructor(
         AlipayAuthenticationTask(
             intent,
             authenticator,
-            object : ApiResultCallback<Int> {
-                override fun onSuccess(result: Int) {
+            object : ApiResultCallback<AlipayAuthResult> {
+                override fun onSuccess(result: AlipayAuthResult) {
                     val requestOptions = ApiRequest.Options(
                         apiKey = publishableKey,
                         stripeAccount = stripeAccountId
@@ -323,7 +325,11 @@ internal class StripePaymentController internal constructor(
                         requestOptions,
                         expandFields = EXPAND_PAYMENT_METHOD,
                         callback = createPaymentIntentCallback(
-                            requestOptions, result, "", false, callback
+                            requestOptions,
+                            result.outcome,
+                            "",
+                            false,
+                            callback
                         )
                     )
                 }
@@ -338,18 +344,21 @@ internal class StripePaymentController internal constructor(
     internal class AlipayAuthenticationTask(
         private val intent: StripeIntent,
         private val authenticator: AlipayAuthenticator,
-        callback: ApiResultCallback<Int>
-    ) : ApiOperation<Int>(callback = callback) {
-        override suspend fun getResult(): Int? {
+        callback: ApiResultCallback<AlipayAuthResult>
+    ) : ApiOperation<AlipayAuthResult>(callback = callback) {
+        override suspend fun getResult(): AlipayAuthResult {
             val nextActionData = intent.nextActionData
             if (nextActionData is RedirectToUrl && nextActionData.mobileData is AlipayData) {
-                val output = authenticator.onAuthenticationRequest(nextActionData.mobileData.data)
-                return when (output[RESULT_FIELD]) {
-                    RESULT_CODE_SUCCESS -> StripeIntentResult.Outcome.SUCCEEDED
-                    RESULT_CODE_FAILED -> StripeIntentResult.Outcome.FAILED
-                    RESULT_CODE_CANCELLED -> StripeIntentResult.Outcome.CANCELED
-                    else -> StripeIntentResult.Outcome.UNKNOWN
-                }
+                val output =
+                    authenticator.onAuthenticationRequest(nextActionData.mobileData.data)
+                return AlipayAuthResult(
+                    when (output[RESULT_FIELD]) {
+                        RESULT_CODE_SUCCESS -> StripeIntentResult.Outcome.SUCCEEDED
+                        RESULT_CODE_FAILED -> StripeIntentResult.Outcome.FAILED
+                        RESULT_CODE_CANCELLED -> StripeIntentResult.Outcome.CANCELED
+                        else -> StripeIntentResult.Outcome.UNKNOWN
+                    }
+                )
             } else {
                 throw RuntimeException("Unable to authenticate Payment Intent with Alipay SDK")
             }
@@ -897,8 +906,8 @@ internal class StripePaymentController internal constructor(
             stripeRepository.complete3ds2Auth(
                 sourceId,
                 requestOptions,
-                object : ApiResultCallback<Boolean> {
-                    override fun onSuccess(result: Boolean) {
+                object : ApiResultCallback<Complete3ds2Result> {
+                    override fun onSuccess(result: Complete3ds2Result) {
                         completed3ds2Callback()
                     }
 

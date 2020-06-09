@@ -19,6 +19,7 @@ import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.InvalidRequestException
+import com.stripe.android.model.Complete3ds2Result
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntent
@@ -804,9 +805,9 @@ class StripePaymentControllerTest {
         override fun complete3ds2Auth(
             sourceId: String,
             requestOptions: ApiRequest.Options,
-            callback: ApiResultCallback<Boolean>
+            callback: ApiResultCallback<Complete3ds2Result>
         ) {
-            callback.onSuccess(true)
+            callback.onSuccess(Complete3ds2Result(true))
         }
 
         override fun retrieveIntent(

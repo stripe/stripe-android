@@ -2,6 +2,7 @@ package com.stripe.android
 
 import androidx.lifecycle.MutableLiveData
 import com.stripe.android.exception.APIException
+import com.stripe.android.model.Complete3ds2Result
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.Customer
@@ -241,7 +242,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
     override fun complete3ds2Auth(
         sourceId: String,
         requestOptions: ApiRequest.Options,
-        callback: ApiResultCallback<Boolean>
+        callback: ApiResultCallback<Complete3ds2Result>
     ) {
     }
 

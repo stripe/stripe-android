@@ -2,6 +2,7 @@ package com.stripe.android
 
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
+import com.stripe.android.model.AlipayAuthResult
 import com.stripe.android.model.PaymentIntentFixtures
 import kotlin.test.assertFailsWith
 import kotlinx.coroutines.runBlocking
@@ -12,7 +13,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class AlipayAuthenticationTaskTest {
     private val intent = PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION
-    private val callback: ApiResultCallback<Int> = mock()
+    private val callback: ApiResultCallback<AlipayAuthResult> = mock()
 
     @Test
     fun `AlipayAuthenticationTask should handle success`() {
@@ -22,7 +23,8 @@ class AlipayAuthenticationTaskTest {
             callback
         )
         val result = runBlocking { task.getResult() }
-        assertThat(result).isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
+        assertThat(result?.outcome)
+            .isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
     }
 
     @Test
@@ -33,7 +35,8 @@ class AlipayAuthenticationTaskTest {
             callback
         )
         val result = runBlocking { task.getResult() }
-        assertThat(result).isEqualTo(StripeIntentResult.Outcome.CANCELED)
+        assertThat(result?.outcome)
+            .isEqualTo(StripeIntentResult.Outcome.CANCELED)
     }
 
     @Test
@@ -44,7 +47,8 @@ class AlipayAuthenticationTaskTest {
             callback
         )
         val result = runBlocking { task.getResult() }
-        assertThat(result).isEqualTo(StripeIntentResult.Outcome.FAILED)
+        assertThat(result?.outcome)
+            .isEqualTo(StripeIntentResult.Outcome.FAILED)
     }
 
     @Test
@@ -55,7 +59,8 @@ class AlipayAuthenticationTaskTest {
             callback
         )
         val result = runBlocking { task.getResult() }
-        assertThat(result).isEqualTo(StripeIntentResult.Outcome.UNKNOWN)
+        assertThat(result?.outcome)
+            .isEqualTo(StripeIntentResult.Outcome.UNKNOWN)
     }
 
     @Test
@@ -66,7 +71,8 @@ class AlipayAuthenticationTaskTest {
             callback
         )
         val result = runBlocking { task.getResult() }
-        assertThat(result).isEqualTo(StripeIntentResult.Outcome.UNKNOWN)
+        assertThat(result?.outcome)
+            .isEqualTo(StripeIntentResult.Outcome.UNKNOWN)
     }
 
     @Test
