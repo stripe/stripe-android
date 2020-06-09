@@ -33,7 +33,7 @@ internal class SourcesAdapter : RecyclerView.Adapter<SourcesAdapter.ViewHolder>(
 
         private fun getRedirectStatus(source: Source): String? {
             return source.redirect?.status
-                ?: (source.sourceTypeModel as SourceTypeModel.Card).threeDSecureStatus
+                ?: (source.sourceTypeModel as SourceTypeModel.Card).threeDSecureStatus.toString()
         }
     }
 

@@ -5,6 +5,8 @@
 - Changes to `AddPaymentMethodActivity`
     - When `CustomerSession` is instantiated with a `stripeAccountId`, it will be used in `AddPaymentMethodActivity`
       when creating a payment method
+- Changes to `SourceTypeModel.Card`
+    - `SourceTypeModel.Card.ThreeDSecureStatus` is now an enum
 - Changes to `BankAccount`
     - public constructors have been removed
     - `BankAccount#accountNumber` has been removed
