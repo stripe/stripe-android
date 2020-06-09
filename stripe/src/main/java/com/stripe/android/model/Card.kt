@@ -191,7 +191,7 @@ data class Card internal constructor(
      * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-metadata).
      */
     val metadata: Map<String, String>?
-) : StripeModel, StripePaymentSource, TokenParams(Token.TokenType.CARD, loggingTokens) {
+) : StripeModel, StripePaymentSource, TokenParams(Token.Type.Card, loggingTokens) {
 
     fun toPaymentMethodsParams(): PaymentMethodCreateParams {
         return PaymentMethodCreateParams.create(
@@ -332,8 +332,8 @@ data class Card internal constructor(
         }
     }
 
-    override fun toParamMap(): Map<String, Any> {
-        return CardParams(
+    override val typeDataParams: Map<String, Any>
+        get() = CardParams(
             number = number.orEmpty(),
             expMonth = expMonth ?: 0,
             expYear = expYear ?: 0,
@@ -349,7 +349,6 @@ data class Card internal constructor(
                 country = addressCountry
             )
         ).toParamMap()
-    }
 
     /**
      * Builder class for a [Card] model.

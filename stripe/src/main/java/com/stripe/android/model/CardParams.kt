@@ -144,7 +144,7 @@ internal data class CardParams internal constructor(
     )
 
     override fun toParamMap(): Map<String, Any> {
-        val params: Map<String, Any> = listOf(
+        return listOf(
             PARAM_NUMBER to number,
             PARAM_EXP_MONTH to expMonth,
             PARAM_EXP_YEAR to expYear,
@@ -162,8 +162,6 @@ internal data class CardParams internal constructor(
                 value?.let { mapOf(key to it) }.orEmpty()
             )
         }
-
-        return mapOf(Token.TokenType.CARD to params)
     }
 
     private companion object {
