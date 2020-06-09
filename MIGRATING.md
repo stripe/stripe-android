@@ -15,6 +15,8 @@
 - Changes to `AccountParams`
     - Remove `AccountParams.create()` that takes a raw map; instead, use `create()` method that takes a
       `AccountParams.BusinessTypeParams.Individual` or `AccountParams.BusinessTypeParams.Company`
+- Changes to `CardInputListener`
+    - `FocusField` is now an enum
 
 ## Migrating from versions < 14.5.0
 - Changes to `StripeIntent`

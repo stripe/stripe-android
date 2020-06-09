@@ -32,9 +32,6 @@ import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_CARD
-import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_CVC
-import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_EXPIRY
 import kotlin.properties.Delegates
 
 /**
@@ -723,14 +720,14 @@ class CardInputWidget @JvmOverloads constructor(
         cardNumberEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 scrollLeft()
-                cardInputListener?.onFocusChange(FOCUS_CARD)
+                cardInputListener?.onFocusChange(CardInputListener.FocusField.CardNumber)
             }
         }
 
         expiryDateEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 scrollRight()
-                cardInputListener?.onFocusChange(FOCUS_EXPIRY)
+                cardInputListener?.onFocusChange(CardInputListener.FocusField.ExpiryDate)
             }
         }
 
@@ -741,7 +738,7 @@ class CardInputWidget @JvmOverloads constructor(
         cvcNumberEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 scrollRight()
-                cardInputListener?.onFocusChange(FOCUS_CVC)
+                cardInputListener?.onFocusChange(CardInputListener.FocusField.Cvc)
             }
             updateIconCvc(hasFocus, cvcValue)
         }

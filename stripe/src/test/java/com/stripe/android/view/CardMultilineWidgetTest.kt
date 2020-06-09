@@ -22,10 +22,6 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
-import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_CARD
-import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_CVC
-import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_EXPIRY
-import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_POSTAL
 import java.util.Calendar
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -481,12 +477,12 @@ internal class CardMultilineWidgetTest {
 
         fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
         verify(fullCardListener).onCardComplete()
-        verify(fullCardListener).onFocusChange(FOCUS_EXPIRY)
+        verify(fullCardListener).onFocusChange(CardInputListener.FocusField.ExpiryDate)
         assertTrue(fullGroup.expiryDateEditText.hasFocus())
 
         noZipGroup.cardNumberEditText.setText(AMEX_WITH_SPACES)
         verify(noZipCardListener).onCardComplete()
-        verify(noZipCardListener).onFocusChange(FOCUS_EXPIRY)
+        verify(noZipCardListener).onFocusChange(CardInputListener.FocusField.ExpiryDate)
         assertTrue(noZipGroup.expiryDateEditText.hasFocus())
     }
 
@@ -498,13 +494,13 @@ internal class CardMultilineWidgetTest {
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
         verify(fullCardListener).onExpirationComplete()
-        verify(fullCardListener).onFocusChange(FOCUS_CVC)
+        verify(fullCardListener).onFocusChange(CardInputListener.FocusField.Cvc)
         assertTrue(fullGroup.cvcEditText.hasFocus())
 
         noZipGroup.expiryDateEditText.append("12")
         noZipGroup.expiryDateEditText.append("50")
         verify(noZipCardListener).onExpirationComplete()
-        verify(noZipCardListener).onFocusChange(FOCUS_CVC)
+        verify(noZipCardListener).onFocusChange(CardInputListener.FocusField.Cvc)
         assertTrue(noZipGroup.cvcEditText.hasFocus())
     }
 
@@ -518,7 +514,7 @@ internal class CardMultilineWidgetTest {
         fullGroup.expiryDateEditText.append("50")
         fullGroup.cvcEditText.append("123")
         verify(fullCardListener).onCvcComplete()
-        verify(fullCardListener).onFocusChange(FOCUS_POSTAL)
+        verify(fullCardListener).onFocusChange(CardInputListener.FocusField.PostalCode)
         assertTrue(fullGroup.postalCodeEditText.hasFocus())
 
         noZipGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
@@ -526,7 +522,7 @@ internal class CardMultilineWidgetTest {
         noZipGroup.expiryDateEditText.append("50")
         noZipGroup.cvcEditText.append("123")
         verify(noZipCardListener).onCvcComplete()
-        verify(noZipCardListener, never()).onFocusChange(FOCUS_POSTAL)
+        verify(noZipCardListener, never()).onFocusChange(CardInputListener.FocusField.PostalCode)
         assertTrue(noZipGroup.cvcEditText.hasFocus())
     }
 
@@ -543,7 +539,7 @@ internal class CardMultilineWidgetTest {
         assertTrue(fullGroup.expiryDateEditText.hasFocus())
         ViewTestUtils.sendDeleteKeyEvent(fullGroup.expiryDateEditText)
 
-        verify(fullCardListener).onFocusChange(FOCUS_CARD)
+        verify(fullCardListener).onFocusChange(CardInputListener.FocusField.CardNumber)
         assertTrue(fullGroup.cardNumberEditText.hasFocus())
         assertEquals(deleteOneCharacterString, fullGroup.cardNumberEditText.text?.toString())
 
@@ -553,7 +549,7 @@ internal class CardMultilineWidgetTest {
         assertTrue(noZipGroup.expiryDateEditText.hasFocus())
         ViewTestUtils.sendDeleteKeyEvent(noZipGroup.expiryDateEditText)
 
-        verify(noZipCardListener).onFocusChange(FOCUS_CARD)
+        verify(noZipCardListener).onFocusChange(CardInputListener.FocusField.CardNumber)
         assertTrue(noZipGroup.cardNumberEditText.hasFocus())
         assertEquals(deleteOneCharacterString, noZipGroup.cardNumberEditText.text?.toString())
     }
@@ -570,7 +566,7 @@ internal class CardMultilineWidgetTest {
         assertTrue(fullGroup.cvcEditText.hasFocus())
         ViewTestUtils.sendDeleteKeyEvent(fullGroup.cvcEditText)
 
-        verify(fullCardListener).onFocusChange(FOCUS_EXPIRY)
+        verify(fullCardListener).onFocusChange(CardInputListener.FocusField.ExpiryDate)
         assertTrue(fullGroup.expiryDateEditText.hasFocus())
         assertEquals("12/5", fullGroup.expiryDateEditText.text?.toString())
 
@@ -581,7 +577,7 @@ internal class CardMultilineWidgetTest {
         assertTrue(noZipGroup.cvcEditText.hasFocus())
         ViewTestUtils.sendDeleteKeyEvent(noZipGroup.cvcEditText)
 
-        verify(noZipCardListener).onFocusChange(FOCUS_EXPIRY)
+        verify(noZipCardListener).onFocusChange(CardInputListener.FocusField.ExpiryDate)
         assertTrue(noZipGroup.expiryDateEditText.hasFocus())
         assertEquals("12/5", noZipGroup.expiryDateEditText.text.toString())
     }
@@ -598,7 +594,7 @@ internal class CardMultilineWidgetTest {
         reset(fullCardListener)
         ViewTestUtils.sendDeleteKeyEvent(fullGroup.postalCodeEditText)
 
-        verify(fullCardListener).onFocusChange(FOCUS_CVC)
+        verify(fullCardListener).onFocusChange(CardInputListener.FocusField.Cvc)
         assertEquals("12", fullGroup.cvcEditText.text?.toString())
     }
 

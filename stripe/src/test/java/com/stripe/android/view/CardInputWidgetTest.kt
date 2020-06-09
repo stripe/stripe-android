@@ -25,9 +25,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.TestFocusChangeListener
 import com.stripe.android.testharness.ViewTestUtils
-import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_CARD
-import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_CVC
-import com.stripe.android.view.CardInputListener.FocusField.Companion.FOCUS_EXPIRY
 import com.stripe.android.view.CardInputWidget.Companion.LOGGING_TOKEN
 import com.stripe.android.view.CardInputWidget.Companion.shouldIconShowBrand
 import java.util.Calendar
@@ -505,7 +502,7 @@ internal class CardInputWidgetTest {
         cardNumberEditText.setText(VISA_WITH_SPACES)
 
         verify(cardInputListener).onCardComplete()
-        verify(cardInputListener).onFocusChange(FOCUS_EXPIRY)
+        verify(cardInputListener).onFocusChange(CardInputListener.FocusField.ExpiryDate)
         assertEquals(cardNumberEditText.id, onGlobalFocusChangeListener.oldFocusId)
         assertEquals(expiryEditText.id, onGlobalFocusChangeListener.newFocusId)
     }
@@ -520,7 +517,7 @@ internal class CardInputWidgetTest {
         reset(cardInputListener)
 
         ViewTestUtils.sendDeleteKeyEvent(expiryEditText)
-        verify(cardInputListener).onFocusChange(FOCUS_CARD)
+        verify(cardInputListener).onFocusChange(CardInputListener.FocusField.CardNumber)
         assertEquals(expiryEditText.id, onGlobalFocusChangeListener.oldFocusId)
         assertEquals(cardNumberEditText.id, onGlobalFocusChangeListener.newFocusId)
 
@@ -550,20 +547,20 @@ internal class CardInputWidgetTest {
         cardNumberEditText.setText(VISA_WITH_SPACES)
 
         verify(cardInputListener).onCardComplete()
-        verify(cardInputListener).onFocusChange(FOCUS_EXPIRY)
+        verify(cardInputListener).onFocusChange(CardInputListener.FocusField.ExpiryDate)
 
         expiryEditText.append("12")
         expiryEditText.append("79")
 
         verify(cardInputListener).onExpirationComplete()
-        verify(cardInputListener).onFocusChange(FOCUS_CVC)
+        verify(cardInputListener).onFocusChange(CardInputListener.FocusField.Cvc)
         assertTrue(cvcEditText.hasFocus())
 
         // Clearing already-verified data.
         reset(cardInputListener)
 
         ViewTestUtils.sendDeleteKeyEvent(cvcEditText)
-        verify(cardInputListener).onFocusChange(FOCUS_EXPIRY)
+        verify(cardInputListener).onFocusChange(CardInputListener.FocusField.ExpiryDate)
         assertEquals(cvcEditText.id, onGlobalFocusChangeListener.oldFocusId)
         assertEquals(expiryEditText.id, onGlobalFocusChangeListener.newFocusId)
 
