@@ -1125,7 +1125,7 @@ public class StripeTest {
                 paymentMethodCreateParams);
         assertNotNull(createdPaymentMethod);
         assertNotNull(createdPaymentMethod.card);
-        assertEquals("visa", createdPaymentMethod.card.brand);
+        assertEquals(CardBrand.Visa, createdPaymentMethod.card.brand);
         assertEquals("4242", createdPaymentMethod.card.last4);
     }
 
