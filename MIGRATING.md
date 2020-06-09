@@ -2,6 +2,37 @@
 
 ## Migrating from versions < 15.0.0
 - The SDK now targets JVM 1.8
+- Changes to `PaymentIntent`
+    - `PaymentIntent#captureMethod` is now an enum, `PaymentIntent.CaptureMethod`
+        ```kotlin
+        // before
+        if (paymentIntent.captureMethod == "automatic") {
+
+        } else if (paymentIntent.captureMethod == "manual") {
+
+        }
+
+        // after
+        when (paymentIntent.captureMethod) {
+            PaymentIntent.CaptureMethod.Automatic -> {}
+            PaymentIntent.CaptureMethod.Manual -> {}
+        }
+        ```
+    - `PaymentIntent#confirmationMethod` is now an enum, `PaymentIntent.ConfirmationMethod`
+        ```kotlin
+        // before
+        if (paymentIntent.confirmationMethod == "automatic") {
+
+        } else if (paymentIntent.confirmationMethod == "manual") {
+
+        }
+
+        // after
+        when (paymentIntent.confirmationMethod) {
+            PaymentIntent.ConfirmationMethod.Automatic -> {}
+            PaymentIntent.ConfirmationMethod.Manual -> {}
+        }
+        ```
 - Changes to `AddPaymentMethodActivity`
     - When `CustomerSession` is instantiated with a `stripeAccountId`, it will be used in `AddPaymentMethodActivity`
       when creating a payment method

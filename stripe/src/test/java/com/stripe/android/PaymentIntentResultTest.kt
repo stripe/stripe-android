@@ -24,7 +24,6 @@ class PaymentIntentResultTest {
         val paymentIntent = PaymentIntent(
             created = 500L,
             amount = 1000L,
-            captureMethod = "automatic",
             clientSecret = "secret",
             paymentMethod = PaymentMethodFixtures.BACS_DEBIT_PAYMENT_METHOD,
             isLiveMode = false,
