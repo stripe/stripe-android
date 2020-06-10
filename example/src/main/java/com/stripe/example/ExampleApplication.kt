@@ -52,6 +52,6 @@ class ExampleApplication : MultiDexApplication() {
     }
 
     private companion object {
-        private val IS_PENALTY_DEATH_ENABLED = true
+        private val IS_PENALTY_DEATH_ENABLED = false
     }
 }
