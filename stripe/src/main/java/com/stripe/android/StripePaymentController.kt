@@ -38,6 +38,7 @@ import java.security.cert.CertificateException
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * A controller responsible for confirming and authenticating payment (typically through resolving
@@ -595,31 +596,45 @@ internal class StripePaymentController internal constructor(
             config.stripe3ds2Config.uiCustomization.uiCustomization
         )
 
-        val areqParams = transaction.authenticationRequestParameters
-        val timeout = config.stripe3ds2Config.timeout
-        val authParams = Stripe3ds2AuthParams(
-            stripe3ds2Fingerprint.source,
-            areqParams.sdkAppId,
-            areqParams.sdkReferenceNumber,
-            areqParams.sdkTransactionId,
-            areqParams.deviceData,
-            areqParams.sdkEphemeralPublicKey,
-            areqParams.messageVersion,
-            timeout,
-            // We do not currently have a fallback url
-            // TODO(smaskell-stripe): Investigate more robust error handling
-            returnUrl = null
-        )
-        stripeRepository.start3ds2Auth(
-            authParams,
-            stripeIntent.id.orEmpty(),
-            requestOptions,
-            Stripe3ds2AuthCallback(
-                host, stripeRepository, transaction, timeout,
-                stripeIntent, stripe3ds2Fingerprint.source, requestOptions,
-                analyticsRequestExecutor, analyticsDataFactory,
-                challengeFlowStarter, enableLogging)
-        )
+        workScope.launch {
+            // call `authenticationRequestParameters` on background thread to avoid StrictMode
+            // DiskReadViolation
+            val areqParams = transaction.authenticationRequestParameters
+
+            val timeout = config.stripe3ds2Config.timeout
+            val authParams = Stripe3ds2AuthParams(
+                stripe3ds2Fingerprint.source,
+                areqParams.sdkAppId,
+                areqParams.sdkReferenceNumber,
+                areqParams.sdkTransactionId,
+                areqParams.deviceData,
+                areqParams.sdkEphemeralPublicKey,
+                areqParams.messageVersion,
+                timeout,
+                // We do not currently have a fallback url
+                // TODO(smaskell-stripe): Investigate more robust error handling
+                returnUrl = null
+            )
+
+            stripeRepository.start3ds2Auth(
+                authParams,
+                stripeIntent.id.orEmpty(),
+                requestOptions,
+                Stripe3ds2AuthCallback(
+                    host,
+                    stripeRepository,
+                    transaction,
+                    timeout,
+                    stripeIntent,
+                    stripe3ds2Fingerprint.source,
+                    requestOptions,
+                    analyticsRequestExecutor,
+                    analyticsDataFactory,
+                    challengeFlowStarter,
+                    enableLogging
+                )
+            )
+        }
     }
 
     private class ConfirmStripeIntentTask(
