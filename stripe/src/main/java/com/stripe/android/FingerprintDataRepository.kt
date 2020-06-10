@@ -39,10 +39,11 @@ internal interface FingerprintDataRepository {
             if (Stripe.advancedFraudSignalsEnabled) {
                 coroutineScope.launch {
                     Transformations.switchMap(store.get()) { localFingerprintData ->
-                        if (localFingerprintData.isExpired(timestampSupplier())) {
+                        if (localFingerprintData == null ||
+                            localFingerprintData.isExpired(timestampSupplier())) {
                             fingerprintRequestExecutor.execute(
                                 request = fingerprintRequestFactory.create(
-                                    localFingerprintData.guid
+                                    localFingerprintData
                                 )
                             )
                         } else {
