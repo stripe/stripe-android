@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
-import androidx.annotation.StringDef
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.Source
@@ -30,20 +29,6 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
         context.applicationContext.packageName.orEmpty(),
         publishableKey
     )
-
-    @Retention(AnnotationRetention.SOURCE)
-    @StringDef(ThreeDS2UiType.NONE, ThreeDS2UiType.TEXT, ThreeDS2UiType.SINGLE_SELECT,
-        ThreeDS2UiType.MULTI_SELECT, ThreeDS2UiType.OOB, ThreeDS2UiType.HTML)
-    private annotation class ThreeDS2UiType {
-        companion object {
-            const val NONE = "none"
-            const val TEXT = "text"
-            const val SINGLE_SELECT = "single_select"
-            const val MULTI_SELECT = "multi_select"
-            const val OOB = "oob"
-            const val HTML = "html"
-        }
-    }
 
     @JvmSynthetic
     internal fun createAuthParams(
@@ -76,7 +61,10 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
         return createParams(
             event,
             extraParams = createIntentParam(intentId)
-                .plus(FIELD_3DS2_UI_TYPE to get3ds2UiType(uiTypeCode))
+                .plus(
+                    FIELD_3DS2_UI_TYPE to
+                        ThreeDS2UiType.fromUiTypeCode(uiTypeCode).toString()
+                )
         )
     }
 
@@ -327,6 +315,26 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
         } ?: packageName
     }
 
+    private enum class ThreeDS2UiType(
+        private val code: String?,
+        private val typeName: String
+    ) {
+        None(null, "none"),
+        Text("01", "text"),
+        SingleSelect("02", "single_select"),
+        MultiSelect("03", "multi_select"),
+        Oob("04", "oob"),
+        Html("05", "html");
+
+        override fun toString(): String = typeName
+
+        internal companion object {
+            fun fromUiTypeCode(uiTypeCode: String?) = values().firstOrNull {
+                it.code == uiTypeCode
+            } ?: None
+        }
+    }
+
     internal companion object {
         internal const val FIELD_PRODUCT_USAGE = "product_usage"
         internal const val FIELD_ANALYTICS_UA = "analytics_ua"
@@ -362,18 +370,6 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
         private val DEVICE_TYPE: String = "${Build.MANUFACTURER}_${Build.BRAND}_${Build.MODEL}"
 
         internal const val ANALYTICS_UA = "$ANALYTICS_PREFIX.$ANALYTICS_NAME-$ANALYTICS_VERSION"
-
-        @ThreeDS2UiType
-        private fun get3ds2UiType(uiTypeCode: String): String {
-            return when (uiTypeCode) {
-                "01" -> ThreeDS2UiType.TEXT
-                "02" -> ThreeDS2UiType.SINGLE_SELECT
-                "03" -> ThreeDS2UiType.MULTI_SELECT
-                "04" -> ThreeDS2UiType.OOB
-                "05" -> ThreeDS2UiType.HTML
-                else -> ThreeDS2UiType.NONE
-            }
-        }
 
         private fun createIntentParam(intentId: String): Map<String, String> {
             return mapOf(
