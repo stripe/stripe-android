@@ -58,8 +58,8 @@ class FragmentExamplesFragment : Fragment() {
         )
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         initPaymentSession(createCustomerSession())
         viewBinding.launchPaymentSession.setOnClickListener {
@@ -69,7 +69,7 @@ class FragmentExamplesFragment : Fragment() {
         viewBinding.launchSetupAuth.setOnClickListener { createSetupIntent() }
 
         viewModel.paymentIntentResultLiveData.observe(
-            this,
+            viewLifecycleOwner,
             Observer { result ->
                 result.fold(
                     onSuccess = {
@@ -86,7 +86,7 @@ class FragmentExamplesFragment : Fragment() {
         )
 
         viewModel.setupIntentResultLiveData.observe(
-            this,
+            viewLifecycleOwner,
             Observer { result ->
                 result.fold(
                     onSuccess = {
