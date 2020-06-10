@@ -32,7 +32,7 @@ class CustomerSourceTest {
         assertNotNull(sourceData)
         assertNotNull(sourceData.asCard())
         assertEquals("card_189fi32eZvKYlo2CHK8NPRME", sourceData.id)
-        assertEquals("apple_pay", sourceData.tokenizationMethod)
+        assertEquals(TokenizationMethod.ApplePay, sourceData.tokenizationMethod)
     }
 
     @Test
