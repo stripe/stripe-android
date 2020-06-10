@@ -305,19 +305,20 @@ public class StripeTest {
                 "usd",
                 "Example Payer",
                 "abc@def.com",
-                "stripe://start");
+                "stripe://start"
+        );
 
         final Source alipaySource = defaultStripe.createSourceSynchronous(alipayParams);
         assertNotNull(alipaySource);
         assertNotNull(alipaySource.getId());
         assertNotNull(alipaySource.getClientSecret());
         assertEquals(Source.SourceType.ALIPAY, alipaySource.getType());
-        assertEquals("redirect", alipaySource.getFlow());
+        assertEquals(Source.Flow.Redirect, alipaySource.getFlow());
         assertNotNull(alipaySource.getOwner());
         assertEquals("Example Payer", alipaySource.getOwner().getName());
         assertEquals("abc@def.com", alipaySource.getOwner().getEmail());
         assertEquals("usd", alipaySource.getCurrency());
-        assertEquals(Source.Usage.REUSABLE, alipaySource.getUsage());
+        assertEquals(Source.Usage.Reusable, alipaySource.getUsage());
         assertNotNull(alipaySource.getRedirect());
         assertEquals("stripe://start", alipaySource.getRedirect().getReturnUrl());
     }
@@ -339,12 +340,12 @@ public class StripeTest {
         assertNotNull(alipaySource.getAmount());
         assertEquals(1000L, alipaySource.getAmount().longValue());
         assertEquals(Source.SourceType.ALIPAY, alipaySource.getType());
-        assertEquals("redirect", alipaySource.getFlow());
+        assertEquals(Source.Flow.Redirect, alipaySource.getFlow());
         assertNotNull(alipaySource.getOwner());
         assertEquals("Example Payer", alipaySource.getOwner().getName());
         assertEquals("abc@def.com", alipaySource.getOwner().getEmail());
         assertEquals("usd", alipaySource.getCurrency());
-        assertEquals(Source.Usage.SINGLE_USE, alipaySource.getUsage());
+        assertEquals(Source.Usage.SingleUse, alipaySource.getUsage());
         assertNotNull(alipaySource.getRedirect());
         assertEquals("stripe://start", alipaySource.getRedirect().getReturnUrl());
     }
@@ -542,12 +543,12 @@ public class StripeTest {
         assertNotNull(p24Source.getId());
         assertNotNull(p24Source.getClientSecret());
         assertEquals(Source.SourceType.P24, p24Source.getType());
-        assertEquals("redirect", p24Source.getFlow());
+        assertEquals(Source.Flow.Redirect, p24Source.getFlow());
         assertNotNull(p24Source.getOwner());
         assertEquals("Example Payer", p24Source.getOwner().getName());
         assertEquals("abc@def.com", p24Source.getOwner().getEmail());
         assertEquals("eur", p24Source.getCurrency());
-        assertEquals(Source.Usage.SINGLE_USE, p24Source.getUsage());
+        assertEquals(Source.Usage.SingleUse, p24Source.getUsage());
         assertNotNull(p24Source.getRedirect());
         assertEquals("stripe://start", p24Source.getRedirect().getReturnUrl());
     }
@@ -861,13 +862,13 @@ public class StripeTest {
         assertNotNull(token);
 
         final Map<String, String> map = new HashMap<>();
-        map.put("usage", Source.Usage.SINGLE_USE);
+        map.put("usage", "single_use");
         final SourceParams sourceParams = SourceParams.createSourceFromTokenParams(token.getId())
                 .setExtraParams(map);
 
         final Source source = stripe.createSourceSynchronous(sourceParams);
         assertNotNull(source);
-        assertNotNull(Source.Usage.SINGLE_USE, source.getUsage());
+        assertEquals(Source.Usage.SingleUse, source.getUsage());
     }
 
     @Test
