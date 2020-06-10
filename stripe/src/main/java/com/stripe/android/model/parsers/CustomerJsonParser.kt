@@ -3,6 +3,7 @@ package com.stripe.android.model.parsers
 import com.stripe.android.model.Customer
 import com.stripe.android.model.CustomerSource
 import com.stripe.android.model.StripeJsonUtils
+import com.stripe.android.model.TokenizationMethod
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -35,7 +36,7 @@ internal class CustomerJsonParser : ModelJsonParser<Customer> {
                 (0 until dataArray.length())
                     .map { idx -> dataArray.getJSONObject(idx) }
                     .mapNotNull { customerSourceJsonParser.parse(it) }
-                    .filterNot { source -> VALUE_APPLE_PAY == source.tokenizationMethod }
+                    .filterNot { it.tokenizationMethod == TokenizationMethod.ApplePay }
         } else {
             hasMore = false
             totalCount = null

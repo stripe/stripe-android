@@ -78,6 +78,8 @@
     - `SourceOwner` has been moved to `Source.Owner`
     - `SourceReceiver` has been moved to `Source.Receiver`
     - `SourceRedirect` has been moved to `Source.Redirect`
+- Changes to `CustomerSource`
+    - `CustomerSource#tokenizationMethod` is now a `TokenizationMethod?`
 - Changes to `SourceTypeModel.Card`
     - `SourceTypeModel.Card.ThreeDSecureStatus` is now an enum
 - Changes to `BankAccount`
