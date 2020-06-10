@@ -33,7 +33,7 @@ class AnalyticsDataFactoryTest {
 
         val params = analyticsDataFactory.createTokenCreationParams(
             ATTRIBUTION,
-            Token.TokenType.PII
+            Token.Type.Pii
         )
         // Size is SIZE-1 because tokens don't have a source_type field
         assertEquals(
@@ -41,7 +41,7 @@ class AnalyticsDataFactoryTest {
             params.size
         )
         assertEquals(expectedEvent, params[AnalyticsDataFactory.FIELD_EVENT])
-        assertEquals(Token.TokenType.PII, params[AnalyticsDataFactory.FIELD_TOKEN_TYPE])
+        assertEquals(Token.Type.Pii.code, params[AnalyticsDataFactory.FIELD_TOKEN_TYPE])
     }
 
     @Test
@@ -51,7 +51,7 @@ class AnalyticsDataFactoryTest {
 
         val params = analyticsDataFactory.createTokenCreationParams(
             ATTRIBUTION,
-            Token.TokenType.CVC_UPDATE
+            Token.Type.CvcUpdate
         )
         // Size is SIZE-1 because tokens don't have a source_type field
         assertEquals(
@@ -59,7 +59,7 @@ class AnalyticsDataFactoryTest {
             params.size
         )
         assertEquals(expectedEventName, params[AnalyticsDataFactory.FIELD_EVENT])
-        assertEquals(Token.TokenType.CVC_UPDATE, params[AnalyticsDataFactory.FIELD_TOKEN_TYPE])
+        assertEquals(Token.Type.CvcUpdate.code, params[AnalyticsDataFactory.FIELD_TOKEN_TYPE])
     }
 
     @Test
@@ -170,12 +170,12 @@ class AnalyticsDataFactoryTest {
         val params = AnalyticsDataFactory(packageManager, packageInfo, packageName, API_KEY)
             .createTokenCreationParams(
                 ATTRIBUTION,
-                Token.TokenType.CARD
+                Token.Type.Card
             )
         assertEquals(AnalyticsDataFactory.VALID_PARAM_FIELDS.size - 1, params.size)
         assertEquals(API_KEY, params[AnalyticsDataFactory.FIELD_PUBLISHABLE_KEY])
         assertEquals(ATTRIBUTION.toList(), params[AnalyticsDataFactory.FIELD_PRODUCT_USAGE])
-        assertEquals(Token.TokenType.CARD, params[AnalyticsDataFactory.FIELD_TOKEN_TYPE])
+        assertEquals(Token.Type.Card.code, params[AnalyticsDataFactory.FIELD_TOKEN_TYPE])
         assertEquals(Build.VERSION.SDK_INT, params[AnalyticsDataFactory.FIELD_OS_VERSION])
         assertNotNull(params[AnalyticsDataFactory.FIELD_OS_RELEASE])
         assertNotNull(params[AnalyticsDataFactory.FIELD_OS_NAME])
@@ -197,11 +197,11 @@ class AnalyticsDataFactoryTest {
         val expectedUaName = AnalyticsDataFactory.ANALYTICS_UA
 
         val params = analyticsDataFactory.createSourceCreationParams(
-            Token.TokenType.BANK_ACCOUNT
+            Source.SourceType.SEPA_DEBIT
         )
         assertEquals(AnalyticsDataFactory.VALID_PARAM_FIELDS.size - 2, params.size)
         assertEquals(API_KEY, params[AnalyticsDataFactory.FIELD_PUBLISHABLE_KEY])
-        assertEquals(Token.TokenType.BANK_ACCOUNT, params[AnalyticsDataFactory.FIELD_SOURCE_TYPE])
+        assertEquals(Source.SourceType.SEPA_DEBIT, params[AnalyticsDataFactory.FIELD_SOURCE_TYPE])
 
         assertEquals(Build.VERSION.SDK_INT, params[AnalyticsDataFactory.FIELD_OS_VERSION])
         assertNotNull(params[AnalyticsDataFactory.FIELD_OS_RELEASE])

@@ -35,26 +35,17 @@ data class AccountParams internal constructor(
      * See [BusinessTypeParams]
      */
     private val businessData: Map<String, @RawValue Any>? = null
-) : TokenParams(Token.TokenType.ACCOUNT) {
-
-    /**
-     * Create a string-keyed map representing this object that is ready to be sent over the network.
-     *
-     * @return a String-keyed map
-     */
-    override fun toParamMap(): Map<String, Any> {
-        return mapOf("account" to
-            mapOf(PARAM_TOS_SHOWN_AND_ACCEPTED to tosShownAndAccepted)
-                .plus(
-                    businessType?.code?.let { code ->
-                        mapOf(PARAM_BUSINESS_TYPE to code)
-                            .plus(
-                                businessData?.let { mapOf(code to it) }.orEmpty()
-                            )
-                    }.orEmpty()
-                )
-        )
-    }
+) : TokenParams(Token.Type.Account) {
+    override val typeDataParams: Map<String, Any>
+        get() = mapOf(PARAM_TOS_SHOWN_AND_ACCEPTED to tosShownAndAccepted)
+            .plus(
+                businessType?.code?.let { code ->
+                    mapOf(PARAM_BUSINESS_TYPE to code)
+                        .plus(
+                            businessData?.let { mapOf(code to it) }.orEmpty()
+                        )
+                }.orEmpty()
+            )
 
     /**
      * The business type.

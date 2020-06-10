@@ -51,7 +51,7 @@ internal object TokenFixtures {
             "id": "btok_9xJAbronBnS9bH",
             "object": "token",
             "bank_account": {
-                "id": "ba_19dOY72eZvKYlo2CVNPhmtv3",
+                "id": "ba_19d8Fh2eZvKYlo2C9qw8RwpV",
                 "object": "bank_account",
                 "account_holder_name": "Jane Austen",
                 "account_holder_type": "individual",

@@ -50,6 +50,23 @@
             else -> {}
         }
         ```
+- Changes to `Token`
+    - `Token.TokenType` is renamed to `Token.Type` and is now an enum
+        ```kotlin
+        // before
+        when (token.type) {
+            Token.TokenType.CARD -> {}
+            Token.TokenType.BANK_ACCOUNT -> {}
+            else -> {}
+        }
+
+        // after
+        when (token.type) {
+            Token.Type.Card -> {}
+            Token.Type.BankAccount -> {}
+            else -> {}
+        }
+        ```
 - Changes to `AddPaymentMethodActivity`
     - When `CustomerSession` is instantiated with a `stripeAccountId`, it will be used in `AddPaymentMethodActivity`
       when creating a payment method
