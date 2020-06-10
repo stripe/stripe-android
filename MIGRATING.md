@@ -50,9 +50,34 @@
             else -> {}
         }
         ```
+- Changes to `Token`
+    - `Token.TokenType` is renamed to `Token.Type` and is now an enum
+        ```kotlin
+        // before
+        when (token.type) {
+            Token.TokenType.CARD -> {}
+            Token.TokenType.BANK_ACCOUNT -> {}
+            else -> {}
+        }
+
+        // after
+        when (token.type) {
+            Token.Type.Card -> {}
+            Token.Type.BankAccount -> {}
+            else -> {}
+        }
+        ```
 - Changes to `AddPaymentMethodActivity`
     - When `CustomerSession` is instantiated with a `stripeAccountId`, it will be used in `AddPaymentMethodActivity`
       when creating a payment method
+- Changes to `Source`
+    - `Source.SourceFlow` has been renamed to `Source.Flow` and is now an enum
+    - `Source.SourceStatus` has been renamed to `Source.Status` and is now an enum
+    - `Source.Usage` is now an enum
+    - `SourceCodeVerification` has been moved to `Source.CodeVerification`
+    - `SourceOwner` has been moved to `Source.Owner`
+    - `SourceReceiver` has been moved to `Source.Receiver`
+    - `SourceRedirect` has been moved to `Source.Redirect`
 - Changes to `SourceTypeModel.Card`
     - `SourceTypeModel.Card.ThreeDSecureStatus` is now an enum
 - Changes to `BankAccount`

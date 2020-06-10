@@ -53,7 +53,7 @@ data class BankAccountTokenParams @JvmOverloads constructor(
      * [bank_account.routing_number](https://stripe.com/docs/api/tokens/create_bank_account#create_bank_account_token-bank_account-routing_number)
      */
     private val routingNumber: String? = null
-) : TokenParams(Token.TokenType.BANK_ACCOUNT) {
+) : TokenParams(Token.Type.BankAccount) {
     enum class Type(internal val code: String) {
         Individual("individual"),
         Company("company");
@@ -66,8 +66,8 @@ data class BankAccountTokenParams @JvmOverloads constructor(
         }
     }
 
-    override fun toParamMap(): Map<String, Any> {
-        val bankAccountParams: Map<String, String> = listOf(
+    override val typeDataParams: Map<String, Any>
+        get() = listOf(
             PARAM_COUNTRY to country,
             PARAM_CURRENCY to currency,
             PARAM_ACCOUNT_HOLDER_NAME to accountHolderName,
@@ -79,9 +79,6 @@ data class BankAccountTokenParams @JvmOverloads constructor(
                 value?.let { mapOf(key to it) }.orEmpty()
             )
         }
-
-        return mapOf(Token.TokenType.BANK_ACCOUNT to bankAccountParams)
-    }
 
     private companion object {
         private const val PARAM_COUNTRY = "country"

@@ -8,10 +8,7 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 internal data class PiiTokenParams(
     private val personalId: String
-) : TokenParams(Token.TokenType.PII) {
-    override fun toParamMap(): Map<String, Any> {
-        return mapOf(
-            Token.TokenType.PII to mapOf("personal_id_number" to personalId)
-        )
-    }
+) : TokenParams(Token.Type.Pii) {
+    override val typeDataParams: Map<String, Any>
+        get() = mapOf("personal_id_number" to personalId)
 }

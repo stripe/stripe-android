@@ -109,7 +109,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createTokenCreationParams(
         productUsageTokens: Set<String>?,
-        @Token.TokenType tokenType: String
+        tokenType: Token.Type
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.TokenCreate,
@@ -247,7 +247,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
         event: AnalyticsEvent,
         productUsageTokens: Set<String>? = null,
         @Source.SourceType sourceType: String? = null,
-        @Token.TokenType tokenType: String? = null,
+        tokenType: Token.Type? = null,
         extraParams: Map<String, Any>? = null
     ): Map<String, Any> {
         return createStandardParams(event)
@@ -264,10 +264,10 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
 
     private fun createTokenTypeParam(
         @Source.SourceType sourceType: String? = null,
-        @Token.TokenType tokenType: String? = null
+        tokenType: Token.Type? = null
     ): Map<String, String> {
         val value = when {
-            tokenType != null -> tokenType
+            tokenType != null -> tokenType.code
             // This is not a source event, so to match iOS we log a token without type
             // as type "unknown"
             sourceType == null -> "unknown"

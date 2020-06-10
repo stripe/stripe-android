@@ -1,66 +1,53 @@
 package com.stripe.android.model
 
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.parsers.TokenJsonParser
 import java.util.Date
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 import org.json.JSONObject
 
 class TokenTest {
 
     @Test
-    fun parseToken_whenCardToken_readsObjectCorrectly() {
-        val expectedToken = Token(
-            id = "tok_189fi32eZvKYlo2Ct0KZvU5Y",
-            livemode = false,
-            created = Date(1462905355L * 1000L),
-            used = false,
-            type = Token.TokenType.CARD,
-            card = CARD
-        )
-        assertEquals(expectedToken, TokenFixtures.CARD_TOKEN)
+    fun `Card token is parsed correctly`() {
+        assertThat(TokenFixtures.CARD_TOKEN)
+            .isEqualTo(
+                Token(
+                    id = "tok_189fi32eZvKYlo2Ct0KZvU5Y",
+                    livemode = false,
+                    created = Date(1462905355L * 1000L),
+                    used = false,
+                    type = Token.Type.Card,
+                    card = CARD
+                )
+            )
     }
 
     @Test
-    fun parseToken_whenNullString_returnsNull() {
-        assertNull(Token.fromString(null))
+    fun `BankAccount token is parsed correctly`() {
+        assertThat(TokenFixtures.BANK_TOKEN)
+            .isEqualTo(
+                Token(
+                    id = "btok_9xJAbronBnS9bH",
+                    livemode = false,
+                    created = Date(1484765567L * 1000L),
+                    used = false,
+                    type = Token.Type.BankAccount,
+                    bankAccount = BankAccountFixtures.BANK_ACCOUNT
+                )
+            )
     }
 
     @Test
-    fun parseToken_whenBankAccount_readsObject() {
-        val createdDate = Date(1484765567L * 1000L)
-        val expectedToken = Token(
-            id = "btok_9xJAbronBnS9bH",
-            livemode = false,
-            created = createdDate,
-            used = false,
-            type = Token.TokenType.BANK_ACCOUNT,
-            bankAccount = BankAccountFixtures.BANK_ACCOUNT
-        )
-        val answerToken = TokenFixtures.BANK_TOKEN
-        assertNotNull(answerToken)
-        assertEquals(expectedToken.id, answerToken.id)
-        assertEquals(expectedToken.livemode, answerToken.livemode)
-        assertEquals(expectedToken.created, answerToken.created)
-        assertEquals(expectedToken.used, answerToken.used)
-        assertEquals(Token.TokenType.BANK_ACCOUNT, answerToken.type)
-
-        assertNotNull(answerToken.bankAccount)
-        assertNull(answerToken.card)
+    fun `Token parser should require a non-null id`() {
+        assertThat(TokenJsonParser().parse(RAW_TOKEN_NO_ID))
+            .isNull()
     }
 
     @Test
-    fun parseToken_withoutId_returnsNull() {
-        val token = TokenJsonParser().parse(RAW_TOKEN_NO_ID)
-        assertNull(token)
-    }
-
-    @Test
-    fun parseToken_withoutType_returnsNull() {
-        val token = TokenJsonParser().parse(RAW_BANK_TOKEN_NO_TYPE)
-        assertNull(token)
+    fun `Token parser should require a valid type id`() {
+        assertThat(TokenJsonParser().parse(RAW_BANK_TOKEN_NO_TYPE))
+            .isNull()
     }
 
     private companion object {

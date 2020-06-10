@@ -168,7 +168,7 @@ class CreateCardSourceActivity : AppCompatActivity() {
      * Authenticate the [Source]
      */
     private fun authenticateSource(source: Source) {
-        if (source.flow == Source.SourceFlow.REDIRECT) {
+        if (source.flow == Source.Flow.Redirect) {
             createAuthenticateSourceDialog(source).let {
                 alertDialog = it
                 it.show()

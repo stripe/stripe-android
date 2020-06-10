@@ -14,7 +14,7 @@ import org.robolectric.RobolectricTestRunner
 class PaymentIntentResultTest {
 
     @Test
-    fun testBuilder() {
+    fun `intent should return expected object`() {
         assertThat(PaymentIntentResult(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2).intent)
             .isEqualTo(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2)
     }
@@ -33,18 +33,18 @@ class PaymentIntentResultTest {
             status = StripeIntent.Status.Processing
         )
         val result = PaymentIntentResult(
-            paymentIntent = paymentIntent
+            intent = paymentIntent
         )
         assertThat(result.outcome)
             .isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
     }
 
     @Test
-    fun shouldImplementParcelableCorrectly() {
+    fun `should parcelize correctly`() {
         ParcelUtils.verifyParcelRoundtrip(
             PaymentIntentResult(
-                paymentIntent = PaymentIntentFixtures.PI_REQUIRES_AMEX_3DS2,
-                outcome = StripeIntentResult.Outcome.CANCELED
+                intent = PaymentIntentFixtures.PI_REQUIRES_AMEX_3DS2,
+                outcomeFromFlow = StripeIntentResult.Outcome.CANCELED
             )
         )
     }

@@ -150,7 +150,7 @@ public class StripeTest {
         Card returnedCard = token.getCard();
         assertNotNull(returnedCard);
         assertNull(token.getBankAccount());
-        assertEquals(Token.TokenType.CARD, token.getType());
+        assertEquals(Token.Type.Card, token.getType());
         assertEquals(CARD.getLast4(), returnedCard.getLast4());
         assertEquals(CardBrand.Visa, returnedCard.getBrand());
         assertEquals(CARD.getExpYear(), returnedCard.getExpYear());
@@ -173,7 +173,7 @@ public class StripeTest {
         Card returnedCard = token.getCard();
         assertNotNull(returnedCard);
         assertNull(token.getBankAccount());
-        assertEquals(Token.TokenType.CARD, token.getType());
+        assertEquals(Token.Type.Card, token.getType());
         assertEquals(CARD.getLast4(), returnedCard.getLast4());
         assertEquals(CardBrand.Visa, returnedCard.getBrand());
         assertEquals(CARD.getExpYear(), returnedCard.getExpYear());
@@ -278,7 +278,7 @@ public class StripeTest {
                 BankAccountTokenParamsFixtures.DEFAULT
         );
         assertNotNull(token);
-        assertEquals(Token.TokenType.BANK_ACCOUNT, token.getType());
+        assertEquals(Token.Type.BankAccount, token.getType());
         assertNull(token.getCard());
 
         final BankAccount returnedBankAccount = token.getBankAccount();
@@ -305,19 +305,20 @@ public class StripeTest {
                 "usd",
                 "Example Payer",
                 "abc@def.com",
-                "stripe://start");
+                "stripe://start"
+        );
 
         final Source alipaySource = defaultStripe.createSourceSynchronous(alipayParams);
         assertNotNull(alipaySource);
         assertNotNull(alipaySource.getId());
         assertNotNull(alipaySource.getClientSecret());
         assertEquals(Source.SourceType.ALIPAY, alipaySource.getType());
-        assertEquals("redirect", alipaySource.getFlow());
+        assertEquals(Source.Flow.Redirect, alipaySource.getFlow());
         assertNotNull(alipaySource.getOwner());
         assertEquals("Example Payer", alipaySource.getOwner().getName());
         assertEquals("abc@def.com", alipaySource.getOwner().getEmail());
         assertEquals("usd", alipaySource.getCurrency());
-        assertEquals(Source.Usage.REUSABLE, alipaySource.getUsage());
+        assertEquals(Source.Usage.Reusable, alipaySource.getUsage());
         assertNotNull(alipaySource.getRedirect());
         assertEquals("stripe://start", alipaySource.getRedirect().getReturnUrl());
     }
@@ -339,12 +340,12 @@ public class StripeTest {
         assertNotNull(alipaySource.getAmount());
         assertEquals(1000L, alipaySource.getAmount().longValue());
         assertEquals(Source.SourceType.ALIPAY, alipaySource.getType());
-        assertEquals("redirect", alipaySource.getFlow());
+        assertEquals(Source.Flow.Redirect, alipaySource.getFlow());
         assertNotNull(alipaySource.getOwner());
         assertEquals("Example Payer", alipaySource.getOwner().getName());
         assertEquals("abc@def.com", alipaySource.getOwner().getEmail());
         assertEquals("usd", alipaySource.getCurrency());
-        assertEquals(Source.Usage.SINGLE_USE, alipaySource.getUsage());
+        assertEquals(Source.Usage.SingleUse, alipaySource.getUsage());
         assertNotNull(alipaySource.getRedirect());
         assertEquals("stripe://start", alipaySource.getRedirect().getReturnUrl());
     }
@@ -542,12 +543,12 @@ public class StripeTest {
         assertNotNull(p24Source.getId());
         assertNotNull(p24Source.getClientSecret());
         assertEquals(Source.SourceType.P24, p24Source.getType());
-        assertEquals("redirect", p24Source.getFlow());
+        assertEquals(Source.Flow.Redirect, p24Source.getFlow());
         assertNotNull(p24Source.getOwner());
         assertEquals("Example Payer", p24Source.getOwner().getName());
         assertEquals("abc@def.com", p24Source.getOwner().getEmail());
         assertEquals("eur", p24Source.getCurrency());
-        assertEquals(Source.Usage.SINGLE_USE, p24Source.getUsage());
+        assertEquals(Source.Usage.SingleUse, p24Source.getUsage());
         assertNotNull(p24Source.getRedirect());
         assertEquals("stripe://start", p24Source.getRedirect().getReturnUrl());
     }
@@ -861,13 +862,13 @@ public class StripeTest {
         assertNotNull(token);
 
         final Map<String, String> map = new HashMap<>();
-        map.put("usage", Source.Usage.SINGLE_USE);
+        map.put("usage", "single_use");
         final SourceParams sourceParams = SourceParams.createSourceFromTokenParams(token.getId())
                 .setExtraParams(map);
 
         final Source source = stripe.createSourceSynchronous(sourceParams);
         assertNotNull(source);
-        assertNotNull(Source.Usage.SINGLE_USE, source.getUsage());
+        assertEquals(Source.Usage.SingleUse, source.getUsage());
     }
 
     @Test
@@ -900,7 +901,7 @@ public class StripeTest {
             throws StripeException {
         final Token token = defaultStripe.createPiiTokenSynchronous("0123456789");
         assertNotNull(token);
-        assertEquals(Token.TokenType.PII, token.getType());
+        assertEquals(Token.Type.Pii, token.getType());
         assertFalse(token.getLivemode());
         assertFalse(token.getUsed());
         assertNotNull(token.getId());
@@ -912,7 +913,7 @@ public class StripeTest {
 
         final Token token = defaultStripe.createCvcUpdateTokenSynchronous("1234");
         assertNotNull(token);
-        assertEquals(Token.TokenType.CVC_UPDATE, token.getType());
+        assertEquals(Token.Type.CvcUpdate, token.getType());
         assertFalse(token.getLivemode());
         assertFalse(token.getUsed());
         assertNotNull(token.getId());
@@ -925,7 +926,7 @@ public class StripeTest {
         stripe.createPersonToken(PersonTokenParamsFixtures.PARAMS, tokenCallback);
         verify(tokenCallback).onSuccess(tokenArgumentCaptor.capture());
         final Token token = tokenArgumentCaptor.getValue();
-        assertEquals(Token.TokenType.PERSON, Objects.requireNonNull(token).getType());
+        assertEquals(Token.Type.Person, Objects.requireNonNull(token).getType());
         assertTrue(token.getId().startsWith("cpt_"));
     }
 
@@ -933,7 +934,7 @@ public class StripeTest {
     public void testCreatePersonTokenSynchronous() throws StripeException {
         final Token token =
                 defaultStripe.createPersonTokenSynchronous(PersonTokenParamsFixtures.PARAMS);
-        assertEquals(Token.TokenType.PERSON, Objects.requireNonNull(token).getType());
+        assertEquals(Token.Type.Person, Objects.requireNonNull(token).getType());
         assertTrue(token.getId().startsWith("cpt_"));
     }
 
@@ -952,7 +953,7 @@ public class StripeTest {
                 )
         );
         assertNotNull(token);
-        assertEquals(Token.TokenType.ACCOUNT, token.getType());
+        assertEquals(Token.Type.Account, token.getType());
         assertFalse(token.getLivemode());
         assertFalse(token.getUsed());
         assertNotNull(token.getId());
@@ -972,7 +973,7 @@ public class StripeTest {
                 )
         );
         assertNotNull(token);
-        assertEquals(Token.TokenType.ACCOUNT, token.getType());
+        assertEquals(Token.Type.Account, token.getType());
         assertFalse(token.getLivemode());
         assertFalse(token.getUsed());
         assertNotNull(token.getId());
@@ -992,7 +993,7 @@ public class StripeTest {
                 )
         );
         assertNotNull(token);
-        assertEquals(Token.TokenType.ACCOUNT, token.getType());
+        assertEquals(Token.Type.Account, token.getType());
         assertFalse(token.getLivemode());
         assertFalse(token.getUsed());
         assertNotNull(token.getId());
@@ -1008,7 +1009,7 @@ public class StripeTest {
                 )
         );
         assertNotNull(token);
-        assertEquals(Token.TokenType.ACCOUNT, token.getType());
+        assertEquals(Token.Type.Account, token.getType());
         assertFalse(token.getLivemode());
         assertFalse(token.getUsed());
         assertNotNull(token.getId());
@@ -1019,7 +1020,7 @@ public class StripeTest {
             throws StripeException {
         final Token token = defaultStripe.createAccountTokenSynchronous(AccountParams.create(false));
         assertNotNull(token);
-        assertEquals(Token.TokenType.ACCOUNT, token.getType());
+        assertEquals(Token.Type.Account, token.getType());
         assertFalse(token.getLivemode());
         assertFalse(token.getUsed());
         assertNotNull(token.getId());

@@ -713,7 +713,7 @@ class StripePaymentControllerTest {
         )
         verify(sourceCallback).onSuccess(sourceArgumentCaptor.capture())
         assertEquals(
-            Source.SourceStatus.CHARGEABLE,
+            Source.Status.Chargeable,
             sourceArgumentCaptor.firstValue.status
         )
 
@@ -725,7 +725,7 @@ class StripePaymentControllerTest {
         controller.startAuthenticateSource(
             host = host,
             source = SourceFixtures.SOURCE_WITH_SOURCE_ORDER.copy(
-                flow = Source.SourceFlow.NONE
+                flow = Source.Flow.None
             ),
             requestOptions = REQUEST_OPTIONS
         )
@@ -827,7 +827,7 @@ class StripePaymentControllerTest {
             callback: ApiResultCallback<Source>
         ) {
             callback.onSuccess(
-                SourceFixtures.SOURCE_CARD.copy(status = Source.SourceStatus.CHARGEABLE)
+                SourceFixtures.SOURCE_CARD.copy(status = Source.Status.Chargeable)
             )
         }
     }

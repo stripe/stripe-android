@@ -42,7 +42,7 @@ class StripeEndToEndTest {
                 )
             )
         )
-        assertEquals(Token.TokenType.ACCOUNT, token?.type)
+        assertEquals(Token.Type.Account, token?.type)
     }
 
     @Test
