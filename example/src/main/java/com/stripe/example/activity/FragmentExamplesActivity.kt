@@ -10,40 +10,19 @@ class FragmentExamplesActivity : AppCompatActivity() {
         FragmentsExampleActivityBinding.inflate(layoutInflater)
     }
 
-    private var fragment: FragmentExamplesFragment? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
         setTitle(R.string.launch_payment_session_from_fragment)
 
         if (savedInstanceState == null) {
-            this.fragment = FragmentExamplesFragment().also {
-                supportFragmentManager
-                    .beginTransaction()
-                    .replace(
-                        viewBinding.fragmentContainer.id,
-                        it,
-                        FragmentExamplesFragment::class.java.simpleName
-                    )
-                    .commit()
-            }
-        } else {
-            this.fragment = supportFragmentManager.getFragment(
-                savedInstanceState,
-                STATE_FRAGMENT
-            ) as? FragmentExamplesFragment?
+            supportFragmentManager
+                .beginTransaction()
+                .replace(
+                    viewBinding.fragmentContainer.id,
+                    FragmentExamplesFragment()
+                )
+                .commit()
         }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        fragment?.let {
-            supportFragmentManager.putFragment(outState, STATE_FRAGMENT, it)
-        }
-    }
-
-    private companion object {
-        private const val STATE_FRAGMENT = "state_fragment"
     }
 }
