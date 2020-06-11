@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.Stripe3ds2AuthParams
 import kotlin.test.Test
 import org.json.JSONObject
 import org.junit.runner.RunWith
