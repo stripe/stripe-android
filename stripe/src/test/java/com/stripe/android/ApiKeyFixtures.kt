@@ -17,4 +17,5 @@ internal object ApiKeyFixtures {
     const val EPS_PUBLISHABLE_KEY = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
     const val OXXO_PUBLISHABLE_KEY = "pk_test_bjqpeDIsfh4Bnwok0rtnrS7200PY7PLRfb"
     const val ALIPAY_PUBLISHABLE_KEY = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
+    const val CB_PUBLISHABLE_KEY = "pk_test_51Gsr5VLtxFHECmaoeyWTxRKLZZiks5QKbg5H0IeGd8yt7OzQhA7807thLrHayMOeDRmJv3ara1VYy6AvBXAnUGcB00QAZheC0Z"
 }

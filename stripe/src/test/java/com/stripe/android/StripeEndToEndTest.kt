@@ -11,6 +11,7 @@ import com.stripe.android.model.AccountParams
 import com.stripe.android.model.AddressFixtures
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.Token
@@ -86,6 +87,41 @@ class StripeEndToEndTest {
                 it is InvalidRequestException && it.message == "No such setupintent: seti_abc"
             }
         )
+    }
+
+    @Test
+    fun `createPaymentMethod with CB cards should create expected Networks object`() {
+        val stripe = Stripe(context, ApiKeyFixtures.CB_PUBLISHABLE_KEY)
+        val createPaymentMethod = { number: String ->
+            stripe.createPaymentMethodSynchronous(
+                paymentMethodCreateParams = PaymentMethodCreateParams.create(
+                    card = PaymentMethodCreateParams.Card(
+                        number = number,
+                        expiryMonth = 1,
+                        expiryYear = 2025,
+                        cvc = "123"
+                    )
+                )
+            )
+        }
+
+        assertThat(createPaymentMethod("4000002500001001")?.card?.networks)
+            .isEqualTo(
+                PaymentMethod.Card.Networks(
+                    available = setOf("visa"),
+                    selectionMandatory = false,
+                    preferred = null
+                )
+            )
+
+        assertThat(createPaymentMethod("5555552500001001")?.card?.networks)
+            .isEqualTo(
+                PaymentMethod.Card.Networks(
+                    available = setOf("mastercard"),
+                    selectionMandatory = false,
+                    preferred = null
+                )
+            )
     }
 
     private fun createStripeWithTestScope(
