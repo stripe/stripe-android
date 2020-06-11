@@ -6,6 +6,21 @@
 * [#2544](https://github.com/stripe/stripe-android/pull/2544) Remove deprecated code related to `BankAccount` and `ActivityStarter`
 * [#2545](https://github.com/stripe/stripe-android/pull/2545) Remove deprecated `AccountParams.create()` method
 * [#2546](https://github.com/stripe/stripe-android/pull/2546) Remove deprecated `next_action` data objects from `PaymentIntent` and `SetupIntent`
+* [#2547](https://github.com/stripe/stripe-android/pull/2547) Convert `BankAccount.BankAccountType` to `BankAccount.Type` enum
+* [#2554](https://github.com/stripe/stripe-android/pull/2554) Update `PaymentAuthWebViewActivity`'s back button behavior
+* [#2551](https://github.com/stripe/stripe-android/pull/2551) Fix `StrictMode` `DiskReadViolation` violations
+* [#2555](https://github.com/stripe/stripe-android/pull/2555) Improve `PaymentAuthWebViewActivity`
+* [#2557](https://github.com/stripe/stripe-android/pull/2557) Update 3DS2 SDK to `3.0.3`
+* [#2559](https://github.com/stripe/stripe-android/pull/2559) Represent `PaymentIntent`'s `confirmationMethod` and `captureMethod` as enums
+* [#2561](https://github.com/stripe/stripe-android/pull/2561) Make `CardInputListener.FocusField` an enum
+* [#2562](https://github.com/stripe/stripe-android/pull/2562) Make `SourceTypeModel.Card.ThreeDSecureStatus` an enum
+* [#2563](https://github.com/stripe/stripe-android/pull/2563) Make `PaymentMethod.Card#brand` a `CardBrand`
+* [#2566](https://github.com/stripe/stripe-android/pull/2566) Make `Token.Type` an enum
+* [#2569](https://github.com/stripe/stripe-android/pull/2569) Refactor `Source` class and related classes
+* [#2572](https://github.com/stripe/stripe-android/pull/2572) Fix `StrictMode` `DiskReadViolation` violations when starting 3DS2
+* [#2576](https://github.com/stripe/stripe-android/pull/2576) Add `@JvmOverloads` to `Stripe.confirmAlipayPayment()`
+* [#2577](https://github.com/stripe/stripe-android/pull/2577) Make `CustomerSource#tokenizationMethod` a `TokenizationMethod?`
+* [#2579](https://github.com/stripe/stripe-android/pull/2579) Make `PaymentMethod.Card.Networks` fields public
 
 ## 14.5.0 - 2020-06-04
 * [#2453](https://github.com/stripe/stripe-android/pull/2453) Add `ConfirmPaymentIntentParams#receiptEmail`
