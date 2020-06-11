@@ -1,6 +1,9 @@
 # CHANGELOG
 
 ## 15.0.0 - unreleased
+This release includes several breaking changes.
+See the [migration guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) for more details.
+
 * [#2542](https://github.com/stripe/stripe-android/pull/2542) Use `CustomerSession.stripeAccountId` in `AddPaymentMethodActivity`
 * [#2543](https://github.com/stripe/stripe-android/pull/2543) Target JVM 1.8
 * [#2544](https://github.com/stripe/stripe-android/pull/2544) Remove deprecated code related to `BankAccount` and `ActivityStarter`
@@ -18,7 +21,6 @@
 * [#2566](https://github.com/stripe/stripe-android/pull/2566) Make `Token.Type` an enum
 * [#2569](https://github.com/stripe/stripe-android/pull/2569) Refactor `Source` class and related classes
 * [#2572](https://github.com/stripe/stripe-android/pull/2572) Fix `StrictMode` `DiskReadViolation` violations when starting 3DS2
-* [#2576](https://github.com/stripe/stripe-android/pull/2576) Add `@JvmOverloads` to `Stripe.confirmAlipayPayment()`
 * [#2577](https://github.com/stripe/stripe-android/pull/2577) Make `CustomerSource#tokenizationMethod` a `TokenizationMethod?`
 * [#2579](https://github.com/stripe/stripe-android/pull/2579) Make `PaymentMethod.Card.Networks` fields public
 
