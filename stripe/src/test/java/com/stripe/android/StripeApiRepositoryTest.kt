@@ -81,10 +81,7 @@ class StripeApiRepositoryTest {
     @BeforeTest
     fun before() {
         whenever(fingerprintDataRepository.get()).thenReturn(
-            FingerprintData(
-                guid = UUID.randomUUID().toString(),
-                timestamp = Calendar.getInstance().timeInMillis
-            )
+            FingerprintDataFixtures.create(Calendar.getInstance().timeInMillis)
         )
 
         whenever(stripeApiRequestExecutor.execute(any<FileUploadRequest>()))
@@ -909,11 +906,7 @@ class StripeApiRepositoryTest {
             stripeApiRequestExecutor = stripeApiRequestExecutor,
             analyticsRequestExecutor = analyticsRequestExecutor,
             fingerprintDataRepository = fingerprintDataRepository,
-            fingerprintParamsUtils = FingerprintParamsUtils(
-                ApiFingerprintParamsFactory(
-                    store = FakeClientFingerprintDataStore()
-                )
-            )
+            fingerprintParamsUtils = FingerprintParamsUtils()
         )
     }
 

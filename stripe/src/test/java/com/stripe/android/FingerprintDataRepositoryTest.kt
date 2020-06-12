@@ -9,7 +9,6 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import java.util.Calendar
-import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlin.test.AfterTest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -67,26 +66,6 @@ class FingerprintDataRepositoryTest {
     }
 
     @Test
-    fun `isExpired() when less than 30 minutes have elapsed should return false`() {
-        val fingerprintData = createFingerprintData()
-        assertThat(
-            fingerprintData.isExpired(
-                currentTime = fingerprintData.timestamp + TimeUnit.MINUTES.toMillis(29L)
-            )
-        ).isFalse()
-    }
-
-    @Test
-    fun `isExpired() when more than 30 minutes have elapsed should return true`() {
-        val fingerprintData = createFingerprintData()
-        assertThat(
-            fingerprintData.isExpired(
-                currentTime = fingerprintData.timestamp + TimeUnit.MINUTES.toMillis(31L)
-            )
-        ).isTrue()
-    }
-
-    @Test
     fun `refresh() when advancedFraudSignals is disabled should not fetch FingerprintData`() {
         Stripe.advancedFraudSignalsEnabled = false
 
@@ -108,10 +87,8 @@ class FingerprintDataRepositoryTest {
 
     private companion object {
         fun createFingerprintData(elapsedTime: Long = 0L): FingerprintData {
-            return FingerprintData(
-                guid = UUID.randomUUID().toString(),
-                timestamp = Calendar.getInstance().timeInMillis +
-                    TimeUnit.MINUTES.toMillis(elapsedTime)
+            return FingerprintDataFixtures.create(
+                Calendar.getInstance().timeInMillis + TimeUnit.MINUTES.toMillis(elapsedTime)
             )
         }
     }

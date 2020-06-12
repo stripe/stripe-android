@@ -3,7 +3,6 @@ package com.stripe.android
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import java.io.ByteArrayOutputStream
-import java.util.UUID
 import kotlin.test.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -16,8 +15,8 @@ class FingerprintRequestTest {
 
     private val request =
         FingerprintRequest(
-            params = fingerprintRequestParamsFactory.createParams(),
-            guid = GUID
+            params = fingerprintRequestParamsFactory.createParams(FINGERPRINT_DATA),
+            guid = FINGERPRINT_DATA.guid
         )
 
     @Test
@@ -31,7 +30,7 @@ class FingerprintRequestTest {
         assertThat(request.headers)
             .isEqualTo(
                 mapOf(
-                    "Cookie" to "m=$GUID",
+                    "Cookie" to "m=${FINGERPRINT_DATA.guid}",
                     "User-Agent" to RequestHeadersFactory.getUserAgent(),
                     "Accept-Charset" to "UTF-8"
                 )
@@ -48,6 +47,6 @@ class FingerprintRequestTest {
     }
 
     private companion object {
-        private val GUID = UUID.randomUUID().toString()
+        private val FINGERPRINT_DATA = FingerprintDataFixtures.create()
     }
 }

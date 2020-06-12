@@ -15,10 +15,8 @@ internal class FingerprintRequestParamsFactory @VisibleForTesting internal const
     private val displayMetrics: DisplayMetrics,
     private val packageName: String,
     private val versionName: String?,
-    private val timeZone: String,
-    private val clientFingerprintDataStore: ClientFingerprintDataStore
+    private val timeZone: String
 ) {
-
     private val screen: String =
         "${displayMetrics.widthPixels}w_${displayMetrics.heightPixels}h_${displayMetrics.densityDpi}dpi"
 
@@ -29,18 +27,17 @@ internal class FingerprintRequestParamsFactory @VisibleForTesting internal const
         displayMetrics = context.resources.displayMetrics,
         packageName = context.packageName.orEmpty(),
         versionName = context.packageInfo?.versionName,
-        timeZone = createTimezone(),
-        clientFingerprintDataStore = ClientFingerprintDataStore.Default(context)
+        timeZone = createTimezone()
     )
 
     @JvmSynthetic
-    internal fun createParams(): Map<String, Any> {
+    internal fun createParams(fingerprintData: FingerprintData?): Map<String, Any> {
         return mapOf(
             "v2" to 1,
             "tag" to BuildConfig.VERSION_NAME,
             "src" to "android-sdk",
             "a" to createFirstMap(),
-            "b" to createSecondMap()
+            "b" to createSecondMap(fingerprintData)
         )
     }
 
@@ -53,10 +50,10 @@ internal class FingerprintRequestParamsFactory @VisibleForTesting internal const
         )
     }
 
-    private fun createSecondMap(): Map<String, Any> {
+    private fun createSecondMap(fingerprintData: FingerprintData?): Map<String, Any> {
         return mapOf(
-            "d" to clientFingerprintDataStore.getMuid(),
-            "e" to clientFingerprintDataStore.getSid(),
+            "d" to fingerprintData?.muid.orEmpty(),
+            "e" to fingerprintData?.sid.orEmpty(),
             "k" to packageName,
             "o" to Build.VERSION.RELEASE,
             "p" to Build.VERSION.SDK_INT,

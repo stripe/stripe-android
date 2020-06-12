@@ -5,7 +5,6 @@ import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import java.io.IOException
-import java.util.UUID
 import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -22,21 +21,25 @@ class FingerprintRequestExecutorTest {
     )
 
     @Test
-    fun `execute() when successful should return response with UUID`() {
+    fun `execute() when successful should return non-empty values`() {
         var remoteFingerprintData: FingerprintData? = null
         createFingerprintRequestExecutor().execute(
-            request = fingerprintRequestFactory.create(GUID.toString())
+            request = fingerprintRequestFactory.create(FINGERPRINT_DATA)
         ).observeForever {
             remoteFingerprintData = it
         }
 
-        assertThat(UUID.fromString(remoteFingerprintData?.guid))
-            .isNotNull()
+        assertThat(remoteFingerprintData?.guid)
+            .isNotEmpty()
+        assertThat(remoteFingerprintData?.muid)
+            .isNotEmpty()
+        assertThat(remoteFingerprintData?.sid)
+            .isNotEmpty()
     }
 
     @Test
     fun `execute() when successful should return null`() {
-        val request = fingerprintRequestFactory.create(GUID.toString())
+        val request = fingerprintRequestFactory.create(FINGERPRINT_DATA)
         val connection = mock<StripeConnection>().also {
             whenever(it.responseCode).thenReturn(500)
         }
@@ -63,7 +66,7 @@ class FingerprintRequestExecutorTest {
 
     @Test
     fun `execute() when connection exception should return null`() {
-        val request = fingerprintRequestFactory.create(GUID.toString())
+        val request = fingerprintRequestFactory.create(FINGERPRINT_DATA)
         val connectionFactory = mock<ConnectionFactory>().also {
             whenever(it.create(request)).thenThrow(IOException())
         }
@@ -91,6 +94,6 @@ class FingerprintRequestExecutorTest {
     )
 
     private companion object {
-        private val GUID = UUID.randomUUID()
+        private val FINGERPRINT_DATA = FingerprintDataFixtures.create()
     }
 }

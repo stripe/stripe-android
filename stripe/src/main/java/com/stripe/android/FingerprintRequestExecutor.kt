@@ -2,6 +2,7 @@ package com.stripe.android
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
+import com.stripe.android.model.parsers.FingerprintDataJsonParser
 import java.util.Calendar
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -34,10 +35,8 @@ internal interface FingerprintRequestExecutor {
             connectionFactory.create(request).use { conn ->
                 return runCatching {
                     conn.response.takeIf { it.isOk }?.let {
-                        FingerprintData(
-                            guid = it.body,
-                            timestamp = timestampSupplier()
-                        )
+                        FingerprintDataJsonParser(timestampSupplier)
+                            .parse(it.responseJson)
                     }
                 }.getOrNull()
             }

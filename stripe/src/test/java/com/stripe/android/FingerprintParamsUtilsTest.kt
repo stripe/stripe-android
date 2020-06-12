@@ -6,7 +6,6 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.SourceParams
-import java.util.UUID
 import kotlin.test.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -14,11 +13,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class FingerprintParamsUtilsTest {
 
-    private val fingerprintParamsUtils = FingerprintParamsUtils(
-        ApiFingerprintParamsFactory(
-            store = FakeClientFingerprintDataStore(MUID)
-        )
-    )
+    private val fingerprintParamsUtils = FingerprintParamsUtils()
 
     @Test
     fun addUidParamsToPaymentIntent_withSource_addsParamsAtRightLevel() {
@@ -27,7 +22,7 @@ class FingerprintParamsUtilsTest {
                 ConfirmPaymentIntentParams.PARAM_SOURCE_DATA to
                     SourceParams.createCardParams(CardFixtures.CARD).toParamMap()
             ),
-            fingerprintGuid = GUID.toString()
+            fingerprintData = FINGERPRINT_DATA
         )
 
         assertThat(updatedParams[ConfirmPaymentIntentParams.PARAM_SOURCE_DATA])
@@ -51,8 +46,9 @@ class FingerprintParamsUtilsTest {
                         "exp_year" to 2019,
                         "cvc" to "123"
                     ),
-                    "muid" to MUID.toString(),
-                    "guid" to GUID.toString()
+                    "muid" to FINGERPRINT_DATA.muid,
+                    "guid" to FINGERPRINT_DATA.guid,
+                    "sid" to FINGERPRINT_DATA.sid
                 )
             )
     }
@@ -64,7 +60,7 @@ class FingerprintParamsUtilsTest {
                 PARAM_PAYMENT_METHOD_DATA to
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD.toParamMap()
             ),
-            fingerprintGuid = GUID.toString()
+            fingerprintData = FINGERPRINT_DATA
         )
         assertThat(updatedParams[PARAM_PAYMENT_METHOD_DATA])
             .isEqualTo(
@@ -88,14 +84,14 @@ class FingerprintParamsUtilsTest {
                         "exp_year" to 2024,
                         "cvc" to "111"
                     ),
-                    "muid" to MUID.toString(),
-                    "guid" to GUID.toString()
+                    "muid" to FINGERPRINT_DATA.muid,
+                    "guid" to FINGERPRINT_DATA.guid,
+                    "sid" to FINGERPRINT_DATA.sid
                 )
             )
     }
 
     private companion object {
-        private val GUID = UUID.randomUUID()
-        private val MUID = UUID.randomUUID()
+        private val FINGERPRINT_DATA = FingerprintDataFixtures.create()
     }
 }

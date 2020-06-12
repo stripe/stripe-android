@@ -22,6 +22,6 @@ internal class FingerprintRequest(
         }
 
     private companion object {
-        private const val URL = "https://m.stripe.com/4"
+        private const val URL = "https://m.stripe.com/6"
     }
 }
