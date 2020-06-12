@@ -164,7 +164,21 @@ interface StripeIntent : StripeModel {
                 @Parcelize
                 data class Alipay(
                     val data: String
-                ) : MobileData()
+                ) : MobileData() {
+                    /**
+                     * The alipay data string is formatted as query parameters.
+                     * When authenticate is complete, we make a request to the
+                     * return_url, as a hint to the backend to ping Alipay for
+                     * the updated state
+                     */
+                    val authCompleteUrl: String?
+                    get() = runCatching {
+                        Uri.parse("alipay://url?$data")
+                            .getQueryParameter("return_url")?.takeIf {
+                                Uri.parse(it).host == "hooks.stripe.com"
+                            }
+                    }.getOrNull()
+                }
             }
         }
 
