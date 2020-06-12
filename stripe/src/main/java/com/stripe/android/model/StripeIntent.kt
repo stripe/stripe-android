@@ -168,13 +168,7 @@ interface StripeIntent : StripeModel {
                     /**
                      * The alipay data string is formatted as query parameters.
                      * When authenticate is complete, we make a request to the
-                     * return_url, as a hint to the backend to ping Alipay for
-                     * the updated state
-                     */
-                    /**
-                     * The alipay data string is formatted as query parameters.
-                     * When authenticate is complete, we make a request to the
-                     * return_url, as a hint to the backend to ping Alipay for
+                     * return_url param, as a hint to the backend to ping Alipay for
                      * the updated state
                      */
                     val authCompleteUrl: String? = runCatching {
