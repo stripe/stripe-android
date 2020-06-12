@@ -27,6 +27,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import org.json.JSONException
+import org.json.JSONObject
 
 /**
  * An interface for data operations on Stripe API objects.
@@ -251,4 +252,9 @@ internal interface StripeRepository {
         fileParams: StripeFileParams,
         requestOptions: ApiRequest.Options
     ): StripeFile
+
+    fun retrieveObject(
+        url: String,
+        requestOptions: ApiRequest.Options
+    ): JSONObject
 }

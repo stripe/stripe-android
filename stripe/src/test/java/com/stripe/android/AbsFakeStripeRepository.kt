@@ -22,6 +22,7 @@ import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
+import org.json.JSONObject
 
 internal abstract class AbsFakeStripeRepository : StripeRepository {
 
@@ -252,5 +253,9 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         requestOptions: ApiRequest.Options
     ): StripeFile {
         return StripeFile()
+    }
+
+    override fun retrieveObject(url: String, requestOptions: ApiRequest.Options): JSONObject {
+        return JSONObject()
     }
 }

@@ -51,6 +51,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.Dispatchers
 import org.json.JSONArray
 import org.json.JSONException
+import org.json.JSONObject
 
 /**
  * An implementation of [StripeRepository] that makes network requests to the Stripe API.
@@ -887,6 +888,14 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         )
         fireAnalyticsRequest(AnalyticsEvent.FileCreate, requestOptions.apiKey)
         return StripeFileJsonParser().parse(response.responseJson)
+    }
+
+    override fun retrieveObject(url: String, requestOptions: ApiRequest.Options): JSONObject {
+        val response = makeApiRequest(apiRequestFactory.createGet(
+            url,
+            requestOptions
+        ))
+        return response.responseJson
     }
 
     /**

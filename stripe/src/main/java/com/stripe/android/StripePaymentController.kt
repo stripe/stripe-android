@@ -312,16 +312,17 @@ internal class StripePaymentController internal constructor(
         authenticator: AlipayAuthenticator,
         callback: ApiResultCallback<PaymentIntentResult>
     ) {
+        val requestOptions = ApiRequest.Options(
+            apiKey = publishableKey,
+            stripeAccount = stripeAccountId
+        )
         AlipayAuthenticationTask(
             intent,
             authenticator,
+            stripeRepository,
+            requestOptions,
             object : ApiResultCallback<AlipayAuthResult> {
                 override fun onSuccess(result: AlipayAuthResult) {
-                    val requestOptions = ApiRequest.Options(
-                        apiKey = publishableKey,
-                        stripeAccount = stripeAccountId
-                    )
-
                     stripeRepository.retrieveIntent(
                         intent.clientSecret.orEmpty(),
                         requestOptions,
@@ -346,6 +347,8 @@ internal class StripePaymentController internal constructor(
     internal class AlipayAuthenticationTask(
         private val intent: StripeIntent,
         private val authenticator: AlipayAuthenticator,
+        private val apiRepository: StripeRepository,
+        private val requestOptions: ApiRequest.Options,
         callback: ApiResultCallback<AlipayAuthResult>
     ) : ApiOperation<AlipayAuthResult>(callback = callback) {
         override suspend fun getResult(): AlipayAuthResult {
@@ -355,7 +358,14 @@ internal class StripePaymentController internal constructor(
                     authenticator.onAuthenticationRequest(nextActionData.mobileData.data)
                 return AlipayAuthResult(
                     when (output[RESULT_FIELD]) {
-                        RESULT_CODE_SUCCESS -> StripeIntentResult.Outcome.SUCCEEDED
+                        RESULT_CODE_SUCCESS -> {
+                            nextActionData.mobileData.authCompleteUrl?.let {
+                                runCatching {
+                                    apiRepository.retrieveObject(it, requestOptions)
+                                }
+                            }
+                            StripeIntentResult.Outcome.SUCCEEDED
+                        }
                         RESULT_CODE_FAILED -> StripeIntentResult.Outcome.FAILED
                         RESULT_CODE_CANCELLED -> StripeIntentResult.Outcome.CANCELED
                         else -> StripeIntentResult.Outcome.UNKNOWN
