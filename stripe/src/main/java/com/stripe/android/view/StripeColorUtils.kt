@@ -9,29 +9,16 @@ import android.util.TypedValue
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
-import androidx.annotation.IdRes
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 
 internal class StripeColorUtils(private val context: Context) {
+    val colorAccent: Int = getTypedValue(R.attr.colorAccent).data
+    val colorControlNormal: Int = getTypedValue(R.attr.colorControlNormal).data
+    val textColorPrimary: Int = getTypedValue(R.attr.textColorPrimary).data
+    val textColorSecondary: Int = getTypedValue(R.attr.textColorSecondary).data
 
-    fun getThemeAccentColor(): TypedValue {
-        return getTypedValue(R.attr.colorAccent)
-    }
-
-    fun getThemeColorControlNormal(): TypedValue {
-        return getTypedValue(R.attr.colorControlNormal)
-    }
-
-    fun getThemeTextColorSecondary(): TypedValue {
-        return getTypedValue(R.attr.textColorSecondary)
-    }
-
-    fun getThemeTextColorPrimary(): TypedValue {
-        return getTypedValue(R.attr.textColorPrimary)
-    }
-
-    private fun getTypedValue(@IdRes idRes: Int) = TypedValue().also {
+    private fun getTypedValue(@AttrRes idRes: Int) = TypedValue().also {
         context.theme.resolveAttribute(idRes, it, true)
     }
 

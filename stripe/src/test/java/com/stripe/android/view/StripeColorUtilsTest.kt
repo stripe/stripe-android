@@ -31,8 +31,7 @@ internal class StripeColorUtilsTest {
             PaymentSessionFixtures.PAYMENT_FLOW_ARGS
         ).use { activityScenario ->
             activityScenario.onActivity {
-                @ColorInt val color = StripeColorUtils(it).getThemeAccentColor().data
-                assertThat(Color.alpha(color))
+                assertThat(Color.alpha(StripeColorUtils(it).colorAccent))
                     .isGreaterThan(0)
             }
         }
@@ -44,7 +43,7 @@ internal class StripeColorUtilsTest {
             PaymentSessionFixtures.PAYMENT_FLOW_ARGS
         ).use { activityScenario ->
             activityScenario.onActivity {
-                assertThat(Color.alpha(StripeColorUtils(it).getThemeColorControlNormal().data))
+                assertThat(Color.alpha(StripeColorUtils(it).colorControlNormal))
                     .isGreaterThan(0)
             }
         }
