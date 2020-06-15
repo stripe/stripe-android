@@ -23,6 +23,11 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 * [#2572](https://github.com/stripe/stripe-android/pull/2572) Fix `StrictMode` `DiskReadViolation` violations when starting 3DS2
 * [#2577](https://github.com/stripe/stripe-android/pull/2577) Make `CustomerSource#tokenizationMethod` a `TokenizationMethod?`
 * [#2579](https://github.com/stripe/stripe-android/pull/2579) Make `PaymentMethod.Card.Networks` fields public
+* [#2587](https://github.com/stripe/stripe-android/pull/2587) Fix BouncyCastle Proguard rule
+* [#2594](https://github.com/stripe/stripe-android/pull/2594) Fix vector icon references in layout files
+    * Reduce SDK size by ~30kb
+    * Fix Google Pay icon in `PaymentMethodsActivity`
+* [#2595](https://github.com/stripe/stripe-android/pull/2595) Bump SDK `minSdkVersion` to `21`
 
 ## 14.5.0 - 2020-06-04
 * [#2453](https://github.com/stripe/stripe-android/pull/2453) Add `ConfirmPaymentIntentParams#receiptEmail`
