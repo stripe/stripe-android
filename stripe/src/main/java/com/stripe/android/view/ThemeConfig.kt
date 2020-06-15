@@ -13,21 +13,21 @@ internal class ThemeConfig(context: Context) {
     @ColorInt
     private val selectedColorInt = determineColor(
         context,
-        colorUtils.getThemeAccentColor().data,
+        colorUtils.colorAccent,
         R.color.stripe_accent_color_default
     )
 
     @ColorInt
     private val unselectedColorInt = determineColor(
         context,
-        colorUtils.getThemeColorControlNormal().data,
+        colorUtils.colorControlNormal,
         R.color.stripe_control_normal_color_default
     )
 
     @ColorInt
     private val unselectedTextColorInt = determineColor(
         context,
-        colorUtils.getThemeTextColorSecondary().data,
+        colorUtils.textColorSecondary,
         R.color.stripe_color_text_secondary_default
     )
 

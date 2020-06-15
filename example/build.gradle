@@ -61,10 +61,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
 
-    // Used to debug your Retrofit connections
-    // Do not upgrade as it will require increasing minSdkVersion to 21
-    //noinspection GradleDependency
-    implementation 'com.squareup.okhttp3:logging-interceptor:3.12.3'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.7.2'
 
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.4'
 
@@ -117,7 +114,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion rootProject.ext.compileSdkVersion
         multiDexEnabled true
 

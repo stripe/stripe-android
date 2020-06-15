@@ -25,8 +25,7 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="@dimen/stripe_toolbar_elevation"
-        tools:targetApi="lollipop">
+        android:elevation="@dimen/stripe_toolbar_elevation">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"

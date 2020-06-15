@@ -102,7 +102,7 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
         settings.domStorageEnabled = true
     }
 
-    internal fun loadBlank() {
+    private fun loadBlank() {
         webViewClient?.let {
             it.hasLoadedBlank = true
         }
@@ -117,11 +117,7 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
          * for more context.
          */
         private fun createContext(context: Context): Context {
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                context.createConfigurationContext(Configuration())
-            } else {
-                context
-            }
+            return context.createConfigurationContext(Configuration())
         }
     }
 

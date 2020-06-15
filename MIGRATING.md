@@ -2,6 +2,7 @@
 
 ## Migrating from versions < 15.0.0
 - The SDK now targets JVM 1.8
+- The SDK now requires Android 5.0+ (API level 21+)
 - Changes to `PaymentIntent`
     - `PaymentIntent#captureMethod` is now an enum, `PaymentIntent.CaptureMethod`
         ```kotlin
