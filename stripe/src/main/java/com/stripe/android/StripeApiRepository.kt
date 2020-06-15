@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import android.content.Context
+import android.net.Uri
 import android.util.Pair
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.liveData
@@ -43,6 +44,7 @@ import com.stripe.android.model.parsers.SourceJsonParser
 import com.stripe.android.model.parsers.Stripe3ds2AuthResultJsonParser
 import com.stripe.android.model.parsers.StripeFileJsonParser
 import com.stripe.android.model.parsers.TokenJsonParser
+import com.stripe.android.utils.StripeUrlUtils
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.security.Security
@@ -891,6 +893,9 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     override fun retrieveObject(url: String, requestOptions: ApiRequest.Options): JSONObject {
+        if (!StripeUrlUtils.isStripeUrl(url)) {
+            throw IllegalArgumentException("Unrecognized domain: $url")
+        }
         val response = makeApiRequest(apiRequestFactory.createGet(
             url,
             requestOptions

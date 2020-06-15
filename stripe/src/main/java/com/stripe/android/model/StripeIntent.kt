@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import android.net.Uri
 import android.os.Parcelable
+import com.stripe.android.utils.StripeUrlUtils
 import kotlinx.android.parcel.Parcelize
 
 /**
@@ -174,7 +175,7 @@ interface StripeIntent : StripeModel {
                     val authCompleteUrl: String? = runCatching {
                         Uri.parse("alipay://url?$data")
                             .getQueryParameter("return_url")?.takeIf {
-                                Uri.parse(it).host == "hooks.stripe.com"
+                                StripeUrlUtils.isStripeUrl(it)
                             }
                     }.getOrNull()
                 }
