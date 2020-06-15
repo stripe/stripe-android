@@ -130,8 +130,7 @@ class CreateCardTokenActivity : AppCompatActivity() {
     internal class CreateCardTokenViewModel(
         application: Application
     ) : AndroidViewModel(application) {
-        private val context = application.applicationContext
-        private val stripe = StripeFactory(context).create()
+        private val stripe = StripeFactory(application).create()
 
         fun createCardToken(card: Card): LiveData<Token> {
             val data = MutableLiveData<Token>()

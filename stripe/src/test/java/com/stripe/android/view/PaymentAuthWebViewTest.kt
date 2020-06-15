@@ -3,6 +3,8 @@ package com.stripe.android.view
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.widget.ProgressBar
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
@@ -35,7 +37,7 @@ class PaymentAuthWebViewTest {
             "pi_123_secret_456",
             "stripe://payment_intent_return"
         )
-        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, url)
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, createWebResourceRequest(url))
         verify(activity).finish()
     }
 
@@ -43,7 +45,7 @@ class PaymentAuthWebViewTest {
     fun shouldOverrideUrlLoading_withSetupIntent_shouldSetResult() {
         val url = "stripe://payment_auth?setup_intent=seti_1234" + "&setup_intent_client_secret=seti_1234_secret_5678&source_type=card"
         val paymentAuthWebViewClient = createWebViewClient("seti_1234_secret_5678", "stripe://payment_auth")
-        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, url)
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, createWebResourceRequest(url))
         verify(activity).finish()
     }
 
@@ -51,7 +53,7 @@ class PaymentAuthWebViewTest {
     fun shouldOverrideUrlLoading_withoutReturnUrl_onPaymentIntentImplicitReturnUrl_shouldSetResult() {
         val url = "stripe://payment_intent_return?payment_intent=pi_123&" + "payment_intent_client_secret=pi_123_secret_456&source_type=card"
         val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
-        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, url)
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, createWebResourceRequest(url))
         verify(activity).finish()
     }
 
@@ -59,30 +61,35 @@ class PaymentAuthWebViewTest {
     fun shouldOverrideUrlLoading_withoutReturnUrl_onSetupIntentImplicitReturnUrl_shouldSetResult() {
         val url = "stripe://payment_auth?setup_intent=seti_1234" + "&setup_intent_client_secret=seti_1234_secret_5678&source_type=card"
         val paymentAuthWebViewClient = createWebViewClient("seti_1234_secret_5678")
-        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, url)
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, createWebResourceRequest(url))
         verify(activity).finish()
     }
 
     @Test
     fun shouldOverrideUrlLoading_withoutReturnUrl_shouldNotAutoFinishActivity() {
         val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
-        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView,
-            "https://example.com")
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(
+            webView,
+            createWebResourceRequest("https://example.com")
+        )
         verify(activity, never()).finish()
     }
 
     @Test
     fun shouldOverrideUrlLoading_withKnownReturnUrl_shouldFinish() {
         val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
-        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView,
-            "stripejs://use_stripe_sdk/return_url")
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(
+            webView,
+            createWebResourceRequest("stripejs://use_stripe_sdk/return_url")
+        )
         verify(activity).finish()
     }
 
     @Test
     fun onPageFinished_wit3DSecureCompleteUrl_shouldFinish() {
         val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
-        paymentAuthWebViewClient.onPageFinished(webView,
+        paymentAuthWebViewClient.onPageFinished(
+            webView,
             "https://hooks.stripe.com/3d_secure/complete/tdsrc_1ExLWoCRMbs6FrXfjPJRYtng")
         verify(activity).finish()
     }
@@ -99,14 +106,14 @@ class PaymentAuthWebViewTest {
     fun shouldOverrideUrlLoading_withOpaqueUri_shouldNotCrash() {
         val url = "mailto:patrick@example.com?payment_intent=pi_123&" + "payment_intent_client_secret=pi_123_secret_456&source_type=card"
         val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
-        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, url)
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, createWebResourceRequest(url))
     }
 
     @Test
     fun shouldOverrideUrlLoading_withUnsupportedDeeplink_shouldFinish() {
         val url = "deep://link"
         val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
-        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, url)
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, createWebResourceRequest(url))
         verify(activity).finish()
     }
 
@@ -114,7 +121,7 @@ class PaymentAuthWebViewTest {
     fun shouldOverloadUrlLoading_withAlipayDeeplink_shouldNotFinishActivity() {
         val url = "alipays://link"
         val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
-        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, url)
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, createWebResourceRequest(url))
         verify(activity, never()).finish()
     }
 
@@ -122,7 +129,7 @@ class PaymentAuthWebViewTest {
     fun shouldOverrideUrlLoading_withIntentUri_shouldParseUri() {
         val deepLink = "intent://example.com/#Intent;scheme=https;action=android.intent.action.VIEW;end"
         val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
-        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, deepLink)
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, createWebResourceRequest(deepLink))
         verify(packageManager).resolveActivity(
             intentArgumentCaptor.capture(),
             eq(PackageManager.MATCH_DEFAULT_ONLY)
@@ -136,7 +143,7 @@ class PaymentAuthWebViewTest {
     fun shouldOverrideUrlLoading_withAuthenticationUrlWithReturnUrlParam_shouldPopulateCompletionUrl() {
         val url = "https://hooks.stripe.com/three_d_secure/authenticate?amount=1250&client_secret=src_client_secret_abc123&return_url=https%3A%2F%2Fhooks.stripe.com%2Fredirect%2Fcomplete%2Fsrc_X9Y8Z7%3Fclient_secret%3Dsrc_client_secret_abc123&source=src_X9Y8Z7&usage=single_use"
         val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
-        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, url)
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, createWebResourceRequest(url))
         assertEquals(
             "https://hooks.stripe.com/redirect/complete/src_X9Y8Z7?client_secret=src_client_secret_abc123",
             paymentAuthWebViewClient.completionUrlParam
@@ -147,7 +154,7 @@ class PaymentAuthWebViewTest {
     fun shouldOverrideUrlLoading_withAuthenticationUrlWithoutReturnUrlParam_shouldNotPopulateCompletionUrl() {
         val url = "https://hooks.stripe.com/three_d_secure/authenticate?amount=1250&client_secret=src_client_secret_abc123&return_url=&source=src_X9Y8Z7&usage=single_use"
         val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
-        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, url)
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, createWebResourceRequest(url))
         assertNull(paymentAuthWebViewClient.completionUrlParam)
     }
 
@@ -163,5 +170,20 @@ class PaymentAuthWebViewTest {
             clientSecret,
             returnUrl
         )
+    }
+
+    private fun createWebResourceRequest(url: String): WebResourceRequest {
+        return object : WebResourceRequest {
+            override fun getUrl(): Uri = Uri.parse(url)
+
+            override fun isRedirect(): Boolean = false
+
+            override fun getMethod(): String = "GET"
+
+            override fun getRequestHeaders(): MutableMap<String, String> = mutableMapOf()
+            override fun hasGesture(): Boolean = true
+
+            override fun isForMainFrame(): Boolean = true
+        }
     }
 }

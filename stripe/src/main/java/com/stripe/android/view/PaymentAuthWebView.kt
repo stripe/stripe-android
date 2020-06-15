@@ -1,14 +1,12 @@
 package com.stripe.android.view
 
 import android.annotation.SuppressLint
-import android.annotation.TargetApi
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.net.Uri
-import android.os.Build
 import android.util.AttributeSet
 import android.view.View
 import android.webkit.ConsoleMessage
@@ -102,7 +100,7 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
         settings.domStorageEnabled = true
     }
 
-    internal fun loadBlank() {
+    private fun loadBlank() {
         webViewClient?.let {
             it.hasLoadedBlank = true
         }
@@ -117,11 +115,7 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
          * for more context.
          */
         private fun createContext(context: Context): Context {
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                context.createConfigurationContext(Configuration())
-            } else {
-                context
-            }
+            return context.createConfigurationContext(Configuration())
         }
     }
 
@@ -175,28 +169,6 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
             return false
         }
 
-        override fun shouldOverrideUrlLoading(view: WebView, urlString: String): Boolean {
-            logger.debug("PaymentAuthWebViewClient#shouldOverrideUrlLoading() - $urlString")
-            val uri = Uri.parse(urlString)
-            updateCompletionUrl(uri)
-
-            return if (isReturnUrl(uri)) {
-                logger.debug("PaymentAuthWebViewClient#shouldOverrideUrlLoading() - handle return URL")
-                onAuthCompleted()
-                true
-            } else if ("intent".equals(uri.scheme, ignoreCase = true)) {
-                openIntentScheme(uri)
-                true
-            } else if (!URLUtil.isNetworkUrl(uri.toString())) {
-                // Non-network URLs are likely deep-links into banking apps. If the deep-link can be
-                // opened via an Intent, start it. Otherwise, stop the authentication attempt.
-                openIntent(Intent(Intent.ACTION_VIEW, uri))
-                true
-            } else {
-                super.shouldOverrideUrlLoading(view, urlString)
-            }
-        }
-
         private fun openIntentScheme(uri: Uri) {
             logger.debug("PaymentAuthWebViewClient#openIntentScheme()")
             runCatching {
@@ -233,13 +205,29 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
             }
         }
 
-        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
         override fun shouldOverrideUrlLoading(
             view: WebView,
             request: WebResourceRequest
         ): Boolean {
-            logger.debug("PaymentAuthWebViewClient#shouldOverrideUrlLoading(WebResourceRequest)")
-            return shouldOverrideUrlLoading(view, request.url.toString())
+            val url = request.url
+            logger.debug("PaymentAuthWebViewClient#shouldOverrideUrlLoading() - $url")
+            updateCompletionUrl(url)
+
+            return if (isReturnUrl(url)) {
+                logger.debug("PaymentAuthWebViewClient#shouldOverrideUrlLoading() - handle return URL")
+                onAuthCompleted()
+                true
+            } else if ("intent".equals(url.scheme, ignoreCase = true)) {
+                openIntentScheme(url)
+                true
+            } else if (!URLUtil.isNetworkUrl(url.toString())) {
+                // Non-network URLs are likely deep-links into banking apps. If the deep-link can be
+                // opened via an Intent, start it. Otherwise, stop the authentication attempt.
+                openIntent(Intent(Intent.ACTION_VIEW, url))
+                true
+            } else {
+                super.shouldOverrideUrlLoading(view, request)
+            }
         }
 
         private fun isReturnUrl(uri: Uri): Boolean {
