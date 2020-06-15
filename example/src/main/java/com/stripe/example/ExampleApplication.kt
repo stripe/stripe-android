@@ -1,7 +1,7 @@
 package com.stripe.example
 
+import android.app.Application
 import android.os.StrictMode
-import androidx.multidex.MultiDexApplication
 import com.facebook.stetho.Stetho
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
@@ -10,7 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class ExampleApplication : MultiDexApplication() {
+class ExampleApplication : Application() {
 
     override fun onCreate() {
         PaymentConfiguration.init(this, Settings(this).publishableKey)
