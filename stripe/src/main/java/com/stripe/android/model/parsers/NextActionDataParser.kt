@@ -22,7 +22,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
         override fun parse(json: JSONObject): StripeIntent.NextActionData.DisplayOxxoDetails? {
             return StripeIntent.NextActionData.DisplayOxxoDetails(
                 expiresAfter = json.optInt(FIELD_EXPIRES_AFTER),
-                number = StripeJsonUtils.optString(json, FIELD_NUMBER)
+                number = optString(json, FIELD_NUMBER)
             )
         }
 
@@ -86,7 +86,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
 
     private class SdkDataJsonParser : ModelJsonParser<StripeIntent.NextActionData.SdkData> {
         override fun parse(json: JSONObject): StripeIntent.NextActionData.SdkData? {
-            return when (StripeJsonUtils.optString(json, FIELD_TYPE)) {
+            return when (optString(json, FIELD_TYPE)) {
                 TYPE_3DS1 -> StripeIntent.NextActionData.SdkData.Use3DS1(
                     json.optString(FIELD_STRIPE_JS)
                 )
