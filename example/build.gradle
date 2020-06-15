@@ -121,6 +121,8 @@ android {
         targetSdkVersion rootProject.ext.compileSdkVersion
         multiDexEnabled true
 
+        vectorDrawables.useSupportLibrary = true
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments clearPackageData: 'true'
 
