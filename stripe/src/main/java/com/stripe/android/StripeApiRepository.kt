@@ -43,6 +43,7 @@ import com.stripe.android.model.parsers.SourceJsonParser
 import com.stripe.android.model.parsers.Stripe3ds2AuthResultJsonParser
 import com.stripe.android.model.parsers.StripeFileJsonParser
 import com.stripe.android.model.parsers.TokenJsonParser
+import com.stripe.android.utils.StripeUrlUtils
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.security.Security
@@ -51,6 +52,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.Dispatchers
 import org.json.JSONArray
 import org.json.JSONException
+import org.json.JSONObject
 
 /**
  * An implementation of [StripeRepository] that makes network requests to the Stripe API.
@@ -887,6 +889,20 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         )
         fireAnalyticsRequest(AnalyticsEvent.FileCreate, requestOptions.apiKey)
         return StripeFileJsonParser().parse(response.responseJson)
+    }
+
+    @Throws(IllegalArgumentException::class, InvalidRequestException::class,
+        APIConnectionException::class, APIException::class,
+        CardException::class, AuthenticationException::class)
+    override fun retrieveObject(url: String, requestOptions: ApiRequest.Options): JSONObject {
+        if (!StripeUrlUtils.isStripeUrl(url)) {
+            throw IllegalArgumentException("Unrecognized domain: $url")
+        }
+        val response = makeApiRequest(apiRequestFactory.createGet(
+            url,
+            requestOptions
+        ))
+        return response.responseJson
     }
 
     /**
