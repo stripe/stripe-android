@@ -41,5 +41,4 @@ class StripeUrlUtilsTest {
     fun `isStripeUrl does not allow other domains`() {
         assertThat(StripeUrlUtils.isStripeUrl("https://fakestripe.com")).isFalse()
     }
-
 }

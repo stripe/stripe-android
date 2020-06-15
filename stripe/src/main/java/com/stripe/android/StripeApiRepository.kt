@@ -1,7 +1,6 @@
 package com.stripe.android
 
 import android.content.Context
-import android.net.Uri
 import android.util.Pair
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.liveData
