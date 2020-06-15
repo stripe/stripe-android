@@ -163,16 +163,21 @@ interface StripeIntent : StripeModel {
 
             sealed class MobileData : StripeModel {
                 @Parcelize
-                data class Alipay(
-                    val data: String
+                data class Alipay constructor(
+                    val data: String,
+                    val authCompleteUrl: String?
                 ) : MobileData() {
+                    constructor(data: String) : this(data, extractReturnUrl(data))
+                }
+
+                private companion object {
                     /**
                      * The alipay data string is formatted as query parameters.
                      * When authenticate is complete, we make a request to the
                      * return_url param, as a hint to the backend to ping Alipay for
                      * the updated state
                      */
-                    val authCompleteUrl: String? = runCatching {
+                    private fun extractReturnUrl(data: String): String? = runCatching {
                         Uri.parse("alipay://url?$data")
                             .getQueryParameter("return_url")?.takeIf {
                                 StripeUrlUtils.isStripeUrl(it)
