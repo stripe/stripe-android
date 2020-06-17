@@ -14,10 +14,10 @@ import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import com.google.android.material.textfield.TextInputEditText
 import com.stripe.android.R
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -33,8 +33,10 @@ open class StripeEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle,
-    private val workScope: CoroutineScope = CoroutineScope(Dispatchers.IO + Job())
+    workDispatcher: CoroutineContext = Dispatchers.IO
 ) : TextInputEditText(context, attrs, defStyleAttr) {
+    internal val job = Job()
+    private val workScope: CoroutineScope = CoroutineScope(workDispatcher + job)
 
     protected var isLastKeyDelete: Boolean = false
 
@@ -195,7 +197,7 @@ open class StripeEditText @JvmOverloads constructor(
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        workScope.cancel()
+        job.cancel()
     }
 
     private fun determineDefaultErrorColor() {

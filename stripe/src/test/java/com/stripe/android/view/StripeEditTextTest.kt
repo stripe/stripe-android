@@ -12,7 +12,6 @@ import com.stripe.android.testharness.ViewTestUtils
 import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.runner.RunWith
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
@@ -25,11 +24,11 @@ class StripeEditTextTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val afterTextChangedListener: StripeEditText.AfterTextChangedListener = mock()
     private val deleteEmptyListener: StripeEditText.DeleteEmptyListener = mock()
-    private val testScope = TestCoroutineScope(TestCoroutineDispatcher())
+    private val testDispatcher = TestCoroutineDispatcher()
 
     private val editText = StripeEditText(
         context,
-        workScope = testScope
+        workDispatcher = testDispatcher
     ).also {
         it.setDeleteEmptyListener(deleteEmptyListener)
         it.setAfterTextChangedListener(afterTextChangedListener)
@@ -137,13 +136,28 @@ class StripeEditTextTest {
 
     @Test
     fun `setHintDelayed should set hint after delay`() {
-        val delay = 100L
+        assertThat(editText.hint)
+            .isNull()
+        editText.setHintDelayed("Here's a hint", DELAY)
+        testDispatcher.advanceTimeBy(DELAY + 10)
+        assertThat(editText.hint)
+            .isEqualTo("Here's a hint")
+    }
+
+    @Test
+    fun `setHintDelayed when Job is canceled before delay should not set hint`() {
+        assertThat(editText.hint)
+            .isNull()
+        editText.setHintDelayed("Here's a hint", DELAY)
+        testDispatcher.advanceTimeBy(DELAY - 10)
+
+        editText.job.cancel()
 
         assertThat(editText.hint)
             .isNull()
-        editText.setHintDelayed("Here's a hint", delay)
-        testScope.advanceTimeBy(delay + 10)
-        assertThat(editText.hint)
-            .isEqualTo("Here's a hint")
+    }
+
+    private companion object {
+        private const val DELAY = 100L
     }
 }
