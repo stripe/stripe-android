@@ -4,47 +4,40 @@ import android.content.Context
 import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.stripe.android.R
 import com.stripe.android.testharness.ViewTestUtils
-import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.runner.RunWith
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
-/**
- * Test class for [StripeEditText].
- */
 @RunWith(RobolectricTestRunner::class)
+@ExperimentalCoroutinesApi
 class StripeEditTextTest {
 
+    private val context: Context = ApplicationProvider.getApplicationContext()
     private val afterTextChangedListener: StripeEditText.AfterTextChangedListener = mock()
     private val deleteEmptyListener: StripeEditText.DeleteEmptyListener = mock()
-    private val editText: StripeEditText by lazy {
-        StripeEditText(context)
-    }
+    private val testDispatcher = TestCoroutineDispatcher()
 
-    private val context: Context = ApplicationProvider.getApplicationContext()
-
-    @BeforeTest
-    fun setup() {
-        MockitoAnnotations.initMocks(this)
-
-        editText.setText("")
-        editText.setDeleteEmptyListener(deleteEmptyListener)
-        editText.setAfterTextChangedListener(afterTextChangedListener)
+    private val editText = StripeEditText(
+        context,
+        workDispatcher = testDispatcher
+    ).also {
+        it.setDeleteEmptyListener(deleteEmptyListener)
+        it.setAfterTextChangedListener(afterTextChangedListener)
     }
 
     @Test
     fun deleteText_whenZeroLength_callsDeleteListener() {
         ViewTestUtils.sendDeleteKeyEvent(editText)
-        verify<StripeEditText.DeleteEmptyListener>(deleteEmptyListener).onDeleteEmpty()
+        verify(deleteEmptyListener).onDeleteEmpty()
         verifyNoMoreInteractions(afterTextChangedListener)
     }
 
@@ -52,25 +45,25 @@ class StripeEditTextTest {
     fun addText_callsAppropriateListeners() {
         editText.append("1")
         verifyNoMoreInteractions(deleteEmptyListener)
-        verify<StripeEditText.AfterTextChangedListener>(afterTextChangedListener)
+        verify(afterTextChangedListener)
             .onTextChanged("1")
     }
 
     @Test
     fun deleteText_whenNonZeroLength_callsAppropriateListeners() {
         editText.append("1")
-        reset<StripeEditText.AfterTextChangedListener>(afterTextChangedListener)
+        reset(afterTextChangedListener)
 
         ViewTestUtils.sendDeleteKeyEvent(editText)
         verifyNoMoreInteractions(deleteEmptyListener)
-        verify<StripeEditText.AfterTextChangedListener>(afterTextChangedListener)
+        verify(afterTextChangedListener)
             .onTextChanged("")
     }
 
     @Test
     fun deleteText_whenSelectionAtBeginningButLengthNonZero_doesNotCallListener() {
         editText.append("12")
-        verify<StripeEditText.AfterTextChangedListener>(afterTextChangedListener)
+        verify(afterTextChangedListener)
             .onTextChanged("12")
         editText.setSelection(0)
         ViewTestUtils.sendDeleteKeyEvent(editText)
@@ -83,29 +76,25 @@ class StripeEditTextTest {
         editText.append("123")
         // Doing this four times because we need to delete all three items, then jump back.
 
-        for (i in 0..3) {
+        repeat(4) {
             ViewTestUtils.sendDeleteKeyEvent(editText)
         }
 
-        verify<StripeEditText.DeleteEmptyListener>(deleteEmptyListener).onDeleteEmpty()
+        verify(deleteEmptyListener).onDeleteEmpty()
     }
 
     @Test
     fun getDefaultErrorColorInt_onDarkTheme_returnsDarkError() {
         editText.setTextColor(ContextCompat.getColor(context, android.R.color.primary_text_dark))
-        @ColorInt val colorInt = editText.defaultErrorColorInt
-        @ColorInt val expectedErrorInt = ContextCompat.getColor(context,
-            R.color.stripe_error_text_dark_theme)
-        assertEquals(expectedErrorInt, colorInt)
+        assertThat(editText.defaultErrorColorInt)
+            .isEqualTo(ContextCompat.getColor(context, R.color.stripe_error_text_dark_theme))
     }
 
     @Test
     fun getDefaultErrorColorInt_onLightTheme_returnsLightError() {
         editText.setTextColor(ContextCompat.getColor(context, android.R.color.primary_text_light))
-        @ColorInt val colorInt = editText.defaultErrorColorInt
-        @ColorInt val expectedErrorInt =
-            ContextCompat.getColor(context, R.color.stripe_error_text_light_theme)
-        assertEquals(expectedErrorInt, colorInt)
+        assertThat(editText.defaultErrorColorInt)
+            .isEqualTo(ContextCompat.getColor(context, R.color.stripe_error_text_light_theme))
     }
 
     @Test
@@ -115,19 +104,21 @@ class StripeEditTextTest {
         editText.setErrorColor(blueError)
         editText.shouldShowError = true
         val currentColorInt = editText.textColors.defaultColor
-        assertEquals(blueError, currentColorInt)
+        assertThat(currentColorInt)
+            .isEqualTo(blueError)
     }
 
     @Test
     fun getCachedColorStateList_afterInit_returnsNotNull() {
-        assertNotNull(editText.cachedColorStateList)
+        assertThat(editText.cachedColorStateList)
+            .isNotNull()
     }
 
     @Test
     fun setShouldShowError_whenErrorColorNotSet_shouldUseDefaultErrorColor() {
         editText.shouldShowError = true
-        assertEquals(ContextCompat.getColor(context, R.color.stripe_error_text_light_theme),
-            editText.textColors.defaultColor)
+        assertThat(editText.textColors.defaultColor)
+            .isEqualTo(ContextCompat.getColor(context, R.color.stripe_error_text_light_theme))
     }
 
     @Test
@@ -135,9 +126,38 @@ class StripeEditTextTest {
         editText.errorMessage = "There was an error!"
 
         editText.shouldShowError = true
-        assertEquals(-1369050, editText.currentTextColor)
+        assertThat(editText.currentTextColor)
+            .isEqualTo(-1369050)
 
         editText.shouldShowError = false
-        assertEquals(-570425344, editText.currentTextColor)
+        assertThat(editText.currentTextColor)
+            .isEqualTo(-570425344)
+    }
+
+    @Test
+    fun `setHintDelayed should set hint after delay`() {
+        assertThat(editText.hint)
+            .isNull()
+        editText.setHintDelayed("Here's a hint", DELAY)
+        testDispatcher.advanceTimeBy(DELAY + 10)
+        assertThat(editText.hint)
+            .isEqualTo("Here's a hint")
+    }
+
+    @Test
+    fun `setHintDelayed when Job is canceled before delay should not set hint`() {
+        assertThat(editText.hint)
+            .isNull()
+        editText.setHintDelayed("Here's a hint", DELAY)
+        testDispatcher.advanceTimeBy(DELAY - 10)
+
+        editText.job.cancel()
+
+        assertThat(editText.hint)
+            .isNull()
+    }
+
+    private companion object {
+        private const val DELAY = 100L
     }
 }
