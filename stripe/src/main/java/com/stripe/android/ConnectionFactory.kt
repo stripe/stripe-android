@@ -19,7 +19,6 @@ internal interface ConnectionFactory {
                 connectTimeout = CONNECT_TIMEOUT
                 readTimeout = READ_TIMEOUT
                 useCaches = false
-                sslSocketFactory = SSL_SOCKET_FACTORY
                 requestMethod = request.method.code
 
                 request.headers.forEach { (key, value) ->
@@ -41,7 +40,6 @@ internal interface ConnectionFactory {
         }
 
         private companion object {
-            private val SSL_SOCKET_FACTORY = StripeSSLSocketFactory()
             private val CONNECT_TIMEOUT = TimeUnit.SECONDS.toMillis(30).toInt()
             private val READ_TIMEOUT = TimeUnit.SECONDS.toMillis(80).toInt()
 

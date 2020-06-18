@@ -56,7 +56,7 @@ internal class StripePaymentController internal constructor(
     private val config: PaymentAuthConfig =
         PaymentAuthConfig.get(),
     private val threeDs2Service: StripeThreeDs2Service =
-        StripeThreeDs2ServiceImpl(context, StripeSSLSocketFactory(), enableLogging),
+        StripeThreeDs2ServiceImpl(context, null, enableLogging),
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
         AnalyticsRequestExecutor.Default(Logger.getInstance(enableLogging)),
     private val analyticsDataFactory: AnalyticsDataFactory =
