@@ -68,7 +68,7 @@ class StripePaymentControllerTest {
     private val paymentRelayStarter: PaymentRelayStarter = mock()
     private val analyticsRequestExecutor: AnalyticsRequestExecutor = mock()
     private val challengeFlowStarter: StripePaymentController.ChallengeFlowStarter = mock()
-    private val challengeProgressDialogActivityStarter: StripePaymentController.ChallengeProgressDialogActivityStarter = mock()
+    private val challengeProgressActivityStarter: StripePaymentController.ChallengeProgressActivityStarter = mock()
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val controller: PaymentController by lazy {
         createController()
@@ -129,7 +129,7 @@ class StripePaymentControllerTest {
         verify(challengeFlowStarter)
             .start(any())
 
-        verify(challengeProgressDialogActivityStarter).start(
+        verify(challengeProgressActivityStarter).start(
             eq(activity),
             eq("mastercard"),
             eq(false),
@@ -182,7 +182,7 @@ class StripePaymentControllerTest {
         verify(challengeFlowStarter)
             .start(any())
 
-        verify(challengeProgressDialogActivityStarter).start(
+        verify(challengeProgressActivityStarter).start(
             eq(activity),
             eq("american_express"),
             eq(false),
@@ -780,7 +780,7 @@ class StripePaymentControllerTest {
             analyticsRequestExecutor,
             analyticsDataFactory,
             challengeFlowStarter,
-            challengeProgressDialogActivityStarter,
+            challengeProgressActivityStarter,
             testScope
         )
     }
