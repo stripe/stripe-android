@@ -28,7 +28,10 @@ class FpxViewModelTest {
 
     @Test
     fun `getFpxBankStatues should update LiveData`() {
-        val viewModel = FpxViewModel(application, workContext = testDispatcher)
+        val viewModel = FpxViewModel(
+            application,
+            workDispatcher = testDispatcher
+        )
         testDispatcher.runBlockingTest {
             var bankStatuses: FpxBankStatuses? = null
             viewModel.getFpxBankStatues().observeForever {
