@@ -66,7 +66,7 @@ class StripeApiRepositoryTest {
     private val stripeApiRepository = StripeApiRepository(
         context,
         DEFAULT_OPTIONS.apiKey,
-        workContext = testDispatcher
+        workDispatcher = testDispatcher
     )
     private val fileFactory = FileFactory(context)
 

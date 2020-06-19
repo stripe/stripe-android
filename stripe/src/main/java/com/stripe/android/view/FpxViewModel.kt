@@ -8,25 +8,25 @@ import com.stripe.android.ApiRequest
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.StripeApiRepository
 import com.stripe.android.model.FpxBankStatuses
-import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancelChildren
 
 internal class FpxViewModel @JvmOverloads internal constructor(
     application: Application,
-    private val workContext: CoroutineContext = Dispatchers.IO
+    private val workDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : AndroidViewModel(application) {
     private val publishableKey = PaymentConfiguration.getInstance(application).publishableKey
     private val stripeRepository = StripeApiRepository(
         application,
         publishableKey,
-        workContext = workContext
+        workDispatcher = workDispatcher
     )
 
     internal var selectedPosition: Int? = null
 
     @JvmSynthetic
-    internal fun getFpxBankStatues() = liveData<FpxBankStatuses>(workContext) {
+    internal fun getFpxBankStatues() = liveData<FpxBankStatuses>(workDispatcher) {
         emitSource(
             runCatching {
                 stripeRepository.getFpxBankStatus(ApiRequest.Options(publishableKey))
@@ -36,6 +36,6 @@ internal class FpxViewModel @JvmOverloads internal constructor(
 
     override fun onCleared() {
         super.onCleared()
-        workContext.cancelChildren()
+        workDispatcher.cancelChildren()
     }
 }
