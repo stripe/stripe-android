@@ -90,6 +90,14 @@ class AddPaymentMethodActivity : StripeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         configureView(args)
+        setResult(
+            Activity.RESULT_OK,
+            Intent()
+                .putExtras(
+                    AddPaymentMethodActivityStarter.Result.Canceled
+                        .toBundle()
+                )
+        )
     }
 
     override fun onResume() {
@@ -207,15 +215,21 @@ class AddPaymentMethodActivity : StripeActivity() {
                 })
             },
             onFailure = {
-                finish()
+                finishWithResult(AddPaymentMethodActivityStarter.Result.Failure(it))
             }
         )
     }
 
     private fun finishWithPaymentMethod(paymentMethod: PaymentMethod) {
+        finishWithResult(AddPaymentMethodActivityStarter.Result.Success(paymentMethod))
+    }
+
+    private fun finishWithResult(result: AddPaymentMethodActivityStarter.Result) {
         isProgressBarVisible = false
-        setResult(Activity.RESULT_OK, Intent()
-            .putExtras(AddPaymentMethodActivityStarter.Result(paymentMethod).toBundle()))
+        setResult(
+            Activity.RESULT_OK,
+            Intent().putExtras(result.toBundle())
+        )
         finish()
     }
 

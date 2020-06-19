@@ -100,6 +100,35 @@
         ```kotlin
         PaymentConfiguration.init(context, "pk_test", "acct_1234")
         ```
+    - `AddPaymentMethodActivity.Result` is now a sealed class with `Success`, `Failure`, and `Canceled` subclasses
+        ```kotlin
+        // before
+        val result = AddPaymentMethodActivityStarter.Result.fromIntent(
+            intent
+        )
+        when {
+            result != null -> result.paymentMethod
+            else -> {
+                // error happened or customer canceled
+            }
+        }
+    
+        // after
+        val result = AddPaymentMethodActivityStarter.Result.fromIntent(
+            intent
+        )
+        when (result) {
+            is AddPaymentMethodActivityStarter.Result.Success -> {
+                result.paymentMethod
+            }
+            is AddPaymentMethodActivityStarter.Result.Failure -> {
+                result.exception
+            }
+            is AddPaymentMethodActivityStarter.Result.Canceled -> {
+                // customer canceled
+            }
+        }
+        ```
 - Changes to `Source`
     - `Source.SourceFlow` has been renamed to `Source.Flow` and is now an enum
     - `Source.SourceStatus` has been renamed to `Source.Status` and is now an enum
