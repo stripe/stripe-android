@@ -17,7 +17,6 @@ import java.lang.RuntimeException
 
 internal class AddPaymentMethodViewModel(
     private val stripe: Stripe,
-    private val customerSession: CustomerSession,
     private val args: AddPaymentMethodActivityStarter.Args,
     private val errorMessageTranslator: ErrorMessageTranslator =
         TranslatorManager.getErrorMessageTranslator()
@@ -47,7 +46,10 @@ internal class AddPaymentMethodViewModel(
     }
 
     @JvmSynthetic
-    internal fun attachPaymentMethod(paymentMethod: PaymentMethod): LiveData<Result<PaymentMethod>> {
+    internal fun attachPaymentMethod(
+        customerSession: CustomerSession,
+        paymentMethod: PaymentMethod
+    ): LiveData<Result<PaymentMethod>> {
         val resultData = MutableLiveData<Result<PaymentMethod>>()
         customerSession.attachPaymentMethod(
             paymentMethodId = paymentMethod.id.orEmpty(),
@@ -79,13 +81,10 @@ internal class AddPaymentMethodViewModel(
 
     internal class Factory(
         private val stripe: Stripe,
-        private val customerSession: CustomerSession,
         private val args: AddPaymentMethodActivityStarter.Args
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return AddPaymentMethodViewModel(
-                stripe, customerSession, args
-            ) as T
+            return AddPaymentMethodViewModel(stripe, args) as T
         }
     }
 }

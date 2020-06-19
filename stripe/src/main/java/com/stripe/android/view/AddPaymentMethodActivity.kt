@@ -60,14 +60,14 @@ class AddPaymentMethodActivity : StripeActivity() {
         }
     }
 
-    private val customerSession: CustomerSession by lazy {
-        CustomerSession.getInstance()
-    }
-
     private val viewModel: AddPaymentMethodViewModel by lazy {
-        ViewModelProvider(this, AddPaymentMethodViewModel.Factory(
-            stripe, customerSession, args
-        ))[AddPaymentMethodViewModel::class.java]
+        ViewModelProvider(
+            this,
+            AddPaymentMethodViewModel.Factory(
+                stripe,
+                args
+            )
+        )[AddPaymentMethodViewModel::class.java]
     }
 
     private val titleStringRes: Int
@@ -189,17 +189,27 @@ class AddPaymentMethodActivity : StripeActivity() {
     }
 
     private fun attachPaymentMethodToCustomer(paymentMethod: PaymentMethod) {
-        viewModel.attachPaymentMethod(
-            paymentMethod
-        ).observe(this, Observer { result ->
-            result.fold(
-                onSuccess = ::finishWithPaymentMethod,
-                onFailure = {
-                    isProgressBarVisible = false
-                    showError(it.message.orEmpty())
-                }
-            )
-        })
+        runCatching {
+            CustomerSession.getInstance()
+        }.fold(
+            onSuccess = { customerSession ->
+                viewModel.attachPaymentMethod(
+                    customerSession,
+                    paymentMethod
+                ).observe(this, Observer { result ->
+                    result.fold(
+                        onSuccess = ::finishWithPaymentMethod,
+                        onFailure = {
+                            isProgressBarVisible = false
+                            showError(it.message.orEmpty())
+                        }
+                    )
+                })
+            },
+            onFailure = {
+                finish()
+            }
+        )
     }
 
     private fun finishWithPaymentMethod(paymentMethod: PaymentMethod) {

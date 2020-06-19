@@ -10,11 +10,13 @@ import android.widget.TextView
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
@@ -36,7 +38,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.never
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
@@ -125,7 +126,7 @@ class AddPaymentMethodActivityTest {
                 val progressBar: ProgressBar = activity.findViewById(R.id.progress_bar)
                 assertEquals(View.GONE, progressBar.visibility)
 
-                `when`(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
+                whenever(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
                     .thenReturn(createSuccessLiveData(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
                 activity.createPaymentMethod(
                     viewModel, PaymentMethodCreateParamsFixtures.DEFAULT_CARD
@@ -145,7 +146,7 @@ class AddPaymentMethodActivityTest {
 
                 assertEquals(View.GONE, progressBar.visibility)
 
-                `when`(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_FPX))
+                whenever(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_FPX))
                     .thenReturn(createSuccessLiveData(PaymentMethodFixtures.FPX_PAYMENT_METHOD))
                 activity.createPaymentMethod(viewModel, PaymentMethodCreateParamsFixtures.DEFAULT_FPX)
 
@@ -250,7 +251,7 @@ class AddPaymentMethodActivityTest {
                 assertEquals(View.GONE, progressBar.visibility)
                 assertTrue(cardMultilineWidget.isEnabled)
 
-                `when`(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
+                whenever(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
                     .thenReturn(createSuccessLiveData(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
                 activity.createPaymentMethod(viewModel, PaymentMethodCreateParamsFixtures.DEFAULT_CARD)
                 assertEquals(View.VISIBLE, progressBar.visibility)
@@ -287,7 +288,7 @@ class AddPaymentMethodActivityTest {
                 val progressBar: ProgressBar = activity.findViewById(R.id.progress_bar)
                 assertEquals(View.GONE, progressBar.visibility)
 
-                `when`(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
+                whenever(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
                     .thenReturn(createErrorLiveData())
                 activity.createPaymentMethod(
                     viewModel, PaymentMethodCreateParamsFixtures.DEFAULT_CARD
@@ -314,7 +315,7 @@ class AddPaymentMethodActivityTest {
                 assertEquals(View.GONE, progressBar.visibility)
                 assertTrue(cardMultilineWidget.isEnabled)
 
-                `when`(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
+                whenever(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
                     .thenReturn(createSuccessLiveData(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
                 activity.createPaymentMethod(viewModel, PaymentMethodCreateParamsFixtures.DEFAULT_CARD)
 
@@ -338,7 +339,7 @@ class AddPaymentMethodActivityTest {
                 assertEquals(EXPECTED_PAYMENT_METHOD.id, paymentMethodIdCaptor.firstValue)
 
                 val error: StripeException = mock()
-                `when`(error.localizedMessage).thenReturn(ERROR_MESSAGE)
+                whenever(error.localizedMessage).thenReturn(ERROR_MESSAGE)
                 listenerArgumentCaptor.firstValue.onError(400, ERROR_MESSAGE, null)
 
                 val intent = shadowOf(activity).resultIntent
@@ -347,6 +348,27 @@ class AddPaymentMethodActivityTest {
                 assertEquals(View.GONE, progressBar.visibility)
 
                 verifyDialogWithMessage(ERROR_MESSAGE)
+            }
+        }
+    }
+
+    @Test
+    fun `createPaymentMethod when CustomerSession is null and should attach should finish Activity`() {
+        CustomerSession.instance = null
+
+        whenever(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
+            .thenReturn(createSuccessLiveData(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
+
+        activityScenarioFactory.create<AddPaymentMethodActivity>(
+            createArgs(PaymentMethod.Type.Card)
+        ).use { activityScenario ->
+            activityScenario.onActivity { activity ->
+                activity.createPaymentMethod(
+                    viewModel,
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+                )
+                assertThat(activity.isFinishing)
+                    .isTrue()
             }
         }
     }

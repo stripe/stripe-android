@@ -62,7 +62,10 @@ class AddPaymentMethodViewModelTest {
     fun attachPaymentMethod_whenError_returnsError() {
         var throwable: Throwable? = null
         createViewModel()
-            .attachPaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD).observeForever {
+            .attachPaymentMethod(
+                customerSession,
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            ).observeForever {
                 throwable = it.exceptionOrNull()
             }
 
@@ -92,7 +95,10 @@ class AddPaymentMethodViewModelTest {
     fun attachPaymentMethod_withCustomErrorMessageTranslator_whenError_returnsLocalizedError() {
         var throwable: Throwable? = null
         createViewModel(translator = TRANSLATOR)
-            .attachPaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD).observeForever {
+            .attachPaymentMethod(
+                customerSession,
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            ).observeForever {
                 throwable = it.exceptionOrNull()
             }
 
@@ -124,7 +130,6 @@ class AddPaymentMethodViewModelTest {
     ): AddPaymentMethodViewModel {
         return AddPaymentMethodViewModel(
             stripe,
-            customerSession,
             AddPaymentMethodActivityStarter.Args.Builder().build(),
             translator
         )
