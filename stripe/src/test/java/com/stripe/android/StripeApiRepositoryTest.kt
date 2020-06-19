@@ -688,6 +688,23 @@ class StripeApiRepositoryTest {
     }
 
     @Test
+    fun getFpxBankStatus_withFpxKey_ignoresStripeAccountId() {
+        testScope.runBlockingTest {
+            var fpxBankStatuses: FpxBankStatuses? = null
+            stripeApiRepository.getFpxBankStatus(
+                ApiRequest.Options(
+                    apiKey = ApiKeyFixtures.FPX_PUBLISHABLE_KEY,
+                    stripeAccount = "acct_1234"
+                )
+            ).observeForever {
+                fpxBankStatuses = it
+            }
+            assertThat(fpxBankStatuses?.isOnline(FpxBank.Hsbc))
+                .isTrue()
+        }
+    }
+
+    @Test
     fun cancelPaymentIntentSource_whenAlreadyCanceled_throwsInvalidRequestException() {
         val exception = assertFailsWith<InvalidRequestException> {
             stripeApiRepository.cancelPaymentIntentSource(
