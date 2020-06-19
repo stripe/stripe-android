@@ -62,7 +62,7 @@ class AddPaymentMethodActivityTest {
     fun setup() {
         // The input in this test class will be invalid after 2050. Please update the test.
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
-        PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        PaymentConfiguration.init(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
         CustomerSession.instance = customerSession
     }
 
@@ -84,7 +84,7 @@ class AddPaymentMethodActivityTest {
     @Test
     fun testConstructionForCustomerSession() {
         activityScenarioFactory.create<AddPaymentMethodActivity>(
-            createArgs(PaymentMethod.Type.Card, true)
+            createArgs(PaymentMethod.Type.Card)
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
                 val cardMultilineWidget: CardMultilineWidget =
@@ -134,10 +134,7 @@ class AddPaymentMethodActivityTest {
     @Test
     fun addFpx_whenServerReturnsSuccessAndUpdatesCustomer_finishesWithIntent() {
         activityScenarioFactory.create<AddPaymentMethodActivity>(
-            createArgs(
-                PaymentMethod.Type.Fpx,
-                initCustomerSessionTokens = true
-            )
+            createArgs(PaymentMethod.Type.Fpx)
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
                 val progressBar: ProgressBar = activity.findViewById(R.id.progress_bar)
@@ -170,7 +167,6 @@ class AddPaymentMethodActivityTest {
         activityScenarioFactory.create<AddPaymentMethodActivity>(
             createArgs(
                 PaymentMethod.Type.Card,
-                initCustomerSessionTokens = true,
                 billingAddressFields = BillingAddressFields.Full
             )
         ).use { activityScenario ->
@@ -195,7 +191,6 @@ class AddPaymentMethodActivityTest {
         activityScenarioFactory.create<AddPaymentMethodActivity>(
             createArgs(
                 PaymentMethod.Type.Card,
-                initCustomerSessionTokens = true,
                 billingAddressFields = BillingAddressFields.PostalCode
             )
         ).use { activityScenario ->
@@ -220,7 +215,6 @@ class AddPaymentMethodActivityTest {
         activityScenarioFactory.create<AddPaymentMethodActivity>(
             createArgs(
                 PaymentMethod.Type.Card,
-                initCustomerSessionTokens = true,
                 billingAddressFields = BillingAddressFields.None
             )
         ).use { activityScenario ->
@@ -243,10 +237,7 @@ class AddPaymentMethodActivityTest {
     @Test
     fun addCardData_whenServerReturnsSuccessAndUpdatesCustomer_finishesWithIntent() {
         activityScenarioFactory.create<AddPaymentMethodActivity>(
-            createArgs(
-                PaymentMethod.Type.Card,
-                initCustomerSessionTokens = true
-            )
+            createArgs(PaymentMethod.Type.Card)
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
                 val progressBar: ProgressBar = activity.findViewById(R.id.progress_bar)
@@ -310,10 +301,7 @@ class AddPaymentMethodActivityTest {
     @Test
     fun addCardData_whenPaymentMethodCreateWorksButAddToCustomerFails_showErrorNotFinish() {
         activityScenarioFactory.create<AddPaymentMethodActivity>(
-            createArgs(
-                PaymentMethod.Type.Card,
-                initCustomerSessionTokens = true
-            )
+            createArgs(PaymentMethod.Type.Card)
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
                 val progressBar: ProgressBar = activity.findViewById(R.id.progress_bar)
@@ -382,13 +370,11 @@ class AddPaymentMethodActivityTest {
 
     private fun createArgs(
         paymentMethodType: PaymentMethod.Type,
-        initCustomerSessionTokens: Boolean = false,
         billingAddressFields: BillingAddressFields = BillingAddressFields.PostalCode
     ): AddPaymentMethodActivityStarter.Args {
         return AddPaymentMethodActivityStarter.Args.Builder()
             .setShouldAttachToCustomer(true)
             .setIsPaymentSessionActive(true)
-            .setShouldInitCustomerSessionTokens(initCustomerSessionTokens)
             .setPaymentMethodType(paymentMethodType)
             .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
             .setBillingAddressFields(billingAddressFields)
