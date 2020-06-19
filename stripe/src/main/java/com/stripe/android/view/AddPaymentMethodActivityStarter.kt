@@ -40,7 +40,6 @@ class AddPaymentMethodActivityStarter : ActivityStarter<AddPaymentMethodActivity
         internal val billingAddressFields: BillingAddressFields,
         internal val shouldAttachToCustomer: Boolean,
         internal val isPaymentSessionActive: Boolean,
-        internal val shouldInitCustomerSessionTokens: Boolean,
         internal val paymentMethodType: PaymentMethod.Type,
         internal val paymentConfiguration: PaymentConfiguration?,
         @LayoutRes internal val addPaymentMethodFooterLayoutId: Int,
@@ -51,7 +50,6 @@ class AddPaymentMethodActivityStarter : ActivityStarter<AddPaymentMethodActivity
             private var billingAddressFields: BillingAddressFields = BillingAddressFields.PostalCode
             private var shouldAttachToCustomer: Boolean = false
             private var isPaymentSessionActive = false
-            private var shouldInitCustomerSessionTokens = true
             private var paymentMethodType: PaymentMethod.Type? = PaymentMethod.Type.Card
             private var paymentConfiguration: PaymentConfiguration? = null
             private var windowFlags: Int? = null
@@ -113,13 +111,6 @@ class AddPaymentMethodActivityStarter : ActivityStarter<AddPaymentMethodActivity
             }
 
             @JvmSynthetic
-            internal fun setShouldInitCustomerSessionTokens(
-                shouldInitCustomerSessionTokens: Boolean
-            ): Builder = apply {
-                this.shouldInitCustomerSessionTokens = shouldInitCustomerSessionTokens
-            }
-
-            @JvmSynthetic
             internal fun setPaymentConfiguration(
                 paymentConfiguration: PaymentConfiguration?
             ): Builder = apply {
@@ -131,7 +122,6 @@ class AddPaymentMethodActivityStarter : ActivityStarter<AddPaymentMethodActivity
                     billingAddressFields = billingAddressFields,
                     shouldAttachToCustomer = shouldAttachToCustomer,
                     isPaymentSessionActive = isPaymentSessionActive,
-                    shouldInitCustomerSessionTokens = shouldInitCustomerSessionTokens,
                     paymentMethodType = paymentMethodType ?: PaymentMethod.Type.Card,
                     paymentConfiguration = paymentConfiguration,
                     addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId,
