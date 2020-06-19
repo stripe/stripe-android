@@ -68,9 +68,38 @@
             else -> {}
         }
         ```
+- Changes to `CustomerSession`
+    - `CustomerSession`'s constructor no longer takes a `stripeAccountId`;
+      instead, instantiate `PaymentConfiguration` with a `stripeAccountId`
+        ```kotlin
+        // before
+        PaymentConfiguration.init(
+            context,
+            "pk_test"
+        )
+        CustomerSession.initCustomerSession(
+            context
+            ephemeralKeyProvider,
+            "acct_1234"
+        )
+
+        // after
+        PaymentConfiguration.init(
+            context,
+            "pk_test",
+            "acct_1234"
+        )
+        CustomerSession.initCustomerSession(
+            context
+            ephemeralKeyProvider
+        )
+        ```
 - Changes to `AddPaymentMethodActivity`
-    - When `CustomerSession` is instantiated with a `stripeAccountId`, it will be used in `AddPaymentMethodActivity`
+    - When `PaymentConfiguration` is instantiated with a `stripeAccountId`, it will be used in `AddPaymentMethodActivity`
       when creating a payment method
+        ```kotlin
+        PaymentConfiguration.init(context, "pk_test", "acct_1234")
+        ```
 - Changes to `Source`
     - `Source.SourceFlow` has been renamed to `Source.Flow` and is now an enum
     - `Source.SourceStatus` has been renamed to `Source.Status` and is now an enum

@@ -6,7 +6,11 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class PaymentConfiguration internal constructor(val publishableKey: String) : Parcelable {
+data class PaymentConfiguration internal constructor(
+    val publishableKey: String,
+    val stripeAccountId: String? = null
+) : Parcelable {
+
     init {
         ApiKeyValidator.get().requireValid(publishableKey)
     }
@@ -19,16 +23,23 @@ data class PaymentConfiguration internal constructor(val publishableKey: String)
             context.applicationContext.getSharedPreferences(NAME, 0)
 
         @JvmSynthetic
-        internal fun save(publishableKey: String) {
+        internal fun save(
+            publishableKey: String,
+            stripeAccountId: String?
+        ) {
             prefs.edit()
                 .putString(KEY_PUBLISHABLE_KEY, publishableKey)
+                .putString(KEY_ACCOUNT_ID, stripeAccountId)
                 .apply()
         }
 
         @JvmSynthetic
         internal fun load(): PaymentConfiguration? {
             return prefs.getString(KEY_PUBLISHABLE_KEY, null)?.let { publishableKey ->
-                PaymentConfiguration(publishableKey)
+                PaymentConfiguration(
+                    publishableKey = publishableKey,
+                    stripeAccountId = prefs.getString(KEY_ACCOUNT_ID, null)
+                )
             }
         }
 
@@ -36,6 +47,7 @@ data class PaymentConfiguration internal constructor(val publishableKey: String)
             private val NAME = PaymentConfiguration::class.java.canonicalName
 
             private const val KEY_PUBLISHABLE_KEY = "key_publishable_key"
+            private const val KEY_ACCOUNT_ID = "key_account_id"
         }
     }
 
@@ -68,9 +80,21 @@ data class PaymentConfiguration internal constructor(val publishableKey: String)
          * A publishable key from the Dashboard's [API keys](https://dashboard.stripe.com/apikeys) page.
          */
         @JvmStatic
-        fun init(context: Context, publishableKey: String) {
-            instance = PaymentConfiguration(publishableKey)
-            Store(context).save(publishableKey)
+        @JvmOverloads
+        fun init(
+            context: Context,
+            publishableKey: String,
+            stripeAccountId: String? = null
+        ) {
+            instance = PaymentConfiguration(
+                publishableKey = publishableKey,
+                stripeAccountId = stripeAccountId
+            )
+            Store(context)
+                .save(
+                    publishableKey = publishableKey,
+                    stripeAccountId = stripeAccountId
+                )
 
             FingerprintDataRepository.Default(context).refresh()
         }
