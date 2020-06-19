@@ -32,7 +32,7 @@ import com.stripe.android.stripe3ds2.transaction.RuntimeErrorEvent
 import com.stripe.android.stripe3ds2.transaction.Stripe3ds2ActivityStarterHost
 import com.stripe.android.stripe3ds2.transaction.StripeChallengeStatusReceiver
 import com.stripe.android.stripe3ds2.transaction.Transaction
-import com.stripe.android.stripe3ds2.views.ChallengeProgressDialogActivity
+import com.stripe.android.stripe3ds2.views.ChallengeProgressActivity
 import com.stripe.android.view.AuthActivityStarter
 import com.stripe.android.view.Stripe3ds2CompletionActivity
 import java.security.cert.CertificateException
@@ -56,14 +56,14 @@ internal class StripePaymentController internal constructor(
     private val config: PaymentAuthConfig =
         PaymentAuthConfig.get(),
     private val threeDs2Service: StripeThreeDs2Service =
-        StripeThreeDs2ServiceImpl(context, null, enableLogging),
+        StripeThreeDs2ServiceImpl(context, enableLogging),
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
         AnalyticsRequestExecutor.Default(Logger.getInstance(enableLogging)),
     private val analyticsDataFactory: AnalyticsDataFactory =
         AnalyticsDataFactory(context.applicationContext, publishableKey),
     private val challengeFlowStarter: ChallengeFlowStarter = ChallengeFlowStarter.Default(),
-    private val challengeProgressDialogActivityStarter: ChallengeProgressDialogActivityStarter =
-        ChallengeProgressDialogActivityStarter.Default(),
+    private val challengeProgressActivityStarter: ChallengeProgressActivityStarter =
+        ChallengeProgressActivityStarter.Default(),
     private val workScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 ) : PaymentController {
     private val logger = Logger.getInstance(enableLogging)
@@ -600,7 +600,7 @@ internal class StripePaymentController internal constructor(
             challengeCompletionRequestCode = getRequestCode(stripeIntent)
         )
 
-        challengeProgressDialogActivityStarter.start(
+        challengeProgressActivityStarter.start(
             activity,
             stripe3ds2Fingerprint.directoryServer.networkName,
             false,
@@ -995,7 +995,7 @@ internal class StripePaymentController internal constructor(
         }
     }
 
-    internal interface ChallengeProgressDialogActivityStarter {
+    internal interface ChallengeProgressActivityStarter {
         fun start(
             context: Context,
             directoryServerName: String,
@@ -1003,14 +1003,14 @@ internal class StripePaymentController internal constructor(
             uiCustomization: StripeUiCustomization
         )
 
-        class Default : ChallengeProgressDialogActivityStarter {
+        class Default : ChallengeProgressActivityStarter {
             override fun start(
                 context: Context,
                 directoryServerName: String,
                 cancelable: Boolean,
                 uiCustomization: StripeUiCustomization
             ) {
-                ChallengeProgressDialogActivity.show(
+                ChallengeProgressActivity.show(
                     context,
                     directoryServerName,
                     cancelable,
