@@ -62,7 +62,11 @@ class AddPaymentMethodActivityTest {
     fun setup() {
         // The input in this test class will be invalid after 2050. Please update the test.
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
-        PaymentConfiguration.init(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        PaymentConfiguration.init(
+            context,
+            ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            "acct_12345"
+        )
         CustomerSession.instance = customerSession
     }
 

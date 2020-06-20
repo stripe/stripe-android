@@ -42,7 +42,7 @@ class AddPaymentMethodActivity : StripeActivity() {
         Stripe(
             applicationContext,
             publishableKey = paymentConfiguration.publishableKey,
-            stripeAccountId = customerSession.stripeAccountId
+            stripeAccountId = paymentConfiguration.stripeAccountId
         )
     }
 
