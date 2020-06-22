@@ -55,8 +55,10 @@ public class FpxPaymentActivity extends AppCompatActivity {
 
         final AddPaymentMethodActivityStarter.Result result =
                 AddPaymentMethodActivityStarter.Result.fromIntent(data);
-        if (result != null) {
-            onPaymentMethodResult(result.getPaymentMethod());
+        if (result instanceof AddPaymentMethodActivityStarter.Result.Success) {
+            final AddPaymentMethodActivityStarter.Result.Success successResult =
+                    (AddPaymentMethodActivityStarter.Result.Success) result;
+            onPaymentMethodResult(successResult.getPaymentMethod());
         }
     }
 

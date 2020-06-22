@@ -35,7 +35,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never
@@ -159,10 +158,9 @@ class AddPaymentMethodActivityTest {
                 )
 
                 assertEquals(RESULT_OK, activityScenario.result.resultCode)
-                val paymentMethod = getPaymentMethodFromIntent(
-                    activityScenario.result.resultData
-                )
-                assertEquals(expectedPaymentMethod, paymentMethod)
+                assertThat(
+                    getPaymentMethodFromIntent(activityScenario.result.resultData)
+                ).isEqualTo(expectedPaymentMethod)
             }
         }
     }
@@ -294,7 +292,12 @@ class AddPaymentMethodActivityTest {
                     viewModel, PaymentMethodCreateParamsFixtures.DEFAULT_CARD
                 )
 
-                assertNull(shadowOf(activity).resultIntent)
+                val result = AddPaymentMethodActivityStarter.Result.fromIntent(
+                    shadowOf(activity).resultIntent
+                )
+                assertThat(result)
+                    .isEqualTo(AddPaymentMethodActivityStarter.Result.Canceled)
+
                 assertFalse(activity.isFinishing)
                 assertEquals(View.GONE, progressBar.visibility)
 
@@ -328,12 +331,11 @@ class AddPaymentMethodActivityTest {
                     listenerArgumentCaptor.capture()
                 )
 
-                assertEquals(
-                    setOf(
-                        AddPaymentMethodActivity.PRODUCT_TOKEN,
-                        PaymentSession.PRODUCT_TOKEN
-                    ),
+                assertThat(
                     productUsageArgumentCaptor.firstValue
+                ).containsExactly(
+                    AddPaymentMethodActivity.PRODUCT_TOKEN,
+                    PaymentSession.PRODUCT_TOKEN
                 )
 
                 assertEquals(EXPECTED_PAYMENT_METHOD.id, paymentMethodIdCaptor.firstValue)
@@ -342,8 +344,12 @@ class AddPaymentMethodActivityTest {
                 whenever(error.localizedMessage).thenReturn(ERROR_MESSAGE)
                 listenerArgumentCaptor.firstValue.onError(400, ERROR_MESSAGE, null)
 
-                val intent = shadowOf(activity).resultIntent
-                assertNull(intent)
+                val result = AddPaymentMethodActivityStarter.Result.fromIntent(
+                    shadowOf(activity).resultIntent
+                )
+                assertThat(result)
+                    .isEqualTo(AddPaymentMethodActivityStarter.Result.Canceled)
+
                 assertFalse(activity.isFinishing)
                 assertEquals(View.GONE, progressBar.visibility)
 
@@ -367,6 +373,13 @@ class AddPaymentMethodActivityTest {
                     viewModel,
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD
                 )
+
+                val result = AddPaymentMethodActivityStarter.Result.fromIntent(
+                    shadowOf(activity).resultIntent
+                ) as? AddPaymentMethodActivityStarter.Result.Failure
+                assertThat(result?.exception?.message)
+                    .isEqualTo("Attempted to get instance of CustomerSession without initialization.")
+
                 assertThat(activity.isFinishing)
                     .isTrue()
             }
@@ -384,14 +397,17 @@ class AddPaymentMethodActivityTest {
 
     private fun verifyFinishesWithResult(activityResult: Instrumentation.ActivityResult) {
         assertEquals(RESULT_OK, activityResult.resultCode)
-        val paymentMethod = getPaymentMethodFromIntent(activityResult.resultData)
-        assertEquals(EXPECTED_PAYMENT_METHOD, paymentMethod)
+        assertThat(getPaymentMethodFromIntent(activityResult.resultData))
+            .isEqualTo(EXPECTED_PAYMENT_METHOD)
     }
 
-    private fun getPaymentMethodFromIntent(intent: Intent): PaymentMethod {
+    private fun getPaymentMethodFromIntent(intent: Intent): PaymentMethod? {
         val result =
-            requireNotNull(AddPaymentMethodActivityStarter.Result.fromIntent(intent))
-        return result.paymentMethod
+            AddPaymentMethodActivityStarter.Result.fromIntent(intent)
+        return when (result) {
+            is AddPaymentMethodActivityStarter.Result.Success -> result.paymentMethod
+            else -> null
+        }
     }
 
     private fun createArgs(

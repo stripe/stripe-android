@@ -24,8 +24,9 @@ class AddPaymentMethodActivityStarterTest {
 
     @Test
     fun testResultParceling() {
-        val result =
-            AddPaymentMethodActivityStarter.Result(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        val result = AddPaymentMethodActivityStarter.Result.Success(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        )
         assertEquals(result, ParcelUtils.create(result))
     }
 }

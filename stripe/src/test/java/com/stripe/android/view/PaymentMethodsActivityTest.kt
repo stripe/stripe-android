@@ -169,7 +169,10 @@ class PaymentMethodsActivityTest {
                 assertNotNull(paymentMethod)
 
                 val resultIntent = Intent()
-                    .putExtras(AddPaymentMethodActivityStarter.Result(paymentMethod).toBundle())
+                    .putExtras(
+                        AddPaymentMethodActivityStarter.Result.Success(paymentMethod)
+                            .toBundle()
+                    )
                 activity.onActivityResult(
                     AddPaymentMethodActivityStarter.REQUEST_CODE, RESULT_OK, resultIntent
                 )
