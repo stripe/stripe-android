@@ -68,6 +68,8 @@
             else -> {}
         }
         ```
+- Changes to `PaymentSession`
+    - Remove `PaymentSession#ActivityPaymentSessionListener`
 - Changes to `CustomerSession`
     - `CustomerSession`'s constructor no longer takes a `stripeAccountId`;
       instead, instantiate `PaymentConfiguration` with a `stripeAccountId`
@@ -94,6 +96,8 @@
             ephemeralKeyProvider
         )
         ```
+    - Remove `CustomerSession#ActivityCustomerRetrievalListener`, `CustomerSession#ActivityPaymentMethodRetrievalListener`,
+      `CustomerSession#ActivityPaymentMethodsRetrievalListener`, and `CustomerSession#ActivitySourceRetrievalListener`
 - Changes to `AddPaymentMethodActivity`
     - When `PaymentConfiguration` is instantiated with a `stripeAccountId`, it will be used in `AddPaymentMethodActivity`
       when creating a payment method

@@ -22,7 +22,6 @@ import com.stripe.android.view.PaymentFlowActivity
 import com.stripe.android.view.PaymentFlowActivityStarter
 import com.stripe.android.view.PaymentMethodsActivity
 import com.stripe.android.view.PaymentMethodsActivityStarter
-import java.lang.ref.WeakReference
 
 /**
  * Represents a single start-to-finish payment operation.
@@ -309,19 +308,6 @@ class PaymentSession @VisibleForTesting internal constructor(
          * @param data the updated [PaymentSessionData]
          */
         fun onPaymentSessionDataChanged(data: PaymentSessionData)
-    }
-
-    /**
-     * Abstract implementation of [PaymentSessionListener] that holds a
-     * [WeakReference] to an `Activity` object.
-     */
-    abstract class ActivityPaymentSessionListener<A : Activity>(
-        activity: A
-    ) : PaymentSessionListener {
-        private val activityRef: WeakReference<A> = WeakReference(activity)
-
-        protected val listenerActivity: A?
-            get() = activityRef.get()
     }
 
     internal companion object {
