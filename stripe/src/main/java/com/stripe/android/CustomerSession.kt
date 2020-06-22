@@ -1,6 +1,5 @@
 package com.stripe.android
 
-import android.app.Activity
 import android.content.Context
 import android.os.Handler
 import androidx.annotation.IntRange
@@ -12,7 +11,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.Source
 import com.stripe.android.model.Source.SourceType
-import java.lang.ref.WeakReference
 import java.util.Calendar
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
@@ -465,12 +463,6 @@ class CustomerSession @VisibleForTesting internal constructor(
         return listeners.remove(operationId) as L?
     }
 
-    abstract class ActivityCustomerRetrievalListener<A : Activity?>(activity: A) : CustomerRetrievalListener {
-        private val activityRef: WeakReference<A> = WeakReference(activity)
-        protected val activity: A?
-            get() = activityRef.get()
-    }
-
     interface CustomerRetrievalListener : RetrievalListener {
         fun onCustomerRetrieved(customer: Customer)
     }
@@ -489,36 +481,6 @@ class CustomerSession @VisibleForTesting internal constructor(
 
     interface RetrievalListener {
         fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?)
-    }
-
-    /**
-     * Abstract implementation of [PaymentMethodsRetrievalListener] that holds a
-     * [WeakReference] to an `Activity` object.
-     */
-    abstract class ActivityPaymentMethodsRetrievalListener<A : Activity?>(activity: A) : PaymentMethodsRetrievalListener {
-        private val activityRef: WeakReference<A> = WeakReference(activity)
-        protected val activity: A?
-            get() = activityRef.get()
-    }
-
-    /**
-     * Abstract implementation of [SourceRetrievalListener] that holds a
-     * [WeakReference] to an `Activity` object.
-     */
-    abstract class ActivitySourceRetrievalListener<A : Activity?>(activity: A) : SourceRetrievalListener {
-        private val activityRef: WeakReference<A> = WeakReference(activity)
-        protected val activity: A?
-            get() = activityRef.get()
-    }
-
-    /**
-     * Abstract implementation of [PaymentMethodRetrievalListener] that holds a
-     * [WeakReference] to an `Activity` object.
-     */
-    abstract class ActivityPaymentMethodRetrievalListener<A : Activity?>(activity: A) : PaymentMethodRetrievalListener {
-        private val activityRef: WeakReference<A> = WeakReference(activity)
-        protected val activity: A?
-            get() = activityRef.get()
     }
 
     companion object {
