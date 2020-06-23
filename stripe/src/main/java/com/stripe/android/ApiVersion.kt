@@ -15,6 +15,12 @@ internal data class ApiVersion internal constructor(internal val code: String) {
         return code
     }
 
+    fun withBetas(betas: Set<StripeApiBeta>): ApiVersion =
+        ApiVersion(listOf(this.code)
+            .plus(betas.map { it.code })
+            .joinToString(";")
+        )
+
     internal companion object {
         private const val API_VERSION_CODE: String = "2020-03-02"
 

@@ -507,13 +507,17 @@ class CustomerSession @VisibleForTesting internal constructor(
          * @param shouldPrefetchEphemeralKey If true, will immediately fetch an ephemeral key using
          * {@param ephemeralKeyProvider}. Otherwise, will only fetch
          * an ephemeral key when needed.
+         * @param betas optional, set of beta flags to pass to the Stripe API. Setting this property is
+         * not sufficient to participate in a beta, and passing a beta you are not registered
+         * in will result in API errors.
          */
         @JvmStatic
         @JvmOverloads
         fun initCustomerSession(
             context: Context,
             ephemeralKeyProvider: EphemeralKeyProvider,
-            shouldPrefetchEphemeralKey: Boolean = true
+            shouldPrefetchEphemeralKey: Boolean = true,
+            betas: Set<StripeApiBeta> = emptySet()
         ) {
             val operationIdFactory = StripeOperationIdFactory()
             val timeSupplier = { Calendar.getInstance().timeInMillis }
@@ -528,7 +532,7 @@ class CustomerSession @VisibleForTesting internal constructor(
 
             instance = CustomerSession(
                 context,
-                StripeApiRepository(context, config.publishableKey, appInfo),
+                StripeApiRepository(context, config.publishableKey, appInfo, betas = betas),
                 config.publishableKey,
                 config.stripeAccountId,
                 createCoroutineDispatcher(),

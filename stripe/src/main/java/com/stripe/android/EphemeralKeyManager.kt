@@ -13,9 +13,10 @@ internal class EphemeralKeyManager(
     operationIdFactory: OperationIdFactory = StripeOperationIdFactory(),
     shouldPrefetchEphemeralKey: Boolean = true,
     private val timeSupplier: TimeSupplier = { Calendar.getInstance().timeInMillis },
-    private val timeBufferInSeconds: Long = REFRESH_BUFFER_IN_SECONDS
+    private val timeBufferInSeconds: Long = REFRESH_BUFFER_IN_SECONDS,
+    betas: Set<StripeApiBeta> = emptySet()
 ) {
-    private val apiVersion: String = ApiVersion.get().code
+    private val apiVersion: String = ApiVersion.get().withBetas(betas).code
 
     @JvmSynthetic
     internal var ephemeralKey: EphemeralKey? = null
@@ -134,7 +135,8 @@ internal class EphemeralKeyManager(
             private val keyProvider: EphemeralKeyProvider,
             private val shouldPrefetchEphemeralKey: Boolean,
             private val operationIdFactory: OperationIdFactory = StripeOperationIdFactory(),
-            private val timeSupplier: TimeSupplier = { Calendar.getInstance().timeInMillis }
+            private val timeSupplier: TimeSupplier = { Calendar.getInstance().timeInMillis },
+            private val betas: Set<StripeApiBeta> = emptySet()
         ) : Factory {
             @JvmSynthetic
             override fun create(arg: KeyManagerListener): EphemeralKeyManager {
@@ -143,7 +145,8 @@ internal class EphemeralKeyManager(
                     arg,
                     operationIdFactory,
                     shouldPrefetchEphemeralKey,
-                    timeSupplier
+                    timeSupplier,
+                    betas = betas
                 )
             }
         }

@@ -139,17 +139,10 @@ class PaymentMethodEndToEndTest {
 
     @Test
     fun createPaymentMethod_withOxxo_shouldCreatePaymentMethodWithOxxoType() {
-        val repository = StripeApiRepository(
-            context,
-            ApiKeyFixtures.OXXO_PUBLISHABLE_KEY,
-            apiVersion = "2020-03-02;oxxo_beta=v1"
-        )
-        val paymentMethod = repository.createPaymentMethod(
+        val stripe = Stripe(context, ApiKeyFixtures.OXXO_PUBLISHABLE_KEY, betas = setOf(StripeApiBeta.OxxoV1))
+        val paymentMethod = stripe.createPaymentMethodSynchronous(
             PaymentMethodCreateParams.createOxxo(
                 billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS
-            ),
-            ApiRequest.Options(
-                ApiKeyFixtures.OXXO_PUBLISHABLE_KEY
             )
         )
         assertThat(paymentMethod?.type)
@@ -158,23 +151,16 @@ class PaymentMethodEndToEndTest {
 
     @Test
     fun createPaymentMethod_withOxxo_shouldRequireNameAndEmail() {
-        val repository = StripeApiRepository(
-            context,
-            ApiKeyFixtures.OXXO_PUBLISHABLE_KEY,
-            apiVersion = "2020-03-02;oxxo_beta=v1"
-        )
+        val stripe = Stripe(context, ApiKeyFixtures.OXXO_PUBLISHABLE_KEY, betas = setOf(StripeApiBeta.OxxoV1))
 
         val missingNameException = assertFailsWith<InvalidRequestException>(
             "A name is required to create an OXXO payment method."
         ) {
-            repository.createPaymentMethod(
+            stripe.createPaymentMethodSynchronous(
                 PaymentMethodCreateParams.createOxxo(
                     billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(
                         name = null
                     )
-                ),
-                ApiRequest.Options(
-                    ApiKeyFixtures.OXXO_PUBLISHABLE_KEY
                 )
             )
         }
@@ -184,14 +170,11 @@ class PaymentMethodEndToEndTest {
         val missingEmailException = assertFailsWith<InvalidRequestException>(
             "An email is required to create an OXXO payment method."
         ) {
-            repository.createPaymentMethod(
+            stripe.createPaymentMethodSynchronous(
                 PaymentMethodCreateParams.createOxxo(
                     billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(
                         email = null
                     )
-                ),
-                ApiRequest.Options(
-                    ApiKeyFixtures.OXXO_PUBLISHABLE_KEY
                 )
             )
         }
@@ -201,15 +184,10 @@ class PaymentMethodEndToEndTest {
 
     @Test
     fun createPaymentMethod_withAlipay_shouldCreateObject() {
-        val repository = StripeApiRepository(
-            context,
-            ApiKeyFixtures.ALIPAY_PUBLISHABLE_KEY,
-            apiVersion = "2020-03-02;alipay_beta=v1"
-        )
+        val stripe = Stripe(context, ApiKeyFixtures.ALIPAY_PUBLISHABLE_KEY, betas = setOf(StripeApiBeta.AlipayV1))
 
-        val paymentMethod = repository.createPaymentMethod(
-            PaymentMethodCreateParams.createAlipay(),
-            ApiRequest.Options(ApiKeyFixtures.ALIPAY_PUBLISHABLE_KEY)
+        val paymentMethod = stripe.createPaymentMethodSynchronous(
+            PaymentMethodCreateParams.createAlipay()
         )
         assertThat(paymentMethod?.type)
             .isEqualTo(PaymentMethod.Type.Alipay)

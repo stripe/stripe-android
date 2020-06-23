@@ -10,11 +10,13 @@ internal class StripeFactory(
     private val enableLogging: Boolean = true
 ) {
     fun create(): Stripe {
+        val paymentConfiguration = PaymentConfiguration.getInstance(context)
         return Stripe(
             context,
-            PaymentConfiguration.getInstance(context).publishableKey,
+            paymentConfiguration.publishableKey,
             stripeAccountId,
-            enableLogging
+            enableLogging,
+            betas = paymentConfiguration.betas
         )
     }
 }

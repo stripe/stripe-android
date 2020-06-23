@@ -16,11 +16,13 @@ internal class FpxViewModel @JvmOverloads internal constructor(
     application: Application,
     private val workDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : AndroidViewModel(application) {
-    private val publishableKey = PaymentConfiguration.getInstance(application).publishableKey
+    private val paymentConfiguration = PaymentConfiguration.getInstance(application)
+    private val publishableKey = paymentConfiguration.publishableKey
     private val stripeRepository = StripeApiRepository(
         application,
         publishableKey,
-        workDispatcher = workDispatcher
+        workDispatcher = workDispatcher,
+        betas = paymentConfiguration.betas
     )
 
     internal var selectedPosition: Int? = null
