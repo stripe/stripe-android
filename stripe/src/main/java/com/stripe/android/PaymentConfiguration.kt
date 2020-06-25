@@ -43,11 +43,9 @@ data class PaymentConfiguration internal constructor(
                     publishableKey = publishableKey,
                     stripeAccountId = prefs.getString(KEY_ACCOUNT_ID, null),
                     betas = prefs.getStringSet(KEY_BETAS, emptySet())
-                        ?.fold(emptySet<StripeApiBeta>()) { acc, key ->
-                            StripeApiBeta.fromCode(key)?.let {
-                                acc.plus(it)
-                            } ?: acc
-                        }.orEmpty()
+                        .orEmpty()
+                        .mapNotNull { StripeApiBeta.fromCode(it) }
+                        .toSet()
                 )
             }
         }
