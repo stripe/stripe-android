@@ -49,7 +49,8 @@ class PaymentConfigurationTest {
     fun getInstance_whenInstanceIsNull_loadsFromPrefs() {
         PaymentConfiguration.init(
             context,
-            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            betas = setOf(StripeApiBeta.AlipayV1)
         )
 
         PaymentConfiguration.clearInstance()
@@ -58,7 +59,8 @@ class PaymentConfigurationTest {
             PaymentConfiguration.getInstance(context)
         ).isEqualTo(
             PaymentConfiguration(
-                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                betas = setOf(StripeApiBeta.AlipayV1)
             )
         )
     }
