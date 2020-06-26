@@ -1,7 +1,7 @@
 package com.stripe.android
 
+import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class ApiRequestOptionsTest {
@@ -10,8 +10,8 @@ class ApiRequestOptionsTest {
     fun testCreate() {
         val opts = ApiRequest.Options(
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "account")
-        assertEquals(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, opts.apiKey)
-        assertEquals("account", opts.stripeAccount)
+        assertThat(opts.apiKey).isEqualTo(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        assertThat(opts.stripeAccount).isEqualTo("account")
     }
 
     @Test
