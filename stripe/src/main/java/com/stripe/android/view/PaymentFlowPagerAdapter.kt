@@ -123,10 +123,8 @@ internal class PaymentFlowPagerAdapter(
                 shippingInformation: ShippingInformation?,
                 allowedShippingCountryCodes: Set<String>
             ) {
-                shippingInfoWidget
-                    .setHiddenFields(paymentSessionConfig.hiddenShippingInfoFields)
-                shippingInfoWidget
-                    .setOptionalFields(paymentSessionConfig.optionalShippingInfoFields)
+                shippingInfoWidget.hiddenFields = paymentSessionConfig.hiddenShippingInfoFields
+                shippingInfoWidget.optionalFields = paymentSessionConfig.optionalShippingInfoFields
                 shippingInfoWidget
                     .setAllowedCountryCodes(allowedShippingCountryCodes)
                 shippingInfoWidget
