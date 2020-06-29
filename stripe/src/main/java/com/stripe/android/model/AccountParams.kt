@@ -28,10 +28,10 @@ data class AccountParams internal constructor(
         get() = mapOf(PARAM_TOS_SHOWN_AND_ACCEPTED to tosShownAndAccepted)
             .plus(
                 businessTypeParams?.let { params ->
-                    mapOf(PARAM_BUSINESS_TYPE to params.type.code)
-                        .plus(
-                            mapOf(params.type.code to params.toParamMap())
-                        )
+                    mapOf(
+                        PARAM_BUSINESS_TYPE to params.type.code,
+                        params.type.code to params.toParamMap()
+                    )
                 }.orEmpty()
             )
 
