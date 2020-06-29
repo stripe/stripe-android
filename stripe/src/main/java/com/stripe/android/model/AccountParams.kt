@@ -2,9 +2,7 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import com.stripe.android.ObjectBuilder
-import com.stripe.android.model.AccountParams.BusinessTypeParams
 import kotlinx.android.parcel.Parcelize
-import kotlinx.android.parcel.RawValue
 
 /**
  * [Create an account token](https://stripe.com/docs/api/tokens/create_account)
@@ -24,25 +22,15 @@ data class AccountParams internal constructor(
      */
     private val tosShownAndAccepted: Boolean,
 
-    /**
-     * The business type.
-     *
-     * [account.business_type](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-business_type)
-     */
-    private val businessType: BusinessType? = null,
-
-    /**
-     * See [BusinessTypeParams]
-     */
-    private val businessData: Map<String, @RawValue Any>? = null
+    private val businessTypeParams: BusinessTypeParams? = null
 ) : TokenParams(Token.Type.Account) {
     override val typeDataParams: Map<String, Any>
         get() = mapOf(PARAM_TOS_SHOWN_AND_ACCEPTED to tosShownAndAccepted)
             .plus(
-                businessType?.code?.let { code ->
-                    mapOf(PARAM_BUSINESS_TYPE to code)
+                businessTypeParams?.let { params ->
+                    mapOf(PARAM_BUSINESS_TYPE to params.type.code)
                         .plus(
-                            businessData?.let { mapOf(code to it) }.orEmpty()
+                            mapOf(params.type.code to params.toParamMap())
                         )
                 }.orEmpty()
             )
@@ -57,7 +45,20 @@ data class AccountParams internal constructor(
         Company("company")
     }
 
-    sealed class BusinessTypeParams : StripeParamsModel, Parcelable {
+    sealed class BusinessTypeParams(
+        internal val type: BusinessType
+    ) : StripeParamsModel, Parcelable {
+
+        abstract val paramsList: List<Pair<String, Any?>>
+
+        override fun toParamMap(): Map<String, Any> {
+            return paramsList.fold(emptyMap()) { acc, (key, value) ->
+                acc.plus(
+                    value?.let { mapOf(key to it) }.orEmpty()
+                )
+            }
+        }
+
         /**
          * Information about the company or business.
          *
@@ -70,21 +71,21 @@ data class AccountParams internal constructor(
              *
              * [account.company.address](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-address)
              */
-            val address: Address? = null,
+            var address: Address? = null,
 
             /**
              * The Kana variation of the company’s primary address (Japan only).
              *
              * [account.company.address_kana](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-address_kana)
              */
-            val addressKana: AddressJapanParams? = null,
+            var addressKana: AddressJapanParams? = null,
 
             /**
              * The Kanji variation of the company’s primary address (Japan only).
              *
              * [account.company.address_kanji](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-address_kanji)
              */
-            val addressKanji: AddressJapanParams? = null,
+            var addressKanji: AddressJapanParams? = null,
 
             /**
              * Whether the company’s directors have been provided. Set this Boolean to `true` after
@@ -96,7 +97,7 @@ data class AccountParams internal constructor(
              *
              * [account.company.directors_provided](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-directors_provided)
              */
-            val directorsProvided: Boolean? = null,
+            var directorsProvided: Boolean? = null,
 
             /**
              * Whether the company’s executives have been provided. Set this Boolean to `true` after
@@ -106,28 +107,28 @@ data class AccountParams internal constructor(
              *
              * [account.company.executives_provided](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-executives_provided)
              */
-            val executivesProvided: Boolean? = null,
+            var executivesProvided: Boolean? = null,
 
             /**
              * The company’s legal name.
              *
              * [account.company.name](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-name)
              */
-            val name: String? = null,
+            var name: String? = null,
 
             /**
              * The Kana variation of the company’s legal name (Japan only).
              *
              * [account.company.name_kana](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-name_kana)
              */
-            val nameKana: String? = null,
+            var nameKana: String? = null,
 
             /**
              * The Kanji variation of the company’s legal name (Japan only).
              *
              * [account.company.name_kanji](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-name_kanji)
              */
-            val nameKanji: String? = null,
+            var nameKanji: String? = null,
 
             /**
              * Whether the company’s owners have been provided. Set this Boolean to `true` after
@@ -137,14 +138,14 @@ data class AccountParams internal constructor(
              *
              * [account.company.owners_provided](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-owners_provided)
              */
-            val ownersProvided: Boolean? = false,
+            var ownersProvided: Boolean? = false,
 
             /**
              * The company’s phone number (used for verification).
              *
              * [account.company.phone](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-phone)
              */
-            val phone: String? = null,
+            var phone: String? = null,
 
             /**
              * The business ID number of the company, as appropriate for the company’s country.
@@ -153,31 +154,32 @@ data class AccountParams internal constructor(
              *
              * [account.company.tax_id](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-tax_id)
              */
-            val taxId: String? = null,
+            var taxId: String? = null,
 
             /**
              * The jurisdiction in which the `tax_id` is registered (Germany-based companies only).
              *
              * [account.company.tax_id_registrar](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-tax_id_registrar)
              */
-            val taxIdRegistrar: String? = null,
+            var taxIdRegistrar: String? = null,
 
             /**
              * The VAT number of the company.
              *
              * [account.company.vat_id](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-vat_id)
              */
-            val vatId: String? = null,
+            var vatId: String? = null,
 
             /**
              * Information on the verification state of the company.
              *
              * [account.company.verification](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-company-verification)
              */
-            val verification: Verification? = null
-        ) : BusinessTypeParams() {
-            override fun toParamMap(): Map<String, Any> {
-                val params = listOf(
+            var verification: Verification? = null
+        ) : BusinessTypeParams(BusinessType.Company) {
+
+            override val paramsList: List<Pair<String, Any?>>
+                get() = listOf(
                     PARAM_ADDRESS to address?.toParamMap(),
                     PARAM_ADDRESS_KANA to addressKana?.toParamMap(),
                     PARAM_ADDRESS_KANJI to addressKanji?.toParamMap(),
@@ -194,19 +196,12 @@ data class AccountParams internal constructor(
                     PARAM_VERIFICATION to verification?.toParamMap()
                 )
 
-                return params.fold(emptyMap()) { acc, (key, value) ->
-                    acc.plus(
-                        value?.let { mapOf(key to it) }.orEmpty()
-                    )
-                }
-            }
-
             @Parcelize
             data class Verification(
                 /**
                  * A document verifying the business.
                  */
-                val document: Document? = null
+                var document: Document? = null
             ) : StripeParamsModel, Parcelable {
                 override fun toParamMap(): Map<String, Any> {
                     return document?.let {
@@ -466,63 +461,63 @@ data class AccountParams internal constructor(
              *
              * [account.individual.address](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-address)
              */
-            val address: Address? = null,
+            var address: Address? = null,
 
             /**
              * The Kana variation of the the individual’s primary address (Japan only).
              *
              * [account.individual.address_kana](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-address_kana)
              */
-            val addressKana: AddressJapanParams? = null,
+            var addressKana: AddressJapanParams? = null,
 
             /**
              * The Kanji variation of the the individual’s primary address (Japan only).
              *
              * [account.individual.address_kanji](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-address_kanji)
              */
-            val addressKanji: AddressJapanParams? = null,
+            var addressKanji: AddressJapanParams? = null,
 
             /**
              * The individual’s date of birth.
              *
              * [account.individual.dob](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-dob)
              */
-            val dateOfBirth: DateOfBirth? = null,
+            var dateOfBirth: DateOfBirth? = null,
 
             /**
              * The individual’s email.
              *
              * [account.individual.email](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-email)
              */
-            val email: String? = null,
+            var email: String? = null,
 
             /**
              * The individual’s first name.
              *
              * [account.individual.first_name](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-first_name)
              */
-            val firstName: String? = null,
+            var firstName: String? = null,
 
             /**
              * The Kana variation of the the individual’s first name (Japan only).
              *
              * [account.individual.first_name_kana](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-first_name_kana)
              */
-            val firstNameKana: String? = null,
+            var firstNameKana: String? = null,
 
             /**
              * The Kanji variation of the individual’s first name (Japan only).
              *
              * [account.individual.first_name_kanji](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-first_name_kanji)
              */
-            val firstNameKanji: String? = null,
+            var firstNameKanji: String? = null,
 
             /**
              * The individual’s gender (International regulations require either “male” or “female”).
              *
              * [account.individual.gender](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-gender)
              */
-            val gender: String? = null,
+            var gender: String? = null,
 
             /**
              * The government-issued ID number of the individual, as appropriate for the
@@ -532,35 +527,35 @@ data class AccountParams internal constructor(
              *
              * [account.individual.id_number](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-id_number)
              */
-            val idNumber: String? = null,
+            var idNumber: String? = null,
 
             /**
              * The individual’s last name.
              *
              * [account.individual.last_name](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-last_name)
              */
-            val lastName: String? = null,
+            var lastName: String? = null,
 
             /**
              * The Kana varation of the individual’s last name (Japan only).
              *
              * [account.individual.last_name_kana](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-last_name_kana)
              */
-            val lastNameKana: String? = null,
+            var lastNameKana: String? = null,
 
             /**
              * The Kanji varation of the individual’s last name (Japan only).
              *
              * [account.individual.last_name_kanji](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-last_name_kanji)
              */
-            val lastNameKanji: String? = null,
+            var lastNameKanji: String? = null,
 
             /**
              * The individual’s maiden name.
              *
              * [account.individual.maiden_name](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-maiden_name)
              */
-            val maidenName: String? = null,
+            var maidenName: String? = null,
 
             /**
              * Set of key-value pairs that you can attach to an object. This can be useful for
@@ -570,31 +565,31 @@ data class AccountParams internal constructor(
              *
              * [account.individual.metadata](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-metadata)
              */
-            val metadata: Map<String, String>? = null,
+            var metadata: Map<String, String>? = null,
 
             /**
              * The individual’s phone number.
              *
              * [account.individual.phone](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-phone)
              */
-            val phone: String? = null,
+            var phone: String? = null,
 
             /**
              * The last four digits of the individual’s Social Security Number (U.S. only).
              *
              * [account.individual.ssn_last_4](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-ssn_last_4)
              */
-            val ssnLast4: String? = null,
+            var ssnLast4: String? = null,
 
             /**
              * The individual’s verification document information.
              *
              * [account.individual.verification](https://stripe.com/docs/api/tokens/create_account#create_account_token-account-individual-verification)
              */
-            val verification: Verification? = null
-        ) : BusinessTypeParams() {
-            override fun toParamMap(): Map<String, Any> {
-                return listOf(
+            var verification: Verification? = null
+        ) : BusinessTypeParams(BusinessType.Individual) {
+            override val paramsList: List<Pair<String, Any?>>
+                get() = listOf(
                     PARAM_ADDRESS to address?.toParamMap(),
                     PARAM_ADDRESS_KANA to addressKana?.toParamMap(),
                     PARAM_ADDRESS_KANJI to addressKanji?.toParamMap(),
@@ -613,25 +608,20 @@ data class AccountParams internal constructor(
                     PARAM_PHONE to phone,
                     PARAM_SSN_LAST_4 to ssnLast4,
                     PARAM_VERIFICATION to verification?.toParamMap()
-                ).fold(emptyMap()) { acc, (key, value) ->
-                    acc.plus(
-                        value?.let { mapOf(key to it) }.orEmpty()
-                    )
-                }
-            }
+                )
 
             @Parcelize
             data class Verification @JvmOverloads constructor(
                 /**
                  * An identifying document, either a passport or local ID card.
                  */
-                val document: Document? = null,
+                var document: Document? = null,
 
                 /**
                  * A document showing address, either a passport, local ID card, or utility bill from
                  * a well-known utility company.
                  */
-                val additionalDocument: Document? = null
+                var additionalDocument: Document? = null
             ) : StripeParamsModel, Parcelable {
                 override fun toParamMap(): Map<String, Any> {
                     return listOf(
@@ -659,7 +649,7 @@ data class AccountParams internal constructor(
                  * image (smaller than 8,000px by 8,000px), in JPG or PNG format, and less than
                  * 10 MB in size.
                  */
-                private val front: String? = null,
+                private var front: String? = null,
 
                 /**
                  * The back of an ID returned by a
@@ -668,7 +658,7 @@ data class AccountParams internal constructor(
                  * color image (smaller than 8,000px by 8,000px), in JPG or PNG format, and less
                  * than 10 MB in size.
                  */
-                private val back: String? = null
+                private var back: String? = null
             ) : StripeParamsModel, Parcelable {
                 override fun toParamMap(): Map<String, Any> {
                     return listOf(
@@ -923,8 +913,8 @@ data class AccountParams internal constructor(
     }
 
     companion object {
-        internal const val PARAM_BUSINESS_TYPE = "business_type"
-        internal const val PARAM_TOS_SHOWN_AND_ACCEPTED = "tos_shown_and_accepted"
+        private const val PARAM_BUSINESS_TYPE = "business_type"
+        private const val PARAM_TOS_SHOWN_AND_ACCEPTED = "tos_shown_and_accepted"
 
         /**
          * Create an [AccountParams] instance with information about the person represented by the account.
@@ -944,8 +934,7 @@ data class AccountParams internal constructor(
         ): AccountParams {
             return AccountParams(
                 tosShownAndAccepted,
-                BusinessType.Individual,
-                individual.toParamMap()
+                individual
             )
         }
 
@@ -967,8 +956,7 @@ data class AccountParams internal constructor(
         ): AccountParams {
             return AccountParams(
                 tosShownAndAccepted,
-                BusinessType.Company,
-                company.toParamMap()
+                company
             )
         }
 
@@ -988,7 +976,13 @@ data class AccountParams internal constructor(
             tosShownAndAccepted: Boolean,
             businessType: BusinessType
         ): AccountParams {
-            return AccountParams(tosShownAndAccepted, businessType)
+            return AccountParams(
+                tosShownAndAccepted,
+                when (businessType) {
+                    BusinessType.Individual -> BusinessTypeParams.Individual()
+                    BusinessType.Company -> BusinessTypeParams.Company()
+                }
+            )
         }
 
         /**
