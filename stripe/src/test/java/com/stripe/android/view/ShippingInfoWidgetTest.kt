@@ -248,8 +248,8 @@ class ShippingInfoWidgetTest {
             .isEqualTo(res.getString(R.string.address_label_zip_code))
         assertThat(nameTextInputLayout.hint.toString())
             .isEqualTo(res.getString(R.string.address_label_name))
-        shippingInfoWidget.setOptionalFields(
-            listOf(ShippingInfoWidget.CustomizableShippingField.POSTAL_CODE_FIELD)
+        shippingInfoWidget.optionalFields = listOf(
+            ShippingInfoWidget.CustomizableShippingField.PostalCode
         )
         assertThat(postalCodeTextInputLayout.hint.toString())
             .isEqualTo(res.getString(R.string.address_label_zip_code_optional))
@@ -258,10 +258,10 @@ class ShippingInfoWidgetTest {
         countryAutoCompleteTextView.updateUiForCountryEntered(Locale.CANADA.displayCountry)
         assertThat(stateTextInputLayout.hint.toString())
             .isEqualTo(res.getString(R.string.address_label_province))
-        shippingInfoWidget.setOptionalFields(listOf(
-            ShippingInfoWidget.CustomizableShippingField.POSTAL_CODE_FIELD,
-            ShippingInfoWidget.CustomizableShippingField.STATE_FIELD
-        ))
+        shippingInfoWidget.optionalFields = listOf(
+            ShippingInfoWidget.CustomizableShippingField.PostalCode,
+            ShippingInfoWidget.CustomizableShippingField.State
+        )
         assertThat(stateTextInputLayout.hint.toString())
             .isEqualTo(res.getString(R.string.address_label_province_optional))
     }
@@ -272,8 +272,8 @@ class ShippingInfoWidgetTest {
             .isEqualTo(View.VISIBLE)
         assertThat(postalCodeTextInputLayout.visibility)
             .isEqualTo(View.VISIBLE)
-        shippingInfoWidget.setHiddenFields(
-            listOf(ShippingInfoWidget.CustomizableShippingField.POSTAL_CODE_FIELD)
+        shippingInfoWidget.hiddenFields = listOf(
+            ShippingInfoWidget.CustomizableShippingField.PostalCode
         )
         assertThat(postalCodeTextInputLayout.visibility)
             .isEqualTo(View.GONE)

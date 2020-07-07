@@ -1,6 +1,5 @@
 package com.stripe.android
 
-import android.annotation.SuppressLint
 import android.os.Parcelable
 import androidx.annotation.LayoutRes
 import androidx.annotation.WorkerThread
@@ -24,8 +23,8 @@ import kotlinx.android.parcel.Parcelize
  */
 @Parcelize
 data class PaymentSessionConfig internal constructor(
-    val hiddenShippingInfoFields: List<String> = emptyList(),
-    val optionalShippingInfoFields: List<String> = emptyList(),
+    val hiddenShippingInfoFields: List<CustomizableShippingField> = emptyList(),
+    val optionalShippingInfoFields: List<CustomizableShippingField> = emptyList(),
     val prepopulatedShippingInfo: ShippingInformation? = null,
     val isShippingInfoRequired: Boolean = false,
     val isShippingMethodRequired: Boolean = false,
@@ -93,8 +92,8 @@ data class PaymentSessionConfig internal constructor(
         private var billingAddressFields: BillingAddressFields = DEFAULT_BILLING_ADDRESS_FIELDS
         private var shippingInfoRequired = true
         private var shippingMethodsRequired = true
-        private var hiddenShippingInfoFields: List<String>? = null
-        private var optionalShippingInfoFields: List<String>? = null
+        private var hiddenShippingInfoFields: List<CustomizableShippingField>? = null
+        private var optionalShippingInfoFields: List<CustomizableShippingField>? = null
         private var shippingInformation: ShippingInformation? = null
         private var paymentMethodTypes: List<PaymentMethod.Type> = listOf(PaymentMethod.Type.Card)
         private var shouldShowGooglePay: Boolean = false
@@ -122,9 +121,8 @@ data class PaymentSessionConfig internal constructor(
          * hidden in the shipping information screen. All fields will be shown if this list is
          * empty. Note that not all fields can be hidden, such as country or name.
          */
-        @SuppressLint("WrongConstant")
         fun setHiddenShippingInfoFields(
-            @CustomizableShippingField vararg hiddenShippingInfoFields: String
+            vararg hiddenShippingInfoFields: CustomizableShippingField
         ): Builder = apply {
             this.hiddenShippingInfoFields = listOf(*hiddenShippingInfoFields)
         }
@@ -133,9 +131,8 @@ data class PaymentSessionConfig internal constructor(
          * @param optionalShippingInfoFields [CustomizableShippingField] fields that should be
          * optional in the [ShippingInfoWidget]
          */
-        @SuppressLint("WrongConstant")
         fun setOptionalShippingInfoFields(
-            @CustomizableShippingField vararg optionalShippingInfoFields: String
+            vararg optionalShippingInfoFields: CustomizableShippingField
         ): Builder = apply {
             this.optionalShippingInfoFields = listOf(*optionalShippingInfoFields)
         }
