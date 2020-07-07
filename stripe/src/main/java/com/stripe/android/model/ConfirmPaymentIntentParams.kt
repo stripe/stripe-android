@@ -518,7 +518,7 @@ data class ConfirmPaymentIntentParams internal constructor(
                 paymentMethodCreateParams = PaymentMethodCreateParams.createAlipay(),
                 // return_url is no longer used by is still required by the backend
                 // TODO(smaskell): remove this when no longer required
-                returnUrl = "fake://return_url"
+                returnUrl = "stripe://return_url"
             )
         }
     }
