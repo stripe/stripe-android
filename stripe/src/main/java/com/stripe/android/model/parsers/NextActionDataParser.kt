@@ -22,13 +22,15 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
         override fun parse(json: JSONObject): StripeIntent.NextActionData.DisplayOxxoDetails? {
             return StripeIntent.NextActionData.DisplayOxxoDetails(
                 expiresAfter = json.optInt(FIELD_EXPIRES_AFTER),
-                number = optString(json, FIELD_NUMBER)
+                number = optString(json, FIELD_NUMBER),
+                hostedVoucherUrl = optString(json, FIELD_HOSTED_VOUCHER_URL)
             )
         }
 
         private companion object {
             private const val FIELD_EXPIRES_AFTER = "expires_after"
             private const val FIELD_NUMBER = "number"
+            private const val FIELD_HOSTED_VOUCHER_URL = "hosted_voucher_url"
         }
     }
 
