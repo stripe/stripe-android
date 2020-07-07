@@ -5,6 +5,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.CustomerSession
 import com.stripe.android.StripeError
 import com.stripe.android.model.Customer
@@ -22,6 +27,13 @@ class CustomerSessionActivity : AppCompatActivity() {
         CustomerSessionActivityBinding.inflate(layoutInflater)
     }
 
+    private val viewModel: ActivityViewModel by lazy {
+        ViewModelProvider(
+            this,
+            ViewModelProvider.NewInstanceFactory()
+        )[ActivityViewModel::class.java]
+    }
+
     private val snackbarController: SnackbarController by lazy {
         SnackbarController(viewBinding.coordinator)
     }
@@ -32,8 +44,19 @@ class CustomerSessionActivity : AppCompatActivity() {
         setTitle(R.string.customer_payment_data_example)
 
         viewBinding.progressBar.visibility = View.VISIBLE
-        CustomerSession.getInstance().retrieveCurrentCustomer(
-            CustomerRetrievalListenerImpl(this)
+        viewModel.retrieveCustomer().observe(
+            this,
+            Observer {
+                viewBinding.progressBar.visibility = View.INVISIBLE
+                viewBinding.selectPaymentMethodButton.isEnabled = it.isSuccess
+
+                it.fold(
+                    onSuccess = {},
+                    onFailure = { error ->
+                        snackbarController.show(error.message.orEmpty())
+                    }
+                )
+            }
         )
 
         viewBinding.selectPaymentMethodButton.isEnabled = false
@@ -66,27 +89,27 @@ class CustomerSessionActivity : AppCompatActivity() {
         return getString(R.string.ending_in, data.brand, data.last4)
     }
 
-    private fun onCustomerRetrieved() {
-        viewBinding.selectPaymentMethodButton.isEnabled = true
-        viewBinding.progressBar.visibility = View.INVISIBLE
-    }
+    internal class ActivityViewModel : ViewModel() {
+        private val customerSession = CustomerSession.getInstance()
 
-    private fun onRetrieveError(errorMessage: String) {
-        viewBinding.selectPaymentMethodButton.isEnabled = false
-        viewBinding.progressBar.visibility = View.INVISIBLE
-        snackbarController.show(errorMessage)
-    }
+        fun retrieveCustomer(): LiveData<Result<Customer>> {
+            val liveData = MutableLiveData<Result<Customer>>()
+            customerSession.retrieveCurrentCustomer(
+                object : CustomerSession.CustomerRetrievalListener {
+                    override fun onCustomerRetrieved(customer: Customer) {
+                        liveData.value = Result.success(customer)
+                    }
 
-    private class CustomerRetrievalListenerImpl constructor(
-        activity: CustomerSessionActivity
-    ) : CustomerSession.ActivityCustomerRetrievalListener<CustomerSessionActivity>(activity) {
-
-        override fun onCustomerRetrieved(customer: Customer) {
-            activity?.onCustomerRetrieved()
-        }
-
-        override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
-            activity?.onRetrieveError(errorMessage)
+                    override fun onError(
+                        errorCode: Int,
+                        errorMessage: String,
+                        stripeError: StripeError?
+                    ) {
+                        liveData.value = Result.failure(RuntimeException(errorMessage))
+                    }
+                }
+            )
+            return liveData
         }
     }
 }

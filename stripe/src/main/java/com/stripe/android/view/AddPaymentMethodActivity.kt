@@ -42,7 +42,7 @@ class AddPaymentMethodActivity : StripeActivity() {
         Stripe(
             applicationContext,
             publishableKey = paymentConfiguration.publishableKey,
-            stripeAccountId = customerSession.stripeAccountId
+            stripeAccountId = paymentConfiguration.stripeAccountId
         )
     }
 
@@ -60,14 +60,14 @@ class AddPaymentMethodActivity : StripeActivity() {
         }
     }
 
-    private val customerSession: CustomerSession by lazy {
-        CustomerSession.getInstance()
-    }
-
     private val viewModel: AddPaymentMethodViewModel by lazy {
-        ViewModelProvider(this, AddPaymentMethodViewModel.Factory(
-            stripe, customerSession, args
-        ))[AddPaymentMethodViewModel::class.java]
+        ViewModelProvider(
+            this,
+            AddPaymentMethodViewModel.Factory(
+                stripe,
+                args
+            )
+        )[AddPaymentMethodViewModel::class.java]
     }
 
     private val titleStringRes: Int
@@ -90,6 +90,14 @@ class AddPaymentMethodActivity : StripeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         configureView(args)
+        setResult(
+            Activity.RESULT_OK,
+            Intent()
+                .putExtras(
+                    AddPaymentMethodActivityStarter.Result.Canceled
+                        .toBundle()
+                )
+        )
     }
 
     override fun onResume() {
@@ -189,23 +197,39 @@ class AddPaymentMethodActivity : StripeActivity() {
     }
 
     private fun attachPaymentMethodToCustomer(paymentMethod: PaymentMethod) {
-        viewModel.attachPaymentMethod(
-            paymentMethod
-        ).observe(this, Observer { result ->
-            result.fold(
-                onSuccess = ::finishWithPaymentMethod,
-                onFailure = {
-                    isProgressBarVisible = false
-                    showError(it.message.orEmpty())
-                }
-            )
-        })
+        runCatching {
+            CustomerSession.getInstance()
+        }.fold(
+            onSuccess = { customerSession ->
+                viewModel.attachPaymentMethod(
+                    customerSession,
+                    paymentMethod
+                ).observe(this, Observer { result ->
+                    result.fold(
+                        onSuccess = ::finishWithPaymentMethod,
+                        onFailure = {
+                            isProgressBarVisible = false
+                            showError(it.message.orEmpty())
+                        }
+                    )
+                })
+            },
+            onFailure = {
+                finishWithResult(AddPaymentMethodActivityStarter.Result.Failure(it))
+            }
+        )
     }
 
     private fun finishWithPaymentMethod(paymentMethod: PaymentMethod) {
+        finishWithResult(AddPaymentMethodActivityStarter.Result.Success(paymentMethod))
+    }
+
+    private fun finishWithResult(result: AddPaymentMethodActivityStarter.Result) {
         isProgressBarVisible = false
-        setResult(Activity.RESULT_OK, Intent()
-            .putExtras(AddPaymentMethodActivityStarter.Result(paymentMethod).toBundle()))
+        setResult(
+            Activity.RESULT_OK,
+            Intent().putExtras(result.toBundle())
+        )
         finish()
     }
 

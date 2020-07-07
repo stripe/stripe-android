@@ -1,12 +1,11 @@
 package com.stripe.android
 
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentSessionFixtures.CONFIG
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.utils.ParcelUtils
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -15,7 +14,7 @@ class PaymentSessionConfigTest {
 
     @Test
     fun testParcel() {
-        assertEquals(CONFIG, ParcelUtils.create(CONFIG))
+        assertThat(ParcelUtils.create(CONFIG)).isEqualTo(CONFIG)
     }
 
     @Test
@@ -24,7 +23,7 @@ class PaymentSessionConfigTest {
         val config = CONFIG.copy(
             allowedShippingCountryCodes = allowedShippingCountryCodes
         )
-        assertEquals(allowedShippingCountryCodes, config.allowedShippingCountryCodes)
+        assertThat(config.allowedShippingCountryCodes).isEqualTo(allowedShippingCountryCodes)
     }
 
     @Test
@@ -32,7 +31,7 @@ class PaymentSessionConfigTest {
         val config = CONFIG.copy(
             allowedShippingCountryCodes = emptySet()
         )
-        assertTrue(config.allowedShippingCountryCodes.isEmpty())
+        assertThat(config.allowedShippingCountryCodes.isEmpty()).isTrue()
     }
 
     @Test
@@ -42,10 +41,7 @@ class PaymentSessionConfigTest {
                 allowedShippingCountryCodes = setOf("invalid_country_code")
             )
         }
-        assertEquals(
-            "'invalid_country_code' is not a valid country code",
-            exception.message
-        )
+        assertThat(exception.message).isEqualTo("'invalid_country_code' is not a valid country code")
     }
 
     @Test

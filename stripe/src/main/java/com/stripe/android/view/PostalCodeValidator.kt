@@ -11,8 +11,8 @@ internal class PostalCodeValidator {
     fun isValid(
         postalCode: String,
         countryCode: String?,
-        optionalShippingInfoFields: List<String>,
-        hiddenShippingInfoFields: List<String>
+        optionalShippingInfoFields: List<ShippingInfoWidget.CustomizableShippingField>,
+        hiddenShippingInfoFields: List<ShippingInfoWidget.CustomizableShippingField>
     ): Boolean {
         if (countryCode == null) {
             return false
@@ -42,13 +42,13 @@ internal class PostalCodeValidator {
         )
 
         private fun isPostalCodeNotRequired(
-            optionalShippingInfoFields: List<String>,
-            hiddenShippingInfoFields: List<String>
+            optionalShippingInfoFields: List<ShippingInfoWidget.CustomizableShippingField>,
+            hiddenShippingInfoFields: List<ShippingInfoWidget.CustomizableShippingField>
         ): Boolean {
             return optionalShippingInfoFields.contains(
-                ShippingInfoWidget.CustomizableShippingField.POSTAL_CODE_FIELD
+                ShippingInfoWidget.CustomizableShippingField.PostalCode
             ) || hiddenShippingInfoFields.contains(
-                ShippingInfoWidget.CustomizableShippingField.POSTAL_CODE_FIELD
+                ShippingInfoWidget.CustomizableShippingField.PostalCode
             )
         }
     }

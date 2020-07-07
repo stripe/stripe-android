@@ -13,12 +13,12 @@ internal object PaymentSessionFixtures {
 
         // hide the phone field on the shipping information form
         .setHiddenShippingInfoFields(
-            ShippingInfoWidget.CustomizableShippingField.ADDRESS_LINE_TWO_FIELD
+            ShippingInfoWidget.CustomizableShippingField.Line2
         )
 
         // make the address line 2 field optional
         .setOptionalShippingInfoFields(
-            ShippingInfoWidget.CustomizableShippingField.PHONE_FIELD
+            ShippingInfoWidget.CustomizableShippingField.Phone
         )
 
         // specify an address to pre-populate the shipping information form

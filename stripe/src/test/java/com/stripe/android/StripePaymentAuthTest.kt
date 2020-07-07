@@ -126,8 +126,7 @@ class StripePaymentAuthTest {
 
         val stripe = createStripe()
         val confirmPaymentIntentParams = ConfirmPaymentIntentParams.createAlipay(
-            "client_secret",
-            "yourapp://post-authentication-return-url")
+            "client_secret")
         val authenticationHandler = object : AlipayAuthenticator {
             override fun onAuthenticationRequest(data: String): Map<String, String> {
                 return mapOf("resultStatus" to "9000")

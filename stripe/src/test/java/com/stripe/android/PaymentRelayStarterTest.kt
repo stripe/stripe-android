@@ -2,6 +2,7 @@ package com.stripe.android
 
 import android.app.Activity
 import android.content.Intent
+import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
@@ -16,8 +17,6 @@ import com.stripe.android.model.SourceFixtures
 import com.stripe.android.utils.ParcelUtils.verifyParcelRoundtrip
 import com.stripe.android.view.AuthActivityStarter
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -37,15 +36,9 @@ class PaymentRelayStarterTest {
         )
         verify(activity).startActivityForResult(intentArgumentCaptor.capture(), eq(500))
 
-        assertEquals(
-            PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.clientSecret,
-            result.clientSecret
-        )
-        assertEquals(
-            StripeIntentResult.Outcome.UNKNOWN,
-            result.flowOutcome
-        )
-        assertNull(result.exception)
+        assertThat(result.clientSecret).isEqualTo(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.clientSecret)
+        assertThat(result.flowOutcome).isEqualTo(StripeIntentResult.Outcome.UNKNOWN)
+        assertThat(result.exception).isNull()
     }
 
     @Test
@@ -54,12 +47,9 @@ class PaymentRelayStarterTest {
         starter.start(PaymentRelayStarter.Args.create(exception))
         verify(activity).startActivityForResult(intentArgumentCaptor.capture(), eq(500))
 
-        assertNull(result.clientSecret)
-        assertEquals(
-            StripeIntentResult.Outcome.UNKNOWN,
-            result.flowOutcome
-        )
-        assertEquals(exception, result.exception)
+        assertThat(result.clientSecret).isNull()
+        assertThat(result.flowOutcome).isEqualTo(StripeIntentResult.Outcome.UNKNOWN)
+        assertThat(result.exception).isEqualTo(exception)
     }
 
     @Test
@@ -70,13 +60,10 @@ class PaymentRelayStarterTest {
         starter.start(PaymentRelayStarter.Args.create(exception))
         verify(activity).startActivityForResult(intentArgumentCaptor.capture(), eq(500))
 
-        assertNull(result.clientSecret)
-        assertEquals(
-            StripeIntentResult.Outcome.UNKNOWN,
-            result.flowOutcome
-        )
+        assertThat(result.clientSecret).isNull()
+        assertThat(result.flowOutcome).isEqualTo(StripeIntentResult.Outcome.UNKNOWN)
 
-        assertEquals(exception, result.exception)
+        assertThat(result.exception).isEqualTo(exception)
     }
 
     @Test

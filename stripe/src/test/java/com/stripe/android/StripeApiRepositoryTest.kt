@@ -66,7 +66,7 @@ class StripeApiRepositoryTest {
     private val stripeApiRepository = StripeApiRepository(
         context,
         DEFAULT_OPTIONS.apiKey,
-        workContext = testDispatcher
+        workDispatcher = testDispatcher
     )
     private val fileFactory = FileFactory(context)
 
@@ -679,6 +679,23 @@ class StripeApiRepositoryTest {
             var fpxBankStatuses: FpxBankStatuses? = null
             stripeApiRepository.getFpxBankStatus(
                 ApiRequest.Options(ApiKeyFixtures.FPX_PUBLISHABLE_KEY)
+            ).observeForever {
+                fpxBankStatuses = it
+            }
+            assertThat(fpxBankStatuses?.isOnline(FpxBank.Hsbc))
+                .isTrue()
+        }
+    }
+
+    @Test
+    fun getFpxBankStatus_withFpxKey_ignoresStripeAccountId() {
+        testScope.runBlockingTest {
+            var fpxBankStatuses: FpxBankStatuses? = null
+            stripeApiRepository.getFpxBankStatus(
+                ApiRequest.Options(
+                    apiKey = ApiKeyFixtures.FPX_PUBLISHABLE_KEY,
+                    stripeAccount = "acct_1234"
+                )
             ).observeForever {
                 fpxBankStatuses = it
             }

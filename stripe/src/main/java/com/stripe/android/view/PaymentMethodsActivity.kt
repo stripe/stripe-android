@@ -160,7 +160,17 @@ class PaymentMethodsActivity : AppCompatActivity() {
         data?.let {
             val result =
                 AddPaymentMethodActivityStarter.Result.fromIntent(data)
-            result?.paymentMethod?.let { onAddedPaymentMethod(it) }
+            when (result) {
+                is AddPaymentMethodActivityStarter.Result.Success -> {
+                    onAddedPaymentMethod(result.paymentMethod)
+                }
+                is AddPaymentMethodActivityStarter.Result.Failure -> {
+                    // TODO(mshafrir-stripe): notify user that payment method can not be added at this time
+                }
+                else -> {
+                    // no-op
+                }
+            }
         } ?: fetchCustomerPaymentMethods()
     }
 

@@ -1,34 +1,26 @@
 package com.stripe.android
 
 import android.os.Build
+import com.google.common.truth.Truth.assertThat
 import java.util.Locale
 import java.util.UUID
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class ApiRequestHeadersFactoryTest {
+
     @Test
     fun create_shouldIncludeExpectedAcceptLanguageHeader() {
-        assertEquals(
-            "ja-JP",
-            createHeaders(Locale.JAPAN)["Accept-Language"]
-        )
+        assertThat(createHeaders(Locale.JAPAN)["Accept-Language"])
+            .isEqualTo("ja-JP")
 
-        assertEquals(
-            "en",
-            createHeaders(Locale.ENGLISH)["Accept-Language"]
-        )
+        assertThat(createHeaders(Locale.ENGLISH)["Accept-Language"]).isEqualTo("en")
 
-        assertNull(
-            createHeaders(Locale.ROOT)["Accept-Language"]
-        )
+        assertThat(createHeaders(Locale.ROOT)["Accept-Language"])
+            .isNull()
     }
 
     @Test
@@ -39,22 +31,20 @@ class ApiRequestHeadersFactoryTest {
             options = ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccount)
         )
 
-        assertEquals(
-            "Bearer ${ApiKeyFixtures.FAKE_PUBLISHABLE_KEY}",
-            headers["Authorization"]
-        )
-        assertEquals(ApiVersion.get().code, headers["Stripe-Version"])
-        assertEquals(stripeAccount, headers["Stripe-Account"])
-        assertEquals("en-US", headers["Accept-Language"])
+        assertThat(headers["Authorization"])
+            .isEqualTo("Bearer ${ApiKeyFixtures.FAKE_PUBLISHABLE_KEY}")
+        assertThat(headers["Stripe-Version"]).isEqualTo(ApiVersion.get().code)
+        assertThat(headers["Stripe-Account"]).isEqualTo(stripeAccount)
+        assertThat(headers["Accept-Language"]).isEqualTo("en-US")
     }
 
     @Test
     fun headers_withOnlyRequiredOptions_doesNotAddEmptyOptions() {
         val headers = createHeaders()
 
-        assertTrue(headers.containsKey("Stripe-Version"))
-        assertFalse(headers.containsKey("Stripe-Account"))
-        assertTrue(headers.containsKey("Authorization"))
+        assertThat(headers.containsKey("Stripe-Version")).isTrue()
+        assertThat(headers.containsKey("Stripe-Account")).isFalse()
+        assertThat(headers.containsKey("Authorization")).isTrue()
     }
 
     @Test
@@ -62,12 +52,12 @@ class ApiRequestHeadersFactoryTest {
         val headers = createHeaders()
 
         val userAgentData = JSONObject(requireNotNull(headers[ApiRequest.HEADER_STRIPE_CLIENT_USER_AGENT]))
-        assertEquals(BuildConfig.VERSION_NAME, userAgentData.getString("bindings.version"))
-        assertEquals("Java", userAgentData.getString("lang"))
-        assertEquals("Stripe", userAgentData.getString("publisher"))
-        assertEquals("android", userAgentData.getString("os.name"))
-        assertEquals(Build.VERSION.SDK_INT, userAgentData.getString("os.version").toInt())
-        assertTrue(userAgentData.getString("http.agent").isNotBlank())
+        assertThat(userAgentData.getString("bindings.version")).isEqualTo(BuildConfig.VERSION_NAME)
+        assertThat(userAgentData.getString("lang")).isEqualTo("Java")
+        assertThat(userAgentData.getString("publisher")).isEqualTo("Stripe")
+        assertThat(userAgentData.getString("os.name")).isEqualTo("android")
+        assertThat(userAgentData.getString("os.version").toInt()).isEqualTo(Build.VERSION.SDK_INT)
+        assertThat(userAgentData.getString("http.agent").isNotBlank()).isTrue()
     }
 
     @Test
@@ -75,35 +65,31 @@ class ApiRequestHeadersFactoryTest {
         val headers = createHeaders()
 
         val expectedUserAgent = "Stripe/v1 AndroidBindings/${BuildConfig.VERSION_NAME}"
-        assertEquals(expectedUserAgent, headers["User-Agent"])
-        assertEquals("application/json", headers["Accept"])
-        assertEquals("UTF-8", headers["Accept-Charset"])
+        assertThat(headers["User-Agent"]).isEqualTo(expectedUserAgent)
+        assertThat(headers["Accept"]).isEqualTo("application/json")
+        assertThat(headers["Accept-Charset"]).isEqualTo("UTF-8")
     }
 
     @Test
     fun headers_withAppInfo() {
         val headers = createHeaders(appInfo = AppInfoFixtures.DEFAULT)
-        assertEquals(
-            "${RequestHeadersFactory.getUserAgent()} MyAwesomePlugin/1.2.34 (https://myawesomeplugin.info)",
-            headers["User-Agent"]
-        )
+        assertThat(headers["User-Agent"])
+            .isEqualTo("${RequestHeadersFactory.getUserAgent()} MyAwesomePlugin/1.2.34 (https://myawesomeplugin.info)")
 
         val stripeClientUserAgent = headers[ApiRequest.HEADER_STRIPE_CLIENT_USER_AGENT]
             ?: error("Invalid JSON in `${ApiRequest.HEADER_STRIPE_CLIENT_USER_AGENT}`")
         val stripeClientUserAgentData = JSONObject(stripeClientUserAgent)
-        assertEquals(
-            JSONObject(
-                """
-                {
-                    "name": "MyAwesomePlugin",
-                    "version": "1.2.34",
-                    "url": "https:\/\/myawesomeplugin.info",
-                    "partner_id": "pp_partner_1234"
-                }
-                """.trimIndent()
-            ).toString(),
-            JSONObject(stripeClientUserAgentData.getString("application")).toString()
-        )
+        assertThat(JSONObject(stripeClientUserAgentData.getString("application")).toString())
+            .isEqualTo(JSONObject(
+            """
+            {
+                "name": "MyAwesomePlugin",
+                "version": "1.2.34",
+                "url": "https:\/\/myawesomeplugin.info",
+                "partner_id": "pp_partner_1234"
+            }
+            """.trimIndent()
+        ).toString())
     }
 
     private fun createHeaders(

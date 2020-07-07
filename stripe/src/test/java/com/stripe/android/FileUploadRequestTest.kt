@@ -2,11 +2,11 @@ package com.stripe.android
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeFilePurpose
 import java.io.ByteArrayOutputStream
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -29,10 +29,7 @@ class FileUploadRequestTest {
         ByteArrayOutputStream().use {
             request.writeBody(it)
 
-            assertEquals(
-                1247,
-                it.size()
-            )
+            assertThat(it.size()).isEqualTo(1247)
         }
     }
 
@@ -54,7 +51,7 @@ class FileUploadRequestTest {
             identity_document
             
             """.trimIndent()
-        assertEquals(expected, request.purposeContents)
+        assertThat(request.purposeContents).isEqualTo(expected)
     }
 
     @Test
@@ -76,7 +73,7 @@ class FileUploadRequestTest {
             
             
             """.trimIndent()
-        assertEquals(expected, request.fileMetadata)
+        assertThat(request.fileMetadata).isEqualTo(expected)
     }
 
     private companion object {

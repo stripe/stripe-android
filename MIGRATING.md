@@ -68,9 +68,75 @@
             else -> {}
         }
         ```
+- Changes to `PaymentSession`
+    - Remove `PaymentSession#ActivityPaymentSessionListener`
+- Changes to `CustomerSession`
+    - `CustomerSession`'s constructor no longer takes a `stripeAccountId`;
+      instead, instantiate `PaymentConfiguration` with a `stripeAccountId`
+        ```kotlin
+        // before
+        PaymentConfiguration.init(
+            context,
+            "pk_test"
+        )
+        CustomerSession.initCustomerSession(
+            context
+            ephemeralKeyProvider,
+            "acct_1234"
+        )
+
+        // after
+        PaymentConfiguration.init(
+            context,
+            "pk_test",
+            "acct_1234"
+        )
+        CustomerSession.initCustomerSession(
+            context
+            ephemeralKeyProvider
+        )
+        ```
+    - Remove `CustomerSession#ActivityCustomerRetrievalListener`, `CustomerSession#ActivityPaymentMethodRetrievalListener`,
+      `CustomerSession#ActivityPaymentMethodsRetrievalListener`, and `CustomerSession#ActivitySourceRetrievalListener`
 - Changes to `AddPaymentMethodActivity`
-    - When `CustomerSession` is instantiated with a `stripeAccountId`, it will be used in `AddPaymentMethodActivity`
+    - When `PaymentConfiguration` is instantiated with a `stripeAccountId`, it will be used in `AddPaymentMethodActivity`
       when creating a payment method
+        ```kotlin
+        PaymentConfiguration.init(context, "pk_test", "acct_1234")
+        ```
+    - `AddPaymentMethodActivity.Result` is now a sealed class with `Success`, `Failure`, and `Canceled` subclasses
+        ```kotlin
+        // before
+        val result = AddPaymentMethodActivityStarter.Result.fromIntent(
+            intent
+        )
+        when {
+            result != null -> result.paymentMethod
+            else -> {
+                // error happened or customer canceled
+            }
+        }
+    
+        // after
+        val result = AddPaymentMethodActivityStarter.Result.fromIntent(
+            intent
+        )
+        when (result) {
+            is AddPaymentMethodActivityStarter.Result.Success -> {
+                result.paymentMethod
+            }
+            is AddPaymentMethodActivityStarter.Result.Failure -> {
+                result.exception
+            }
+            is AddPaymentMethodActivityStarter.Result.Canceled -> {
+                // customer canceled
+            }
+        }
+        ```
+- Changes to `ShippingInfoWidget`
+    - `setOptionalFields()` is now `optionalFields`
+    - `setHiddenFields()` is now `hiddenFields`
+    - `CustomizableShippingField` is now an enum
 - Changes to `Source`
     - `Source.SourceFlow` has been renamed to `Source.Flow` and is now an enum
     - `Source.SourceStatus` has been renamed to `Source.Status` and is now an enum

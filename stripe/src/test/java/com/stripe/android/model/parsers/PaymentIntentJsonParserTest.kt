@@ -57,7 +57,8 @@ class PaymentIntentJsonParserTest {
             .isEqualTo(
                 StripeIntent.NextActionData.DisplayOxxoDetails(
                     expiresAfter = 1587704399,
-                    number = "12345678901234657890123456789012"
+                    number = "12345678901234657890123456789012",
+                    hostedVoucherUrl = "https://payments.stripe.com/oxxo/voucher/vchr_test_YWNjdF8xR1hhNUZIU0wxMEo5d3F2LHZjaHJfSGJIOGVMYmNmQlkyMUJ5OU1WTU5uMVYxdDNta1Q2RQ0000gtenGCef"
                 )
             )
     }

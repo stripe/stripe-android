@@ -1,6 +1,5 @@
 package com.stripe.android
 
-import android.app.Activity
 import android.content.Context
 import android.os.Handler
 import androidx.annotation.IntRange
@@ -12,7 +11,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.Source
 import com.stripe.android.model.Source.SourceType
-import java.lang.ref.WeakReference
 import java.util.Calendar
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
@@ -30,7 +28,7 @@ class CustomerSession @VisibleForTesting internal constructor(
     context: Context,
     stripeRepository: StripeRepository,
     publishableKey: String,
-    internal val stripeAccountId: String?,
+    stripeAccountId: String?,
     private val workDispatcher: CoroutineDispatcher = createCoroutineDispatcher(),
     private val operationIdFactory: OperationIdFactory = StripeOperationIdFactory(),
     private val timeSupplier: TimeSupplier = { Calendar.getInstance().timeInMillis },
@@ -38,6 +36,7 @@ class CustomerSession @VisibleForTesting internal constructor(
 ) {
     @JvmSynthetic
     internal var customerCacheTime: Long = 0
+
     @JvmSynthetic
     internal var customer: Customer? = null
 
@@ -464,12 +463,6 @@ class CustomerSession @VisibleForTesting internal constructor(
         return listeners.remove(operationId) as L?
     }
 
-    abstract class ActivityCustomerRetrievalListener<A : Activity?>(activity: A) : CustomerRetrievalListener {
-        private val activityRef: WeakReference<A> = WeakReference(activity)
-        protected val activity: A?
-            get() = activityRef.get()
-    }
-
     interface CustomerRetrievalListener : RetrievalListener {
         fun onCustomerRetrieved(customer: Customer)
     }
@@ -490,43 +483,16 @@ class CustomerSession @VisibleForTesting internal constructor(
         fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?)
     }
 
-    /**
-     * Abstract implementation of [PaymentMethodsRetrievalListener] that holds a
-     * [WeakReference] to an `Activity` object.
-     */
-    abstract class ActivityPaymentMethodsRetrievalListener<A : Activity?>(activity: A) : PaymentMethodsRetrievalListener {
-        private val activityRef: WeakReference<A> = WeakReference(activity)
-        protected val activity: A?
-            get() = activityRef.get()
-    }
-
-    /**
-     * Abstract implementation of [SourceRetrievalListener] that holds a
-     * [WeakReference] to an `Activity` object.
-     */
-    abstract class ActivitySourceRetrievalListener<A : Activity?>(activity: A) : SourceRetrievalListener {
-        private val activityRef: WeakReference<A> = WeakReference(activity)
-        protected val activity: A?
-            get() = activityRef.get()
-    }
-
-    /**
-     * Abstract implementation of [PaymentMethodRetrievalListener] that holds a
-     * [WeakReference] to an `Activity` object.
-     */
-    abstract class ActivityPaymentMethodRetrievalListener<A : Activity?>(activity: A) : PaymentMethodRetrievalListener {
-        private val activityRef: WeakReference<A> = WeakReference(activity)
-        protected val activity: A?
-            get() = activityRef.get()
-    }
-
     companion object {
         // The maximum number of active threads we support
         private const val THREAD_POOL_SIZE = 3
+
         // Sets the amount of time an idle thread waits before terminating
         private const val KEEP_ALIVE_TIME = 2
+
         // Sets the Time Unit to seconds
         private val KEEP_ALIVE_TIME_UNIT = TimeUnit.SECONDS
+
         private val CUSTOMER_CACHE_DURATION_MILLISECONDS = TimeUnit.MINUTES.toMillis(1)
 
         /**
@@ -538,8 +504,6 @@ class CustomerSession @VisibleForTesting internal constructor(
          * @param context The application context
          * @param ephemeralKeyProvider An [EphemeralKeyProvider] used to retrieve
          * [EphemeralKey] ephemeral keys
-         * @param stripeAccountId An optional Stripe Connect account to associate with Customer-related
-         * Stripe API Requests. See [Stripe].
          * @param shouldPrefetchEphemeralKey If true, will immediately fetch an ephemeral key using
          * {@param ephemeralKeyProvider}. Otherwise, will only fetch
          * an ephemeral key when needed.
@@ -549,7 +513,6 @@ class CustomerSession @VisibleForTesting internal constructor(
         fun initCustomerSession(
             context: Context,
             ephemeralKeyProvider: EphemeralKeyProvider,
-            stripeAccountId: String? = null,
             shouldPrefetchEphemeralKey: Boolean = true
         ) {
             val operationIdFactory = StripeOperationIdFactory()
@@ -561,30 +524,17 @@ class CustomerSession @VisibleForTesting internal constructor(
                 timeSupplier = timeSupplier
             )
 
-            val publishableKey = PaymentConfiguration.getInstance(context).publishableKey
+            val config = PaymentConfiguration.getInstance(context)
+
             instance = CustomerSession(
                 context,
-                StripeApiRepository(context, publishableKey, appInfo),
-                publishableKey,
-                stripeAccountId,
+                StripeApiRepository(context, config.publishableKey, appInfo),
+                config.publishableKey,
+                config.stripeAccountId,
                 createCoroutineDispatcher(),
                 operationIdFactory,
                 timeSupplier,
                 ephemeralKeyManagerFactory
-            )
-        }
-
-        /**
-         * See [initCustomerSession]
-         */
-        @JvmStatic
-        fun initCustomerSession(
-            context: Context,
-            ephemeralKeyProvider: EphemeralKeyProvider,
-            shouldPrefetchEphemeralKey: Boolean
-        ) {
-            initCustomerSession(
-                context, ephemeralKeyProvider, null, shouldPrefetchEphemeralKey
             )
         }
 
