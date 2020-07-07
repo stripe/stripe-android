@@ -511,13 +511,14 @@ data class ConfirmPaymentIntentParams internal constructor(
          */
         @JvmStatic
         internal fun createAlipay(
-            clientSecret: String,
-            returnUrl: String
+            clientSecret: String
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
                 paymentMethodCreateParams = PaymentMethodCreateParams.createAlipay(),
-                returnUrl = returnUrl
+                // return_url is no longer used by is still required by the backend
+                // TODO(smaskell): remove this when no longer required
+                returnUrl = "stripe://return_url"
             )
         }
     }
