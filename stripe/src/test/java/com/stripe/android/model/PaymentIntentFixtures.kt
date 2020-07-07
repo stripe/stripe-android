@@ -664,7 +664,8 @@ internal object PaymentIntentFixtures {
             "next_action": {
                 "display_oxxo_details": {
                     "expires_after": 1587704399,
-                    "number": "12345678901234657890123456789012"
+                    "number": "12345678901234657890123456789012",
+                    "hosted_voucher_url": "https://payments.stripe.com/oxxo/voucher/vchr_test_YWNjdF8xR1hhNUZIU0wxMEo5d3F2LHZjaHJfSGJIOGVMYmNmQlkyMUJ5OU1WTU5uMVYxdDNta1Q2RQ0000gtenGCef"
                 },
                 "type": "display_oxxo_details"
             },
