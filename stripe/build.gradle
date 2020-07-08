@@ -67,6 +67,7 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     defaultConfig {
         minSdkVersion 21
+        targetSdkVersion rootProject.ext.compileSdkVersion
         consumerProguardFiles 'proguard-rules.txt'
 
         vectorDrawables.useSupportLibrary = true
