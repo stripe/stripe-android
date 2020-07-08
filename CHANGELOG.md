@@ -32,6 +32,7 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 * [#2604](https://github.com/stripe/stripe-android/pull/2604) Add `stripeAccountId` to `PaymentConfiguration` and use in `AddPaymentMethodActivity`
 * [#2609](https://github.com/stripe/stripe-android/pull/2609) Refactor `AddPaymentMethodActivity.Result`
 * [#2610](https://github.com/stripe/stripe-android/pull/2610) Remove `PaymentSession` and `CustomerSession`'s "Activity" Listeners
+* [#2611](https://github.com/stripe/stripe-android/pull/2611) Target API 30
 * [#2617](https://github.com/stripe/stripe-android/pull/2617) Convert `CustomizableShippingField` to enum
 * [#2623](https://github.com/stripe/stripe-android/pull/2623) Update Gradle to `6.5.1`
 
