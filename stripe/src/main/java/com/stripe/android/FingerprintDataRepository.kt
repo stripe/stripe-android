@@ -3,7 +3,7 @@ package com.stripe.android
 import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import androidx.lifecycle.Transformations
+import androidx.lifecycle.switchMap
 import java.util.Calendar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +38,7 @@ internal interface FingerprintDataRepository {
         override fun refresh() {
             if (Stripe.advancedFraudSignalsEnabled) {
                 coroutineScope.launch {
-                    Transformations.switchMap(store.get()) { localFingerprintData ->
+                    store.get().switchMap { localFingerprintData ->
                         if (localFingerprintData == null ||
                             localFingerprintData.isExpired(timestampSupplier())) {
                             fingerprintRequestExecutor.execute(
