@@ -51,7 +51,7 @@ class PaymentIntentJsonParserTest {
     @Test
     fun parse_withOxxo_shouldCreateExpectedNextActionData() {
         val paymentIntent = PaymentIntentJsonParser().parse(
-            PaymentIntentFixtures.OXXO_REQUIRES_ACTION
+            PaymentIntentFixtures.OXXO_REQUIRES_ACTION_JSON
         )
         assertThat(paymentIntent?.nextActionData)
             .isEqualTo(
