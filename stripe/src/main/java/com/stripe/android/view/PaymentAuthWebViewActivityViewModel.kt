@@ -42,7 +42,7 @@ internal class PaymentAuthWebViewActivityViewModel(
         get() {
             return Intent().putExtras(
                 paymentResult.copy(
-                    flowOutcome = if (args.cancelOnUserNavigation) {
+                    flowOutcome = if (args.shouldCancelIntentOnUserNavigation) {
                         StripeIntentResult.Outcome.CANCELED
                     } else {
                         StripeIntentResult.Outcome.SUCCEEDED

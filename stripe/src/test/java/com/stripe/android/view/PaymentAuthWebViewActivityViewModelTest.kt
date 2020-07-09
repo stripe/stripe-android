@@ -37,7 +37,7 @@ class PaymentAuthWebViewActivityViewModelTest {
                 clientSecret = "client_secret",
                 url = "https://example.com",
                 shouldCancelSource = true,
-                cancelOnUserNavigation = false
+                shouldCancelIntentOnUserNavigation = false
             )
         )
 

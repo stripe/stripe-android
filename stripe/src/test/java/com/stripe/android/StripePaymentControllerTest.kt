@@ -258,7 +258,7 @@ class StripePaymentControllerTest {
         )
         assertThat(args.url)
             .isEqualTo("https://payments.stripe.com/oxxo/voucher/vchr_test_YWNjdF8xR1hhNUZIU0wxMEo5d3F2LHZjaHJfSGJIOGVMYmNmQlkyMUJ5OU1WTU5uMVYxdDNta1Q2RQ0000gtenGCef")
-        assertThat(args.cancelOnUserNavigation).isFalse()
+        assertThat(args.shouldCancelIntentOnUserNavigation).isFalse()
     }
 
     @Test

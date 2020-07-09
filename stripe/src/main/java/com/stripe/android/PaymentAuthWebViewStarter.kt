@@ -41,7 +41,7 @@ internal class PaymentAuthWebViewStarter internal constructor(
          * Simply displaying the web view is all we need to do, and we expect the user to
          * navigate away after this.
          */
-        val cancelOnUserNavigation: Boolean = true
+        val shouldCancelIntentOnUserNavigation: Boolean = true
     ) : Parcelable
 
     internal companion object {

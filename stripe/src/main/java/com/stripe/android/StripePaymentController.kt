@@ -556,7 +556,7 @@ internal class StripePaymentController internal constructor(
                             nextActionData.hostedVoucherUrl,
                             requestOptions.stripeAccount,
                             enableLogging = enableLogging,
-                            cancelOnUserNavigation = false
+                            shouldCancelIntentOnUserNavigation = false
                         )
                     } else {
                         // TODO(smaskell): Determine how to handle missing URL
@@ -1086,14 +1086,14 @@ internal class StripePaymentController internal constructor(
             returnUrl: String? = null,
             enableLogging: Boolean = false,
             shouldCancelSource: Boolean = false,
-            cancelOnUserNavigation: Boolean = true
+            shouldCancelIntentOnUserNavigation: Boolean = true
         ) {
             Logger.getInstance(enableLogging).debug("PaymentAuthWebViewStarter#start()")
             val starter = PaymentAuthWebViewStarter(host, requestCode)
             starter.start(
                 PaymentAuthWebViewStarter.Args(clientSecret, authUrl, returnUrl, enableLogging,
                     stripeAccountId = stripeAccount, shouldCancelSource = shouldCancelSource,
-                    cancelOnUserNavigation = cancelOnUserNavigation)
+                    shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation)
             )
         }
 
