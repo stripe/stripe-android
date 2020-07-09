@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 15.0.0 - unreleased
+## 15.0.0 - 2020-07-09 
 This release includes several breaking changes.
 See the [migration guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) for more details.
 
