@@ -140,7 +140,12 @@ interface StripeIntent : StripeModel {
             /**
              * The OXXO number.
              */
-            val number: String? = null
+            val number: String? = null,
+
+            /**
+             * URL of a webpage containing the voucher for this OXXO payment.
+             */
+            val hostedVoucherUrl: String? = null
         ) : NextActionData()
 
         /**

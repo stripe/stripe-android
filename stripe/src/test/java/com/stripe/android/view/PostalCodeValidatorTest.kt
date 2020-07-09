@@ -12,7 +12,7 @@ class PostalCodeValidatorTest {
             postalCode = "",
             countryCode = "US",
             optionalShippingInfoFields = listOf(
-                ShippingInfoWidget.CustomizableShippingField.POSTAL_CODE_FIELD
+                ShippingInfoWidget.CustomizableShippingField.PostalCode
             ),
             hiddenShippingInfoFields = emptyList()
         ))
@@ -24,7 +24,7 @@ class PostalCodeValidatorTest {
             postalCode = "94107",
             countryCode = "",
             optionalShippingInfoFields = listOf(
-                ShippingInfoWidget.CustomizableShippingField.POSTAL_CODE_FIELD
+                ShippingInfoWidget.CustomizableShippingField.PostalCode
             ),
             hiddenShippingInfoFields = emptyList()
         ))

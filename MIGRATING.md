@@ -133,6 +133,10 @@
             }
         }
         ```
+- Changes to `ShippingInfoWidget`
+    - `setOptionalFields()` is now `optionalFields`
+    - `setHiddenFields()` is now `hiddenFields`
+    - `CustomizableShippingField` is now an enum
 - Changes to `Source`
     - `Source.SourceFlow` has been renamed to `Source.Flow` and is now an enum
     - `Source.SourceStatus` has been renamed to `Source.Status` and is now an enum

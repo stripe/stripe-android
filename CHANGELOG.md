@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 15.0.0 - unreleased
+## 15.0.0 - 2020-07-09 
 This release includes several breaking changes.
 See the [migration guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) for more details.
 
@@ -13,7 +13,6 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 * [#2554](https://github.com/stripe/stripe-android/pull/2554) Update `PaymentAuthWebViewActivity`'s back button behavior
 * [#2551](https://github.com/stripe/stripe-android/pull/2551) Fix `StrictMode` `DiskReadViolation` violations
 * [#2555](https://github.com/stripe/stripe-android/pull/2555) Improve `PaymentAuthWebViewActivity`
-* [#2557](https://github.com/stripe/stripe-android/pull/2557) Update 3DS2 SDK to `3.0.3`
 * [#2559](https://github.com/stripe/stripe-android/pull/2559) Represent `PaymentIntent`'s `confirmationMethod` and `captureMethod` as enums
 * [#2561](https://github.com/stripe/stripe-android/pull/2561) Make `CardInputListener.FocusField` an enum
 * [#2562](https://github.com/stripe/stripe-android/pull/2562) Make `SourceTypeModel.Card.ThreeDSecureStatus` an enum
@@ -28,6 +27,14 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
     * Reduce SDK size by ~30kb
     * Fix Google Pay icon in `PaymentMethodsActivity`
 * [#2595](https://github.com/stripe/stripe-android/pull/2595) Bump SDK `minSdkVersion` to `21`
+* [#2599](https://github.com/stripe/stripe-android/pull/2599) Remove `StripeSSLSocketFactory`
+* [#2604](https://github.com/stripe/stripe-android/pull/2604) Add `stripeAccountId` to `PaymentConfiguration` and use in `AddPaymentMethodActivity`
+* [#2609](https://github.com/stripe/stripe-android/pull/2609) Refactor `AddPaymentMethodActivity.Result`
+* [#2610](https://github.com/stripe/stripe-android/pull/2610) Remove `PaymentSession` and `CustomerSession`'s "Activity" Listeners
+* [#2611](https://github.com/stripe/stripe-android/pull/2611) Target API 30
+* [#2617](https://github.com/stripe/stripe-android/pull/2617) Convert `CustomizableShippingField` to enum
+* [#2623](https://github.com/stripe/stripe-android/pull/2623) Update Gradle to `6.5.1`
+* [#2557](https://github.com/stripe/stripe-android/pull/2634) Update 3DS2 SDK to `4.0.3`
 
 ## 14.5.0 - 2020-06-04
 * [#2453](https://github.com/stripe/stripe-android/pull/2453) Add `ConfirmPaymentIntentParams#receiptEmail`

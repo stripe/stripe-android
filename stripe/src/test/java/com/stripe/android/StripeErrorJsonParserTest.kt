@@ -1,7 +1,7 @@
 package com.stripe.android
 
+import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import org.json.JSONObject
 
 /**
@@ -16,23 +16,19 @@ class StripeErrorJsonParserTest {
             message = "The Stripe API is only accessible over HTTPS. Please see <https://stripe.com/docs> for more information.",
             type = "invalid_request_error"
         )
-        assertEquals(expected, actual)
+        assertThat(actual).isEqualTo(expected)
     }
 
     @Test
     fun parseError_withEmptyJson_addsInvalidResponseMessage() {
-        assertEquals(
-            StripeErrorJsonParser.MALFORMED_RESPONSE_MESSAGE,
-            StripeErrorJsonParser().parse(JSONObject()).message
-        )
+        assertThat(StripeErrorJsonParser().parse(JSONObject()).message)
+            .isEqualTo(StripeErrorJsonParser.MALFORMED_RESPONSE_MESSAGE)
     }
 
     @Test
     fun parseError_withNoErrorMessage_addsInvalidResponseMessage() {
-        assertEquals(
-            StripeErrorJsonParser.MALFORMED_RESPONSE_MESSAGE,
-            StripeErrorJsonParser().parse(RAW_INCORRECT_FORMAT_ERROR).message
-        )
+        assertThat(StripeErrorJsonParser().parse(RAW_INCORRECT_FORMAT_ERROR).message)
+            .isEqualTo(StripeErrorJsonParser.MALFORMED_RESPONSE_MESSAGE)
     }
 
     @Test
@@ -45,18 +41,14 @@ class StripeErrorJsonParserTest {
             declineCode = "card_declined",
             type = "invalid_request_error"
         )
-        assertEquals(
-            expected,
-            StripeErrorJsonParser().parse(RAW_ERROR_WITH_ALL_FIELDS)
-        )
+        assertThat(StripeErrorJsonParser().parse(RAW_ERROR_WITH_ALL_FIELDS))
+            .isEqualTo(expected)
     }
 
     @Test
     fun parse_withDocUrl() {
-        assertEquals(
-            "https://stripe.com/docs/error-codes/incorrect-number",
-            StripeErrorFixtures.INVALID_CARD_NUMBER.docUrl
-        )
+        assertThat(StripeErrorFixtures.INVALID_CARD_NUMBER.docUrl)
+            .isEqualTo("https://stripe.com/docs/error-codes/incorrect-number")
     }
 
     private companion object {
