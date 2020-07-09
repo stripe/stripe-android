@@ -13,7 +13,6 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 * [#2554](https://github.com/stripe/stripe-android/pull/2554) Update `PaymentAuthWebViewActivity`'s back button behavior
 * [#2551](https://github.com/stripe/stripe-android/pull/2551) Fix `StrictMode` `DiskReadViolation` violations
 * [#2555](https://github.com/stripe/stripe-android/pull/2555) Improve `PaymentAuthWebViewActivity`
-* [#2557](https://github.com/stripe/stripe-android/pull/2557) Update 3DS2 SDK to `3.0.3`
 * [#2559](https://github.com/stripe/stripe-android/pull/2559) Represent `PaymentIntent`'s `confirmationMethod` and `captureMethod` as enums
 * [#2561](https://github.com/stripe/stripe-android/pull/2561) Make `CardInputListener.FocusField` an enum
 * [#2562](https://github.com/stripe/stripe-android/pull/2562) Make `SourceTypeModel.Card.ThreeDSecureStatus` an enum
@@ -35,6 +34,7 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 * [#2611](https://github.com/stripe/stripe-android/pull/2611) Target API 30
 * [#2617](https://github.com/stripe/stripe-android/pull/2617) Convert `CustomizableShippingField` to enum
 * [#2623](https://github.com/stripe/stripe-android/pull/2623) Update Gradle to `6.5.1`
+* [#2557](https://github.com/stripe/stripe-android/pull/2634) Update 3DS2 SDK to `4.0.3`
 
 ## 14.5.0 - 2020-06-04
 * [#2453](https://github.com/stripe/stripe-android/pull/2453) Add `ConfirmPaymentIntentParams#receiptEmail`
