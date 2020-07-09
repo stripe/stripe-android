@@ -268,11 +268,12 @@ class GooglePayJsonFactory constructor(
         internal val transactionId: String? = null,
 
         /**
-         * Total monetary value of the transaction with an optional decimal precision of two
-         * decimal places. This field is required unless totalPriceStatus is set to
-         * NOT_CURRENTLY_KNOWN.
+         * Total monetary value of the transaction.
          *
-         * The format of the string should follow the regex format: ^[0-9]+(\.[0-9][0-9])?$
+         * This field is required unless [totalPriceStatus] is set to [TotalPriceStatus.NotCurrentlyKnown].
+         *
+         * The value of this field is represented in the [smallest currency unit](https://stripe.com/docs/currencies#zero-decimal).
+         * For example, when [currencyCode] is `"USD"`, a value of `100` represents 100 cents ($1.00).
          */
         internal val totalPrice: Int? = null,
 
