@@ -16,18 +16,6 @@ class ApiVersionTest {
     }
 
     @Test
-    fun `oxxo beta should have correct code`() {
-        assertThat(ApiVersion.get().withBetas(setOf(StripeApiBeta.OxxoV1)).code)
-            .isEqualTo("2020-03-02;oxxo_beta=v1")
-    }
-
-    @Test
-    fun `betas should combine correctly`() {
-        assertThat(ApiVersion.get().withBetas(setOf(StripeApiBeta.AlipayV1, StripeApiBeta.OxxoV1)).code)
-            .isEqualTo("2020-03-02;alipay_beta=v1;oxxo_beta=v1")
-    }
-
-    @Test
     fun `empty beta list should be ignored`() {
         assertThat(ApiVersion.get().withBetas(setOf()).code)
             .isEqualTo(ApiVersion.get().code)
