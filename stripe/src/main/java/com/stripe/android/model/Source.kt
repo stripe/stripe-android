@@ -411,8 +411,6 @@ data class Source internal constructor(
     ) : StripeModel
 
     companion object {
-        internal const val OBJECT_TYPE = "source"
-
         internal const val EURO: String = "eur"
         internal const val USD: String = "usd"
 

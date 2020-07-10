@@ -13,7 +13,7 @@ data class BankAccount internal constructor(
      *
      * [id](https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-id)
      */
-    val id: String? = null,
+    override val id: String? = null,
 
     /**
      * The name of the person or business that owns the bank account.
@@ -91,7 +91,7 @@ data class BankAccount internal constructor(
      * [status](https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-status)
      */
     val status: Status? = null
-) : StripeModel {
+) : StripeModel, StripePaymentSource {
 
     enum class Type(internal val code: String) {
         Company("company"),
