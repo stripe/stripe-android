@@ -525,8 +525,6 @@ data class Card internal constructor(
     }
 
     companion object {
-        internal const val OBJECT_TYPE = "card"
-
         /**
          * Create a Card object from a raw JSON string.
          *

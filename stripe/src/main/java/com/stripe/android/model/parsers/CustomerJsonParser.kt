@@ -25,7 +25,7 @@ internal class CustomerJsonParser : ModelJsonParser<Customer> {
         val hasMore: Boolean
         val totalCount: Int?
         val url: String?
-        val sources: List<CustomerSource>?
+        val sources: List<CustomerSource>
         if (sourcesJson != null && VALUE_LIST == StripeJsonUtils.optString(sourcesJson, FIELD_OBJECT)) {
             hasMore = StripeJsonUtils.optBoolean(sourcesJson, FIELD_HAS_MORE)
             totalCount = StripeJsonUtils.optInteger(sourcesJson, FIELD_TOTAL_COUNT)
@@ -44,7 +44,15 @@ internal class CustomerJsonParser : ModelJsonParser<Customer> {
             sources = emptyList()
         }
 
-        return Customer(id, defaultSource, shippingInformation, sources, hasMore, totalCount, url)
+        return Customer(
+            id = id,
+            defaultSource = defaultSource,
+            shippingInformation = shippingInformation,
+            sources = sources,
+            hasMore = hasMore,
+            totalCount = totalCount,
+            url = url
+        )
     }
 
     private companion object {
