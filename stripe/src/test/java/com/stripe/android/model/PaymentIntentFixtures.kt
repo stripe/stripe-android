@@ -645,7 +645,7 @@ internal object PaymentIntentFixtures {
         """.trimIndent()
     )
 
-    val OXXO_REQUIRES_ACTION = JSONObject(
+    val OXXO_REQUIRES_ACTION_JSON = JSONObject(
         """
         {
             "id": "pi_1Ga0nFLYnbCF8",
@@ -681,6 +681,7 @@ internal object PaymentIntentFixtures {
         }
         """.trimIndent()
     )
+    val OXXO_REQUIES_ACTION = PARSER.parse(OXXO_REQUIRES_ACTION_JSON)!!
 
     val ALIPAY_REQUIRES_ACTION_JSON = JSONObject(
         """

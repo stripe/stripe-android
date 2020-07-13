@@ -546,6 +546,23 @@ internal class StripePaymentController internal constructor(
                         enableLogging = enableLogging
                     )
                 }
+                is StripeIntent.NextActionData.DisplayOxxoDetails -> {
+                    // TODO(smaskell): add analytics event
+                    if (nextActionData.hostedVoucherUrl != null) {
+                        beginWebAuth(
+                            host,
+                            getRequestCode(stripeIntent),
+                            stripeIntent.clientSecret.orEmpty(),
+                            nextActionData.hostedVoucherUrl,
+                            requestOptions.stripeAccount,
+                            enableLogging = enableLogging,
+                            shouldCancelIntentOnUserNavigation = false
+                        )
+                    } else {
+                        // TODO(smaskell): Determine how to handle missing URL
+                        bypassAuth(host, stripeIntent, requestOptions.stripeAccount)
+                    }
+                }
                 else -> bypassAuth(host, stripeIntent, requestOptions.stripeAccount)
             }
         } else {
@@ -1068,13 +1085,15 @@ internal class StripePaymentController internal constructor(
             stripeAccount: String?,
             returnUrl: String? = null,
             enableLogging: Boolean = false,
-            shouldCancelSource: Boolean = false
+            shouldCancelSource: Boolean = false,
+            shouldCancelIntentOnUserNavigation: Boolean = true
         ) {
             Logger.getInstance(enableLogging).debug("PaymentAuthWebViewStarter#start()")
             val starter = PaymentAuthWebViewStarter(host, requestCode)
             starter.start(
                 PaymentAuthWebViewStarter.Args(clientSecret, authUrl, returnUrl, enableLogging,
-                    stripeAccountId = stripeAccount, shouldCancelSource = shouldCancelSource)
+                    stripeAccountId = stripeAccount, shouldCancelSource = shouldCancelSource,
+                    shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation)
             )
         }
 

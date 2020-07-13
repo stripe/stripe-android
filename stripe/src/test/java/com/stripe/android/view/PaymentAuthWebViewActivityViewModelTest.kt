@@ -31,6 +31,25 @@ class PaymentAuthWebViewActivityViewModelTest {
     }
 
     @Test
+    fun `cancellationResult should set correct outcome when user nav is allowed`() {
+        val viewModel = PaymentAuthWebViewActivityViewModel(
+            PaymentAuthWebViewStarter.Args(
+                clientSecret = "client_secret",
+                url = "https://example.com",
+                shouldCancelSource = true,
+                shouldCancelIntentOnUserNavigation = false
+            )
+        )
+
+        val intent = viewModel.cancellationResult
+        val resultIntent = PaymentController.Result.fromIntent(requireNotNull(intent))
+        assertThat(
+            resultIntent?.flowOutcome
+        ).isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
+        assertThat(resultIntent?.shouldCancelSource).isTrue()
+    }
+
+    @Test
     fun toolbarBackgroundColor_returnsCorrectValue() {
         val viewModel = PaymentAuthWebViewActivityViewModel(
             PaymentAuthWebViewStarter.Args(

@@ -31,7 +31,17 @@ internal class PaymentAuthWebViewStarter internal constructor(
         val enableLogging: Boolean = false,
         val toolbarCustomization: StripeToolbarCustomization? = null,
         val stripeAccountId: String? = null,
-        val shouldCancelSource: Boolean = false
+        val shouldCancelSource: Boolean = false,
+        /**
+         * For most payment methods, if the user navigates away from the webview
+         * (e.g. by pressing the back button or tapping "close" in the menu bar),
+         * we assume the confirmation flow has been cancelled.
+         *
+         * However, for some payment methods, such as OXXO, no immediate user action is required.
+         * Simply displaying the web view is all we need to do, and we expect the user to
+         * navigate away after this.
+         */
+        val shouldCancelIntentOnUserNavigation: Boolean = true
     ) : Parcelable
 
     internal companion object {
