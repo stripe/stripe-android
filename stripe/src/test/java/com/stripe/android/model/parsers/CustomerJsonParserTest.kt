@@ -37,7 +37,10 @@ class CustomerJsonParserTest {
                 ),
                 hasMore = false,
                 totalCount = 1,
-                url = "/v1/customers/cus_HcLIwF3BCi/sources"
+                url = "/v1/customers/cus_HcLIwF3BCi/sources",
+                description = "mobile SDK example customer",
+                email = "jenny.rosen@example.com",
+                liveMode = true
             )
         )
     }
@@ -51,8 +54,8 @@ class CustomerJsonParserTest {
             	"created": 1594327465,
             	"default_source": "ba_1H3NOMCRMbs6FrXfahj",
             	"description": "mobile SDK example customer",
-            	"email": null,
-            	"livemode": false,
+            	"email": "jenny.rosen@example.com",
+            	"livemode": true,
             	"shipping": null,
             	"sources": {
             		"object": "list",

@@ -15,7 +15,10 @@ data class Customer internal constructor(
     val sources: List<CustomerSource>,
     val hasMore: Boolean,
     val totalCount: Int?,
-    val url: String?
+    val url: String?,
+    val description: String?,
+    val email: String?,
+    val liveMode: Boolean
 ) : StripeModel {
 
     fun getSourceById(sourceId: String): CustomerSource? {
