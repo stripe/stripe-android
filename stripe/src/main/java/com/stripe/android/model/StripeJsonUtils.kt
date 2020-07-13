@@ -12,12 +12,12 @@ internal object StripeJsonUtils {
     private const val NULL = "null"
 
     /**
-     * Calls through to [JSONObject.optInt] only in the case that the
+     * Calls through to [JSONObject.optBoolean] only in the case that the
      * key exists. This returns `null` if the key is not in the object.
      *
      * @param jsonObject the input object
      * @param fieldName the required field name
-     * @return the value stored in the requested field, or `null` if the key is not present
+     * @return the value stored in the requested field, or `false` if the key is not present
      */
     @JvmSynthetic
     internal fun optBoolean(
