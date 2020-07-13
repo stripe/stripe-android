@@ -598,9 +598,9 @@ internal class StripePaymentController internal constructor(
         val activity = host.activity ?: return
 
         val transaction = threeDs2Service.createTransaction(
-            stripe3ds2Fingerprint.directoryServer.id,
+            stripe3ds2Fingerprint.directoryServerEncryption.directoryServerId,
             messageVersionRegistry.current, stripeIntent.isLiveMode,
-            stripe3ds2Fingerprint.directoryServer.networkName,
+            stripe3ds2Fingerprint.directoryServerName,
             stripe3ds2Fingerprint.directoryServerEncryption.rootCerts,
             stripe3ds2Fingerprint.directoryServerEncryption.directoryServerPublicKey,
             stripe3ds2Fingerprint.directoryServerEncryption.keyId,
@@ -619,7 +619,7 @@ internal class StripePaymentController internal constructor(
 
         challengeProgressActivityStarter.start(
             activity,
-            stripe3ds2Fingerprint.directoryServer.networkName,
+            stripe3ds2Fingerprint.directoryServerName,
             false,
             config.stripe3ds2Config.uiCustomization.uiCustomization
         )

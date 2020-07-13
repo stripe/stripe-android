@@ -97,10 +97,10 @@ class StripePaymentControllerTest {
             .directoryServerPublicKey
         whenever(
             threeDs2Service.createTransaction(
-                eq(Stripe3ds2Fingerprint.DirectoryServer.Mastercard.id),
+                eq(MASTERCARD_DS_ID),
                 eq(MESSAGE_VERSION),
                 eq(paymentIntent.isLiveMode),
-                eq(Stripe3ds2Fingerprint.DirectoryServer.Mastercard.networkName),
+                eq("mastercard"),
                 any(),
                 eq(dsPublicKey),
                 eq("7c4debe3f4af7f9d1569a2ffea4343c2566826ee"),
@@ -111,10 +111,10 @@ class StripePaymentControllerTest {
             .thenReturn(transaction)
         controller.handleNextAction(host, paymentIntent, REQUEST_OPTIONS)
         verify(threeDs2Service).createTransaction(
-            eq(Stripe3ds2Fingerprint.DirectoryServer.Mastercard.id),
+            eq(MASTERCARD_DS_ID),
             eq(MESSAGE_VERSION),
             eq(paymentIntent.isLiveMode),
-            eq(Stripe3ds2Fingerprint.DirectoryServer.Mastercard.networkName),
+            eq("mastercard"),
             any(),
             eq(dsPublicKey),
             eq("7c4debe3f4af7f9d1569a2ffea4343c2566826ee"),
@@ -143,10 +143,10 @@ class StripePaymentControllerTest {
     @Test
     fun handleNextAction_withAmexAnd3ds2_shouldStart3ds2ChallengeFlow() {
         whenever(threeDs2Service.createTransaction(
-            eq(Stripe3ds2Fingerprint.DirectoryServer.Amex.id),
+            eq(AMEX_DS_ID),
             eq(MESSAGE_VERSION),
             eq(PaymentIntentFixtures.PI_REQUIRES_AMEX_3DS2.isLiveMode),
-            eq(Stripe3ds2Fingerprint.DirectoryServer.Amex.networkName),
+            eq("american_express"),
             any(),
             eq(Stripe3ds2FingerprintTest.DS_RSA_PUBLIC_KEY),
             eq(PaymentIntentFixtures.KEY_ID),
@@ -160,10 +160,10 @@ class StripePaymentControllerTest {
             REQUEST_OPTIONS
         )
         verify(threeDs2Service).createTransaction(
-            eq(Stripe3ds2Fingerprint.DirectoryServer.Amex.id),
+            eq(AMEX_DS_ID),
             eq(MESSAGE_VERSION),
             eq(PaymentIntentFixtures.PI_REQUIRES_AMEX_3DS2.isLiveMode),
-            eq(Stripe3ds2Fingerprint.DirectoryServer.Amex.networkName),
+            eq("american_express"),
             any(),
             eq(Stripe3ds2FingerprintTest.DS_RSA_PUBLIC_KEY),
             eq(PaymentIntentFixtures.KEY_ID),
@@ -821,5 +821,8 @@ class StripePaymentControllerTest {
                 .setTimeout(5)
                 .build())
             .build()
+
+        private const val MASTERCARD_DS_ID = "A000000004"
+        private const val AMEX_DS_ID = "A000000025"
     }
 }
