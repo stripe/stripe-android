@@ -2,7 +2,6 @@ package com.stripe.android.model
 
 import java.io.ByteArrayInputStream
 import java.security.PublicKey
-import java.security.cert.CertificateException
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import kotlin.test.Test
@@ -15,23 +14,19 @@ import org.robolectric.RobolectricTestRunner
 class Stripe3ds2FingerprintTest {
 
     @Test
-    @Throws(CertificateException::class)
     fun create_with3ds2SdkData_shouldCreateObject() {
         val sdkData = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
             .nextActionData as StripeIntent.NextActionData.SdkData.Use3DS2
         assertNotNull(sdkData)
         val stripe3ds2Fingerprint = Stripe3ds2Fingerprint(sdkData)
         assertEquals("src_1ExkUeAWhjPjYwPiLWUvXrSA", stripe3ds2Fingerprint.source)
-        assertEquals(Stripe3ds2Fingerprint.DirectoryServer.Mastercard,
-            stripe3ds2Fingerprint.directoryServer)
+        assertEquals("mastercard", stripe3ds2Fingerprint.directoryServerName)
         assertEquals("34b16ea1-1206-4ee8-84d2-d292bc73c2ae",
             stripe3ds2Fingerprint.serverTransactionId)
 
         val directoryServerEncryption =
             stripe3ds2Fingerprint.directoryServerEncryption
-        assertNotNull(stripe3ds2Fingerprint.directoryServerEncryption)
-        assertEquals(Stripe3ds2Fingerprint.DirectoryServer.Mastercard.id,
-            directoryServerEncryption.directoryServerId)
+        assertEquals("A000000004", directoryServerEncryption.directoryServerId)
         assertNotNull(directoryServerEncryption.directoryServerPublicKey)
         assertEquals("7c4debe3f4af7f9d1569a2ffea4343c2566826ee",
             directoryServerEncryption.keyId)
@@ -39,25 +34,22 @@ class Stripe3ds2FingerprintTest {
     }
 
     @Test
-    @Throws(CertificateException::class)
     fun create_with3ds2AmexSdkData_shouldCreateObject() {
         val sdkData = PaymentIntentFixtures.PI_REQUIRES_AMEX_3DS2
             .nextActionData as StripeIntent.NextActionData.SdkData.Use3DS2
         assertNotNull(sdkData)
         val stripe3ds2Fingerprint = Stripe3ds2Fingerprint(sdkData)
         assertEquals("src_1EceOlCRMbs6FrXf2hqrI1g5", stripe3ds2Fingerprint.source)
-        assertEquals(Stripe3ds2Fingerprint.DirectoryServer.Amex,
-            stripe3ds2Fingerprint.directoryServer)
+        assertEquals("american_express", stripe3ds2Fingerprint.directoryServerName)
         assertEquals("e64bb72f-60ac-4845-b8b6-47cfdb0f73aa",
             stripe3ds2Fingerprint.serverTransactionId)
 
-        assertNotNull(stripe3ds2Fingerprint.directoryServerEncryption)
-        assertEquals(Stripe3ds2Fingerprint.DirectoryServer.Amex.id,
-            stripe3ds2Fingerprint.directoryServerEncryption.directoryServerId)
-        assertEquals(DS_RSA_PUBLIC_KEY,
-            stripe3ds2Fingerprint.directoryServerEncryption.directoryServerPublicKey)
+        val directoryServerEncryption =
+            stripe3ds2Fingerprint.directoryServerEncryption
+        assertEquals("A000000025", directoryServerEncryption.directoryServerId)
+        assertEquals(DS_RSA_PUBLIC_KEY, directoryServerEncryption.directoryServerPublicKey)
         assertEquals("7c4debe3f4af7f9d1569a2ffea4343c2566826ee",
-            stripe3ds2Fingerprint.directoryServerEncryption.keyId)
+            directoryServerEncryption.keyId)
     }
 
     internal companion object {
