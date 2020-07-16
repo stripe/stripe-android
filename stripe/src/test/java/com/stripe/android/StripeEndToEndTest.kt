@@ -108,7 +108,7 @@ class StripeEndToEndTest {
         assertThat(createPaymentMethod("4000002500001001")?.card?.networks)
             .isEqualTo(
                 PaymentMethod.Card.Networks(
-                    available = setOf("visa"),
+                    available = setOf("cartes_bancaires", "visa"),
                     selectionMandatory = false,
                     preferred = null
                 )
@@ -117,7 +117,7 @@ class StripeEndToEndTest {
         assertThat(createPaymentMethod("5555552500001001")?.card?.networks)
             .isEqualTo(
                 PaymentMethod.Card.Networks(
-                    available = setOf("mastercard"),
+                    available = setOf("cartes_bancaires", "mastercard"),
                     selectionMandatory = false,
                     preferred = null
                 )
