@@ -48,7 +48,7 @@
     </style>
 
     <style name="Stripe.CardMultilineWidget.TextInputLayout"
-        parent="Stripe.Base.CardInputWidget.TextInputLayout" />
+        parent="Stripe.Base.CardMultilineWidget.TextInputLayout" />
 
     <style name="Stripe.Base.BecsDebitWidget.EditText" parent="Widget.AppCompat.EditText">
         <item name="android:textSize">@dimen/stripe_becs_debit_widget_edit_text_size</item>
