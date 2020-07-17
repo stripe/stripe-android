@@ -42,6 +42,7 @@ class GooglePayJsonFactory constructor(
     /**
      * [IsReadyToPayRequest](https://developers.google.com/pay/api/android/reference/request-objects#IsReadyToPayRequest)
      */
+    @JvmOverloads
     fun createIsReadyToPayRequest(
         /**
          * Configure additional fields to be returned for a requested billing address.
@@ -72,6 +73,7 @@ class GooglePayJsonFactory constructor(
     /**
      * [PaymentDataRequest](https://developers.google.com/pay/api/android/reference/request-objects#PaymentDataRequest)
      */
+    @JvmOverloads
     fun createPaymentDataRequest(
         /**
          * Details about the authorization of the transaction based upon whether the user agrees to
