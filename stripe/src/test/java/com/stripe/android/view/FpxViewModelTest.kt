@@ -38,8 +38,11 @@ class FpxViewModelTest {
                 bankStatuses = it
             }
 
-            assertThat(requireNotNull(bankStatuses).isOnline(FpxBank.Hsbc))
-                .isTrue()
+            assertThat(
+                setOf(FpxBank.Hsbc, FpxBank.Bsn).any {
+                    bankStatuses?.isOnline(it) == true
+                }
+            ).isTrue()
         }
     }
 }
