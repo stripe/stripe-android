@@ -682,8 +682,11 @@ class StripeApiRepositoryTest {
             ).observeForever {
                 fpxBankStatuses = it
             }
-            assertThat(fpxBankStatuses?.isOnline(FpxBank.Hsbc))
-                .isTrue()
+            assertThat(
+                setOf(FpxBank.Hsbc, FpxBank.Bsn).any {
+                    fpxBankStatuses?.isOnline(it) == true
+                }
+            ).isTrue()
         }
     }
 
@@ -699,8 +702,11 @@ class StripeApiRepositoryTest {
             ).observeForever {
                 fpxBankStatuses = it
             }
-            assertThat(fpxBankStatuses?.isOnline(FpxBank.Hsbc))
-                .isTrue()
+            assertThat(
+                setOf(FpxBank.Hsbc, FpxBank.Bsn).any {
+                    fpxBankStatuses?.isOnline(it) == true
+                }
+            ).isTrue()
         }
     }
 
