@@ -12,11 +12,11 @@ import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.exception.PermissionException
 import com.stripe.android.exception.RateLimitException
 import com.stripe.android.exception.StripeException
+import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.Complete3ds2Result
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.Customer
-import com.stripe.android.model.FpxBankStatuses
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -33,6 +33,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeModel
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
+import com.stripe.android.model.parsers.CardMetadataJsonParser
 import com.stripe.android.model.parsers.CustomerJsonParser
 import com.stripe.android.model.parsers.FpxBankStatusesJsonParser
 import com.stripe.android.model.parsers.ModelJsonParser
@@ -799,7 +800,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
     override suspend fun getFpxBankStatus(
         options: ApiRequest.Options
-    ) = liveData<FpxBankStatuses>(workDispatcher) {
+    ) = liveData(workDispatcher) {
         makeApiRequest(
             apiRequestFactory.createGet(
                 getApiUrl("fpx/bank_statuses"),
@@ -812,6 +813,21 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         ).let {
             emit(FpxBankStatusesJsonParser().parse(it.responseJson))
         }
+    }
+
+    override suspend fun getCardMetadata(binPrefix: String, options: ApiRequest.Options) = liveData(workDispatcher) {
+        val result = kotlin.runCatching {
+            makeApiRequest(
+                apiRequestFactory.createGet(
+                    getEdgeUrl("card-metadata"),
+                    options.copy(stripeAccount = null),
+                    mapOf("key" to options.apiKey, "bin_prefix" to binPrefix)
+                )
+            ).let {
+                CardMetadataJsonParser(binPrefix).parse(it.responseJson)
+            }
+        }.getOrDefault(CardMetadata(binPrefix, emptyList()))
+        emit(result)
     }
 
     /**
@@ -1309,6 +1325,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
         private fun getApiUrl(path: String): String {
             return "${ApiRequest.API_HOST}/v1/$path"
+        }
+
+        private fun getEdgeUrl(path: String): String {
+            return "${ApiRequest.API_HOST}/edge-internal/$path"
         }
 
         private fun createExpandParam(expandFields: List<String>): Map<String, List<String>> {

@@ -18,6 +18,7 @@ import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.BankAccountTokenParamsFixtures
 import com.stripe.android.model.Card
 import com.stripe.android.model.CardFixtures
+import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.FpxBankStatuses
 import com.stripe.android.model.ListPaymentMethodsParams
@@ -707,6 +708,66 @@ class StripeApiRepositoryTest {
                     fpxBankStatuses?.isOnline(it) == true
                 }
             ).isTrue()
+        }
+    }
+
+    @Test
+    fun `getCardMetadata with valid bin prefix should succeed`() {
+        testScope.runBlockingTest {
+            var cardMetadata: CardMetadata? = null
+            stripeApiRepository.getCardMetadata("424242",
+                ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+            ).observeForever {
+                cardMetadata = it
+            }
+            assertNotNull(cardMetadata)
+            assertThat(cardMetadata!!.binPrefix).isEqualTo("424242")
+            assertThat(cardMetadata!!.accountRanges).isNotEmpty()
+        }
+    }
+
+    @Test
+    fun `getCardMetadata with short bin prefix should fail gracefully`() {
+        testScope.runBlockingTest {
+            var cardMetadata: CardMetadata? = null
+            stripeApiRepository.getCardMetadata("4242",
+                ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+            ).observeForever {
+                cardMetadata = it
+            }
+            assertNotNull(cardMetadata)
+            assertThat(cardMetadata!!.binPrefix).isEqualTo("4242")
+            assertThat(cardMetadata!!.accountRanges).isEmpty()
+        }
+    }
+
+    @Test
+    fun `getCardMetadata with long bin prefix should fail gracefully`() {
+        testScope.runBlockingTest {
+            var cardMetadata: CardMetadata? = null
+            stripeApiRepository.getCardMetadata("4242424",
+                ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+            ).observeForever {
+                cardMetadata = it
+            }
+            assertNotNull(cardMetadata)
+            assertThat(cardMetadata!!.binPrefix).isEqualTo("4242424")
+            assertThat(cardMetadata!!.accountRanges).isEmpty()
+        }
+    }
+
+    @Test
+    fun `getCardMetadata with invalid bin prefix should fail gracefully`() {
+        testScope.runBlockingTest {
+            var cardMetadata: CardMetadata? = null
+            stripeApiRepository.getCardMetadata("000000",
+                ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+            ).observeForever {
+                cardMetadata = it
+            }
+            assertNotNull(cardMetadata)
+            assertThat(cardMetadata!!.binPrefix).isEqualTo("000000")
+            assertThat(cardMetadata!!.accountRanges).isEmpty()
         }
     }
 
