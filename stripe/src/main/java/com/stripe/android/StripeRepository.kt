@@ -27,6 +27,7 @@ import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
+import kotlinx.coroutines.flow.Flow
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -236,7 +237,7 @@ internal interface StripeRepository {
 
     suspend fun getFpxBankStatus(options: ApiRequest.Options): LiveData<FpxBankStatuses>
 
-    suspend fun getCardMetadata(binPrefix: String, options: ApiRequest.Options): LiveData<CardMetadata>
+    suspend fun getCardMetadata(binPrefix: String, options: ApiRequest.Options): Flow<Result<CardMetadata>>
 
     fun start3ds2Auth(
         authParams: Stripe3ds2AuthParams,
