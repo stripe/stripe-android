@@ -6,7 +6,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.util.AttributeSet
@@ -31,7 +30,7 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : WebView(createContext(context), attrs, defStyleAttr) {
+) : WebView(context, attrs, defStyleAttr) {
     private var webViewClient: PaymentAuthWebViewClient? = null
 
     init {
@@ -107,18 +106,6 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
             it.hasLoadedBlank = true
         }
         loadUrl(BLANK_PAGE)
-    }
-
-    private companion object {
-        /**
-         * Fix for crash in API 21 and 22
-         *
-         * See <a href="https://stackoverflow.com/q/41025200/">https://stackoverflow.com/q/41025200/</a>
-         * for more context.
-         */
-        private fun createContext(context: Context): Context {
-            return context.createConfigurationContext(Configuration())
-        }
     }
 
     internal class PaymentAuthWebViewClient(
