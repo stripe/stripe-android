@@ -1,19 +1,16 @@
 package com.stripe.android
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.liveData
 import com.stripe.android.model.parsers.FingerprintDataJsonParser
 import java.util.Calendar
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 internal interface FingerprintRequestExecutor {
     fun execute(
         request: FingerprintRequest
-    ): LiveData<FingerprintData?>
+    ): Flow<FingerprintData?>
 
     class Default(
-        private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
         private val connectionFactory: ConnectionFactory = ConnectionFactory.Default()
     ) : FingerprintRequestExecutor {
         private val timestampSupplier = {
@@ -22,7 +19,7 @@ internal interface FingerprintRequestExecutor {
 
         override fun execute(
             request: FingerprintRequest
-        ) = liveData<FingerprintData?>(dispatcher) {
+        ) = flow<FingerprintData?> {
             emit(
                 // fingerprint request failures should be non-fatal
                 runCatching {

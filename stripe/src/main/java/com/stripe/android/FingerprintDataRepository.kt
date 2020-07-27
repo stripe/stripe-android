@@ -1,13 +1,14 @@
 package com.stripe.android
 
 import android.content.Context
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
-import androidx.lifecycle.switchMap
 import java.util.Calendar
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flatMapMerge
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
 internal interface FingerprintDataRepository {
@@ -20,13 +21,15 @@ internal interface FingerprintDataRepository {
         private val fingerprintRequestFactory: FingerprintRequestFactory,
         private val fingerprintRequestExecutor: FingerprintRequestExecutor =
             FingerprintRequestExecutor.Default(),
-        private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+        dispatcher: CoroutineDispatcher = Dispatchers.IO
     ) : FingerprintDataRepository {
         private var cachedFingerprintData: FingerprintData? = null
 
         private val timestampSupplier: () -> Long = {
             Calendar.getInstance().timeInMillis
         }
+
+        private val scope = CoroutineScope(dispatcher)
 
         constructor(
             context: Context
@@ -35,10 +38,11 @@ internal interface FingerprintDataRepository {
             fingerprintRequestFactory = FingerprintRequestFactory(context)
         )
 
+        @OptIn(FlowPreview::class)
         override fun refresh() {
             if (Stripe.advancedFraudSignalsEnabled) {
-                coroutineScope.launch {
-                    store.get().switchMap { localFingerprintData ->
+                scope.launch {
+                    store.get().flatMapMerge { localFingerprintData ->
                         if (localFingerprintData == null ||
                             localFingerprintData.isExpired(timestampSupplier())) {
                             fingerprintRequestExecutor.execute(
@@ -47,19 +51,14 @@ internal interface FingerprintDataRepository {
                                 )
                             )
                         } else {
-                            MutableLiveData(localFingerprintData)
+                            flowOf(localFingerprintData)
                         }
-                    }.let { liveData ->
-                        liveData.observeForever(object : Observer<FingerprintData?> {
-                            override fun onChanged(fingerprintData: FingerprintData?) {
-                                if (cachedFingerprintData != fingerprintData) {
-                                    fingerprintData?.let {
-                                        save(it)
-                                    }
-                                }
-                                liveData.removeObserver(this)
+                    }.collect { fingerprintData ->
+                        if (cachedFingerprintData != fingerprintData) {
+                            fingerprintData?.let {
+                                save(it)
                             }
-                        })
+                        }
                     }
                 }
             }

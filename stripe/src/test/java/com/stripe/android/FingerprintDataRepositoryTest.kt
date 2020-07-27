@@ -1,7 +1,6 @@
 package com.stripe.android
 
 import android.content.Context
-import androidx.lifecycle.MutableLiveData
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.any
@@ -12,8 +11,8 @@ import java.util.Calendar
 import java.util.concurrent.TimeUnit
 import kotlin.test.AfterTest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -23,7 +22,6 @@ import org.robolectric.RobolectricTestRunner
 class FingerprintDataRepositoryTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = TestCoroutineDispatcher()
-    private val testScope = TestCoroutineScope(testDispatcher)
     private val fingerprintRequestExecutor: FingerprintRequestExecutor = mock()
 
     @AfterTest
@@ -51,17 +49,15 @@ class FingerprintDataRepositoryTest {
             ),
             fingerprintRequestFactory = FingerprintRequestFactory(context),
             fingerprintRequestExecutor = object : FingerprintRequestExecutor {
-                override fun execute(
-                    request: FingerprintRequest
-                ) = MutableLiveData<FingerprintData?>().also {
-                    it.value = expectedFingerprintData
-                }
-            }
+                override fun execute(request: FingerprintRequest) = flowOf(expectedFingerprintData)
+            },
+            dispatcher = testDispatcher
         )
         repository.save(createFingerprintData(elapsedTime = -60L))
         repository.refresh()
+        val actualFingerprintData = repository.get()
 
-        assertThat(repository.get())
+        assertThat(actualFingerprintData)
             .isEqualTo(expectedFingerprintData)
     }
 
@@ -75,7 +71,7 @@ class FingerprintDataRepositoryTest {
             store = store,
             fingerprintRequestFactory = fingerprintRequestFactory,
             fingerprintRequestExecutor = fingerprintRequestExecutor,
-            coroutineScope = testScope
+            dispatcher = testDispatcher
         )
         repository.refresh()
 

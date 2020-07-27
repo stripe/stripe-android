@@ -7,7 +7,9 @@ import com.nhaarman.mockitokotlin2.whenever
 import java.io.IOException
 import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -22,19 +24,21 @@ class FingerprintRequestExecutorTest {
 
     @Test
     fun `execute() when successful should return non-empty values`() {
-        var remoteFingerprintData: FingerprintData? = null
-        createFingerprintRequestExecutor().execute(
-            request = fingerprintRequestFactory.create(FINGERPRINT_DATA)
-        ).observeForever {
-            remoteFingerprintData = it
-        }
+        testDispatcher.runBlockingTest {
+            var remoteFingerprintData: FingerprintData? = null
+            createFingerprintRequestExecutor().execute(
+                request = fingerprintRequestFactory.create(FINGERPRINT_DATA)
+            ).collect {
+                remoteFingerprintData = it
+            }
 
-        assertThat(remoteFingerprintData?.guid)
-            .isNotEmpty()
-        assertThat(remoteFingerprintData?.muid)
-            .isNotEmpty()
-        assertThat(remoteFingerprintData?.sid)
-            .isNotEmpty()
+            assertThat(remoteFingerprintData?.guid)
+                .isNotEmpty()
+            assertThat(remoteFingerprintData?.muid)
+                .isNotEmpty()
+            assertThat(remoteFingerprintData?.sid)
+                .isNotEmpty()
+        }
     }
 
     @Test
@@ -49,19 +53,21 @@ class FingerprintRequestExecutorTest {
                 .thenReturn(connection)
         }
 
-        var callbackCount = 0
-        var remoteFingerprintData: FingerprintData? = null
-        createFingerprintRequestExecutor(connectionFactory = connectionFactory)
-            .execute(request = request)
-            .observeForever {
-                callbackCount++
-                remoteFingerprintData = it
-            }
+        testDispatcher.runBlockingTest {
+            var callbackCount = 0
+            var remoteFingerprintData: FingerprintData? = null
+            createFingerprintRequestExecutor(connectionFactory = connectionFactory)
+                .execute(request = request)
+                .collect {
+                    callbackCount++
+                    remoteFingerprintData = it
+                }
 
-        assertThat(callbackCount)
-            .isEqualTo(1)
-        assertThat(remoteFingerprintData)
-            .isNull()
+            assertThat(callbackCount)
+                .isEqualTo(1)
+            assertThat(remoteFingerprintData)
+                .isNull()
+        }
     }
 
     @Test
@@ -73,23 +79,25 @@ class FingerprintRequestExecutorTest {
 
         var callbackCount = 0
         var remoteFingerprintData: FingerprintData? = null
-        createFingerprintRequestExecutor(connectionFactory = connectionFactory)
-            .execute(request = request)
-            .observeForever {
-                callbackCount++
-                remoteFingerprintData = it
-            }
 
-        assertThat(callbackCount)
-            .isEqualTo(1)
-        assertThat(remoteFingerprintData)
-            .isNull()
+        testDispatcher.runBlockingTest {
+            createFingerprintRequestExecutor(connectionFactory = connectionFactory)
+                .execute(request = request)
+                .collect {
+                    callbackCount++
+                    remoteFingerprintData = it
+                }
+
+            assertThat(callbackCount)
+                .isEqualTo(1)
+            assertThat(remoteFingerprintData)
+                .isNull()
+        }
     }
 
     private fun createFingerprintRequestExecutor(
         connectionFactory: ConnectionFactory = ConnectionFactory.Default()
     ) = FingerprintRequestExecutor.Default(
-        dispatcher = testDispatcher,
         connectionFactory = connectionFactory
     )
 
