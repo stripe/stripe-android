@@ -1,6 +1,5 @@
 package com.stripe.android
 
-import androidx.lifecycle.MutableLiveData
 import com.stripe.android.exception.APIException
 import com.stripe.android.model.Complete3ds2Result
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -231,7 +230,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
 
     override suspend fun getFpxBankStatus(
         options: ApiRequest.Options
-    ) = MutableLiveData(FpxBankStatuses())
+    ) = FpxBankStatuses()
 
     override fun start3ds2Auth(
         authParams: Stripe3ds2AuthParams,

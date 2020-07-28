@@ -3,7 +3,6 @@ package com.stripe.android
 import android.content.Context
 import android.util.Pair
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.liveData
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.AuthenticationException
@@ -16,7 +15,6 @@ import com.stripe.android.model.Complete3ds2Result
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.Customer
-import com.stripe.android.model.FpxBankStatuses
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -50,6 +48,7 @@ import java.security.Security
 import java.util.Locale
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -799,7 +798,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
     override suspend fun getFpxBankStatus(
         options: ApiRequest.Options
-    ) = liveData<FpxBankStatuses>(workDispatcher) {
+    ) = withContext(workDispatcher) {
         makeApiRequest(
             apiRequestFactory.createGet(
                 getApiUrl("fpx/bank_statuses"),
@@ -810,7 +809,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 mapOf("account_holder_type" to "individual")
             )
         ).let {
-            emit(FpxBankStatusesJsonParser().parse(it.responseJson))
+            FpxBankStatusesJsonParser().parse(it.responseJson)
         }
     }
 
