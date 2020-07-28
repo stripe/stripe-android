@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.liveData
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
+import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
 import org.json.JSONObject
 
@@ -20,12 +21,14 @@ internal class FragmentExamplesViewModel(
 
     private fun createIntent(
         apiMethod: suspend () -> ResponseBody
-    ) = liveData<Result<JSONObject>>(workContext) {
-        emit(
-            runCatching {
-                JSONObject(apiMethod().string())
-            }
-        )
+    ) = liveData {
+        withContext(workContext) {
+            emit(
+                runCatching {
+                    JSONObject(apiMethod().string())
+                }
+            )
+        }
     }
 
     private companion object {
