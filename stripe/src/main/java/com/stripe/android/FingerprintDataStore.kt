@@ -1,15 +1,14 @@
 package com.stripe.android
 
 import android.content.Context
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.liveData
 import com.stripe.android.model.parsers.FingerprintDataJsonParser
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
 internal interface FingerprintDataStore {
-    fun get(): LiveData<FingerprintData?>
+    suspend fun get(): FingerprintData?
     fun save(fingerprintData: FingerprintData)
 
     class Default(
@@ -22,16 +21,14 @@ internal interface FingerprintDataStore {
             )
         }
 
-        override fun get() = liveData<FingerprintData?>(coroutineDispatcher) {
-            emit(
-                runCatching {
-                    val json = JSONObject(prefs.getString(KEY_DATA, null).orEmpty())
-                    val timestampSupplier = {
-                        json.optLong(FingerprintData.KEY_TIMESTAMP, -1)
-                    }
-                    FingerprintDataJsonParser(timestampSupplier).parse(json)
-                }.getOrNull()
-            )
+        override suspend fun get() = withContext(coroutineDispatcher) {
+            runCatching {
+                val json = JSONObject(prefs.getString(KEY_DATA, null).orEmpty())
+                val timestampSupplier = {
+                    json.optLong(FingerprintData.KEY_TIMESTAMP, -1)
+                }
+                FingerprintDataJsonParser(timestampSupplier).parse(json)
+            }.getOrNull()
         }
 
         override fun save(fingerprintData: FingerprintData) {

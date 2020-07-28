@@ -1,13 +1,10 @@
 package com.stripe.android
 
 import android.content.Context
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
-import androidx.lifecycle.switchMap
 import java.util.Calendar
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 internal interface FingerprintDataRepository {
@@ -16,11 +13,11 @@ internal interface FingerprintDataRepository {
     fun save(fingerprintData: FingerprintData)
 
     class Default(
-        private val store: FingerprintDataStore,
+        private val localStore: FingerprintDataStore,
         private val fingerprintRequestFactory: FingerprintRequestFactory,
         private val fingerprintRequestExecutor: FingerprintRequestExecutor =
             FingerprintRequestExecutor.Default(),
-        private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+        dispatcher: CoroutineDispatcher = Dispatchers.IO
     ) : FingerprintDataRepository {
         private var cachedFingerprintData: FingerprintData? = null
 
@@ -28,17 +25,19 @@ internal interface FingerprintDataRepository {
             Calendar.getInstance().timeInMillis
         }
 
+        private val scope = CoroutineScope(dispatcher)
+
         constructor(
             context: Context
         ) : this(
-            store = FingerprintDataStore.Default(context),
+            localStore = FingerprintDataStore.Default(context),
             fingerprintRequestFactory = FingerprintRequestFactory(context)
         )
 
         override fun refresh() {
             if (Stripe.advancedFraudSignalsEnabled) {
-                coroutineScope.launch {
-                    store.get().switchMap { localFingerprintData ->
+                scope.launch {
+                    localStore.get().let { localFingerprintData ->
                         if (localFingerprintData == null ||
                             localFingerprintData.isExpired(timestampSupplier())) {
                             fingerprintRequestExecutor.execute(
@@ -47,19 +46,14 @@ internal interface FingerprintDataRepository {
                                 )
                             )
                         } else {
-                            MutableLiveData(localFingerprintData)
+                            localFingerprintData
                         }
-                    }.let { liveData ->
-                        liveData.observeForever(object : Observer<FingerprintData?> {
-                            override fun onChanged(fingerprintData: FingerprintData?) {
-                                if (cachedFingerprintData != fingerprintData) {
-                                    fingerprintData?.let {
-                                        save(it)
-                                    }
-                                }
-                                liveData.removeObserver(this)
+                    }.let { fingerprintData ->
+                        if (cachedFingerprintData != fingerprintData) {
+                            fingerprintData?.let {
+                                save(it)
                             }
-                        })
+                        }
                     }
                 }
             }
@@ -73,7 +67,7 @@ internal interface FingerprintDataRepository {
 
         override fun save(fingerprintData: FingerprintData) {
             cachedFingerprintData = fingerprintData
-            store.save(fingerprintData)
+            localStore.save(fingerprintData)
         }
     }
 }

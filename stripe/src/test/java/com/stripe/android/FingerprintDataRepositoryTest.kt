@@ -1,7 +1,6 @@
 package com.stripe.android
 
 import android.content.Context
-import androidx.lifecycle.MutableLiveData
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.any
@@ -13,7 +12,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.test.AfterTest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -23,7 +22,6 @@ import org.robolectric.RobolectricTestRunner
 class FingerprintDataRepositoryTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = TestCoroutineDispatcher()
-    private val testScope = TestCoroutineScope(testDispatcher)
     private val fingerprintRequestExecutor: FingerprintRequestExecutor = mock()
 
     @AfterTest
@@ -45,37 +43,35 @@ class FingerprintDataRepositoryTest {
     fun `get() when FingerprintData is expired should request new remote FingerprintData`() {
         val expectedFingerprintData = createFingerprintData()
         val repository = FingerprintDataRepository.Default(
-            store = FingerprintDataStore.Default(
+            localStore = FingerprintDataStore.Default(
                 context,
                 testDispatcher
             ),
             fingerprintRequestFactory = FingerprintRequestFactory(context),
             fingerprintRequestExecutor = object : FingerprintRequestExecutor {
-                override fun execute(
-                    request: FingerprintRequest
-                ) = MutableLiveData<FingerprintData?>().also {
-                    it.value = expectedFingerprintData
-                }
-            }
+                override suspend fun execute(request: FingerprintRequest) = expectedFingerprintData
+            },
+            dispatcher = testDispatcher
         )
         repository.save(createFingerprintData(elapsedTime = -60L))
         repository.refresh()
+        val actualFingerprintData = repository.get()
 
-        assertThat(repository.get())
+        assertThat(actualFingerprintData)
             .isEqualTo(expectedFingerprintData)
     }
 
     @Test
-    fun `refresh() when advancedFraudSignals is disabled should not fetch FingerprintData`() {
+    fun `refresh() when advancedFraudSignals is disabled should not fetch FingerprintData`() = testDispatcher.runBlockingTest {
         Stripe.advancedFraudSignalsEnabled = false
 
         val store: FingerprintDataStore = mock()
         val fingerprintRequestFactory: FingerprintRequestFactory = mock()
         val repository = FingerprintDataRepository.Default(
-            store = store,
+            localStore = store,
             fingerprintRequestFactory = fingerprintRequestFactory,
             fingerprintRequestExecutor = fingerprintRequestExecutor,
-            coroutineScope = testScope
+            dispatcher = testDispatcher
         )
         repository.refresh()
 

@@ -3,7 +3,6 @@ package com.stripe.android
 import android.content.Context
 import android.util.Pair
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.liveData
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.AuthenticationException
@@ -801,7 +800,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
     override suspend fun getFpxBankStatus(
         options: ApiRequest.Options
-    ) = liveData(workDispatcher) {
+    ) = withContext(workDispatcher) {
         makeApiRequest(
             apiRequestFactory.createGet(
                 getApiUrl("fpx/bank_statuses"),
@@ -812,12 +811,12 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 mapOf("account_holder_type" to "individual")
             )
         ).let {
-            emit(FpxBankStatusesJsonParser().parse(it.responseJson))
+            FpxBankStatusesJsonParser().parse(it.responseJson)
         }
     }
 
-    override suspend fun getCardMetadata(binPrefix: String, options: ApiRequest.Options): CardMetadata {
-        return withContext(workDispatcher) {
+    override suspend fun getCardMetadata(binPrefix: String, options: ApiRequest.Options) =
+        withContext(workDispatcher) {
             makeApiRequest(
                 apiRequestFactory.createGet(
                     getEdgeUrl("card-metadata"),
@@ -828,7 +827,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 CardMetadataJsonParser(binPrefix).parse(it.responseJson)
             }
         }
-    }
 
     /**
      * Analytics event: [AnalyticsEvent.Auth3ds2Start]
