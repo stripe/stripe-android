@@ -5,10 +5,6 @@ import java.util.Calendar
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flatMapMerge
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
 internal interface FingerprintDataRepository {
@@ -17,7 +13,7 @@ internal interface FingerprintDataRepository {
     fun save(fingerprintData: FingerprintData)
 
     class Default(
-        private val store: FingerprintDataStore,
+        private val localStore: FingerprintDataStore,
         private val fingerprintRequestFactory: FingerprintRequestFactory,
         private val fingerprintRequestExecutor: FingerprintRequestExecutor =
             FingerprintRequestExecutor.Default(),
@@ -34,15 +30,14 @@ internal interface FingerprintDataRepository {
         constructor(
             context: Context
         ) : this(
-            store = FingerprintDataStore.Default(context),
+            localStore = FingerprintDataStore.Default(context),
             fingerprintRequestFactory = FingerprintRequestFactory(context)
         )
 
-        @OptIn(FlowPreview::class)
         override fun refresh() {
             if (Stripe.advancedFraudSignalsEnabled) {
                 scope.launch {
-                    store.get().flatMapMerge { localFingerprintData ->
+                    localStore.get().let { localFingerprintData ->
                         if (localFingerprintData == null ||
                             localFingerprintData.isExpired(timestampSupplier())) {
                             fingerprintRequestExecutor.execute(
@@ -51,9 +46,9 @@ internal interface FingerprintDataRepository {
                                 )
                             )
                         } else {
-                            flowOf(localFingerprintData)
+                            localFingerprintData
                         }
-                    }.collect { fingerprintData ->
+                    }.let { fingerprintData ->
                         if (cachedFingerprintData != fingerprintData) {
                             fingerprintData?.let {
                                 save(it)
@@ -72,7 +67,7 @@ internal interface FingerprintDataRepository {
 
         override fun save(fingerprintData: FingerprintData) {
             cachedFingerprintData = fingerprintData
-            store.save(fingerprintData)
+            localStore.save(fingerprintData)
         }
     }
 }

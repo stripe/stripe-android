@@ -11,8 +11,8 @@ import java.util.Calendar
 import java.util.concurrent.TimeUnit
 import kotlin.test.AfterTest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -49,7 +49,7 @@ class FingerprintDataRepositoryTest {
             ),
             fingerprintRequestFactory = FingerprintRequestFactory(context),
             fingerprintRequestExecutor = object : FingerprintRequestExecutor {
-                override fun execute(request: FingerprintRequest) = flowOf(expectedFingerprintData)
+                override suspend fun execute(request: FingerprintRequest) = expectedFingerprintData
             },
             dispatcher = testDispatcher
         )
@@ -62,7 +62,7 @@ class FingerprintDataRepositoryTest {
     }
 
     @Test
-    fun `refresh() when advancedFraudSignals is disabled should not fetch FingerprintData`() {
+    fun `refresh() when advancedFraudSignals is disabled should not fetch FingerprintData`() = testDispatcher.runBlockingTest {
         Stripe.advancedFraudSignalsEnabled = false
 
         val store: FingerprintDataStore = mock()

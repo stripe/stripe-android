@@ -2,30 +2,30 @@ package com.stripe.android
 
 import com.stripe.android.model.parsers.FingerprintDataJsonParser
 import java.util.Calendar
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 internal interface FingerprintRequestExecutor {
-    fun execute(
+    suspend fun execute(
         request: FingerprintRequest
-    ): Flow<FingerprintData?>
+    ): FingerprintData?
 
     class Default(
-        private val connectionFactory: ConnectionFactory = ConnectionFactory.Default()
+        private val connectionFactory: ConnectionFactory = ConnectionFactory.Default(),
+        private val workDispatcher: CoroutineDispatcher = Dispatchers.IO
     ) : FingerprintRequestExecutor {
         private val timestampSupplier = {
             Calendar.getInstance().timeInMillis
         }
 
-        override fun execute(
+        override suspend fun execute(
             request: FingerprintRequest
-        ) = flow<FingerprintData?> {
-            emit(
-                // fingerprint request failures should be non-fatal
-                runCatching {
-                    executeInternal(request)
-                }.getOrNull()
-            )
+        ) = withContext(workDispatcher) {
+            // fingerprint request failures should be non-fatal
+            runCatching {
+                executeInternal(request)
+            }.getOrNull()
         }
 
         private fun executeInternal(request: FingerprintRequest): FingerprintData? {
