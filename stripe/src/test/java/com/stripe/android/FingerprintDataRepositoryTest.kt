@@ -43,7 +43,7 @@ class FingerprintDataRepositoryTest {
     fun `get() when FingerprintData is expired should request new remote FingerprintData`() {
         val expectedFingerprintData = createFingerprintData()
         val repository = FingerprintDataRepository.Default(
-            store = FingerprintDataStore.Default(
+            localStore = FingerprintDataStore.Default(
                 context,
                 testDispatcher
             ),
@@ -68,7 +68,7 @@ class FingerprintDataRepositoryTest {
         val store: FingerprintDataStore = mock()
         val fingerprintRequestFactory: FingerprintRequestFactory = mock()
         val repository = FingerprintDataRepository.Default(
-            store = store,
+            localStore = store,
             fingerprintRequestFactory = fingerprintRequestFactory,
             fingerprintRequestExecutor = fingerprintRequestExecutor,
             dispatcher = testDispatcher
