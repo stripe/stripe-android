@@ -19,7 +19,6 @@ import com.stripe.android.model.BankAccountTokenParamsFixtures
 import com.stripe.android.model.Card
 import com.stripe.android.model.CardFixtures
 import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.FpxBankStatuses
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -48,7 +47,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -60,9 +58,8 @@ import org.robolectric.RobolectricTestRunner
 @ExperimentalCoroutinesApi
 class StripeApiRepositoryTest {
     private val testDispatcher = TestCoroutineDispatcher()
-    private val testScope = TestCoroutineScope(testDispatcher)
 
-    private val context: Context = ApplicationProvider.getApplicationContext()
+    private val context = ApplicationProvider.getApplicationContext<Context>()
     private val stripeApiRepository = StripeApiRepository(
         context,
         DEFAULT_OPTIONS.apiKey,
@@ -674,40 +671,30 @@ class StripeApiRepositoryTest {
     }
 
     @Test
-    fun getFpxBankStatus_withFpxKey() {
-        testScope.runBlockingTest {
-            var fpxBankStatuses: FpxBankStatuses? = null
-            stripeApiRepository.getFpxBankStatus(
-                ApiRequest.Options(ApiKeyFixtures.FPX_PUBLISHABLE_KEY)
-            ).observeForever {
-                fpxBankStatuses = it
+    fun getFpxBankStatus_withFpxKey() = testDispatcher.runBlockingTest {
+        val fpxBankStatuses = stripeApiRepository.getFpxBankStatus(
+            ApiRequest.Options(ApiKeyFixtures.FPX_PUBLISHABLE_KEY)
+        )
+        assertThat(
+            setOf(FpxBank.Hsbc, FpxBank.Bsn).any {
+                fpxBankStatuses.isOnline(it)
             }
-            assertThat(
-                setOf(FpxBank.Hsbc, FpxBank.Bsn).any {
-                    fpxBankStatuses?.isOnline(it) == true
-                }
-            ).isTrue()
-        }
+        ).isTrue()
     }
 
     @Test
-    fun getFpxBankStatus_withFpxKey_ignoresStripeAccountId() {
-        testScope.runBlockingTest {
-            var fpxBankStatuses: FpxBankStatuses? = null
-            stripeApiRepository.getFpxBankStatus(
-                ApiRequest.Options(
-                    apiKey = ApiKeyFixtures.FPX_PUBLISHABLE_KEY,
-                    stripeAccount = "acct_1234"
-                )
-            ).observeForever {
-                fpxBankStatuses = it
+    fun getFpxBankStatus_withFpxKey_ignoresStripeAccountId() = testDispatcher.runBlockingTest {
+        val fpxBankStatuses = stripeApiRepository.getFpxBankStatus(
+            ApiRequest.Options(
+                apiKey = ApiKeyFixtures.FPX_PUBLISHABLE_KEY,
+                stripeAccount = "acct_1234"
+            )
+        )
+        assertThat(
+            setOf(FpxBank.Hsbc, FpxBank.Bsn).any {
+                fpxBankStatuses.isOnline(it)
             }
-            assertThat(
-                setOf(FpxBank.Hsbc, FpxBank.Bsn).any {
-                    fpxBankStatuses?.isOnline(it) == true
-                }
-            ).isTrue()
-        }
+        ).isTrue()
     }
 
     @Test
