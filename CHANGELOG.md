@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 15.0.1 - unreleased
+## 15.0.1 - 2020-08-28
 * [#2641](https://github.com/stripe/stripe-android/pull/2641) Add support for Bank Account as source on `Customer` object
 * [#2643](https://github.com/stripe/stripe-android/pull/2643) Add missing fields to `Customer` model
 * [#2646](https://github.com/stripe/stripe-android/pull/2646) Allow `CardMultilineWidget`'s `TextInputLayout`s to be styled
