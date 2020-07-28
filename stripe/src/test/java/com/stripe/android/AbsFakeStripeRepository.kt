@@ -23,7 +23,6 @@ import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
-import kotlinx.coroutines.flow.flowOf
 import org.json.JSONObject
 
 internal abstract class AbsFakeStripeRepository : StripeRepository {
@@ -236,7 +235,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
     ) = MutableLiveData(FpxBankStatuses())
 
     override suspend fun getCardMetadata(binPrefix: String, options: ApiRequest.Options) =
-        flowOf(Result.success(CardMetadata("424242", emptyList())))
+        CardMetadata("424242", emptyList())
 
     override fun start3ds2Auth(
         authParams: Stripe3ds2AuthParams,

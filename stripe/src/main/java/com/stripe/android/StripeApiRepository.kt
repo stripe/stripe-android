@@ -12,6 +12,7 @@ import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.exception.PermissionException
 import com.stripe.android.exception.RateLimitException
 import com.stripe.android.exception.StripeException
+import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.Complete3ds2Result
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -50,7 +51,7 @@ import java.security.Security
 import java.util.Locale
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -815,8 +816,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
-    override suspend fun getCardMetadata(binPrefix: String, options: ApiRequest.Options) = flow {
-        emit(kotlin.runCatching {
+    override suspend fun getCardMetadata(binPrefix: String, options: ApiRequest.Options): CardMetadata {
+        return withContext(workDispatcher) {
             makeApiRequest(
                 apiRequestFactory.createGet(
                     getEdgeUrl("card-metadata"),
@@ -826,7 +827,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             ).let {
                 CardMetadataJsonParser(binPrefix).parse(it.responseJson)
             }
-        })
+        }
     }
 
     /**
