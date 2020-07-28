@@ -11,7 +11,6 @@ import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.exception.PermissionException
 import com.stripe.android.exception.RateLimitException
 import com.stripe.android.exception.StripeException
-import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.Complete3ds2Result
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
