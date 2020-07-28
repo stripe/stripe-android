@@ -8,6 +8,7 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
 import com.stripe.example.R
 import com.stripe.example.activity.BaseViewModel
+import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
 import org.json.JSONObject
 import retrofit2.HttpException
@@ -47,12 +48,14 @@ internal class StripeIntentViewModel(
         @StringRes creatingStringRes: Int,
         @StringRes resultStringRes: Int,
         apiMethod: suspend () -> ResponseBody
-    ) = liveData<Result<JSONObject>>(workContext) {
+    ) = liveData {
         inProgress.postValue(true)
         status.postValue(resources.getString(creatingStringRes))
 
-        val result = runCatching {
-            JSONObject(apiMethod().string())
+        val result = withContext(workContext) {
+            runCatching {
+                JSONObject(apiMethod().string())
+            }
         }
 
         result.fold(
