@@ -699,7 +699,7 @@ class StripeApiRepositoryTest {
 
     @Test
     fun `getCardMetadata with valid bin prefix should succeed`() {
-        testScope.runBlockingTest {
+        testDispatcher.runBlockingTest {
             val cardMetadata =
                 stripeApiRepository.getCardMetadata(
                     "424242",
