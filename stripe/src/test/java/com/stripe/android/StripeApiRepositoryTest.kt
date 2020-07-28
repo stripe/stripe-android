@@ -59,7 +59,7 @@ import org.robolectric.RobolectricTestRunner
 class StripeApiRepositoryTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
-    private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val context: Context = ApplicationProvider.getApplicationContext()
     private val stripeApiRepository = StripeApiRepository(
         context,
         DEFAULT_OPTIONS.apiKey,
