@@ -68,7 +68,7 @@ class StripeEndToEndTest {
 
         verify(paymentIntentCallback).onError(
             argWhere {
-                it is InvalidRequestException && it.message == "No such payment_intent: pi_abc"
+                it is InvalidRequestException && it.message == "No such payment_intent: \"pi_abc\""
             }
         )
     }
@@ -84,7 +84,7 @@ class StripeEndToEndTest {
 
         verify(setupIntentCallback).onError(
             argWhere {
-                it is InvalidRequestException && it.message == "No such setupintent: seti_abc"
+                it is InvalidRequestException && it.message == "No such setupintent: \"seti_abc\""
             }
         )
     }
