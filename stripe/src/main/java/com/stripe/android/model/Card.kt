@@ -348,7 +348,7 @@ data class Card internal constructor(
                 postalCode = addressZip,
                 country = addressCountry
             )
-        ).toParamMap()
+        ).typeDataParams
 
     /**
      * Builder class for a [Card] model.
