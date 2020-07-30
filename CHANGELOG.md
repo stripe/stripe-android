@@ -1,6 +1,9 @@
 # CHANGELOG
 
-## 15.0.1 - 2020-07-28 
+## 15.0.2 - unreleased
+* [#2666](https://github.com/stripe/stripe-android/pull/2666) Bump 3DS2 SDK to `4.0.4`
+
+## 15.0.1 - 2020-07-28
 * [#2641](https://github.com/stripe/stripe-android/pull/2641) Add support for Bank Account as source on `Customer` object
 * [#2643](https://github.com/stripe/stripe-android/pull/2643) Add missing fields to `Customer` model
 * [#2646](https://github.com/stripe/stripe-android/pull/2646) Allow `CardMultilineWidget`'s `TextInputLayout`s to be styled
@@ -232,7 +235,7 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
     * Fix "Postal Code" field being partially cut off on some screens
 * [#2066](https://github.com/stripe/stripe-android/pull/2066) Add support for uploading a file to Stripe
     * See `Stripe#createFile()` and `Stripe#createFileSynchronous()`
- * [#2071](https://github.com/stripe/stripe-android/pull/2071) Fix accessibility issues on Payment Methods selection screen
+* [#2071](https://github.com/stripe/stripe-android/pull/2071) Fix accessibility issues on Payment Methods selection screen
     * Mark `View`s representing existing payment methods and add a new payment method action as focusable and clickable
 
 
