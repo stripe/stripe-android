@@ -42,4 +42,4 @@ jobs:
                 path: ~/.gradle/caches
                 key: gradle-${{ runner.os }}-${{ hashFiles('**/build.gradle') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
             - name: Unit tests
-              run: ./gradlew testDebugUnitTest --info
+              run: ./gradlew testDebugUnitTest

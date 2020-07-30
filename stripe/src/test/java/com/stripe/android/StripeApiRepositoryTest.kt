@@ -763,7 +763,7 @@ class StripeApiRepositoryTest {
             )
         }
         assertEquals(
-            "No such setupintent: \"seti_1CkiBMLENEVhOs7YMtUehLau\"",
+            "No such setupintent: 'seti_1CkiBMLENEVhOs7YMtUehLau'",
             ex.stripeError?.message
         )
     }
@@ -785,7 +785,7 @@ class StripeApiRepositoryTest {
             )
         }
         assertEquals(
-            "そのような setupintent はありません : \"seti_1CkiBMLENEVhOs7YMtUehLau\" ",
+            "そのような setupintent はありません : 'seti_1CkiBMLENEVhOs7YMtUehLau' ",
             ex.stripeError?.message
         )
     }
