@@ -1257,7 +1257,7 @@ class Stripe internal constructor(
      */
     @UiThread
     @JvmOverloads
-    internal fun createCardToken(
+    fun createCardToken(
         cardParams: CardParams,
         idempotencyKey: String? = null,
         stripeAccountId: String? = this.stripeAccountId,
@@ -1334,7 +1334,7 @@ class Stripe internal constructor(
         APIConnectionException::class, CardException::class, APIException::class)
     @WorkerThread
     @JvmOverloads
-    internal fun createCardTokenSynchronous(
+    fun createCardTokenSynchronous(
         cardParams: CardParams,
         idempotencyKey: String? = null,
         stripeAccountId: String? = this.stripeAccountId

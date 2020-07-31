@@ -6,7 +6,7 @@ import kotlinx.android.parcel.Parcelize
  * [Create a card token](https://stripe.com/docs/api/tokens/create_card)
  */
 @Parcelize
-internal data class CardParams internal constructor(
+data class CardParams internal constructor(
     private val loggingTokens: Set<String> = emptySet(),
 
     /**
@@ -81,7 +81,7 @@ internal data class CardParams internal constructor(
 ) : TokenParams(Token.Type.Card, loggingTokens) {
 
     @JvmOverloads
-    constructor(
+    internal constructor(
         /**
          * [card.number](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-number)
          *

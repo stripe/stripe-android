@@ -177,7 +177,11 @@ class CardMultilineWidget @JvmOverloads constructor(
             return cardBuilder?.build()
         }
 
-    internal val cardParams: CardParams?
+    /**
+     * A [CardParams] representing the card details and postal code if all fields are valid;
+     * otherwise `null`
+     */
+    override val cardParams: CardParams?
         get() {
             if (!validateAllFields()) {
                 shouldShowErrorIcon = true
