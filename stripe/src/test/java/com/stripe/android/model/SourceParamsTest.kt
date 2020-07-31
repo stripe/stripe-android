@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -170,59 +171,59 @@ class SourceParamsTest {
     }
 
     @Test
-    fun createCardParams_hasBothExpectedMaps() {
-        val params = SourceParams.createCardParams(FULL_FIELDS_VISA_CARD)
-
-        val apiMap = params.apiParameterMap
-        requireNotNull(apiMap)
-        assertEquals(VISA_NO_SPACES, apiMap["number"])
-        assertEquals(12, apiMap["exp_month"])
-        assertEquals(2050, apiMap["exp_year"])
-        assertEquals("123", apiMap["cvc"])
-
-        val owner = requireNotNull(params.owner)
-        assertEquals("Captain Cardholder", owner.name)
-        assertNull(owner.email)
-        assertNull(owner.phone)
-
-        val addressMap = owner.address?.toParamMap().orEmpty()
-        assertEquals("1 ABC Street", addressMap["line1"])
-        assertEquals("Apt. 123", addressMap["line2"])
-        assertEquals("San Francisco", addressMap["city"])
-        assertEquals("CA", addressMap["state"])
-        assertEquals("94107", addressMap["postal_code"])
-        assertEquals("US", addressMap["country"])
-
-        assertEquals(METADATA, params.metaData)
+    fun `create with CardParams object should return expected map`() {
+        assertThat(SourceParams.createCardParams(CardParamsFixture.DEFAULT).toParamMap())
+            .isEqualTo(
+                mapOf(
+                    "type" to "card",
+                    "card" to mapOf(
+                        "number" to VISA_NO_SPACES,
+                        "exp_month" to 12,
+                        "exp_year" to 2025,
+                        "cvc" to "123"
+                    ),
+                    "owner" to mapOf(
+                        "address" to mapOf(
+                            "line1" to "123 Market St",
+                            "line2" to "#345",
+                            "city" to "San Francisco",
+                            "state" to "CA",
+                            "postal_code" to "94107",
+                            "country" to "US"
+                        ),
+                        "name" to "Jenny Rosen"
+                    ),
+                    "metadata" to mapOf("fruit" to "orange")
+                )
+            )
     }
 
     @Test
-    fun createCardParams_toParamMap_createsExpectedMap() {
-        val params = SourceParams.createCardParams(FULL_FIELDS_VISA_CARD)
-
-        val totalExpectedMap = mapOf(
-            "type" to "card",
-            "card" to mapOf(
-                "number" to VISA_NO_SPACES,
-                "exp_month" to 12,
-                "exp_year" to 2050,
-                "cvc" to "123"
-            ),
-            "owner" to mapOf(
-                "address" to mapOf(
-                    "line1" to "1 ABC Street",
-                    "line2" to "Apt. 123",
-                    "city" to "San Francisco",
-                    "state" to "CA",
-                    "postal_code" to "94107",
-                    "country" to "US"
-                ),
-                "name" to "Captain Cardholder"
-            ),
-            "metadata" to METADATA
-        )
-
-        assertEquals(totalExpectedMap, params.toParamMap())
+    fun `create with Card object should return expected map`() {
+        assertThat(SourceParams.createCardParams(FULL_FIELDS_VISA_CARD).toParamMap())
+            .isEqualTo(
+                mapOf(
+                    "type" to "card",
+                    "card" to mapOf(
+                        "number" to VISA_NO_SPACES,
+                        "exp_month" to 12,
+                        "exp_year" to 2050,
+                        "cvc" to "123"
+                    ),
+                    "owner" to mapOf(
+                        "address" to mapOf(
+                            "line1" to "1 ABC Street",
+                            "line2" to "Apt. 123",
+                            "city" to "San Francisco",
+                            "state" to "CA",
+                            "postal_code" to "94107",
+                            "country" to "US"
+                        ),
+                        "name" to "Captain Cardholder"
+                    ),
+                    "metadata" to METADATA
+                )
+            )
     }
 
     @Test
