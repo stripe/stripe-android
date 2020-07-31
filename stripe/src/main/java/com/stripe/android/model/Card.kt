@@ -17,11 +17,13 @@ data class Card internal constructor(
     /**
      * the [number] of this card
      */
+    @Deprecated("Use CardParams")
     val number: String?,
 
     /**
      * the [cvc] for this card
      */
+    @Deprecated("Use CardParams")
     val cvc: String?,
 
     /**
@@ -225,6 +227,7 @@ data class Card internal constructor(
     /**
      * @return a [Card.Builder] populated with the fields of this [Card] instance
      */
+    @Deprecated("Use CardParams")
     fun toBuilder(): Builder {
         return Builder(number, expMonth, expYear, cvc)
             .name(name)
@@ -360,6 +363,7 @@ data class Card internal constructor(
      * @param expYear the expiry year
      * @param cvc the card CVC number
      */
+    @Deprecated("Use CardParams")
     class Builder(
         internal val number: String? = null,
         @param:IntRange(from = 1, to = 12) internal val expMonth: Int? = null,
@@ -377,8 +381,10 @@ data class Card internal constructor(
         private var addressCountry: String? = null
         private var brand: CardBrand? = null
         private var funding: CardFunding? = null
+
         @Size(4)
         private var last4: String? = null
+
         private var fingerprint: String? = null
         private var country: String? = null
         private var currency: String? = null

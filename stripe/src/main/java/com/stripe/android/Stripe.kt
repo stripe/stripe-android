@@ -1227,6 +1227,7 @@ class Stripe internal constructor(
      * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      * @param callback a [ApiResultCallback] to receive the result or error
      */
+    @Deprecated("Use createCardToken(CardParams)")
     @UiThread
     @JvmOverloads
     fun createCardToken(
@@ -1291,6 +1292,7 @@ class Stripe internal constructor(
      * @throws APIException any other type of problem (for instance, a temporary issue with
      * Stripe's servers
      */
+    @Deprecated("Use createCardTokenSynchronous(CardParams)")
     @Throws(AuthenticationException::class, InvalidRequestException::class,
         APIConnectionException::class, CardException::class, APIException::class)
     @WorkerThread
