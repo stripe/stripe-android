@@ -9,6 +9,7 @@ import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.AccountParams
 import com.stripe.android.model.AddressFixtures
+import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardFunding
 import com.stripe.android.model.CardParamsFixture
@@ -148,6 +149,37 @@ class StripeEndToEndTest {
                     funding = CardFunding.Credit,
                     threeDSecureStatus = SourceTypeModel.Card.ThreeDSecureStatus.Optional
                 )
+            )
+    }
+
+    @Test
+    fun `create card token using CardParams should return object with expected data`() {
+        val token = defaultStripe.createCardTokenSynchronous(
+            CardParamsFixture.DEFAULT
+        )
+        val card = token?.card
+
+        assertThat(card)
+            .isEqualTo(
+                Card.Builder(expMonth = 12, expYear = 2025)
+                    .id(card?.id)
+                    .name("Jenny Rosen")
+                    .last4("4242")
+                    .addressLine1("123 Market St")
+                    .addressLine1Check("unchecked")
+                    .addressLine2("#345")
+                    .addressCity("San Francisco")
+                    .addressState("CA")
+                    .addressZip("94107")
+                    .addressZipCheck("unchecked")
+                    .addressCountry("US")
+                    .brand(CardBrand.Visa)
+                    .funding(CardFunding.Credit)
+                    .country("US")
+                    .currency("usd")
+                    .cvcCheck("unchecked")
+                    .metadata(emptyMap())
+                    .build()
             )
     }
 
