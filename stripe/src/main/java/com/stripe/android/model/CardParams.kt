@@ -16,7 +16,7 @@ internal data class CardParams internal constructor(
      *
      * The card number, as a string without any separators.
      */
-    var number: String,
+    internal var number: String,
 
     /**
      * [card.exp_month](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-exp_month)
@@ -25,7 +25,7 @@ internal data class CardParams internal constructor(
      *
      * Two-digit number representing the card's expiration month.
      */
-    var expMonth: Int,
+    internal var expMonth: Int,
 
     /**
      * [card.exp_year](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-exp_year)
@@ -34,7 +34,7 @@ internal data class CardParams internal constructor(
      *
      * Two- or four-digit number representing the card's expiration year.
      */
-    var expYear: Int,
+    internal var expYear: Int,
 
     /**
      * [card.cvc](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-cvc)
@@ -44,7 +44,7 @@ internal data class CardParams internal constructor(
      * Card security code. Highly recommended to always include this value, but it's required only
      * for accounts based in European countries.
      */
-    var cvc: String? = null,
+    internal var cvc: String? = null,
 
     /**
      * [card.name](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-name)
