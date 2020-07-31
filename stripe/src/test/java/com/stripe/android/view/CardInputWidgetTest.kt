@@ -126,7 +126,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    attribution = ATTRIBUTION,
+                    loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,
                     expYear = 2050,
@@ -171,7 +171,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    attribution = ATTRIBUTION,
+                    loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,
                     expYear = 2050,
@@ -220,7 +220,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    attribution = ATTRIBUTION,
+                    loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
                     expMonth = 12,
                     expYear = 2050,
@@ -265,7 +265,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    attribution = ATTRIBUTION,
+                    loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
                     expMonth = 12,
                     expYear = 2050,
@@ -314,7 +314,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    attribution = ATTRIBUTION,
+                    loggingTokens = ATTRIBUTION,
                     number = DINERS_CLUB_14_NO_SPACES,
                     expMonth = 12,
                     expYear = 2050,
@@ -357,7 +357,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    attribution = ATTRIBUTION,
+                    loggingTokens = ATTRIBUTION,
                     number = DINERS_CLUB_14_NO_SPACES,
                     expMonth = 12,
                     expYear = 2050,
@@ -465,7 +465,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    attribution = ATTRIBUTION,
+                    loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,
                     expYear = 2050,
@@ -495,7 +495,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    attribution = ATTRIBUTION,
+                    loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
                     expMonth = 12,
                     expYear = 2050,
@@ -527,7 +527,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    attribution = ATTRIBUTION,
+                    loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
                     expMonth = 12,
                     expYear = 2050,
@@ -1349,7 +1349,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    attribution = ATTRIBUTION,
+                    loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
                     expMonth = 12,
                     expYear = 2079,
@@ -1391,7 +1391,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    attribution = ATTRIBUTION,
+                    loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
                     expMonth = 12,
                     expYear = 2079,
@@ -1689,7 +1689,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    attribution = ATTRIBUTION,
+                    loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,
                     expYear = 2050,

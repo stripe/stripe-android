@@ -160,7 +160,7 @@ internal class CardMultilineWidgetTest {
         assertThat(cardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    attribution = ATTRIBUTION,
+                    loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,
                     expYear = 2050,
@@ -188,7 +188,7 @@ internal class CardMultilineWidgetTest {
         assertThat(cardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    attribution = ATTRIBUTION,
+                    loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,
                     expYear = 2050,
@@ -215,7 +215,7 @@ internal class CardMultilineWidgetTest {
         assertThat(noZipCardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    attribution = ATTRIBUTION,
+                    loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,
                     expYear = 2050,
@@ -242,7 +242,7 @@ internal class CardMultilineWidgetTest {
         assertThat(noZipCardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    attribution = ATTRIBUTION,
+                    loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
                     expMonth = 12,
                     expYear = 2050,
@@ -269,7 +269,7 @@ internal class CardMultilineWidgetTest {
         assertThat(noZipCardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    attribution = ATTRIBUTION,
+                    loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
                     expMonth = 12,
                     expYear = 2050,
@@ -725,7 +725,7 @@ internal class CardMultilineWidgetTest {
         assertThat(cardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    attribution = ATTRIBUTION,
+                    loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,
                     expYear = 2050,
@@ -755,7 +755,7 @@ internal class CardMultilineWidgetTest {
         assertThat(cardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    attribution = ATTRIBUTION,
+                    loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,
                     expYear = 2050,
@@ -820,7 +820,7 @@ internal class CardMultilineWidgetTest {
         assertThat(cardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    attribution = ATTRIBUTION,
+                    loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,
                     expYear = 2050,
@@ -873,7 +873,7 @@ internal class CardMultilineWidgetTest {
         assertThat(cardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    attribution = ATTRIBUTION,
+                    loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,
                     expYear = 2050,
