@@ -1,6 +1,5 @@
 package com.stripe.android.model
 
-import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 /**
@@ -8,7 +7,7 @@ import kotlinx.android.parcel.Parcelize
  */
 @Parcelize
 internal data class CardParams internal constructor(
-    internal val attribution: Set<String> = emptySet(),
+    private val loggingTokens: Set<String> = emptySet(),
 
     /**
      * [card.number](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-number)
@@ -69,7 +68,7 @@ internal data class CardParams internal constructor(
      * currency for debit card payouts is `usd`.
      */
     var currency: String? = null
-) : StripeParamsModel, Parcelable {
+) : TokenParams(Token.Type.Card, loggingTokens) {
 
     @JvmOverloads
     constructor(
@@ -133,7 +132,7 @@ internal data class CardParams internal constructor(
          */
         currency: String? = null
     ) : this(
-        attribution = emptySet(),
+        loggingTokens = emptySet(),
         number = number,
         expMonth = expMonth,
         expYear = expYear,
@@ -143,8 +142,8 @@ internal data class CardParams internal constructor(
         currency = currency
     )
 
-    override fun toParamMap(): Map<String, Any> {
-        return listOf(
+    override val typeDataParams: Map<String, Any>
+        get() = listOf(
             PARAM_NUMBER to number,
             PARAM_EXP_MONTH to expMonth,
             PARAM_EXP_YEAR to expYear,
@@ -162,7 +161,6 @@ internal data class CardParams internal constructor(
                 value?.let { mapOf(key to it) }.orEmpty()
             )
         }
-    }
 
     private companion object {
         private const val PARAM_NUMBER = "number"
