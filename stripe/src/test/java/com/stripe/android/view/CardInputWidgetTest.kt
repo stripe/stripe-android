@@ -20,7 +20,9 @@ import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.model.Address
+import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.TestFocusChangeListener
@@ -30,12 +32,6 @@ import com.stripe.android.view.CardInputWidget.Companion.shouldIconShowBrand
 import java.util.Calendar
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNotEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -64,7 +60,8 @@ internal class CardInputWidgetTest {
     @BeforeTest
     fun setup() {
         // The input date here will be invalid after 2050. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
+        assertThat(Calendar.getInstance().get(Calendar.YEAR) < 2050)
+            .isTrue()
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
         activityScenarioFactory.create<AddPaymentMethodActivity>(
@@ -119,30 +116,38 @@ internal class CardInputWidgetTest {
         expiryEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
 
-        val card = cardInputWidget.card
-        assertNotNull(card)
-        assertEquals(VISA_NO_SPACES, card.number)
-        assertNotNull(card.expMonth)
-        assertNotNull(card.expYear)
-        assertEquals(12, card.expMonth)
-        assertEquals(2050, card.expYear)
-        assertEquals(CVC_VALUE_COMMON, card.cvc)
-        assertTrue(card.validateCard())
-        assertEquals(ATTRIBUTION, card.loggingTokens)
+        assertThat(cardInputWidget.card)
+            .isEqualTo(
+                Card.Builder(VISA_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
+                    .loggingTokens(ATTRIBUTION)
+                    .build()
+            )
 
-        val actualPaymentMethodParams =
-            requireNotNull(cardInputWidget.paymentMethodCreateParams)
-        val expectedPaymentMethodParams =
-            PaymentMethodCreateParams.create(
-                card = PaymentMethodCreateParams.Card(
+        assertThat(cardInputWidget.cardParams)
+            .isEqualTo(
+                CardParams(
+                    attribution = ATTRIBUTION,
                     number = VISA_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2050,
                     cvc = CVC_VALUE_COMMON,
-                    expiryMonth = 12,
-                    expiryYear = 2050,
-                    attribution = ATTRIBUTION
+                    address = Address.Builder()
+                        .build()
                 )
             )
-        assertEquals(expectedPaymentMethodParams, actualPaymentMethodParams)
+
+        assertThat(cardInputWidget.paymentMethodCreateParams)
+            .isEqualTo(
+                PaymentMethodCreateParams.create(
+                    card = PaymentMethodCreateParams.Card(
+                        number = VISA_NO_SPACES,
+                        cvc = CVC_VALUE_COMMON,
+                        expiryMonth = 12,
+                        expiryYear = 2050,
+                        attribution = ATTRIBUTION
+                    )
+                )
+            )
     }
 
     @Test
@@ -155,34 +160,45 @@ internal class CardInputWidgetTest {
         cvcEditText.append(CVC_VALUE_COMMON)
         postalCodeEditText.setText(POSTAL_CODE_VALUE)
 
-        val card = cardInputWidget.card
-        assertNotNull(card)
-        assertEquals(VISA_NO_SPACES, card.number)
-        assertEquals(12, card.expMonth)
-        assertEquals(2050, card.expYear)
-        assertEquals(CVC_VALUE_COMMON, card.cvc)
-        assertEquals(POSTAL_CODE_VALUE, card.addressZip)
-        assertTrue(card.validateCard())
-        assertEquals(ATTRIBUTION, card.loggingTokens)
+        assertThat(cardInputWidget.card)
+            .isEqualTo(
+                Card.Builder(VISA_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
+                    .loggingTokens(ATTRIBUTION)
+                    .addressZip(POSTAL_CODE_VALUE)
+                    .build()
+            )
 
-        val actualPaymentMethodParams =
-            requireNotNull(cardInputWidget.paymentMethodCreateParams)
-        val expectedPaymentMethodParams =
-            PaymentMethodCreateParams.create(
-                card = PaymentMethodCreateParams.Card(
+        assertThat(cardInputWidget.cardParams)
+            .isEqualTo(
+                CardParams(
+                    attribution = ATTRIBUTION,
                     number = VISA_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2050,
                     cvc = CVC_VALUE_COMMON,
-                    expiryMonth = 12,
-                    expiryYear = 2050,
-                    attribution = ATTRIBUTION
-                ),
-                billingDetails = PaymentMethod.BillingDetails(
-                    address = Address(
-                        postalCode = POSTAL_CODE_VALUE
+                    address = Address.Builder()
+                        .setPostalCode(POSTAL_CODE_VALUE)
+                        .build()
+                )
+            )
+
+        assertThat(cardInputWidget.paymentMethodCreateParams)
+            .isEqualTo(
+                PaymentMethodCreateParams.create(
+                    card = PaymentMethodCreateParams.Card(
+                        number = VISA_NO_SPACES,
+                        cvc = CVC_VALUE_COMMON,
+                        expiryMonth = 12,
+                        expiryYear = 2050,
+                        attribution = ATTRIBUTION
+                    ),
+                    billingDetails = PaymentMethod.BillingDetails(
+                        address = Address(
+                            postalCode = POSTAL_CODE_VALUE
+                        )
                     )
                 )
             )
-        assertEquals(expectedPaymentMethodParams, actualPaymentMethodParams)
     }
 
     @Test
@@ -194,28 +210,38 @@ internal class CardInputWidgetTest {
         expiryEditText.append("50")
         cvcEditText.append(CVC_VALUE_AMEX)
 
-        val card = requireNotNull(cardInputWidget.card)
-        assertEquals(AMEX_NO_SPACES, card.number)
-        assertNotNull(card.expMonth)
-        assertNotNull(card.expYear)
-        assertEquals(12, card.expMonth)
-        assertEquals(2050, card.expYear)
-        assertEquals(CVC_VALUE_AMEX, card.cvc)
-        assertTrue(card.validateCard())
-        assertEquals(ATTRIBUTION, card.loggingTokens)
-
-        val actualPaymentMethodParams =
-            requireNotNull(cardInputWidget.paymentMethodCreateParams)
-        val expectedPaymentMethodParams = PaymentMethodCreateParams.create(
-            PaymentMethodCreateParams.Card(
-                number = AMEX_NO_SPACES,
-                cvc = CVC_VALUE_AMEX,
-                expiryMonth = 12,
-                expiryYear = 2050,
-                attribution = ATTRIBUTION
+        assertThat(cardInputWidget.card)
+            .isEqualTo(
+                Card.Builder(AMEX_NO_SPACES, 12, 2050, CVC_VALUE_AMEX)
+                    .loggingTokens(ATTRIBUTION)
+                    .build()
             )
-        )
-        assertEquals(expectedPaymentMethodParams, actualPaymentMethodParams)
+
+        assertThat(cardInputWidget.cardParams)
+            .isEqualTo(
+                CardParams(
+                    attribution = ATTRIBUTION,
+                    number = AMEX_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2050,
+                    cvc = CVC_VALUE_AMEX,
+                    address = Address.Builder()
+                        .build()
+                )
+            )
+
+        assertThat(cardInputWidget.paymentMethodCreateParams)
+            .isEqualTo(
+                PaymentMethodCreateParams.create(
+                    PaymentMethodCreateParams.Card(
+                        number = AMEX_NO_SPACES,
+                        cvc = CVC_VALUE_AMEX,
+                        expiryMonth = 12,
+                        expiryYear = 2050,
+                        attribution = ATTRIBUTION
+                    )
+                )
+            )
     }
 
     @Test
@@ -228,35 +254,45 @@ internal class CardInputWidgetTest {
         cvcEditText.append(CVC_VALUE_AMEX)
         postalCodeEditText.setText(POSTAL_CODE_VALUE)
 
-        val card = requireNotNull(cardInputWidget.card)
-        assertEquals(AMEX_NO_SPACES, card.number)
-        assertNotNull(card.expMonth)
-        assertNotNull(card.expYear)
-        assertEquals(12, card.expMonth)
-        assertEquals(2050, card.expYear)
-        assertEquals(CVC_VALUE_AMEX, card.cvc)
-        assertEquals(POSTAL_CODE_VALUE, card.addressZip)
-        assertTrue(card.validateCard())
-        assertEquals(ATTRIBUTION, card.loggingTokens)
-
-        val actualPaymentMethodParams = cardInputWidget.paymentMethodCreateParams
-        assertNotNull(actualPaymentMethodParams)
-        val expectedPaymentMethodParams =
-            PaymentMethodCreateParams.create(
-                card = PaymentMethodCreateParams.Card(
-                    number = AMEX_NO_SPACES,
-                    cvc = CVC_VALUE_AMEX,
-                    expiryYear = 2050,
-                    expiryMonth = 12,
-                    attribution = ATTRIBUTION
-                ),
-                billingDetails = PaymentMethod.BillingDetails.Builder()
-                    .setAddress(Address(
-                        postalCode = POSTAL_CODE_VALUE
-                    ))
+        assertThat(cardInputWidget.card)
+            .isEqualTo(
+                Card.Builder(AMEX_NO_SPACES, 12, 2050, CVC_VALUE_AMEX)
+                    .loggingTokens(ATTRIBUTION)
+                    .addressZip(POSTAL_CODE_VALUE)
                     .build()
             )
-        assertEquals(expectedPaymentMethodParams, actualPaymentMethodParams)
+
+        assertThat(cardInputWidget.cardParams)
+            .isEqualTo(
+                CardParams(
+                    attribution = ATTRIBUTION,
+                    number = AMEX_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2050,
+                    cvc = CVC_VALUE_AMEX,
+                    address = Address.Builder()
+                        .setPostalCode(POSTAL_CODE_VALUE)
+                        .build()
+                )
+            )
+
+        assertThat(cardInputWidget.paymentMethodCreateParams)
+            .isEqualTo(
+                PaymentMethodCreateParams.create(
+                    card = PaymentMethodCreateParams.Card(
+                        number = AMEX_NO_SPACES,
+                        cvc = CVC_VALUE_AMEX,
+                        expiryYear = 2050,
+                        expiryMonth = 12,
+                        attribution = ATTRIBUTION
+                    ),
+                    billingDetails = PaymentMethod.BillingDetails.Builder()
+                        .setAddress(Address(
+                            postalCode = POSTAL_CODE_VALUE
+                        ))
+                        .build()
+                )
+            )
     }
 
     @Test
@@ -268,27 +304,36 @@ internal class CardInputWidgetTest {
         expiryEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
 
-        val card = requireNotNull(cardInputWidget.card)
-        assertEquals(DINERS_CLUB_14_NO_SPACES, card.number)
-        assertNotNull(card.expMonth)
-        assertNotNull(card.expYear)
-        assertEquals(12, card.expMonth)
-        assertEquals(2050, card.expYear)
-        assertEquals(CVC_VALUE_COMMON, card.cvc)
-        assertTrue(card.validateCard())
-        assertEquals(ATTRIBUTION, card.loggingTokens)
-
-        val paymentMethodCard = cardInputWidget.paymentMethodCard
-        assertNotNull(paymentMethodCard)
-        val expectedPaymentMethodCard =
-            PaymentMethodCreateParams.Card(
-                number = DINERS_CLUB_14_NO_SPACES,
-                cvc = CVC_VALUE_COMMON,
-                expiryMonth = 12,
-                expiryYear = 2050,
-                attribution = ATTRIBUTION
+        assertThat(cardInputWidget.card)
+            .isEqualTo(
+                Card.Builder(DINERS_CLUB_14_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
+                    .loggingTokens(ATTRIBUTION)
+                    .build()
             )
-        assertEquals(expectedPaymentMethodCard, paymentMethodCard)
+
+        assertThat(cardInputWidget.cardParams)
+            .isEqualTo(
+                CardParams(
+                    attribution = ATTRIBUTION,
+                    number = DINERS_CLUB_14_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2050,
+                    cvc = CVC_VALUE_COMMON,
+                    address = Address.Builder()
+                        .build()
+                )
+            )
+
+        assertThat(cardInputWidget.paymentMethodCard)
+            .isEqualTo(
+                PaymentMethodCreateParams.Card(
+                    number = DINERS_CLUB_14_NO_SPACES,
+                    cvc = CVC_VALUE_COMMON,
+                    expiryMonth = 12,
+                    expiryYear = 2050,
+                    attribution = ATTRIBUTION
+                )
+            )
     }
 
     @Test
@@ -301,26 +346,38 @@ internal class CardInputWidgetTest {
         cvcEditText.append(CVC_VALUE_COMMON)
         postalCodeEditText.setText(POSTAL_CODE_VALUE)
 
-        val card = requireNotNull(cardInputWidget.card)
-        assertEquals(DINERS_CLUB_14_NO_SPACES, card.number)
-        assertNotNull(card.expMonth)
-        assertNotNull(card.expYear)
-        assertEquals(12, card.expMonth)
-        assertEquals(2050, card.expYear)
-        assertEquals(CVC_VALUE_COMMON, card.cvc)
-        assertTrue(card.validateCard())
-        assertEquals(ATTRIBUTION, card.loggingTokens)
+        assertThat(cardInputWidget.card)
+            .isEqualTo(
+                Card.Builder(DINERS_CLUB_14_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
+                    .loggingTokens(ATTRIBUTION)
+                    .addressZip(POSTAL_CODE_VALUE)
+                    .build()
+            )
 
-        val paymentMethodCard = cardInputWidget.paymentMethodCard
-        assertNotNull(paymentMethodCard)
-        val expectedPaymentMethodCard = PaymentMethodCreateParams.Card(
-            number = DINERS_CLUB_14_NO_SPACES,
-            cvc = CVC_VALUE_COMMON,
-            expiryYear = 2050,
-            expiryMonth = 12,
-            attribution = ATTRIBUTION
-        )
-        assertEquals(expectedPaymentMethodCard, paymentMethodCard)
+        assertThat(cardInputWidget.cardParams)
+            .isEqualTo(
+                CardParams(
+                    attribution = ATTRIBUTION,
+                    number = DINERS_CLUB_14_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2050,
+                    cvc = CVC_VALUE_COMMON,
+                    address = Address.Builder()
+                        .setPostalCode(POSTAL_CODE_VALUE)
+                        .build()
+                )
+            )
+
+        assertThat(cardInputWidget.paymentMethodCard)
+            .isEqualTo(
+                PaymentMethodCreateParams.Card(
+                    number = DINERS_CLUB_14_NO_SPACES,
+                    cvc = CVC_VALUE_COMMON,
+                    expiryYear = 2050,
+                    expiryMonth = 12,
+                    attribution = ATTRIBUTION
+                )
+            )
     }
 
     @Test
@@ -334,11 +391,12 @@ internal class CardInputWidgetTest {
         cvcEditText.append(CVC_VALUE_COMMON)
         postalCodeEditText.append("")
 
-        val card = cardInputWidget.card
-        assertNull(card)
-
-        val paymentMethodCard = cardInputWidget.paymentMethodCard
-        assertNull(paymentMethodCard)
+        assertThat(cardInputWidget.card)
+            .isNull()
+        assertThat(cardInputWidget.cardParams)
+            .isNull()
+        assertThat(cardInputWidget.paymentMethodCard)
+            .isNull()
     }
 
     @Test
@@ -349,29 +407,28 @@ internal class CardInputWidgetTest {
         expiryEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
 
-        val card = cardInputWidget.card
-        assertNull(card)
-
-        val paymentMethodCard = cardInputWidget.paymentMethodCard
-        assertNull(paymentMethodCard)
+        assertThat(cardInputWidget.card)
+            .isNull()
+        assertThat(cardInputWidget.cardParams)
+            .isNull()
+        assertThat(cardInputWidget.paymentMethodCard)
+            .isNull()
     }
 
     @Test
     fun getCard_whenInputHasExpiredDate_returnsNull() {
-        // The test will be testing the wrong variable after 2080. Please update the test.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2080)
-
         cardNumberEditText.setText(VISA_WITH_SPACES)
         // Date interpreted as 12/2012 until 2080, when it will be 12/2112
         expiryEditText.append("12")
         expiryEditText.append("12")
         cvcEditText.append(CVC_VALUE_COMMON)
 
-        val card = cardInputWidget.card
-        assertNull(card)
-
-        val paymentMethodCard = cardInputWidget.paymentMethodCard
-        assertNull(paymentMethodCard)
+        assertThat(cardInputWidget.card)
+            .isNull()
+        assertThat(cardInputWidget.cardParams)
+            .isNull()
+        assertThat(cardInputWidget.paymentMethodCard)
+            .isNull()
     }
 
     @Test
@@ -381,11 +438,12 @@ internal class CardInputWidgetTest {
         expiryEditText.append("50")
         cvcEditText.append("12")
 
-        val card = cardInputWidget.card
-        assertNull(card)
-
-        val paymentMethodCard = cardInputWidget.paymentMethodCard
-        assertNull(paymentMethodCard)
+        assertThat(cardInputWidget.card)
+            .isNull()
+        assertThat(cardInputWidget.cardParams)
+            .isNull()
+        assertThat(cardInputWidget.paymentMethodCard)
+            .isNull()
     }
 
     @Test
@@ -398,11 +456,25 @@ internal class CardInputWidgetTest {
         cvcEditText.append(CVC_VALUE_COMMON)
         postalCodeEditText.setText("")
 
-        val card = cardInputWidget.card
-        assertNotNull(card)
-
-        val paymentMethodCard = cardInputWidget.paymentMethodCard
-        assertNotNull(paymentMethodCard)
+        assertThat(cardInputWidget.card)
+            .isEqualTo(
+                Card.Builder(VISA_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
+                    .loggingTokens(ATTRIBUTION)
+                    .build()
+            )
+        assertThat(cardInputWidget.cardParams)
+            .isEqualTo(
+                CardParams(
+                    attribution = ATTRIBUTION,
+                    number = VISA_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2050,
+                    cvc = CVC_VALUE_COMMON,
+                    address = Address()
+                )
+            )
+        assertThat(cardInputWidget.paymentMethodCard)
+            .isNotNull()
     }
 
     @Test
@@ -414,11 +486,25 @@ internal class CardInputWidgetTest {
         expiryEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
 
-        val card = cardInputWidget.card
-        assertNotNull(card)
-
-        val paymentMethodCard = cardInputWidget.paymentMethodCard
-        assertNotNull(paymentMethodCard)
+        assertThat(cardInputWidget.card)
+            .isEqualTo(
+                Card.Builder(AMEX_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
+                    .loggingTokens(ATTRIBUTION)
+                    .build()
+            )
+        assertThat(cardInputWidget.cardParams)
+            .isEqualTo(
+                CardParams(
+                    attribution = ATTRIBUTION,
+                    number = AMEX_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2050,
+                    cvc = CVC_VALUE_COMMON,
+                    address = Address()
+                )
+            )
+        assertThat(cardInputWidget.paymentMethodCard)
+            .isNotNull()
     }
 
     @Test
@@ -431,11 +517,28 @@ internal class CardInputWidgetTest {
         cvcEditText.append(CVC_VALUE_COMMON)
         postalCodeEditText.setText(POSTAL_CODE_VALUE)
 
-        val card = cardInputWidget.card
-        assertNotNull(card)
-
-        val paymentMethodCard = cardInputWidget.paymentMethodCard
-        assertNotNull(paymentMethodCard)
+        assertThat(cardInputWidget.card)
+            .isEqualTo(
+                Card.Builder(AMEX_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
+                    .loggingTokens(ATTRIBUTION)
+                    .addressZip(POSTAL_CODE_VALUE)
+                    .build()
+            )
+        assertThat(cardInputWidget.cardParams)
+            .isEqualTo(
+                CardParams(
+                    attribution = ATTRIBUTION,
+                    number = AMEX_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2050,
+                    cvc = CVC_VALUE_COMMON,
+                    address = Address.Builder()
+                        .setPostalCode(POSTAL_CODE_VALUE)
+                        .build()
+                )
+            )
+        assertThat(cardInputWidget.paymentMethodCard)
+            .isNotNull()
     }
 
     @Test
@@ -445,11 +548,12 @@ internal class CardInputWidgetTest {
         expiryEditText.append("50")
         cvcEditText.append("12")
 
-        val card = cardInputWidget.card
-        assertNull(card)
-
-        val paymentMethodCard = cardInputWidget.paymentMethodCard
-        assertNull(paymentMethodCard)
+        assertThat(cardInputWidget.card)
+            .isNull()
+        assertThat(cardInputWidget.cardParams)
+            .isNull()
+        assertThat(cardInputWidget.paymentMethodCard)
+            .isNull()
     }
 
     @Test
@@ -461,24 +565,23 @@ internal class CardInputWidgetTest {
         cardInputWidget.setCvcCode(CVC_VALUE_COMMON)
         cardInputWidget.setPostalCode(POSTAL_CODE_VALUE)
 
-        val params = cardInputWidget.paymentMethodCreateParams
-        assertNotNull(params)
-
-        val expectedParams = PaymentMethodCreateParams.create(
-            card = PaymentMethodCreateParams.Card(
-                number = VISA_NO_SPACES,
-                cvc = CVC_VALUE_COMMON,
-                expiryMonth = 12,
-                expiryYear = 2030,
-                attribution = ATTRIBUTION
-            ),
-            billingDetails = PaymentMethod.BillingDetails(
-                address = Address(
-                    postalCode = POSTAL_CODE_VALUE
+        assertThat(cardInputWidget.paymentMethodCreateParams)
+            .isEqualTo(
+                PaymentMethodCreateParams.create(
+                    card = PaymentMethodCreateParams.Card(
+                        number = VISA_NO_SPACES,
+                        cvc = CVC_VALUE_COMMON,
+                        expiryMonth = 12,
+                        expiryYear = 2030,
+                        attribution = ATTRIBUTION
+                    ),
+                    billingDetails = PaymentMethod.BillingDetails(
+                        address = Address(
+                            postalCode = POSTAL_CODE_VALUE
+                        )
+                    )
                 )
             )
-        )
-        assertEquals(expectedParams, params)
     }
 
     @Test
@@ -488,11 +591,12 @@ internal class CardInputWidgetTest {
         expiryEditText.append("50")
         cvcEditText.append("12")
 
-        val card = cardInputWidget.card
-        assertNull(card)
-
-        val paymentMethodCard = cardInputWidget.paymentMethodCard
-        assertNull(paymentMethodCard)
+        assertThat(cardInputWidget.card)
+            .isNull()
+        assertThat(cardInputWidget.cardParams)
+            .isNull()
+        assertThat(cardInputWidget.paymentMethodCard)
+            .isNull()
     }
 
     @Test
@@ -503,46 +607,54 @@ internal class CardInputWidgetTest {
 
         verify(cardInputListener).onCardComplete()
         verify(cardInputListener).onFocusChange(CardInputListener.FocusField.ExpiryDate)
-        assertEquals(cardNumberEditText.id, onGlobalFocusChangeListener.oldFocusId)
-        assertEquals(expiryEditText.id, onGlobalFocusChangeListener.newFocusId)
+
+        assertThat(onGlobalFocusChangeListener.oldFocusId)
+            .isEqualTo(cardNumberEditText.id)
+        assertThat(onGlobalFocusChangeListener.newFocusId)
+            .isEqualTo(expiryEditText.id)
     }
 
     @Test
     fun onDeleteFromExpiryDate_whenEmpty_shiftsFocusToCardNumberAndDeletesDigit() {
         cardInputWidget.setCardInputListener(cardInputListener)
         cardNumberEditText.setText(VISA_WITH_SPACES)
-        assertTrue(expiryEditText.hasFocus())
+        assertThat(expiryEditText.hasFocus())
+            .isTrue()
 
         // The above functionality is tested elsewhere, so we reset this listener.
         reset(cardInputListener)
 
         ViewTestUtils.sendDeleteKeyEvent(expiryEditText)
         verify(cardInputListener).onFocusChange(CardInputListener.FocusField.CardNumber)
-        assertEquals(expiryEditText.id, onGlobalFocusChangeListener.oldFocusId)
-        assertEquals(cardNumberEditText.id, onGlobalFocusChangeListener.newFocusId)
+        assertThat(onGlobalFocusChangeListener.oldFocusId)
+            .isEqualTo(expiryEditText.id)
+        assertThat(onGlobalFocusChangeListener.newFocusId)
+            .isEqualTo(cardNumberEditText.id)
 
         val subString = VISA_WITH_SPACES.substring(0, VISA_WITH_SPACES.length - 1)
-        assertEquals(subString, cardNumberEditText.text.toString())
-        assertEquals(subString.length, cardNumberEditText.selectionStart)
+        assertThat(cardNumberEditText.text.toString())
+            .isEqualTo(subString)
+        assertThat(cardNumberEditText.selectionStart)
+            .isEqualTo(subString.length)
     }
 
     @Test
     fun onDeleteFromExpiryDate_whenNotEmpty_doesNotShiftFocusOrDeleteDigit() {
         cardNumberEditText.setText(AMEX_WITH_SPACES)
-        assertTrue(expiryEditText.hasFocus())
+        assertThat(expiryEditText.hasFocus())
+            .isTrue()
 
         expiryEditText.append("1")
         ViewTestUtils.sendDeleteKeyEvent(expiryEditText)
 
-        assertTrue(expiryEditText.hasFocus())
-        assertEquals(AMEX_WITH_SPACES, cardNumberEditText.text.toString())
+        assertThat(expiryEditText.hasFocus())
+            .isTrue()
+        assertThat(cardNumberEditText.text.toString())
+            .isEqualTo(AMEX_WITH_SPACES)
     }
 
     @Test
     fun onDeleteFromCvcDate_whenEmpty_shiftsFocusToExpiryAndDeletesDigit() {
-        // This test will be invalid if run between 2080 and 2112. Please update the code.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2080)
-
         cardInputWidget.setCardInputListener(cardInputListener)
         cardNumberEditText.setText(VISA_WITH_SPACES)
 
@@ -554,59 +666,64 @@ internal class CardInputWidgetTest {
 
         verify(cardInputListener).onExpirationComplete()
         verify(cardInputListener).onFocusChange(CardInputListener.FocusField.Cvc)
-        assertTrue(cvcEditText.hasFocus())
+        assertThat(cvcEditText.hasFocus())
+            .isTrue()
 
         // Clearing already-verified data.
         reset(cardInputListener)
 
         ViewTestUtils.sendDeleteKeyEvent(cvcEditText)
         verify(cardInputListener).onFocusChange(CardInputListener.FocusField.ExpiryDate)
-        assertEquals(cvcEditText.id, onGlobalFocusChangeListener.oldFocusId)
-        assertEquals(expiryEditText.id, onGlobalFocusChangeListener.newFocusId)
+        assertThat(onGlobalFocusChangeListener.oldFocusId)
+            .isEqualTo(cvcEditText.id)
+        assertThat(onGlobalFocusChangeListener.newFocusId)
+            .isEqualTo(expiryEditText.id)
 
         val expectedResult = "12/7"
-        assertEquals(expectedResult, expiryEditText.text.toString())
-        assertEquals(expectedResult.length, expiryEditText.selectionStart)
+        assertThat(expiryEditText.text.toString())
+            .isEqualTo(expectedResult)
+        assertThat(expiryEditText.selectionStart)
+            .isEqualTo(expectedResult.length)
     }
 
     @Test
     fun onDeleteFromCvcDate_withPostalCodeDisabled_whenNotEmpty_doesNotShiftFocusOrDeleteEntry() {
         cardInputWidget.postalCodeEnabled = false
 
-        // This test will be invalid if run between 2080 and 2112. Please update the code.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2080)
-
         cardNumberEditText.setText(AMEX_WITH_SPACES)
 
         expiryEditText.append("12")
         expiryEditText.append("79")
-        assertTrue(cvcEditText.hasFocus())
+        assertThat(cvcEditText.hasFocus())
+            .isTrue()
 
         cvcEditText.append(CVC_VALUE_COMMON)
         ViewTestUtils.sendDeleteKeyEvent(cvcEditText)
 
-        assertTrue(cvcEditText.hasFocus())
-        assertEquals("12/79", expiryEditText.text.toString())
+        assertThat(cvcEditText.hasFocus())
+            .isTrue()
+        assertThat(expiryEditText.text.toString())
+            .isEqualTo("12/79")
     }
 
     @Test
     fun onDeleteFromCvcDate_withPostalCodeEnabled_whenNotEmpty_doesNotShiftFocusOrDeleteEntry() {
         cardInputWidget.postalCodeEnabled = true
 
-        // This test will be invalid if run between 2080 and 2112. Please update the code.
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2080)
-
         cardNumberEditText.setText(AMEX_WITH_SPACES)
 
         expiryEditText.append("12")
         expiryEditText.append("79")
-        assertTrue(cvcEditText.hasFocus())
+        assertThat(cvcEditText.hasFocus())
+            .isTrue()
 
         cvcEditText.append("12")
         ViewTestUtils.sendDeleteKeyEvent(cvcEditText)
 
-        assertTrue(cvcEditText.hasFocus())
-        assertEquals("12/79", expiryEditText.text.toString())
+        assertThat(cvcEditText.hasFocus())
+            .isTrue()
+        assertThat(expiryEditText.text.toString())
+            .isEqualTo("12/79")
     }
 
     @Test
@@ -617,8 +734,10 @@ internal class CardInputWidgetTest {
         cvcEditText.requestFocus()
 
         ViewTestUtils.sendDeleteKeyEvent(cvcEditText)
-        assertEquals(cvcEditText.id, onGlobalFocusChangeListener.oldFocusId)
-        assertEquals(expiryEditText.id, onGlobalFocusChangeListener.newFocusId)
+        assertThat(onGlobalFocusChangeListener.oldFocusId)
+            .isEqualTo(cvcEditText.id)
+        assertThat(onGlobalFocusChangeListener.newFocusId)
+            .isEqualTo(expiryEditText.id)
     }
 
     @Test
@@ -626,13 +745,15 @@ internal class CardInputWidgetTest {
         // This should set the brand to Visa. Note that more extensive brand checking occurs
         // in CardNumberEditTextTest.
         cardNumberEditText.append("4")
-        assertTrue(ViewTestUtils.hasMaxLength(cvcEditText, 3))
+        assertThat(ViewTestUtils.hasMaxLength(cvcEditText, 3))
+            .isTrue()
     }
 
     @Test
     fun onUpdateText_forAmExPrefix_setsLengthOnCvc() {
         cardNumberEditText.append("34")
-        assertTrue(ViewTestUtils.hasMaxLength(cvcEditText, 4))
+        assertThat(ViewTestUtils.hasMaxLength(cvcEditText, 4))
+            .isTrue()
     }
 
     @Test
@@ -642,12 +763,25 @@ internal class CardInputWidgetTest {
         // |(card==190)--(space==260)--(date==50)|
         // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
 
-        val initialParameters = cardInputWidget.placementParameters
-        assertEquals(190, initialParameters.cardWidth)
-        assertEquals(50, initialParameters.dateWidth)
-        assertEquals(260, initialParameters.cardDateSeparation)
-        assertEquals(380, initialParameters.cardTouchBufferLimit)
-        assertEquals(510, initialParameters.dateStartPosition)
+        assertThat(cardInputWidget.placementParameters)
+            .isEqualTo(
+                CardInputWidget.PlacementParameters(
+                    totalLengthInPixels = 500,
+                    cardWidth = 190,
+                    hiddenCardWidth = 150,
+                    peekCardWidth = 40,
+                    cardDateSeparation = 260,
+                    dateWidth = 50,
+                    dateCvcSeparation = 0,
+                    cvcWidth = 30,
+                    cvcPostalCodeSeparation = 0,
+                    postalCodeWidth = 100,
+                    cvcStartPosition = 0,
+                    dateRightTouchBufferLimit = 0,
+                    cardTouchBufferLimit = 380,
+                    dateStartPosition = 510
+                )
+            )
     }
 
     @Test
@@ -658,16 +792,26 @@ internal class CardInputWidgetTest {
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         cardInputWidget.updateSpaceSizes(false)
-        val shiftedParameters = cardInputWidget.placementParameters
-        assertEquals(40, shiftedParameters.peekCardWidth)
-        assertEquals(185, shiftedParameters.cardDateSeparation)
-        assertEquals(50, shiftedParameters.dateWidth)
-        assertEquals(195, shiftedParameters.dateCvcSeparation)
-        assertEquals(30, shiftedParameters.cvcWidth)
-        assertEquals(192, shiftedParameters.cardTouchBufferLimit)
-        assertEquals(285, shiftedParameters.dateStartPosition)
-        assertEquals(432, shiftedParameters.dateRightTouchBufferLimit)
-        assertEquals(530, shiftedParameters.cvcStartPosition)
+
+        assertThat(cardInputWidget.placementParameters)
+            .isEqualTo(
+                CardInputWidget.PlacementParameters(
+                    totalLengthInPixels = 500,
+                    cardWidth = 190,
+                    hiddenCardWidth = 150,
+                    peekCardWidth = 40,
+                    cardDateSeparation = 185,
+                    dateWidth = 50,
+                    dateCvcSeparation = 195,
+                    cvcWidth = 30,
+                    cvcPostalCodeSeparation = 0,
+                    postalCodeWidth = 100,
+                    cvcStartPosition = 530,
+                    dateRightTouchBufferLimit = 432,
+                    cardTouchBufferLimit = 192,
+                    dateStartPosition = 285
+                )
+            )
     }
 
     @Test
@@ -678,16 +822,28 @@ internal class CardInputWidgetTest {
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         cardInputWidget.updateSpaceSizes(false)
-        val shiftedParameters = cardInputWidget.placementParameters
-        assertEquals(40, shiftedParameters.peekCardWidth)
-        assertEquals(98, shiftedParameters.cardDateSeparation)
-        assertEquals(50, shiftedParameters.dateWidth)
-        assertEquals(82, shiftedParameters.dateCvcSeparation)
-        assertEquals(30, shiftedParameters.cvcWidth)
-        assertEquals(66, shiftedParameters.cardTouchBufferLimit)
-        assertEquals(198, shiftedParameters.dateStartPosition)
-        assertEquals(110, shiftedParameters.dateRightTouchBufferLimit)
-        assertEquals(330, shiftedParameters.cvcStartPosition)
+
+        assertThat(cardInputWidget.placementParameters)
+            .isEqualTo(
+                CardInputWidget.PlacementParameters(
+                    totalLengthInPixels = 500,
+                    cardWidth = 190,
+                    hiddenCardWidth = 150,
+                    peekCardWidth = 40,
+                    cardDateSeparation = 98,
+                    dateWidth = 50,
+                    dateCvcSeparation = 82,
+                    cvcWidth = 30,
+                    cvcPostalCodeSeparation = 0,
+                    postalCodeWidth = 100,
+                    cvcStartPosition = 330,
+                    dateRightTouchBufferLimit = 110,
+                    cardTouchBufferLimit = 66,
+                    dateStartPosition = 198,
+                    cvcRightTouchBufferLimit = 120,
+                    postalCodeStartPosition = 360
+                )
+            )
     }
 
     @Test
@@ -696,7 +852,8 @@ internal class CardInputWidgetTest {
         // |(card==190)--(space==260)--(date==50)|
         // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
         // So any touch lower than 60 will be the icon
-        assertNull(cardInputWidget.getFocusRequestOnTouch(30))
+        assertThat(cardInputWidget.getFocusRequestOnTouch(30))
+            .isNull()
     }
 
     @Test
@@ -705,7 +862,8 @@ internal class CardInputWidgetTest {
         // |(card==190)--(space==260)--(date==50)|
         // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
         // So any touch between 60 and 250 will be the actual card widget
-        assertNull(cardInputWidget.getFocusRequestOnTouch(200))
+        assertThat(cardInputWidget.getFocusRequestOnTouch(200))
+            .isNull()
     }
 
     @Test
@@ -714,9 +872,8 @@ internal class CardInputWidgetTest {
         // |(card==190)--(space==260)--(date==50)|
         // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
         // So any touch between 250 and 380 needs to send focus to the card editor
-        val focusRequester = cardInputWidget.getFocusRequestOnTouch(300)
-        assertNotNull(focusRequester)
-        assertEquals(cardNumberEditText, focusRequester)
+        assertThat(cardInputWidget.getFocusRequestOnTouch(300))
+            .isEqualTo(cardNumberEditText)
     }
 
     @Test
@@ -725,9 +882,8 @@ internal class CardInputWidgetTest {
         // |(card==190)--(space==260)--(date==50)|
         // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
         // So any touch between 380 and 510 needs to send focus to the date editor
-        val focusRequester = cardInputWidget.getFocusRequestOnTouch(390)
-        assertNotNull(focusRequester)
-        assertEquals(expiryEditText, focusRequester)
+        assertThat(cardInputWidget.getFocusRequestOnTouch(390))
+            .isEqualTo(expiryEditText)
     }
 
     @Test
@@ -736,7 +892,8 @@ internal class CardInputWidgetTest {
         // |(card==190)--(space==260)--(date==50)|
         // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
         // So any touch over 510 doesn't need to do anything
-        assertNull(cardInputWidget.getFocusRequestOnTouch(530))
+        assertThat(cardInputWidget.getFocusRequestOnTouch(530))
+            .isNull()
     }
 
     @Test
@@ -747,7 +904,8 @@ internal class CardInputWidgetTest {
         // So any touch between 60 and 100 does nothing
         cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
-        assertNull(cardInputWidget.getFocusRequestOnTouch(75))
+        assertThat(cardInputWidget.getFocusRequestOnTouch(75))
+            .isNull()
     }
 
     @Test
@@ -760,9 +918,9 @@ internal class CardInputWidgetTest {
         // So any touch between 100 and 192 returns the card editor
         cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
-        val focusRequester = cardInputWidget.getFocusRequestOnTouch(150)
-        assertNotNull(focusRequester)
-        assertEquals(cardNumberEditText, focusRequester)
+
+        assertThat(cardInputWidget.getFocusRequestOnTouch(150))
+            .isEqualTo(cardNumberEditText)
     }
 
     @Test
@@ -775,9 +933,9 @@ internal class CardInputWidgetTest {
         // So any touch between 192 and 285 returns the date editor
         cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
-        val focusRequester = cardInputWidget.getFocusRequestOnTouch(200)
-        assertNotNull(focusRequester)
-        assertEquals(expiryEditText, focusRequester)
+
+        assertThat(cardInputWidget.getFocusRequestOnTouch(200))
+            .isEqualTo(expiryEditText)
     }
 
     @Test
@@ -790,9 +948,9 @@ internal class CardInputWidgetTest {
         // So any touch between 192 and 285 returns the date editor
         cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
-        val focusRequester = cardInputWidget.getFocusRequestOnTouch(170)
-        assertNotNull(focusRequester)
-        assertEquals(expiryEditText, focusRequester)
+
+        assertThat(cardInputWidget.getFocusRequestOnTouch(170))
+            .isEqualTo(expiryEditText)
     }
 
     @Test
@@ -805,7 +963,8 @@ internal class CardInputWidgetTest {
         // So any touch between 285 and 335 does nothing
         cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
-        assertNull(cardInputWidget.getFocusRequestOnTouch(300))
+        assertThat(cardInputWidget.getFocusRequestOnTouch(300))
+            .isNull()
     }
 
     @Test
@@ -818,7 +977,8 @@ internal class CardInputWidgetTest {
         // So any touch between 285 and 335 does nothing
         cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
-        assertNull(cardInputWidget.getFocusRequestOnTouch(200))
+        assertThat(cardInputWidget.getFocusRequestOnTouch(200))
+            .isNull()
     }
 
     @Test
@@ -831,9 +991,9 @@ internal class CardInputWidgetTest {
         // So any touch between 335 and 432 returns the date editor
         cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
-        val focusRequester = cardInputWidget.getFocusRequestOnTouch(400)
-        assertNotNull(focusRequester)
-        assertEquals(expiryEditText, focusRequester)
+
+        assertThat(cardInputWidget.getFocusRequestOnTouch(400))
+            .isEqualTo(expiryEditText)
     }
 
     @Test
@@ -846,9 +1006,9 @@ internal class CardInputWidgetTest {
         // So any touch between 335 and 432 returns the date editor
         cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
-        val focusRequester = cardInputWidget.getFocusRequestOnTouch(185)
-        assertNotNull(focusRequester)
-        assertEquals(expiryEditText, focusRequester)
+
+        assertThat(cardInputWidget.getFocusRequestOnTouch(185))
+            .isEqualTo(expiryEditText)
     }
 
     @Test
@@ -861,9 +1021,9 @@ internal class CardInputWidgetTest {
         // So any touch between 432 and 530 returns the date editor
         cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
-        val focusRequester = cardInputWidget.getFocusRequestOnTouch(485)
-        assertNotNull(focusRequester)
-        assertEquals(cvcEditText, focusRequester)
+
+        assertThat(cardInputWidget.getFocusRequestOnTouch(485))
+            .isEqualTo(cvcEditText)
     }
 
     @Test
@@ -876,9 +1036,9 @@ internal class CardInputWidgetTest {
         // So any touch between 432 and 530 returns the date editor
         cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
-        val focusRequester = cardInputWidget.getFocusRequestOnTouch(300)
-        assertNotNull(focusRequester)
-        assertEquals(cvcEditText, focusRequester)
+
+        assertThat(cardInputWidget.getFocusRequestOnTouch(300))
+            .isEqualTo(cvcEditText)
     }
 
     @Test
@@ -889,7 +1049,9 @@ internal class CardInputWidgetTest {
         // So any touch over 530 does nothing
         cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
-        assertNull(cardInputWidget.getFocusRequestOnTouch(545))
+
+        assertThat(cardInputWidget.getFocusRequestOnTouch(545))
+            .isNull()
     }
 
     @Test
@@ -899,14 +1061,26 @@ internal class CardInputWidgetTest {
         // Moving left with an actual Visa number does the same as moving when empty.
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         cardNumberEditText.setText(VISA_WITH_SPACES)
-        val shiftedParameters = cardInputWidget.placementParameters
-        assertEquals(40, shiftedParameters.peekCardWidth)
-        assertEquals(185, shiftedParameters.cardDateSeparation)
-        assertEquals(50, shiftedParameters.dateWidth)
-        assertEquals(195, shiftedParameters.dateCvcSeparation)
-        assertEquals(30, shiftedParameters.cvcWidth)
-        assertEquals(0, shiftedParameters.cvcPostalCodeSeparation)
-        assertEquals(100, shiftedParameters.postalCodeWidth)
+
+        assertThat(cardInputWidget.placementParameters)
+            .isEqualTo(
+                CardInputWidget.PlacementParameters(
+                    totalLengthInPixels = 500,
+                    cardWidth = 190,
+                    hiddenCardWidth = 150,
+                    peekCardWidth = 40,
+                    cardDateSeparation = 185,
+                    dateWidth = 50,
+                    dateCvcSeparation = 195,
+                    cvcWidth = 30,
+                    cvcPostalCodeSeparation = 0,
+                    postalCodeWidth = 100,
+                    cvcStartPosition = 530,
+                    dateRightTouchBufferLimit = 432,
+                    cardTouchBufferLimit = 192,
+                    dateStartPosition = 285
+                )
+            )
     }
 
     @Test
@@ -916,14 +1090,28 @@ internal class CardInputWidgetTest {
         // Moving left with an actual Visa number does the same as moving when empty.
         // |(peek==40)--(space==98)--(date==50)--(space==82)--(cvc==30)--(space==0)--(postal==100)|
         cardNumberEditText.setText(VISA_WITH_SPACES)
-        val shiftedParameters = cardInputWidget.placementParameters
-        assertEquals(40, shiftedParameters.peekCardWidth)
-        assertEquals(98, shiftedParameters.cardDateSeparation)
-        assertEquals(50, shiftedParameters.dateWidth)
-        assertEquals(82, shiftedParameters.dateCvcSeparation)
-        assertEquals(30, shiftedParameters.cvcWidth)
-        assertEquals(0, shiftedParameters.cvcPostalCodeSeparation)
-        assertEquals(100, shiftedParameters.postalCodeWidth)
+
+        assertThat(cardInputWidget.placementParameters)
+            .isEqualTo(
+                CardInputWidget.PlacementParameters(
+                    totalLengthInPixels = 500,
+                    cardWidth = 190,
+                    hiddenCardWidth = 150,
+                    peekCardWidth = 40,
+                    cardDateSeparation = 98,
+                    dateWidth = 50,
+                    dateCvcSeparation = 82,
+                    cvcWidth = 30,
+                    cvcPostalCodeSeparation = 0,
+                    postalCodeWidth = 100,
+                    cvcStartPosition = 330,
+                    cvcRightTouchBufferLimit = 120,
+                    dateRightTouchBufferLimit = 110,
+                    cardTouchBufferLimit = 66,
+                    dateStartPosition = 198,
+                    postalCodeStartPosition = 360
+                )
+            )
     }
 
     @Test
@@ -933,14 +1121,26 @@ internal class CardInputWidgetTest {
         // Moving left with an AmEx number has a larger peek and cvc size.
         // |(peek==50)--(space==175)--(date==50)--(space==185)--(cvc==40)|
         cardNumberEditText.setText(AMEX_WITH_SPACES)
-        val shiftedParameters = cardInputWidget.placementParameters
-        assertEquals(50, shiftedParameters.peekCardWidth)
-        assertEquals(175, shiftedParameters.cardDateSeparation)
-        assertEquals(50, shiftedParameters.dateWidth)
-        assertEquals(185, shiftedParameters.dateCvcSeparation)
-        assertEquals(40, shiftedParameters.cvcWidth)
-        assertEquals(0, shiftedParameters.cvcPostalCodeSeparation)
-        assertEquals(100, shiftedParameters.postalCodeWidth)
+
+        assertThat(cardInputWidget.placementParameters)
+            .isEqualTo(
+                CardInputWidget.PlacementParameters(
+                    totalLengthInPixels = 500,
+                    cardWidth = 190,
+                    hiddenCardWidth = 120,
+                    peekCardWidth = 50,
+                    cardDateSeparation = 175,
+                    dateWidth = 50,
+                    dateCvcSeparation = 185,
+                    cvcWidth = 40,
+                    cvcPostalCodeSeparation = 0,
+                    postalCodeWidth = 100,
+                    cvcStartPosition = 520,
+                    dateRightTouchBufferLimit = 427,
+                    cardTouchBufferLimit = 197,
+                    dateStartPosition = 285
+                )
+            )
     }
 
     @Test
@@ -950,14 +1150,28 @@ internal class CardInputWidgetTest {
         // Moving left with an AmEx number has a larger peek and cvc size.
         // |(peek==50)--(space==88)--(date==50)--(space==72)--(cvc==40)--(space==0)--(postal==100)|
         cardNumberEditText.setText(AMEX_WITH_SPACES)
-        val shiftedParameters = cardInputWidget.placementParameters
-        assertEquals(50, shiftedParameters.peekCardWidth)
-        assertEquals(88, shiftedParameters.cardDateSeparation)
-        assertEquals(50, shiftedParameters.dateWidth)
-        assertEquals(72, shiftedParameters.dateCvcSeparation)
-        assertEquals(40, shiftedParameters.cvcWidth)
-        assertEquals(0, shiftedParameters.cvcPostalCodeSeparation)
-        assertEquals(100, shiftedParameters.postalCodeWidth)
+
+        assertThat(cardInputWidget.placementParameters)
+            .isEqualTo(
+                CardInputWidget.PlacementParameters(
+                    totalLengthInPixels = 500,
+                    cardWidth = 190,
+                    hiddenCardWidth = 120,
+                    peekCardWidth = 50,
+                    cardDateSeparation = 88,
+                    dateWidth = 50,
+                    dateCvcSeparation = 72,
+                    cvcWidth = 40,
+                    cvcPostalCodeSeparation = 0,
+                    postalCodeWidth = 100,
+                    cvcStartPosition = 320,
+                    cvcRightTouchBufferLimit = 120,
+                    dateRightTouchBufferLimit = 106,
+                    cardTouchBufferLimit = 66,
+                    dateStartPosition = 198,
+                    postalCodeStartPosition = 360
+                )
+            )
     }
 
     @Test
@@ -967,14 +1181,26 @@ internal class CardInputWidgetTest {
         // When we move for a Diner's club card, the peek text is shorter, so we expect:
         // |(peek==20)--(space==205)--(date==50)--(space==195)--(cvc==30)|
         cardNumberEditText.setText(DINERS_CLUB_14_WITH_SPACES)
-        val shiftedParameters = cardInputWidget.placementParameters
-        assertEquals(20, shiftedParameters.peekCardWidth)
-        assertEquals(205, shiftedParameters.cardDateSeparation)
-        assertEquals(50, shiftedParameters.dateWidth)
-        assertEquals(195, shiftedParameters.dateCvcSeparation)
-        assertEquals(30, shiftedParameters.cvcWidth)
-        assertEquals(0, shiftedParameters.cvcPostalCodeSeparation)
-        assertEquals(100, shiftedParameters.postalCodeWidth)
+
+        assertThat(cardInputWidget.placementParameters)
+            .isEqualTo(
+                CardInputWidget.PlacementParameters(
+                    totalLengthInPixels = 500,
+                    cardWidth = 190,
+                    hiddenCardWidth = 120,
+                    peekCardWidth = 20,
+                    cardDateSeparation = 205,
+                    dateWidth = 50,
+                    dateCvcSeparation = 195,
+                    cvcWidth = 30,
+                    cvcPostalCodeSeparation = 0,
+                    postalCodeWidth = 100,
+                    cvcStartPosition = 530,
+                    dateRightTouchBufferLimit = 432,
+                    cardTouchBufferLimit = 182,
+                    dateStartPosition = 285
+                )
+            )
     }
 
     @Test
@@ -984,148 +1210,208 @@ internal class CardInputWidgetTest {
         // When we move for a Diner's club card, the peek text is shorter, so we expect:
         // |(peek==20)--(space==205)--(date==50)--(space==195)--(cvc==30)--(space==0)--(postal==100)|
         cardNumberEditText.setText(DINERS_CLUB_14_WITH_SPACES)
-        val shiftedParameters = cardInputWidget.placementParameters
-        assertEquals(20, shiftedParameters.peekCardWidth)
-        assertEquals(118, shiftedParameters.cardDateSeparation)
-        assertEquals(50, shiftedParameters.dateWidth)
-        assertEquals(82, shiftedParameters.dateCvcSeparation)
-        assertEquals(30, shiftedParameters.cvcWidth)
-        assertEquals(0, shiftedParameters.cvcPostalCodeSeparation)
-        assertEquals(100, shiftedParameters.postalCodeWidth)
+
+        assertThat(cardInputWidget.placementParameters)
+            .isEqualTo(
+                CardInputWidget.PlacementParameters(
+                    totalLengthInPixels = 500,
+                    cardWidth = 190,
+                    hiddenCardWidth = 120,
+                    peekCardWidth = 20,
+                    cardDateSeparation = 118,
+                    dateWidth = 50,
+                    dateCvcSeparation = 82,
+                    cvcWidth = 30,
+                    cvcPostalCodeSeparation = 0,
+                    postalCodeWidth = 100,
+                    cvcStartPosition = 330,
+                    dateRightTouchBufferLimit = 110,
+                    cardTouchBufferLimit = 66,
+                    dateStartPosition = 198,
+                    cvcRightTouchBufferLimit = 120,
+                    postalCodeStartPosition = 360
+                )
+            )
     }
 
     @Test
     fun setCardNumber_withIncompleteNumber_doesNotValidateCard() {
         cardInputWidget.setCardNumber("123456")
-        assertFalse(cardNumberEditText.isCardNumberValid)
-        assertTrue(cardNumberEditText.hasFocus())
+        assertThat(cardNumberEditText.isCardNumberValid)
+            .isFalse()
+        assertThat(cardNumberEditText.hasFocus())
+            .isTrue()
     }
 
     @Test
     fun setExpirationDate_withValidData_setsCorrectValues() {
         cardInputWidget.setExpiryDate(12, 79)
-        assertEquals("12/79", expiryEditText.text.toString())
+        assertThat(expiryEditText.text.toString())
+            .isEqualTo("12/79")
     }
 
     @Test
     fun setCvcCode_withValidData_setsValue() {
         cardInputWidget.setCvcCode(CVC_VALUE_COMMON)
-        assertEquals(CVC_VALUE_COMMON, cvcEditText.text.toString())
+        assertThat(cvcEditText.text.toString())
+            .isEqualTo(CVC_VALUE_COMMON)
     }
 
     @Test
     fun setCvcCode_withLongString_truncatesValue() {
         cvcEditText.updateBrand(CardBrand.Visa)
         cardInputWidget.setCvcCode(CVC_VALUE_AMEX)
-        assertEquals(CVC_VALUE_COMMON, cvcEditText.text.toString())
+
+        assertThat(cvcEditText.text.toString())
+            .isEqualTo(CVC_VALUE_COMMON)
     }
 
     @Test
     fun setCvcCode_whenCardBrandIsAmericanExpress_allowsFourDigits() {
         cardInputWidget.setCardNumber(AMEX_NO_SPACES)
         cardInputWidget.setCvcCode(CVC_VALUE_AMEX)
-        assertEquals("1234", cvcEditText.text.toString())
+
+        assertThat(cvcEditText.text.toString())
+            .isEqualTo(CVC_VALUE_AMEX)
     }
 
     @Test
     fun setEnabledTrue_withPostalCodeDisabled_isTrue() {
         cardInputWidget.postalCodeEnabled = false
         cardInputWidget.isEnabled = true
-        assertTrue(cardNumberEditText.isEnabled)
-        assertTrue(expiryEditText.isEnabled)
-        assertTrue(cvcEditText.isEnabled)
-        assertFalse(postalCodeEditText.isEnabled)
+        assertThat(cardNumberEditText.isEnabled)
+            .isTrue()
+        assertThat(expiryEditText.isEnabled)
+            .isTrue()
+        assertThat(cvcEditText.isEnabled)
+            .isTrue()
+        assertThat(postalCodeEditText.isEnabled)
+            .isFalse()
     }
 
     @Test
     fun setEnabledTrue_withPostalCodeEnabled_isTrue() {
         cardInputWidget.postalCodeEnabled = true
         cardInputWidget.isEnabled = true
-        assertTrue(cardNumberEditText.isEnabled)
-        assertTrue(expiryEditText.isEnabled)
-        assertTrue(cvcEditText.isEnabled)
-        assertTrue(postalCodeEditText.isEnabled)
+        assertThat(cardNumberEditText.isEnabled)
+            .isTrue()
+        assertThat(expiryEditText.isEnabled)
+            .isTrue()
+        assertThat(cvcEditText.isEnabled)
+            .isTrue()
+        assertThat(postalCodeEditText.isEnabled)
+            .isTrue()
     }
 
     @Test
     fun setEnabledFalse_withPostalCodeDisabled_isFalse() {
         cardInputWidget.postalCodeEnabled = false
         cardInputWidget.isEnabled = false
-        assertFalse(cardNumberEditText.isEnabled)
-        assertFalse(expiryEditText.isEnabled)
-        assertFalse(cvcEditText.isEnabled)
-        assertFalse(postalCodeEditText.isEnabled)
+        assertThat(cardNumberEditText.isEnabled)
+            .isFalse()
+        assertThat(expiryEditText.isEnabled)
+            .isFalse()
+        assertThat(cvcEditText.isEnabled)
+            .isFalse()
+        assertThat(postalCodeEditText.isEnabled)
+            .isFalse()
     }
 
     @Test
     fun setEnabledFalse_withPostalCodeEnabled_isFalse() {
         cardInputWidget.postalCodeEnabled = true
         cardInputWidget.isEnabled = false
-        assertFalse(cardNumberEditText.isEnabled)
-        assertFalse(expiryEditText.isEnabled)
-        assertFalse(cvcEditText.isEnabled)
-        assertFalse(postalCodeEditText.isEnabled)
+        assertThat(cardNumberEditText.isEnabled)
+            .isFalse()
+        assertThat(expiryEditText.isEnabled)
+            .isFalse()
+        assertThat(cvcEditText.isEnabled)
+            .isFalse()
+        assertThat(postalCodeEditText.isEnabled)
+            .isFalse()
     }
 
     @Test
     fun setAllCardFields_whenValidValues_withPostalCodeDisabled_allowsGetCardWithExpectedValues() {
         cardInputWidget.postalCodeEnabled = false
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) <= 2079)
 
         cardInputWidget.setCardNumber(AMEX_WITH_SPACES)
         cardInputWidget.setExpiryDate(12, 2079)
         cardInputWidget.setCvcCode(CVC_VALUE_AMEX)
-        val card = cardInputWidget.card
-        assertNotNull(card)
-        assertEquals(AMEX_NO_SPACES, card.number)
-        assertNotNull(card.expMonth)
-        assertNotNull(card.expYear)
-        assertEquals(12, card.expMonth)
-        assertEquals(2079, card.expYear)
-        assertEquals("1234", card.cvc)
-        assertEquals(CardBrand.AmericanExpress, card.brand)
 
-        val paymentMethodCard = cardInputWidget.paymentMethodCard
-        assertNotNull(paymentMethodCard)
-        val expectedPaymentMethodCard = PaymentMethodCreateParams.Card(
-            number = AMEX_NO_SPACES,
-            cvc = CVC_VALUE_AMEX,
-            expiryMonth = 12,
-            expiryYear = 2079,
-            attribution = ATTRIBUTION
-        )
-        assertEquals(expectedPaymentMethodCard, paymentMethodCard)
+        assertThat(cardInputWidget.card)
+            .isEqualTo(
+                Card.Builder(AMEX_NO_SPACES, 12, 2079, CVC_VALUE_AMEX)
+                    .loggingTokens(ATTRIBUTION)
+                    .build()
+            )
+
+        assertThat(cardInputWidget.cardParams)
+            .isEqualTo(
+                CardParams(
+                    attribution = ATTRIBUTION,
+                    number = AMEX_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2079,
+                    cvc = CVC_VALUE_AMEX,
+                    address = Address.Builder()
+                        .build()
+                )
+            )
+
+        assertThat(cardInputWidget.paymentMethodCard)
+            .isEqualTo(
+                PaymentMethodCreateParams.Card(
+                    number = AMEX_NO_SPACES,
+                    cvc = CVC_VALUE_AMEX,
+                    expiryMonth = 12,
+                    expiryYear = 2079,
+                    attribution = ATTRIBUTION
+                )
+            )
     }
 
     @Test
     fun setAllCardFields_whenValidValues_withPostalCodeEnabled_allowsGetCardWithExpectedValues() {
         cardInputWidget.postalCodeEnabled = true
-        assertTrue(Calendar.getInstance().get(Calendar.YEAR) <= 2079)
 
         cardInputWidget.setCardNumber(AMEX_WITH_SPACES)
         cardInputWidget.setExpiryDate(12, 2079)
         cardInputWidget.setCvcCode(CVC_VALUE_AMEX)
         cardInputWidget.setPostalCode(POSTAL_CODE_VALUE)
-        val card = cardInputWidget.card
-        assertNotNull(card)
-        assertEquals(AMEX_NO_SPACES, card.number)
-        assertNotNull(card.expMonth)
-        assertNotNull(card.expYear)
-        assertEquals(12, card.expMonth)
-        assertEquals(2079, card.expYear)
-        assertEquals("1234", card.cvc)
-        assertEquals(CardBrand.AmericanExpress, card.brand)
 
-        val paymentMethodCard = cardInputWidget.paymentMethodCard
-        assertNotNull(paymentMethodCard)
-        val expectedPaymentMethodCard = PaymentMethodCreateParams.Card(
-            number = AMEX_NO_SPACES,
-            cvc = CVC_VALUE_AMEX,
-            expiryYear = 2079,
-            expiryMonth = 12,
-            attribution = ATTRIBUTION
-        )
-        assertEquals(expectedPaymentMethodCard, paymentMethodCard)
+        assertThat(cardInputWidget.card)
+            .isEqualTo(
+                Card.Builder(AMEX_NO_SPACES, 12, 2079, CVC_VALUE_AMEX)
+                    .loggingTokens(ATTRIBUTION)
+                    .addressZip(POSTAL_CODE_VALUE)
+                    .build()
+            )
+
+        assertThat(cardInputWidget.cardParams)
+            .isEqualTo(
+                CardParams(
+                    attribution = ATTRIBUTION,
+                    number = AMEX_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2079,
+                    cvc = CVC_VALUE_AMEX,
+                    address = Address.Builder()
+                        .setPostalCode(POSTAL_CODE_VALUE)
+                        .build()
+                )
+            )
+
+        assertThat(cardInputWidget.paymentMethodCard)
+            .isEqualTo(
+                PaymentMethodCreateParams.Card(
+                    number = AMEX_NO_SPACES,
+                    cvc = CVC_VALUE_AMEX,
+                    expiryYear = 2079,
+                    expiryMonth = 12,
+                    attribution = ATTRIBUTION
+                )
+            )
     }
 
     @Test
@@ -1135,11 +1421,18 @@ internal class CardInputWidgetTest {
         cardInputWidget.setExpiryDate(12, 2079)
         cardInputWidget.setCvcCode(CVC_VALUE_AMEX)
         cardInputWidget.clear()
-        assertEquals("", cardNumberEditText.text.toString())
-        assertEquals("", expiryEditText.text.toString())
-        assertEquals("", cvcEditText.text.toString())
-        assertEquals(cvcEditText.id, onGlobalFocusChangeListener.oldFocusId)
-        assertEquals(cardNumberEditText.id, onGlobalFocusChangeListener.newFocusId)
+
+        assertThat(cardNumberEditText.text.toString())
+            .isEmpty()
+        assertThat(expiryEditText.text.toString())
+            .isEmpty()
+        assertThat(cvcEditText.text.toString())
+            .isEmpty()
+
+        assertThat(onGlobalFocusChangeListener.oldFocusId)
+            .isEqualTo(cvcEditText.id)
+        assertThat(onGlobalFocusChangeListener.newFocusId)
+            .isEqualTo(cardNumberEditText.id)
     }
 
     @Test
@@ -1150,71 +1443,104 @@ internal class CardInputWidgetTest {
         cardInputWidget.setCvcCode(CVC_VALUE_AMEX)
         cardInputWidget.setPostalCode(POSTAL_CODE_VALUE)
         cardInputWidget.clear()
-        assertEquals("", cardNumberEditText.text.toString())
-        assertEquals("", expiryEditText.text.toString())
-        assertEquals("", cvcEditText.text.toString())
-        assertEquals("", postalCodeEditText.text.toString())
-        assertEquals(postalCodeEditText.id, onGlobalFocusChangeListener.oldFocusId)
-        assertEquals(cardNumberEditText.id, onGlobalFocusChangeListener.newFocusId)
+
+        assertThat(cardNumberEditText.text.toString())
+            .isEmpty()
+        assertThat(expiryEditText.text.toString())
+            .isEmpty()
+        assertThat(cvcEditText.text.toString())
+            .isEmpty()
+        assertThat(postalCodeEditText.text.toString())
+            .isEmpty()
+
+        assertThat(onGlobalFocusChangeListener.oldFocusId)
+            .isEqualTo(postalCodeEditText.id)
+        assertThat(onGlobalFocusChangeListener.newFocusId)
+            .isEqualTo(cardNumberEditText.id)
     }
 
     @Test
     fun shouldIconShowBrand_whenCvcNotFocused_isAlwaysTrue() {
-        assertTrue(shouldIconShowBrand(CardBrand.AmericanExpress, false, CVC_VALUE_AMEX))
-        assertTrue(shouldIconShowBrand(CardBrand.AmericanExpress, false, ""))
-        assertTrue(shouldIconShowBrand(CardBrand.Visa, false, "333"))
-        assertTrue(shouldIconShowBrand(CardBrand.DinersClub, false, "12"))
-        assertTrue(shouldIconShowBrand(CardBrand.Discover, false, null))
-        assertTrue(shouldIconShowBrand(CardBrand.JCB, false, "7"))
+        assertThat(shouldIconShowBrand(CardBrand.AmericanExpress, false, CVC_VALUE_AMEX))
+            .isTrue()
+        assertThat(shouldIconShowBrand(CardBrand.AmericanExpress, false, ""))
+            .isTrue()
+        assertThat(shouldIconShowBrand(CardBrand.Visa, false, "333"))
+            .isTrue()
+        assertThat(shouldIconShowBrand(CardBrand.DinersClub, false, "12"))
+            .isTrue()
+        assertThat(shouldIconShowBrand(CardBrand.Discover, false, null))
+            .isTrue()
+        assertThat(shouldIconShowBrand(CardBrand.JCB, false, "7"))
+            .isTrue()
     }
 
     @Test
     fun shouldIconShowBrand_whenAmexAndCvCStringLengthNotFour_isFalse() {
-        assertFalse(shouldIconShowBrand(CardBrand.AmericanExpress, true, ""))
-        assertFalse(shouldIconShowBrand(CardBrand.AmericanExpress, true, "1"))
-        assertFalse(shouldIconShowBrand(CardBrand.AmericanExpress, true, "22"))
-        assertFalse(shouldIconShowBrand(CardBrand.AmericanExpress, true, "333"))
+        assertThat(shouldIconShowBrand(CardBrand.AmericanExpress, true, ""))
+            .isFalse()
+        assertThat(shouldIconShowBrand(CardBrand.AmericanExpress, true, "1"))
+            .isFalse()
+        assertThat(shouldIconShowBrand(CardBrand.AmericanExpress, true, "22"))
+            .isFalse()
+        assertThat(shouldIconShowBrand(CardBrand.AmericanExpress, true, "333"))
+            .isFalse()
     }
 
     @Test
     fun shouldIconShowBrand_whenAmexAndCvcStringLengthIsFour_isTrue() {
-        assertTrue(shouldIconShowBrand(CardBrand.AmericanExpress, true, CVC_VALUE_AMEX))
+        assertThat(shouldIconShowBrand(CardBrand.AmericanExpress, true, CVC_VALUE_AMEX))
+            .isTrue()
     }
 
     @Test
     fun shouldIconShowBrand_whenNotAmexAndCvcStringLengthIsNotThree_isFalse() {
-        assertFalse(shouldIconShowBrand(CardBrand.Visa, true, ""))
-        assertFalse(shouldIconShowBrand(CardBrand.Discover, true, "12"))
-        assertFalse(shouldIconShowBrand(CardBrand.JCB, true, "55"))
-        assertFalse(shouldIconShowBrand(CardBrand.MasterCard, true, "9"))
-        assertFalse(shouldIconShowBrand(CardBrand.DinersClub, true, null))
-        assertFalse(shouldIconShowBrand(CardBrand.Unknown, true, "12"))
+        assertThat(shouldIconShowBrand(CardBrand.Visa, true, ""))
+            .isFalse()
+        assertThat(shouldIconShowBrand(CardBrand.Discover, true, "12"))
+            .isFalse()
+        assertThat(shouldIconShowBrand(CardBrand.JCB, true, "55"))
+            .isFalse()
+        assertThat(shouldIconShowBrand(CardBrand.MasterCard, true, "9"))
+            .isFalse()
+        assertThat(shouldIconShowBrand(CardBrand.DinersClub, true, null))
+            .isFalse()
+        assertThat(shouldIconShowBrand(CardBrand.Unknown, true, "12"))
+            .isFalse()
     }
 
     @Test
     fun shouldIconShowBrand_whenNotAmexAndCvcStringLengthIsThree_isTrue() {
-        assertTrue(shouldIconShowBrand(CardBrand.Visa, true, "999"))
-        assertTrue(shouldIconShowBrand(CardBrand.Discover, true, "123"))
-        assertTrue(shouldIconShowBrand(CardBrand.JCB, true, "555"))
-        assertTrue(shouldIconShowBrand(CardBrand.MasterCard, true, "919"))
-        assertTrue(shouldIconShowBrand(CardBrand.DinersClub, true, "415"))
+        assertThat(shouldIconShowBrand(CardBrand.Visa, true, "999"))
+            .isTrue()
+        assertThat(shouldIconShowBrand(CardBrand.Discover, true, "123"))
+            .isTrue()
+        assertThat(shouldIconShowBrand(CardBrand.JCB, true, "555"))
+            .isTrue()
+        assertThat(shouldIconShowBrand(CardBrand.MasterCard, true, "919"))
+            .isTrue()
+        assertThat(shouldIconShowBrand(CardBrand.DinersClub, true, "415"))
+            .isTrue()
     }
 
     @Test
     fun shouldIconShowBrand_whenUnknownBrandAndCvcStringLengthIsFour_isTrue() {
-        assertTrue(shouldIconShowBrand(CardBrand.Unknown, true, "2124"))
+        assertThat(shouldIconShowBrand(CardBrand.Unknown, true, "2124"))
+            .isTrue()
     }
 
     @Test
-    fun allFields_equals_standardFields_withPostalCodeDisabled() {
+    fun currentFields_equals_requiredFields_withPostalCodeDisabled() {
         cardInputWidget.postalCodeEnabled = false
-        assertEquals(cardInputWidget.requiredFields, cardInputWidget.currentFields)
+        assertThat(cardInputWidget.requiredFields)
+            .isEqualTo(cardInputWidget.currentFields)
     }
 
     @Test
-    fun allFields_notEquals_standardFields_withPostalCodeEnabled() {
+    fun currentFields_notEquals_requiredFields_withPostalCodeEnabled() {
         cardInputWidget.postalCodeEnabled = true
-        assertNotEquals(cardInputWidget.requiredFields, cardInputWidget.currentFields)
+        assertThat(cardInputWidget.requiredFields)
+            .isNotEqualTo(cardInputWidget.currentFields)
     }
 
     @Test
@@ -1231,54 +1557,50 @@ internal class CardInputWidgetTest {
             }
         })
 
-        assertFalse(currentIsValid)
-        assertEquals(
-            setOf(
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(
                 CardValidCallback.Fields.Number,
                 CardValidCallback.Fields.Expiry,
                 CardValidCallback.Fields.Cvc
-            ),
-            currentInvalidFields
-        )
+            )
 
         cardInputWidget.setCardNumber(VISA_NO_SPACES)
-        assertFalse(currentIsValid)
-        assertEquals(
-            setOf(CardValidCallback.Fields.Expiry, CardValidCallback.Fields.Cvc),
-            currentInvalidFields
-        )
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(CardValidCallback.Fields.Expiry, CardValidCallback.Fields.Cvc)
 
         expiryEditText.append("12")
-        assertFalse(currentIsValid)
-        assertEquals(
-            setOf(CardValidCallback.Fields.Expiry, CardValidCallback.Fields.Cvc),
-            currentInvalidFields
-        )
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(CardValidCallback.Fields.Expiry, CardValidCallback.Fields.Cvc)
 
         expiryEditText.append("50")
-        assertFalse(currentIsValid)
-        assertEquals(
-            setOf(CardValidCallback.Fields.Cvc),
-            currentInvalidFields
-        )
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(CardValidCallback.Fields.Cvc)
 
         cvcEditText.append("12")
-        assertFalse(currentIsValid)
-        assertEquals(
-            setOf(CardValidCallback.Fields.Cvc),
-            currentInvalidFields
-        )
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(CardValidCallback.Fields.Cvc)
 
         cvcEditText.append("3")
-        assertTrue(currentIsValid)
-        assertTrue(currentInvalidFields.isEmpty())
+        assertThat(currentIsValid)
+            .isTrue()
+        assertThat(currentInvalidFields)
+            .isEmpty()
 
         cvcEditText.setText("0")
-        assertFalse(currentIsValid)
-        assertEquals(
-            setOf(CardValidCallback.Fields.Cvc),
-            currentInvalidFields
-        )
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(CardValidCallback.Fields.Cvc)
     }
 
     @Test
@@ -1288,18 +1610,24 @@ internal class CardInputWidgetTest {
 
         // show error icon when validating fields with invalid card number
         cardInputWidget.setCardNumber(VISA_NO_SPACES.take(6))
-        assertNull(cardInputWidget.paymentMethodCreateParams)
-        assertTrue(cardInputWidget.shouldShowErrorIcon)
+        assertThat(cardInputWidget.paymentMethodCreateParams)
+            .isNull()
+        assertThat(cardInputWidget.shouldShowErrorIcon)
+            .isTrue()
 
         // don't show error icon after changing input
         cardInputWidget.setCardNumber(VISA_NO_SPACES.take(7))
-        assertFalse(cardInputWidget.shouldShowErrorIcon)
+        assertThat(cardInputWidget.shouldShowErrorIcon)
+            .isFalse()
 
         // don't show error icon when validating fields with invalid card number
-        assertNull(cardInputWidget.paymentMethodCreateParams)
+        assertThat(cardInputWidget.paymentMethodCreateParams)
+            .isNull()
         cardInputWidget.setCardNumber(VISA_NO_SPACES)
-        assertNotNull(cardInputWidget.paymentMethodCreateParams)
-        assertFalse(cardInputWidget.shouldShowErrorIcon)
+        assertThat(cardInputWidget.paymentMethodCreateParams)
+            .isNotNull()
+        assertThat(cardInputWidget.shouldShowErrorIcon)
+            .isFalse()
     }
 
     @Test
@@ -1317,14 +1645,6 @@ internal class CardInputWidgetTest {
         cardInputWidget.usZipCodeRequired = false
         assertThat(cardInputWidget.postalCodeEditText.hint)
             .isEqualTo("Postal code")
-
-        cardInputWidget.setCardNumber(VISA_WITH_SPACES)
-        cardInputWidget.expiryDateEditText.append("12")
-        cardInputWidget.expiryDateEditText.append("50")
-        cardInputWidget.cvcNumberEditText.append("123")
-
-        assertThat(cardInputWidget.card)
-            .isNotNull()
     }
 
     @Test
@@ -1336,10 +1656,10 @@ internal class CardInputWidgetTest {
         cardInputWidget.setCardNumber(VISA_WITH_SPACES)
         cardInputWidget.expiryDateEditText.append("12")
         cardInputWidget.expiryDateEditText.append("50")
-        cardInputWidget.cvcNumberEditText.append("123")
+        cardInputWidget.cvcNumberEditText.append(CVC_VALUE_COMMON)
 
         // invalid zipcode
-        cardInputWidget.postalCodeEditText.setText("1234")
+        cardInputWidget.postalCodeEditText.setText(CVC_VALUE_AMEX)
         assertThat(cardInputWidget.card)
             .isNull()
     }
@@ -1353,12 +1673,32 @@ internal class CardInputWidgetTest {
         cardInputWidget.setCardNumber(VISA_WITH_SPACES)
         cardInputWidget.expiryDateEditText.append("12")
         cardInputWidget.expiryDateEditText.append("50")
-        cardInputWidget.cvcNumberEditText.append("123")
+        cardInputWidget.cvcNumberEditText.append(CVC_VALUE_COMMON)
 
         // valid zipcode
-        cardInputWidget.postalCodeEditText.setText("12345")
+        cardInputWidget.postalCodeEditText.setText(POSTAL_CODE_VALUE)
+
         assertThat(cardInputWidget.card)
-            .isNotNull()
+            .isEqualTo(
+                Card.Builder(VISA_NO_SPACES, 12, 2050, CVC_VALUE_COMMON)
+                    .loggingTokens(ATTRIBUTION)
+                    .addressZip(POSTAL_CODE_VALUE)
+                    .build()
+            )
+
+        assertThat(cardInputWidget.cardParams)
+            .isEqualTo(
+                CardParams(
+                    attribution = ATTRIBUTION,
+                    number = VISA_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2050,
+                    cvc = CVC_VALUE_COMMON,
+                    address = Address.Builder()
+                        .setPostalCode(POSTAL_CODE_VALUE)
+                        .build()
+                )
+            )
     }
 
     private companion object {

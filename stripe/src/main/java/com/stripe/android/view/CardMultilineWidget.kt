@@ -26,6 +26,7 @@ import com.stripe.android.databinding.CardMultilineWidgetBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import java.math.BigDecimal
@@ -82,6 +83,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     private var customCvcLabel: String? = null
 
     private var cardBrand: CardBrand = CardBrand.Unknown
+
     @ColorInt
     private val tintColorInt: Int
 
@@ -173,6 +175,32 @@ class CardMultilineWidget @JvmOverloads constructor(
     override val card: Card?
         get() {
             return cardBuilder?.build()
+        }
+
+    internal val cardParams: CardParams?
+        get() {
+            if (!validateAllFields()) {
+                shouldShowErrorIcon = true
+                return null
+            }
+
+            shouldShowErrorIcon = false
+
+            val cardDate = requireNotNull(expiryDateEditText.validDateFields)
+            val cvcValue = cvcEditText.text?.toString()
+            val postalCode = postalCodeEditText.text?.toString()
+                .takeIf { shouldShowPostalCode }
+
+            return CardParams(
+                setOf(CARD_MULTILINE_TOKEN),
+                number = cardNumber.orEmpty(),
+                expMonth = cardDate.first,
+                expYear = cardDate.second,
+                cvc = cvcValue,
+                address = Address.Builder()
+                    .setPostalCode(postalCode.takeUnless { it.isNullOrBlank() })
+                    .build()
+            )
         }
 
     /**

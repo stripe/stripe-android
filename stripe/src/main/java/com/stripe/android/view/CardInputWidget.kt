@@ -30,6 +30,7 @@ import com.stripe.android.databinding.CardInputWidgetBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import kotlin.properties.Delegates
@@ -206,6 +207,61 @@ class CardInputWidget @JvmOverloads constructor(
     override val card: Card?
         get() {
             return cardBuilder?.build()
+        }
+
+    internal val cardParams: CardParams?
+        get() {
+            val cardNumber = cardNumberEditText.cardNumber
+            val cardDate = expiryDateEditText.validDateFields
+            val cvcValue = this.cvcValue
+
+            cardNumberEditText.shouldShowError = cardNumber == null
+            expiryDateEditText.shouldShowError = cardDate == null
+            cvcNumberEditText.shouldShowError = cvcValue == null
+            postalCodeEditText.shouldShowError =
+                (postalCodeRequired || usZipCodeRequired) &&
+                    postalCodeEditText.postalCode.isNullOrBlank()
+
+            // Announce error messages for accessibility
+            currentFields
+                .filter { it.shouldShowError }
+                .forEach { editText ->
+                    editText.errorMessage?.let { errorMessage ->
+                        editText.announceForAccessibility(errorMessage)
+                    }
+                }
+
+            when {
+                cardNumber == null -> {
+                    cardNumberEditText.requestFocus()
+                }
+                cardDate == null -> {
+                    expiryDateEditText.requestFocus()
+                }
+                cvcValue == null -> {
+                    cvcNumberEditText.requestFocus()
+                }
+                postalCodeEditText.shouldShowError -> {
+                    postalCodeEditText.requestFocus()
+                }
+                else -> {
+                    shouldShowErrorIcon = false
+                    return CardParams(
+                        setOf(LOGGING_TOKEN),
+                        number = cardNumber,
+                        expMonth = cardDate.first,
+                        expYear = cardDate.second,
+                        cvc = cvcValue,
+                        address = Address.Builder()
+                            .setPostalCode(postalCodeValue.takeUnless { it.isNullOrBlank() })
+                            .build()
+                    )
+                }
+            }
+
+            shouldShowErrorIcon = true
+
+            return null
         }
 
     /**
@@ -1047,26 +1103,26 @@ class CardInputWidget @JvmOverloads constructor(
     /**
      * A class for tracking the placement and layout of fields
      */
-    internal class PlacementParameters {
-        internal var totalLengthInPixels: Int = 0
+    internal data class PlacementParameters(
+        internal var totalLengthInPixels: Int = 0,
 
-        internal var cardWidth: Int = 0
-        internal var hiddenCardWidth: Int = 0
-        internal var peekCardWidth: Int = 0
-        internal var cardDateSeparation: Int = 0
-        internal var dateWidth: Int = 0
-        internal var dateCvcSeparation: Int = 0
-        internal var cvcWidth: Int = 0
-        internal var cvcPostalCodeSeparation: Int = 0
-        internal var postalCodeWidth: Int = 0
+        internal var cardWidth: Int = 0,
+        internal var hiddenCardWidth: Int = 0,
+        internal var peekCardWidth: Int = 0,
+        internal var cardDateSeparation: Int = 0,
+        internal var dateWidth: Int = 0,
+        internal var dateCvcSeparation: Int = 0,
+        internal var cvcWidth: Int = 0,
+        internal var cvcPostalCodeSeparation: Int = 0,
+        internal var postalCodeWidth: Int = 0,
 
-        internal var cardTouchBufferLimit: Int = 0
-        internal var dateStartPosition: Int = 0
-        internal var dateRightTouchBufferLimit: Int = 0
-        internal var cvcStartPosition: Int = 0
-        internal var cvcRightTouchBufferLimit: Int = 0
+        internal var cardTouchBufferLimit: Int = 0,
+        internal var dateStartPosition: Int = 0,
+        internal var dateRightTouchBufferLimit: Int = 0,
+        internal var cvcStartPosition: Int = 0,
+        internal var cvcRightTouchBufferLimit: Int = 0,
         internal var postalCodeStartPosition: Int = 0
-
+    ) {
         private val cardPeekDateLeftMargin: Int
             @JvmSynthetic
             get() {
