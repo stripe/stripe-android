@@ -67,7 +67,17 @@ internal data class CardParams internal constructor(
      * as a transfer destination for funds in this currency. Currently, the only supported
      * currency for debit card payouts is `usd`.
      */
-    var currency: String? = null
+    var currency: String? = null,
+
+    /**
+     * [card.metadata](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-metadata)
+     *
+     * Optional
+     *
+     * A set of key-value pairs that you can attach to a card object. This can be useful for
+     * storing additional information about the card in a structured format.
+     */
+    var metadata: Map<String, String>? = null
 ) : TokenParams(Token.Type.Card, loggingTokens) {
 
     @JvmOverloads
@@ -130,7 +140,17 @@ internal data class CardParams internal constructor(
          * as a transfer destination for funds in this currency. Currently, the only supported
          * currency for debit card payouts is `usd`.
          */
-        currency: String? = null
+        currency: String? = null,
+
+        /**
+         * [card.metadata](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-metadata)
+         *
+         * Optional
+         *
+         * A set of key-value pairs that you can attach to a card object. This can be useful for
+         * storing additional information about the card in a structured format.
+         */
+        metadata: Map<String, String>? = null
     ) : this(
         loggingTokens = emptySet(),
         number = number,
@@ -139,7 +159,8 @@ internal data class CardParams internal constructor(
         address = address,
         cvc = cvc,
         name = name,
-        currency = currency
+        currency = currency,
+        metadata = metadata
     )
 
     override val typeDataParams: Map<String, Any>
@@ -155,7 +176,8 @@ internal data class CardParams internal constructor(
             PARAM_ADDRESS_CITY to address?.city,
             PARAM_ADDRESS_STATE to address?.state,
             PARAM_ADDRESS_ZIP to address?.postalCode,
-            PARAM_ADDRESS_COUNTRY to address?.country
+            PARAM_ADDRESS_COUNTRY to address?.country,
+            PARAM_METADATA to metadata
         ).fold(emptyMap()) { acc, (key, value) ->
             acc.plus(
                 value?.let { mapOf(key to it) }.orEmpty()
@@ -175,5 +197,6 @@ internal data class CardParams internal constructor(
         private const val PARAM_ADDRESS_ZIP = "address_zip"
         private const val PARAM_ADDRESS_COUNTRY = "address_country"
         private const val PARAM_CURRENCY = "currency"
+        private const val PARAM_METADATA = "metadata"
     }
 }

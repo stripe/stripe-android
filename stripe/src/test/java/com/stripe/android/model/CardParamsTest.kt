@@ -15,7 +15,8 @@ class CardParamsTest {
             cvc = "123",
             name = "Jenny Rosen",
             address = AddressFixtures.ADDRESS,
-            currency = "usd"
+            currency = "usd",
+            metadata = mapOf("fruit" to "orange")
         ).toParamMap()
 
         assertThat(actualParams)
@@ -33,7 +34,8 @@ class CardParamsTest {
                         "address_city" to "San Francisco",
                         "address_state" to "CA",
                         "address_zip" to "94107",
-                        "address_country" to "US"
+                        "address_country" to "US",
+                        "metadata" to mapOf("fruit" to "orange")
                     )
                 )
             )
