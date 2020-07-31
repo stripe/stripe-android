@@ -1,25 +1,13 @@
 package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.CardNumberFixtures
 import kotlin.test.Test
 
 class CardParamsTest {
 
     @Test
-    fun toParamMap_shouldCreateExpectedMap() {
-        val actualParams = CardParams(
-            number = CardNumberFixtures.VISA_NO_SPACES,
-            expMonth = 12,
-            expYear = 2025,
-            cvc = "123",
-            name = "Jenny Rosen",
-            address = AddressFixtures.ADDRESS,
-            currency = "usd",
-            metadata = mapOf("fruit" to "orange")
-        ).toParamMap()
-
-        assertThat(actualParams)
+    fun `toParamMap() should create expected map`() {
+        assertThat(CardParamsFixture.DEFAULT.toParamMap())
             .isEqualTo(
                 mapOf("card" to
                     mapOf(

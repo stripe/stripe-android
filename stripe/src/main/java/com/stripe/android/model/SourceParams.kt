@@ -677,6 +677,34 @@ class SourceParams private constructor(
         }
 
         /**
+         * Create Card Source params.
+         *
+         * @param cardParams A [CardParams] object containing the details necessary for the source.
+         * @return a [SourceParams] object that can be used to create a card source.
+         *
+         * @see [Card Payments with Sources](https://stripe.com/docs/sources/cards)
+         */
+        @JvmStatic
+        internal fun createCardParams(cardParams: CardParams): SourceParams {
+            return SourceParams(SourceType.CARD, cardParams.attribution)
+                .setApiParameterMap(
+                    mapOf(
+                        PARAM_NUMBER to cardParams.number,
+                        PARAM_EXP_MONTH to cardParams.expMonth,
+                        PARAM_EXP_YEAR to cardParams.expYear,
+                        PARAM_CVC to cardParams.cvc
+                    )
+                )
+                .setOwner(
+                    OwnerParams(
+                        address = cardParams.address,
+                        name = cardParams.name
+                    )
+                )
+                .setMetaData(cardParams.metadata)
+        }
+
+        /**
          * @param googlePayPaymentData a [JSONObject] derived from Google Pay's
          * [PaymentData#toJson()](https://developers.google.com/pay/api/android/reference/client#tojson)
          */
