@@ -63,10 +63,13 @@ class CardInputWidget @JvmOverloads constructor(
 
     @JvmSynthetic
     internal val cardNumberEditText = viewBinding.cardNumberEditText
+
     @JvmSynthetic
     internal val expiryDateEditText = viewBinding.expiryDateEditText
+
     @JvmSynthetic
     internal val cvcNumberEditText = viewBinding.cvcEditText
+
     @JvmSynthetic
     internal val postalCodeEditText = viewBinding.postalCodeEditText
 
@@ -209,7 +212,11 @@ class CardInputWidget @JvmOverloads constructor(
             return cardBuilder?.build()
         }
 
-    internal val cardParams: CardParams?
+    /**
+     * A [CardParams] representing the card details and postal code if all fields are valid;
+     * otherwise `null`
+     */
+    override val cardParams: CardParams?
         get() {
             val cardNumber = cardNumberEditText.cardNumber
             val cardDate = expiryDateEditText.validDateFields

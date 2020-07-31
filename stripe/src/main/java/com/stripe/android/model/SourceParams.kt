@@ -685,7 +685,7 @@ class SourceParams private constructor(
          * @see [Card Payments with Sources](https://stripe.com/docs/sources/cards)
          */
         @JvmStatic
-        internal fun createCardParams(cardParams: CardParams): SourceParams {
+        fun createCardParams(cardParams: CardParams): SourceParams {
             return SourceParams(SourceType.CARD, cardParams.attribution)
                 .setApiParameterMap(
                     mapOf(

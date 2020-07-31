@@ -13,6 +13,7 @@ import com.stripe.android.ApiResultCallback
 import com.stripe.android.Stripe
 import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardParams
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.SourceTypeModel
@@ -55,7 +56,7 @@ class CreateCardSourceActivity : AppCompatActivity() {
         setContentView(viewBinding.root)
 
         viewBinding.createButton.setOnClickListener {
-            viewBinding.cardWidget.card?.let {
+            viewBinding.cardWidget.cardParams?.let {
                 createCardSource(it)
             } ?: showSnackbar("Enter a valid card.")
         }
@@ -91,17 +92,17 @@ class CreateCardSourceActivity : AppCompatActivity() {
     }
 
     /**
-     * To start the 3DS cycle, create a [Source] out of the user-entered [Card].
+     * To start the 3DS cycle, create a [Source] out of the user-entered [CardParams].
      *
-     * @param card the [Card] used to create a source
+     * @param cardParams the [CardParams] used to create a source
      */
-    private fun createCardSource(card: Card) {
+    private fun createCardSource(cardParams: CardParams) {
         keyboardController.hide()
 
         viewBinding.createButton.isEnabled = false
         viewBinding.progressBar.visibility = View.VISIBLE
 
-        val params = SourceParams.createCardParams(card)
+        val params = SourceParams.createCardParams(cardParams)
         viewModel.createSource(params).observe(
             this,
             Observer { result ->
@@ -138,7 +139,7 @@ class CreateCardSourceActivity : AppCompatActivity() {
      * to verify the third-party approval. The only information from the Card source
      * that is used is the ID field.
      *
-     * @param source the [Card]-created [Source].
+     * @param source the [CardParams]-created [Source].
      */
     private fun createThreeDSecureSource(source: Source) {
         // This represents a request for a 3DS purchase of 10.00 euro.

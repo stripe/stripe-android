@@ -3,6 +3,7 @@ package com.stripe.android.view
 import android.text.TextWatcher
 import androidx.annotation.IntRange
 import com.stripe.android.model.Card
+import com.stripe.android.model.CardParams
 import com.stripe.android.model.PaymentMethodCreateParams
 
 internal interface CardWidget {
@@ -11,6 +12,12 @@ internal interface CardWidget {
      * otherwise `null`
      */
     val card: Card?
+
+    /**
+     * A [CardParams] representing the card details and postal code if all fields are valid;
+     * otherwise `null`
+     */
+    val cardParams: CardParams?
 
     /**
      * A [Card.Builder] representing the card details and postal code if all fields are valid;
