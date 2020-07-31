@@ -7,7 +7,7 @@ import android.text.method.DigitsKeyListener
 import android.util.AttributeSet
 import com.stripe.android.R
 
-internal class BecsDebitBsbEditText @JvmOverloads constructor(
+open class BecsDebitBsbEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle

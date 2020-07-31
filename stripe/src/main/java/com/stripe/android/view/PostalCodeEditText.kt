@@ -15,7 +15,7 @@ import com.stripe.android.R
 import java.util.regex.Pattern
 import kotlin.properties.Delegates
 
-class PostalCodeEditText @JvmOverloads constructor(
+open class PostalCodeEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle

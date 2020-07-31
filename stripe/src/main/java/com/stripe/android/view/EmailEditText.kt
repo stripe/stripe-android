@@ -5,7 +5,7 @@ import android.util.AttributeSet
 import android.util.Patterns
 import com.stripe.android.R
 
-internal class EmailEditText @JvmOverloads constructor(
+open class EmailEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle

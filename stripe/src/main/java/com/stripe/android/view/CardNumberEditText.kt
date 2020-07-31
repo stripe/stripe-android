@@ -15,7 +15,7 @@ import com.stripe.android.model.CardBrand
 /**
  * A [StripeEditText] that handles spacing out the digits of a credit card.
  */
-class CardNumberEditText @JvmOverloads constructor(
+open class CardNumberEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle
