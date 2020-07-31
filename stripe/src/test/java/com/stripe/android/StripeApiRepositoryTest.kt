@@ -698,6 +698,19 @@ class StripeApiRepositoryTest {
     }
 
     @Test
+    fun `getCardMetadata with valid bin prefix should succeed`() {
+        testDispatcher.runBlockingTest {
+            val cardMetadata =
+                stripeApiRepository.getCardMetadata(
+                    "424242",
+                    ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+                )
+            assertThat(cardMetadata.binPrefix).isEqualTo("424242")
+            assertThat(cardMetadata.accountRanges).isNotEmpty()
+        }
+    }
+
+    @Test
     fun cancelPaymentIntentSource_whenAlreadyCanceled_throwsInvalidRequestException() {
         val exception = assertFailsWith<InvalidRequestException> {
             stripeApiRepository.cancelPaymentIntentSource(

@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import com.stripe.android.exception.APIException
+import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.Complete3ds2Result
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -231,6 +232,9 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun getFpxBankStatus(
         options: ApiRequest.Options
     ) = FpxBankStatuses()
+
+    override suspend fun getCardMetadata(binPrefix: String, options: ApiRequest.Options) =
+        CardMetadata("424242", emptyList())
 
     override fun start3ds2Auth(
         authParams: Stripe3ds2AuthParams,

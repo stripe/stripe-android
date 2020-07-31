@@ -31,6 +31,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeModel
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
+import com.stripe.android.model.parsers.CardMetadataJsonParser
 import com.stripe.android.model.parsers.CustomerJsonParser
 import com.stripe.android.model.parsers.FpxBankStatusesJsonParser
 import com.stripe.android.model.parsers.ModelJsonParser
@@ -813,6 +814,19 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
+    override suspend fun getCardMetadata(binPrefix: String, options: ApiRequest.Options) =
+        withContext(workDispatcher) {
+            makeApiRequest(
+                apiRequestFactory.createGet(
+                    getEdgeUrl("card-metadata"),
+                    options.copy(stripeAccount = null),
+                    mapOf("key" to options.apiKey, "bin_prefix" to binPrefix)
+                )
+            ).let {
+                CardMetadataJsonParser(binPrefix).parse(it.responseJson)
+            }
+        }
+
     /**
      * Analytics event: [AnalyticsEvent.Auth3ds2Start]
      */
@@ -1308,6 +1322,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
         private fun getApiUrl(path: String): String {
             return "${ApiRequest.API_HOST}/v1/$path"
+        }
+
+        private fun getEdgeUrl(path: String): String {
+            return "${ApiRequest.API_HOST}/edge-internal/$path"
         }
 
         private fun createExpandParam(expandFields: List<String>): Map<String, List<String>> {
