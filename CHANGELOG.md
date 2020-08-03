@@ -5,6 +5,9 @@
 * [#2671](https://github.com/stripe/stripe-android/pull/2671) Add `cardParams` property to `CardInputWidget` and `CardMultilineWidget`
 * [#2674](https://github.com/stripe/stripe-android/pull/2674) Add `SourceParams` creation method for `CardParams`
 * [#2675](https://github.com/stripe/stripe-android/pull/2675) Add `CardParams` methods to `Stripe` class
+* [#2679](https://github.com/stripe/stripe-android/pull/2679) Add missing `TokenizationMethod` values
+    * Add `Masterpass` and `VisaCheckout`
+* [#2681](https://github.com/stripe/stripe-android/pull/2681) Mark code using `Card` for card object creation as `@Deprecated`
 
 ## 15.0.1 - 2020-07-28
 * [#2641](https://github.com/stripe/stripe-android/pull/2641) Add support for Bank Account as source on `Customer` object
