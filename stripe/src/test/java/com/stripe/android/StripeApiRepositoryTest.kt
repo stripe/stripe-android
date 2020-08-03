@@ -16,8 +16,8 @@ import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.BankAccountTokenParamsFixtures
-import com.stripe.android.model.Card
-import com.stripe.android.model.CardFixtures
+import com.stripe.android.model.CardParams
+import com.stripe.android.model.CardParamsFixtures
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -187,7 +187,7 @@ class StripeApiRepositoryTest {
     @Test
     fun createSource_shouldLogSourceCreation_andReturnSource() {
         val source = stripeApiRepository.createSource(
-            SourceParams.createCardParams(CARD),
+            SourceParams.createCardParams(CARD_PARAMS),
             DEFAULT_OPTIONS
         )
 
@@ -205,7 +205,7 @@ class StripeApiRepositoryTest {
         whenever(stripeApiRequestExecutor.execute(any<ApiRequest>()))
             .thenReturn(stripeResponse)
         create().createSource(
-            SourceParams.createCardParams(CardFixtures.CARD_WITH_ATTRIBUTION),
+            SourceParams.createCardParams(CardParamsFixtures.WITH_ATTRIBUTION),
             DEFAULT_OPTIONS
         )
 
@@ -242,7 +242,7 @@ class StripeApiRepositoryTest {
     @Test
     fun createSource_withConnectAccount_keepsHeaderInAccount() {
         val connectAccountId = "acct_1Acj2PBUgO3KuWzz"
-        val source = stripeApiRepository.createSource(SourceParams.createCardParams(CARD),
+        val source = stripeApiRepository.createSource(SourceParams.createCardParams(CARD_PARAMS),
             ApiRequest.Options(ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY, connectAccountId))
 
         // Check that we get a source back; we don't care about its fields for this test.
@@ -345,7 +345,7 @@ class StripeApiRepositoryTest {
                     ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
                     connectAccountId
                 ),
-                SourceParams.createCardParams(CARD).toParamMap()
+                SourceParams.createCardParams(CARD_PARAMS).toParamMap()
             )
         )
         assertNotNull(response)
@@ -434,7 +434,7 @@ class StripeApiRepositoryTest {
             fingerprintDataRepository = fingerprintDataRepository
         )
         val source = stripeApiRepository.createSource(
-            SourceParams.createCardParams(CARD),
+            SourceParams.createCardParams(CARD_PARAMS),
             DEFAULT_OPTIONS
         )
         assertNotNull(source)
@@ -734,7 +734,7 @@ class StripeApiRepositoryTest {
 
         assertFailsWith<APIConnectionException> {
             create().createSource(
-                SourceParams.createCardParams(CARD),
+                SourceParams.createCardParams(CARD_PARAMS),
                 DEFAULT_OPTIONS
             )
         }
@@ -812,7 +812,7 @@ class StripeApiRepositoryTest {
         )
         whenever(stripeApiRequestExecutor.execute(any<ApiRequest>())).thenReturn(stripeResponse)
         create().createToken(
-            CardFixtures.CARD_WITH_ATTRIBUTION,
+            CardParamsFixtures.WITH_ATTRIBUTION,
             DEFAULT_OPTIONS
         )
 
@@ -935,8 +935,8 @@ class StripeApiRepositoryTest {
 
     private companion object {
         private const val STRIPE_ACCOUNT_RESPONSE_HEADER = "Stripe-Account"
-        private val CARD =
-            Card.create("4242424242424242", 1, 2050, "123")
+        private val CARD_PARAMS =
+            CardParams("4242424242424242", 1, 2050, "123")
 
         private val DEFAULT_OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
 

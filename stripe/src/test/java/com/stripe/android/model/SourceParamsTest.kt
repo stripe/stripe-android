@@ -172,7 +172,7 @@ class SourceParamsTest {
 
     @Test
     fun `create with CardParams object should return expected map`() {
-        assertThat(SourceParams.createCardParams(CardParamsFixture.DEFAULT).toParamMap())
+        assertThat(SourceParams.createCardParams(CardParamsFixtures.DEFAULT).toParamMap())
             .isEqualTo(
                 mapOf(
                     "type" to "card",

@@ -562,6 +562,13 @@ data class Card internal constructor(
          * @param expYear the expiry year
          * @param cvc the CVC code
          */
+        @Deprecated(
+            "Use CardParams",
+            ReplaceWith(
+                "Builder(number, expMonth, expYear, cvc).build()",
+                "com.stripe.android.model.Card.Builder"
+            )
+        )
         @JvmStatic
         fun create(
             number: String? = null,

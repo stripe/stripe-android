@@ -2,7 +2,7 @@ package com.stripe.android
 
 import android.net.Uri
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.CardFixtures
+import com.stripe.android.model.CardParamsFixtures
 import java.io.ByteArrayOutputStream
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -16,12 +16,11 @@ internal class ApiRequestTest {
 
     @Test
     fun url_withCardData_createsProperQueryString() {
-        val cardMap = CardFixtures.MINIMUM_CARD.toParamMap()
-            .plus(FINGERPRINT_DATA.params)
         val url = FACTORY.createGet(
-            StripeApiRepository.sourcesUrl,
-            OPTIONS,
-            cardMap
+            url = StripeApiRepository.sourcesUrl,
+            options = OPTIONS,
+            params = CardParamsFixtures.MINIMUM.toParamMap()
+                .plus(FINGERPRINT_DATA.params)
         ).url
 
         assertThat(Uri.parse(url))
