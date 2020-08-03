@@ -156,7 +156,6 @@ class Stripe internal constructor(
      *
      * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
      * [PaymentIntent]
-     * @param clientSecret the [client_secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret)
      * @param authenticator a [AlipayAuthenticator] used to interface with the Alipay SDK
      * @param stripeAccountId Optional, the Connect account to associate with this request.
      * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
