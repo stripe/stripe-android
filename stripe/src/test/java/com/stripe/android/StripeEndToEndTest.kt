@@ -12,7 +12,7 @@ import com.stripe.android.model.AddressFixtures
 import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardFunding
-import com.stripe.android.model.CardParamsFixture
+import com.stripe.android.model.CardParamsFixtures
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -133,7 +133,7 @@ class StripeEndToEndTest {
     @Test
     fun `create Source using CardParams should return object with expected data`() {
         val source = defaultStripe.createSourceSynchronous(
-            SourceParams.createCardParams(CardParamsFixture.DEFAULT)
+            SourceParams.createCardParams(CardParamsFixtures.DEFAULT)
         )
         assertThat(source?.sourceTypeModel)
             .isEqualTo(
@@ -155,7 +155,7 @@ class StripeEndToEndTest {
     @Test
     fun `create card token using CardParams should return object with expected data`() {
         val token = defaultStripe.createCardTokenSynchronous(
-            CardParamsFixture.DEFAULT
+            CardParamsFixtures.DEFAULT
         )
         val card = token?.card
 

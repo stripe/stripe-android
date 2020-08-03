@@ -7,7 +7,7 @@ class ConfirmPaymentIntentParamsTest {
 
     @Test
     fun toParamMap_withSourceParams_shouldCreateExpectedMap() {
-        val sourceParams = SourceParams.createCardParams(CardFixtures.CARD)
+        val sourceParams = SourceParams.createCardParams(CardParamsFixtures.MINIMUM)
         val params = ConfirmPaymentIntentParams
             .createWithSourceParams(sourceParams, CLIENT_SECRET, RETURN_URL)
             .toParamMap()

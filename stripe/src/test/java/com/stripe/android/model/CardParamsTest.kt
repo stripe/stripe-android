@@ -7,7 +7,7 @@ class CardParamsTest {
 
     @Test
     fun `toParamMap() should create expected map`() {
-        assertThat(CardParamsFixture.DEFAULT.toParamMap())
+        assertThat(CardParamsFixtures.DEFAULT.toParamMap())
             .isEqualTo(
                 mapOf("card" to
                     mapOf(
