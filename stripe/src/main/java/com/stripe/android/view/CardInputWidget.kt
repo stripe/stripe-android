@@ -170,7 +170,7 @@ class CardInputWidget @JvmOverloads constructor(
      */
     override val paymentMethodCard: PaymentMethodCreateParams.Card?
         get() {
-            return card?.let {
+            return cardParams?.let {
                 PaymentMethodCreateParams.Card(
                     number = it.number,
                     cvc = it.cvc,
@@ -207,6 +207,7 @@ class CardInputWidget @JvmOverloads constructor(
      * A [Card] representing the card details and postal code if all fields are valid;
      * otherwise `null`
      */
+    @Deprecated("Use cardParams", ReplaceWith("cardParams"))
     override val card: Card?
         get() {
             return cardBuilder?.build()
@@ -275,6 +276,7 @@ class CardInputWidget @JvmOverloads constructor(
      * A [Card.Builder] representing the card details and postal code if all fields are valid;
      * otherwise `null`
      */
+    @Deprecated("Use cardParams", ReplaceWith("cardParams"))
     override val cardBuilder: Card.Builder?
         get() {
             val cardNumber = cardNumberEditText.cardNumber

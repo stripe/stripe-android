@@ -649,6 +649,7 @@ class SourceParams private constructor(
          *
          * @see [Card Payments with Sources](https://stripe.com/docs/sources/cards)
          */
+        @Deprecated("Use createCardParams with CardParams argument.")
         @JvmStatic
         fun createCardParams(card: Card): SourceParams {
             return SourceParams(SourceType.CARD, card.loggingTokens)

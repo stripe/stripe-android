@@ -11,6 +11,7 @@ internal interface CardWidget {
      * A [Card] representing the card details and postal code if all fields are valid;
      * otherwise `null`
      */
+    @Deprecated("Use cardParams", ReplaceWith("cardParams"))
     val card: Card?
 
     /**
@@ -23,6 +24,7 @@ internal interface CardWidget {
      * A [Card.Builder] representing the card details and postal code if all fields are valid;
      * otherwise `null`
      */
+    @Deprecated("Use cardParams", ReplaceWith("cardParams"))
     val cardBuilder: Card.Builder?
 
     /**
