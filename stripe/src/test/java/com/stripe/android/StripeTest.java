@@ -434,45 +434,6 @@ public class StripeTest {
     }
 
     @Test
-    public void createSourceSynchronous_withCardParams_passesIntegrationTest()
-            throws StripeException {
-        final Card card = new Card.Builder(CardNumberFixtures.VISA_NO_SPACES, 12, 2050, "123")
-                .addressCity("Sheboygan")
-                .addressCountry("US")
-                .addressLine1("123 Main St")
-                .addressLine2("#456")
-                .addressZip("53081")
-                .addressState("WI")
-                .name("Winnie Hoop")
-                .build();
-        final SourceParams params = SourceParams.createCardParams(card);
-        final Map<String, String> metamap = new HashMap<String, String>() {{
-            put("addons", "cream");
-            put("type", "halfandhalf");
-        }};
-        params.setMetaData(metamap);
-
-        final Source cardSource = createStripe().createSourceSynchronous(params);
-        assertNotNull(cardSource);
-        assertNotNull(cardSource.getClientSecret());
-        assertNotNull(cardSource.getId());
-        assertEquals(Source.SourceType.CARD, cardSource.getType());
-        assertNotNull(cardSource.getSourceTypeData());
-        assertNotNull(cardSource.getSourceTypeModel());
-        assertTrue(cardSource.getSourceTypeModel() instanceof SourceTypeModel.Card);
-        assertNotNull(cardSource.getOwner());
-        assertNotNull(cardSource.getOwner().getAddress());
-        assertEquals("Sheboygan", cardSource.getOwner().getAddress().getCity());
-        assertEquals("WI", cardSource.getOwner().getAddress().getState());
-        assertEquals("53081", cardSource.getOwner().getAddress().getPostalCode());
-        assertEquals("123 Main St", cardSource.getOwner().getAddress().getLine1());
-        assertEquals("#456", cardSource.getOwner().getAddress().getLine2());
-        assertEquals("US", cardSource.getOwner().getAddress().getCountry());
-        assertEquals("Winnie Hoop", cardSource.getOwner().getName());
-        assertEquals(metamap, cardSource.getMetaData());
-    }
-
-    @Test
     public void createSourceSynchronous_with3DSParams_passesIntegrationTest()
             throws StripeException {
         final Stripe stripe = defaultStripe;

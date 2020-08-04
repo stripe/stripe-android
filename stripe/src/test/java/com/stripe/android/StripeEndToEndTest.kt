@@ -157,29 +157,31 @@ class StripeEndToEndTest {
         val token = defaultStripe.createCardTokenSynchronous(
             CardParamsFixtures.DEFAULT
         )
-        val card = token?.card
+        val card = requireNotNull(token?.card)
 
         assertThat(card)
             .isEqualTo(
-                Card.Builder(expMonth = 12, expYear = 2025)
-                    .id(card?.id)
-                    .name("Jenny Rosen")
-                    .last4("4242")
-                    .addressLine1("123 Market St")
-                    .addressLine1Check("unchecked")
-                    .addressLine2("#345")
-                    .addressCity("San Francisco")
-                    .addressState("CA")
-                    .addressZip("94107")
-                    .addressZipCheck("unchecked")
-                    .addressCountry("US")
-                    .brand(CardBrand.Visa)
-                    .funding(CardFunding.Credit)
-                    .country("US")
-                    .currency("usd")
-                    .cvcCheck("unchecked")
-                    .metadata(emptyMap())
-                    .build()
+                Card(
+                    expMonth = 12,
+                    expYear = 2025,
+                    id = card.id,
+                    name = "Jenny Rosen",
+                    last4 = "4242",
+                    addressLine1 = "123 Market St",
+                    addressLine1Check = "unchecked",
+                    addressLine2 = "#345",
+                    addressCity = "San Francisco",
+                    addressState = "CA",
+                    addressZip = "94107",
+                    addressZipCheck = "unchecked",
+                    addressCountry = "US",
+                    brand = CardBrand.Visa,
+                    funding = CardFunding.Credit,
+                    country = "US",
+                    currency = "usd",
+                    cvcCheck = "unchecked",
+                    metadata = emptyMap()
+                )
             )
     }
 

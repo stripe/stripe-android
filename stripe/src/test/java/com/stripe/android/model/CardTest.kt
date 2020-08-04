@@ -2,7 +2,6 @@ package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures
-import com.stripe.android.model.parsers.CardJsonParser
 import java.util.Calendar
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -11,7 +10,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.json.JSONObject
 
 /**
  * Test class for [Card].
@@ -506,32 +504,32 @@ class CardTest {
 
     @Test
     fun getLast4_whenNumberIsNullButLast4IsSet_returnsCorrectValue() {
-        val card = Card.Builder(null, 2, 2020, "123")
-            .name("Jenny Rosen")
-            .last4("1234")
-            .build()
-        assertEquals("1234", card.last4)
+        val card = Card(
+            expMonth = 2,
+            expYear = 2020,
+            cvc = "123",
+            name = "Jenny Rosen",
+            last4 = "1234",
+            brand = CardBrand.Visa,
+            id = "id"
+        )
+        assertThat(card.last4)
+            .isEqualTo("1234")
     }
 
     @Test
     fun getBrand_whenNumberIsNullButBrandIsSet_returnsCorrectValue() {
-        val card = Card.Builder(null, 2, 2020, "123")
-            .name("Jenny Rosen")
-            .brand(CardBrand.AmericanExpress)
-            .build()
-        assertEquals(CardBrand.AmericanExpress, card.brand)
-    }
-
-    @Test
-    fun fromString_whenStringIsValidJson_returnsExpectedCard() {
-        val expectedCard = CARD_USD
-        val actualCard = CardJsonParser().parse(JSON_CARD_USD)
-        assertEquals(expectedCard, actualCard)
-    }
-
-    @Test
-    fun fromString_whenStringIsBadJson_returnsNull() {
-        assertNull(Card.fromString(BAD_JSON))
+        val card = Card(
+            expMonth = 2,
+            expYear = 2020,
+            cvc = "123",
+            name = "Jenny Rosen",
+            last4 = "1234",
+            brand = CardBrand.AmericanExpress,
+            id = "id"
+        )
+        assertThat(card.brand)
+            .isEqualTo(CardBrand.AmericanExpress)
     }
 
     @Test
@@ -548,7 +546,7 @@ class CardTest {
 
     @Test
     fun toBuilder_withLoggingToken_whenUnchanged_isEquals() {
-        val card = requireNotNull(CardJsonParser().parse(JSON_CARD_USD))
+        val card = CardFixtures.CARD_USD
         card.toBuilder()
             .loggingTokens(setOf("hello"))
 
@@ -557,25 +555,26 @@ class CardTest {
 
     @Test
     fun toPaymentMethodsParams() {
-        val actual = CARD_USD.toPaymentMethodsParams()
-        val expected = PaymentMethodCreateParams.create(
-            card = PaymentMethodCreateParams.Card(
-                expiryMonth = 8,
-                expiryYear = 2017
-            ),
-            billingDetails = PaymentMethod.BillingDetails(
-                name = "John Cardholder",
-                address = Address.Builder()
-                    .setLine1("123 Any Street")
-                    .setLine2("456")
-                    .setCity("Des Moines")
-                    .setState("IA")
-                    .setPostalCode("50305")
-                    .setCountry("US")
-                    .build()
+        assertThat(CardFixtures.CARD_USD.toPaymentMethodsParams())
+            .isEqualTo(
+                PaymentMethodCreateParams.create(
+                    card = PaymentMethodCreateParams.Card(
+                        expiryMonth = 8,
+                        expiryYear = 2017
+                    ),
+                    billingDetails = PaymentMethod.BillingDetails(
+                        name = "Jenny Rosen",
+                        address = Address.Builder()
+                            .setLine1("123 Market St")
+                            .setLine2("#345")
+                            .setCity("San Francisco")
+                            .setState("CA")
+                            .setPostalCode("94107")
+                            .setCountry("US")
+                            .build()
+                    )
+                )
             )
-        )
-        assertEquals(expected, actual)
     }
 
     @Test
@@ -586,15 +585,15 @@ class CardTest {
                     "card" to mapOf(
                         "number" to CardNumberFixtures.VISA_NO_SPACES,
                         "exp_month" to 8,
-                        "exp_year" to 2019,
+                        "exp_year" to 2050,
                         "cvc" to "123",
                         "name" to "Jenny Rosen",
                         "currency" to "USD",
-                        "address_line1" to "1234 Main Street",
-                        "address_line2" to "906",
+                        "address_line1" to "123 Market St",
+                        "address_line2" to "#345",
                         "address_city" to "San Francisco",
                         "address_state" to "CA",
-                        "address_zip" to "94111",
+                        "address_zip" to "94107",
                         "address_country" to "US"
                     )
                 )
@@ -603,65 +602,6 @@ class CardTest {
 
     internal companion object {
         private const val YEAR_IN_FUTURE: Int = 2100
-
-        internal val JSON_CARD_USD = JSONObject(
-            """
-            {
-                "id": "card_189fi32eZvKYlo2CHK8NPRME",
-                "object": "card",
-                "address_city": "Des Moines",
-                "address_country": "US",
-                "address_line1": "123 Any Street",
-                "address_line1_check": "unavailable",
-                "address_line2": "456",
-                "address_state": "IA",
-                "address_zip": "50305",
-                "address_zip_check": "unavailable",
-                "brand": "Visa",
-                "country": "US",
-                "currency": "usd",
-                "customer": "customer77",
-                "cvc_check": "unavailable",
-                "exp_month": 8,
-                "exp_year": 2017,
-                "funding": "credit",
-                "fingerprint": "abc123",
-                "last4": "4242",
-                "name": "John Cardholder",
-                "metadata": {
-                    "color": "blue",
-                    "animal": "dog"
-                }
-            }
-            """.trimIndent()
-        )
-
-        private const val BAD_JSON: String = "{ \"id\": "
-
-        internal val CARD_USD = Card.Builder(expMonth = 8, expYear = 2017)
-            .brand(CardBrand.Visa)
-            .funding(CardFunding.Credit)
-            .last4("4242")
-            .id("card_189fi32eZvKYlo2CHK8NPRME")
-            .country("US")
-            .currency("usd")
-            .addressCountry("US")
-            .addressCity("Des Moines")
-            .addressState("IA")
-            .addressZip("50305")
-            .addressZipCheck("unavailable")
-            .addressLine1("123 Any Street")
-            .addressLine1Check("unavailable")
-            .addressLine2("456")
-            .name("John Cardholder")
-            .cvcCheck("unavailable")
-            .customer("customer77")
-            .fingerprint("abc123")
-            .metadata(mapOf(
-                "color" to "blue",
-                "animal" to "dog"
-            ))
-            .build()
 
         private fun createCard(
             number: String? = null,

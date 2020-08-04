@@ -1,6 +1,5 @@
 package com.stripe.android.model
 
-import com.stripe.android.model.CardTest.Companion.JSON_CARD_USD
 import com.stripe.android.model.parsers.CustomerJsonParser
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -71,8 +70,8 @@ class CustomerTest {
             // convenient for the test because it is not an apple pay source.
             put(SourceFixtures.CUSTOMER_SOURCE_CARD_JSON)
             put(SourceFixtures.ALIPAY_JSON)
-            put(JSONObject(JSON_CARD_USD.toString()))
-            put(JSONObject(JSON_CARD_USD.toString()).apply {
+            put(JSONObject(CardFixtures.CARD_USD_JSON.toString()))
+            put(JSONObject(CardFixtures.CARD_USD_JSON.toString()).apply {
                 put("id", "card_id55555")
                 put("tokenization_method", "apple_pay")
             })

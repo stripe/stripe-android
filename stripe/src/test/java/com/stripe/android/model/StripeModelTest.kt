@@ -6,7 +6,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotSame
-import kotlin.test.assertTrue
 import org.json.JSONObject
 
 /**
@@ -16,13 +15,14 @@ class StripeModelTest {
 
     @BeforeTest
     fun setup() {
-        assertTrue(StripeModel::class.java.isAssignableFrom(Card::class.java))
+        assertThat(StripeModel::class.java.isAssignableFrom(Card::class.java))
+            .isTrue()
     }
 
     @Test
     fun equals_whenEquals_returnsTrue() {
-        val firstCard = parse(CardTest.JSON_CARD_USD)
-        val secondCard = parse(CardTest.JSON_CARD_USD)
+        val firstCard = parse(CardFixtures.CARD_USD_JSON)
+        val secondCard = parse(CardFixtures.CARD_USD_JSON)
 
         assertEquals(firstCard, secondCard)
         // Just confirming for sanity
@@ -37,14 +37,18 @@ class StripeModelTest {
 
     @Test
     fun hashCode_whenEquals_returnsSameValue() {
-        assertThat(parse(CardTest.JSON_CARD_USD).hashCode())
-            .isEqualTo(parse(CardTest.JSON_CARD_USD).hashCode())
+        assertThat(parse(CardFixtures.CARD_USD_JSON).hashCode())
+            .isEqualTo(parse(CardFixtures.CARD_USD_JSON).hashCode())
     }
 
     @Test
     fun hashCode_whenNotEquals_returnsDifferentValues() {
         assertThat(CardFixtures.CARD_USD.hashCode())
-            .isNotEqualTo(CardFixtures.CARD_EUR.hashCode())
+            .isNotEqualTo(
+                CardFixtures.CARD_USD
+                    .copy(currency = "eur")
+                    .hashCode()
+            )
     }
 
     private fun parse(json: JSONObject): Card {
