@@ -1341,9 +1341,16 @@ internal class CardInputWidgetTest {
 
         assertThat(cardInputWidget.card)
             .isEqualTo(
-                Card.Builder(AMEX_NO_SPACES, 12, 2079, CVC_VALUE_AMEX)
-                    .loggingTokens(ATTRIBUTION)
-                    .build()
+                Card(
+                    id = null,
+                    brand = CardBrand.AmericanExpress,
+                    number = AMEX_NO_SPACES,
+                    expMonth = 12,
+                    expYear = 2079,
+                    cvc = CVC_VALUE_AMEX,
+                    loggingTokens = ATTRIBUTION,
+                    last4 = "0005"
+                )
             )
 
         assertThat(cardInputWidget.cardParams)

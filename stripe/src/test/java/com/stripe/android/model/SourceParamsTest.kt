@@ -200,28 +200,28 @@ class SourceParamsTest {
 
     @Test
     fun `create with Card object should return expected map`() {
-        assertThat(SourceParams.createCardParams(FULL_FIELDS_VISA_CARD).toParamMap())
+        assertThat(SourceParams.createCardParams(CardFixtures.CARD).toParamMap())
             .isEqualTo(
                 mapOf(
                     "type" to "card",
                     "card" to mapOf(
                         "number" to VISA_NO_SPACES,
-                        "exp_month" to 12,
+                        "exp_month" to 8,
                         "exp_year" to 2050,
                         "cvc" to "123"
                     ),
                     "owner" to mapOf(
                         "address" to mapOf(
-                            "line1" to "1 ABC Street",
-                            "line2" to "Apt. 123",
+                            "line1" to "123 Market St",
+                            "line2" to "#345",
                             "city" to "San Francisco",
                             "state" to "CA",
                             "postal_code" to "94107",
                             "country" to "US"
                         ),
-                        "name" to "Captain Cardholder"
+                        "name" to "Jenny Rosen"
                     ),
-                    "metadata" to METADATA
+                    "metadata" to mapOf("fruit" to "orange")
                 )
             )
     }
@@ -712,18 +712,5 @@ class SourceParamsTest {
         )
 
         private const val RETURN_URL = "stripe://return"
-
-        private val FULL_FIELDS_VISA_CARD =
-            Card.Builder(VISA_NO_SPACES, 12, 2050, "123")
-                .name("Captain Cardholder")
-                .addressLine1("1 ABC Street")
-                .addressLine2("Apt. 123")
-                .addressCity("San Francisco")
-                .addressState("CA")
-                .addressZip("94107")
-                .addressCountry("US")
-                .currency("usd")
-                .metadata(METADATA)
-                .build()
     }
 }

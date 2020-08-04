@@ -51,14 +51,16 @@ class TokenTest {
     }
 
     private companion object {
-        private val CARD = Card.Builder(expMonth = 8, expYear = 2017)
-            .id("card_189fi32eZvKYlo2CHK8NPRME")
-            .brand(CardBrand.Visa)
-            .country("US")
-            .last4("4242")
-            .funding(CardFunding.Credit)
-            .metadata(emptyMap())
-            .build()
+        private val CARD = Card(
+            id = "card_189fi32eZvKYlo2CHK8NPRME",
+            expMonth = 8,
+            expYear = 2017,
+            brand = CardBrand.Visa,
+            country = "US",
+            last4 = "4242",
+            funding = CardFunding.Credit,
+            metadata = emptyMap()
+        )
 
         private val RAW_TOKEN_NO_ID = JSONObject(
             """
