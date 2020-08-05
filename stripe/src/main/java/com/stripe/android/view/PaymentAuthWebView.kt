@@ -144,12 +144,12 @@ internal class PaymentAuthWebView @JvmOverloads constructor(
             progressBar.visibility = View.GONE
         }
 
-        private fun isAuthenticateUrl(url: String) = isWhiteListedUrl(url, AUTHENTICATE_URLS)
+        private fun isAuthenticateUrl(url: String) = isAllowedUrl(url, AUTHENTICATE_URLS)
 
-        private fun isCompletionUrl(url: String) = isWhiteListedUrl(url, COMPLETION_URLS)
+        private fun isCompletionUrl(url: String) = isAllowedUrl(url, COMPLETION_URLS)
 
-        private fun isWhiteListedUrl(url: String, whitelistedUrls: Set<String>): Boolean {
-            for (completionUrl in whitelistedUrls) {
+        private fun isAllowedUrl(url: String, allowedUrls: Set<String>): Boolean {
+            for (completionUrl in allowedUrls) {
                 if (url.startsWith(completionUrl)) {
                     return true
                 }
