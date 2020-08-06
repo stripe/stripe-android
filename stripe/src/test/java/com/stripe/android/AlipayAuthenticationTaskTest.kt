@@ -31,7 +31,7 @@ class AlipayAuthenticationTaskTest {
         assertThat(result.outcome)
             .isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
         verify(stripeRepository).retrieveObject(
-            "https://hooks.stripe.com/adapter/alipay/redirect/complete/src_1Gt188KlwPmebFhp4SWhZwn1/src_client_secret_RMaQKPfAmHOdUwcNhXEjolR4",
+            "https://hooks.stripe.com/adapter/alipay/redirect/complete/src_1HDEFWKlwPmebFhp6tcpln8T/src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K",
             requestOptions
         )
     }

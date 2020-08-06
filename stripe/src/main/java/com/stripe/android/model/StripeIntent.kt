@@ -60,7 +60,8 @@ interface StripeIntent : StripeModel {
     enum class NextActionType(val code: String) {
         RedirectToUrl("redirect_to_url"),
         UseStripeSdk("use_stripe_sdk"),
-        DisplayOxxoDetails("display_oxxo_details");
+        DisplayOxxoDetails("display_oxxo_details"),
+        AlipayRedirect("alipay_handle_redirect");
 
         override fun toString(): String {
             return code
@@ -162,33 +163,33 @@ interface StripeIntent : StripeModel {
              * If the customer does not exit their browser while authenticating, they will be redirected
              * to this specified URL after completion.
              */
-            val returnUrl: String?,
-            val mobileData: MobileData?
+            val returnUrl: String?
+        ) : NextActionData()
+
+        @Parcelize
+        internal data class AlipayRedirect constructor(
+            val data: String,
+            val authCompleteUrl: String?,
+            val webViewUrl: Uri,
+            val returnUrl: String? = null
         ) : NextActionData() {
 
-            sealed class MobileData : StripeModel {
-                @Parcelize
-                data class Alipay constructor(
-                    val data: String,
-                    val authCompleteUrl: String?
-                ) : MobileData() {
-                    constructor(data: String) : this(data, extractReturnUrl(data))
-                }
+            internal constructor(data: String, webViewUrl: String, returnUrl: String? = null) :
+                this(data, extractReturnUrl(data), Uri.parse(webViewUrl), returnUrl)
 
-                private companion object {
-                    /**
-                     * The alipay data string is formatted as query parameters.
-                     * When authenticate is complete, we make a request to the
-                     * return_url param, as a hint to the backend to ping Alipay for
-                     * the updated state
-                     */
-                    private fun extractReturnUrl(data: String): String? = runCatching {
-                        Uri.parse("alipay://url?$data")
-                            .getQueryParameter("return_url")?.takeIf {
-                                StripeUrlUtils.isStripeUrl(it)
-                            }
-                    }.getOrNull()
-                }
+            private companion object {
+                /**
+                 * The alipay data string is formatted as query parameters.
+                 * When authenticate is complete, we make a request to the
+                 * return_url param, as a hint to the backend to ping Alipay for
+                 * the updated state
+                 */
+                private fun extractReturnUrl(data: String): String? = runCatching {
+                    Uri.parse("alipay://url?$data")
+                        .getQueryParameter("return_url")?.takeIf {
+                            StripeUrlUtils.isStripeUrl(it)
+                        }
+                }.getOrNull()
             }
         }
 

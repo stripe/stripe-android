@@ -13,6 +13,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             StripeIntent.NextActionType.DisplayOxxoDetails -> DisplayOxxoDetailsJsonParser()
             StripeIntent.NextActionType.RedirectToUrl -> RedirectToUrlParser()
             StripeIntent.NextActionType.UseStripeSdk -> SdkDataJsonParser()
+            StripeIntent.NextActionType.AlipayRedirect -> AlipayRedirectParser()
             else -> return null
         }
         return parser.parse(json.optJSONObject(nextActionType.code) ?: JSONObject())
@@ -40,49 +41,31 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
                 json.has(FIELD_URL) ->
                     StripeIntent.NextActionData.RedirectToUrl(
                         Uri.parse(json.getString(FIELD_URL)),
-                        json.optString(FIELD_RETURN_URL),
-                        MobileDataParser().parse(json.optJSONObject(FIELD_MOBILE) ?: JSONObject())
+                        json.optString(FIELD_RETURN_URL)
                     )
                 else -> null
-            }
-        }
-
-        internal class MobileDataParser : ModelJsonParser<StripeIntent.NextActionData.RedirectToUrl.MobileData> {
-            override fun parse(json: JSONObject): StripeIntent.NextActionData.RedirectToUrl.MobileData? {
-                val type = Type.fromCode(optString(json, FIELD_TYPE))
-                val obj = type?.let { json.optJSONObject(it.code) }
-                return when (type) {
-                    Type.Alipay -> obj?.let {
-                        StripeIntent.NextActionData.RedirectToUrl.MobileData.Alipay(
-                            it.optString(FIELD_DATA)
-                        )
-                    }
-                    else -> null
-                }
-            }
-
-            private companion object {
-                internal const val FIELD_TYPE = "type"
-                internal const val FIELD_DATA = "data"
-
-                internal enum class Type(
-                    internal val code: String
-                ) {
-                    Alipay("alipay");
-
-                    internal companion object {
-                        internal fun fromCode(code: String?): Type? {
-                            return values().firstOrNull { it.code == code }
-                        }
-                    }
-                }
             }
         }
 
         private companion object {
             internal const val FIELD_URL = "url"
             internal const val FIELD_RETURN_URL = "return_url"
-            internal const val FIELD_MOBILE = "mobile"
+        }
+    }
+
+    internal class AlipayRedirectParser : ModelJsonParser<StripeIntent.NextActionData.AlipayRedirect> {
+        override fun parse(json: JSONObject): StripeIntent.NextActionData.AlipayRedirect? {
+            return StripeIntent.NextActionData.AlipayRedirect(
+                json.getString(FIELD_NATIVE_DATA),
+                json.getString(FIELD_URL),
+                optString(json, FIELD_RETURN_URL)
+            )
+        }
+
+        private companion object {
+            internal const val FIELD_NATIVE_DATA = "native_data"
+            internal const val FIELD_RETURN_URL = "return_url"
+            internal const val FIELD_URL = "url"
         }
     }
 
