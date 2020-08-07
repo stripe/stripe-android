@@ -201,16 +201,10 @@ class PaymentMethodEndToEndTest {
 
     @Test
     fun createPaymentMethod_withAlipay_shouldCreateObject() {
-        val repository = StripeApiRepository(
-            context,
-            ApiKeyFixtures.ALIPAY_PUBLISHABLE_KEY,
-            apiVersion = "2020-03-02;alipay_beta=v1"
-        )
-
-        val paymentMethod = repository.createPaymentMethod(
-            PaymentMethodCreateParams.createAlipay(),
-            ApiRequest.Options(ApiKeyFixtures.ALIPAY_PUBLISHABLE_KEY)
-        )
+        val params = PaymentMethodCreateParams.createAlipay()
+        val paymentMethod =
+            Stripe(context, ApiKeyFixtures.ALIPAY_PUBLISHABLE_KEY)
+                .createPaymentMethodSynchronous(params)
         assertThat(paymentMethod?.type)
             .isEqualTo(PaymentMethod.Type.Alipay)
     }

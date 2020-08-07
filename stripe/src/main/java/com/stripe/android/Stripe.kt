@@ -162,7 +162,7 @@ class Stripe internal constructor(
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @JvmOverloads
-    internal fun confirmAlipayPayment(
+    fun confirmAlipayPayment(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         authenticator: AlipayAuthenticator,
         stripeAccountId: String? = this.stripeAccountId,
