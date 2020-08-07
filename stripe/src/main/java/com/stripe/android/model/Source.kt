@@ -66,6 +66,8 @@ data class Source internal constructor(
     /**
      * Set of key-value pairs that you can attach to an object. This can be useful for storing
      * additional information about the object in a structured format.
+     *
+     * Note: This field will only be populated when retrieved using an ephemeral key.
      */
     val metaData: Map<String, String>? = null,
 

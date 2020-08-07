@@ -70,6 +70,8 @@ data class PaymentMethod internal constructor(
      * additional information about the object in a structured format.
      *
      * [metadata](https://stripe.com/docs/api/payment_methods/object#payment_method_object-metadata)
+     *
+     * Note: This field will only be populated when retrieved using an ephemeral key.
      */
     @JvmField val metadata: Map<String, String>? = null,
 
