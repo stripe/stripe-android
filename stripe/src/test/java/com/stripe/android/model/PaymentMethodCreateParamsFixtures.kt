@@ -84,4 +84,13 @@ internal object PaymentMethodCreateParamsFixtures {
     internal val EPS = PaymentMethodCreateParams.createEps(
         billingDetails = BILLING_DETAILS
     )
+
+    @JvmStatic
+    fun createWith(metadata: Map<String, String>): PaymentMethodCreateParams {
+        return PaymentMethodCreateParams.create(
+            CARD,
+            BILLING_DETAILS,
+            metadata
+        )
+    }
 }

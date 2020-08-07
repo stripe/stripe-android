@@ -411,6 +411,11 @@ public class StripeTest {
                 "a statement described",
                 "en"
         );
+        final Map<String, String> metamap = new HashMap<String, String>() {{
+            put("flavor", "strawberry");
+            put("type", "sherbet");
+        }};
+        bancontactParams.setMetaData(metamap);
 
         final Source bancontactSource = defaultStripe.createSourceSynchronous(bancontactParams);
         assertNotNull(bancontactSource);
@@ -425,6 +430,7 @@ public class StripeTest {
         assertNotNull(bancontactSource.getRedirect());
         assertEquals("John Doe", bancontactSource.getOwner().getName());
         assertEquals("example://path", bancontactSource.getRedirect().getReturnUrl());
+        assertThat(bancontactSource.getMetaData()).isEmpty();
     }
 
     @Test
@@ -441,6 +447,11 @@ public class StripeTest {
                 "brl",
                 "example://return",
                 cardSource.getId());
+        final Map<String, String> metadata = new HashMap<String, String>() {{
+            put("dimensions", "three");
+            put("type", "beach ball");
+        }};
+        threeDParams.setMetaData(metadata);
 
         final Source threeDSource = stripe.createSourceSynchronous(threeDParams);
         assertNotNull(threeDSource);
@@ -452,6 +463,7 @@ public class StripeTest {
         assertNull(threeDSource.getSourceTypeModel());
         assertEquals(Source.SourceType.THREE_D_SECURE, threeDSource.getType());
         assertNotNull(threeDSource.getSourceTypeData());
+        assertThat(threeDSource.getMetaData()).isEmpty();
     }
 
     @Test
@@ -462,6 +474,11 @@ public class StripeTest {
                 "Mr. X",
                 "example://redirect",
                 "a well-described statement");
+        final Map<String, String> metamap = new HashMap<String, String>() {{
+            put("giro", "with chicken");
+            put("type", "wrap");
+        }};
+        params.setMetaData(metamap);
 
         final Source giropaySource = defaultStripe.createSourceSynchronous(params);
         assertNotNull(giropaySource);
@@ -477,6 +494,7 @@ public class StripeTest {
         assertNotNull(giropaySource.getRedirect());
         assertEquals("Mr. X", giropaySource.getOwner().getName());
         assertEquals("example://redirect", giropaySource.getRedirect().getReturnUrl());
+        assertThat(giropaySource.getMetaData()).isEmpty();
     }
 
     @Test
@@ -516,6 +534,12 @@ public class StripeTest {
                 "Eureka",
                 "90210",
                 "EI");
+        final Map<String, String> metamap = new HashMap<String, String>() {{
+            put("water source", "well");
+            put("type", "brackish");
+            put("value", "100000");
+        }};
+        params.setMetaData(metamap);
 
         final Source sepaDebitSource = defaultStripe.createSourceSynchronous(params);
         assertNotNull(sepaDebitSource);
@@ -533,6 +557,7 @@ public class StripeTest {
         assertEquals("123 Main St", sepaDebitSource.getOwner().getAddress().getLine1());
         assertEquals("EI", sepaDebitSource.getOwner().getAddress().getCountry());
         assertEquals("Sepa Account Holder", sepaDebitSource.getOwner().getName());
+        assertThat(sepaDebitSource.getMetaData()).isEmpty();
     }
 
 
@@ -548,11 +573,18 @@ public class StripeTest {
                 null,
                 null,
                 null);
+        final Map<String, String> metamap = new HashMap<String, String>() {{
+            put("water source", "well");
+            put("type", "brackish");
+            put("value", "100000");
+        }};
+        params.setMetaData(metamap);
         final Source sepaDebitSource = defaultStripe.createSourceSynchronous(params);
         assertNotNull(sepaDebitSource);
         assertNotNull(sepaDebitSource.getClientSecret());
         assertNotNull(sepaDebitSource.getId());
         assertEquals(Source.SourceType.SEPA_DEBIT, sepaDebitSource.getType());
+        assertThat(sepaDebitSource.getMetaData()).isEmpty();
     }
 
     @Test
@@ -567,6 +599,12 @@ public class StripeTest {
                 "90210",
                 "EI"
         );
+        Map<String, String> metamap = new HashMap<String, String>() {{
+            put("water source", "well");
+            put("type", "brackish");
+            put("value", "100000");
+        }};
+        params.setMetaData(metamap);
 
         final Source sepaDebitSource = defaultStripe.createSourceSynchronous(params);
         assertNotNull(sepaDebitSource);
@@ -584,6 +622,7 @@ public class StripeTest {
         assertEquals("123 Main St", sepaDebitSource.getOwner().getAddress().getLine1());
         assertEquals("EI", sepaDebitSource.getOwner().getAddress().getCountry());
         assertEquals("Sepa Account Holder", sepaDebitSource.getOwner().getName());
+        assertThat(sepaDebitSource.getMetaData()).isEmpty();
     }
 
     @Test
@@ -624,6 +663,12 @@ public class StripeTest {
                 "example://return",
                 "A statement description",
                 "rabobank");
+        final Map<String, String> metamap = new HashMap<String, String>() {{
+            put("state", "quite ideal");
+            put("picture", "17L");
+            put("arrows", "what?");
+        }};
+        params.setMetaData(metamap);
 
         final Source idealSource = defaultStripe.createSourceSynchronous(params);
         assertNotNull(idealSource);
@@ -639,6 +684,7 @@ public class StripeTest {
         assertEquals("Bond", idealSource.getOwner().getName());
         assertNotNull(idealSource.getRedirect());
         assertEquals("example://return", idealSource.getRedirect().getReturnUrl());
+        assertThat(idealSource.getMetaData()).isEmpty();
     }
 
     @Test
@@ -651,6 +697,12 @@ public class StripeTest {
                 "example://return",
                 null,
                 bankName);
+        final Map<String, String> metamap = new HashMap<String, String>() {{
+            put("state", "quite ideal");
+            put("picture", "17L");
+            put("arrows", "what?");
+        }};
+        params.setMetaData(metamap);
 
         final Source idealSource = defaultStripe.createSourceSynchronous(params);
         assertNotNull(idealSource);
@@ -667,6 +719,7 @@ public class StripeTest {
         assertNotNull(idealSource.getRedirect());
         assertEquals(bankName, idealSource.getSourceTypeData().get("bank"));
         assertEquals("example://return", idealSource.getRedirect().getReturnUrl());
+        assertThat(idealSource.getMetaData()).isEmpty();
     }
 
     @Test
@@ -679,6 +732,12 @@ public class StripeTest {
                 "example://return",
                 null,
                 bankName);
+        final Map<String, String> metamap = new HashMap<String, String>() {{
+            put("state", "quite ideal");
+            put("picture", "17L");
+            put("arrows", "what?");
+        }};
+        params.setMetaData(metamap);
 
         final Source idealSource = defaultStripe.createSourceSynchronous(params);
         assertNotNull(idealSource);
@@ -695,6 +754,7 @@ public class StripeTest {
         assertEquals(bankName, idealSource.getSourceTypeData().get("bank"));
         assertNull(idealSource.getOwner().getName());
         assertEquals("example://return", idealSource.getRedirect().getReturnUrl());
+        assertThat(idealSource.getMetaData()).isEmpty();
     }
 
     @Test
@@ -705,6 +765,11 @@ public class StripeTest {
                 "example://return",
                 "NL",
                 "a description");
+        Map<String, String> metamap = new HashMap<String, String>() {{
+            put("state", "soforting");
+            put("repetitions", "400");
+        }};
+        params.setMetaData(metamap);
 
         final Source sofortSource = defaultStripe.createSourceSynchronous(params);
         assertNotNull(sofortSource);
@@ -718,6 +783,7 @@ public class StripeTest {
         assertEquals(70000L, sofortSource.getAmount().longValue());
         assertNotNull(sofortSource.getRedirect());
         assertEquals("example://return", sofortSource.getRedirect().getReturnUrl());
+        assertThat(sofortSource.getMetaData()).isEmpty();
     }
 
     @Test
@@ -1036,9 +1102,11 @@ public class StripeTest {
     @Test
     public void createPaymentMethodSynchronous_withCardAndMetadata()
             throws StripeException {
+        final Map<String, String> metadata = new HashMap<>();
+        metadata.put("order_id", "123456789");
 
         final PaymentMethodCreateParams paymentMethodCreateParams =
-                PaymentMethodCreateParamsFixtures.DEFAULT_CARD;
+                PaymentMethodCreateParamsFixtures.createWith(metadata);
         final Stripe stripe = createStripe(
                 ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
                 analyticsRequestExecutor
@@ -1050,6 +1118,7 @@ public class StripeTest {
                 createdPaymentMethod.billingDetails);
         assertNotNull(createdPaymentMethod.card);
         assertEquals("4242", createdPaymentMethod.card.last4);
+        assertThat(createdPaymentMethod.metadata).isEmpty();
 
         verify(analyticsRequestExecutor)
                 .executeAsync(analyticsRequestArgumentCaptor.capture());
