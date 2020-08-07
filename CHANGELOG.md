@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 15.0.3 - unreleased
+* [#2692](https://github.com/stripe/stripe-android/pull/2692) Make Alipay PaymentMethod public
+
 ## 15.0.2 - 2020-08-03
 * [#2666](https://github.com/stripe/stripe-android/pull/2666) Bump 3DS2 SDK to `4.0.4`
 * [#2671](https://github.com/stripe/stripe-android/pull/2671) Add `cardParams` property to `CardInputWidget` and `CardMultilineWidget`
