@@ -1,16 +1,15 @@
 package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.StripeIntent.NextActionData.RedirectToUrl.MobileData
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class MobileDataTest {
+class AlipayRedirectTest {
     @Test
     fun `Alipay data should parse return_url correctly`() {
-        val data = MobileData.Alipay("_input_charset=utf-8&app_pay=Y" +
+        val data = StripeIntent.NextActionData.AlipayRedirect("_input_charset=utf-8&app_pay=Y" +
             "&currency=USD&forex_biz=FP" +
             "&notify_url=https%3A%2F%2Fhooks.stripe.com%2Falipay%2Falipay%2Fhook%2F6255d30b067c8f7a162c79c654483646%2Fsrc_1Gt188KlwPmebFhp4SWhZwn1" +
             "&out_trade_no=src_1Gt188KlwPmebFhp4SWhZwn1" +
@@ -27,7 +26,9 @@ class MobileDataTest {
             "&subject=Yuki-Test" +
             "&supplier=Yuki-Test" +
             "&timeout_rule=20m" +
-            "&total_fee=1.00")
+            "&total_fee=1.00",
+            WEB_URL
+        )
         assertThat(data.authCompleteUrl).isEqualTo(
             "https://hooks.stripe.com/adapter/alipay/redirect/complete/src_1Gt188KlwPmebFhp4SWhZwn1/src_client_secret_RMaQKPfAmHOdUwcNhXEjolR4"
         )
@@ -35,13 +36,17 @@ class MobileDataTest {
 
     @Test
     fun `Alipay data should handle missing data`() {
-        val data = MobileData.Alipay("")
+        val data = StripeIntent.NextActionData.AlipayRedirect("", WEB_URL)
         assertThat(data.authCompleteUrl).isNull()
     }
 
     @Test
     fun `Alipay data should ignore non-stripe urls`() {
-        val data = MobileData.Alipay("return_url=https://google.com")
+        val data = StripeIntent.NextActionData.AlipayRedirect("return_url=https://google.com", WEB_URL)
         assertThat(data.authCompleteUrl).isNull()
+    }
+
+    private companion object {
+        internal const val WEB_URL = "https://unused-param.com"
     }
 }

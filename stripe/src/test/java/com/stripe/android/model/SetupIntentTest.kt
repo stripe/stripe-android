@@ -38,8 +38,7 @@ class SetupIntentTest {
         assertEquals(
             StripeIntent.NextActionData.RedirectToUrl(
                 Uri.parse("https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B" + "?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02"),
-                returnUrl = "stripe://setup_intent_return",
-                mobileData = null
+                returnUrl = "stripe://setup_intent_return"
             ),
             setupIntent.nextActionData
         )

@@ -686,35 +686,30 @@ internal object PaymentIntentFixtures {
     val ALIPAY_REQUIRES_ACTION_JSON = JSONObject(
         """
         {
-          "id": "pi_1GiUlYHSL10J9wqv4ZXqstCu",
+          "id": "pi_1HDEFVKlwPmebFhpCobFP55H",
           "object": "payment_intent",
-          "amount": 1099,
+          "amount": 100,
           "canceled_at": null,
           "cancellation_reason": null,
           "capture_method": "automatic",
-          "client_secret": "pi_1GiUlYHSL10J9wqv4ZXqstCu_secret_m8KioBxOULjcOevkIuihrYxXI",
+          "client_secret": "pi_1HDEFVKlwPmebFhpCobFP55H_secret_XW8sADccCxtusewAwn5z9kAiw",
           "confirmation_method": "automatic",
-          "created": 1589415456,
+          "created": 1596740133,
           "currency": "usd",
           "description": "Example PaymentIntent",
           "last_payment_error": null,
-          "livemode": false,
+          "livemode": true,
           "next_action": {
-            "redirect_to_url": {
-              "mobile": {
-                "alipay": {
-                  "data": "_input_charset=utf-8&app_pay=Y&currency=USD&forex_biz=FP&notify_url=https%3A%2F%2Fhooks.stripe.com%2Falipay%2Falipay%2Fhook%2F6255d30b067c8f7a162c79c654483646%2Fsrc_1Gt188KlwPmebFhp4SWhZwn1&out_trade_no=src_1Gt188KlwPmebFhp4SWhZwn1&partner=2088621828244481&payment_type=1&product_code=NEW_WAP_OVERSEAS_SELLER&return_url=https%3A%2F%2Fhooks.stripe.com%2Fadapter%2Falipay%2Fredirect%2Fcomplete%2Fsrc_1Gt188KlwPmebFhp4SWhZwn1%2Fsrc_client_secret_RMaQKPfAmHOdUwcNhXEjolR4&secondary_merchant_id=acct_1EqOyCKlwPmebFhp&secondary_merchant_industry=5734&secondary_merchant_name=Yuki-Test&sendFormat=normal&service=create_forex_trade_wap&sign=44e797e6d5ba1c784d3cceb176c359db&sign_type=MD5&subject=Yuki-Test&supplier=Yuki-Test&timeout_rule=20m&total_fee=1.00"
-                },
-                "native_url": null,
-                "type": "alipay"
-              },
+            "alipay_handle_redirect": {
+              "native_data": "_input_charset=utf-8&app_pay=Y&currency=USD&forex_biz=FP&notify_url=https%3A%2F%2Fhooks.stripe.com%2Falipay%2Falipay%2Fhook%2F6255d30b067c8f7a162c79c654483646%2Fsrc_1HDEFWKlwPmebFhp6tcpln8T&out_trade_no=src_1HDEFWKlwPmebFhp6tcpln8T&partner=2088621828244481&payment_type=1&product_code=NEW_WAP_OVERSEAS_SELLER&return_url=https%3A%2F%2Fhooks.stripe.com%2Fadapter%2Falipay%2Fredirect%2Fcomplete%2Fsrc_1HDEFWKlwPmebFhp6tcpln8T%2Fsrc_client_secret_S6H9mVMKK6qxk9YxsUvbH55K&secondary_merchant_id=acct_1EqOyCKlwPmebFhp&secondary_merchant_industry=5734&secondary_merchant_name=Yuki-Test&sendFormat=normal&service=create_forex_trade_wap&sign=b691876a7f0bd889530f54a271d314d5&sign_type=MD5&subject=Yuki-Test&supplier=Yuki-Test&timeout_rule=20m&total_fee=1.00",
+              "native_url": null,
               "return_url": "example://return_url",
-              "url": "https://hooks.stripe.com/redirect/authenticate/src_1GiUlyHSL10J9wqvLZKrtWo3?client_secret=src_client_secret_JjkxntbeO885UyGjnwqjVDwI"
+              "url": "https://hooks.stripe.com/redirect/authenticate/src_1HDEFWKlwPmebFhp6tcpln8T?client_secret=src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K"
             },
-            "type": "redirect_to_url"
+            "type": "alipay_handle_redirect"
           },
           "payment_method": {
-            "id": "pm_1GiUlyHSL10J9wqv0SUGxiGi",
+            "id": "pm_1HDEFVKlwPmebFhpKYYkSm8H",
             "object": "payment_method",
             "alipay": {},
             "billing_details": {
@@ -730,14 +725,12 @@ internal object PaymentIntentFixtures {
               "name": null,
               "phone": null
             },
-            "created": 1589415482,
+            "created": 1596740133,
             "customer": null,
-            "livemode": false,
-            "metadata": {},
+            "livemode": true,
             "type": "alipay"
           },
           "payment_method_types": [
-            "card",
             "alipay"
           ],
           "receipt_email": null,
