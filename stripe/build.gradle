@@ -23,7 +23,7 @@ configurations {
 
 dependencies {
     implementation 'androidx.annotation:annotation:1.1.0'
-    implementation 'androidx.appcompat:appcompat:1.2.0-rc02'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidLifecycleVersion"
@@ -40,7 +40,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
 
     javadocDeps 'androidx.annotation:annotation:1.1.0'
-    javadocDeps 'androidx.appcompat:appcompat:1.1.0'
+    javadocDeps 'androidx.appcompat:appcompat:1.2.0'
     javadocDeps 'com.google.android.material:material:1.1.0'
 
     testImplementation 'junit:junit:4.13'
