@@ -167,7 +167,7 @@ interface StripeIntent : StripeModel {
         ) : NextActionData()
 
         @Parcelize
-        data class AlipayRedirect constructor(
+        internal data class AlipayRedirect constructor(
             val data: String,
             val authCompleteUrl: String?,
             val webViewUrl: Uri,
