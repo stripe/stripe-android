@@ -31,7 +31,7 @@ class CustomerSession @VisibleForTesting internal constructor(
     stripeAccountId: String?,
     private val workDispatcher: CoroutineDispatcher = createCoroutineDispatcher(),
     private val operationIdFactory: OperationIdFactory = StripeOperationIdFactory(),
-    private val timeSupplier: TimeSupplier = { Calendar.getInstance().timeInMillis },
+    private val timeSupplier: () -> Long = { Calendar.getInstance().timeInMillis },
     ephemeralKeyManagerFactory: EphemeralKeyManager.Factory
 ) {
     @JvmSynthetic
@@ -596,5 +596,3 @@ class CustomerSession @VisibleForTesting internal constructor(
         }
     }
 }
-
-internal typealias TimeSupplier = () -> Long

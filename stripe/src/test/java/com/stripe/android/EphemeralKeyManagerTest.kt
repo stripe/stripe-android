@@ -265,7 +265,7 @@ class EphemeralKeyManagerTest {
 
     private fun createEphemeralKeyManager(
         operationIdFactory: OperationIdFactory = OperationIdFactory.get(),
-        timeSupplier: TimeSupplier = { Calendar.getInstance().timeInMillis }
+        timeSupplier: () -> Long = { Calendar.getInstance().timeInMillis }
     ): EphemeralKeyManager {
         return EphemeralKeyManager(
             testEphemeralKeyProvider,

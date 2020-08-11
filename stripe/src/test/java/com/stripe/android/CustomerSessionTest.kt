@@ -718,7 +718,7 @@ class CustomerSessionTest {
     }
 
     private fun createCustomerSession(
-        timeSupplier: TimeSupplier = { Calendar.getInstance().timeInMillis },
+        timeSupplier: () -> Long = { Calendar.getInstance().timeInMillis },
         ephemeralKeyManagerFactory: EphemeralKeyManager.Factory =
             createEphemeralKeyManagerFactory(timeSupplier)
     ): CustomerSession {
@@ -734,7 +734,7 @@ class CustomerSessionTest {
     }
 
     private fun createEphemeralKeyManagerFactory(
-        timeSupplier: TimeSupplier
+        timeSupplier: () -> Long
     ): EphemeralKeyManager.Factory {
         return EphemeralKeyManager.Factory.Default(
             keyProvider = ephemeralKeyProvider,
