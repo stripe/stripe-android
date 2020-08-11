@@ -1,5 +1,6 @@
 package com.stripe.android.view
 
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -32,7 +33,7 @@ internal class AddPaymentMethodViewModel(
     ): LiveData<Result<PaymentMethod>> {
         val resultData = MutableLiveData<Result<PaymentMethod>>()
         stripe.createPaymentMethod(
-            paymentMethodCreateParams = params.copy(productUsage = productUsage),
+            paymentMethodCreateParams = updatedPaymentMethodCreateParams(params),
             callback = object : ApiResultCallback<PaymentMethod> {
                 override fun onSuccess(result: PaymentMethod) {
                     resultData.value = Result.success(result)
@@ -44,6 +45,11 @@ internal class AddPaymentMethodViewModel(
             })
         return resultData
     }
+
+    @VisibleForTesting
+    internal fun updatedPaymentMethodCreateParams(
+        params: PaymentMethodCreateParams
+    ) = params.copy(productUsage = productUsage)
 
     @JvmSynthetic
     internal fun attachPaymentMethod(
