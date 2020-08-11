@@ -60,6 +60,8 @@ dependencies {
     androidTestUtil 'androidx.test:orchestrator:1.2.0'
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
+
+    dokkaHtmlPlugin("org.jetbrains.dokka:dokka-base:$dokkaVersion")
 }
 
 android {
@@ -102,8 +104,7 @@ android {
         lintConfig file("../settings/lint.xml")
     }
 
-    dokka {
-        outputFormat = 'javadoc'
+    dokkaHtml {
         outputDirectory = "${project.rootDir}/docs/"
     }
 
