@@ -743,4 +743,65 @@ internal object PaymentIntentFixtures {
     )
 
     val ALIPAY_REQUIRES_ACTION = PARSER.parse(ALIPAY_REQUIRES_ACTION_JSON)!!
+
+    val ALIPAY_TEST_MODE_JSON = JSONObject(
+        """
+        {
+          "id": "pi_1HDEFVKlwPmebFhpCobFP55H",
+          "object": "payment_intent",
+          "amount": 100,
+          "canceled_at": null,
+          "cancellation_reason": null,
+          "capture_method": "automatic",
+          "client_secret": "pi_1HDEFVKlwPmebFhpCobFP55H_secret_XW8sADccCxtusewAwn5z9kAiw",
+          "confirmation_method": "automatic",
+          "created": 1596740133,
+          "currency": "usd",
+          "description": "Example PaymentIntent",
+          "last_payment_error": null,
+          "livemode": true,
+          "next_action": {
+            "alipay_handle_redirect": {
+              "native_data": null,
+              "native_url": null,
+              "return_url": "example://return_url",
+              "url": "https://hooks.stripe.com/redirect/authenticate/src_1HDEFWKlwPmebFhp6tcpln8T?client_secret=src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K"
+            },
+            "type": "alipay_handle_redirect"
+          },
+          "payment_method": {
+            "id": "pm_1HDEFVKlwPmebFhpKYYkSm8H",
+            "object": "payment_method",
+            "alipay": {},
+            "billing_details": {
+              "address": {
+                "city": null,
+                "country": null,
+                "line1": null,
+                "line2": null,
+                "postal_code": null,
+                "state": null
+              },
+              "email": null,
+              "name": null,
+              "phone": null
+            },
+            "created": 1596740133,
+            "customer": null,
+            "livemode": false,
+            "type": "alipay"
+          },
+          "payment_method_types": [
+            "alipay"
+          ],
+          "receipt_email": null,
+          "setup_future_usage": null,
+          "shipping": null,
+          "source": null,
+          "status": "requires_action"
+        }
+        """.trimIndent()
+    )
+
+    val ALIPAY_TEST_MODE = PARSER.parse(ALIPAY_TEST_MODE_JSON)!!
 }
