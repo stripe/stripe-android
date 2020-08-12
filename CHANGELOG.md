@@ -7,6 +7,8 @@
     * See `MIGRATING.md` for more details
 * [#2692](https://github.com/stripe/stripe-android/pull/2692) Make Alipay PaymentMethod public
 * [#2696](https://github.com/stripe/stripe-android/pull/2696) Upgrade to Gradle v6.6
+* [#2704](https://github.com/stripe/stripe-android/pull/2704) Deprecate metadata field on retrieved API objects
+    * See `MIGRATING.md` for more details
 
 ## 15.0.2 - 2020-08-03
 * [#2666](https://github.com/stripe/stripe-android/pull/2666) Bump 3DS2 SDK to `4.0.4`
