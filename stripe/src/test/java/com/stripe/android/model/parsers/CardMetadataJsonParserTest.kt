@@ -2,6 +2,7 @@ package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.BinRange
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardMetadata
 import org.json.JSONObject
 import org.junit.Test
@@ -16,15 +17,23 @@ class CardMetadataJsonParserTest {
                     BIN_PREFIX,
                     listOf(
                         CardMetadata.AccountRange(
-                            binRange = BinRange(low = "4242420000000000", high = "4242424239999999"),
+                            binRange = BinRange(
+                                low = "4242420000000000",
+                                high = "4242424239999999"
+                            ),
                             panLength = 16,
-                            brand = "VISA",
+                            brandName = "VISA",
+                            brand = CardBrand.Visa,
                             country = "GB"
                         ),
                         CardMetadata.AccountRange(
-                            binRange = BinRange(low = "4242424250000000", high = "4242429999999999"),
+                            binRange = BinRange(
+                                low = "4242424250000000",
+                                high = "4242429999999999"
+                            ),
                             panLength = 16,
-                            brand = "VISA",
+                            brandName = "VISA",
+                            brand = CardBrand.Visa,
                             country = "GB"
                         )
                     )
@@ -40,9 +49,13 @@ class CardMetadataJsonParserTest {
                     BIN_PREFIX,
                     listOf(
                         CardMetadata.AccountRange(
-                            binRange = BinRange(low = "4242420000000000", high = "4242424239999999"),
+                            binRange = BinRange(
+                                low = "4242420000000000",
+                                high = "4242424239999999"
+                            ),
                             panLength = 16,
-                            brand = "VISA",
+                            brandName = "VISA",
+                            brand = CardBrand.Visa,
                             country = "GB"
                         )
                     )
