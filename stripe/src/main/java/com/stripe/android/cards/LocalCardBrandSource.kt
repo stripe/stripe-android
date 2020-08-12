@@ -83,24 +83,25 @@ internal class LocalCardBrandSource : CardBrandSource {
         )
 
         private val DINERSCLUB_BIN_RANGES = mapOf(
+            // 14 digits
             BinRange(
-                low = "360000000000000",
-                high = "369999999999999"
+                low = "36000000000000",
+                high = "36999999999999"
             ) to CardBrand.DinersClub,
 
             BinRange(
-                low = "300000000000000",
-                high = "305999999999999"
+                low = "3000000000000000",
+                high = "3059999999999999"
             ) to CardBrand.DinersClub,
 
             BinRange(
-                low = "309500000000000",
-                high = "309599999999999"
+                low = "3095000000000000",
+                high = "3095999999999999"
             ) to CardBrand.DinersClub,
 
             BinRange(
-                low = "380000000000000",
-                high = "399999999999999"
+                low = "3800000000000000",
+                high = "3999999999999999"
             ) to CardBrand.DinersClub
         )
 
