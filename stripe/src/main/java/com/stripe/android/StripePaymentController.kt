@@ -351,6 +351,12 @@ internal class StripePaymentController internal constructor(
         callback: ApiResultCallback<AlipayAuthResult>
     ) : ApiOperation<AlipayAuthResult>(callback = callback) {
         override suspend fun getResult(): AlipayAuthResult {
+            if (intent.paymentMethod?.liveMode == false) {
+                throw IllegalArgumentException("Attempted to authenticate test mode " +
+                    "PaymentIntent with the Alipay SDK.\n" +
+                    "The Alipay SDK does not support test mode payments.")
+            }
+
             val nextActionData = intent.nextActionData
             if (nextActionData is StripeIntent.NextActionData.AlipayRedirect) {
                 val output =

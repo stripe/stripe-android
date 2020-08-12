@@ -5,6 +5,7 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.model.AlipayAuthResult
 import com.stripe.android.model.PaymentIntentFixtures
+import java.lang.IllegalArgumentException
 import kotlin.test.assertFailsWith
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
@@ -102,6 +103,20 @@ class AlipayAuthenticationTaskTest {
             callback
         )
         assertFailsWith<RuntimeException> {
+            runBlocking { task.getResult() }
+        }
+    }
+
+    @Test
+    fun `AlipayAuthenticationTask should throw exception in test mode`() {
+        val task = StripePaymentController.AlipayAuthenticationTask(
+            PaymentIntentFixtures.ALIPAY_TEST_MODE,
+            createAuthenticator("9000"),
+            stripeRepository,
+            requestOptions,
+            callback
+        )
+        assertFailsWith<IllegalArgumentException> {
             runBlocking { task.getResult() }
         }
     }
