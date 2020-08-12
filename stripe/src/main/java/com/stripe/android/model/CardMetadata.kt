@@ -12,7 +12,8 @@ internal data class CardMetadata internal constructor(
     internal data class AccountRange internal constructor(
         val binRange: BinRange,
         val panLength: Int,
-        val brand: String,
-        val country: String
+        val brandName: String,
+        val brand: CardBrand,
+        val country: String? = null
     ) : StripeModel
 }

@@ -1,6 +1,7 @@
 package com.stripe.android.model.parsers
 
 import com.stripe.android.model.BinRange
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.StripeJsonUtils.optInteger
 import com.stripe.android.model.StripeJsonUtils.optString
@@ -15,18 +16,17 @@ internal class CardMetadataJsonParser(private val binPrefix: String) : ModelJson
                 val accountRangeHigh = optString(jsonEntry, FIELD_ACCOUNT_RANGE_HIGH)
                 val accountRangeLow = optString(jsonEntry, FIELD_ACCOUNT_RANGE_LOW)
                 val panLength = optInteger(jsonEntry, FIELD_PAN_LENGTH)
-                val brand = optString(jsonEntry, FIELD_BRAND)
-                val country = optString(jsonEntry, FIELD_COUNTRY)
+                val brandName = optString(jsonEntry, FIELD_BRAND)
                 if (accountRangeHigh != null &&
                     accountRangeLow != null &&
                     panLength != null &&
-                    brand != null &&
-                    country != null) {
+                    brandName != null) {
                     CardMetadata.AccountRange(
                         binRange = BinRange(accountRangeLow, accountRangeHigh),
                         panLength = panLength,
-                        brand = brand,
-                        country = country
+                        brandName = brandName,
+                        brand = CardBrand.fromCode(brandName),
+                        country = optString(jsonEntry, FIELD_COUNTRY)
                     )
                 } else {
                     null
