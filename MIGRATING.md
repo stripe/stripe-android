@@ -8,11 +8,28 @@
     - `Card.Builder` is deprecated. Use `CardParams` instead.
     - `Card.fromString()`, `Card.fromJson()`, and `Card.create()` are deprecated
       and will be removed in a future release.
+    - `metadata` is deprecated and no longer populated on the client.
+        It must be fetched on your server using your secret key.
+        If this is causing issues with your deployed app versions please reach out
+        to [Stripe Support](https://support.stripe.com/?contact=true).
+        This field will be removed in a future SDK version.
 - Changes to `SourceParams`
     - `createCardToken()` that accepts a `Card` parameter is deprecated.
       Use `createCardToken()` that accepts a `CardParams` parameter instead.
     - `createCardTokenSynchronous()` that accepts a `Card` parameter is deprecated.
       Use `createCardTokenSynchronous()` that accepts a `CardParams` parameter instead.
+- Changes to `Source`
+    - `metadata` is deprecated and no longer populated on the client.
+        It must be fetched on your server using your secret key.
+        If this is causing issues with your deployed app versions please reach out
+        to [Stripe Support](https://support.stripe.com/?contact=true).
+        This field will be removed in a future SDK version.
+- Changes to `PaymentMethod`
+    - `metadata` is deprecated and no longer populated on the client.
+        It must be fetched on your server using your secret key.
+        If this is causing issues with your deployed app versions please reach out
+        to [Stripe Support](https://support.stripe.com/?contact=true).
+        This field will be removed in a future SDK version.
 - Changes to `Stripe`
     - `createCardParams()` that accepts a `Card` parameter is deprecated.
       Use `createCardParams()` that accepts a `CardParams` parameter instead.

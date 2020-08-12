@@ -67,8 +67,9 @@ data class Source internal constructor(
      * Set of key-value pairs that you can attach to an object. This can be useful for storing
      * additional information about the object in a structured format.
      *
-     * Note: This field will only be populated when retrieved using an ephemeral key.
+     * @deprecated Metadata is no longer returned to clients using publishable keys. Retrieve them on your server using you secret key instead.
      */
+    @Deprecated("Metadata is no longer returned to clients using publishable keys. Retrieve them on your server using you secret key instead.")
     val metaData: Map<String, String>? = null,
 
     /**
