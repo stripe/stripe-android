@@ -510,7 +510,7 @@ data class ConfirmPaymentIntentParams internal constructor(
          * process
          */
         @JvmStatic
-        internal fun createAlipay(
+        fun createAlipay(
             clientSecret: String
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(

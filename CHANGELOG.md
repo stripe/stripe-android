@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 16.0.0 - unreleased
+* [#2671](https://github.com/stripe/stripe-android/pull/2671) Add cardParams property to CardInputWidget and CardMultilineWidget
+* [#2675](https://github.com/stripe/stripe-android/pull/2675) Add CardParams methods to Stripe class
+* [#2677](https://github.com/stripe/stripe-android/pull/2677) Deprecate Card.create()
+    * See `MIGRATING.md` for more details
+* [#2692](https://github.com/stripe/stripe-android/pull/2692) Make Alipay PaymentMethod public
+* [#2696](https://github.com/stripe/stripe-android/pull/2696) Upgrade to Gradle v6.6
+
 ## 15.0.2 - 2020-08-03
 * [#2666](https://github.com/stripe/stripe-android/pull/2666) Bump 3DS2 SDK to `4.0.4`
 * [#2671](https://github.com/stripe/stripe-android/pull/2671) Add `cardParams` property to `CardInputWidget` and `CardMultilineWidget`
