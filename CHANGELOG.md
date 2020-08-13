@@ -1,14 +1,21 @@
 # CHANGELOG
 
-## 16.0.0 - unreleased
-* [#2671](https://github.com/stripe/stripe-android/pull/2671) Add cardParams property to CardInputWidget and CardMultilineWidget
-* [#2675](https://github.com/stripe/stripe-android/pull/2675) Add CardParams methods to Stripe class
-* [#2677](https://github.com/stripe/stripe-android/pull/2677) Deprecate Card.create()
-    * See `MIGRATING.md` for more details
-* [#2692](https://github.com/stripe/stripe-android/pull/2692) Make Alipay PaymentMethod public
-* [#2696](https://github.com/stripe/stripe-android/pull/2696) Upgrade to Gradle v6.6
+
+## 15.1.0 - unreleased
+* [#2671](https://github.com/stripe/stripe-android/pull/2671) Add `cardParams` property to `CardInputWidget` and `CardMultilineWidget`
+* [#2675](https://github.com/stripe/stripe-android/pull/2675) Add `CardParams` methods to `Stripe`
+* [#2677](https://github.com/stripe/stripe-android/pull/2677) Deprecate `Card.create()`
+* [#2679](https://github.com/stripe/stripe-android/pull/2679) Add missing `TokenizationMethod` values
+    * `TokenizationMethod.Masterpass` and `TokenizationMethod.VisaCheckout`
+* [#2692](https://github.com/stripe/stripe-android/pull/2692) Add support for Alipay PaymentMethod
+    * See `Stripe#confirmAlipayPayment()`
+* [#2693](https://github.com/stripe/stripe-android/pull/2693) Upgrade `androidx.appcompat:appcompat` to `1.2.0`
+* [#2696](https://github.com/stripe/stripe-android/pull/2696) Upgrade to Gradle `6.6`
 * [#2704](https://github.com/stripe/stripe-android/pull/2704) Deprecate metadata field on retrieved API objects
     * See `MIGRATING.md` for more details
+* [#2708](https://github.com/stripe/stripe-android/pull/2708) Bump 3DS2 SDK to `4.0.5`
+    * Fix crash related to SDK app id
+    * Upgrade `com.nimbusds:nimbus-jose-jwt` to `8.20`
 
 ## 15.0.2 - 2020-08-03
 * [#2666](https://github.com/stripe/stripe-android/pull/2666) Bump 3DS2 SDK to `4.0.4`

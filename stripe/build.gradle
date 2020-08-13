@@ -33,7 +33,7 @@ dependencies {
     // Api for this import because we use reflection to alter TextInputLayout
     api 'com.google.android.material:material:1.1.0'
 
-    implementation "com.stripe:stripe-3ds2-android:4.0.4"
+    implementation "com.stripe:stripe-3ds2-android:4.0.5"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
@@ -60,6 +60,8 @@ dependencies {
     androidTestUtil 'androidx.test:orchestrator:1.2.0'
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
+
+    dokkaHtmlPlugin("org.jetbrains.dokka:dokka-base:$dokkaVersion")
 }
 
 android {
@@ -102,8 +104,7 @@ android {
         lintConfig file("../settings/lint.xml")
     }
 
-    dokka {
-        outputFormat = 'javadoc'
+    dokkaHtml {
         outputDirectory = "${project.rootDir}/docs/"
     }
 

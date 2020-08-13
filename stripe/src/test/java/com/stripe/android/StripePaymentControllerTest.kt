@@ -45,6 +45,7 @@ import com.stripe.android.view.PaymentRelayActivity
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.runner.RunWith
@@ -83,8 +84,10 @@ class StripePaymentControllerTest {
 
     @BeforeTest
     fun setup() {
-        whenever(transaction.authenticationRequestParameters)
-            .thenReturn(Stripe3ds2Fixtures.AREQ_PARAMS)
+        runBlocking {
+            whenever(transaction.createAuthenticationRequestParameters())
+                .thenReturn(Stripe3ds2Fixtures.AREQ_PARAMS)
+        }
         whenever(activity.applicationContext)
             .thenReturn(context)
     }
