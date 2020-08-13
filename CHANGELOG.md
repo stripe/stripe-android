@@ -1,7 +1,7 @@
 # CHANGELOG
 
 
-## 15.1.0 - unreleased
+## 15.1.0 - 2020-08-13 
 * [#2671](https://github.com/stripe/stripe-android/pull/2671) Add `cardParams` property to `CardInputWidget` and `CardMultilineWidget`
 * [#2675](https://github.com/stripe/stripe-android/pull/2675) Add `CardParams` methods to `Stripe`
 * [#2677](https://github.com/stripe/stripe-android/pull/2677) Deprecate `Card.create()`
