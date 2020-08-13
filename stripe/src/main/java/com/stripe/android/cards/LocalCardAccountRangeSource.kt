@@ -8,7 +8,9 @@ import com.stripe.android.model.CardMetadata
  * A [CardAccountRangeSource] that uses a local, static source of BIN ranges.
  */
 internal class LocalCardAccountRangeSource : CardAccountRangeSource {
-    override fun getAccountRange(cardNumber: String): CardMetadata.AccountRange? {
+    override suspend fun getAccountRange(
+        cardNumber: String
+    ): CardMetadata.AccountRange? {
         return ACCOUNTS
             .firstOrNull {
                 it.binRange.matches(cardNumber)

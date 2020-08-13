@@ -4,13 +4,18 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.model.CardBrand
 import kotlin.test.Test
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.runBlockingTest
 
-class LocalCardAccountRangeSourceTest {
+@ExperimentalCoroutinesApi
+internal class LocalCardAccountRangeSourceTest {
+    private val testDispatcher = TestCoroutineDispatcher()
 
     private val source = LocalCardAccountRangeSource()
 
     @Test
-    fun `getAccountRange() should return expected AccountRange`() {
+    fun `getAccountRange() should return expected AccountRange`() = testDispatcher.runBlockingTest {
         assertThat(source.getAccountRange("4")?.brand)
             .isEqualTo(CardBrand.Visa)
         assertThat(source.getAccountRange("424242")?.brand)
