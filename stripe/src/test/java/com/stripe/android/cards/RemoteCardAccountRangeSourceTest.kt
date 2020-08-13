@@ -98,28 +98,7 @@ internal class RemoteCardAccountRangeSourceTest {
 
         private val VISA_METADATA = CardMetadata(
             binPrefix = "424242",
-            accountRanges = listOf(
-                CardMetadata.AccountRange(
-                    binRange = BinRange(
-                        low = "4242420000000000",
-                        high = "4242424239999999"
-                    ),
-                    panLength = 16,
-                    brand = CardBrand.Visa,
-                    brandName = CardBrand.Visa.name,
-                    country = "GB"
-                ),
-                CardMetadata.AccountRange(
-                    binRange = BinRange(
-                        low = "4242424240000000",
-                        high = "4242424249999999"
-                    ),
-                    panLength = 16,
-                    brand = CardBrand.Visa,
-                    brandName = CardBrand.Visa.name,
-                    country = "GB"
-                )
-            )
+            accountRanges = AccountRangeFixtures.DEFAULT
         )
     }
 }
