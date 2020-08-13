@@ -2,9 +2,12 @@ $dokka.format:html
 $dokka.linkExtension:html
 
 com.stripe.android
+com.stripe.android.cards
 com.stripe.android.exception
 com.stripe.android.model
+com.stripe.android.model.parsers
 com.stripe.android.model.wallets
 com.stripe.android.utils
 com.stripe.android.view
 com.stripe.android.view.i18n
+
