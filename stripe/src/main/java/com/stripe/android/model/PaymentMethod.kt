@@ -71,9 +71,9 @@ data class PaymentMethod internal constructor(
      *
      * [metadata](https://stripe.com/docs/api/payment_methods/object#payment_method_object-metadata)
      *
-     * @deprecated Metadata is no longer returned to clients using publishable keys. Retrieve them on your server using you secret key instead.
+     * @deprecated Metadata is no longer returned to clients using publishable keys. Retrieve them on your server using your secret key instead.
      */
-    @Deprecated("Metadata is no longer returned to clients using publishable keys. Retrieve them on your server using you secret key instead.")
+    @Deprecated("Metadata is no longer returned to clients using publishable keys. Retrieve them on your server using your secret key instead.")
     @JvmField val metadata: Map<String, String>? = null,
 
     /**
