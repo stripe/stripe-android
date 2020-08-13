@@ -1,5 +1,6 @@
 # CHANGELOG
 
+
 ## 15.1.0 - unreleased
 * [#2671](https://github.com/stripe/stripe-android/pull/2671) Add `cardParams` property to `CardInputWidget` and `CardMultilineWidget`
 * [#2675](https://github.com/stripe/stripe-android/pull/2675) Add `CardParams` methods to `Stripe`
@@ -10,6 +11,8 @@
     * See `Stripe#confirmAlipayPayment()`
 * [#2693](https://github.com/stripe/stripe-android/pull/2693) Upgrade `androidx.appcompat:appcompat` to `1.2.0`
 * [#2696](https://github.com/stripe/stripe-android/pull/2696) Upgrade to Gradle `6.6`
+* [#2704](https://github.com/stripe/stripe-android/pull/2704) Deprecate metadata field on retrieved API objects
+    * See `MIGRATING.md` for more details
 * [#2708](https://github.com/stripe/stripe-android/pull/2708) Bump 3DS2 SDK to `4.0.5`
     * Fix crash related to SDK app id
     * Upgrade `com.nimbusds:nimbus-jose-jwt` to `8.20`

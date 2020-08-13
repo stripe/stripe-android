@@ -220,8 +220,7 @@ class SourceParamsTest {
                             "country" to "US"
                         ),
                         "name" to "Jenny Rosen"
-                    ),
-                    "metadata" to mapOf("fruit" to "orange")
+                    )
                 )
             )
     }

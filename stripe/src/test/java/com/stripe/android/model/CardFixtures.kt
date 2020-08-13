@@ -20,8 +20,7 @@ object CardFixtures {
         name = "Jenny Rosen",
         brand = CardBrand.Visa,
         last4 = "4242",
-        id = "id",
-        metadata = mapOf("fruit" to "orange")
+        id = "id"
     )
 
     internal val CARD_USD_JSON = JSONObject(
