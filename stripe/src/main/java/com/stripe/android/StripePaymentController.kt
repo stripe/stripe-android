@@ -657,9 +657,7 @@ internal class StripePaymentController internal constructor(
         )
 
         workScope.launch {
-            // call `authenticationRequestParameters` on background thread to avoid StrictMode
-            // DiskReadViolation
-            val areqParams = transaction.authenticationRequestParameters
+            val areqParams = transaction.createAuthenticationRequestParameters()
 
             val timeout = config.stripe3ds2Config.timeout
             val authParams = Stripe3ds2AuthParams(
