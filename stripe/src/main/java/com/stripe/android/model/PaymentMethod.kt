@@ -597,7 +597,6 @@ data class PaymentMethod internal constructor(
         @JvmField val accountHolderType: String?
     ) : StripeModel
 
-
     /**
      * If this is a `sepa_debit` PaymentMethod, this hash contains details about the SEPA debit bank account.
      *
