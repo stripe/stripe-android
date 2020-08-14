@@ -28,6 +28,15 @@ internal class AccountRangeJsonParser : ModelJsonParser<CardMetadata.AccountRang
         }
     }
 
+    fun serialize(accountRange: CardMetadata.AccountRange): JSONObject {
+        return JSONObject()
+            .put(FIELD_ACCOUNT_RANGE_LOW, accountRange.binRange.low)
+            .put(FIELD_ACCOUNT_RANGE_HIGH, accountRange.binRange.high)
+            .put(FIELD_PAN_LENGTH, accountRange.panLength)
+            .put(FIELD_BRAND, accountRange.brandName)
+            .put(FIELD_COUNTRY, accountRange.country)
+    }
+
     private companion object {
         const val FIELD_ACCOUNT_RANGE_HIGH = "account_range_high"
         const val FIELD_ACCOUNT_RANGE_LOW = "account_range_low"
