@@ -219,8 +219,7 @@ class PaymentMethodEndToEndTest {
     fun createPaymentMethod_withGrabPay_shouldCreateObject() {
         val repository = StripeApiRepository(
             context,
-            ApiKeyFixtures.GRABPAY_PUBLISHABLE_KEY,
-            apiVersion = "2020-03-02"
+            ApiKeyFixtures.GRABPAY_PUBLISHABLE_KEY
         )
 
         val params = PaymentMethodCreateParamsFixtures.GRABPAY
