@@ -167,7 +167,8 @@ data class PaymentMethodCreateParams internal constructor(
         Giropay("giropay"),
         Eps("eps"),
         Oxxo("oxxo"),
-        Alipay("alipay")
+        Alipay("alipay"),
+        GrabPay("grabpay"),
     }
 
     @Parcelize
@@ -529,6 +530,22 @@ data class PaymentMethodCreateParams internal constructor(
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = Type.Giropay,
+                billingDetails = billingDetails,
+                metadata = metadata
+            )
+        }
+
+        /**
+         * @return params for creating a [PaymentMethod.Type.GrabPay] payment method
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun createGrabPay(
+            billingDetails: PaymentMethod.BillingDetails,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = Type.GrabPay,
                 billingDetails = billingDetails,
                 metadata = metadata
             )

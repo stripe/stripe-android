@@ -129,6 +129,10 @@ class SimplePaymentMethodConfirmationActivity : StripeIntentActivity() {
             Giropay(
                 "de", R.drawable.ic_brandicon__giropay,
                 PaymentMethodCreateParams.Companion::createGiropay
+            ),
+            GrabPay(
+                "sg", R.drawable.ic_brandicon_grabpay,
+                PaymentMethodCreateParams.Companion::createGrabPay
             );
         }
 

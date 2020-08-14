@@ -133,7 +133,8 @@ data class PaymentMethod internal constructor(
         Giropay("giropay", isReusable = false),
         Eps("eps", isReusable = false),
         Oxxo("oxxo", isReusable = false),
-        Alipay("alipay", isReusable = false);
+        Alipay("alipay", isReusable = false),
+        GrabPay("grabpay", isReusable = false);
 
         override fun toString(): String {
             return code
@@ -595,6 +596,7 @@ data class PaymentMethod internal constructor(
         @JvmField val bank: String?,
         @JvmField val accountHolderType: String?
     ) : StripeModel
+
 
     /**
      * If this is a `sepa_debit` PaymentMethod, this hash contains details about the SEPA debit bank account.
