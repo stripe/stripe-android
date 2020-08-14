@@ -7,7 +7,8 @@ import com.stripe.android.model.CardMetadata
 
 internal class RemoteCardAccountRangeSource(
     private val stripeRepository: StripeRepository,
-    private val requestOptions: ApiRequest.Options
+    private val requestOptions: ApiRequest.Options,
+    private val cardAccountRangeStore: CardAccountRangeStore
 ) : CardAccountRangeSource {
 
     override suspend fun getAccountRange(
@@ -18,7 +19,12 @@ internal class RemoteCardAccountRangeSource(
             .takeIf {
                 it.length == BIN_LENGTH
             }?.let { bin ->
-                stripeRepository.getCardMetadata(bin, requestOptions).accountRanges
+                val accountRanges =
+                    stripeRepository.getCardMetadata(bin, requestOptions).accountRanges
+
+                cardAccountRangeStore.save(bin, accountRanges)
+
+                accountRanges
                     .firstOrNull { (binRange) ->
                         binRange.matches(cardNumber)
                     }
