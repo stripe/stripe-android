@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.CardNumberFixtures
 import com.stripe.android.view.AddPaymentMethodActivity
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -180,6 +181,32 @@ class PaymentMethodCreateParamsTest {
                 "CardMultilineWidget",
                 AddPaymentMethodActivity.PRODUCT_TOKEN
             )
+    }
+
+    @Test
+    fun `createCard() with CardParams returns expected PaymentMethodCreateParams`() {
+        val cardParams = CardParamsFixtures.DEFAULT
+            .copy(loggingTokens = setOf("CardInputView"))
+
+        assertThat(
+            PaymentMethodCreateParams.createCard(cardParams)
+        ).isEqualTo(
+            PaymentMethodCreateParams(
+                type = PaymentMethodCreateParams.Type.Card,
+                card = PaymentMethodCreateParams.Card(
+                    number = CardNumberFixtures.VISA_NO_SPACES,
+                    expiryMonth = 12,
+                    expiryYear = 2025,
+                    cvc = "123",
+                    attribution = setOf("CardInputView")
+                ),
+                billingDetails = PaymentMethod.BillingDetails(
+                    name = cardParams.name,
+                    address = cardParams.address
+                ),
+                metadata = mapOf("fruit" to "orange")
+            )
+        )
     }
 
     private fun createFpx(): PaymentMethodCreateParams {
