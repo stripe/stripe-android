@@ -24,20 +24,23 @@ internal class CardWidgetViewModel(
         private val application: Application
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            val context = application.applicationContext
+
             val paymentConfiguration = PaymentConfiguration.getInstance(
-                application.applicationContext
+                context
             )
             return CardWidgetViewModel(
                 DefaultCardAccountRangeRepository(
                     localCardAccountRangeSource = LocalCardAccountRangeSource(),
                     remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
                         StripeApiRepository(
-                            application.applicationContext,
+                            context,
                             paymentConfiguration.publishableKey
                         ),
                         ApiRequest.Options(
                             paymentConfiguration.publishableKey
-                        )
+                        ),
+                        DefaultCardAccountRangeStore(context)
                     )
                 )
             ) as T
