@@ -208,4 +208,20 @@ class PaymentMethodEndToEndTest {
         assertThat(paymentMethod?.type)
             .isEqualTo(PaymentMethod.Type.Alipay)
     }
+
+    @Test
+    fun createPaymentMethod_withGrabPay_shouldCreateObject() {
+        val repository = StripeApiRepository(
+            context,
+            ApiKeyFixtures.GRABPAY_PUBLISHABLE_KEY
+        )
+
+        val params = PaymentMethodCreateParamsFixtures.GRABPAY
+        val paymentMethod = repository.createPaymentMethod(
+            params,
+            ApiRequest.Options(ApiKeyFixtures.GRABPAY_PUBLISHABLE_KEY)
+        )
+        assertThat(paymentMethod?.type)
+            .isEqualTo(PaymentMethod.Type.GrabPay)
+    }
 }
