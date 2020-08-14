@@ -22,11 +22,14 @@ import kotlinx.coroutines.test.runBlockingTest
 internal class RemoteCardAccountRangeSourceTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
+    private val cardAccountRangeStore = mock<CardAccountRangeStore>()
+
     @Test
     fun `getAccountRange() should return expected AccountRange`() = testDispatcher.runBlockingTest {
         val remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
             FakeStripeRepository(VISA_METADATA),
-            REQUEST_OPTIONS
+            REQUEST_OPTIONS,
+            cardAccountRangeStore
         )
 
         assertThat(
@@ -45,13 +48,15 @@ internal class RemoteCardAccountRangeSourceTest {
                 country = "GB"
             )
         )
+        verify(cardAccountRangeStore).save("424242", AccountRangeFixtures.DEFAULT)
     }
 
     @Test
     fun `getAccountRange() when CardMetadata is empty should return null`() = testDispatcher.runBlockingTest {
         val remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
             FakeStripeRepository(EMPTY_METADATA),
-            REQUEST_OPTIONS
+            REQUEST_OPTIONS,
+            cardAccountRangeStore
         )
 
         assertThat(
@@ -59,6 +64,7 @@ internal class RemoteCardAccountRangeSourceTest {
                 CardNumberFixtures.VISA_NO_SPACES
             )
         ).isNull()
+        verify(cardAccountRangeStore).save("424242", emptyList())
     }
 
     @Test
@@ -67,14 +73,16 @@ internal class RemoteCardAccountRangeSourceTest {
 
         val remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
             repository,
-            REQUEST_OPTIONS
+            REQUEST_OPTIONS,
+            cardAccountRangeStore
         )
-
-        verify(repository, never()).getCardMetadata(any(), any())
 
         assertThat(
             remoteCardAccountRangeSource.getAccountRange("42")
         ).isNull()
+
+        verify(repository, never()).getCardMetadata(any(), any())
+        verify(cardAccountRangeStore, never()).save(any(), any())
     }
 
     private class FakeStripeRepository(
