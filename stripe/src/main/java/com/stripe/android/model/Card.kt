@@ -198,6 +198,7 @@ data class Card internal constructor(
     val metadata: Map<String, String>? = null
 ) : StripeModel, StripePaymentSource, TokenParams(Token.Type.Card, loggingTokens) {
 
+    @Deprecated("Use PaymentMethodCreateParams#createCard()")
     fun toPaymentMethodsParams(): PaymentMethodCreateParams {
         return PaymentMethodCreateParams.create(
             card = toPaymentMethodParamsCard(),
@@ -218,6 +219,7 @@ data class Card internal constructor(
     /**
      * Use [toPaymentMethodsParams] to include Billing Details
      */
+    @Deprecated("Use PaymentMethodCreateParams#createCard()")
     fun toPaymentMethodParamsCard(): PaymentMethodCreateParams.Card {
         return PaymentMethodCreateParams.Card(
             number = number,
