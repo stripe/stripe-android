@@ -32,7 +32,6 @@ import com.stripe.android.model.StripeFileFixtures
 import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeFilePurpose
 import com.stripe.android.model.TokenFixtures
-import com.stripe.android.view.FpxBank
 import java.net.HttpURLConnection
 import java.net.UnknownHostException
 import java.util.Calendar
@@ -51,12 +50,9 @@ import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-/**
- * Test class for [StripeApiRepository].
- */
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
-class StripeApiRepositoryTest {
+internal class StripeApiRepositoryTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
@@ -675,11 +671,8 @@ class StripeApiRepositoryTest {
         val fpxBankStatuses = stripeApiRepository.getFpxBankStatus(
             ApiRequest.Options(ApiKeyFixtures.FPX_PUBLISHABLE_KEY)
         )
-        assertThat(
-            setOf(FpxBank.Hsbc, FpxBank.Bsn).any {
-                fpxBankStatuses.isOnline(it)
-            }
-        ).isTrue()
+        assertThat(fpxBankStatuses.size())
+            .isEqualTo(25)
     }
 
     @Test
@@ -690,11 +683,8 @@ class StripeApiRepositoryTest {
                 stripeAccount = "acct_1234"
             )
         )
-        assertThat(
-            setOf(FpxBank.Hsbc, FpxBank.Bsn).any {
-                fpxBankStatuses.isOnline(it)
-            }
-        ).isTrue()
+        assertThat(fpxBankStatuses.size())
+            .isEqualTo(25)
     }
 
     @Test
