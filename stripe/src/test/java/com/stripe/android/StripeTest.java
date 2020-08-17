@@ -430,7 +430,6 @@ public class StripeTest {
         assertNotNull(bancontactSource.getRedirect());
         assertEquals("John Doe", bancontactSource.getOwner().getName());
         assertEquals("example://path", bancontactSource.getRedirect().getReturnUrl());
-        assertThat(bancontactSource.getMetaData()).isEmpty();
     }
 
     @Test
@@ -463,7 +462,6 @@ public class StripeTest {
         assertNull(threeDSource.getSourceTypeModel());
         assertEquals(Source.SourceType.THREE_D_SECURE, threeDSource.getType());
         assertNotNull(threeDSource.getSourceTypeData());
-        assertThat(threeDSource.getMetaData()).isEmpty();
     }
 
     @Test
@@ -494,7 +492,6 @@ public class StripeTest {
         assertNotNull(giropaySource.getRedirect());
         assertEquals("Mr. X", giropaySource.getOwner().getName());
         assertEquals("example://redirect", giropaySource.getRedirect().getReturnUrl());
-        assertThat(giropaySource.getMetaData()).isEmpty();
     }
 
     @Test
@@ -557,7 +554,6 @@ public class StripeTest {
         assertEquals("123 Main St", sepaDebitSource.getOwner().getAddress().getLine1());
         assertEquals("EI", sepaDebitSource.getOwner().getAddress().getCountry());
         assertEquals("Sepa Account Holder", sepaDebitSource.getOwner().getName());
-        assertThat(sepaDebitSource.getMetaData()).isEmpty();
     }
 
 
@@ -584,7 +580,6 @@ public class StripeTest {
         assertNotNull(sepaDebitSource.getClientSecret());
         assertNotNull(sepaDebitSource.getId());
         assertEquals(Source.SourceType.SEPA_DEBIT, sepaDebitSource.getType());
-        assertThat(sepaDebitSource.getMetaData()).isEmpty();
     }
 
     @Test
@@ -622,7 +617,6 @@ public class StripeTest {
         assertEquals("123 Main St", sepaDebitSource.getOwner().getAddress().getLine1());
         assertEquals("EI", sepaDebitSource.getOwner().getAddress().getCountry());
         assertEquals("Sepa Account Holder", sepaDebitSource.getOwner().getName());
-        assertThat(sepaDebitSource.getMetaData()).isEmpty();
     }
 
     @Test
@@ -684,7 +678,6 @@ public class StripeTest {
         assertEquals("Bond", idealSource.getOwner().getName());
         assertNotNull(idealSource.getRedirect());
         assertEquals("example://return", idealSource.getRedirect().getReturnUrl());
-        assertThat(idealSource.getMetaData()).isEmpty();
     }
 
     @Test
@@ -719,7 +712,6 @@ public class StripeTest {
         assertNotNull(idealSource.getRedirect());
         assertEquals(bankName, idealSource.getSourceTypeData().get("bank"));
         assertEquals("example://return", idealSource.getRedirect().getReturnUrl());
-        assertThat(idealSource.getMetaData()).isEmpty();
     }
 
     @Test
@@ -754,7 +746,6 @@ public class StripeTest {
         assertEquals(bankName, idealSource.getSourceTypeData().get("bank"));
         assertNull(idealSource.getOwner().getName());
         assertEquals("example://return", idealSource.getRedirect().getReturnUrl());
-        assertThat(idealSource.getMetaData()).isEmpty();
     }
 
     @Test
@@ -783,7 +774,6 @@ public class StripeTest {
         assertEquals(70000L, sofortSource.getAmount().longValue());
         assertNotNull(sofortSource.getRedirect());
         assertEquals("example://return", sofortSource.getRedirect().getReturnUrl());
-        assertThat(sofortSource.getMetaData()).isEmpty();
     }
 
     @Test

@@ -58,8 +58,7 @@ class TokenTest {
             brand = CardBrand.Visa,
             country = "US",
             last4 = "4242",
-            funding = CardFunding.Credit,
-            metadata = emptyMap()
+            funding = CardFunding.Credit
         )
 
         private val RAW_TOKEN_NO_ID = JSONObject(
