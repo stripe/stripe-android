@@ -13,15 +13,15 @@ internal data class BinRange(
      */
     internal fun matches(number: String): Boolean {
         val withinLowRange = if (number.length < low.length) {
-            number.toBigDecimal() >= low.substring(0, number.length).toBigDecimal()
+            number.toBigDecimal() >= low.take(number.length).toBigDecimal()
         } else {
-            number.substring(0, low.length).toBigDecimal() >= low.toBigDecimal()
+            number.take(low.length).toBigDecimal() >= low.toBigDecimal()
         }
 
         val withinHighRange = if (number.length < high.length) {
-            number.toBigDecimal() <= high.substring(0, number.length).toBigDecimal()
+            number.toBigDecimal() <= high.take(number.length).toBigDecimal()
         } else {
-            number.substring(0, high.length).toBigDecimal() <= high.toBigDecimal()
+            number.take(high.length).toBigDecimal() <= high.toBigDecimal()
         }
         return withinLowRange && withinHighRange
     }
