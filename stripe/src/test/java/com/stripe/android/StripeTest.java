@@ -1108,7 +1108,7 @@ public class StripeTest {
                 createdPaymentMethod.billingDetails);
         assertNotNull(createdPaymentMethod.card);
         assertEquals("4242", createdPaymentMethod.card.last4);
-        assertThat(createdPaymentMethod.metadata).isEmpty();
+        assertThat(createdPaymentMethod.metadata).isNull();
 
         verify(analyticsRequestExecutor)
                 .executeAsync(analyticsRequestArgumentCaptor.capture());
