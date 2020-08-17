@@ -149,26 +149,23 @@ class CardNumberEditText @JvmOverloads constructor(
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                if (ignoreChanges) {
+                // skip formatting if we're past the last possible space position
+                if (ignoreChanges || start > 16) {
                     return
                 }
 
-                val inputText = s?.toString().orEmpty()
-                if (start < 4) {
-                    updateCardBrandFromNumber(inputText)
-                }
+                val spacelessNumber = StripeTextUtils.removeSpacesAndHyphens(
+                    s?.toString().orEmpty()
+                ).orEmpty()
 
-                if (start > 16) {
-                    // no need to do formatting if we're past all of the spaces.
-                    return
-                }
-
-                val spacelessNumber = StripeTextUtils.removeSpacesAndHyphens(inputText)
-                    ?: return
+                updateCardBrandFromNumber(spacelessNumber)
 
                 val formattedNumber = cardBrand.formatNumber(spacelessNumber)
-                this.newCursorPosition = updateSelectionIndex(formattedNumber.length,
-                    latestChangeStart, latestInsertionSize)
+                this.newCursorPosition = updateSelectionIndex(
+                    formattedNumber.length,
+                    latestChangeStart,
+                    latestInsertionSize
+                )
                 this.formattedNumber = formattedNumber
             }
 
@@ -207,6 +204,10 @@ class CardNumberEditText @JvmOverloads constructor(
 
     @JvmSynthetic
     internal fun updateCardBrandFromNumber(partialNumber: String) {
-        cardBrand = CardUtils.getPossibleCardBrand(partialNumber)
+        cardBrand = partialNumber.take(6).takeIf {
+            it.length == 6
+        }.let {
+            CardUtils.getPossibleCardBrand(it)
+        }
     }
 }
