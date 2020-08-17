@@ -114,7 +114,7 @@ public class StripeTest {
 
     @Test
     public void constructorShouldFailWithNullPublishableKey() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(NullPointerException.class, () -> {
             //noinspection ConstantConditions
             new Stripe(context, null);
         });
