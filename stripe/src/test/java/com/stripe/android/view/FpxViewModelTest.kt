@@ -1,12 +1,11 @@
 package com.stripe.android.view
 
-import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.AbsFakeStripeRepository
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.ApiRequest
 import com.stripe.android.model.FpxBankStatuses
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -17,32 +16,25 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
 class FpxViewModelTest {
-    private val application: Application = ApplicationProvider.getApplicationContext()
-
     private val testDispatcher = TestCoroutineDispatcher()
-
-    @BeforeTest
-    fun setup() {
-        PaymentConfiguration.init(application, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
-    }
+    private val viewModel = FpxViewModel(
+        ApplicationProvider.getApplicationContext(),
+        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        FakeStripeRepository()
+    )
 
     @Test
-    fun `getFpxBankStatues should update LiveData`() {
-        val viewModel = FpxViewModel(
-            application,
-            workDispatcher = testDispatcher
-        )
-        testDispatcher.runBlockingTest {
-            var bankStatuses: FpxBankStatuses? = null
-            viewModel.getFpxBankStatues().observeForever {
-                bankStatuses = it
-            }
-
-            assertThat(
-                setOf(FpxBank.Hsbc, FpxBank.Bsn).any {
-                    bankStatuses?.isOnline(it) == true
-                }
-            ).isTrue()
+    internal fun `getFpxBankStatues should update LiveData`() = testDispatcher.runBlockingTest {
+        var bankStatuses: FpxBankStatuses? = null
+        viewModel.getFpxBankStatues().observeForever {
+            bankStatuses = it
         }
+
+        assertThat(bankStatuses?.isOnline(FpxBank.AffinBank))
+            .isTrue()
+    }
+
+    private class FakeStripeRepository : AbsFakeStripeRepository() {
+        override suspend fun getFpxBankStatus(options: ApiRequest.Options) = FpxBankStatuses()
     }
 }
