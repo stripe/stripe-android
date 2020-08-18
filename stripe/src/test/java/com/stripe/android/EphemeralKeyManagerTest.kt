@@ -205,8 +205,7 @@ class EphemeralKeyManagerTest {
     @Test
     fun triggerCorrectErrorOnInvalidJsonKey() {
         val operationId = "12345"
-        val operationIdFactory: OperationIdFactory = mock()
-        whenever(operationIdFactory.create()).thenReturn(operationId)
+        val operationIdFactory = OperationIdFactory { operationId }
 
         testEphemeralKeyProvider.setNextRawEphemeralKey("{}")
         createEphemeralKeyManager(operationIdFactory)
@@ -230,8 +229,7 @@ class EphemeralKeyManagerTest {
     @Test
     fun triggerCorrectErrorOnEmptyKey() {
         val operationId = "12345"
-        val operationIdFactory: OperationIdFactory = mock()
-        whenever(operationIdFactory.create()).thenReturn(operationId)
+        val operationIdFactory = OperationIdFactory { operationId }
 
         testEphemeralKeyProvider.setNextRawEphemeralKey("")
         createEphemeralKeyManager(operationIdFactory)

@@ -1437,7 +1437,7 @@ class CardInputWidget @JvmOverloads constructor(
         }
     }
 
-    internal interface LayoutWidthCalculator {
+    internal fun interface LayoutWidthCalculator {
         fun calculate(text: String, paint: TextPaint): Int
     }
 
