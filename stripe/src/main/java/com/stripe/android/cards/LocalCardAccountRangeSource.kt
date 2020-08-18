@@ -1,7 +1,6 @@
 package com.stripe.android.cards
 
 import com.stripe.android.model.BinRange
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardMetadata
 
 /**
@@ -28,8 +27,7 @@ internal class LocalCardAccountRangeSource : CardAccountRangeSource {
                 CardMetadata.AccountRange(
                     binRange = it,
                     panLength = 16,
-                    brandName = CardBrand.Visa.code,
-                    brand = CardBrand.Visa
+                    brandName = CardMetadata.AccountRange.BrandName.Visa
                 )
             }
 
@@ -47,8 +45,7 @@ internal class LocalCardAccountRangeSource : CardAccountRangeSource {
                 CardMetadata.AccountRange(
                     binRange = it,
                     panLength = 16,
-                    brandName = CardBrand.MasterCard.code,
-                    brand = CardBrand.MasterCard
+                    brandName = CardMetadata.AccountRange.BrandName.Mastercard
                 )
             }
 
@@ -66,8 +63,7 @@ internal class LocalCardAccountRangeSource : CardAccountRangeSource {
             CardMetadata.AccountRange(
                 binRange = it,
                 panLength = 15,
-                brandName = CardBrand.AmericanExpress.code,
-                brand = CardBrand.AmericanExpress
+                brandName = CardMetadata.AccountRange.BrandName.AmericanExpress
             )
         }
 
@@ -90,8 +86,7 @@ internal class LocalCardAccountRangeSource : CardAccountRangeSource {
             CardMetadata.AccountRange(
                 binRange = it,
                 panLength = 16,
-                brandName = CardBrand.Discover.code,
-                brand = CardBrand.Discover
+                brandName = CardMetadata.AccountRange.BrandName.Discover
             )
         }
 
@@ -104,8 +99,7 @@ internal class LocalCardAccountRangeSource : CardAccountRangeSource {
             CardMetadata.AccountRange(
                 binRange = it,
                 panLength = 16,
-                brandName = CardBrand.JCB.code,
-                brand = CardBrand.JCB
+                brandName = CardMetadata.AccountRange.BrandName.JCB
             )
         }
 
@@ -123,8 +117,7 @@ internal class LocalCardAccountRangeSource : CardAccountRangeSource {
             CardMetadata.AccountRange(
                 binRange = it,
                 panLength = 16,
-                brandName = CardBrand.UnionPay.code,
-                brand = CardBrand.UnionPay
+                brandName = CardMetadata.AccountRange.BrandName.UnionPay
             )
         }
 
@@ -147,8 +140,7 @@ internal class LocalCardAccountRangeSource : CardAccountRangeSource {
             CardMetadata.AccountRange(
                 binRange = it,
                 panLength = 16,
-                brandName = CardBrand.DinersClub.code,
-                brand = CardBrand.DinersClub
+                brandName = CardMetadata.AccountRange.BrandName.DinersClub
             )
         }
 
@@ -161,8 +153,7 @@ internal class LocalCardAccountRangeSource : CardAccountRangeSource {
             CardMetadata.AccountRange(
                 binRange = it,
                 panLength = 14,
-                brandName = CardBrand.DinersClub.code,
-                brand = CardBrand.DinersClub
+                brandName = CardMetadata.AccountRange.BrandName.DinersClub
             )
         }
 

@@ -11,7 +11,6 @@ import com.stripe.android.ApiRequest
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.StripeRepository
 import com.stripe.android.model.BinRange
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardMetadata
 import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -43,8 +42,7 @@ internal class RemoteCardAccountRangeSourceTest {
                     high = "4242424249999999"
                 ),
                 panLength = 16,
-                brand = CardBrand.Visa,
-                brandName = CardBrand.Visa.name,
+                brandName = CardMetadata.AccountRange.BrandName.Visa,
                 country = "GB"
             )
         )
