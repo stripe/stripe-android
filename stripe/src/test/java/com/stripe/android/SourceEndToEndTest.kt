@@ -108,7 +108,7 @@ internal class SourceEndToEndTest {
                 CardNumberFixtures.JCB_NO_SPACES to CardBrand.JCB,
                 CardNumberFixtures.UNIONPAY_NO_SPACES to CardBrand.UnionPay,
                 CardNumberFixtures.DISCOVER_NO_SPACES to CardBrand.Discover,
-                CardNumberFixtures.DINERS_CLUB_14_NO_SPACES to CardBrand.DinersClub,
+                CardNumberFixtures.DINERS_CLUB_14_NO_SPACES to CardBrand.DinersClub
             ).all { (cardNumber, cardBrand) ->
                 val source = requireNotNull(stripe.createSourceSynchronous(
                     SourceParams.createCardParams(
