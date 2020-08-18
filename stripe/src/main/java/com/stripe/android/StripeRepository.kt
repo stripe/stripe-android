@@ -1,5 +1,6 @@
 package com.stripe.android
 
+import com.stripe.android.cards.Bin
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.AuthenticationException
@@ -235,7 +236,7 @@ internal interface StripeRepository {
 
     suspend fun getFpxBankStatus(options: ApiRequest.Options): FpxBankStatuses
 
-    suspend fun getCardMetadata(binPrefix: String, options: ApiRequest.Options): CardMetadata
+    suspend fun getCardMetadata(bin: Bin, options: ApiRequest.Options): CardMetadata
 
     fun start3ds2Auth(
         authParams: Stripe3ds2AuthParams,

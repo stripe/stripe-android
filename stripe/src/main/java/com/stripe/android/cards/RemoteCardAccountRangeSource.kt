@@ -13,7 +13,7 @@ internal class RemoteCardAccountRangeSource(
     override suspend fun getAccountRange(
         cardNumber: String
     ): CardMetadata.AccountRange? {
-        return Bin.create(cardNumber)?.let { (bin) ->
+        return Bin.create(cardNumber)?.let { bin ->
             val accountRanges =
                 stripeRepository.getCardMetadata(bin, requestOptions).accountRanges
 

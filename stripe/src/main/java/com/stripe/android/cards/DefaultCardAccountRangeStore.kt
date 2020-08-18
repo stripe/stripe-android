@@ -1,6 +1,7 @@
 package com.stripe.android.cards
 
 import android.content.Context
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.parsers.AccountRangeJsonParser
 import org.json.JSONObject
@@ -14,7 +15,7 @@ internal class DefaultCardAccountRangeStore(
         context.getSharedPreferences(PREF_FILE, Context.MODE_PRIVATE)
     }
 
-    override suspend fun get(bin: String): List<CardMetadata.AccountRange> {
+    override suspend fun get(bin: Bin): List<CardMetadata.AccountRange> {
         return prefs.getStringSet(createPrefKey(bin), null)
             .orEmpty()
             .mapNotNull {
@@ -23,7 +24,7 @@ internal class DefaultCardAccountRangeStore(
     }
 
     override fun save(
-        bin: String,
+        bin: Bin,
         accountRanges: List<CardMetadata.AccountRange>
     ) {
         val serializedAccountRanges = accountRanges.map {
@@ -35,7 +36,8 @@ internal class DefaultCardAccountRangeStore(
             .apply()
     }
 
-    private fun createPrefKey(bin: String): String = "$PREF_KEY_ACCOUNT_RANGES$bin"
+    @VisibleForTesting
+    internal fun createPrefKey(bin: Bin): String = "$PREF_KEY_ACCOUNT_RANGES:$bin"
 
     private companion object {
         private const val PREF_FILE = "InMemoryCardAccountRangeSource.Store"

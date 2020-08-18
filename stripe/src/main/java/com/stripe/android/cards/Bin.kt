@@ -1,8 +1,14 @@
 package com.stripe.android.cards
 
+import com.stripe.android.model.StripeModel
+import kotlinx.android.parcel.Parcelize
+
+@Parcelize
 internal data class Bin internal constructor(
     internal val value: String
-) {
+) : StripeModel {
+    override fun toString() = value
+
     companion object {
         fun create(cardNumber: String): Bin? {
             return cardNumber
