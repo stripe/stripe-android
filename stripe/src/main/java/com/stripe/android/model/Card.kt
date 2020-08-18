@@ -515,7 +515,6 @@ data class Card internal constructor(
                 cvcCheck = cvcCheck.takeUnless { it.isNullOrBlank() },
                 id = id.takeUnless { it.isNullOrBlank() },
                 tokenizationMethod = tokenizationMethod,
-                metadata = metadata,
                 loggingTokens = loggingTokens.orEmpty()
             )
         }

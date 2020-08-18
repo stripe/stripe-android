@@ -45,8 +45,7 @@ internal class CardJsonParser : ModelJsonParser<Card> {
             name = StripeJsonUtils.optString(json, FIELD_NAME),
             tokenizationMethod = TokenizationMethod.fromCode(
                 StripeJsonUtils.optString(json, FIELD_TOKENIZATION_METHOD)
-            ),
-            metadata = StripeJsonUtils.optHash(json, FIELD_METADATA)
+            )
         )
     }
 
@@ -72,7 +71,6 @@ internal class CardJsonParser : ModelJsonParser<Card> {
         private const val FIELD_EXP_YEAR = "exp_year"
         private const val FIELD_FINGERPRINT = "fingerprint"
         private const val FIELD_FUNDING = "funding"
-        private const val FIELD_METADATA = "metadata"
         private const val FIELD_NAME = "name"
         private const val FIELD_LAST4 = "last4"
         private const val FIELD_ID = "id"

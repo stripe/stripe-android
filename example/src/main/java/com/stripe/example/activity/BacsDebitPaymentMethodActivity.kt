@@ -17,7 +17,7 @@ class BacsDebitPaymentMethodActivity : StripeIntentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
-        viewModel.inProgress.observe(this, Observer { enableUi(!it) })
+        viewModel.inProgress.observe(this, { enableUi(!it) })
         viewModel.status.observe(this, Observer(viewBinding.status::setText))
 
         viewBinding.submit.setOnClickListener {

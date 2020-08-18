@@ -20,7 +20,6 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
             )
             .setCustomerId(StripeJsonUtils.optString(json, FIELD_CUSTOMER))
             .setLiveMode(json.optBoolean(FIELD_LIVEMODE))
-            .setMetadata(StripeJsonUtils.optHash(json, FIELD_METADATA))
 
         when (type) {
             PaymentMethod.Type.Card ->
@@ -284,7 +283,6 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
         private const val FIELD_CREATED = "created"
         private const val FIELD_CUSTOMER = "customer"
         private const val FIELD_LIVEMODE = "livemode"
-        private const val FIELD_METADATA = "metadata"
         private const val FIELD_TYPE = "type"
     }
 }

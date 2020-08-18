@@ -19,8 +19,7 @@ class PaymentMethodTest {
                     type = PaymentMethod.Type.Card,
                     customerId = "cus_AQsHpvKfKwJDrF",
                     billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
-                    card = PaymentMethodFixtures.CARD,
-                    metadata = mapOf("order_id" to "123456789")
+                    card = PaymentMethodFixtures.CARD
                 )
             )
     }
@@ -42,10 +41,6 @@ class PaymentMethodTest {
             id = "pm_123456789",
             type = PaymentMethod.Type.Card,
             liveMode = true,
-            metadata = mapOf(
-                "meta" to "data",
-                "meta2" to "data2"
-            ),
             card = PaymentMethodFixtures.CARD,
             cardPresent = PaymentMethod.CardPresent.EMPTY,
             fpx = PaymentMethodFixtures.FPX_PAYMENT_METHOD.fpx,

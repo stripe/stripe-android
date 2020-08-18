@@ -29,8 +29,10 @@ internal class CardWidgetViewModel(
             val paymentConfiguration = PaymentConfiguration.getInstance(
                 context
             )
+            val store = DefaultCardAccountRangeStore(context)
             return CardWidgetViewModel(
                 DefaultCardAccountRangeRepository(
+                    inMemoryCardAccountRangeSource = InMemoryCardAccountRangeSource(store),
                     localCardAccountRangeSource = LocalCardAccountRangeSource(),
                     remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
                         StripeApiRepository(

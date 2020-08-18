@@ -37,9 +37,6 @@ internal object PaymentIntentFixtures {
             "invoice": null,
             "last_payment_error": null,
             "livemode": true,
-            "metadata": {
-                "order_id": "5278735C-1F40-407D-933A-286E463E72D8"
-            },
             "next_action": {
                 "type": "use_stripe_sdk",
                 "use_stripe_sdk": {
@@ -368,9 +365,7 @@ internal object PaymentIntentFixtures {
             "invoice": null,
             "last_payment_error": null,
             "livemode": false,
-            "metadata": {
-                "order_id": "5278735C-1F40-407D-933A-286E463E72D8"
-            },
+            "metadata": null,
             "next_action": null,
             "on_behalf_of": null,
             "payment_method": null,

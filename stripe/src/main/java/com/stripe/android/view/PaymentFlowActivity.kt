@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.ViewGroup
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager.widget.ViewPager
 import com.stripe.android.CustomerSession
@@ -120,7 +119,7 @@ class PaymentFlowActivity : StripeActivity() {
     private fun onShippingInfoValidated(shippingMethods: List<ShippingMethod>) {
         viewModel.paymentSessionData.shippingInformation?.let { shippingInfo ->
             viewModel.saveCustomerShippingInformation(shippingInfo)
-                .observe(this, Observer { result ->
+                .observe(this, { result ->
                     result.fold(
                         onSuccess = {
                             onShippingInfoSaved(
@@ -202,7 +201,7 @@ class PaymentFlowActivity : StripeActivity() {
             shippingInfoValidator,
             shippingMethodsFactory,
             shippingInformation
-        ).observe(this, Observer {
+        ).observe(this, {
             it.fold(
                 // show shipping methods screen
                 onSuccess = ::onShippingInfoValidated,

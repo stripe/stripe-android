@@ -36,9 +36,9 @@ internal class InMemoryCardAccountRangeSourceTest {
     }
 
     private class FakeStore : CardAccountRangeStore {
-        override suspend fun get(bin: String) = AccountRangeFixtures.DEFAULT
+        override suspend fun get(bin: Bin) = AccountRangeFixtures.DEFAULT
 
-        override fun save(bin: String, accountRanges: List<CardMetadata.AccountRange>) {
+        override fun save(bin: Bin, accountRanges: List<CardMetadata.AccountRange>) {
         }
     }
 }

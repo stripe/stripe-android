@@ -3,6 +3,7 @@ package com.stripe.android
 import android.content.Context
 import android.util.Pair
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.cards.Bin
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.AuthenticationException
@@ -814,16 +815,16 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
-    override suspend fun getCardMetadata(binPrefix: String, options: ApiRequest.Options) =
+    override suspend fun getCardMetadata(bin: Bin, options: ApiRequest.Options) =
         withContext(workDispatcher) {
             makeApiRequest(
                 apiRequestFactory.createGet(
                     getEdgeUrl("card-metadata"),
                     options.copy(stripeAccount = null),
-                    mapOf("key" to options.apiKey, "bin_prefix" to binPrefix)
+                    mapOf("key" to options.apiKey, "bin_prefix" to bin.value)
                 )
             ).let {
-                CardMetadataJsonParser(binPrefix).parse(it.responseJson)
+                CardMetadataJsonParser(bin).parse(it.responseJson)
             }
         }
 
