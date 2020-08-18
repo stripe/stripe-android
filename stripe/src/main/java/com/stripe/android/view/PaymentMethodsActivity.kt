@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.CustomerSession
@@ -79,12 +78,12 @@ class PaymentMethodsActivity : AppCompatActivity() {
             window.addFlags(it)
         }
 
-        viewModel.snackbarData.observe(this, Observer { snackbarText ->
+        viewModel.snackbarData.observe(this, { snackbarText ->
             snackbarText?.let {
                 Snackbar.make(viewBinding.coordinator, it, Snackbar.LENGTH_SHORT).show()
             }
         })
-        viewModel.progressData.observe(this, Observer {
+        viewModel.progressData.observe(this, {
             viewBinding.progressBar.visibility = if (it) {
                 View.VISIBLE
             } else {
@@ -192,7 +191,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
     }
 
     private fun fetchCustomerPaymentMethods() {
-        viewModel.getPaymentMethods().observe(this, Observer { result ->
+        viewModel.getPaymentMethods().observe(this, { result ->
             result.fold(
                 onSuccess = { adapter.setPaymentMethods(it) },
                 onFailure = {

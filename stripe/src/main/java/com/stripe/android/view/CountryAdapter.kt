@@ -55,7 +55,7 @@ internal class CountryAdapter(
                     layoutInflater,
                     viewGroup,
                     false
-                ).root as TextView
+                ).root
             }
         }.also { countryText ->
             countryText.text = getItem(i).name
@@ -88,7 +88,7 @@ internal class CountryAdapter(
     }
 
     private class CountryFilter(
-        internal var unfilteredCountries: List<Country>,
+        var unfilteredCountries: List<Country>,
         private val adapter: CountryAdapter,
         activity: Activity?
     ) : Filter() {

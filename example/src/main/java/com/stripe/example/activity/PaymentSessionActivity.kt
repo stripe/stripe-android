@@ -6,7 +6,6 @@ import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
@@ -72,7 +71,7 @@ class PaymentSessionActivity : AppCompatActivity() {
 
         viewModel.paymentSessionDataResult.observe(
             this,
-            Observer { result ->
+            { result ->
                 result.fold(
                     onSuccess = {
                         onPaymentSessionDataChanged(it)
@@ -85,7 +84,7 @@ class PaymentSessionActivity : AppCompatActivity() {
         )
         viewModel.customerResult.observe(
             this,
-            Observer { result ->
+            { result ->
                 result.fold(
                     onSuccess = {
                         onCustomerRetrieved()
@@ -99,7 +98,7 @@ class PaymentSessionActivity : AppCompatActivity() {
 
         viewModel.isProcessing.observe(
             this,
-            Observer { isCommunicating ->
+            { isCommunicating ->
                 when (isCommunicating) {
                     true -> disableUi()
                     false -> enableUi()

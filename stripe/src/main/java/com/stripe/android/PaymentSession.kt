@@ -70,7 +70,7 @@ class PaymentSession @VisibleForTesting internal constructor(
 
     init {
         lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
-        viewModel.networkState.observe(lifecycleOwner, Observer {
+        viewModel.networkState.observe(lifecycleOwner, {
             it?.let { networkState ->
                 listener?.onCommunicatingStateChanged(
                     when (networkState) {
@@ -81,7 +81,7 @@ class PaymentSession @VisibleForTesting internal constructor(
             }
         })
 
-        viewModel.paymentSessionDataLiveData.observe(lifecycleOwner, Observer {
+        viewModel.paymentSessionDataLiveData.observe(lifecycleOwner, {
             listener?.onPaymentSessionDataChanged(it)
         })
     }

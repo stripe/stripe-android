@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -55,7 +54,7 @@ class CreateCardTokenActivity : AppCompatActivity() {
                 onRequestStart()
                 viewModel.createCardToken(cardParams).observe(
                     this,
-                    Observer {
+                    {
                         onRequestEnd()
                         adapter.addToken(it)
                     }
