@@ -81,7 +81,7 @@ object CardFixtures {
             "fingerprint": "abc123",
             "last4": "4242",
             "name": "John Cardholder",
-            "tokenization_method": "google_pay",
+            "tokenization_method": "android_pay",
             "metadata": {
                 "color": "blue",
                 "animal": "dog"
