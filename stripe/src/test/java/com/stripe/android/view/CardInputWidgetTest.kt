@@ -10,6 +10,7 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.reset
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.CardNumberFixtures
 import com.stripe.android.CardNumberFixtures.AMEX_NO_SPACES
 import com.stripe.android.CardNumberFixtures.AMEX_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_14_NO_SPACES
@@ -402,7 +403,7 @@ internal class CardInputWidgetTest {
     @Test
     fun getCard_whenInputHasIncompleteCardNumber_returnsNull() {
         // This will be 242 4242 4242 4242
-        cardNumberEditText.setText(VISA_WITH_SPACES.substring(1))
+        cardNumberEditText.setText(VISA_WITH_SPACES.drop(1))
         expiryEditText.append("12")
         expiryEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
@@ -631,7 +632,7 @@ internal class CardInputWidgetTest {
         assertThat(onGlobalFocusChangeListener.newFocusId)
             .isEqualTo(cardNumberEditText.id)
 
-        val subString = VISA_WITH_SPACES.substring(0, VISA_WITH_SPACES.length - 1)
+        val subString = VISA_WITH_SPACES.take(VISA_WITH_SPACES.length - 1)
         assertThat(cardNumberEditText.text.toString())
             .isEqualTo(subString)
         assertThat(cardNumberEditText.selectionStart)
@@ -744,14 +745,14 @@ internal class CardInputWidgetTest {
     fun onUpdateIcon_forCommonLengthBrand_setsLengthOnCvc() {
         // This should set the brand to Visa. Note that more extensive brand checking occurs
         // in CardNumberEditTextTest.
-        cardNumberEditText.append("4")
+        cardNumberEditText.append(CardNumberFixtures.VISA_BIN)
         assertThat(ViewTestUtils.hasMaxLength(cvcEditText, 3))
             .isTrue()
     }
 
     @Test
-    fun onUpdateText_forAmExPrefix_setsLengthOnCvc() {
-        cardNumberEditText.append("34")
+    fun onUpdateText_forAmexBin_setsLengthOnCvc() {
+        cardNumberEditText.append(CardNumberFixtures.AMEX_BIN)
         assertThat(ViewTestUtils.hasMaxLength(cvcEditText, 4))
             .isTrue()
     }

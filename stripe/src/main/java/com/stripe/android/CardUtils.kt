@@ -1,5 +1,6 @@
 package com.stripe.android
 
+import com.stripe.android.cards.Bin
 import com.stripe.android.model.CardBrand
 
 /**
@@ -15,6 +16,11 @@ object CardUtils {
     @JvmStatic
     fun getPossibleCardBrand(cardNumber: String?): CardBrand {
         return getPossibleCardBrand(cardNumber, true)
+    }
+
+    @JvmSynthetic
+    internal fun getPossibleCardBrand(bin: Bin): CardBrand {
+        return getPossibleCardBrand(bin.value, true)
     }
 
     /**

@@ -474,8 +474,7 @@ internal class CardMultilineWidgetTest {
     @Test
     fun clear_whenFieldsInErrorState_clearsFieldsAndHidesErrors() {
         // Makes this 4242 4242 4242 4243
-        val badVisa = VISA_WITH_SPACES
-            .substring(VISA_WITH_SPACES.length - 1) + "3"
+        val badVisa = VISA_WITH_SPACES.take(VISA_WITH_SPACES.length - 1) + "3"
         fullGroup.cardNumberEditText.setText(badVisa)
 
         fullGroup.expiryDateEditText.append("01")
@@ -627,8 +626,8 @@ internal class CardMultilineWidgetTest {
         cardMultilineWidget.setCardInputListener(fullCardListener)
         noZipCardMultilineWidget.setCardInputListener(noZipCardListener)
 
-        val deleteOneCharacterString = VISA_WITH_SPACES
-            .substring(0, VISA_WITH_SPACES.length - 1)
+        val deleteOneCharacterString =
+            VISA_WITH_SPACES.take(VISA_WITH_SPACES.length - 1)
         fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
 
         reset(fullCardListener)
