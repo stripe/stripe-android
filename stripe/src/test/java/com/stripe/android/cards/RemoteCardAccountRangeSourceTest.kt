@@ -10,6 +10,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.ApiRequest
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.StripeRepository
+import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardMetadata
@@ -48,7 +49,10 @@ internal class RemoteCardAccountRangeSourceTest {
                 country = "GB"
             )
         )
-        verify(cardAccountRangeStore).save("424242", AccountRangeFixtures.DEFAULT)
+        verify(cardAccountRangeStore).save(
+            BinFixtures.VISA,
+            AccountRangeFixtures.DEFAULT
+        )
     }
 
     @Test
@@ -64,7 +68,10 @@ internal class RemoteCardAccountRangeSourceTest {
                 CardNumberFixtures.VISA_NO_SPACES
             )
         ).isNull()
-        verify(cardAccountRangeStore).save("424242", emptyList())
+        verify(cardAccountRangeStore).save(
+            BinFixtures.VISA,
+            emptyList()
+        )
     }
 
     @Test
@@ -89,7 +96,7 @@ internal class RemoteCardAccountRangeSourceTest {
         private val cardMetadata: CardMetadata
     ) : AbsFakeStripeRepository() {
         override suspend fun getCardMetadata(
-            binPrefix: String,
+            bin: Bin,
             options: ApiRequest.Options
         ) = cardMetadata
     }
@@ -100,12 +107,12 @@ internal class RemoteCardAccountRangeSourceTest {
         )
 
         private val EMPTY_METADATA = CardMetadata(
-            binPrefix = "999999",
+            bin = BinFixtures.FAKE,
             accountRanges = emptyList()
         )
 
         private val VISA_METADATA = CardMetadata(
-            binPrefix = "424242",
+            bin = BinFixtures.VISA,
             accountRanges = AccountRangeFixtures.DEFAULT
         )
     }

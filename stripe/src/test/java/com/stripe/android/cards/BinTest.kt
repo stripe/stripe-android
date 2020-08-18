@@ -2,6 +2,7 @@ package com.stripe.android.cards
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures
+import com.stripe.android.model.BinFixtures
 import kotlin.test.Test
 
 class BinTest {
@@ -15,7 +16,7 @@ class BinTest {
     @Test
     fun `create() with 6 digit partial card number should return BIN`() {
         assertThat(
-            Bin.create("424242")
+            BinFixtures.VISA
         ).isEqualTo(
             Bin(DEFAULT_BIN)
         )

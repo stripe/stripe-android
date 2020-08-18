@@ -8,7 +8,7 @@ internal class InMemoryCardAccountRangeSource(
     override suspend fun getAccountRange(
         cardNumber: String
     ): CardMetadata.AccountRange? {
-        return Bin.create(cardNumber)?.let { (bin) ->
+        return Bin.create(cardNumber)?.let { bin ->
             store.get(bin)
                 .firstOrNull { (binRange) ->
                     binRange.matches(cardNumber)
