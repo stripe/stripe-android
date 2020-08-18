@@ -10,6 +10,7 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.CardUtils
 import com.stripe.android.R
 import com.stripe.android.StripeTextUtils
+import com.stripe.android.cards.Bin
 import com.stripe.android.model.CardBrand
 
 /**
@@ -158,7 +159,9 @@ class CardNumberEditText @JvmOverloads constructor(
                     s?.toString().orEmpty()
                 ).orEmpty()
 
-                updateCardBrandFromNumber(spacelessNumber)
+                updateCardBrandFromNumber(
+                    Bin.create(spacelessNumber)
+                )
 
                 val formattedNumber = cardBrand.formatNumber(spacelessNumber)
                 this.newCursorPosition = updateSelectionIndex(
@@ -203,11 +206,9 @@ class CardNumberEditText @JvmOverloads constructor(
     }
 
     @JvmSynthetic
-    internal fun updateCardBrandFromNumber(partialNumber: String) {
-        cardBrand = partialNumber.take(6).takeIf {
-            it.length == 6
-        }.let {
+    internal fun updateCardBrandFromNumber(bin: Bin?) {
+        cardBrand = bin?.let {
             CardUtils.getPossibleCardBrand(it)
-        }
+        } ?: CardBrand.Unknown
     }
 }

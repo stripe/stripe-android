@@ -11,6 +11,7 @@ import com.stripe.android.CardNumberFixtures.DINERS_CLUB_16_NO_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_16_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
+import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.CardBrand
 import com.stripe.android.testharness.ViewTestUtils
 import kotlin.test.BeforeTest
@@ -427,9 +428,9 @@ class CardNumberEditTextTest {
 
     @Test
     fun testUpdateCardBrandFromNumber() {
-        cardNumberEditText.updateCardBrandFromNumber(DINERS_CLUB_14_NO_SPACES)
+        cardNumberEditText.updateCardBrandFromNumber(BinFixtures.DINERSCLUB14)
         assertEquals(CardBrand.DinersClub, lastBrandChangeCallbackInvocation)
-        cardNumberEditText.updateCardBrandFromNumber(AMEX_NO_SPACES)
+        cardNumberEditText.updateCardBrandFromNumber(BinFixtures.AMEX)
         assertEquals(CardBrand.AmericanExpress, lastBrandChangeCallbackInvocation)
     }
 
