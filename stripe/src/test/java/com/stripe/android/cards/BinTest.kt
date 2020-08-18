@@ -6,17 +6,23 @@ import kotlin.test.Test
 
 class BinTest {
     @Test
-    fun `create() should return expected value`() {
+    fun `create() with 2 digit partial card number should return null`() {
         assertThat(
             Bin.create("42")
         ).isNull()
+    }
 
+    @Test
+    fun `create() with 6 digit partial card number should return BIN`() {
         assertThat(
             Bin.create("424242")
         ).isEqualTo(
             Bin(DEFAULT_BIN)
         )
+    }
 
+    @Test
+    fun `create() with full card number should return BIN`() {
         assertThat(
             Bin.create(CardNumberFixtures.VISA_NO_SPACES)
         ).isEqualTo(
