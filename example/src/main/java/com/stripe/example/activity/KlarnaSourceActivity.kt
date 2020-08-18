@@ -6,7 +6,6 @@ import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.Stripe
@@ -50,7 +49,7 @@ class KlarnaSourceActivity : AppCompatActivity() {
             disableUi()
             createKlarnaSource().observe(
                 this,
-                Observer { result ->
+                { result ->
                     result.fold(
                         onSuccess = { source ->
                             logSource(source)
@@ -66,7 +65,7 @@ class KlarnaSourceActivity : AppCompatActivity() {
             disableUi()
             viewModel.fetchSource(viewModel.source).observe(
                 this,
-                Observer { result ->
+                { result ->
                     enableUi()
                     result.fold(::logSource, ::logException)
                 }

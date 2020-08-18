@@ -5,13 +5,11 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.Stripe
-import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.Source
@@ -105,7 +103,7 @@ class CreateCardSourceActivity : AppCompatActivity() {
         val params = SourceParams.createCardParams(cardParams)
         viewModel.createSource(params).observe(
             this,
-            Observer { result ->
+            { result ->
                 viewBinding.createButton.isEnabled = true
                 viewBinding.progressBar.visibility = View.INVISIBLE
 
@@ -152,7 +150,7 @@ class CreateCardSourceActivity : AppCompatActivity() {
 
         viewModel.createSource(params).observe(
             this,
-            Observer { result ->
+            { result ->
                 viewBinding.progressBar.visibility = View.INVISIBLE
 
                 result.fold(
@@ -188,10 +186,10 @@ class CreateCardSourceActivity : AppCompatActivity() {
                 )
             )
             .setIcon(cardBrand.icon)
-            .setPositiveButton(android.R.string.yes) { _, _ ->
+            .setPositiveButton(android.R.string.ok) { _, _ ->
                 stripe.authenticateSource(this, source)
             }
-            .setNegativeButton(android.R.string.no, null)
+            .setNegativeButton(android.R.string.cancel, null)
             .create()
     }
 
