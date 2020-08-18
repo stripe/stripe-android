@@ -1633,7 +1633,7 @@ class Stripe internal constructor(
         )
     }
 
-    private class CreateSourceTask internal constructor(
+    private class CreateSourceTask(
         private val stripeRepository: StripeRepository,
         private val sourceParams: SourceParams,
         private val options: ApiRequest.Options,
@@ -1646,7 +1646,7 @@ class Stripe internal constructor(
         }
     }
 
-    private class RetrieveSourceTask internal constructor(
+    private class RetrieveSourceTask(
         private val stripeRepository: StripeRepository,
         private val sourceId: String,
         private val clientSecret: String,
@@ -1660,7 +1660,7 @@ class Stripe internal constructor(
         }
     }
 
-    private class CreatePaymentMethodTask internal constructor(
+    private class CreatePaymentMethodTask(
         private val stripeRepository: StripeRepository,
         private val paymentMethodCreateParams: PaymentMethodCreateParams,
         private val options: ApiRequest.Options,
@@ -1673,7 +1673,7 @@ class Stripe internal constructor(
         }
     }
 
-    private class CreateTokenTask internal constructor(
+    private class CreateTokenTask(
         private val stripeRepository: StripeRepository,
         private val tokenParams: TokenParams,
         private val options: ApiRequest.Options,
@@ -1686,7 +1686,7 @@ class Stripe internal constructor(
         }
     }
 
-    private class CreateFileTask internal constructor(
+    private class CreateFileTask(
         private val stripeRepository: StripeRepository,
         private val fileParams: StripeFileParams,
         private val options: ApiRequest.Options,
@@ -1699,7 +1699,7 @@ class Stripe internal constructor(
         }
     }
 
-    private class RetrievePaymentIntentTask internal constructor(
+    private class RetrievePaymentIntentTask(
         private val stripeRepository: StripeRepository,
         private val clientSecret: String,
         private val options: ApiRequest.Options,
@@ -1712,7 +1712,7 @@ class Stripe internal constructor(
         }
     }
 
-    private class RetrieveSetupIntentTask internal constructor(
+    private class RetrieveSetupIntentTask(
         private val stripeRepository: StripeRepository,
         private val clientSecret: String,
         private val options: ApiRequest.Options,
