@@ -36,6 +36,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never
 import org.robolectric.RobolectricTestRunner
@@ -45,8 +47,10 @@ import org.robolectric.shadows.ShadowAlertDialog
 /**
  * Test class for [AddPaymentMethodActivity].
  */
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class AddPaymentMethodActivityTest {
+    private val testDispatcher = TestCoroutineDispatcher()
 
     private val customerSession: CustomerSession = mock()
     private val viewModel: AddPaymentMethodViewModel = mock()
@@ -79,7 +83,7 @@ class AddPaymentMethodActivityTest {
                 val cardMultilineWidget: CardMultilineWidget =
                     it.findViewById(R.id.card_multiline_widget)
                 val widgetControlGroup =
-                    CardMultilineWidgetTest.WidgetControlGroup(cardMultilineWidget)
+                    CardMultilineWidgetTest.WidgetControlGroup(cardMultilineWidget, testDispatcher)
                 assertEquals(View.VISIBLE, widgetControlGroup.postalCodeInputLayout.visibility)
             }
         }
@@ -94,7 +98,7 @@ class AddPaymentMethodActivityTest {
                 val cardMultilineWidget: CardMultilineWidget =
                     activity.findViewById(R.id.card_multiline_widget)
                 val widgetControlGroup =
-                    CardMultilineWidgetTest.WidgetControlGroup(cardMultilineWidget)
+                    CardMultilineWidgetTest.WidgetControlGroup(cardMultilineWidget, testDispatcher)
                 assertEquals(View.VISIBLE, widgetControlGroup.postalCodeInputLayout.visibility)
             }
         }

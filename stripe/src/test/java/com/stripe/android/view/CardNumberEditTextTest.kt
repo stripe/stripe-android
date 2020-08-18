@@ -11,6 +11,8 @@ import com.stripe.android.CardNumberFixtures.DINERS_CLUB_16_NO_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_16_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
+import com.stripe.android.cards.LegacyCardAccountRangeRepository
+import com.stripe.android.cards.LocalCardAccountRangeSource
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.CardBrand
 import com.stripe.android.testharness.ViewTestUtils
@@ -18,14 +20,19 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 /**
  * Test class for [CardNumberEditText].
  */
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class CardNumberEditTextTest {
+    private val testDispatcher = TestCoroutineDispatcher()
+
     private var completionCallbackInvocations = 0
     private val completionCallback: () -> Unit = { completionCallbackInvocations++ }
 
@@ -34,8 +41,14 @@ class CardNumberEditTextTest {
         lastBrandChangeCallbackInvocation = it
     }
 
+    private val cardAccountRangeRepository = LegacyCardAccountRangeRepository(
+        LocalCardAccountRangeSource()
+    )
+
     private val cardNumberEditText = CardNumberEditText(
-        ApplicationProvider.getApplicationContext()
+        ApplicationProvider.getApplicationContext(),
+        workDispatcher = testDispatcher,
+        cardAccountRangeRepository = cardAccountRangeRepository
     )
 
     @BeforeTest
@@ -427,11 +440,18 @@ class CardNumberEditTextTest {
     }
 
     @Test
-    fun testUpdateCardBrandFromNumber() {
-        cardNumberEditText.updateCardBrandFromNumber(BinFixtures.DINERSCLUB14)
+    fun `updateCardBrand() should update cardBrand value`() {
+        cardNumberEditText.updateCardBrand(BinFixtures.DINERSCLUB14)
         assertEquals(CardBrand.DinersClub, lastBrandChangeCallbackInvocation)
-        cardNumberEditText.updateCardBrandFromNumber(BinFixtures.AMEX)
+
+        cardNumberEditText.updateCardBrand(BinFixtures.AMEX)
         assertEquals(CardBrand.AmericanExpress, lastBrandChangeCallbackInvocation)
+    }
+
+    @Test
+    fun `updateCardBrand() with null bin should set cardBrand to Unknown`() {
+        cardNumberEditText.updateCardBrand(null)
+        assertEquals(CardBrand.Unknown, lastBrandChangeCallbackInvocation)
     }
 
     private fun verifyCardBrandBin(

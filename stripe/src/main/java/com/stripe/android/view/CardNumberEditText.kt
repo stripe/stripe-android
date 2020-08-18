@@ -11,16 +11,44 @@ import com.stripe.android.CardUtils
 import com.stripe.android.R
 import com.stripe.android.StripeTextUtils
 import com.stripe.android.cards.Bin
+import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.LegacyCardAccountRangeRepository
+import com.stripe.android.cards.LocalCardAccountRangeSource
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardMetadata
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * A [StripeEditText] that handles spacing out the digits of a credit card.
  */
-class CardNumberEditText @JvmOverloads constructor(
+class CardNumberEditText internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle
+    defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle,
+
+    // TODO(mshafrir-stripe): make immutable after `CardWidgetViewModel` is integrated in `CardWidget` subclasses
+    internal var workDispatcher: CoroutineDispatcher,
+
+    private val cardAccountRangeRepository: CardAccountRangeRepository
 ) : StripeEditText(context, attrs, defStyleAttr) {
+
+    @JvmOverloads
+    constructor(
+        context: Context,
+        attrs: AttributeSet? = null,
+        defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle
+    ) : this(
+        context,
+        attrs,
+        defStyleAttr,
+        Dispatchers.IO,
+        LegacyCardAccountRangeRepository(LocalCardAccountRangeSource())
+    )
 
     @VisibleForTesting
     var cardBrand: CardBrand = CardBrand.Unknown
@@ -70,6 +98,8 @@ class CardNumberEditText @JvmOverloads constructor(
         } else {
             null
         }
+
+    private var accountRangeRepositoryjob: Job? = null
 
     init {
         setErrorMessage(resources.getString(R.string.invalid_card_number))
@@ -159,9 +189,7 @@ class CardNumberEditText @JvmOverloads constructor(
                     s?.toString().orEmpty()
                 ).orEmpty()
 
-                updateCardBrandFromNumber(
-                    Bin.create(spacelessNumber)
-                )
+                updateCardBrand(Bin.create(spacelessNumber))
 
                 val formattedNumber = cardBrand.formatNumber(spacelessNumber)
                 this.newCursorPosition = updateSelectionIndex(
@@ -206,9 +234,25 @@ class CardNumberEditText @JvmOverloads constructor(
     }
 
     @JvmSynthetic
-    internal fun updateCardBrandFromNumber(bin: Bin?) {
-        cardBrand = bin?.let {
-            CardUtils.getPossibleCardBrand(it)
-        } ?: CardBrand.Unknown
+    internal fun updateCardBrand(inputBin: Bin?) {
+        // cancel in-flight job
+        accountRangeRepositoryjob?.cancel()
+        accountRangeRepositoryjob = null
+
+        accountRangeRepositoryjob = CoroutineScope(workDispatcher).launch {
+            if (inputBin != null) {
+                onAccountRangeResult(
+                    cardAccountRangeRepository.getAccountRange(inputBin.value)
+                )
+            } else {
+                onAccountRangeResult(null)
+            }
+        }
+    }
+
+    private suspend fun onAccountRangeResult(
+        accountRange: CardMetadata.AccountRange?
+    ) = withContext(Dispatchers.Main) {
+        cardBrand = accountRange?.brand ?: CardBrand.Unknown
     }
 }

@@ -27,6 +27,9 @@ import com.stripe.android.testharness.ViewTestUtils
 import java.util.Calendar
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.runner.RunWith
 import org.mockito.Mockito.reset
 import org.robolectric.RobolectricTestRunner
@@ -34,8 +37,10 @@ import org.robolectric.RobolectricTestRunner
 /**
  * Test class for [CardMultilineWidget].
  */
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class CardMultilineWidgetTest {
+    private val testDispatcher = TestCoroutineDispatcher()
 
     private lateinit var cardMultilineWidget: CardMultilineWidget
     private lateinit var noZipCardMultilineWidget: CardMultilineWidget
@@ -67,7 +72,7 @@ internal class CardMultilineWidgetTest {
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
                 cardMultilineWidget = activity.findViewById(R.id.card_multiline_widget)
-                fullGroup = WidgetControlGroup(cardMultilineWidget)
+                fullGroup = WidgetControlGroup(cardMultilineWidget, testDispatcher)
 
                 fullGroup.cardNumberEditText.setText("")
 
@@ -89,7 +94,7 @@ internal class CardMultilineWidgetTest {
             activityScenario.onActivity {
                 noZipCardMultilineWidget = it.findViewById(R.id.card_multiline_widget)
                 noZipCardMultilineWidget.setShouldShowPostalCode(false)
-                noZipGroup = WidgetControlGroup(noZipCardMultilineWidget)
+                noZipGroup = WidgetControlGroup(noZipCardMultilineWidget, testDispatcher)
             }
         }
     }
@@ -1043,8 +1048,13 @@ internal class CardMultilineWidgetTest {
             .isFalse()
     }
 
-    internal class WidgetControlGroup(widget: CardMultilineWidget) {
-        val cardNumberEditText: CardNumberEditText = widget.findViewById(R.id.et_card_number)
+    internal class WidgetControlGroup(
+        widget: CardMultilineWidget,
+        workDispatcher: CoroutineDispatcher
+    ) {
+        val cardNumberEditText: CardNumberEditText = widget.findViewById<CardNumberEditText>(R.id.et_card_number).also {
+            it.workDispatcher = workDispatcher
+        }
         val cardInputLayout: TextInputLayout = widget.findViewById(R.id.tl_card_number)
         val expiryDateEditText: ExpiryDateEditText = widget.findViewById(R.id.et_expiry)
         val expiryInputLayout: TextInputLayout = widget.findViewById(R.id.tl_expiry)
