@@ -599,10 +599,14 @@ data class PaymentMethodCreateParams internal constructor(
         @JvmStatic
         fun createFromGooglePay(googlePayPaymentData: JSONObject): PaymentMethodCreateParams {
             val googlePayResult = GooglePayResult.fromJson(googlePayPaymentData)
-            val tokenId = requireNotNull(googlePayResult.token?.id)
+            val token = googlePayResult.token
+            val tokenId = token?.id.orEmpty()
 
             return create(
-                Card.create(tokenId),
+                Card(
+                    token = tokenId,
+                    attribution = setOfNotNull(token?.card?.tokenizationMethod?.toString())
+                ),
                 PaymentMethod.BillingDetails(
                     address = googlePayResult.address,
                     name = googlePayResult.name,
