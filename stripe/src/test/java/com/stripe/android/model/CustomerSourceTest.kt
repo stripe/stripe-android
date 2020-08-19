@@ -6,7 +6,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import org.json.JSONException
 import org.json.JSONObject
 
 /**
@@ -42,7 +41,6 @@ class CustomerSourceTest {
     }
 
     @Test
-    @Throws(JSONException::class)
     fun getSourceType_whenCard_returnsCard() {
         val sourceData = parse(CardFixtures.CARD_USD_JSON)
         assertNotNull(sourceData)

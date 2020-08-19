@@ -3,7 +3,7 @@ package com.stripe.android
 import com.google.common.truth.Truth.assertThat
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
-import org.junit.Test
+import kotlin.test.Test
 
 class FingerprintDataTest {
 

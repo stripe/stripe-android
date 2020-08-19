@@ -3,7 +3,6 @@ package com.stripe.android.cards
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.model.BinRange
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardMetadata
 import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,8 +27,7 @@ internal class InMemoryCardAccountRangeSourceTest {
                     high = "4242424249999999"
                 ),
                 panLength = 16,
-                brand = CardBrand.Visa,
-                brandName = CardBrand.Visa.name,
+                brandInfo = CardMetadata.AccountRange.BrandInfo.Visa,
                 country = "GB"
             )
         )

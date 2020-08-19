@@ -9,7 +9,6 @@ import com.stripe.android.CardNumberFixtures
 import com.stripe.android.StripeApiRepository
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardMetadata
 import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,8 +43,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
                     high = "4999999999999999"
                 ),
                 panLength = 16,
-                brandName = "visa",
-                brand = CardBrand.Visa
+                brandInfo = CardMetadata.AccountRange.BrandInfo.Visa
             )
         )
         assertThat(realStore.get(BinFixtures.VISA))
@@ -54,15 +52,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
         assertThat(
             realRepository.getAccountRange(CardNumberFixtures.DINERS_CLUB_14_NO_SPACES)
         ).isEqualTo(
-            CardMetadata.AccountRange(
-                binRange = BinRange(
-                    low = "36000000000000",
-                    high = "36999999999999"
-                ),
-                panLength = 14,
-                brandName = "diners",
-                brand = CardBrand.DinersClub
-            )
+            AccountRangeFixtures.DINERSCLUB14
         )
         assertThat(
             realStore.get(BinFixtures.DINERSCLUB14)
@@ -71,15 +61,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
         assertThat(
             realRepository.getAccountRange(CardNumberFixtures.DINERS_CLUB_16_NO_SPACES)
         ).isEqualTo(
-            CardMetadata.AccountRange(
-                binRange = BinRange(
-                    low = "3000000000000000",
-                    high = "3059999999999999"
-                ),
-                panLength = 16,
-                brandName = "diners",
-                brand = CardBrand.DinersClub
-            )
+            AccountRangeFixtures.DINERSCLUB16
         )
         assertThat(
             realStore.get(BinFixtures.DINERSCLUB16)
@@ -88,16 +70,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
         assertThat(
             realRepository.getAccountRange("378282")
         ).isEqualTo(
-            CardMetadata.AccountRange(
-                binRange = BinRange(
-                    low = "378282000000000",
-                    high = "378282999999999"
-                ),
-                panLength = 15,
-                brandName = "AMERICAN_EXPRESS",
-                brand = CardBrand.Unknown,
-                country = "US"
-            )
+            AccountRangeFixtures.AMERICANEXPRESS
         )
 
         assertThat(
@@ -107,15 +80,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
         assertThat(
             realRepository.getAccountRange("5555552500001001")
         ).isEqualTo(
-            CardMetadata.AccountRange(
-                binRange = BinRange(
-                    low = "5100000000000000",
-                    high = "5599999999999999"
-                ),
-                panLength = 16,
-                brandName = "mastercard",
-                brand = CardBrand.MasterCard
-            )
+            AccountRangeFixtures.MASTERCARD
         )
         assertThat(
             realStore.get(BinFixtures.MASTERCARD)
@@ -124,15 +89,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
         assertThat(
             realRepository.getAccountRange("356840")
         ).isEqualTo(
-            CardMetadata.AccountRange(
-                binRange = BinRange(
-                    low = "3528000000000000",
-                    high = "3589999999999999"
-                ),
-                panLength = 16,
-                brandName = "jcb",
-                brand = CardBrand.JCB
-            )
+            AccountRangeFixtures.JCB
         )
         assertThat(
             realStore.get(BinFixtures.JCB)
@@ -141,16 +98,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
         assertThat(
             realRepository.getAccountRange("621682")
         ).isEqualTo(
-            CardMetadata.AccountRange(
-                binRange = BinRange(
-                    low = "6216828050000000000",
-                    high = "6216828059999999999"
-                ),
-                panLength = 19,
-                brandName = "UNIONPAY",
-                brand = CardBrand.UnionPay,
-                country = "CN"
-            )
+            AccountRangeFixtures.UNIONPAY19
         )
 
         assertThat(
