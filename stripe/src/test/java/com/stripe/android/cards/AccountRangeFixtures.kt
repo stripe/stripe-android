@@ -11,7 +11,7 @@ internal object AccountRangeFixtures {
                 high = "4242424239999999"
             ),
             panLength = 16,
-            brandName = CardMetadata.AccountRange.BrandName.Visa,
+            brandInfo = CardMetadata.AccountRange.BrandInfo.Visa,
             country = "GB"
         ),
         CardMetadata.AccountRange(
@@ -20,7 +20,7 @@ internal object AccountRangeFixtures {
                 high = "4242424249999999"
             ),
             panLength = 16,
-            brandName = CardMetadata.AccountRange.BrandName.Visa,
+            brandInfo = CardMetadata.AccountRange.BrandInfo.Visa,
             country = "GB"
         )
     )

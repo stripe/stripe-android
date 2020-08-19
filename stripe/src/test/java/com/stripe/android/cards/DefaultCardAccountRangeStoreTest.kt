@@ -54,7 +54,7 @@ internal class DefaultCardAccountRangeStoreTest {
                     high = "9999999999999999"
                 ),
                 panLength = 16,
-                brandName = CardMetadata.AccountRange.BrandName.JCB
+                brandInfo = CardMetadata.AccountRange.BrandInfo.JCB
             )
         )
     }

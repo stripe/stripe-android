@@ -43,7 +43,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
                     high = "4999999999999999"
                 ),
                 panLength = 16,
-                brandName = CardMetadata.AccountRange.BrandName.Visa
+                brandInfo = CardMetadata.AccountRange.BrandInfo.Visa
             )
         )
         assertThat(realStore.get(BinFixtures.VISA))
@@ -58,7 +58,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
                     high = "36999999999999"
                 ),
                 panLength = 14,
-                brandName = CardMetadata.AccountRange.BrandName.DinersClub
+                brandInfo = CardMetadata.AccountRange.BrandInfo.DinersClub
             )
         )
         assertThat(
@@ -74,7 +74,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
                     high = "3059999999999999"
                 ),
                 panLength = 16,
-                brandName = CardMetadata.AccountRange.BrandName.DinersClub
+                brandInfo = CardMetadata.AccountRange.BrandInfo.DinersClub
             )
         )
         assertThat(
@@ -90,7 +90,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
                     high = "378282999999999"
                 ),
                 panLength = 15,
-                brandName = CardMetadata.AccountRange.BrandName.AmericanExpress,
+                brandInfo = CardMetadata.AccountRange.BrandInfo.AmericanExpress,
                 country = "US"
             )
         )
@@ -108,7 +108,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
                     high = "5599999999999999"
                 ),
                 panLength = 16,
-                brandName = CardMetadata.AccountRange.BrandName.Mastercard
+                brandInfo = CardMetadata.AccountRange.BrandInfo.Mastercard
             )
         )
         assertThat(
@@ -124,7 +124,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
                     high = "3589999999999999"
                 ),
                 panLength = 16,
-                brandName = CardMetadata.AccountRange.BrandName.JCB
+                brandInfo = CardMetadata.AccountRange.BrandInfo.JCB
             )
         )
         assertThat(
@@ -140,7 +140,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
                     high = "6216828059999999999"
                 ),
                 panLength = 19,
-                brandName = CardMetadata.AccountRange.BrandName.UnionPay,
+                brandInfo = CardMetadata.AccountRange.BrandInfo.UnionPay,
                 country = "CN"
             )
         )

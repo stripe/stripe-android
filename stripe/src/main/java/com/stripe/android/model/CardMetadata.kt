@@ -13,14 +13,14 @@ internal data class CardMetadata internal constructor(
     internal data class AccountRange internal constructor(
         val binRange: BinRange,
         val panLength: Int,
-        val brandName: BrandName,
+        val brandInfo: BrandInfo,
         val country: String? = null
     ) : StripeModel {
         val brand: CardBrand
-            get() = brandName.brand
+            get() = brandInfo.brand
 
-        internal enum class BrandName(
-            val code: String,
+        internal enum class BrandInfo(
+            val brandName: String,
             val brand: CardBrand
         ) {
             Visa("VISA", CardBrand.Visa),
