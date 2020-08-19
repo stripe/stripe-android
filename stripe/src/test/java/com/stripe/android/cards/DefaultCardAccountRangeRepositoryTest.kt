@@ -7,6 +7,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.ApiRequest
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.StripeApiRepository
+import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardMetadata
 import kotlin.test.Test
@@ -45,7 +46,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
                 brandName = CardMetadata.AccountRange.BrandName.Visa
             )
         )
-        assertThat(realStore.get("424242"))
+        assertThat(realStore.get(BinFixtures.VISA))
             .hasSize(2)
 
         assertThat(
@@ -60,8 +61,9 @@ internal class DefaultCardAccountRangeRepositoryTest {
                 brandName = CardMetadata.AccountRange.BrandName.DinersClub
             )
         )
-        assertThat(realStore.get("362272"))
-            .isEmpty()
+        assertThat(
+            realStore.get(BinFixtures.DINERSCLUB14)
+        ).isEmpty()
 
         assertThat(
             realRepository.getAccountRange(CardNumberFixtures.DINERS_CLUB_16_NO_SPACES)
@@ -75,24 +77,27 @@ internal class DefaultCardAccountRangeRepositoryTest {
                 brandName = CardMetadata.AccountRange.BrandName.DinersClub
             )
         )
-        assertThat(realStore.get("305693"))
-            .isEmpty()
+        assertThat(
+            realStore.get(BinFixtures.DINERSCLUB16)
+        ).isEmpty()
 
         assertThat(
-            realRepository.getAccountRange("372651")
+            realRepository.getAccountRange("378282")
         ).isEqualTo(
             CardMetadata.AccountRange(
                 binRange = BinRange(
-                    low = "372651000000000",
-                    high = "372651999999999"
+                    low = "378282000000000",
+                    high = "378282999999999"
                 ),
                 panLength = 15,
                 brandName = CardMetadata.AccountRange.BrandName.AmericanExpress,
                 country = "US"
             )
         )
-        assertThat(realStore.get("372651"))
-            .hasSize(1)
+
+        assertThat(
+            realStore.get(BinFixtures.AMEX)
+        ).hasSize(1)
 
         assertThat(
             realRepository.getAccountRange("5555552500001001")
@@ -106,8 +111,9 @@ internal class DefaultCardAccountRangeRepositoryTest {
                 brandName = CardMetadata.AccountRange.BrandName.Mastercard
             )
         )
-        assertThat(realStore.get("555555"))
-            .isEmpty()
+        assertThat(
+            realStore.get(BinFixtures.MASTERCARD)
+        ).isEmpty()
 
         assertThat(
             realRepository.getAccountRange("356840")
@@ -121,8 +127,9 @@ internal class DefaultCardAccountRangeRepositoryTest {
                 brandName = CardMetadata.AccountRange.BrandName.JCB
             )
         )
-        assertThat(realStore.get("356840"))
-            .isEmpty()
+        assertThat(
+            realStore.get(BinFixtures.JCB)
+        ).isEmpty()
 
         assertThat(
             realRepository.getAccountRange("621682")
@@ -137,8 +144,10 @@ internal class DefaultCardAccountRangeRepositoryTest {
                 country = "CN"
             )
         )
-        assertThat(realStore.get("621682"))
-            .hasSize(69)
+
+        assertThat(
+            realStore.get(BinFixtures.UNIONPAY_CN)
+        ).hasSize(69)
     }
 
     @Test

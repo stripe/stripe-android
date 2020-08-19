@@ -179,8 +179,7 @@ class StripeEndToEndTest {
                     funding = CardFunding.Credit,
                     country = "US",
                     currency = "usd",
-                    cvcCheck = "unchecked",
-                    metadata = emptyMap()
+                    cvcCheck = "unchecked"
                 )
             )
     }

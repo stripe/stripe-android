@@ -1,6 +1,7 @@
 package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardMetadata
 import org.json.JSONObject
@@ -10,10 +11,10 @@ class CardMetadataJsonParserTest {
 
     @Test
     fun `parse should create expected object`() {
-        assertThat(CardMetadataJsonParser(BIN_PREFIX).parse(DEFAULT))
+        assertThat(CardMetadataJsonParser(BinFixtures.VISA).parse(DEFAULT))
             .isEqualTo(
                 CardMetadata(
-                    BIN_PREFIX,
+                    BinFixtures.VISA,
                     listOf(
                         CardMetadata.AccountRange(
                             binRange = BinRange(
@@ -40,10 +41,10 @@ class CardMetadataJsonParserTest {
 
     @Test
     fun `parse should drop objects with missing fields`() {
-        assertThat(CardMetadataJsonParser(BIN_PREFIX).parse(MISSING_FIELD))
+        assertThat(CardMetadataJsonParser(BinFixtures.VISA).parse(MISSING_FIELD))
             .isEqualTo(
                 CardMetadata(
-                    BIN_PREFIX,
+                    BinFixtures.VISA,
                     listOf(
                         CardMetadata.AccountRange(
                             binRange = BinRange(
@@ -61,18 +62,16 @@ class CardMetadataJsonParserTest {
 
     @Test
     fun `parse should handle empty result`() {
-        assertThat(CardMetadataJsonParser(BIN_PREFIX).parse(EMPTY))
+        assertThat(CardMetadataJsonParser(BinFixtures.VISA).parse(EMPTY))
             .isEqualTo(
                 CardMetadata(
-                    BIN_PREFIX,
+                    BinFixtures.VISA,
                     emptyList()
                 )
             )
     }
 
     private companion object {
-        private const val BIN_PREFIX = "424242"
-
         private val DEFAULT = JSONObject(
             """
                 {

@@ -23,10 +23,10 @@ internal class DeletePaymentMethodDialogFactory internal constructor(
         return AlertDialog.Builder(context, R.style.AlertDialogStyle)
             .setTitle(R.string.delete_payment_method_prompt_title)
             .setMessage(message)
-            .setPositiveButton(android.R.string.yes) { _, _ ->
+            .setPositiveButton(android.R.string.ok) { _, _ ->
                 onDeletedPaymentMethod(paymentMethod)
             }
-            .setNegativeButton(android.R.string.no) { _, _ ->
+            .setNegativeButton(android.R.string.cancel) { _, _ ->
                 adapter.resetPaymentMethod(paymentMethod)
             }
             .setOnCancelListener {

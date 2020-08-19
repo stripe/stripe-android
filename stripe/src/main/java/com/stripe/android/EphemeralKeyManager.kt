@@ -104,7 +104,7 @@ internal class EphemeralKeyManager(
         )
     }
 
-    private class ClientKeyUpdateListener internal constructor(
+    private class ClientKeyUpdateListener(
         private val ephemeralKeyManager: EphemeralKeyManager,
         private val operation: EphemeralOperation
     ) : EphemeralKeyUpdateListener {

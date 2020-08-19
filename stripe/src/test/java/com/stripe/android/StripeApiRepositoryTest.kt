@@ -16,6 +16,7 @@ import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.BankAccountTokenParamsFixtures
+import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.CardParamsFixtures
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -389,7 +390,7 @@ internal class StripeApiRepositoryTest {
         verifyFingerprintAndAnalyticsRequests(AnalyticsEvent.PaymentIntentConfirm)
 
         val analyticsRequest = analyticsRequestArgumentCaptor.firstValue
-        assertEquals(PaymentMethod.Type.Card.code, analyticsRequest.params.get("source_type"))
+        assertEquals(PaymentMethod.Type.Card.code, analyticsRequest.params["source_type"])
     }
 
     @Ignore("requires a secret key")
@@ -692,11 +693,13 @@ internal class StripeApiRepositoryTest {
         testDispatcher.runBlockingTest {
             val cardMetadata =
                 stripeApiRepository.getCardMetadata(
-                    "424242",
+                    BinFixtures.VISA,
                     ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
                 )
-            assertThat(cardMetadata.binPrefix).isEqualTo("424242")
-            assertThat(cardMetadata.accountRanges).isNotEmpty()
+            assertThat(cardMetadata.bin)
+                .isEqualTo(BinFixtures.VISA)
+            assertThat(cardMetadata.accountRanges)
+                .isNotEmpty()
         }
     }
 

@@ -12,7 +12,6 @@ import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.core.text.util.LinkifyCompat
 import androidx.core.view.ViewCompat
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
@@ -179,7 +178,7 @@ class AddPaymentMethodActivity : StripeActivity() {
 
         isProgressBarVisible = true
 
-        viewModel.createPaymentMethod(params).observe(this, Observer { result ->
+        viewModel.createPaymentMethod(params).observe(this, { result ->
             result.fold(
                 onSuccess = {
                     if (shouldAttachToCustomer) {
@@ -204,7 +203,7 @@ class AddPaymentMethodActivity : StripeActivity() {
                 viewModel.attachPaymentMethod(
                     customerSession,
                     paymentMethod
-                ).observe(this, Observer { result ->
+                ).observe(this, { result ->
                     result.fold(
                         onSuccess = ::finishWithPaymentMethod,
                         onFailure = {

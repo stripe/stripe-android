@@ -40,8 +40,7 @@ class CardJsonParserTest {
                 funding = CardFunding.Credit,
                 fingerprint = "abc123",
                 last4 = "4242",
-                name = "Jenny Rosen",
-                metadata = mapOf("color" to "blue", "animal" to "dog")
+                name = "Jenny Rosen"
             )
         )
     }

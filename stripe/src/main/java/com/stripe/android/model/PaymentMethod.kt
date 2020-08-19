@@ -234,7 +234,6 @@ data class PaymentMethod internal constructor(
                 type = type,
                 billingDetails = billingDetails,
                 customerId = customerId,
-                metadata = metadata,
                 card = card,
                 cardPresent = cardPresent,
                 fpx = fpx,

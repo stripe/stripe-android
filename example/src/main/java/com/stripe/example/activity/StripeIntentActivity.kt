@@ -3,7 +3,6 @@ package com.stripe.example.activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentIntentResult
@@ -47,7 +46,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         viewModel.paymentIntentResultLiveData
             .observe(
                 this,
-                Observer {
+                {
                     it.fold(
                         onSuccess = ::onConfirmSuccess,
                         onFailure = ::onConfirmError
@@ -58,7 +57,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         viewModel.setupIntentResultLiveData
             .observe(
                 this,
-                Observer {
+                {
                     it.fold(
                         onSuccess = ::onConfirmSuccess,
                         onFailure = ::onConfirmError
@@ -81,7 +80,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
 
         viewModel.createPaymentIntent(country).observe(
             this,
-            Observer { result ->
+            { result ->
                 result.onSuccess {
                     handleCreatePaymentIntentResponse(
                         it, paymentMethodCreateParams, shippingDetails,
@@ -101,7 +100,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
 
         viewModel.createSetupIntent(country).observe(
             this,
-            Observer { result ->
+            { result ->
                 result.onSuccess {
                     handleCreateSetupIntentResponse(it, params, stripeAccountId)
                 }

@@ -2,6 +2,7 @@ package com.stripe.android.cards
 
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardMetadata
 import kotlin.test.Test
@@ -22,28 +23,35 @@ internal class DefaultCardAccountRangeStoreTest {
 
     @Test
     fun `cache hit should return expected results`() = testDispatcher.runBlockingTest {
-        store.save("424242", AccountRangeFixtures.DEFAULT)
-        store.save("555555", BRANDX_ACCOUNT_RANGES)
+        store.save(BinFixtures.VISA, AccountRangeFixtures.DEFAULT)
+        store.save(BinFixtures.FAKE, BRANDX_ACCOUNT_RANGES)
 
-        assertThat(store.get("424242"))
+        assertThat(store.get(BinFixtures.VISA))
             .isEqualTo(AccountRangeFixtures.DEFAULT)
 
-        assertThat(store.get("555555"))
+        assertThat(store.get(BinFixtures.FAKE))
             .isEqualTo(BRANDX_ACCOUNT_RANGES)
     }
 
     @Test
     fun `cache miss should return empty`() = testDispatcher.runBlockingTest {
-        assertThat(store.get("999999"))
+        assertThat(store.get(BinFixtures.FAKE))
             .isEmpty()
+    }
+
+    @Test
+    fun `createPrefKey should return expected value`() {
+        assertThat(
+            store.createPrefKey(BinFixtures.VISA)
+        ).isEqualTo("key_account_ranges:424242")
     }
 
     private companion object {
         private val BRANDX_ACCOUNT_RANGES = listOf(
             CardMetadata.AccountRange(
                 binRange = BinRange(
-                    low = "5555550000000000",
-                    high = "5555559999999999"
+                    low = "9999990000000000",
+                    high = "9999999999999999"
                 ),
                 panLength = 16,
                 brandName = CardMetadata.AccountRange.BrandName.JCB

@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.CustomerSession
@@ -70,7 +69,7 @@ class FragmentExamplesFragment : Fragment() {
 
         viewModel.paymentIntentResultLiveData.observe(
             viewLifecycleOwner,
-            Observer { result ->
+            { result ->
                 result.fold(
                     onSuccess = {
                         val status = getString(
@@ -87,7 +86,7 @@ class FragmentExamplesFragment : Fragment() {
 
         viewModel.setupIntentResultLiveData.observe(
             viewLifecycleOwner,
-            Observer { result ->
+            { result ->
                 result.fold(
                     onSuccess = {
                         val paymentIntent = it.intent
@@ -176,7 +175,7 @@ class FragmentExamplesFragment : Fragment() {
 
         viewModel.createPaymentIntent().observe(
             viewLifecycleOwner,
-            Observer {
+            {
                 it.fold(
                     onSuccess = ::onCreatePaymentIntentResponse,
                     onFailure = ::onError
@@ -192,7 +191,7 @@ class FragmentExamplesFragment : Fragment() {
 
         viewModel.createSetupIntent().observe(
             viewLifecycleOwner,
-            Observer {
+            {
                 it.fold(
                     onSuccess = ::onCreateSetupIntentResponse,
                     onFailure = ::onError
