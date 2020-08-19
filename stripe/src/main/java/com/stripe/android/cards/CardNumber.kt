@@ -1,14 +1,38 @@
 package com.stripe.android.cards
 
+import com.stripe.android.CardUtils
 import com.stripe.android.StripeTextUtils
 
-internal sealed class CardNumber(number: String) {
-    private val normalizedNumber = StripeTextUtils.removeSpacesAndHyphens(number).orEmpty()
+internal sealed class CardNumber(
+    denormalizedNumber: String
+) {
+    protected val normalizedNumber = StripeTextUtils
+        .removeSpacesAndHyphens(denormalizedNumber)
+        .orEmpty()
 
     /**
      * A representation of a partial or full card number that hasn't been validated.
      */
-    class Unvalidated(number: String) : CardNumber(number)
+    internal data class Unvalidated internal constructor(
+        private val denormalizedNumber: String
+    ) : CardNumber(denormalizedNumber) {
+        fun validate(panLength: Int): Validated? {
+            return if (panLength >= MIN_PAN_LENGTH &&
+                normalizedNumber.length == panLength &&
+                CardUtils.isValidLuhnNumber(normalizedNumber)) {
+                Validated(normalizedNumber)
+            } else {
+                null
+            }
+        }
+    }
+
+    /**
+     * A representation of a client-side validated card number.
+     */
+    internal data class Validated internal constructor(
+        private val denormalizedNumber: String
+    ) : CardNumber(denormalizedNumber)
 
     /**
      * Format a number based on its expected length
@@ -59,6 +83,7 @@ internal sealed class CardNumber(number: String) {
         private fun getSpacePositions(panLength: Int) = SPACE_POSITIONS[panLength]
             ?: DEFAULT_SPACE_POSITIONS
 
+        private const val MIN_PAN_LENGTH = 14
         private const val DEFAULT_PAN_LENGTH = 16
         private val DEFAULT_SPACE_POSITIONS = setOf(4, 9, 14)
 

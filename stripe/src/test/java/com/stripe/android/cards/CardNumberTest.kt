@@ -60,4 +60,38 @@ class CardNumberTest {
             CardNumber.Unvalidated("36227206271667").getFormatted(14)
         ).isEqualTo("3622 720627 1667")
     }
+
+    @Test
+    fun `validate() with valid card number should return Validated object`() {
+        assertThat(
+            CardNumber.Unvalidated("4242 4242 4242 4242")
+                .validate(16)
+        ).isEqualTo(
+            CardNumber.Validated("4242424242424242")
+        )
+    }
+
+    @Test
+    fun `validate() with invalid Luhn card number should return null`() {
+        assertThat(
+            CardNumber.Unvalidated("4242 4242 4242 4243")
+                .validate(16)
+        ).isNull()
+    }
+
+    @Test
+    fun `validate() with valid Luhn card number but incorrect length should return null`() {
+        assertThat(
+            CardNumber.Unvalidated("4242 4242 4242 4242")
+                .validate(19)
+        ).isNull()
+    }
+
+    @Test
+    fun `validate() with empty number should return null`() {
+        assertThat(
+            CardNumber.Unvalidated("")
+                .validate(0)
+        ).isNull()
+    }
 }
