@@ -11,18 +11,18 @@ internal class AccountRangeJsonParser : ModelJsonParser<CardMetadata.AccountRang
         val accountRangeLow = StripeJsonUtils.optString(json, FIELD_ACCOUNT_RANGE_LOW)
         val panLength = StripeJsonUtils.optInteger(json, FIELD_PAN_LENGTH)
 
-        val brandName =
+        val brandInfo =
             StripeJsonUtils.optString(json, FIELD_BRAND).let { brandName ->
                 CardMetadata.AccountRange.BrandInfo.values().firstOrNull { it.brandName == brandName }
             }
         return if (accountRangeHigh != null &&
             accountRangeLow != null &&
             panLength != null &&
-            brandName != null) {
+            brandInfo != null) {
             CardMetadata.AccountRange(
                 binRange = BinRange(accountRangeLow, accountRangeHigh),
                 panLength = panLength,
-                brandInfo = brandName,
+                brandInfo = brandInfo,
                 country = StripeJsonUtils.optString(json, FIELD_COUNTRY)
             )
         } else {
