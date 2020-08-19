@@ -75,8 +75,6 @@ internal class CardInputWidgetTest {
 
     @BeforeTest
     fun setup() {
-//        Dispatchers.setMain(testDispatcher)
-
         // The input date here will be invalid after 2050. Please update the test.
         assertThat(Calendar.getInstance().get(Calendar.YEAR) < 2050)
             .isTrue()
