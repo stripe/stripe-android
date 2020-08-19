@@ -2,20 +2,20 @@ package com.stripe.android.cards
 
 import com.stripe.android.StripeTextUtils
 
-/**
- * A representation of a partial or full card number.
- */
-internal data class CardNumber(
-    private val number: String
-) {
+internal sealed class CardNumber(number: String) {
     private val normalizedNumber = StripeTextUtils.removeSpacesAndHyphens(number).orEmpty()
+
+    /**
+     * A representation of a partial or full card number that hasn't been validated.
+     */
+    class Unvalidated(number: String) : CardNumber(number)
 
     /**
      * Format a number based on its expected length
      *
      * e.g. `"4242424242424242"` with pan length `16` will return `"4242 4242 4242 4242"`;
      * `"424242"` with pan length `16` will return `"4242 42"`;
-     * `"4242424242424242"` with pan length `14` will return `"4242 424242 4242"`;
+     * `"4242424242424242"` with pan length `14` will return `"4242 424242 4242"`
      */
     fun getFormatted(
         panLength: Int = DEFAULT_PAN_LENGTH
