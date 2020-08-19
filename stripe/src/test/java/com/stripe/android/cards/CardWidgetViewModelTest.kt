@@ -3,9 +3,7 @@ package com.stripe.android.cards
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardMetadata
 import kotlin.test.Test
@@ -15,7 +13,12 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class CardWidgetViewModelTest {
     private val application = ApplicationProvider.getApplicationContext<Application>()
-    private val viewModel = CardWidgetViewModel(FakeCardAccountRangeRepository())
+    private val viewModel = CardWidgetViewModel(
+        application,
+        object : CardAccountRangeRepository.Factory {
+            override fun create() = FakeCardAccountRangeRepository()
+        }
+    )
 
     @Test
     fun `getAccountRange() should return expected value`() {
@@ -25,15 +28,6 @@ class CardWidgetViewModelTest {
         }
         assertThat(accountRange)
             .isEqualTo(ACCOUNT_RANGE)
-    }
-
-    @Test
-    fun `Factory#create() should succeed`() {
-        PaymentConfiguration.init(application, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-        assertThat(
-            CardWidgetViewModel.Factory(application)
-                .create(CardWidgetViewModel::class.java)
-        ).isNotNull()
     }
 
     private class FakeCardAccountRangeRepository : CardAccountRangeRepository {
