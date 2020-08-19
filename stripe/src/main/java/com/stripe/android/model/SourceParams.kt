@@ -299,7 +299,8 @@ class SourceParams private constructor(
             Objects.equals(token, params.token) &&
             Objects.equals(usage, params.usage) &&
             Objects.equals(type, params.type) &&
-            Objects.equals(weChatParams, params.weChatParams)
+            Objects.equals(weChatParams, params.weChatParams) &&
+            Objects.equals(attribution, params.attribution)
     }
 
     /**
@@ -637,7 +638,15 @@ class SourceParams private constructor(
          */
         @JvmStatic
         fun createSourceFromTokenParams(tokenId: String): SourceParams {
-            return SourceParams(SourceType.CARD)
+            return createSourceFromTokenParams(tokenId, emptySet())
+        }
+
+        @JvmSynthetic
+        internal fun createSourceFromTokenParams(
+            tokenId: String,
+            attribution: Set<String>
+        ): SourceParams {
+            return SourceParams(SourceType.CARD, attribution)
                 .setToken(tokenId)
         }
 
@@ -715,16 +724,21 @@ class SourceParams private constructor(
             googlePayPaymentData: JSONObject
         ): SourceParams {
             val googlePayResult = GooglePayResult.fromJson(googlePayPaymentData)
-            return SourceParams(SourceType.CARD)
-                .setToken(requireNotNull(googlePayResult.token?.id))
-                .setOwner(
-                    OwnerParams(
-                        address = googlePayResult.address,
-                        email = googlePayResult.email,
-                        name = googlePayResult.name,
-                        phone = googlePayResult.phoneNumber
-                    )
+            val token = googlePayResult.token
+
+            return createSourceFromTokenParams(
+                tokenId = token?.id.orEmpty(),
+                attribution = setOfNotNull(
+                    token?.card?.tokenizationMethod?.toString()
                 )
+            ).setOwner(
+                OwnerParams(
+                    address = googlePayResult.address,
+                    email = googlePayResult.email,
+                    name = googlePayResult.name,
+                    phone = googlePayResult.phoneNumber
+                )
+            )
         }
 
         /**

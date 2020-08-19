@@ -400,6 +400,29 @@ data class PaymentMethodCreateParams internal constructor(
          * @return params for creating a [PaymentMethod.Type.Card] payment method
          */
         @JvmStatic
+        fun createCard(
+            cardParams: CardParams
+        ): PaymentMethodCreateParams {
+            return create(
+                card = Card(
+                    number = cardParams.number,
+                    expiryMonth = cardParams.expMonth,
+                    expiryYear = cardParams.expYear,
+                    cvc = cardParams.cvc,
+                    attribution = cardParams.attribution
+                ),
+                billingDetails = PaymentMethod.BillingDetails(
+                    name = cardParams.name,
+                    address = cardParams.address
+                ),
+                metadata = cardParams.metadata
+            )
+        }
+
+        /**
+         * @return params for creating a [PaymentMethod.Type.Card] payment method
+         */
+        @JvmStatic
         @JvmOverloads
         fun create(
             card: Card,

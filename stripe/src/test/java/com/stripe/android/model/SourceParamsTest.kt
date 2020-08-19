@@ -5,7 +5,6 @@ import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import org.json.JSONException
 
 /**
  * Test class for [SourceParams].
@@ -226,39 +225,47 @@ class SourceParamsTest {
     }
 
     @Test
-    @Throws(JSONException::class)
     fun createCardParamsFromGooglePay_withNoBillingAddress() {
-        val createdParams = SourceParams.createCardParamsFromGooglePay(
-            GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS)
-        val expectedParams = SourceParams
-            .createSourceFromTokenParams("tok_1F4ACMCRMbs6FrXf6fPqLnN7")
-            .setOwner(SourceParams.OwnerParams())
-        assertEquals(expectedParams, createdParams)
+        assertThat(
+            SourceParams.createCardParamsFromGooglePay(
+                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS
+            )
+        ).isEqualTo(
+            SourceParams
+                .createSourceFromTokenParams(
+                    "tok_1F4ACMCRMbs6FrXf6fPqLnN7",
+                    setOf("GooglePay")
+                )
+                .setOwner(SourceParams.OwnerParams())
+        )
     }
 
     @Test
-    @Throws(JSONException::class)
     fun createCardParamsFromGooglePay_withFullBillingAddress() {
-        val createdParams = SourceParams.createCardParamsFromGooglePay(
-            GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS)
-
-        val ownerParams = SourceParams.OwnerParams(
-            email = "stripe@example.com",
-            name = "Stripe Johnson",
-            phone = "1-888-555-1234",
-            address = Address(
-                line1 = "510 Townsend St",
-                city = "San Francisco",
-                state = "CA",
-                postalCode = "94103",
-                country = "US"
+        assertThat(
+            SourceParams.createCardParamsFromGooglePay(
+                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS
             )
+        ).isEqualTo(
+            SourceParams.createSourceFromTokenParams(
+                "tok_1F4VSjBbvEcIpqUbSsbEtBap",
+                setOf("GooglePay")
+            )
+                .setOwner(
+                    SourceParams.OwnerParams(
+                        email = "stripe@example.com",
+                        name = "Stripe Johnson",
+                        phone = "1-888-555-1234",
+                        address = Address(
+                            line1 = "510 Townsend St",
+                            city = "San Francisco",
+                            state = "CA",
+                            postalCode = "94103",
+                            country = "US"
+                        )
+                    )
+                )
         )
-
-        val expectedParams = SourceParams.createSourceFromTokenParams("tok_1F4VSjBbvEcIpqUbSsbEtBap")
-            .setOwner(ownerParams)
-
-        assertEquals(expectedParams, createdParams)
     }
 
     @Test

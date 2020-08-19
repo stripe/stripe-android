@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import org.json.JSONException
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -12,7 +11,6 @@ import org.robolectric.RobolectricTestRunner
 class GooglePayConfigTest {
 
     @Test
-    @Throws(JSONException::class)
     fun getTokenizationSpecification_withoutConnectedAccount() {
         PaymentConfiguration.init(ApplicationProvider.getApplicationContext<Context>(),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
@@ -29,7 +27,6 @@ class GooglePayConfigTest {
     }
 
     @Test
-    @Throws(JSONException::class)
     fun getTokenizationSpecification_withConnectedAccount() {
         val tokenizationSpec = GooglePayConfig(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_1234")
             .tokenizationSpecification

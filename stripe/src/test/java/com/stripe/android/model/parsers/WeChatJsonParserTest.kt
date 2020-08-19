@@ -1,30 +1,28 @@
 package com.stripe.android.model.parsers
 
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.WeChat
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import org.json.JSONException
 import org.json.JSONObject
 
 class WeChatJsonParserTest {
 
     @Test
-    @Throws(JSONException::class)
     fun parse_shouldReturnExpectedObject() {
-        val actual = WeChatJsonParser().parse(WE_CHAT_PAY_JSON)
-
-        val expected = WeChat(
-            statementDescriptor = "ORDER 123",
-            appId = "wxa0dfnoie578ce",
-            nonce = "yFNjgfoni3kZEPYID",
-            packageValue = "Sign=WXPay",
-            partnerId = "2623457",
-            prepayId = "wx070440552351e841913701900",
-            sign = "1A98A09EA74DCF12349B33DED3FF6BCED1C062C63B43AE773D8",
-            timestamp = "1565134055"
+        assertThat(
+            WeChatJsonParser().parse(WE_CHAT_PAY_JSON)
+        ).isEqualTo(
+            WeChat(
+                statementDescriptor = "ORDER 123",
+                appId = "wxa0dfnoie578ce",
+                nonce = "yFNjgfoni3kZEPYID",
+                packageValue = "Sign=WXPay",
+                partnerId = "2623457",
+                prepayId = "wx070440552351e841913701900",
+                sign = "1A98A09EA74DCF12349B33DED3FF6BCED1C062C63B43AE773D8",
+                timestamp = "1565134055"
+            )
         )
-
-        assertEquals(expected, actual)
     }
 
     private companion object {
