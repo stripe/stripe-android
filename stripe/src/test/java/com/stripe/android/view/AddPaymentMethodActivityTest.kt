@@ -22,10 +22,6 @@ import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentSession
 import com.stripe.android.R
-import com.stripe.android.exception.APIConnectionException
-import com.stripe.android.exception.APIException
-import com.stripe.android.exception.AuthenticationException
-import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
@@ -101,8 +97,6 @@ class AddPaymentMethodActivityTest {
     }
 
     @Test
-    @Throws(APIException::class, AuthenticationException::class, InvalidRequestException::class,
-        APIConnectionException::class)
     fun softEnterKey_whenDataIsNotValid_doesNotHideKeyboardAndDoesNotFinish() {
         activityScenarioFactory.create<AddPaymentMethodActivity>(
             BASE_CARD_ARGS
