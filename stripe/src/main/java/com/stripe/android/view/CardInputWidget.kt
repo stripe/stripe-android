@@ -846,6 +846,10 @@ class CardInputWidget @JvmOverloads constructor(
         if (shouldRequestFocus) {
             cardNumberEditText.requestFocus()
         }
+
+        cardNumberEditText.isProcessingCallback = {
+            cardBrandView.isProcessing = it
+        }
     }
 
     /**

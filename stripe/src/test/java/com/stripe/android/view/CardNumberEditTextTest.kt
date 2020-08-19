@@ -528,6 +528,28 @@ class CardNumberEditTextTest {
             }
     }
 
+    @Test
+    fun `isProcessingCallback should be invoked with 'true' when fetching account range and 'false' when fetch is completed`() {
+        var isProcessing = false
+        cardNumberEditText.isProcessingCallback = {
+            isProcessing = it
+        }
+
+        // not processing at rest
+        assertThat(isProcessing)
+            .isFalse()
+
+        // start processing once a BIN is typed in
+        cardNumberEditText.setText(BinFixtures.VISA.value)
+        assertThat(isProcessing)
+            .isTrue()
+        idle()
+
+        // account range data has been retrieved
+        assertThat(isProcessing)
+            .isFalse()
+    }
+
     private fun verifyCardBrandBin(
         cardBrand: CardBrand,
         bin: String

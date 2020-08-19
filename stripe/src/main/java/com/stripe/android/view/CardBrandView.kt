@@ -8,6 +8,7 @@ import androidx.annotation.ColorInt
 import androidx.core.graphics.drawable.DrawableCompat
 import com.stripe.android.databinding.CardBrandViewBinding
 import com.stripe.android.model.CardBrand
+import kotlin.properties.Delegates
 
 internal class CardBrandView @JvmOverloads constructor(
     context: Context,
@@ -22,6 +23,12 @@ internal class CardBrandView @JvmOverloads constructor(
 
     @ColorInt
     internal var tintColorInt: Int = 0
+
+    var isProcessing: Boolean by Delegates.observable(
+        false
+    ) { _, _, isProcessing ->
+        // TODO(mshafrir-stripe): implement processing logoic
+    }
 
     init {
         isClickable = false
