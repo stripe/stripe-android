@@ -12,6 +12,7 @@ import com.stripe.android.R
 import com.stripe.android.StripeTextUtils
 import com.stripe.android.cards.Bin
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.LegacyCardAccountRangeRepository
 import com.stripe.android.cards.LocalCardAccountRangeSource
 import com.stripe.android.model.CardBrand
@@ -189,7 +190,8 @@ class CardNumberEditText internal constructor(
                     s?.toString().orEmpty()
                 ).orEmpty()
 
-                updateCardBrand(Bin.create(spacelessNumber))
+                val cardNumber = CardNumber.Unvalidated(spacelessNumber)
+                updateCardBrand(cardNumber.bin)
 
                 val formattedNumber = cardBrand.formatNumber(spacelessNumber)
                 this.newCursorPosition = updateSelectionIndex(
