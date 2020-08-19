@@ -19,12 +19,10 @@ internal sealed class CardNumber(number: String) {
      */
     fun getFormatted(
         panLength: Int = DEFAULT_PAN_LENGTH
-    ) = formatNumber(panLength, getSpacePositions(panLength))
+    ) = formatNumber(panLength)
 
-    private fun formatNumber(
-        panLength: Int,
-        spacePositions: Set<Int>
-    ): String {
+    private fun formatNumber(panLength: Int): String {
+        val spacePositions = getSpacePositions(panLength)
         val spacelessCardNumber = normalizedNumber.take(panLength)
         val groups = arrayOfNulls<String?>(spacePositions.size + 1)
 
