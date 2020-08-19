@@ -4,7 +4,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardMetadata
 import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -55,8 +54,7 @@ internal class DefaultCardAccountRangeStoreTest {
                     high = "9999999999999999"
                 ),
                 panLength = 16,
-                brandName = "BrandX",
-                brand = CardBrand.Unknown
+                brandInfo = CardMetadata.AccountRange.BrandInfo.JCB
             )
         )
     }

@@ -7,7 +7,6 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.BinRange
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardMetadata
 import kotlin.test.Test
 import org.junit.runner.RunWith
@@ -48,8 +47,7 @@ class CardWidgetViewModelTest {
                 high = "4242424239999999"
             ),
             panLength = 16,
-            brandName = "VISA",
-            brand = CardBrand.Visa,
+            brandInfo = CardMetadata.AccountRange.BrandInfo.Visa,
             country = "GB"
         )
     }

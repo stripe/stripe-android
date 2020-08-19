@@ -9,7 +9,6 @@ import com.stripe.android.CardNumberFixtures
 import com.stripe.android.StripeApiRepository
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardMetadata
 import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,8 +43,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
                     high = "4999999999999999"
                 ),
                 panLength = 16,
-                brandName = "visa",
-                brand = CardBrand.Visa
+                brandInfo = CardMetadata.AccountRange.BrandInfo.Visa
             )
         )
         assertThat(realStore.get(BinFixtures.VISA))
@@ -60,8 +58,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
                     high = "36999999999999"
                 ),
                 panLength = 14,
-                brandName = "diners",
-                brand = CardBrand.DinersClub
+                brandInfo = CardMetadata.AccountRange.BrandInfo.DinersClub
             )
         )
         assertThat(
@@ -77,8 +74,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
                     high = "3059999999999999"
                 ),
                 panLength = 16,
-                brandName = "diners",
-                brand = CardBrand.DinersClub
+                brandInfo = CardMetadata.AccountRange.BrandInfo.DinersClub
             )
         )
         assertThat(
@@ -94,8 +90,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
                     high = "378282999999999"
                 ),
                 panLength = 15,
-                brandName = "AMERICAN_EXPRESS",
-                brand = CardBrand.Unknown,
+                brandInfo = CardMetadata.AccountRange.BrandInfo.AmericanExpress,
                 country = "US"
             )
         )
@@ -113,8 +108,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
                     high = "5599999999999999"
                 ),
                 panLength = 16,
-                brandName = "mastercard",
-                brand = CardBrand.MasterCard
+                brandInfo = CardMetadata.AccountRange.BrandInfo.Mastercard
             )
         )
         assertThat(
@@ -130,8 +124,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
                     high = "3589999999999999"
                 ),
                 panLength = 16,
-                brandName = "jcb",
-                brand = CardBrand.JCB
+                brandInfo = CardMetadata.AccountRange.BrandInfo.JCB
             )
         )
         assertThat(
@@ -147,8 +140,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
                     high = "6216828059999999999"
                 ),
                 panLength = 19,
-                brandName = "UNIONPAY",
-                brand = CardBrand.UnionPay,
+                brandInfo = CardMetadata.AccountRange.BrandInfo.UnionPay,
                 country = "CN"
             )
         )

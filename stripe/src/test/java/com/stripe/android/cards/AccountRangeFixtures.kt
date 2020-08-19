@@ -1,7 +1,6 @@
 package com.stripe.android.cards
 
 import com.stripe.android.model.BinRange
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardMetadata
 
 internal object AccountRangeFixtures {
@@ -12,8 +11,7 @@ internal object AccountRangeFixtures {
                 high = "4242424239999999"
             ),
             panLength = 16,
-            brand = CardBrand.Visa,
-            brandName = CardBrand.Visa.name,
+            brandInfo = CardMetadata.AccountRange.BrandInfo.Visa,
             country = "GB"
         ),
         CardMetadata.AccountRange(
@@ -22,8 +20,7 @@ internal object AccountRangeFixtures {
                 high = "4242424249999999"
             ),
             panLength = 16,
-            brand = CardBrand.Visa,
-            brandName = CardBrand.Visa.name,
+            brandInfo = CardMetadata.AccountRange.BrandInfo.Visa,
             country = "GB"
         )
     )
