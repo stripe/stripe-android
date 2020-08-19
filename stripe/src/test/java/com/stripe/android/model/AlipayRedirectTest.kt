@@ -1,7 +1,7 @@
 package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
-import org.junit.Test
+import kotlin.test.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 

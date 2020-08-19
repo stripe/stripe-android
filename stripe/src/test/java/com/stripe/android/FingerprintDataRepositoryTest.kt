@@ -10,10 +10,10 @@ import com.nhaarman.mockitokotlin2.verify
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 import kotlin.test.AfterTest
+import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 

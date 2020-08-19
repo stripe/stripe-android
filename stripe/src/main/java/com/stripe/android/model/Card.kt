@@ -585,5 +585,22 @@ data class Card internal constructor(
             return Builder(number, expMonth, expYear, cvc)
                 .build()
         }
+
+        /**
+         * See https://stripe.com/docs/api/cards/object#card_object-brand for valid values.
+         */
+        @JvmSynthetic
+        internal fun getCardBrand(brandName: String?): CardBrand {
+            return when (brandName) {
+                "American Express" -> CardBrand.AmericanExpress
+                "Diners Club" -> CardBrand.DinersClub
+                "Discover" -> CardBrand.Discover
+                "JCB" -> CardBrand.JCB
+                "MasterCard" -> CardBrand.MasterCard
+                "UnionPay" -> CardBrand.UnionPay
+                "Visa" -> CardBrand.Visa
+                else -> CardBrand.Unknown
+            }
+        }
     }
 }
