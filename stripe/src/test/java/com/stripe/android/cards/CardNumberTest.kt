@@ -67,7 +67,10 @@ class CardNumberTest {
             CardNumber.Unvalidated("4242 4242 4242 4242")
                 .validate(16)
         ).isEqualTo(
-            CardNumber.Validated("4242424242424242")
+            CardNumber.Validated(
+                "4242424242424242",
+                "4242 4242 4242 4242"
+            )
         )
     }
 
