@@ -5,6 +5,8 @@ import com.stripe.android.StripeTextUtils
 internal sealed class CardNumber(number: String) {
     private val normalizedNumber = StripeTextUtils.removeSpacesAndHyphens(number).orEmpty()
 
+    val bin: Bin? = Bin.create(normalizedNumber)
+
     /**
      * A representation of a partial or full card number that hasn't been validated.
      */

@@ -1,7 +1,11 @@
 package com.stripe.android.view
 
+import android.content.Context
+import android.os.Looper
+import android.view.ViewGroup
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.CardNumberFixtures.AMEX_NO_SPACES
 import com.stripe.android.CardNumberFixtures.AMEX_WITH_SPACES
@@ -11,21 +15,39 @@ import com.stripe.android.CardNumberFixtures.DINERS_CLUB_16_NO_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_16_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.R
+import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.LegacyCardAccountRangeRepository
+import com.stripe.android.cards.LocalCardAccountRangeSource
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardMetadata
 import com.stripe.android.testharness.ViewTestUtils
+import java.util.concurrent.TimeUnit
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
+import org.robolectric.annotation.LooperMode
 
 /**
  * Test class for [CardNumberEditText].
  */
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
+@LooperMode(LooperMode.Mode.PAUSED)
 class CardNumberEditTextTest {
+    private val testDispatcher = TestCoroutineDispatcher()
+    private val context: Context = ApplicationProvider.getApplicationContext()
+    private val activityScenarioFactory = ActivityScenarioFactory(context)
+
     private var completionCallbackInvocations = 0
     private val completionCallback: () -> Unit = { completionCallbackInvocations++ }
 
@@ -34,8 +56,14 @@ class CardNumberEditTextTest {
         lastBrandChangeCallbackInvocation = it
     }
 
+    private val cardAccountRangeRepository = LegacyCardAccountRangeRepository(
+        LocalCardAccountRangeSource()
+    )
+
     private val cardNumberEditText = CardNumberEditText(
-        ApplicationProvider.getApplicationContext()
+        context,
+        workDispatcher = testDispatcher,
+        cardAccountRangeRepository = cardAccountRangeRepository
     )
 
     @BeforeTest
@@ -168,8 +196,12 @@ class CardNumberEditTextTest {
     }
 
     @Test
-    fun setText_whenTextIsValidAmExDinersClubLengthNumber_changesCardValidState() {
-        cardNumberEditText.setText(AMEX_WITH_SPACES)
+    fun `valid Amex should change isCardNumberValid to true and invoke completion callback`() {
+        // type Amex BIN
+        updateCardNumberAndIdle(CardNumberFixtures.AMEX_BIN)
+        // type rest of card number
+        cardNumberEditText.append(AMEX_NO_SPACES.drop(6))
+        idle()
 
         assertThat(cardNumberEditText.isCardNumberValid)
             .isTrue()
@@ -179,7 +211,7 @@ class CardNumberEditTextTest {
 
     @Test
     fun setText_whenTextChangesFromValidToInvalid_changesCardValidState() {
-        cardNumberEditText.setText(VISA_WITH_SPACES)
+        updateCardNumberAndIdle(VISA_WITH_SPACES)
         // Simply setting the value interacts with this mock once -- that is tested elsewhere
         completionCallbackInvocations = 0
 
@@ -197,7 +229,7 @@ class CardNumberEditTextTest {
     @Test
     fun setText_whenTextIsInvalidCommonLengthNumber_doesNotNotifyListener() {
         // This creates a full-length but not valid number: 4242 4242 4242 4243
-        cardNumberEditText.setText(
+        updateCardNumberAndIdle(
             withoutLastCharacter(VISA_WITH_SPACES) + "3"
         )
 
@@ -213,36 +245,40 @@ class CardNumberEditTextTest {
         assertThat(cardNumberEditText.shouldShowError)
             .isFalse()
 
-        cardNumberEditText.setText("123")
+        updateCardNumberAndIdle("123")
         assertThat(cardNumberEditText.shouldShowError)
             .isFalse()
     }
 
     @Test
     fun finishTypingCommonLengthCardNumber_whenValidCard_doesNotSetErrorValue() {
-        cardNumberEditText.setText(withoutLastCharacter(VISA_WITH_SPACES))
+        updateCardNumberAndIdle(withoutLastCharacter(VISA_WITH_SPACES))
         assertThat(cardNumberEditText.shouldShowError)
             .isFalse()
 
         // We now have the valid 4242 Visa
         cardNumberEditText.append("2")
+        idle()
+
         assertThat(cardNumberEditText.shouldShowError)
             .isFalse()
     }
 
     @Test
     fun finishTypingCommonLengthCardNumber_whenInvalidCard_setsErrorValue() {
-        cardNumberEditText.setText(withoutLastCharacter(VISA_WITH_SPACES))
+        updateCardNumberAndIdle(withoutLastCharacter(VISA_WITH_SPACES))
 
         // This makes the number officially invalid
         cardNumberEditText.append("3")
+        idle()
+
         assertThat(cardNumberEditText.shouldShowError)
             .isTrue()
     }
 
     @Test
     fun finishTypingInvalidCardNumber_whenFollowedByDelete_setsErrorBackToFalse() {
-        cardNumberEditText.setText(
+        updateCardNumberAndIdle(
             withoutLastCharacter(VISA_WITH_SPACES) + "3"
         )
         assertThat(cardNumberEditText.shouldShowError)
@@ -256,25 +292,31 @@ class CardNumberEditTextTest {
 
     @Test
     fun finishTypingDinersClub14_whenInvalid_setsErrorValueAndRemovesItAppropriately() {
-        cardNumberEditText.setText(
-            withoutLastCharacter(DINERS_CLUB_14_WITH_SPACES) + "3"
+        // type DinersClub BIN
+        updateCardNumberAndIdle(CardNumberFixtures.DINERS_CLUB_14_BIN)
+        // type rest of card number
+        cardNumberEditText.append(
+            withoutLastCharacter(DINERS_CLUB_14_WITH_SPACES.drop(6)) + "3"
         )
         assertThat(cardNumberEditText.shouldShowError)
             .isTrue()
 
         // Now that we're in an error state, back up by one
         ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
+        idle()
         assertThat(cardNumberEditText.shouldShowError)
             .isFalse()
 
         cardNumberEditText.append(DINERS_CLUB_14_WITH_SPACES.last().toString())
+        idle()
+
         assertThat(cardNumberEditText.shouldShowError)
             .isFalse()
     }
 
     @Test
     fun finishTypingDinersClub16_whenInvalid_setsErrorValueAndRemovesItAppropriately() {
-        cardNumberEditText.setText(
+        updateCardNumberAndIdle(
             withoutLastCharacter(DINERS_CLUB_16_WITH_SPACES) + "3"
         )
         assertThat(cardNumberEditText.shouldShowError)
@@ -286,24 +328,33 @@ class CardNumberEditTextTest {
             .isFalse()
 
         cardNumberEditText.append(DINERS_CLUB_16_WITH_SPACES.last().toString())
+        idle()
+
         assertThat(cardNumberEditText.shouldShowError)
             .isFalse()
     }
 
     @Test
     fun finishTypingAmEx_whenInvalid_setsErrorValueAndRemovesItAppropriately() {
-        cardNumberEditText.setText(
-            withoutLastCharacter(AMEX_WITH_SPACES) + "3"
+        // type Amex BIN
+        updateCardNumberAndIdle(CardNumberFixtures.AMEX_BIN)
+        // type rest of card number
+        cardNumberEditText.append(
+            withoutLastCharacter(AMEX_NO_SPACES.drop(6)) + "3"
         )
+        idle()
         assertThat(cardNumberEditText.shouldShowError)
             .isTrue()
 
         // Now that we're in an error state, back up by one
         ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
+        idle()
         assertThat(cardNumberEditText.shouldShowError)
             .isFalse()
 
         cardNumberEditText.append("5")
+        idle()
+
         assertThat(cardNumberEditText.shouldShowError)
             .isFalse()
     }
@@ -315,7 +366,7 @@ class CardNumberEditTextTest {
 
     @Test
     fun enterVisaBin_callsBrandListener() {
-        cardNumberEditText.setText(CardNumberFixtures.VISA_BIN)
+        updateCardNumberAndIdle(CardNumberFixtures.VISA_BIN)
         assertEquals(CardBrand.Visa, lastBrandChangeCallbackInvocation)
     }
 
@@ -348,60 +399,65 @@ class CardNumberEditTextTest {
     @Test
     fun enterCompleteNumberInParts_onlyCallsBrandListenerOnce() {
         cardNumberEditText.append(AMEX_WITH_SPACES.take(2))
+        idle()
         cardNumberEditText.append(AMEX_WITH_SPACES.drop(2))
+        idle()
         assertEquals(CardBrand.AmericanExpress, lastBrandChangeCallbackInvocation)
     }
 
     @Test
     fun enterBrandBin_thenDelete_callsUpdateWithUnknown() {
-        cardNumberEditText.setText(CardNumberFixtures.DINERS_CLUB_14_BIN)
+        updateCardNumberAndIdle(CardNumberFixtures.DINERS_CLUB_14_BIN)
         assertEquals(CardBrand.DinersClub, lastBrandChangeCallbackInvocation)
 
         ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
+        idle()
         assertEquals(CardBrand.Unknown, lastBrandChangeCallbackInvocation)
     }
 
     @Test
     fun enterBrandBin_thenClearAllText_callsUpdateWithUnknown() {
-        cardNumberEditText.setText(CardNumberFixtures.VISA_BIN)
+        updateCardNumberAndIdle(CardNumberFixtures.VISA_BIN)
         assertEquals(CardBrand.Visa, lastBrandChangeCallbackInvocation)
 
         // Just adding some other text. Not enough to invalidate the card or complete it.
         lastBrandChangeCallbackInvocation = null
         cardNumberEditText.append("123")
+        idle()
+
         assertNull(lastBrandChangeCallbackInvocation)
 
         // This simulates the user selecting all text and deleting it.
-        cardNumberEditText.setText("")
+        updateCardNumberAndIdle("")
 
         assertEquals(CardBrand.Unknown, lastBrandChangeCallbackInvocation)
     }
 
     @Test
     fun cardNumber_withSpaces_returnsCardNumberWithoutSpaces() {
-        cardNumberEditText.setText(VISA_WITH_SPACES)
+        updateCardNumberAndIdle(VISA_WITH_SPACES)
         assertThat(cardNumberEditText.cardNumber)
             .isEqualTo(VISA_NO_SPACES)
 
-        cardNumberEditText.setText("")
-        cardNumberEditText.setText(AMEX_WITH_SPACES)
+        updateCardNumberAndIdle("")
+        updateCardNumberAndIdle(AMEX_WITH_SPACES)
         assertThat(cardNumberEditText.cardNumber)
             .isEqualTo(AMEX_NO_SPACES)
 
-        cardNumberEditText.setText("")
-        cardNumberEditText.setText(DINERS_CLUB_14_WITH_SPACES)
+        updateCardNumberAndIdle("")
+        updateCardNumberAndIdle(DINERS_CLUB_14_WITH_SPACES)
         assertThat(cardNumberEditText.cardNumber)
             .isEqualTo(DINERS_CLUB_14_NO_SPACES)
 
-        cardNumberEditText.setText("")
-        cardNumberEditText.setText(DINERS_CLUB_16_WITH_SPACES)
+        updateCardNumberAndIdle("")
+        updateCardNumberAndIdle(DINERS_CLUB_16_WITH_SPACES)
         assertThat(cardNumberEditText.cardNumber)
             .isEqualTo(DINERS_CLUB_16_NO_SPACES)
     }
 
     @Test
     fun getCardNumber_whenIncompleteCard_returnsNull() {
-        cardNumberEditText.setText(
+        updateCardNumberAndIdle(
             DINERS_CLUB_14_WITH_SPACES.take(DINERS_CLUB_14_WITH_SPACES.length - 2)
         )
         assertThat(cardNumberEditText.cardNumber)
@@ -410,7 +466,7 @@ class CardNumberEditTextTest {
 
     @Test
     fun getCardNumber_whenInvalidCardNumber_returnsNull() {
-        cardNumberEditText.setText(
+        updateCardNumberAndIdle(
             withoutLastCharacter(VISA_WITH_SPACES) + "3" // creates the 4242 4242 4242 4243 bad number
         )
         assertThat(cardNumberEditText.cardNumber)
@@ -419,7 +475,7 @@ class CardNumberEditTextTest {
 
     @Test
     fun getCardNumber_whenValidNumberIsChangedToInvalid_returnsNull() {
-        cardNumberEditText.setText(AMEX_WITH_SPACES)
+        updateCardNumberAndIdle(AMEX_WITH_SPACES)
         ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
 
         assertThat(cardNumberEditText.cardNumber)
@@ -427,11 +483,49 @@ class CardNumberEditTextTest {
     }
 
     @Test
-    fun testUpdateCardBrandFromNumber() {
-        cardNumberEditText.updateCardBrandFromNumber(BinFixtures.DINERSCLUB14)
+    fun `updateCardBrand() should update cardBrand value`() {
+        cardNumberEditText.updateCardBrand(BinFixtures.DINERSCLUB14)
+        idle()
         assertEquals(CardBrand.DinersClub, lastBrandChangeCallbackInvocation)
-        cardNumberEditText.updateCardBrandFromNumber(BinFixtures.AMEX)
+
+        cardNumberEditText.updateCardBrand(BinFixtures.AMEX)
+        idle()
         assertEquals(CardBrand.AmericanExpress, lastBrandChangeCallbackInvocation)
+    }
+
+    @Test
+    fun `updateCardBrand() with null bin should set cardBrand to Unknown`() {
+        cardNumberEditText.updateCardBrand(null)
+        assertEquals(CardBrand.Unknown, lastBrandChangeCallbackInvocation)
+    }
+
+    @Test
+    fun `onDetachedFromWindow() should cancel accountRangeRepositoryJob`() {
+        PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+
+        activityScenarioFactory.createAddPaymentMethodActivity()
+            .use { activityScenario ->
+                activityScenario.onActivity { activity ->
+                    val cardNumberEditText = CardNumberEditText(
+                        activity,
+                        workDispatcher = testDispatcher,
+                        cardAccountRangeRepository = DelayedCardAccountRangeRepository()
+                    )
+
+                    val root = activity.findViewById<ViewGroup>(R.id.add_payment_method_card).also {
+                        it.removeAllViews()
+                        it.addView(cardNumberEditText)
+                    }
+
+                    cardNumberEditText.setText(CardNumberFixtures.VISA_NO_SPACES)
+                    assertThat(cardNumberEditText.accountRangeRepositoryJob)
+                        .isNotNull()
+
+                    root.removeView(cardNumberEditText)
+                    assertThat(cardNumberEditText.accountRangeRepositoryJob)
+                        .isNull()
+                }
+            }
     }
 
     private fun verifyCardBrandBin(
@@ -440,9 +534,23 @@ class CardNumberEditTextTest {
     ) {
         // Reset inside the loop so we don't count each prefix
         lastBrandChangeCallbackInvocation = null
-        cardNumberEditText.setText(bin)
+        updateCardNumberAndIdle(bin)
         assertEquals(cardBrand, lastBrandChangeCallbackInvocation)
-        cardNumberEditText.setText("")
+        updateCardNumberAndIdle("")
+    }
+
+    private fun updateCardNumberAndIdle(cardNumber: String) {
+        cardNumberEditText.setText(cardNumber)
+        idle()
+    }
+
+    private fun idle() = shadowOf(Looper.getMainLooper()).idle()
+
+    private class DelayedCardAccountRangeRepository : CardAccountRangeRepository {
+        override suspend fun getAccountRange(cardNumber: String): CardMetadata.AccountRange? {
+            delay(TimeUnit.SECONDS.toMillis(10))
+            return null
+        }
     }
 
     private companion object {
