@@ -76,10 +76,16 @@ class CardNumberEditText internal constructor(
     @JvmSynthetic
     internal var completionCallback: () -> Unit = {}
 
+    @Deprecated("Will be removed in upcoming major release.")
     val lengthMax: Int
         get() {
             return cardBrand.getMaxLengthWithSpacesForCardNumber(fieldText)
         }
+
+    private var panLength = CardNumber.DEFAULT_PAN_LENGTH
+
+    private val formattedPanLength: Int
+        get() = panLength + CardNumber.getSpacePositions(panLength).size
 
     private var ignoreChanges = false
 
@@ -127,7 +133,7 @@ class CardNumberEditText internal constructor(
 
     @JvmSynthetic
     internal fun updateLengthFilter() {
-        filters = arrayOf<InputFilter>(InputFilter.LengthFilter(lengthMax))
+        filters = arrayOf<InputFilter>(InputFilter.LengthFilter(formattedPanLength))
     }
 
     /**
@@ -202,7 +208,7 @@ class CardNumberEditText internal constructor(
                 val cardNumber = CardNumber.Unvalidated(spacelessNumber)
                 updateCardBrand(cardNumber.bin)
 
-                val formattedNumber = cardBrand.formatNumber(spacelessNumber)
+                val formattedNumber = cardNumber.getFormatted(panLength)
                 this.newCursorPosition = updateSelectionIndex(
                     formattedNumber.length,
                     latestChangeStart,
@@ -228,7 +234,7 @@ class CardNumberEditText internal constructor(
 
                 ignoreChanges = false
 
-                if (fieldText.length == lengthMax) {
+                if (fieldText.length == formattedPanLength) {
                     val wasCardNumberValid = isCardNumberValid
                     isCardNumberValid = CardUtils.isValidCardNumber(fieldText)
                     shouldShowError = !isCardNumberValid
@@ -268,6 +274,7 @@ class CardNumberEditText internal constructor(
     private suspend fun onAccountRangeResult(
         accountRange: CardMetadata.AccountRange?
     ) = withContext(Dispatchers.Main) {
+        panLength = accountRange?.panLength ?: CardNumber.DEFAULT_PAN_LENGTH
         cardBrand = accountRange?.brand ?: CardBrand.Unknown
     }
 }
