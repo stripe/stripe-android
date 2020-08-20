@@ -19,8 +19,7 @@ internal sealed class CardNumber {
                 normalizedNumber.length == panLength &&
                 CardUtils.isValidLuhnNumber(normalizedNumber)) {
                 Validated(
-                    normalizedNumber = normalizedNumber,
-                    formattedNumber = getFormatted(panLength)
+                    number = normalizedNumber
                 )
             } else {
                 null
@@ -71,21 +70,23 @@ internal sealed class CardNumber {
                 .takeWhile { it != null }
                 .joinToString(" ")
         }
+
+        private companion object {
+            private const val MIN_PAN_LENGTH = 14
+        }
     }
 
     /**
      * A representation of a client-side validated card number.
      */
     internal data class Validated internal constructor(
-        private val denormalizedNumber: String,
-        private val formattedNumber: String
+        private val number: String
     ) : CardNumber()
 
     private companion object {
         private fun getSpacePositions(panLength: Int) = SPACE_POSITIONS[panLength]
             ?: DEFAULT_SPACE_POSITIONS
 
-        private const val MIN_PAN_LENGTH = 14
         private const val DEFAULT_PAN_LENGTH = 16
         private val DEFAULT_SPACE_POSITIONS = setOf(4, 9, 14)
 
