@@ -1,7 +1,10 @@
 package com.stripe.android.view
 
+import android.content.Context
+import android.view.ViewGroup
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.CardNumberFixtures.AMEX_NO_SPACES
 import com.stripe.android.CardNumberFixtures.AMEX_WITH_SPACES
@@ -11,27 +14,37 @@ import com.stripe.android.CardNumberFixtures.DINERS_CLUB_16_NO_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_16_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.R
+import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.LegacyCardAccountRangeRepository
 import com.stripe.android.cards.LocalCardAccountRangeSource
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardMetadata
 import com.stripe.android.testharness.ViewTestUtils
+import java.util.concurrent.TimeUnit
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.LooperMode
 
 /**
  * Test class for [CardNumberEditText].
  */
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
+@LooperMode(LooperMode.Mode.PAUSED)
 class CardNumberEditTextTest {
     private val testDispatcher = TestCoroutineDispatcher()
+    private val context: Context = ApplicationProvider.getApplicationContext()
+    private val activityScenarioFactory = ActivityScenarioFactory(context)
 
     private var completionCallbackInvocations = 0
     private val completionCallback: () -> Unit = { completionCallbackInvocations++ }
@@ -46,7 +59,7 @@ class CardNumberEditTextTest {
     )
 
     private val cardNumberEditText = CardNumberEditText(
-        ApplicationProvider.getApplicationContext(),
+        context,
         workDispatcher = testDispatcher,
         cardAccountRangeRepository = cardAccountRangeRepository
     )
@@ -454,6 +467,35 @@ class CardNumberEditTextTest {
         assertEquals(CardBrand.Unknown, lastBrandChangeCallbackInvocation)
     }
 
+    @Test
+    fun `onDetachedFromWindow() should cancel accountRangeRepositoryJob`() {
+        PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+
+        activityScenarioFactory.createAddPaymentMethodActivity()
+            .use { activityScenario ->
+                activityScenario.onActivity { activity ->
+                    val cardNumberEditText = CardNumberEditText(
+                        activity,
+                        workDispatcher = testDispatcher,
+                        cardAccountRangeRepository = DelayedCardAccountRangeRepository()
+                    )
+
+                    val root = activity.findViewById<ViewGroup>(R.id.add_payment_method_card).also {
+                        it.removeAllViews()
+                        it.addView(cardNumberEditText)
+                    }
+
+                    cardNumberEditText.setText(CardNumberFixtures.VISA_NO_SPACES)
+                    assertThat(cardNumberEditText.accountRangeRepositoryJob)
+                        .isNotNull()
+
+                    root.removeView(cardNumberEditText)
+                    assertThat(cardNumberEditText.accountRangeRepositoryJob)
+                        .isNull()
+                }
+            }
+    }
+
     private fun verifyCardBrandBin(
         cardBrand: CardBrand,
         bin: String
@@ -463,6 +505,13 @@ class CardNumberEditTextTest {
         cardNumberEditText.setText(bin)
         assertEquals(cardBrand, lastBrandChangeCallbackInvocation)
         cardNumberEditText.setText("")
+    }
+
+    private class DelayedCardAccountRangeRepository : CardAccountRangeRepository {
+        override suspend fun getAccountRange(cardNumber: String): CardMetadata.AccountRange? {
+            delay(TimeUnit.SECONDS.toMillis(10))
+            return null
+        }
     }
 
     private companion object {

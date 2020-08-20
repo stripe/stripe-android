@@ -100,7 +100,8 @@ class CardNumberEditText internal constructor(
             null
         }
 
-    private var accountRangeRepositoryjob: Job? = null
+    @VisibleForTesting
+    internal var accountRangeRepositoryJob: Job? = null
 
     init {
         setErrorMessage(resources.getString(R.string.invalid_card_number))
@@ -115,6 +116,12 @@ class CardNumberEditText internal constructor(
         get() {
             return resources.getString(R.string.acc_label_card_number_node, text)
         }
+
+    override fun onDetachedFromWindow() {
+        cancelAccountRangeRepositoryJob()
+
+        super.onDetachedFromWindow()
+    }
 
     @JvmSynthetic
     internal fun updateLengthFilter() {
@@ -238,10 +245,9 @@ class CardNumberEditText internal constructor(
     @JvmSynthetic
     internal fun updateCardBrand(inputBin: Bin?) {
         // cancel in-flight job
-        accountRangeRepositoryjob?.cancel()
-        accountRangeRepositoryjob = null
+        cancelAccountRangeRepositoryJob()
 
-        accountRangeRepositoryjob = CoroutineScope(workDispatcher).launch {
+        accountRangeRepositoryJob = CoroutineScope(workDispatcher).launch {
             if (inputBin != null) {
                 onAccountRangeResult(
                     cardAccountRangeRepository.getAccountRange(inputBin.value)
@@ -250,6 +256,11 @@ class CardNumberEditText internal constructor(
                 onAccountRangeResult(null)
             }
         }
+    }
+
+    private fun cancelAccountRangeRepositoryJob() {
+        accountRangeRepositoryJob?.cancel()
+        accountRangeRepositoryJob = null
     }
 
     private suspend fun onAccountRangeResult(

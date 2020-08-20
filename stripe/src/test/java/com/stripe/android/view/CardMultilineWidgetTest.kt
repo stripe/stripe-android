@@ -63,40 +63,32 @@ internal class CardMultilineWidgetTest {
 
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
-        activityScenarioFactory.create<AddPaymentMethodActivity>(
-            AddPaymentMethodActivityStarter.Args.Builder()
-                .setPaymentMethodType(PaymentMethod.Type.Card)
-                .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
-                .setBillingAddressFields(BillingAddressFields.PostalCode)
-                .build()
-        ).use { activityScenario ->
-            activityScenario.onActivity { activity ->
-                cardMultilineWidget = activity.findViewById(R.id.card_multiline_widget)
-                fullGroup = WidgetControlGroup(cardMultilineWidget, testDispatcher)
+        activityScenarioFactory
+            .createAddPaymentMethodActivity()
+            .use { activityScenario ->
+                activityScenario.onActivity { activity ->
+                    cardMultilineWidget = activity.findViewById(R.id.card_multiline_widget)
+                    fullGroup = WidgetControlGroup(cardMultilineWidget, testDispatcher)
 
-                fullGroup.cardNumberEditText.setText("")
+                    fullGroup.cardNumberEditText.setText("")
 
-                cardMultilineWidget.setCardNumberTextWatcher(EMPTY_WATCHER)
-                cardMultilineWidget.setExpiryDateTextWatcher(EMPTY_WATCHER)
-                cardMultilineWidget.setCvcNumberTextWatcher(EMPTY_WATCHER)
-                cardMultilineWidget.setPostalCodeTextWatcher(EMPTY_WATCHER)
-                cardMultilineWidget.paymentMethodBillingDetailsBuilder
+                    cardMultilineWidget.setCardNumberTextWatcher(EMPTY_WATCHER)
+                    cardMultilineWidget.setExpiryDateTextWatcher(EMPTY_WATCHER)
+                    cardMultilineWidget.setCvcNumberTextWatcher(EMPTY_WATCHER)
+                    cardMultilineWidget.setPostalCodeTextWatcher(EMPTY_WATCHER)
+                    cardMultilineWidget.paymentMethodBillingDetailsBuilder
+                }
             }
-        }
 
-        activityScenarioFactory.create<AddPaymentMethodActivity>(
-            AddPaymentMethodActivityStarter.Args.Builder()
-                .setPaymentMethodType(PaymentMethod.Type.Card)
-                .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
-                .setBillingAddressFields(BillingAddressFields.None)
-                .build()
-        ).use { activityScenario ->
-            activityScenario.onActivity {
-                noZipCardMultilineWidget = it.findViewById(R.id.card_multiline_widget)
-                noZipCardMultilineWidget.setShouldShowPostalCode(false)
-                noZipGroup = WidgetControlGroup(noZipCardMultilineWidget, testDispatcher)
+        activityScenarioFactory
+            .createAddPaymentMethodActivity()
+            .use { activityScenario ->
+                activityScenario.onActivity {
+                    noZipCardMultilineWidget = it.findViewById(R.id.card_multiline_widget)
+                    noZipCardMultilineWidget.setShouldShowPostalCode(false)
+                    noZipGroup = WidgetControlGroup(noZipCardMultilineWidget, testDispatcher)
+                }
             }
-        }
     }
 
     @Test

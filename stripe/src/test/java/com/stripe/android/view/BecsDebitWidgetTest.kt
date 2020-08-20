@@ -37,24 +37,20 @@ internal class BecsDebitWidgetTest {
     @BeforeTest
     fun setup() {
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-        activityScenarioFactory.create<AddPaymentMethodActivity>(
-            AddPaymentMethodActivityStarter.Args.Builder()
-                .setPaymentMethodType(PaymentMethod.Type.Card)
-                .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
-                .setBillingAddressFields(BillingAddressFields.PostalCode)
-                .build()
-        ).use { activityScenario ->
-            activityScenario.onActivity { activity ->
-                activity.findViewById<ViewGroup>(R.id.add_payment_method_card).let { root ->
-                    root.removeAllViews()
-                    becsDebitWidget = BecsDebitWidget(
-                        activity,
-                        companyName = COMPANY_NAME
-                    )
-                    root.addView(becsDebitWidget)
+        activityScenarioFactory
+            .createAddPaymentMethodActivity()
+            .use { activityScenario ->
+                activityScenario.onActivity { activity ->
+                    activity.findViewById<ViewGroup>(R.id.add_payment_method_card).let { root ->
+                        root.removeAllViews()
+                        becsDebitWidget = BecsDebitWidget(
+                            activity,
+                            companyName = COMPANY_NAME
+                        )
+                        root.addView(becsDebitWidget)
+                    }
                 }
             }
-        }
     }
 
     @Test
