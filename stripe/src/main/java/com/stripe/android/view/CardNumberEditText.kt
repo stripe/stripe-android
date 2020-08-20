@@ -110,6 +110,8 @@ class CardNumberEditText internal constructor(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_NUMBER)
         }
+
+        updateLengthFilter()
     }
 
     override val accessibilityText: String?
