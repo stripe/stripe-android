@@ -1,6 +1,8 @@
 package com.stripe.android.cards
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.CardNumberFixtures
+import com.stripe.android.model.BinFixtures
 import kotlin.test.Test
 
 class CardNumberTest {
@@ -59,6 +61,38 @@ class CardNumberTest {
         assertThat(
             CardNumber.Unvalidated("36227206271667").getFormatted(14)
         ).isEqualTo("3622 720627 1667")
+    }
+
+    @Test
+    fun `bin with empty number should return null`() {
+        assertThat(
+            CardNumber.Unvalidated("   ").bin
+        ).isNull()
+    }
+
+    @Test
+    fun `bin with 5 digits should return null`() {
+        assertThat(
+            CardNumber.Unvalidated("12 3 4 5").bin
+        ).isNull()
+    }
+
+    @Test
+    fun `bin with 6 digits should return bin`() {
+        assertThat(
+            CardNumber.Unvalidated("12 3 4 56").bin
+        ).isEqualTo(
+            Bin.create("123456")
+        )
+    }
+
+    @Test
+    fun `bin with full number should return bin`() {
+        assertThat(
+            CardNumber.Unvalidated(CardNumberFixtures.VISA_WITH_SPACES).bin
+        ).isEqualTo(
+            BinFixtures.VISA
+        )
     }
 
     @Test

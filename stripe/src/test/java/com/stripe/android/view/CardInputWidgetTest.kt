@@ -2,6 +2,7 @@ package com.stripe.android.view
 
 import android.app.Activity
 import android.content.Context
+import android.os.Looper
 import android.text.TextPaint
 import android.view.ViewGroup
 import androidx.test.core.app.ApplicationProvider
@@ -31,19 +32,33 @@ import com.stripe.android.testharness.ViewTestUtils
 import com.stripe.android.view.CardInputWidget.Companion.LOGGING_TOKEN
 import com.stripe.android.view.CardInputWidget.Companion.shouldIconShowBrand
 import java.util.Calendar
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
+import org.robolectric.annotation.LooperMode
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
+@LooperMode(LooperMode.Mode.PAUSED)
 internal class CardInputWidgetTest {
+    private val testDispatcher = TestCoroutineDispatcher()
+
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val activityScenarioFactory = ActivityScenarioFactory(context)
 
     private lateinit var cardInputWidget: CardInputWidget
     private val cardNumberEditText: CardNumberEditText by lazy {
-        cardInputWidget.cardNumberEditText
+        cardInputWidget.cardNumberEditText.also {
+            it.workDispatcher = testDispatcher
+        }
     }
     private val expiryEditText: StripeEditText by lazy {
         cardInputWidget.expiryDateEditText
@@ -80,6 +95,11 @@ internal class CardInputWidgetTest {
                 }
             }
         }
+    }
+
+    @AfterTest
+    fun cleanup() {
+        Dispatchers.resetMain()
     }
 
     private fun createCardInputWidget(activity: Activity): CardInputWidget {
@@ -604,7 +624,7 @@ internal class CardInputWidgetTest {
     fun onCompleteCardNumber_whenValid_shiftsFocusToExpiryDate() {
         cardInputWidget.setCardInputListener(cardInputListener)
 
-        cardNumberEditText.setText(VISA_WITH_SPACES)
+        updateCardNumberAndIdle(VISA_WITH_SPACES)
 
         verify(cardInputListener).onCardComplete()
         verify(cardInputListener).onFocusChange(CardInputListener.FocusField.ExpiryDate)
@@ -618,7 +638,9 @@ internal class CardInputWidgetTest {
     @Test
     fun onDeleteFromExpiryDate_whenEmpty_shiftsFocusToCardNumberAndDeletesDigit() {
         cardInputWidget.setCardInputListener(cardInputListener)
-        cardNumberEditText.setText(VISA_WITH_SPACES)
+
+        updateCardNumberAndIdle(VISA_WITH_SPACES)
+
         assertThat(expiryEditText.hasFocus())
             .isTrue()
 
@@ -641,7 +663,10 @@ internal class CardInputWidgetTest {
 
     @Test
     fun onDeleteFromExpiryDate_whenNotEmpty_doesNotShiftFocusOrDeleteDigit() {
-        cardNumberEditText.setText(AMEX_WITH_SPACES)
+        Dispatchers.setMain(testDispatcher)
+
+        updateCardNumberAndIdle(AMEX_WITH_SPACES)
+
         assertThat(expiryEditText.hasFocus())
             .isTrue()
 
@@ -657,7 +682,7 @@ internal class CardInputWidgetTest {
     @Test
     fun onDeleteFromCvcDate_whenEmpty_shiftsFocusToExpiryAndDeletesDigit() {
         cardInputWidget.setCardInputListener(cardInputListener)
-        cardNumberEditText.setText(VISA_WITH_SPACES)
+        updateCardNumberAndIdle(VISA_WITH_SPACES)
 
         verify(cardInputListener).onCardComplete()
         verify(cardInputListener).onFocusChange(CardInputListener.FocusField.ExpiryDate)
@@ -745,14 +770,16 @@ internal class CardInputWidgetTest {
     fun onUpdateIcon_forCommonLengthBrand_setsLengthOnCvc() {
         // This should set the brand to Visa. Note that more extensive brand checking occurs
         // in CardNumberEditTextTest.
-        cardNumberEditText.append(CardNumberFixtures.VISA_BIN)
+        updateCardNumberAndIdle(CardNumberFixtures.VISA_BIN)
+
         assertThat(ViewTestUtils.hasMaxLength(cvcEditText, 3))
             .isTrue()
     }
 
     @Test
     fun onUpdateText_forAmexBin_setsLengthOnCvc() {
-        cardNumberEditText.append(CardNumberFixtures.AMEX_BIN)
+        updateCardNumberAndIdle(CardNumberFixtures.AMEX_BIN)
+
         assertThat(ViewTestUtils.hasMaxLength(cvcEditText, 4))
             .isTrue()
     }
@@ -1117,11 +1144,13 @@ internal class CardInputWidgetTest {
 
     @Test
     fun addValidAmExCard_withPostalCodeDisabled_scrollsOver_andSetsExpectedDisplayValues() {
+        Dispatchers.setMain(testDispatcher)
+
         cardInputWidget.postalCodeEnabled = false
 
         // Moving left with an AmEx number has a larger peek and cvc size.
         // |(peek==50)--(space==175)--(date==50)--(space==185)--(cvc==40)|
-        cardNumberEditText.setText(AMEX_WITH_SPACES)
+        updateCardNumberAndIdle(AMEX_WITH_SPACES)
 
         assertThat(cardInputWidget.placementParameters)
             .isEqualTo(
@@ -1146,11 +1175,13 @@ internal class CardInputWidgetTest {
 
     @Test
     fun addValidAmExCard_withPostalCodeEnabled_scrollsOver_andSetsExpectedDisplayValues() {
+        Dispatchers.setMain(testDispatcher)
+
         cardInputWidget.postalCodeEnabled = true
 
         // Moving left with an AmEx number has a larger peek and cvc size.
         // |(peek==50)--(space==88)--(date==50)--(space==72)--(cvc==40)--(space==0)--(postal==100)|
-        cardNumberEditText.setText(AMEX_WITH_SPACES)
+        updateCardNumberAndIdle(AMEX_WITH_SPACES)
 
         assertThat(cardInputWidget.placementParameters)
             .isEqualTo(
@@ -1177,11 +1208,13 @@ internal class CardInputWidgetTest {
 
     @Test
     fun addDinersClubCard_withPostalCodeDisabled_scrollsOver_andSetsExpectedDisplayValues() {
+        Dispatchers.setMain(testDispatcher)
+
         cardInputWidget.postalCodeEnabled = false
 
         // When we move for a Diner's club card, the peek text is shorter, so we expect:
         // |(peek==20)--(space==205)--(date==50)--(space==195)--(cvc==30)|
-        cardNumberEditText.setText(DINERS_CLUB_14_WITH_SPACES)
+        updateCardNumberAndIdle(DINERS_CLUB_14_WITH_SPACES)
 
         assertThat(cardInputWidget.placementParameters)
             .isEqualTo(
@@ -1206,11 +1239,13 @@ internal class CardInputWidgetTest {
 
     @Test
     fun addDinersClubCard_withPostalCodeEnabled_scrollsOver_andSetsExpectedDisplayValues() {
+        Dispatchers.setMain(testDispatcher)
+
         cardInputWidget.postalCodeEnabled = true
 
         // When we move for a Diner's club card, the peek text is shorter, so we expect:
         // |(peek==20)--(space==205)--(date==50)--(space==195)--(cvc==30)--(space==0)--(postal==100)|
-        cardNumberEditText.setText(DINERS_CLUB_14_WITH_SPACES)
+        updateCardNumberAndIdle(DINERS_CLUB_14_WITH_SPACES)
 
         assertThat(cardInputWidget.placementParameters)
             .isEqualTo(
@@ -1707,6 +1742,11 @@ internal class CardInputWidgetTest {
                         .build()
                 )
             )
+    }
+
+    private fun updateCardNumberAndIdle(cardNumber: String) {
+        cardNumberEditText.setText(cardNumber)
+        shadowOf(Looper.getMainLooper()).idle()
     }
 
     private companion object {

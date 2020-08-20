@@ -4,6 +4,7 @@ import com.stripe.android.CardUtils
 import com.stripe.android.StripeTextUtils
 
 internal sealed class CardNumber {
+
     /**
      * A representation of a partial or full card number that hasn't been validated.
      */
@@ -13,6 +14,8 @@ internal sealed class CardNumber {
         private val normalizedNumber = StripeTextUtils
             .removeSpacesAndHyphens(denormalizedNumber)
             .orEmpty()
+
+        val bin: Bin? = Bin.create(normalizedNumber)
 
         fun validate(panLength: Int): Validated? {
             return if (panLength >= MIN_PAN_LENGTH &&
@@ -83,11 +86,11 @@ internal sealed class CardNumber {
         private val number: String
     ) : CardNumber()
 
-    private companion object {
-        private fun getSpacePositions(panLength: Int) = SPACE_POSITIONS[panLength]
+    internal companion object {
+        internal fun getSpacePositions(panLength: Int) = SPACE_POSITIONS[panLength]
             ?: DEFAULT_SPACE_POSITIONS
 
-        private const val DEFAULT_PAN_LENGTH = 16
+        internal const val DEFAULT_PAN_LENGTH = 16
         private val DEFAULT_SPACE_POSITIONS = setOf(4, 9, 14)
 
         private val SPACE_POSITIONS = mapOf(
