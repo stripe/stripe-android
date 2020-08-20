@@ -120,4 +120,7 @@
     <string name="invalid_shipping_information">配送先住所エラー</string>
     <string name="secure_checkout">セキュアな Checkout</string>
     <string name="close">閉じる</string>
+
+    <string name="delete_payment_method_prompt_title">支払い方法を削除しますか？</string>
+    <string name="delete_payment_method">支払い方法を削除</string>
 </resources>
