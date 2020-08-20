@@ -109,6 +109,9 @@ class CardNumberEditText internal constructor(
     @VisibleForTesting
     internal var accountRangeRepositoryJob: Job? = null
 
+    @JvmSynthetic
+    internal var isProcessingCallback: (Boolean) -> Unit = {}
+
     init {
         setErrorMessage(resources.getString(R.string.invalid_card_number))
         listenForTextChanges()
@@ -257,6 +260,7 @@ class CardNumberEditText internal constructor(
 
         accountRangeRepositoryJob = CoroutineScope(workDispatcher).launch {
             if (inputBin != null) {
+                isProcessingCallback(true)
                 onAccountRangeResult(
                     cardAccountRangeRepository.getAccountRange(inputBin.value)
                 )
@@ -276,5 +280,6 @@ class CardNumberEditText internal constructor(
     ) = withContext(Dispatchers.Main) {
         panLength = accountRange?.panLength ?: CardNumber.DEFAULT_PAN_LENGTH
         cardBrand = accountRange?.brand ?: CardBrand.Unknown
+        isProcessingCallback(false)
     }
 }
