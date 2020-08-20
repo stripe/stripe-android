@@ -17,6 +17,7 @@ import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
+import com.stripe.android.cards.AccountRangeFixtures
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.LegacyCardAccountRangeRepository
 import com.stripe.android.cards.LocalCardAccountRangeSource
@@ -25,13 +26,18 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.testharness.ViewTestUtils
 import java.util.concurrent.TimeUnit
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
@@ -43,7 +49,7 @@ import org.robolectric.annotation.LooperMode
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 @LooperMode(LooperMode.Mode.PAUSED)
-class CardNumberEditTextTest {
+internal class CardNumberEditTextTest {
     private val testDispatcher = TestCoroutineDispatcher()
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val activityScenarioFactory = ActivityScenarioFactory(context)
@@ -73,10 +79,17 @@ class CardNumberEditTextTest {
         cardNumberEditText.brandChangeCallback = brandChangeCallback
     }
 
+    @AfterTest
+    fun cleanup() {
+        Dispatchers.resetMain()
+    }
+
     @Test
-    fun updateSelectionIndex_whenVisa_increasesIndexWhenGoingPastTheSpaces() {
-        // Directly setting card brand as a testing hack (annotated in source)
-        cardNumberEditText.cardBrand = CardBrand.Visa
+    fun updateSelectionIndex_whenVisa_increasesIndexWhenGoingPastTheSpaces() = testDispatcher.runBlockingTest {
+        Dispatchers.setMain(testDispatcher)
+        cardNumberEditText.onAccountRangeResult(
+            AccountRangeFixtures.VISA
+        )
 
         // Adding 1 character, starting at position 4, with a final string length 6
         assertThat(
@@ -94,8 +107,12 @@ class CardNumberEditTextTest {
     }
 
     @Test
-    fun updateSelectionIndex_whenAmEx_increasesIndexWhenGoingPastTheSpaces() {
-        cardNumberEditText.cardBrand = CardBrand.AmericanExpress
+    fun updateSelectionIndex_whenAmEx_increasesIndexWhenGoingPastTheSpaces() = testDispatcher.runBlockingTest {
+        Dispatchers.setMain(testDispatcher)
+        cardNumberEditText.onAccountRangeResult(
+            AccountRangeFixtures.AMERICANEXPRESS
+        )
+
         assertThat(
             cardNumberEditText.updateSelectionIndex(6, 4, 1)
         ).isEqualTo(6)
@@ -105,8 +122,11 @@ class CardNumberEditTextTest {
     }
 
     @Test
-    fun updateSelectionIndex_whenDinersClub_decreasesIndexWhenDeletingPastTheSpaces() {
-        cardNumberEditText.cardBrand = CardBrand.DinersClub
+    fun updateSelectionIndex_whenDinersClub16_decreasesIndexWhenDeletingPastTheSpaces() = testDispatcher.runBlockingTest {
+        Dispatchers.setMain(testDispatcher)
+        cardNumberEditText.onAccountRangeResult(
+            AccountRangeFixtures.DINERSCLUB16
+        )
 
         assertThat(
             cardNumberEditText.updateSelectionIndex(6, 5, 0)
@@ -120,8 +140,11 @@ class CardNumberEditTextTest {
     }
 
     @Test
-    fun updateSelectionIndex_whenDeletingNotOnGaps_doesNotDecreaseIndex() {
-        cardNumberEditText.cardBrand = CardBrand.DinersClub
+    fun updateSelectionIndex_whenDeletingNotOnGaps_doesNotDecreaseIndex() = testDispatcher.runBlockingTest {
+        Dispatchers.setMain(testDispatcher)
+        cardNumberEditText.onAccountRangeResult(
+            AccountRangeFixtures.DINERSCLUB14
+        )
 
         assertThat(
             cardNumberEditText.updateSelectionIndex(12, 7, 0)
@@ -129,8 +152,11 @@ class CardNumberEditTextTest {
     }
 
     @Test
-    fun updateSelectionIndex_whenAmEx_decreasesIndexWhenDeletingPastTheSpaces() {
-        cardNumberEditText.cardBrand = CardBrand.AmericanExpress
+    fun updateSelectionIndex_whenAmEx_decreasesIndexWhenDeletingPastTheSpaces() = testDispatcher.runBlockingTest {
+        Dispatchers.setMain(testDispatcher)
+        cardNumberEditText.onAccountRangeResult(
+            AccountRangeFixtures.AMERICANEXPRESS
+        )
 
         assertThat(
             cardNumberEditText.updateSelectionIndex(10, 5, 0)
@@ -141,8 +167,12 @@ class CardNumberEditTextTest {
     }
 
     @Test
-    fun updateSelectionIndex_whenSelectionInTheMiddle_increasesIndexOverASpace() {
-        cardNumberEditText.cardBrand = CardBrand.Visa
+    fun updateSelectionIndex_whenSelectionInTheMiddle_increasesIndexOverASpace() = testDispatcher.runBlockingTest {
+        Dispatchers.setMain(testDispatcher)
+        cardNumberEditText.onAccountRangeResult(
+            AccountRangeFixtures.VISA
+        )
+
         assertThat(
             cardNumberEditText.updateSelectionIndex(10, 4, 1)
         ).isEqualTo(6)

@@ -153,7 +153,7 @@ class CardNumberEditText internal constructor(
         editActionAddition: Int
     ): Int {
         var gapsJumped = 0
-        val gapSet = cardBrand.getSpacePositionsForCardNumber(fieldText)
+        val gapSet = CardNumber.getSpacePositions(panLength)
 
         var skipBack = false
         gapSet.forEach { gap ->
@@ -271,7 +271,8 @@ class CardNumberEditText internal constructor(
         accountRangeRepositoryJob = null
     }
 
-    private suspend fun onAccountRangeResult(
+    @JvmSynthetic
+    internal suspend fun onAccountRangeResult(
         accountRange: CardMetadata.AccountRange?
     ) = withContext(Dispatchers.Main) {
         panLength = accountRange?.panLength ?: CardNumber.DEFAULT_PAN_LENGTH
