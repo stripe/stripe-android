@@ -12,9 +12,10 @@ import com.stripe.android.R
 import com.stripe.android.StripeTextUtils
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardNumber
+import com.stripe.android.cards.DefaultStaticCardAccountRanges
 import com.stripe.android.cards.LegacyCardAccountRangeRepository
-import com.stripe.android.cards.StaticAccountRanges
 import com.stripe.android.cards.StaticCardAccountRangeSource
+import com.stripe.android.cards.StaticCardAccountRanges
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardMetadata
 import kotlinx.coroutines.CoroutineDispatcher
@@ -35,7 +36,8 @@ class CardNumberEditText internal constructor(
     // TODO(mshafrir-stripe): make immutable after `CardWidgetViewModel` is integrated in `CardWidget` subclasses
     internal var workDispatcher: CoroutineDispatcher,
 
-    private val cardAccountRangeRepository: CardAccountRangeRepository
+    private val cardAccountRangeRepository: CardAccountRangeRepository,
+    private val staticCardAccountRanges: StaticCardAccountRanges
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     @JvmOverloads
@@ -48,7 +50,8 @@ class CardNumberEditText internal constructor(
         attrs,
         defStyleAttr,
         Dispatchers.IO,
-        LegacyCardAccountRangeRepository(StaticCardAccountRangeSource())
+        LegacyCardAccountRangeRepository(StaticCardAccountRangeSource()),
+        DefaultStaticCardAccountRanges()
     )
 
     @VisibleForTesting
@@ -90,7 +93,7 @@ class CardNumberEditText internal constructor(
 
     private val panLength: Int
         get() = accountRange?.panLength
-            ?: StaticAccountRanges.match(unvalidatedCardNumber)?.panLength
+            ?: staticCardAccountRanges.match(unvalidatedCardNumber)?.panLength
             ?: CardNumber.DEFAULT_PAN_LENGTH
 
     private val formattedPanLength: Int
