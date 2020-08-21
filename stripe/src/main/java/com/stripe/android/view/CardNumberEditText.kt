@@ -37,7 +37,7 @@ class CardNumberEditText internal constructor(
     internal var workDispatcher: CoroutineDispatcher,
 
     private val cardAccountRangeRepository: CardAccountRangeRepository,
-    private val staticCardAccountRanges: StaticCardAccountRanges
+    private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges()
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     @JvmOverloads

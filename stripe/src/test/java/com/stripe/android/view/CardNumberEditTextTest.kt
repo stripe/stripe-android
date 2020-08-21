@@ -598,7 +598,7 @@ internal class CardNumberEditTextTest {
                         it.addView(cardNumberEditText)
                     }
 
-                    cardNumberEditText.setText(CardNumberFixtures.VISA_NO_SPACES)
+                    cardNumberEditText.setText(VISA_NO_SPACES)
                     assertThat(cardNumberEditText.accountRangeRepositoryJob)
                         .isNotNull()
 
