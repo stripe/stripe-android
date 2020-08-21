@@ -10,7 +10,6 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.CardUtils
 import com.stripe.android.R
 import com.stripe.android.StripeTextUtils
-import com.stripe.android.cards.Bin
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.LegacyCardAccountRangeRepository
@@ -209,7 +208,7 @@ class CardNumberEditText internal constructor(
                 ).orEmpty()
 
                 val cardNumber = CardNumber.Unvalidated(spacelessNumber)
-                updateCardBrand(cardNumber.bin)
+                updateCardBrand(cardNumber)
 
                 val formattedNumber = cardNumber.getFormatted(panLength)
                 this.newCursorPosition = updateSelectionIndex(
@@ -254,15 +253,16 @@ class CardNumberEditText internal constructor(
     }
 
     @JvmSynthetic
-    internal fun updateCardBrand(inputBin: Bin?) {
+    internal fun updateCardBrand(cardNumber: CardNumber.Unvalidated) {
         // cancel in-flight job
         cancelAccountRangeRepositoryJob()
 
         accountRangeRepositoryJob = CoroutineScope(workDispatcher).launch {
-            if (inputBin != null) {
+            val bin = cardNumber.bin
+            if (bin != null) {
                 isProcessingCallback(true)
                 onAccountRangeResult(
-                    cardAccountRangeRepository.getAccountRange(inputBin.value)
+                    cardAccountRangeRepository.getAccountRange(cardNumber)
                 )
             } else {
                 onAccountRangeResult(null)

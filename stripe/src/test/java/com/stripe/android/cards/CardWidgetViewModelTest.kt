@@ -23,7 +23,7 @@ class CardWidgetViewModelTest {
     @Test
     fun `getAccountRange() should return expected value`() {
         var accountRange: CardMetadata.AccountRange? = null
-        viewModel.getAccountRange(CardNumberFixtures.VISA_NO_SPACES).observeForever {
+        viewModel.getAccountRange(CardNumberFixtures.VISA).observeForever {
             accountRange = it
         }
         assertThat(accountRange)
@@ -31,7 +31,9 @@ class CardWidgetViewModelTest {
     }
 
     private class FakeCardAccountRangeRepository : CardAccountRangeRepository {
-        override suspend fun getAccountRange(cardNumber: String) = ACCOUNT_RANGE
+        override suspend fun getAccountRange(
+            cardNumber: CardNumber.Unvalidated
+        ) = ACCOUNT_RANGE
     }
 
     private companion object {

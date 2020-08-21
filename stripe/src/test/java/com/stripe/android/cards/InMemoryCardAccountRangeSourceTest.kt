@@ -19,7 +19,7 @@ internal class InMemoryCardAccountRangeSourceTest {
     fun `getAccountRange() should return expected AccountRange`() = testDispatcher.runBlockingTest {
         assertThat(
             inMemoryCardAccountRangeSource
-                .getAccountRange(CardNumberFixtures.VISA_NO_SPACES)
+                .getAccountRange(CardNumberFixtures.VISA)
         ).isEqualTo(
             CardMetadata.AccountRange(
                 binRange = BinRange(

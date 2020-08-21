@@ -6,9 +6,9 @@ internal class InMemoryCardAccountRangeSource(
     private val store: CardAccountRangeStore
 ) : CardAccountRangeSource {
     override suspend fun getAccountRange(
-        cardNumber: String
+        cardNumber: CardNumber.Unvalidated
     ): CardMetadata.AccountRange? {
-        return Bin.create(cardNumber)?.let { bin ->
+        return cardNumber.bin?.let { bin ->
             store.get(bin)
                 .firstOrNull { (binRange) ->
                     binRange.matches(cardNumber)

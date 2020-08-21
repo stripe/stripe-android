@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import com.stripe.android.cards.CardNumber
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
@@ -8,18 +9,21 @@ internal data class BinRange(
     val high: String
 ) : StripeModel {
     /**
-     *  Number matching strategy: Truncate the longer of the two numbers (theirs and our
-     *  bounds) to match the length of the shorter one, then do numerical compare.
+     * Number matching strategy: Truncate the longer of the two numbers (theirs and our
+     * bounds) to match the length of the shorter one, then do numerical compare.
      */
-    internal fun matches(number: String): Boolean {
+    internal fun matches(cardNumber: CardNumber.Unvalidated): Boolean {
+        val number = cardNumber.normalizedNumber
+        val numberBigDecimal = number.toBigDecimalOrNull() ?: return false
+
         val withinLowRange = if (number.length < low.length) {
-            number.toBigDecimal() >= low.take(number.length).toBigDecimal()
+            numberBigDecimal >= low.take(number.length).toBigDecimal()
         } else {
             number.take(low.length).toBigDecimal() >= low.toBigDecimal()
         }
 
         val withinHighRange = if (number.length < high.length) {
-            number.toBigDecimal() <= high.take(number.length).toBigDecimal()
+            numberBigDecimal <= high.take(number.length).toBigDecimal()
         } else {
             number.take(high.length).toBigDecimal() <= high.toBigDecimal()
         }

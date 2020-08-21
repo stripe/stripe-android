@@ -34,7 +34,7 @@ internal class RemoteCardAccountRangeSourceTest {
 
         assertThat(
             remoteCardAccountRangeSource.getAccountRange(
-                CardNumberFixtures.VISA_NO_SPACES
+                CardNumberFixtures.VISA
             )
         ).isEqualTo(
             CardMetadata.AccountRange(
@@ -63,7 +63,7 @@ internal class RemoteCardAccountRangeSourceTest {
 
         assertThat(
             remoteCardAccountRangeSource.getAccountRange(
-                CardNumberFixtures.VISA_NO_SPACES
+                CardNumberFixtures.VISA
             )
         ).isNull()
         verify(cardAccountRangeStore).save(
@@ -83,7 +83,9 @@ internal class RemoteCardAccountRangeSourceTest {
         )
 
         assertThat(
-            remoteCardAccountRangeSource.getAccountRange("42")
+            remoteCardAccountRangeSource.getAccountRange(
+                CardNumber.Unvalidated("42")
+            )
         ).isNull()
 
         verify(repository, never()).getCardMetadata(any(), any())
