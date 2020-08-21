@@ -564,7 +564,7 @@ internal class CardNumberEditTextTest {
     }
 
     @Test
-    fun `updateCardBrand() should update cardBrand value`() {
+    fun `updateAccountRange() should update cardBrand value`() {
         cardNumberEditText.updateAccountRange(CardNumberFixtures.DINERS_CLUB_14)
         idle()
         assertEquals(CardBrand.DinersClub, lastBrandChangeCallbackInvocation)
@@ -575,7 +575,7 @@ internal class CardNumberEditTextTest {
     }
 
     @Test
-    fun `updateCardBrand() with null bin should set cardBrand to Unknown`() {
+    fun `updateAccountRange() with null bin should set cardBrand to Unknown`() {
         cardNumberEditText.updateAccountRange(CardNumber.Unvalidated(""))
         assertEquals(CardBrand.Unknown, lastBrandChangeCallbackInvocation)
     }
