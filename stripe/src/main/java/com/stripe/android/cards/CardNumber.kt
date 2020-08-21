@@ -11,7 +11,7 @@ internal sealed class CardNumber {
     internal data class Unvalidated internal constructor(
         private val denormalizedNumber: String
     ) : CardNumber() {
-        private val normalizedNumber = StripeTextUtils
+        val normalizedNumber = StripeTextUtils
             .removeSpacesAndHyphens(denormalizedNumber)
             .orEmpty()
 

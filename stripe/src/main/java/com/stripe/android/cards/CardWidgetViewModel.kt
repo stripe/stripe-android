@@ -25,7 +25,7 @@ internal class CardWidgetViewModel(
         cardAccountRangeRepositoryFactory.create()
     }
 
-    fun getAccountRange(cardNumber: String) = liveData {
+    fun getAccountRange(cardNumber: CardNumber.Unvalidated) = liveData {
         emit(cardAccountRangeRepository.getAccountRange(cardNumber))
     }
 }

@@ -8,9 +8,9 @@ internal class DefaultCardAccountRangeRepository(
     private val remoteCardAccountRangeSource: CardAccountRangeSource
 ) : CardAccountRangeRepository {
     override suspend fun getAccountRange(
-        cardNumber: String
+        cardNumber: CardNumber.Unvalidated
     ): CardMetadata.AccountRange? {
-        return Bin.create(cardNumber)?.let {
+        return cardNumber.bin?.let {
             inMemoryCardAccountRangeSource.getAccountRange(cardNumber)
                 ?: remoteCardAccountRangeSource.getAccountRange(cardNumber)
                 ?: localCardAccountRangeSource.getAccountRange(cardNumber)

@@ -8,7 +8,7 @@ import com.stripe.android.model.CardMetadata
  */
 internal class LocalCardAccountRangeSource : CardAccountRangeSource {
     override suspend fun getAccountRange(
-        cardNumber: String
+        cardNumber: CardNumber.Unvalidated
     ): CardMetadata.AccountRange? {
         return ACCOUNTS
             .firstOrNull {

@@ -9,8 +9,10 @@ import com.stripe.android.model.CardMetadata
 internal class LegacyCardAccountRangeRepository(
     private val localCardAccountRangeSource: CardAccountRangeSource
 ) : CardAccountRangeRepository {
-    override suspend fun getAccountRange(cardNumber: String): CardMetadata.AccountRange? {
-        return Bin.create(cardNumber)?.let {
+    override suspend fun getAccountRange(
+        cardNumber: CardNumber.Unvalidated
+    ): CardMetadata.AccountRange? {
+        return cardNumber.bin?.let {
             localCardAccountRangeSource.getAccountRange(cardNumber)
         }
     }

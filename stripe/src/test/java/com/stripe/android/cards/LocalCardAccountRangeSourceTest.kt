@@ -16,75 +16,80 @@ internal class LocalCardAccountRangeSourceTest {
 
     @Test
     fun `getAccountRange() should return expected AccountRange`() = testDispatcher.runBlockingTest {
-        assertThat(source.getAccountRange("4")?.brand)
-            .isEqualTo(CardBrand.Visa)
-        assertThat(source.getAccountRange("424242")?.brand)
-            .isEqualTo(CardBrand.Visa)
-        assertThat(source.getAccountRange(CardNumberFixtures.VISA_NO_SPACES)?.brand)
-            .isEqualTo(CardBrand.Visa)
-        assertThat(source.getAccountRange(CardNumberFixtures.VISA_DEBIT_NO_SPACES)?.brand)
-            .isEqualTo(CardBrand.Visa)
-
-        assertThat(source.getAccountRange("2221")?.brand)
-            .isEqualTo(CardBrand.MasterCard)
-        assertThat(source.getAccountRange("2720")?.brand)
-            .isEqualTo(CardBrand.MasterCard)
-        assertThat(source.getAccountRange("51")?.brand)
-            .isEqualTo(CardBrand.MasterCard)
-        assertThat(source.getAccountRange("55")?.brand)
-            .isEqualTo(CardBrand.MasterCard)
-        assertThat(source.getAccountRange(CardNumberFixtures.MASTERCARD_NO_SPACES)?.brand)
-            .isEqualTo(CardBrand.MasterCard)
-
-        assertThat(source.getAccountRange("37")?.brand)
-            .isEqualTo(CardBrand.AmericanExpress)
-        assertThat(source.getAccountRange("370000")?.brand)
-            .isEqualTo(CardBrand.AmericanExpress)
-        assertThat(source.getAccountRange(CardNumberFixtures.AMEX_NO_SPACES)?.brand)
-            .isEqualTo(CardBrand.AmericanExpress)
-
-        assertThat(source.getAccountRange("60")?.brand)
-            .isEqualTo(CardBrand.Discover)
-        assertThat(source.getAccountRange("600000")?.brand)
-            .isEqualTo(CardBrand.Discover)
-        assertThat(source.getAccountRange(CardNumberFixtures.DISCOVER_NO_SPACES)?.brand)
-            .isEqualTo(CardBrand.Discover)
-
-        assertThat(source.getAccountRange("3528")?.brand)
-            .isEqualTo(CardBrand.JCB)
-        assertThat(source.getAccountRange("3589")?.brand)
-            .isEqualTo(CardBrand.JCB)
-        assertThat(source.getAccountRange(CardNumberFixtures.JCB_NO_SPACES)?.brand)
-            .isEqualTo(CardBrand.JCB)
-
-        assertThat(source.getAccountRange("36")?.brand)
-            .isEqualTo(CardBrand.DinersClub)
-        assertThat(source.getAccountRange("300")?.brand)
-            .isEqualTo(CardBrand.DinersClub)
-        assertThat(source.getAccountRange("3095")?.brand)
-            .isEqualTo(CardBrand.DinersClub)
-        assertThat(source.getAccountRange("38")?.brand)
-            .isEqualTo(CardBrand.DinersClub)
-
         assertThat(
-            source.getAccountRange(CardNumberFixtures.DINERS_CLUB_14_NO_SPACES)?.brand
+            source.getAccountRange(CardNumber.Unvalidated("4"))?.brand
+        ).isEqualTo(CardBrand.Visa)
+        assertThat(
+            source.getAccountRange(CardNumber.Unvalidated("424242"))?.brand)
+            .isEqualTo(CardBrand.Visa)
+        assertThat(source.getAccountRange(CardNumberFixtures.VISA)?.brand)
+            .isEqualTo(CardBrand.Visa)
+        assertThat(source.getAccountRange(CardNumberFixtures.VISA_DEBIT)?.brand)
+            .isEqualTo(CardBrand.Visa)
+
+        assertThat(source.getAccountRange(CardNumber.Unvalidated("2221"))?.brand)
+            .isEqualTo(CardBrand.MasterCard)
+        assertThat(source.getAccountRange(CardNumber.Unvalidated("2720"))?.brand)
+            .isEqualTo(CardBrand.MasterCard)
+        assertThat(source.getAccountRange(CardNumber.Unvalidated("51"))?.brand)
+            .isEqualTo(CardBrand.MasterCard)
+        assertThat(source.getAccountRange(CardNumber.Unvalidated("55"))?.brand)
+            .isEqualTo(CardBrand.MasterCard)
+        assertThat(source.getAccountRange(CardNumberFixtures.MASTERCARD)?.brand)
+            .isEqualTo(CardBrand.MasterCard)
+
+        assertThat(source.getAccountRange(CardNumber.Unvalidated("37"))?.brand)
+            .isEqualTo(CardBrand.AmericanExpress)
+        assertThat(source.getAccountRange(CardNumber.Unvalidated("370000"))?.brand)
+            .isEqualTo(CardBrand.AmericanExpress)
+        assertThat(source.getAccountRange(CardNumberFixtures.AMEX)?.brand)
+            .isEqualTo(CardBrand.AmericanExpress)
+
+        assertThat(source.getAccountRange(CardNumber.Unvalidated("60"))?.brand)
+            .isEqualTo(CardBrand.Discover)
+        assertThat(source.getAccountRange(CardNumber.Unvalidated("600000"))?.brand)
+            .isEqualTo(CardBrand.Discover)
+        assertThat(source.getAccountRange(CardNumberFixtures.DISCOVER)?.brand)
+            .isEqualTo(CardBrand.Discover)
+
+        assertThat(source.getAccountRange(CardNumber.Unvalidated("3528"))?.brand)
+            .isEqualTo(CardBrand.JCB)
+        assertThat(source.getAccountRange(CardNumber.Unvalidated("3589"))?.brand)
+            .isEqualTo(CardBrand.JCB)
+        assertThat(source.getAccountRange(CardNumberFixtures.JCB)?.brand)
+            .isEqualTo(CardBrand.JCB)
+
+        assertThat(source.getAccountRange(CardNumber.Unvalidated("36"))?.brand)
+            .isEqualTo(CardBrand.DinersClub)
+        assertThat(source.getAccountRange(CardNumber.Unvalidated("300"))?.brand)
+            .isEqualTo(CardBrand.DinersClub)
+        assertThat(
+            source.getAccountRange(CardNumber.Unvalidated("3095"))?.brand
         ).isEqualTo(CardBrand.DinersClub)
         assertThat(
-            source.getAccountRange(CardNumberFixtures.DINERS_CLUB_14_NO_SPACES)?.panLength
+            source.getAccountRange(CardNumber.Unvalidated("38"))?.brand
+        ).isEqualTo(CardBrand.DinersClub)
+
+        assertThat(
+            source.getAccountRange(CardNumberFixtures.DINERS_CLUB_14)?.brand
+        ).isEqualTo(CardBrand.DinersClub)
+        assertThat(
+            source.getAccountRange(CardNumberFixtures.DINERS_CLUB_14)?.panLength
         ).isEqualTo(14)
 
         assertThat(
-            source.getAccountRange(CardNumberFixtures.DINERS_CLUB_16_NO_SPACES)?.brand
-        )
-            .isEqualTo(CardBrand.DinersClub)
+            source.getAccountRange(CardNumberFixtures.DINERS_CLUB_16)?.brand
+        ).isEqualTo(CardBrand.DinersClub)
         assertThat(
-            source.getAccountRange(CardNumberFixtures.DINERS_CLUB_16_NO_SPACES)?.panLength
+            source.getAccountRange(CardNumberFixtures.DINERS_CLUB_16)?.panLength
         ).isEqualTo(16)
 
-        assertThat(source.getAccountRange("1"))
-            .isNull()
-        assertThat(source.getAccountRange("61"))
-            .isNull()
+        assertThat(
+            source.getAccountRange(CardNumber.Unvalidated("1"))
+        ).isNull()
+        assertThat(
+            source.getAccountRange(CardNumber.Unvalidated("61"))
+        ).isNull()
     }
 
     @Test

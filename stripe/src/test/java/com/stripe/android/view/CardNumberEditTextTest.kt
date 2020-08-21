@@ -19,6 +19,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.AccountRangeFixtures
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.LegacyCardAccountRangeRepository
 import com.stripe.android.cards.LocalCardAccountRangeSource
 import com.stripe.android.model.BinFixtures
@@ -514,18 +515,18 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun `updateCardBrand() should update cardBrand value`() {
-        cardNumberEditText.updateCardBrand(BinFixtures.DINERSCLUB14)
+        cardNumberEditText.updateCardBrand(CardNumberFixtures.DINERS_CLUB_14)
         idle()
         assertEquals(CardBrand.DinersClub, lastBrandChangeCallbackInvocation)
 
-        cardNumberEditText.updateCardBrand(BinFixtures.AMEX)
+        cardNumberEditText.updateCardBrand(CardNumberFixtures.AMEX)
         idle()
         assertEquals(CardBrand.AmericanExpress, lastBrandChangeCallbackInvocation)
     }
 
     @Test
     fun `updateCardBrand() with null bin should set cardBrand to Unknown`() {
-        cardNumberEditText.updateCardBrand(null)
+        cardNumberEditText.updateCardBrand(CardNumber.Unvalidated(""))
         assertEquals(CardBrand.Unknown, lastBrandChangeCallbackInvocation)
     }
 
@@ -599,7 +600,9 @@ internal class CardNumberEditTextTest {
     private fun idle() = shadowOf(Looper.getMainLooper()).idle()
 
     private class DelayedCardAccountRangeRepository : CardAccountRangeRepository {
-        override suspend fun getAccountRange(cardNumber: String): CardMetadata.AccountRange? {
+        override suspend fun getAccountRange(
+            cardNumber: CardNumber.Unvalidated
+        ): CardMetadata.AccountRange? {
             delay(TimeUnit.SECONDS.toMillis(10))
             return null
         }

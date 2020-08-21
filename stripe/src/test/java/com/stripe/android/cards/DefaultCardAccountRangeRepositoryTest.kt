@@ -31,11 +31,13 @@ internal class DefaultCardAccountRangeRepositoryTest {
     @Test
     fun `repository with real sources returns expected results`() = runBlocking {
         assertThat(
-            realRepository.getAccountRange("42424")
+            realRepository.getAccountRange(
+                CardNumber.Unvalidated("42424")
+            )
         ).isNull()
 
         assertThat(
-            realRepository.getAccountRange(CardNumberFixtures.VISA_NO_SPACES)
+            realRepository.getAccountRange(CardNumberFixtures.VISA)
         ).isEqualTo(
             CardMetadata.AccountRange(
                 binRange = BinRange(
@@ -50,7 +52,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
             .hasSize(2)
 
         assertThat(
-            realRepository.getAccountRange(CardNumberFixtures.DINERS_CLUB_14_NO_SPACES)
+            realRepository.getAccountRange(CardNumberFixtures.DINERS_CLUB_14)
         ).isEqualTo(
             AccountRangeFixtures.DINERSCLUB14
         )
@@ -59,7 +61,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
         ).isEmpty()
 
         assertThat(
-            realRepository.getAccountRange(CardNumberFixtures.DINERS_CLUB_16_NO_SPACES)
+            realRepository.getAccountRange(CardNumberFixtures.DINERS_CLUB_16)
         ).isEqualTo(
             AccountRangeFixtures.DINERSCLUB16
         )
@@ -68,7 +70,9 @@ internal class DefaultCardAccountRangeRepositoryTest {
         ).isEmpty()
 
         assertThat(
-            realRepository.getAccountRange("378282")
+            realRepository.getAccountRange(
+                CardNumber.Unvalidated("378282")
+            )
         ).isEqualTo(
             AccountRangeFixtures.AMERICANEXPRESS
         )
@@ -78,7 +82,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
         ).hasSize(1)
 
         assertThat(
-            realRepository.getAccountRange("5555552500001001")
+            realRepository.getAccountRange(CardNumber.Unvalidated("5555552500001001"))
         ).isEqualTo(
             AccountRangeFixtures.MASTERCARD
         )
@@ -87,7 +91,9 @@ internal class DefaultCardAccountRangeRepositoryTest {
         ).isEmpty()
 
         assertThat(
-            realRepository.getAccountRange("356840")
+            realRepository.getAccountRange(
+                CardNumber.Unvalidated("356840")
+            )
         ).isEqualTo(
             AccountRangeFixtures.JCB
         )
@@ -96,7 +102,9 @@ internal class DefaultCardAccountRangeRepositoryTest {
         ).isEmpty()
 
         assertThat(
-            realRepository.getAccountRange("621682")
+            realRepository.getAccountRange(
+                CardNumber.Unvalidated("621682")
+            )
         ).isEqualTo(
             AccountRangeFixtures.UNIONPAY19
         )
@@ -113,7 +121,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
                 inMemoryCardAccountRangeSource = FakeCardAccountRangeSource(),
                 localCardAccountRangeSource = FakeCardAccountRangeSource(),
                 remoteCardAccountRangeSource = FakeCardAccountRangeSource()
-            ).getAccountRange(CardNumberFixtures.VISA_NO_SPACES)
+            ).getAccountRange(CardNumberFixtures.VISA)
         ).isNull()
     }
 
@@ -138,7 +146,9 @@ internal class DefaultCardAccountRangeRepositoryTest {
     }
 
     private class FakeCardAccountRangeSource : CardAccountRangeSource {
-        override suspend fun getAccountRange(cardNumber: String): CardMetadata.AccountRange? {
+        override suspend fun getAccountRange(
+            cardNumber: CardNumber.Unvalidated
+        ): CardMetadata.AccountRange? {
             return null
         }
     }
