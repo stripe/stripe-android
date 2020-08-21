@@ -15,6 +15,8 @@ internal sealed class CardNumber {
             .removeSpacesAndHyphens(denormalizedNumber)
             .orEmpty()
 
+        val length = normalizedNumber.length
+
         val bin: Bin? = Bin.create(normalizedNumber)
 
         fun validate(panLength: Int): Validated? {
