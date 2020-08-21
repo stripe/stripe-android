@@ -23,6 +23,7 @@ import com.stripe.android.cards.AccountRangeFixtures
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.LegacyCardAccountRangeRepository
+import com.stripe.android.cards.NullCardAccountRangeRepository
 import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.CardBrand
@@ -229,11 +230,39 @@ internal class CardNumberEditTextTest {
     }
 
     @Test
-    fun `valid Amex should change isCardNumberValid to true and invoke completion callback`() {
+    fun `updating text with null account range should format text correctly but not set card brand`() {
+        val cardNumberEditText = CardNumberEditText(
+            context,
+            workDispatcher = testDispatcher,
+            cardAccountRangeRepository = NullCardAccountRangeRepository()
+        )
+
+        cardNumberEditText.setText(AMEX_NO_SPACES)
+        idle()
+
+        assertThat(cardNumberEditText.fieldText)
+            .isEqualTo(AMEX_WITH_SPACES)
+        assertThat(cardNumberEditText.cardBrand)
+            .isEqualTo(CardBrand.Unknown)
+    }
+
+    @Test
+    fun `full Amex typed as BIN followed by remaining number should change isCardNumberValid to true and invoke completion callback`() {
         // type Amex BIN
         updateCardNumberAndIdle(CardNumberFixtures.AMEX_BIN)
         // type rest of card number
         cardNumberEditText.append(AMEX_NO_SPACES.drop(6))
+        idle()
+
+        assertThat(cardNumberEditText.isCardNumberValid)
+            .isTrue()
+        assertThat(completionCallbackInvocations)
+            .isEqualTo(1)
+    }
+
+    @Test
+    fun `full Amex typed typed at once should change isCardNumberValid to true and invoke completion callback`() {
+        updateCardNumberAndIdle(AMEX_NO_SPACES)
         idle()
 
         assertThat(cardNumberEditText.isCardNumberValid)
@@ -535,19 +564,19 @@ internal class CardNumberEditTextTest {
     }
 
     @Test
-    fun `updateCardBrand() should update cardBrand value`() {
-        cardNumberEditText.updateCardBrand(CardNumberFixtures.DINERS_CLUB_14)
+    fun `updateAccountRange() should update cardBrand value`() {
+        cardNumberEditText.updateAccountRange(CardNumberFixtures.DINERS_CLUB_14)
         idle()
         assertEquals(CardBrand.DinersClub, lastBrandChangeCallbackInvocation)
 
-        cardNumberEditText.updateCardBrand(CardNumberFixtures.AMEX)
+        cardNumberEditText.updateAccountRange(CardNumberFixtures.AMEX)
         idle()
         assertEquals(CardBrand.AmericanExpress, lastBrandChangeCallbackInvocation)
     }
 
     @Test
-    fun `updateCardBrand() with null bin should set cardBrand to Unknown`() {
-        cardNumberEditText.updateCardBrand(CardNumber.Unvalidated(""))
+    fun `updateAccountRange() with null bin should set cardBrand to Unknown`() {
+        cardNumberEditText.updateAccountRange(CardNumber.Unvalidated(""))
         assertEquals(CardBrand.Unknown, lastBrandChangeCallbackInvocation)
     }
 
@@ -569,7 +598,7 @@ internal class CardNumberEditTextTest {
                         it.addView(cardNumberEditText)
                     }
 
-                    cardNumberEditText.setText(CardNumberFixtures.VISA_NO_SPACES)
+                    cardNumberEditText.setText(VISA_NO_SPACES)
                     assertThat(cardNumberEditText.accountRangeRepositoryJob)
                         .isNotNull()
 
