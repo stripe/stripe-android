@@ -95,7 +95,7 @@ internal class StaticCardAccountRangeSourceTest {
     @Test
     fun `all BinRange values should be the expected length`() {
         assertThat(
-            StaticCardAccountRangeSource.ACCOUNTS
+            DefaultStaticCardAccountRanges.ACCOUNTS
                 .all {
                     it.binRange.low.length == it.panLength &&
                         it.binRange.high.length == it.panLength
