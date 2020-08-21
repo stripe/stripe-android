@@ -14,6 +14,7 @@ import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.LegacyCardAccountRangeRepository
 import com.stripe.android.cards.LocalCardAccountRangeSource
+import com.stripe.android.cards.StaticAccountRanges
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardMetadata
 import kotlinx.coroutines.CoroutineDispatcher
@@ -81,7 +82,16 @@ class CardNumberEditText internal constructor(
             return cardBrand.getMaxLengthWithSpacesForCardNumber(fieldText)
         }
 
-    private var panLength = CardNumber.DEFAULT_PAN_LENGTH
+    private var accountRange: CardMetadata.AccountRange? = null
+        set(value) {
+            field = value
+            updateLengthFilter()
+        }
+
+    private val panLength: Int
+        get() = accountRange?.panLength
+            ?: StaticAccountRanges.match(unvalidatedCardNumber)?.panLength
+            ?: CardNumber.DEFAULT_PAN_LENGTH
 
     private val formattedPanLength: Int
         get() = panLength + CardNumber.getSpacePositions(panLength).size
@@ -104,6 +114,9 @@ class CardNumberEditText internal constructor(
         } else {
             null
         }
+
+    private val unvalidatedCardNumber: CardNumber.Unvalidated
+        get() = CardNumber.Unvalidated(fieldText)
 
     @VisibleForTesting
     internal var accountRangeRepositoryJob: Job? = null
@@ -190,11 +203,11 @@ class CardNumberEditText internal constructor(
             private var newCursorPosition: Int? = null
             private var formattedNumber: String? = null
 
-            private var beforeCardNumber = CardNumber.Unvalidated("")
+            private var beforeCardNumber = unvalidatedCardNumber
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
                 if (!ignoreChanges) {
-                    beforeCardNumber = CardNumber.Unvalidated(s?.toString().orEmpty())
+                    beforeCardNumber = unvalidatedCardNumber
 
                     latestChangeStart = start
                     latestInsertionSize = after
@@ -212,7 +225,7 @@ class CardNumberEditText internal constructor(
                 ).orEmpty()
 
                 val cardNumber = CardNumber.Unvalidated(spacelessNumber)
-                updateCardBrand(cardNumber)
+                updateAccountRange(cardNumber)
 
                 val formattedNumber = cardNumber.getFormatted(panLength)
                 this.newCursorPosition = updateSelectionIndex(
@@ -242,7 +255,7 @@ class CardNumberEditText internal constructor(
 
                 ignoreChanges = false
 
-                if (fieldText.length == formattedPanLength) {
+                if (unvalidatedCardNumber.length == panLength) {
                     val wasCardNumberValid = isCardNumberValid
                     isCardNumberValid = CardUtils.isValidCardNumber(fieldText)
                     shouldShowError = !isCardNumberValid
@@ -263,14 +276,16 @@ class CardNumberEditText internal constructor(
              * Have digits been added in this text change.
              */
             private val digitsAdded: Boolean
-                get() = CardNumber.Unvalidated(fieldText).length > beforeCardNumber.length
+                get() = unvalidatedCardNumber.length > beforeCardNumber.length
         })
     }
 
     @JvmSynthetic
-    internal fun updateCardBrand(cardNumber: CardNumber.Unvalidated) {
+    internal fun updateAccountRange(cardNumber: CardNumber.Unvalidated) {
         // cancel in-flight job
         cancelAccountRangeRepositoryJob()
+
+        accountRange = null
 
         accountRangeRepositoryJob = CoroutineScope(workDispatcher).launch {
             val bin = cardNumber.bin
@@ -292,10 +307,10 @@ class CardNumberEditText internal constructor(
 
     @JvmSynthetic
     internal suspend fun onAccountRangeResult(
-        accountRange: CardMetadata.AccountRange?
+        newAccountRange: CardMetadata.AccountRange?
     ) = withContext(Dispatchers.Main) {
-        panLength = accountRange?.panLength ?: CardNumber.DEFAULT_PAN_LENGTH
-        cardBrand = accountRange?.brand ?: CardBrand.Unknown
+        accountRange = newAccountRange
+        cardBrand = newAccountRange?.brand ?: CardBrand.Unknown
         isProcessingCallback(false)
     }
 }
