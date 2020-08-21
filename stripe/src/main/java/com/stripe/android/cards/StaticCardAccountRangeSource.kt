@@ -5,13 +5,12 @@ import com.stripe.android.model.CardMetadata
 /**
  * A [CardAccountRangeSource] that uses a local, static source of BIN ranges.
  */
-internal class LocalCardAccountRangeSource : CardAccountRangeSource {
+internal class StaticCardAccountRangeSource(
+    private val accountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges()
+) : CardAccountRangeSource {
     override suspend fun getAccountRange(
         cardNumber: CardNumber.Unvalidated
     ): CardMetadata.AccountRange? {
-        return StaticAccountRanges.ACCOUNTS
-            .firstOrNull {
-                it.binRange.matches(cardNumber)
-            }
+        return accountRanges.match(cardNumber)
     }
 }

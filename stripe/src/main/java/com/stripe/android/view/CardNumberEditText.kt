@@ -13,8 +13,8 @@ import com.stripe.android.StripeTextUtils
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.LegacyCardAccountRangeRepository
-import com.stripe.android.cards.LocalCardAccountRangeSource
 import com.stripe.android.cards.StaticAccountRanges
+import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardMetadata
 import kotlinx.coroutines.CoroutineDispatcher
@@ -48,7 +48,7 @@ class CardNumberEditText internal constructor(
         attrs,
         defStyleAttr,
         Dispatchers.IO,
-        LegacyCardAccountRangeRepository(LocalCardAccountRangeSource())
+        LegacyCardAccountRangeRepository(StaticCardAccountRangeSource())
     )
 
     @VisibleForTesting

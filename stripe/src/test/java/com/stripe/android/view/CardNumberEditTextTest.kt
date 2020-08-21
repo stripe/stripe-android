@@ -25,6 +25,7 @@ import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.LegacyCardAccountRangeRepository
 import com.stripe.android.cards.LocalCardAccountRangeSource
 import com.stripe.android.cards.NullCardAccountRangeRepository
+import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardMetadata
@@ -67,7 +68,7 @@ internal class CardNumberEditTextTest {
     }
 
     private val cardAccountRangeRepository = LegacyCardAccountRangeRepository(
-        LocalCardAccountRangeSource()
+        StaticCardAccountRangeSource()
     )
 
     private val cardNumberEditText = CardNumberEditText(

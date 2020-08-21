@@ -9,10 +9,10 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
 
 @ExperimentalCoroutinesApi
-internal class LocalCardAccountRangeSourceTest {
+internal class StaticCardAccountRangeSourceTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
-    private val source = LocalCardAccountRangeSource()
+    private val source = StaticCardAccountRangeSource()
 
     @Test
     fun `getAccountRange() should return expected AccountRange`() = testDispatcher.runBlockingTest {
@@ -95,7 +95,7 @@ internal class LocalCardAccountRangeSourceTest {
     @Test
     fun `all BinRange values should be the expected length`() {
         assertThat(
-            StaticAccountRanges.ACCOUNTS
+            DefaultStaticCardAccountRanges.ACCOUNTS
                 .all {
                     it.binRange.low.length == it.panLength &&
                         it.binRange.high.length == it.panLength
