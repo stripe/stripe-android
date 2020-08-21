@@ -4,8 +4,8 @@ import com.stripe.android.model.CardMetadata
 
 internal class DefaultCardAccountRangeRepository(
     private val inMemoryCardAccountRangeSource: CardAccountRangeSource,
-    private val localCardAccountRangeSource: CardAccountRangeSource,
-    private val remoteCardAccountRangeSource: CardAccountRangeSource
+    private val remoteCardAccountRangeSource: CardAccountRangeSource,
+    private val staticCardAccountRangeSource: CardAccountRangeSource
 ) : CardAccountRangeRepository {
     override suspend fun getAccountRange(
         cardNumber: CardNumber.Unvalidated
@@ -13,7 +13,7 @@ internal class DefaultCardAccountRangeRepository(
         return cardNumber.bin?.let {
             inMemoryCardAccountRangeSource.getAccountRange(cardNumber)
                 ?: remoteCardAccountRangeSource.getAccountRange(cardNumber)
-                ?: localCardAccountRangeSource.getAccountRange(cardNumber)
+                ?: staticCardAccountRangeSource.getAccountRange(cardNumber)
         }
     }
 }

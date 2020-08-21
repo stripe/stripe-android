@@ -119,8 +119,8 @@ internal class DefaultCardAccountRangeRepositoryTest {
         assertThat(
             DefaultCardAccountRangeRepository(
                 inMemoryCardAccountRangeSource = FakeCardAccountRangeSource(),
-                localCardAccountRangeSource = FakeCardAccountRangeSource(),
-                remoteCardAccountRangeSource = FakeCardAccountRangeSource()
+                remoteCardAccountRangeSource = FakeCardAccountRangeSource(),
+                staticCardAccountRangeSource = FakeCardAccountRangeSource()
             ).getAccountRange(CardNumberFixtures.VISA)
         ).isNull()
     }
@@ -134,14 +134,14 @@ internal class DefaultCardAccountRangeRepositoryTest {
         )
         return DefaultCardAccountRangeRepository(
             inMemoryCardAccountRangeSource = InMemoryCardAccountRangeSource(store),
-            localCardAccountRangeSource = LocalCardAccountRangeSource(),
             remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
                 stripeRepository,
                 ApiRequest.Options(
                     ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
                 ),
                 store
-            )
+            ),
+            staticCardAccountRangeSource = StaticCardAccountRangeSource()
         )
     }
 

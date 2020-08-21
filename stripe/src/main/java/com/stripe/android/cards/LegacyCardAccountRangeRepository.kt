@@ -7,13 +7,13 @@ import com.stripe.android.model.CardMetadata
  * using a local, static source.
  */
 internal class LegacyCardAccountRangeRepository(
-    private val localCardAccountRangeSource: CardAccountRangeSource
+    private val staticCardAccountRangeSource: CardAccountRangeSource
 ) : CardAccountRangeRepository {
     override suspend fun getAccountRange(
         cardNumber: CardNumber.Unvalidated
     ): CardMetadata.AccountRange? {
         return cardNumber.bin?.let {
-            localCardAccountRangeSource.getAccountRange(cardNumber)
+            staticCardAccountRangeSource.getAccountRange(cardNumber)
         }
     }
 }
