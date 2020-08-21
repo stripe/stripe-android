@@ -7,6 +7,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures
+import com.stripe.android.CardNumberFixtures.AMEX_BIN
 import com.stripe.android.CardNumberFixtures.AMEX_NO_SPACES
 import com.stripe.android.CardNumberFixtures.AMEX_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_14_NO_SPACES
@@ -15,6 +16,7 @@ import com.stripe.android.CardNumberFixtures.DINERS_CLUB_16_NO_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_16_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.JCB_NO_SPACES
 import com.stripe.android.CardNumberFixtures.JCB_WITH_SPACES
+import com.stripe.android.CardNumberFixtures.VISA_BIN
 import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
 import com.stripe.android.PaymentConfiguration
@@ -629,6 +631,61 @@ internal class CardNumberEditTextTest {
         // account range data has been retrieved
         assertThat(isProcessing)
             .isFalse()
+    }
+
+    @Test
+    fun `getAccountRange() should only be called when necessary`() {
+        Dispatchers.setMain(testDispatcher)
+
+        var repositoryCalls = 0
+        val cardNumberEditText = CardNumberEditText(
+            context,
+            workDispatcher = testDispatcher,
+            cardAccountRangeRepository = object : CardAccountRangeRepository {
+                override suspend fun getAccountRange(
+                    cardNumber: CardNumber.Unvalidated
+                ): CardMetadata.AccountRange? {
+                    repositoryCalls++
+                    return cardAccountRangeRepository.getAccountRange(cardNumber)
+                }
+            }
+        )
+
+        // 424242 - valid BIN, call repo
+        cardNumberEditText.setText(VISA_BIN)
+        idle()
+        assertThat(repositoryCalls)
+            .isEqualTo(1)
+
+        // 4242424 - valid BIN but matches existing accountRange
+        cardNumberEditText.append("4")
+        idle()
+        assertThat(repositoryCalls)
+            .isEqualTo(1)
+
+        // 424242 - valid BIN but matches existing accountRange
+        ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
+        idle()
+        assertThat(repositoryCalls)
+            .isEqualTo(1)
+
+        // 42424 - not a BIN
+        ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
+        idle()
+        assertThat(repositoryCalls)
+            .isEqualTo(1)
+
+        // 424242 - transitioned to valid BIN, call repo
+        cardNumberEditText.append("2")
+        idle()
+        assertThat(repositoryCalls)
+            .isEqualTo(2)
+
+        // 378282 - new valid BIN, call repo
+        cardNumberEditText.setText(AMEX_BIN)
+        idle()
+        assertThat(repositoryCalls)
+            .isEqualTo(3)
     }
 
     private fun verifyCardBrandBin(
