@@ -13,6 +13,8 @@ import com.stripe.android.CardNumberFixtures.DINERS_CLUB_14_NO_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_14_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_16_NO_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_16_WITH_SPACES
+import com.stripe.android.CardNumberFixtures.JCB_NO_SPACES
+import com.stripe.android.CardNumberFixtures.JCB_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
 import com.stripe.android.PaymentConfiguration
@@ -510,6 +512,25 @@ internal class CardNumberEditTextTest {
 
         assertThat(cardNumberEditText.cardNumber)
             .isNull()
+    }
+
+    @Test
+    fun `pasting a full number, fully deleting it via delete key, then pasting a new full number should format the new number`() {
+        // paste a full number
+        updateCardNumberAndIdle(VISA_NO_SPACES)
+
+        // fully delete it with delete key
+        repeat(cardNumberEditText.fieldText.length) {
+            ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
+        }
+        assertThat(cardNumberEditText.fieldText)
+            .isEmpty()
+
+        // paste a new number
+        updateCardNumberAndIdle(JCB_NO_SPACES)
+
+        assertThat(cardNumberEditText.fieldText)
+            .isEqualTo(JCB_WITH_SPACES)
     }
 
     @Test

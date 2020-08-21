@@ -191,8 +191,12 @@ class CardNumberEditText internal constructor(
             private var newCursorPosition: Int? = null
             private var formattedNumber: String? = null
 
+            private var beforeCardNumber = CardNumber.Unvalidated("")
+
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
                 if (!ignoreChanges) {
+                    beforeCardNumber = CardNumber.Unvalidated(s?.toString().orEmpty())
+
                     latestChangeStart = start
                     latestInsertionSize = after
                 }
@@ -226,12 +230,14 @@ class CardNumberEditText internal constructor(
                 }
 
                 ignoreChanges = true
-                if (!isLastKeyDelete && formattedNumber != null) {
+
+                if (shouldUpdateAfterChange) {
                     setText(formattedNumber)
                     newCursorPosition?.let {
                         setSelection(it.coerceIn(0, fieldText.length))
                     }
                 }
+
                 formattedNumber = null
                 newCursorPosition = null
 
@@ -250,6 +256,15 @@ class CardNumberEditText internal constructor(
                     shouldShowError = false
                 }
             }
+
+            private val shouldUpdateAfterChange: Boolean
+                get() = (digitsAdded || !isLastKeyDelete) && formattedNumber != null
+
+            /**
+             * Have digits been added in this text change.
+             */
+            private val digitsAdded: Boolean
+                get() = CardNumber.Unvalidated(fieldText).length > beforeCardNumber.length
         })
     }
 
