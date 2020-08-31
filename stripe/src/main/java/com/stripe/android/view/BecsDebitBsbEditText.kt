@@ -52,58 +52,60 @@ internal class BecsDebitBsbEditText @JvmOverloads constructor(
         filters = arrayOf(InputFilter.LengthFilter(MAX_LENGTH))
         keyListener = DigitsKeyListener.getInstance(false, true)
 
-        addTextChangedListener(object : StripeTextWatcher() {
-            private var ignoreChanges = false
-            private var newCursorPosition: Int? = null
-            private var formattedBsb: String? = null
+        addTextChangedListener(
+            object : StripeTextWatcher() {
+                private var ignoreChanges = false
+                private var newCursorPosition: Int? = null
+                private var formattedBsb: String? = null
 
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                if (ignoreChanges) {
-                    return
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    if (ignoreChanges) {
+                        return
+                    }
+
+// skip formatting if past the separator
+                    if (start > 4) {
+                        return
+                    }
+
+                    val bsb = s?.toString().orEmpty().filter { it.isDigit() }
+                    formattedBsb = formatBsb(bsb)
+                    newCursorPosition = formattedBsb?.length
                 }
 
-                // skip formatting if past the separator
-                if (start > 4) {
-                    return
-                }
+                override fun afterTextChanged(s: Editable?) {
+                    if (ignoreChanges) {
+                        return
+                    }
 
-                val bsb = s?.toString().orEmpty().filter { it.isDigit() }
-                formattedBsb = formatBsb(bsb)
-                newCursorPosition = formattedBsb?.length
-            }
+                    ignoreChanges = true
+                    if (!isLastKeyDelete && formattedBsb != null) {
+                        setText(formattedBsb)
+                        newCursorPosition?.let {
+                            setSelection(it.coerceIn(0, fieldText.length))
+                        }
+                    }
+                    formattedBsb = null
+                    newCursorPosition = null
+                    ignoreChanges = false
 
-            override fun afterTextChanged(s: Editable?) {
-                if (ignoreChanges) {
-                    return
-                }
+                    val isInvalid = bank == null && fieldText.length >= MIN_VALIDATION_THRESHOLD
+                    errorMessage = if (isInvalid) {
+                        resources.getString(R.string.becs_widget_bsb_invalid)
+                    } else {
+                        null
+                    }
+                    shouldShowError = errorMessage != null
 
-                ignoreChanges = true
-                if (!isLastKeyDelete && formattedBsb != null) {
-                    setText(formattedBsb)
-                    newCursorPosition?.let {
-                        setSelection(it.coerceIn(0, fieldText.length))
+                    onBankChangedCallback(bank)
+                    updateIcon(isInvalid)
+
+                    if (isComplete) {
+                        onCompletedCallback()
                     }
                 }
-                formattedBsb = null
-                newCursorPosition = null
-                ignoreChanges = false
-
-                val isInvalid = bank == null && fieldText.length >= MIN_VALIDATION_THRESHOLD
-                errorMessage = if (isInvalid) {
-                    resources.getString(R.string.becs_widget_bsb_invalid)
-                } else {
-                    null
-                }
-                shouldShowError = errorMessage != null
-
-                onBankChangedCallback(bank)
-                updateIcon(isInvalid)
-
-                if (isComplete) {
-                    onCompletedCallback()
-                }
             }
-        })
+        )
     }
 
     private fun updateIcon(isError: Boolean) {
@@ -113,7 +115,9 @@ internal class BecsDebitBsbEditText @JvmOverloads constructor(
             } else {
                 R.drawable.stripe_ic_bank
             },
-            0, 0, 0
+            0,
+            0,
+            0
         )
     }
 

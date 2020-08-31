@@ -91,8 +91,9 @@ internal object PaymentIntentFixtures {
 
     val PI_REQUIRES_MASTERCARD_3DS2 = PARSER.parse(PI_REQUIRES_MASTERCARD_3DS2_JSON)!!
 
-    val PI_REQUIRES_AMEX_3DS2 = PARSER.parse(JSONObject(
-        """
+    val PI_REQUIRES_AMEX_3DS2 = PARSER.parse(
+        JSONObject(
+            """
         {
             "id": "pi_1EceMnCRMbs6FrXfCXdF8dnx",
             "object": "payment_intent",
@@ -150,11 +151,13 @@ internal object PaymentIntentFixtures {
             "transfer_data": null,
             "transfer_group": null
         }
-        """.trimIndent()
-    ))!!
+            """.trimIndent()
+        )
+    )!!
 
-    val PI_REQUIRES_3DS1 = PARSER.parse(JSONObject(
-        """
+    val PI_REQUIRES_3DS1 = PARSER.parse(
+        JSONObject(
+            """
         {
             "id": "pi_1EceMnCRMbs6FrXfCXdF8dnx",
             "object": "payment_intent",
@@ -204,11 +207,13 @@ internal object PaymentIntentFixtures {
             "transfer_data": null,
             "transfer_group": null
         }
-        """.trimIndent()
-    ))!!
+            """.trimIndent()
+        )
+    )!!
 
-    val PI_REQUIRES_REDIRECT = PARSER.parse(JSONObject(
-        """
+    val PI_REQUIRES_REDIRECT = PARSER.parse(
+        JSONObject(
+            """
         {
             "id": "pi_1EZlvVCRMbs6FrXfKpq2xMmy",
             "object": "payment_intent",
@@ -258,11 +263,13 @@ internal object PaymentIntentFixtures {
             "transfer_data": null,
             "transfer_group": null
         }
-        """.trimIndent()
-    ))!!
+            """.trimIndent()
+        )
+    )!!
 
-    val PI_WITH_LAST_PAYMENT_ERROR = PARSER.parse(JSONObject(
-        """
+    val PI_WITH_LAST_PAYMENT_ERROR = PARSER.parse(
+        JSONObject(
+            """
         {
             "id": "pi_1F7J1aCRMbs6FrXfaJcvbxF6",
             "object": "payment_intent",
@@ -333,11 +340,13 @@ internal object PaymentIntentFixtures {
             "source": null,
             "status": "requires_payment_method"
         }
-        """.trimIndent()
-    ))!!
+            """.trimIndent()
+        )
+    )!!
 
-    val CANCELLED = PARSER.parse(JSONObject(
-        """
+    val CANCELLED = PARSER.parse(
+        JSONObject(
+            """
         {
             "id": "pi_1FCpMECRMbs6FrXfVulorSf5",
             "object": "payment_intent",
@@ -401,11 +410,13 @@ internal object PaymentIntentFixtures {
             "transfer_data": null,
             "transfer_group": null
         }
-        """.trimIndent()
-    ))!!
+            """.trimIndent()
+        )
+    )!!
 
-    val PAYMENT_INTENT_WITH_CANCELED_3DS1_SOURCE = PARSER.parse(JSONObject(
-        """
+    val PAYMENT_INTENT_WITH_CANCELED_3DS1_SOURCE = PARSER.parse(
+        JSONObject(
+            """
         {
             "id": "pi_1FeqH9CRMbs6FrXfcqqpoC2H",
             "object": "payment_intent",
@@ -474,8 +485,9 @@ internal object PaymentIntentFixtures {
             "source": null,
             "status": "requires_payment_method"
         }
-        """.trimIndent()
-    ))
+            """.trimIndent()
+        )
+    )
 
     val EXPANDED_PAYMENT_METHOD_JSON = JSONObject(
         """

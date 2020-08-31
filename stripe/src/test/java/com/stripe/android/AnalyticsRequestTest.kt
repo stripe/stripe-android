@@ -6,9 +6,9 @@ import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.model.PaymentMethod
-import kotlin.test.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class AnalyticsRequestTest {
@@ -31,18 +31,20 @@ class AnalyticsRequestTest {
             appInfo = AppInfoFixtures.DEFAULT
         )
         assertThat(analyticsRequest.headers)
-            .isEqualTo(mapOf(
-                "Accept" to "application/json",
-                "X-Stripe-Client-User-Agent" to
-                    """
+            .isEqualTo(
+                mapOf(
+                    "Accept" to "application/json",
+                    "X-Stripe-Client-User-Agent" to
+                        """
                     {"os.name":"android","os.version":"28","bindings.version":"$sdkVersion","lang":"Java","publisher":"Stripe","http.agent":"","application":{"name":"MyAwesomePlugin","version":"1.2.34","url":"https:\/\/myawesomeplugin.info","partner_id":"pp_partner_1234"}}
-                    """.trimIndent(),
-                "Stripe-Version" to "2020-03-02",
-                "Authorization" to "Bearer pk_test_123",
-                "Accept-Language" to "en-US",
-                "User-Agent" to "Stripe/v1 AndroidBindings/$sdkVersion MyAwesomePlugin/1.2.34 (https://myawesomeplugin.info)",
-                "Accept-Charset" to "UTF-8"
-            ))
+                        """.trimIndent(),
+                    "Stripe-Version" to "2020-03-02",
+                    "Authorization" to "Bearer pk_test_123",
+                    "Accept-Language" to "en-US",
+                    "User-Agent" to "Stripe/v1 AndroidBindings/$sdkVersion MyAwesomePlugin/1.2.34 (https://myawesomeplugin.info)",
+                    "Accept-Charset" to "UTF-8"
+                )
+            )
         val requestUrl = analyticsRequest.url
 
         assertThat(requestUrl)

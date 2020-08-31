@@ -4,10 +4,10 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardMetadata
-import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
+import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
 internal class InMemoryCardAccountRangeSourceTest {

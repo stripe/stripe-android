@@ -22,13 +22,13 @@ import com.stripe.android.model.SourceParams
 import com.stripe.android.model.SourceTypeModel
 import com.stripe.android.model.Token
 import com.stripe.android.utils.TestUtils.idleLooper
-import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi

@@ -25,7 +25,8 @@ class PaymentMethodCreateParamsTest {
     fun createFromGooglePay_withNoBillingAddress() {
         assertThat(
             PaymentMethodCreateParams.createFromGooglePay(
-                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS)
+                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS
+            )
         ).isEqualTo(
             PaymentMethodCreateParams.create(
                 PaymentMethodCreateParams.Card(
@@ -42,7 +43,8 @@ class PaymentMethodCreateParamsTest {
     fun createFromGooglePay_withFullBillingAddress() {
         assertThat(
             PaymentMethodCreateParams.createFromGooglePay(
-                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS)
+                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS
+            )
         ).isEqualTo(
             PaymentMethodCreateParams.create(
                 PaymentMethodCreateParams.Card(

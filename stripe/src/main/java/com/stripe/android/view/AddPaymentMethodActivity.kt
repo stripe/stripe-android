@@ -81,7 +81,8 @@ class AddPaymentMethodActivity : StripeActivity() {
                 }
                 else -> {
                     throw IllegalArgumentException(
-                        "Unsupported Payment Method type: ${paymentMethodType.code}")
+                        "Unsupported Payment Method type: ${paymentMethodType.code}"
+                    )
                 }
             }
         }
@@ -140,7 +141,8 @@ class AddPaymentMethodActivity : StripeActivity() {
             }
             else -> {
                 throw IllegalArgumentException(
-                    "Unsupported Payment Method type: ${paymentMethodType.code}")
+                    "Unsupported Payment Method type: ${paymentMethodType.code}"
+                )
             }
         }
     }
@@ -150,7 +152,9 @@ class AddPaymentMethodActivity : StripeActivity() {
     ): View? {
         return if (args.addPaymentMethodFooterLayoutId > 0) {
             val footerView = layoutInflater.inflate(
-                args.addPaymentMethodFooterLayoutId, contentRoot, false
+                args.addPaymentMethodFooterLayoutId,
+                contentRoot,
+                false
             )
             footerView.id = R.id.stripe_add_payment_method_footer
             if (footerView is TextView) {
@@ -178,21 +182,24 @@ class AddPaymentMethodActivity : StripeActivity() {
 
         isProgressBarVisible = true
 
-        viewModel.createPaymentMethod(params).observe(this, { result ->
-            result.fold(
-                onSuccess = {
-                    if (shouldAttachToCustomer) {
-                        attachPaymentMethodToCustomer(it)
-                    } else {
-                        finishWithPaymentMethod(it)
+        viewModel.createPaymentMethod(params).observe(
+            this,
+            { result ->
+                result.fold(
+                    onSuccess = {
+                        if (shouldAttachToCustomer) {
+                            attachPaymentMethodToCustomer(it)
+                        } else {
+                            finishWithPaymentMethod(it)
+                        }
+                    },
+                    onFailure = {
+                        isProgressBarVisible = false
+                        showError(it.message.orEmpty())
                     }
-                },
-                onFailure = {
-                    isProgressBarVisible = false
-                    showError(it.message.orEmpty())
-                }
-            )
-        })
+                )
+            }
+        )
     }
 
     private fun attachPaymentMethodToCustomer(paymentMethod: PaymentMethod) {
@@ -203,15 +210,18 @@ class AddPaymentMethodActivity : StripeActivity() {
                 viewModel.attachPaymentMethod(
                     customerSession,
                     paymentMethod
-                ).observe(this, { result ->
-                    result.fold(
-                        onSuccess = ::finishWithPaymentMethod,
-                        onFailure = {
-                            isProgressBarVisible = false
-                            showError(it.message.orEmpty())
-                        }
-                    )
-                })
+                ).observe(
+                    this,
+                    { result ->
+                        result.fold(
+                            onSuccess = ::finishWithPaymentMethod,
+                            onFailure = {
+                                isProgressBarVisible = false
+                                showError(it.message.orEmpty())
+                            }
+                        )
+                    }
+                )
             },
             onFailure = {
                 finishWithResult(AddPaymentMethodActivityStarter.Result.Failure(it))

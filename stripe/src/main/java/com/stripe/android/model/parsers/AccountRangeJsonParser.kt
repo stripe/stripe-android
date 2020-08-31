@@ -18,7 +18,8 @@ internal class AccountRangeJsonParser : ModelJsonParser<CardMetadata.AccountRang
         return if (accountRangeHigh != null &&
             accountRangeLow != null &&
             panLength != null &&
-            brandInfo != null) {
+            brandInfo != null
+        ) {
             CardMetadata.AccountRange(
                 binRange = BinRange(accountRangeLow, accountRangeHigh),
                 panLength = panLength,

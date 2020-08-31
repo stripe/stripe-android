@@ -26,7 +26,9 @@ internal class CustomerSessionEphemeralKeyManagerListener(
         errorMessage: String
     ) {
         listeners.remove(operationId)?.onError(
-            errorCode, errorMessage, null
+            errorCode,
+            errorMessage,
+            null
         )
     }
 }

@@ -534,9 +534,12 @@ class CardTest {
 
     @Test
     fun toBuilder_whenChanged_isNotEquals() {
-        assertNotEquals(CardFixtures.CARD, CardFixtures.CARD.toBuilder()
-            .name("some other name")
-            .build())
+        assertNotEquals(
+            CardFixtures.CARD,
+            CardFixtures.CARD.toBuilder()
+                .name("some other name")
+                .build()
+        )
     }
 
     @Test

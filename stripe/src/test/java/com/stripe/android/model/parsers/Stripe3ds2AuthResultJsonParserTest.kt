@@ -1,13 +1,13 @@
 package com.stripe.android.model.parsers
 
 import com.stripe.android.model.Stripe3ds2AuthResult
+import org.json.JSONObject
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.json.JSONObject
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class Stripe3ds2AuthResultJsonParserTest {

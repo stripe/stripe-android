@@ -11,6 +11,8 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentSessionData
 import com.stripe.android.PaymentSessionFixtures
 import com.stripe.android.R
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.util.Locale
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -21,8 +23,6 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
 /**
  * Test class for [CountryAutoCompleteTextView]
@@ -77,11 +77,15 @@ class CountryAutoCompleteTextViewTest {
             countryAutoCompleteTextView.selectedCountry?.code.orEmpty()
         countryAutoCompleteTextView.setCountrySelected("FAKE COUNTRY CODE")
         assertNull(autoCompleteTextView.error)
-        assertEquals(autoCompleteTextView.text.toString(),
-            Locale("", previousValidCountryCode).displayCountry)
+        assertEquals(
+            autoCompleteTextView.text.toString(),
+            Locale("", previousValidCountryCode).displayCountry
+        )
         countryAutoCompleteTextView.setCountrySelected(Locale.UK.country)
-        assertNotEquals(autoCompleteTextView.text.toString(),
-            Locale("", previousValidCountryCode).displayCountry)
+        assertNotEquals(
+            autoCompleteTextView.text.toString(),
+            Locale("", previousValidCountryCode).displayCountry
+        )
         assertEquals(autoCompleteTextView.text.toString(), Locale.UK.displayCountry)
     }
 

@@ -30,17 +30,22 @@ class IconTextInputLayout @JvmOverloads constructor(
          * at the first opportunity.
          */
         collapsingTextHelper = ClassUtils.getInternalObject(
-            TextInputLayout::class.java, TEXT_FIELD_NAMES, this
+            TextInputLayout::class.java,
+            TEXT_FIELD_NAMES,
+            this
         )
         if (collapsingTextHelper == null) {
             bounds = null
             recalculateMethod = null
         } else {
             bounds = ClassUtils.getInternalObject(
-                collapsingTextHelper.javaClass, BOUNDS_FIELD_NAMES, collapsingTextHelper
+                collapsingTextHelper.javaClass,
+                BOUNDS_FIELD_NAMES,
+                collapsingTextHelper
             ) as Rect?
             recalculateMethod = ClassUtils.findMethod(
-                collapsingTextHelper.javaClass, RECALCULATE_METHOD_NAMES
+                collapsingTextHelper.javaClass,
+                RECALCULATE_METHOD_NAMES
             )
         }
     }
@@ -53,7 +58,8 @@ class IconTextInputLayout @JvmOverloads constructor(
     private fun adjustBounds() {
         val editText = editText
         if (collapsingTextHelper == null || bounds == null || recalculateMethod == null ||
-            editText == null) {
+            editText == null
+        ) {
             return
         }
 

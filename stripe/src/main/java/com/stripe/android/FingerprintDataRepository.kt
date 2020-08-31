@@ -1,11 +1,11 @@
 package com.stripe.android
 
 import android.content.Context
-import java.util.Calendar
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.Calendar
 
 internal interface FingerprintDataRepository {
     fun refresh()
@@ -39,7 +39,8 @@ internal interface FingerprintDataRepository {
                 scope.launch {
                     localStore.get().let { localFingerprintData ->
                         if (localFingerprintData == null ||
-                            localFingerprintData.isExpired(timestampSupplier())) {
+                            localFingerprintData.isExpired(timestampSupplier())
+                        ) {
                             fingerprintRequestExecutor.execute(
                                 request = fingerprintRequestFactory.create(
                                     localFingerprintData

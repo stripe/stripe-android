@@ -35,11 +35,13 @@ internal class BecsDebitAccountNumberEditText @JvmOverloads constructor(
         filters = arrayOf(InputFilter.LengthFilter(MAX_LENGTH))
         keyListener = DigitsKeyListener.getInstance(false, true)
 
-        addTextChangedListener(object : StripeTextWatcher() {
-            override fun afterTextChanged(s: Editable?) {
-                shouldShowError = false
+        addTextChangedListener(
+            object : StripeTextWatcher() {
+                override fun afterTextChanged(s: Editable?) {
+                    shouldShowError = false
+                }
             }
-        })
+        )
     }
 
     internal companion object {

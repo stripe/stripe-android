@@ -2,8 +2,8 @@ package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.WeChat
-import kotlin.test.Test
 import org.json.JSONObject
+import kotlin.test.Test
 
 class WeChatJsonParserTest {
 

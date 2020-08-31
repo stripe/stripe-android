@@ -3,13 +3,13 @@ package com.stripe.android
 import android.net.Uri
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardParamsFixtures
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.io.ByteArrayOutputStream
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 internal class ApiRequestTest {

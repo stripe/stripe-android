@@ -22,7 +22,8 @@ internal sealed class CardNumber {
         fun validate(panLength: Int): Validated? {
             return if (panLength >= MIN_PAN_LENGTH &&
                 normalizedNumber.length == panLength &&
-                CardUtils.isValidLuhnNumber(normalizedNumber)) {
+                CardUtils.isValidLuhnNumber(normalizedNumber)
+            ) {
                 Validated(
                     number = normalizedNumber
                 )

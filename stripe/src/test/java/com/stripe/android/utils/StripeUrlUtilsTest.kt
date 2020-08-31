@@ -1,9 +1,9 @@
 package com.stripe.android.utils
 
 import com.google.common.truth.Truth.assertThat
-import kotlin.test.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class StripeUrlUtilsTest {

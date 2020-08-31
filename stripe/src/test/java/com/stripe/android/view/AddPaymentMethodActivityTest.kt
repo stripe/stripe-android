@@ -26,12 +26,6 @@ import com.stripe.android.exception.StripeException
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import java.util.Calendar
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.runner.RunWith
@@ -39,6 +33,12 @@ import org.mockito.Mockito.never
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.shadows.ShadowAlertDialog
+import java.util.Calendar
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 /**
  * Test class for [AddPaymentMethodActivity].
@@ -126,7 +126,8 @@ class AddPaymentMethodActivityTest {
                 whenever(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
                     .thenReturn(createSuccessLiveData(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
                 activity.createPaymentMethod(
-                    viewModel, PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+                    viewModel,
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD
                 )
                 verifyFinishesWithResult(activityScenario.result)
             }
@@ -287,7 +288,8 @@ class AddPaymentMethodActivityTest {
                 whenever(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
                     .thenReturn(createErrorLiveData())
                 activity.createPaymentMethod(
-                    viewModel, PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+                    viewModel,
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD
                 )
 
                 val result = AddPaymentMethodActivityStarter.Result.fromIntent(

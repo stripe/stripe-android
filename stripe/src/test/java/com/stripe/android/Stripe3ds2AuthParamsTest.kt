@@ -2,10 +2,10 @@ package com.stripe.android
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Stripe3ds2AuthParams
-import kotlin.test.Test
 import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class Stripe3ds2AuthParamsTest {

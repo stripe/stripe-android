@@ -17,10 +17,10 @@ import com.stripe.android.model.CustomerFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.view.PaymentMethodsActivityStarter
-import kotlin.test.BeforeTest
-import kotlin.test.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentSessionViewModelTest {
@@ -62,9 +62,11 @@ class PaymentSessionViewModelTest {
 
     @Test
     fun init_whenSavedStateHasData_shouldUpdatePaymentSessionData() {
-        whenever(savedStateHandle.get<PaymentSessionData>(
-            PaymentSessionViewModel.KEY_PAYMENT_SESSION_DATA
-        )).thenReturn(UPDATED_DATA)
+        whenever(
+            savedStateHandle.get<PaymentSessionData>(
+                PaymentSessionViewModel.KEY_PAYMENT_SESSION_DATA
+            )
+        ).thenReturn(UPDATED_DATA)
 
         val viewModel = createViewModel()
         viewModel.paymentSessionDataLiveData.observeForever {
@@ -121,9 +123,11 @@ class PaymentSessionViewModelTest {
 
     @Test
     fun onPaymentMethodResult_withGooglePay_shouldUpdateLiveData() {
-        viewModel.onPaymentMethodResult(PaymentMethodsActivityStarter.Result(
-            useGooglePay = true
-        ))
+        viewModel.onPaymentMethodResult(
+            PaymentMethodsActivityStarter.Result(
+                useGooglePay = true
+            )
+        )
         assertThat(paymentSessionDatas.last().useGooglePay)
             .isTrue()
     }

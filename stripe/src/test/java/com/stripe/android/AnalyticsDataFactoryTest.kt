@@ -9,11 +9,11 @@ import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
 /**
  * Test class for [AnalyticsDataFactory].
@@ -71,15 +71,19 @@ class AnalyticsDataFactoryTest {
         assertThat(loggingParams)
             .hasSize(AnalyticsDataFactory.VALID_PARAM_FIELDS.size - 1)
 
-        assertEquals(Source.SourceType.SEPA_DEBIT,
-            loggingParams[AnalyticsDataFactory.FIELD_SOURCE_TYPE])
+        assertEquals(
+            Source.SourceType.SEPA_DEBIT,
+            loggingParams[AnalyticsDataFactory.FIELD_SOURCE_TYPE]
+        )
         assertEquals(API_KEY, loggingParams[AnalyticsDataFactory.FIELD_PUBLISHABLE_KEY])
         assertEquals(
             AnalyticsEvent.SourceCreate.toString(),
             loggingParams[AnalyticsDataFactory.FIELD_EVENT]
         )
-        assertEquals(AnalyticsDataFactory.ANALYTICS_UA,
-            loggingParams[AnalyticsDataFactory.FIELD_ANALYTICS_UA])
+        assertEquals(
+            AnalyticsDataFactory.ANALYTICS_UA,
+            loggingParams[AnalyticsDataFactory.FIELD_ANALYTICS_UA]
+        )
     }
 
     @Test
@@ -126,8 +130,10 @@ class AnalyticsDataFactoryTest {
             AnalyticsEvent.PaymentIntentConfirm.toString(),
             loggingParams[AnalyticsDataFactory.FIELD_EVENT]
         )
-        assertEquals(AnalyticsDataFactory.ANALYTICS_UA,
-            loggingParams[AnalyticsDataFactory.FIELD_ANALYTICS_UA])
+        assertEquals(
+            AnalyticsDataFactory.ANALYTICS_UA,
+            loggingParams[AnalyticsDataFactory.FIELD_ANALYTICS_UA]
+        )
     }
 
     @Test
@@ -142,8 +148,10 @@ class AnalyticsDataFactoryTest {
             AnalyticsEvent.PaymentIntentRetrieve.toString(),
             loggingParams[AnalyticsDataFactory.FIELD_EVENT]
         )
-        assertEquals(AnalyticsDataFactory.ANALYTICS_UA,
-            loggingParams[AnalyticsDataFactory.FIELD_ANALYTICS_UA])
+        assertEquals(
+            AnalyticsDataFactory.ANALYTICS_UA,
+            loggingParams[AnalyticsDataFactory.FIELD_ANALYTICS_UA]
+        )
     }
 
     @Test
@@ -189,8 +197,10 @@ class AnalyticsDataFactoryTest {
         assertEquals(expectedEventName, params[AnalyticsDataFactory.FIELD_EVENT])
         assertEquals(expectedUaName, params[AnalyticsDataFactory.FIELD_ANALYTICS_UA])
 
-        assertEquals("unknown_Android_robolectric",
-            params[AnalyticsDataFactory.FIELD_DEVICE_TYPE])
+        assertEquals(
+            "unknown_Android_robolectric",
+            params[AnalyticsDataFactory.FIELD_DEVICE_TYPE]
+        )
     }
 
     @Test

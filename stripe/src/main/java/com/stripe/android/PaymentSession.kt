@@ -42,9 +42,9 @@ class PaymentSession @VisibleForTesting internal constructor(
     private val config: PaymentSessionConfig,
     customerSession: CustomerSession,
     private val paymentMethodsActivityStarter:
-    ActivityStarter<PaymentMethodsActivity, PaymentMethodsActivityStarter.Args>,
+        ActivityStarter<PaymentMethodsActivity, PaymentMethodsActivityStarter.Args>,
     private val paymentFlowActivityStarter:
-    ActivityStarter<PaymentFlowActivity, PaymentFlowActivityStarter.Args>,
+        ActivityStarter<PaymentFlowActivity, PaymentFlowActivityStarter.Args>,
     paymentSessionData: PaymentSessionData = PaymentSessionData(config)
 ) {
     internal val viewModel: PaymentSessionViewModel =
@@ -70,20 +70,26 @@ class PaymentSession @VisibleForTesting internal constructor(
 
     init {
         lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
-        viewModel.networkState.observe(lifecycleOwner, {
-            it?.let { networkState ->
-                listener?.onCommunicatingStateChanged(
-                    when (networkState) {
-                        PaymentSessionViewModel.NetworkState.Active -> true
-                        PaymentSessionViewModel.NetworkState.Inactive -> false
-                    }
-                )
+        viewModel.networkState.observe(
+            lifecycleOwner,
+            {
+                it?.let { networkState ->
+                    listener?.onCommunicatingStateChanged(
+                        when (networkState) {
+                            PaymentSessionViewModel.NetworkState.Active -> true
+                            PaymentSessionViewModel.NetworkState.Inactive -> false
+                        }
+                    )
+                }
             }
-        })
+        )
 
-        viewModel.paymentSessionDataLiveData.observe(lifecycleOwner, {
-            listener?.onPaymentSessionDataChanged(it)
-        })
+        viewModel.paymentSessionDataLiveData.observe(
+            lifecycleOwner,
+            {
+                listener?.onPaymentSessionDataChanged(it)
+            }
+        )
     }
 
     /**
@@ -275,11 +281,14 @@ class PaymentSession @VisibleForTesting internal constructor(
     }
 
     private fun fetchCustomer(isInitialFetch: Boolean = false) {
-        viewModel.fetchCustomer(isInitialFetch).observe(lifecycleOwner, Observer {
-            if (it is PaymentSessionViewModel.FetchCustomerResult.Error) {
-                listener?.onError(it.errorCode, it.errorMessage)
+        viewModel.fetchCustomer(isInitialFetch).observe(
+            lifecycleOwner,
+            Observer {
+                if (it is PaymentSessionViewModel.FetchCustomerResult.Error) {
+                    listener?.onError(it.errorCode, it.errorMessage)
+                }
             }
-        })
+        )
     }
 
     /**

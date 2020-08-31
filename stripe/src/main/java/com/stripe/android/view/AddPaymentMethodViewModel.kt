@@ -42,7 +42,8 @@ internal class AddPaymentMethodViewModel(
                 override fun onError(e: Exception) {
                     resultData.value = Result.failure(e)
                 }
-            })
+            }
+        )
         return resultData
     }
 

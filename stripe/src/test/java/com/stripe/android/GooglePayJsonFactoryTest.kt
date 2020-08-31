@@ -2,12 +2,12 @@ package com.stripe.android
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.StripeJsonUtils
-import java.util.UUID
-import kotlin.test.Test
-import kotlin.test.assertEquals
 import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.UUID
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
 class GooglePayJsonFactoryTest {
@@ -18,7 +18,8 @@ class GooglePayJsonFactoryTest {
     @Test
     fun testCreateIsReadyToPayRequestJson_withoutArgs() {
         val isReadyToPayRequestJson = factory.createIsReadyToPayRequest()
-        val expectedJson = JSONObject("""
+        val expectedJson = JSONObject(
+            """
             {
                 "apiVersion": 2,
                 "apiVersionMinor": 0,
@@ -38,7 +39,8 @@ class GooglePayJsonFactoryTest {
                     }
                 }]
             }
-        """.trimIndent())
+            """.trimIndent()
+        )
         assertEquals(expectedJson.toString(), isReadyToPayRequestJson.toString())
     }
 
@@ -52,7 +54,8 @@ class GooglePayJsonFactoryTest {
             ),
             existingPaymentMethodRequired = true
         )
-        val expectedJson = JSONObject("""
+        val expectedJson = JSONObject(
+            """
             {
                 "apiVersion": 2,
                 "apiVersionMinor": 0,
@@ -78,7 +81,8 @@ class GooglePayJsonFactoryTest {
                 }],
                 "existingPaymentMethodRequired": true
             }
-        """.trimIndent())
+            """.trimIndent()
+        )
         assertThat(isReadyToPayRequestJson.toString())
             .isEqualTo(expectedJson.toString())
     }
@@ -86,7 +90,8 @@ class GooglePayJsonFactoryTest {
     @Test
     fun testCreatePaymentMethodRequestJson() {
         val transactionId = UUID.randomUUID().toString()
-        val expectedJson = JSONObject("""
+        val expectedJson = JSONObject(
+            """
             {
                 "apiVersion": 2,
                 "apiVersionMinor": 0,
@@ -129,7 +134,8 @@ class GooglePayJsonFactoryTest {
                     "merchantName": "Widget Store"
                 }
             }
-        """.trimIndent())
+            """.trimIndent()
+        )
 
         val createPaymentDataRequestJson = factory.createPaymentDataRequest(
             transactionInfo = GooglePayJsonFactory.TransactionInfo(

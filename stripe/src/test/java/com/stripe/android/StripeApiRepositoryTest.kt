@@ -33,6 +33,11 @@ import com.stripe.android.model.StripeFileFixtures
 import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeFilePurpose
 import com.stripe.android.model.TokenFixtures
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.runBlockingTest
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.net.HttpURLConnection
 import java.net.UnknownHostException
 import java.util.Calendar
@@ -45,11 +50,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
@@ -124,8 +124,10 @@ internal class StripeApiRepositoryTest {
     fun testGetAddCustomerSourceUrl() {
         val customerId = "cus_123abc"
         val addSourceUrl = StripeApiRepository.getAddCustomerSourceUrl(customerId)
-        assertEquals("https://api.stripe.com/v1/customers/$customerId/sources",
-            addSourceUrl)
+        assertEquals(
+            "https://api.stripe.com/v1/customers/$customerId/sources",
+            addSourceUrl
+        )
     }
 
     @Test
@@ -143,8 +145,11 @@ internal class StripeApiRepositoryTest {
     fun testGetAttachPaymentMethodUrl() {
         val paymentMethodId = "pm_1ETDEa2eZvKYlo2CN5828c52"
         val attachUrl = StripeApiRepository.getAttachPaymentMethodUrl(paymentMethodId)
-        val expectedUrl = arrayOf("https://api.stripe.com/v1/payment_methods/",
-            paymentMethodId, "/attach").joinToString("")
+        val expectedUrl = arrayOf(
+            "https://api.stripe.com/v1/payment_methods/",
+            paymentMethodId,
+            "/attach"
+        ).joinToString("")
         assertEquals(expectedUrl, attachUrl)
     }
 
@@ -152,33 +157,44 @@ internal class StripeApiRepositoryTest {
     fun testGetDetachPaymentMethodUrl() {
         val paymentMethodId = "pm_1ETDEa2eZvKYlo2CN5828c52"
         val detachUrl = stripeApiRepository.getDetachPaymentMethodUrl(paymentMethodId)
-        val expectedUrl = arrayOf("https://api.stripe.com/v1/payment_methods/",
-            paymentMethodId, "/detach").joinToString("")
+        val expectedUrl = arrayOf(
+            "https://api.stripe.com/v1/payment_methods/",
+            paymentMethodId,
+            "/detach"
+        ).joinToString("")
         assertEquals(expectedUrl, detachUrl)
     }
 
     @Test
     fun testGetPaymentMethodsUrl() {
-        assertEquals("https://api.stripe.com/v1/payment_methods",
-            StripeApiRepository.paymentMethodsUrl)
+        assertEquals(
+            "https://api.stripe.com/v1/payment_methods",
+            StripeApiRepository.paymentMethodsUrl
+        )
     }
 
     @Test
     fun testGetIssuingCardPinUrl() {
-        assertEquals("https://api.stripe.com/v1/issuing/cards/card123/pin",
-            StripeApiRepository.getIssuingCardPinUrl("card123"))
+        assertEquals(
+            "https://api.stripe.com/v1/issuing/cards/card123/pin",
+            StripeApiRepository.getIssuingCardPinUrl("card123")
+        )
     }
 
     @Test
     fun testRetrievePaymentIntentUrl() {
-        assertEquals("https://api.stripe.com/v1/payment_intents/pi123",
-            StripeApiRepository.getRetrievePaymentIntentUrl("pi123"))
+        assertEquals(
+            "https://api.stripe.com/v1/payment_intents/pi123",
+            StripeApiRepository.getRetrievePaymentIntentUrl("pi123")
+        )
     }
 
     @Test
     fun testConfirmPaymentIntentUrl() {
-        assertEquals("https://api.stripe.com/v1/payment_intents/pi123/confirm",
-            StripeApiRepository.getConfirmPaymentIntentUrl("pi123"))
+        assertEquals(
+            "https://api.stripe.com/v1/payment_intents/pi123/confirm",
+            StripeApiRepository.getConfirmPaymentIntentUrl("pi123")
+        )
     }
 
     @Test
@@ -239,8 +255,10 @@ internal class StripeApiRepositoryTest {
     @Test
     fun createSource_withConnectAccount_keepsHeaderInAccount() {
         val connectAccountId = "acct_1Acj2PBUgO3KuWzz"
-        val source = stripeApiRepository.createSource(SourceParams.createCardParams(CARD_PARAMS),
-            ApiRequest.Options(ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY, connectAccountId))
+        val source = stripeApiRepository.createSource(
+            SourceParams.createCardParams(CARD_PARAMS),
+            ApiRequest.Options(ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY, connectAccountId)
+        )
 
         // Check that we get a source back; we don't care about its fields for this test.
         assertNotNull(source)
@@ -360,7 +378,8 @@ internal class StripeApiRepositoryTest {
 
         whenever(stripeApiRequestExecutor.execute(any<ApiRequest>()))
             .thenReturn(
-                StripeResponse(200,
+                StripeResponse(
+                    200,
                     PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2_JSON.toString(),
                     emptyMap()
                 )
@@ -405,7 +424,9 @@ internal class StripeApiRepositoryTest {
             "yourapp://post-authentication-return-url"
         )
         val paymentIntent = stripeApiRepository.confirmPaymentIntent(
-            confirmPaymentIntentParams, ApiRequest.Options(publishableKey))
+            confirmPaymentIntentParams,
+            ApiRequest.Options(publishableKey)
+        )
         assertNotNull(paymentIntent)
     }
 
@@ -592,14 +613,17 @@ internal class StripeApiRepositoryTest {
         val options = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
         val url = DEFAULT_API_REQUEST_FACTORY.createGet(
             StripeApiRepository.paymentMethodsUrl,
-            options, queryParams
+            options,
+            queryParams
         ).url
 
         whenever(
-            stripeApiRequestExecutor.execute(argThat<ApiRequest> {
-                ApiRequestMatcher(StripeRequest.Method.GET, url, options, queryParams)
-                    .matches(this)
-            })
+            stripeApiRequestExecutor.execute(
+                argThat<ApiRequest> {
+                    ApiRequestMatcher(StripeRequest.Method.GET, url, options, queryParams)
+                        .matches(this)
+                }
+            )
         ).thenReturn(stripeResponse)
         val stripeApiRepository = create()
         val paymentMethods = stripeApiRepository
@@ -648,10 +672,12 @@ internal class StripeApiRepositoryTest {
         ).url
 
         whenever(
-            stripeApiRequestExecutor.execute(argThat<ApiRequest> {
-                ApiRequestMatcher(StripeRequest.Method.GET, url, options, queryParams)
-                    .matches(this)
-            })
+            stripeApiRequestExecutor.execute(
+                argThat<ApiRequest> {
+                    ApiRequestMatcher(StripeRequest.Method.GET, url, options, queryParams)
+                        .matches(this)
+                }
+            )
         ).thenReturn(stripeResponse)
         val stripeApiRepository = create()
         val paymentMethods = stripeApiRepository

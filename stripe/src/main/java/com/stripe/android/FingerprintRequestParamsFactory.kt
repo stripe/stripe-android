@@ -72,8 +72,10 @@ internal class FingerprintRequestParamsFactory @VisibleForTesting internal const
 
     private companion object {
         private fun createTimezone(): String {
-            val minutes = TimeUnit.MINUTES.convert(TimeZone.getDefault().rawOffset.toLong(),
-                TimeUnit.MILLISECONDS).toInt()
+            val minutes = TimeUnit.MINUTES.convert(
+                TimeZone.getDefault().rawOffset.toLong(),
+                TimeUnit.MILLISECONDS
+            ).toInt()
             if (minutes % 60 == 0) {
                 return (minutes / 60).toString()
             }

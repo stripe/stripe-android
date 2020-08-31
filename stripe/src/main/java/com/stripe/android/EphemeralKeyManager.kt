@@ -1,11 +1,11 @@
 package com.stripe.android
 
 import com.stripe.android.model.parsers.EphemeralKeyJsonParser
+import org.json.JSONException
+import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
-import org.json.JSONException
-import org.json.JSONObject
 
 internal class EphemeralKeyManager(
     private val ephemeralKeyProvider: EphemeralKeyProvider,

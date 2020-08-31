@@ -78,7 +78,8 @@ internal class PaymentMethodsAdapter constructor(
                     PaymentMethod.Type.Fpx -> ViewType.AddFpx.ordinal
                     else ->
                         throw IllegalArgumentException(
-                            "Unsupported PaymentMethod type: ${paymentMethodType.code}")
+                            "Unsupported PaymentMethod type: ${paymentMethodType.code}"
+                        )
                 }
             }
         }

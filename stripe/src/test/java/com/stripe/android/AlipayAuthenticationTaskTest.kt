@@ -5,12 +5,12 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.model.AlipayAuthResult
 import com.stripe.android.model.PaymentIntentFixtures
-import java.lang.IllegalArgumentException
-import kotlin.test.Test
-import kotlin.test.assertFailsWith
 import kotlinx.coroutines.runBlocking
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.lang.IllegalArgumentException
+import kotlin.test.Test
+import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 class AlipayAuthenticationTaskTest {

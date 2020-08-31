@@ -1,8 +1,8 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
-import java.io.File
 import kotlinx.android.parcel.Parcelize
+import java.io.File
 
 /**
  * [Create a file](https://stripe.com/docs/api/files/create)

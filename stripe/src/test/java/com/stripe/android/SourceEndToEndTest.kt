@@ -10,9 +10,9 @@ import com.stripe.android.model.KlarnaSourceParams
 import com.stripe.android.model.SourceOrder
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.SourceTypeModel
-import kotlin.test.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 internal class SourceEndToEndTest {
@@ -38,13 +38,15 @@ internal class SourceEndToEndTest {
         assertThat(items)
             .hasSize(4)
         assertThat(items.first())
-            .isEqualTo(SourceOrder.Item(
-                type = SourceOrder.Item.Type.Sku,
-                amount = 10000,
-                currency = "eur",
-                description = "towel",
-                quantity = 1
-            ))
+            .isEqualTo(
+                SourceOrder.Item(
+                    type = SourceOrder.Item.Type.Sku,
+                    amount = 10000,
+                    currency = "eur",
+                    description = "towel",
+                    quantity = 1
+                )
+            )
     }
 
     @Test
@@ -110,16 +112,18 @@ internal class SourceEndToEndTest {
                 CardNumberFixtures.DISCOVER_NO_SPACES to CardBrand.Discover,
                 CardNumberFixtures.DINERS_CLUB_14_NO_SPACES to CardBrand.DinersClub
             ).all { (cardNumber, cardBrand) ->
-                val source = requireNotNull(stripe.createSourceSynchronous(
-                    SourceParams.createCardParams(
-                        CardParams(
-                            number = cardNumber,
-                            expMonth = 10,
-                            expYear = 2030,
-                            cvc = "123"
+                val source = requireNotNull(
+                    stripe.createSourceSynchronous(
+                        SourceParams.createCardParams(
+                            CardParams(
+                                number = cardNumber,
+                                expMonth = 10,
+                                expYear = 2030,
+                                cvc = "123"
+                            )
                         )
                     )
-                ))
+                )
                 val cardModel = requireNotNull(
                     source.sourceTypeModel as? SourceTypeModel.Card
                 )

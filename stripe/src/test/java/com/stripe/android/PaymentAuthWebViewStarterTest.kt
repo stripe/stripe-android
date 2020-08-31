@@ -8,12 +8,12 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 import com.stripe.android.view.AuthActivityStarter
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentAuthWebViewStarterTest {
@@ -28,8 +28,10 @@ class PaymentAuthWebViewStarterTest {
     @Test
     fun start_startsWithCorrectIntentAndRequestCode() {
         PaymentAuthWebViewStarter(host, 50000).start(DATA)
-        verify(activity).startActivityForResult(intentArgumentCaptor.capture(),
-            requestCodeCaptor.capture())
+        verify(activity).startActivityForResult(
+            intentArgumentCaptor.capture(),
+            requestCodeCaptor.capture()
+        )
 
         val args: PaymentAuthWebViewStarter.Args = requireNotNull(
             intentArgumentCaptor.firstValue.getParcelableExtra(PaymentAuthWebViewStarter.EXTRA_ARGS)
@@ -40,11 +42,15 @@ class PaymentAuthWebViewStarterTest {
 
     @Test
     fun start_startsWithCorrectIntentAndRequestCodeAndCustomization() {
-        PaymentAuthWebViewStarter(host, 50000).start(DATA.copy(
-            toolbarCustomization = StripeToolbarCustomization()
-        ))
-        verify(activity).startActivityForResult(intentArgumentCaptor.capture(),
-            requestCodeCaptor.capture())
+        PaymentAuthWebViewStarter(host, 50000).start(
+            DATA.copy(
+                toolbarCustomization = StripeToolbarCustomization()
+            )
+        )
+        verify(activity).startActivityForResult(
+            intentArgumentCaptor.capture(),
+            requestCodeCaptor.capture()
+        )
 
         val args: PaymentAuthWebViewStarter.Args = requireNotNull(
             intentArgumentCaptor.firstValue.getParcelableExtra(PaymentAuthWebViewStarter.EXTRA_ARGS)
