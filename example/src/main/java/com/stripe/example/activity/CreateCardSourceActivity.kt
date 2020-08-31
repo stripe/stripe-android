@@ -182,7 +182,9 @@ class CreateCardSourceActivity : AppCompatActivity() {
             .setTitle(this.getString(R.string.authentication_dialog_title))
             .setMessage(
                 getString(
-                    R.string.authentication_dialog_message, cardBrand.displayName, typeData["last4"]
+                    R.string.authentication_dialog_message,
+                    cardBrand.displayName,
+                    typeData["last4"]
                 )
             )
             .setIcon(cardBrand.icon)

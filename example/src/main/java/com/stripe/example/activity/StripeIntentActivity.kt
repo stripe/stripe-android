@@ -83,8 +83,12 @@ abstract class StripeIntentActivity : AppCompatActivity() {
             { result ->
                 result.onSuccess {
                     handleCreatePaymentIntentResponse(
-                        it, paymentMethodCreateParams, shippingDetails,
-                        stripeAccountId, existingPaymentMethodId, mandateDataParams
+                        it,
+                        paymentMethodCreateParams,
+                        shippingDetails,
+                        stripeAccountId,
+                        existingPaymentMethodId,
+                        mandateDataParams
                     )
                 }
             }

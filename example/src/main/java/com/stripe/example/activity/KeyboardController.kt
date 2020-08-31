@@ -16,7 +16,8 @@ internal class KeyboardController(
     internal fun hide() {
         if (inputMethodManager.isAcceptingText) {
             inputMethodManager.hideSoftInputFromWindow(
-                activity.currentFocus?.windowToken, 0
+                activity.currentFocus?.windowToken,
+                0
             )
         }
     }
