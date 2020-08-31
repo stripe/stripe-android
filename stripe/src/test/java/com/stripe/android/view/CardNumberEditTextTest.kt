@@ -1,7 +1,6 @@
 package com.stripe.android.view
 
 import android.content.Context
-import android.os.Looper
 import android.view.ViewGroup
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -31,6 +30,7 @@ import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.testharness.ViewTestUtils
+import com.stripe.android.utils.TestUtils.idleLooper
 import java.util.concurrent.TimeUnit
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -46,7 +46,6 @@ import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.LooperMode
 
 /**
@@ -240,7 +239,7 @@ internal class CardNumberEditTextTest {
         )
 
         cardNumberEditText.setText(AMEX_NO_SPACES)
-        idle()
+        idleLooper()
 
         assertThat(cardNumberEditText.fieldText)
             .isEqualTo(AMEX_WITH_SPACES)
@@ -254,7 +253,7 @@ internal class CardNumberEditTextTest {
         updateCardNumberAndIdle(CardNumberFixtures.AMEX_BIN)
         // type rest of card number
         cardNumberEditText.append(AMEX_NO_SPACES.drop(6))
-        idle()
+        idleLooper()
 
         assertThat(cardNumberEditText.isCardNumberValid)
             .isTrue()
@@ -265,7 +264,7 @@ internal class CardNumberEditTextTest {
     @Test
     fun `full Amex typed typed at once should change isCardNumberValid to true and invoke completion callback`() {
         updateCardNumberAndIdle(AMEX_NO_SPACES)
-        idle()
+        idleLooper()
 
         assertThat(cardNumberEditText.isCardNumberValid)
             .isTrue()
@@ -322,7 +321,7 @@ internal class CardNumberEditTextTest {
 
         // We now have the valid 4242 Visa
         cardNumberEditText.append("2")
-        idle()
+        idleLooper()
 
         assertThat(cardNumberEditText.shouldShowError)
             .isFalse()
@@ -334,7 +333,7 @@ internal class CardNumberEditTextTest {
 
         // This makes the number officially invalid
         cardNumberEditText.append("3")
-        idle()
+        idleLooper()
 
         assertThat(cardNumberEditText.shouldShowError)
             .isTrue()
@@ -367,12 +366,12 @@ internal class CardNumberEditTextTest {
 
         // Now that we're in an error state, back up by one
         ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
-        idle()
+        idleLooper()
         assertThat(cardNumberEditText.shouldShowError)
             .isFalse()
 
         cardNumberEditText.append(DINERS_CLUB_14_WITH_SPACES.last().toString())
-        idle()
+        idleLooper()
 
         assertThat(cardNumberEditText.shouldShowError)
             .isFalse()
@@ -392,7 +391,7 @@ internal class CardNumberEditTextTest {
             .isFalse()
 
         cardNumberEditText.append(DINERS_CLUB_16_WITH_SPACES.last().toString())
-        idle()
+        idleLooper()
 
         assertThat(cardNumberEditText.shouldShowError)
             .isFalse()
@@ -406,18 +405,18 @@ internal class CardNumberEditTextTest {
         cardNumberEditText.append(
             withoutLastCharacter(AMEX_NO_SPACES.drop(6)) + "3"
         )
-        idle()
+        idleLooper()
         assertThat(cardNumberEditText.shouldShowError)
             .isTrue()
 
         // Now that we're in an error state, back up by one
         ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
-        idle()
+        idleLooper()
         assertThat(cardNumberEditText.shouldShowError)
             .isFalse()
 
         cardNumberEditText.append("5")
-        idle()
+        idleLooper()
 
         assertThat(cardNumberEditText.shouldShowError)
             .isFalse()
@@ -463,9 +462,9 @@ internal class CardNumberEditTextTest {
     @Test
     fun enterCompleteNumberInParts_onlyCallsBrandListenerOnce() {
         cardNumberEditText.append(AMEX_WITH_SPACES.take(2))
-        idle()
+        idleLooper()
         cardNumberEditText.append(AMEX_WITH_SPACES.drop(2))
-        idle()
+        idleLooper()
         assertEquals(CardBrand.AmericanExpress, lastBrandChangeCallbackInvocation)
     }
 
@@ -475,7 +474,7 @@ internal class CardNumberEditTextTest {
         assertEquals(CardBrand.DinersClub, lastBrandChangeCallbackInvocation)
 
         ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
-        idle()
+        idleLooper()
         assertEquals(CardBrand.Unknown, lastBrandChangeCallbackInvocation)
     }
 
@@ -487,7 +486,7 @@ internal class CardNumberEditTextTest {
         // Just adding some other text. Not enough to invalidate the card or complete it.
         lastBrandChangeCallbackInvocation = null
         cardNumberEditText.append("123")
-        idle()
+        idleLooper()
 
         assertNull(lastBrandChangeCallbackInvocation)
 
@@ -568,11 +567,11 @@ internal class CardNumberEditTextTest {
     @Test
     fun `updateAccountRange() should update cardBrand value`() {
         cardNumberEditText.updateAccountRange(CardNumberFixtures.DINERS_CLUB_14)
-        idle()
+        idleLooper()
         assertEquals(CardBrand.DinersClub, lastBrandChangeCallbackInvocation)
 
         cardNumberEditText.updateAccountRange(CardNumberFixtures.AMEX)
-        idle()
+        idleLooper()
         assertEquals(CardBrand.AmericanExpress, lastBrandChangeCallbackInvocation)
     }
 
@@ -626,7 +625,7 @@ internal class CardNumberEditTextTest {
         cardNumberEditText.setText(BinFixtures.VISA.value)
         assertThat(isProcessing)
             .isTrue()
-        idle()
+        idleLooper()
 
         // account range data has been retrieved
         assertThat(isProcessing)
@@ -653,37 +652,37 @@ internal class CardNumberEditTextTest {
 
         // 424242 - valid BIN, call repo
         cardNumberEditText.setText(VISA_BIN)
-        idle()
+        idleLooper()
         assertThat(repositoryCalls)
             .isEqualTo(1)
 
         // 4242424 - valid BIN but matches existing accountRange
         cardNumberEditText.append("4")
-        idle()
+        idleLooper()
         assertThat(repositoryCalls)
             .isEqualTo(1)
 
         // 424242 - valid BIN but matches existing accountRange
         ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
-        idle()
+        idleLooper()
         assertThat(repositoryCalls)
             .isEqualTo(1)
 
         // 42424 - not a BIN
         ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
-        idle()
+        idleLooper()
         assertThat(repositoryCalls)
             .isEqualTo(1)
 
         // 424242 - transitioned to valid BIN, call repo
         cardNumberEditText.append("2")
-        idle()
+        idleLooper()
         assertThat(repositoryCalls)
             .isEqualTo(2)
 
         // 378282 - new valid BIN, call repo
         cardNumberEditText.setText(AMEX_BIN)
-        idle()
+        idleLooper()
         assertThat(repositoryCalls)
             .isEqualTo(3)
     }
@@ -701,10 +700,8 @@ internal class CardNumberEditTextTest {
 
     private fun updateCardNumberAndIdle(cardNumber: String) {
         cardNumberEditText.setText(cardNumber)
-        idle()
+        idleLooper()
     }
-
-    private fun idle() = shadowOf(Looper.getMainLooper()).idle()
 
     private class DelayedCardAccountRangeRepository : CardAccountRangeRepository {
         override suspend fun getAccountRange(
