@@ -329,12 +329,18 @@ class PaymentSessionActivity : AppCompatActivity() {
 
         private val SHIPPING_METHODS = listOf(
             ShippingMethod(
-                "UPS Ground", "ups-ground",
-                599, "USD", "Arrives in 3-5 days"
+                "UPS Ground",
+                "ups-ground",
+                599,
+                "USD",
+                "Arrives in 3-5 days"
             ),
             ShippingMethod(
-                "FedEx Overnight", "fedex",
-                1499, "USD", "Arrives tomorrow"
+                "FedEx Overnight",
+                "fedex",
+                1499,
+                "USD",
+                "Arrives tomorrow"
             )
         )
     }

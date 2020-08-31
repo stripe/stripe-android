@@ -67,7 +67,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
 
-    ktlint 'com.pinterest:ktlint:0.37.2'
+    ktlint 'com.pinterest:ktlint:0.38.1'
 
     testImplementation "androidx.test:core:$androidTestVersion"
 
