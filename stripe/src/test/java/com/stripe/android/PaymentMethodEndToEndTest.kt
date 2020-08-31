@@ -7,10 +7,10 @@ import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
-import kotlin.test.Test
-import kotlin.test.assertFailsWith
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
+import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentMethodEndToEndTest {

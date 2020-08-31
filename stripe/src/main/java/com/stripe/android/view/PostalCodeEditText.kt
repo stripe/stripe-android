@@ -45,11 +45,13 @@ class PostalCodeEditText @JvmOverloads constructor(
         setErrorMessage(resources.getString(R.string.invalid_zip))
         maxLines = 1
 
-        addTextChangedListener(object : StripeTextWatcher() {
-            override fun afterTextChanged(s: Editable?) {
-                shouldShowError = false
+        addTextChangedListener(
+            object : StripeTextWatcher() {
+                override fun afterTextChanged(s: Editable?) {
+                    shouldShowError = false
+                }
             }
-        })
+        )
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             setAutofillHints(View.AUTOFILL_HINT_POSTAL_CODE)

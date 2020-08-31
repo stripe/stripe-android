@@ -104,7 +104,9 @@ internal class CardBrandSpinner @JvmOverloads constructor(
                 it.text = cardBrand.displayName
                 it.setCompoundDrawablesRelativeWithIntrinsicBounds(
                     createCardBrandDrawable(cardBrand),
-                    null, null, null
+                    null,
+                    null,
+                    null
                 )
             }
 

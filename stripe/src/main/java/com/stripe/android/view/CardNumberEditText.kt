@@ -199,88 +199,90 @@ class CardNumberEditText internal constructor(
     }
 
     private fun listenForTextChanges() {
-        addTextChangedListener(object : StripeTextWatcher() {
-            private var latestChangeStart: Int = 0
-            private var latestInsertionSize: Int = 0
+        addTextChangedListener(
+            object : StripeTextWatcher() {
+                private var latestChangeStart: Int = 0
+                private var latestInsertionSize: Int = 0
 
-            private var newCursorPosition: Int? = null
-            private var formattedNumber: String? = null
+                private var newCursorPosition: Int? = null
+                private var formattedNumber: String? = null
 
-            private var beforeCardNumber = unvalidatedCardNumber
+                private var beforeCardNumber = unvalidatedCardNumber
 
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                if (!ignoreChanges) {
-                    beforeCardNumber = unvalidatedCardNumber
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                    if (!ignoreChanges) {
+                        beforeCardNumber = unvalidatedCardNumber
 
-                    latestChangeStart = start
-                    latestInsertionSize = after
-                }
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // skip formatting if we're past the last possible space position
-                if (ignoreChanges || start > 16) {
-                    return
-                }
-
-                val spacelessNumber = StripeTextUtils.removeSpacesAndHyphens(
-                    s?.toString().orEmpty()
-                ).orEmpty()
-
-                val cardNumber = CardNumber.Unvalidated(spacelessNumber)
-                updateAccountRange(cardNumber)
-
-                val formattedNumber = cardNumber.getFormatted(panLength)
-                this.newCursorPosition = updateSelectionIndex(
-                    formattedNumber.length,
-                    latestChangeStart,
-                    latestInsertionSize
-                )
-                this.formattedNumber = formattedNumber
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-                if (ignoreChanges) {
-                    return
-                }
-
-                ignoreChanges = true
-
-                if (shouldUpdateAfterChange) {
-                    setText(formattedNumber)
-                    newCursorPosition?.let {
-                        setSelection(it.coerceIn(0, fieldText.length))
+                        latestChangeStart = start
+                        latestInsertionSize = after
                     }
                 }
 
-                formattedNumber = null
-                newCursorPosition = null
-
-                ignoreChanges = false
-
-                if (unvalidatedCardNumber.length == panLength) {
-                    val wasCardNumberValid = isCardNumberValid
-                    isCardNumberValid = CardUtils.isValidCardNumber(fieldText)
-                    shouldShowError = !isCardNumberValid
-                    if (!wasCardNumberValid && isCardNumberValid) {
-                        completionCallback()
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+// skip formatting if we're past the last possible space position
+                    if (ignoreChanges || start > 16) {
+                        return
                     }
-                } else {
-                    isCardNumberValid = CardUtils.isValidCardNumber(fieldText)
-                    // Don't show errors if we aren't full-length.
-                    shouldShowError = false
+
+                    val spacelessNumber = StripeTextUtils.removeSpacesAndHyphens(
+                        s?.toString().orEmpty()
+                    ).orEmpty()
+
+                    val cardNumber = CardNumber.Unvalidated(spacelessNumber)
+                    updateAccountRange(cardNumber)
+
+                    val formattedNumber = cardNumber.getFormatted(panLength)
+                    this.newCursorPosition = updateSelectionIndex(
+                        formattedNumber.length,
+                        latestChangeStart,
+                        latestInsertionSize
+                    )
+                    this.formattedNumber = formattedNumber
                 }
+
+                override fun afterTextChanged(s: Editable?) {
+                    if (ignoreChanges) {
+                        return
+                    }
+
+                    ignoreChanges = true
+
+                    if (shouldUpdateAfterChange) {
+                        setText(formattedNumber)
+                        newCursorPosition?.let {
+                            setSelection(it.coerceIn(0, fieldText.length))
+                        }
+                    }
+
+                    formattedNumber = null
+                    newCursorPosition = null
+
+                    ignoreChanges = false
+
+                    if (unvalidatedCardNumber.length == panLength) {
+                        val wasCardNumberValid = isCardNumberValid
+                        isCardNumberValid = CardUtils.isValidCardNumber(fieldText)
+                        shouldShowError = !isCardNumberValid
+                        if (!wasCardNumberValid && isCardNumberValid) {
+                            completionCallback()
+                        }
+                    } else {
+                        isCardNumberValid = CardUtils.isValidCardNumber(fieldText)
+                        // Don't show errors if we aren't full-length.
+                        shouldShowError = false
+                    }
+                }
+
+                private val shouldUpdateAfterChange: Boolean
+                    get() = (digitsAdded || !isLastKeyDelete) && formattedNumber != null
+
+/**
+* Have digits been added in this text change.
+*/
+                private val digitsAdded: Boolean
+                    get() = unvalidatedCardNumber.length > beforeCardNumber.length
             }
-
-            private val shouldUpdateAfterChange: Boolean
-                get() = (digitsAdded || !isLastKeyDelete) && formattedNumber != null
-
-            /**
-             * Have digits been added in this text change.
-             */
-            private val digitsAdded: Boolean
-                get() = unvalidatedCardNumber.length > beforeCardNumber.length
-        })
+        )
     }
 
     @JvmSynthetic

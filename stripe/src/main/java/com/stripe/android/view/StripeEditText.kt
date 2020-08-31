@@ -14,13 +14,13 @@ import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import com.google.android.material.textfield.TextInputEditText
 import com.stripe.android.R
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Extension of [TextInputEditText] that listens for users pressing the delete key when
@@ -215,11 +215,13 @@ open class StripeEditText @JvmOverloads constructor(
     }
 
     private fun listenForTextChanges() {
-        addTextChangedListener(object : StripeTextWatcher() {
-            override fun afterTextChanged(s: Editable?) {
-                afterTextChangedListener?.onTextChanged(s?.toString().orEmpty())
+        addTextChangedListener(
+            object : StripeTextWatcher() {
+                override fun afterTextChanged(s: Editable?) {
+                    afterTextChangedListener?.onTextChanged(s?.toString().orEmpty())
+                }
             }
-        })
+        )
     }
 
     private fun listenForDeleteEmpty() {

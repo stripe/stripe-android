@@ -24,15 +24,15 @@ import com.stripe.android.model.CardParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
-import java.util.Calendar
-import kotlin.test.BeforeTest
-import kotlin.test.Test
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.runner.RunWith
 import org.mockito.Mockito.reset
 import org.robolectric.RobolectricTestRunner
+import java.util.Calendar
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 /**
  * Test class for [CardMultilineWidget].
@@ -296,9 +296,10 @@ internal class CardMultilineWidgetTest {
                         attribution = ATTRIBUTION
                     ),
                     PaymentMethod.BillingDetails.Builder()
-                        .setAddress(Address.Builder()
-                            .setPostalCode(POSTAL_CODE_VALUE)
-                            .build()
+                        .setAddress(
+                            Address.Builder()
+                                .setPostalCode(POSTAL_CODE_VALUE)
+                                .build()
                         )
                         .build()
                 )
@@ -949,15 +950,17 @@ internal class CardMultilineWidgetTest {
     fun testCardValidCallback() {
         var currentIsValid = false
         var currentInvalidFields = emptySet<CardValidCallback.Fields>()
-        cardMultilineWidget.setCardValidCallback(object : CardValidCallback {
-            override fun onInputChanged(
-                isValid: Boolean,
-                invalidFields: Set<CardValidCallback.Fields>
-            ) {
-                currentIsValid = isValid
-                currentInvalidFields = invalidFields
+        cardMultilineWidget.setCardValidCallback(
+            object : CardValidCallback {
+                override fun onInputChanged(
+                    isValid: Boolean,
+                    invalidFields: Set<CardValidCallback.Fields>
+                ) {
+                    currentIsValid = isValid
+                    currentInvalidFields = invalidFields
+                }
             }
-        })
+        )
 
         assertThat(currentIsValid)
             .isFalse()

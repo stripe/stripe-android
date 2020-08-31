@@ -2,9 +2,9 @@ package com.stripe.android.model
 
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.parsers.AddressJsonParser
-import java.util.Locale
 import kotlinx.android.parcel.Parcelize
 import org.json.JSONObject
+import java.util.Locale
 
 /**
  * Model for an owner [address](https://stripe.com/docs/api#source_object-owner-address)

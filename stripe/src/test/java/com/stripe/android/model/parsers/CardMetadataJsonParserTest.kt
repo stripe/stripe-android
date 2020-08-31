@@ -4,8 +4,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardMetadata
-import kotlin.test.Test
 import org.json.JSONObject
+import kotlin.test.Test
 
 class CardMetadataJsonParserTest {
 

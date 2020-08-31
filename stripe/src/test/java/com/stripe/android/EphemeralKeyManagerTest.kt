@@ -11,6 +11,10 @@ import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.testharness.TestEphemeralKeyProvider
+import org.junit.runner.RunWith
+import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
+import org.robolectric.RobolectricTestRunner
 import java.net.HttpURLConnection
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
@@ -19,10 +23,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import org.junit.runner.RunWith
-import org.mockito.Mockito.never
-import org.mockito.Mockito.verify
-import org.robolectric.RobolectricTestRunner
 
 /**
  * Test class for [EphemeralKeyManager].
@@ -165,10 +165,12 @@ class EphemeralKeyManagerTest {
 
         // It should be necessary to update because the key is expired.
         val operationId = operationIdFactory.create()
-        keyManager.retrieveEphemeralKey(EphemeralOperation.RetrieveKey(
-            id = operationId,
-            productUsage = emptySet()
-        ))
+        keyManager.retrieveEphemeralKey(
+            EphemeralOperation.RetrieveKey(
+                id = operationId,
+                productUsage = emptySet()
+            )
+        )
 
         verify(keyManagerListener)
             .onKeyError(operationId, 404, errorMessage)

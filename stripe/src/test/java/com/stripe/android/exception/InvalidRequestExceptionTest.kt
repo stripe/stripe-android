@@ -9,7 +9,9 @@ class InvalidRequestExceptionTest {
     @Test
     fun stripeError_shouldReturnStripeError() {
         val stripeException = InvalidRequestException(
-            StripeErrorFixtures.INVALID_REQUEST_ERROR, "req_123", HttpURLConnection.HTTP_BAD_REQUEST
+            StripeErrorFixtures.INVALID_REQUEST_ERROR,
+            "req_123",
+            HttpURLConnection.HTTP_BAD_REQUEST
         )
         assertEquals(StripeErrorFixtures.INVALID_REQUEST_ERROR, stripeException.stripeError)
     }
@@ -28,10 +30,11 @@ class InvalidRequestExceptionTest {
             requestId = "req_123",
             cause = IllegalArgumentException()
         ).toString()
-        val expected = """
+        val expected =
+            """
             Request-id: req_123
             com.stripe.android.exception.InvalidRequestException
-        """.trimIndent()
+            """.trimIndent()
         assertEquals(expected, actual)
     }
 

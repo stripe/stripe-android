@@ -6,9 +6,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardMetadata
-import kotlin.test.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class CardWidgetViewModelTest {

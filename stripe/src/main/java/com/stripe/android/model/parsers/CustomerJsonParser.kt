@@ -3,7 +3,6 @@ package com.stripe.android.model.parsers
 import com.stripe.android.model.Customer
 import com.stripe.android.model.CustomerSource
 import com.stripe.android.model.StripeJsonUtils
-import com.stripe.android.model.StripeJsonUtils.optBoolean
 import com.stripe.android.model.StripeJsonUtils.optString
 import com.stripe.android.model.TokenizationMethod
 import org.json.JSONArray

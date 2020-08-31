@@ -76,11 +76,13 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
         return createParams(
             AnalyticsEvent.Auth3ds2ChallengeErrored,
             extraParams = createIntentParam(intentId)
-                .plus(FIELD_ERROR_DATA to mapOf(
-                    "type" to "runtime_error_event",
-                    "error_code" to runtimeErrorEvent.errorCode,
-                    "error_message" to runtimeErrorEvent.errorMessage
-                ))
+                .plus(
+                    FIELD_ERROR_DATA to mapOf(
+                        "type" to "runtime_error_event",
+                        "error_code" to runtimeErrorEvent.errorCode,
+                        "error_message" to runtimeErrorEvent.errorMessage
+                    )
+                )
         )
     }
 

@@ -8,9 +8,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.databinding.CardBrandSpinnerDropdownBinding
 import com.stripe.android.databinding.CardBrandSpinnerMainBinding
 import com.stripe.android.model.CardBrand
-import kotlin.test.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class CardBrandSpinnerTest {

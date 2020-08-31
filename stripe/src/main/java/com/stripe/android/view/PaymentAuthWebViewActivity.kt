@@ -38,7 +38,8 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         }
 
         viewModel = ViewModelProvider(
-            this, PaymentAuthWebViewActivityViewModel.Factory(args)
+            this,
+            PaymentAuthWebViewActivityViewModel.Factory(args)
         )[PaymentAuthWebViewActivityViewModel::class.java]
 
         logger = Logger.getInstance(args.enableLogging)

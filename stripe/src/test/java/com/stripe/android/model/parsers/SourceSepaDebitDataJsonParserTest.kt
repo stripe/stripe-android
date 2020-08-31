@@ -1,10 +1,10 @@
 package com.stripe.android.model.parsers
 
 import com.stripe.android.model.SourceTypeModel
+import org.json.JSONObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import org.json.JSONObject
 
 class SourceSepaDebitDataJsonParserTest {
     @Test

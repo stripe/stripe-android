@@ -7,19 +7,22 @@ class AppInfoTest {
 
     @Test
     fun toUserAgent() {
-        assertEquals("MyAwesomePlugin/1.2.34 (https://myawesomeplugin.info)",
-            APP_INFO.toUserAgent())
+        assertEquals(
+            "MyAwesomePlugin/1.2.34 (https://myawesomeplugin.info)",
+            APP_INFO.toUserAgent()
+        )
     }
 
     @Test
     fun createClientHeaders() {
-        val header = mapOf("application" to
-            mapOf(
-                "name" to "MyAwesomePlugin",
-                "partner_id" to "pp_partner_1234",
-                "version" to "1.2.34",
-                "url" to "https://myawesomeplugin.info"
-            )
+        val header = mapOf(
+            "application" to
+                mapOf(
+                    "name" to "MyAwesomePlugin",
+                    "partner_id" to "pp_partner_1234",
+                    "version" to "1.2.34",
+                    "url" to "https://myawesomeplugin.info"
+                )
         )
         assertEquals(header, APP_INFO.createClientHeaders())
     }
@@ -51,13 +54,15 @@ class AppInfoTest {
 
     @Test
     fun equals() {
-        assertEquals(APP_INFO,
+        assertEquals(
+            APP_INFO,
             AppInfo.create(
                 "MyAwesomePlugin",
                 "1.2.34",
                 "https://myawesomeplugin.info",
                 "pp_partner_1234"
-            ))
+            )
+        )
     }
 
     internal companion object {

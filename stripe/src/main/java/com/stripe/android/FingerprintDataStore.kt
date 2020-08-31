@@ -17,7 +17,8 @@ internal interface FingerprintDataStore {
     ) : FingerprintDataStore {
         private val prefs by lazy {
             context.getSharedPreferences(
-                PREF_FILE, Context.MODE_PRIVATE
+                PREF_FILE,
+                Context.MODE_PRIVATE
             )
         }
 

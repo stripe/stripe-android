@@ -81,7 +81,9 @@ internal class PaymentSessionViewModel(
                 ) {
                     mutableNetworkState.value = NetworkState.Inactive
                     resultData.value = FetchCustomerResult.Error(
-                        errorCode, errorMessage, stripeError
+                        errorCode,
+                        errorMessage,
+                        stripeError
                     )
                 }
             }

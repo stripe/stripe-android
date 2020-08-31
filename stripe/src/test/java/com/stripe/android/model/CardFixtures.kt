@@ -57,8 +57,10 @@ object CardFixtures {
 
     internal val CARD_USD = requireNotNull(CardJsonParser().parse(CARD_USD_JSON))
 
-    internal val CARD_GOOGLE_PAY = requireNotNull(CardJsonParser().parse(JSONObject(
-        """
+    internal val CARD_GOOGLE_PAY = requireNotNull(
+        CardJsonParser().parse(
+            JSONObject(
+                """
         {
             "id": "card_189fi32eZvKYlo2CHK8NPRME",
             "object": "card",
@@ -87,6 +89,8 @@ object CardFixtures {
                 "animal": "dog"
             }
         }
-        """.trimIndent()
-    )))
+                """.trimIndent()
+            )
+        )
+    )
 }

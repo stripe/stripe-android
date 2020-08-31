@@ -1,9 +1,9 @@
 package com.stripe.android.model
 
 import com.stripe.android.model.parsers.SetupIntentJsonParser
-import java.util.regex.Pattern
 import kotlinx.android.parcel.Parcelize
 import org.json.JSONObject
+import java.util.regex.Pattern
 
 /**
  * A [SetupIntent] guides you through the process of setting up a customer's payment credentials for

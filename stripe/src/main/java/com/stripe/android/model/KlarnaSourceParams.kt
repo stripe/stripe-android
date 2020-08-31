@@ -97,10 +97,11 @@ data class KlarnaSourceParams @JvmOverloads constructor(
             PARAM_PURCHASE_COUNTRY to purchaseCountry
         ).plus(
             customPaymentMethods.takeIf { it.isNotEmpty() }?.let { klarnaCustomPaymentMethods ->
-                mapOf(PARAM_CUSTOM_PAYMENT_METHODS to
-                    klarnaCustomPaymentMethods.toList()
-                        .sortedBy { it.ordinal }
-                        .joinToString(",") { it.code }
+                mapOf(
+                    PARAM_CUSTOM_PAYMENT_METHODS to
+                        klarnaCustomPaymentMethods.toList()
+                            .sortedBy { it.ordinal }
+                            .joinToString(",") { it.code }
                 )
             }.orEmpty()
         ).plus(

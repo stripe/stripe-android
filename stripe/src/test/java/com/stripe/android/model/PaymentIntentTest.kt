@@ -2,10 +2,10 @@ package com.stripe.android.model
 
 import android.net.Uri
 import com.google.common.truth.Truth.assertThat
-import kotlin.test.Test
-import kotlin.test.assertFailsWith
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
+import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentIntentTest {

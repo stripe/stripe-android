@@ -151,7 +151,8 @@ internal class SourceJsonParser : ModelJsonParser<Source> {
         private const val VALUE_CARD = "card"
 
         private val MODELED_TYPES = setOf(
-            Source.SourceType.CARD, Source.SourceType.SEPA_DEBIT
+            Source.SourceType.CARD,
+            Source.SourceType.SEPA_DEBIT
         )
 
         private const val FIELD_ID: String = "id"

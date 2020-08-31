@@ -10,12 +10,12 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
-import kotlin.test.BeforeTest
-import kotlin.test.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
 import org.robolectric.annotation.LooperMode
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 @LooperMode(LooperMode.Mode.PAUSED)
 @RunWith(RobolectricTestRunner::class)

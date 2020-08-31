@@ -19,6 +19,10 @@ import com.stripe.android.model.SourceFixtures
 import com.stripe.android.testharness.TestEphemeralKeyProvider
 import com.stripe.android.view.AddPaymentMethodActivity
 import com.stripe.android.view.PaymentMethodsActivity
+import kotlinx.coroutines.Dispatchers
+import org.junit.runner.RunWith
+import org.mockito.Mockito.`when`
+import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 import kotlin.test.BeforeTest
@@ -26,10 +30,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
-import kotlinx.coroutines.Dispatchers
-import org.junit.runner.RunWith
-import org.mockito.Mockito.`when`
-import org.robolectric.RobolectricTestRunner
 
 /**
  * Test class for [CustomerSession].
@@ -57,56 +57,70 @@ class CustomerSessionTest {
         `when`<Customer>(stripeRepository.retrieveCustomer(any(), any(), any()))
             .thenReturn(FIRST_CUSTOMER, SECOND_CUSTOMER)
 
-        `when`<Source>(stripeRepository.addCustomerSource(
-            any(),
-            eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-            any(),
-            any(),
-            any(),
-            any()
-        ))
+        `when`<Source>(
+            stripeRepository.addCustomerSource(
+                any(),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        )
             .thenReturn(SourceFixtures.SOURCE_CARD)
 
-        `when`<Source>(stripeRepository.deleteCustomerSource(
-            any(),
-            eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-            any(),
-            any(),
-            any()))
+        `when`<Source>(
+            stripeRepository.deleteCustomerSource(
+                any(),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+                any(),
+                any(),
+                any()
+            )
+        )
             .thenReturn(SourceFixtures.SOURCE_CARD)
 
-        `when`<Customer>(stripeRepository.setDefaultCustomerSource(
-            any(),
-            eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-            any(),
-            any(),
-            any(),
-            any()))
+        `when`<Customer>(
+            stripeRepository.setDefaultCustomerSource(
+                any(),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        )
             .thenReturn(SECOND_CUSTOMER)
 
-        `when`<PaymentMethod>(stripeRepository.attachPaymentMethod(
-            any(),
-            eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-            any(),
-            any(),
-            any()
-        ))
+        `when`<PaymentMethod>(
+            stripeRepository.attachPaymentMethod(
+                any(),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+                any(),
+                any(),
+                any()
+            )
+        )
             .thenReturn(PAYMENT_METHOD)
 
-        `when`<PaymentMethod>(stripeRepository.detachPaymentMethod(
-            eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-            any(),
-            any(),
-            any()
-        ))
+        `when`<PaymentMethod>(
+            stripeRepository.detachPaymentMethod(
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+                any(),
+                any(),
+                any()
+            )
+        )
             .thenReturn(PAYMENT_METHOD)
 
-        `when`(stripeRepository.getPaymentMethods(
-            any(),
-            eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-            any(),
-            any()
-        ))
+        `when`(
+            stripeRepository.getPaymentMethods(
+                any(),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+                any(),
+                any()
+            )
+        )
             .thenReturn(listOf(PAYMENT_METHOD))
     }
 
@@ -178,7 +192,8 @@ class CustomerSessionTest {
                     stripeError: StripeError?
                 ) {
                 }
-            })
+            }
+        )
 
         assertNotNull(FIRST_CUSTOMER.id)
         verify(stripeRepository).setCustomerShippingInfo(
@@ -186,7 +201,8 @@ class CustomerSessionTest {
             eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             eq(DEFAULT_PRODUCT_USAGE),
             eq(shippingInformation),
-            requestOptionsArgumentCaptor.capture())
+            requestOptionsArgumentCaptor.capture()
+        )
         assertEquals(
             EphemeralKeyFixtures.FIRST.secret,
             requestOptionsArgumentCaptor.firstValue.apiKey
@@ -232,15 +248,19 @@ class CustomerSessionTest {
             eq(emptySet()),
             requestOptionsArgumentCaptor.capture()
         )
-        assertEquals(firstKey.secret,
-            requestOptionsArgumentCaptor.firstValue.apiKey)
+        assertEquals(
+            firstKey.secret,
+            requestOptionsArgumentCaptor.firstValue.apiKey
+        )
         verify(stripeRepository).retrieveCustomer(
             eq(secondKey.objectId),
             eq(DEFAULT_PRODUCT_USAGE),
             requestOptionsArgumentCaptor.capture()
         )
-        assertEquals(secondKey.secret,
-            requestOptionsArgumentCaptor.allValues[1].apiKey)
+        assertEquals(
+            secondKey.secret,
+            requestOptionsArgumentCaptor.allValues[1].apiKey
+        )
     }
 
     @Test
@@ -261,8 +281,10 @@ class CustomerSessionTest {
             productUsageArgumentCaptor.capture(),
             requestOptionsArgumentCaptor.capture()
         )
-        assertEquals(firstKey.secret,
-            requestOptionsArgumentCaptor.firstValue.apiKey)
+        assertEquals(
+            firstKey.secret,
+            requestOptionsArgumentCaptor.firstValue.apiKey
+        )
 
         val firstCustomerCacheTime = customerSession.customerCacheTime
         val shortIntervalInMilliseconds = 10L
@@ -646,10 +668,12 @@ class CustomerSessionTest {
 
         assertNotNull(FIRST_CUSTOMER.id)
         verify(stripeRepository).getPaymentMethods(
-            eq(ListPaymentMethodsParams(
-                customerId = FIRST_CUSTOMER.id.orEmpty(),
-                paymentMethodType = PaymentMethod.Type.Card
-            )),
+            eq(
+                ListPaymentMethodsParams(
+                    customerId = FIRST_CUSTOMER.id.orEmpty(),
+                    paymentMethodType = PaymentMethod.Type.Card
+                )
+            ),
             eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
             eq(expectedProductUsage),
             requestOptionsArgumentCaptor.capture()
@@ -666,54 +690,70 @@ class CustomerSessionTest {
     }
 
     private fun setupErrorProxy() {
-        `when`<Source>(stripeRepository.addCustomerSource(
-            any(),
-            eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-            any(),
-            any(),
-            any(),
-            any()
-        ))
+        `when`<Source>(
+            stripeRepository.addCustomerSource(
+                any(),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        )
             .thenThrow(APIException(statusCode = 404, message = "The card is invalid"))
 
-        `when`<Source>(stripeRepository.deleteCustomerSource(
-            any(),
-            eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-            any(),
-            any(),
-            any()))
+        `when`<Source>(
+            stripeRepository.deleteCustomerSource(
+                any(),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+                any(),
+                any(),
+                any()
+            )
+        )
             .thenThrow(APIException(statusCode = 404, message = "The card does not exist"))
 
-        `when`<Customer>(stripeRepository.setDefaultCustomerSource(
-            any(),
-            eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-            any(),
-            any(),
-            any(),
-            any()))
+        `when`<Customer>(
+            stripeRepository.setDefaultCustomerSource(
+                any(),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        )
             .thenThrow(APIException(statusCode = 405, message = "auth error"))
 
-        `when`<PaymentMethod>(stripeRepository.attachPaymentMethod(
-            any(),
-            eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-            any(),
-            any(),
-            any()
-        ))
+        `when`<PaymentMethod>(
+            stripeRepository.attachPaymentMethod(
+                any(),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+                any(),
+                any(),
+                any()
+            )
+        )
             .thenThrow(APIException(statusCode = 404, message = "The payment method is invalid"))
 
-        `when`<PaymentMethod>(stripeRepository.detachPaymentMethod(
-            eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-            any(),
-            any(),
-            any()))
+        `when`<PaymentMethod>(
+            stripeRepository.detachPaymentMethod(
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+                any(),
+                any(),
+                any()
+            )
+        )
             .thenThrow(APIException(statusCode = 404, message = "The payment method does not exist"))
 
-        `when`(stripeRepository.getPaymentMethods(
-            any(),
-            eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-            any(),
-            any()))
+        `when`(
+            stripeRepository.getPaymentMethods(
+                any(),
+                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+                any(),
+                any()
+            )
+        )
             .thenThrow(APIException(statusCode = 404, message = "The payment method does not exist"))
     }
 

@@ -5,10 +5,10 @@ import com.stripe.android.PaymentAuthWebViewStarter
 import com.stripe.android.PaymentController
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
-import kotlin.test.Test
-import kotlin.test.assertEquals
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentAuthWebViewActivityViewModelTest {
@@ -89,9 +89,12 @@ class PaymentAuthWebViewActivityViewModelTest {
                 toolbarCustomization = toolbarCustomization
             )
         )
-        assertEquals(PaymentAuthWebViewActivityViewModel.ToolbarTitleData(
-            "auth webview",
-            toolbarCustomization
-        ), viewModel.toolbarTitle)
+        assertEquals(
+            PaymentAuthWebViewActivityViewModel.ToolbarTitleData(
+                "auth webview",
+                toolbarCustomization
+            ),
+            viewModel.toolbarTitle
+        )
     }
 }

@@ -6,14 +6,14 @@ import android.widget.ImageView
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodFixtures
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
 /**
  * Test class for [MaskedCardView]

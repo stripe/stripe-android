@@ -2,11 +2,11 @@ package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.parsers.CardJsonParser
+import org.json.JSONObject
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotSame
-import org.json.JSONObject
 
 /**
  * Test class for [StripeModel].

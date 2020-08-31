@@ -3,10 +3,10 @@ package com.stripe.android.cards
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.model.CardBrand
-import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
+import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
 internal class StaticCardAccountRangeSourceTest {
@@ -20,7 +20,8 @@ internal class StaticCardAccountRangeSourceTest {
             source.getAccountRange(CardNumber.Unvalidated("4"))?.brand
         ).isEqualTo(CardBrand.Visa)
         assertThat(
-            source.getAccountRange(CardNumber.Unvalidated("424242"))?.brand)
+            source.getAccountRange(CardNumber.Unvalidated("424242"))?.brand
+        )
             .isEqualTo(CardBrand.Visa)
         assertThat(source.getAccountRange(CardNumberFixtures.VISA)?.brand)
             .isEqualTo(CardBrand.Visa)

@@ -5,9 +5,9 @@ import androidx.annotation.Size
 import com.stripe.android.CardUtils
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.parsers.CardJsonParser
-import java.util.Calendar
 import kotlinx.android.parcel.Parcelize
 import org.json.JSONObject
+import java.util.Calendar
 
 /**
  * A representation of a [Card API object](https://stripe.com/docs/api/cards/object).

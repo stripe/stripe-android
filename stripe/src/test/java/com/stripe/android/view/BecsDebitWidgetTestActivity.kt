@@ -17,8 +17,10 @@ internal class BecsDebitWidgetTestActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setTheme(R.style.StripeDefaultTheme)
-        setContentView(FrameLayout(this).also {
-            it.addView(becsDebitWidget)
-        })
+        setContentView(
+            FrameLayout(this).also {
+                it.addView(becsDebitWidget)
+            }
+        )
     }
 }

@@ -6,10 +6,10 @@ import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
-import kotlin.test.Test
-import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
+import kotlin.test.assertTrue
 
 /**
  * Test class for [IconTextInputLayout] to ensure that the Reflection doesn't break

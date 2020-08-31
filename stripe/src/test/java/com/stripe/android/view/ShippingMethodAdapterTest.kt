@@ -1,10 +1,10 @@
 package com.stripe.android.view
 
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class ShippingMethodAdapterTest {

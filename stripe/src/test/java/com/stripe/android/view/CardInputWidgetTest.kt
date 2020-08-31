@@ -31,10 +31,6 @@ import com.stripe.android.testharness.TestFocusChangeListener
 import com.stripe.android.testharness.ViewTestUtils
 import com.stripe.android.view.CardInputWidget.Companion.LOGGING_TOKEN
 import com.stripe.android.view.CardInputWidget.Companion.shouldIconShowBrand
-import java.util.Calendar
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -44,6 +40,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.LooperMode
+import java.util.Calendar
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -308,9 +308,11 @@ internal class CardInputWidgetTest {
                         attribution = ATTRIBUTION
                     ),
                     billingDetails = PaymentMethod.BillingDetails.Builder()
-                        .setAddress(Address(
-                            postalCode = POSTAL_CODE_VALUE
-                        ))
+                        .setAddress(
+                            Address(
+                                postalCode = POSTAL_CODE_VALUE
+                            )
+                        )
                         .build()
                 )
             )
@@ -1590,15 +1592,17 @@ internal class CardInputWidgetTest {
     fun testCardValidCallback() {
         var currentIsValid = false
         var currentInvalidFields = emptySet<CardValidCallback.Fields>()
-        cardInputWidget.setCardValidCallback(object : CardValidCallback {
-            override fun onInputChanged(
-                isValid: Boolean,
-                invalidFields: Set<CardValidCallback.Fields>
-            ) {
-                currentIsValid = isValid
-                currentInvalidFields = invalidFields
+        cardInputWidget.setCardValidCallback(
+            object : CardValidCallback {
+                override fun onInputChanged(
+                    isValid: Boolean,
+                    invalidFields: Set<CardValidCallback.Fields>
+                ) {
+                    currentIsValid = isValid
+                    currentInvalidFields = invalidFields
+                }
             }
-        })
+        )
 
         assertThat(currentIsValid)
             .isFalse()

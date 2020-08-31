@@ -2,8 +2,8 @@ package com.stripe.android
 
 import android.os.Parcelable
 import com.stripe.android.exception.InvalidRequestException
-import java.io.UnsupportedEncodingException
 import kotlinx.android.parcel.Parcelize
+import java.io.UnsupportedEncodingException
 
 /**
  * A class representing a Stripe API or Analytics request.
@@ -63,7 +63,11 @@ internal data class ApiRequest internal constructor(
             params: Map<String, *>? = null
         ): ApiRequest {
             return ApiRequest(
-                Method.GET, url, params, options, appInfo,
+                Method.GET,
+                url,
+                params,
+                options,
+                appInfo,
                 apiVersion = apiVersion,
                 sdkVersion = sdkVersion
             )
@@ -75,7 +79,11 @@ internal data class ApiRequest internal constructor(
             params: Map<String, *>? = null
         ): ApiRequest {
             return ApiRequest(
-                Method.POST, url, params, options, appInfo,
+                Method.POST,
+                url,
+                params,
+                options,
+                appInfo,
                 apiVersion = apiVersion,
                 sdkVersion = sdkVersion
             )

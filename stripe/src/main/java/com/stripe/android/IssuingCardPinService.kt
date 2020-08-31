@@ -231,7 +231,8 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
                         listener.onError(
                             CardPinActionError.ONE_TIME_CODE_INCORRECT,
                             "The one-time code was incorrect.",
-                            null)
+                            null
+                        )
                     }
                     "too_many_attempts" -> {
                         listener.onError(
