@@ -3,7 +3,6 @@ package com.stripe.android.view
 import android.app.Activity
 import android.content.Context
 import android.os.Looper
-import android.text.TextPaint
 import android.view.ViewGroup
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -104,10 +103,8 @@ internal class CardInputWidgetTest {
 
     private fun createCardInputWidget(activity: Activity): CardInputWidget {
         return CardInputWidget(activity).also {
-            it.layoutWidthCalculator = object : CardInputWidget.LayoutWidthCalculator {
-                override fun calculate(text: String, paint: TextPaint): Int {
-                    return text.length * 10
-                }
+            it.layoutWidthCalculator = CardInputWidget.LayoutWidthCalculator { text, _ ->
+                text.length * 10
             }
 
             it.frameWidthSupplier = {

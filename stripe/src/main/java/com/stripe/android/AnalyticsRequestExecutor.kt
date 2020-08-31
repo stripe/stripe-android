@@ -10,7 +10,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import java.io.IOException
 
-internal interface AnalyticsRequestExecutor {
+internal fun interface AnalyticsRequestExecutor {
     /**
      * Execute the fire-and-forget request asynchronously.
      */

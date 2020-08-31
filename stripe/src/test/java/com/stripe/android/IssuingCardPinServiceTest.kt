@@ -24,7 +24,7 @@ class IssuingCardPinServiceTest {
         ApplicationProvider.getApplicationContext(),
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
         stripeApiRequestExecutor = stripeApiRequestExecutor,
-        analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
+        analyticsRequestExecutor = {}
     )
     private val service = IssuingCardPinService(
         TestEphemeralKeyProvider().also {
