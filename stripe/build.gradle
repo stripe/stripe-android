@@ -44,9 +44,9 @@ dependencies {
     javadocDeps 'com.google.android.material:material:1.1.0'
 
     testImplementation 'junit:junit:4.13'
-    testImplementation "org.mockito:mockito-core:3.5.0"
+    testImplementation "org.mockito:mockito-core:3.5.2"
     testImplementation 'org.robolectric:robolectric:4.3.1'
-    testImplementation 'androidx.test:core:1.2.0'
+    testImplementation "androidx.test:core:$androidTestVersion"
     testImplementation 'org.json:json:20200518'
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
@@ -54,10 +54,10 @@ dependencies {
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
     testImplementation 'com.google.truth:truth:1.0.1'
 
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    androidTestImplementation 'androidx.test:rules:1.2.0'
-    androidTestImplementation 'androidx.test:runner:1.2.0'
-    androidTestUtil 'androidx.test:orchestrator:1.2.0'
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
+    androidTestImplementation "androidx.test:rules:$androidTestVersion"
+    androidTestImplementation "androidx.test:runner:$androidTestVersion"
+    androidTestUtil "androidx.test:orchestrator:$androidTestVersion"
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 
