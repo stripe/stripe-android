@@ -55,7 +55,7 @@ internal class CustomerJsonParser : ModelJsonParser<Customer> {
             url = url,
             description = optString(json, FIELD_DESCRIPTION),
             email = optString(json, FIELD_EMAIL),
-            liveMode = optBoolean(json, FIELD_LIVEMODE)
+            liveMode = json.optBoolean(FIELD_LIVEMODE, false)
         )
     }
 
