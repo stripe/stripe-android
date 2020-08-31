@@ -285,20 +285,23 @@ class CardNumberEditText internal constructor(
 
     @JvmSynthetic
     internal fun updateAccountRange(cardNumber: CardNumber.Unvalidated) {
-        // cancel in-flight job
-        cancelAccountRangeRepositoryJob()
+        if (shouldUpdateAccountRange(cardNumber)) {
+            // cancel in-flight job
+            cancelAccountRangeRepositoryJob()
 
-        accountRange = null
+            // invalidate accountRange before fetching
+            accountRange = null
 
-        accountRangeRepositoryJob = CoroutineScope(workDispatcher).launch {
-            val bin = cardNumber.bin
-            if (bin != null) {
-                isProcessingCallback(true)
-                onAccountRangeResult(
-                    cardAccountRangeRepository.getAccountRange(cardNumber)
-                )
-            } else {
-                onAccountRangeResult(null)
+            accountRangeRepositoryJob = CoroutineScope(workDispatcher).launch {
+                val bin = cardNumber.bin
+                if (bin != null) {
+                    isProcessingCallback(true)
+                    onAccountRangeResult(
+                        cardAccountRangeRepository.getAccountRange(cardNumber)
+                    )
+                } else {
+                    onAccountRangeResult(null)
+                }
             }
         }
     }
@@ -315,5 +318,11 @@ class CardNumberEditText internal constructor(
         accountRange = newAccountRange
         cardBrand = newAccountRange?.brand ?: CardBrand.Unknown
         isProcessingCallback(false)
+    }
+
+    private fun shouldUpdateAccountRange(cardNumber: CardNumber.Unvalidated): Boolean {
+        return accountRange == null ||
+            cardNumber.bin == null ||
+            accountRange?.binRange?.matches(cardNumber) == false
     }
 }
