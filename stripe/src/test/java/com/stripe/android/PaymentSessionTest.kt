@@ -21,6 +21,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.testharness.TestEphemeralKeyProvider
+import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.view.ActivityScenarioFactory
 import com.stripe.android.view.ActivityStarter
 import com.stripe.android.view.BillingAddressFields
@@ -45,8 +46,8 @@ class PaymentSessionTest {
 
     private val ephemeralKeyProvider = TestEphemeralKeyProvider()
 
-    private val paymentSessionListener: PaymentSession.PaymentSessionListener = mock()
-    private val customerSession: CustomerSession = mock()
+    private val paymentSessionListener = mock<PaymentSession.PaymentSessionListener>()
+    private val customerSession = mock<CustomerSession>()
     private val paymentMethodsActivityStarter:
         ActivityStarter<PaymentMethodsActivity, PaymentMethodsActivityStarter.Args> = mock()
     private val paymentFlowActivityStarter:
@@ -73,6 +74,7 @@ class PaymentSessionTest {
                 shouldPrefetchCustomer = true
             ))
             paymentSession.init(paymentSessionListener)
+            idleLooper()
 
             verify(customerSession).retrieveCurrentCustomer(
                 productUsageArgumentCaptor.capture(),
@@ -94,6 +96,8 @@ class PaymentSessionTest {
         createActivity {
             val paymentSession = PaymentSession(it, DEFAULT_CONFIG)
             paymentSession.init(paymentSessionListener)
+            idleLooper()
+
             verify(paymentSessionListener)
                 .onCommunicatingStateChanged(true)
             verify(paymentSessionListener)

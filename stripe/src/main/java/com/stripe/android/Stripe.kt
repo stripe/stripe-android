@@ -35,6 +35,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import com.stripe.android.view.AuthActivityStarter
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 
@@ -55,8 +56,9 @@ class Stripe internal constructor(
     private val paymentController: PaymentController,
     publishableKey: String,
     private val stripeAccountId: String? = null,
-    private val workScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    workDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
+    private val workScope = CoroutineScope(workDispatcher)
     private val publishableKey: String = ApiKeyValidator().requireValid(publishableKey)
 
     /**
@@ -116,7 +118,7 @@ class Stripe internal constructor(
         paymentController,
         publishableKey,
         stripeAccountId,
-        CoroutineScope(Dispatchers.IO)
+        Dispatchers.IO
     )
 
     //

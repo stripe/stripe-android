@@ -21,11 +21,12 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.SourceTypeModel
 import com.stripe.android.model.Token
+import com.stripe.android.utils.TestUtils.idleLooper
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -35,7 +36,7 @@ internal class StripeEndToEndTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val defaultStripe = Stripe(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
 
-    private val testScope = TestCoroutineScope(TestCoroutineDispatcher())
+    private val testDispatcher = TestCoroutineDispatcher()
 
     @Test
     fun testCreateAccountToken() {
@@ -71,6 +72,7 @@ internal class StripeEndToEndTest {
             clientSecret = "pi_abc_secret_invalid",
             callback = paymentIntentCallback
         )
+        idleLooper()
 
         verify(paymentIntentCallback).onError(
             argWhere {
@@ -80,13 +82,14 @@ internal class StripeEndToEndTest {
     }
 
     @Test
-    fun retrieveSetupIntentAsync_withInvalidClientSecret_shouldReturnInvalidRequestException() {
+    fun retrieveSetupIntentAsync_withInvalidClientSecret_shouldReturnInvalidRequestException() = testDispatcher.runBlockingTest {
         val setupIntentCallback: ApiResultCallback<SetupIntent> = mock()
 
         createStripeWithTestScope().retrieveSetupIntent(
             clientSecret = "seti_abc_secret_invalid",
             callback = setupIntentCallback
         )
+        idleLooper()
 
         verify(setupIntentCallback).onError(
             argWhere {
@@ -218,7 +221,7 @@ internal class StripeEndToEndTest {
                 stripeRepository
             ),
             publishableKey = publishableKey,
-            workScope = testScope
+            workDispatcher = testDispatcher
         )
     }
 }
