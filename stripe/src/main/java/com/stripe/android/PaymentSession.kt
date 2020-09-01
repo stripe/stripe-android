@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.Observer
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
@@ -283,7 +282,7 @@ class PaymentSession @VisibleForTesting internal constructor(
     private fun fetchCustomer(isInitialFetch: Boolean = false) {
         viewModel.fetchCustomer(isInitialFetch).observe(
             lifecycleOwner,
-            Observer {
+            {
                 if (it is PaymentSessionViewModel.FetchCustomerResult.Error) {
                     listener?.onError(it.errorCode, it.errorMessage)
                 }

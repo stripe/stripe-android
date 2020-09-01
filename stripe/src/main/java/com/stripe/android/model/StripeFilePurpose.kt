@@ -6,7 +6,7 @@ package com.stripe.android.model
  * or `tax_document_user_upload`.
  *
  * [purpose](https://stripe.com/docs/api/files/create#create_file-purpose)
-*/
+ */
 enum class StripeFilePurpose(internal val code: String) {
     BusinessIcon("business_icon"),
     BusinessLogo("business_logo"),

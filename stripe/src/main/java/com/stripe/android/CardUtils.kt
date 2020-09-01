@@ -52,7 +52,7 @@ object CardUtils {
 
         for (index in cardNumber.length - 1 downTo 0) {
             val c = cardNumber[index]
-            if (!Character.isDigit(c)) {
+            if (!c.isDigit()) {
                 return false
             }
 
