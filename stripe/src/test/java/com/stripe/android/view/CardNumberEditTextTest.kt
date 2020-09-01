@@ -499,22 +499,22 @@ internal class CardNumberEditTextTest {
     @Test
     fun cardNumber_withSpaces_returnsCardNumberWithoutSpaces() {
         updateCardNumberAndIdle(VISA_WITH_SPACES)
-        assertThat(cardNumberEditText.cardNumber)
+        assertThat(cardNumberEditText.validatedCardNumber?.number)
             .isEqualTo(VISA_NO_SPACES)
 
         updateCardNumberAndIdle("")
         updateCardNumberAndIdle(AMEX_WITH_SPACES)
-        assertThat(cardNumberEditText.cardNumber)
+        assertThat(cardNumberEditText.validatedCardNumber?.number)
             .isEqualTo(AMEX_NO_SPACES)
 
         updateCardNumberAndIdle("")
         updateCardNumberAndIdle(DINERS_CLUB_14_WITH_SPACES)
-        assertThat(cardNumberEditText.cardNumber)
+        assertThat(cardNumberEditText.validatedCardNumber?.number)
             .isEqualTo(DINERS_CLUB_14_NO_SPACES)
 
         updateCardNumberAndIdle("")
         updateCardNumberAndIdle(DINERS_CLUB_16_WITH_SPACES)
-        assertThat(cardNumberEditText.cardNumber)
+        assertThat(cardNumberEditText.validatedCardNumber?.number)
             .isEqualTo(DINERS_CLUB_16_NO_SPACES)
     }
 
@@ -523,7 +523,7 @@ internal class CardNumberEditTextTest {
         updateCardNumberAndIdle(
             DINERS_CLUB_14_WITH_SPACES.take(DINERS_CLUB_14_WITH_SPACES.length - 2)
         )
-        assertThat(cardNumberEditText.cardNumber)
+        assertThat(cardNumberEditText.validatedCardNumber)
             .isNull()
     }
 
@@ -532,7 +532,7 @@ internal class CardNumberEditTextTest {
         updateCardNumberAndIdle(
             withoutLastCharacter(VISA_WITH_SPACES) + "3" // creates the 4242 4242 4242 4243 bad number
         )
-        assertThat(cardNumberEditText.cardNumber)
+        assertThat(cardNumberEditText.validatedCardNumber)
             .isNull()
     }
 
@@ -541,7 +541,7 @@ internal class CardNumberEditTextTest {
         updateCardNumberAndIdle(AMEX_WITH_SPACES)
         ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
 
-        assertThat(cardNumberEditText.cardNumber)
+        assertThat(cardNumberEditText.validatedCardNumber)
             .isNull()
     }
 
