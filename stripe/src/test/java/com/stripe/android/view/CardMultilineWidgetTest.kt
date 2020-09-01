@@ -25,8 +25,10 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.mockito.Mockito.reset
 import org.robolectric.RobolectricTestRunner
@@ -58,6 +60,8 @@ internal class CardMultilineWidgetTest {
         // The input date here will be invalid after 2050. Please update the test.
         assertThat(Calendar.getInstance().get(Calendar.YEAR) < 2050)
             .isTrue()
+
+        Dispatchers.setMain(testDispatcher)
 
         CustomerSession.instance = mock()
 
