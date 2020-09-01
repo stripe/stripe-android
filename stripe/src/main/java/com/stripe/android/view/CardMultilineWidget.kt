@@ -74,7 +74,9 @@ class CardMultilineWidget @JvmOverloads constructor(
                 CardValidCallback.Fields.Expiry.takeIf {
                     expiryDate == null
                 },
-                CardValidCallback.Fields.Cvc.takeUnless { isCvcLengthValid }
+                CardValidCallback.Fields.Cvc.takeUnless {
+                    cvcEditText.cvc == null
+                }
             ).toSet()
         }
 
@@ -242,14 +244,12 @@ class CardMultilineWidget @JvmOverloads constructor(
         get() {
             return cardNumberEditText.validatedCardNumber
         }
+
     private val expiryDate: Pair<Int, Int>?
         get() {
             return expiryDateEditText.validDateFields
         }
-    private val isCvcLengthValid: Boolean
-        get() {
-            return cardBrand.isValidCvc(cvcEditText.rawCvcValue)
-        }
+
     private val allFields: Collection<StripeEditText>
         get() {
             return listOf(
@@ -415,7 +415,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     fun validateAllFields(): Boolean {
         val cardNumberIsValid = validatedCardNumber != null
         val expiryIsValid = expiryDate != null
-        val cvcIsValid = isCvcLengthValid
+        val cvcIsValid = cvcEditText.cvc != null
         cardNumberEditText.shouldShowError = !cardNumberIsValid
         expiryDateEditText.shouldShowError = !expiryIsValid
         cvcEditText.shouldShowError = !cvcIsValid

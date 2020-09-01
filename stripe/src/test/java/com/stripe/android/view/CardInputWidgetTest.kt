@@ -63,7 +63,7 @@ internal class CardInputWidgetTest {
         cardInputWidget.expiryDateEditText
     }
     private val cvcEditText: CvcEditText by lazy {
-        cardInputWidget.cvcNumberEditText
+        cardInputWidget.cvcEditText
     }
     private val postalCodeEditText: PostalCodeEditText by lazy {
         cardInputWidget.postalCodeEditText
@@ -1700,7 +1700,7 @@ internal class CardInputWidgetTest {
         cardInputWidget.setCardNumber(VISA_WITH_SPACES)
         cardInputWidget.expiryDateEditText.append("12")
         cardInputWidget.expiryDateEditText.append("50")
-        cardInputWidget.cvcNumberEditText.append(CVC_VALUE_COMMON)
+        cardInputWidget.cvcEditText.append(CVC_VALUE_COMMON)
 
         // invalid zipcode
         cardInputWidget.postalCodeEditText.setText(CVC_VALUE_AMEX)
@@ -1717,7 +1717,7 @@ internal class CardInputWidgetTest {
         cardInputWidget.setCardNumber(VISA_WITH_SPACES)
         cardInputWidget.expiryDateEditText.append("12")
         cardInputWidget.expiryDateEditText.append("50")
-        cardInputWidget.cvcNumberEditText.append(CVC_VALUE_COMMON)
+        cardInputWidget.cvcEditText.append(CVC_VALUE_COMMON)
 
         // valid zipcode
         cardInputWidget.postalCodeEditText.setText(POSTAL_CODE_VALUE)
