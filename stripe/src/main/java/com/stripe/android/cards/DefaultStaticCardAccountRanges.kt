@@ -1,21 +1,12 @@
 package com.stripe.android.cards
 
 import com.stripe.android.model.BinRange
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardMetadata
 
-/**
- * A [CardAccountRangeSource] that uses a local, static source of BIN ranges.
- */
-internal class LocalCardAccountRangeSource : CardAccountRangeSource {
-    override suspend fun getAccountRange(
-        cardNumber: String
-    ): CardMetadata.AccountRange? {
-        return ACCOUNTS
-            .firstOrNull {
-                it.binRange.matches(cardNumber)
-            }
-    }
+internal class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
+    override fun match(
+        cardNumber: CardNumber.Unvalidated
+    ) = ACCOUNTS.firstOrNull { it.binRange.matches(cardNumber) }
 
     internal companion object {
         private val VISA_ACCOUNTS =
@@ -28,8 +19,7 @@ internal class LocalCardAccountRangeSource : CardAccountRangeSource {
                 CardMetadata.AccountRange(
                     binRange = it,
                     panLength = 16,
-                    brandName = CardBrand.Visa.code,
-                    brand = CardBrand.Visa
+                    brandInfo = CardMetadata.AccountRange.BrandInfo.Visa
                 )
             }
 
@@ -47,8 +37,7 @@ internal class LocalCardAccountRangeSource : CardAccountRangeSource {
                 CardMetadata.AccountRange(
                     binRange = it,
                     panLength = 16,
-                    brandName = CardBrand.MasterCard.code,
-                    brand = CardBrand.MasterCard
+                    brandInfo = CardMetadata.AccountRange.BrandInfo.Mastercard
                 )
             }
 
@@ -66,8 +55,7 @@ internal class LocalCardAccountRangeSource : CardAccountRangeSource {
             CardMetadata.AccountRange(
                 binRange = it,
                 panLength = 15,
-                brandName = CardBrand.AmericanExpress.code,
-                brand = CardBrand.AmericanExpress
+                brandInfo = CardMetadata.AccountRange.BrandInfo.AmericanExpress
             )
         }
 
@@ -90,8 +78,7 @@ internal class LocalCardAccountRangeSource : CardAccountRangeSource {
             CardMetadata.AccountRange(
                 binRange = it,
                 panLength = 16,
-                brandName = CardBrand.Discover.code,
-                brand = CardBrand.Discover
+                brandInfo = CardMetadata.AccountRange.BrandInfo.Discover
             )
         }
 
@@ -104,8 +91,7 @@ internal class LocalCardAccountRangeSource : CardAccountRangeSource {
             CardMetadata.AccountRange(
                 binRange = it,
                 panLength = 16,
-                brandName = CardBrand.JCB.code,
-                brand = CardBrand.JCB
+                brandInfo = CardMetadata.AccountRange.BrandInfo.JCB
             )
         }
 
@@ -123,8 +109,7 @@ internal class LocalCardAccountRangeSource : CardAccountRangeSource {
             CardMetadata.AccountRange(
                 binRange = it,
                 panLength = 16,
-                brandName = CardBrand.UnionPay.code,
-                brand = CardBrand.UnionPay
+                brandInfo = CardMetadata.AccountRange.BrandInfo.UnionPay
             )
         }
 
@@ -147,8 +132,7 @@ internal class LocalCardAccountRangeSource : CardAccountRangeSource {
             CardMetadata.AccountRange(
                 binRange = it,
                 panLength = 16,
-                brandName = CardBrand.DinersClub.code,
-                brand = CardBrand.DinersClub
+                brandInfo = CardMetadata.AccountRange.BrandInfo.DinersClub
             )
         }
 
@@ -161,8 +145,7 @@ internal class LocalCardAccountRangeSource : CardAccountRangeSource {
             CardMetadata.AccountRange(
                 binRange = it,
                 panLength = 14,
-                brandName = CardBrand.DinersClub.code,
-                brand = CardBrand.DinersClub
+                brandInfo = CardMetadata.AccountRange.BrandInfo.DinersClub
             )
         }
 

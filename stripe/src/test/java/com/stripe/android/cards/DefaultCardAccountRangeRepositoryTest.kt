@@ -9,15 +9,14 @@ import com.stripe.android.CardNumberFixtures
 import com.stripe.android.StripeApiRepository
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardMetadata
-import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
@@ -32,11 +31,13 @@ internal class DefaultCardAccountRangeRepositoryTest {
     @Test
     fun `repository with real sources returns expected results`() = runBlocking {
         assertThat(
-            realRepository.getAccountRange("42424")
+            realRepository.getAccountRange(
+                CardNumber.Unvalidated("42424")
+            )
         ).isNull()
 
         assertThat(
-            realRepository.getAccountRange(CardNumberFixtures.VISA_NO_SPACES)
+            realRepository.getAccountRange(CardNumberFixtures.VISA)
         ).isEqualTo(
             CardMetadata.AccountRange(
                 binRange = BinRange(
@@ -44,60 +45,36 @@ internal class DefaultCardAccountRangeRepositoryTest {
                     high = "4999999999999999"
                 ),
                 panLength = 16,
-                brandName = "visa",
-                brand = CardBrand.Visa
+                brandInfo = CardMetadata.AccountRange.BrandInfo.Visa
             )
         )
         assertThat(realStore.get(BinFixtures.VISA))
             .hasSize(2)
 
         assertThat(
-            realRepository.getAccountRange(CardNumberFixtures.DINERS_CLUB_14_NO_SPACES)
+            realRepository.getAccountRange(CardNumberFixtures.DINERS_CLUB_14)
         ).isEqualTo(
-            CardMetadata.AccountRange(
-                binRange = BinRange(
-                    low = "36000000000000",
-                    high = "36999999999999"
-                ),
-                panLength = 14,
-                brandName = "diners",
-                brand = CardBrand.DinersClub
-            )
+            AccountRangeFixtures.DINERSCLUB14
         )
         assertThat(
             realStore.get(BinFixtures.DINERSCLUB14)
         ).isEmpty()
 
         assertThat(
-            realRepository.getAccountRange(CardNumberFixtures.DINERS_CLUB_16_NO_SPACES)
+            realRepository.getAccountRange(CardNumberFixtures.DINERS_CLUB_16)
         ).isEqualTo(
-            CardMetadata.AccountRange(
-                binRange = BinRange(
-                    low = "3000000000000000",
-                    high = "3059999999999999"
-                ),
-                panLength = 16,
-                brandName = "diners",
-                brand = CardBrand.DinersClub
-            )
+            AccountRangeFixtures.DINERSCLUB16
         )
         assertThat(
             realStore.get(BinFixtures.DINERSCLUB16)
         ).isEmpty()
 
         assertThat(
-            realRepository.getAccountRange("378282")
-        ).isEqualTo(
-            CardMetadata.AccountRange(
-                binRange = BinRange(
-                    low = "378282000000000",
-                    high = "378282999999999"
-                ),
-                panLength = 15,
-                brandName = "AMERICAN_EXPRESS",
-                brand = CardBrand.Unknown,
-                country = "US"
+            realRepository.getAccountRange(
+                CardNumber.Unvalidated("378282")
             )
+        ).isEqualTo(
+            AccountRangeFixtures.AMERICANEXPRESS
         )
 
         assertThat(
@@ -105,52 +82,31 @@ internal class DefaultCardAccountRangeRepositoryTest {
         ).hasSize(1)
 
         assertThat(
-            realRepository.getAccountRange("5555552500001001")
+            realRepository.getAccountRange(CardNumber.Unvalidated("5555552500001001"))
         ).isEqualTo(
-            CardMetadata.AccountRange(
-                binRange = BinRange(
-                    low = "5100000000000000",
-                    high = "5599999999999999"
-                ),
-                panLength = 16,
-                brandName = "mastercard",
-                brand = CardBrand.MasterCard
-            )
+            AccountRangeFixtures.MASTERCARD
         )
         assertThat(
             realStore.get(BinFixtures.MASTERCARD)
         ).isEmpty()
 
         assertThat(
-            realRepository.getAccountRange("356840")
-        ).isEqualTo(
-            CardMetadata.AccountRange(
-                binRange = BinRange(
-                    low = "3528000000000000",
-                    high = "3589999999999999"
-                ),
-                panLength = 16,
-                brandName = "jcb",
-                brand = CardBrand.JCB
+            realRepository.getAccountRange(
+                CardNumber.Unvalidated("356840")
             )
+        ).isEqualTo(
+            AccountRangeFixtures.JCB
         )
         assertThat(
             realStore.get(BinFixtures.JCB)
         ).isEmpty()
 
         assertThat(
-            realRepository.getAccountRange("621682")
-        ).isEqualTo(
-            CardMetadata.AccountRange(
-                binRange = BinRange(
-                    low = "6216828050000000000",
-                    high = "6216828059999999999"
-                ),
-                panLength = 19,
-                brandName = "UNIONPAY",
-                brand = CardBrand.UnionPay,
-                country = "CN"
+            realRepository.getAccountRange(
+                CardNumber.Unvalidated("621682")
             )
+        ).isEqualTo(
+            AccountRangeFixtures.UNIONPAY19
         )
 
         assertThat(
@@ -163,9 +119,9 @@ internal class DefaultCardAccountRangeRepositoryTest {
         assertThat(
             DefaultCardAccountRangeRepository(
                 inMemoryCardAccountRangeSource = FakeCardAccountRangeSource(),
-                localCardAccountRangeSource = FakeCardAccountRangeSource(),
-                remoteCardAccountRangeSource = FakeCardAccountRangeSource()
-            ).getAccountRange(CardNumberFixtures.VISA_NO_SPACES)
+                remoteCardAccountRangeSource = FakeCardAccountRangeSource(),
+                staticCardAccountRangeSource = FakeCardAccountRangeSource()
+            ).getAccountRange(CardNumberFixtures.VISA)
         ).isNull()
     }
 
@@ -178,19 +134,21 @@ internal class DefaultCardAccountRangeRepositoryTest {
         )
         return DefaultCardAccountRangeRepository(
             inMemoryCardAccountRangeSource = InMemoryCardAccountRangeSource(store),
-            localCardAccountRangeSource = LocalCardAccountRangeSource(),
             remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
                 stripeRepository,
                 ApiRequest.Options(
                     ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
                 ),
                 store
-            )
+            ),
+            staticCardAccountRangeSource = StaticCardAccountRangeSource()
         )
     }
 
     private class FakeCardAccountRangeSource : CardAccountRangeSource {
-        override suspend fun getAccountRange(cardNumber: String): CardMetadata.AccountRange? {
+        override suspend fun getAccountRange(
+            cardNumber: CardNumber.Unvalidated
+        ): CardMetadata.AccountRange? {
             return null
         }
     }

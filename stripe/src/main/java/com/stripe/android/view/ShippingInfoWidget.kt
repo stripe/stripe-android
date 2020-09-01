@@ -237,8 +237,12 @@ class ShippingInfoWidget @JvmOverloads constructor(
         addressEditText.setErrorMessage(resources.getString(R.string.address_required))
         cityEditText.setErrorMessage(resources.getString(R.string.address_city_required))
         nameEditText.setErrorMessage(resources.getString(R.string.address_name_required))
-        phoneNumberEditText.setErrorMessage(resources.getString(R.string
-            .address_phone_number_required))
+        phoneNumberEditText.setErrorMessage(
+            resources.getString(
+                R.string
+                    .address_phone_number_required
+            )
+        )
     }
 
     private fun renderLabels() {
@@ -291,7 +295,8 @@ class ShippingInfoWidget @JvmOverloads constructor(
 
         postalCodeTextInputLayout.visibility =
             if (CountryUtils.doesCountryUsePostalCode(country.code) &&
-                !isFieldHidden(CustomizableShippingField.PostalCode)) {
+                !isFieldHidden(CustomizableShippingField.PostalCode)
+            ) {
                 View.VISIBLE
             } else {
                 View.GONE
@@ -312,8 +317,10 @@ class ShippingInfoWidget @JvmOverloads constructor(
             } else {
                 resources.getString(R.string.address_label_address)
             }
-        addressLine2TextInputLayout.hint = resources.getString(R.string
-            .address_label_apt_optional)
+        addressLine2TextInputLayout.hint = resources.getString(
+            R.string
+                .address_label_apt_optional
+        )
         postalCodeTextInputLayout.hint =
             if (isFieldOptional(CustomizableShippingField.PostalCode)) {
                 resources.getString(R.string.address_label_zip_code_optional)
@@ -377,10 +384,18 @@ class ShippingInfoWidget @JvmOverloads constructor(
                 resources.getString(R.string.address_label_province)
             }
 
-        postalCodeEditText.setErrorMessage(resources.getString(R.string
-            .address_postal_code_invalid))
-        stateEditText.setErrorMessage(resources.getString(R.string
-            .address_province_required))
+        postalCodeEditText.setErrorMessage(
+            resources.getString(
+                R.string
+                    .address_postal_code_invalid
+            )
+        )
+        stateEditText.setErrorMessage(
+            resources.getString(
+                R.string
+                    .address_province_required
+            )
+        )
     }
 
     private fun renderInternationalForm() {
@@ -407,9 +422,17 @@ class ShippingInfoWidget @JvmOverloads constructor(
                 resources.getString(R.string.address_label_region_generic)
             }
 
-        postalCodeEditText.setErrorMessage(resources.getString(R.string
-            .address_zip_postal_invalid))
-        stateEditText.setErrorMessage(resources.getString(R.string
-            .address_region_generic_required))
+        postalCodeEditText.setErrorMessage(
+            resources.getString(
+                R.string
+                    .address_zip_postal_invalid
+            )
+        )
+        stateEditText.setErrorMessage(
+            resources.getString(
+                R.string
+                    .address_region_generic_required
+            )
+        )
     }
 }

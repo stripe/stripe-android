@@ -5,10 +5,10 @@ import androidx.annotation.IntRange
 import androidx.annotation.Size
 import com.stripe.android.model.Source.Companion.asSourceType
 import com.stripe.android.model.Source.SourceType
-import java.util.Objects
 import kotlinx.android.parcel.Parcelize
 import org.json.JSONException
 import org.json.JSONObject
+import java.util.Objects
 
 /**
  * Represents a grouping of parameters needed to create a [Source] object on the server.
@@ -275,8 +275,10 @@ class SourceParams private constructor(
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(amount, apiParameterMap, currency, typeRaw, owner, metaData,
-            returnUrl, extraParams, token, usage, type, weChatParams)
+        return Objects.hash(
+            amount, apiParameterMap, currency, typeRaw, owner, metaData,
+            returnUrl, extraParams, token, usage, type, weChatParams
+        )
     }
 
     override fun equals(other: Any?): Boolean {
@@ -299,7 +301,8 @@ class SourceParams private constructor(
             Objects.equals(token, params.token) &&
             Objects.equals(usage, params.usage) &&
             Objects.equals(type, params.type) &&
-            Objects.equals(weChatParams, params.weChatParams)
+            Objects.equals(weChatParams, params.weChatParams) &&
+            Objects.equals(attribution, params.attribution)
     }
 
     /**
@@ -637,7 +640,15 @@ class SourceParams private constructor(
          */
         @JvmStatic
         fun createSourceFromTokenParams(tokenId: String): SourceParams {
-            return SourceParams(SourceType.CARD)
+            return createSourceFromTokenParams(tokenId, emptySet())
+        }
+
+        @JvmSynthetic
+        internal fun createSourceFromTokenParams(
+            tokenId: String,
+            attribution: Set<String>
+        ): SourceParams {
+            return SourceParams(SourceType.CARD, attribution)
                 .setToken(tokenId)
         }
 
@@ -715,16 +726,21 @@ class SourceParams private constructor(
             googlePayPaymentData: JSONObject
         ): SourceParams {
             val googlePayResult = GooglePayResult.fromJson(googlePayPaymentData)
-            return SourceParams(SourceType.CARD)
-                .setToken(requireNotNull(googlePayResult.token?.id))
-                .setOwner(
-                    OwnerParams(
-                        address = googlePayResult.address,
-                        email = googlePayResult.email,
-                        name = googlePayResult.name,
-                        phone = googlePayResult.phoneNumber
-                    )
+            val token = googlePayResult.token
+
+            return createSourceFromTokenParams(
+                tokenId = token?.id.orEmpty(),
+                attribution = setOfNotNull(
+                    token?.card?.tokenizationMethod?.toString()
                 )
+            ).setOwner(
+                OwnerParams(
+                    address = googlePayResult.address,
+                    email = googlePayResult.email,
+                    name = googlePayResult.name,
+                    phone = googlePayResult.phoneNumber
+                )
+            )
         }
 
         /**
@@ -1001,7 +1017,8 @@ class SourceParams private constructor(
         fun createVisaCheckoutParams(callId: String): SourceParams {
             return SourceParams(SourceType.CARD)
                 .setApiParameterMap(
-                    mapOf(PARAM_VISA_CHECKOUT to mapOf(PARAM_CALL_ID to callId)))
+                    mapOf(PARAM_VISA_CHECKOUT to mapOf(PARAM_CALL_ID to callId))
+                )
         }
 
         /**

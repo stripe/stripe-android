@@ -1,9 +1,9 @@
 package com.stripe.android
 
 import com.stripe.android.exception.APIException
-import java.net.HttpURLConnection
 import org.json.JSONException
 import org.json.JSONObject
+import java.net.HttpURLConnection
 
 /**
  * Represents a response from the Stripe servers.
@@ -40,13 +40,14 @@ internal data class StripeResponse internal constructor(
                     JSONObject(it)
                 } catch (e: JSONException) {
                     throw APIException(
-                        message = """
+                        message =
+                            """
                             Exception while parsing response body.
                               Status code: $code
                               Request-Id: $requestId
                               Content-Type: $contentType
                               Body: "$it"
-                        """.trimIndent(),
+                            """.trimIndent(),
                         cause = e
                     )
                 }

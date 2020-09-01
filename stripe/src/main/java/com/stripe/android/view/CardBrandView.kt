@@ -8,6 +8,7 @@ import androidx.annotation.ColorInt
 import androidx.core.graphics.drawable.DrawableCompat
 import com.stripe.android.databinding.CardBrandViewBinding
 import com.stripe.android.model.CardBrand
+import kotlin.properties.Delegates
 
 internal class CardBrandView @JvmOverloads constructor(
     context: Context,
@@ -19,9 +20,22 @@ internal class CardBrandView @JvmOverloads constructor(
         this
     )
     private val iconView = viewBinding.icon
+    private val progressView = viewBinding.progress
 
     @ColorInt
     internal var tintColorInt: Int = 0
+
+    var isProcessing: Boolean by Delegates.observable(
+        false
+    ) { _, wasProcessing, isProcessing ->
+        if (SHOULD_SHOW_PROGRESS && wasProcessing != isProcessing) {
+            if (isProcessing) {
+                progressView.show()
+            } else {
+                progressView.hide()
+            }
+        }
+    }
 
     init {
         isClickable = false
@@ -50,5 +64,9 @@ internal class CardBrandView @JvmOverloads constructor(
         val compatIcon = DrawableCompat.wrap(icon)
         DrawableCompat.setTint(compatIcon.mutate(), tintColorInt)
         iconView.setImageDrawable(DrawableCompat.unwrap(compatIcon))
+    }
+
+    private companion object {
+        private const val SHOULD_SHOW_PROGRESS = false
     }
 }

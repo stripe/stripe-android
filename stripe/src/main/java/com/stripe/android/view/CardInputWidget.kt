@@ -228,7 +228,7 @@ class CardInputWidget @JvmOverloads constructor(
             cvcNumberEditText.shouldShowError = cvcValue == null
             postalCodeEditText.shouldShowError =
                 (postalCodeRequired || usZipCodeRequired) &&
-                    postalCodeEditText.postalCode.isNullOrBlank()
+                postalCodeEditText.postalCode.isNullOrBlank()
 
             // Announce error messages for accessibility
             currentFields
@@ -288,7 +288,7 @@ class CardInputWidget @JvmOverloads constructor(
             cvcNumberEditText.shouldShowError = cvcValue == null
             postalCodeEditText.shouldShowError =
                 (postalCodeRequired || usZipCodeRequired) &&
-                    postalCodeEditText.postalCode.isNullOrBlank()
+                postalCodeEditText.postalCode.isNullOrBlank()
 
             // Announce error messages for accessibility
             currentFields
@@ -392,7 +392,9 @@ class CardInputWidget @JvmOverloads constructor(
         frameWidthSupplier = { containerLayout.width }
 
         requiredFields = listOf(
-            cardNumberEditText, cvcNumberEditText, expiryDateEditText
+            cardNumberEditText,
+            cvcNumberEditText,
+            expiryDateEditText
         )
         allFields = requiredFields.plus(postalCodeEditText)
 
@@ -695,27 +697,33 @@ class CardInputWidget @JvmOverloads constructor(
         }
 
         placementParameters.cardWidth = getDesiredWidthInPixels(
-            FULL_SIZING_CARD_TEXT, cardNumberEditText
+            FULL_SIZING_CARD_TEXT,
+            cardNumberEditText
         )
 
         placementParameters.dateWidth = getDesiredWidthInPixels(
-            FULL_SIZING_DATE_TEXT, expiryDateEditText
+            FULL_SIZING_DATE_TEXT,
+            expiryDateEditText
         )
 
         placementParameters.hiddenCardWidth = getDesiredWidthInPixels(
-            hiddenCardText, cardNumberEditText
+            hiddenCardText,
+            cardNumberEditText
         )
 
         placementParameters.cvcWidth = getDesiredWidthInPixels(
-            cvcPlaceHolder, cvcNumberEditText
+            cvcPlaceHolder,
+            cvcNumberEditText
         )
 
         placementParameters.postalCodeWidth = getDesiredWidthInPixels(
-            FULL_SIZING_POSTAL_CODE_TEXT, postalCodeEditText
+            FULL_SIZING_POSTAL_CODE_TEXT,
+            postalCodeEditText
         )
 
         placementParameters.peekCardWidth = getDesiredWidthInPixels(
-            peekCardText, cardNumberEditText
+            peekCardText,
+            cardNumberEditText
         )
 
         placementParameters.updateSpacing(isShowingFullCard, postalCodeEnabled, frameStart, frameWidth)
@@ -747,7 +755,8 @@ class CardInputWidget @JvmOverloads constructor(
                     // Avoid reading out "1234 1234 1234 1234"
                     info.hintText = null
                 }
-            })
+            }
+        )
 
         isShowingFullCard = true
 
@@ -759,7 +768,9 @@ class CardInputWidget @JvmOverloads constructor(
             val a = context.theme.obtainStyledAttributes(
                 attrs,
                 R.styleable.CardInputView,
-                0, 0)
+                0,
+                0
+            )
 
             try {
                 cardBrandView.tintColorInt = a.getColor(
@@ -846,6 +857,10 @@ class CardInputWidget @JvmOverloads constructor(
         if (shouldRequestFocus) {
             cardNumberEditText.requestFocus()
         }
+
+        cardNumberEditText.isProcessingCallback = {
+            cardBrandView.isProcessing = it
+        }
     }
 
     /**
@@ -883,7 +898,10 @@ class CardInputWidget @JvmOverloads constructor(
 
     private fun applyAttributes(attrs: AttributeSet) {
         val typedArray = context.theme.obtainStyledAttributes(
-            attrs, R.styleable.CardElement, 0, 0
+            attrs,
+            R.styleable.CardElement,
+            0,
+            0
         )
 
         try {
@@ -947,12 +965,14 @@ class CardInputWidget @JvmOverloads constructor(
             null
         }
 
-        startSlideAnimation(listOfNotNull(
-            slideCardLeftAnimation,
-            slideDateLeftAnimation,
-            slideCvcLeftAnimation,
-            slidePostalCodeLeftAnimation
-        ))
+        startSlideAnimation(
+            listOfNotNull(
+                slideCardLeftAnimation,
+                slideDateLeftAnimation,
+                slideCvcLeftAnimation,
+                slidePostalCodeLeftAnimation
+            )
+        )
 
         isShowingFullCard = true
     }
@@ -1002,12 +1022,14 @@ class CardInputWidget @JvmOverloads constructor(
             null
         }
 
-        startSlideAnimation(listOfNotNull(
-            slideCardRightAnimation,
-            slideDateRightAnimation,
-            slideCvcRightAnimation,
-            slidePostalCodeRightAnimation
-        ))
+        startSlideAnimation(
+            listOfNotNull(
+                slideCardRightAnimation,
+                slideDateRightAnimation,
+                slideCvcRightAnimation,
+                slidePostalCodeRightAnimation
+            )
+        )
 
         isShowingFullCard = false
     }
@@ -1224,7 +1246,8 @@ class CardInputWidget @JvmOverloads constructor(
         }
 
         override fun toString(): String {
-            val touchBufferData = """
+            val touchBufferData =
+                """
                 Touch Buffer Data:
                 CardTouchBufferLimit = $cardTouchBufferLimit
                 DateStartPosition = $dateStartPosition
@@ -1234,7 +1257,8 @@ class CardInputWidget @JvmOverloads constructor(
                 PostalCodeStartPosition = $postalCodeStartPosition
                 """
 
-            val elementSizeData = """
+            val elementSizeData =
+                """
                 TotalLengthInPixels = $totalLengthInPixels
                 CardWidth = $cardWidth
                 HiddenCardWidth = $hiddenCardWidth
@@ -1265,11 +1289,13 @@ class CardInputWidget @JvmOverloads constructor(
         private val view: View
     ) : CardFieldAnimation() {
         init {
-            setAnimationListener(object : AnimationEndListener() {
-                override fun onAnimationEnd(animation: Animation) {
-                    view.requestFocus()
+            setAnimationListener(
+                object : AnimationEndListener() {
+                    override fun onAnimationEnd(animation: Animation) {
+                        view.requestFocus()
+                    }
                 }
-            })
+            )
         }
 
         override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
@@ -1333,11 +1359,13 @@ class CardInputWidget @JvmOverloads constructor(
         private val focusOnEndView: View
     ) : CardFieldAnimation() {
         init {
-            setAnimationListener(object : AnimationEndListener() {
-                override fun onAnimationEnd(animation: Animation) {
-                    focusOnEndView.requestFocus()
+            setAnimationListener(
+                object : AnimationEndListener() {
+                    override fun onAnimationEnd(animation: Animation) {
+                        focusOnEndView.requestFocus()
+                    }
                 }
-            })
+            )
         }
 
         override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
@@ -1409,7 +1437,7 @@ class CardInputWidget @JvmOverloads constructor(
         }
     }
 
-    internal interface LayoutWidthCalculator {
+    internal fun interface LayoutWidthCalculator {
         fun calculate(text: String, paint: TextPaint): Int
     }
 

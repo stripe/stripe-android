@@ -4,10 +4,10 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentSessionFixtures.CONFIG
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.utils.ParcelUtils
-import kotlin.test.Test
-import kotlin.test.assertFailsWith
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
+import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentSessionConfigTest {

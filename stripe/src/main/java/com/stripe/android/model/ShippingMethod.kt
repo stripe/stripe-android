@@ -1,8 +1,8 @@
 package com.stripe.android.model
 
 import androidx.annotation.Size
-import java.util.Currency
 import kotlinx.android.parcel.Parcelize
+import java.util.Currency
 
 /**
  * Model representing a shipping method in the Android SDK.
@@ -44,6 +44,10 @@ data class ShippingMethod @JvmOverloads constructor(
         @Size(min = 0, max = 3) currencyCode: String,
         detail: String? = null
     ) : this(
-        label, identifier, amount, Currency.getInstance(currencyCode), detail
+        label,
+        identifier,
+        amount,
+        Currency.getInstance(currencyCode),
+        detail
     )
 }

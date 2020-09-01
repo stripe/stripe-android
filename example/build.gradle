@@ -60,14 +60,14 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
 
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.8.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.8.1'
 
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.4'
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
 
-    ktlint 'com.pinterest:ktlint:0.37.2'
+    ktlint "com.pinterest:ktlint:$ktlintVersion"
 
     testImplementation "androidx.test:core:$androidTestVersion"
 
@@ -80,8 +80,8 @@ dependencies {
     androidTestImplementation "androidx.test:rules:$androidTestVersion"
 
     // Assertions
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.ext:junit-ktx:1.1.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.ext:junit-ktx:1.1.2'
     androidTestImplementation "androidx.test.ext:truth:$androidTestVersion"
     androidTestImplementation 'com.google.truth:truth:1.0.1'
 

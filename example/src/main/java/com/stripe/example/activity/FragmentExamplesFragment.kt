@@ -283,7 +283,8 @@ class FragmentExamplesFragment : Fragment() {
                                 stripeError: StripeError?
                             ) {
                             }
-                        })
+                        }
+                    )
                 }
             }
         )

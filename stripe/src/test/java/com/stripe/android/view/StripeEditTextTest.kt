@@ -9,17 +9,19 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.stripe.android.R
 import com.stripe.android.testharness.ViewTestUtils
-import kotlin.test.Test
+import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
-class StripeEditTextTest {
+internal class StripeEditTextTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val afterTextChangedListener: StripeEditText.AfterTextChangedListener = mock()
@@ -135,11 +137,14 @@ class StripeEditTextTest {
     }
 
     @Test
-    fun `setHintDelayed should set hint after delay`() {
+    fun `setHintDelayed should set hint after delay`() = testDispatcher.runBlockingTest {
         assertThat(editText.hint)
             .isNull()
+
         editText.setHintDelayed("Here's a hint", DELAY)
         testDispatcher.advanceTimeBy(DELAY + 10)
+        idleLooper()
+
         assertThat(editText.hint)
             .isEqualTo("Here's a hint")
     }

@@ -2,8 +2,8 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import com.stripe.android.ObjectBuilder
-import java.util.Locale
 import kotlinx.android.parcel.Parcelize
+import java.util.Locale
 
 @Parcelize
 data class AddressJapanParams(

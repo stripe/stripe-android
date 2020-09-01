@@ -1,8 +1,8 @@
 package com.stripe.android
 
 import com.google.common.truth.Truth.assertThat
-import kotlin.test.Test
 import org.json.JSONObject
+import kotlin.test.Test
 
 /**
  * Test class for [StripeErrorJsonParser].

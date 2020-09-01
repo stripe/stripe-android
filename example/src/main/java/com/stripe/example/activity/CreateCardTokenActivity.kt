@@ -62,14 +62,16 @@ class CreateCardTokenActivity : AppCompatActivity() {
             } ?: snackbarController.show(getString(R.string.invalid_card_details))
         }
 
-        viewBinding.cardInputWidget.setCardValidCallback(object : CardValidCallback {
-            override fun onInputChanged(
-                isValid: Boolean,
-                invalidFields: Set<CardValidCallback.Fields>
-            ) {
-                // added as an example - no-op
+        viewBinding.cardInputWidget.setCardValidCallback(
+            object : CardValidCallback {
+                override fun onInputChanged(
+                    isValid: Boolean,
+                    invalidFields: Set<CardValidCallback.Fields>
+                ) {
+                    // added as an example - no-op
+                }
             }
-        })
+        )
 
         viewBinding.cardInputWidget.requestFocus()
     }

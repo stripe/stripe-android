@@ -1,6 +1,6 @@
 package com.stripe.android.model.parsers
 
-import com.stripe.android.model.CardBrand
+import com.stripe.android.model.Card
 import com.stripe.android.model.CardFunding
 import com.stripe.android.model.SourceTypeModel
 import com.stripe.android.model.StripeJsonUtils
@@ -12,7 +12,7 @@ internal class SourceCardDataJsonParser : ModelJsonParser<SourceTypeModel.Card> 
         return SourceTypeModel.Card(
             addressLine1Check = StripeJsonUtils.optString(json, FIELD_ADDRESS_LINE1_CHECK),
             addressZipCheck = StripeJsonUtils.optString(json, FIELD_ADDRESS_ZIP_CHECK),
-            brand = CardBrand.fromCode(StripeJsonUtils.optString(json, FIELD_BRAND)),
+            brand = Card.getCardBrand(StripeJsonUtils.optString(json, FIELD_BRAND)),
             country = StripeJsonUtils.optString(json, FIELD_COUNTRY),
             cvcCheck = StripeJsonUtils.optString(json, FIELD_CVC_CHECK),
             dynamicLast4 = StripeJsonUtils.optString(json, FIELD_DYNAMIC_LAST4),

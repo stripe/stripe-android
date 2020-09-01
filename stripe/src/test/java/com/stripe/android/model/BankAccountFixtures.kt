@@ -4,8 +4,9 @@ import com.stripe.android.model.parsers.BankAccountJsonParser
 import org.json.JSONObject
 
 internal object BankAccountFixtures {
-    val BANK_ACCOUNT = BankAccountJsonParser().parse(JSONObject(
-        """
+    val BANK_ACCOUNT = BankAccountJsonParser().parse(
+        JSONObject(
+            """
         {
             "id": "ba_19d8Fh2eZvKYlo2C9qw8RwpV",
             "object": "bank_account",
@@ -19,6 +20,7 @@ internal object BankAccountFixtures {
             "routing_number": "110000000",
             "status": "new"
         }
-        """.trimIndent()
-    ))
+            """.trimIndent()
+        )
+    )
 }

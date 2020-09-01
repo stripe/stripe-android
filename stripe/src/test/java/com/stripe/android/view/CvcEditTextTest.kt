@@ -2,13 +2,13 @@ package com.stripe.android.view
 
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.model.CardBrand
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class CvcEditTextTest {

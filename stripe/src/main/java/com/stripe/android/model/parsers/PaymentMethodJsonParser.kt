@@ -123,7 +123,8 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                 return PaymentMethod.Card.Checks(
                     addressLine1Check = StripeJsonUtils.optString(json, FIELD_ADDRESS_LINE1_CHECK),
                     addressPostalCodeCheck = StripeJsonUtils.optString(
-                        json, FIELD_ADDRESS_POSTAL_CODE_CHECK
+                        json,
+                        FIELD_ADDRESS_POSTAL_CODE_CHECK
                     ),
                     cvcCheck = StripeJsonUtils.optString(json, FIELD_CVC_CHECK)
                 )

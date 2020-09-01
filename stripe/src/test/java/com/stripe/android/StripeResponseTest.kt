@@ -43,13 +43,14 @@ class StripeResponseTest {
                 )
             ).responseJson
         }
-        val expectedMessage = """
+        val expectedMessage =
+            """
                 Exception while parsing response body.
                   Status code: 500
                   Request-Id: req_12345
                   Content-Type: text/plain
                   Body: "there was an error"
-        """.trimIndent()
+            """.trimIndent()
         assertThat(exception.message)
             .isEqualTo(expectedMessage)
     }

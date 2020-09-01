@@ -10,13 +10,13 @@ import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import com.stripe.android.stripe3ds2.init.ui.UiCustomization
 import com.stripe.android.view.ActivityScenarioFactory
 import com.stripe.android.view.PaymentFlowActivity
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentAuthConfigTest {
@@ -33,18 +33,24 @@ class PaymentAuthConfigTest {
     @Test
     fun get_whenNotInited_returnsDefault() {
         val paymentAuthConfig = PaymentAuthConfig.get()
-        assertEquals(PaymentAuthConfig.Stripe3ds2Config.DEFAULT_TIMEOUT,
-            paymentAuthConfig.stripe3ds2Config.timeout)
+        assertEquals(
+            PaymentAuthConfig.Stripe3ds2Config.DEFAULT_TIMEOUT,
+            paymentAuthConfig.stripe3ds2Config.timeout
+        )
         assertNotNull(paymentAuthConfig.stripe3ds2Config.uiCustomization)
     }
 
     @Test
     fun get_whenInit_returnsInstance() {
-        PaymentAuthConfig.init(PaymentAuthConfig.Builder()
-            .set3ds2Config(PaymentAuthConfig.Stripe3ds2Config.Builder()
-                .setTimeout(20)
-                .build())
-            .build())
+        PaymentAuthConfig.init(
+            PaymentAuthConfig.Builder()
+                .set3ds2Config(
+                    PaymentAuthConfig.Stripe3ds2Config.Builder()
+                        .setTimeout(20)
+                        .build()
+                )
+                .build()
+        )
         assertEquals(20, PaymentAuthConfig.get().stripe3ds2Config.timeout)
     }
 
@@ -66,14 +72,20 @@ class PaymentAuthConfigTest {
     @Test
     fun testStripe3ds2ConfigBuilder() {
         val uiCustomization = PaymentAuthConfig.Stripe3ds2UiCustomization.Builder().build()
-        PaymentAuthConfig.init(PaymentAuthConfig.Builder()
-            .set3ds2Config(PaymentAuthConfig.Stripe3ds2Config.Builder()
-                .setTimeout(20)
-                .setUiCustomization(uiCustomization)
-                .build())
-            .build())
-        assertEquals(uiCustomization,
-            PaymentAuthConfig.get().stripe3ds2Config.uiCustomization)
+        PaymentAuthConfig.init(
+            PaymentAuthConfig.Builder()
+                .set3ds2Config(
+                    PaymentAuthConfig.Stripe3ds2Config.Builder()
+                        .setTimeout(20)
+                        .setUiCustomization(uiCustomization)
+                        .build()
+                )
+                .build()
+        )
+        assertEquals(
+            uiCustomization,
+            PaymentAuthConfig.get().stripe3ds2Config.uiCustomization
+        )
     }
 
     @Test
@@ -193,12 +205,18 @@ class PaymentAuthConfigTest {
             .setTextColor("#000004").build()
 
         val uiCustomization = PaymentAuthConfig.Stripe3ds2UiCustomization.Builder()
-            .setButtonCustomization(nextStripe3ds2ButtonCustomization,
-                PaymentAuthConfig.Stripe3ds2UiCustomization.ButtonType.NEXT)
-            .setButtonCustomization(cancelStripe3ds2ButtonCustomization,
-                PaymentAuthConfig.Stripe3ds2UiCustomization.ButtonType.CANCEL)
-            .setButtonCustomization(selectStripe3ds2ButtonCustomization,
-                PaymentAuthConfig.Stripe3ds2UiCustomization.ButtonType.SELECT)
+            .setButtonCustomization(
+                nextStripe3ds2ButtonCustomization,
+                PaymentAuthConfig.Stripe3ds2UiCustomization.ButtonType.NEXT
+            )
+            .setButtonCustomization(
+                cancelStripe3ds2ButtonCustomization,
+                PaymentAuthConfig.Stripe3ds2UiCustomization.ButtonType.CANCEL
+            )
+            .setButtonCustomization(
+                selectStripe3ds2ButtonCustomization,
+                PaymentAuthConfig.Stripe3ds2UiCustomization.ButtonType.SELECT
+            )
             .setLabelCustomization(stripe3ds2LabelCustomization)
             .setTextBoxCustomization(stripe3ds2TextBoxCustomization)
             .setToolbarCustomization(stripe3ds2ToolbarCustomization)
@@ -224,12 +242,18 @@ class PaymentAuthConfigTest {
         toolbarCustomization.setTextColor("#000004")
 
         val expectedUiCustomization = StripeUiCustomization()
-        expectedUiCustomization.setButtonCustomization(nextButtonCustomization,
-            UiCustomization.ButtonType.NEXT)
-        expectedUiCustomization.setButtonCustomization(cancelButtonCustomization,
-            UiCustomization.ButtonType.CANCEL)
-        expectedUiCustomization.setButtonCustomization(selectButtonCustomization,
-            UiCustomization.ButtonType.SELECT)
+        expectedUiCustomization.setButtonCustomization(
+            nextButtonCustomization,
+            UiCustomization.ButtonType.NEXT
+        )
+        expectedUiCustomization.setButtonCustomization(
+            cancelButtonCustomization,
+            UiCustomization.ButtonType.CANCEL
+        )
+        expectedUiCustomization.setButtonCustomization(
+            selectButtonCustomization,
+            UiCustomization.ButtonType.SELECT
+        )
         expectedUiCustomization.setLabelCustomization(labelCustomization)
         expectedUiCustomization.setTextBoxCustomization(textBoxCustomization)
         expectedUiCustomization.setToolbarCustomization(toolbarCustomization)
@@ -257,8 +281,10 @@ class PaymentAuthConfigTest {
                         setTextColor("#00000621")
                         setStatusBarColor("#FF000000")
                     }
-                assertEquals(toolbarCustomization,
-                    uiCustomizationFromTheme.uiCustomization.toolbarCustomization)
+                assertEquals(
+                    toolbarCustomization,
+                    uiCustomizationFromTheme.uiCustomization.toolbarCustomization
+                )
             }
         }
     }

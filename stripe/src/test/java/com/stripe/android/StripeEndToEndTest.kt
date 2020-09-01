@@ -21,21 +21,22 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.SourceTypeModel
 import com.stripe.android.model.Token
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
-class StripeEndToEndTest {
+internal class StripeEndToEndTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val defaultStripe = Stripe(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
 
-    private val testScope = TestCoroutineScope(TestCoroutineDispatcher())
+    private val testDispatcher = TestCoroutineDispatcher()
 
     @Test
     fun testCreateAccountToken() {
@@ -71,6 +72,7 @@ class StripeEndToEndTest {
             clientSecret = "pi_abc_secret_invalid",
             callback = paymentIntentCallback
         )
+        idleLooper()
 
         verify(paymentIntentCallback).onError(
             argWhere {
@@ -80,13 +82,14 @@ class StripeEndToEndTest {
     }
 
     @Test
-    fun retrieveSetupIntentAsync_withInvalidClientSecret_shouldReturnInvalidRequestException() {
+    fun retrieveSetupIntentAsync_withInvalidClientSecret_shouldReturnInvalidRequestException() = testDispatcher.runBlockingTest {
         val setupIntentCallback: ApiResultCallback<SetupIntent> = mock()
 
         createStripeWithTestScope().retrieveSetupIntent(
             clientSecret = "seti_abc_secret_invalid",
             callback = setupIntentCallback
         )
+        idleLooper()
 
         verify(setupIntentCallback).onError(
             argWhere {
@@ -184,6 +187,28 @@ class StripeEndToEndTest {
             )
     }
 
+    @Test
+    fun `Card objects should be populated with the expected CardBrand value`() {
+        assertThat(
+            listOf(
+                CardNumberFixtures.AMEX_NO_SPACES to CardBrand.AmericanExpress,
+                CardNumberFixtures.VISA_NO_SPACES to CardBrand.Visa,
+                CardNumberFixtures.MASTERCARD_NO_SPACES to CardBrand.MasterCard,
+                CardNumberFixtures.JCB_NO_SPACES to CardBrand.JCB,
+                CardNumberFixtures.UNIONPAY_NO_SPACES to CardBrand.UnionPay,
+                CardNumberFixtures.DISCOVER_NO_SPACES to CardBrand.Discover,
+                CardNumberFixtures.DINERS_CLUB_14_NO_SPACES to CardBrand.DinersClub
+            ).all { (cardNumber, cardBrand) ->
+                val token = defaultStripe.createCardTokenSynchronous(
+                    CardParamsFixtures.DEFAULT.copy(
+                        number = cardNumber
+                    )
+                )
+                token?.card?.brand == cardBrand
+            }
+        ).isTrue()
+    }
+
     private fun createStripeWithTestScope(
         publishableKey: String = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     ): Stripe {
@@ -196,7 +221,7 @@ class StripeEndToEndTest {
                 stripeRepository
             ),
             publishableKey = publishableKey,
-            workScope = testScope
+            workDispatcher = testDispatcher
         )
     }
 }

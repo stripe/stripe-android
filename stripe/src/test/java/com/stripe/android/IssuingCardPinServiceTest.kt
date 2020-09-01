@@ -6,10 +6,10 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.testharness.TestEphemeralKeyProvider
-import kotlin.test.Test
 import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
 
 /**
  * Test class for [IssuingCardPinService].
@@ -24,7 +24,7 @@ class IssuingCardPinServiceTest {
         ApplicationProvider.getApplicationContext(),
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
         stripeApiRequestExecutor = stripeApiRequestExecutor,
-        analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
+        analyticsRequestExecutor = {}
     )
     private val service = IssuingCardPinService(
         TestEphemeralKeyProvider().also {
@@ -48,11 +48,13 @@ class IssuingCardPinServiceTest {
 
         whenever(
             stripeApiRequestExecutor.execute(
-                argThat(ApiRequestMatcher(
-                    StripeRequest.Method.GET,
-                    "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin?verification%5Bone_time_code%5D=123-456&verification%5Bid%5D=iv_abcd",
-                    ApiRequest.Options("ek_test_123")
-                ))
+                argThat(
+                    ApiRequestMatcher(
+                        StripeRequest.Method.GET,
+                        "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin?verification%5Bone_time_code%5D=123-456&verification%5Bid%5D=iv_abcd",
+                        ApiRequest.Options("ek_test_123")
+                    )
+                )
             )
         ).thenReturn(response)
 
@@ -60,7 +62,8 @@ class IssuingCardPinServiceTest {
             "ic_abcdef",
             "iv_abcd",
             "123-456",
-            retrievalListener)
+            retrievalListener
+        )
 
         verify(retrievalListener)
             .onIssuingCardPinRetrieved("1234")
@@ -80,11 +83,13 @@ class IssuingCardPinServiceTest {
 
         whenever(
             stripeApiRequestExecutor.execute(
-                argThat(ApiRequestMatcher(
-                    StripeRequest.Method.POST,
-                    "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin",
-                    ApiRequest.Options("ek_test_123")
-                ))
+                argThat(
+                    ApiRequestMatcher(
+                        StripeRequest.Method.POST,
+                        "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin",
+                        ApiRequest.Options("ek_test_123")
+                    )
+                )
             )
         ).thenReturn(response)
 
@@ -117,11 +122,13 @@ class IssuingCardPinServiceTest {
 
         whenever(
             stripeApiRequestExecutor.execute(
-                argThat(ApiRequestMatcher(
-                    StripeRequest.Method.GET,
-                    "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin?verification%5Bone_time_code%5D=123-456&verification%5Bid%5D=iv_abcd",
-                    ApiRequest.Options("ek_test_123")
-                ))
+                argThat(
+                    ApiRequestMatcher(
+                        StripeRequest.Method.GET,
+                        "https://api.stripe.com/v1/issuing/cards/ic_abcdef/pin?verification%5Bone_time_code%5D=123-456&verification%5Bid%5D=iv_abcd",
+                        ApiRequest.Options("ek_test_123")
+                    )
+                )
             )
         ).thenReturn(response)
 

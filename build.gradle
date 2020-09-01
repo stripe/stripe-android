@@ -9,7 +9,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.0'
+        classpath 'com.android.tools.build:gradle:4.0.1'
         classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:1.0.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion"
@@ -48,10 +48,10 @@ ext {
 
     kotlinCoroutinesVersion = '1.3.9'
     androidLifecycleVersion = '2.2.0'
-    espressoVersion = '3.2.0'
-    ktlintVersion = '0.36.0'
+    espressoVersion = '3.3.0'
+    ktlintVersion = '0.38.1'
 
-    androidTestVersion = '1.2.0'
+    androidTestVersion = '1.3.0'
 }
 
 if (JavaVersion.current().isJava8Compatible()) {

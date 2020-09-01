@@ -13,9 +13,9 @@ import com.stripe.android.PaymentSession
 import com.stripe.android.exception.APIException
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import kotlin.test.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentMethodsViewModelTest {
@@ -69,7 +69,9 @@ class PaymentMethodsViewModelTest {
         )
 
         listenerArgumentCaptor.firstValue.onError(
-            404, "error!", null
+            404,
+            "error!",
+            null
         )
 
         assertThat(throwable)

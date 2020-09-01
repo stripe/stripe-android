@@ -1,10 +1,10 @@
 package com.stripe.android.model
 
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
-import java.util.regex.Pattern
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.parcel.RawValue
 import org.json.JSONObject
+import java.util.regex.Pattern
 
 /**
  * A PaymentIntent tracks the process of collecting a payment from your customer.

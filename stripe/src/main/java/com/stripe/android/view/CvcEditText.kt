@@ -59,14 +59,16 @@ class CvcEditText @JvmOverloads constructor(
             setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE)
         }
 
-        addTextChangedListener(object : StripeTextWatcher() {
-            override fun afterTextChanged(s: Editable?) {
-                shouldShowError = false
-                if (cardBrand.isMaxCvc(rawCvcValue)) {
-                    completionCallback()
+        addTextChangedListener(
+            object : StripeTextWatcher() {
+                override fun afterTextChanged(s: Editable?) {
+                    shouldShowError = false
+                    if (cardBrand.isMaxCvc(rawCvcValue)) {
+                        completionCallback()
+                    }
                 }
             }
-        })
+        )
     }
 
     override val accessibilityText: String?

@@ -1,9 +1,9 @@
 package com.stripe.android.model
 
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
+import org.json.JSONObject
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
-import org.json.JSONObject
 
 internal object PaymentMethodFixtures {
     val CARD = PaymentMethod.Card(
@@ -163,7 +163,7 @@ internal object PaymentMethodFixtures {
                     }
                 }
             }
-            """.trimIndent()
+        """.trimIndent()
     )
 
     internal val CARD_WITH_NETWORKS_JSON = JSONObject(
@@ -244,7 +244,7 @@ internal object PaymentMethodFixtures {
                     "bic": "bank id"
                 }
             }
-            """.trimIndent()
+        """.trimIndent()
     )
 
     val FPX_JSON = JSONObject(
@@ -275,7 +275,7 @@ internal object PaymentMethodFixtures {
                 "metadata": null,
                 "type": "fpx"
             }
-            """.trimIndent()
+        """.trimIndent()
     )
 
     val AU_BECS_DEBIT_JSON = JSONObject(

@@ -2,12 +2,12 @@ package com.stripe.android
 
 import android.os.Build
 import com.google.common.truth.Truth.assertThat
-import java.util.Locale
-import java.util.UUID
-import kotlin.test.Test
 import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.Locale
+import java.util.UUID
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class ApiRequestHeadersFactoryTest {
@@ -80,16 +80,18 @@ class ApiRequestHeadersFactoryTest {
             ?: error("Invalid JSON in `${ApiRequest.HEADER_STRIPE_CLIENT_USER_AGENT}`")
         val stripeClientUserAgentData = JSONObject(stripeClientUserAgent)
         assertThat(JSONObject(stripeClientUserAgentData.getString("application")).toString())
-            .isEqualTo(JSONObject(
-            """
+            .isEqualTo(
+                JSONObject(
+                    """
             {
                 "name": "MyAwesomePlugin",
                 "version": "1.2.34",
                 "url": "https:\/\/myawesomeplugin.info",
                 "partner_id": "pp_partner_1234"
             }
-            """.trimIndent()
-        ).toString())
+                    """.trimIndent()
+                ).toString()
+            )
     }
 
     private fun createHeaders(

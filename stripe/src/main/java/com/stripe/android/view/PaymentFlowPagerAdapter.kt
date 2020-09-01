@@ -67,7 +67,9 @@ internal class PaymentFlowPagerAdapter(
         when (viewHolder) {
             is PaymentFlowViewHolder.ShippingInformationViewHolder -> {
                 viewHolder.bind(
-                    paymentSessionConfig, shippingInformation, allowedShippingCountryCodes
+                    paymentSessionConfig,
+                    shippingInformation,
+                    allowedShippingCountryCodes
                 )
             }
             is PaymentFlowViewHolder.ShippingMethodViewHolder -> {

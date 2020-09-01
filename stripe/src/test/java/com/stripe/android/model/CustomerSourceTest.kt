@@ -2,12 +2,11 @@ package com.stripe.android.model
 
 import com.stripe.android.model.SourceFixtures.CUSTOMER_SOURCE_CARD
 import com.stripe.android.model.parsers.CustomerSourceJsonParser
+import org.json.JSONObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import org.json.JSONException
-import org.json.JSONObject
 
 /**
  * Test class for [CustomerSource] model class.
@@ -42,7 +41,6 @@ class CustomerSourceTest {
     }
 
     @Test
-    @Throws(JSONException::class)
     fun getSourceType_whenCard_returnsCard() {
         val sourceData = parse(CardFixtures.CARD_USD_JSON)
         assertNotNull(sourceData)

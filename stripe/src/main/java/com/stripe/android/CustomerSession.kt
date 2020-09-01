@@ -11,13 +11,13 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.Source
 import com.stripe.android.model.Source.SourceType
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.cancelChildren
 import java.util.Calendar
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.cancelChildren
 
 /**
  * Represents a logged-in session of a single Customer.
@@ -55,65 +55,67 @@ class CustomerSession @VisibleForTesting internal constructor(
     )
 
     private fun createHandler(): Handler {
-        return CustomerSessionHandler(object : CustomerSessionHandler.Listener {
-            override fun onCustomerRetrieved(
-                customer: Customer?,
-                operationId: String
-            ) {
-                this@CustomerSession.customer = customer
-                customerCacheTime = timeSupplier()
-                val listener: CustomerRetrievalListener? = getListener(operationId)
-                if (customer != null) {
-                    listener?.onCustomerRetrieved(customer)
+        return CustomerSessionHandler(
+            object : CustomerSessionHandler.Listener {
+                override fun onCustomerRetrieved(
+                    customer: Customer?,
+                    operationId: String
+                ) {
+                    this@CustomerSession.customer = customer
+                    customerCacheTime = timeSupplier()
+                    val listener: CustomerRetrievalListener? = getListener(operationId)
+                    if (customer != null) {
+                        listener?.onCustomerRetrieved(customer)
+                    }
+                }
+
+                override fun onSourceRetrieved(
+                    source: Source?,
+                    operationId: String
+                ) {
+                    val listener: SourceRetrievalListener? = getListener(operationId)
+                    if (source != null) {
+                        listener?.onSourceRetrieved(source)
+                    }
+                }
+
+                override fun onPaymentMethodRetrieved(
+                    paymentMethod: PaymentMethod?,
+                    operationId: String
+                ) {
+                    val listener: PaymentMethodRetrievalListener? = getListener(operationId)
+                    if (paymentMethod != null) {
+                        listener?.onPaymentMethodRetrieved(paymentMethod)
+                    }
+                }
+
+                override fun onPaymentMethodsRetrieved(
+                    paymentMethods: List<PaymentMethod>,
+                    operationId: String
+                ) {
+                    val listener: PaymentMethodsRetrievalListener? = getListener(operationId)
+                    listener?.onPaymentMethodsRetrieved(paymentMethods)
+                }
+
+                override fun onCustomerShippingInfoSaved(
+                    customer: Customer?,
+                    operationId: String
+                ) {
+                    this@CustomerSession.customer = customer
+                    val listener: CustomerRetrievalListener? = getListener(operationId)
+                    if (customer != null) {
+                        listener?.onCustomerRetrieved(customer)
+                    }
+                }
+
+                override fun onError(
+                    exception: StripeException,
+                    operationId: String
+                ) {
+                    handleRetrievalError(operationId, exception)
                 }
             }
-
-            override fun onSourceRetrieved(
-                source: Source?,
-                operationId: String
-            ) {
-                val listener: SourceRetrievalListener? = getListener(operationId)
-                if (source != null) {
-                    listener?.onSourceRetrieved(source)
-                }
-            }
-
-            override fun onPaymentMethodRetrieved(
-                paymentMethod: PaymentMethod?,
-                operationId: String
-            ) {
-                val listener: PaymentMethodRetrievalListener? = getListener(operationId)
-                if (paymentMethod != null) {
-                    listener?.onPaymentMethodRetrieved(paymentMethod)
-                }
-            }
-
-            override fun onPaymentMethodsRetrieved(
-                paymentMethods: List<PaymentMethod>,
-                operationId: String
-            ) {
-                val listener: PaymentMethodsRetrievalListener? = getListener(operationId)
-                listener?.onPaymentMethodsRetrieved(paymentMethods)
-            }
-
-            override fun onCustomerShippingInfoSaved(
-                customer: Customer?,
-                operationId: String
-            ) {
-                this@CustomerSession.customer = customer
-                val listener: CustomerRetrievalListener? = getListener(operationId)
-                if (customer != null) {
-                    listener?.onCustomerRetrieved(customer)
-                }
-            }
-
-            override fun onError(
-                exception: StripeException,
-                operationId: String
-            ) {
-                handleRetrievalError(operationId, exception)
-            }
-        })
+        )
     }
 
     /**

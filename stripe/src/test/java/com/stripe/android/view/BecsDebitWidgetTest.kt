@@ -9,11 +9,11 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 internal class BecsDebitWidgetTest {
@@ -37,24 +37,20 @@ internal class BecsDebitWidgetTest {
     @BeforeTest
     fun setup() {
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-        activityScenarioFactory.create<AddPaymentMethodActivity>(
-            AddPaymentMethodActivityStarter.Args.Builder()
-                .setPaymentMethodType(PaymentMethod.Type.Card)
-                .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
-                .setBillingAddressFields(BillingAddressFields.PostalCode)
-                .build()
-        ).use { activityScenario ->
-            activityScenario.onActivity { activity ->
-                activity.findViewById<ViewGroup>(R.id.add_payment_method_card).let { root ->
-                    root.removeAllViews()
-                    becsDebitWidget = BecsDebitWidget(
-                        activity,
-                        companyName = COMPANY_NAME
-                    )
-                    root.addView(becsDebitWidget)
+        activityScenarioFactory
+            .createAddPaymentMethodActivity()
+            .use { activityScenario ->
+                activityScenario.onActivity { activity ->
+                    activity.findViewById<ViewGroup>(R.id.add_payment_method_card).let { root ->
+                        root.removeAllViews()
+                        becsDebitWidget = BecsDebitWidget(
+                            activity,
+                            companyName = COMPANY_NAME
+                        )
+                        root.addView(becsDebitWidget)
+                    }
                 }
             }
-        }
     }
 
     @Test

@@ -3,9 +3,9 @@ package com.stripe.android.model.parsers
 import com.stripe.android.model.StripeJsonUtils
 import com.stripe.android.model.Token
 import com.stripe.android.model.Token.Type
+import org.json.JSONObject
 import java.util.Date
 import java.util.concurrent.TimeUnit
-import org.json.JSONObject
 
 internal class TokenJsonParser : ModelJsonParser<Token> {
     override fun parse(json: JSONObject): Token? {

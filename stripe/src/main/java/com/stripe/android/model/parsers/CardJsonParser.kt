@@ -1,7 +1,6 @@
 package com.stripe.android.model.parsers
 
 import com.stripe.android.model.Card
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardFunding
 import com.stripe.android.model.StripeJsonUtils
 import com.stripe.android.model.TokenizationMethod
@@ -33,7 +32,7 @@ internal class CardJsonParser : ModelJsonParser<Card> {
             addressState = StripeJsonUtils.optString(json, FIELD_ADDRESS_STATE),
             addressZip = StripeJsonUtils.optString(json, FIELD_ADDRESS_ZIP),
             addressZipCheck = StripeJsonUtils.optString(json, FIELD_ADDRESS_ZIP_CHECK),
-            brand = CardBrand.fromCode(StripeJsonUtils.optString(json, FIELD_BRAND)),
+            brand = Card.getCardBrand(StripeJsonUtils.optString(json, FIELD_BRAND)),
             country = StripeJsonUtils.optCountryCode(json, FIELD_COUNTRY),
             customerId = StripeJsonUtils.optString(json, FIELD_CUSTOMER),
             currency = StripeJsonUtils.optCurrency(json, FIELD_CURRENCY),

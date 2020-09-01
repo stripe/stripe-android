@@ -5,9 +5,9 @@ import androidx.annotation.Size
 import com.stripe.android.CardUtils
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.parsers.CardJsonParser
-import java.util.Calendar
 import kotlinx.android.parcel.Parcelize
 import org.json.JSONObject
+import java.util.Calendar
 
 /**
  * A representation of a [Card API object](https://stripe.com/docs/api/cards/object).
@@ -198,6 +198,7 @@ data class Card internal constructor(
     val metadata: Map<String, String>? = null
 ) : StripeModel, StripePaymentSource, TokenParams(Token.Type.Card, loggingTokens) {
 
+    @Deprecated("Use PaymentMethodCreateParams#createCard()")
     fun toPaymentMethodsParams(): PaymentMethodCreateParams {
         return PaymentMethodCreateParams.create(
             card = toPaymentMethodParamsCard(),
@@ -218,6 +219,7 @@ data class Card internal constructor(
     /**
      * Use [toPaymentMethodsParams] to include Billing Details
      */
+    @Deprecated("Use PaymentMethodCreateParams#createCard()")
     fun toPaymentMethodParamsCard(): PaymentMethodCreateParams.Card {
         return PaymentMethodCreateParams.Card(
             number = number,
@@ -582,6 +584,23 @@ data class Card internal constructor(
         ): Card {
             return Builder(number, expMonth, expYear, cvc)
                 .build()
+        }
+
+        /**
+         * See https://stripe.com/docs/api/cards/object#card_object-brand for valid values.
+         */
+        @JvmSynthetic
+        internal fun getCardBrand(brandName: String?): CardBrand {
+            return when (brandName) {
+                "American Express" -> CardBrand.AmericanExpress
+                "Diners Club" -> CardBrand.DinersClub
+                "Discover" -> CardBrand.Discover
+                "JCB" -> CardBrand.JCB
+                "MasterCard" -> CardBrand.MasterCard
+                "UnionPay" -> CardBrand.UnionPay
+                "Visa" -> CardBrand.Visa
+                else -> CardBrand.Unknown
+            }
         }
     }
 }

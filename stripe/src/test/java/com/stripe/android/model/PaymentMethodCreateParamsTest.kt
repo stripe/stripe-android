@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.CardNumberFixtures
 import com.stripe.android.view.AddPaymentMethodActivity
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -24,10 +25,14 @@ class PaymentMethodCreateParamsTest {
     fun createFromGooglePay_withNoBillingAddress() {
         assertThat(
             PaymentMethodCreateParams.createFromGooglePay(
-                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS)
+                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS
+            )
         ).isEqualTo(
             PaymentMethodCreateParams.create(
-                PaymentMethodCreateParams.Card.create("tok_1F4ACMCRMbs6FrXf6fPqLnN7"),
+                PaymentMethodCreateParams.Card(
+                    token = "tok_1F4ACMCRMbs6FrXf6fPqLnN7",
+                    attribution = setOf("GooglePay")
+                ),
                 PaymentMethod.BillingDetails.Builder()
                     .build()
             )
@@ -38,10 +43,14 @@ class PaymentMethodCreateParamsTest {
     fun createFromGooglePay_withFullBillingAddress() {
         assertThat(
             PaymentMethodCreateParams.createFromGooglePay(
-                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS)
+                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS
+            )
         ).isEqualTo(
             PaymentMethodCreateParams.create(
-                PaymentMethodCreateParams.Card.create("tok_1F4VSjBbvEcIpqUbSsbEtBap"),
+                PaymentMethodCreateParams.Card(
+                    token = "tok_1F4VSjBbvEcIpqUbSsbEtBap",
+                    attribution = setOf("GooglePay")
+                ),
                 PaymentMethod.BillingDetails(
                     phone = "1-888-555-1234",
                     email = "stripe@example.com",
@@ -180,6 +189,32 @@ class PaymentMethodCreateParamsTest {
                 "CardMultilineWidget",
                 AddPaymentMethodActivity.PRODUCT_TOKEN
             )
+    }
+
+    @Test
+    fun `createCard() with CardParams returns expected PaymentMethodCreateParams`() {
+        val cardParams = CardParamsFixtures.DEFAULT
+            .copy(loggingTokens = setOf("CardInputView"))
+
+        assertThat(
+            PaymentMethodCreateParams.createCard(cardParams)
+        ).isEqualTo(
+            PaymentMethodCreateParams(
+                type = PaymentMethodCreateParams.Type.Card,
+                card = PaymentMethodCreateParams.Card(
+                    number = CardNumberFixtures.VISA_NO_SPACES,
+                    expiryMonth = 12,
+                    expiryYear = 2025,
+                    cvc = "123",
+                    attribution = setOf("CardInputView")
+                ),
+                billingDetails = PaymentMethod.BillingDetails(
+                    name = cardParams.name,
+                    address = cardParams.address
+                ),
+                metadata = mapOf("fruit" to "orange")
+            )
+        )
     }
 
     private fun createFpx(): PaymentMethodCreateParams {

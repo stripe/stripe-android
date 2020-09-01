@@ -34,11 +34,11 @@ import com.stripe.android.stripe3ds2.transaction.Transaction
 import com.stripe.android.stripe3ds2.views.ChallengeProgressActivity
 import com.stripe.android.view.AuthActivityStarter
 import com.stripe.android.view.Stripe3ds2CompletionActivity
-import java.security.cert.CertificateException
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.security.cert.CertificateException
+import java.util.concurrent.TimeUnit
 
 /**
  * A controller responsible for confirming and authenticating payment (typically through resolving
@@ -86,7 +86,10 @@ internal class StripePaymentController internal constructor(
             confirmStripeIntentParams,
             requestOptions,
             ConfirmStripeIntentCallback(
-                host, requestOptions, this, getRequestCode(confirmStripeIntentParams)
+                host,
+                requestOptions,
+                this,
+                getRequestCode(confirmStripeIntentParams)
             )
         )
     }
@@ -97,7 +100,11 @@ internal class StripePaymentController internal constructor(
         callback: ApiResultCallback<StripeIntent>
     ) {
         ConfirmStripeIntentTask(
-            stripeRepository, confirmStripeIntentParams, requestOptions, workScope, callback
+            stripeRepository,
+            confirmStripeIntentParams,
+            requestOptions,
+            workScope,
+            callback
         ).execute()
     }
 
@@ -171,13 +178,15 @@ internal class StripePaymentController internal constructor(
             PaymentAuthWebViewStarter(
                 host,
                 SOURCE_REQUEST_CODE
-            ).start(PaymentAuthWebViewStarter.Args(
-                clientSecret = source.clientSecret.orEmpty(),
-                url = source.redirect?.url.orEmpty(),
-                returnUrl = source.redirect?.returnUrl,
-                enableLogging = enableLogging,
-                stripeAccountId = requestOptions.stripeAccount
-            ))
+            ).start(
+                PaymentAuthWebViewStarter.Args(
+                    clientSecret = source.clientSecret.orEmpty(),
+                    url = source.redirect?.url.orEmpty(),
+                    returnUrl = source.redirect?.returnUrl,
+                    enableLogging = enableLogging,
+                    stripeAccountId = requestOptions.stripeAccount
+                )
+            )
         } else {
             bypassAuth(host, source, requestOptions.stripeAccount)
         }
@@ -235,7 +244,11 @@ internal class StripePaymentController internal constructor(
             requestOptions,
             expandFields = EXPAND_PAYMENT_METHOD,
             callback = createPaymentIntentCallback(
-                requestOptions, flowOutcome, sourceId, shouldCancelSource, callback
+                requestOptions,
+                flowOutcome,
+                sourceId,
+                shouldCancelSource,
+                callback
             )
         )
     }
@@ -274,7 +287,11 @@ internal class StripePaymentController internal constructor(
             requestOptions,
             expandFields = EXPAND_PAYMENT_METHOD,
             callback = createSetupIntentCallback(
-                requestOptions, flowOutcome, sourceId, shouldCancelSource, callback
+                requestOptions,
+                flowOutcome,
+                sourceId,
+                shouldCancelSource,
+                callback
             )
         )
     }
@@ -352,9 +369,11 @@ internal class StripePaymentController internal constructor(
     ) : ApiOperation<AlipayAuthResult>(callback = callback) {
         override suspend fun getResult(): AlipayAuthResult {
             if (intent.paymentMethod?.liveMode == false) {
-                throw IllegalArgumentException("Attempted to authenticate test mode " +
-                    "PaymentIntent with the Alipay SDK.\n" +
-                    "The Alipay SDK does not support test mode payments.")
+                throw IllegalArgumentException(
+                    "Attempted to authenticate test mode " +
+                        "PaymentIntent with the Alipay SDK.\n" +
+                        "The Alipay SDK does not support test mode payments."
+                )
             }
 
             val nextActionData = intent.nextActionData
@@ -421,9 +440,11 @@ internal class StripePaymentController internal constructor(
                         )
                     }
                 } else {
-                    callback.onError(IllegalArgumentException(
-                        "Expected a PaymentIntent, received a ${result.javaClass.simpleName}"
-                    ))
+                    callback.onError(
+                        IllegalArgumentException(
+                            "Expected a PaymentIntent, received a ${result.javaClass.simpleName}"
+                        )
+                    )
                 }
             }
 
@@ -464,9 +485,11 @@ internal class StripePaymentController internal constructor(
                         )
                     }
                 } else {
-                    resultCallback.onError(IllegalArgumentException(
-                        "Expected a SetupIntent, received a ${result.javaClass.simpleName}"
-                    ))
+                    resultCallback.onError(
+                        IllegalArgumentException(
+                            "Expected a SetupIntent, received a ${result.javaClass.simpleName}"
+                        )
+                    )
                 }
             }
 
@@ -802,18 +825,23 @@ internal class StripePaymentController internal constructor(
                     "Invalid 3DS2 authentication response"
                 }
 
-                onError(RuntimeException(
-                    "Error encountered during 3DS2 authentication request. $errorMessage"))
+                onError(
+                    RuntimeException(
+                        "Error encountered during 3DS2 authentication request. $errorMessage"
+                    )
+                )
             }
         }
 
         override fun onError(e: Exception) {
-            paymentRelayStarter.start(PaymentRelayStarter.Args.create(
-                when (e) {
-                    is StripeException -> e
-                    else -> APIException(e)
-                }
-            ))
+            paymentRelayStarter.start(
+                PaymentRelayStarter.Args.create(
+                    when (e) {
+                        is StripeException -> e
+                        else -> APIException(e)
+                    }
+                )
+            )
         }
 
         private fun startFrictionlessFlow() {
@@ -843,23 +871,25 @@ internal class StripePaymentController internal constructor(
             }
 
             host?.let {
-                challengeFlowStarter.start(Runnable {
-                    transaction.doChallenge(
-                        it,
-                        challengeParameters,
-                        PaymentAuth3ds2ChallengeStatusReceiver.create(
-                            stripeRepository,
-                            stripeIntent,
-                            sourceId,
-                            requestOptions,
-                            analyticsRequestExecutor,
-                            analyticsDataFactory,
-                            transaction,
-                            analyticsRequestFactory
-                        ),
-                        maxTimeout
-                    )
-                })
+                challengeFlowStarter.start(
+                    Runnable {
+                        transaction.doChallenge(
+                            it,
+                            challengeParameters,
+                            PaymentAuth3ds2ChallengeStatusReceiver.create(
+                                stripeRepository,
+                                stripeIntent,
+                                sourceId,
+                                requestOptions,
+                                analyticsRequestExecutor,
+                                analyticsDataFactory,
+                                transaction,
+                                analyticsRequestFactory
+                            ),
+                            maxTimeout
+                        )
+                    }
+                )
             }
         }
     }
@@ -1025,10 +1055,13 @@ internal class StripePaymentController internal constructor(
                 // create Handler to notifyCompletion challenge flow on background thread
                 val handler = createHandler(handlerThread)
 
-                handler.postDelayed({
-                    runnable.run()
-                    handlerThread.quitSafely()
-                }, TimeUnit.SECONDS.toMillis(DELAY_SECONDS))
+                handler.postDelayed(
+                    {
+                        runnable.run()
+                        handlerThread.quitSafely()
+                    },
+                    TimeUnit.SECONDS.toMillis(DELAY_SECONDS)
+                )
             }
 
             private companion object {
@@ -1121,9 +1154,15 @@ internal class StripePaymentController internal constructor(
             Logger.getInstance(enableLogging).debug("PaymentAuthWebViewStarter#start()")
             val starter = PaymentAuthWebViewStarter(host, requestCode)
             starter.start(
-                PaymentAuthWebViewStarter.Args(clientSecret, authUrl, returnUrl, enableLogging,
-                    stripeAccountId = stripeAccount, shouldCancelSource = shouldCancelSource,
-                    shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation)
+                PaymentAuthWebViewStarter.Args(
+                    clientSecret,
+                    authUrl,
+                    returnUrl,
+                    enableLogging,
+                    stripeAccountId = stripeAccount,
+                    shouldCancelSource = shouldCancelSource,
+                    shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation
+                )
             )
         }
 
@@ -1133,12 +1172,14 @@ internal class StripePaymentController internal constructor(
             exception: Exception
         ) {
             PaymentRelayStarter.create(host, requestCode)
-                .start(PaymentRelayStarter.Args.create(
-                    when (exception) {
-                        is StripeException -> exception
-                        else -> APIException(exception)
-                    }
-                ))
+                .start(
+                    PaymentRelayStarter.Args.create(
+                        when (exception) {
+                            is StripeException -> exception
+                            else -> APIException(exception)
+                        }
+                    )
+                )
         }
 
         @JvmStatic

@@ -48,10 +48,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
-import kotlinx.coroutines.CoroutineScope;
+import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.test.TestCoroutineDispatcher;
 
+import static android.os.Looper.getMainLooper;
 import static com.google.common.truth.Truth.assertThat;
-import static kotlinx.coroutines.CoroutineScopeKt.MainScope;
+import static com.stripe.android.utils.TestUtils.idleLooper;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -60,6 +62,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
+import static org.robolectric.Shadows.shadowOf;
 
 /**
  * Run integration tests on Stripe.
@@ -94,9 +97,11 @@ public class StripeTest {
     @Captor
     private ArgumentCaptor<StripeFile> stripeFileArgumentCaptor;
 
+    private final CoroutineDispatcher testDispatcher = new TestCoroutineDispatcher();
+
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
@@ -135,8 +140,10 @@ public class StripeTest {
 
     @Test
     public void createCardTokenShouldCreateRealToken() {
-        final Stripe stripe = createStripe(MainScope());
+        final Stripe stripe = createStripe(testDispatcher);
         stripe.createCardToken(CARD_PARAMS, tokenCallback);
+        idleLooper();
+
         verify(tokenCallback).onSuccess(tokenArgumentCaptor.capture());
         final Token token = tokenArgumentCaptor.getValue();
         final String tokenId = token.getId();
@@ -780,12 +787,14 @@ public class StripeTest {
     public void retrieveSourceAsync_withValidData_passesIntegrationTest() throws StripeException {
         final Source source = createSource();
 
-        final Stripe stripe = createStripe(MainScope());
+        final Stripe stripe = createStripe(testDispatcher);
         stripe.retrieveSource(
                 Objects.requireNonNull(source.getId()),
                 Objects.requireNonNull(source.getClientSecret()),
                 sourceCallback
         );
+        idle();
+
         verify(sourceCallback).onSuccess(sourceArgumentCaptor.capture());
 
         final Source capturedSource = sourceArgumentCaptor.getValue();
@@ -881,8 +890,10 @@ public class StripeTest {
 
     @Test
     public void testCreatePersonToken() {
-        final Stripe stripe = createStripe(MainScope());
+        final Stripe stripe = createStripe(testDispatcher);
         stripe.createPersonToken(PersonTokenParamsFixtures.PARAMS, tokenCallback);
+        idle();
+
         verify(tokenCallback).onSuccess(tokenArgumentCaptor.capture());
         final Token token = tokenArgumentCaptor.getValue();
         assertEquals(Token.Type.Person, Objects.requireNonNull(token).getType());
@@ -1196,7 +1207,7 @@ public class StripeTest {
     @Test
     public void createFile_shouldCreateFile() {
         final File file = new FileFactory(context).create();
-        final Stripe stripe = createStripe(MainScope());
+        final Stripe stripe = createStripe(testDispatcher);
         stripe.createFile(
                 new StripeFileParams(
                         file,
@@ -1204,6 +1215,8 @@ public class StripeTest {
                 ),
                 stripeFileCallback
         );
+        idle();
+
         verify(stripeFileCallback).onSuccess(stripeFileArgumentCaptor.capture());
 
         final StripeFile stripeFile = stripeFileArgumentCaptor.getValue();
@@ -1312,7 +1325,7 @@ public class StripeTest {
     }
 
     @NonNull
-    private Stripe createStripe(@NonNull CoroutineScope workScope) {
+    private Stripe createStripe(@NonNull CoroutineDispatcher workDispatcher) {
         final StripeRepository stripeRepository = createStripeRepository(
                 ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
                 new FakeAnalyticsRequestExecutor(),
@@ -1327,7 +1340,7 @@ public class StripeTest {
                 ),
                 ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
                 null,
-                workScope
+                workDispatcher
         );
     }
 
@@ -1346,5 +1359,9 @@ public class StripeTest {
                 analyticsRequestExecutor,
                 fingerprintDataRepository
         );
+    }
+
+    private void idle() {
+        shadowOf(getMainLooper()).idle();
     }
 }

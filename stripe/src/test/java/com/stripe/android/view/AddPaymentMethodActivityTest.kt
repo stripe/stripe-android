@@ -22,31 +22,31 @@ import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentSession
 import com.stripe.android.R
-import com.stripe.android.exception.APIConnectionException
-import com.stripe.android.exception.APIException
-import com.stripe.android.exception.AuthenticationException
-import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import org.junit.runner.RunWith
+import org.mockito.Mockito.never
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
+import org.robolectric.shadows.ShadowAlertDialog
 import java.util.Calendar
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.runner.RunWith
-import org.mockito.Mockito.never
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.Shadows.shadowOf
-import org.robolectric.shadows.ShadowAlertDialog
 
 /**
  * Test class for [AddPaymentMethodActivity].
  */
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class AddPaymentMethodActivityTest {
+    private val testDispatcher = TestCoroutineDispatcher()
 
     private val customerSession: CustomerSession = mock()
     private val viewModel: AddPaymentMethodViewModel = mock()
@@ -79,7 +79,7 @@ class AddPaymentMethodActivityTest {
                 val cardMultilineWidget: CardMultilineWidget =
                     it.findViewById(R.id.card_multiline_widget)
                 val widgetControlGroup =
-                    CardMultilineWidgetTest.WidgetControlGroup(cardMultilineWidget)
+                    CardMultilineWidgetTest.WidgetControlGroup(cardMultilineWidget, testDispatcher)
                 assertEquals(View.VISIBLE, widgetControlGroup.postalCodeInputLayout.visibility)
             }
         }
@@ -94,15 +94,13 @@ class AddPaymentMethodActivityTest {
                 val cardMultilineWidget: CardMultilineWidget =
                     activity.findViewById(R.id.card_multiline_widget)
                 val widgetControlGroup =
-                    CardMultilineWidgetTest.WidgetControlGroup(cardMultilineWidget)
+                    CardMultilineWidgetTest.WidgetControlGroup(cardMultilineWidget, testDispatcher)
                 assertEquals(View.VISIBLE, widgetControlGroup.postalCodeInputLayout.visibility)
             }
         }
     }
 
     @Test
-    @Throws(APIException::class, AuthenticationException::class, InvalidRequestException::class,
-        APIConnectionException::class)
     fun softEnterKey_whenDataIsNotValid_doesNotHideKeyboardAndDoesNotFinish() {
         activityScenarioFactory.create<AddPaymentMethodActivity>(
             BASE_CARD_ARGS
@@ -128,7 +126,8 @@ class AddPaymentMethodActivityTest {
                 whenever(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
                     .thenReturn(createSuccessLiveData(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
                 activity.createPaymentMethod(
-                    viewModel, PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+                    viewModel,
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD
                 )
                 verifyFinishesWithResult(activityScenario.result)
             }
@@ -289,7 +288,8 @@ class AddPaymentMethodActivityTest {
                 whenever(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
                     .thenReturn(createErrorLiveData())
                 activity.createPaymentMethod(
-                    viewModel, PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+                    viewModel,
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD
                 )
 
                 val result = AddPaymentMethodActivityStarter.Result.fromIntent(

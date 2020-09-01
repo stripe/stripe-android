@@ -17,12 +17,12 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.AuthActivityStarter
-import java.lang.RuntimeException
-import kotlin.test.Test
-import kotlin.test.assertEquals
 import org.junit.runner.RunWith
 import org.mockito.Mockito.`when`
 import org.robolectric.RobolectricTestRunner
+import java.lang.RuntimeException
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
 class StripePaymentAuthTest {
@@ -40,7 +40,8 @@ class StripePaymentAuthTest {
         val confirmPaymentIntentParams = ConfirmPaymentIntentParams.createWithPaymentMethodId(
             "pm_card_threeDSecure2Required",
             "client_secret",
-            "yourapp://post-authentication-return-url")
+            "yourapp://post-authentication-return-url"
+        )
         stripe.confirmPayment(activity, confirmPaymentIntentParams)
         verify(paymentController).startConfirmAndAuth(
             hostArgumentCaptor.capture(),
@@ -56,7 +57,8 @@ class StripePaymentAuthTest {
         val confirmSetupIntentParams = ConfirmSetupIntentParams.create(
             "pm_card_threeDSecure2Required",
             "client_secret",
-            "yourapp://post-authentication-return-url")
+            "yourapp://post-authentication-return-url"
+        )
         stripe.confirmSetupIntent(activity, confirmSetupIntentParams)
         verify(paymentController).startConfirmAndAuth(
             hostArgumentCaptor.capture(),
@@ -97,12 +99,19 @@ class StripePaymentAuthTest {
     @Test
     fun onPaymentResult_whenShouldHandleResultIsTrue_shouldCallHandleResult() {
         val data = Intent()
-        `when`(paymentController.shouldHandlePaymentResult(
-            StripePaymentController.PAYMENT_REQUEST_CODE, data))
+        `when`(
+            paymentController.shouldHandlePaymentResult(
+                StripePaymentController.PAYMENT_REQUEST_CODE,
+                data
+            )
+        )
             .thenReturn(true)
         val stripe = createStripe()
-        stripe.onPaymentResult(StripePaymentController.PAYMENT_REQUEST_CODE, data,
-            callback = paymentCallback)
+        stripe.onPaymentResult(
+            StripePaymentController.PAYMENT_REQUEST_CODE,
+            data,
+            callback = paymentCallback
+        )
 
         verify(paymentController).handlePaymentResult(data, paymentCallback)
     }
@@ -110,12 +119,19 @@ class StripePaymentAuthTest {
     @Test
     fun onSetupResult_whenShouldHandleResultIsTrue_shouldCallHandleResult() {
         val data = Intent()
-        `when`(paymentController.shouldHandleSetupResult(
-            StripePaymentController.SETUP_REQUEST_CODE, data))
+        `when`(
+            paymentController.shouldHandleSetupResult(
+                StripePaymentController.SETUP_REQUEST_CODE,
+                data
+            )
+        )
             .thenReturn(true)
         val stripe = createStripe()
-        stripe.onSetupResult(StripePaymentController.SETUP_REQUEST_CODE, data,
-            callback = setupCallback)
+        stripe.onSetupResult(
+            StripePaymentController.SETUP_REQUEST_CODE,
+            data,
+            callback = setupCallback
+        )
 
         verify(paymentController).handleSetupResult(data, setupCallback)
     }
@@ -126,7 +142,8 @@ class StripePaymentAuthTest {
 
         val stripe = createStripe()
         val confirmPaymentIntentParams = ConfirmPaymentIntentParams.createAlipay(
-            "client_secret")
+            "client_secret"
+        )
         val authenticationHandler = object : AlipayAuthenticator {
             override fun onAuthenticationRequest(data: String): Map<String, String> {
                 return mapOf("resultStatus" to "9000")
@@ -167,10 +184,11 @@ class StripePaymentAuthTest {
                 context,
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 stripeApiRequestExecutor = ApiRequestExecutor.Default(),
-                analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
+                analyticsRequestExecutor = {}
             ),
             paymentController,
-            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, null
+            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            null
         )
     }
 

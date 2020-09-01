@@ -4,12 +4,12 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
 import com.stripe.android.utils.ParcelUtils
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentSessionDataTest {
@@ -34,26 +34,32 @@ class PaymentSessionDataTest {
 
         assertFalse(PaymentSessionData(config).isPaymentReadyToCharge)
 
-        assertFalse(PaymentSessionData(
-            isShippingInfoRequired = config.isShippingInfoRequired,
-            isShippingMethodRequired = config.isShippingMethodRequired,
-            paymentMethod = PAYMENT_METHOD
-        ).isPaymentReadyToCharge)
+        assertFalse(
+            PaymentSessionData(
+                isShippingInfoRequired = config.isShippingInfoRequired,
+                isShippingMethodRequired = config.isShippingMethodRequired,
+                paymentMethod = PAYMENT_METHOD
+            ).isPaymentReadyToCharge
+        )
 
-        assertFalse(PaymentSessionData(
-            isShippingInfoRequired = config.isShippingInfoRequired,
-            isShippingMethodRequired = config.isShippingMethodRequired,
-            paymentMethod = PAYMENT_METHOD,
-            shippingInformation = ShippingInformation()
-        ).isPaymentReadyToCharge)
+        assertFalse(
+            PaymentSessionData(
+                isShippingInfoRequired = config.isShippingInfoRequired,
+                isShippingMethodRequired = config.isShippingMethodRequired,
+                paymentMethod = PAYMENT_METHOD,
+                shippingInformation = ShippingInformation()
+            ).isPaymentReadyToCharge
+        )
 
-        assertTrue(PaymentSessionData(
-            isShippingInfoRequired = config.isShippingInfoRequired,
-            isShippingMethodRequired = config.isShippingMethodRequired,
-            paymentMethod = PAYMENT_METHOD,
-            shippingInformation = ShippingInformation(),
-            shippingMethod = ShippingMethod("label", "id", 0, "USD")
-        ).isPaymentReadyToCharge)
+        assertTrue(
+            PaymentSessionData(
+                isShippingInfoRequired = config.isShippingInfoRequired,
+                isShippingMethodRequired = config.isShippingMethodRequired,
+                paymentMethod = PAYMENT_METHOD,
+                shippingInformation = ShippingInformation(),
+                shippingMethod = ShippingMethod("label", "id", 0, "USD")
+            ).isPaymentReadyToCharge
+        )
     }
 
     @Test

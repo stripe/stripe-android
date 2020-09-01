@@ -13,8 +13,9 @@ internal object StripeErrorFixtures {
         ""
     )
 
-    val INVALID_CARD_NUMBER = StripeErrorJsonParser().parse(JSONObject(
-        """
+    val INVALID_CARD_NUMBER = StripeErrorJsonParser().parse(
+        JSONObject(
+            """
         {
             "error": {
                 "code": "incorrect_number",
@@ -24,6 +25,7 @@ internal object StripeErrorFixtures {
                 "type": "card_error"
             }
         }
-        """.trimIndent()
-    ))
+            """.trimIndent()
+        )
+    )
 }

@@ -10,13 +10,12 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
-import com.stripe.android.model.PaymentMethod
-import kotlin.test.BeforeTest
-import kotlin.test.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
 import org.robolectric.annotation.LooperMode
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 @LooperMode(LooperMode.Mode.PAUSED)
 @RunWith(RobolectricTestRunner::class)
@@ -30,23 +29,19 @@ class ViewWidthAnimatorTest {
     fun setup() {
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
-        activityScenarioFactory.create<AddPaymentMethodActivity>(
-            AddPaymentMethodActivityStarter.Args.Builder()
-                .setPaymentMethodType(PaymentMethod.Type.Card)
-                .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
-                .setBillingAddressFields(BillingAddressFields.PostalCode)
-                .build()
-        ).use { activityScenario ->
-            activityScenario.onActivity { activity ->
-                activity.findViewById<ViewGroup>(R.id.add_payment_method_card).let { root ->
-                    root.removeAllViews()
-                    view = Button(activity).also {
-                        it.layoutParams = ViewGroup.LayoutParams(START_WIDTH, 100)
+        activityScenarioFactory
+            .createAddPaymentMethodActivity()
+            .use { activityScenario ->
+                activityScenario.onActivity { activity ->
+                    activity.findViewById<ViewGroup>(R.id.add_payment_method_card).let { root ->
+                        root.removeAllViews()
+                        view = Button(activity).also {
+                            it.layoutParams = ViewGroup.LayoutParams(START_WIDTH, 100)
+                        }
+                        root.addView(view)
                     }
-                    root.addView(view)
                 }
             }
-        }
     }
 
     @Test

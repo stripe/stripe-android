@@ -24,18 +24,23 @@ import com.stripe.android.model.CardParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
-import java.util.Calendar
-import kotlin.test.BeforeTest
-import kotlin.test.Test
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.runner.RunWith
 import org.mockito.Mockito.reset
 import org.robolectric.RobolectricTestRunner
+import java.util.Calendar
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 /**
  * Test class for [CardMultilineWidget].
  */
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class CardMultilineWidgetTest {
+    private val testDispatcher = TestCoroutineDispatcher()
 
     private lateinit var cardMultilineWidget: CardMultilineWidget
     private lateinit var noZipCardMultilineWidget: CardMultilineWidget
@@ -58,40 +63,32 @@ internal class CardMultilineWidgetTest {
 
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
-        activityScenarioFactory.create<AddPaymentMethodActivity>(
-            AddPaymentMethodActivityStarter.Args.Builder()
-                .setPaymentMethodType(PaymentMethod.Type.Card)
-                .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
-                .setBillingAddressFields(BillingAddressFields.PostalCode)
-                .build()
-        ).use { activityScenario ->
-            activityScenario.onActivity { activity ->
-                cardMultilineWidget = activity.findViewById(R.id.card_multiline_widget)
-                fullGroup = WidgetControlGroup(cardMultilineWidget)
+        activityScenarioFactory
+            .createAddPaymentMethodActivity()
+            .use { activityScenario ->
+                activityScenario.onActivity { activity ->
+                    cardMultilineWidget = activity.findViewById(R.id.card_multiline_widget)
+                    fullGroup = WidgetControlGroup(cardMultilineWidget, testDispatcher)
 
-                fullGroup.cardNumberEditText.setText("")
+                    fullGroup.cardNumberEditText.setText("")
 
-                cardMultilineWidget.setCardNumberTextWatcher(EMPTY_WATCHER)
-                cardMultilineWidget.setExpiryDateTextWatcher(EMPTY_WATCHER)
-                cardMultilineWidget.setCvcNumberTextWatcher(EMPTY_WATCHER)
-                cardMultilineWidget.setPostalCodeTextWatcher(EMPTY_WATCHER)
-                cardMultilineWidget.paymentMethodBillingDetailsBuilder
+                    cardMultilineWidget.setCardNumberTextWatcher(EMPTY_WATCHER)
+                    cardMultilineWidget.setExpiryDateTextWatcher(EMPTY_WATCHER)
+                    cardMultilineWidget.setCvcNumberTextWatcher(EMPTY_WATCHER)
+                    cardMultilineWidget.setPostalCodeTextWatcher(EMPTY_WATCHER)
+                    cardMultilineWidget.paymentMethodBillingDetailsBuilder
+                }
             }
-        }
 
-        activityScenarioFactory.create<AddPaymentMethodActivity>(
-            AddPaymentMethodActivityStarter.Args.Builder()
-                .setPaymentMethodType(PaymentMethod.Type.Card)
-                .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
-                .setBillingAddressFields(BillingAddressFields.None)
-                .build()
-        ).use { activityScenario ->
-            activityScenario.onActivity {
-                noZipCardMultilineWidget = it.findViewById(R.id.card_multiline_widget)
-                noZipCardMultilineWidget.setShouldShowPostalCode(false)
-                noZipGroup = WidgetControlGroup(noZipCardMultilineWidget)
+        activityScenarioFactory
+            .createAddPaymentMethodActivity()
+            .use { activityScenario ->
+                activityScenario.onActivity {
+                    noZipCardMultilineWidget = it.findViewById(R.id.card_multiline_widget)
+                    noZipCardMultilineWidget.setShouldShowPostalCode(false)
+                    noZipGroup = WidgetControlGroup(noZipCardMultilineWidget, testDispatcher)
+                }
             }
-        }
     }
 
     @Test
@@ -299,9 +296,10 @@ internal class CardMultilineWidgetTest {
                         attribution = ATTRIBUTION
                     ),
                     PaymentMethod.BillingDetails.Builder()
-                        .setAddress(Address.Builder()
-                            .setPostalCode(POSTAL_CODE_VALUE)
-                            .build()
+                        .setAddress(
+                            Address.Builder()
+                                .setPostalCode(POSTAL_CODE_VALUE)
+                                .build()
                         )
                         .build()
                 )
@@ -474,8 +472,7 @@ internal class CardMultilineWidgetTest {
     @Test
     fun clear_whenFieldsInErrorState_clearsFieldsAndHidesErrors() {
         // Makes this 4242 4242 4242 4243
-        val badVisa = VISA_WITH_SPACES
-            .substring(VISA_WITH_SPACES.length - 1) + "3"
+        val badVisa = VISA_WITH_SPACES.take(VISA_WITH_SPACES.length - 1) + "3"
         fullGroup.cardNumberEditText.setText(badVisa)
 
         fullGroup.expiryDateEditText.append("01")
@@ -627,8 +624,8 @@ internal class CardMultilineWidgetTest {
         cardMultilineWidget.setCardInputListener(fullCardListener)
         noZipCardMultilineWidget.setCardInputListener(noZipCardListener)
 
-        val deleteOneCharacterString = VISA_WITH_SPACES
-            .substring(0, VISA_WITH_SPACES.length - 1)
+        val deleteOneCharacterString =
+            VISA_WITH_SPACES.take(VISA_WITH_SPACES.length - 1)
         fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
 
         reset(fullCardListener)
@@ -953,15 +950,17 @@ internal class CardMultilineWidgetTest {
     fun testCardValidCallback() {
         var currentIsValid = false
         var currentInvalidFields = emptySet<CardValidCallback.Fields>()
-        cardMultilineWidget.setCardValidCallback(object : CardValidCallback {
-            override fun onInputChanged(
-                isValid: Boolean,
-                invalidFields: Set<CardValidCallback.Fields>
-            ) {
-                currentIsValid = isValid
-                currentInvalidFields = invalidFields
+        cardMultilineWidget.setCardValidCallback(
+            object : CardValidCallback {
+                override fun onInputChanged(
+                    isValid: Boolean,
+                    invalidFields: Set<CardValidCallback.Fields>
+                ) {
+                    currentIsValid = isValid
+                    currentInvalidFields = invalidFields
+                }
             }
-        })
+        )
 
         assertThat(currentIsValid)
             .isFalse()
@@ -1044,8 +1043,13 @@ internal class CardMultilineWidgetTest {
             .isFalse()
     }
 
-    internal class WidgetControlGroup(widget: CardMultilineWidget) {
-        val cardNumberEditText: CardNumberEditText = widget.findViewById(R.id.et_card_number)
+    internal class WidgetControlGroup(
+        widget: CardMultilineWidget,
+        workDispatcher: CoroutineDispatcher
+    ) {
+        val cardNumberEditText: CardNumberEditText = widget.findViewById<CardNumberEditText>(R.id.et_card_number).also {
+            it.workDispatcher = workDispatcher
+        }
         val cardInputLayout: TextInputLayout = widget.findViewById(R.id.tl_card_number)
         val expiryDateEditText: ExpiryDateEditText = widget.findViewById(R.id.et_expiry)
         val expiryInputLayout: TextInputLayout = widget.findViewById(R.id.tl_expiry)

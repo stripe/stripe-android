@@ -57,8 +57,10 @@ object CardFixtures {
 
     internal val CARD_USD = requireNotNull(CardJsonParser().parse(CARD_USD_JSON))
 
-    internal val CARD_GOOGLE_PAY = requireNotNull(CardJsonParser().parse(JSONObject(
-        """
+    internal val CARD_GOOGLE_PAY = requireNotNull(
+        CardJsonParser().parse(
+            JSONObject(
+                """
         {
             "id": "card_189fi32eZvKYlo2CHK8NPRME",
             "object": "card",
@@ -81,12 +83,14 @@ object CardFixtures {
             "fingerprint": "abc123",
             "last4": "4242",
             "name": "John Cardholder",
-            "tokenization_method": "google_pay",
+            "tokenization_method": "android_pay",
             "metadata": {
                 "color": "blue",
                 "animal": "dog"
             }
         }
-        """.trimIndent()
-    )))
+                """.trimIndent()
+            )
+        )
+    )
 }

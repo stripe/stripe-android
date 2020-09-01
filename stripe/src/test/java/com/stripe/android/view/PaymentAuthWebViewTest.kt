@@ -11,12 +11,12 @@ import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.FakeLogger
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentAuthWebViewTest {
@@ -66,32 +66,40 @@ class PaymentAuthWebViewTest {
     @Test
     fun shouldOverrideUrlLoading_withoutReturnUrl_shouldNotAutoFinishActivity() {
         val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
-        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView,
-            "https://example.com")
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(
+            webView,
+            "https://example.com"
+        )
         verify(activity, never()).finish()
     }
 
     @Test
     fun shouldOverrideUrlLoading_withKnownReturnUrl_shouldFinish() {
         val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
-        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView,
-            "stripejs://use_stripe_sdk/return_url")
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(
+            webView,
+            "stripejs://use_stripe_sdk/return_url"
+        )
         verify(activity).finish()
     }
 
     @Test
     fun onPageFinished_wit3DSecureCompleteUrl_shouldFinish() {
         val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
-        paymentAuthWebViewClient.onPageFinished(webView,
-            "https://hooks.stripe.com/3d_secure/complete/tdsrc_1ExLWoCRMbs6FrXfjPJRYtng")
+        paymentAuthWebViewClient.onPageFinished(
+            webView,
+            "https://hooks.stripe.com/3d_secure/complete/tdsrc_1ExLWoCRMbs6FrXfjPJRYtng"
+        )
         verify(activity).finish()
     }
 
     @Test
     fun onPageFinished_witRedirectCompleteUrl_shouldFinish() {
         val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
-        paymentAuthWebViewClient.onPageFinished(webView,
-            "https://hooks.stripe.com/redirect/complete/src_1ExLWoCRMbs6FrXfjPJRYtng")
+        paymentAuthWebViewClient.onPageFinished(
+            webView,
+            "https://hooks.stripe.com/redirect/complete/src_1ExLWoCRMbs6FrXfjPJRYtng"
+        )
         verify(activity).finish()
     }
 

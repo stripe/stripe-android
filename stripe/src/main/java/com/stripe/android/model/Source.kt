@@ -160,10 +160,12 @@ data class Source internal constructor(
         }
 
     @Retention(AnnotationRetention.SOURCE)
-    @StringDef(SourceType.ALIPAY, SourceType.CARD, SourceType.THREE_D_SECURE, SourceType.GIROPAY,
+    @StringDef(
+        SourceType.ALIPAY, SourceType.CARD, SourceType.THREE_D_SECURE, SourceType.GIROPAY,
         SourceType.SEPA_DEBIT, SourceType.IDEAL, SourceType.SOFORT, SourceType.BANCONTACT,
         SourceType.P24, SourceType.EPS, SourceType.MULTIBANCO, SourceType.WECHAT, SourceType.KLARNA,
-        SourceType.UNKNOWN)
+        SourceType.UNKNOWN
+    )
     annotation class SourceType {
         companion object {
             const val ALIPAY: String = "alipay"

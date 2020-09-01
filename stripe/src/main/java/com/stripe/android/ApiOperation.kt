@@ -5,13 +5,13 @@ import com.stripe.android.exception.APIException
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.StripeModel
-import java.io.IOException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONException
+import java.io.IOException
 
 internal abstract class ApiOperation<out ResultType : StripeModel>(
     private val workScope: CoroutineScope = CoroutineScope(IO),

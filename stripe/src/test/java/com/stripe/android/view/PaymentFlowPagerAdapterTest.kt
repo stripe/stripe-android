@@ -4,10 +4,10 @@ import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSessionFixtures
-import kotlin.test.assertEquals
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentFlowPagerAdapterTest {

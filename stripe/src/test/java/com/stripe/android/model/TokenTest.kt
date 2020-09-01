@@ -2,9 +2,9 @@ package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.parsers.TokenJsonParser
+import org.json.JSONObject
 import java.util.Date
 import kotlin.test.Test
-import org.json.JSONObject
 
 class TokenTest {
 

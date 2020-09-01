@@ -32,7 +32,9 @@ internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter
                         stripeAccountId = args.stripeAccountId
                     ).toBundle()
                     host.startActivityForResult(
-                        PaymentRelayActivity::class.java, extras, requestCode
+                        PaymentRelayActivity::class.java,
+                        extras,
+                        requestCode
                     )
                 }
             }
