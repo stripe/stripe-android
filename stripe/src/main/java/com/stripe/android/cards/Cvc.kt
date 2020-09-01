@@ -8,11 +8,11 @@ internal sealed class Cvc {
     internal data class Unvalidated internal constructor(
         private val denormalized: String
     ) : Cvc() {
-        private val normalizedValue = denormalized.filter { it.isDigit() }
+        private val normalized = denormalized.filter { it.isDigit() }
 
         fun validate(maxLength: Int): Validated? {
-            return if (setOf(COMMON_LENGTH, maxLength).contains(normalizedValue.length)) {
-                Validated(normalizedValue)
+            return if (setOf(COMMON_LENGTH, maxLength).contains(normalized.length)) {
+                Validated(normalized)
             } else {
                 null
             }
