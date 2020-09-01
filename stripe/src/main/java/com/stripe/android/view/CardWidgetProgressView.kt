@@ -37,7 +37,22 @@ internal class CardWidgetProgressView @JvmOverloads constructor(
     private val fadeOut = AnimationUtils.loadAnimation(
         context,
         R.anim.stripe_card_widget_progress_fade_out
-    )
+    ).also {
+        it.setAnimationListener(
+            object : Animation.AnimationListener {
+                override fun onAnimationStart(p0: Animation?) {
+                    visibility = View.VISIBLE
+                }
+
+                override fun onAnimationEnd(p0: Animation?) {
+                    visibility = View.INVISIBLE
+                }
+
+                override fun onAnimationRepeat(p0: Animation?) {
+                }
+            }
+        )
+    }
 
     init {
         CardWidgetProgressViewBinding.inflate(

@@ -48,5 +48,5 @@
     <dimen name="card_brand_spinner_dropdown_padding">20dp</dimen>
     <dimen name="card_brand_spinner_dropdown_drawable_padding">5dp</dimen>
 
-    <dimen name="stripe_card_widget_progress_size">14dp</dimen>
+    <dimen name="stripe_card_widget_progress_size">12dp</dimen>
 </resources>
