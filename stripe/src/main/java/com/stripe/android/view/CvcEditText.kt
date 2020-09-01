@@ -10,6 +10,7 @@ import android.util.AttributeSet
 import android.view.View
 import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
+import com.stripe.android.cards.Cvc
 import com.stripe.android.model.CardBrand
 
 /**
@@ -33,6 +34,16 @@ class CvcEditText @JvmOverloads constructor(
         @JvmSynthetic
         get() {
             return fieldText.trim()
+        }
+
+    private val unvalidatedCvc: Cvc.Unvalidated
+        get() {
+            return Cvc.Unvalidated(fieldText)
+        }
+
+    internal val cvc: Cvc.Validated?
+        get() {
+            return unvalidatedCvc.validate(cardBrand.maxCvcLength)
         }
 
     private var cardBrand: CardBrand = CardBrand.Unknown
