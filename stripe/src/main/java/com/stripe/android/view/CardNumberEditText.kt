@@ -12,6 +12,7 @@ import com.stripe.android.R
 import com.stripe.android.StripeTextUtils
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardNumber
+import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.cards.DefaultStaticCardAccountRanges
 import com.stripe.android.cards.LegacyCardAccountRangeRepository
 import com.stripe.android.cards.StaticCardAccountRangeSource
@@ -50,7 +51,12 @@ class CardNumberEditText internal constructor(
         attrs,
         defStyleAttr,
         Dispatchers.IO,
-        LegacyCardAccountRangeRepository(StaticCardAccountRangeSource()),
+
+        when (USE_DEFAULT_CARD_ACCOUNT_RANGE_REPO) {
+            true -> DefaultCardAccountRangeRepositoryFactory(context).create()
+            false -> LegacyCardAccountRangeRepository(StaticCardAccountRangeSource())
+        },
+
         DefaultStaticCardAccountRanges()
     )
 
@@ -330,5 +336,9 @@ class CardNumberEditText internal constructor(
         return accountRange == null ||
             cardNumber.bin == null ||
             accountRange?.binRange?.matches(cardNumber) == false
+    }
+
+    private companion object {
+        private const val USE_DEFAULT_CARD_ACCOUNT_RANGE_REPO = false
     }
 }
