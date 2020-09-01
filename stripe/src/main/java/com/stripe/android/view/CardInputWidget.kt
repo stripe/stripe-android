@@ -26,6 +26,7 @@ import androidx.core.view.AccessibilityDelegateCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import com.stripe.android.R
+import com.stripe.android.cards.Cvc
 import com.stripe.android.databinding.CardInputWidgetBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.Card
@@ -68,7 +69,7 @@ class CardInputWidget @JvmOverloads constructor(
     internal val expiryDateEditText = viewBinding.expiryDateEditText
 
     @JvmSynthetic
-    internal val cvcNumberEditText = viewBinding.cvcEditText
+    internal val cvcEditText = viewBinding.cvcEditText
 
     @JvmSynthetic
     internal val postalCodeEditText = viewBinding.postalCodeEditText
@@ -98,7 +99,7 @@ class CardInputWidget @JvmOverloads constructor(
                     expiryDateEditText.validDateFields == null
                 },
                 CardValidCallback.Fields.Cvc.takeIf {
-                    this.cvcValue == null
+                    this.cvc == null
                 }
             ).toSet()
         }
@@ -137,9 +138,9 @@ class CardInputWidget @JvmOverloads constructor(
             }
         }
 
-    private val cvcValue: String?
+    private val cvc: Cvc.Validated?
         get() {
-            return cvcNumberEditText.cvcValue
+            return cvcEditText.cvc
         }
 
     private val brand: CardBrand
@@ -221,11 +222,11 @@ class CardInputWidget @JvmOverloads constructor(
         get() {
             val cardNumber = cardNumberEditText.validatedCardNumber
             val cardDate = expiryDateEditText.validDateFields
-            val cvcValue = this.cvcValue
+            val cvc = this.cvc
 
             cardNumberEditText.shouldShowError = cardNumber == null
             expiryDateEditText.shouldShowError = cardDate == null
-            cvcNumberEditText.shouldShowError = cvcValue == null
+            cvcEditText.shouldShowError = cvc == null
             postalCodeEditText.shouldShowError =
                 (postalCodeRequired || usZipCodeRequired) &&
                 postalCodeEditText.postalCode.isNullOrBlank()
@@ -246,8 +247,8 @@ class CardInputWidget @JvmOverloads constructor(
                 cardDate == null -> {
                     expiryDateEditText.requestFocus()
                 }
-                cvcValue == null -> {
-                    cvcNumberEditText.requestFocus()
+                cvc == null -> {
+                    cvcEditText.requestFocus()
                 }
                 postalCodeEditText.shouldShowError -> {
                     postalCodeEditText.requestFocus()
@@ -259,7 +260,7 @@ class CardInputWidget @JvmOverloads constructor(
                         number = cardNumber.number,
                         expMonth = cardDate.first,
                         expYear = cardDate.second,
-                        cvc = cvcValue,
+                        cvc = cvc.value,
                         address = Address.Builder()
                             .setPostalCode(postalCodeValue.takeUnless { it.isNullOrBlank() })
                             .build()
@@ -281,11 +282,11 @@ class CardInputWidget @JvmOverloads constructor(
         get() {
             val cardNumber = cardNumberEditText.validatedCardNumber
             val cardDate = expiryDateEditText.validDateFields
-            val cvcValue = this.cvcValue
+            val cvc = this.cvc
 
             cardNumberEditText.shouldShowError = cardNumber == null
             expiryDateEditText.shouldShowError = cardDate == null
-            cvcNumberEditText.shouldShowError = cvcValue == null
+            cvcEditText.shouldShowError = cvc == null
             postalCodeEditText.shouldShowError =
                 (postalCodeRequired || usZipCodeRequired) &&
                 postalCodeEditText.postalCode.isNullOrBlank()
@@ -306,8 +307,8 @@ class CardInputWidget @JvmOverloads constructor(
                 cardDate == null -> {
                     expiryDateEditText.requestFocus()
                 }
-                cvcValue == null -> {
-                    cvcNumberEditText.requestFocus()
+                cvc == null -> {
+                    cvcEditText.requestFocus()
                 }
                 postalCodeEditText.shouldShowError -> {
                     postalCodeEditText.requestFocus()
@@ -318,7 +319,7 @@ class CardInputWidget @JvmOverloads constructor(
                         number = cardNumber.number,
                         expMonth = cardDate.first,
                         expYear = cardDate.second,
-                        cvc = cvcValue
+                        cvc = cvc.value
                     )
                         .addressZip(postalCodeValue)
                         .loggingTokens(setOf(LOGGING_TOKEN))
@@ -348,12 +349,12 @@ class CardInputWidget @JvmOverloads constructor(
             postalCodeEditText.isEnabled = true
             postalCodeTextInputLayout.visibility = View.VISIBLE
 
-            cvcNumberEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
+            cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
         } else {
             postalCodeEditText.isEnabled = false
             postalCodeTextInputLayout.visibility = View.GONE
 
-            cvcNumberEditText.imeOptions = EditorInfo.IME_ACTION_DONE
+            cvcEditText.imeOptions = EditorInfo.IME_ACTION_DONE
         }
     }
 
@@ -398,7 +399,7 @@ class CardInputWidget @JvmOverloads constructor(
 
         requiredFields = listOf(
             cardNumberEditText,
-            cvcNumberEditText,
+            cvcEditText,
             expiryDateEditText
         )
         allFields = requiredFields.plus(postalCodeEditText)
@@ -473,7 +474,7 @@ class CardInputWidget @JvmOverloads constructor(
      * @param cvcCode the CVC value to be set
      */
     override fun setCvcCode(cvcCode: String?) {
-        cvcNumberEditText.setText(cvcCode)
+        cvcEditText.setText(cvcCode)
     }
 
     @JvmSynthetic
@@ -519,7 +520,7 @@ class CardInputWidget @JvmOverloads constructor(
      * Set a `TextWatcher` to receive CVC value changes.
      */
     override fun setCvcNumberTextWatcher(cvcNumberTextWatcher: TextWatcher?) {
-        cvcNumberEditText.addTextChangedListener(cvcNumberTextWatcher)
+        cvcEditText.addTextChangedListener(cvcNumberTextWatcher)
     }
 
     /**
@@ -660,11 +661,11 @@ class CardInputWidget @JvmOverloads constructor(
                     touchX < placementParameters.dateRightTouchBufferLimit -> // We need to act like this was a touch on the date editor
                         expiryDateEditText
                     touchX < placementParameters.cvcStartPosition -> // We need to act like this was a touch on the cvc editor.
-                        cvcNumberEditText
+                        cvcEditText
                     touchX < placementParameters.cvcStartPosition + placementParameters.cvcWidth -> // Just a regular touch on the cvc editor.
                         null
                     touchX < placementParameters.cvcRightTouchBufferLimit -> // We need to act like this was a touch on the cvc editor.
-                        cvcNumberEditText
+                        cvcEditText
                     touchX < placementParameters.postalCodeStartPosition -> // We need to act like this was a touch on the postal code editor.
                         postalCodeEditText
                     else -> null
@@ -685,7 +686,7 @@ class CardInputWidget @JvmOverloads constructor(
                     touchX < placementParameters.dateRightTouchBufferLimit -> // We need to act like this was a touch on the date editor
                         expiryDateEditText
                     touchX < placementParameters.cvcStartPosition -> // We need to act like this was a touch on the cvc editor.
-                        cvcNumberEditText
+                        cvcEditText
                     else -> null
                 }
             }
@@ -718,7 +719,7 @@ class CardInputWidget @JvmOverloads constructor(
 
         placementParameters.cvcWidth = getDesiredWidthInPixels(
             cvcPlaceHolder,
-            cvcNumberEditText
+            cvcEditText
         )
 
         placementParameters.postalCodeWidth = getDesiredWidthInPixels(
@@ -813,24 +814,24 @@ class CardInputWidget @JvmOverloads constructor(
         }
 
         expiryDateEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(cardNumberEditText))
-        cvcNumberEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(expiryDateEditText))
-        postalCodeEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(cvcNumberEditText))
+        cvcEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(expiryDateEditText))
+        postalCodeEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(cvcEditText))
 
-        cvcNumberEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+        cvcEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 scrollRight()
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.Cvc)
             }
-            updateIconCvc(hasFocus, cvcValue)
+            updateIconCvc(hasFocus, cvc?.value)
         }
 
-        cvcNumberEditText.setAfterTextChangedListener(
+        cvcEditText.setAfterTextChangedListener(
             object : StripeEditText.AfterTextChangedListener {
                 override fun onTextChanged(text: String) {
                     if (brand.isMaxCvc(text)) {
                         cardInputListener?.onCvcComplete()
                     }
-                    updateIconCvc(cvcNumberEditText.hasFocus(), text)
+                    updateIconCvc(cvcEditText.hasFocus(), text)
                 }
             }
         )
@@ -843,15 +844,15 @@ class CardInputWidget @JvmOverloads constructor(
         cardNumberEditText.brandChangeCallback = { brand ->
             hiddenCardText = createHiddenCardText(brand)
             updateIcon()
-            cvcNumberEditText.updateBrand(brand)
+            cvcEditText.updateBrand(brand)
         }
 
         expiryDateEditText.completionCallback = {
-            cvcNumberEditText.requestFocus()
+            cvcEditText.requestFocus()
             cardInputListener?.onExpirationComplete()
         }
 
-        cvcNumberEditText.completionCallback = {
+        cvcEditText.completionCallback = {
             if (postalCodeEnabled) {
                 postalCodeEditText.requestFocus()
             }
@@ -1481,7 +1482,7 @@ class CardInputWidget @JvmOverloads constructor(
          *
          * @param brand the [CardBrand] of the card number
          * @param cvcHasFocus `true` if the CVC entry field has focus, `false` otherwise
-         * @param cvcText the current content of [cvcNumberEditText]
+         * @param cvcText the current content of [cvcEditText]
          *
          * @return `true` if we should show the brand of the card, or `false` if we
          * should show the CVC helper icon instead

@@ -25,15 +25,10 @@ class CvcEditText @JvmOverloads constructor(
     /**
      * The inputted CVC value if valid; otherwise, `null`.
      */
+    @Deprecated("Will be removed in next major release.")
     val cvcValue: String?
         get() {
-            return rawCvcValue.takeIf { isValid }
-        }
-
-    internal val rawCvcValue: String
-        @JvmSynthetic
-        get() {
-            return fieldText.trim()
+            return cvc?.value
         }
 
     private val unvalidatedCvc: Cvc.Unvalidated
@@ -47,11 +42,6 @@ class CvcEditText @JvmOverloads constructor(
         }
 
     private var cardBrand: CardBrand = CardBrand.Unknown
-
-    private val isValid: Boolean
-        get() {
-            return cardBrand.isValidCvc(rawCvcValue)
-        }
 
     // invoked when a valid CVC has been entered
     @JvmSynthetic
@@ -74,7 +64,7 @@ class CvcEditText @JvmOverloads constructor(
             object : StripeTextWatcher() {
                 override fun afterTextChanged(s: Editable?) {
                     shouldShowError = false
-                    if (cardBrand.isMaxCvc(rawCvcValue)) {
+                    if (cardBrand.isMaxCvc(unvalidatedCvc.normalized)) {
                         completionCallback()
                     }
                 }
