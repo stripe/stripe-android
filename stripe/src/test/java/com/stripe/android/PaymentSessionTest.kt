@@ -29,7 +29,8 @@ import com.stripe.android.view.PaymentFlowActivity
 import com.stripe.android.view.PaymentFlowActivityStarter
 import com.stripe.android.view.PaymentMethodsActivity
 import com.stripe.android.view.PaymentMethodsActivityStarter
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
@@ -38,11 +39,10 @@ import org.robolectric.Shadows
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-/**
- * Test class for [PaymentSession]
- */
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class PaymentSessionTest {
+    private val testDispatcher = TestCoroutineDispatcher()
 
     private val ephemeralKeyProvider = TestEphemeralKeyProvider()
 
@@ -340,7 +340,7 @@ class PaymentSessionTest {
             stripeRepository,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             "acct_abc123",
-            workDispatcher = Dispatchers.Main,
+            workDispatcher = testDispatcher,
             ephemeralKeyManagerFactory = EphemeralKeyManager.Factory.Default(
                 keyProvider = ephemeralKeyProvider,
                 shouldPrefetchEphemeralKey = true
