@@ -74,7 +74,7 @@ class CardMultilineWidget @JvmOverloads constructor(
                 CardValidCallback.Fields.Expiry.takeIf {
                     expiryDate == null
                 },
-                CardValidCallback.Fields.Cvc.takeUnless {
+                CardValidCallback.Fields.Cvc.takeIf {
                     cvcEditText.cvc == null
                 }
             ).toSet()
