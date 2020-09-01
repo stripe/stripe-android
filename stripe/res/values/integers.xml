@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="stripe_card_widget_progress_animation_duration">600</integer>
+</resources>

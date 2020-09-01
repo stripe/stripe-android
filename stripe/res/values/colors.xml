@@ -16,4 +16,7 @@
 
     <color name="stripe_swipe_start_payment_method">#DFDEDF</color>
     <color name="stripe_swipe_threshold_payment_method">#D5473F</color>
+
+    <color name="stripe_card_widget_progress_foreground">#ffffffcc</color>
+    <color name="stripe_card_widget_progress_background">#4F566B</color>
 </resources>

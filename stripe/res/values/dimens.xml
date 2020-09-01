@@ -47,4 +47,6 @@
     <dimen name="card_brand_spinner_image_height">21dp</dimen>
     <dimen name="card_brand_spinner_dropdown_padding">20dp</dimen>
     <dimen name="card_brand_spinner_dropdown_drawable_padding">5dp</dimen>
+
+    <dimen name="stripe_card_widget_progress_size">14dp</dimen>
 </resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@color/stripe_card_widget_progress_background" />
+
+    <size
+        android:width="@dimen/stripe_card_widget_progress_size"
+        android:height="@dimen/stripe_card_widget_progress_size" />
+</shape>
