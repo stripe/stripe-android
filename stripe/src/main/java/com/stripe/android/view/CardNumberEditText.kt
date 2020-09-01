@@ -111,12 +111,16 @@ class CardNumberEditText internal constructor(
      * A normalized form of the card number. If the entered card number is "4242 4242 4242 4242",
      * this will be "4242424242424242". If the entered card number is invalid, this is `null`.
      */
+    @Deprecated("Will be removed in next major release.")
     val cardNumber: String?
         get() = if (isCardNumberValid) {
             StripeTextUtils.removeSpacesAndHyphens(fieldText)
         } else {
             null
         }
+
+    internal val validatedCardNumber: CardNumber.Validated?
+        get() = unvalidatedCardNumber.validate(panLength)
 
     private val unvalidatedCardNumber: CardNumber.Unvalidated
         get() = CardNumber.Unvalidated(fieldText)
@@ -219,7 +223,7 @@ class CardNumberEditText internal constructor(
                 }
 
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-// skip formatting if we're past the last possible space position
+                    // skip formatting if we're past the last possible space position
                     if (ignoreChanges || start > 16) {
                         return
                     }
@@ -276,9 +280,9 @@ class CardNumberEditText internal constructor(
                 private val shouldUpdateAfterChange: Boolean
                     get() = (digitsAdded || !isLastKeyDelete) && formattedNumber != null
 
-/**
-* Have digits been added in this text change.
-*/
+                /**
+                 * Have digits been added in this text change.
+                 */
                 private val digitsAdded: Boolean
                     get() = unvalidatedCardNumber.length > beforeCardNumber.length
             }

@@ -20,8 +20,8 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import com.google.android.material.textfield.TextInputLayout
-import com.stripe.android.CardUtils
 import com.stripe.android.R
+import com.stripe.android.cards.CardNumber
 import com.stripe.android.databinding.CardMultilineWidgetBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.Card
@@ -69,7 +69,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         get() {
             return listOfNotNull(
                 CardValidCallback.Fields.Number.takeIf {
-                    cardNumber == null
+                    validatedCardNumber == null
                 },
                 CardValidCallback.Fields.Expiry.takeIf {
                     expiryDate == null
@@ -199,7 +199,7 @@ class CardMultilineWidget @JvmOverloads constructor(
 
             return CardParams(
                 setOf(CARD_MULTILINE_TOKEN),
-                number = cardNumber.orEmpty(),
+                number = validatedCardNumber?.number.orEmpty(),
                 expMonth = cardDate.first,
                 expYear = cardDate.second,
                 cvc = cvcValue,
@@ -223,20 +223,24 @@ class CardMultilineWidget @JvmOverloads constructor(
 
             shouldShowErrorIcon = false
 
-            val cardNumber = cardNumber
             val cardDate = requireNotNull(expiryDateEditText.validDateFields)
             val cvcValue = cvcEditText.text?.toString()
             val postalCode = postalCodeEditText.text?.toString()
                 .takeIf { shouldShowPostalCode }
 
-            return Card.Builder(cardNumber, cardDate.first, cardDate.second, cvcValue)
+            return Card.Builder(
+                number = validatedCardNumber?.number,
+                expMonth = cardDate.first,
+                expYear = cardDate.second,
+                cvc = cvcValue
+            )
                 .addressZip(postalCode)
                 .loggingTokens(setOf(CARD_MULTILINE_TOKEN))
         }
 
-    private val cardNumber: String?
+    private val validatedCardNumber: CardNumber.Validated?
         get() {
-            return cardNumberEditText.cardNumber
+            return cardNumberEditText.validatedCardNumber
         }
     private val expiryDate: Pair<Int, Int>?
         get() {
@@ -409,7 +413,7 @@ class CardMultilineWidget @JvmOverloads constructor(
      * @return `true` if all shown fields are valid, `false` otherwise
      */
     fun validateAllFields(): Boolean {
-        val cardNumberIsValid = CardUtils.isValidCardNumber(cardNumber)
+        val cardNumberIsValid = validatedCardNumber != null
         val expiryIsValid = expiryDate != null
         val cvcIsValid = isCvcLengthValid
         cardNumberEditText.shouldShowError = !cardNumberIsValid
@@ -473,7 +477,7 @@ class CardMultilineWidget @JvmOverloads constructor(
      * Checks whether the current card number is valid
      */
     fun validateCardNumber(): Boolean {
-        val cardNumberIsValid = CardUtils.isValidCardNumber(cardNumber)
+        val cardNumberIsValid = validatedCardNumber != null
         cardNumberEditText.shouldShowError = !cardNumberIsValid
         return cardNumberIsValid
     }

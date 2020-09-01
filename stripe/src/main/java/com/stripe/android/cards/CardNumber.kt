@@ -86,7 +86,7 @@ internal sealed class CardNumber {
      * A representation of a client-side validated card number.
      */
     internal data class Validated internal constructor(
-        private val number: String
+        internal val number: String
     ) : CardNumber()
 
     internal companion object {

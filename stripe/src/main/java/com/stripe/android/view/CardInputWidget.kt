@@ -92,7 +92,7 @@ class CardInputWidget @JvmOverloads constructor(
         get() {
             return listOfNotNull(
                 CardValidCallback.Fields.Number.takeIf {
-                    cardNumberEditText.cardNumber == null
+                    cardNumberEditText.validatedCardNumber == null
                 },
                 CardValidCallback.Fields.Expiry.takeIf {
                     expiryDateEditText.validDateFields == null
@@ -219,7 +219,7 @@ class CardInputWidget @JvmOverloads constructor(
      */
     override val cardParams: CardParams?
         get() {
-            val cardNumber = cardNumberEditText.cardNumber
+            val cardNumber = cardNumberEditText.validatedCardNumber
             val cardDate = expiryDateEditText.validDateFields
             val cvcValue = this.cvcValue
 
@@ -256,7 +256,7 @@ class CardInputWidget @JvmOverloads constructor(
                     shouldShowErrorIcon = false
                     return CardParams(
                         setOf(LOGGING_TOKEN),
-                        number = cardNumber,
+                        number = cardNumber.number,
                         expMonth = cardDate.first,
                         expYear = cardDate.second,
                         cvc = cvcValue,
@@ -279,7 +279,7 @@ class CardInputWidget @JvmOverloads constructor(
     @Deprecated("Use cardParams", ReplaceWith("cardParams"))
     override val cardBuilder: Card.Builder?
         get() {
-            val cardNumber = cardNumberEditText.cardNumber
+            val cardNumber = cardNumberEditText.validatedCardNumber
             val cardDate = expiryDateEditText.validDateFields
             val cvcValue = this.cvcValue
 
@@ -314,7 +314,12 @@ class CardInputWidget @JvmOverloads constructor(
                 }
                 else -> {
                     shouldShowErrorIcon = false
-                    return Card.Builder(cardNumber, cardDate.first, cardDate.second, cvcValue)
+                    return Card.Builder(
+                        number = cardNumber.number,
+                        expMonth = cardDate.first,
+                        expYear = cardDate.second,
+                        cvc = cvcValue
+                    )
                         .addressZip(postalCodeValue)
                         .loggingTokens(setOf(LOGGING_TOKEN))
                 }
