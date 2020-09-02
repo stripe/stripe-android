@@ -10,7 +10,7 @@ internal sealed class CardNumber {
     internal data class Unvalidated internal constructor(
         private val denormalizedNumber: String
     ) : CardNumber() {
-        val normalizedNumber = denormalizedNumber.filter { it.isDigit() }
+        val normalizedNumber = denormalizedNumber.filterNot { REJECT_CHARS.contains(it) }
 
         val length = normalizedNumber.length
 
@@ -74,6 +74,10 @@ internal sealed class CardNumber {
             return groups
                 .takeWhile { it != null }
                 .joinToString(" ")
+        }
+
+        private companion object {
+            private val REJECT_CHARS = setOf('-', ' ')
         }
     }
 
