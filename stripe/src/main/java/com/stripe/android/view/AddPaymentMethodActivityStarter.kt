@@ -24,14 +24,12 @@ class AddPaymentMethodActivityStarter : ActivityStarter<AddPaymentMethodActivity
     constructor(activity: Activity) : super(
         activity,
         AddPaymentMethodActivity::class.java,
-        Args.DEFAULT,
         REQUEST_CODE
     )
 
     constructor(fragment: Fragment) : super(
         fragment,
         AddPaymentMethodActivity::class.java,
-        Args.DEFAULT,
         REQUEST_CODE
     )
 
@@ -131,8 +129,6 @@ class AddPaymentMethodActivityStarter : ActivityStarter<AddPaymentMethodActivity
         }
 
         internal companion object {
-            internal val DEFAULT = Builder().build()
-
             @JvmSynthetic
             internal fun create(intent: Intent): Args {
                 return requireNotNull(intent.getParcelableExtra(ActivityStarter.Args.EXTRA))

@@ -201,7 +201,7 @@ class CardMultilineWidget @JvmOverloads constructor(
 
             return CardParams(
                 setOf(CARD_MULTILINE_TOKEN),
-                number = validatedCardNumber?.number.orEmpty(),
+                number = validatedCardNumber?.value.orEmpty(),
                 expMonth = cardDate.first,
                 expYear = cardDate.second,
                 cvc = cvcValue,
@@ -231,7 +231,7 @@ class CardMultilineWidget @JvmOverloads constructor(
                 .takeIf { shouldShowPostalCode }
 
             return Card.Builder(
-                number = validatedCardNumber?.number,
+                number = validatedCardNumber?.value,
                 expMonth = cardDate.first,
                 expYear = cardDate.second,
                 cvc = cvcValue

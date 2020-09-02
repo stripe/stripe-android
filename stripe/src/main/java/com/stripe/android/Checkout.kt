@@ -4,10 +4,9 @@ import androidx.activity.ComponentActivity
 
 internal class Checkout(val clientSecret: String, val ephemeralKey: String, val customerId: String) {
     fun confirm(activity: ComponentActivity, callback: (CompletionStatus) -> Unit) {
-        val launcher = activity.registerForActivityResult(CheckoutContract()) {
-            callback(it)
-        }
-        launcher.launch(CheckoutContract.Args(clientSecret, ephemeralKey, customerId))
+        // TODO: Actually handle result
+        CheckoutActivityStarter(activity)
+            .startForResult(CheckoutActivityStarter.Args(clientSecret, ephemeralKey, customerId))
     }
 
     internal sealed class CompletionStatus {

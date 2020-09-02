@@ -7,9 +7,7 @@ import android.text.InputFilter
 import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.CardUtils
 import com.stripe.android.R
-import com.stripe.android.StripeTextUtils
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
@@ -97,7 +95,7 @@ class CardNumberEditText internal constructor(
             updateLengthFilter()
         }
 
-    private val panLength: Int
+    internal val panLength: Int
         get() = accountRange?.panLength
             ?: staticCardAccountRanges.match(unvalidatedCardNumber)?.panLength
             ?: CardNumber.DEFAULT_PAN_LENGTH
@@ -120,7 +118,7 @@ class CardNumberEditText internal constructor(
     @Deprecated("Will be removed in next major release.")
     val cardNumber: String?
         get() = if (isCardNumberValid) {
-            StripeTextUtils.removeSpacesAndHyphens(fieldText)
+            unvalidatedCardNumber.normalized
         } else {
             null
         }
@@ -130,6 +128,9 @@ class CardNumberEditText internal constructor(
 
     private val unvalidatedCardNumber: CardNumber.Unvalidated
         get() = CardNumber.Unvalidated(fieldText)
+
+    private val isValid: Boolean
+        get() = validatedCardNumber != null
 
     @VisibleForTesting
     internal var accountRangeRepositoryJob: Job? = null
@@ -229,16 +230,11 @@ class CardNumberEditText internal constructor(
                 }
 
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    // skip formatting if we're past the last possible space position
-                    if (ignoreChanges || start > 16) {
+                    if (ignoreChanges) {
                         return
                     }
 
-                    val spacelessNumber = StripeTextUtils.removeSpacesAndHyphens(
-                        s?.toString().orEmpty()
-                    ).orEmpty()
-
-                    val cardNumber = CardNumber.Unvalidated(spacelessNumber)
+                    val cardNumber = CardNumber.Unvalidated(s?.toString().orEmpty())
                     updateAccountRange(cardNumber)
 
                     val formattedNumber = cardNumber.getFormatted(panLength)
@@ -271,13 +267,14 @@ class CardNumberEditText internal constructor(
 
                     if (unvalidatedCardNumber.length == panLength) {
                         val wasCardNumberValid = isCardNumberValid
-                        isCardNumberValid = CardUtils.isValidCardNumber(fieldText)
-                        shouldShowError = !isCardNumberValid
-                        if (!wasCardNumberValid && isCardNumberValid) {
+                        isCardNumberValid = isValid
+                        shouldShowError = !isValid
+
+                        if (isComplete(wasCardNumberValid)) {
                             completionCallback()
                         }
                     } else {
-                        isCardNumberValid = CardUtils.isValidCardNumber(fieldText)
+                        isCardNumberValid = isValid
                         // Don't show errors if we aren't full-length.
                         shouldShowError = false
                     }
@@ -291,6 +288,16 @@ class CardNumberEditText internal constructor(
                  */
                 private val digitsAdded: Boolean
                     get() = unvalidatedCardNumber.length > beforeCardNumber.length
+
+                /**
+                 * If `true`, [completionCallback] will be invoked.
+                 */
+                private fun isComplete(
+                    wasCardNumberValid: Boolean
+                ) = !wasCardNumberValid && (
+                    unvalidatedCardNumber.isMaxLength ||
+                        (isValid && accountRange != null)
+                    )
             }
         )
     }
