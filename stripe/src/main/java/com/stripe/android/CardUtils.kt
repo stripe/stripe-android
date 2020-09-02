@@ -1,6 +1,5 @@
 package com.stripe.android
 
-import com.stripe.android.cards.Bin
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.model.CardBrand
 
@@ -14,14 +13,10 @@ object CardUtils {
      * @return the [CardBrand] that matches the card number based on prefixes,
      * or [CardBrand.Unknown] if it can't be determined
      */
+    @Deprecated("CardInputWidget and CardMultilineWidget handle card brand lookup. This method should not be relied on for determining CardBrand.")
     @JvmStatic
     fun getPossibleCardBrand(cardNumber: String?): CardBrand {
         return getPossibleCardBrand(cardNumber, true)
-    }
-
-    @JvmSynthetic
-    internal fun getPossibleCardBrand(bin: Bin): CardBrand {
-        return getPossibleCardBrand(bin.value, true)
     }
 
     /**
@@ -31,6 +26,7 @@ object CardUtils {
      * @param cardNumber a String that may or may not represent a valid card number
      * @return `true` if and only if the input value is a valid card number
      */
+    @Deprecated("CardInputWidget and CardMultilineWidget handle validation")
     @JvmStatic
     fun isValidCardNumber(cardNumber: String?): Boolean {
         val normalizedNumber = CardNumber.Unvalidated(cardNumber.orEmpty()).normalized
