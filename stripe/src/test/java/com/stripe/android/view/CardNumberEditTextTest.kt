@@ -26,6 +26,7 @@ import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.LegacyCardAccountRangeRepository
 import com.stripe.android.cards.NullCardAccountRangeRepository
 import com.stripe.android.cards.StaticCardAccountRangeSource
+import com.stripe.android.cards.StaticCardAccountRanges
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardMetadata
@@ -43,7 +44,6 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.LooperMode
 import java.util.concurrent.TimeUnit
 import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -75,13 +75,9 @@ internal class CardNumberEditTextTest {
         context,
         workDispatcher = testDispatcher,
         cardAccountRangeRepository = cardAccountRangeRepository
-    )
-
-    @BeforeTest
-    fun setup() {
-        cardNumberEditText.setText("")
-        cardNumberEditText.completionCallback = completionCallback
-        cardNumberEditText.brandChangeCallback = brandChangeCallback
+    ).also {
+        it.completionCallback = completionCallback
+        it.brandChangeCallback = brandChangeCallback
     }
 
     @AfterTest
@@ -212,7 +208,8 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun setText_whenTextIsValidCommonLengthNumber_changesCardValidState() {
-        cardNumberEditText.setText(VISA_WITH_SPACES)
+        Dispatchers.setMain(testDispatcher)
+        updateCardNumberAndIdle(VISA_WITH_SPACES)
 
         assertThat(cardNumberEditText.isCardNumberValid)
             .isTrue()
@@ -222,11 +219,57 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun setText_whenTextIsSpacelessValidNumber_changesToSpaceNumberAndValidates() {
-        cardNumberEditText.setText(VISA_NO_SPACES)
+        Dispatchers.setMain(testDispatcher)
+        updateCardNumberAndIdle(VISA_NO_SPACES)
 
         assertThat(cardNumberEditText.isCardNumberValid)
             .isTrue()
         assertThat(completionCallbackInvocations)
+            .isEqualTo(1)
+    }
+
+    @Test
+    fun `when 15 digit PAN is pasted, should not call completion callback`() {
+        val cardNumberEditText = CardNumberEditText(
+            context,
+            workDispatcher = testDispatcher,
+            cardAccountRangeRepository = NullCardAccountRangeRepository()
+        )
+
+        var callbacks = 0
+        cardNumberEditText.completionCallback = {
+            callbacks++
+        }
+
+        cardNumberEditText.setText(AMEX_NO_SPACES)
+        idleLooper()
+
+        assertThat(callbacks)
+            .isEqualTo(0)
+    }
+
+    @Test
+    fun `when 19 digit PAN is pasted, call completion callback`() {
+        val cardNumberEditText = CardNumberEditText(
+            context,
+            workDispatcher = testDispatcher,
+            cardAccountRangeRepository = NullCardAccountRangeRepository(),
+            staticCardAccountRanges = object : StaticCardAccountRanges {
+                override fun match(
+                    cardNumber: CardNumber.Unvalidated
+                ): CardMetadata.AccountRange? = AccountRangeFixtures.UNIONPAY19
+            }
+        )
+
+        var callbacks = 0
+        cardNumberEditText.completionCallback = {
+            callbacks++
+        }
+
+        cardNumberEditText.setText("6216828050000000000")
+        idleLooper()
+
+        assertThat(callbacks)
             .isEqualTo(1)
     }
 
@@ -250,7 +293,7 @@ internal class CardNumberEditTextTest {
     @Test
     fun `full Amex typed as BIN followed by remaining number should change isCardNumberValid to true and invoke completion callback`() {
         // type Amex BIN
-        updateCardNumberAndIdle(CardNumberFixtures.AMEX_BIN)
+        updateCardNumberAndIdle(AMEX_BIN)
         // type rest of card number
         cardNumberEditText.append(AMEX_NO_SPACES.drop(6))
         idleLooper()
@@ -263,6 +306,7 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun `full Amex typed typed at once should change isCardNumberValid to true and invoke completion callback`() {
+        Dispatchers.setMain(testDispatcher)
         updateCardNumberAndIdle(AMEX_NO_SPACES)
         idleLooper()
 
@@ -400,7 +444,7 @@ internal class CardNumberEditTextTest {
     @Test
     fun finishTypingAmEx_whenInvalid_setsErrorValueAndRemovesItAppropriately() {
         // type Amex BIN
-        updateCardNumberAndIdle(CardNumberFixtures.AMEX_BIN)
+        updateCardNumberAndIdle(AMEX_BIN)
         // type rest of card number
         cardNumberEditText.append(
             withoutLastCharacter(AMEX_NO_SPACES.drop(6)) + "3"
@@ -429,13 +473,13 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun enterVisaBin_callsBrandListener() {
-        updateCardNumberAndIdle(CardNumberFixtures.VISA_BIN)
+        updateCardNumberAndIdle(VISA_BIN)
         assertEquals(CardBrand.Visa, lastBrandChangeCallbackInvocation)
     }
 
     @Test
     fun addAmExBin_callsBrandListener() {
-        verifyCardBrandBin(CardBrand.AmericanExpress, CardNumberFixtures.AMEX_BIN)
+        verifyCardBrandBin(CardBrand.AmericanExpress, AMEX_BIN)
     }
 
     @Test
@@ -480,7 +524,7 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun enterBrandBin_thenClearAllText_callsUpdateWithUnknown() {
-        updateCardNumberAndIdle(CardNumberFixtures.VISA_BIN)
+        updateCardNumberAndIdle(VISA_BIN)
         assertEquals(CardBrand.Visa, lastBrandChangeCallbackInvocation)
 
         // Just adding some other text. Not enough to invalidate the card or complete it.
