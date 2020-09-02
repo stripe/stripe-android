@@ -1097,10 +1097,13 @@ class CardInputWidget @JvmOverloads constructor(
 
     private val peekCardText: String
         get() {
-            return when (brand) {
-                CardBrand.AmericanExpress -> PEEK_TEXT_AMEX
-                CardBrand.DinersClub -> PEEK_TEXT_DINERS_14
-                else -> PEEK_TEXT_COMMON
+            return when (cardNumberEditText.panLength) {
+                19 -> 3
+                15 -> 5
+                14 -> 2
+                else -> 4
+            }.let { peekSize ->
+                List(peekSize) { "0" }.joinToString(separator = "")
             }
         }
 
@@ -1447,10 +1450,6 @@ class CardInputWidget @JvmOverloads constructor(
 
     internal companion object {
         internal const val LOGGING_TOKEN = "CardInputView"
-
-        private const val PEEK_TEXT_COMMON = "4242"
-        private const val PEEK_TEXT_DINERS_14 = "88"
-        private const val PEEK_TEXT_AMEX = "34343"
 
         private const val CVC_PLACEHOLDER_COMMON = "CVC"
         private const val CVC_PLACEHOLDER_AMEX = "2345"
