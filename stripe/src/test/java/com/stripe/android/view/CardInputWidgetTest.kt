@@ -786,17 +786,17 @@ internal class CardInputWidgetTest {
     fun updateToInitialSizes_returnsExpectedValues() {
         // Initial spacing should look like
         // |img==60||---total == 500--------|
-        // |(card==190)--(space==260)--(date==50)|
-        // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
+        // |(card==230)--(space==220)--(date==50)|
+        // |img==60||  cardTouchArea | 420 | dateTouchArea | dateStart==510 |
 
         assertThat(cardInputWidget.placementParameters)
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
                     totalLengthInPixels = 500,
-                    cardWidth = 190,
+                    cardWidth = 230,
                     hiddenCardWidth = 150,
                     peekCardWidth = 40,
-                    cardDateSeparation = 260,
+                    cardDateSeparation = 220,
                     dateWidth = 50,
                     dateCvcSeparation = 0,
                     cvcWidth = 30,
@@ -804,7 +804,7 @@ internal class CardInputWidgetTest {
                     postalCodeWidth = 100,
                     cvcStartPosition = 0,
                     dateRightTouchBufferLimit = 0,
-                    cardTouchBufferLimit = 380,
+                    cardTouchBufferLimit = 400,
                     dateStartPosition = 510
                 )
             )
@@ -824,7 +824,7 @@ internal class CardInputWidgetTest {
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
                     totalLengthInPixels = 500,
-                    cardWidth = 190,
+                    cardWidth = 230,
                     hiddenCardWidth = 150,
                     peekCardWidth = 40,
                     cardDateSeparation = 185,
@@ -855,7 +855,7 @@ internal class CardInputWidgetTest {
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
                     totalLengthInPixels = 500,
-                    cardWidth = 190,
+                    cardWidth = 230,
                     hiddenCardWidth = 150,
                     peekCardWidth = 40,
                     cardDateSeparation = 98,
@@ -877,8 +877,8 @@ internal class CardInputWidgetTest {
     @Test
     fun getFocusRequestOnTouch_whenTouchOnImage_returnsNull() {
         // |img==60||---total == 500--------|
-        // |(card==190)--(space==260)--(date==50)|
-        // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
+        // |(card==230)--(space==220)--(date==50)|
+        // |img==60||  cardTouchArea | 420 | dateTouchArea | dateStart==510 |
         // So any touch lower than 60 will be the icon
         assertThat(cardInputWidget.getFocusRequestOnTouch(30))
             .isNull()
@@ -887,8 +887,8 @@ internal class CardInputWidgetTest {
     @Test
     fun getFocusRequestOnTouch_whenTouchActualCardWidget_returnsNull() {
         // |img==60||---total == 500--------|
-        // |(card==190)--(space==260)--(date==50)|
-        // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
+        // |(card==230)--(space==220)--(date==50)|
+        // |img==60||  cardTouchArea | 420 | dateTouchArea | dateStart==510 |
         // So any touch between 60 and 250 will be the actual card widget
         assertThat(cardInputWidget.getFocusRequestOnTouch(200))
             .isNull()
@@ -897,9 +897,9 @@ internal class CardInputWidgetTest {
     @Test
     fun getFocusRequestOnTouch_whenTouchInCardEditorSlop_returnsCardEditor() {
         // |img==60||---total == 500--------|
-        // |(card==190)--(space==260)--(date==50)|
-        // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
-        // So any touch between 250 and 380 needs to send focus to the card editor
+        // |(card==230)--(space==220)--(date==50)|
+        // |img==60||  cardTouchArea | 420 | dateTouchArea | dateStart==510 |
+        // So any touch between 250 and 420 needs to send focus to the card editor
         assertThat(cardInputWidget.getFocusRequestOnTouch(300))
             .isEqualTo(cardNumberEditText)
     }
@@ -907,18 +907,18 @@ internal class CardInputWidgetTest {
     @Test
     fun getFocusRequestOnTouch_whenTouchInDateSlop_returnsDateEditor() {
         // |img==60||---total == 500--------|
-        // |(card==190)--(space==260)--(date==50)|
-        // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
-        // So any touch between 380 and 510 needs to send focus to the date editor
-        assertThat(cardInputWidget.getFocusRequestOnTouch(390))
+        // |(card==230)--(space==220)--(date==50)|
+        // |img==60||  cardTouchArea | 420 | dateTouchArea | dateStart==510 |
+        // So any touch between 420 and 510 needs to send focus to the date editor
+        assertThat(cardInputWidget.getFocusRequestOnTouch(430))
             .isEqualTo(expiryEditText)
     }
 
     @Test
     fun getFocusRequestOnTouch_whenTouchInDateEditor_returnsNull() {
         // |img==60||---total == 500--------|
-        // |(card==190)--(space==260)--(date==50)|
-        // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
+        // |(card==230)--(space==220)--(date==50)|
+        // |img==60||  cardTouchArea | 420 | dateTouchArea | dateStart==510 |
         // So any touch over 510 doesn't need to do anything
         assertThat(cardInputWidget.getFocusRequestOnTouch(530))
             .isNull()
@@ -1094,7 +1094,7 @@ internal class CardInputWidgetTest {
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
                     totalLengthInPixels = 500,
-                    cardWidth = 190,
+                    cardWidth = 230,
                     hiddenCardWidth = 150,
                     peekCardWidth = 40,
                     cardDateSeparation = 185,
@@ -1123,7 +1123,7 @@ internal class CardInputWidgetTest {
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
                     totalLengthInPixels = 500,
-                    cardWidth = 190,
+                    cardWidth = 230,
                     hiddenCardWidth = 150,
                     peekCardWidth = 40,
                     cardDateSeparation = 98,
@@ -1154,7 +1154,7 @@ internal class CardInputWidgetTest {
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
                     totalLengthInPixels = 500,
-                    cardWidth = 190,
+                    cardWidth = 230,
                     hiddenCardWidth = 120,
                     peekCardWidth = 50,
                     cardDateSeparation = 175,
@@ -1183,7 +1183,7 @@ internal class CardInputWidgetTest {
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
                     totalLengthInPixels = 500,
-                    cardWidth = 190,
+                    cardWidth = 230,
                     hiddenCardWidth = 120,
                     peekCardWidth = 50,
                     cardDateSeparation = 88,
@@ -1214,7 +1214,7 @@ internal class CardInputWidgetTest {
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
                     totalLengthInPixels = 500,
-                    cardWidth = 190,
+                    cardWidth = 230,
                     hiddenCardWidth = 120,
                     peekCardWidth = 20,
                     cardDateSeparation = 205,
@@ -1243,7 +1243,7 @@ internal class CardInputWidgetTest {
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
                     totalLengthInPixels = 500,
-                    cardWidth = 190,
+                    cardWidth = 230,
                     hiddenCardWidth = 120,
                     peekCardWidth = 20,
                     cardDateSeparation = 118,
