@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import com.stripe.android.cards.Bin
+import com.stripe.android.cards.CardNumber
 import com.stripe.android.model.CardBrand
 
 /**
@@ -32,7 +33,7 @@ object CardUtils {
      */
     @JvmStatic
     fun isValidCardNumber(cardNumber: String?): Boolean {
-        val normalizedNumber = StripeTextUtils.removeSpacesAndHyphens(cardNumber)
+        val normalizedNumber = CardNumber.Unvalidated(cardNumber.orEmpty()).normalizedNumber
         return isValidLuhnNumber(normalizedNumber) && isValidCardLength(normalizedNumber)
     }
 
@@ -92,7 +93,7 @@ object CardUtils {
 
         val spacelessCardNumber =
             if (shouldNormalize) {
-                StripeTextUtils.removeSpacesAndHyphens(cardNumber)
+                CardNumber.Unvalidated(cardNumber).normalizedNumber
             } else {
                 cardNumber
             }

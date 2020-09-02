@@ -1,7 +1,6 @@
 package com.stripe.android.cards
 
 import com.stripe.android.CardUtils
-import com.stripe.android.StripeTextUtils
 
 internal sealed class CardNumber {
 
@@ -11,9 +10,7 @@ internal sealed class CardNumber {
     internal data class Unvalidated internal constructor(
         private val denormalizedNumber: String
     ) : CardNumber() {
-        val normalizedNumber = StripeTextUtils
-            .removeSpacesAndHyphens(denormalizedNumber)
-            .orEmpty()
+        val normalizedNumber = denormalizedNumber.filter { it.isDigit() }
 
         val length = normalizedNumber.length
 
