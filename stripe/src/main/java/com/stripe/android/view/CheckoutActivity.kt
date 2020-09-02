@@ -28,6 +28,12 @@ internal class CheckoutActivity : AppCompatActivity() {
         }
 
         setupBottomSheet()
+
+        // TODO: Add loading state
+        supportFragmentManager
+            .beginTransaction()
+            .replace(viewBinding.fragmentContainer.id, CheckoutPaymentMethodsListFragment())
+            .commitAllowingStateLoss()
     }
 
     private fun setupBottomSheet() {
