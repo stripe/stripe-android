@@ -27,7 +27,7 @@
 
         <activity
             android:name=".view.CheckoutActivity"
-            android:theme="@style/StripeDefaultTheme.Transparent" />
+            android:theme="@style/StripeCheckoutDefaultTheme" />
     </application>
 
 </manifest>
