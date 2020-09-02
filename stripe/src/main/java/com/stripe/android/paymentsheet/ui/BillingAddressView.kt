@@ -64,17 +64,6 @@ internal class BillingAddressView @JvmOverloads constructor(
         ).root
     }
 
-    private val stateAdapter = StateAdapter(
-        context,
-        R.layout.stripe_country_dropdown_item
-    ) {
-        StripeCountryDropdownItemBinding.inflate(
-            LayoutInflater.from(context),
-            it,
-            false
-        ).root
-    }
-
     private val postalCodeValidator = PostalCodeValidator()
 
     private val _address = MutableLiveData<Address?>(null)
@@ -82,6 +71,9 @@ internal class BillingAddressView @JvmOverloads constructor(
 
     @VisibleForTesting
     internal val countryView = viewBinding.country
+
+    @VisibleForTesting
+    internal val cityPostalContainer = viewBinding.cityPostalContainer
 
     @VisibleForTesting
     internal val postalCodeView = viewBinding.postalCode
@@ -96,29 +88,20 @@ internal class BillingAddressView @JvmOverloads constructor(
     internal val address2View = viewBinding.address2
 
     @VisibleForTesting
-    internal val cityView = viewBinding.city
+    internal val cityLayout = viewBinding.cityLayout
 
     @VisibleForTesting
-    internal val stateView = viewBinding.state
+    internal val cityView = viewBinding.city
 
     @VisibleForTesting
     internal var selectedCountry: Country? by Delegates.observable(
         null
     ) { _, _, newCountry ->
-        updateStateViewVisibility()
         updatePostalCodeView(newCountry)
         _address.value = createAddress()
     }
 
     private val isUnitedStates: Boolean get() = selectedCountry?.code == Locale.US.country
-
-    @VisibleForTesting
-    internal var selectedState: StateAdapter.State? by Delegates.observable(
-        null
-    ) { _, _, newState ->
-        stateView.setText(newState?.name)
-        _address.value = createAddress()
-    }
 
     private var postalCodeConfig: PostalCodeConfig by Delegates.observable(
         PostalCodeConfig.Global
@@ -127,12 +110,6 @@ internal class BillingAddressView @JvmOverloads constructor(
         postalCodeView.keyListener = config.getKeyListener()
         postalCodeView.inputType = config.inputType
     }
-
-    private val stateViews = setOf(
-        viewBinding.stateDivider,
-        viewBinding.stateLayout,
-        stateView
-    )
 
     private val requiredViews = setOf(
         viewBinding.address1Divider,
@@ -145,11 +122,10 @@ internal class BillingAddressView @JvmOverloads constructor(
 
         viewBinding.cityLayout,
         cityView
-    ).plus(stateViews)
+    )
 
     init {
         configureCountryAutoComplete()
-        configureStateAutoComplete()
         configureForLevel()
 
         setOf(postalCodeView, address1View, address2View, cityView).forEach { editText ->
@@ -185,15 +161,6 @@ internal class BillingAddressView @JvmOverloads constructor(
         }
     }
 
-    private fun configureStateAutoComplete() {
-        stateView.threshold = 0
-        stateView.setAdapter(stateAdapter)
-        stateView.onItemClickListener =
-            AdapterView.OnItemClickListener { _, _, position, _ ->
-                updateSelectedState(stateAdapter.getItem(position))
-            }
-    }
-
     private fun updateInitialCountry() {
         val initialCountry = countryAdapter.firstItem
         countryView.setText(initialCountry.name)
@@ -218,17 +185,6 @@ internal class BillingAddressView @JvmOverloads constructor(
         if (selectedCountry != country) {
             selectedCountry = country
         }
-    }
-
-    private fun updateSelectedState(state: StateAdapter.State) {
-        if (selectedState != state) {
-            selectedState = state
-        }
-    }
-
-    private fun updateStateViewVisibility() {
-        val isVisible = level == PaymentSheet.BillingAddressCollectionLevel.Required && isUnitedStates
-        stateViews.forEach { it.isVisible = isVisible }
     }
 
     internal fun validateCountry() {
@@ -270,7 +226,6 @@ internal class BillingAddressView @JvmOverloads constructor(
         val line1 = address1View.value
         val line2 = address2View.value
         val city = cityView.value
-        val state = selectedState?.code
 
         return if (line1 != null && city != null) {
             if (!isUnitedStates) {
@@ -281,17 +236,16 @@ internal class BillingAddressView @JvmOverloads constructor(
                     line2 = line2,
                     city = city
                 )
-            } else if (state != null) {
+            } else {
+                // TODO(mshafrir-stripe): handle state field
+
                 Address(
                     country = countryCode,
                     postalCode = postalCode,
                     line1 = line1,
                     line2 = line2,
-                    city = city,
-                    state = state
+                    city = city
                 )
-            } else {
-                null
             }
         } else {
             null
@@ -322,8 +276,7 @@ internal class BillingAddressView @JvmOverloads constructor(
             viewBinding.address1Layout,
             viewBinding.address2Layout,
             viewBinding.cityLayout,
-            postalCodeLayout,
-            viewBinding.stateLayout
+            postalCodeLayout
         ).forEach {
             it.isEnabled = enabled
         }
