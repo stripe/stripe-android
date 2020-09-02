@@ -1,5 +1,6 @@
 package com.stripe.android
 
+import com.stripe.android.cards.CardNumber
 import com.stripe.android.model.CardBrand
 
 /**
@@ -28,7 +29,7 @@ object CardUtils {
     @Deprecated("CardInputWidget and CardMultilineWidget handle validation")
     @JvmStatic
     fun isValidCardNumber(cardNumber: String?): Boolean {
-        val normalizedNumber = StripeTextUtils.removeSpacesAndHyphens(cardNumber)
+        val normalizedNumber = CardNumber.Unvalidated(cardNumber.orEmpty()).normalized
         return isValidLuhnNumber(normalizedNumber) && isValidCardLength(normalizedNumber)
     }
 
@@ -88,7 +89,7 @@ object CardUtils {
 
         val spacelessCardNumber =
             if (shouldNormalize) {
-                StripeTextUtils.removeSpacesAndHyphens(cardNumber)
+                CardNumber.Unvalidated(cardNumber).normalized
             } else {
                 cardNumber
             }

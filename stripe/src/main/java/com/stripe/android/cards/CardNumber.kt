@@ -1,7 +1,6 @@
 package com.stripe.android.cards
 
 import com.stripe.android.CardUtils
-import com.stripe.android.StripeTextUtils
 
 internal sealed class CardNumber {
 
@@ -9,25 +8,23 @@ internal sealed class CardNumber {
      * A representation of a partial or full card number that hasn't been validated.
      */
     internal data class Unvalidated internal constructor(
-        private val denormalizedNumber: String
+        private val denormalized: String
     ) : CardNumber() {
-        val normalizedNumber = StripeTextUtils
-            .removeSpacesAndHyphens(denormalizedNumber)
-            .orEmpty()
+        val normalized = denormalized.filterNot { REJECT_CHARS.contains(it) }
 
-        val length = normalizedNumber.length
+        val length = normalized.length
 
         val isMaxLength = length == MAX_PAN_LENGTH
 
-        val bin: Bin? = Bin.create(normalizedNumber)
+        val bin: Bin? = Bin.create(normalized)
 
         fun validate(panLength: Int): Validated? {
             return if (panLength >= MIN_PAN_LENGTH &&
-                normalizedNumber.length == panLength &&
-                CardUtils.isValidLuhnNumber(normalizedNumber)
+                normalized.length == panLength &&
+                CardUtils.isValidLuhnNumber(normalized)
             ) {
                 Validated(
-                    number = normalizedNumber
+                    value = normalized
                 )
             } else {
                 null
@@ -47,7 +44,7 @@ internal sealed class CardNumber {
 
         private fun formatNumber(panLength: Int): String {
             val spacePositions = getSpacePositions(panLength)
-            val spacelessCardNumber = normalizedNumber.take(panLength)
+            val spacelessCardNumber = normalized.take(panLength)
             val groups = arrayOfNulls<String?>(spacePositions.size + 1)
 
             val length = spacelessCardNumber.length
@@ -78,13 +75,18 @@ internal sealed class CardNumber {
                 .takeWhile { it != null }
                 .joinToString(" ")
         }
+
+        private companion object {
+            // characters to remove from a denormalized number to make it normalized
+            private val REJECT_CHARS = setOf('-', ' ')
+        }
     }
 
     /**
      * A representation of a client-side validated card number.
      */
     internal data class Validated internal constructor(
-        internal val number: String
+        internal val value: String
     ) : CardNumber()
 
     internal companion object {
