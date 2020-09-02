@@ -2,6 +2,8 @@ package com.stripe.android.view
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -17,6 +19,9 @@ internal class CheckoutActivity : AppCompatActivity() {
     private val bottomSheetBehavior by lazy {
         BottomSheetBehavior.from(viewBinding.bottomSheet)
     }
+    private val viewModel by viewModels<CheckoutViewModel> {
+        CheckoutViewModel.Factory(application)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,6 +29,11 @@ internal class CheckoutActivity : AppCompatActivity() {
 
         // Handle taps outside of bottom sheet
         viewBinding.root.setOnClickListener {
+            animateOut()
+        }
+        viewModel.error.observe(this) {
+            // TODO: Communicate error to caller
+            Toast.makeText(this, "Received error: ${it.message}", Toast.LENGTH_LONG).show()
             animateOut()
         }
 
