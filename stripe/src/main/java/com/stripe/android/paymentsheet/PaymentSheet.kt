@@ -11,7 +11,7 @@ import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
-internal class PaymentSheet internal constructor(
+class PaymentSheet internal constructor(
     private val args: PaymentSheetActivityStarter.Args
 ) {
     /**
@@ -120,7 +120,7 @@ internal class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    internal data class Result(val status: PaymentResult) : ActivityStarter.Result {
+    data class Result(val status: PaymentResult) : ActivityStarter.Result {
         override fun toBundle(): Bundle {
             return bundleOf(ActivityStarter.Result.EXTRA to this)
         }
@@ -137,6 +137,10 @@ internal class PaymentSheet internal constructor(
         fun getPaymentOption(): PaymentOption?
 
         fun presentPaymentOptions(activity: ComponentActivity)
+
+        fun isPaymentOptionResult(
+            requestCode: Int
+        ): Boolean
 
         fun onPaymentOptionResult(intent: Intent?): PaymentOption?
 

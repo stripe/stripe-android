@@ -5,10 +5,9 @@ import android.os.Parcelable
 import com.stripe.android.model.PaymentIntent
 import kotlinx.parcelize.Parcelize
 
-internal sealed class PaymentResult(
+sealed class PaymentResult(
     val resultCode: Int
 ) : Parcelable {
-
     @Parcelize
     data class Succeeded(
         val paymentIntent: PaymentIntent

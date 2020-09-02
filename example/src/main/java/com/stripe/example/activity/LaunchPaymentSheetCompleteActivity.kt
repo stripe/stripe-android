@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import com.stripe.android.paymentsheet.PaymentResult
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.example.databinding.ActivityPaymentSheetCompleteBinding
 import com.stripe.example.paymentsheet.EphemeralKey
 import com.stripe.example.paymentsheet.PaymentSheetViewModel
@@ -41,7 +43,33 @@ class LaunchPaymentSheetCompleteActivity : AppCompatActivity() {
             fetchEphemeralKey()
         }
         viewBinding.launch.setOnClickListener {
-            // TODO(mshafrir-stripe): handle click
+            viewModel.createPaymentIntent("us", ephemeralKey.customer).observe(this) {
+                it.fold(
+                    onSuccess = { json ->
+                        viewModel.inProgress.postValue(false)
+                        val secret = json.getString("secret")
+                        val checkout = PaymentSheet(
+                            secret,
+                            PaymentSheet.Configuration(
+                                merchantDisplayName = "Widget Store",
+                                customer = PaymentSheet.CustomerConfiguration(
+                                    id = ephemeralKey.customer,
+                                    ephemeralKeySecret = ephemeralKey.key
+                                ),
+                                googlePay = PaymentSheet.GooglePayConfiguration(
+                                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                                    countryCode = "US"
+                                ),
+                                billingAddressCollection = PaymentSheet.BillingAddressCollectionLevel.Automatic
+                            )
+                        )
+                        checkout.present(this)
+                    },
+                    onFailure = {
+                        viewModel.status.postValue(viewModel.status.value + "\nFailed: ${it.message}")
+                    }
+                )
+            }
         }
 
         fetchEphemeralKey()
@@ -50,7 +78,21 @@ class LaunchPaymentSheetCompleteActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        // handle result
+        val paymentSheetResult = PaymentSheet.Result.fromIntent(data)
+        if (paymentSheetResult != null) {
+            val statusString = when (val status = paymentSheetResult.status) {
+                is PaymentResult.Cancelled -> {
+                    "MC Completed with status: Cancelled"
+                }
+                is PaymentResult.Failed -> {
+                    "MC Completed with status: Failed(${status.error.message}"
+                }
+                is PaymentResult.Succeeded -> {
+                    "MC Completed with status: Succeeded"
+                }
+            }
+            viewModel.status.value = viewModel.status.value + "\n\n$statusString"
+        }
     }
 
     private fun fetchEphemeralKey() {

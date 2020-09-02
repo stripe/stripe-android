@@ -76,6 +76,10 @@ internal class DefaultPaymentSheetFlowController internal constructor(
         return paymentSelection?.let(paymentOptionFactory::create)
     }
 
+    override fun isPaymentOptionResult(
+        requestCode: Int
+    ): Boolean = PaymentOptionsActivityStarter.REQUEST_CODE == requestCode
+
     override fun confirmPayment(
         activity: ComponentActivity
     ) {
