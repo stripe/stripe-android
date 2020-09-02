@@ -11,7 +11,6 @@ internal class CheckoutActivityStarter : ActivityStarter<CheckoutActivity, Check
     internal constructor(activity: Activity) : super(
         activity,
         CheckoutActivity::class.java,
-        Args.DEFAULT,
         REQUEST_CODE
     )
 
@@ -23,8 +22,6 @@ internal class CheckoutActivityStarter : ActivityStarter<CheckoutActivity, Check
     ) : ActivityStarter.Args {
 
         internal companion object {
-            internal val DEFAULT = Args("", "", "")
-
             internal fun fromIntent(intent: Intent): Args? {
                 return intent.getParcelableExtra(ActivityStarter.Args.EXTRA)
             }
