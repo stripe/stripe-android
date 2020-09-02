@@ -14,7 +14,9 @@ internal class CheckoutActivity : AppCompatActivity() {
     private val viewBinding by lazy {
         ActivityCheckoutBinding.inflate(layoutInflater)
     }
-    private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
+    private val bottomSheetBehavior by lazy {
+        BottomSheetBehavior.from(viewBinding.bottomSheet)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,7 +31,6 @@ internal class CheckoutActivity : AppCompatActivity() {
     }
 
     private fun setupBottomSheet() {
-        bottomSheetBehavior = BottomSheetBehavior.from(viewBinding.bottomSheet)
         bottomSheetBehavior.peekHeight = BottomSheetBehavior.PEEK_HEIGHT_AUTO
         bottomSheetBehavior.isHideable = true
         // Start hidden and then animate in after delay
