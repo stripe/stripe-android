@@ -263,6 +263,7 @@ data class Card internal constructor(
      *
      * @return `true` if valid, `false` otherwise.
      */
+    @Deprecated("CardInputWidget and CardMultilineWidget handle validation")
     fun validateCard(): Boolean {
         return validateCard(Calendar.getInstance())
     }
@@ -272,6 +273,7 @@ data class Card internal constructor(
      *
      * @return `true` if valid, `false` otherwise.
      */
+    @Deprecated("CardInputWidget and CardMultilineWidget handle validation")
     fun validateNumber(): Boolean {
         return CardUtils.isValidCardNumber(number)
     }
@@ -282,6 +284,7 @@ data class Card internal constructor(
      *
      * @return `true` if valid, `false` otherwise
      */
+    @Deprecated("CardInputWidget and CardMultilineWidget handle validation")
     fun validateExpiryDate(): Boolean {
         return validateExpiryDate(Calendar.getInstance())
     }
@@ -291,6 +294,7 @@ data class Card internal constructor(
      *
      * @return `true` if valid, `false` otherwise
      */
+    @Deprecated("CardInputWidget and CardMultilineWidget handle validation")
     fun validateCVC(): Boolean {
         if (cvc.isNullOrBlank()) {
             return false
@@ -306,6 +310,7 @@ data class Card internal constructor(
      *
      * @return `true` if valid, `false` otherwise.
      */
+    @Deprecated("CardInputWidget and CardMultilineWidget handle validation")
     fun validateExpMonth(): Boolean {
         return expMonth?.let { expMonth -> expMonth in 1..12 } == true
     }
@@ -315,10 +320,12 @@ data class Card internal constructor(
      *
      * @return `true` if valid, `false` otherwise.
      */
+    @Deprecated("CardInputWidget and CardMultilineWidget handle validation")
     internal fun validateExpYear(now: Calendar): Boolean {
         return expYear?.let { !ModelUtils.hasYearPassed(it, now) } == true
     }
 
+    @Deprecated("CardInputWidget and CardMultilineWidget handle validation")
     internal fun validateCard(now: Calendar): Boolean {
         return if (cvc == null) {
             validateNumber() && validateExpiryDate(now)
@@ -327,6 +334,7 @@ data class Card internal constructor(
         }
     }
 
+    @Deprecated("CardInputWidget and CardMultilineWidget handle validation")
     internal fun validateExpiryDate(now: Calendar): Boolean {
         val expMonth = this.expMonth
         if (expMonth == null || !validateExpMonth()) {
