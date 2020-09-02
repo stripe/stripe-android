@@ -8,7 +8,6 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.R
-import com.stripe.android.StripeTextUtils
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
@@ -119,7 +118,7 @@ class CardNumberEditText internal constructor(
     @Deprecated("Will be removed in next major release.")
     val cardNumber: String?
         get() = if (isCardNumberValid) {
-            StripeTextUtils.removeSpacesAndHyphens(fieldText)
+            unvalidatedCardNumber.normalized
         } else {
             null
         }
@@ -235,11 +234,7 @@ class CardNumberEditText internal constructor(
                         return
                     }
 
-                    val spacelessNumber = StripeTextUtils.removeSpacesAndHyphens(
-                        s?.toString().orEmpty()
-                    ).orEmpty()
-
-                    val cardNumber = CardNumber.Unvalidated(spacelessNumber)
+                    val cardNumber = CardNumber.Unvalidated(s?.toString().orEmpty())
                     updateAccountRange(cardNumber)
 
                     val formattedNumber = cardNumber.getFormatted(panLength)

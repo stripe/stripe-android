@@ -258,7 +258,7 @@ class CardInputWidget @JvmOverloads constructor(
                     shouldShowErrorIcon = false
                     return CardParams(
                         setOf(LOGGING_TOKEN),
-                        number = cardNumber.number,
+                        number = cardNumber.value,
                         expMonth = cardDate.first,
                         expYear = cardDate.second,
                         cvc = cvc.value,
@@ -317,7 +317,7 @@ class CardInputWidget @JvmOverloads constructor(
                 else -> {
                     shouldShowErrorIcon = false
                     return Card.Builder(
-                        number = cardNumber.number,
+                        number = cardNumber.value,
                         expMonth = cardDate.first,
                         expYear = cardDate.second,
                         cvc = cvc.value

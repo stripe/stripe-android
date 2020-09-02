@@ -13,7 +13,7 @@ internal data class BinRange(
      * bounds) to match the length of the shorter one, then do numerical compare.
      */
     internal fun matches(cardNumber: CardNumber.Unvalidated): Boolean {
-        val number = cardNumber.normalizedNumber
+        val number = cardNumber.normalized
         val numberBigDecimal = number.toBigDecimalOrNull() ?: return false
 
         val withinLowRange = if (number.length < low.length) {
