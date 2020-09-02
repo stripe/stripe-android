@@ -1455,7 +1455,7 @@ class CardInputWidget @JvmOverloads constructor(
         private const val CVC_PLACEHOLDER_COMMON = "CVC"
         private const val CVC_PLACEHOLDER_AMEX = "2345"
 
-        private const val FULL_SIZING_CARD_TEXT = "4242 4242 4242 4242"
+        private const val FULL_SIZING_CARD_TEXT = "4242 4242 4242 4242 424"
         private const val FULL_SIZING_DATE_TEXT = "MM/MM"
         private const val FULL_SIZING_POSTAL_CODE_TEXT = "1234567890"
 
