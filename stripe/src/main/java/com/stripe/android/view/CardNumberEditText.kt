@@ -97,7 +97,7 @@ class CardNumberEditText internal constructor(
             updateLengthFilter()
         }
 
-    private val panLength: Int
+    internal val panLength: Int
         get() = accountRange?.panLength
             ?: staticCardAccountRanges.match(unvalidatedCardNumber)?.panLength
             ?: CardNumber.DEFAULT_PAN_LENGTH
@@ -229,8 +229,7 @@ class CardNumberEditText internal constructor(
                 }
 
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    // skip formatting if we're past the last possible space position
-                    if (ignoreChanges || start > 16) {
+                    if (ignoreChanges) {
                         return
                     }
 

@@ -15,7 +15,6 @@ import com.stripe.android.CardNumberFixtures.AMEX_NO_SPACES
 import com.stripe.android.CardNumberFixtures.AMEX_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_14_NO_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_14_WITH_SPACES
-import com.stripe.android.CardNumberFixtures.DINERS_CLUB_16_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
 import com.stripe.android.PaymentConfiguration
@@ -28,6 +27,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.TestFocusChangeListener
 import com.stripe.android.testharness.ViewTestUtils
+import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.view.CardInputWidget.Companion.LOGGING_TOKEN
 import com.stripe.android.view.CardInputWidget.Companion.shouldIconShowBrand
 import kotlinx.coroutines.Dispatchers
@@ -849,6 +849,7 @@ internal class CardInputWidgetTest {
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         cardInputWidget.updateSpaceSizes(false)
+        idleLooper()
 
         assertThat(cardInputWidget.placementParameters)
             .isEqualTo(
@@ -1087,7 +1088,7 @@ internal class CardInputWidgetTest {
 
         // Moving left with an actual Visa number does the same as moving when empty.
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
-        cardNumberEditText.setText(VISA_WITH_SPACES)
+        updateCardNumberAndIdle(VISA_WITH_SPACES)
 
         assertThat(cardInputWidget.placementParameters)
             .isEqualTo(
@@ -1574,6 +1575,8 @@ internal class CardInputWidgetTest {
     @Test
     fun currentFields_equals_requiredFields_withPostalCodeDisabled() {
         cardInputWidget.postalCodeEnabled = false
+        idleLooper()
+
         assertThat(cardInputWidget.requiredFields)
             .isEqualTo(cardInputWidget.currentFields)
     }
@@ -1675,13 +1678,31 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun createHiddenCardText_shouldReturnExpectedValue() {
-        assertThat(cardInputWidget.createHiddenCardText(CardBrand.Visa, VISA_NO_SPACES))
-            .isEqualTo("0000 0000 0000 ")
-        assertThat(cardInputWidget.createHiddenCardText(CardBrand.DinersClub, DINERS_CLUB_14_NO_SPACES))
-            .isEqualTo("0000 000000 ")
-        assertThat(cardInputWidget.createHiddenCardText(CardBrand.DinersClub, DINERS_CLUB_16_NO_SPACES))
-            .isEqualTo("0000 0000 0000 ")
+    fun `createHiddenCardText with 19 digit PAN`() {
+        assertThat(
+            cardInputWidget.createHiddenCardText(19)
+        ).isEqualTo("0000 0000 0000 0000 ")
+    }
+
+    @Test
+    fun `createHiddenCardText with 16 digit PAN`() {
+        assertThat(
+            cardInputWidget.createHiddenCardText(16)
+        ).isEqualTo("0000 0000 0000 ")
+    }
+
+    @Test
+    fun `createHiddenCardText with 15 digit PAN`() {
+        assertThat(
+            cardInputWidget.createHiddenCardText(15)
+        ).isEqualTo("0000 000000 ")
+    }
+
+    @Test
+    fun `createHiddenCardText with 14 digit PAN`() {
+        assertThat(
+            cardInputWidget.createHiddenCardText(14)
+        ).isEqualTo("0000 000000 ")
     }
 
     @Test
