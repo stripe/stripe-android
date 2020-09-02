@@ -14,20 +14,12 @@ class PaymentFlowActivityStarter :
     constructor(activity: Activity, config: PaymentSessionConfig) : super(
         activity,
         PaymentFlowActivity::class.java,
-        Args(
-            paymentSessionConfig = config,
-            paymentSessionData = PaymentSessionData(config)
-        ),
         REQUEST_CODE
     )
 
     constructor(fragment: Fragment, config: PaymentSessionConfig) : super(
         fragment,
         PaymentFlowActivity::class.java,
-        Args(
-            paymentSessionConfig = config,
-            paymentSessionData = PaymentSessionData(config)
-        ),
         REQUEST_CODE
     )
 
