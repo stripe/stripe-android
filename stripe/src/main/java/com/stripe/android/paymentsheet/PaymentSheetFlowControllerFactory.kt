@@ -11,6 +11,8 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -124,6 +126,10 @@ internal class PaymentSheetFlowControllerFactory(
                     Result.Success(
                         DefaultPaymentSheetFlowController(
                             paymentController = createPaymentController(),
+                            eventReporter = DefaultEventReporter(
+                                mode = EventReporter.Mode.Custom,
+                                context
+                            ),
                             args = DefaultPaymentSheetFlowController.Args(
                                 clientSecret,
                                 config
@@ -159,10 +165,14 @@ internal class PaymentSheetFlowControllerFactory(
 
                 Result.Success(
                     DefaultPaymentSheetFlowController(
-                        createPaymentController(),
-                        publishableKey,
-                        stripeAccountId,
-                        DefaultPaymentSheetFlowController.Args(
+                        paymentController = createPaymentController(),
+                        eventReporter = DefaultEventReporter(
+                            mode = EventReporter.Mode.Custom,
+                            context
+                        ),
+                        publishableKey = publishableKey,
+                        stripeAccountId = stripeAccountId,
+                        args = DefaultPaymentSheetFlowController.Args(
                             clientSecret,
                             config = config
                         ),
