@@ -63,7 +63,7 @@
     <style name="Stripe.BecsDebitWidget.MandateAcceptanceTextView"
         parent="Stripe.Base.BecsDebitWidget.MandateAcceptanceTextView" />
 
-    <style name="StripeBaseTheme.Transparent" parent="@style/Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="StripeCheckoutBaseTheme" parent="@style/Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowContentOverlay">@null</item>
@@ -73,5 +73,5 @@
         <item name="android:windowAnimationStyle">@null</item>
     </style>
 
-    <style name="StripeDefaultTheme.Transparent" parent="StripeBaseTheme.Transparent" />
+    <style name="StripeCheckoutDefaultTheme" parent="StripeCheckoutBaseTheme" />
 </resources>

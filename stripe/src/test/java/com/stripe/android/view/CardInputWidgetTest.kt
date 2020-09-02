@@ -2,7 +2,6 @@ package com.stripe.android.view
 
 import android.app.Activity
 import android.content.Context
-import android.os.Looper
 import android.view.ViewGroup
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -15,7 +14,6 @@ import com.stripe.android.CardNumberFixtures.AMEX_NO_SPACES
 import com.stripe.android.CardNumberFixtures.AMEX_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_14_NO_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_14_WITH_SPACES
-import com.stripe.android.CardNumberFixtures.DINERS_CLUB_16_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
 import com.stripe.android.PaymentConfiguration
@@ -28,6 +26,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.TestFocusChangeListener
 import com.stripe.android.testharness.ViewTestUtils
+import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.view.CardInputWidget.Companion.LOGGING_TOKEN
 import com.stripe.android.view.CardInputWidget.Companion.shouldIconShowBrand
 import kotlinx.coroutines.Dispatchers
@@ -37,7 +36,6 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.LooperMode
 import java.util.Calendar
 import kotlin.test.AfterTest
@@ -77,6 +75,9 @@ internal class CardInputWidgetTest {
         // The input date here will be invalid after 2050. Please update the test.
         assertThat(Calendar.getInstance().get(Calendar.YEAR) < 2050)
             .isTrue()
+
+        Dispatchers.setMain(testDispatcher)
+
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
         activityScenarioFactory.create<AddPaymentMethodActivity>(
@@ -662,8 +663,6 @@ internal class CardInputWidgetTest {
 
     @Test
     fun onDeleteFromExpiryDate_whenNotEmpty_doesNotShiftFocusOrDeleteDigit() {
-        Dispatchers.setMain(testDispatcher)
-
         updateCardNumberAndIdle(AMEX_WITH_SPACES)
 
         assertThat(expiryEditText.hasFocus())
@@ -787,17 +786,17 @@ internal class CardInputWidgetTest {
     fun updateToInitialSizes_returnsExpectedValues() {
         // Initial spacing should look like
         // |img==60||---total == 500--------|
-        // |(card==190)--(space==260)--(date==50)|
-        // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
+        // |(card==230)--(space==220)--(date==50)|
+        // |img==60||  cardTouchArea | 420 | dateTouchArea | dateStart==510 |
 
         assertThat(cardInputWidget.placementParameters)
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
                     totalLengthInPixels = 500,
-                    cardWidth = 190,
+                    cardWidth = 230,
                     hiddenCardWidth = 150,
                     peekCardWidth = 40,
-                    cardDateSeparation = 260,
+                    cardDateSeparation = 220,
                     dateWidth = 50,
                     dateCvcSeparation = 0,
                     cvcWidth = 30,
@@ -805,7 +804,7 @@ internal class CardInputWidgetTest {
                     postalCodeWidth = 100,
                     cvcStartPosition = 0,
                     dateRightTouchBufferLimit = 0,
-                    cardTouchBufferLimit = 380,
+                    cardTouchBufferLimit = 400,
                     dateStartPosition = 510
                 )
             )
@@ -819,12 +818,13 @@ internal class CardInputWidgetTest {
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         cardInputWidget.updateSpaceSizes(false)
+        idleLooper()
 
         assertThat(cardInputWidget.placementParameters)
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
                     totalLengthInPixels = 500,
-                    cardWidth = 190,
+                    cardWidth = 230,
                     hiddenCardWidth = 150,
                     peekCardWidth = 40,
                     cardDateSeparation = 185,
@@ -849,12 +849,13 @@ internal class CardInputWidgetTest {
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         cardInputWidget.updateSpaceSizes(false)
+        idleLooper()
 
         assertThat(cardInputWidget.placementParameters)
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
                     totalLengthInPixels = 500,
-                    cardWidth = 190,
+                    cardWidth = 230,
                     hiddenCardWidth = 150,
                     peekCardWidth = 40,
                     cardDateSeparation = 98,
@@ -876,8 +877,8 @@ internal class CardInputWidgetTest {
     @Test
     fun getFocusRequestOnTouch_whenTouchOnImage_returnsNull() {
         // |img==60||---total == 500--------|
-        // |(card==190)--(space==260)--(date==50)|
-        // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
+        // |(card==230)--(space==220)--(date==50)|
+        // |img==60||  cardTouchArea | 420 | dateTouchArea | dateStart==510 |
         // So any touch lower than 60 will be the icon
         assertThat(cardInputWidget.getFocusRequestOnTouch(30))
             .isNull()
@@ -886,8 +887,8 @@ internal class CardInputWidgetTest {
     @Test
     fun getFocusRequestOnTouch_whenTouchActualCardWidget_returnsNull() {
         // |img==60||---total == 500--------|
-        // |(card==190)--(space==260)--(date==50)|
-        // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
+        // |(card==230)--(space==220)--(date==50)|
+        // |img==60||  cardTouchArea | 420 | dateTouchArea | dateStart==510 |
         // So any touch between 60 and 250 will be the actual card widget
         assertThat(cardInputWidget.getFocusRequestOnTouch(200))
             .isNull()
@@ -896,9 +897,9 @@ internal class CardInputWidgetTest {
     @Test
     fun getFocusRequestOnTouch_whenTouchInCardEditorSlop_returnsCardEditor() {
         // |img==60||---total == 500--------|
-        // |(card==190)--(space==260)--(date==50)|
-        // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
-        // So any touch between 250 and 380 needs to send focus to the card editor
+        // |(card==230)--(space==220)--(date==50)|
+        // |img==60||  cardTouchArea | 420 | dateTouchArea | dateStart==510 |
+        // So any touch between 250 and 420 needs to send focus to the card editor
         assertThat(cardInputWidget.getFocusRequestOnTouch(300))
             .isEqualTo(cardNumberEditText)
     }
@@ -906,18 +907,18 @@ internal class CardInputWidgetTest {
     @Test
     fun getFocusRequestOnTouch_whenTouchInDateSlop_returnsDateEditor() {
         // |img==60||---total == 500--------|
-        // |(card==190)--(space==260)--(date==50)|
-        // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
-        // So any touch between 380 and 510 needs to send focus to the date editor
-        assertThat(cardInputWidget.getFocusRequestOnTouch(390))
+        // |(card==230)--(space==220)--(date==50)|
+        // |img==60||  cardTouchArea | 420 | dateTouchArea | dateStart==510 |
+        // So any touch between 420 and 510 needs to send focus to the date editor
+        assertThat(cardInputWidget.getFocusRequestOnTouch(430))
             .isEqualTo(expiryEditText)
     }
 
     @Test
     fun getFocusRequestOnTouch_whenTouchInDateEditor_returnsNull() {
         // |img==60||---total == 500--------|
-        // |(card==190)--(space==260)--(date==50)|
-        // |img==60||  cardTouchArea | 380 | dateTouchArea | dateStart==510 |
+        // |(card==230)--(space==220)--(date==50)|
+        // |img==60||  cardTouchArea | 420 | dateTouchArea | dateStart==510 |
         // So any touch over 510 doesn't need to do anything
         assertThat(cardInputWidget.getFocusRequestOnTouch(530))
             .isNull()
@@ -1087,13 +1088,13 @@ internal class CardInputWidgetTest {
 
         // Moving left with an actual Visa number does the same as moving when empty.
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
-        cardNumberEditText.setText(VISA_WITH_SPACES)
+        updateCardNumberAndIdle(VISA_WITH_SPACES)
 
         assertThat(cardInputWidget.placementParameters)
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
                     totalLengthInPixels = 500,
-                    cardWidth = 190,
+                    cardWidth = 230,
                     hiddenCardWidth = 150,
                     peekCardWidth = 40,
                     cardDateSeparation = 185,
@@ -1122,7 +1123,7 @@ internal class CardInputWidgetTest {
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
                     totalLengthInPixels = 500,
-                    cardWidth = 190,
+                    cardWidth = 230,
                     hiddenCardWidth = 150,
                     peekCardWidth = 40,
                     cardDateSeparation = 98,
@@ -1143,8 +1144,6 @@ internal class CardInputWidgetTest {
 
     @Test
     fun addValidAmExCard_withPostalCodeDisabled_scrollsOver_andSetsExpectedDisplayValues() {
-        Dispatchers.setMain(testDispatcher)
-
         cardInputWidget.postalCodeEnabled = false
 
         // Moving left with an AmEx number has a larger peek and cvc size.
@@ -1155,7 +1154,7 @@ internal class CardInputWidgetTest {
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
                     totalLengthInPixels = 500,
-                    cardWidth = 190,
+                    cardWidth = 230,
                     hiddenCardWidth = 120,
                     peekCardWidth = 50,
                     cardDateSeparation = 175,
@@ -1174,8 +1173,6 @@ internal class CardInputWidgetTest {
 
     @Test
     fun addValidAmExCard_withPostalCodeEnabled_scrollsOver_andSetsExpectedDisplayValues() {
-        Dispatchers.setMain(testDispatcher)
-
         cardInputWidget.postalCodeEnabled = true
 
         // Moving left with an AmEx number has a larger peek and cvc size.
@@ -1186,7 +1183,7 @@ internal class CardInputWidgetTest {
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
                     totalLengthInPixels = 500,
-                    cardWidth = 190,
+                    cardWidth = 230,
                     hiddenCardWidth = 120,
                     peekCardWidth = 50,
                     cardDateSeparation = 88,
@@ -1207,8 +1204,6 @@ internal class CardInputWidgetTest {
 
     @Test
     fun addDinersClubCard_withPostalCodeDisabled_scrollsOver_andSetsExpectedDisplayValues() {
-        Dispatchers.setMain(testDispatcher)
-
         cardInputWidget.postalCodeEnabled = false
 
         // When we move for a Diner's club card, the peek text is shorter, so we expect:
@@ -1219,7 +1214,7 @@ internal class CardInputWidgetTest {
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
                     totalLengthInPixels = 500,
-                    cardWidth = 190,
+                    cardWidth = 230,
                     hiddenCardWidth = 120,
                     peekCardWidth = 20,
                     cardDateSeparation = 205,
@@ -1238,8 +1233,6 @@ internal class CardInputWidgetTest {
 
     @Test
     fun addDinersClubCard_withPostalCodeEnabled_scrollsOver_andSetsExpectedDisplayValues() {
-        Dispatchers.setMain(testDispatcher)
-
         cardInputWidget.postalCodeEnabled = true
 
         // When we move for a Diner's club card, the peek text is shorter, so we expect:
@@ -1250,7 +1243,7 @@ internal class CardInputWidgetTest {
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
                     totalLengthInPixels = 500,
-                    cardWidth = 190,
+                    cardWidth = 230,
                     hiddenCardWidth = 120,
                     peekCardWidth = 20,
                     cardDateSeparation = 118,
@@ -1574,6 +1567,8 @@ internal class CardInputWidgetTest {
     @Test
     fun currentFields_equals_requiredFields_withPostalCodeDisabled() {
         cardInputWidget.postalCodeEnabled = false
+        idleLooper()
+
         assertThat(cardInputWidget.requiredFields)
             .isEqualTo(cardInputWidget.currentFields)
     }
@@ -1675,13 +1670,31 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun createHiddenCardText_shouldReturnExpectedValue() {
-        assertThat(cardInputWidget.createHiddenCardText(CardBrand.Visa, VISA_NO_SPACES))
-            .isEqualTo("0000 0000 0000 ")
-        assertThat(cardInputWidget.createHiddenCardText(CardBrand.DinersClub, DINERS_CLUB_14_NO_SPACES))
-            .isEqualTo("0000 000000 ")
-        assertThat(cardInputWidget.createHiddenCardText(CardBrand.DinersClub, DINERS_CLUB_16_NO_SPACES))
-            .isEqualTo("0000 0000 0000 ")
+    fun `createHiddenCardText with 19 digit PAN`() {
+        assertThat(
+            cardInputWidget.createHiddenCardText(19)
+        ).isEqualTo("0000 0000 0000 0000 ")
+    }
+
+    @Test
+    fun `createHiddenCardText with 16 digit PAN`() {
+        assertThat(
+            cardInputWidget.createHiddenCardText(16)
+        ).isEqualTo("0000 0000 0000 ")
+    }
+
+    @Test
+    fun `createHiddenCardText with 15 digit PAN`() {
+        assertThat(
+            cardInputWidget.createHiddenCardText(15)
+        ).isEqualTo("0000 000000 ")
+    }
+
+    @Test
+    fun `createHiddenCardText with 14 digit PAN`() {
+        assertThat(
+            cardInputWidget.createHiddenCardText(14)
+        ).isEqualTo("0000 000000 ")
     }
 
     @Test
@@ -1747,7 +1760,7 @@ internal class CardInputWidgetTest {
 
     private fun updateCardNumberAndIdle(cardNumber: String) {
         cardNumberEditText.setText(cardNumber)
-        shadowOf(Looper.getMainLooper()).idle()
+        idleLooper()
     }
 
     private companion object {

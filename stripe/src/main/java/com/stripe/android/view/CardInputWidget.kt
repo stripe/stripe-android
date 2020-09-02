@@ -26,6 +26,7 @@ import androidx.core.view.AccessibilityDelegateCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import com.stripe.android.R
+import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.Cvc
 import com.stripe.android.databinding.CardInputWidgetBinding
 import com.stripe.android.model.Address
@@ -842,7 +843,7 @@ class CardInputWidget @JvmOverloads constructor(
         }
 
         cardNumberEditText.brandChangeCallback = { brand ->
-            hiddenCardText = createHiddenCardText(brand)
+            hiddenCardText = createHiddenCardText(cardNumberEditText.panLength)
             updateIcon()
             cvcEditText.updateBrand(brand)
         }
@@ -870,36 +871,27 @@ class CardInputWidget @JvmOverloads constructor(
     }
 
     /**
-     * @return a [String] that is the length of a full card number for the current [brand],
-     * without the last group of digits when the card is formatted with spaces. This is used for
-     * measuring the rendered width of the hidden portion (i.e. when the card number is "peeking")
-     * and does not have to be a valid card number.
+     * @return a [String] that is the length of a full formatted PAN for the given PAN length,
+     * without the last group of digits. This is used for measuring the rendered width of the
+     * hidden portion (i.e. when the card number is "peeking") and does not have to be a valid
+     * card number.
      *
-     * e.g. if [brand] is [CardBrand.Visa], this will generate `"0000 0000 0000 "` (including the
+     * e.g. if [panLength] is `16`, this will generate `"0000 0000 0000 "` (including the
      * trailing space).
      *
      * This should only be called when [brand] changes.
      */
     @VisibleForTesting
     internal fun createHiddenCardText(
-        brand: CardBrand,
-        cardNumber: String = cardNumberEditText.fieldText
+        panLength: Int
     ): String {
-        var lastIndex = 0
-        val digits: MutableList<String> = mutableListOf()
+        val formattedNumber = CardNumber.Unvalidated(
+            List(panLength) { "0" }.joinToString(separator = "")
+        ).getFormatted(panLength)
 
-        brand.getSpacePositionsForCardNumber(cardNumber)
-            .toList()
-            .sorted()
-            .forEach {
-                repeat(it - lastIndex) {
-                    digits.add("0")
-                }
-                digits.add(" ")
-                lastIndex = it + 1
-            }
-
-        return digits.joinToString(separator = "")
+        return formattedNumber.take(
+            formattedNumber.lastIndexOf(' ') + 1
+        )
     }
 
     private fun applyAttributes(attrs: AttributeSet) {
@@ -1092,7 +1084,7 @@ class CardInputWidget @JvmOverloads constructor(
         }
     }
 
-    private var hiddenCardText: String = createHiddenCardText(brand)
+    private var hiddenCardText: String = createHiddenCardText(cardNumberEditText.panLength)
 
     private val cvcPlaceHolder: String
         get() {
@@ -1105,10 +1097,13 @@ class CardInputWidget @JvmOverloads constructor(
 
     private val peekCardText: String
         get() {
-            return when (brand) {
-                CardBrand.AmericanExpress -> PEEK_TEXT_AMEX
-                CardBrand.DinersClub -> PEEK_TEXT_DINERS_14
-                else -> PEEK_TEXT_COMMON
+            return when (cardNumberEditText.panLength) {
+                19 -> 3
+                15 -> 5
+                14 -> 2
+                else -> 4
+            }.let { peekSize ->
+                List(peekSize) { "0" }.joinToString(separator = "")
             }
         }
 
@@ -1456,14 +1451,10 @@ class CardInputWidget @JvmOverloads constructor(
     internal companion object {
         internal const val LOGGING_TOKEN = "CardInputView"
 
-        private const val PEEK_TEXT_COMMON = "4242"
-        private const val PEEK_TEXT_DINERS_14 = "88"
-        private const val PEEK_TEXT_AMEX = "34343"
-
         private const val CVC_PLACEHOLDER_COMMON = "CVC"
         private const val CVC_PLACEHOLDER_AMEX = "2345"
 
-        private const val FULL_SIZING_CARD_TEXT = "4242 4242 4242 4242"
+        private const val FULL_SIZING_CARD_TEXT = "4242 4242 4242 4242 424"
         private const val FULL_SIZING_DATE_TEXT = "MM/MM"
         private const val FULL_SIZING_POSTAL_CODE_TEXT = "1234567890"
 
