@@ -16,8 +16,7 @@ object StripeTextUtils {
     @Deprecated("Will be removed in upcoming major release.")
     @JvmStatic
     fun removeSpacesAndHyphens(cardNumberWithSpaces: String?): String? {
-        return cardNumberWithSpaces.takeUnless { it.isNullOrBlank() }?.let {
-            it.filter { c -> c.isDigit() }
-        }
+        return cardNumberWithSpaces.takeUnless { it.isNullOrBlank() }
+            ?.replace("\\s|-".toRegex(), "")
     }
 }
