@@ -173,7 +173,7 @@ enum class CardBrand(
      */
     @Deprecated("Will be replaced with AccountRange#panLength, which is internal.")
     fun getMaxLengthForCardNumber(cardNumber: String): Int {
-        val normalizedCardNumber = CardNumber.Unvalidated(cardNumber).normalizedNumber
+        val normalizedCardNumber = CardNumber.Unvalidated(cardNumber).normalized
         return variantMaxLength.entries.firstOrNull { (pattern, _) ->
             pattern.matcher(normalizedCardNumber).matches()
         }?.value ?: defaultMaxLength
@@ -193,7 +193,7 @@ enum class CardBrand(
      */
     @Deprecated("Will be replaced with CardNumber#getSpacePositions(), which is internal.")
     fun getSpacePositionsForCardNumber(cardNumber: String): Set<Int> {
-        val normalizedCardNumber = CardNumber.Unvalidated(cardNumber).normalizedNumber
+        val normalizedCardNumber = CardNumber.Unvalidated(cardNumber).normalized
         return variantSpacePositions.entries.firstOrNull { (pattern, _) ->
             pattern.matcher(normalizedCardNumber).matches()
         }?.value ?: defaultSpacePositions

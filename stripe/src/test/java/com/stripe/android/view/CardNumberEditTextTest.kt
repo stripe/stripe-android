@@ -543,22 +543,22 @@ internal class CardNumberEditTextTest {
     @Test
     fun cardNumber_withSpaces_returnsCardNumberWithoutSpaces() {
         updateCardNumberAndIdle(VISA_WITH_SPACES)
-        assertThat(cardNumberEditText.validatedCardNumber?.number)
+        assertThat(cardNumberEditText.validatedCardNumber?.value)
             .isEqualTo(VISA_NO_SPACES)
 
         updateCardNumberAndIdle("")
         updateCardNumberAndIdle(AMEX_WITH_SPACES)
-        assertThat(cardNumberEditText.validatedCardNumber?.number)
+        assertThat(cardNumberEditText.validatedCardNumber?.value)
             .isEqualTo(AMEX_NO_SPACES)
 
         updateCardNumberAndIdle("")
         updateCardNumberAndIdle(DINERS_CLUB_14_WITH_SPACES)
-        assertThat(cardNumberEditText.validatedCardNumber?.number)
+        assertThat(cardNumberEditText.validatedCardNumber?.value)
             .isEqualTo(DINERS_CLUB_14_NO_SPACES)
 
         updateCardNumberAndIdle("")
         updateCardNumberAndIdle(DINERS_CLUB_16_WITH_SPACES)
-        assertThat(cardNumberEditText.validatedCardNumber?.number)
+        assertThat(cardNumberEditText.validatedCardNumber?.value)
             .isEqualTo(DINERS_CLUB_16_NO_SPACES)
     }
 

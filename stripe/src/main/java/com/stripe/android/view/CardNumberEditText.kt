@@ -118,7 +118,7 @@ class CardNumberEditText internal constructor(
     @Deprecated("Will be removed in next major release.")
     val cardNumber: String?
         get() = if (isCardNumberValid) {
-            unvalidatedCardNumber.normalizedNumber
+            unvalidatedCardNumber.normalized
         } else {
             null
         }

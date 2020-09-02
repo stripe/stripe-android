@@ -33,7 +33,7 @@ object CardUtils {
      */
     @JvmStatic
     fun isValidCardNumber(cardNumber: String?): Boolean {
-        val normalizedNumber = CardNumber.Unvalidated(cardNumber.orEmpty()).normalizedNumber
+        val normalizedNumber = CardNumber.Unvalidated(cardNumber.orEmpty()).normalized
         return isValidLuhnNumber(normalizedNumber) && isValidCardLength(normalizedNumber)
     }
 
@@ -93,7 +93,7 @@ object CardUtils {
 
         val spacelessCardNumber =
             if (shouldNormalize) {
-                CardNumber.Unvalidated(cardNumber).normalizedNumber
+                CardNumber.Unvalidated(cardNumber).normalized
             } else {
                 cardNumber
             }
