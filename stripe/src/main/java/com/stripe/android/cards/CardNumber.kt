@@ -17,6 +17,8 @@ internal sealed class CardNumber {
 
         val length = normalizedNumber.length
 
+        val isMaxLength = length == MAX_PAN_LENGTH
+
         val bin: Bin? = Bin.create(normalizedNumber)
 
         fun validate(panLength: Int): Validated? {
@@ -76,10 +78,6 @@ internal sealed class CardNumber {
                 .takeWhile { it != null }
                 .joinToString(" ")
         }
-
-        private companion object {
-            private const val MIN_PAN_LENGTH = 14
-        }
     }
 
     /**
@@ -93,6 +91,8 @@ internal sealed class CardNumber {
         internal fun getSpacePositions(panLength: Int) = SPACE_POSITIONS[panLength]
             ?: DEFAULT_SPACE_POSITIONS
 
+        private const val MIN_PAN_LENGTH = 14
+        internal const val MAX_PAN_LENGTH = 19
         internal const val DEFAULT_PAN_LENGTH = 16
         private val DEFAULT_SPACE_POSITIONS = setOf(4, 9, 14)
 
