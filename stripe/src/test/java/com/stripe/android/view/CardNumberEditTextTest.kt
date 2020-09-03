@@ -27,8 +27,8 @@ import com.stripe.android.cards.LegacyCardAccountRangeRepository
 import com.stripe.android.cards.NullCardAccountRangeRepository
 import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.cards.StaticCardAccountRanges
+import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.CardMetadata
 import com.stripe.android.testharness.ViewTestUtils
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
@@ -258,7 +258,7 @@ internal class CardNumberEditTextTest {
             staticCardAccountRanges = object : StaticCardAccountRanges {
                 override fun match(
                     cardNumber: CardNumber.Unvalidated
-                ): CardMetadata.AccountRange? = AccountRangeFixtures.UNIONPAY19
+                ): AccountRange? = AccountRangeFixtures.UNIONPAY19
             }
         )
 
@@ -666,7 +666,7 @@ internal class CardNumberEditTextTest {
             cardAccountRangeRepository = object : CardAccountRangeRepository {
                 override suspend fun getAccountRange(
                     cardNumber: CardNumber.Unvalidated
-                ): CardMetadata.AccountRange? {
+                ): AccountRange? {
                     repositoryCalls++
                     return cardAccountRangeRepository.getAccountRange(cardNumber)
                 }
@@ -731,7 +731,7 @@ internal class CardNumberEditTextTest {
     private class DelayedCardAccountRangeRepository : CardAccountRangeRepository {
         override suspend fun getAccountRange(
             cardNumber: CardNumber.Unvalidated
-        ): CardMetadata.AccountRange? {
+        ): AccountRange? {
             delay(TimeUnit.SECONDS.toMillis(10))
             return null
         }

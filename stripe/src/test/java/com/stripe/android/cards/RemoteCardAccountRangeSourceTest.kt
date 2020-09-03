@@ -10,6 +10,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.ApiRequest
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.StripeRepository
+import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardMetadata
@@ -37,13 +38,13 @@ internal class RemoteCardAccountRangeSourceTest {
                 CardNumberFixtures.VISA
             )
         ).isEqualTo(
-            CardMetadata.AccountRange(
+            AccountRange(
                 binRange = BinRange(
                     low = "4242424240000000",
                     high = "4242424249999999"
                 ),
                 panLength = 16,
-                brandInfo = CardMetadata.AccountRange.BrandInfo.Visa,
+                brandInfo = AccountRange.BrandInfo.Visa,
                 country = "GB"
             )
         )

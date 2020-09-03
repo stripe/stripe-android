@@ -16,8 +16,8 @@ import com.stripe.android.cards.DefaultStaticCardAccountRanges
 import com.stripe.android.cards.LegacyCardAccountRangeRepository
 import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.cards.StaticCardAccountRanges
+import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.CardMetadata
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -91,7 +91,7 @@ class CardNumberEditText internal constructor(
             return cardBrand.getMaxLengthWithSpacesForCardNumber(fieldText)
         }
 
-    private var accountRange: CardMetadata.AccountRange? = null
+    private var accountRange: AccountRange? = null
         set(value) {
             field = value
             updateLengthFilter()
@@ -344,7 +344,7 @@ class CardNumberEditText internal constructor(
 
     @JvmSynthetic
     internal suspend fun onAccountRangeResult(
-        newAccountRange: CardMetadata.AccountRange?
+        newAccountRange: AccountRange?
     ) = withContext(Dispatchers.Main) {
         accountRange = newAccountRange
         cardBrand = newAccountRange?.brand ?: CardBrand.Unknown

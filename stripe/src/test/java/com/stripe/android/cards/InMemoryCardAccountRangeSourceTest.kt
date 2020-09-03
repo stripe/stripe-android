@@ -2,8 +2,8 @@ package com.stripe.android.cards
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures
+import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
-import com.stripe.android.model.CardMetadata
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
@@ -21,13 +21,13 @@ internal class InMemoryCardAccountRangeSourceTest {
             inMemoryCardAccountRangeSource
                 .getAccountRange(CardNumberFixtures.VISA)
         ).isEqualTo(
-            CardMetadata.AccountRange(
+            AccountRange(
                 binRange = BinRange(
                     low = "4242424240000000",
                     high = "4242424249999999"
                 ),
                 panLength = 16,
-                brandInfo = CardMetadata.AccountRange.BrandInfo.Visa,
+                brandInfo = AccountRange.BrandInfo.Visa,
                 country = "GB"
             )
         )
@@ -36,7 +36,7 @@ internal class InMemoryCardAccountRangeSourceTest {
     private class FakeStore : CardAccountRangeStore {
         override suspend fun get(bin: Bin) = AccountRangeFixtures.DEFAULT
 
-        override fun save(bin: Bin, accountRanges: List<CardMetadata.AccountRange>) {
+        override fun save(bin: Bin, accountRanges: List<AccountRange>) {
         }
 
         override suspend fun contains(bin: Bin): Boolean = false
