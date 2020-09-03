@@ -30,7 +30,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/stripe_ic_check_circle"
-        android:tint="@color/stripe_checkout_selected_payment_method"
+        app:tint="@color/stripe_checkout_selected_payment_method"
         app:layout_constraintEnd_toEndOf="@+id/brand_icon"
         app:layout_constraintBottom_toBottomOf="@+id/brand_icon"
         android:paddingBottom="10dp"
