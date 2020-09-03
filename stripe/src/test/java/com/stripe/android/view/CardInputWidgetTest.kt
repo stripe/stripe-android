@@ -946,6 +946,7 @@ internal class CardInputWidgetTest {
         // So any touch between 100 and 192 returns the card editor
         cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
+        idleLooper()
 
         assertThat(cardInputWidget.getFocusRequestOnTouch(150))
             .isEqualTo(cardNumberEditText)
@@ -961,6 +962,7 @@ internal class CardInputWidgetTest {
         // So any touch between 192 and 285 returns the date editor
         cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
+        idleLooper()
 
         assertThat(cardInputWidget.getFocusRequestOnTouch(200))
             .isEqualTo(expiryEditText)
@@ -976,6 +978,7 @@ internal class CardInputWidgetTest {
         // So any touch between 192 and 285 returns the date editor
         cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
+        idleLooper()
 
         assertThat(cardInputWidget.getFocusRequestOnTouch(170))
             .isEqualTo(expiryEditText)
@@ -991,6 +994,8 @@ internal class CardInputWidgetTest {
         // So any touch between 285 and 335 does nothing
         cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
+        idleLooper()
+
         assertThat(cardInputWidget.getFocusRequestOnTouch(300))
             .isNull()
     }
@@ -1005,6 +1010,8 @@ internal class CardInputWidgetTest {
         // So any touch between 285 and 335 does nothing
         cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
+        idleLooper()
+
         assertThat(cardInputWidget.getFocusRequestOnTouch(200))
             .isNull()
     }
@@ -1019,6 +1026,7 @@ internal class CardInputWidgetTest {
         // So any touch between 335 and 432 returns the date editor
         cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
+        idleLooper()
 
         assertThat(cardInputWidget.getFocusRequestOnTouch(400))
             .isEqualTo(expiryEditText)
@@ -1034,6 +1042,7 @@ internal class CardInputWidgetTest {
         // So any touch between 335 and 432 returns the date editor
         cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
+        idleLooper()
 
         assertThat(cardInputWidget.getFocusRequestOnTouch(185))
             .isEqualTo(expiryEditText)
@@ -1049,6 +1058,7 @@ internal class CardInputWidgetTest {
         // So any touch between 432 and 530 returns the date editor
         cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
+        idleLooper()
 
         assertThat(cardInputWidget.getFocusRequestOnTouch(485))
             .isEqualTo(cvcEditText)
@@ -1064,6 +1074,7 @@ internal class CardInputWidgetTest {
         // So any touch between 432 and 530 returns the date editor
         cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
+        idleLooper()
 
         assertThat(cardInputWidget.getFocusRequestOnTouch(300))
             .isEqualTo(cvcEditText)
@@ -1117,7 +1128,7 @@ internal class CardInputWidgetTest {
 
         // Moving left with an actual Visa number does the same as moving when empty.
         // |(peek==40)--(space==98)--(date==50)--(space==82)--(cvc==30)--(space==0)--(postal==100)|
-        cardNumberEditText.setText(VISA_WITH_SPACES)
+        updateCardNumberAndIdle(VISA_WITH_SPACES)
 
         assertThat(cardInputWidget.placementParameters)
             .isEqualTo(
