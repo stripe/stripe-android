@@ -24,6 +24,7 @@ import com.stripe.android.model.CardParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
+import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -567,12 +568,16 @@ internal class CardMultilineWidgetTest {
         noZipCardMultilineWidget.setCardInputListener(noZipCardListener)
 
         fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
+        idleLooper()
+
         verify(fullCardListener).onCardComplete()
         verify(fullCardListener).onFocusChange(CardInputListener.FocusField.ExpiryDate)
         assertThat(fullGroup.expiryDateEditText.hasFocus())
             .isTrue()
 
         noZipGroup.cardNumberEditText.setText(AMEX_WITH_SPACES)
+        idleLooper()
+
         verify(noZipCardListener).onCardComplete()
         verify(noZipCardListener).onFocusChange(CardInputListener.FocusField.ExpiryDate)
         assertThat(noZipGroup.expiryDateEditText.hasFocus())
