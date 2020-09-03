@@ -3,6 +3,7 @@ package com.stripe.android.view
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HIDDEN
@@ -28,6 +29,11 @@ internal class CheckoutActivity : AppCompatActivity() {
         }
 
         setupBottomSheet()
+
+        // TODO: Add loading state
+        supportFragmentManager.commit {
+            replace(viewBinding.fragmentContainer.id, CheckoutPaymentMethodsListFragment())
+        }
     }
 
     private fun setupBottomSheet() {
