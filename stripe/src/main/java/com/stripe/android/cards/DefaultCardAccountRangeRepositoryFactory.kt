@@ -22,8 +22,8 @@ internal class DefaultCardAccountRangeRepositoryFactory(
         )
         val store = DefaultCardAccountRangeStore(appContext)
         return DefaultCardAccountRangeRepository(
-            inMemoryCardAccountRangeSource = InMemoryCardAccountRangeSource(store),
-            remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
+            inMemorySource = InMemoryCardAccountRangeSource(store),
+            remoteSource = RemoteCardAccountRangeSource(
                 StripeApiRepository(
                     appContext,
                     paymentConfiguration.publishableKey
@@ -33,7 +33,8 @@ internal class DefaultCardAccountRangeRepositoryFactory(
                 ),
                 DefaultCardAccountRangeStore(appContext)
             ),
-            staticCardAccountRangeSource = StaticCardAccountRangeSource()
+            staticSource = StaticCardAccountRangeSource(),
+            store = store
         )
     }
 }

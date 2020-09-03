@@ -38,5 +38,7 @@ internal class InMemoryCardAccountRangeSourceTest {
 
         override fun save(bin: Bin, accountRanges: List<CardMetadata.AccountRange>) {
         }
+
+        override suspend fun contains(bin: Bin): Boolean = false
     }
 }
