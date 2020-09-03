@@ -2,8 +2,8 @@ package com.stripe.android
 
 import android.app.Activity
 import android.content.Intent
+import com.stripe.android.checkout.CheckoutActivity
 import com.stripe.android.view.ActivityStarter
-import com.stripe.android.view.CheckoutActivity
 import kotlinx.android.parcel.Parcelize
 
 internal class CheckoutActivityStarter : ActivityStarter<CheckoutActivity, CheckoutActivityStarter.Args> {

@@ -1,6 +1,7 @@
-package com.stripe.android
+package com.stripe.android.checkout
 
 import androidx.activity.ComponentActivity
+import com.stripe.android.CheckoutActivityStarter
 
 internal class Checkout(val clientSecret: String, val ephemeralKey: String, val customerId: String) {
     fun confirm(activity: ComponentActivity, callback: (CompletionStatus) -> Unit) {

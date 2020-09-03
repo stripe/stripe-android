@@ -1,4 +1,4 @@
-package com.stripe.android.view
+package com.stripe.android.checkout
 
 import android.view.LayoutInflater
 import android.view.View

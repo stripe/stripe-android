@@ -1,4 +1,4 @@
-package com.stripe.android.view
+package com.stripe.android.checkout
 
 import android.os.Bundle
 import android.view.View
@@ -7,7 +7,6 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HIDDEN
 import com.stripe.android.databinding.ActivityCheckoutBinding
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -50,7 +49,7 @@ internal class CheckoutActivity : AppCompatActivity() {
         bottomSheetBehavior.peekHeight = BottomSheetBehavior.PEEK_HEIGHT_AUTO
         bottomSheetBehavior.isHideable = true
         // Start hidden and then animate in after delay
-        bottomSheetBehavior.state = STATE_HIDDEN
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
 
         lifecycleScope.launch {
             delay(ANIMATE_IN_DELAY)
@@ -61,7 +60,7 @@ internal class CheckoutActivity : AppCompatActivity() {
                     }
 
                     override fun onStateChanged(bottomSheet: View, newState: Int) {
-                        if (newState == STATE_HIDDEN) {
+                        if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                             finish()
                         }
                     }
@@ -73,7 +72,7 @@ internal class CheckoutActivity : AppCompatActivity() {
     private fun animateOut() {
         // When the bottom sheet finishes animating to its new state,
         // the callback will finish the activity
-        bottomSheetBehavior.state = STATE_HIDDEN
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
     }
 
     override fun finish() {
