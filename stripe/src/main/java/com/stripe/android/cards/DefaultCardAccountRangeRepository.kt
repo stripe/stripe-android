@@ -1,6 +1,6 @@
 package com.stripe.android.cards
 
-import com.stripe.android.model.CardMetadata
+import com.stripe.android.model.AccountRange
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
@@ -11,7 +11,7 @@ internal class DefaultCardAccountRangeRepository(
 ) : CardAccountRangeRepository {
     override suspend fun getAccountRange(
         cardNumber: CardNumber.Unvalidated
-    ): CardMetadata.AccountRange? {
+    ): AccountRange? {
         return cardNumber.bin?.let {
             inMemoryCardAccountRangeSource.getAccountRange(cardNumber)
                 ?: remoteCardAccountRangeSource.getAccountRange(cardNumber)
