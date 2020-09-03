@@ -1,11 +1,10 @@
-package com.stripe.android.view
+package com.stripe.android.checkout
 
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.stripe.android.CheckoutActivityStarter
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentCheckoutPaymentMethodsListBinding
 import java.lang.IllegalStateException
