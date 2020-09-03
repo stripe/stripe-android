@@ -36,6 +36,10 @@ internal class DefaultCardAccountRangeStore(
             .apply()
     }
 
+    override suspend fun contains(
+        bin: Bin
+    ): Boolean = prefs.contains(createPrefKey(bin))
+
     @VisibleForTesting
     internal fun createPrefKey(bin: Bin): String = "$PREF_KEY_ACCOUNT_RANGES:$bin"
 
