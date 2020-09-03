@@ -989,6 +989,8 @@ internal class CardInputWidgetTest {
         // So any touch between 285 and 335 does nothing
         cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
+        idleLooper()
+
         assertThat(cardInputWidget.getFocusRequestOnTouch(300))
             .isNull()
     }

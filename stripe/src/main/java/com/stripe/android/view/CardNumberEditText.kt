@@ -22,6 +22,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -137,7 +138,10 @@ class CardNumberEditText internal constructor(
     internal var accountRangeRepositoryJob: Job? = null
 
     @JvmSynthetic
-    internal var isProcessingCallback: (Boolean) -> Unit = {}
+    internal var isLoadingCallback: (Boolean) -> Unit = {}
+
+    private val workScope = CoroutineScope(workDispatcher)
+    private val loadingJob: Job
 
     init {
         inputType = InputType.TYPE_CLASS_NUMBER
@@ -149,6 +153,12 @@ class CardNumberEditText internal constructor(
         }
 
         updateLengthFilter()
+
+        loadingJob = workScope.launch {
+            cardAccountRangeRepository.loading.collect {
+                isLoadingCallback(it)
+            }
+        }
     }
 
     override val accessibilityText: String?
@@ -157,6 +167,7 @@ class CardNumberEditText internal constructor(
         }
 
     override fun onDetachedFromWindow() {
+        loadingJob.cancel()
         cancelAccountRangeRepositoryJob()
 
         super.onDetachedFromWindow()
@@ -313,10 +324,9 @@ class CardNumberEditText internal constructor(
             // invalidate accountRange before fetching
             accountRange = null
 
-            accountRangeRepositoryJob = CoroutineScope(workDispatcher).launch {
+            accountRangeRepositoryJob = workScope.launch {
                 val bin = cardNumber.bin
                 if (bin != null) {
-                    isProcessingCallback(true)
                     onAccountRangeResult(
                         cardAccountRangeRepository.getAccountRange(cardNumber)
                     )
@@ -338,7 +348,6 @@ class CardNumberEditText internal constructor(
     ) = withContext(Dispatchers.Main) {
         accountRange = newAccountRange
         cardBrand = newAccountRange?.brand ?: CardBrand.Unknown
-        isProcessingCallback(false)
     }
 
     private fun shouldUpdateAccountRange(cardNumber: CardNumber.Unvalidated): Boolean {
