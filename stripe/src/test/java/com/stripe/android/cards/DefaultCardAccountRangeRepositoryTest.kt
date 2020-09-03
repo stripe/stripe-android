@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.ApiRequest
@@ -164,7 +165,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
     }
 
     @Test
-    fun `foo`() = testDispatcher.runBlockingTest {
+    fun `getAccountRange should not access remote source if BIN is in store`() = testDispatcher.runBlockingTest {
         val remoteSource = mock<CardAccountRangeSource>()
         val repository = DefaultCardAccountRangeRepository(
             inMemorySource = FakeCardAccountRangeSource(),
@@ -174,15 +175,11 @@ internal class DefaultCardAccountRangeRepositoryTest {
         )
 
         val bin = requireNotNull(CardNumberFixtures.VISA.bin)
-
-        // should not access remote source
-        repository.getAccountRange(CardNumberFixtures.VISA)
-        verify(remoteSource).getAccountRange(CardNumberFixtures.VISA)
         realStore.save(bin, emptyList())
 
         // should not access remote source
         repository.getAccountRange(CardNumberFixtures.VISA)
-        verify(remoteSource).getAccountRange(CardNumberFixtures.VISA)
+        verify(remoteSource, never()).getAccountRange(CardNumberFixtures.VISA)
     }
 
     private fun createRealRepository(
