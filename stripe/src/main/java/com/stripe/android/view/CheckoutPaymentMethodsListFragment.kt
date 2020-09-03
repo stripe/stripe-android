@@ -24,6 +24,7 @@ internal class CheckoutPaymentMethodsListFragment : Fragment(R.layout.fragment_c
         val args: CheckoutActivityStarter.Args? = CheckoutActivityStarter.Args.fromIntent(requireActivity().intent)
         if (args == null) {
             viewModel.onError(IllegalStateException("Missing activity args"))
+            return
         }
 
         viewModel.getPaymentMethods(
