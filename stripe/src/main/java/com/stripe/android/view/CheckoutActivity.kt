@@ -2,11 +2,13 @@ package com.stripe.android.view
 
 import android.os.Bundle
 import android.view.View
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HIDDEN
+import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.databinding.ActivityCheckoutBinding
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -18,6 +20,9 @@ internal class CheckoutActivity : AppCompatActivity() {
     private val bottomSheetBehavior by lazy {
         BottomSheetBehavior.from(viewBinding.bottomSheet)
     }
+    private val viewModel by viewModels<CheckoutViewModel> {
+        CheckoutViewModel.Factory(application)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +31,10 @@ internal class CheckoutActivity : AppCompatActivity() {
         // Handle taps outside of bottom sheet
         viewBinding.root.setOnClickListener {
             animateOut()
+        }
+        viewModel.error.observe(this) {
+            // TODO: Communicate error to caller
+            Snackbar.make(viewBinding.coordinator, "Received error: ${it.message}", Snackbar.LENGTH_LONG).show()
         }
 
         setupBottomSheet()

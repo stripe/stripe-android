@@ -2,6 +2,8 @@ package com.stripe.android.view
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.liveData
@@ -21,6 +23,12 @@ internal class CheckoutViewModel internal constructor(
     private val stripeRepository: StripeRepository,
     private val workDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : AndroidViewModel(application) {
+    private val mutableError = MutableLiveData<Throwable>()
+    internal val error: LiveData<Throwable> = mutableError
+
+    fun onError(throwable: Throwable) {
+        mutableError.postValue(throwable)
+    }
 
     fun getPaymentMethods(
         customerId: String,

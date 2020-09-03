@@ -3,43 +3,42 @@ package com.stripe.android.view
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.stripe.android.CheckoutActivityStarter
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentCheckoutPaymentMethodsListBinding
-import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PaymentMethod
+import java.lang.IllegalStateException
 
 internal class CheckoutPaymentMethodsListFragment : Fragment(R.layout.fragment_checkout_payment_methods_list) {
+    private val viewModel by activityViewModels<CheckoutViewModel> {
+        CheckoutViewModel.Factory(requireActivity().application)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val binding = FragmentCheckoutPaymentMethodsListBinding.bind(view)
         binding.recycler.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        // TODO: Use real data
-        binding.recycler.adapter = CheckoutPaymentMethodsAdapter(
-            listOf(
-                PaymentMethod(
-                    "amex",
-                    0,
-                    false,
-                    PaymentMethod.Type.Card,
-                    card = PaymentMethod.Card(CardBrand.AmericanExpress, last4 = "1234")
-                ),
-                PaymentMethod(
-                    "visa",
-                    0,
-                    false,
-                    PaymentMethod.Type.Card,
-                    card = PaymentMethod.Card(CardBrand.Visa, last4 = "4242")
-                ),
-                PaymentMethod(
-                    "mastercard",
-                    0,
-                    false,
-                    PaymentMethod.Type.Card,
-                    card = PaymentMethod.Card(CardBrand.MasterCard, last4 = "6789")
-                )
+
+        val args: CheckoutActivityStarter.Args? = CheckoutActivityStarter.Args.fromIntent(requireActivity().intent)
+        if (args == null) {
+            viewModel.onError(IllegalStateException("Missing activity args"))
+            return
+        }
+
+        viewModel.getPaymentMethods(
+            args.customerId,
+            args.ephemeralKey
+        ).observe(viewLifecycleOwner) { result ->
+            result.fold(
+                onSuccess = {
+                    binding.recycler.adapter = CheckoutPaymentMethodsAdapter(it)
+                },
+                onFailure = {
+                    viewModel.onError(it)
+                }
             )
-        )
+        }
     }
 }
