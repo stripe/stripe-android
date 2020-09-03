@@ -36,7 +36,6 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.LooperMode
 import java.util.Calendar
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -44,7 +43,6 @@ import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-@LooperMode(LooperMode.Mode.PAUSED)
 internal class CardInputWidgetTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
@@ -130,7 +128,7 @@ internal class CardInputWidgetTest {
     fun getCard_whenInputIsValidVisa_withPostalCodeDisabled_returnsCardObjectWithLoggingToken() {
         cardInputWidget.postalCodeEnabled = false
 
-        cardNumberEditText.setText(VISA_WITH_SPACES)
+        updateCardNumberAndIdle(VISA_WITH_SPACES)
         expiryEditText.append("12")
         expiryEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
@@ -173,7 +171,7 @@ internal class CardInputWidgetTest {
     fun getCard_whenInputIsValidVisa_withPostalCodeEnabled_returnsCardObjectWithLoggingToken() {
         cardInputWidget.postalCodeEnabled = true
 
-        cardNumberEditText.setText(VISA_WITH_SPACES)
+        updateCardNumberAndIdle(VISA_WITH_SPACES)
         expiryEditText.append("12")
         expiryEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
@@ -224,7 +222,7 @@ internal class CardInputWidgetTest {
     fun getCard_whenInputIsValidAmEx_withPostalCodeDisabled_createsExpectedObjects() {
         cardInputWidget.postalCodeEnabled = false
 
-        cardNumberEditText.setText(AMEX_WITH_SPACES)
+        updateCardNumberAndIdle(AMEX_WITH_SPACES)
         expiryEditText.append("12")
         expiryEditText.append("50")
         cvcEditText.append(CVC_VALUE_AMEX)
@@ -267,7 +265,7 @@ internal class CardInputWidgetTest {
     fun getCard_whenInputIsValidAmEx_withPostalCodeEnabled_createsExpectedObjects() {
         cardInputWidget.postalCodeEnabled = true
 
-        cardNumberEditText.setText(AMEX_WITH_SPACES)
+        updateCardNumberAndIdle(AMEX_WITH_SPACES)
         expiryEditText.append("12")
         expiryEditText.append("50")
         cvcEditText.append(CVC_VALUE_AMEX)
@@ -320,7 +318,7 @@ internal class CardInputWidgetTest {
     fun getCard_whenInputIsValidDinersClub_withPostalCodeDisabled_returnsCardObjectWithLoggingToken() {
         cardInputWidget.postalCodeEnabled = false
 
-        cardNumberEditText.setText(DINERS_CLUB_14_WITH_SPACES)
+        updateCardNumberAndIdle(DINERS_CLUB_14_WITH_SPACES)
         expiryEditText.append("12")
         expiryEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
@@ -361,7 +359,7 @@ internal class CardInputWidgetTest {
     fun getCard_whenInputIsValidDinersClub_withPostalCodeEnabled_returnsCardObjectWithLoggingToken() {
         cardInputWidget.postalCodeEnabled = true
 
-        cardNumberEditText.setText(DINERS_CLUB_14_WITH_SPACES)
+        updateCardNumberAndIdle(DINERS_CLUB_14_WITH_SPACES)
         expiryEditText.append("12")
         expiryEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
@@ -406,7 +404,7 @@ internal class CardInputWidgetTest {
         cardInputWidget.postalCodeEnabled = true
         cardInputWidget.postalCodeRequired = true
 
-        cardNumberEditText.setText(VISA_WITH_SPACES)
+        updateCardNumberAndIdle(VISA_WITH_SPACES)
         expiryEditText.append("12")
         expiryEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
@@ -423,7 +421,7 @@ internal class CardInputWidgetTest {
     @Test
     fun getCard_whenInputHasIncompleteCardNumber_returnsNull() {
         // This will be 242 4242 4242 4242
-        cardNumberEditText.setText(VISA_WITH_SPACES.drop(1))
+        updateCardNumberAndIdle(VISA_WITH_SPACES.drop(1))
         expiryEditText.append("12")
         expiryEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
@@ -438,7 +436,7 @@ internal class CardInputWidgetTest {
 
     @Test
     fun getCard_whenInputHasExpiredDate_returnsNull() {
-        cardNumberEditText.setText(VISA_WITH_SPACES)
+        updateCardNumberAndIdle(VISA_WITH_SPACES)
         // Date interpreted as 12/2012 until 2080, when it will be 12/2112
         expiryEditText.append("12")
         expiryEditText.append("12")
@@ -454,7 +452,7 @@ internal class CardInputWidgetTest {
 
     @Test
     fun getCard_whenIncompleteCvCForVisa_returnsNull() {
-        cardNumberEditText.setText(VISA_WITH_SPACES)
+        updateCardNumberAndIdle(VISA_WITH_SPACES)
         expiryEditText.append("12")
         expiryEditText.append("50")
         cvcEditText.append("12")
@@ -471,7 +469,7 @@ internal class CardInputWidgetTest {
     fun getCard_doesNotValidatePostalCode() {
         cardInputWidget.postalCodeEnabled = true
 
-        cardNumberEditText.setText(VISA_WITH_SPACES)
+        updateCardNumberAndIdle(VISA_WITH_SPACES)
         expiryEditText.append("12")
         expiryEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
@@ -502,7 +500,7 @@ internal class CardInputWidgetTest {
     fun getCard_when3DigitCvCForAmEx_withPostalCodeDisabled_returnsCard() {
         cardInputWidget.postalCodeEnabled = false
 
-        cardNumberEditText.setText(AMEX_WITH_SPACES)
+        updateCardNumberAndIdle(AMEX_WITH_SPACES)
         expiryEditText.append("12")
         expiryEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
@@ -532,7 +530,7 @@ internal class CardInputWidgetTest {
     fun getCard_when3DigitCvCForAmEx_withPostalCodeEnabled_returnsCard() {
         cardInputWidget.postalCodeEnabled = true
 
-        cardNumberEditText.setText(AMEX_WITH_SPACES)
+        updateCardNumberAndIdle(AMEX_WITH_SPACES)
         expiryEditText.append("12")
         expiryEditText.append("50")
         cvcEditText.append(CVC_VALUE_COMMON)
@@ -564,7 +562,7 @@ internal class CardInputWidgetTest {
 
     @Test
     fun getCard_whenIncompleteCvCForAmEx_returnsNull() {
-        cardNumberEditText.setText(AMEX_WITH_SPACES)
+        updateCardNumberAndIdle(AMEX_WITH_SPACES)
         expiryEditText.append("12")
         expiryEditText.append("50")
         cvcEditText.append("12")
@@ -607,7 +605,7 @@ internal class CardInputWidgetTest {
 
     @Test
     fun getCard_whenIncompleteCvCForDiners_returnsNull() {
-        cardNumberEditText.setText(DINERS_CLUB_14_WITH_SPACES)
+        updateCardNumberAndIdle(DINERS_CLUB_14_WITH_SPACES)
         expiryEditText.append("12")
         expiryEditText.append("50")
         cvcEditText.append("12")
@@ -714,7 +712,7 @@ internal class CardInputWidgetTest {
     fun onDeleteFromCvcDate_withPostalCodeDisabled_whenNotEmpty_doesNotShiftFocusOrDeleteEntry() {
         cardInputWidget.postalCodeEnabled = false
 
-        cardNumberEditText.setText(AMEX_WITH_SPACES)
+        updateCardNumberAndIdle(AMEX_WITH_SPACES)
 
         expiryEditText.append("12")
         expiryEditText.append("79")
@@ -734,7 +732,7 @@ internal class CardInputWidgetTest {
     fun onDeleteFromCvcDate_withPostalCodeEnabled_whenNotEmpty_doesNotShiftFocusOrDeleteEntry() {
         cardInputWidget.postalCodeEnabled = true
 
-        cardNumberEditText.setText(AMEX_WITH_SPACES)
+        updateCardNumberAndIdle(AMEX_WITH_SPACES)
 
         expiryEditText.append("12")
         expiryEditText.append("79")
@@ -752,7 +750,7 @@ internal class CardInputWidgetTest {
 
     @Test
     fun onDeleteFromCvcDate_whenEmptyAndExpiryDateIsEmpty_shiftsFocusOnly() {
-        cardNumberEditText.setText(DINERS_CLUB_14_WITH_SPACES)
+        updateCardNumberAndIdle(DINERS_CLUB_14_WITH_SPACES)
 
         // Simulates user tapping into this text field without filling out the date first.
         cvcEditText.requestFocus()
@@ -991,6 +989,8 @@ internal class CardInputWidgetTest {
         // So any touch between 285 and 335 does nothing
         cardInputWidget.isShowingFullCard = false
         cardInputWidget.updateSpaceSizes(false)
+        idleLooper()
+
         assertThat(cardInputWidget.getFocusRequestOnTouch(300))
             .isNull()
     }
@@ -1117,7 +1117,7 @@ internal class CardInputWidgetTest {
 
         // Moving left with an actual Visa number does the same as moving when empty.
         // |(peek==40)--(space==98)--(date==50)--(space==82)--(cvc==30)--(space==0)--(postal==100)|
-        cardNumberEditText.setText(VISA_WITH_SPACES)
+        updateCardNumberAndIdle(VISA_WITH_SPACES)
 
         assertThat(cardInputWidget.placementParameters)
             .isEqualTo(
@@ -1452,7 +1452,8 @@ internal class CardInputWidgetTest {
     @Test
     fun addValues_thenClear_withPostalCodeDisabled_leavesAllTextFieldsEmpty() {
         cardInputWidget.postalCodeEnabled = false
-        cardInputWidget.setCardNumber(VISA_NO_SPACES)
+        updateCardNumberAndIdle(VISA_NO_SPACES)
+
         cardInputWidget.setExpiryDate(12, 2079)
         cardInputWidget.setCvcCode(CVC_VALUE_AMEX)
         cardInputWidget.clear()

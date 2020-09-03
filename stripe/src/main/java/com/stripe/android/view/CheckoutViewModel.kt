@@ -16,7 +16,7 @@ import com.stripe.android.model.PaymentMethod
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
-class CheckoutViewModel internal constructor(
+internal class CheckoutViewModel internal constructor(
     application: Application,
     private val publishableKey: String,
     private val stripeAccountId: String?,

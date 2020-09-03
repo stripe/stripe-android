@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.text.Editable
 import android.text.InputFilter
+import android.text.InputType
 import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.VisibleForTesting
@@ -15,12 +16,13 @@ import com.stripe.android.cards.DefaultStaticCardAccountRanges
 import com.stripe.android.cards.LegacyCardAccountRangeRepository
 import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.cards.StaticCardAccountRanges
+import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.CardMetadata
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -89,7 +91,7 @@ class CardNumberEditText internal constructor(
             return cardBrand.getMaxLengthWithSpacesForCardNumber(fieldText)
         }
 
-    private var accountRange: CardMetadata.AccountRange? = null
+    private var accountRange: AccountRange? = null
         set(value) {
             field = value
             updateLengthFilter()
@@ -136,9 +138,13 @@ class CardNumberEditText internal constructor(
     internal var accountRangeRepositoryJob: Job? = null
 
     @JvmSynthetic
-    internal var isProcessingCallback: (Boolean) -> Unit = {}
+    internal var isLoadingCallback: (Boolean) -> Unit = {}
+
+    private val workScope = CoroutineScope(workDispatcher)
+    private val loadingJob: Job
 
     init {
+        inputType = InputType.TYPE_CLASS_NUMBER
         setErrorMessage(resources.getString(R.string.invalid_card_number))
         listenForTextChanges()
 
@@ -147,6 +153,12 @@ class CardNumberEditText internal constructor(
         }
 
         updateLengthFilter()
+
+        loadingJob = workScope.launch {
+            cardAccountRangeRepository.loading.collect {
+                isLoadingCallback(it)
+            }
+        }
     }
 
     override val accessibilityText: String?
@@ -155,6 +167,7 @@ class CardNumberEditText internal constructor(
         }
 
     override fun onDetachedFromWindow() {
+        loadingJob.cancel()
         cancelAccountRangeRepositoryJob()
 
         super.onDetachedFromWindow()
@@ -311,10 +324,9 @@ class CardNumberEditText internal constructor(
             // invalidate accountRange before fetching
             accountRange = null
 
-            accountRangeRepositoryJob = CoroutineScope(workDispatcher).launch {
+            accountRangeRepositoryJob = workScope.launch {
                 val bin = cardNumber.bin
                 if (bin != null) {
-                    isProcessingCallback(true)
                     onAccountRangeResult(
                         cardAccountRangeRepository.getAccountRange(cardNumber)
                     )
@@ -332,11 +344,10 @@ class CardNumberEditText internal constructor(
 
     @JvmSynthetic
     internal suspend fun onAccountRangeResult(
-        newAccountRange: CardMetadata.AccountRange?
+        newAccountRange: AccountRange?
     ) = withContext(Dispatchers.Main) {
         accountRange = newAccountRange
         cardBrand = newAccountRange?.brand ?: CardBrand.Unknown
-        isProcessingCallback(false)
     }
 
     private fun shouldUpdateAccountRange(cardNumber: CardNumber.Unvalidated): Boolean {

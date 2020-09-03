@@ -1,26 +1,26 @@
 package com.stripe.android.model.parsers
 
+import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
-import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.StripeJsonUtils
 import org.json.JSONObject
 
-internal class AccountRangeJsonParser : ModelJsonParser<CardMetadata.AccountRange> {
-    override fun parse(json: JSONObject): CardMetadata.AccountRange? {
+internal class AccountRangeJsonParser : ModelJsonParser<AccountRange> {
+    override fun parse(json: JSONObject): AccountRange? {
         val accountRangeHigh = StripeJsonUtils.optString(json, FIELD_ACCOUNT_RANGE_HIGH)
         val accountRangeLow = StripeJsonUtils.optString(json, FIELD_ACCOUNT_RANGE_LOW)
         val panLength = StripeJsonUtils.optInteger(json, FIELD_PAN_LENGTH)
 
         val brandInfo =
             StripeJsonUtils.optString(json, FIELD_BRAND).let { brandName ->
-                CardMetadata.AccountRange.BrandInfo.values().firstOrNull { it.brandName == brandName }
+                AccountRange.BrandInfo.values().firstOrNull { it.brandName == brandName }
             }
         return if (accountRangeHigh != null &&
             accountRangeLow != null &&
             panLength != null &&
             brandInfo != null
         ) {
-            CardMetadata.AccountRange(
+            AccountRange(
                 binRange = BinRange(accountRangeLow, accountRangeHigh),
                 panLength = panLength,
                 brandInfo = brandInfo,
@@ -31,7 +31,7 @@ internal class AccountRangeJsonParser : ModelJsonParser<CardMetadata.AccountRang
         }
     }
 
-    fun serialize(accountRange: CardMetadata.AccountRange): JSONObject {
+    fun serialize(accountRange: AccountRange): JSONObject {
         return JSONObject()
             .put(FIELD_ACCOUNT_RANGE_LOW, accountRange.binRange.low)
             .put(FIELD_ACCOUNT_RANGE_HIGH, accountRange.binRange.high)
