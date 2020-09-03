@@ -52,4 +52,5 @@
 
     <!--    Checkout -->
     <dimen name="stripe_checkout_payment_method_icon_size">76dp</dimen>
+    <dimen name="stripe_checkout_outer_spacing">10dp</dimen>
 </resources>
