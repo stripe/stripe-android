@@ -275,6 +275,26 @@ internal class CardNumberEditTextTest {
     }
 
     @Test
+    fun `when 19 digit PAN is pasted, full PAN is accepted and formatted`() {
+        val cardNumberEditText = CardNumberEditText(
+            context,
+            workDispatcher = testDispatcher,
+            cardAccountRangeRepository = NullCardAccountRangeRepository(),
+            staticCardAccountRanges = object : StaticCardAccountRanges {
+                override fun match(
+                    cardNumber: CardNumber.Unvalidated
+                ): AccountRange? = null
+            }
+        )
+
+        cardNumberEditText.setText("6216828050000000000")
+        idleLooper()
+
+        assertThat(cardNumberEditText.fieldText)
+            .isEqualTo("6216 8280 5000 0000 000")
+    }
+
+    @Test
     fun `updating text with null account range should format text correctly but not set card brand`() {
         val cardNumberEditText = CardNumberEditText(
             context,
