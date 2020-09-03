@@ -25,11 +25,11 @@ internal class CardBrandView @JvmOverloads constructor(
     @ColorInt
     internal var tintColorInt: Int = 0
 
-    var isProcessing: Boolean by Delegates.observable(
+    var isLoading: Boolean by Delegates.observable(
         false
-    ) { _, wasProcessing, isProcessing ->
-        if (SHOULD_SHOW_PROGRESS && wasProcessing != isProcessing) {
-            if (isProcessing) {
+    ) { _, wasLoading, isLoading ->
+        if (SHOULD_SHOW_PROGRESS && wasLoading != isLoading) {
+            if (isLoading) {
                 progressView.show()
             } else {
                 progressView.hide()
