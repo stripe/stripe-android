@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.text.Editable
 import android.text.InputFilter
+import android.text.InputType
 import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.VisibleForTesting
@@ -139,6 +140,7 @@ class CardNumberEditText internal constructor(
     internal var isProcessingCallback: (Boolean) -> Unit = {}
 
     init {
+        inputType = InputType.TYPE_CLASS_NUMBER
         setErrorMessage(resources.getString(R.string.invalid_card_number))
         listenForTextChanges()
 
