@@ -1,6 +1,7 @@
 package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardMetadata
@@ -16,22 +17,22 @@ class CardMetadataJsonParserTest {
                 CardMetadata(
                     BinFixtures.VISA,
                     listOf(
-                        CardMetadata.AccountRange(
+                        AccountRange(
                             binRange = BinRange(
                                 low = "4242420000000000",
                                 high = "4242424239999999"
                             ),
                             panLength = 16,
-                            brandInfo = CardMetadata.AccountRange.BrandInfo.Visa,
+                            brandInfo = AccountRange.BrandInfo.Visa,
                             country = "GB"
                         ),
-                        CardMetadata.AccountRange(
+                        AccountRange(
                             binRange = BinRange(
                                 low = "4242424250000000",
                                 high = "4242429999999999"
                             ),
                             panLength = 16,
-                            brandInfo = CardMetadata.AccountRange.BrandInfo.Visa,
+                            brandInfo = AccountRange.BrandInfo.Visa,
                             country = "GB"
                         )
                     )
@@ -46,13 +47,13 @@ class CardMetadataJsonParserTest {
                 CardMetadata(
                     BinFixtures.VISA,
                     listOf(
-                        CardMetadata.AccountRange(
+                        AccountRange(
                             binRange = BinRange(
                                 low = "4242420000000000",
                                 high = "4242424239999999"
                             ),
                             panLength = 16,
-                            brandInfo = CardMetadata.AccountRange.BrandInfo.Visa,
+                            brandInfo = AccountRange.BrandInfo.Visa,
                             country = "GB"
                         )
                     )
