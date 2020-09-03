@@ -2,9 +2,9 @@ package com.stripe.android.cards
 
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
-import com.stripe.android.model.CardMetadata
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
@@ -48,13 +48,13 @@ internal class DefaultCardAccountRangeStoreTest {
 
     private companion object {
         private val BRANDX_ACCOUNT_RANGES = listOf(
-            CardMetadata.AccountRange(
+            AccountRange(
                 binRange = BinRange(
                     low = "9999990000000000",
                     high = "9999999999999999"
                 ),
                 panLength = 16,
-                brandInfo = CardMetadata.AccountRange.BrandInfo.JCB
+                brandInfo = AccountRange.BrandInfo.JCB
             )
         )
     }

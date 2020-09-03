@@ -7,9 +7,9 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.ApiRequest
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.StripeApiRepository
+import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
-import com.stripe.android.model.CardMetadata
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -42,13 +42,13 @@ internal class DefaultCardAccountRangeRepositoryTest {
         assertThat(
             realRepository.getAccountRange(CardNumberFixtures.VISA)
         ).isEqualTo(
-            CardMetadata.AccountRange(
+            AccountRange(
                 binRange = BinRange(
                     low = "4000000000000000",
                     high = "4999999999999999"
                 ),
                 panLength = 16,
-                brandInfo = CardMetadata.AccountRange.BrandInfo.Visa
+                brandInfo = AccountRange.BrandInfo.Visa
             )
         )
         assertThat(realStore.get(BinFixtures.VISA))
@@ -183,7 +183,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
     ) : CardAccountRangeSource {
         override suspend fun getAccountRange(
             cardNumber: CardNumber.Unvalidated
-        ): CardMetadata.AccountRange? {
+        ): AccountRange? {
             return null
         }
 

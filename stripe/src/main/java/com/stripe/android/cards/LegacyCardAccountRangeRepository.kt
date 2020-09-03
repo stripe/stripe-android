@@ -1,6 +1,6 @@
 package com.stripe.android.cards
 
-import com.stripe.android.model.CardMetadata
+import com.stripe.android.model.AccountRange
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
@@ -13,7 +13,7 @@ internal class LegacyCardAccountRangeRepository(
 ) : CardAccountRangeRepository {
     override suspend fun getAccountRange(
         cardNumber: CardNumber.Unvalidated
-    ): CardMetadata.AccountRange? {
+    ): AccountRange? {
         return cardNumber.bin?.let {
             staticCardAccountRangeSource.getAccountRange(cardNumber)
         }

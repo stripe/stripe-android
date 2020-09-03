@@ -2,7 +2,7 @@ package com.stripe.android.cards
 
 import com.stripe.android.ApiRequest
 import com.stripe.android.StripeRepository
-import com.stripe.android.model.CardMetadata
+import com.stripe.android.model.AccountRange
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +21,7 @@ internal class RemoteCardAccountRangeSource(
 
     override suspend fun getAccountRange(
         cardNumber: CardNumber.Unvalidated
-    ): CardMetadata.AccountRange? {
+    ): AccountRange? {
         return cardNumber.bin?.let { bin ->
             mutableLoading.value = true
 
