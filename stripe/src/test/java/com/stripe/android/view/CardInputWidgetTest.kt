@@ -107,7 +107,7 @@ internal class CardInputWidgetTest {
             }
 
             it.frameWidthSupplier = {
-                500 // That's a pretty small screen, but one that we theoretically support.
+                SCREEN_WIDTH // That's a pretty small screen, but one that we theoretically support.
             }
 
             // Set the width of the icon and its margin so that test calculations have
@@ -790,7 +790,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.placementParameters)
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
-                    totalLengthInPixels = 500,
+                    totalLengthInPixels = SCREEN_WIDTH,
                     cardWidth = 230,
                     hiddenCardWidth = 150,
                     peekCardWidth = 40,
@@ -815,13 +815,18 @@ internal class CardInputWidgetTest {
         // Moving left uses Visa-style ("common") defaults
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
-        cardInputWidget.updateSpaceSizes(false)
+        cardInputWidget.updateSpaceSizes(
+            false,
+            frameWidth = SCREEN_WIDTH,
+            frameStart = BRAND_ICON_WIDTH
+        )
         idleLooper()
+        cardInputWidget.requestLayout()
 
         assertThat(cardInputWidget.placementParameters)
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
-                    totalLengthInPixels = 500,
+                    totalLengthInPixels = SCREEN_WIDTH,
                     cardWidth = 230,
                     hiddenCardWidth = 150,
                     peekCardWidth = 40,
@@ -846,13 +851,17 @@ internal class CardInputWidgetTest {
         // Moving left uses Visa-style ("common") defaults
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
-        cardInputWidget.updateSpaceSizes(false)
+        cardInputWidget.updateSpaceSizes(
+            false,
+            frameWidth = SCREEN_WIDTH,
+            frameStart = BRAND_ICON_WIDTH
+        )
         idleLooper()
 
         assertThat(cardInputWidget.placementParameters)
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
-                    totalLengthInPixels = 500,
+                    totalLengthInPixels = SCREEN_WIDTH,
                     cardWidth = 230,
                     hiddenCardWidth = 150,
                     peekCardWidth = 40,
@@ -929,7 +938,11 @@ internal class CardInputWidgetTest {
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch between 60 and 100 does nothing
         cardInputWidget.isShowingFullCard = false
-        cardInputWidget.updateSpaceSizes(false)
+        cardInputWidget.updateSpaceSizes(
+            false,
+            frameWidth = SCREEN_WIDTH,
+            frameStart = BRAND_ICON_WIDTH
+        )
         assertThat(cardInputWidget.getFocusRequestOnTouch(75))
             .isNull()
     }
@@ -943,7 +956,11 @@ internal class CardInputWidgetTest {
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch between 100 and 192 returns the card editor
         cardInputWidget.isShowingFullCard = false
-        cardInputWidget.updateSpaceSizes(false)
+        cardInputWidget.updateSpaceSizes(
+            false,
+            frameWidth = SCREEN_WIDTH,
+            frameStart = BRAND_ICON_WIDTH
+        )
 
         assertThat(cardInputWidget.getFocusRequestOnTouch(150))
             .isEqualTo(cardNumberEditText)
@@ -958,7 +975,11 @@ internal class CardInputWidgetTest {
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch between 192 and 285 returns the date editor
         cardInputWidget.isShowingFullCard = false
-        cardInputWidget.updateSpaceSizes(false)
+        cardInputWidget.updateSpaceSizes(
+            false,
+            frameWidth = SCREEN_WIDTH,
+            frameStart = BRAND_ICON_WIDTH
+        )
 
         assertThat(cardInputWidget.getFocusRequestOnTouch(200))
             .isEqualTo(expiryEditText)
@@ -973,7 +994,11 @@ internal class CardInputWidgetTest {
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch between 192 and 285 returns the date editor
         cardInputWidget.isShowingFullCard = false
-        cardInputWidget.updateSpaceSizes(false)
+        cardInputWidget.updateSpaceSizes(
+            false,
+            frameWidth = SCREEN_WIDTH,
+            frameStart = BRAND_ICON_WIDTH
+        )
 
         assertThat(cardInputWidget.getFocusRequestOnTouch(170))
             .isEqualTo(expiryEditText)
@@ -988,7 +1013,11 @@ internal class CardInputWidgetTest {
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch between 285 and 335 does nothing
         cardInputWidget.isShowingFullCard = false
-        cardInputWidget.updateSpaceSizes(false)
+        cardInputWidget.updateSpaceSizes(
+            false,
+            frameWidth = SCREEN_WIDTH,
+            frameStart = BRAND_ICON_WIDTH
+        )
         idleLooper()
 
         assertThat(cardInputWidget.getFocusRequestOnTouch(300))
@@ -1004,7 +1033,11 @@ internal class CardInputWidgetTest {
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch between 285 and 335 does nothing
         cardInputWidget.isShowingFullCard = false
-        cardInputWidget.updateSpaceSizes(false)
+        cardInputWidget.updateSpaceSizes(
+            false,
+            frameWidth = SCREEN_WIDTH,
+            frameStart = BRAND_ICON_WIDTH
+        )
         assertThat(cardInputWidget.getFocusRequestOnTouch(200))
             .isNull()
     }
@@ -1018,7 +1051,11 @@ internal class CardInputWidgetTest {
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch between 335 and 432 returns the date editor
         cardInputWidget.isShowingFullCard = false
-        cardInputWidget.updateSpaceSizes(false)
+        cardInputWidget.updateSpaceSizes(
+            false,
+            frameWidth = SCREEN_WIDTH,
+            frameStart = BRAND_ICON_WIDTH
+        )
 
         assertThat(cardInputWidget.getFocusRequestOnTouch(400))
             .isEqualTo(expiryEditText)
@@ -1033,7 +1070,11 @@ internal class CardInputWidgetTest {
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch between 335 and 432 returns the date editor
         cardInputWidget.isShowingFullCard = false
-        cardInputWidget.updateSpaceSizes(false)
+        cardInputWidget.updateSpaceSizes(
+            false,
+            frameWidth = SCREEN_WIDTH,
+            frameStart = BRAND_ICON_WIDTH
+        )
 
         assertThat(cardInputWidget.getFocusRequestOnTouch(185))
             .isEqualTo(expiryEditText)
@@ -1048,7 +1089,11 @@ internal class CardInputWidgetTest {
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch between 432 and 530 returns the date editor
         cardInputWidget.isShowingFullCard = false
-        cardInputWidget.updateSpaceSizes(false)
+        cardInputWidget.updateSpaceSizes(
+            false,
+            frameWidth = SCREEN_WIDTH,
+            frameStart = BRAND_ICON_WIDTH
+        )
 
         assertThat(cardInputWidget.getFocusRequestOnTouch(485))
             .isEqualTo(cvcEditText)
@@ -1063,7 +1108,11 @@ internal class CardInputWidgetTest {
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch between 432 and 530 returns the date editor
         cardInputWidget.isShowingFullCard = false
-        cardInputWidget.updateSpaceSizes(false)
+        cardInputWidget.updateSpaceSizes(
+            false,
+            frameWidth = SCREEN_WIDTH,
+            frameStart = BRAND_ICON_WIDTH
+        )
 
         assertThat(cardInputWidget.getFocusRequestOnTouch(300))
             .isEqualTo(cvcEditText)
@@ -1076,7 +1125,11 @@ internal class CardInputWidgetTest {
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         // So any touch over 530 does nothing
         cardInputWidget.isShowingFullCard = false
-        cardInputWidget.updateSpaceSizes(false)
+        cardInputWidget.updateSpaceSizes(
+            false,
+            frameWidth = SCREEN_WIDTH,
+            frameStart = BRAND_ICON_WIDTH
+        )
 
         assertThat(cardInputWidget.getFocusRequestOnTouch(545))
             .isNull()
@@ -1093,7 +1146,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.placementParameters)
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
-                    totalLengthInPixels = 500,
+                    totalLengthInPixels = SCREEN_WIDTH,
                     cardWidth = 230,
                     hiddenCardWidth = 150,
                     peekCardWidth = 40,
@@ -1122,7 +1175,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.placementParameters)
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
-                    totalLengthInPixels = 500,
+                    totalLengthInPixels = SCREEN_WIDTH,
                     cardWidth = 230,
                     hiddenCardWidth = 150,
                     peekCardWidth = 40,
@@ -1153,7 +1206,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.placementParameters)
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
-                    totalLengthInPixels = 500,
+                    totalLengthInPixels = SCREEN_WIDTH,
                     cardWidth = 230,
                     hiddenCardWidth = 120,
                     peekCardWidth = 50,
@@ -1182,7 +1235,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.placementParameters)
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
-                    totalLengthInPixels = 500,
+                    totalLengthInPixels = SCREEN_WIDTH,
                     cardWidth = 230,
                     hiddenCardWidth = 120,
                     peekCardWidth = 50,
@@ -1213,7 +1266,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.placementParameters)
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
-                    totalLengthInPixels = 500,
+                    totalLengthInPixels = SCREEN_WIDTH,
                     cardWidth = 230,
                     hiddenCardWidth = 120,
                     peekCardWidth = 20,
@@ -1242,7 +1295,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.placementParameters)
             .isEqualTo(
                 CardInputWidget.PlacementParameters(
-                    totalLengthInPixels = 500,
+                    totalLengthInPixels = SCREEN_WIDTH,
                     cardWidth = 230,
                     hiddenCardWidth = 120,
                     peekCardWidth = 20,
@@ -1771,5 +1824,8 @@ internal class CardInputWidgetTest {
         private const val CVC_VALUE_COMMON = "123"
         private const val CVC_VALUE_AMEX = "1234"
         private const val POSTAL_CODE_VALUE = "94103"
+
+        private const val SCREEN_WIDTH = 500
+        private const val BRAND_ICON_WIDTH = 60
     }
 }

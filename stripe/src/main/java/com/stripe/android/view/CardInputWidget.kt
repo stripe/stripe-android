@@ -695,9 +695,11 @@ class CardInputWidget @JvmOverloads constructor(
     }
 
     @VisibleForTesting
-    internal fun updateSpaceSizes(isShowingFullCard: Boolean) {
-        val frameWidth = frameWidth
-        val frameStart = containerLayout.left
+    internal fun updateSpaceSizes(
+        isShowingFullCard: Boolean,
+        frameWidth: Int = this.frameWidth,
+        frameStart: Int = this.containerLayout.left
+    ) {
         if (frameWidth == 0) {
             // This is an invalid view state.
             return
