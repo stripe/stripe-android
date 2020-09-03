@@ -1,6 +1,8 @@
 package com.stripe.android.cards
 
 import com.stripe.android.model.CardMetadata
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 /**
  * A [CardAccountRangeRepository] that simulates existing card account range lookup logic by only
@@ -16,4 +18,6 @@ internal class LegacyCardAccountRangeRepository(
             staticCardAccountRangeSource.getAccountRange(cardNumber)
         }
     }
+
+    override val loading: Flow<Boolean> = flowOf(false)
 }

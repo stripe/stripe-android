@@ -6,6 +6,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardMetadata
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -34,6 +36,8 @@ class CardWidgetViewModelTest {
         override suspend fun getAccountRange(
             cardNumber: CardNumber.Unvalidated
         ) = ACCOUNT_RANGE
+
+        override val loading: Flow<Boolean> = flowOf(false)
     }
 
     private companion object {
