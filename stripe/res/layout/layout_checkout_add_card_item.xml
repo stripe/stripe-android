@@ -19,7 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:tint="#c3cfd9"
+            android:tint="@color/stripe_checkout_add_card_tint"
             android:src="@drawable/stripe_ic_add_circle" />
     </FrameLayout>
 
