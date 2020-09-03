@@ -2,12 +2,12 @@ package com.stripe.android.view
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HIDDEN
+import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.databinding.ActivityCheckoutBinding
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -33,8 +33,7 @@ internal class CheckoutActivity : AppCompatActivity() {
         }
         viewModel.error.observe(this) {
             // TODO: Communicate error to caller
-            Toast.makeText(this, "Received error: ${it.message}", Toast.LENGTH_LONG).show()
-            animateOut()
+            Snackbar.make(viewBinding.coordinator, "Received error: ${it.message}", Snackbar.LENGTH_LONG).show()
         }
 
         setupBottomSheet()

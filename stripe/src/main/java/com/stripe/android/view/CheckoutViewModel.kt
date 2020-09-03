@@ -23,11 +23,11 @@ class CheckoutViewModel internal constructor(
     private val stripeRepository: StripeRepository,
     private val workDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : AndroidViewModel(application) {
-    private val _error = MutableLiveData<Throwable>()
-    internal val error: LiveData<Throwable> = _error
+    private val mutableError = MutableLiveData<Throwable>()
+    internal val error: LiveData<Throwable> = mutableError
 
     fun onError(throwable: Throwable) {
-        _error.postValue(throwable)
+        mutableError.postValue(throwable)
     }
 
     fun getPaymentMethods(
