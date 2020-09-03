@@ -628,76 +628,77 @@ class CardInputWidget @JvmOverloads constructor(
      * if no such request is necessary.
      */
     @VisibleForTesting
-    internal fun getFocusRequestOnTouch(touchX: Int): View? {
-        val frameStart = containerLayout.left
+    internal fun getFocusRequestOnTouch(
+        touchX: Int,
+        frameStart: Int = containerLayout.left
+    ): View? = when {
+        isShowingFullCard -> {
+            // Then our view is
+            // |full card||space||date|
 
-        return when {
-            isShowingFullCard -> {
-                // Then our view is
-                // |full card||space||date|
-
-                when {
-                    touchX < frameStart + placementParameters.cardWidth -> // Then the card edit view will already handle this touch.
-                        null
-                    touchX < placementParameters.cardTouchBufferLimit -> // Then we want to act like this was a touch on the card view
-                        cardNumberEditText
-                    touchX < placementParameters.dateStartPosition -> // Then we act like this was a touch on the date editor.
-                        expiryDateEditText
-                    else -> // Then the date editor will already handle this touch.
-                        null
-                }
+            when {
+                touchX < frameStart + placementParameters.cardWidth -> // Then the card edit view will already handle this touch.
+                    null
+                touchX < placementParameters.cardTouchBufferLimit -> // Then we want to act like this was a touch on the card view
+                    cardNumberEditText
+                touchX < placementParameters.dateStartPosition -> // Then we act like this was a touch on the date editor.
+                    expiryDateEditText
+                else -> // Then the date editor will already handle this touch.
+                    null
             }
-            postalCodeEnabled -> {
-                // Our view is
-                // |peek card||space||date||space||cvc||space||postal code|
-                when {
-                    touchX < frameStart + placementParameters.peekCardWidth -> // This was a touch on the card number editor, so we don't need to handle it.
-                        null
-                    touchX < placementParameters.cardTouchBufferLimit -> // Then we need to act like the user touched the card editor
-                        cardNumberEditText
-                    touchX < placementParameters.dateStartPosition -> // Then we need to act like this was a touch on the date editor
-                        expiryDateEditText
-                    touchX < placementParameters.dateStartPosition + placementParameters.dateWidth -> // Just a regular touch on the date editor.
-                        null
-                    touchX < placementParameters.dateRightTouchBufferLimit -> // We need to act like this was a touch on the date editor
-                        expiryDateEditText
-                    touchX < placementParameters.cvcStartPosition -> // We need to act like this was a touch on the cvc editor.
-                        cvcEditText
-                    touchX < placementParameters.cvcStartPosition + placementParameters.cvcWidth -> // Just a regular touch on the cvc editor.
-                        null
-                    touchX < placementParameters.cvcRightTouchBufferLimit -> // We need to act like this was a touch on the cvc editor.
-                        cvcEditText
-                    touchX < placementParameters.postalCodeStartPosition -> // We need to act like this was a touch on the postal code editor.
-                        postalCodeEditText
-                    else -> null
-                }
+        }
+        postalCodeEnabled -> {
+            // Our view is
+            // |peek card||space||date||space||cvc||space||postal code|
+            when {
+                touchX < frameStart + placementParameters.peekCardWidth -> // This was a touch on the card number editor, so we don't need to handle it.
+                    null
+                touchX < placementParameters.cardTouchBufferLimit -> // Then we need to act like the user touched the card editor
+                    cardNumberEditText
+                touchX < placementParameters.dateStartPosition -> // Then we need to act like this was a touch on the date editor
+                    expiryDateEditText
+                touchX < placementParameters.dateStartPosition + placementParameters.dateWidth -> // Just a regular touch on the date editor.
+                    null
+                touchX < placementParameters.dateRightTouchBufferLimit -> // We need to act like this was a touch on the date editor
+                    expiryDateEditText
+                touchX < placementParameters.cvcStartPosition -> // We need to act like this was a touch on the cvc editor.
+                    cvcEditText
+                touchX < placementParameters.cvcStartPosition + placementParameters.cvcWidth -> // Just a regular touch on the cvc editor.
+                    null
+                touchX < placementParameters.cvcRightTouchBufferLimit -> // We need to act like this was a touch on the cvc editor.
+                    cvcEditText
+                touchX < placementParameters.postalCodeStartPosition -> // We need to act like this was a touch on the postal code editor.
+                    postalCodeEditText
+                else -> null
             }
-            else -> {
-                // Our view is
-                // |peek card||space||date||space||cvc|
-                when {
-                    touchX < frameStart + placementParameters.peekCardWidth -> // This was a touch on the card number editor, so we don't need to handle it.
-                        null
-                    touchX < placementParameters.cardTouchBufferLimit -> // Then we need to act like the user touched the card editor
-                        cardNumberEditText
-                    touchX < placementParameters.dateStartPosition -> // Then we need to act like this was a touch on the date editor
-                        expiryDateEditText
-                    touchX < placementParameters.dateStartPosition + placementParameters.dateWidth -> // Just a regular touch on the date editor.
-                        null
-                    touchX < placementParameters.dateRightTouchBufferLimit -> // We need to act like this was a touch on the date editor
-                        expiryDateEditText
-                    touchX < placementParameters.cvcStartPosition -> // We need to act like this was a touch on the cvc editor.
-                        cvcEditText
-                    else -> null
-                }
+        }
+        else -> {
+            // Our view is
+            // |peek card||space||date||space||cvc|
+            when {
+                touchX < frameStart + placementParameters.peekCardWidth -> // This was a touch on the card number editor, so we don't need to handle it.
+                    null
+                touchX < placementParameters.cardTouchBufferLimit -> // Then we need to act like the user touched the card editor
+                    cardNumberEditText
+                touchX < placementParameters.dateStartPosition -> // Then we need to act like this was a touch on the date editor
+                    expiryDateEditText
+                touchX < placementParameters.dateStartPosition + placementParameters.dateWidth -> // Just a regular touch on the date editor.
+                    null
+                touchX < placementParameters.dateRightTouchBufferLimit -> // We need to act like this was a touch on the date editor
+                    expiryDateEditText
+                touchX < placementParameters.cvcStartPosition -> // We need to act like this was a touch on the cvc editor.
+                    cvcEditText
+                else -> null
             }
         }
     }
 
     @VisibleForTesting
-    internal fun updateSpaceSizes(isShowingFullCard: Boolean) {
-        val frameWidth = frameWidth
-        val frameStart = containerLayout.left
+    internal fun updateSpaceSizes(
+        isShowingFullCard: Boolean,
+        frameWidth: Int = this.frameWidth,
+        frameStart: Int = this.containerLayout.left
+    ) {
         if (frameWidth == 0) {
             // This is an invalid view state.
             return
@@ -865,8 +866,8 @@ class CardInputWidget @JvmOverloads constructor(
             cardNumberEditText.requestFocus()
         }
 
-        cardNumberEditText.isProcessingCallback = {
-            cardBrandView.isProcessing = it
+        cardNumberEditText.isLoadingCallback = {
+            cardBrandView.isLoading = it
         }
     }
 
@@ -1167,7 +1168,7 @@ class CardInputWidget @JvmOverloads constructor(
                 return cardPeekDateLeftMargin + dateWidth + dateCvcSeparation
             }
 
-        internal val cardPeekPostalCodeLeftMargin: Int
+        private val cardPeekPostalCodeLeftMargin: Int
             @JvmSynthetic
             get() {
                 return cardPeekCvcLeftMargin + postalCodeWidth + cvcPostalCodeSeparation

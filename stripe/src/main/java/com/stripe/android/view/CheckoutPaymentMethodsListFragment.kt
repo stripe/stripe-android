@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.CheckoutActivityStarter
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentCheckoutPaymentMethodsListBinding
+import java.lang.IllegalStateException
 
 internal class CheckoutPaymentMethodsListFragment : Fragment(R.layout.fragment_checkout_payment_methods_list) {
     private val viewModel by activityViewModels<CheckoutViewModel> {
@@ -19,7 +20,12 @@ internal class CheckoutPaymentMethodsListFragment : Fragment(R.layout.fragment_c
 
         val binding = FragmentCheckoutPaymentMethodsListBinding.bind(view)
         binding.recycler.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        val args: CheckoutActivityStarter.Args = requireNotNull(CheckoutActivityStarter.Args.fromIntent(requireActivity().intent))
+
+        val args: CheckoutActivityStarter.Args? = CheckoutActivityStarter.Args.fromIntent(requireActivity().intent)
+        if (args == null) {
+            viewModel.onError(IllegalStateException("Missing activity args"))
+            return
+        }
 
         viewModel.getPaymentMethods(
             args.customerId,

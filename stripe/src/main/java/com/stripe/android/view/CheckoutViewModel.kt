@@ -16,18 +16,18 @@ import com.stripe.android.model.PaymentMethod
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
-class CheckoutViewModel internal constructor(
+internal class CheckoutViewModel internal constructor(
     application: Application,
     private val publishableKey: String,
     private val stripeAccountId: String?,
     private val stripeRepository: StripeRepository,
     private val workDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : AndroidViewModel(application) {
-    private val _error = MutableLiveData<Throwable>()
-    internal val error: LiveData<Throwable> = _error
+    private val mutableError = MutableLiveData<Throwable>()
+    internal val error: LiveData<Throwable> = mutableError
 
     fun onError(throwable: Throwable) {
-        _error.postValue(throwable)
+        mutableError.postValue(throwable)
     }
 
     fun getPaymentMethods(

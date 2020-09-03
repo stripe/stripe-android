@@ -13,6 +13,10 @@ import java.lang.IllegalStateException
 internal class CheckoutPaymentMethodsAdapter(val paymentMethods: List<PaymentMethod>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var selectedPaymentMethodId: String? = null
 
+    init {
+        setHasStableIds(true)
+    }
+
     private fun updateSelectedPaymentMethod(position: Int) {
         val currentlySelectedPosition = paymentMethods.indexOfFirst {
             it.id == selectedPaymentMethodId
@@ -23,6 +27,10 @@ internal class CheckoutPaymentMethodsAdapter(val paymentMethods: List<PaymentMet
             notifyItemChanged(position)
             selectedPaymentMethodId = paymentMethods.getOrNull(position)?.id
         }
+    }
+
+    override fun getItemId(position: Int): Long {
+        return paymentMethods[position].hashCode().toLong()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -64,11 +72,13 @@ internal class CheckoutPaymentMethodsAdapter(val paymentMethods: List<PaymentMet
         )
 
         fun setPaymentMethod(method: PaymentMethod) {
-            val card = method.card!!
-            // TODO: Get updated card brand icons
-            binding.brandIcon.setImageResource(card.brand.icon)
-            binding.cardNumber.text = binding.root.context
-                .getString(R.string.checkout_payment_method_item_card_number, card.last4)
+            // TODO: Communicate error if card data not present
+            method.card?.let { card ->
+                // TODO: Get updated card brand icons
+                binding.brandIcon.setImageResource(card.brand.icon)
+                binding.cardNumber.text = itemView.context
+                    .getString(R.string.checkout_payment_method_item_card_number, card.last4)
+            }
         }
 
         fun setSelected(selected: Boolean) {
