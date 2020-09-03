@@ -95,6 +95,7 @@ internal class CardInputWidgetTest {
                 }
             }
         }
+        idleLooper()
     }
 
     @AfterTest
