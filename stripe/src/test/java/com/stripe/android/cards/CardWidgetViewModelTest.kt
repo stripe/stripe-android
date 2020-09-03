@@ -4,8 +4,10 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures
+import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
-import com.stripe.android.model.CardMetadata
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -22,7 +24,7 @@ class CardWidgetViewModelTest {
 
     @Test
     fun `getAccountRange() should return expected value`() {
-        var accountRange: CardMetadata.AccountRange? = null
+        var accountRange: AccountRange? = null
         viewModel.getAccountRange(CardNumberFixtures.VISA).observeForever {
             accountRange = it
         }
@@ -34,16 +36,18 @@ class CardWidgetViewModelTest {
         override suspend fun getAccountRange(
             cardNumber: CardNumber.Unvalidated
         ) = ACCOUNT_RANGE
+
+        override val loading: Flow<Boolean> = flowOf(false)
     }
 
     private companion object {
-        private val ACCOUNT_RANGE = CardMetadata.AccountRange(
+        private val ACCOUNT_RANGE = AccountRange(
             binRange = BinRange(
                 low = "4242420000000000",
                 high = "4242424239999999"
             ),
             panLength = 16,
-            brandInfo = CardMetadata.AccountRange.BrandInfo.Visa,
+            brandInfo = AccountRange.BrandInfo.Visa,
             country = "GB"
         )
     }

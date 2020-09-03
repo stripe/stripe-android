@@ -27,14 +27,15 @@ import com.stripe.android.cards.LegacyCardAccountRangeRepository
 import com.stripe.android.cards.NullCardAccountRangeRepository
 import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.cards.StaticCardAccountRanges
-import com.stripe.android.model.BinFixtures
+import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.CardMetadata
 import com.stripe.android.testharness.ViewTestUtils
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
@@ -257,7 +258,7 @@ internal class CardNumberEditTextTest {
             staticCardAccountRanges = object : StaticCardAccountRanges {
                 override fun match(
                     cardNumber: CardNumber.Unvalidated
-                ): CardMetadata.AccountRange? = AccountRangeFixtures.UNIONPAY19
+                ): AccountRange? = AccountRangeFixtures.UNIONPAY19
             }
         )
 
@@ -655,28 +656,6 @@ internal class CardNumberEditTextTest {
     }
 
     @Test
-    fun `isProcessingCallback should be invoked with 'true' when fetching account range and 'false' when fetch is completed`() {
-        var isProcessing = false
-        cardNumberEditText.isProcessingCallback = {
-            isProcessing = it
-        }
-
-        // not processing at rest
-        assertThat(isProcessing)
-            .isFalse()
-
-        // start processing once a BIN is typed in
-        cardNumberEditText.setText(BinFixtures.VISA.value)
-        assertThat(isProcessing)
-            .isTrue()
-        idleLooper()
-
-        // account range data has been retrieved
-        assertThat(isProcessing)
-            .isFalse()
-    }
-
-    @Test
     fun `getAccountRange() should only be called when necessary`() {
         Dispatchers.setMain(testDispatcher)
 
@@ -687,10 +666,12 @@ internal class CardNumberEditTextTest {
             cardAccountRangeRepository = object : CardAccountRangeRepository {
                 override suspend fun getAccountRange(
                     cardNumber: CardNumber.Unvalidated
-                ): CardMetadata.AccountRange? {
+                ): AccountRange? {
                     repositoryCalls++
                     return cardAccountRangeRepository.getAccountRange(cardNumber)
                 }
+
+                override val loading: Flow<Boolean> = flowOf(false)
             }
         )
 
@@ -750,10 +731,12 @@ internal class CardNumberEditTextTest {
     private class DelayedCardAccountRangeRepository : CardAccountRangeRepository {
         override suspend fun getAccountRange(
             cardNumber: CardNumber.Unvalidated
-        ): CardMetadata.AccountRange? {
+        ): AccountRange? {
             delay(TimeUnit.SECONDS.toMillis(10))
             return null
         }
+
+        override val loading: Flow<Boolean> = flowOf(false)
     }
 
     private companion object {
