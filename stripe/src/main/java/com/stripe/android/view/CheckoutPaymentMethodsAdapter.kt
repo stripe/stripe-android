@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.R
+import com.stripe.android.databinding.LayoutCheckoutAddCardItemBinding
 import com.stripe.android.databinding.LayoutCheckoutPaymentMethodItemBinding
 import com.stripe.android.model.PaymentMethod
 import java.lang.IllegalStateException
@@ -33,20 +34,25 @@ internal class CheckoutPaymentMethodsAdapter(val paymentMethods: List<PaymentMet
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        // TODO: Support AddCard, GooglePay
+        // TODO: Support GooglePay
         return when (ViewType.values()[viewType]) {
             ViewType.Card -> CardViewHolder(parent)
+            ViewType.AddCard -> AddCardViewHolder(parent)
             else -> throw IllegalStateException("Unsupported view type")
         }
     }
 
     override fun getItemCount(): Int {
-        return paymentMethods.size
+        return paymentMethods.size + 1
     }
 
     override fun getItemViewType(position: Int): Int {
-        // TODO: Support AddCard, GooglePay
-        return ViewType.Card.ordinal
+        // TODO: Support GooglePay
+        val type = when (position) {
+            paymentMethods.size -> ViewType.AddCard
+            else -> ViewType.Card
+        }
+        return type.ordinal
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -79,6 +85,10 @@ internal class CheckoutPaymentMethodsAdapter(val paymentMethods: List<PaymentMet
             binding.checkIcon.visibility = if (selected) View.VISIBLE else View.GONE
         }
     }
+
+    private class AddCardViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(
+        LayoutCheckoutAddCardItemBinding.inflate(LayoutInflater.from(parent.context), parent, false).root
+    )
 
     private enum class ViewType {
         Card,
