@@ -888,8 +888,12 @@ internal class CardInputWidgetTest {
         // |(card==230)--(space==220)--(date==50)|
         // |img==60||  cardTouchArea | 420 | dateTouchArea | dateStart==510 |
         // So any touch lower than 60 will be the icon
-        assertThat(cardInputWidget.getFocusRequestOnTouch(30))
-            .isNull()
+        assertThat(
+            cardInputWidget.getFocusRequestOnTouch(
+                30,
+                frameStart = BRAND_ICON_WIDTH
+            )
+        ).isNull()
     }
 
     @Test
@@ -898,8 +902,12 @@ internal class CardInputWidgetTest {
         // |(card==230)--(space==220)--(date==50)|
         // |img==60||  cardTouchArea | 420 | dateTouchArea | dateStart==510 |
         // So any touch between 60 and 250 will be the actual card widget
-        assertThat(cardInputWidget.getFocusRequestOnTouch(200))
-            .isNull()
+        assertThat(
+            cardInputWidget.getFocusRequestOnTouch(
+                200,
+                frameStart = BRAND_ICON_WIDTH
+            )
+        ).isNull()
     }
 
     @Test
@@ -908,8 +916,12 @@ internal class CardInputWidgetTest {
         // |(card==230)--(space==220)--(date==50)|
         // |img==60||  cardTouchArea | 420 | dateTouchArea | dateStart==510 |
         // So any touch between 250 and 420 needs to send focus to the card editor
-        assertThat(cardInputWidget.getFocusRequestOnTouch(300))
-            .isEqualTo(cardNumberEditText)
+        assertThat(
+            cardInputWidget.getFocusRequestOnTouch(
+                300,
+                frameStart = BRAND_ICON_WIDTH
+            )
+        ).isEqualTo(cardNumberEditText)
     }
 
     @Test
@@ -918,8 +930,12 @@ internal class CardInputWidgetTest {
         // |(card==230)--(space==220)--(date==50)|
         // |img==60||  cardTouchArea | 420 | dateTouchArea | dateStart==510 |
         // So any touch between 420 and 510 needs to send focus to the date editor
-        assertThat(cardInputWidget.getFocusRequestOnTouch(430))
-            .isEqualTo(expiryEditText)
+        assertThat(
+            cardInputWidget.getFocusRequestOnTouch(
+                430,
+                frameStart = BRAND_ICON_WIDTH
+            )
+        ).isEqualTo(expiryEditText)
     }
 
     @Test
@@ -928,8 +944,12 @@ internal class CardInputWidgetTest {
         // |(card==230)--(space==220)--(date==50)|
         // |img==60||  cardTouchArea | 420 | dateTouchArea | dateStart==510 |
         // So any touch over 510 doesn't need to do anything
-        assertThat(cardInputWidget.getFocusRequestOnTouch(530))
-            .isNull()
+        assertThat(
+            cardInputWidget.getFocusRequestOnTouch(
+                530,
+                frameStart = BRAND_ICON_WIDTH
+            )
+        ).isNull()
     }
 
     @Test
@@ -944,8 +964,13 @@ internal class CardInputWidgetTest {
             frameWidth = SCREEN_WIDTH,
             frameStart = BRAND_ICON_WIDTH
         )
-        assertThat(cardInputWidget.getFocusRequestOnTouch(75))
-            .isNull()
+
+        assertThat(
+            cardInputWidget.getFocusRequestOnTouch(
+                75,
+                frameStart = BRAND_ICON_WIDTH
+            )
+        ).isNull()
     }
 
     @Test
@@ -963,8 +988,12 @@ internal class CardInputWidgetTest {
             frameStart = BRAND_ICON_WIDTH
         )
 
-        assertThat(cardInputWidget.getFocusRequestOnTouch(150))
-            .isEqualTo(cardNumberEditText)
+        assertThat(
+            cardInputWidget.getFocusRequestOnTouch(
+                150,
+                frameStart = BRAND_ICON_WIDTH
+            )
+        ).isEqualTo(cardNumberEditText)
     }
 
     @Test
@@ -982,8 +1011,12 @@ internal class CardInputWidgetTest {
             frameStart = BRAND_ICON_WIDTH
         )
 
-        assertThat(cardInputWidget.getFocusRequestOnTouch(200))
-            .isEqualTo(expiryEditText)
+        assertThat(
+            cardInputWidget.getFocusRequestOnTouch(
+                200,
+                frameStart = BRAND_ICON_WIDTH
+            )
+        ).isEqualTo(expiryEditText)
     }
 
     @Test
@@ -1001,8 +1034,12 @@ internal class CardInputWidgetTest {
             frameStart = BRAND_ICON_WIDTH
         )
 
-        assertThat(cardInputWidget.getFocusRequestOnTouch(170))
-            .isEqualTo(expiryEditText)
+        assertThat(
+            cardInputWidget.getFocusRequestOnTouch(
+                170,
+                frameStart = BRAND_ICON_WIDTH
+            )
+        ).isEqualTo(expiryEditText)
     }
 
     @Test
@@ -1021,8 +1058,12 @@ internal class CardInputWidgetTest {
         )
         idleLooper()
 
-        assertThat(cardInputWidget.getFocusRequestOnTouch(300))
-            .isNull()
+        assertThat(
+            cardInputWidget.getFocusRequestOnTouch(
+                300,
+                frameStart = BRAND_ICON_WIDTH
+            )
+        ).isNull()
     }
 
     @Test
@@ -1039,8 +1080,13 @@ internal class CardInputWidgetTest {
             frameWidth = SCREEN_WIDTH,
             frameStart = BRAND_ICON_WIDTH
         )
-        assertThat(cardInputWidget.getFocusRequestOnTouch(200))
-            .isNull()
+
+        assertThat(
+            cardInputWidget.getFocusRequestOnTouch(
+                200,
+                frameStart = BRAND_ICON_WIDTH
+            )
+        ).isNull()
     }
 
     @Test
@@ -1058,8 +1104,12 @@ internal class CardInputWidgetTest {
             frameStart = BRAND_ICON_WIDTH
         )
 
-        assertThat(cardInputWidget.getFocusRequestOnTouch(400))
-            .isEqualTo(expiryEditText)
+        assertThat(
+            cardInputWidget.getFocusRequestOnTouch(
+                400,
+                frameStart = BRAND_ICON_WIDTH
+            )
+        ).isEqualTo(expiryEditText)
     }
 
     @Test
@@ -1077,8 +1127,12 @@ internal class CardInputWidgetTest {
             frameStart = BRAND_ICON_WIDTH
         )
 
-        assertThat(cardInputWidget.getFocusRequestOnTouch(185))
-            .isEqualTo(expiryEditText)
+        assertThat(
+            cardInputWidget.getFocusRequestOnTouch(
+                185,
+                frameStart = BRAND_ICON_WIDTH
+            )
+        ).isEqualTo(expiryEditText)
     }
 
     @Test
@@ -1096,8 +1150,12 @@ internal class CardInputWidgetTest {
             frameStart = BRAND_ICON_WIDTH
         )
 
-        assertThat(cardInputWidget.getFocusRequestOnTouch(485))
-            .isEqualTo(cvcEditText)
+        assertThat(
+            cardInputWidget.getFocusRequestOnTouch(
+                485,
+                frameStart = BRAND_ICON_WIDTH
+            )
+        ).isEqualTo(cvcEditText)
     }
 
     @Test
@@ -1115,8 +1173,12 @@ internal class CardInputWidgetTest {
             frameStart = BRAND_ICON_WIDTH
         )
 
-        assertThat(cardInputWidget.getFocusRequestOnTouch(300))
-            .isEqualTo(cvcEditText)
+        assertThat(
+            cardInputWidget.getFocusRequestOnTouch(
+                300,
+                frameStart = BRAND_ICON_WIDTH
+            )
+        ).isEqualTo(cvcEditText)
     }
 
     @Test
@@ -1132,8 +1194,12 @@ internal class CardInputWidgetTest {
             frameStart = BRAND_ICON_WIDTH
         )
 
-        assertThat(cardInputWidget.getFocusRequestOnTouch(545))
-            .isNull()
+        assertThat(
+            cardInputWidget.getFocusRequestOnTouch(
+                545,
+                frameStart = BRAND_ICON_WIDTH
+            )
+        ).isNull()
     }
 
     @Test
