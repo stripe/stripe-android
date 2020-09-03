@@ -3,6 +3,9 @@ package com.stripe.android.cards
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.never
+import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.ApiRequest
 import com.stripe.android.CardNumberFixtures
@@ -121,9 +124,10 @@ internal class DefaultCardAccountRangeRepositoryTest {
     fun `getAccountRange() should return null`() = testDispatcher.runBlockingTest {
         assertThat(
             DefaultCardAccountRangeRepository(
-                inMemoryCardAccountRangeSource = FakeCardAccountRangeSource(),
-                remoteCardAccountRangeSource = FakeCardAccountRangeSource(),
-                staticCardAccountRangeSource = FakeCardAccountRangeSource()
+                inMemorySource = FakeCardAccountRangeSource(),
+                remoteSource = FakeCardAccountRangeSource(),
+                staticSource = FakeCardAccountRangeSource(),
+                store = realStore
             ).getAccountRange(CardNumberFixtures.VISA)
         ).isNull()
     }
@@ -132,9 +136,10 @@ internal class DefaultCardAccountRangeRepositoryTest {
     fun `loading when no sources are loading should emit false`() = testDispatcher.runBlockingTest {
         val collected = mutableListOf<Boolean>()
         DefaultCardAccountRangeRepository(
-            inMemoryCardAccountRangeSource = FakeCardAccountRangeSource(),
-            remoteCardAccountRangeSource = FakeCardAccountRangeSource(),
-            staticCardAccountRangeSource = FakeCardAccountRangeSource()
+            inMemorySource = FakeCardAccountRangeSource(),
+            remoteSource = FakeCardAccountRangeSource(),
+            staticSource = FakeCardAccountRangeSource(),
+            store = realStore
         ).loading.collect {
             collected.add(it)
         }
@@ -147,9 +152,10 @@ internal class DefaultCardAccountRangeRepositoryTest {
     fun `loading when one source is loading should emit true`() = testDispatcher.runBlockingTest {
         val collected = mutableListOf<Boolean>()
         DefaultCardAccountRangeRepository(
-            inMemoryCardAccountRangeSource = FakeCardAccountRangeSource(),
-            remoteCardAccountRangeSource = FakeCardAccountRangeSource(isLoading = true),
-            staticCardAccountRangeSource = FakeCardAccountRangeSource()
+            inMemorySource = FakeCardAccountRangeSource(),
+            remoteSource = FakeCardAccountRangeSource(isLoading = true),
+            staticSource = FakeCardAccountRangeSource(),
+            store = realStore
         ).loading.collect {
             collected.add(it)
         }
@@ -158,23 +164,48 @@ internal class DefaultCardAccountRangeRepositoryTest {
             .containsExactly(true)
     }
 
+    @Test
+    fun `getAccountRange should not access remote source if BIN is in store`() = testDispatcher.runBlockingTest {
+        val remoteSource = mock<CardAccountRangeSource>()
+        val repository = DefaultCardAccountRangeRepository(
+            inMemorySource = FakeCardAccountRangeSource(),
+            remoteSource = remoteSource,
+            staticSource = FakeCardAccountRangeSource(),
+            store = realStore
+        )
+
+        val bin = requireNotNull(CardNumberFixtures.VISA.bin)
+        realStore.save(bin, emptyList())
+
+        // should not access remote source
+        repository.getAccountRange(CardNumberFixtures.VISA)
+        verify(remoteSource, never()).getAccountRange(CardNumberFixtures.VISA)
+    }
+
     private fun createRealRepository(
         store: CardAccountRangeStore
     ): CardAccountRangeRepository {
+        return DefaultCardAccountRangeRepository(
+            inMemorySource = InMemoryCardAccountRangeSource(store),
+            remoteSource = createRemoteCardAccountRangeSource(store),
+            staticSource = StaticCardAccountRangeSource(),
+            store = realStore
+        )
+    }
+
+    private fun createRemoteCardAccountRangeSource(
+        store: CardAccountRangeStore
+    ): CardAccountRangeSource {
         val stripeRepository = StripeApiRepository(
             application,
             ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
         )
-        return DefaultCardAccountRangeRepository(
-            inMemoryCardAccountRangeSource = InMemoryCardAccountRangeSource(store),
-            remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
-                stripeRepository,
-                ApiRequest.Options(
-                    ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
-                ),
-                store
+        return RemoteCardAccountRangeSource(
+            stripeRepository,
+            ApiRequest.Options(
+                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
             ),
-            staticCardAccountRangeSource = StaticCardAccountRangeSource()
+            store
         )
     }
 
