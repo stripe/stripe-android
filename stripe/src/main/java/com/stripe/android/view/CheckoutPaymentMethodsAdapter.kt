@@ -1,6 +1,7 @@
 package com.stripe.android.view
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.R
@@ -9,9 +10,22 @@ import com.stripe.android.model.PaymentMethod
 import java.lang.IllegalStateException
 
 internal class CheckoutPaymentMethodsAdapter(val paymentMethods: List<PaymentMethod>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    private var selectedPaymentMethodId: String? = null
 
     init {
         setHasStableIds(true)
+    }
+
+    private fun updateSelectedPaymentMethod(position: Int) {
+        val currentlySelectedPosition = paymentMethods.indexOfFirst {
+            it.id == selectedPaymentMethodId
+        }
+        if (currentlySelectedPosition != position) {
+            // selected a new Payment Method
+            notifyItemChanged(currentlySelectedPosition)
+            notifyItemChanged(position)
+            selectedPaymentMethodId = paymentMethods.getOrNull(position)?.id
+        }
     }
 
     override fun getItemId(position: Int): Long {
@@ -39,6 +53,10 @@ internal class CheckoutPaymentMethodsAdapter(val paymentMethods: List<PaymentMet
         if (holder is CardViewHolder) {
             val paymentMethod = paymentMethods[position]
             holder.setPaymentMethod(paymentMethod)
+            holder.setSelected(paymentMethod.id == selectedPaymentMethodId)
+            holder.itemView.setOnClickListener {
+                updateSelectedPaymentMethod(holder.adapterPosition)
+            }
         }
     }
 
@@ -55,6 +73,10 @@ internal class CheckoutPaymentMethodsAdapter(val paymentMethods: List<PaymentMet
                 binding.cardNumber.text = itemView.context
                     .getString(R.string.checkout_payment_method_item_card_number, card.last4)
             }
+        }
+
+        fun setSelected(selected: Boolean) {
+            binding.checkIcon.visibility = if (selected) View.VISIBLE else View.GONE
         }
     }
 
