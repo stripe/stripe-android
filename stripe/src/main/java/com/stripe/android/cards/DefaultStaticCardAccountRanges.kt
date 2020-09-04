@@ -1,7 +1,7 @@
 package com.stripe.android.cards
 
+import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
-import com.stripe.android.model.CardMetadata
 
 internal class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
     override fun match(
@@ -16,10 +16,10 @@ internal class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
                     high = "4999999999999999"
                 )
             ).map {
-                CardMetadata.AccountRange(
+                AccountRange(
                     binRange = it,
                     panLength = 16,
-                    brandInfo = CardMetadata.AccountRange.BrandInfo.Visa
+                    brandInfo = AccountRange.BrandInfo.Visa
                 )
             }
 
@@ -34,10 +34,10 @@ internal class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
                     high = "5599999999999999"
                 )
             ).map {
-                CardMetadata.AccountRange(
+                AccountRange(
                     binRange = it,
                     panLength = 16,
-                    brandInfo = CardMetadata.AccountRange.BrandInfo.Mastercard
+                    brandInfo = AccountRange.BrandInfo.Mastercard
                 )
             }
 
@@ -52,10 +52,10 @@ internal class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
                 high = "379999999999999"
             )
         ).map {
-            CardMetadata.AccountRange(
+            AccountRange(
                 binRange = it,
                 panLength = 15,
-                brandInfo = CardMetadata.AccountRange.BrandInfo.AmericanExpress
+                brandInfo = AccountRange.BrandInfo.AmericanExpress
             )
         }
 
@@ -75,10 +75,10 @@ internal class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
                 high = "6599999999999999"
             )
         ).map {
-            CardMetadata.AccountRange(
+            AccountRange(
                 binRange = it,
                 panLength = 16,
-                brandInfo = CardMetadata.AccountRange.BrandInfo.Discover
+                brandInfo = AccountRange.BrandInfo.Discover
             )
         }
 
@@ -88,10 +88,10 @@ internal class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
                 high = "3589999999999999"
             )
         ).map {
-            CardMetadata.AccountRange(
+            AccountRange(
                 binRange = it,
                 panLength = 16,
-                brandInfo = CardMetadata.AccountRange.BrandInfo.JCB
+                brandInfo = AccountRange.BrandInfo.JCB
             )
         }
 
@@ -106,10 +106,10 @@ internal class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
                 high = "8199999999999999"
             )
         ).map {
-            CardMetadata.AccountRange(
+            AccountRange(
                 binRange = it,
                 panLength = 16,
-                brandInfo = CardMetadata.AccountRange.BrandInfo.UnionPay
+                brandInfo = AccountRange.BrandInfo.UnionPay
             )
         }
 
@@ -129,10 +129,10 @@ internal class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
                 high = "3999999999999999"
             )
         ).map {
-            CardMetadata.AccountRange(
+            AccountRange(
                 binRange = it,
                 panLength = 16,
-                brandInfo = CardMetadata.AccountRange.BrandInfo.DinersClub
+                brandInfo = AccountRange.BrandInfo.DinersClub
             )
         }
 
@@ -142,10 +142,10 @@ internal class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
                 high = "36999999999999"
             )
         ).map {
-            CardMetadata.AccountRange(
+            AccountRange(
                 binRange = it,
                 panLength = 14,
-                brandInfo = CardMetadata.AccountRange.BrandInfo.DinersClub
+                brandInfo = AccountRange.BrandInfo.DinersClub
             )
         }
 

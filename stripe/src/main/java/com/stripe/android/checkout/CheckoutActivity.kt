@@ -2,11 +2,13 @@ package com.stripe.android.checkout
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HIDDEN
+import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.databinding.ActivityCheckoutBinding
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -32,24 +34,22 @@ internal class CheckoutActivity : AppCompatActivity() {
         }
         viewModel.error.observe(this) {
             // TODO: Communicate error to caller
-            Toast.makeText(this, "Received error: ${it.message}", Toast.LENGTH_LONG).show()
-            animateOut()
+            Snackbar.make(viewBinding.coordinator, "Received error: ${it.message}", Snackbar.LENGTH_LONG).show()
         }
 
         setupBottomSheet()
 
         // TODO: Add loading state
-        supportFragmentManager
-            .beginTransaction()
-            .replace(viewBinding.fragmentContainer.id, CheckoutPaymentMethodsListFragment())
-            .commitAllowingStateLoss()
+        supportFragmentManager.commit {
+            replace(viewBinding.fragmentContainer.id, CheckoutPaymentMethodsListFragment())
+        }
     }
 
     private fun setupBottomSheet() {
         bottomSheetBehavior.peekHeight = BottomSheetBehavior.PEEK_HEIGHT_AUTO
         bottomSheetBehavior.isHideable = true
         // Start hidden and then animate in after delay
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        bottomSheetBehavior.state = STATE_HIDDEN
 
         lifecycleScope.launch {
             delay(ANIMATE_IN_DELAY)
@@ -60,7 +60,7 @@ internal class CheckoutActivity : AppCompatActivity() {
                     }
 
                     override fun onStateChanged(bottomSheet: View, newState: Int) {
-                        if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+                        if (newState == STATE_HIDDEN) {
                             finish()
                         }
                     }
@@ -72,7 +72,7 @@ internal class CheckoutActivity : AppCompatActivity() {
     private fun animateOut() {
         // When the bottom sheet finishes animating to its new state,
         // the callback will finish the activity
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        bottomSheetBehavior.state = STATE_HIDDEN
     }
 
     override fun finish() {

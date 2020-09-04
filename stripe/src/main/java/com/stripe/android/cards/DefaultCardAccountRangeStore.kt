@@ -2,7 +2,7 @@ package com.stripe.android.cards
 
 import android.content.Context
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.model.CardMetadata
+import com.stripe.android.model.AccountRange
 import com.stripe.android.model.parsers.AccountRangeJsonParser
 import org.json.JSONObject
 
@@ -15,7 +15,7 @@ internal class DefaultCardAccountRangeStore(
         context.getSharedPreferences(PREF_FILE, Context.MODE_PRIVATE)
     }
 
-    override suspend fun get(bin: Bin): List<CardMetadata.AccountRange> {
+    override suspend fun get(bin: Bin): List<AccountRange> {
         return prefs.getStringSet(createPrefKey(bin), null)
             .orEmpty()
             .mapNotNull {
@@ -25,7 +25,7 @@ internal class DefaultCardAccountRangeStore(
 
     override fun save(
         bin: Bin,
-        accountRanges: List<CardMetadata.AccountRange>
+        accountRanges: List<AccountRange>
     ) {
         val serializedAccountRanges = accountRanges.map {
             accountRangeJsonParser.serialize(it).toString()
@@ -35,6 +35,10 @@ internal class DefaultCardAccountRangeStore(
             .putStringSet(createPrefKey(bin), serializedAccountRanges)
             .apply()
     }
+
+    override suspend fun contains(
+        bin: Bin
+    ): Boolean = prefs.contains(createPrefKey(bin))
 
     @VisibleForTesting
     internal fun createPrefKey(bin: Bin): String = "$PREF_KEY_ACCOUNT_RANGES:$bin"
