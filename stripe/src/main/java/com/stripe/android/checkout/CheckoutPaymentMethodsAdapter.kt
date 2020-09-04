@@ -30,7 +30,10 @@ internal class CheckoutPaymentMethodsAdapter(val paymentMethods: List<PaymentMet
     }
 
     override fun getItemId(position: Int): Long {
-        return paymentMethods[position].hashCode().toLong()
+        return when(position) {
+            paymentMethods.size -> ADD_CARD_ID
+            else -> paymentMethods[position].hashCode().toLong()
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -94,5 +97,9 @@ internal class CheckoutPaymentMethodsAdapter(val paymentMethods: List<PaymentMet
         Card,
         AddCard,
         GooglePay
+    }
+
+    private companion object {
+        private const val ADD_CARD_ID = 1234L
     }
 }
