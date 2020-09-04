@@ -789,9 +789,9 @@ internal class CardInputWidgetTest {
         // |(card==230)--(space==220)--(date==50)|
         // |img==60||  cardTouchArea | 420 | dateTouchArea | dateStart==510 |
 
-        assertThat(cardInputWidget.placementParameters)
+        assertThat(cardInputWidget.placement)
             .isEqualTo(
-                CardInputWidget.PlacementParameters(
+                CardInputWidgetPlacement(
                     totalLengthInPixels = SCREEN_WIDTH,
                     cardWidth = 230,
                     hiddenCardWidth = 150,
@@ -825,9 +825,9 @@ internal class CardInputWidgetTest {
         )
         idleLooper()
 
-        assertThat(cardInputWidget.placementParameters)
+        assertThat(cardInputWidget.placement)
             .isEqualTo(
-                CardInputWidget.PlacementParameters(
+                CardInputWidgetPlacement(
                     totalLengthInPixels = SCREEN_WIDTH,
                     cardWidth = 230,
                     hiddenCardWidth = 150,
@@ -860,9 +860,9 @@ internal class CardInputWidgetTest {
         )
         idleLooper()
 
-        assertThat(cardInputWidget.placementParameters)
+        assertThat(cardInputWidget.placement)
             .isEqualTo(
-                CardInputWidget.PlacementParameters(
+                CardInputWidgetPlacement(
                     totalLengthInPixels = SCREEN_WIDTH,
                     cardWidth = 230,
                     hiddenCardWidth = 150,
@@ -1211,9 +1211,9 @@ internal class CardInputWidgetTest {
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         updateCardNumberAndIdle(VISA_WITH_SPACES)
 
-        assertThat(cardInputWidget.placementParameters)
+        assertThat(cardInputWidget.placement)
             .isEqualTo(
-                CardInputWidget.PlacementParameters(
+                CardInputWidgetPlacement(
                     totalLengthInPixels = SCREEN_WIDTH,
                     cardWidth = 230,
                     hiddenCardWidth = 150,
@@ -1240,9 +1240,9 @@ internal class CardInputWidgetTest {
         // |(peek==40)--(space==98)--(date==50)--(space==82)--(cvc==30)--(space==0)--(postal==100)|
         updateCardNumberAndIdle(VISA_WITH_SPACES)
 
-        assertThat(cardInputWidget.placementParameters)
+        assertThat(cardInputWidget.placement)
             .isEqualTo(
-                CardInputWidget.PlacementParameters(
+                CardInputWidgetPlacement(
                     totalLengthInPixels = SCREEN_WIDTH,
                     cardWidth = 230,
                     hiddenCardWidth = 150,
@@ -1271,9 +1271,9 @@ internal class CardInputWidgetTest {
         // |(peek==50)--(space==175)--(date==50)--(space==185)--(cvc==40)|
         updateCardNumberAndIdle(AMEX_WITH_SPACES)
 
-        assertThat(cardInputWidget.placementParameters)
+        assertThat(cardInputWidget.placement)
             .isEqualTo(
-                CardInputWidget.PlacementParameters(
+                CardInputWidgetPlacement(
                     totalLengthInPixels = SCREEN_WIDTH,
                     cardWidth = 230,
                     hiddenCardWidth = 120,
@@ -1300,9 +1300,9 @@ internal class CardInputWidgetTest {
         // |(peek==50)--(space==88)--(date==50)--(space==72)--(cvc==40)--(space==0)--(postal==100)|
         updateCardNumberAndIdle(AMEX_WITH_SPACES)
 
-        assertThat(cardInputWidget.placementParameters)
+        assertThat(cardInputWidget.placement)
             .isEqualTo(
-                CardInputWidget.PlacementParameters(
+                CardInputWidgetPlacement(
                     totalLengthInPixels = SCREEN_WIDTH,
                     cardWidth = 230,
                     hiddenCardWidth = 120,
@@ -1331,9 +1331,9 @@ internal class CardInputWidgetTest {
         // |(peek==20)--(space==205)--(date==50)--(space==195)--(cvc==30)|
         updateCardNumberAndIdle(DINERS_CLUB_14_WITH_SPACES)
 
-        assertThat(cardInputWidget.placementParameters)
+        assertThat(cardInputWidget.placement)
             .isEqualTo(
-                CardInputWidget.PlacementParameters(
+                CardInputWidgetPlacement(
                     totalLengthInPixels = SCREEN_WIDTH,
                     cardWidth = 230,
                     hiddenCardWidth = 120,
@@ -1360,9 +1360,9 @@ internal class CardInputWidgetTest {
         // |(peek==20)--(space==205)--(date==50)--(space==195)--(cvc==30)--(space==0)--(postal==100)|
         updateCardNumberAndIdle(DINERS_CLUB_14_WITH_SPACES)
 
-        assertThat(cardInputWidget.placementParameters)
+        assertThat(cardInputWidget.placement)
             .isEqualTo(
-                CardInputWidget.PlacementParameters(
+                CardInputWidgetPlacement(
                     totalLengthInPixels = SCREEN_WIDTH,
                     cardWidth = 230,
                     hiddenCardWidth = 120,
