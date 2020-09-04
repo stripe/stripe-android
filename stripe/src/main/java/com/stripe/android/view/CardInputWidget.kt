@@ -547,8 +547,13 @@ class CardInputWidget @JvmOverloads constructor(
             return super.onInterceptTouchEvent(ev)
         }
 
-        return getFocusRequestOnTouch(ev.x.toInt())?.let {
-            it.requestFocus()
+        return getFocusRequestOnTouch(ev.x.toInt())?.let { field ->
+            when (field) {
+                Field.Number -> cardNumberEditText
+                Field.Expiry -> expiryDateEditText
+                Field.Cvc -> cvcEditText
+                Field.PostalCode -> postalCodeEditText
+            }.requestFocus()
             true
         } ?: super.onInterceptTouchEvent(ev)
     }
@@ -624,14 +629,14 @@ class CardInputWidget @JvmOverloads constructor(
      * Android will naturally do in response to that touch.
      *
      * @param touchX distance in pixels from the left side of this control
-     * @return a [StripeEditText] that needs to request focus, or `null`
+     * @return a [Field] that represents the [View] to request focus, or `null`
      * if no such request is necessary.
      */
     @VisibleForTesting
     internal fun getFocusRequestOnTouch(
         touchX: Int,
         frameStart: Int = containerLayout.left
-    ): View? = when {
+    ) = when {
         isShowingFullCard -> {
             // Then our view is
             // |full card||space||date|
@@ -640,9 +645,9 @@ class CardInputWidget @JvmOverloads constructor(
                 touchX < frameStart + placementParameters.cardWidth -> // Then the card edit view will already handle this touch.
                     null
                 touchX < placementParameters.cardTouchBufferLimit -> // Then we want to act like this was a touch on the card view
-                    cardNumberEditText
+                    Field.Number
                 touchX < placementParameters.dateStartPosition -> // Then we act like this was a touch on the date editor.
-                    expiryDateEditText
+                    Field.Expiry
                 else -> // Then the date editor will already handle this touch.
                     null
             }
@@ -654,21 +659,21 @@ class CardInputWidget @JvmOverloads constructor(
                 touchX < frameStart + placementParameters.peekCardWidth -> // This was a touch on the card number editor, so we don't need to handle it.
                     null
                 touchX < placementParameters.cardTouchBufferLimit -> // Then we need to act like the user touched the card editor
-                    cardNumberEditText
+                    Field.Number
                 touchX < placementParameters.dateStartPosition -> // Then we need to act like this was a touch on the date editor
-                    expiryDateEditText
+                    Field.Expiry
                 touchX < placementParameters.dateStartPosition + placementParameters.dateWidth -> // Just a regular touch on the date editor.
                     null
                 touchX < placementParameters.dateRightTouchBufferLimit -> // We need to act like this was a touch on the date editor
-                    expiryDateEditText
+                    Field.Expiry
                 touchX < placementParameters.cvcStartPosition -> // We need to act like this was a touch on the cvc editor.
-                    cvcEditText
+                    Field.Cvc
                 touchX < placementParameters.cvcStartPosition + placementParameters.cvcWidth -> // Just a regular touch on the cvc editor.
                     null
                 touchX < placementParameters.cvcRightTouchBufferLimit -> // We need to act like this was a touch on the cvc editor.
-                    cvcEditText
+                    Field.Cvc
                 touchX < placementParameters.postalCodeStartPosition -> // We need to act like this was a touch on the postal code editor.
-                    postalCodeEditText
+                    Field.PostalCode
                 else -> null
             }
         }
@@ -679,15 +684,15 @@ class CardInputWidget @JvmOverloads constructor(
                 touchX < frameStart + placementParameters.peekCardWidth -> // This was a touch on the card number editor, so we don't need to handle it.
                     null
                 touchX < placementParameters.cardTouchBufferLimit -> // Then we need to act like the user touched the card editor
-                    cardNumberEditText
+                    Field.Number
                 touchX < placementParameters.dateStartPosition -> // Then we need to act like this was a touch on the date editor
-                    expiryDateEditText
+                    Field.Expiry
                 touchX < placementParameters.dateStartPosition + placementParameters.dateWidth -> // Just a regular touch on the date editor.
                     null
                 touchX < placementParameters.dateRightTouchBufferLimit -> // We need to act like this was a touch on the date editor
-                    expiryDateEditText
+                    Field.Expiry
                 touchX < placementParameters.cvcStartPosition -> // We need to act like this was a touch on the cvc editor.
-                    cvcEditText
+                    Field.Cvc
                 else -> null
             }
         }
@@ -1447,6 +1452,13 @@ class CardInputWidget @JvmOverloads constructor(
         override fun calculate(text: String, paint: TextPaint): Int {
             return Layout.getDesiredWidth(text, paint).toInt()
         }
+    }
+
+    internal enum class Field {
+        Number,
+        Expiry,
+        Cvc,
+        PostalCode
     }
 
     internal companion object {
