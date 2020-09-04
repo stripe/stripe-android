@@ -1,4 +1,4 @@
-package com.stripe.android
+package com.stripe.android.checkout
 
 import androidx.activity.ComponentActivity
 

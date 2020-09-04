@@ -1,4 +1,4 @@
-package com.stripe.android.view
+package com.stripe.android.checkout
 
 import android.os.Bundle
 import android.view.View
