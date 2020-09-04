@@ -24,10 +24,16 @@ internal class CheckoutViewModel internal constructor(
     private val workContext: CoroutineContext = Dispatchers.IO
 ) : AndroidViewModel(application) {
     private val mutableError = MutableLiveData<Throwable>()
+    private val mutableTransition = MutableLiveData<Transition>()
     internal val error: LiveData<Throwable> = mutableError
+    internal val transition: LiveData<Transition> = mutableTransition
 
     fun onError(throwable: Throwable) {
         mutableError.postValue(throwable)
+    }
+
+    fun transitionTo(transition: Transition) {
+        mutableTransition.postValue(transition)
     }
 
     fun getPaymentMethods(
@@ -48,6 +54,10 @@ internal class CheckoutViewModel internal constructor(
                 )
             }
         emit(result)
+    }
+
+    internal enum class Transition {
+        ADD_CARD
     }
 
     internal class Factory(

@@ -10,7 +10,7 @@ import com.stripe.android.databinding.LayoutCheckoutPaymentMethodItemBinding
 import com.stripe.android.model.PaymentMethod
 import java.lang.IllegalStateException
 
-internal class CheckoutPaymentMethodsAdapter(val paymentMethods: List<PaymentMethod>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+internal class CheckoutPaymentMethodsAdapter(val paymentMethods: List<PaymentMethod>, val addCardClickListener: View.OnClickListener) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var selectedPaymentMethodId: String? = null
 
     init {
@@ -40,7 +40,9 @@ internal class CheckoutPaymentMethodsAdapter(val paymentMethods: List<PaymentMet
         // TODO: Support GooglePay
         return when (ViewType.values()[viewType]) {
             ViewType.Card -> CardViewHolder(parent)
-            ViewType.AddCard -> AddCardViewHolder(parent)
+            ViewType.AddCard -> AddCardViewHolder(parent).apply {
+                itemView.setOnClickListener(addCardClickListener)
+            }
             else -> throw IllegalStateException("Unsupported view type")
         }
     }
