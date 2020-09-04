@@ -922,7 +922,7 @@ internal class CardInputWidgetTest {
                 300,
                 frameStart = BRAND_ICON_WIDTH
             )
-        ).isEqualTo(cardNumberEditText)
+        ).isEqualTo(CardInputWidget.Field.Number)
     }
 
     @Test
@@ -936,7 +936,7 @@ internal class CardInputWidgetTest {
                 430,
                 frameStart = BRAND_ICON_WIDTH
             )
-        ).isEqualTo(expiryEditText)
+        ).isEqualTo(CardInputWidget.Field.Expiry)
     }
 
     @Test
@@ -994,7 +994,7 @@ internal class CardInputWidgetTest {
                 150,
                 frameStart = BRAND_ICON_WIDTH
             )
-        ).isEqualTo(cardNumberEditText)
+        ).isEqualTo(CardInputWidget.Field.Number)
     }
 
     @Test
@@ -1017,7 +1017,7 @@ internal class CardInputWidgetTest {
                 200,
                 frameStart = BRAND_ICON_WIDTH
             )
-        ).isEqualTo(expiryEditText)
+        ).isEqualTo(CardInputWidget.Field.Expiry)
     }
 
     @Test
@@ -1040,7 +1040,7 @@ internal class CardInputWidgetTest {
                 170,
                 frameStart = BRAND_ICON_WIDTH
             )
-        ).isEqualTo(expiryEditText)
+        ).isEqualTo(CardInputWidget.Field.Expiry)
     }
 
     @Test
@@ -1110,7 +1110,7 @@ internal class CardInputWidgetTest {
                 400,
                 frameStart = BRAND_ICON_WIDTH
             )
-        ).isEqualTo(expiryEditText)
+        ).isEqualTo(CardInputWidget.Field.Expiry)
     }
 
     @Test
@@ -1133,7 +1133,7 @@ internal class CardInputWidgetTest {
                 185,
                 frameStart = BRAND_ICON_WIDTH
             )
-        ).isEqualTo(expiryEditText)
+        ).isEqualTo(CardInputWidget.Field.Expiry)
     }
 
     @Test
@@ -1156,7 +1156,7 @@ internal class CardInputWidgetTest {
                 485,
                 frameStart = BRAND_ICON_WIDTH
             )
-        ).isEqualTo(cvcEditText)
+        ).isEqualTo(CardInputWidget.Field.Cvc)
     }
 
     @Test
@@ -1179,7 +1179,7 @@ internal class CardInputWidgetTest {
                 300,
                 frameStart = BRAND_ICON_WIDTH
             )
-        ).isEqualTo(cvcEditText)
+        ).isEqualTo(CardInputWidget.Field.Cvc)
     }
 
     @Test
