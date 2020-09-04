@@ -5,8 +5,6 @@ import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.InvalidRequestException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import java.io.IOException
 
@@ -20,8 +18,7 @@ internal fun interface AnalyticsRequestExecutor {
         private val logger: Logger = Logger.noop()
     ) : AnalyticsRequestExecutor {
         private val connectionFactory = ConnectionFactory.Default()
-        private val job = SupervisorJob()
-        private val scope = CoroutineScope(Dispatchers.Default + job)
+        private val scope = CoroutineScope(Dispatchers.IO)
 
         /**
          * Make the request and ignore the response
@@ -44,9 +41,7 @@ internal fun interface AnalyticsRequestExecutor {
         override fun executeAsync(request: AnalyticsRequest) {
             scope.launch {
                 runCatching {
-                    coroutineScope {
-                        execute(request)
-                    }
+                    execute(request)
                 }.recover {
                     logger.error("Exception while making analytics request", it)
                 }
