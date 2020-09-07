@@ -1,7 +1,6 @@
 package com.stripe.android
 
 import com.stripe.android.model.StripeModel
-import kotlinx.coroutines.Deferred
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException

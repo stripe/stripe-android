@@ -1059,6 +1059,31 @@ class Stripe internal constructor(
     }
 
     /**
+     * Create a [Token] asynchronously.
+     *
+     * See [Create an account token](https://stripe.com/docs/api/tokens/create_account).
+     * `POST /v1/tokens`
+     *
+     * @param accountParams the [AccountParams] used to create this token
+     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+     */
+    @UiThread
+    suspend fun createAccountToken(
+        accountParams: AccountParams,
+        idempotencyKey: String? = null,
+        stripeAccountId: String? = this.stripeAccountId
+    ): Token = suspendApiResultCoroutine { callback ->
+        createAccountToken(
+            accountParams = accountParams,
+            idempotencyKey = idempotencyKey,
+            stripeAccountId = stripeAccountId,
+            callback = callback
+        )
+    }
+
+    /**
      * Blocking method to create a [Token] for a Connect Account. Do not call this on the UI
      * thread or your app will crash.
      *

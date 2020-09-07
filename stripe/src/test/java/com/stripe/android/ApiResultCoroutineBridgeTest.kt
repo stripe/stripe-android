@@ -2,19 +2,16 @@ package com.stripe.android
 
 import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.model.StripeModel
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.Assert.assertTrue
-import org.junit.Assert.fail
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertSame
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
