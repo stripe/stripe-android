@@ -323,22 +323,18 @@ class CardMultilineWidget @JvmOverloads constructor(
             cardInputListener?.onExpirationComplete()
         }
 
-        cvcEditText.setAfterTextChangedListener(
-            object : StripeEditText.AfterTextChangedListener {
-                override fun onTextChanged(text: String) {
-                    if (cardBrand.isMaxCvc(text)) {
-                        updateBrandUi()
-                        if (shouldShowPostalCode) {
-                            postalCodeEditText.requestFocus()
-                        }
-                        cardInputListener?.onCvcComplete()
-                    } else {
-                        flipToCvcIconIfNotFinished()
-                    }
-                    cvcEditText.shouldShowError = false
+        cvcEditText.setAfterTextChangedListener { text ->
+            if (cardBrand.isMaxCvc(text)) {
+                updateBrandUi()
+                if (shouldShowPostalCode) {
+                    postalCodeEditText.requestFocus()
                 }
+                cardInputListener?.onCvcComplete()
+            } else {
+                flipToCvcIconIfNotFinished()
             }
-        )
+            cvcEditText.shouldShowError = false
+        }
 
         adjustViewForPostalCodeAttribute(shouldShowPostalCode)
 

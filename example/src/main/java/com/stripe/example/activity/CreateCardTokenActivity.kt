@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.Token
-import com.stripe.android.view.CardValidCallback
 import com.stripe.example.R
 import com.stripe.example.StripeFactory
 import com.stripe.example.databinding.CreateCardTokenActivityBinding
