@@ -30,7 +30,7 @@ internal class CheckoutPaymentMethodsAdapter(val paymentMethods: List<PaymentMet
     }
 
     override fun getItemId(position: Int): Long {
-        return when(position) {
+        return when (position) {
             paymentMethods.size -> ADD_CARD_ID
             else -> paymentMethods[position].hashCode().toLong()
         }
