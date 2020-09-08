@@ -892,7 +892,7 @@ class CardInputWidget @JvmOverloads constructor(
         panLength: Int
     ): String {
         val formattedNumber = CardNumber.Unvalidated(
-            List(panLength) { "0" }.joinToString(separator = "")
+            "0".repeat(panLength)
         ).getFormatted(panLength)
 
         return formattedNumber.take(
@@ -1109,7 +1109,7 @@ class CardInputWidget @JvmOverloads constructor(
                 14 -> 2
                 else -> 4
             }.let { peekSize ->
-                List(peekSize) { "0" }.joinToString(separator = "")
+                "0".repeat(peekSize)
             }
         }
 

@@ -173,8 +173,8 @@ class CardNumberEditText internal constructor(
     }
 
     @JvmSynthetic
-    internal fun updateLengthFilter() {
-        filters = arrayOf<InputFilter>(InputFilter.LengthFilter(formattedPanLength))
+    internal fun updateLengthFilter(maxLength: Int = formattedPanLength) {
+        filters = arrayOf<InputFilter>(InputFilter.LengthFilter(maxLength))
     }
 
     /**
@@ -185,13 +185,15 @@ class CardNumberEditText internal constructor(
      * @param editActionStart the position in the string at which the edit action starts
      * @param editActionAddition the number of new characters going into the string (zero for
      * delete)
+     * @param panLength the maximum normalized length of the PAN
      * @return an index within the string at which to put the cursor
      */
     @JvmSynthetic
     internal fun updateSelectionIndex(
         newLength: Int,
         editActionStart: Int,
-        editActionAddition: Int
+        editActionAddition: Int,
+        panLength: Int = this.panLength
     ): Int {
         var gapsJumped = 0
         val gapSet = CardNumber.getSpacePositions(panLength)
@@ -232,8 +234,11 @@ class CardNumberEditText internal constructor(
 
                 private var beforeCardNumber = unvalidatedCardNumber
 
+                private var isPastedPan = false
+
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
                     if (!ignoreChanges) {
+                        isPastedPan = false
                         beforeCardNumber = unvalidatedCardNumber
 
                         latestChangeStart = start
@@ -249,13 +254,26 @@ class CardNumberEditText internal constructor(
                     val cardNumber = CardNumber.Unvalidated(s?.toString().orEmpty())
                     updateAccountRange(cardNumber)
 
-                    val formattedNumber = cardNumber.getFormatted(panLength)
-                    this.newCursorPosition = updateSelectionIndex(
-                        formattedNumber.length,
-                        latestChangeStart,
-                        latestInsertionSize
-                    )
-                    this.formattedNumber = formattedNumber
+                    isPastedPan = isPastedPan(start, cardNumber)
+
+                    if (isPastedPan) {
+                        updateLengthFilter(cardNumber.getFormatted(cardNumber.length).length)
+                    }
+
+                    if (isPastedPan) {
+                        cardNumber.length
+                    } else {
+                        panLength
+                    }.let { maxPanLength ->
+                        val formattedNumber = cardNumber.getFormatted(maxPanLength)
+                        newCursorPosition = updateSelectionIndex(
+                            formattedNumber.length,
+                            latestChangeStart,
+                            latestInsertionSize,
+                            maxPanLength
+                        )
+                        this.formattedNumber = formattedNumber
+                    }
                 }
 
                 override fun afterTextChanged(s: Editable?) {
@@ -310,6 +328,10 @@ class CardNumberEditText internal constructor(
                     unvalidatedCardNumber.isMaxLength ||
                         (isValid && accountRange != null)
                     )
+
+                private fun isPastedPan(start: Int, cardNumber: CardNumber.Unvalidated): Boolean {
+                    return start == 0 && cardNumber.normalized.length >= CardNumber.MIN_PAN_LENGTH
+                }
             }
         )
     }
