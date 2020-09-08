@@ -14,7 +14,6 @@ class AnalyticsRequestExecutorTest {
     private val analyticsRequestExecutor = AnalyticsRequestExecutor.Default()
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
-    // Test to verify fingerprint endpoint's success
     @Test
     fun execute_withFingerprintRequest_shouldReturnSuccessfully() {
         val responseCode = analyticsRequestExecutor.execute(
