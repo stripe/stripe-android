@@ -105,8 +105,6 @@ class CardNumberEditText internal constructor(
     private val formattedPanLength: Int
         get() = panLength + CardNumber.getSpacePositions(panLength).size
 
-    private var ignoreChanges = false
-
     /**
      * Check whether or not the card number is valid
      */
@@ -145,7 +143,7 @@ class CardNumberEditText internal constructor(
     init {
         inputType = InputType.TYPE_CLASS_NUMBER
         setErrorMessage(resources.getString(R.string.invalid_card_number))
-        listenForTextChanges()
+        addTextChangedListener(CardNumberTextWatcher())
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_NUMBER)
@@ -223,119 +221,6 @@ class CardNumberEditText internal constructor(
         }
     }
 
-    private fun listenForTextChanges() {
-        addTextChangedListener(
-            object : StripeTextWatcher() {
-                private var latestChangeStart: Int = 0
-                private var latestInsertionSize: Int = 0
-
-                private var newCursorPosition: Int? = null
-                private var formattedNumber: String? = null
-
-                private var beforeCardNumber = unvalidatedCardNumber
-
-                private var isPastedPan = false
-
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                    if (!ignoreChanges) {
-                        isPastedPan = false
-                        beforeCardNumber = unvalidatedCardNumber
-
-                        latestChangeStart = start
-                        latestInsertionSize = after
-                    }
-                }
-
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    if (ignoreChanges) {
-                        return
-                    }
-
-                    val cardNumber = CardNumber.Unvalidated(s?.toString().orEmpty())
-                    updateAccountRange(cardNumber)
-
-                    isPastedPan = isPastedPan(start, cardNumber)
-
-                    if (isPastedPan) {
-                        updateLengthFilter(cardNumber.getFormatted(cardNumber.length).length)
-                    }
-
-                    if (isPastedPan) {
-                        cardNumber.length
-                    } else {
-                        panLength
-                    }.let { maxPanLength ->
-                        val formattedNumber = cardNumber.getFormatted(maxPanLength)
-                        newCursorPosition = updateSelectionIndex(
-                            formattedNumber.length,
-                            latestChangeStart,
-                            latestInsertionSize,
-                            maxPanLength
-                        )
-                        this.formattedNumber = formattedNumber
-                    }
-                }
-
-                override fun afterTextChanged(s: Editable?) {
-                    if (ignoreChanges) {
-                        return
-                    }
-
-                    ignoreChanges = true
-
-                    if (shouldUpdateAfterChange) {
-                        setText(formattedNumber)
-                        newCursorPosition?.let {
-                            setSelection(it.coerceIn(0, fieldText.length))
-                        }
-                    }
-
-                    formattedNumber = null
-                    newCursorPosition = null
-
-                    ignoreChanges = false
-
-                    if (unvalidatedCardNumber.length == panLength) {
-                        val wasCardNumberValid = isCardNumberValid
-                        isCardNumberValid = isValid
-                        shouldShowError = !isValid
-
-                        if (isComplete(wasCardNumberValid)) {
-                            completionCallback()
-                        }
-                    } else {
-                        isCardNumberValid = isValid
-                        // Don't show errors if we aren't full-length.
-                        shouldShowError = false
-                    }
-                }
-
-                private val shouldUpdateAfterChange: Boolean
-                    get() = (digitsAdded || !isLastKeyDelete) && formattedNumber != null
-
-                /**
-                 * Have digits been added in this text change.
-                 */
-                private val digitsAdded: Boolean
-                    get() = unvalidatedCardNumber.length > beforeCardNumber.length
-
-                /**
-                 * If `true`, [completionCallback] will be invoked.
-                 */
-                private fun isComplete(
-                    wasCardNumberValid: Boolean
-                ) = !wasCardNumberValid && (
-                    unvalidatedCardNumber.isMaxLength ||
-                        (isValid && accountRange != null)
-                    )
-
-                private fun isPastedPan(start: Int, cardNumber: CardNumber.Unvalidated): Boolean {
-                    return start == 0 && cardNumber.normalized.length >= CardNumber.MIN_PAN_LENGTH
-                }
-            }
-        )
-    }
-
     @JvmSynthetic
     internal fun updateAccountRange(cardNumber: CardNumber.Unvalidated) {
         if (shouldUpdateAccountRange(cardNumber)) {
@@ -375,6 +260,116 @@ class CardNumberEditText internal constructor(
         return accountRange == null ||
             cardNumber.bin == null ||
             accountRange?.binRange?.matches(cardNumber) == false
+    }
+
+    private inner class CardNumberTextWatcher : StripeTextWatcher() {
+        private var ignoreChanges = false
+        private var latestChangeStart: Int = 0
+        private var latestInsertionSize: Int = 0
+
+        private var newCursorPosition: Int? = null
+        private var formattedNumber: String? = null
+
+        private var beforeCardNumber = unvalidatedCardNumber
+
+        private var isPastedPan = false
+
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            if (!ignoreChanges) {
+                isPastedPan = false
+                beforeCardNumber = unvalidatedCardNumber
+
+                latestChangeStart = start
+                latestInsertionSize = after
+            }
+        }
+
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            if (ignoreChanges) {
+                return
+            }
+
+            val cardNumber = CardNumber.Unvalidated(s?.toString().orEmpty())
+            updateAccountRange(cardNumber)
+
+            isPastedPan = isPastedPan(start, cardNumber)
+
+            if (isPastedPan) {
+                updateLengthFilter(cardNumber.getFormatted(cardNumber.length).length)
+            }
+
+            if (isPastedPan) {
+                cardNumber.length
+            } else {
+                panLength
+            }.let { maxPanLength ->
+                val formattedNumber = cardNumber.getFormatted(maxPanLength)
+                newCursorPosition = updateSelectionIndex(
+                    formattedNumber.length,
+                    latestChangeStart,
+                    latestInsertionSize,
+                    maxPanLength
+                )
+                this.formattedNumber = formattedNumber
+            }
+        }
+
+        override fun afterTextChanged(s: Editable?) {
+            if (ignoreChanges) {
+                return
+            }
+
+            ignoreChanges = true
+
+            if (shouldUpdateAfterChange) {
+                setText(formattedNumber)
+                newCursorPosition?.let {
+                    setSelection(it.coerceIn(0, fieldText.length))
+                }
+            }
+
+            formattedNumber = null
+            newCursorPosition = null
+
+            ignoreChanges = false
+
+            if (unvalidatedCardNumber.length == panLength) {
+                val wasCardNumberValid = isCardNumberValid
+                isCardNumberValid = isValid
+                shouldShowError = !isValid
+
+                if (isComplete(wasCardNumberValid)) {
+                    completionCallback()
+                }
+            } else {
+                isCardNumberValid = isValid
+                // Don't show errors if we aren't full-length.
+                shouldShowError = false
+            }
+        }
+
+        private val shouldUpdateAfterChange: Boolean
+            get() = (digitsAdded || !isLastKeyDelete) && formattedNumber != null
+
+        /**
+         * Have digits been added in this text change.
+         */
+        private val digitsAdded: Boolean
+            get() = unvalidatedCardNumber.length > beforeCardNumber.length
+
+        /**
+         * If `true`, [completionCallback] will be invoked.
+         */
+        private fun isComplete(
+            wasCardNumberValid: Boolean
+        ) = !wasCardNumberValid && (
+            unvalidatedCardNumber.isMaxLength ||
+                (isValid && accountRange != null)
+            )
+
+        private fun isPastedPan(start: Int, cardNumber: CardNumber.Unvalidated): Boolean {
+            return start == 0 && cardNumber.normalized.length >= CardNumber.MIN_PAN_LENGTH
+        }
     }
 
     private companion object {

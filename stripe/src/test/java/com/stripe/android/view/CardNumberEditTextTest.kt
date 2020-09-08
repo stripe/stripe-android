@@ -278,7 +278,7 @@ internal class CardNumberEditTextTest {
     fun `when 19 digit PAN is pasted, full PAN is accepted and formatted`() {
         val cardNumberEditText = CardNumberEditText(
             context,
-            workDispatcher = testDispatcher,
+            workContext = testDispatcher,
             cardAccountRangeRepository = NullCardAccountRangeRepository(),
             staticCardAccountRanges = object : StaticCardAccountRanges {
                 override fun match(
