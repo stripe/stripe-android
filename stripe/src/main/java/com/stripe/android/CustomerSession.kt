@@ -11,13 +11,13 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.Source
 import com.stripe.android.model.Source.SourceType
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancelChildren
 import java.util.Calendar
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Represents a logged-in session of a single Customer.
@@ -29,7 +29,7 @@ class CustomerSession @VisibleForTesting internal constructor(
     stripeRepository: StripeRepository,
     publishableKey: String,
     stripeAccountId: String?,
-    private val workDispatcher: CoroutineDispatcher = createCoroutineDispatcher(),
+    private val workContext: CoroutineContext = createCoroutineDispatcher(),
     private val operationIdFactory: OperationIdFactory = StripeOperationIdFactory(),
     private val timeSupplier: TimeSupplier = { Calendar.getInstance().timeInMillis },
     ephemeralKeyManagerFactory: EphemeralKeyManager.Factory
@@ -49,7 +49,7 @@ class CustomerSession @VisibleForTesting internal constructor(
                 publishableKey,
                 stripeAccountId
             ),
-            workDispatcher,
+            workContext,
             listeners
         )
     )
@@ -458,7 +458,7 @@ class CustomerSession @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun cancel() {
         listeners.clear()
-        workDispatcher.cancelChildren()
+        workContext.cancelChildren()
     }
 
     private fun <L : RetrievalListener?> getListener(operationId: String): L? {
@@ -587,7 +587,7 @@ class CustomerSession @VisibleForTesting internal constructor(
             instance?.cancel()
         }
 
-        private fun createCoroutineDispatcher(): CoroutineDispatcher {
+        private fun createCoroutineDispatcher(): CoroutineContext {
             return ThreadPoolExecutor(
                 THREAD_POOL_SIZE,
                 THREAD_POOL_SIZE,

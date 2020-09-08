@@ -221,7 +221,7 @@ internal class StripeEndToEndTest {
                 stripeRepository
             ),
             publishableKey = publishableKey,
-            workDispatcher = testDispatcher
+            workContext = testDispatcher
         )
     }
 }

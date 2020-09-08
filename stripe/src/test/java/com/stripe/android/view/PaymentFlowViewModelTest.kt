@@ -15,8 +15,6 @@ import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -31,13 +29,10 @@ class PaymentFlowViewModelTest {
 
     private val customerRetrievalListener = argumentCaptor<CustomerSession.CustomerRetrievalListener>()
 
-    private val testScope = TestCoroutineScope(TestCoroutineDispatcher())
-
     private val viewModel: PaymentFlowViewModel by lazy {
         PaymentFlowViewModel(
             customerSession = customerSession,
-            paymentSessionData = PaymentSessionData(PaymentSessionFixtures.CONFIG),
-            workScope = testScope
+            paymentSessionData = PaymentSessionData(PaymentSessionFixtures.CONFIG)
         )
     }
 

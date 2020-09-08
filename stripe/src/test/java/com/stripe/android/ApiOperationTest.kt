@@ -12,7 +12,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineScope
 import org.json.JSONException
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -101,7 +100,7 @@ class ApiOperationTest {
         private val resultSupplier: () -> PaymentIntent?,
         callback: ApiResultCallback<PaymentIntent>
     ) : ApiOperation<PaymentIntent>(
-        workScope = TestCoroutineScope(TestCoroutineDispatcher()),
+        workContext = TestCoroutineDispatcher(),
         callback = callback
     ) {
         override suspend fun getResult(): PaymentIntent? = resultSupplier()

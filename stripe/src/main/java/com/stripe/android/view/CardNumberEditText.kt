@@ -18,13 +18,13 @@ import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.cards.StaticCardAccountRanges
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 /**
  * A [StripeEditText] that handles spacing out the digits of a credit card.
@@ -35,7 +35,7 @@ class CardNumberEditText internal constructor(
     defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle,
 
     // TODO(mshafrir-stripe): make immutable after `CardWidgetViewModel` is integrated in `CardWidget` subclasses
-    internal var workDispatcher: CoroutineDispatcher,
+    internal var workContext: CoroutineContext,
 
     private val cardAccountRangeRepository: CardAccountRangeRepository,
     private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges()
@@ -138,7 +138,6 @@ class CardNumberEditText internal constructor(
     @JvmSynthetic
     internal var isLoadingCallback: (Boolean) -> Unit = {}
 
-    private val workScope = CoroutineScope(workDispatcher)
     private val loadingJob: Job
 
     init {
@@ -152,7 +151,7 @@ class CardNumberEditText internal constructor(
 
         updateLengthFilter()
 
-        loadingJob = workScope.launch {
+        loadingJob = CoroutineScope(workContext).launch {
             cardAccountRangeRepository.loading.collect {
                 isLoadingCallback(it)
             }
@@ -231,7 +230,7 @@ class CardNumberEditText internal constructor(
             // invalidate accountRange before fetching
             accountRange = null
 
-            accountRangeRepositoryJob = workScope.launch {
+            accountRangeRepositoryJob = CoroutineScope(workContext).launch {
                 val bin = cardNumber.bin
                 if (bin != null) {
                     onAccountRangeResult(

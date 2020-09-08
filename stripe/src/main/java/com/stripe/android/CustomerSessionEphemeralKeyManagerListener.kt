@@ -1,12 +1,12 @@
 package com.stripe.android
 
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 
 internal class CustomerSessionEphemeralKeyManagerListener(
     private val runnableFactory: CustomerSessionRunnableFactory,
-    private val workDispatcher: CoroutineDispatcher,
+    private val workContext: CoroutineContext,
     private val listeners: MutableMap<String, CustomerSession.RetrievalListener?>
 ) : EphemeralKeyManager.KeyManagerListener {
     override fun onKeyUpdate(
@@ -14,7 +14,7 @@ internal class CustomerSessionEphemeralKeyManagerListener(
         operation: EphemeralOperation
     ) {
         runnableFactory.create(ephemeralKey, operation)?.let {
-            CoroutineScope(workDispatcher).launch {
+            CoroutineScope(workContext).launch {
                 it.run()
             }
         }

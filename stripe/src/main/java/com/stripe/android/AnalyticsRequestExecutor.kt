@@ -7,6 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.IOException
+import kotlin.coroutines.CoroutineContext
 
 internal fun interface AnalyticsRequestExecutor {
     /**
@@ -15,10 +16,10 @@ internal fun interface AnalyticsRequestExecutor {
     fun executeAsync(request: AnalyticsRequest)
 
     class Default(
-        private val logger: Logger = Logger.noop()
+        private val logger: Logger = Logger.noop(),
+        private val workContext: CoroutineContext = Dispatchers.IO
     ) : AnalyticsRequestExecutor {
         private val connectionFactory = ConnectionFactory.Default()
-        private val scope = CoroutineScope(Dispatchers.IO)
 
         /**
          * Make the request and ignore the response
@@ -39,7 +40,7 @@ internal fun interface AnalyticsRequestExecutor {
         }
 
         override fun executeAsync(request: AnalyticsRequest) {
-            scope.launch {
+            CoroutineScope(workContext).launch {
                 runCatching {
                     execute(request)
                 }.recover {

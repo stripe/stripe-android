@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession
 import com.stripe.android.PaymentSessionConfig
@@ -12,14 +13,11 @@ import com.stripe.android.StripeError
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 internal class PaymentFlowViewModel(
     private val customerSession: CustomerSession,
-    internal var paymentSessionData: PaymentSessionData,
-    private val workScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    internal var paymentSessionData: PaymentSessionData
 ) : ViewModel() {
     internal var shippingMethods: List<ShippingMethod> = emptyList()
     internal var isShippingInfoSubmitted: Boolean = false
@@ -68,7 +66,7 @@ internal class PaymentFlowViewModel(
         shippingInformation: ShippingInformation
     ): LiveData<Result<List<ShippingMethod>>> {
         val resultData = MutableLiveData<Result<List<ShippingMethod>>>()
-        workScope.launch {
+        viewModelScope.launch {
             val isValid = shippingInfoValidator.isValid(shippingInformation)
             if (isValid) {
                 val shippingMethods =
