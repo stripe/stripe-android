@@ -179,45 +179,41 @@ class CardNumberEditText internal constructor(
      * Updates the selection index based on the current (pre-edit) index, and
      * the size change of the number being input.
      *
-     * @param newLength the post-edit length of the string
-     * @param editActionStart the position in the string at which the edit action starts
-     * @param editActionAddition the number of new characters going into the string (zero for
+     * @param newFormattedLength the post-edit length of the string
+     * @param start the position in the string at which the edit action starts
+     * @param addedDigits the number of new characters going into the string (zero for
      * delete)
      * @param panLength the maximum normalized length of the PAN
      * @return an index within the string at which to put the cursor
      */
     @JvmSynthetic
-    internal fun updateSelectionIndex(
-        newLength: Int,
-        editActionStart: Int,
-        editActionAddition: Int,
+    internal fun calculateCursorPosition(
+        newFormattedLength: Int,
+        start: Int,
+        addedDigits: Int,
         panLength: Int = this.panLength
     ): Int {
-        var gapsJumped = 0
         val gapSet = CardNumber.getSpacePositions(panLength)
 
-        var skipBack = false
-        gapSet.forEach { gap ->
-            if (editActionStart <= gap && editActionStart + editActionAddition > gap) {
-                gapsJumped++
-            }
-
-            // editActionAddition can only be 0 if we are deleting,
-            // so we need to check whether or not to skip backwards one space
-            if (editActionAddition == 0 && editActionStart == gap + 1) {
-                skipBack = true
-            }
+        val gapsJumped = gapSet.count { gap ->
+            start <= gap && start + addedDigits >= gap
         }
 
-        var newPosition: Int = editActionStart + editActionAddition + gapsJumped
+        val skipBack = gapSet.any { gap ->
+            // addedDigits can only be 0 if we are deleting,
+            // so we need to check whether or not to skip backwards one space
+            addedDigits == 0 && start == gap + 1
+        }
+
+        var newPosition = start + addedDigits + gapsJumped
         if (skipBack && newPosition > 0) {
             newPosition--
         }
 
-        return if (newPosition <= newLength) {
+        return if (newPosition <= newFormattedLength) {
             newPosition
         } else {
-            newLength
+            newFormattedLength
         }
     }
 
@@ -304,7 +300,7 @@ class CardNumberEditText internal constructor(
                 panLength
             }.let { maxPanLength ->
                 val formattedNumber = cardNumber.getFormatted(maxPanLength)
-                newCursorPosition = updateSelectionIndex(
+                newCursorPosition = calculateCursorPosition(
                     formattedNumber.length,
                     latestChangeStart,
                     latestInsertionSize,

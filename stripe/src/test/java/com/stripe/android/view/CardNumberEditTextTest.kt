@@ -87,123 +87,130 @@ internal class CardNumberEditTextTest {
     }
 
     @Test
-    fun updateSelectionIndex_whenVisa_increasesIndexWhenGoingPastTheSpaces() = testDispatcher.runBlockingTest {
-        Dispatchers.setMain(testDispatcher)
-        cardNumberEditText.onAccountRangeResult(
-            AccountRangeFixtures.VISA
-        )
-
+    fun calculateCursorPosition_whenVisa_increasesIndexWhenGoingPastTheSpaces() = testDispatcher.runBlockingTest {
         // Adding 1 character, starting at position 4, with a final string length 6
         assertThat(
-            cardNumberEditText.updateSelectionIndex(6, 4, 1)
+            cardNumberEditText.calculateCursorPosition(6, 4, 1)
         ).isEqualTo(6)
         assertThat(
-            cardNumberEditText.updateSelectionIndex(8, 4, 1)
+            cardNumberEditText.calculateCursorPosition(8, 4, 1)
         ).isEqualTo(6)
         assertThat(
-            cardNumberEditText.updateSelectionIndex(11, 9, 1)
+            cardNumberEditText.calculateCursorPosition(11, 9, 1)
         ).isEqualTo(11)
         assertThat(
-            cardNumberEditText.updateSelectionIndex(16, 14, 1)
+            cardNumberEditText.calculateCursorPosition(16, 14, 1)
         ).isEqualTo(16)
     }
 
     @Test
-    fun updateSelectionIndex_whenAmEx_increasesIndexWhenGoingPastTheSpaces() = testDispatcher.runBlockingTest {
+    fun `calculateCursorPosition() when pasting 19 digit number should return expected value`() = testDispatcher.runBlockingTest {
+        assertThat(
+            cardNumberEditText.calculateCursorPosition(
+                newFormattedLength = 23,
+                start = 0,
+                addedDigits = 19,
+                panLength = 19
+            )
+        ).isEqualTo(23)
+    }
+
+    @Test
+    fun calculateCursorPosition_whenAmEx_increasesIndexWhenGoingPastTheSpaces() = testDispatcher.runBlockingTest {
         Dispatchers.setMain(testDispatcher)
         cardNumberEditText.onAccountRangeResult(
             AccountRangeFixtures.AMERICANEXPRESS
         )
 
         assertThat(
-            cardNumberEditText.updateSelectionIndex(6, 4, 1)
+            cardNumberEditText.calculateCursorPosition(6, 4, 1)
         ).isEqualTo(6)
         assertThat(
-            cardNumberEditText.updateSelectionIndex(13, 11, 1)
+            cardNumberEditText.calculateCursorPosition(13, 11, 1)
         ).isEqualTo(13)
     }
 
     @Test
-    fun updateSelectionIndex_whenDinersClub16_decreasesIndexWhenDeletingPastTheSpaces() = testDispatcher.runBlockingTest {
+    fun calculateCursorPosition_whenDinersClub16_decreasesIndexWhenDeletingPastTheSpaces() = testDispatcher.runBlockingTest {
         Dispatchers.setMain(testDispatcher)
         cardNumberEditText.onAccountRangeResult(
             AccountRangeFixtures.DINERSCLUB16
         )
 
         assertThat(
-            cardNumberEditText.updateSelectionIndex(6, 5, 0)
+            cardNumberEditText.calculateCursorPosition(6, 5, 0)
         ).isEqualTo(4)
         assertThat(
-            cardNumberEditText.updateSelectionIndex(13, 10, 0)
+            cardNumberEditText.calculateCursorPosition(13, 10, 0)
         ).isEqualTo(9)
         assertThat(
-            cardNumberEditText.updateSelectionIndex(17, 15, 0)
+            cardNumberEditText.calculateCursorPosition(17, 15, 0)
         ).isEqualTo(14)
     }
 
     @Test
-    fun updateSelectionIndex_whenDeletingNotOnGaps_doesNotDecreaseIndex() = testDispatcher.runBlockingTest {
+    fun calculateCursorPosition_whenDeletingNotOnGaps_doesNotDecreaseIndex() = testDispatcher.runBlockingTest {
         Dispatchers.setMain(testDispatcher)
         cardNumberEditText.onAccountRangeResult(
             AccountRangeFixtures.DINERSCLUB14
         )
 
         assertThat(
-            cardNumberEditText.updateSelectionIndex(12, 7, 0)
+            cardNumberEditText.calculateCursorPosition(12, 7, 0)
         ).isEqualTo(7)
     }
 
     @Test
-    fun updateSelectionIndex_whenAmEx_decreasesIndexWhenDeletingPastTheSpaces() = testDispatcher.runBlockingTest {
+    fun calculateCursorPosition_whenAmEx_decreasesIndexWhenDeletingPastTheSpaces() = testDispatcher.runBlockingTest {
         Dispatchers.setMain(testDispatcher)
         cardNumberEditText.onAccountRangeResult(
             AccountRangeFixtures.AMERICANEXPRESS
         )
 
         assertThat(
-            cardNumberEditText.updateSelectionIndex(10, 5, 0)
+            cardNumberEditText.calculateCursorPosition(10, 5, 0)
         ).isEqualTo(4)
         assertThat(
-            cardNumberEditText.updateSelectionIndex(13, 12, 0)
+            cardNumberEditText.calculateCursorPosition(13, 12, 0)
         ).isEqualTo(11)
     }
 
     @Test
-    fun updateSelectionIndex_whenSelectionInTheMiddle_increasesIndexOverASpace() = testDispatcher.runBlockingTest {
+    fun calculateCursorPosition_whenSelectionInTheMiddle_increasesIndexOverASpace() = testDispatcher.runBlockingTest {
         Dispatchers.setMain(testDispatcher)
         cardNumberEditText.onAccountRangeResult(
             AccountRangeFixtures.VISA
         )
 
         assertThat(
-            cardNumberEditText.updateSelectionIndex(10, 4, 1)
+            cardNumberEditText.calculateCursorPosition(10, 4, 1)
         ).isEqualTo(6)
     }
 
     @Test
-    fun updateSelectionIndex_whenPastingIntoAGap_includesTheGapJump() {
+    fun calculateCursorPosition_whenPastingIntoAGap_includesTheGapJump() {
         cardNumberEditText.cardBrand = CardBrand.Unknown
 
         assertThat(
-            cardNumberEditText.updateSelectionIndex(12, 8, 2)
+            cardNumberEditText.calculateCursorPosition(12, 8, 2)
         ).isEqualTo(11)
     }
 
     @Test
-    fun updateSelectionIndex_whenPastingOverAGap_includesTheGapJump() {
+    fun calculateCursorPosition_whenPastingOverAGap_includesTheGapJump() {
         cardNumberEditText.cardBrand = CardBrand.Unknown
         assertThat(
-            cardNumberEditText.updateSelectionIndex(12, 3, 5)
+            cardNumberEditText.calculateCursorPosition(12, 3, 5)
         ).isEqualTo(9)
     }
 
     @Test
-    fun updateSelectionIndex_whenIndexWouldGoOutOfBounds_setsToEndOfString() {
+    fun calculateCursorPosition_whenIndexWouldGoOutOfBounds_setsToEndOfString() {
         cardNumberEditText.cardBrand = CardBrand.Visa
 
         // This case could happen when you paste over 5 digits with only 2
         assertThat(
-            cardNumberEditText.updateSelectionIndex(3, 3, 2)
+            cardNumberEditText.calculateCursorPosition(3, 3, 2)
         ).isEqualTo(3)
     }
 
