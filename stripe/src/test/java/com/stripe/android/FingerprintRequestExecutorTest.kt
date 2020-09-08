@@ -76,7 +76,7 @@ class FingerprintRequestExecutorTest {
         connectionFactory: ConnectionFactory = ConnectionFactory.Default()
     ) = FingerprintRequestExecutor.Default(
         connectionFactory = connectionFactory,
-        workDispatcher = testDispatcher
+        workContext = testDispatcher
     )
 
     private companion object {

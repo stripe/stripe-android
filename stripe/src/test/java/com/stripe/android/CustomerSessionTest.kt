@@ -800,7 +800,7 @@ class CustomerSessionTest {
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             "acct_abc123",
             timeSupplier = timeSupplier,
-            workDispatcher = testDispatcher,
+            workContext = testDispatcher,
             ephemeralKeyManagerFactory = ephemeralKeyManagerFactory
         )
     }

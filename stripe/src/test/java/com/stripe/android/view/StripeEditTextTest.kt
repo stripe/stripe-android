@@ -30,7 +30,7 @@ internal class StripeEditTextTest {
 
     private val editText = StripeEditText(
         context,
-        workDispatcher = testDispatcher
+        workContext = testDispatcher
     ).also {
         it.setDeleteEmptyListener(deleteEmptyListener)
         it.setAfterTextChangedListener(afterTextChangedListener)

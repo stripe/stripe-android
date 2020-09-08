@@ -13,15 +13,15 @@ import com.stripe.android.StripeApiRepository
 import com.stripe.android.StripeRepository
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlin.coroutines.CoroutineContext
 
 internal class CheckoutViewModel internal constructor(
     application: Application,
     private val publishableKey: String,
     private val stripeAccountId: String?,
     private val stripeRepository: StripeRepository,
-    private val workDispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val workContext: CoroutineContext = Dispatchers.IO
 ) : AndroidViewModel(application) {
     private val mutableError = MutableLiveData<Throwable>()
     internal val error: LiveData<Throwable> = mutableError
@@ -34,7 +34,7 @@ internal class CheckoutViewModel internal constructor(
         customerId: String,
         ephemeralKey: String,
         stripeAccountId: String? = this.stripeAccountId
-    ) = liveData(workDispatcher) {
+    ) = liveData(workContext) {
         val result =
             kotlin.runCatching {
                 stripeRepository.getPaymentMethods(

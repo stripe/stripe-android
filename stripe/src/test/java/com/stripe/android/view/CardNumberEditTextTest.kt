@@ -74,7 +74,7 @@ internal class CardNumberEditTextTest {
 
     private val cardNumberEditText = CardNumberEditText(
         context,
-        workDispatcher = testDispatcher,
+        workContext = testDispatcher,
         cardAccountRangeRepository = cardAccountRangeRepository
     ).also {
         it.completionCallback = completionCallback
@@ -233,7 +233,7 @@ internal class CardNumberEditTextTest {
     fun `when 15 digit PAN is pasted, should not call completion callback`() {
         val cardNumberEditText = CardNumberEditText(
             context,
-            workDispatcher = testDispatcher,
+            workContext = testDispatcher,
             cardAccountRangeRepository = NullCardAccountRangeRepository()
         )
 
@@ -253,7 +253,7 @@ internal class CardNumberEditTextTest {
     fun `when 19 digit PAN is pasted, call completion callback`() {
         val cardNumberEditText = CardNumberEditText(
             context,
-            workDispatcher = testDispatcher,
+            workContext = testDispatcher,
             cardAccountRangeRepository = NullCardAccountRangeRepository(),
             staticCardAccountRanges = object : StaticCardAccountRanges {
                 override fun match(
@@ -278,7 +278,7 @@ internal class CardNumberEditTextTest {
     fun `updating text with null account range should format text correctly but not set card brand`() {
         val cardNumberEditText = CardNumberEditText(
             context,
-            workDispatcher = testDispatcher,
+            workContext = testDispatcher,
             cardAccountRangeRepository = NullCardAccountRangeRepository()
         )
 
@@ -635,7 +635,7 @@ internal class CardNumberEditTextTest {
                 activityScenario.onActivity { activity ->
                     val cardNumberEditText = CardNumberEditText(
                         activity,
-                        workDispatcher = testDispatcher,
+                        workContext = testDispatcher,
                         cardAccountRangeRepository = DelayedCardAccountRangeRepository()
                     )
 
@@ -662,7 +662,7 @@ internal class CardNumberEditTextTest {
         var repositoryCalls = 0
         val cardNumberEditText = CardNumberEditText(
             context,
-            workDispatcher = testDispatcher,
+            workContext = testDispatcher,
             cardAccountRangeRepository = object : CardAccountRangeRepository {
                 override suspend fun getAccountRange(
                     cardNumber: CardNumber.Unvalidated

@@ -39,6 +39,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.security.cert.CertificateException
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.CoroutineContext
 
 /**
  * A controller responsible for confirming and authenticating payment (typically through resolving
@@ -63,7 +64,7 @@ internal class StripePaymentController internal constructor(
     private val challengeFlowStarter: ChallengeFlowStarter = ChallengeFlowStarter.Default(),
     private val challengeProgressActivityStarter: ChallengeProgressActivityStarter =
         ChallengeProgressActivityStarter.Default(),
-    private val workScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private val workContext: CoroutineContext = Dispatchers.IO
 ) : PaymentController {
     private val logger = Logger.getInstance(enableLogging)
     private val analyticsRequestFactory = AnalyticsRequest.Factory(logger)
@@ -103,7 +104,7 @@ internal class StripePaymentController internal constructor(
             stripeRepository,
             confirmStripeIntentParams,
             requestOptions,
-            workScope,
+            workContext,
             callback
         ).execute()
     }
@@ -679,7 +680,7 @@ internal class StripePaymentController internal constructor(
             config.stripe3ds2Config.uiCustomization.uiCustomization
         )
 
-        workScope.launch {
+        CoroutineScope(workContext).launch {
             val areqParams = transaction.createAuthenticationRequestParameters()
 
             val timeout = config.stripe3ds2Config.timeout
@@ -722,9 +723,9 @@ internal class StripePaymentController internal constructor(
         private val stripeRepository: StripeRepository,
         params: ConfirmStripeIntentParams,
         private val requestOptions: ApiRequest.Options,
-        workScope: CoroutineScope,
+        workContext: CoroutineContext,
         callback: ApiResultCallback<StripeIntent>
-    ) : ApiOperation<StripeIntent>(workScope, callback) {
+    ) : ApiOperation<StripeIntent>(workContext, callback) {
         // mark this request as `use_stripe_sdk=true`
         private val params: ConfirmStripeIntentParams =
             params.withShouldUseStripeSdk(shouldUseStripeSdk = true)

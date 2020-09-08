@@ -51,7 +51,7 @@ class FingerprintDataRepositoryTest {
             fingerprintRequestExecutor = object : FingerprintRequestExecutor {
                 override suspend fun execute(request: FingerprintRequest) = expectedFingerprintData
             },
-            dispatcher = testDispatcher
+            workContext = testDispatcher
         )
         repository.save(createFingerprintData(elapsedTime = -60L))
         repository.refresh()
@@ -71,7 +71,7 @@ class FingerprintDataRepositoryTest {
             localStore = store,
             fingerprintRequestFactory = fingerprintRequestFactory,
             fingerprintRequestExecutor = fingerprintRequestExecutor,
-            dispatcher = testDispatcher
+            workContext = testDispatcher
         )
         repository.refresh()
 

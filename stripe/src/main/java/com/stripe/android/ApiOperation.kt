@@ -6,21 +6,21 @@ import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.StripeModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONException
 import java.io.IOException
+import kotlin.coroutines.CoroutineContext
 
 internal abstract class ApiOperation<out ResultType : StripeModel>(
-    private val workScope: CoroutineScope = CoroutineScope(IO),
+    private val workContext: CoroutineContext = Dispatchers.IO,
     private val callback: ApiResultCallback<ResultType>
 ) {
     internal abstract suspend fun getResult(): ResultType?
 
     internal fun execute() {
-        workScope.launch {
+        CoroutineScope(workContext).launch {
             val result: Result<ResultType?> = try {
                 Result.success(getResult())
             } catch (e: StripeException) {
@@ -38,14 +38,13 @@ internal abstract class ApiOperation<out ResultType : StripeModel>(
                 )
             }
 
-            // dispatch the API operation result to the main thread
-            withContext(Main) {
-                dispatchResult(result)
-            }
+            dispatchResult(result)
         }
     }
 
-    private fun dispatchResult(result: Result<ResultType?>) {
+    private suspend fun dispatchResult(
+        result: Result<ResultType?>
+    ) = withContext(Dispatchers.Main) {
         result.fold(
             onSuccess = {
                 when {
