@@ -45,7 +45,6 @@ import com.stripe.android.view.PaymentRelayActivity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
@@ -82,7 +81,7 @@ class StripePaymentControllerTest {
     private val apiResultStripeIntentArgumentCaptor: KArgumentCaptor<ApiResultCallback<StripeIntent>> = argumentCaptor()
     private val sourceArgumentCaptor: KArgumentCaptor<Source> = argumentCaptor()
 
-    private val testScope = TestCoroutineScope(TestCoroutineDispatcher())
+    private val testDispatcher = TestCoroutineDispatcher()
 
     @BeforeTest
     fun setup() {
@@ -768,7 +767,7 @@ class StripePaymentControllerTest {
             analyticsDataFactory,
             challengeFlowStarter,
             challengeProgressActivityStarter,
-            testScope
+            testDispatcher
         )
     }
 

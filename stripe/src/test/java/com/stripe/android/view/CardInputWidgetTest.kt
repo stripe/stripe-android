@@ -53,7 +53,7 @@ internal class CardInputWidgetTest {
     private lateinit var cardInputWidget: CardInputWidget
     private val cardNumberEditText: CardNumberEditText by lazy {
         cardInputWidget.cardNumberEditText.also {
-            it.workDispatcher = testDispatcher
+            it.workContext = testDispatcher
         }
     }
     private val expiryEditText: StripeEditText by lazy {

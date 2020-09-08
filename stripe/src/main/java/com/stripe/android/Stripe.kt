@@ -35,9 +35,8 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import com.stripe.android.view.AuthActivityStarter
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Entry-point to the Stripe SDK.
@@ -56,9 +55,8 @@ class Stripe internal constructor(
     private val paymentController: PaymentController,
     publishableKey: String,
     private val stripeAccountId: String? = null,
-    workDispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val workContext: CoroutineContext = Dispatchers.IO
 ) {
-    private val workScope = CoroutineScope(workDispatcher)
     private val publishableKey: String = ApiKeyValidator().requireValid(publishableKey)
 
     /**
@@ -373,7 +371,7 @@ class Stripe internal constructor(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId
             ),
-            workScope,
+            workContext,
             callback
         ).execute()
     }
@@ -646,7 +644,7 @@ class Stripe internal constructor(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId
             ),
-            workScope,
+            workContext,
             callback
         ).execute()
     }
@@ -751,7 +749,7 @@ class Stripe internal constructor(
                 stripeAccount = stripeAccountId,
                 idempotencyKey = idempotencyKey
             ),
-            workScope,
+            workContext,
             callback
         ).execute()
     }
@@ -898,7 +896,7 @@ class Stripe internal constructor(
                 stripeAccount = stripeAccountId,
                 idempotencyKey = idempotencyKey
             ),
-            workScope,
+            workContext,
             callback
         ).execute()
     }
@@ -979,7 +977,7 @@ class Stripe internal constructor(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId
             ),
-            workScope,
+            workContext,
             callback
         ).execute()
     }
@@ -1575,7 +1573,7 @@ class Stripe internal constructor(
                 stripeAccount = stripeAccountId,
                 idempotencyKey = idempotencyKey
             ),
-            workScope,
+            workContext,
             callback
         ).execute()
     }
@@ -1604,7 +1602,7 @@ class Stripe internal constructor(
                 stripeAccount = stripeAccountId,
                 idempotencyKey = idempotencyKey
             ),
-            workScope,
+            workContext,
             callback
         ).execute()
     }
@@ -1637,9 +1635,9 @@ class Stripe internal constructor(
         private val stripeRepository: StripeRepository,
         private val sourceParams: SourceParams,
         private val options: ApiRequest.Options,
-        workScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
+        workContext: CoroutineContext,
         callback: ApiResultCallback<Source>
-    ) : ApiOperation<Source>(workScope, callback) {
+    ) : ApiOperation<Source>(workContext, callback) {
         @Throws(StripeException::class)
         override suspend fun getResult(): Source? {
             return stripeRepository.createSource(sourceParams, options)
@@ -1651,9 +1649,9 @@ class Stripe internal constructor(
         private val sourceId: String,
         private val clientSecret: String,
         private val options: ApiRequest.Options,
-        workScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
+        workContext: CoroutineContext,
         callback: ApiResultCallback<Source>
-    ) : ApiOperation<Source>(workScope, callback) {
+    ) : ApiOperation<Source>(workContext, callback) {
         @Throws(StripeException::class)
         override suspend fun getResult(): Source? {
             return stripeRepository.retrieveSource(sourceId, clientSecret, options)
@@ -1664,9 +1662,9 @@ class Stripe internal constructor(
         private val stripeRepository: StripeRepository,
         private val paymentMethodCreateParams: PaymentMethodCreateParams,
         private val options: ApiRequest.Options,
-        workScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
+        workContext: CoroutineContext,
         callback: ApiResultCallback<PaymentMethod>
-    ) : ApiOperation<PaymentMethod>(workScope, callback) {
+    ) : ApiOperation<PaymentMethod>(workContext, callback) {
         @Throws(StripeException::class)
         override suspend fun getResult(): PaymentMethod? {
             return stripeRepository.createPaymentMethod(paymentMethodCreateParams, options)
@@ -1677,9 +1675,9 @@ class Stripe internal constructor(
         private val stripeRepository: StripeRepository,
         private val tokenParams: TokenParams,
         private val options: ApiRequest.Options,
-        workScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
+        workContext: CoroutineContext,
         callback: ApiResultCallback<Token>
-    ) : ApiOperation<Token>(workScope, callback) {
+    ) : ApiOperation<Token>(workContext, callback) {
         @Throws(StripeException::class)
         override suspend fun getResult(): Token? {
             return stripeRepository.createToken(tokenParams, options)
@@ -1690,9 +1688,9 @@ class Stripe internal constructor(
         private val stripeRepository: StripeRepository,
         private val fileParams: StripeFileParams,
         private val options: ApiRequest.Options,
-        workScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
+        workContext: CoroutineContext,
         callback: ApiResultCallback<StripeFile>
-    ) : ApiOperation<StripeFile>(workScope, callback) {
+    ) : ApiOperation<StripeFile>(workContext, callback) {
         @Throws(StripeException::class)
         override suspend fun getResult(): StripeFile {
             return stripeRepository.createFile(fileParams, options)
@@ -1703,9 +1701,9 @@ class Stripe internal constructor(
         private val stripeRepository: StripeRepository,
         private val clientSecret: String,
         private val options: ApiRequest.Options,
-        workScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
+        workContext: CoroutineContext,
         callback: ApiResultCallback<PaymentIntent>
-    ) : ApiOperation<PaymentIntent>(workScope, callback) {
+    ) : ApiOperation<PaymentIntent>(workContext, callback) {
         @Throws(StripeException::class)
         override suspend fun getResult(): PaymentIntent? {
             return stripeRepository.retrievePaymentIntent(clientSecret, options)
@@ -1716,9 +1714,9 @@ class Stripe internal constructor(
         private val stripeRepository: StripeRepository,
         private val clientSecret: String,
         private val options: ApiRequest.Options,
-        workScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
+        workContext: CoroutineContext,
         callback: ApiResultCallback<SetupIntent>
-    ) : ApiOperation<SetupIntent>(workScope, callback) {
+    ) : ApiOperation<SetupIntent>(workContext, callback) {
         @Throws(StripeException::class)
         override suspend fun getResult(): SetupIntent? {
             return stripeRepository.retrieveSetupIntent(clientSecret, options)

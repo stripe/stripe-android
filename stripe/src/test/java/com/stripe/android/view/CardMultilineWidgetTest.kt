@@ -25,7 +25,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
 import com.stripe.android.utils.TestUtils.idleLooper
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -34,6 +33,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.reset
 import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
+import kotlin.coroutines.CoroutineContext
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -1054,10 +1054,10 @@ internal class CardMultilineWidgetTest {
 
     internal class WidgetControlGroup(
         widget: CardMultilineWidget,
-        workDispatcher: CoroutineDispatcher
+        workContext: CoroutineContext
     ) {
         val cardNumberEditText: CardNumberEditText = widget.findViewById<CardNumberEditText>(R.id.et_card_number).also {
-            it.workDispatcher = workDispatcher
+            it.workContext = workContext
         }
         val cardInputLayout: TextInputLayout = widget.findViewById(R.id.tl_card_number)
         val expiryDateEditText: ExpiryDateEditText = widget.findViewById(R.id.et_expiry)

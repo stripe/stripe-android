@@ -33,10 +33,9 @@ open class StripeEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle,
-    workDispatcher: CoroutineContext = Dispatchers.IO
+    private val workContext: CoroutineContext = Dispatchers.IO
 ) : TextInputEditText(context, attrs, defStyleAttr) {
     internal val job = Job()
-    private val workScope: CoroutineScope = CoroutineScope(workDispatcher + job)
 
     protected var isLastKeyDelete: Boolean = false
 
@@ -167,7 +166,7 @@ open class StripeEditText @JvmOverloads constructor(
      * @param delayMilliseconds a delay period, measured in milliseconds
      */
     fun setHintDelayed(hint: CharSequence, delayMilliseconds: Long) {
-        workScope.launch {
+        CoroutineScope(workContext).launch {
             delay(delayMilliseconds)
 
             withContext(Dispatchers.Main) {
