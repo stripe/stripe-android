@@ -4,7 +4,7 @@
     android:layout_height="@dimen/stripe_card_widget_progress_size">
 
     <ProgressBar
-        android:id="@+id/progress_bar"
+        android:id="@+id/card_loading"
         android:background="@android:color/transparent"
         android:indeterminate="true"
         android:indeterminateTint="@color/stripe_card_widget_progress_foreground"
