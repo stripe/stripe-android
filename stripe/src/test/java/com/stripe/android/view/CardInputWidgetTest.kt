@@ -18,7 +18,10 @@ import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
+import com.stripe.android.cards.AccountRangeFixtures
+import com.stripe.android.cards.DefaultCardAccountRangeStore
 import com.stripe.android.model.Address
+import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
@@ -69,6 +72,8 @@ internal class CardInputWidgetTest {
     private val onGlobalFocusChangeListener: TestFocusChangeListener = TestFocusChangeListener()
     private val cardInputListener: CardInputListener = mock()
 
+    private val accountRangeStore = DefaultCardAccountRangeStore(context)
+
     @BeforeTest
     fun setup() {
         // The input date here will be invalid after 2050. Please update the test.
@@ -78,6 +83,20 @@ internal class CardInputWidgetTest {
         Dispatchers.setMain(testDispatcher)
 
         PaymentConfiguration.init(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+
+        // populate store with data to circumvent network requests that cause flakiness
+        accountRangeStore.save(
+            BinFixtures.VISA,
+            listOf(AccountRangeFixtures.VISA)
+        )
+        accountRangeStore.save(
+            BinFixtures.AMEX,
+            listOf(AccountRangeFixtures.AMERICANEXPRESS)
+        )
+        accountRangeStore.save(
+            BinFixtures.DINERSCLUB14,
+            listOf(AccountRangeFixtures.DINERSCLUB14)
+        )
 
         activityScenarioFactory.create<AddPaymentMethodActivity>(
             AddPaymentMethodActivityStarter.Args.Builder()

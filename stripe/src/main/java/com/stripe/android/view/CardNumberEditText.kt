@@ -380,6 +380,6 @@ class CardNumberEditText internal constructor(
     }
 
     private companion object {
-        private const val USE_DEFAULT_CARD_ACCOUNT_RANGE_REPO = false
+        private const val USE_DEFAULT_CARD_ACCOUNT_RANGE_REPO = true
     }
 }
