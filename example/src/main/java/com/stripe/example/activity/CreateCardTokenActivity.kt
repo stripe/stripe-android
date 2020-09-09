@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.Token
-import com.stripe.android.view.CardValidCallback
 import com.stripe.example.R
 import com.stripe.example.StripeFactory
 import com.stripe.example.databinding.CreateCardTokenActivityBinding
@@ -62,16 +61,9 @@ class CreateCardTokenActivity : AppCompatActivity() {
             } ?: snackbarController.show(getString(R.string.invalid_card_details))
         }
 
-        viewBinding.cardInputWidget.setCardValidCallback(
-            object : CardValidCallback {
-                override fun onInputChanged(
-                    isValid: Boolean,
-                    invalidFields: Set<CardValidCallback.Fields>
-                ) {
-                    // added as an example - no-op
-                }
-            }
-        )
+        viewBinding.cardInputWidget.setCardValidCallback { isValid, invalidFields ->
+            // added as an example - no-op
+        }
 
         viewBinding.cardInputWidget.requestFocus()
     }

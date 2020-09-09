@@ -955,17 +955,10 @@ internal class CardMultilineWidgetTest {
     fun testCardValidCallback() {
         var currentIsValid = false
         var currentInvalidFields = emptySet<CardValidCallback.Fields>()
-        cardMultilineWidget.setCardValidCallback(
-            object : CardValidCallback {
-                override fun onInputChanged(
-                    isValid: Boolean,
-                    invalidFields: Set<CardValidCallback.Fields>
-                ) {
-                    currentIsValid = isValid
-                    currentInvalidFields = invalidFields
-                }
-            }
-        )
+        cardMultilineWidget.setCardValidCallback { isValid, invalidFields ->
+            currentIsValid = isValid
+            currentInvalidFields = invalidFields
+        }
 
         assertThat(currentIsValid)
             .isFalse()

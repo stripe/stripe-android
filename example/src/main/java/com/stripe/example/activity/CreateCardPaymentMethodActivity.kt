@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.view.CardValidCallback
 import com.stripe.example.databinding.CreateCardPaymentMethodActivityBinding
 import com.stripe.example.databinding.PaymentMethodItemBinding
 
@@ -42,16 +41,9 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
         viewBinding.paymentMethods.layoutManager = LinearLayoutManager(this)
         viewBinding.paymentMethods.adapter = adapter
 
-        viewBinding.cardMultilineWidget.setCardValidCallback(
-            object : CardValidCallback {
-                override fun onInputChanged(
-                    isValid: Boolean,
-                    invalidFields: Set<CardValidCallback.Fields>
-                ) {
-                    // added as an example - no-op
-                }
-            }
-        )
+        viewBinding.cardMultilineWidget.setCardValidCallback { isValid, invalidFields ->
+            // added as an example - no-op
+        }
 
         viewBinding.createButton.setOnClickListener {
             keyboardController.hide()

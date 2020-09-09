@@ -238,15 +238,15 @@ open class StripeEditText @JvmOverloads constructor(
         return keyCode == KeyEvent.KEYCODE_DEL && event.action == KeyEvent.ACTION_DOWN
     }
 
-    interface DeleteEmptyListener {
+    fun interface DeleteEmptyListener {
         fun onDeleteEmpty()
     }
 
-    interface AfterTextChangedListener {
+    fun interface AfterTextChangedListener {
         fun onTextChanged(text: String)
     }
 
-    interface ErrorMessageListener {
+    fun interface ErrorMessageListener {
         fun displayErrorMessage(message: String?)
     }
 

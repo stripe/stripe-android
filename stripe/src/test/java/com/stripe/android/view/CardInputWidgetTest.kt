@@ -1384,17 +1384,10 @@ internal class CardInputWidgetTest {
     fun testCardValidCallback() {
         var currentIsValid = false
         var currentInvalidFields = emptySet<CardValidCallback.Fields>()
-        cardInputWidget.setCardValidCallback(
-            object : CardValidCallback {
-                override fun onInputChanged(
-                    isValid: Boolean,
-                    invalidFields: Set<CardValidCallback.Fields>
-                ) {
-                    currentIsValid = isValid
-                    currentInvalidFields = invalidFields
-                }
-            }
-        )
+        cardInputWidget.setCardValidCallback { isValid, invalidFields ->
+            currentIsValid = isValid
+            currentInvalidFields = invalidFields
+        }
 
         assertThat(currentIsValid)
             .isFalse()

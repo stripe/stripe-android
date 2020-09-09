@@ -3,7 +3,7 @@ package com.stripe.android.view
 /**
  * An interface for a callback object that will be called when the user's input changes.
  */
-interface CardValidCallback {
+fun interface CardValidCallback {
     /**
      * @param isValid if the current input is valid
      * @param invalidFields if the current input is invalid, this [Set] will be populated with the

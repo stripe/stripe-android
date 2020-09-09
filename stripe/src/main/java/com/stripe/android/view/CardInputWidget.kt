@@ -763,16 +763,12 @@ class CardInputWidget @JvmOverloads constructor(
             updateIconCvc(hasFocus, cvc?.value)
         }
 
-        cvcEditText.setAfterTextChangedListener(
-            object : StripeEditText.AfterTextChangedListener {
-                override fun onTextChanged(text: String) {
-                    if (brand.isMaxCvc(text)) {
-                        cardInputListener?.onCvcComplete()
-                    }
-                    updateIconCvc(cvcEditText.hasFocus(), text)
-                }
+        cvcEditText.setAfterTextChangedListener { text ->
+            if (brand.isMaxCvc(text)) {
+                cardInputListener?.onCvcComplete()
             }
-        )
+            updateIconCvc(cvcEditText.hasFocus(), text)
+        }
 
         cardNumberEditText.completionCallback = {
             scrollRight()
