@@ -8,6 +8,7 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
+import com.nhaarman.mockitokotlin2.reset
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures.AMEX_NO_SPACES
@@ -30,7 +31,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
-import org.mockito.Mockito.reset
 import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
 import kotlin.coroutines.CoroutineContext
@@ -629,15 +629,10 @@ internal class CardMultilineWidgetTest {
     }
 
     @Test
-    fun deleteWhenEmpty_fromExpiry_shiftsToCardNumber() {
+    fun deleteWhenEmpty_fromExpiry_withPostalCode_shiftsToCardNumber() {
         cardMultilineWidget.setCardInputListener(fullCardListener)
-        noZipCardMultilineWidget.setCardInputListener(noZipCardListener)
-
-        val deleteOneCharacterString =
-            VISA_WITH_SPACES.take(VISA_WITH_SPACES.length - 1)
         fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
 
-        reset(fullCardListener)
         assertThat(fullGroup.expiryDateEditText.hasFocus())
             .isTrue()
         ViewTestUtils.sendDeleteKeyEvent(fullGroup.expiryDateEditText)
@@ -646,11 +641,14 @@ internal class CardMultilineWidgetTest {
         assertThat(fullGroup.cardNumberEditText.hasFocus())
             .isTrue()
         assertThat(fullGroup.cardNumberEditText.text?.toString())
-            .isEqualTo(deleteOneCharacterString)
+            .isEqualTo(VISA_WITH_SPACES.take(VISA_WITH_SPACES.length - 1))
+    }
 
+    @Test
+    fun deleteWhenEmpty_fromExpiry_withoutPostalCode_shiftsToCardNumber() {
+        noZipCardMultilineWidget.setCardInputListener(noZipCardListener)
         noZipGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
 
-        reset(noZipCardListener)
         assertThat(noZipGroup.expiryDateEditText.hasFocus())
             .isTrue()
         ViewTestUtils.sendDeleteKeyEvent(noZipGroup.expiryDateEditText)
@@ -659,7 +657,7 @@ internal class CardMultilineWidgetTest {
         assertThat(noZipGroup.cardNumberEditText.hasFocus())
             .isTrue()
         assertThat(noZipGroup.cardNumberEditText.text?.toString())
-            .isEqualTo(deleteOneCharacterString)
+            .isEqualTo(VISA_WITH_SPACES.take(VISA_WITH_SPACES.length - 1))
     }
 
     @Test
@@ -670,7 +668,6 @@ internal class CardMultilineWidgetTest {
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
 
-        reset(fullCardListener)
         assertThat(fullGroup.cvcEditText.hasFocus())
             .isTrue()
         ViewTestUtils.sendDeleteKeyEvent(fullGroup.cvcEditText)
@@ -684,7 +681,6 @@ internal class CardMultilineWidgetTest {
         noZipGroup.expiryDateEditText.append("12")
         noZipGroup.expiryDateEditText.append("50")
 
-        reset(noZipCardListener)
         assertThat(noZipGroup.cvcEditText.hasFocus())
             .isTrue()
         ViewTestUtils.sendDeleteKeyEvent(noZipGroup.cvcEditText)
@@ -692,7 +688,7 @@ internal class CardMultilineWidgetTest {
         verify(noZipCardListener).onFocusChange(CardInputListener.FocusField.ExpiryDate)
         assertThat(noZipGroup.expiryDateEditText.hasFocus())
             .isTrue()
-        assertThat(noZipGroup.expiryDateEditText.text.toString())
+        assertThat(noZipGroup.expiryDateEditText.fieldText)
             .isEqualTo("12/5")
     }
 
