@@ -181,4 +181,5 @@
 
     <!-- Checkout -->
     <string name="stripe_checkout_pay_with_your"  tools:ignore="MissingTranslation">Pay with your</string>
+    <string name="stripe_checkout_add_payment_method" tools:ignore="MissingTranslation">Add payment method</string>
 </resources>

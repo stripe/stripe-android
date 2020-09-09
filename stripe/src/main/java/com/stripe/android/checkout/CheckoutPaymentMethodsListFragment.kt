@@ -32,7 +32,9 @@ internal class CheckoutPaymentMethodsListFragment : Fragment(R.layout.fragment_c
         ).observe(viewLifecycleOwner) { result ->
             result.fold(
                 onSuccess = {
-                    binding.recycler.adapter = CheckoutPaymentMethodsAdapter(it)
+                    binding.recycler.adapter = CheckoutPaymentMethodsAdapter(it) {
+                        viewModel.transitionTo(CheckoutViewModel.TransitionTarget.AddCard)
+                    }
                 },
                 onFailure = {
                     viewModel.onError(it)

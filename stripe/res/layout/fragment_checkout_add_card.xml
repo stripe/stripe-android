@@ -10,16 +10,14 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/stripe_checkout_pay_with_your"
+        android:text="@string/stripe_checkout_add_payment_method"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:paddingBottom="10dp"
-        />
+        android:paddingBottom="10dp" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler"
+    <com.stripe.android.view.CardMultilineWidget
+        android:id="@+id/card_multiline_widget"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        />
+        android:layout_height="wrap_content" />
 
 </LinearLayout>
