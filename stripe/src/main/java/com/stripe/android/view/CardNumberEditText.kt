@@ -288,7 +288,7 @@ class CardNumberEditText internal constructor(
             val cardNumber = CardNumber.Unvalidated(s?.toString().orEmpty())
             updateAccountRange(cardNumber)
 
-            isPastedPan = isPastedPan(start, cardNumber)
+            isPastedPan = isPastedPan(start, before, count, cardNumber)
 
             if (isPastedPan) {
                 updateLengthFilter(cardNumber.getFormatted(cardNumber.length).length)
@@ -363,8 +363,14 @@ class CardNumberEditText internal constructor(
                 (isValid && accountRange != null)
             )
 
-        private fun isPastedPan(start: Int, cardNumber: CardNumber.Unvalidated): Boolean {
-            return start == 0 && cardNumber.normalized.length >= CardNumber.MIN_PAN_LENGTH
+        private fun isPastedPan(
+            start: Int,
+            before: Int,
+            count: Int,
+            cardNumber: CardNumber.Unvalidated
+        ): Boolean {
+            return count > before && start == 0 &&
+                cardNumber.normalized.length >= CardNumber.MIN_PAN_LENGTH
         }
     }
 

@@ -644,18 +644,16 @@ internal class CardInputWidgetTest {
         assertThat(expiryEditText.hasFocus())
             .isTrue()
 
-        // The above functionality is tested elsewhere, so we reset this listener.
-        reset(cardInputListener)
-
         ViewTestUtils.sendDeleteKeyEvent(expiryEditText)
-        verify(cardInputListener).onFocusChange(CardInputListener.FocusField.CardNumber)
+        verify(cardInputListener)
+            .onFocusChange(CardInputListener.FocusField.CardNumber)
         assertThat(onGlobalFocusChangeListener.oldFocusId)
             .isEqualTo(expiryEditText.id)
         assertThat(onGlobalFocusChangeListener.newFocusId)
             .isEqualTo(cardNumberEditText.id)
 
         val subString = VISA_WITH_SPACES.take(VISA_WITH_SPACES.length - 1)
-        assertThat(cardNumberEditText.text.toString())
+        assertThat(cardNumberEditText.fieldText)
             .isEqualTo(subString)
         assertThat(cardNumberEditText.selectionStart)
             .isEqualTo(subString.length)
@@ -673,7 +671,7 @@ internal class CardInputWidgetTest {
 
         assertThat(expiryEditText.hasFocus())
             .isTrue()
-        assertThat(cardNumberEditText.text.toString())
+        assertThat(cardNumberEditText.fieldText)
             .isEqualTo(AMEX_WITH_SPACES)
     }
 
@@ -704,7 +702,7 @@ internal class CardInputWidgetTest {
             .isEqualTo(expiryEditText.id)
 
         val expectedResult = "12/7"
-        assertThat(expiryEditText.text.toString())
+        assertThat(expiryEditText.fieldText)
             .isEqualTo(expectedResult)
         assertThat(expiryEditText.selectionStart)
             .isEqualTo(expectedResult.length)
@@ -726,7 +724,7 @@ internal class CardInputWidgetTest {
 
         assertThat(cvcEditText.hasFocus())
             .isTrue()
-        assertThat(expiryEditText.text.toString())
+        assertThat(expiryEditText.fieldText)
             .isEqualTo("12/79")
     }
 
@@ -746,7 +744,7 @@ internal class CardInputWidgetTest {
 
         assertThat(cvcEditText.hasFocus())
             .isTrue()
-        assertThat(expiryEditText.text.toString())
+        assertThat(expiryEditText.fieldText)
             .isEqualTo("12/79")
     }
 
@@ -1395,14 +1393,14 @@ internal class CardInputWidgetTest {
     @Test
     fun setExpirationDate_withValidData_setsCorrectValues() {
         cardInputWidget.setExpiryDate(12, 79)
-        assertThat(expiryEditText.text.toString())
+        assertThat(expiryEditText.fieldText)
             .isEqualTo("12/79")
     }
 
     @Test
     fun setCvcCode_withValidData_setsValue() {
         cardInputWidget.setCvcCode(CVC_VALUE_COMMON)
-        assertThat(cvcEditText.text.toString())
+        assertThat(cvcEditText.fieldText)
             .isEqualTo(CVC_VALUE_COMMON)
     }
 
@@ -1411,7 +1409,7 @@ internal class CardInputWidgetTest {
         cvcEditText.updateBrand(CardBrand.Visa)
         cardInputWidget.setCvcCode(CVC_VALUE_AMEX)
 
-        assertThat(cvcEditText.text.toString())
+        assertThat(cvcEditText.fieldText)
             .isEqualTo(CVC_VALUE_COMMON)
     }
 
@@ -1420,7 +1418,7 @@ internal class CardInputWidgetTest {
         cardInputWidget.setCardNumber(AMEX_NO_SPACES)
         cardInputWidget.setCvcCode(CVC_VALUE_AMEX)
 
-        assertThat(cvcEditText.text.toString())
+        assertThat(cvcEditText.fieldText)
             .isEqualTo(CVC_VALUE_AMEX)
     }
 
@@ -1579,11 +1577,11 @@ internal class CardInputWidgetTest {
         cardInputWidget.setCvcCode(CVC_VALUE_AMEX)
         cardInputWidget.clear()
 
-        assertThat(cardNumberEditText.text.toString())
+        assertThat(cardNumberEditText.fieldText)
             .isEmpty()
-        assertThat(expiryEditText.text.toString())
+        assertThat(expiryEditText.fieldText)
             .isEmpty()
-        assertThat(cvcEditText.text.toString())
+        assertThat(cvcEditText.fieldText)
             .isEmpty()
 
         assertThat(onGlobalFocusChangeListener.oldFocusId)
@@ -1601,13 +1599,13 @@ internal class CardInputWidgetTest {
         cardInputWidget.setPostalCode(POSTAL_CODE_VALUE)
         cardInputWidget.clear()
 
-        assertThat(cardNumberEditText.text.toString())
+        assertThat(cardNumberEditText.fieldText)
             .isEmpty()
-        assertThat(expiryEditText.text.toString())
+        assertThat(expiryEditText.fieldText)
             .isEmpty()
-        assertThat(cvcEditText.text.toString())
+        assertThat(cvcEditText.fieldText)
             .isEmpty()
-        assertThat(postalCodeEditText.text.toString())
+        assertThat(postalCodeEditText.fieldText)
             .isEmpty()
 
         assertThat(onGlobalFocusChangeListener.oldFocusId)
