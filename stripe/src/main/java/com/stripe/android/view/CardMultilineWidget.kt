@@ -54,7 +54,7 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     private val cardNumberTextInputLayout = viewBinding.tlCardNumber
     private val expiryTextInputLayout = viewBinding.tlExpiry
-    private val cvcTextInputLayout = viewBinding.tlCvc
+    private val cvcInputLayout = viewBinding.tlCvc
     internal val postalInputLayout = viewBinding.tlPostalCode
 
     private var cardInputListener: CardInputListener? = null
@@ -301,7 +301,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         initTextInputLayoutErrorHandlers(
             cardNumberTextInputLayout,
             expiryTextInputLayout,
-            cvcTextInputLayout,
+            cvcInputLayout,
             postalInputLayout
         )
 
@@ -356,6 +356,10 @@ class CardMultilineWidget @JvmOverloads constructor(
                     }
                 }
             )
+        }
+
+        cardNumberEditText.isLoadingCallback = {
+            cardNumberTextInputLayout.isLoading = it
         }
 
         isEnabled = true
@@ -517,7 +521,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     override fun setEnabled(enabled: Boolean) {
         expiryTextInputLayout.isEnabled = enabled
         cardNumberTextInputLayout.isEnabled = enabled
-        cvcTextInputLayout.isEnabled = enabled
+        cvcInputLayout.isEnabled = enabled
         postalInputLayout.isEnabled = enabled
         isEnabled = enabled
     }
@@ -560,11 +564,11 @@ class CardMultilineWidget @JvmOverloads constructor(
         } else {
             0
         }
-        val linearParams = cvcTextInputLayout.layoutParams as LayoutParams
+        val linearParams = cvcInputLayout.layoutParams as LayoutParams
         linearParams.setMargins(0, 0, marginPixels, 0)
         linearParams.marginEnd = marginPixels
 
-        cvcTextInputLayout.layoutParams = linearParams
+        cvcInputLayout.layoutParams = linearParams
     }
 
     private fun checkAttributeSet(attrs: AttributeSet) {
@@ -698,7 +702,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     }
 
     private fun updateCvc() {
-        cvcEditText.updateBrand(cardBrand, customCvcLabel, cvcTextInputLayout)
+        cvcEditText.updateBrand(cardBrand, customCvcLabel, cvcInputLayout)
     }
 
     private fun updateDrawable(@DrawableRes iconResourceId: Int, shouldTint: Boolean) {
