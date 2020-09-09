@@ -178,4 +178,7 @@
     by the Merchant. You certify that you are either an account holder or an authorised
     signatory on the account listed above.
     </string>
+
+    <!-- Checkout -->
+    <string name="stripe_checkout_pay_with_your"  tools:ignore="MissingTranslation">Pay with your</string>
 </resources>
