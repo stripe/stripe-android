@@ -28,7 +28,7 @@ internal class CardBrandView @JvmOverloads constructor(
     var isLoading: Boolean by Delegates.observable(
         false
     ) { _, wasLoading, isLoading ->
-        if (SHOULD_SHOW_PROGRESS && wasLoading != isLoading) {
+        if (wasLoading != isLoading) {
             if (isLoading) {
                 progressView.show()
             } else {
@@ -64,9 +64,5 @@ internal class CardBrandView @JvmOverloads constructor(
         val compatIcon = DrawableCompat.wrap(icon)
         DrawableCompat.setTint(compatIcon.mutate(), tintColorInt)
         iconView.setImageDrawable(DrawableCompat.unwrap(compatIcon))
-    }
-
-    private companion object {
-        private const val SHOULD_SHOW_PROGRESS = false
     }
 }

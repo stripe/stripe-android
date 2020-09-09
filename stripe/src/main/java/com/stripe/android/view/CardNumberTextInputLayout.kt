@@ -21,7 +21,7 @@ internal class CardNumberTextInputLayout @JvmOverloads constructor(
     internal var isLoading: Boolean by Delegates.observable(
         false
     ) { _, wasLoading, isLoading ->
-        if (SHOULD_SHOW_PROGRESS && wasLoading != isLoading) {
+        if (wasLoading != isLoading) {
             if (isLoading) {
                 progressView.show()
             } else {
@@ -45,9 +45,5 @@ internal class CardNumberTextInputLayout @JvmOverloads constructor(
                 R.dimen.stripe_card_number_text_input_layout_progress_top_margin
             )
         }
-    }
-
-    private companion object {
-        private const val SHOULD_SHOW_PROGRESS = false
     }
 }
