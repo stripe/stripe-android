@@ -25,6 +25,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.view.AccessibilityDelegateCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.Cvc
@@ -38,7 +39,9 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import kotlin.properties.Delegates
 
 /**
- * A card input widget that handles all animation on its own.
+ * A single-line card input widget.
+ *
+ * [PaymentConfiguration.init] must be called before [CardInputWidget] is instantiated.
  *
  * The individual `EditText` views of this widget can be styled by defining a style
  * `Stripe.CardInputWidget.EditText` that extends `Stripe.Base.CardInputWidget.EditText`.
