@@ -33,7 +33,7 @@ internal class CheckoutPaymentMethodsListFragment : Fragment(R.layout.fragment_c
             result.fold(
                 onSuccess = {
                     binding.recycler.adapter = CheckoutPaymentMethodsAdapter(it) {
-                        viewModel.transitionTo(CheckoutViewModel.Transition.ADD_CARD)
+                        viewModel.transitionTo(CheckoutViewModel.TransitionTarget.AddCard)
                     }
                 },
                 onFailure = {

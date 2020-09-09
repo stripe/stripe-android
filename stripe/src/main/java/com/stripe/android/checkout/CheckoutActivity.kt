@@ -53,7 +53,7 @@ internal class CheckoutActivity : AppCompatActivity() {
         viewModel.transition.observe(this) {
             supportFragmentManager.commit {
                 when (it) {
-                    CheckoutViewModel.Transition.ADD_CARD -> {
+                    CheckoutViewModel.TransitionTarget.AddCard -> {
                         setCustomAnimations(
                             R.anim.stripe_checkout_transition_enter_from_right,
                             R.anim.stripe_checkout_transition_exit_to_left,
