@@ -3,7 +3,7 @@
        android:layout_width="match_parent"
        android:layout_height="wrap_content">
 
-    <com.stripe.android.view.IconTextInputLayout
+    <com.stripe.android.view.CardNumberTextInputLayout
         android:id="@+id/tl_card_number"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -23,7 +23,7 @@
             android:nextFocusForward="@+id/et_expiry"
             />
 
-    </com.stripe.android.view.IconTextInputLayout>
+    </com.stripe.android.view.CardNumberTextInputLayout>
 
     <LinearLayout
         android:id="@+id/second_row_layout"
