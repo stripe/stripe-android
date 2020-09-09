@@ -1,5 +1,9 @@
 package com.stripe.android.view
 
+import android.view.View
+import androidx.annotation.VisibleForTesting
+import com.stripe.android.view.CardInputWidget.Field
+
 /**
  * A class for tracking the placement and layout of fields in [CardInputWidget].
  */
@@ -110,6 +114,87 @@ internal data class CardInputWidgetPlacement(
 
                 this.dateRightTouchBufferLimit = dateStartPosition + dateWidth + dateCvcSeparation / 2
                 this.cvcStartPosition = dateStartPosition + dateWidth + dateCvcSeparation
+            }
+        }
+    }
+
+    /**
+     * Checks on the horizontal position of a touch event to see if
+     * that event needs to be associated with one of the controls even
+     * without having actually touched it. This essentially gives a larger
+     * touch surface to the controls. We return `null` if the user touches
+     * actually inside the widget because no interception is necessary - the touch will
+     * naturally give focus to that control, and we don't want to interfere with what
+     * Android will naturally do in response to that touch.
+     *
+     * @param touchX distance in pixels from the left side of this control
+     * @return a [Field] that represents the [View] to request focus, or `null`
+     * if no such request is necessary.
+     */
+    @VisibleForTesting
+    internal fun getFocusField(
+        touchX: Int,
+        frameStart: Int,
+        isShowingFullCard: Boolean,
+        postalCodeEnabled: Boolean
+    ) = when {
+        isShowingFullCard -> {
+            // Then our view is
+            // |full card||space||date|
+
+            when {
+                touchX < frameStart + cardWidth -> // Then the card edit view will already handle this touch.
+                    null
+                touchX < cardTouchBufferLimit -> // Then we want to act like this was a touch on the card view
+                    Field.Number
+                touchX < dateStartPosition -> // Then we act like this was a touch on the date editor.
+                    Field.Expiry
+                else -> // Then the date editor will already handle this touch.
+                    null
+            }
+        }
+        postalCodeEnabled -> {
+            // Our view is
+            // |peek card||space||date||space||cvc||space||postal code|
+            when {
+                touchX < frameStart + peekCardWidth -> // This was a touch on the card number editor, so we don't need to handle it.
+                    null
+                touchX < cardTouchBufferLimit -> // Then we need to act like the user touched the card editor
+                    Field.Number
+                touchX < dateStartPosition -> // Then we need to act like this was a touch on the date editor
+                    Field.Expiry
+                touchX < dateStartPosition + dateWidth -> // Just a regular touch on the date editor.
+                    null
+                touchX < dateRightTouchBufferLimit -> // We need to act like this was a touch on the date editor
+                    Field.Expiry
+                touchX < cvcStartPosition -> // We need to act like this was a touch on the cvc editor.
+                    Field.Cvc
+                touchX < cvcStartPosition + cvcWidth -> // Just a regular touch on the cvc editor.
+                    null
+                touchX < cvcRightTouchBufferLimit -> // We need to act like this was a touch on the cvc editor.
+                    Field.Cvc
+                touchX < postalCodeStartPosition -> // We need to act like this was a touch on the postal code editor.
+                    Field.PostalCode
+                else -> null
+            }
+        }
+        else -> {
+            // Our view is
+            // |peek card||space||date||space||cvc|
+            when {
+                touchX < frameStart + peekCardWidth -> // This was a touch on the card number editor, so we don't need to handle it.
+                    null
+                touchX < cardTouchBufferLimit -> // Then we need to act like the user touched the card editor
+                    Field.Number
+                touchX < dateStartPosition -> // Then we need to act like this was a touch on the date editor
+                    Field.Expiry
+                touchX < dateStartPosition + dateWidth -> // Just a regular touch on the date editor.
+                    null
+                touchX < dateRightTouchBufferLimit -> // We need to act like this was a touch on the date editor
+                    Field.Expiry
+                touchX < cvcStartPosition -> // We need to act like this was a touch on the cvc editor.
+                    Field.Cvc
+                else -> null
             }
         }
     }
