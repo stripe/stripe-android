@@ -363,13 +363,18 @@ class CardNumberEditText internal constructor(
                 (isValid && accountRange != null)
             )
 
+        /**
+         * The [currentCount] characters beginning at [startPosition] have just replaced old text
+         * that had length [previousCount]. If [currentCount] < [previousCount], digits were
+         * deleted.
+         */
         private fun isPastedPan(
-            start: Int,
-            before: Int,
-            count: Int,
+            startPosition: Int,
+            previousCount: Int,
+            currentCount: Int,
             cardNumber: CardNumber.Unvalidated
         ): Boolean {
-            return count > before && start == 0 &&
+            return currentCount > previousCount && startPosition == 0 &&
                 cardNumber.normalized.length >= CardNumber.MIN_PAN_LENGTH
         }
     }
