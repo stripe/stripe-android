@@ -20,6 +20,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import com.google.android.material.textfield.TextInputLayout
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.databinding.CardMultilineWidgetBinding
@@ -34,8 +35,9 @@ import java.math.RoundingMode
 import kotlin.properties.Delegates
 
 /**
- * A multiline card input widget using the support design library's [TextInputLayout]
- * to match Material Design.
+ * A multiline card input widget that uses Material Components for Android.
+ *
+ * [PaymentConfiguration.init] must be called before [CardMultilineWidget] is instantiated.
  */
 class CardMultilineWidget @JvmOverloads constructor(
     context: Context,
