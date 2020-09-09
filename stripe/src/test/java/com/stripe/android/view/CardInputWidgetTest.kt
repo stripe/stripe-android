@@ -77,7 +77,7 @@ internal class CardInputWidgetTest {
 
         Dispatchers.setMain(testDispatcher)
 
-        PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        PaymentConfiguration.init(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
 
         activityScenarioFactory.create<AddPaymentMethodActivity>(
             AddPaymentMethodActivityStarter.Args.Builder()
