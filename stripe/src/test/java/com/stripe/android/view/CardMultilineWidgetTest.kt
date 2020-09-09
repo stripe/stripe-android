@@ -19,7 +19,10 @@ import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
+import com.stripe.android.cards.AccountRangeFixtures
+import com.stripe.android.cards.DefaultCardAccountRangeStore
 import com.stripe.android.model.Address
+import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.Card
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.PaymentMethod
@@ -56,6 +59,8 @@ internal class CardMultilineWidgetTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val activityScenarioFactory = ActivityScenarioFactory(context)
 
+    private val accountRangeStore = DefaultCardAccountRangeStore(context)
+
     @BeforeTest
     fun setup() {
         // The input date here will be invalid after 2050. Please update the test.
@@ -67,6 +72,20 @@ internal class CardMultilineWidgetTest {
         CustomerSession.instance = mock()
 
         PaymentConfiguration.init(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+
+        // populate store with data to circumvent network requests that cause flakiness
+        accountRangeStore.save(
+            BinFixtures.VISA,
+            listOf(AccountRangeFixtures.VISA)
+        )
+        accountRangeStore.save(
+            BinFixtures.AMEX,
+            listOf(AccountRangeFixtures.AMERICANEXPRESS)
+        )
+        accountRangeStore.save(
+            BinFixtures.DINERSCLUB14,
+            listOf(AccountRangeFixtures.DINERSCLUB14)
+        )
 
         activityScenarioFactory
             .createAddPaymentMethodActivity()
