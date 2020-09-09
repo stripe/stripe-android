@@ -14,7 +14,7 @@ import java.lang.reflect.Method
  * a DrawableLeft, instead of just straight up beside it. If the Material Components library ever
  * officially support this behavior, this class should be removed to avoid Reflection.
  */
-class IconTextInputLayout @JvmOverloads constructor(
+open class IconTextInputLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = R.attr.textInputStyle
@@ -24,7 +24,7 @@ class IconTextInputLayout @JvmOverloads constructor(
     private val recalculateMethod: Method?
 
     init {
-        /*
+        /**
          * Note: this method will break if we upgrade our version of the library
          * and the variable and method names change. We should remove usage of reflection
          * at the first opportunity.
