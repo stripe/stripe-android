@@ -66,7 +66,7 @@ internal class CardMultilineWidgetTest {
 
         CustomerSession.instance = mock()
 
-        PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        PaymentConfiguration.init(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
 
         activityScenarioFactory
             .createAddPaymentMethodActivity()
