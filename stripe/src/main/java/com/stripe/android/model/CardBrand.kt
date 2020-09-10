@@ -26,29 +26,35 @@ enum class CardBrand(
      * Note that [CardBrand.DinersClub]'s max length depends on the BIN (e.g. card number prefix).
      * In the case of a [CardBrand.DinersClub] card, use [getMaxLengthForCardNumber].
      */
+    @Deprecated("Will be removed in upcoming major release.")
     val defaultMaxLength: Int = 16,
 
     /**
      * Based on [Issuer identification number table](http://en.wikipedia.org/wiki/Bank_card_number#Issuer_identification_number_.28IIN.29)
      */
+    @Deprecated("Will be removed in upcoming major release.")
     val pattern: Pattern? = null,
 
     /**
      * Patterns for discrete lengths
      */
+    @Deprecated("Will be removed in upcoming major release.")
     private val partialPatterns: Map<Int, Pattern> = emptyMap(),
 
     /**
      * The position of spaces in a formatted card number. For example, "4242424242424242" is
      * formatted to "4242 4242 4242 4242".
      */
+    @Deprecated("Will be removed in upcoming major release.")
     val defaultSpacePositions: Set<Int> = setOf(4, 9, 14),
 
     /**
      * By default, a [CardBrand] does not have variants.
      */
+    @Deprecated("Will be removed in upcoming major release.")
     private val variantMaxLength: Map<Pattern, Int> = emptyMap(),
 
+    @Deprecated("Will be removed in upcoming major release.")
     private val variantSpacePositions: Map<Pattern, Set<Int>> = emptyMap()
 ) {
     AmericanExpress(
@@ -137,6 +143,7 @@ enum class CardBrand(
         cvcLength = setOf(3, 4)
     );
 
+    @Deprecated("Will be removed in upcoming major release.")
     val defaultMaxLengthWithSpaces: Int = defaultMaxLength + defaultSpacePositions.size
 
     val maxCvcLength: Int

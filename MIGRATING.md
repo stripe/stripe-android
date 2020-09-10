@@ -2,10 +2,15 @@
 
 ## Migrating from versions < 16.0.0
 - Changes to `CardInputWidget` and `CardMultilineWidget`
+    - `PaymentConfiguration.init()` must be called before the card widgets are instantiated.
     - `card` and `cardBuilder` are deprecated. Use `cardParams` instead.
+- Changes to `CardNumberEditText`
+    - `lengthMax` and `cardNumber` are deprecated
+- Changes to `CvcEditText`
+    - `cvcValue` is deprecated
 - Changes to `Card`
     - `number` and `cvc` are deprecated and will be removed in a future release.
-    - `Card.Builder` is deprecated. Use `CardParams` instead.
+    - `Card.Builder` and `toBuilder()` are deprecated; use `CardParams` instead.
     - `Card.fromString()`, `Card.fromJson()`, and `Card.create()` are deprecated
       and will be removed in a future release.
     - `metadata` is deprecated and no longer populated on the client.
@@ -13,6 +18,21 @@
         If this is causing issues with your deployed app versions please reach out
         to [Stripe Support](https://support.stripe.com/?contact=true).
         This field will be removed in a future SDK version.
+    - `toPaymentMethodsParams()` and `toPaymentMethodParamsCard()` are deprecated;
+      use `PaymentMethodCreateParams.createCard()` instead.
+    - `validateCard()`, `validateNumber()`, `validateExpiryDate()`,
+      `validateCVC()`, `validateExpMonth()` are deprecated
+- Changes to `CardBrand`
+    - Methods `fromCardNumber()`, `formatNumber()`, `groupNumber()`,
+      `getSpacePositionsForCardNumber()`,
+      `getMaxLengthWithSpacesForCardNumber()`,
+      `getMaxLengthForCardNumber()` are deprecated
+    - Properties `defaultMaxLength`, `pattern`, and
+      `defaultSpacePositions` are deprecated
+- Changes to `CardUtils`
+    - `getPossibleCardBrand()` and `isValidCardNumber` are deprecated
+- Changes to `StripeTextUtils`
+    - `removeSpacesAndHyphens()` is deprecated
 - Changes to `SourceParams`
     - `createCardToken()` that accepts a `Card` parameter is deprecated.
       Use `createCardToken()` that accepts a `CardParams` parameter instead.
