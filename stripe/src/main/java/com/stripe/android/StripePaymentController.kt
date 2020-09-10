@@ -2,6 +2,7 @@ package com.stripe.android
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.os.Handler
 import android.os.HandlerThread
 import androidx.annotation.VisibleForTesting
@@ -64,7 +65,8 @@ internal class StripePaymentController internal constructor(
     private val challengeFlowStarter: ChallengeFlowStarter = ChallengeFlowStarter.Default(),
     private val challengeProgressActivityStarter: ChallengeProgressActivityStarter =
         ChallengeProgressActivityStarter.Default(),
-    private val workContext: CoroutineContext = Dispatchers.IO
+    private val workContext: CoroutineContext = Dispatchers.IO,
+    private val resources: Resources = context.applicationContext.resources
 ) : PaymentController {
     private val logger = Logger.getInstance(enableLogging)
     private val analyticsRequestFactory = AnalyticsRequest.Factory(logger)
@@ -437,7 +439,7 @@ internal class StripePaymentController internal constructor(
                     } else {
                         logger.debug("Dispatching PaymentIntentResult for ${result.id}")
                         callback.onSuccess(
-                            PaymentIntentResult(result, flowOutcome)
+                            PaymentIntentResult(result, flowOutcome, getIntentResultContext(result, flowOutcome))
                         )
                     }
                 } else {
@@ -451,6 +453,48 @@ internal class StripePaymentController internal constructor(
 
             override fun onError(e: Exception) {
                 callback.onError(e)
+            }
+        }
+    }
+
+    private fun getIntentResultContext(intent: StripeIntent, @StripeIntentResult.Outcome outcome: Int): String? {
+        return when {
+            intent.status == StripeIntent.Status.RequiresPaymentMethod -> {
+                when (intent) {
+                    is PaymentIntent -> {
+                        when {
+                            intent.lastPaymentError?.code == PaymentIntent.Error.CODE_AUTHENTICATION_ERROR -> {
+                                resources.getString(R.string.stripe_failure_reason_authentication)
+                            }
+                            intent.lastPaymentError?.type == PaymentIntent.Error.Type.CardError -> {
+                                intent.lastPaymentError.message
+                            }
+                            else -> {
+                                null
+                            }
+                        }
+                    }
+                    is SetupIntent -> {
+                        when {
+                            intent.lastSetupError?.code == SetupIntent.Error.CODE_AUTHENTICATION_ERROR -> {
+                                resources.getString(R.string.stripe_failure_reason_authentication)
+                            }
+                            intent.lastSetupError?.type == SetupIntent.Error.Type.CardError -> {
+                                intent.lastSetupError.message
+                            }
+                            else -> {
+                                null
+                            }
+                        }
+                    }
+                    else -> null
+                }
+            }
+            outcome == StripeIntentResult.Outcome.TIMEDOUT -> {
+                resources.getString(R.string.stripe_failure_reason_timed_out)
+            }
+            else -> {
+                null
             }
         }
     }
@@ -482,7 +526,7 @@ internal class StripePaymentController internal constructor(
                     } else {
                         logger.debug("Dispatching SetupIntentResult for ${result.id}")
                         resultCallback.onSuccess(
-                            SetupIntentResult(result, flowOutcome)
+                            SetupIntentResult(result, flowOutcome, getIntentResultContext(result, flowOutcome))
                         )
                     }
                 } else {

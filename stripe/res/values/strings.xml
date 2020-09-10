@@ -182,4 +182,8 @@
     <!-- Checkout -->
     <string name="stripe_checkout_pay_with_your"  tools:ignore="MissingTranslation">Pay with your</string>
     <string name="stripe_checkout_add_payment_method" tools:ignore="MissingTranslation">Add payment method</string>
+
+    <!-- Failure Reason -->
+    <string name="stripe_failure_reason_authentication" tools:ignore="MissingTranslation">We are unable to authenticate your payment method. Please choose a different payment method and try again.</string>
+    <string name="stripe_failure_reason_timed_out" tools:ignore="MissingTranslation">Timed out authenticating your payment method -- try again</string>
 </resources>
