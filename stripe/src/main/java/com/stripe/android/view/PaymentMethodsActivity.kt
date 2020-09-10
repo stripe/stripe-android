@@ -32,8 +32,8 @@ class PaymentMethodsActivity : AppCompatActivity() {
         args.isPaymentSessionActive
     }
 
-    private val customerSession: CustomerSession by lazy {
-        CustomerSession.getInstance()
+    private val customerSession: Result<CustomerSession> by lazy {
+        runCatching { CustomerSession.getInstance() }
     }
     private val cardDisplayTextFactory: CardDisplayTextFactory by lazy {
         CardDisplayTextFactory(this)
@@ -72,6 +72,14 @@ class PaymentMethodsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (customerSession.isFailure) {
+            finishWithResult(
+                null,
+                Activity.RESULT_CANCELED
+            )
+            return
+        }
+
         setContentView(viewBinding.root)
 
         args.windowFlags?.let {

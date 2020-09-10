@@ -11,7 +11,7 @@ internal class DeletePaymentMethodDialogFactory internal constructor(
     private val context: Context,
     private val adapter: PaymentMethodsAdapter,
     private val cardDisplayTextFactory: CardDisplayTextFactory,
-    private val customerSession: CustomerSession,
+    private val customerSession: Result<CustomerSession>,
     private val productUsage: Set<String>,
     private val onDeletedPaymentMethodCallback: (PaymentMethod) -> Unit
 ) {
@@ -40,7 +40,7 @@ internal class DeletePaymentMethodDialogFactory internal constructor(
         adapter.deletePaymentMethod(paymentMethod)
 
         paymentMethod.id?.let { paymentMethodId ->
-            customerSession.detachPaymentMethod(
+            customerSession.getOrNull()?.detachPaymentMethod(
                 paymentMethodId = paymentMethodId,
                 productUsage = productUsage,
                 listener = PaymentMethodDeleteListener()
