@@ -77,6 +77,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
                 null,
                 Activity.RESULT_CANCELED
             )
+            return
         }
 
         setContentView(viewBinding.root)
