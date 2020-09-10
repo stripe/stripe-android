@@ -24,7 +24,7 @@ class PaymentMethodsViewModelTest {
     private val listenerArgumentCaptor: KArgumentCaptor<CustomerSession.PaymentMethodsRetrievalListener> = argumentCaptor()
     private val viewModel = PaymentMethodsViewModel(
         application = ApplicationProvider.getApplicationContext(),
-        customerSession = customerSession,
+        customerSession = Result.success(customerSession),
         startedFromPaymentSession = true
     )
 
@@ -100,6 +100,22 @@ class PaymentMethodsViewModelTest {
             .isEqualTo("Removed Visa ending in 4242")
         assertThat(values[1])
             .isNull()
+    }
+
+    @Test
+    fun `getPaymentMethods() with CustomerSession failure should return failure result`() {
+        var result: Result<List<PaymentMethod>>? = null
+        PaymentMethodsViewModel(
+            application = ApplicationProvider.getApplicationContext(),
+            customerSession = Result.failure(RuntimeException("failure")),
+            startedFromPaymentSession = true
+        ).getPaymentMethods().observeForever {
+            result = it
+        }
+
+        requireNotNull(result)
+        assertThat(result?.isFailure)
+            .isTrue()
     }
 
     private companion object {

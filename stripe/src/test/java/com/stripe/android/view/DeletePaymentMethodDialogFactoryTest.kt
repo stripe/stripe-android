@@ -18,7 +18,7 @@ import kotlin.test.Test
 class DeletePaymentMethodDialogFactoryTest {
 
     private val customerSession: CustomerSession = mock()
-    private val context: Context = ApplicationProvider.getApplicationContext<Context>()
+    private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Test
     fun onDeletedPaymentMethod_shouldCallDetachPaymentMethodAndCallback() {
@@ -27,7 +27,7 @@ class DeletePaymentMethodDialogFactoryTest {
             context,
             mock(),
             CardDisplayTextFactory(context),
-            customerSession,
+            Result.success(customerSession),
             setOf(PaymentMethodsActivity.PRODUCT_TOKEN)
         ) {
             callbackPaymentMethod = it
