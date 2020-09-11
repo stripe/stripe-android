@@ -1,22 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="acc_label_card_number">"卡号"</string>
+    <string name="acc_label_card_number_node">%s, 卡号</string>
+    <string name="acc_label_cvc_node">%s, 信用卡驗證碼</string>
     <string name="acc_label_expiry_date">"有效日期"</string>
+    <string name="acc_label_expiry_date_node">%s, 有效日期</string>
     <string name="acc_label_zip">邮政编码</string>
     <string name="acc_label_zip_short">邮政编码</string>
-    <string name="acc_label_card_number_node">%s, 卡号</string>
-    <string name="acc_label_expiry_date_node">%s, 有效日期</string>
-    <string name="acc_label_cvc_node">%s, 信用卡驗證碼</string>
-    <string name="expiry_date_hint">月 / 年</string>
-    <string name="expiry_label_short">有效期</string>
-    <string name="invalid_card_number">您的卡号无效。</string>
-    <string name="invalid_expiry_month">您的银行卡有效日期的月份无效。</string>
-    <string name="invalid_expiry_year">您的银行卡有效日期的年份无效。</string>
-    <string name="invalid_cvc">您的银行卡安全码无效。</string>
-    <string name="invalid_zip">您的邮政编码不完整。</string>
-    <string name="payment_method_add_new_card">添加新卡……</string>
-    <string name="title_add_a_card">添加一张卡</string>
-    <string name="title_payment_method">支付方式</string>
+    <string name="add_card">添加一张新的借记卡或信用卡以便在此应用中进行购买。</string>
     <string name="address_city_required">请输入您所在的城市</string>
     <string name="address_county_required">请输入您所在的县</string>
     <string name="address_label_address">地址</string>
@@ -61,13 +52,22 @@
     <string name="address_state_required">请输入您所在的州</string>
     <string name="address_zip_invalid">您的邮政编码无效。</string>
     <string name="address_zip_postal_invalid">您的邮政编码无效</string>
-    <string name="add_card">添加一张新的借记卡或信用卡以便在此应用中进行购买。</string>
-    <string name="ending_in">%1$s - %2$s</string>
-    <string name="no_payment_methods">没有付款方式。</string>
-    <string name="price_free">免费</string>
-    <string name="title_add_an_address">添加一个地址</string>
-    <string name="title_select_shipping_method">选择送货方式</string>
-    <string name="invalid_shipping_information">无效配送地址</string>
-    <string name="secure_checkout">安全的支付流程</string>
     <string name="close">关闭</string>
+    <string name="ending_in">%1$s - %2$s</string>
+    <string name="expiry_date_hint">月 / 年</string>
+    <string name="expiry_label_short">有效期</string>
+    <string name="invalid_card_number">您的卡号无效。</string>
+    <string name="invalid_cvc">您的银行卡安全码无效。</string>
+    <string name="invalid_expiry_month">您的银行卡有效日期的月份无效。</string>
+    <string name="invalid_expiry_year">您的银行卡有效日期的年份无效。</string>
+    <string name="invalid_shipping_information">无效配送地址</string>
+    <string name="invalid_zip">您的邮政编码不完整。</string>
+    <string name="no_payment_methods">没有付款方式。</string>
+    <string name="payment_method_add_new_card">添加新卡……</string>
+    <string name="price_free">免费</string>
+    <string name="secure_checkout">安全的支付流程</string>
+    <string name="title_add_a_card">添加一张卡</string>
+    <string name="title_add_an_address">添加一个地址</string>
+    <string name="title_payment_method">支付方式</string>
+    <string name="title_select_shipping_method">选择送货方式</string>
 </resources>

@@ -1,22 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="acc_label_card_number">Kaartnummer</string>
+    <string name="acc_label_card_number_node">%s, Kaartnummer</string>
+    <string name="acc_label_cvc_node">%s, CVC</string>
     <string name="acc_label_expiry_date">Vervaldatum</string>
+    <string name="acc_label_expiry_date_node">%s, Vervaldatum</string>
     <string name="acc_label_zip">Postcode</string>
     <string name="acc_label_zip_short">ZIP</string>
-    <string name="acc_label_card_number_node">%s, Kaartnummer</string>
-    <string name="acc_label_expiry_date_node">%s, Vervaldatum</string>
-    <string name="acc_label_cvc_node">%s, CVC</string>
-    <string name="expiry_date_hint">MM/JJ</string>
-    <string name="expiry_label_short">Verval</string>
-    <string name="invalid_card_number">Uw kaartnummer is ongeldig.</string>
-    <string name="invalid_expiry_month">De vervalmaand van uw kaart is ongeldig.</string>
-    <string name="invalid_expiry_year">Het vervaljaar van uw kaart is ongeldig.</string>
-    <string name="invalid_cvc">De beveiligingscode van uw kaart is ongeldig.</string>
-    <string name="invalid_zip">Uw postcode is onvolledig.</string>
-    <string name="payment_method_add_new_card">Nieuwe kaart toevoegen…</string>
-    <string name="title_add_a_card">Een kaart toevoegen</string>
-    <string name="title_payment_method">Betalingsmethode</string>
+    <string name="add_card">Voeg een nieuwe betaalkaart toe om aankopen te doen in deze app.</string>
     <string name="address_city_required">Geef je plaats op</string>
     <string name="address_county_required">Geef je graafschap op</string>
     <string name="address_label_address">Adres</string>
@@ -61,13 +52,22 @@
     <string name="address_state_required">Geef je staat op</string>
     <string name="address_zip_invalid">Je postcode is ongeldig.</string>
     <string name="address_zip_postal_invalid">Je postcode is ongeldig</string>
-    <string name="add_card">Voeg een nieuwe betaalkaart toe om aankopen te doen in deze app.</string>
-    <string name="ending_in">%1$s - %2$s</string>
-    <string name="no_payment_methods">Geen betalingsmethoden.</string>
-    <string name="price_free">Gratis</string>
-    <string name="title_add_an_address">Voeg een adres toe</string>
-    <string name="title_select_shipping_method">Selecteer een verzendmethode</string>
-    <string name="invalid_shipping_information">Ongeldig verzendadres</string>
-    <string name="secure_checkout">Beveiligde Checkout</string>
     <string name="close">Sluiten</string>
+    <string name="ending_in">%1$s - %2$s</string>
+    <string name="expiry_date_hint">MM/JJ</string>
+    <string name="expiry_label_short">Verval</string>
+    <string name="invalid_card_number">Uw kaartnummer is ongeldig.</string>
+    <string name="invalid_cvc">De beveiligingscode van uw kaart is ongeldig.</string>
+    <string name="invalid_expiry_month">De vervalmaand van uw kaart is ongeldig.</string>
+    <string name="invalid_expiry_year">Het vervaljaar van uw kaart is ongeldig.</string>
+    <string name="invalid_shipping_information">Ongeldig verzendadres</string>
+    <string name="invalid_zip">Uw postcode is onvolledig.</string>
+    <string name="no_payment_methods">Geen betalingsmethoden.</string>
+    <string name="payment_method_add_new_card">Nieuwe kaart toevoegen…</string>
+    <string name="price_free">Gratis</string>
+    <string name="secure_checkout">Beveiligde Checkout</string>
+    <string name="title_add_a_card">Een kaart toevoegen</string>
+    <string name="title_add_an_address">Voeg een adres toe</string>
+    <string name="title_payment_method">Betalingsmethode</string>
+    <string name="title_select_shipping_method">Selecteer een verzendmethode</string>
 </resources>
