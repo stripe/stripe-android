@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="acc_label_card_number">Číslo karty</string>
+    <string name="acc_label_card_number_node">%s, číslo karty</string>
+    <string name="acc_label_cvc_node">%s, CVC</string>
+    <string name="acc_label_expiry_date">Datum konce platnosti</string>
+    <string name="acc_label_expiry_date_node">%s, datum konce platnosti</string>
+    <string name="acc_label_zip">PSČ</string>
+    <string name="acc_label_zip_short">PSČ</string>
+    <string name="add_card">Abyste mohli v této aplikaci nakupovat, přidejte novou debetní nebo kreditní kartu.</string>
+    <string name="added">Přidáno %s</string>
+    <string name="address_city_required">Zadejte město</string>
+    <string name="address_country_invalid">Vaše země je neplatná</string>
+    <string name="address_county_required">Zadejte okres</string>
+    <string name="address_label_address">Adresa</string>
+    <string name="address_label_address_line1">1. řádek adresy</string>
+    <string name="address_label_address_line1_optional">1. řádek adresy (volitelně)</string>
+    <string name="address_label_address_line2">2. řádek adresy</string>
+    <string name="address_label_address_line2_optional">2. řádek adresy (volitelně)</string>
+    <string name="address_label_address_optional">Adresa(volitelně) </string>
+    <string name="address_label_apt">Byt </string>
+    <string name="address_label_apt_optional">Byt (volitelně)</string>
+    <string name="address_label_city">Město</string>
+    <string name="address_label_city_optional">Město (volitelně)</string>
+    <string name="address_label_country">Země</string>
+    <string name="address_label_county">Okres</string>
+    <string name="address_label_county_optional">Okres (volitelně)</string>
+    <string name="address_label_name">Jméno</string>
+    <string name="address_label_name_optional">Jméno (volitelně)</string>
+    <string name="address_label_phone_number">Telefonní číslo</string>
+    <string name="address_label_phone_number_optional">Telefonní číslo (volitelně)</string>
+    <string name="address_label_postal_code">Poštovní směrovací číslo</string>
+    <string name="address_label_postal_code_optional">Poštovní směrovací číslo (volitelně)</string>
+    <string name="address_label_postcode">Poštovní směrovací číslo</string>
+    <string name="address_label_postcode_optional">Poštovní směrovací číslo (volitelně)</string>
+    <string name="address_label_province">Provincie</string>
+    <string name="address_label_province_optional">Provincie (volitelně)</string>
+    <string name="address_label_region_generic">Stát / provincie / region</string>
+    <string name="address_label_region_generic_optional">Stát / provincie / region (volitelně)</string>
+    <string name="address_label_state">Stát</string>
+    <string name="address_label_state_optional">Stát (volitelně)</string>
+    <string name="address_label_zip_code">PSČ</string>
+    <string name="address_label_zip_code_optional">PSČ (volitelně)</string>
+    <string name="address_label_zip_postal_code">PSČ</string>
+    <string name="address_label_zip_postal_code_optional">PSČ (volitelně)</string>
+    <string name="address_name_required">Zadejte své jméno</string>
+    <string name="address_phone_number_required">Zadejte své telefonní číslo</string>
+    <string name="address_postal_code_invalid">Vaše poštovní směrovací číslo je neplatné</string>
+    <string name="address_postcode_invalid">Vaše PSČ je neplatné.</string>
+    <string name="address_province_required">Zadejte provincii</string>
+    <string name="address_region_generic_required">Zadejte stát/provincii/region</string>
+    <string name="address_required">Zadejte svou adresu</string>
+    <string name="address_shipping_address">Dodací adresa</string>
+    <string name="address_state_required">Zadejte stát</string>
+    <string name="address_zip_invalid">Vaše PSČ je neplatné.</string>
+    <string name="address_zip_postal_invalid">Vaše poštovní směrovací číslo je neplatné</string>
+    <string name="becs_mandate_acceptance">
+    Poskytnutím údajů o svém bankovním účtu a potvrzením této platby souhlasíte
+    s tímto požadavkem přímého inkasa a smlouvou o službách inkasa, a autorizujete
+   Stripe Payments Australia Pty Ltd ACN 160 180 343, ID uživatele služby přímého inkasa 507156
+    („Stripe“) k inkasu z vašeho účtu prostřednictvím systému hromadného elektronického zúčtování (BECS) dne
+    jménem %1$s (dále jen „Obchodník“), a to jakýchkoli částek, které vám byly sděleny samostatně
+    obchodníkem. Potvrzujete, že jste buď držitelem účtu nebo autorizovaným
+    signatářem na výše uvedeném účtu.
+    </string>
+    <string name="becs_widget_account_number">Číslo účtu</string>
+    <string name="becs_widget_account_number_required">Vašečíslo účtu je povinný údaj.</string>
+    <string name="becs_widget_bsb">BSB</string>
+    <string name="becs_widget_bsb_incomplete">Hodnota BSB, kterou jste zadali, je neúplná.</string>
+    <string name="becs_widget_bsb_invalid">Hodnota BSB, kterou jste zadali, je neplatná.</string>
+    <string name="becs_widget_email">E-mailová adresa</string>
+    <string name="becs_widget_email_required">Vaše e-mailová adresa je povinný údaj.</string>
+    <string name="becs_widget_name">Jméno</string>
+    <string name="becs_widget_name_required">Vaše jméno je povinný údaj.</string>
+    <string name="close">Zavřít</string>
+    <string name="delete_payment_method">Odstranit způsob platby?</string>
+    <string name="delete_payment_method_prompt_title">Odstranit způsob platby?</string>
+    <string name="ending_in"> končí za </string>
+    <string name="expiry_date_hint">MM/RR</string>
+    <string name="expiry_label_short">Konec platnosti</string>
+    <string name="fpx_bank_offline">%s - Offline</string>
+    <string name="google_pay">Google Pay</string>
+    <string name="invalid_card_number">Číslo vaší karty je neplatné.</string>
+    <string name="invalid_cvc">Bezpečnostní kód vaší karty je neplatný.</string>
+    <string name="invalid_expiry_month">Rok konce platnosti vaší karty je neplatný.</string>
+    <string name="invalid_expiry_year">Rok konce platnosti vaší karty je neplatný.</string>
+    <string name="invalid_shipping_information">Neplatná dodací adresa</string>
+    <string name="invalid_zip">Vaše poštovní směrovací číslo je neúplné.</string>
+    <string name="no_payment_methods">Žádný způsob platby.</string>
+    <string name="payment_method_add_new_card">Přidat novou kartu...</string>
+    <string name="payment_method_add_new_fpx">Vyberte bankovní účet (FPX)</string>
+    <string name="price_free">Zdarma</string>
+    <string name="removed">Odebráno %s</string>
+    <string name="secure_checkout">Bezpečné dokončení platby</string>
+    <string name="title_add_a_card">Přidat kartu</string>
+    <string name="title_add_an_address">Nastavit adresu</string>
+    <string name="title_bank_account">Bankovní účet</string>
+    <string name="title_payment_method">Způsob platby</string>
+    <string name="title_select_shipping_method">Vyberte způsob dopravy</string>
+</resources>

@@ -1,14 +1,16 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <resources>
     <string name="acc_label_card_number">カード番号</string>
-    <string name="acc_label_card_number_node">%s, カード番号</string>
-    <string name="acc_label_cvc_node">%s, セキュリティコード</string>
+    <string name="acc_label_card_number_node">%s、カード番号</string>
+    <string name="acc_label_cvc_node">%s、セキュリティコード</string>
     <string name="acc_label_expiry_date">有効期限</string>
-    <string name="acc_label_expiry_date_node">%s, 有効期限</string>
+    <string name="acc_label_expiry_date_node">%s、有効期限</string>
     <string name="acc_label_zip">郵便番号</string>
-    <string name="acc_label_zip_short">ZIP</string>
+    <string name="acc_label_zip_short">郵便番号</string>
     <string name="add_card">このアプリで購入するには、別のデビットカードまたはクレジットカードの登録が必要です。</string>
+    <string name="added">追加された %s</string>
     <string name="address_city_required">市区町村を入力してください</string>
+    <string name="address_country_invalid">国が無効です</string>
     <string name="address_county_required">国を入力してください</string>
     <string name="address_label_address">住所</string>
     <string name="address_label_address_line1">住所 (1 行目)</string>
@@ -18,7 +20,7 @@
     <string name="address_label_address_optional">住所 (省略可)</string>
     <string name="address_label_apt">アパート / マンション名など</string>
     <string name="address_label_apt_optional">アパート / マンション名など (省略可)</string>
-    <string name="address_label_city">市区町村</string>
+    <string name="address_label_city">市</string>
     <string name="address_label_city_optional">市区町村 (省略可)</string>
     <string name="address_label_country">国</string>
     <string name="address_label_county">群</string>
@@ -35,7 +37,7 @@
     <string name="address_label_province_optional">都道府県 (省略可)</string>
     <string name="address_label_region_generic">都道府県</string>
     <string name="address_label_region_generic_optional">都道府県 (省略可)</string>
-    <string name="address_label_state">都道府県</string>
+    <string name="address_label_state">州</string>
     <string name="address_label_state_optional">都道府県 (省略可)</string>
     <string name="address_label_zip_code">郵便番号</string>
     <string name="address_label_zip_code_optional">郵便番号 (省略可)</string>
@@ -52,22 +54,47 @@
     <string name="address_state_required">都道府県を入力してください</string>
     <string name="address_zip_invalid">郵便番号が無効です。</string>
     <string name="address_zip_postal_invalid">郵便番号が無効です</string>
+    <string name="becs_mandate_acceptance">
+    お客様の銀行情報を提供し、この支払いを確認することで、お客様はこの口座引き落とし依頼およびダイレクトデビットリクエスト利用規約 
+    に同意し、
+    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156
+    (「Stripe」) が、%1$s (「加盟店」) の代理として、加盟店から別途連絡された金額について、Bulk 
+    Electronic Clearing System (BECS 振替) を通して口座引き落としを行うことを承認するものとします。お客様が上
+    記の口座の口座名義人または承認された署名者であることを、
+    お客様は証明するものとします。
+    </string>
+    <string name="becs_widget_account_number">アカウント番号</string>
+    <string name="becs_widget_account_number_required">アカウント番号を入力してください。</string>
+    <string name="becs_widget_bsb">BSB</string>
+    <string name="becs_widget_bsb_incomplete">入力した BSB コードに不備があります。</string>
+    <string name="becs_widget_bsb_invalid">入力した BSB コードが無効です。</string>
+    <string name="becs_widget_email">メールアドレス</string>
+    <string name="becs_widget_email_required">メールアドレスを入力してください。</string>
+    <string name="becs_widget_name">名前</string>
+    <string name="becs_widget_name_required">名前を入力してください。</string>
     <string name="close">閉じる</string>
-    <string name="ending_in">%1$s - %2$s</string>
+    <string name="delete_payment_method">支払い方法を削除しますか？</string>
+    <string name="delete_payment_method_prompt_title">支払い方法を削除しますか？</string>
+    <string name="ending_in">末尾が</string>
     <string name="expiry_date_hint">MM/YY</string>
     <string name="expiry_label_short">有効期限</string>
+    <string name="fpx_bank_offline">%s - オフライン</string>
+    <string name="google_pay">Google Pay</string>
     <string name="invalid_card_number">カードの番号が無効です。</string>
-    <string name="invalid_cvc">指定したカードのセキュリティコードが無効です。</string>
-    <string name="invalid_expiry_month">カードの有効期限として指定した月が無効です。</string>
-    <string name="invalid_expiry_year">カードの有効期限として指定した年が無効です。</string>
-    <string name="invalid_shipping_information">配送先住所エラー</string>
-    <string name="invalid_zip">指定した郵便番号が未入力です。</string>
+    <string name="invalid_cvc">カードのセキュリティコードが無効です。</string>
+    <string name="invalid_expiry_month">カードの有効期限の月が無効です。</string>
+    <string name="invalid_expiry_year">カードの有効期限の年が無効です。</string>
+    <string name="invalid_shipping_information">配送先住所が無効です</string>
+    <string name="invalid_zip">郵便番号の入力に不備があります。</string>
     <string name="no_payment_methods">支払い方法が指定されていません。</string>
-    <string name="payment_method_add_new_card">新しいカードを追加…</string>
+    <string name="payment_method_add_new_card">新しいカードを追加...</string>
+    <string name="payment_method_add_new_fpx">銀行口座を選択 (FPX)...</string>
     <string name="price_free">無料</string>
-    <string name="secure_checkout">セキュアな Checkout</string>
+    <string name="removed">削除された %s</string>
+    <string name="secure_checkout">安全なチェックアウト</string>
     <string name="title_add_a_card">カードを追加</string>
     <string name="title_add_an_address">住所を設定してください</string>
-    <string name="title_payment_method">お支払い方法</string>
+    <string name="title_bank_account">銀行口座</string>
+    <string name="title_payment_method">支払い方法</string>
     <string name="title_select_shipping_method">配送方法を選択してください</string>
 </resources>
