@@ -1,22 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="acc_label_card_number">カード番号</string>
+    <string name="acc_label_card_number_node">%s, カード番号</string>
+    <string name="acc_label_cvc_node">%s, セキュリティコード</string>
     <string name="acc_label_expiry_date">有効期限</string>
+    <string name="acc_label_expiry_date_node">%s, 有効期限</string>
     <string name="acc_label_zip">郵便番号</string>
     <string name="acc_label_zip_short">ZIP</string>
-    <string name="acc_label_card_number_node">%s, カード番号</string>
-    <string name="acc_label_expiry_date_node">%s, 有効期限</string>
-    <string name="acc_label_cvc_node">%s, セキュリティコード</string>
-    <string name="expiry_date_hint">MM/YY</string>
-    <string name="expiry_label_short">有効期限</string>
-    <string name="invalid_card_number">カードの番号が無効です。</string>
-    <string name="invalid_expiry_month">カードの有効期限として指定した月が無効です。</string>
-    <string name="invalid_expiry_year">カードの有効期限として指定した年が無効です。</string>
-    <string name="invalid_cvc">指定したカードのセキュリティコードが無効です。</string>
-    <string name="invalid_zip">指定した郵便番号が未入力です。</string>
-    <string name="payment_method_add_new_card">新しいカードを追加…</string>
-    <string name="title_add_a_card">カードを追加</string>
-    <string name="title_payment_method">お支払い方法</string>
+    <string name="add_card">このアプリで購入するには、別のデビットカードまたはクレジットカードの登録が必要です。</string>
     <string name="address_city_required">市区町村を入力してください</string>
     <string name="address_county_required">国を入力してください</string>
     <string name="address_label_address">住所</string>
@@ -61,13 +52,22 @@
     <string name="address_state_required">都道府県を入力してください</string>
     <string name="address_zip_invalid">郵便番号が無効です。</string>
     <string name="address_zip_postal_invalid">郵便番号が無効です</string>
-    <string name="add_card">このアプリで購入するには、別のデビットカードまたはクレジットカードの登録が必要です。</string>
-    <string name="ending_in">%1$s - %2$s</string>
-    <string name="no_payment_methods">支払い方法が指定されていません。</string>
-    <string name="price_free">無料</string>
-    <string name="title_add_an_address">住所を設定してください</string>
-    <string name="title_select_shipping_method">配送方法を選択してください</string>
-    <string name="invalid_shipping_information">配送先住所エラー</string>
-    <string name="secure_checkout">セキュアな Checkout</string>
     <string name="close">閉じる</string>
+    <string name="ending_in">%1$s - %2$s</string>
+    <string name="expiry_date_hint">MM/YY</string>
+    <string name="expiry_label_short">有効期限</string>
+    <string name="invalid_card_number">カードの番号が無効です。</string>
+    <string name="invalid_cvc">指定したカードのセキュリティコードが無効です。</string>
+    <string name="invalid_expiry_month">カードの有効期限として指定した月が無効です。</string>
+    <string name="invalid_expiry_year">カードの有効期限として指定した年が無効です。</string>
+    <string name="invalid_shipping_information">配送先住所エラー</string>
+    <string name="invalid_zip">指定した郵便番号が未入力です。</string>
+    <string name="no_payment_methods">支払い方法が指定されていません。</string>
+    <string name="payment_method_add_new_card">新しいカードを追加…</string>
+    <string name="price_free">無料</string>
+    <string name="secure_checkout">セキュアな Checkout</string>
+    <string name="title_add_a_card">カードを追加</string>
+    <string name="title_add_an_address">住所を設定してください</string>
+    <string name="title_payment_method">お支払い方法</string>
+    <string name="title_select_shipping_method">配送方法を選択してください</string>
 </resources>

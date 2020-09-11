@@ -1,22 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="acc_label_card_number">Kartennummer</string>
+    <string name="acc_label_card_number_node">%s, Kartennummer de carte</string>
+    <string name="acc_label_cvc_node">%s, Kartenprüfnummer</string>
     <string name="acc_label_expiry_date">Gültig bis</string>
+    <string name="acc_label_expiry_date_node">%s, Gültig bis</string>
     <string name="acc_label_zip">Postleitzahl</string>
     <string name="acc_label_zip_short">ZIP</string>
-    <string name="acc_label_card_number_node">%s, Kartennummer de carte</string>
-    <string name="acc_label_expiry_date_node">%s, Gültig bis</string>
-    <string name="acc_label_cvc_node">%s, Kartenprüfnummer</string>
-    <string name="expiry_date_hint">MM/JJ</string>
-    <string name="expiry_label_short">Gültig bis</string>
-    <string name="invalid_card_number">Die Kartennummer ist ungültig.</string>
-    <string name="invalid_expiry_month">Die Monatsangabe Ihrer Karte ist ungültig.</string>
-    <string name="invalid_expiry_year">Die Jahresangabe Ihrer Karte ist ungültig.</string>
-    <string name="invalid_cvc">Der Sicherheitscode Ihrer Karte ist ungültig.</string>
-    <string name="invalid_zip">Ihre Postleitzahl ist unvollständig.</string>
-    <string name="payment_method_add_new_card">Neue Karte hinzufügen…</string>
-    <string name="title_add_a_card">Karte hinzufügen</string>
-    <string name="title_payment_method">Zahlungsmethode</string>
+    <string name="add_card">Fügen Sie eine neue Debit- oder Kreditkarte hinzu, um in dieser App Käufe zu tätigen.</string>
     <string name="address_city_required">Bitte geben Sie Ihren Ort ein</string>
     <string name="address_county_required">Bitte geben Sie Ihr Land ein</string>
     <string name="address_label_address">Adresse</string>
@@ -61,13 +52,22 @@
     <string name="address_state_required">Bitte geben Sie Ihren Bundesland ein</string>
     <string name="address_zip_invalid">Ihre Postleitzahl ist ungültig.</string>
     <string name="address_zip_postal_invalid">Ihre Postleitzahl ist ungültig</string>
-    <string name="add_card">Fügen Sie eine neue Debit- oder Kreditkarte hinzu, um in dieser App Käufe zu tätigen.</string>
-    <string name="ending_in">%1$s - %2$s</string>
-    <string name="no_payment_methods">Keine Zahlungsmethoden.</string>
-    <string name="price_free">Gratis</string>
-    <string name="title_add_an_address">Adresse hinzufügen</string>
-    <string name="title_select_shipping_method">Versandmethode auswählen</string>
-    <string name="invalid_shipping_information">Ungültige Versandadresse</string>
-    <string name="secure_checkout">Sicherer Bezahlvorgang</string>
     <string name="close">Schließen</string>
+    <string name="ending_in">%1$s - %2$s</string>
+    <string name="expiry_date_hint">MM/JJ</string>
+    <string name="expiry_label_short">Gültig bis</string>
+    <string name="invalid_card_number">Die Kartennummer ist ungültig.</string>
+    <string name="invalid_cvc">Der Sicherheitscode Ihrer Karte ist ungültig.</string>
+    <string name="invalid_expiry_month">Die Monatsangabe Ihrer Karte ist ungültig.</string>
+    <string name="invalid_expiry_year">Die Jahresangabe Ihrer Karte ist ungültig.</string>
+    <string name="invalid_shipping_information">Ungültige Versandadresse</string>
+    <string name="invalid_zip">Ihre Postleitzahl ist unvollständig.</string>
+    <string name="no_payment_methods">Keine Zahlungsmethoden.</string>
+    <string name="payment_method_add_new_card">Neue Karte hinzufügen…</string>
+    <string name="price_free">Gratis</string>
+    <string name="secure_checkout">Sicherer Bezahlvorgang</string>
+    <string name="title_add_a_card">Karte hinzufügen</string>
+    <string name="title_add_an_address">Adresse hinzufügen</string>
+    <string name="title_payment_method">Zahlungsmethode</string>
+    <string name="title_select_shipping_method">Versandmethode auswählen</string>
 </resources>
