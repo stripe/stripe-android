@@ -1,7 +1,6 @@
 package com.stripe.android.view
 
 import android.view.View
-import androidx.annotation.VisibleForTesting
 import com.stripe.android.view.CardInputWidget.Field
 
 /**
@@ -131,7 +130,6 @@ internal data class CardInputWidgetPlacement(
      * @return a [Field] that represents the [View] to request focus, or `null`
      * if no such request is necessary.
      */
-    @VisibleForTesting
     internal fun getFocusField(
         touchX: Int,
         frameStart: Int,
