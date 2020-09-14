@@ -1,14 +1,16 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <resources>
     <string name="acc_label_card_number">Kaartnummer</string>
-    <string name="acc_label_card_number_node">%s, Kaartnummer</string>
+    <string name="acc_label_card_number_node">%s, kaartnummer</string>
     <string name="acc_label_cvc_node">%s, CVC</string>
     <string name="acc_label_expiry_date">Vervaldatum</string>
-    <string name="acc_label_expiry_date_node">%s, Vervaldatum</string>
+    <string name="acc_label_expiry_date_node">%s, vervaldatum</string>
     <string name="acc_label_zip">Postcode</string>
-    <string name="acc_label_zip_short">ZIP</string>
+    <string name="acc_label_zip_short">Postcode</string>
     <string name="add_card">Voeg een nieuwe betaalkaart toe om aankopen te doen in deze app.</string>
+    <string name="added">Toegevoegd(e) %s</string>
     <string name="address_city_required">Geef je plaats op</string>
+    <string name="address_country_invalid">Het land is ongeldig</string>
     <string name="address_county_required">Geef je graafschap op</string>
     <string name="address_label_address">Adres</string>
     <string name="address_label_address_line1">Adresregel 1</string>
@@ -52,22 +54,47 @@
     <string name="address_state_required">Geef je staat op</string>
     <string name="address_zip_invalid">Je postcode is ongeldig.</string>
     <string name="address_zip_postal_invalid">Je postcode is ongeldig</string>
+    <string name="becs_mandate_acceptance">
+    Door je bankrekeninggegevens te verstrekken en deze betaling te bevestigen ga je akkoord met deze
+    aanvraag voor automatische incasso en de Direct Debit Request-serviceovereenkomst, en autoriseer je
+    Stripe Payments Australia Pty Ltd ACN 160 180 343 met gebruikers-ID voor automatische incasso\'s 507156
+    (“Stripe”) om bedragen van je rekening af te schrijven via het BECS-systeem (Bulk Electronic Clearing System)
+    namens %1$s (de \"Handelaar\") voor bedragen die afzonderlijk door de handelaar
+    aan je kenbaar worden gemaakt. Je verklaart dat je de rekeninghouder bent van of bevoegd bent
+    om te tekenen voor de hierboven vermelde rekening.
+    </string>
+    <string name="becs_widget_account_number">Rekeningnummer</string>
+    <string name="becs_widget_account_number_required">Je rekeningnummer is vereist.</string>
+    <string name="becs_widget_bsb">BSB</string>
+    <string name="becs_widget_bsb_incomplete">Het opgegeven BSB-nummer is onvolledig.</string>
+    <string name="becs_widget_bsb_invalid">Het opgegeven BSB-nummer is ongeldig.</string>
+    <string name="becs_widget_email">E-mailadres</string>
+    <string name="becs_widget_email_required">Je e-mailadres is vereist.</string>
+    <string name="becs_widget_name">Naam</string>
+    <string name="becs_widget_name_required">Je naam is vereist.</string>
     <string name="card_ending_in">%1$s - %2$s</string>
     <string name="close">Sluiten</string>
+    <string name="delete_payment_method">Betaalmethode verwijderen?</string>
+    <string name="delete_payment_method_prompt_title">Betaalmethode verwijderen?</string>
     <string name="expiry_date_hint">MM/JJ</string>
-    <string name="expiry_label_short">Verval</string>
-    <string name="invalid_card_number">Uw kaartnummer is ongeldig.</string>
-    <string name="invalid_cvc">De beveiligingscode van uw kaart is ongeldig.</string>
-    <string name="invalid_expiry_month">De vervalmaand van uw kaart is ongeldig.</string>
-    <string name="invalid_expiry_year">Het vervaljaar van uw kaart is ongeldig.</string>
+    <string name="expiry_label_short">Vervaldatum</string>
+    <string name="fpx_bank_offline">%s - offline</string>
+    <string name="google_pay">Google Pay</string>
+    <string name="invalid_card_number">Het kaartnummer is ongeldig.</string>
+    <string name="invalid_cvc">De beveiligingscode van je kaart is ongeldig.</string>
+    <string name="invalid_expiry_month">De vervalmaand van de kaart is ongeldig.</string>
+    <string name="invalid_expiry_year">Het vervaljaar van de kaart is ongeldig.</string>
     <string name="invalid_shipping_information">Ongeldig verzendadres</string>
-    <string name="invalid_zip">Uw postcode is onvolledig.</string>
+    <string name="invalid_zip">De postcode is onvolledig.</string>
     <string name="no_payment_methods">Geen betalingsmethoden.</string>
     <string name="payment_method_add_new_card">Nieuwe kaart toevoegen…</string>
+    <string name="payment_method_add_new_fpx">Bankrekening selecteren (FPX)...</string>
     <string name="price_free">Gratis</string>
-    <string name="secure_checkout">Beveiligde Checkout</string>
+    <string name="removed">Verwijderd(e) %s</string>
+    <string name="secure_checkout">Beveiligd afrekenproces</string>
     <string name="title_add_a_card">Een kaart toevoegen</string>
     <string name="title_add_an_address">Voeg een adres toe</string>
-    <string name="title_payment_method">Betalingsmethode</string>
+    <string name="title_bank_account">Bankrekening</string>
+    <string name="title_payment_method">Betaalmethode</string>
     <string name="title_select_shipping_method">Selecteer een verzendmethode</string>
 </resources>
