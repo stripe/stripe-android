@@ -1,6 +1,5 @@
 package com.stripe.android.checkout
 
-import android.app.Activity
 import android.content.Intent
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
@@ -18,7 +17,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.lang.IllegalStateException
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -26,17 +24,14 @@ class CheckoutViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
-    private val activity =
-        Activity().apply {
-            intent = Intent().putExtra(
-                ActivityStarter.Args.EXTRA,
-                CheckoutActivityStarter.Args(
-                    "client_secret",
-                    "ephemeral_key",
-                    "customer_id"
-                )
-            )
-        }
+    private val intent = Intent().putExtra(
+        ActivityStarter.Args.EXTRA,
+        CheckoutActivityStarter.Args(
+            "client_secret",
+            "ephemeral_key",
+            "customer_id"
+        )
+    )
     private val stripeRepository: StripeRepository = FakeStripeRepository()
     private val testDispatcher = TestCoroutineDispatcher()
     private val viewModel = CheckoutViewModel(
@@ -48,11 +43,12 @@ class CheckoutViewModelTest {
     )
 
     @Test
-    fun `getPaymentMethods should fetch from api repository`() = testDispatcher.runBlockingTest {
+    fun `updatePaymentMethods should fetch from api repository`() = testDispatcher.runBlockingTest {
         var paymentMethods: List<PaymentMethod>? = null
-        viewModel.getPaymentMethods(activity).observeForever {
+        viewModel.paymentMethods.observeForever {
             paymentMethods = it
         }
+        viewModel.updatePaymentMethods(intent)
         assertThat(paymentMethods).containsExactly(FAKE_CARD)
     }
 
@@ -62,18 +58,8 @@ class CheckoutViewModelTest {
         viewModel.error.observeForever {
             error = it
         }
-        viewModel.getPaymentMethods(Activity().apply { intent = Intent() })
+        viewModel.updatePaymentMethods(Intent())
         assertThat(error).isInstanceOf(IllegalStateException::class.java)
-    }
-
-    @Test
-    fun `getPaymentMethods should not update multipe times`() = testDispatcher.runBlockingTest {
-        var updates = 0
-        viewModel.getPaymentMethods(activity).observeForever {
-            updates += 1
-        }
-        viewModel.getPaymentMethods(activity).observeForever {}
-        assertThat(updates).isEqualTo(1)
     }
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {

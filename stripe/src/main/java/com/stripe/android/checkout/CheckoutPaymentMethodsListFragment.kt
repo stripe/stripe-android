@@ -16,13 +16,22 @@ internal class CheckoutPaymentMethodsListFragment : Fragment(R.layout.fragment_c
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        if (activity == null) {
+            return
+        }
+
         val binding = FragmentCheckoutPaymentMethodsListBinding.bind(view)
         binding.recycler.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
 
-        viewModel.getPaymentMethods(requireActivity()).observe(viewLifecycleOwner) {
+        viewModel.paymentMethods.observe(viewLifecycleOwner) {
             binding.recycler.adapter = CheckoutPaymentMethodsAdapter(it) {
                 viewModel.transitionTo(CheckoutViewModel.TransitionTarget.AddCard)
             }
+        }
+
+        // Only fetch the payment methods list if we haven't already
+        if (viewModel.paymentMethods.value == null) {
+            viewModel.updatePaymentMethods(requireActivity().intent)
         }
     }
 }

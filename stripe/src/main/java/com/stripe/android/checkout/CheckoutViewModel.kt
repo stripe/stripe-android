@@ -1,7 +1,7 @@
 package com.stripe.android.checkout
 
-import android.app.Activity
 import android.app.Application
+import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -28,7 +28,7 @@ internal class CheckoutViewModel internal constructor(
 ) : AndroidViewModel(application) {
     private val mutableError = MutableLiveData<Throwable>()
     private val mutableTransition = MutableLiveData<TransitionTarget>()
-    private val paymentMethods = MutableLiveData<List<PaymentMethod>>()
+    internal val paymentMethods = MutableLiveData<List<PaymentMethod>>()
     internal val error: LiveData<Throwable> = mutableError
     internal val transition: LiveData<TransitionTarget> = mutableTransition
 
@@ -40,29 +40,19 @@ internal class CheckoutViewModel internal constructor(
         mutableTransition.postValue(target)
     }
 
-    /**
-     * Fetch the customer's saved payment methods.
-     * The activity args are assumed to be static across the lifetime of the view model
-     * so calling this method multiple times will not result in re-fetching the payment methods.
-     *
-     * If you wish to force an update, call [updatePaymentMethods] directly.
-     */
-    fun getPaymentMethods(activity: Activity): LiveData<List<PaymentMethod>> {
-        if (paymentMethods.value == null) {
-            val args: CheckoutActivityStarter.Args? = CheckoutActivityStarter.Args.fromIntent(activity.intent)
-            if (args == null) {
-                onError(IllegalStateException("Missing activity args"))
-            } else {
-                updatePaymentMethods(
-                    args.ephemeralKey,
-                    args.customerId
-                )
-            }
+    fun updatePaymentMethods(intent: Intent) {
+        val args: CheckoutActivityStarter.Args? = CheckoutActivityStarter.Args.fromIntent(intent)
+        if (args == null) {
+            onError(IllegalStateException("Missing activity args"))
+        } else {
+            updatePaymentMethods(
+                args.ephemeralKey,
+                args.customerId
+            )
         }
-        return paymentMethods
     }
 
-    fun updatePaymentMethods(
+    private fun updatePaymentMethods(
         ephemeralKey: String,
         customerId: String,
         stripeAccountId: String? = this.stripeAccountId
