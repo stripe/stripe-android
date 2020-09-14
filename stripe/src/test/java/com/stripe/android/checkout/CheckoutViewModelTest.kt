@@ -53,7 +53,7 @@ class CheckoutViewModelTest {
     }
 
     @Test
-    fun `getPaymentMethods should call onError when no args supplied`() {
+    fun `updatePaymentMethods should call onError when no args supplied`() {
         var error: Throwable? = null
         viewModel.error.observeForever {
             error = it
