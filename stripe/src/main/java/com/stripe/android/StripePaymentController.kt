@@ -439,7 +439,7 @@ internal class StripePaymentController internal constructor(
                     } else {
                         logger.debug("Dispatching PaymentIntentResult for ${result.id}")
                         callback.onSuccess(
-                            PaymentIntentResult(result, flowOutcome, getIntentResultContext(result, flowOutcome))
+                            PaymentIntentResult(result, flowOutcome, getFailureMessage(result, flowOutcome))
                         )
                     }
                 } else {
@@ -457,7 +457,7 @@ internal class StripePaymentController internal constructor(
         }
     }
 
-    private fun getIntentResultContext(intent: StripeIntent, @StripeIntentResult.Outcome outcome: Int): String? {
+    private fun getFailureMessage(intent: StripeIntent, @StripeIntentResult.Outcome outcome: Int): String? {
         return when {
             intent.status == StripeIntent.Status.RequiresPaymentMethod -> {
                 when (intent) {
@@ -526,7 +526,7 @@ internal class StripePaymentController internal constructor(
                     } else {
                         logger.debug("Dispatching SetupIntentResult for ${result.id}")
                         resultCallback.onSuccess(
-                            SetupIntentResult(result, flowOutcome, getIntentResultContext(result, flowOutcome))
+                            SetupIntentResult(result, flowOutcome, getFailureMessage(result, flowOutcome))
                         )
                     }
                 } else {

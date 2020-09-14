@@ -11,5 +11,5 @@ import kotlinx.android.parcel.Parcelize
 data class PaymentIntentResult internal constructor(
     override val intent: PaymentIntent,
     @Outcome private val outcomeFromFlow: Int = 0,
-    val context: String? = null
+    val failureMessage: String? = null
 ) : StripeIntentResult<PaymentIntent>(outcomeFromFlow)
