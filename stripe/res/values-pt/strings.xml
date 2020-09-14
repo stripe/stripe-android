@@ -52,8 +52,8 @@
     <string name="address_state_required">Digite o nome do seu estado</string>
     <string name="address_zip_invalid">Seu CEP é inválido.</string>
     <string name="address_zip_postal_invalid">Seu CEP/Código postal é inválido</string>
+    <string name="card_ending_in">%1$s terminado em %2$s</string>
     <string name="close">Fechar</string>
-    <string name="ending_in">%1$s terminado em %2$s</string>
     <string name="expiry_date_hint">MM/AA</string>
     <string name="expiry_label_short">Validade</string>
     <string name="invalid_card_number">O número do seu cartão é inválido.</string>

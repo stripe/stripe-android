@@ -52,8 +52,8 @@
     <string name="address_state_required">Bitte geben Sie Ihren Bundesland ein</string>
     <string name="address_zip_invalid">Ihre Postleitzahl ist ungültig.</string>
     <string name="address_zip_postal_invalid">Ihre Postleitzahl ist ungültig</string>
+    <string name="card_ending_in">%1$s - %2$s</string>
     <string name="close">Schließen</string>
-    <string name="ending_in">%1$s - %2$s</string>
     <string name="expiry_date_hint">MM/JJ</string>
     <string name="expiry_label_short">Gültig bis</string>
     <string name="invalid_card_number">Die Kartennummer ist ungültig.</string>

@@ -52,8 +52,8 @@
     <string name="address_state_required">Indiquez votre département</string>
     <string name="address_zip_invalid">Votre code postal n’est pas valide.</string>
     <string name="address_zip_postal_invalid">Votre code ZIP/postal n’est pas valide</string>
+    <string name="card_ending_in">%1$s - %2$s</string>
     <string name="close">Fermer</string>
-    <string name="ending_in">%1$s - %2$s</string>
     <string name="expiry_date_hint">MM/AA</string>
     <string name="expiry_label_short">Expire</string>
     <string name="invalid_card_number">Le numéro de carte n’est pas valide.</string>

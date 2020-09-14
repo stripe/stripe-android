@@ -52,8 +52,8 @@
     <string name="address_state_required">Geef je staat op</string>
     <string name="address_zip_invalid">Je postcode is ongeldig.</string>
     <string name="address_zip_postal_invalid">Je postcode is ongeldig</string>
+    <string name="card_ending_in">%1$s - %2$s</string>
     <string name="close">Sluiten</string>
-    <string name="ending_in">%1$s - %2$s</string>
     <string name="expiry_date_hint">MM/JJ</string>
     <string name="expiry_label_short">Verval</string>
     <string name="invalid_card_number">Uw kaartnummer is ongeldig.</string>
