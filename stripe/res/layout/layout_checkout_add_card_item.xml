@@ -1,26 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="@dimen/stripe_checkout_payment_method_icon_size"
-    android:layout_height="@dimen/stripe_checkout_payment_method_icon_size"
-    android:layout_marginVertical="6dp"
-    android:layout_marginHorizontal="2dp"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent">
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="4dp"
+    >
 
     <FrameLayout
-        android:layout_gravity="center"
-        android:layout_width="62dp"
-        android:layout_height="40dp"
+        android:layout_marginTop="18dp"
+        android:layout_marginBottom="14dp"
+        android:layout_width="68dp"
+        android:layout_height="44dp"
         android:background="@drawable/stripe_checkout_add_card_bg">
+
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            app:tint="@color/stripe_checkout_add_card_tint"
-            android:src="@drawable/stripe_ic_add_circle" />
+            android:src="@drawable/stripe_ic_add_circle"
+            app:tint="@color/stripe_checkout_add_card_tint" />
+
     </FrameLayout>
 
-</FrameLayout>
+    <TextView
+        android:text="@string/stripe_checkout_add_payment_method_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/brand_icon"
+        app:layout_constraintTop_toBottomOf="@+id/brand_icon"
+        />
+</LinearLayout>
