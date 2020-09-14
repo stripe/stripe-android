@@ -30,7 +30,5 @@
         android:layout_height="wrap_content"
         android:textSize="12sp"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@+id/brand_icon"
-        app:layout_constraintTop_toBottomOf="@+id/brand_icon"
         />
 </LinearLayout>
