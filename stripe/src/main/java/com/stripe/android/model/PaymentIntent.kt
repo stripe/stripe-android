@@ -218,6 +218,10 @@ data class PaymentIntent internal constructor(
                 fun fromCode(typeCode: String?) = values().firstOrNull { it.code == typeCode }
             }
         }
+
+        internal companion object {
+            internal const val CODE_AUTHENTICATION_ERROR = "payment_intent_authentication_failure"
+        }
     }
 
     /**
