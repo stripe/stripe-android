@@ -52,8 +52,8 @@
     <string name="address_state_required">都道府県を入力してください</string>
     <string name="address_zip_invalid">郵便番号が無効です。</string>
     <string name="address_zip_postal_invalid">郵便番号が無効です</string>
+    <string name="card_ending_in">%1$s - %2$s</string>
     <string name="close">閉じる</string>
-    <string name="ending_in">%1$s - %2$s</string>
     <string name="expiry_date_hint">MM/YY</string>
     <string name="expiry_label_short">有効期限</string>
     <string name="invalid_card_number">カードの番号が無効です。</string>

@@ -52,8 +52,8 @@
     <string name="address_state_required">Introduce el nombre de tu estado</string>
     <string name="address_zip_invalid">El código postal no es válido.</string>
     <string name="address_zip_postal_invalid">El código postal no es válido</string>
+    <string name="card_ending_in">%1$s - %2$s</string>
     <string name="close">Cerrar</string>
-    <string name="ending_in">%1$s - %2$s</string>
     <string name="expiry_date_hint">MM/AA</string>
     <string name="expiry_label_short">Venc.</string>
     <string name="invalid_card_number">El número de tarjeta no es válido.</string>
