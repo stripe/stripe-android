@@ -72,6 +72,7 @@
     <string name="becs_widget_email_required">La dirección de correo electrónico es obligatoria.</string>
     <string name="becs_widget_name">Nombre</string>
     <string name="becs_widget_name_required">El nombre es obligatorio</string>
+    <string name="card_ending_in">%1$s - %2$s</string>
     <string name="close">Cerrar</string>
     <string name="delete_payment_method">¿Deseas eliminar el método de pago?</string>
     <string name="delete_payment_method_prompt_title">¿Deseas eliminar el método de pago?</string>

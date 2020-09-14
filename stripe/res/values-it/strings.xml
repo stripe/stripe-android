@@ -60,7 +60,7 @@
     Stripe Payments Australia Pty Ltd ACN 160 180 343 con numero ID utente per l\'addebito diretto 507156
     (“Stripe”) ad addebitare sul tuo conto tramite il Bulk Electronic Clearing System (BECS) per
     conto di %1$s (\"Esercente\") qualsiasi importo che ti viene comunicato separatamente
-    dall\'Esercente. Dichiari di essere un titolare del conto o un firmatario 
+    dall\'Esercente. Dichiari di essere un titolare del conto o un firmatario
     autorizzato per il conto sopra elencato.
     </string>
     <string name="becs_widget_account_number">Numero di conto</string>
@@ -72,6 +72,7 @@
     <string name="becs_widget_email_required">Il tuo indirizzo email è obbligatorio.</string>
     <string name="becs_widget_name">Nome</string>
     <string name="becs_widget_name_required">Il tuo nome è obbligatorio.</string>
+    <string name="card_ending_in">%1$s - %2$s</string>
     <string name="close">Chiudi</string>
     <string name="delete_payment_method">Eliminare la modalità di pagamento?</string>
     <string name="delete_payment_method_prompt_title">Eliminare la modalità di pagamento?</string>

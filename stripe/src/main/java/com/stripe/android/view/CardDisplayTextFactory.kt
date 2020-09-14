@@ -37,7 +37,7 @@ internal class CardDisplayTextFactory internal constructor(
             return displayString
         }
 
-        val cardEndingIn = resources.getString(R.string.ending_in, brandText, last4)
+        val cardEndingIn = resources.getString(R.string.card_ending_in, brandText, last4)
         val totalLength = cardEndingIn.length
         val last4length = last4.length
         val last4Start = totalLength - last4length
@@ -88,7 +88,7 @@ internal class CardDisplayTextFactory internal constructor(
     @JvmSynthetic
     internal fun createUnstyled(card: PaymentMethod.Card): String {
         return resources.getString(
-            R.string.ending_in,
+            R.string.card_ending_in,
             card.brand.displayName,
             card.last4
         )

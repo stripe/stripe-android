@@ -72,6 +72,7 @@
     <string name="becs_widget_email_required">Je e-mailadres is vereist.</string>
     <string name="becs_widget_name">Naam</string>
     <string name="becs_widget_name_required">Je naam is vereist.</string>
+    <string name="card_ending_in">%1$s - %2$s</string>
     <string name="close">Sluiten</string>
     <string name="delete_payment_method">Betaalmethode verwijderen?</string>
     <string name="delete_payment_method_prompt_title">Betaalmethode verwijderen?</string>

@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 16.0.0 - unreleased
+* [#2715](https://github.com/stripe/stripe-android/pull/2715) Add support for GrabPay PaymentMethod
+* [#2721](https://github.com/stripe/stripe-android/pull/2721) Upgrade Kotlin coroutines to `1.3.9`
+* [#2735](https://github.com/stripe/stripe-android/pull/2735) Upgrade Android Gradle Plugin to `4.0.1`
+* [#2766](https://github.com/stripe/stripe-android/pull/2766) Upgrade Gradle to `6.6.1`
+* [#2821](https://github.com/stripe/stripe-android/pull/2821) Support pasting a 19 digit PAN in `CardNumberEditText`
+* [#2836](https://github.com/stripe/stripe-android/pull/2836) Handle `CustomerSession` failure in `PaymentMethodsActivity`
+* [#2837](https://github.com/stripe/stripe-android/pull/2837) Upgrade Kotlin to `1.4.10`
+* [#2843](https://github.com/stripe/stripe-android/pull/2843) Update pinned API version to [2020-08-27](https://stripe.com/docs/upgrades#2020-08-27)
 
 ## 15.1.0 - 2020-08-13 
 * [#2671](https://github.com/stripe/stripe-android/pull/2671) Add `cardParams` property to `CardInputWidget` and `CardMultilineWidget`

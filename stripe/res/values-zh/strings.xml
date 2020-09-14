@@ -61,7 +61,7 @@
     number 507156 (“Stripe”) 通过批量电子清算系统 (BECS)
     代 %1$s（“商家”）向您的账户扣取商家单独告知您的金额。
     您确认您是账户持有人或上述账户的授权签署人。
-    
+
     </string>
     <string name="becs_widget_account_number">账号</string>
     <string name="becs_widget_account_number_required">您需要填写账号。</string>
@@ -72,6 +72,7 @@
     <string name="becs_widget_email_required">您需要填写邮件地址。</string>
     <string name="becs_widget_name">姓名</string>
     <string name="becs_widget_name_required">您需要填写姓名。</string>
+    <string name="card_ending_in">%1$s - %2$s</string>
     <string name="close">关闭</string>
     <string name="delete_payment_method">删除支付方式？</string>
     <string name="delete_payment_method_prompt_title">删除支付方式？</string>
