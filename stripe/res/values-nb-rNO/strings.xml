@@ -75,7 +75,6 @@
     <string name="close">Lukk</string>
     <string name="delete_payment_method">Slette betalingsmetode?</string>
     <string name="delete_payment_method_prompt_title">Slette betalingsmåte?</string>
-    <string name="ending_in">slutter på</string>
     <string name="expiry_date_hint">MM/ÅÅ</string>
     <string name="expiry_label_short">Utløp</string>
     <string name="fpx_bank_offline">%s – frakoblet</string>

@@ -75,7 +75,6 @@
     <string name="close">Închidere</string>
     <string name="delete_payment_method">Ștergeți metoda de plată?</string>
     <string name="delete_payment_method_prompt_title">Ștergeți metoda de plată?</string>
-    <string name="ending_in"> se termină în </string>
     <string name="expiry_date_hint">LL/AA</string>
     <string name="expiry_label_short">Data de expirare</string>
     <string name="fpx_bank_offline">%s - Offline</string>

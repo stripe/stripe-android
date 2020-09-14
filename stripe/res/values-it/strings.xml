@@ -76,7 +76,6 @@
     <string name="close">Chiudi</string>
     <string name="delete_payment_method">Eliminare la modalità di pagamento?</string>
     <string name="delete_payment_method_prompt_title">Eliminare la modalità di pagamento?</string>
-    <string name="ending_in">che termina con</string>
     <string name="expiry_date_hint">MM/AA</string>
     <string name="expiry_label_short">Scadenza</string>
     <string name="fpx_bank_offline">%s - Offline</string>

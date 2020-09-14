@@ -75,7 +75,6 @@
     <string name="close">Agħlaq</string>
     <string name="delete_payment_method">Tħassar il-Metodu tal-Ħlas?</string>
     <string name="delete_payment_method_prompt_title">Tħassar il-metodu tal-ħlas?</string>
-    <string name="ending_in">li jispiċċa</string>
     <string name="expiry_date_hint">XX/SS</string>
     <string name="expiry_label_short">Skadenza</string>
     <string name="fpx_bank_offline">%s - Offline</string>

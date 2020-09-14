@@ -75,7 +75,6 @@
     <string name="close">Sulge</string>
     <string name="delete_payment_method">Kas kustutada makseviis?</string>
     <string name="delete_payment_method_prompt_title">Kas kustutada makseviis?</string>
-    <string name="ending_in"> lõppeb numbritega </string>
     <string name="expiry_date_hint">KK/AA</string>
     <string name="expiry_label_short">Aegumine</string>
     <string name="fpx_bank_offline">%s - võrguühenduseta</string>

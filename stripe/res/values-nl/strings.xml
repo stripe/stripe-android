@@ -76,7 +76,6 @@
     <string name="close">Sluiten</string>
     <string name="delete_payment_method">Betaalmethode verwijderen?</string>
     <string name="delete_payment_method_prompt_title">Betaalmethode verwijderen?</string>
-    <string name="ending_in">eindigend op</string>
     <string name="expiry_date_hint">MM/JJ</string>
     <string name="expiry_label_short">Vervaldatum</string>
     <string name="fpx_bank_offline">%s - offline</string>

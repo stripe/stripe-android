@@ -76,7 +76,6 @@
     <string name="close">閉じる</string>
     <string name="delete_payment_method">支払い方法を削除しますか？</string>
     <string name="delete_payment_method_prompt_title">支払い方法を削除しますか？</string>
-    <string name="ending_in">末尾が</string>
     <string name="expiry_date_hint">MM/YY</string>
     <string name="expiry_label_short">有効期限</string>
     <string name="fpx_bank_offline">%s - オフライン</string>

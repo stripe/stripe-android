@@ -75,7 +75,6 @@
     <string name="close">Zapri</string>
     <string name="delete_payment_method">Ali želite izbrisati načina plačila?</string>
     <string name="delete_payment_method_prompt_title">Ali želite izbrisati načina plačila?</string>
-    <string name="ending_in"> konča se s/z </string>
     <string name="expiry_date_hint">MM/LL</string>
     <string name="expiry_label_short">Potek</string>
     <string name="fpx_bank_offline">%s – ni dosegljiva</string>

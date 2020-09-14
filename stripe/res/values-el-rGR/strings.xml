@@ -75,7 +75,6 @@
     <string name="close">Κλείσιμο</string>
     <string name="delete_payment_method">Διαγραφή μεθόδου πληρωμής;</string>
     <string name="delete_payment_method_prompt_title">Να γίνει διαγραφή μεθόδου πληρωμής;</string>
-    <string name="ending_in"> λήγει σε </string>
     <string name="expiry_date_hint">ΜΜ/ΕΕ</string>
     <string name="expiry_label_short">Λήξη</string>
     <string name="fpx_bank_offline">%s - Εκτός σύνδεσης</string>

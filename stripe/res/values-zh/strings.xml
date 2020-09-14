@@ -76,7 +76,6 @@
     <string name="close">关闭</string>
     <string name="delete_payment_method">删除支付方式？</string>
     <string name="delete_payment_method_prompt_title">删除支付方式？</string>
-    <string name="ending_in">尾号</string>
     <string name="expiry_date_hint">月月/年年</string>
     <string name="expiry_label_short">有效期</string>
     <string name="fpx_bank_offline">%s - 线下</string>

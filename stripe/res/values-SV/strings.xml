@@ -75,7 +75,6 @@
     <string name="close">Stäng</string>
     <string name="delete_payment_method">Vill du ta bort betalningsmetoden?</string>
     <string name="delete_payment_method_prompt_title">T bort betalningsmetoden?</string>
-    <string name="ending_in">slutar på</string>
     <string name="expiry_date_hint">MM/ÅÅ</string>
     <string name="expiry_label_short">Giltighetstid</string>
     <string name="fpx_bank_offline">%s - offline</string>

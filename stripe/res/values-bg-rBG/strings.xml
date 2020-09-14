@@ -75,7 +75,6 @@
     <string name="close">Затваряне</string>
     <string name="delete_payment_method">Изтриване на метода на плащане?</string>
     <string name="delete_payment_method_prompt_title">Изтриване на метода на плащане?</string>
-    <string name="ending_in">завършващо на</string>
     <string name="expiry_date_hint">ММ/ГГ</string>
     <string name="expiry_label_short">Валидност</string>
     <string name="fpx_bank_offline">%s - офлайн</string>

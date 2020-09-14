@@ -75,7 +75,6 @@
     <string name="close">닫기</string>
     <string name="delete_payment_method">결제 수단을 삭제하시겠습니까?</string>
     <string name="delete_payment_method_prompt_title">결제 수단을 삭제하시겠습니까?</string>
-    <string name="ending_in">(으)로 끝나는</string>
     <string name="expiry_date_hint">MM/YY</string>
     <string name="expiry_label_short">만료</string>
     <string name="fpx_bank_offline">%s - 오프라인</string>

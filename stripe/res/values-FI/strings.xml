@@ -75,7 +75,6 @@
     <string name="close">Sulje</string>
     <string name="delete_payment_method">Poista maksutapa?</string>
     <string name="delete_payment_method_prompt_title">Poista maksutapa?</string>
-    <string name="ending_in">päättyy</string>
     <string name="expiry_date_hint">KK/VV</string>
     <string name="expiry_label_short">Vanheneminen</string>
     <string name="fpx_bank_offline">%s - Offline-tilassa</string>

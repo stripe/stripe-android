@@ -75,7 +75,6 @@
     <string name="close">Закрыть</string>
     <string name="delete_payment_method">Удалить метод оплаты?</string>
     <string name="delete_payment_method_prompt_title">Удалить метод оплаты?</string>
-    <string name="ending_in">оканчивающийся на</string>
     <string name="expiry_date_hint">ММ/ГГ</string>
     <string name="expiry_label_short">Истечение срока действия</string>
     <string name="fpx_bank_offline">%s - не в сети</string>

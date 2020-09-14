@@ -75,7 +75,6 @@
     <string name="close">Zatvoriť</string>
     <string name="delete_payment_method">Vymazať spôsob platby?</string>
     <string name="delete_payment_method_prompt_title">Vymazať spôsob platby?</string>
-    <string name="ending_in">končí na</string>
     <string name="expiry_date_hint">MM/RR</string>
     <string name="expiry_label_short">Ukončenie platnosti</string>
     <string name="fpx_bank_offline">%s - Offline</string>

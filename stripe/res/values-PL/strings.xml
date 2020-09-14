@@ -75,7 +75,6 @@
     <string name="close">Zamknij</string>
     <string name="delete_payment_method">Czy usunąć metodę płatności?</string>
     <string name="delete_payment_method_prompt_title">Czy usunąć metodę płatności?</string>
-    <string name="ending_in"> końcowe numery </string>
     <string name="expiry_date_hint">MM/RR</string>
     <string name="expiry_label_short">Data ważności</string>
     <string name="fpx_bank_offline">%s – offline</string>

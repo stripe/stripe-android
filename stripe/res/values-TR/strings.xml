@@ -75,7 +75,6 @@
     <string name="close">Kapat</string>
     <string name="delete_payment_method">Ödeme Metodu Silinsin mi?</string>
     <string name="delete_payment_method_prompt_title">Ödeme yöntemi silinsin mi?</string>
-    <string name="ending_in">bitişi</string>
     <string name="expiry_date_hint">AA/YY</string>
     <string name="expiry_label_short">Son kullanma</string>
     <string name="fpx_bank_offline">%s - Çevrimdışı</string>

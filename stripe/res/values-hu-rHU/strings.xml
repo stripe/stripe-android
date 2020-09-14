@@ -75,7 +75,6 @@
     <string name="close">Bezárás</string>
     <string name="delete_payment_method">Törli a fizetési módot?</string>
     <string name="delete_payment_method_prompt_title">Törli a fizetési módot?</string>
-    <string name="ending_in">végződés:</string>
     <string name="expiry_date_hint">ÉÉ/HH</string>
     <string name="expiry_label_short">Lejárat</string>
     <string name="fpx_bank_offline">%s - offline</string>

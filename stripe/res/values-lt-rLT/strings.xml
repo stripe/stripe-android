@@ -75,7 +75,6 @@
     <string name="close">Užverti</string>
     <string name="delete_payment_method">Pašalinti mokėjimo būdą?</string>
     <string name="delete_payment_method_prompt_title">Pašalinti mokėjimo būdą?</string>
-    <string name="ending_in"> baigiasi </string>
     <string name="expiry_date_hint">mm / MM</string>
     <string name="expiry_label_short">Galiojimo pabaigos data</string>
     <string name="fpx_bank_offline">%s – neprisijungęs</string>

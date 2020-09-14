@@ -75,7 +75,6 @@
     <string name="close">Luk</string>
     <string name="delete_payment_method">Slet betalingsmetode?</string>
     <string name="delete_payment_method_prompt_title">Slet betalingsmetode?</string>
-    <string name="ending_in"> slutter med</string>
     <string name="expiry_date_hint">MM/ÅÅ</string>
     <string name="expiry_label_short">Udløbsdato</string>
     <string name="fpx_bank_offline">%s -Offline</string>

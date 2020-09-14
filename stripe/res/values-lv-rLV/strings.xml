@@ -75,7 +75,6 @@
     <string name="close">Aizvērt</string>
     <string name="delete_payment_method">Vai dzēst maksājuma metodi?</string>
     <string name="delete_payment_method_prompt_title">Vai dzēst maksājuma metodi?</string>
-    <string name="ending_in"> derīga līdz </string>
     <string name="expiry_date_hint">MM/GG</string>
     <string name="expiry_label_short">Derīguma termiņš</string>
     <string name="fpx_bank_offline">%s — bezsaistē</string>
