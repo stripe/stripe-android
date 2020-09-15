@@ -911,15 +911,22 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         bin: Bin,
         options: ApiRequest.Options
     ) = withContext(workContext) {
-        makeApiRequest(
-            apiRequestFactory.createGet(
-                getEdgeUrl("card-metadata"),
-                options.copy(stripeAccount = null),
-                mapOf("key" to options.apiKey, "bin_prefix" to bin.value)
+        runCatching {
+            makeApiRequest(
+                apiRequestFactory.createGet(
+                    getEdgeUrl("card-metadata"),
+                    options.copy(stripeAccount = null),
+                    mapOf("key" to options.apiKey, "bin_prefix" to bin.value)
+                )
+            ).let {
+                CardMetadataJsonParser(bin).parse(it.responseJson)
+            }
+        }.onFailure {
+            fireAnalyticsRequest(
+                AnalyticsEvent.CardMetadataLoadFailure,
+                options.apiKey
             )
-        ).let {
-            CardMetadataJsonParser(bin).parse(it.responseJson)
-        }
+        }.getOrNull()
     }
 
     /**

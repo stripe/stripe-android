@@ -715,18 +715,17 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun `getCardMetadata with valid bin prefix should succeed`() {
-        testDispatcher.runBlockingTest {
-            val cardMetadata =
-                stripeApiRepository.getCardMetadata(
-                    BinFixtures.VISA,
-                    ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
-                )
-            assertThat(cardMetadata.bin)
-                .isEqualTo(BinFixtures.VISA)
-            assertThat(cardMetadata.accountRanges)
-                .isNotEmpty()
-        }
+    fun `getCardMetadata with valid bin prefix should succeed`() = testDispatcher.runBlockingTest {
+        val cardMetadata =
+            stripeApiRepository.getCardMetadata(
+                BinFixtures.VISA,
+                ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+            )
+        requireNotNull(cardMetadata)
+        assertThat(cardMetadata.bin)
+            .isEqualTo(BinFixtures.VISA)
+        assertThat(cardMetadata.accountRanges)
+            .isNotEmpty()
     }
 
     @Test
