@@ -6,6 +6,8 @@ import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
+import com.stripe.android.AnalyticsDataFactory
+import com.stripe.android.AnalyticsRequest
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.ApiRequest
 import com.stripe.android.CardNumberFixtures
@@ -194,18 +196,21 @@ internal class DefaultCardAccountRangeRepositoryTest {
     }
 
     private fun createRemoteCardAccountRangeSource(
-        store: CardAccountRangeStore
+        store: CardAccountRangeStore,
+        publishableKey: String = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     ): CardAccountRangeSource {
         val stripeRepository = StripeApiRepository(
             application,
-            ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+            publishableKey
         )
         return RemoteCardAccountRangeSource(
             stripeRepository,
-            ApiRequest.Options(
-                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
-            ),
-            store
+            ApiRequest.Options(publishableKey),
+            store,
+            { },
+            AnalyticsRequest.Factory(),
+            AnalyticsDataFactory(application, publishableKey),
+            publishableKey
         )
     }
 

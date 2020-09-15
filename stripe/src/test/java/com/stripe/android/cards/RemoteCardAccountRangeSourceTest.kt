@@ -1,11 +1,14 @@
 package com.stripe.android.cards
 
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.AbsFakeStripeRepository
+import com.stripe.android.AnalyticsDataFactory
+import com.stripe.android.AnalyticsRequest
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.ApiRequest
 import com.stripe.android.CardNumberFixtures
@@ -17,8 +20,11 @@ import com.stripe.android.model.CardMetadata
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
+@RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
 internal class RemoteCardAccountRangeSourceTest {
     private val testDispatcher = TestCoroutineDispatcher()
@@ -30,7 +36,14 @@ internal class RemoteCardAccountRangeSourceTest {
         val remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
             FakeStripeRepository(VISA_METADATA),
             REQUEST_OPTIONS,
-            cardAccountRangeStore
+            cardAccountRangeStore,
+            { },
+            AnalyticsRequest.Factory(),
+            AnalyticsDataFactory(
+                ApplicationProvider.getApplicationContext(),
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+            ),
+            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
 
         assertThat(
@@ -59,7 +72,14 @@ internal class RemoteCardAccountRangeSourceTest {
         val remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
             FakeStripeRepository(EMPTY_METADATA),
             REQUEST_OPTIONS,
-            cardAccountRangeStore
+            cardAccountRangeStore,
+            { },
+            AnalyticsRequest.Factory(),
+            AnalyticsDataFactory(
+                ApplicationProvider.getApplicationContext(),
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+            ),
+            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
 
         assertThat(
@@ -80,7 +100,14 @@ internal class RemoteCardAccountRangeSourceTest {
         val remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
             repository,
             REQUEST_OPTIONS,
-            cardAccountRangeStore
+            cardAccountRangeStore,
+            { },
+            AnalyticsRequest.Factory(),
+            AnalyticsDataFactory(
+                ApplicationProvider.getApplicationContext(),
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+            ),
+            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
 
         assertThat(
@@ -91,6 +118,50 @@ internal class RemoteCardAccountRangeSourceTest {
 
         verify(repository, never()).getCardMetadata(any(), any())
         verify(cardAccountRangeStore, never()).save(any(), any())
+    }
+
+    @Test
+    fun `getAccountRange() should fire missing range analytics request when response is not empty but card number does not match`() = testDispatcher.runBlockingTest {
+        val analyticsRequests = mutableListOf<AnalyticsRequest>()
+
+        val remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
+            FakeStripeRepository(
+                CardMetadata(
+                    bin = BinFixtures.VISA,
+                    accountRanges = listOf(
+                        AccountRange(
+                            binRange = BinRange(
+                                low = "4242420000000000",
+                                high = "4242424200000000"
+                            ),
+                            panLength = 16,
+                            brandInfo = AccountRange.BrandInfo.Visa,
+                            country = "GB"
+                        )
+                    )
+                )
+            ),
+            REQUEST_OPTIONS,
+            cardAccountRangeStore,
+            {
+                analyticsRequests.add(it)
+            },
+            AnalyticsRequest.Factory(),
+            AnalyticsDataFactory(
+                ApplicationProvider.getApplicationContext(),
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+            ),
+            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+        )
+
+        remoteCardAccountRangeSource.getAccountRange(
+            CardNumber.Unvalidated("4242424242424242")
+        )
+
+        assertThat(analyticsRequests)
+            .hasSize(1)
+        assertThat(analyticsRequests.first().params["event"])
+            .isEqualTo("stripe_android.card_metadata_missing_range")
     }
 
     private class FakeStripeRepository(
