@@ -5,7 +5,9 @@ import com.stripe.android.model.CardMetadata
 import org.json.JSONArray
 import org.json.JSONObject
 
-internal class CardMetadataJsonParser(private val bin: Bin) : ModelJsonParser<CardMetadata> {
+internal class CardMetadataJsonParser(
+    private val bin: Bin
+) : ModelJsonParser<CardMetadata> {
     private val accountRangeJsonParser = AccountRangeJsonParser()
 
     override fun parse(json: JSONObject): CardMetadata {

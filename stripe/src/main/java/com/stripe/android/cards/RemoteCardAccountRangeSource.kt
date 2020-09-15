@@ -26,7 +26,7 @@ internal class RemoteCardAccountRangeSource(
             mutableLoading.value = true
 
             val accountRanges =
-                stripeRepository.getCardMetadata(bin, requestOptions).accountRanges
+                stripeRepository.getCardMetadata(bin, requestOptions)?.accountRanges.orEmpty()
             cardAccountRangeStore.save(bin, accountRanges)
 
             mutableLoading.value = false

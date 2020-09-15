@@ -327,7 +327,7 @@ internal interface StripeRepository {
 
     suspend fun getFpxBankStatus(options: ApiRequest.Options): FpxBankStatuses
 
-    suspend fun getCardMetadata(bin: Bin, options: ApiRequest.Options): CardMetadata
+    suspend fun getCardMetadata(bin: Bin, options: ApiRequest.Options): CardMetadata?
 
     fun start3ds2Auth(
         authParams: Stripe3ds2AuthParams,
