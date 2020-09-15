@@ -58,7 +58,11 @@ internal enum class AnalyticsEvent(internal val code: String) {
     // Source Authentication
     AuthSourceStart("auth_source_start"),
     AuthSourceRedirect("auth_source_redirect"),
-    AuthSourceResult("auth_source_result");
+    AuthSourceResult("auth_source_result"),
+
+    CardMetadataLoadedTooSlow("card_metadata_loaded_too_slow"),
+    CardMetadataLoadFailure("card_metadata_load_failure"),
+    CardMetadataMissingRange("card_metadata_missing_range");
 
     override fun toString(): String {
         return "$PREFIX.$code"
