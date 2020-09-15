@@ -1,7 +1,9 @@
 package com.stripe.android.view
 
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.R
 import com.stripe.android.model.CardBrand
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -11,8 +13,12 @@ import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 class CvcEditTextTest {
-
-    private val cvcEditText = CvcEditText(ApplicationProvider.getApplicationContext())
+    private val cvcEditText = CvcEditText(
+        ContextThemeWrapper(
+            ApplicationProvider.getApplicationContext(),
+            R.style.StripeDefaultTheme
+        )
+    )
 
     @Test
     fun cvcValue_withoutText_returnsNull() {

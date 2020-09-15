@@ -50,6 +50,7 @@ ext {
     androidLifecycleVersion = '2.2.0'
     espressoVersion = '3.3.0'
     ktlintVersion = '0.39.0'
+    materialVersion = '1.2.1'
 
     androidTestVersion = '1.3.0'
 }

@@ -1,7 +1,9 @@
 package com.stripe.android.view
 
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.R
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -9,7 +11,12 @@ import kotlin.test.Test
 @RunWith(RobolectricTestRunner::class)
 class BecsDebitBsbEditTextTest {
 
-    private val bsbEditText = BecsDebitBsbEditText(ApplicationProvider.getApplicationContext())
+    private val bsbEditText = BecsDebitBsbEditText(
+        ContextThemeWrapper(
+            ApplicationProvider.getApplicationContext(),
+            R.style.StripeDefaultTheme
+        )
+    )
 
     @Test
     fun onCompletedCallback_isCalled() {
