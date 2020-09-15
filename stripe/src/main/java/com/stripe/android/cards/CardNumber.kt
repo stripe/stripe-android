@@ -18,10 +18,12 @@ internal sealed class CardNumber {
 
         val bin: Bin? = Bin.create(normalized)
 
+        val isValidLuhn = CardUtils.isValidLuhnNumber(normalized)
+
         fun validate(panLength: Int): Validated? {
             return if (panLength >= MIN_PAN_LENGTH &&
                 normalized.length == panLength &&
-                CardUtils.isValidLuhnNumber(normalized)
+                isValidLuhn
             ) {
                 Validated(
                     value = normalized

@@ -8,6 +8,12 @@ import android.text.InputType
 import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.AnalyticsDataFactory
+import com.stripe.android.AnalyticsEvent
+import com.stripe.android.AnalyticsRequest
+import com.stripe.android.AnalyticsRequestExecutor
+import com.stripe.android.ApiRequest
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardNumber
@@ -38,7 +44,11 @@ class CardNumberEditText internal constructor(
     internal var workContext: CoroutineContext,
 
     private val cardAccountRangeRepository: CardAccountRangeRepository,
-    private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges()
+    private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
+    private val analyticsRequestExecutor: AnalyticsRequestExecutor,
+    private val analyticsRequestFactory: AnalyticsRequest.Factory,
+    private val analyticsDataFactory: AnalyticsDataFactory,
+    private val publishableKeySupplier: () -> String
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     @JvmOverloads
@@ -51,13 +61,35 @@ class CardNumberEditText internal constructor(
         attrs,
         defStyleAttr,
         Dispatchers.IO,
+        { PaymentConfiguration.getInstance(context).publishableKey }
+    )
+
+    private constructor(
+        context: Context,
+        attrs: AttributeSet?,
+        defStyleAttr: Int,
+        workContext: CoroutineContext,
+        publishableKeySupplier: () -> String
+    ) : this(
+        context,
+        attrs,
+        defStyleAttr,
+        workContext,
 
         when (USE_DEFAULT_CARD_ACCOUNT_RANGE_REPO) {
             true -> DefaultCardAccountRangeRepositoryFactory(context).create()
             false -> LegacyCardAccountRangeRepository(StaticCardAccountRangeSource())
         },
 
-        DefaultStaticCardAccountRanges()
+        DefaultStaticCardAccountRanges(),
+        AnalyticsRequestExecutor.Default(),
+        AnalyticsRequest.Factory(),
+        AnalyticsDataFactory(
+            context,
+            publishableKeySupplier = publishableKeySupplier
+        ),
+
+        publishableKeySupplier
     )
 
     @VisibleForTesting
@@ -258,6 +290,15 @@ class CardNumberEditText internal constructor(
             accountRange?.binRange?.matches(cardNumber) == false
     }
 
+    private fun onCardMetadataLoadedTooSlow() {
+        analyticsRequestExecutor.executeAsync(
+            analyticsRequestFactory.create(
+                analyticsDataFactory.createParams(AnalyticsEvent.CardMetadataLoadedTooSlow),
+                ApiRequest.Options(publishableKeySupplier())
+            )
+        )
+    }
+
     private inner class CardNumberTextWatcher : StripeTextWatcher() {
         private var ignoreChanges = false
         private var latestChangeStart: Int = 0
@@ -333,6 +374,11 @@ class CardNumberEditText internal constructor(
                 val wasCardNumberValid = isCardNumberValid
                 isCardNumberValid = isValid
                 shouldShowError = !isValid
+
+                if (accountRange == null && unvalidatedCardNumber.isValidLuhn) {
+                    // a complete PAN was inputted before the card service returned results
+                    onCardMetadataLoadedTooSlow()
+                }
 
                 if (isComplete(wasCardNumberValid)) {
                     completionCallback()

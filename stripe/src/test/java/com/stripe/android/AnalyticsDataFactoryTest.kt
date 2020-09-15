@@ -177,7 +177,7 @@ class AnalyticsDataFactoryTest {
         }
 
         val params =
-            AnalyticsDataFactory(packageManager, packageInfo, packageName, API_KEY)
+            AnalyticsDataFactory(packageManager, packageInfo, packageName) { API_KEY }
                 .createTokenCreationParams(
                     ATTRIBUTION,
                     Token.Type.Card
@@ -231,7 +231,7 @@ class AnalyticsDataFactoryTest {
     @Test
     fun createAppDataParams_whenPackageNameIsEmpty_returnsEmptyMap() {
         assertThat(
-            AnalyticsDataFactory(null, null, "", API_KEY)
+            AnalyticsDataFactory(null, null, "") { API_KEY }
                 .createAppDataParams()
         ).isEmpty()
     }
@@ -240,7 +240,7 @@ class AnalyticsDataFactoryTest {
     fun createAppDataParams_whenPackageInfoNotFound_returnsEmptyMap() {
         val packageName = "fake_package"
         assertThat(
-            AnalyticsDataFactory(packageManager, null, packageName, API_KEY)
+            AnalyticsDataFactory(packageManager, null, packageName) { API_KEY }
                 .createAppDataParams()
         ).isEmpty()
     }
