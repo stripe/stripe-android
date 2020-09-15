@@ -22,7 +22,6 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     private val packageName: String,
     private val publishableKey: String
 ) {
-
     internal constructor(context: Context, publishableKey: String) : this(
         context.applicationContext.packageManager,
         context.applicationContext.packageInfo,

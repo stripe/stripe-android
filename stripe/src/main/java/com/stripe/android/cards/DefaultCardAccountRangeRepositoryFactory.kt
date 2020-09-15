@@ -1,6 +1,9 @@
 package com.stripe.android.cards
 
 import android.content.Context
+import com.stripe.android.AnalyticsDataFactory
+import com.stripe.android.AnalyticsRequest
+import com.stripe.android.AnalyticsRequestExecutor
 import com.stripe.android.ApiRequest
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.StripeApiRepository
@@ -20,18 +23,23 @@ internal class DefaultCardAccountRangeRepositoryFactory(
         val paymentConfiguration = PaymentConfiguration.getInstance(
             appContext
         )
+        val publishableKey = paymentConfiguration.publishableKey
         val store = DefaultCardAccountRangeStore(appContext)
         return DefaultCardAccountRangeRepository(
             inMemorySource = InMemoryCardAccountRangeSource(store),
             remoteSource = RemoteCardAccountRangeSource(
                 StripeApiRepository(
                     appContext,
-                    paymentConfiguration.publishableKey
+                    publishableKey
                 ),
                 ApiRequest.Options(
-                    paymentConfiguration.publishableKey
+                    publishableKey
                 ),
-                DefaultCardAccountRangeStore(appContext)
+                DefaultCardAccountRangeStore(appContext),
+                AnalyticsRequestExecutor.Default(),
+                AnalyticsRequest.Factory(),
+                AnalyticsDataFactory(appContext, publishableKey),
+                publishableKey
             ),
             staticSource = StaticCardAccountRangeSource(),
             store = store
