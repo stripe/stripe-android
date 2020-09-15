@@ -1,7 +1,7 @@
 package com.stripe.android.view
 
-import android.content.Context
 import android.view.ViewGroup
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -57,7 +57,10 @@ import kotlin.test.assertNull
 @LooperMode(LooperMode.Mode.PAUSED)
 internal class CardNumberEditTextTest {
     private val testDispatcher = TestCoroutineDispatcher()
-    private val context: Context = ApplicationProvider.getApplicationContext()
+    private val context = ContextThemeWrapper(
+        ApplicationProvider.getApplicationContext(),
+        R.style.StripeDefaultTheme
+    )
     private val activityScenarioFactory = ActivityScenarioFactory(context)
 
     private var completionCallbackInvocations = 0

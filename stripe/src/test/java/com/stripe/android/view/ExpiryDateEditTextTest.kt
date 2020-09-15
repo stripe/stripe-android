@@ -1,7 +1,8 @@
 package com.stripe.android.view
 
-import android.content.Context
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
+import com.stripe.android.R
 import com.stripe.android.testharness.ViewTestUtils
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -19,9 +20,12 @@ import kotlin.test.assertTrue
  */
 @RunWith(RobolectricTestRunner::class)
 class ExpiryDateEditTextTest {
-    private val expiryDateEditText: ExpiryDateEditText by lazy {
-        ExpiryDateEditText(ApplicationProvider.getApplicationContext<Context>())
-    }
+    private val expiryDateEditText = ExpiryDateEditText(
+        ContextThemeWrapper(
+            ApplicationProvider.getApplicationContext(),
+            R.style.StripeDefaultTheme
+        )
+    )
 
     @BeforeTest
     fun setup() {
