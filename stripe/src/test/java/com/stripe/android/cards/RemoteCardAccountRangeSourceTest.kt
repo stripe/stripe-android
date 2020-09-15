@@ -125,7 +125,22 @@ internal class RemoteCardAccountRangeSourceTest {
         val analyticsRequests = mutableListOf<AnalyticsRequest>()
 
         val remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
-            FakeStripeRepository(VISA_METADATA),
+            FakeStripeRepository(
+                CardMetadata(
+                    bin = BinFixtures.VISA,
+                    accountRanges = listOf(
+                        AccountRange(
+                            binRange = BinRange(
+                                low = "4242420000000000",
+                                high = "4242424200000000"
+                            ),
+                            panLength = 16,
+                            brandInfo = AccountRange.BrandInfo.Visa,
+                            country = "GB"
+                        )
+                    )
+                )
+            ),
             REQUEST_OPTIONS,
             cardAccountRangeStore,
             {
@@ -140,7 +155,7 @@ internal class RemoteCardAccountRangeSourceTest {
         )
 
         remoteCardAccountRangeSource.getAccountRange(
-            CardNumber.Unvalidated("4242424259999999")
+            CardNumber.Unvalidated("4242424242424242")
         )
 
         assertThat(analyticsRequests)

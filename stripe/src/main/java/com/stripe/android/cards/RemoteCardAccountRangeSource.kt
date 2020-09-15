@@ -5,6 +5,7 @@ import com.stripe.android.AnalyticsEvent
 import com.stripe.android.AnalyticsRequest
 import com.stripe.android.AnalyticsRequestExecutor
 import com.stripe.android.ApiRequest
+import com.stripe.android.CardUtils
 import com.stripe.android.StripeRepository
 import com.stripe.android.model.AccountRange
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -45,7 +46,9 @@ internal class RemoteCardAccountRangeSource(
                             binRange.matches(cardNumber)
                         }
 
-                    if (matchedAccountRange == null) {
+                    if (matchedAccountRange == null &&
+                        CardUtils.isValidLuhnNumber(cardNumber.normalized)
+                    ) {
                         fireMissingRangeRequest()
                     }
 
