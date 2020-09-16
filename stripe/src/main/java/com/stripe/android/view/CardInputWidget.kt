@@ -22,6 +22,7 @@ import androidx.annotation.ColorInt
 import androidx.annotation.IdRes
 import androidx.annotation.IntRange
 import androidx.annotation.VisibleForTesting
+import androidx.core.os.bundleOf
 import androidx.core.view.AccessibilityDelegateCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
@@ -562,11 +563,11 @@ class CardInputWidget @JvmOverloads constructor(
     }
 
     override fun onSaveInstanceState(): Parcelable {
-        return Bundle().apply {
-            putParcelable(STATE_SUPER_STATE, super.onSaveInstanceState())
-            putBoolean(STATE_CARD_VIEWED, isShowingFullCard)
-            putBoolean(STATE_POSTAL_CODE_ENABLED, postalCodeEnabled)
-        }
+        return bundleOf(
+            STATE_SUPER_STATE to super.onSaveInstanceState(),
+            STATE_CARD_VIEWED to isShowingFullCard,
+            STATE_POSTAL_CODE_ENABLED to postalCodeEnabled
+        )
     }
 
     override fun onRestoreInstanceState(state: Parcelable) {

@@ -1,9 +1,9 @@
 package com.stripe.android
 
 import android.content.Intent
-import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.core.os.bundleOf
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.Source
@@ -121,11 +121,7 @@ internal interface PaymentController {
         internal val stripeAccountId: String? = null
     ) : Parcelable {
         @JvmSynthetic
-        fun toBundle(): Bundle {
-            return Bundle().also {
-                it.putParcelable(EXTRA, this)
-            }
-        }
+        fun toBundle() = bundleOf(EXTRA to this)
 
         internal companion object : Parceler<Result> {
             override fun create(parcel: Parcel): Result {
