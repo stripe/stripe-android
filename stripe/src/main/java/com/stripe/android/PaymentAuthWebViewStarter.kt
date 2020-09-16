@@ -1,7 +1,7 @@
 package com.stripe.android
 
-import android.os.Bundle
 import android.os.Parcelable
+import androidx.core.os.bundleOf
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 import com.stripe.android.view.AuthActivityStarter
 import com.stripe.android.view.PaymentAuthWebViewActivity
@@ -17,10 +17,11 @@ internal class PaymentAuthWebViewStarter internal constructor(
 ) : AuthActivityStarter<PaymentAuthWebViewStarter.Args> {
 
     override fun start(args: Args) {
-        val extras = Bundle().apply {
-            putParcelable(EXTRA_ARGS, args)
-        }
-        host.startActivityForResult(PaymentAuthWebViewActivity::class.java, extras, requestCode)
+        host.startActivityForResult(
+            PaymentAuthWebViewActivity::class.java,
+            bundleOf(EXTRA_ARGS to args),
+            requestCode
+        )
     }
 
     @Parcelize
