@@ -37,6 +37,7 @@ import com.stripe.android.view.AuthActivityStarter
 import com.stripe.android.view.Stripe3ds2CompletionActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.security.cert.CertificateException
 import java.util.concurrent.TimeUnit
@@ -62,7 +63,6 @@ internal class StripePaymentController internal constructor(
         AnalyticsRequestExecutor.Default(Logger.getInstance(enableLogging)),
     private val analyticsDataFactory: AnalyticsDataFactory =
         AnalyticsDataFactory(context.applicationContext, publishableKey),
-    private val challengeFlowStarter: ChallengeFlowStarter = ChallengeFlowStarter.Default(),
     private val challengeProgressActivityStarter: ChallengeProgressActivityStarter =
         ChallengeProgressActivityStarter.Default(),
     private val workContext: CoroutineContext = Dispatchers.IO,
@@ -756,8 +756,8 @@ internal class StripePaymentController internal constructor(
                     requestOptions,
                     analyticsRequestExecutor,
                     analyticsDataFactory,
-                    challengeFlowStarter,
-                    enableLogging
+                    enableLogging,
+                    workContext = workContext
                 )
             )
         }
@@ -820,10 +820,10 @@ internal class StripePaymentController internal constructor(
         private val requestOptions: ApiRequest.Options,
         private val analyticsRequestExecutor: AnalyticsRequestExecutor,
         private val analyticsDataFactory: AnalyticsDataFactory,
-        private val challengeFlowStarter: ChallengeFlowStarter,
         private val enableLogging: Boolean = false,
         private val paymentRelayStarter: PaymentRelayStarter =
-            PaymentRelayStarter.create(host, getRequestCode(stripeIntent))
+            PaymentRelayStarter.create(host, getRequestCode(stripeIntent)),
+        private val workContext: CoroutineContext
     ) : ApiResultCallback<Stripe3ds2AuthResult> {
 
         private val analyticsRequestFactory = AnalyticsRequest.Factory(
@@ -913,27 +913,25 @@ internal class StripePaymentController internal constructor(
                 Stripe3ds2ActivityStarterHost(fragment)
             } ?: host.activity?.let { activity ->
                 Stripe3ds2ActivityStarterHost(activity)
-            }
+            } ?: return
 
-            host?.let {
-                challengeFlowStarter.start(
-                    Runnable {
-                        transaction.doChallenge(
-                            it,
-                            challengeParameters,
-                            PaymentAuth3ds2ChallengeStatusReceiver.create(
-                                stripeRepository,
-                                stripeIntent,
-                                sourceId,
-                                requestOptions,
-                                analyticsRequestExecutor,
-                                analyticsDataFactory,
-                                transaction,
-                                analyticsRequestFactory
-                            ),
-                            maxTimeout
-                        )
-                    }
+            CoroutineScope(workContext).launch {
+                delay(CHALLENGE_DELAY)
+
+                transaction.doChallenge(
+                    host,
+                    challengeParameters,
+                    PaymentAuth3ds2ChallengeStatusReceiver.create(
+                        stripeRepository,
+                        stripeIntent,
+                        sourceId,
+                        requestOptions,
+                        analyticsRequestExecutor,
+                        analyticsDataFactory,
+                        transaction,
+                        analyticsRequestFactory
+                    ),
+                    maxTimeout
                 )
             }
         }
@@ -1249,5 +1247,6 @@ internal class StripePaymentController internal constructor(
         }
 
         private val EXPAND_PAYMENT_METHOD = listOf("payment_method")
+        internal val CHALLENGE_DELAY = TimeUnit.SECONDS.toMillis(2L)
     }
 }

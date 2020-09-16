@@ -38,6 +38,7 @@ import com.stripe.android.stripe3ds2.transaction.ErrorMessage
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.ProtocolErrorEvent
 import com.stripe.android.stripe3ds2.transaction.RuntimeErrorEvent
+import com.stripe.android.stripe3ds2.transaction.Stripe3ds2ActivityStarterHost
 import com.stripe.android.stripe3ds2.transaction.Transaction
 import com.stripe.android.utils.ParcelUtils
 import com.stripe.android.view.AuthActivityStarter
@@ -62,12 +63,8 @@ class StripePaymentControllerTest {
     private val sourceCallback: ApiResultCallback<Source> = mock()
     private val paymentRelayStarter: PaymentRelayStarter = mock()
     private val analyticsRequestExecutor: AnalyticsRequestExecutor = mock()
-    private val challengeFlowStarter: StripePaymentController.ChallengeFlowStarter = mock()
     private val challengeProgressActivityStarter: StripePaymentController.ChallengeProgressActivityStarter = mock()
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val controller: PaymentController by lazy {
-        createController()
-    }
     private val analyticsDataFactory = AnalyticsDataFactory(
         context,
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
@@ -82,6 +79,8 @@ class StripePaymentControllerTest {
     private val sourceArgumentCaptor: KArgumentCaptor<Source> = argumentCaptor()
 
     private val testDispatcher = TestCoroutineDispatcher()
+
+    private val controller = createController()
 
     @BeforeTest
     fun setup() {
@@ -114,6 +113,8 @@ class StripePaymentControllerTest {
         )
             .thenReturn(transaction)
         controller.handleNextAction(host, paymentIntent, REQUEST_OPTIONS)
+        testDispatcher.advanceTimeBy(StripePaymentController.CHALLENGE_DELAY)
+
         verify(threeDs2Service).createTransaction(
             eq(MASTERCARD_DS_ID),
             eq(MESSAGE_VERSION),
@@ -125,8 +126,8 @@ class StripePaymentControllerTest {
             any(),
             any()
         )
-        verify(challengeFlowStarter)
-            .start(any())
+        verify(transaction)
+            .doChallenge(any<Stripe3ds2ActivityStarterHost>(), any(), any(), any())
 
         verify(challengeProgressActivityStarter).start(
             eq(activity),
@@ -165,6 +166,8 @@ class StripePaymentControllerTest {
             PaymentIntentFixtures.PI_REQUIRES_AMEX_3DS2,
             REQUEST_OPTIONS
         )
+        testDispatcher.advanceTimeBy(StripePaymentController.CHALLENGE_DELAY)
+
         verify(threeDs2Service).createTransaction(
             eq(AMEX_DS_ID),
             eq(MESSAGE_VERSION),
@@ -176,8 +179,8 @@ class StripePaymentControllerTest {
             any(),
             any()
         )
-        verify(challengeFlowStarter)
-            .start(any())
+        verify(transaction)
+            .doChallenge(any<Stripe3ds2ActivityStarterHost>(), any(), any(), any())
 
         verify(challengeProgressActivityStarter).start(
             eq(activity),
@@ -556,11 +559,17 @@ class StripePaymentControllerTest {
     @Test
     fun authCallback_withChallengeFlow_shouldNotStartRelayActivity() {
         val authCallback = StripePaymentController.Stripe3ds2AuthCallback(
-            host, FakeStripeRepository(), transaction, MAX_TIMEOUT,
-            PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2, SOURCE_ID,
-            REQUEST_OPTIONS, analyticsRequestExecutor, analyticsDataFactory,
-            challengeFlowStarter,
-            paymentRelayStarter = paymentRelayStarter
+            host,
+            FakeStripeRepository(),
+            transaction,
+            MAX_TIMEOUT,
+            PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
+            SOURCE_ID,
+            REQUEST_OPTIONS,
+            analyticsRequestExecutor,
+            analyticsDataFactory,
+            paymentRelayStarter = paymentRelayStarter,
+            workContext = testDispatcher
         )
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.ARES_CHALLENGE_FLOW)
         verify(paymentRelayStarter, never())
@@ -570,11 +579,17 @@ class StripePaymentControllerTest {
     @Test
     fun authCallback_withFrictionlessFlow_shouldStartRelayActivityWithPaymentIntent() {
         val authCallback = StripePaymentController.Stripe3ds2AuthCallback(
-            host, FakeStripeRepository(), transaction, MAX_TIMEOUT,
-            PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2, SOURCE_ID,
-            REQUEST_OPTIONS, analyticsRequestExecutor, analyticsDataFactory,
-            challengeFlowStarter,
-            paymentRelayStarter = paymentRelayStarter
+            host,
+            FakeStripeRepository(),
+            transaction,
+            MAX_TIMEOUT,
+            PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
+            SOURCE_ID,
+            REQUEST_OPTIONS,
+            analyticsRequestExecutor,
+            analyticsDataFactory,
+            paymentRelayStarter = paymentRelayStarter,
+            workContext = testDispatcher
         )
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.ARES_FRICTIONLESS_FLOW)
         verify(paymentRelayStarter)
@@ -593,11 +608,17 @@ class StripePaymentControllerTest {
     @Test
     fun authCallback_withFallbackRedirectUrl_shouldStartAuthWebView() {
         val authCallback = StripePaymentController.Stripe3ds2AuthCallback(
-            host, FakeStripeRepository(), transaction, MAX_TIMEOUT,
-            PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2, SOURCE_ID,
-            REQUEST_OPTIONS, analyticsRequestExecutor, analyticsDataFactory,
-            challengeFlowStarter,
-            paymentRelayStarter = paymentRelayStarter
+            host,
+            FakeStripeRepository(),
+            transaction,
+            MAX_TIMEOUT,
+            PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
+            SOURCE_ID,
+            REQUEST_OPTIONS,
+            analyticsRequestExecutor,
+            analyticsDataFactory,
+            paymentRelayStarter = paymentRelayStarter,
+            workContext = testDispatcher
         )
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.FALLBACK_REDIRECT_URL)
         verify(activity).startActivityForResult(
@@ -622,11 +643,17 @@ class StripePaymentControllerTest {
     @Test
     fun authCallback_withError_shouldStartRelayActivityWithException() {
         val authCallback = StripePaymentController.Stripe3ds2AuthCallback(
-            host, FakeStripeRepository(), transaction, MAX_TIMEOUT,
-            PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2, SOURCE_ID,
-            REQUEST_OPTIONS, analyticsRequestExecutor, analyticsDataFactory,
-            challengeFlowStarter,
-            paymentRelayStarter = paymentRelayStarter
+            host,
+            FakeStripeRepository(),
+            transaction,
+            MAX_TIMEOUT,
+            PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
+            SOURCE_ID,
+            REQUEST_OPTIONS,
+            analyticsRequestExecutor,
+            analyticsDataFactory,
+            paymentRelayStarter = paymentRelayStarter,
+            workContext = testDispatcher
         )
         authCallback.onSuccess(Stripe3ds2AuthResultFixtures.ERROR)
         verify(paymentRelayStarter).start(relayStarterArgsArgumentCaptor.capture())
@@ -765,7 +792,6 @@ class StripePaymentControllerTest {
             threeDs2Service,
             analyticsRequestExecutor,
             analyticsDataFactory,
-            challengeFlowStarter,
             challengeProgressActivityStarter,
             testDispatcher
         )
