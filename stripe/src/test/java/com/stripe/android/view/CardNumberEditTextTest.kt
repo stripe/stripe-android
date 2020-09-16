@@ -4,6 +4,9 @@ import android.view.ViewGroup
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.AnalyticsDataFactory
+import com.stripe.android.AnalyticsRequest
+import com.stripe.android.AnalyticsRequestExecutor
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.CardNumberFixtures.AMEX_BIN
@@ -75,10 +78,19 @@ internal class CardNumberEditTextTest {
         StaticCardAccountRangeSource()
     )
 
+    private val analyticsRequestExecutor = AnalyticsRequestExecutor {}
+    private val analyticsRequestFactory = AnalyticsRequest.Factory()
+    private val analyticsDataFactory = AnalyticsDataFactory(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+    private val publishableKeySupplier = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY }
+
     private val cardNumberEditText = CardNumberEditText(
         context,
         workContext = testDispatcher,
-        cardAccountRangeRepository = cardAccountRangeRepository
+        cardAccountRangeRepository = cardAccountRangeRepository,
+        analyticsRequestExecutor = analyticsRequestExecutor,
+        analyticsRequestFactory = analyticsRequestFactory,
+        analyticsDataFactory = analyticsDataFactory,
+        publishableKeySupplier = publishableKeySupplier
     ).also {
         it.completionCallback = completionCallback
         it.brandChangeCallback = brandChangeCallback
@@ -244,7 +256,11 @@ internal class CardNumberEditTextTest {
         val cardNumberEditText = CardNumberEditText(
             context,
             workContext = testDispatcher,
-            cardAccountRangeRepository = NullCardAccountRangeRepository()
+            cardAccountRangeRepository = NullCardAccountRangeRepository(),
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            analyticsRequestFactory = analyticsRequestFactory,
+            analyticsDataFactory = analyticsDataFactory,
+            publishableKeySupplier = publishableKeySupplier
         )
 
         var callbacks = 0
@@ -269,7 +285,11 @@ internal class CardNumberEditTextTest {
                 override fun match(
                     cardNumber: CardNumber.Unvalidated
                 ): AccountRange? = AccountRangeFixtures.UNIONPAY19
-            }
+            },
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            analyticsRequestFactory = analyticsRequestFactory,
+            analyticsDataFactory = analyticsDataFactory,
+            publishableKeySupplier = publishableKeySupplier
         )
 
         var callbacks = 0
@@ -294,7 +314,11 @@ internal class CardNumberEditTextTest {
                 override fun match(
                     cardNumber: CardNumber.Unvalidated
                 ): AccountRange? = null
-            }
+            },
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            analyticsRequestFactory = analyticsRequestFactory,
+            analyticsDataFactory = analyticsDataFactory,
+            publishableKeySupplier = publishableKeySupplier
         )
 
         cardNumberEditText.setText("6216828050000000000")
@@ -309,7 +333,11 @@ internal class CardNumberEditTextTest {
         val cardNumberEditText = CardNumberEditText(
             context,
             workContext = testDispatcher,
-            cardAccountRangeRepository = NullCardAccountRangeRepository()
+            cardAccountRangeRepository = NullCardAccountRangeRepository(),
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            analyticsRequestFactory = analyticsRequestFactory,
+            analyticsDataFactory = analyticsDataFactory,
+            publishableKeySupplier = publishableKeySupplier
         )
 
         cardNumberEditText.setText(AMEX_NO_SPACES)
@@ -666,7 +694,11 @@ internal class CardNumberEditTextTest {
                     val cardNumberEditText = CardNumberEditText(
                         activity,
                         workContext = testDispatcher,
-                        cardAccountRangeRepository = DelayedCardAccountRangeRepository()
+                        cardAccountRangeRepository = DelayedCardAccountRangeRepository(),
+                        analyticsRequestExecutor = analyticsRequestExecutor,
+                        analyticsRequestFactory = analyticsRequestFactory,
+                        analyticsDataFactory = analyticsDataFactory,
+                        publishableKeySupplier = publishableKeySupplier
                     )
 
                     val root = activity.findViewById<ViewGroup>(R.id.add_payment_method_card).also {
@@ -702,7 +734,11 @@ internal class CardNumberEditTextTest {
                 }
 
                 override val loading: Flow<Boolean> = flowOf(false)
-            }
+            },
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            analyticsRequestFactory = analyticsRequestFactory,
+            analyticsDataFactory = analyticsDataFactory,
+            publishableKeySupplier = publishableKeySupplier
         )
 
         // 424242 - valid BIN, call repo
@@ -740,6 +776,34 @@ internal class CardNumberEditTextTest {
         idleLooper()
         assertThat(repositoryCalls)
             .isEqualTo(3)
+    }
+
+    @Test
+    fun `inputting a full PAN before card service returns result should fire card_metadata_loaded_too_slow analytics event`() {
+        val analyticsRequests = mutableListOf<AnalyticsRequest>()
+        val cardNumberEditText = CardNumberEditText(
+            context,
+            workContext = testDispatcher,
+            cardAccountRangeRepository = object : CardAccountRangeRepository {
+                override suspend fun getAccountRange(
+                    cardNumber: CardNumber.Unvalidated
+                ): AccountRange? = null
+
+                override val loading: Flow<Boolean> = flowOf(false)
+            },
+            analyticsRequestExecutor = {
+                analyticsRequests.add(it)
+            },
+            analyticsRequestFactory = analyticsRequestFactory,
+            analyticsDataFactory = analyticsDataFactory,
+            publishableKeySupplier = publishableKeySupplier
+        )
+        cardNumberEditText.setText(VISA_NO_SPACES)
+        idleLooper()
+        assertThat(analyticsRequests)
+            .hasSize(1)
+        assertThat(analyticsRequests.first().params["event"])
+            .isEqualTo("stripe_android.card_metadata_loaded_too_slow")
     }
 
     private fun verifyCardBrandBin(
