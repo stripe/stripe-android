@@ -3,8 +3,6 @@ package com.stripe.android
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
-import android.os.Handler
-import android.os.HandlerThread
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.StripeException
@@ -405,6 +403,7 @@ internal class StripePaymentController internal constructor(
 
         companion object {
             private const val RESULT_FIELD = "resultStatus"
+
             // https://intl.alipay.com/docs/ac/3rdpartryqrcode/standard_4
             private const val RESULT_CODE_SUCCESS = "9000"
             private const val RESULT_CODE_CANCELLED = "6001"
@@ -1085,35 +1084,6 @@ internal class StripePaymentController internal constructor(
                     transaction,
                     analyticsRequestFactory
                 )
-            }
-        }
-    }
-
-    internal interface ChallengeFlowStarter {
-        fun start(runnable: Runnable)
-
-        class Default : ChallengeFlowStarter {
-            override fun start(runnable: Runnable) {
-                val handlerThread = HandlerThread(Stripe3ds2AuthCallback::class.java.simpleName)
-                // create Handler to notifyCompletion challenge flow on background thread
-                val handler = createHandler(handlerThread)
-
-                handler.postDelayed(
-                    {
-                        runnable.run()
-                        handlerThread.quitSafely()
-                    },
-                    TimeUnit.SECONDS.toMillis(DELAY_SECONDS)
-                )
-            }
-
-            private companion object {
-                private const val DELAY_SECONDS = 2L
-
-                private fun createHandler(handlerThread: HandlerThread): Handler {
-                    handlerThread.start()
-                    return Handler(handlerThread.looper)
-                }
             }
         }
     }
