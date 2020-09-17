@@ -224,4 +224,19 @@ class PaymentMethodEndToEndTest {
         assertThat(paymentMethod?.type)
             .isEqualTo(PaymentMethod.Type.GrabPay)
     }
+
+    @Test
+    fun `createPaymentMethod() with PayPal PaymentMethod should create expected object`() {
+        val paymentMethod = StripeApiRepository(
+            context,
+            ApiKeyFixtures.PAYPAL_PUBLISHABLE_KEY
+        ).createPaymentMethod(
+            PaymentMethodCreateParams.createPayPal(),
+            ApiRequest.Options(ApiKeyFixtures.PAYPAL_PUBLISHABLE_KEY)
+        )
+
+        requireNotNull(paymentMethod)
+        assertThat(paymentMethod.type)
+            .isEqualTo(PaymentMethod.Type.PayPal)
+    }
 }
