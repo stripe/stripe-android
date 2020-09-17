@@ -329,18 +329,16 @@ internal interface StripeRepository {
 
     suspend fun getCardMetadata(bin: Bin, options: ApiRequest.Options): CardMetadata?
 
-    fun start3ds2Auth(
+    suspend fun start3ds2Auth(
         authParams: Stripe3ds2AuthParams,
         stripeIntentId: String,
-        requestOptions: ApiRequest.Options,
-        callback: ApiResultCallback<Stripe3ds2AuthResult>
-    )
+        requestOptions: ApiRequest.Options
+    ): Stripe3ds2AuthResult
 
-    fun complete3ds2Auth(
+    suspend fun complete3ds2Auth(
         sourceId: String,
-        requestOptions: ApiRequest.Options,
-        callback: ApiResultCallback<Complete3ds2Result>
-    )
+        requestOptions: ApiRequest.Options
+    ): Complete3ds2Result
 
     fun createFile(
         fileParams: StripeFileParams,

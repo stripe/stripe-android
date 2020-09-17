@@ -19,15 +19,12 @@ import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.InvalidRequestException
-import com.stripe.android.model.Complete3ds2Result
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceFixtures
-import com.stripe.android.model.Stripe3ds2AuthParams
-import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.Stripe3ds2AuthResultFixtures
 import com.stripe.android.model.Stripe3ds2Fingerprint
 import com.stripe.android.model.Stripe3ds2FingerprintTest
@@ -43,9 +40,11 @@ import com.stripe.android.stripe3ds2.transaction.Transaction
 import com.stripe.android.utils.ParcelUtils
 import com.stripe.android.view.AuthActivityStarter
 import com.stripe.android.view.PaymentRelayActivity
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
@@ -314,7 +313,8 @@ class StripePaymentControllerTest {
             analyticsRequestExecutor,
             analyticsDataFactory,
             transaction,
-            AnalyticsRequest.Factory()
+            AnalyticsRequest.Factory(),
+            testDispatcher
         )
         receiver.completed(completionEvent, "01", onReceiverCompleted = {})
 
@@ -342,7 +342,8 @@ class StripePaymentControllerTest {
             analyticsRequestExecutor,
             analyticsDataFactory,
             transaction,
-            AnalyticsRequest.Factory()
+            AnalyticsRequest.Factory(),
+            testDispatcher
         )
         receiver.timedout("01", onReceiverCompleted = {})
         verify(analyticsRequestExecutor, times(2))
@@ -366,7 +367,8 @@ class StripePaymentControllerTest {
             analyticsRequestExecutor,
             analyticsDataFactory,
             transaction,
-            AnalyticsRequest.Factory()
+            AnalyticsRequest.Factory(),
+            testDispatcher
         )
         receiver.cancelled("01", onReceiverCompleted = {})
 
@@ -396,7 +398,8 @@ class StripePaymentControllerTest {
             analyticsRequestExecutor,
             analyticsDataFactory,
             transaction,
-            AnalyticsRequest.Factory()
+            AnalyticsRequest.Factory(),
+            testDispatcher
         )
         receiver.runtimeError(runtimeErrorEvent, onReceiverCompleted = {})
 
@@ -441,7 +444,8 @@ class StripePaymentControllerTest {
             analyticsRequestExecutor,
             analyticsDataFactory,
             transaction,
-            AnalyticsRequest.Factory()
+            AnalyticsRequest.Factory(),
+            testDispatcher
         )
         receiver.protocolError(protocolErrorEvent, onReceiverCompleted = {})
 
@@ -471,6 +475,8 @@ class StripePaymentControllerTest {
 
     @Test
     fun test3ds2Completion_whenCanceled_shouldCallStarterWithCancelStatus() {
+        Dispatchers.setMain(testDispatcher)
+
         var onReceiverCompletedCalls = 0
 
         val receiver = StripePaymentController.PaymentAuth3ds2ChallengeStatusReceiver(
@@ -481,7 +487,8 @@ class StripePaymentControllerTest {
             analyticsRequestExecutor,
             analyticsDataFactory,
             transaction,
-            AnalyticsRequest.Factory()
+            AnalyticsRequest.Factory(),
+            testDispatcher
         )
         receiver.cancelled(
             "01",
@@ -804,23 +811,6 @@ class StripePaymentControllerTest {
             expandFields: List<String>
         ): SetupIntent {
             return SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT
-        }
-
-        override fun start3ds2Auth(
-            authParams: Stripe3ds2AuthParams,
-            stripeIntentId: String,
-            requestOptions: ApiRequest.Options,
-            callback: ApiResultCallback<Stripe3ds2AuthResult>
-        ) {
-            callback.onSuccess(Stripe3ds2AuthResultFixtures.ARES_CHALLENGE_FLOW)
-        }
-
-        override fun complete3ds2Auth(
-            sourceId: String,
-            requestOptions: ApiRequest.Options,
-            callback: ApiResultCallback<Complete3ds2Result>
-        ) {
-            callback.onSuccess(Complete3ds2Result(true))
         }
 
         override fun retrieveIntent(
