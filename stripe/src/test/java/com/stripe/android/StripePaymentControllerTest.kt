@@ -44,6 +44,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -92,7 +93,7 @@ class StripePaymentControllerTest {
     }
 
     @Test
-    fun handleNextAction_withMastercardAnd3ds2_shouldStart3ds2ChallengeFlow() {
+    fun handleNextAction_withMastercardAnd3ds2_shouldStart3ds2ChallengeFlow() = testDispatcher.runBlockingTest {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
         val dsPublicKey = Stripe3ds2Fingerprint(paymentIntent.nextActionData as StripeIntent.NextActionData.SdkData.Use3DS2)
             .directoryServerEncryption
@@ -145,7 +146,7 @@ class StripePaymentControllerTest {
     }
 
     @Test
-    fun handleNextAction_withAmexAnd3ds2_shouldStart3ds2ChallengeFlow() {
+    fun handleNextAction_withAmexAnd3ds2_shouldStart3ds2ChallengeFlow() = testDispatcher.runBlockingTest {
         whenever(
             threeDs2Service.createTransaction(
                 eq(AMEX_DS_ID),
