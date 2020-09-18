@@ -18,6 +18,9 @@ import com.stripe.android.CardNumberFixtures.DINERS_CLUB_16_NO_SPACES
 import com.stripe.android.CardNumberFixtures.DINERS_CLUB_16_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.JCB_NO_SPACES
 import com.stripe.android.CardNumberFixtures.JCB_WITH_SPACES
+import com.stripe.android.CardNumberFixtures.UNIONPAY_BIN
+import com.stripe.android.CardNumberFixtures.UNIONPAY_NO_SPACES
+import com.stripe.android.CardNumberFixtures.UNIONPAY_WITH_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_BIN
 import com.stripe.android.CardNumberFixtures.VISA_NO_SPACES
 import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
@@ -252,7 +255,7 @@ internal class CardNumberEditTextTest {
     }
 
     @Test
-    fun `when 15 digit PAN is pasted, should not call completion callback`() {
+    fun `when 15 digit non-UnionPay PAN is pasted, should call completion callback`() {
         val cardNumberEditText = CardNumberEditText(
             context,
             workContext = testDispatcher,
@@ -272,7 +275,7 @@ internal class CardNumberEditTextTest {
         idleLooper()
 
         assertThat(callbacks)
-            .isEqualTo(0)
+            .isEqualTo(1)
     }
 
     @Test
@@ -340,11 +343,11 @@ internal class CardNumberEditTextTest {
             publishableKeySupplier = publishableKeySupplier
         )
 
-        cardNumberEditText.setText(AMEX_NO_SPACES)
+        cardNumberEditText.setText(UNIONPAY_NO_SPACES)
         idleLooper()
 
         assertThat(cardNumberEditText.fieldText)
-            .isEqualTo(AMEX_WITH_SPACES)
+            .isEqualTo(UNIONPAY_WITH_SPACES)
         assertThat(cardNumberEditText.cardBrand)
             .isEqualTo(CardBrand.Unknown)
     }
@@ -432,7 +435,7 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun finishTypingCommonLengthCardNumber_whenInvalidCard_setsErrorValue() {
-        updateCardNumberAndIdle(withoutLastCharacter(VISA_WITH_SPACES))
+        updateCardNumberAndIdle(withoutLastCharacter(UNIONPAY_NO_SPACES))
 
         // This makes the number officially invalid
         cardNumberEditText.append("3")
@@ -573,8 +576,8 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun enterBrandBin_thenDelete_callsUpdateWithUnknown() {
-        updateCardNumberAndIdle(CardNumberFixtures.DINERS_CLUB_14_BIN)
-        assertEquals(CardBrand.DinersClub, lastBrandChangeCallbackInvocation)
+        updateCardNumberAndIdle(UNIONPAY_BIN)
+        assertEquals(CardBrand.UnionPay, lastBrandChangeCallbackInvocation)
 
         ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
         idleLooper()
@@ -668,19 +671,19 @@ internal class CardNumberEditTextTest {
     }
 
     @Test
-    fun `updateAccountRange() should update cardBrand value`() {
-        cardNumberEditText.updateAccountRange(CardNumberFixtures.DINERS_CLUB_14)
+    fun `queryAccountRangeRepository() should update cardBrand value`() {
+        cardNumberEditText.queryAccountRangeRepository(CardNumberFixtures.DINERS_CLUB_14)
         idleLooper()
         assertEquals(CardBrand.DinersClub, lastBrandChangeCallbackInvocation)
 
-        cardNumberEditText.updateAccountRange(CardNumberFixtures.AMEX)
+        cardNumberEditText.queryAccountRangeRepository(CardNumberFixtures.AMEX)
         idleLooper()
         assertEquals(CardBrand.AmericanExpress, lastBrandChangeCallbackInvocation)
     }
 
     @Test
-    fun `updateAccountRange() with null bin should set cardBrand to Unknown`() {
-        cardNumberEditText.updateAccountRange(CardNumber.Unvalidated(""))
+    fun `queryAccountRangeRepository() with null bin should set cardBrand to Unknown`() {
+        cardNumberEditText.queryAccountRangeRepository(CardNumber.Unvalidated(""))
         assertEquals(CardBrand.Unknown, lastBrandChangeCallbackInvocation)
     }
 
@@ -706,7 +709,7 @@ internal class CardNumberEditTextTest {
                         it.addView(cardNumberEditText)
                     }
 
-                    cardNumberEditText.setText(VISA_NO_SPACES)
+                    cardNumberEditText.setText(UNIONPAY_NO_SPACES)
                     assertThat(cardNumberEditText.accountRangeRepositoryJob)
                         .isNotNull()
 
@@ -715,6 +718,34 @@ internal class CardNumberEditTextTest {
                         .isNull()
                 }
             }
+    }
+
+    @Test
+    fun `getAccountRange() should not be called with VISA BIN`() {
+        var repositoryCalls = 0
+        val cardNumberEditText = CardNumberEditText(
+            context,
+            workContext = testDispatcher,
+            cardAccountRangeRepository = object : CardAccountRangeRepository {
+                override suspend fun getAccountRange(
+                    cardNumber: CardNumber.Unvalidated
+                ): AccountRange? {
+                    repositoryCalls++
+                    return cardAccountRangeRepository.getAccountRange(cardNumber)
+                }
+
+                override val loading: Flow<Boolean> = flowOf(false)
+            },
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            analyticsRequestFactory = analyticsRequestFactory,
+            analyticsDataFactory = analyticsDataFactory,
+            publishableKeySupplier = publishableKeySupplier
+        )
+
+        cardNumberEditText.setText(VISA_BIN)
+        idleLooper()
+        assertThat(repositoryCalls)
+            .isEqualTo(0)
     }
 
     @Test
@@ -741,38 +772,42 @@ internal class CardNumberEditTextTest {
             publishableKeySupplier = publishableKeySupplier
         )
 
-        // 424242 - valid BIN, call repo
-        cardNumberEditText.setText(VISA_BIN)
+        // 620000 - valid BIN, call repo
+        cardNumberEditText.setText(UNIONPAY_BIN)
         idleLooper()
         assertThat(repositoryCalls)
             .isEqualTo(1)
 
-        // 4242424 - valid BIN but matches existing accountRange
-        cardNumberEditText.append("4")
+        // 6200000 - valid BIN but matches existing accountRange
+        cardNumberEditText.append("0")
         idleLooper()
         assertThat(repositoryCalls)
             .isEqualTo(1)
 
-        // 424242 - valid BIN but matches existing accountRange
+        // 620000 - valid BIN but matches existing accountRange
         ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
         idleLooper()
         assertThat(repositoryCalls)
             .isEqualTo(1)
 
-        // 42424 - not a BIN
+        // 62000 - not a BIN
         ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
         idleLooper()
         assertThat(repositoryCalls)
             .isEqualTo(1)
 
-        // 424242 - transitioned to valid BIN, call repo
-        cardNumberEditText.append("2")
+        // 6200000 - transitioned to valid BIN, call repo
+        cardNumberEditText.append("0")
         idleLooper()
         assertThat(repositoryCalls)
             .isEqualTo(2)
 
-        // 378282 - new valid BIN, call repo
-        cardNumberEditText.setText(AMEX_BIN)
+        // clear digits
+        cardNumberEditText.setText("")
+        idleLooper()
+
+        // 621368 - new valid UnionPay BIN, call repo
+        cardNumberEditText.setText("621368")
         idleLooper()
         assertThat(repositoryCalls)
             .isEqualTo(3)
@@ -798,7 +833,7 @@ internal class CardNumberEditTextTest {
             analyticsDataFactory = analyticsDataFactory,
             publishableKeySupplier = publishableKeySupplier
         )
-        cardNumberEditText.setText(VISA_NO_SPACES)
+        cardNumberEditText.setText(UNIONPAY_NO_SPACES)
         idleLooper()
         assertThat(analyticsRequests)
             .hasSize(1)
