@@ -169,6 +169,7 @@ data class PaymentMethodCreateParams internal constructor(
         Oxxo("oxxo"),
         Alipay("alipay"),
         GrabPay("grabpay"),
+        PayPal("paypal"),
     }
 
     @Parcelize
@@ -610,6 +611,17 @@ data class PaymentMethodCreateParams internal constructor(
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = Type.Alipay,
+                metadata = metadata
+            )
+        }
+
+        @JvmSynthetic
+        @JvmOverloads
+        fun createPayPal(
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = Type.PayPal,
                 metadata = metadata
             )
         }

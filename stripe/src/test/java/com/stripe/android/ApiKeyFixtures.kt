@@ -19,4 +19,5 @@ internal object ApiKeyFixtures {
     const val ALIPAY_PUBLISHABLE_KEY = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
     const val CB_PUBLISHABLE_KEY = "pk_test_51Gsr5VLtxFHECmaoeyWTxRKLZZiks5QKbg5H0IeGd8yt7OzQhA7807thLrHayMOeDRmJv3ara1VYy6AvBXAnUGcB00QAZheC0Z"
     const val GRABPAY_PUBLISHABLE_KEY = "pk_test_TP0eh0buhedbg787icFUy83H00i9fh4Auj"
+    const val PAYPAL_PUBLISHABLE_KEY = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
 }
