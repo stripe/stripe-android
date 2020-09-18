@@ -291,7 +291,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun start3ds2Auth_withInvalidSource_shouldThrowInvalidRequestException() {
+    fun start3ds2Auth_withInvalidSource_shouldThrowInvalidRequestException() = testDispatcher.runBlockingTest {
         val authParams = Stripe3ds2AuthParams(
             "src_invalid",
             "1.0.0",
@@ -327,7 +327,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun complete3ds2Auth_withInvalidSource_shouldThrowInvalidRequestException() {
+    fun complete3ds2Auth_withInvalidSource_shouldThrowInvalidRequestException() = testDispatcher.runBlockingTest {
         val invalidRequestException =
             assertFailsWith<InvalidRequestException> {
                 stripeApiRepository.complete3ds2Auth(

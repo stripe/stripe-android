@@ -18,7 +18,7 @@ import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Stripe3ds2AuthParams
-import com.stripe.android.model.Stripe3ds2AuthResult
+import com.stripe.android.model.Stripe3ds2AuthResultFixtures
 import com.stripe.android.model.StripeFile
 import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeIntent
@@ -241,20 +241,16 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
             emptyList()
         )
 
-    override fun start3ds2Auth(
+    override suspend fun start3ds2Auth(
         authParams: Stripe3ds2AuthParams,
         stripeIntentId: String,
-        requestOptions: ApiRequest.Options,
-        callback: ApiResultCallback<Stripe3ds2AuthResult>
-    ) {
-    }
+        requestOptions: ApiRequest.Options
+    ) = Stripe3ds2AuthResultFixtures.ARES_CHALLENGE_FLOW
 
-    override fun complete3ds2Auth(
+    override suspend fun complete3ds2Auth(
         sourceId: String,
-        requestOptions: ApiRequest.Options,
-        callback: ApiResultCallback<Complete3ds2Result>
-    ) {
-    }
+        requestOptions: ApiRequest.Options
+    ): Complete3ds2Result = Complete3ds2Result(true)
 
     override fun createFile(
         fileParams: StripeFileParams,

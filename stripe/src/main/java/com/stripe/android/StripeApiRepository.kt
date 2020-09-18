@@ -933,15 +933,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
      * Analytics event: [AnalyticsEvent.Auth3ds2Start]
      */
     @VisibleForTesting
-    @Throws(
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        CardException::class,
-        AuthenticationException::class,
-        JSONException::class
-    )
-    internal fun start3ds2Auth(
+    override suspend fun start3ds2Auth(
         authParams: Stripe3ds2AuthParams,
         stripeIntentId: String,
         requestOptions: ApiRequest.Options
@@ -965,25 +957,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         return Stripe3ds2AuthResultJsonParser().parse(response.responseJson)
     }
 
-    override fun start3ds2Auth(
-        authParams: Stripe3ds2AuthParams,
-        stripeIntentId: String,
-        requestOptions: ApiRequest.Options,
-        callback: ApiResultCallback<Stripe3ds2AuthResult>
-    ) {
-        Start3ds2AuthTask(this, authParams, stripeIntentId, requestOptions, callback)
-            .execute()
-    }
-
-    @VisibleForTesting
-    @Throws(
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class,
-        CardException::class,
-        AuthenticationException::class
-    )
-    internal fun complete3ds2Auth(
+    override suspend fun complete3ds2Auth(
         sourceId: String,
         requestOptions: ApiRequest.Options
     ): Complete3ds2Result {
@@ -995,15 +969,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             )
         )
         return Complete3ds2Result(response.isOk)
-    }
-
-    override fun complete3ds2Auth(
-        sourceId: String,
-        requestOptions: ApiRequest.Options,
-        callback: ApiResultCallback<Complete3ds2Result>
-    ) {
-        Complete3ds2AuthTask(this, sourceId, requestOptions, callback)
-            .execute()
     }
 
     /**
@@ -1208,31 +1173,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     ): Map<String, Any> {
         return mapOf("client_secret" to clientSecret)
             .plus(createExpandParam(expandFields))
-    }
-
-    private class Start3ds2AuthTask constructor(
-        private val stripeApiRepository: StripeApiRepository,
-        private val params: Stripe3ds2AuthParams,
-        private val stripeIntentId: String,
-        private val requestOptions: ApiRequest.Options,
-        callback: ApiResultCallback<Stripe3ds2AuthResult>
-    ) : ApiOperation<Stripe3ds2AuthResult>(callback = callback) {
-        @Throws(StripeException::class, JSONException::class)
-        override suspend fun getResult(): Stripe3ds2AuthResult {
-            return stripeApiRepository.start3ds2Auth(params, stripeIntentId, requestOptions)
-        }
-    }
-
-    private class Complete3ds2AuthTask constructor(
-        private val stripeApiRepository: StripeApiRepository,
-        private val sourceId: String,
-        private val requestOptions: ApiRequest.Options,
-        callback: ApiResultCallback<Complete3ds2Result>
-    ) : ApiOperation<Complete3ds2Result>(callback = callback) {
-        @Throws(StripeException::class)
-        override suspend fun getResult(): Complete3ds2Result {
-            return stripeApiRepository.complete3ds2Auth(sourceId, requestOptions)
-        }
     }
 
     private class RetrieveIntentTask constructor(

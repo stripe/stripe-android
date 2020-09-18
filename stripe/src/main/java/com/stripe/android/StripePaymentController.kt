@@ -7,7 +7,6 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.AlipayAuthResult
-import com.stripe.android.model.Complete3ds2Result
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -37,6 +36,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.security.cert.CertificateException
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
@@ -741,11 +741,16 @@ internal class StripePaymentController internal constructor(
                 returnUrl = null
             )
 
-            stripeRepository.start3ds2Auth(
-                authParams,
-                stripeIntent.id.orEmpty(),
-                requestOptions,
-                Stripe3ds2AuthCallback(
+            val start3ds2AuthResult = runCatching {
+                stripeRepository.start3ds2Auth(
+                    authParams,
+                    stripeIntent.id.orEmpty(),
+                    requestOptions
+                )
+            }
+
+            withContext(Dispatchers.Main) {
+                val callback = Stripe3ds2AuthCallback(
                     host,
                     stripeRepository,
                     transaction,
@@ -758,7 +763,16 @@ internal class StripePaymentController internal constructor(
                     enableLogging,
                     workContext = workContext
                 )
-            )
+
+                start3ds2AuthResult.fold(
+                    onSuccess = {
+                        callback.onSuccess(it)
+                    },
+                    onFailure = {
+                        callback.onError(RuntimeException(it))
+                    }
+                )
+            }
         }
     }
 
@@ -928,7 +942,8 @@ internal class StripePaymentController internal constructor(
                         analyticsRequestExecutor,
                         analyticsDataFactory,
                         transaction,
-                        analyticsRequestFactory
+                        analyticsRequestFactory,
+                        workContext
                     ),
                     maxTimeout
                 )
@@ -944,7 +959,8 @@ internal class StripePaymentController internal constructor(
         private val analyticsRequestExecutor: AnalyticsRequestExecutor,
         private val analyticsDataFactory: AnalyticsDataFactory,
         private val transaction: Transaction,
-        private val analyticsRequestFactory: AnalyticsRequest.Factory
+        private val analyticsRequestFactory: AnalyticsRequest.Factory,
+        private val workContext: CoroutineContext
     ) : StripeChallengeStatusReceiver() {
 
         override fun completed(
@@ -1048,19 +1064,18 @@ internal class StripePaymentController internal constructor(
                 )
             )
 
-            stripeRepository.complete3ds2Auth(
-                sourceId,
-                requestOptions,
-                object : ApiResultCallback<Complete3ds2Result> {
-                    override fun onSuccess(result: Complete3ds2Result) {
-                        completed3ds2Callback()
-                    }
-
-                    override fun onError(e: Exception) {
-                        completed3ds2Callback()
-                    }
+            CoroutineScope(workContext).launch {
+                val complete3ds2AuthResult = runCatching {
+                    stripeRepository.complete3ds2Auth(
+                        sourceId,
+                        requestOptions
+                    )
                 }
-            )
+
+                withContext(Dispatchers.Main) {
+                    completed3ds2Callback()
+                }
+            }
         }
 
         internal companion object {
@@ -1072,7 +1087,8 @@ internal class StripePaymentController internal constructor(
                 analyticsRequestExecutor: AnalyticsRequestExecutor,
                 analyticsDataFactory: AnalyticsDataFactory,
                 transaction: Transaction,
-                analyticsRequestFactory: AnalyticsRequest.Factory
+                analyticsRequestFactory: AnalyticsRequest.Factory,
+                workContext: CoroutineContext
             ): PaymentAuth3ds2ChallengeStatusReceiver {
                 return PaymentAuth3ds2ChallengeStatusReceiver(
                     stripeRepository,
@@ -1082,7 +1098,8 @@ internal class StripePaymentController internal constructor(
                     analyticsRequestExecutor,
                     analyticsDataFactory,
                     transaction,
-                    analyticsRequestFactory
+                    analyticsRequestFactory,
+                    workContext
                 )
             }
         }
