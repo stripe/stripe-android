@@ -1,6 +1,10 @@
 # CHANGELOG
 
 ## 16.0.0 - unreleased
+This release includes several breaking changes. See the [migration guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) for more details.
+
+This release adds support for 19-digit cards in `CardInputWidget` and `CardMultilineWidget`.
+
 * [#2715](https://github.com/stripe/stripe-android/pull/2715) Add support for GrabPay PaymentMethod
 * [#2721](https://github.com/stripe/stripe-android/pull/2721) Upgrade Kotlin coroutines to `1.3.9`
 * [#2735](https://github.com/stripe/stripe-android/pull/2735) Upgrade Android Gradle Plugin to `4.0.1`
