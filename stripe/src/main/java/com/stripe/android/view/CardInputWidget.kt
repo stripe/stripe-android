@@ -112,12 +112,8 @@ class CardInputWidget @JvmOverloads constructor(
     @VisibleForTesting
     internal var shouldShowErrorIcon = false
         private set(value) {
-            val isValueChange = field != value
+            cardBrandView.shouldShowErrorIcon = value
             field = value
-
-            if (isValueChange) {
-                updateIcon()
-            }
         }
 
     /**
@@ -760,18 +756,18 @@ class CardInputWidget @JvmOverloads constructor(
         postalCodeEditText.setDeleteEmptyListener(BackUpFieldDeleteListener(cvcEditText))
 
         cvcEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+            cardBrandView.shouldShowCvc = hasFocus
+
             if (hasFocus) {
                 scrollRight()
                 cardInputListener?.onFocusChange(CardInputListener.FocusField.Cvc)
             }
-            updateIconCvc(hasFocus, cvc?.value)
         }
 
         cvcEditText.setAfterTextChangedListener { text ->
             if (brand.isMaxCvc(text)) {
                 cardInputListener?.onCvcComplete()
             }
-            updateIconCvc(cvcEditText.hasFocus(), text)
         }
 
         cardNumberEditText.completionCallback = {
@@ -780,8 +776,8 @@ class CardInputWidget @JvmOverloads constructor(
         }
 
         cardNumberEditText.brandChangeCallback = { brand ->
+            cardBrandView.brand = brand
             hiddenCardText = createHiddenCardText(cardNumberEditText.panLength)
-            updateIcon()
             cvcEditText.updateBrand(brand)
         }
 
@@ -976,13 +972,6 @@ class CardInputWidget @JvmOverloads constructor(
         containerLayout.startAnimation(animationSet)
     }
 
-    override fun onWindowFocusChanged(hasWindowFocus: Boolean) {
-        super.onWindowFocusChanged(hasWindowFocus)
-        if (hasWindowFocus && CardBrand.Unknown == brand) {
-            cardBrandView.applyTint()
-        }
-    }
-
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         super.onLayout(changed, l, t, r, b)
         if (!isViewInitialized && width != 0) {
@@ -1043,31 +1032,6 @@ class CardInputWidget @JvmOverloads constructor(
                 "0".repeat(peekSize)
             }
         }
-
-    private fun updateIcon() {
-        cardBrandView.showBrandIcon(brand, shouldShowErrorIcon)
-    }
-
-    private fun updateIconCvc(
-        hasFocus: Boolean,
-        cvcText: String?
-    ) {
-        when {
-            shouldShowErrorIcon -> {
-                updateIcon()
-            }
-            shouldIconShowBrand(brand, hasFocus, cvcText) -> {
-                updateIcon()
-            }
-            else -> {
-                updateIconForCvcEntry()
-            }
-        }
-    }
-
-    private fun updateIconForCvcEntry() {
-        cardBrandView.showCvcIcon(brand)
-    }
 
     private abstract class CardFieldAnimation : Animation() {
         init {
