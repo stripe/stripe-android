@@ -11,6 +11,10 @@
 * [#2843](https://github.com/stripe/stripe-android/pull/2843) Update pinned API version to [2020-08-27](https://stripe.com/docs/upgrades#2020-08-27)
 * [#2847](https://github.com/stripe/stripe-android/pull/2847) Update `CardInputWidget` text size for `ldpi` screens
 * [#2854](https://github.com/stripe/stripe-android/pull/2854) Upgrade `com.google.android.material:material` to `1.2.1`
+* [#2867](https://github.com/stripe/stripe-android/pull/2867) Upgrade 3DS2 SDK to `4.1.0`
+    * Upgrade `material-components` to `1.2.1`
+    * Upgrade `com.nimbusds:nimbus-jose-jwt` to `9.0.1`
+    * Guard against crash when `TransactionTimer` is unavailable
 
 ## 15.1.0 - 2020-08-13 
 * [#2671](https://github.com/stripe/stripe-android/pull/2671) Add `cardParams` property to `CardInputWidget` and `CardMultilineWidget`
