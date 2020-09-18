@@ -12,6 +12,8 @@ This release adds support for 19-digit cards in `CardInputWidget` and `CardMulti
 * [#2821](https://github.com/stripe/stripe-android/pull/2821) Support pasting a 19 digit PAN in `CardNumberEditText`
 * [#2836](https://github.com/stripe/stripe-android/pull/2836) Handle `CustomerSession` failure in `PaymentMethodsActivity`
 * [#2837](https://github.com/stripe/stripe-android/pull/2837) Upgrade Kotlin to `1.4.10`
+* [#2841](https://github.com/stripe/stripe-android/pull/2841) Add new string translations
+    * Adds support for several new languages
 * [#2843](https://github.com/stripe/stripe-android/pull/2843) Update pinned API version to [2020-08-27](https://stripe.com/docs/upgrades#2020-08-27)
 * [#2847](https://github.com/stripe/stripe-android/pull/2847) Update `CardInputWidget` text size for `ldpi` screens
 * [#2854](https://github.com/stripe/stripe-android/pull/2854) Upgrade `com.google.android.material:material` to `1.2.1`
