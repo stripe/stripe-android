@@ -53,6 +53,7 @@
 - Changes to `Stripe`
     - `createCardParams()` that accepts a `Card` parameter is deprecated.
       Use `createCardParams()` that accepts a `CardParams` parameter instead.
+    - `createToken()` has been removed; use `createCardToken()` instead.
 
 ## Migrating from versions < 15.0.0
 - The SDK now targets JVM 1.8
