@@ -114,8 +114,7 @@ public class StripeTest {
 
     @Test
     public void testApiVersion() {
-        assertThat(Stripe.API_VERSION)
-                .isEqualTo("2020-08-27");
+        assertEquals("2020-03-02", Stripe.API_VERSION);
     }
 
     @Test
