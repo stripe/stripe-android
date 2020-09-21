@@ -42,7 +42,6 @@ import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
-import kotlin.test.Ignore
 import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
@@ -638,8 +637,7 @@ internal class CardInputWidgetTest {
             .isNull()
     }
 
-    // TODO(mshafrir-stripe): investigate flaky test
-    @Ignore("Flaky test")
+    @Test
     fun onCompleteCardNumber_whenValid_shiftsFocusToExpiryDate() {
         cardInputWidget.setCardInputListener(cardInputListener)
 
@@ -827,8 +825,7 @@ internal class CardInputWidgetTest {
             )
     }
 
-    // TODO(mshafrir-stripe): investigate flaky test
-    @Ignore("Flaky test")
+    @Test
     fun updateToPeekSize_withPostalCodeDisabled_withNoData_returnsExpectedValuesForCommonCardLength() {
         cardInputWidget.postalCodeEnabled = false
 
