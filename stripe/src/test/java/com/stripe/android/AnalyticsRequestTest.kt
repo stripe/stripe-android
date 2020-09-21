@@ -38,7 +38,7 @@ class AnalyticsRequestTest {
                         """
                     {"os.name":"android","os.version":"28","bindings.version":"$sdkVersion","lang":"Java","publisher":"Stripe","http.agent":"","application":{"name":"MyAwesomePlugin","version":"1.2.34","url":"https:\/\/myawesomeplugin.info","partner_id":"pp_partner_1234"}}
                         """.trimIndent(),
-                    "Stripe-Version" to Stripe.API_VERSION,
+                    "Stripe-Version" to "2020-03-02",
                     "Authorization" to "Bearer pk_test_123",
                     "Accept-Language" to "en-US",
                     "User-Agent" to "Stripe/v1 AndroidBindings/$sdkVersion MyAwesomePlugin/1.2.34 (https://myawesomeplugin.info)",

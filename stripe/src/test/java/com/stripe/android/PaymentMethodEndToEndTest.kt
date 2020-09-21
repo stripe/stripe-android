@@ -142,7 +142,7 @@ class PaymentMethodEndToEndTest {
         val repository = StripeApiRepository(
             context,
             ApiKeyFixtures.OXXO_PUBLISHABLE_KEY,
-            apiVersion = "${Stripe.API_VERSION};oxxo_beta=v1"
+            apiVersion = "2020-03-02;oxxo_beta=v1"
         )
         val paymentMethod = repository.createPaymentMethod(
             PaymentMethodCreateParams.createOxxo(
@@ -161,7 +161,7 @@ class PaymentMethodEndToEndTest {
         val repository = StripeApiRepository(
             context,
             ApiKeyFixtures.OXXO_PUBLISHABLE_KEY,
-            apiVersion = "${Stripe.API_VERSION};oxxo_beta=v1"
+            apiVersion = "2020-03-02;oxxo_beta=v1"
         )
 
         val missingNameException = assertFailsWith<InvalidRequestException>(
