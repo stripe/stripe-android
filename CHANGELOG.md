@@ -20,6 +20,7 @@ This release adds support for 19-digit cards in `CardInputWidget` and `CardMulti
     * Upgrade `material-components` to `1.2.1`
     * Upgrade `com.nimbusds:nimbus-jose-jwt` to `9.0.1`
     * Guard against crash when `TransactionTimer` is unavailable
+* [#2873](https://github.com/stripe/stripe-android/pull/2873) Fix `CardInputWidget` field rendering in RTL
 
 ## 15.1.0 - 2020-08-13 
 * [#2671](https://github.com/stripe/stripe-android/pull/2671) Add `cardParams` property to `CardInputWidget` and `CardMultilineWidget`
