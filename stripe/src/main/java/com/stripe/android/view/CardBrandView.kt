@@ -75,15 +75,20 @@ internal class CardBrandView @JvmOverloads constructor(
     }
 
     private fun updateIcon() {
-        if (isLoading) {
-            renderBrandIcon()
-        } else if (shouldShowErrorIcon) {
-            iconView.setImageResource(brand.errorIcon)
-        } else if (shouldShowCvc && !isLoading) {
-            iconView.setImageResource(brand.cvcIcon)
-            applyTint()
-        } else {
-            renderBrandIcon()
+        when {
+            isLoading -> {
+                renderBrandIcon()
+            }
+            shouldShowErrorIcon -> {
+                iconView.setImageResource(brand.errorIcon)
+            }
+            shouldShowCvc -> {
+                iconView.setImageResource(brand.cvcIcon)
+                applyTint()
+            }
+            else -> {
+                renderBrandIcon()
+            }
         }
     }
 
