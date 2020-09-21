@@ -547,7 +547,7 @@ internal class CardMultilineWidgetTest {
             .isEqualTo(View.GONE)
 
         val params = fullGroup.cvcInputLayout.layoutParams as LinearLayout.LayoutParams
-        assertThat(params.rightMargin)
+        assertThat(params.marginEnd)
             .isEqualTo(0)
         assertThat(params.marginEnd)
             .isEqualTo(0)
@@ -575,7 +575,7 @@ internal class CardMultilineWidgetTest {
             .getDimensionPixelSize(R.dimen.stripe_add_card_expiry_middle_margin)
 
         val params = noZipGroup.cvcInputLayout.layoutParams as LinearLayout.LayoutParams
-        assertThat(params.rightMargin)
+        assertThat(params.marginEnd)
             .isEqualTo(expectedMargin)
         assertThat(params.marginEnd)
             .isEqualTo(expectedMargin)

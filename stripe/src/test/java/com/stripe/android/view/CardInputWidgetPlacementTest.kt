@@ -17,9 +17,9 @@ class CardInputWidgetPlacementTest {
         postalCodeWidth = 100,
         cardTouchBufferLimit = 400,
         dateStartPosition = 510,
-        dateRightTouchBufferLimit = 0,
+        dateEndTouchBufferLimit = 0,
         cvcStartPosition = 0,
-        cvcRightTouchBufferLimit = 0,
+        cvcEndTouchBufferLimit = 0,
         postalCodeStartPosition = 0,
     )
 
@@ -36,9 +36,9 @@ class CardInputWidgetPlacementTest {
         postalCodeWidth = 100,
         cardTouchBufferLimit = 66,
         dateStartPosition = 198,
-        dateRightTouchBufferLimit = 110,
+        dateEndTouchBufferLimit = 110,
         cvcStartPosition = 330,
-        cvcRightTouchBufferLimit = 120,
+        cvcEndTouchBufferLimit = 120,
         postalCodeStartPosition = 360
     )
 
@@ -55,9 +55,9 @@ class CardInputWidgetPlacementTest {
         postalCodeWidth = 100,
         cardTouchBufferLimit = 192,
         dateStartPosition = 285,
-        dateRightTouchBufferLimit = 432,
+        dateEndTouchBufferLimit = 432,
         cvcStartPosition = 530,
-        cvcRightTouchBufferLimit = 0,
+        cvcEndTouchBufferLimit = 0,
         postalCodeStartPosition = 0
     )
 
@@ -158,7 +158,7 @@ class CardInputWidgetPlacementTest {
     }
 
     @Test
-    fun getFocusField_whenInDateLeftSlopAfterShift_withPostalCodeEnabled_returnsDateEditor() {
+    fun getFocusField_whenInDateStartSlopAfterShift_withPostalCodeEnabled_returnsDateEditor() {
         // |img==60||---total == 500--------|
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
@@ -191,7 +191,7 @@ class CardInputWidgetPlacementTest {
     }
 
     @Test
-    fun getFocusField_whenInDateLeftSlopAfterShift_withPostalCodeDisabled_returnsDateEditor() {
+    fun getFocusField_whenInDateStartSlopAfterShift_withPostalCodeDisabled_returnsDateEditor() {
         // |img==60||---total == 500--------|
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
@@ -241,7 +241,7 @@ class CardInputWidgetPlacementTest {
     }
 
     @Test
-    fun getFocusField_withPostalCodeDisabled_whenInDateRightSlopAfterShift_returnsDateEditor() {
+    fun getFocusField_withPostalCodeDisabled_whenInDateEndSlopAfterShift_returnsDateEditor() {
         // |img==60||---total == 500--------|
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
@@ -257,7 +257,7 @@ class CardInputWidgetPlacementTest {
     }
 
     @Test
-    fun getFocusField_withPostalCodeEnabled_whenInDateRightSlopAfterShift_returnsDateEditor() {
+    fun getFocusField_withPostalCodeEnabled_whenInDateEndSlopAfterShift_returnsDateEditor() {
         // |img==60||---total == 500--------|
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|

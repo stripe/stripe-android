@@ -21,53 +21,53 @@ internal data class CardInputWidgetPlacement(
 
     internal var cardTouchBufferLimit: Int = 0,
     internal var dateStartPosition: Int = 0,
-    internal var dateRightTouchBufferLimit: Int = 0,
+    internal var dateEndTouchBufferLimit: Int = 0,
     internal var cvcStartPosition: Int = 0,
-    internal var cvcRightTouchBufferLimit: Int = 0,
+    internal var cvcEndTouchBufferLimit: Int = 0,
     internal var postalCodeStartPosition: Int = 0
 ) {
-    private val cardPeekDateLeftMargin: Int
+    private val cardPeekDateStartMargin: Int
         @JvmSynthetic
         get() {
             return peekCardWidth + cardDateSeparation
         }
 
-    private val cardPeekCvcLeftMargin: Int
+    private val cardPeekCvcStartMargin: Int
         @JvmSynthetic
         get() {
-            return cardPeekDateLeftMargin + dateWidth + dateCvcSeparation
+            return cardPeekDateStartMargin + dateWidth + dateCvcSeparation
         }
 
-    private val cardPeekPostalCodeLeftMargin: Int
+    private val cardPeekPostalCodeStartMargin: Int
         @JvmSynthetic
         get() {
-            return cardPeekCvcLeftMargin + postalCodeWidth + cvcPostalCodeSeparation
+            return cardPeekCvcStartMargin + postalCodeWidth + cvcPostalCodeSeparation
         }
 
     @JvmSynthetic
-    internal fun getDateLeftMargin(isFullCard: Boolean): Int {
+    internal fun getDateStartMargin(isFullCard: Boolean): Int {
         return if (isFullCard) {
             cardWidth + cardDateSeparation
         } else {
-            cardPeekDateLeftMargin
+            cardPeekDateStartMargin
         }
     }
 
     @JvmSynthetic
-    internal fun getCvcLeftMargin(isFullCard: Boolean): Int {
+    internal fun getCvcStartMargin(isFullCard: Boolean): Int {
         return if (isFullCard) {
             totalLengthInPixels
         } else {
-            cardPeekCvcLeftMargin
+            cardPeekCvcStartMargin
         }
     }
 
     @JvmSynthetic
-    internal fun getPostalCodeLeftMargin(isFullCard: Boolean): Int {
+    internal fun getPostalCodeStartMargin(isFullCard: Boolean): Int {
         return if (isFullCard) {
             totalLengthInPixels
         } else {
-            cardPeekPostalCodeLeftMargin
+            cardPeekPostalCodeStartMargin
         }
     }
 
@@ -96,11 +96,11 @@ internal data class CardInputWidgetPlacement(
                 this.dateStartPosition = dateStartPosition
 
                 val cvcStartPosition = dateStartPosition + dateWidth + dateCvcSeparation
-                this.dateRightTouchBufferLimit = cvcStartPosition / 3
+                this.dateEndTouchBufferLimit = cvcStartPosition / 3
                 this.cvcStartPosition = cvcStartPosition
 
                 val postalCodeStartPosition = cvcStartPosition + cvcWidth + cvcPostalCodeSeparation
-                this.cvcRightTouchBufferLimit = postalCodeStartPosition / 3
+                this.cvcEndTouchBufferLimit = postalCodeStartPosition / 3
                 this.postalCodeStartPosition = postalCodeStartPosition
             }
             else -> {
@@ -111,7 +111,7 @@ internal data class CardInputWidgetPlacement(
                 this.cardTouchBufferLimit = frameStart + peekCardWidth + cardDateSeparation / 2
                 this.dateStartPosition = frameStart + peekCardWidth + cardDateSeparation
 
-                this.dateRightTouchBufferLimit = dateStartPosition + dateWidth + dateCvcSeparation / 2
+                this.dateEndTouchBufferLimit = dateStartPosition + dateWidth + dateCvcSeparation / 2
                 this.cvcStartPosition = dateStartPosition + dateWidth + dateCvcSeparation
             }
         }
@@ -126,7 +126,7 @@ internal data class CardInputWidgetPlacement(
      * naturally give focus to that control, and we don't want to interfere with what
      * Android will naturally do in response to that touch.
      *
-     * @param touchX distance in pixels from the left side of this control
+     * @param touchX distance in pixels from the start of this control
      * @return a [Field] that represents the [View] to request focus, or `null`
      * if no such request is necessary.
      */
@@ -163,13 +163,13 @@ internal data class CardInputWidgetPlacement(
                     Field.Expiry
                 touchX < dateStartPosition + dateWidth -> // Just a regular touch on the date editor.
                     null
-                touchX < dateRightTouchBufferLimit -> // We need to act like this was a touch on the date editor
+                touchX < dateEndTouchBufferLimit -> // We need to act like this was a touch on the date editor
                     Field.Expiry
                 touchX < cvcStartPosition -> // We need to act like this was a touch on the cvc editor.
                     Field.Cvc
                 touchX < cvcStartPosition + cvcWidth -> // Just a regular touch on the cvc editor.
                     null
-                touchX < cvcRightTouchBufferLimit -> // We need to act like this was a touch on the cvc editor.
+                touchX < cvcEndTouchBufferLimit -> // We need to act like this was a touch on the cvc editor.
                     Field.Cvc
                 touchX < postalCodeStartPosition -> // We need to act like this was a touch on the postal code editor.
                     Field.PostalCode
@@ -188,7 +188,7 @@ internal data class CardInputWidgetPlacement(
                     Field.Expiry
                 touchX < dateStartPosition + dateWidth -> // Just a regular touch on the date editor.
                     null
-                touchX < dateRightTouchBufferLimit -> // We need to act like this was a touch on the date editor
+                touchX < dateEndTouchBufferLimit -> // We need to act like this was a touch on the date editor
                     Field.Expiry
                 touchX < cvcStartPosition -> // We need to act like this was a touch on the cvc editor.
                     Field.Cvc
@@ -203,9 +203,9 @@ internal data class CardInputWidgetPlacement(
             Touch Buffer Data:
             CardTouchBufferLimit = $cardTouchBufferLimit
             DateStartPosition = $dateStartPosition
-            DateRightTouchBufferLimit = $dateRightTouchBufferLimit
+            DateEndTouchBufferLimit = $dateEndTouchBufferLimit
             CvcStartPosition = $cvcStartPosition
-            CvcRightTouchBufferLimit = $cvcRightTouchBufferLimit
+            CvcEndTouchBufferLimit = $cvcEndTouchBufferLimit
             PostalCodeStartPosition = $postalCodeStartPosition
             """
 

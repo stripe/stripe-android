@@ -38,8 +38,8 @@ internal class CardNumberTextInputLayout @JvmOverloads constructor(
 
         // absolutely position the progress view over the brand icon
         progressView.updateLayoutParams<FrameLayout.LayoutParams> {
-            leftMargin = resources.getDimensionPixelSize(
-                R.dimen.stripe_card_number_text_input_layout_progress_left_margin
+            marginStart = resources.getDimensionPixelSize(
+                R.dimen.stripe_card_number_text_input_layout_progress_start_margin
             )
             topMargin = resources.getDimensionPixelSize(
                 R.dimen.stripe_card_number_text_input_layout_progress_top_margin
