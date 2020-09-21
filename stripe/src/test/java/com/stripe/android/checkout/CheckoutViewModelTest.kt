@@ -20,7 +20,7 @@ import org.robolectric.RobolectricTestRunner
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-class CheckoutViewModelTest {
+internal class CheckoutViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
@@ -63,7 +63,12 @@ class CheckoutViewModelTest {
     }
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {
-        override fun getPaymentMethods(listPaymentMethodsParams: ListPaymentMethodsParams, publishableKey: String, productUsageTokens: Set<String>, requestOptions: ApiRequest.Options): List<PaymentMethod> {
+        override suspend fun getPaymentMethods(
+            listPaymentMethodsParams: ListPaymentMethodsParams,
+            publishableKey: String,
+            productUsageTokens: Set<String>,
+            requestOptions: ApiRequest.Options
+        ): List<PaymentMethod> {
             return listOf(FAKE_CARD)
         }
     }

@@ -184,7 +184,7 @@ internal interface StripeRepository {
         APIException::class,
         CardException::class
     )
-    fun addCustomerSource(
+    suspend fun addCustomerSource(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,
@@ -200,7 +200,7 @@ internal interface StripeRepository {
         APIException::class,
         CardException::class
     )
-    fun deleteCustomerSource(
+    suspend fun deleteCustomerSource(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,
@@ -215,7 +215,7 @@ internal interface StripeRepository {
         APIException::class,
         CardException::class
     )
-    fun attachPaymentMethod(
+    suspend fun attachPaymentMethod(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,
@@ -230,7 +230,7 @@ internal interface StripeRepository {
         APIException::class,
         CardException::class
     )
-    fun detachPaymentMethod(
+    suspend fun detachPaymentMethod(
         publishableKey: String,
         productUsageTokens: Set<String>,
         paymentMethodId: String,
@@ -244,7 +244,7 @@ internal interface StripeRepository {
         APIException::class,
         CardException::class
     )
-    fun getPaymentMethods(
+    suspend fun getPaymentMethods(
         listPaymentMethodsParams: ListPaymentMethodsParams,
         publishableKey: String,
         productUsageTokens: Set<String>,
@@ -258,7 +258,7 @@ internal interface StripeRepository {
         APIException::class,
         CardException::class
     )
-    fun setDefaultCustomerSource(
+    suspend fun setDefaultCustomerSource(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,
@@ -274,7 +274,7 @@ internal interface StripeRepository {
         APIException::class,
         CardException::class
     )
-    fun setCustomerShippingInfo(
+    suspend fun setCustomerShippingInfo(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,
@@ -289,7 +289,7 @@ internal interface StripeRepository {
         APIException::class,
         CardException::class
     )
-    fun retrieveCustomer(
+    suspend fun retrieveCustomer(
         customerId: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options

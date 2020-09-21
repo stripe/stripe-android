@@ -282,9 +282,9 @@ class PaymentSession @VisibleForTesting internal constructor(
     private fun fetchCustomer(isInitialFetch: Boolean = false) {
         viewModel.fetchCustomer(isInitialFetch).observe(
             lifecycleOwner,
-            {
-                if (it is PaymentSessionViewModel.FetchCustomerResult.Error) {
-                    listener?.onError(it.errorCode, it.errorMessage)
+            { result ->
+                if (result is PaymentSessionViewModel.FetchCustomerResult.Error) {
+                    listener?.onError(result.errorCode, result.errorMessage)
                 }
             }
         )

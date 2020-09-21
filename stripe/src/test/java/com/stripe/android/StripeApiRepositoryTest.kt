@@ -471,7 +471,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun getPaymentMethods_whenPopulated_returnsExpectedList() {
+    fun getPaymentMethods_whenPopulated_returnsExpectedList() = testDispatcher.runBlockingTest {
         val responseBody =
             """
             {
@@ -648,7 +648,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun getPaymentMethods_whenNotPopulated_returnsEmptydList() {
+    fun getPaymentMethods_whenNotPopulated_returnsEmptyList() = testDispatcher.runBlockingTest {
         val responseBody =
             """
             {

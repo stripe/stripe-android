@@ -22,7 +22,9 @@ import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.view.AddPaymentMethodActivity
 import com.stripe.android.view.PaymentMethodsActivity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
@@ -35,7 +37,7 @@ import kotlin.test.assertNotNull
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-class CustomerSessionTest {
+internal class CustomerSessionTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
     private val stripeRepository: StripeRepository = mock()
@@ -56,84 +58,86 @@ class CustomerSessionTest {
 
     @BeforeTest
     fun setup() {
-        whenever(stripeRepository.retrieveCustomer(any(), any(), any()))
-            .thenReturn(FIRST_CUSTOMER, SECOND_CUSTOMER)
+        runBlocking {
+            whenever(stripeRepository.retrieveCustomer(any(), any(), any()))
+                .thenReturn(FIRST_CUSTOMER, SECOND_CUSTOMER)
 
-        whenever(
-            stripeRepository.addCustomerSource(
-                any(),
-                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-                any(),
-                any(),
-                any(),
-                any()
+            whenever(
+                stripeRepository.addCustomerSource(
+                    any(),
+                    eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
             )
-        )
-            .thenReturn(SourceFixtures.SOURCE_CARD)
+                .thenReturn(SourceFixtures.SOURCE_CARD)
 
-        whenever(
-            stripeRepository.deleteCustomerSource(
-                any(),
-                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-                any(),
-                any(),
-                any()
+            whenever(
+                stripeRepository.deleteCustomerSource(
+                    any(),
+                    eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+                    any(),
+                    any(),
+                    any()
+                )
             )
-        )
-            .thenReturn(SourceFixtures.SOURCE_CARD)
+                .thenReturn(SourceFixtures.SOURCE_CARD)
 
-        whenever(
-            stripeRepository.setDefaultCustomerSource(
-                any(),
-                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-                any(),
-                any(),
-                any(),
-                any()
+            whenever(
+                stripeRepository.setDefaultCustomerSource(
+                    any(),
+                    eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
             )
-        )
-            .thenReturn(SECOND_CUSTOMER)
+                .thenReturn(SECOND_CUSTOMER)
 
-        whenever(
-            stripeRepository.attachPaymentMethod(
-                any(),
-                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-                any(),
-                any(),
-                any()
+            whenever(
+                stripeRepository.attachPaymentMethod(
+                    any(),
+                    eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+                    any(),
+                    any(),
+                    any()
+                )
             )
-        )
-            .thenReturn(PAYMENT_METHOD)
+                .thenReturn(PAYMENT_METHOD)
 
-        whenever(
-            stripeRepository.detachPaymentMethod(
-                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-                any(),
-                any(),
-                any()
+            whenever(
+                stripeRepository.detachPaymentMethod(
+                    eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+                    any(),
+                    any(),
+                    any()
+                )
             )
-        )
-            .thenReturn(PAYMENT_METHOD)
+                .thenReturn(PAYMENT_METHOD)
 
-        whenever(
-            stripeRepository.getPaymentMethods(
-                any(),
-                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-                any(),
-                any()
+            whenever(
+                stripeRepository.getPaymentMethods(
+                    any(),
+                    eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+                    any(),
+                    any()
+                )
             )
-        )
-            .thenReturn(listOf(PAYMENT_METHOD))
+                .thenReturn(listOf(PAYMENT_METHOD))
 
-        whenever(
-            stripeRepository.setCustomerShippingInfo(
-                any(),
-                eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-                any(),
-                any(),
-                any()
-            )
-        ).thenReturn(FIRST_CUSTOMER)
+            whenever(
+                stripeRepository.setCustomerShippingInfo(
+                    any(),
+                    eq(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+                    any(),
+                    any(),
+                    any()
+                )
+            ).thenReturn(FIRST_CUSTOMER)
+        }
     }
 
     @Test
@@ -144,7 +148,7 @@ class CustomerSessionTest {
     }
 
     @Test
-    fun addProductUsageTokenIfValid_whenValid_addsExpectedTokens() {
+    fun addProductUsageTokenIfValid_whenValid_addsExpectedTokens() = testDispatcher.runBlockingTest {
         val customerSession = createCustomerSession(
             ephemeralKeyManagerFactory = FakeEphemeralKeyManagerFactory(
                 ephemeralKeyProvider,
@@ -169,7 +173,7 @@ class CustomerSessionTest {
     }
 
     @Test
-    fun create_withoutInvokingFunctions_fetchesKeyAndCustomer() {
+    fun create_withoutInvokingFunctions_fetchesKeyAndCustomer() = testDispatcher.runBlockingTest {
         ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
         val customerSession = createCustomerSession()
         idleLooper()
@@ -188,7 +192,7 @@ class CustomerSessionTest {
     }
 
     @Test
-    fun setCustomerShippingInfo_withValidInfo_callsWithExpectedArgs() {
+    fun setCustomerShippingInfo_withValidInfo_callsWithExpectedArgs() = testDispatcher.runBlockingTest {
         ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
         val customerSession = createCustomerSession()
         val shippingInformation =
@@ -225,7 +229,7 @@ class CustomerSessionTest {
     }
 
     @Test
-    fun retrieveCustomer_withExpiredCache_updatesCustomer() {
+    fun retrieveCustomer_withExpiredCache_updatesCustomer() = testDispatcher.runBlockingTest {
         val firstKey = EphemeralKeyFixtures.FIRST
         val secondKey = EphemeralKeyFixtures.SECOND
 
@@ -284,7 +288,7 @@ class CustomerSessionTest {
     }
 
     @Test
-    fun retrieveCustomer_withUnExpiredCache_returnsCustomerWithoutHittingApi() {
+    fun retrieveCustomer_withUnExpiredCache_returnsCustomerWithoutHittingApi() = testDispatcher.runBlockingTest {
         val firstKey = EphemeralKeyFixtures.FIRST
 
         var currentTime = DEFAULT_CURRENT_TIME
@@ -326,7 +330,7 @@ class CustomerSessionTest {
     }
 
     @Test
-    fun addSourceToCustomer_withUnExpiredCustomer_returnsAddedSource() {
+    fun addSourceToCustomer_withUnExpiredCustomer_returnsAddedSource() = testDispatcher.runBlockingTest {
         val expectedProductUsage = setOf(
             AddPaymentMethodActivity.PRODUCT_TOKEN,
             PaymentMethodsActivity.PRODUCT_TOKEN
@@ -371,7 +375,7 @@ class CustomerSessionTest {
     }
 
     @Test
-    fun addSourceToCustomer_whenApiThrowsError_callsListener() {
+    fun addSourceToCustomer_whenApiThrowsError_callsListener() = testDispatcher.runBlockingTest {
         val expectedProductUsage = setOf(
             AddPaymentMethodActivity.PRODUCT_TOKEN,
             PaymentMethodsActivity.PRODUCT_TOKEN
@@ -401,7 +405,7 @@ class CustomerSessionTest {
     }
 
     @Test
-    fun removeSourceFromCustomer_withUnExpiredCustomer_returnsRemovedSource() {
+    fun removeSourceFromCustomer_withUnExpiredCustomer_returnsRemovedSource() = testDispatcher.runBlockingTest {
         val expectedProductUsage = setOf(
             AddPaymentMethodActivity.PRODUCT_TOKEN,
             PaymentMethodsActivity.PRODUCT_TOKEN
@@ -444,7 +448,7 @@ class CustomerSessionTest {
     }
 
     @Test
-    fun removeSourceFromCustomer_whenApiThrowsError_callsListener() {
+    fun removeSourceFromCustomer_whenApiThrowsError_callsListener() = testDispatcher.runBlockingTest {
         val expectedProductUsage = setOf(
             AddPaymentMethodActivity.PRODUCT_TOKEN,
             PaymentMethodsActivity.PRODUCT_TOKEN
@@ -473,7 +477,7 @@ class CustomerSessionTest {
     }
 
     @Test
-    fun setDefaultSourceForCustomer_withUnExpiredCustomer_returnsCustomerAndClearsLog() {
+    fun setDefaultSourceForCustomer_withUnExpiredCustomer_returnsCustomerAndClearsLog() = testDispatcher.runBlockingTest {
         var currentTime = DEFAULT_CURRENT_TIME
 
         ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
@@ -514,7 +518,7 @@ class CustomerSessionTest {
     }
 
     @Test
-    fun setDefaultSourceForCustomer_whenApiThrows_callsListenerAndClearsLogs() {
+    fun setDefaultSourceForCustomer_whenApiThrows_callsListenerAndClearsLogs() = testDispatcher.runBlockingTest {
         var currentTime = DEFAULT_CURRENT_TIME
 
         ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
@@ -539,7 +543,7 @@ class CustomerSessionTest {
     }
 
     @Test
-    fun attachPaymentMethodToCustomer_withUnExpiredCustomer_returnsAddedPaymentMethod() {
+    fun attachPaymentMethodToCustomer_withUnExpiredCustomer_returnsAddedPaymentMethod() = testDispatcher.runBlockingTest {
         val expectedProductUsage = setOf(
             AddPaymentMethodActivity.PRODUCT_TOKEN,
             PaymentMethodsActivity.PRODUCT_TOKEN
@@ -582,7 +586,7 @@ class CustomerSessionTest {
     }
 
     @Test
-    fun attachPaymentMethodToCustomer_whenApiThrowsError_callsListenerOnError() {
+    fun attachPaymentMethodToCustomer_whenApiThrowsError_callsListenerOnError() = testDispatcher.runBlockingTest {
         val expectedProductUsage = setOf(
             AddPaymentMethodActivity.PRODUCT_TOKEN,
             PaymentMethodsActivity.PRODUCT_TOKEN
@@ -610,7 +614,7 @@ class CustomerSessionTest {
     }
 
     @Test
-    fun detachPaymentMethodFromCustomer_withUnExpiredCustomer_returnsRemovedPaymentMethod() {
+    fun detachPaymentMethodFromCustomer_withUnExpiredCustomer_returnsRemovedPaymentMethod() = testDispatcher.runBlockingTest {
         val expectedProductUsage = setOf(
             AddPaymentMethodActivity.PRODUCT_TOKEN,
             PaymentMethodsActivity.PRODUCT_TOKEN
@@ -652,7 +656,7 @@ class CustomerSessionTest {
     }
 
     @Test
-    fun detachPaymentMethodFromCustomer_whenApiThrowsError_callsListenerOnError() {
+    fun detachPaymentMethodFromCustomer_whenApiThrowsError_callsListenerOnError() = testDispatcher.runBlockingTest {
         var currentTime = DEFAULT_CURRENT_TIME
 
         ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
@@ -675,7 +679,7 @@ class CustomerSessionTest {
     }
 
     @Test
-    fun getPaymentMethods_withUnExpiredCustomer_returnsAddedPaymentMethod() {
+    fun getPaymentMethods_withUnExpiredCustomer_returnsAddedPaymentMethod() = testDispatcher.runBlockingTest {
         val expectedProductUsage = setOf(
             AddPaymentMethodActivity.PRODUCT_TOKEN,
             PaymentMethodsActivity.PRODUCT_TOKEN
@@ -721,7 +725,7 @@ class CustomerSessionTest {
         assertNotNull(paymentMethods)
     }
 
-    private fun setupErrorProxy() {
+    private suspend fun setupErrorProxy() {
         whenever(
             stripeRepository.addCustomerSource(
                 any(),
