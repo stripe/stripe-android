@@ -136,7 +136,7 @@ internal class CardInputWidgetTest {
                 (it.cardBrandView.layoutParams as ViewGroup.MarginLayoutParams)
                     .also { params ->
                         params.width = 48
-                        params.rightMargin = 12
+                        params.marginEnd = 12
                     }
 
             it.viewTreeObserver
@@ -820,7 +820,7 @@ internal class CardInputWidgetTest {
                     cvcPostalCodeSeparation = 0,
                     postalCodeWidth = 100,
                     cvcStartPosition = 0,
-                    dateRightTouchBufferLimit = 0,
+                    dateEndTouchBufferLimit = 0,
                     cardTouchBufferLimit = 400,
                     dateStartPosition = 510
                 )
@@ -832,7 +832,7 @@ internal class CardInputWidgetTest {
     fun updateToPeekSize_withPostalCodeDisabled_withNoData_returnsExpectedValuesForCommonCardLength() {
         cardInputWidget.postalCodeEnabled = false
 
-        // Moving left uses Visa-style ("common") defaults
+        // Moving to the end uses Visa-style ("common") defaults
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         cardInputWidget.updateSpaceSizes(
@@ -856,7 +856,7 @@ internal class CardInputWidgetTest {
                     cvcPostalCodeSeparation = 0,
                     postalCodeWidth = 100,
                     cvcStartPosition = 530,
-                    dateRightTouchBufferLimit = 432,
+                    dateEndTouchBufferLimit = 432,
                     cardTouchBufferLimit = 192,
                     dateStartPosition = 285
                 )
@@ -867,7 +867,7 @@ internal class CardInputWidgetTest {
     fun updateToPeekSize_withPostalCodeEnabled_withNoData_returnsExpectedValuesForCommonCardLength() {
         cardInputWidget.postalCodeEnabled = true
 
-        // Moving left uses Visa-style ("common") defaults
+        // Moving to the end uses Visa-style ("common") defaults
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         // |img=60|cardTouchLimit==192|dateStart==285|dateTouchLim==432|cvcStart==530|
         cardInputWidget.updateSpaceSizes(
@@ -891,10 +891,10 @@ internal class CardInputWidgetTest {
                     cvcPostalCodeSeparation = 0,
                     postalCodeWidth = 100,
                     cvcStartPosition = 330,
-                    dateRightTouchBufferLimit = 110,
+                    dateEndTouchBufferLimit = 110,
                     cardTouchBufferLimit = 66,
                     dateStartPosition = 198,
-                    cvcRightTouchBufferLimit = 120,
+                    cvcEndTouchBufferLimit = 120,
                     postalCodeStartPosition = 360
                 )
             )
@@ -904,7 +904,7 @@ internal class CardInputWidgetTest {
     fun addValidVisaCard_withPostalCodeDisabled_scrollsOver_andSetsExpectedDisplayValues() {
         cardInputWidget.postalCodeEnabled = false
 
-        // Moving left with an actual Visa number does the same as moving when empty.
+        // Moving to the end with an actual Visa number does the same as moving when empty.
         // |(peek==40)--(space==185)--(date==50)--(space==195)--(cvc==30)|
         updateCardNumberAndIdle(VISA_WITH_SPACES)
 
@@ -922,7 +922,7 @@ internal class CardInputWidgetTest {
                     cvcPostalCodeSeparation = 0,
                     postalCodeWidth = 100,
                     cvcStartPosition = 530,
-                    dateRightTouchBufferLimit = 432,
+                    dateEndTouchBufferLimit = 432,
                     cardTouchBufferLimit = 192,
                     dateStartPosition = 285
                 )
@@ -933,7 +933,7 @@ internal class CardInputWidgetTest {
     fun addValidVisaCard_withPostalCodeEnabled_scrollsOver_andSetsExpectedDisplayValues() {
         cardInputWidget.postalCodeEnabled = true
 
-        // Moving left with an actual Visa number does the same as moving when empty.
+        // Moving to the end with an actual Visa number does the same as moving when empty.
         // |(peek==40)--(space==98)--(date==50)--(space==82)--(cvc==30)--(space==0)--(postal==100)|
         updateCardNumberAndIdle(VISA_WITH_SPACES)
 
@@ -951,8 +951,8 @@ internal class CardInputWidgetTest {
                     cvcPostalCodeSeparation = 0,
                     postalCodeWidth = 100,
                     cvcStartPosition = 330,
-                    cvcRightTouchBufferLimit = 120,
-                    dateRightTouchBufferLimit = 110,
+                    cvcEndTouchBufferLimit = 120,
+                    dateEndTouchBufferLimit = 110,
                     cardTouchBufferLimit = 66,
                     dateStartPosition = 198,
                     postalCodeStartPosition = 360
@@ -964,7 +964,7 @@ internal class CardInputWidgetTest {
     fun addValidAmExCard_withPostalCodeDisabled_scrollsOver_andSetsExpectedDisplayValues() {
         cardInputWidget.postalCodeEnabled = false
 
-        // Moving left with an AmEx number has a larger peek and cvc size.
+        // Moving to the end with an AmEx number has a larger peek and cvc size.
         // |(peek==50)--(space==175)--(date==50)--(space==185)--(cvc==40)|
         updateCardNumberAndIdle(AMEX_WITH_SPACES)
 
@@ -982,7 +982,7 @@ internal class CardInputWidgetTest {
                     cvcPostalCodeSeparation = 0,
                     postalCodeWidth = 100,
                     cvcStartPosition = 520,
-                    dateRightTouchBufferLimit = 427,
+                    dateEndTouchBufferLimit = 427,
                     cardTouchBufferLimit = 197,
                     dateStartPosition = 285
                 )
@@ -993,7 +993,7 @@ internal class CardInputWidgetTest {
     fun addValidAmExCard_withPostalCodeEnabled_scrollsOver_andSetsExpectedDisplayValues() {
         cardInputWidget.postalCodeEnabled = true
 
-        // Moving left with an AmEx number has a larger peek and cvc size.
+        // Moving to the end with an AmEx number has a larger peek and cvc size.
         // |(peek==50)--(space==88)--(date==50)--(space==72)--(cvc==40)--(space==0)--(postal==100)|
         updateCardNumberAndIdle(AMEX_WITH_SPACES)
 
@@ -1011,8 +1011,8 @@ internal class CardInputWidgetTest {
                     cvcPostalCodeSeparation = 0,
                     postalCodeWidth = 100,
                     cvcStartPosition = 320,
-                    cvcRightTouchBufferLimit = 120,
-                    dateRightTouchBufferLimit = 106,
+                    cvcEndTouchBufferLimit = 120,
+                    dateEndTouchBufferLimit = 106,
                     cardTouchBufferLimit = 66,
                     dateStartPosition = 198,
                     postalCodeStartPosition = 360
@@ -1042,7 +1042,7 @@ internal class CardInputWidgetTest {
                     cvcPostalCodeSeparation = 0,
                     postalCodeWidth = 100,
                     cvcStartPosition = 530,
-                    dateRightTouchBufferLimit = 432,
+                    dateEndTouchBufferLimit = 432,
                     cardTouchBufferLimit = 182,
                     dateStartPosition = 285
                 )
@@ -1071,10 +1071,10 @@ internal class CardInputWidgetTest {
                     cvcPostalCodeSeparation = 0,
                     postalCodeWidth = 100,
                     cvcStartPosition = 330,
-                    dateRightTouchBufferLimit = 110,
+                    dateEndTouchBufferLimit = 110,
                     cardTouchBufferLimit = 66,
                     dateStartPosition = 198,
-                    cvcRightTouchBufferLimit = 120,
+                    cvcEndTouchBufferLimit = 120,
                     postalCodeStartPosition = 360
                 )
             )
