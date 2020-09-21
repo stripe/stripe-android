@@ -1256,34 +1256,6 @@ class Stripe internal constructor(
      *
      * @param card the [Card] used to create this payment token
      * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
-     * @param callback a [ApiResultCallback] to receive the result or error
-     */
-    @Deprecated(
-        "Deprecated, replace with Stripe#createCardToken()",
-        ReplaceWith("createCardToken(card, idempotencyKey, callback)")
-    )
-    @UiThread
-    @JvmOverloads
-    fun createToken(
-        card: Card,
-        idempotencyKey: String? = null,
-        callback: ApiResultCallback<Token>
-    ) {
-        createCardToken(
-            card,
-            idempotencyKey = idempotencyKey,
-            callback = callback
-        )
-    }
-
-    /**
-     * Create a Card token asynchronously.
-     *
-     * See [Create a card token](https://stripe.com/docs/api/tokens/create_card).
-     * `POST /v1/tokens`
-     *
-     * @param card the [Card] used to create this payment token
-     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
      * @param stripeAccountId Optional, the Connect account to associate with this request.
      * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      * @param callback a [ApiResultCallback] to receive the result or error
