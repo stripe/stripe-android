@@ -13,6 +13,7 @@ import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardFunding
 import com.stripe.android.model.CardParamsFixtures
+import com.stripe.android.model.DateOfBirth
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -28,7 +29,6 @@ import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
@@ -46,11 +46,13 @@ internal class StripeEndToEndTest {
                 individual = AccountParams.BusinessTypeParams.Individual(
                     firstName = "Jenny",
                     lastName = "Rosen",
-                    address = AddressFixtures.ADDRESS
+                    address = AddressFixtures.ADDRESS,
+                    dateOfBirth = DateOfBirth(1, 1, 1990)
                 )
             )
         )
-        assertEquals(Token.Type.Account, token?.type)
+        assertThat(requireNotNull(token).type)
+            .isEqualTo(Token.Type.Account)
     }
 
     @Test

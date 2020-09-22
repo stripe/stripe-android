@@ -115,9 +115,9 @@ data class KlarnaSourceParams @JvmOverloads constructor(
         ).plus(
             billingDob?.let {
                 mapOf(
-                    PARAM_DOB_DAY to it.day,
-                    PARAM_DOB_MONTH to it.month,
-                    PARAM_DOB_YEAR to it.year
+                    PARAM_DOB_DAY to it.day.toString().padStart(2, '0'),
+                    PARAM_DOB_MONTH to it.month.toString().padStart(2, '0'),
+                    PARAM_DOB_YEAR to it.year.toString()
                 )
             }.orEmpty()
         )
