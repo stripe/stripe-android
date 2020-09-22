@@ -23,7 +23,8 @@ internal class SourceEndToEndTest {
             currency = "eur",
             klarnaParams = KlarnaSourceParams(
                 purchaseCountry = "DE",
-                lineItems = LINE_ITEMS
+                lineItems = LINE_ITEMS,
+                billingDob = DateOfBirth(1, 1, 1990)
             )
         )
         val stripe = createStripe(ApiKeyFixtures.KLARNA_PUBLISHABLE_KEY)
@@ -88,7 +89,8 @@ internal class SourceEndToEndTest {
                 customPaymentMethods = setOf(
                     KlarnaSourceParams.CustomPaymentMethods.Installments,
                     KlarnaSourceParams.CustomPaymentMethods.PayIn4
-                )
+                ),
+                billingDob = DateOfBirth(1, 1, 1990)
             )
         )
 
@@ -143,7 +145,8 @@ internal class SourceEndToEndTest {
                 pageOptions = KlarnaSourceParams.PaymentPageOptions(
                     pageTitle = "Very cool checkout page",
                     purchaseType = KlarnaSourceParams.PaymentPageOptions.PurchaseType.Order
-                )
+                ),
+                billingDob = DateOfBirth(1, 1, 1990)
             )
         )
         val stripe = createStripe(ApiKeyFixtures.KLARNA_PUBLISHABLE_KEY)

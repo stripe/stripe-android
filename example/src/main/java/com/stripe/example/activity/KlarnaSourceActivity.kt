@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.Stripe
 import com.stripe.android.model.Address
+import com.stripe.android.model.DateOfBirth
 import com.stripe.android.model.KlarnaSourceParams
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
@@ -144,7 +145,8 @@ class KlarnaSourceActivity : AppCompatActivity() {
                         .setPostalCode("N1 7BE")
                         .build(),
                     billingEmail = "test@example.com",
-                    billingPhone = "02012267709"
+                    billingPhone = "02012267709",
+                    billingDob = DateOfBirth(1, 1, 1990)
                 )
             )
         )
