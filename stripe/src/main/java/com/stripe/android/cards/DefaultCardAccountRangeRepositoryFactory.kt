@@ -2,6 +2,7 @@ package com.stripe.android.cards
 
 import android.content.Context
 import com.stripe.android.AnalyticsDataFactory
+import com.stripe.android.AnalyticsEvent
 import com.stripe.android.AnalyticsRequest
 import com.stripe.android.AnalyticsRequestExecutor
 import com.stripe.android.ApiRequest
@@ -17,9 +18,17 @@ import kotlinx.coroutines.flow.flowOf
  * Will throw an exception if [PaymentConfiguration] has not been instantiated.
  */
 internal class DefaultCardAccountRangeRepositoryFactory(
-    context: Context
+    context: Context,
+    private val analyticsRequestExecutor: AnalyticsRequestExecutor,
+    private val analyticsRequestFactory: AnalyticsRequest.Factory
 ) : CardAccountRangeRepository.Factory {
     private val appContext = context.applicationContext
+
+    constructor(context: Context) : this(
+        context,
+        AnalyticsRequestExecutor.Default(),
+        AnalyticsRequest.Factory()
+    )
 
     @Throws(IllegalStateException::class)
     override fun create(): CardAccountRangeRepository {
@@ -37,6 +46,16 @@ internal class DefaultCardAccountRangeRepositoryFactory(
             PaymentConfiguration.getInstance(
                 appContext
             ).publishableKey
+        }.onSuccess { publishableKey ->
+            fireAnalyticsEvent(
+                publishableKey,
+                AnalyticsEvent.CardMetadataPublishableKeyAvailable
+            )
+        }.onFailure {
+            fireAnalyticsEvent(
+                ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY,
+                AnalyticsEvent.CardMetadataPublishableKeyUnavailable
+            )
         }.fold(
             onSuccess = { publishableKey ->
                 RemoteCardAccountRangeSource(
@@ -57,6 +76,21 @@ internal class DefaultCardAccountRangeRepositoryFactory(
             onFailure = {
                 NullCardAccountRangeSource()
             }
+        )
+    }
+
+    private fun fireAnalyticsEvent(
+        publishableKey: String,
+        event: AnalyticsEvent
+    ) {
+        analyticsRequestExecutor.executeAsync(
+            analyticsRequestFactory.create(
+                AnalyticsDataFactory(
+                    appContext,
+                    publishableKey
+                ).createParams(event),
+                ApiRequest.Options(publishableKey)
+            )
         )
     }
 
