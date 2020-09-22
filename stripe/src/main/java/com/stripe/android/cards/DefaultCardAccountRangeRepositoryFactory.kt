@@ -7,6 +7,9 @@ import com.stripe.android.AnalyticsRequestExecutor
 import com.stripe.android.ApiRequest
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.StripeApiRepository
+import com.stripe.android.model.AccountRange
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 /**
  * A [CardAccountRangeRepository.Factory] that returns a [DefaultCardAccountRangeRepositoryFactory].
@@ -20,29 +23,48 @@ internal class DefaultCardAccountRangeRepositoryFactory(
 
     @Throws(IllegalStateException::class)
     override fun create(): CardAccountRangeRepository {
-        val paymentConfiguration = PaymentConfiguration.getInstance(
-            appContext
-        )
-        val publishableKey = paymentConfiguration.publishableKey
         val store = DefaultCardAccountRangeStore(appContext)
         return DefaultCardAccountRangeRepository(
             inMemorySource = InMemoryCardAccountRangeSource(store),
-            remoteSource = RemoteCardAccountRangeSource(
-                StripeApiRepository(
-                    appContext,
-                    publishableKey
-                ),
-                ApiRequest.Options(
-                    publishableKey
-                ),
-                DefaultCardAccountRangeStore(appContext),
-                AnalyticsRequestExecutor.Default(),
-                AnalyticsRequest.Factory(),
-                AnalyticsDataFactory(appContext, publishableKey),
-                publishableKey
-            ),
+            remoteSource = createRemoteCardAccountRangeSource(),
             staticSource = StaticCardAccountRangeSource(),
             store = store
         )
+    }
+
+    private fun createRemoteCardAccountRangeSource(): CardAccountRangeSource {
+        return runCatching {
+            PaymentConfiguration.getInstance(
+                appContext
+            ).publishableKey
+        }.fold(
+            onSuccess = { publishableKey ->
+                RemoteCardAccountRangeSource(
+                    StripeApiRepository(
+                        appContext,
+                        publishableKey
+                    ),
+                    ApiRequest.Options(
+                        publishableKey
+                    ),
+                    DefaultCardAccountRangeStore(appContext),
+                    AnalyticsRequestExecutor.Default(),
+                    AnalyticsRequest.Factory(),
+                    AnalyticsDataFactory(appContext, publishableKey),
+                    publishableKey
+                )
+            },
+            onFailure = {
+                NullCardAccountRangeSource()
+            }
+        )
+    }
+
+    private class NullCardAccountRangeSource : CardAccountRangeSource {
+        override suspend fun getAccountRange(
+            cardNumber: CardNumber.Unvalidated
+        ): AccountRange? = null
+
+        override val loading: Flow<Boolean> = flowOf(false)
     }
 }

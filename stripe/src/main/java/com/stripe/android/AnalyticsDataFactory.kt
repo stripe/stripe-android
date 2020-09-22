@@ -297,7 +297,9 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
         return mapOf(
             FIELD_ANALYTICS_UA to ANALYTICS_UA,
             FIELD_EVENT to event.toString(),
-            FIELD_PUBLISHABLE_KEY to publishableKeySupplier(),
+            FIELD_PUBLISHABLE_KEY to runCatching {
+                publishableKeySupplier()
+            }.getOrDefault(ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY),
             FIELD_OS_NAME to Build.VERSION.CODENAME,
             FIELD_OS_RELEASE to Build.VERSION.RELEASE,
             FIELD_OS_VERSION to Build.VERSION.SDK_INT,

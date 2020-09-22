@@ -9,7 +9,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 class DefaultCardAccountRangeRepositoryFactoryTest {
@@ -22,10 +21,9 @@ class DefaultCardAccountRangeRepositoryFactoryTest {
     }
 
     @Test
-    fun `create() without config should throw exception`() {
-        assertFailsWith<IllegalStateException> {
-            factory.create()
-        }
+    fun `create() without config should succeed`() {
+        assertThat(factory.create())
+            .isNotNull()
     }
 
     @Test

@@ -50,6 +50,10 @@ internal data class ApiRequest internal constructor(
         init {
             ApiKeyValidator().requireValid(apiKey)
         }
+
+        companion object {
+            const val UNDEFINED_PUBLISHABLE_KEY = "pk_undefined"
+        }
     }
 
     class Factory(
