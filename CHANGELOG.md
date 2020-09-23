@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 16.0.0 - unreleased
+## 16.0.0 - 2020-09-23
 This release includes several breaking changes. See the [migration guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) for more details.
 
 This release adds support for 19-digit cards in `CardInputWidget` and `CardMultilineWidget`.
