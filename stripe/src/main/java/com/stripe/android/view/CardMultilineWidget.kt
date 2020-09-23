@@ -37,7 +37,8 @@ import kotlin.properties.Delegates
 /**
  * A multiline card input widget that uses Material Components for Android.
  *
- * [PaymentConfiguration.init] must be called before [CardMultilineWidget] is instantiated.
+ * To enable 19-digit card support, [PaymentConfiguration.init] must be called before
+ * [CardMultilineWidget] is instantiated.
  */
 class CardMultilineWidget @JvmOverloads constructor(
     context: Context,

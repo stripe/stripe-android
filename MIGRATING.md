@@ -2,7 +2,8 @@
 
 ## Migrating from versions < 16.0.0
 - Changes to `CardInputWidget` and `CardMultilineWidget`
-    - `PaymentConfiguration.init()` must be called before the card widgets are instantiated.
+    -  To enable 19-digit card support, [PaymentConfiguration.init]
+       must be called before the card widgets are instantiated.
     - `card` and `cardBuilder` are deprecated. Use `cardParams` instead.
 - Changes to `CardNumberEditText`
     - `lengthMax` and `cardNumber` are deprecated
