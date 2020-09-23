@@ -60,6 +60,9 @@ internal enum class AnalyticsEvent(internal val code: String) {
     AuthSourceRedirect("auth_source_redirect"),
     AuthSourceResult("auth_source_result"),
 
+    CardMetadataPublishableKeyAvailable("card_metadata_pk_available"),
+    CardMetadataPublishableKeyUnavailable("card_metadata_pk_unavailable"),
+
     CardMetadataLoadedTooSlow("card_metadata_loaded_too_slow"),
     CardMetadataLoadFailure("card_metadata_load_failure"),
     CardMetadataMissingRange("card_metadata_missing_range");
