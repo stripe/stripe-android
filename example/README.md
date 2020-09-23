@@ -59,9 +59,9 @@ STRIPE_ACCOUNT_ID=
 3. Display Google Pay sheet in `payWithGoogle()`.
 4. After user selects a payment method, `Activity#onActivityResult()` is called.
    Handle result in `handleGooglePayResult()`.
-5. Create a [PaymentMethodCreateParams](https://stripe.dev/stripe-android/com/stripe/android/model/PaymentMethodCreateParams.html)
+5. Create a [PaymentMethodCreateParams](https://stripe.dev/stripe-android/stripe/com.stripe.android.model/-payment-method-create-params/index.html)
    object from the [Google Pay PaymentData](https://developers.google.com/android/reference/com/google/android/gms/wallet/PaymentData) object using
-   [PaymentMethodCreateParams.createFromGooglePay()](https://stripe.dev/stripe-android/com/stripe/android/model/PaymentMethodCreateParams.html#createFromGooglePay-org.json.JSONObject-).
+   [PaymentMethodCreateParams.createFromGooglePay()](https://stripe.dev/stripe-android/stripe/com.stripe.android.model/-payment-method-create-params/-companion/create-from-google-pay.html).
 
    ```
    val paymentData = PaymentData.getFromIntent(data) ?: return
@@ -73,7 +73,7 @@ STRIPE_ACCOUNT_ID=
 
 6. Create a [Stripe Payment Method object](https://stripe.com/docs/payments/payment-methods)
    with the `PaymentMethodCreateParams` object using
-   [Stripe#createPaymentMethod()](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#createPaymentMethod-com.stripe.android.model.PaymentMethodCreateParams-com.stripe.android.ApiResultCallback-).
+   [Stripe#createPaymentMethod()](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/create-payment-method.html).
 
    ```
    stripe.createPaymentMethod(paymentMethodCreateParams,
