@@ -801,24 +801,24 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
     * Improve accessibility of select options on 3DS2 challenge screen by setting minimum height to 48dp
 
 ## 10.2.1 - 2019-08-06
-* [#1314](https://github.com/stripe/stripe-android/pull/1314) Expose pinned API version via [Stripe.API_VERSION](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#API_VERSION)
-* [#1315](https://github.com/stripe/stripe-android/pull/1315) Create [SourceParams#createCardParamsFromGooglePay()](https://stripe.dev/stripe-android/com/stripe/android/model/SourceParams.html#createCardParamsFromGooglePay-org.json.JSONObject-)
-* [#1316](https://github.com/stripe/stripe-android/pull/1316) Fix issue where `InvalidRequestException` is thrown when confirming a Setup Intent using [ConfirmSetupIntentParams#create(PaymentMethodCreateParams, String)](https://stripe.dev/stripe-android/com/stripe/android/model/ConfirmSetupIntentParams.html#create-com.stripe.android.model.PaymentMethodCreateParams-java.lang.String-)
+* [#1314](https://github.com/stripe/stripe-android/pull/1314) Expose pinned API version via [Stripe.API_VERSION](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/-companion/index.html#com.stripe.android/Stripe.Companion/API_VERSION/#/PointingToDeclaration/)
+* [#1315](https://github.com/stripe/stripe-android/pull/1315) Create [SourceParams#createCardParamsFromGooglePay()](https://stripe.dev/stripe-android/stripe/com.stripe.android.model/-source-params/-companion/create-card-params-from-google-pay.html)
+* [#1316](https://github.com/stripe/stripe-android/pull/1316) Fix issue where `InvalidRequestException` is thrown when confirming a Setup Intent using [ConfirmSetupIntentParams#create()](https://stripe.dev/stripe-android/stripe/com.stripe.android.model/-confirm-setup-intent-params/-companion/create.html)
 
 ## 10.2.0 - 2019-08-05
 * [#1275](https://github.com/stripe/stripe-android/pull/1275) Add support for launching `PaymentSession` from a `Fragment`
-    * [PaymentSession(Fragment)](https://stripe.dev/stripe-android/com/stripe/android/PaymentSession.html#PaymentSession-android.support.v4.app.Fragment-)
+    * [PaymentSession(Fragment)](https://stripe.dev/stripe-android/stripe/com.stripe.android/-payment-session/index.html#com.stripe.android/PaymentSession/<init>/#androidx.fragment.app.Fragment#com.stripe.android.PaymentSessionConfig/PointingToDeclaration/)
 * [#1288](https://github.com/stripe/stripe-android/pull/1288) Upgrade Android Gradle Plugin to `3.5.0-rc02`
 * [#1289](https://github.com/stripe/stripe-android/pull/1289) Add support for launching payment confirmation/authentication flow from a `Fragment`
-    * [Stripe#confirmPayment(Fragment, ConfirmPaymentIntentParams)](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#confirmPayment-android.support.v4.app.Fragment-com.stripe.android.model.ConfirmPaymentIntentParams-)
-    * [Stripe#authenticatePayment(Fragment, String)](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#authenticatePayment-android.support.v4.app.Fragment-java.lang.String-)
-    * [Stripe#confirmSetupIntent(Fragment, ConfirmSetupIntentParams)](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#confirmSetupIntent-android.support.v4.app.Fragment-com.stripe.android.model.ConfirmSetupIntentParams-)
-    * [Stripe#authenticateSetup(Fragment, String)](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#authenticateSetup-android.support.v4.app.Fragment-java.lang.String-)
+    * [Stripe#confirmPayment(Fragment, ConfirmPaymentIntentParams)](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/confirm-payment.html)
+    * [Stripe#authenticatePayment(Fragment, String)](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/authenticate-payment.html)
+    * [Stripe#confirmSetupIntent(Fragment, ConfirmSetupIntentParams)](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/confirm-setup-intent.html)
+    * [Stripe#authenticateSetup(Fragment, String)](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/authenticate-setup.html)
 * [#1290](https://github.com/stripe/stripe-android/pull/1290) Convert [samplestore app](https://github.com/stripe/stripe-android/tree/master/samplestore) to Kotlin
 * [#1297](https://github.com/stripe/stripe-android/pull/1297) Convert [example app](https://github.com/stripe/stripe-android/tree/master/example) to Kotlin
-* [#1300](https://github.com/stripe/stripe-android/pull/1300) Rename [StripeIntentResult#getStatus()](https://stripe.dev/stripe-android/com/stripe/android/StripeIntentResult.html#getStatus--) to [StripeIntentResult#getOutcome()](https://stripe.dev/stripe-android/com/stripe/android/StripeIntentResult.html#getOutcome--)
-* [#1302](https://github.com/stripe/stripe-android/pull/1302) Add [GooglePayConfig#getTokenizationSpecification()](https://stripe.dev/stripe-android/com/stripe/android/GooglePayConfig.html#getTokenizationSpecification--) to configure Google Pay to use Stripe as the gateway
-* [#1304](https://github.com/stripe/stripe-android/pull/1304) Add [PaymentMethodCreateParams#createFromGooglePay()](https://stripe.dev/stripe-android/com/stripe/android/model/PaymentMethodCreateParams.html#createFromGooglePay-org.json.JSONObject-) to create `PaymentMethodCreateParams` from a Google Pay [PaymentData](https://developers.google.com/android/reference/com/google/android/gms/wallet/PaymentData) object
+* [#1300](https://github.com/stripe/stripe-android/pull/1300) Rename `StripeIntentResult#getStatus()` to [StripeIntentResult#getOutcome()](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe-intent-result/index.html#com.stripe.android/StripeIntentResult/outcome/#/PointingToDeclaration/)
+* [#1302](https://github.com/stripe/stripe-android/pull/1302) Add [GooglePayConfig#getTokenizationSpecification()](https://stripe.dev/stripe-android/stripe/com.stripe.android/-google-pay-config/index.html#com.stripe.android/GooglePayConfig/tokenizationSpecification/#/PointingToDeclaration/) to configure Google Pay to use Stripe as the gateway
+* [#1304](https://github.com/stripe/stripe-android/pull/1304) Add [PaymentMethodCreateParams#createFromGooglePay()](https://stripe.dev/stripe-android/stripe/com.stripe.android.model/-payment-method-create-params/-companion/create-from-google-pay.html) to create `PaymentMethodCreateParams` from a Google Pay [PaymentData](https://developers.google.com/android/reference/com/google/android/gms/wallet/PaymentData) object
 
 ## 10.1.1 - 2019-07-31
 * [#1275](https://github.com/stripe/stripe-android/pull/1275) Fix `StripeIntentResult.Status` logic
@@ -856,14 +856,14 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 ## 10.0.0 - 2019-07-19
 * Add support for 3DS2 authentication through the Payment Intents API and Setup Intents API. See [Supporting 3D Secure Authentication on Android](https://stripe.com/docs/mobile/android/authentication).
     * Payment Intents - see our guide for [Using Payment Intents on Android](https://stripe.com/docs/payments/payment-intents/android)
-        * [Stripe#confirmPayment()](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#confirmPayment-android.app.Activity-com.stripe.android.model.ConfirmPaymentIntentParams-) for automatic confirmation
-        * [Stripe#authenticatePayment()](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#authenticatePayment-android.app.Activity-java.lang.String-) for manual confirmation
+        * [Stripe#confirmPayment()](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/confirm-payment.html) for automatic confirmation
+        * [Stripe#authenticatePayment()](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/authenticate-payment.html) for manual confirmation
     * Setup Intents - see our guide for [Saving card details without a payment](https://stripe.com/docs/payments/cards/saving-cards#saving-card-without-payment)
-        * [Stripe#confirmSetupIntent()](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#confirmSetupIntent-android.app.Activity-com.stripe.android.model.ConfirmSetupIntentParams-) for automatic confirmation
-        * [Stripe#authenticateSetup()](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#authenticateSetup-android.app.Activity-java.lang.String-) for manual confirmation
-    * [PaymentAuthConfig](https://stripe.dev/stripe-android/com/stripe/android/PaymentAuthConfig.html) for optional authentication customization
+        * [Stripe#confirmSetupIntent()](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/confirm-setup-intent.html) for automatic confirmation
+        * [Stripe#authenticateSetup()](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/authenticate-setup.html) for manual confirmation
+    * [PaymentAuthConfig](https://stripe.dev/stripe-android/stripe/com.stripe.android/-payment-auth-config/index.html) for optional authentication customization
 * Add support for the Setup Intents API. See [Saving card details without a payment](https://stripe.com/docs/payments/cards/saving-cards#saving-card-without-payment).
-    * Use [ConfirmSetupIntentParams](https://stripe.dev/stripe-android/com/stripe/android/model/ConfirmSetupIntentParams.html) to confirm a SetupIntent
+    * Use [ConfirmSetupIntentParams](https://stripe.dev/stripe-android/stripe/com.stripe.android.model/-confirm-setup-intent-params/index.html) to confirm a SetupIntent
 * [#1172](https://github.com/stripe/stripe-android/pull/1172) Refactor `PaymentIntentParams`
 * [#1173](https://github.com/stripe/stripe-android/pull/1173) Inline all `StringDef` values
 
