@@ -20,9 +20,9 @@ import kotlin.test.assertNotNull
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentAuthConfigTest {
-    private val activityScenarioFactory: ActivityScenarioFactory by lazy {
-        ActivityScenarioFactory(ApplicationProvider.getApplicationContext())
-    }
+    private val activityScenarioFactory = ActivityScenarioFactory(
+        ApplicationProvider.getApplicationContext()
+    )
 
     @BeforeTest
     fun setup() {

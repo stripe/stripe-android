@@ -1,11 +1,10 @@
 package com.stripe.android.view
 
-import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 /**
  * Test for [SelectShippingMethodWidget]
@@ -13,28 +12,23 @@ import kotlin.test.assertEquals
 @RunWith(RobolectricTestRunner::class)
 class SelectShippingMethodWidgetTest {
 
-    private val selectShippingMethodWidget: SelectShippingMethodWidget by lazy {
-        SelectShippingMethodWidget(ApplicationProvider.getApplicationContext<Context>())
-            .also {
-                it.setShippingMethods(
-                    listOf(
-                        ShippingMethodFixtures.UPS,
-                        ShippingMethodFixtures.FEDEX
-                    )
+    private val selectShippingMethodWidget =
+        SelectShippingMethodWidget(ApplicationProvider.getApplicationContext()).also {
+            it.setShippingMethods(
+                listOf(
+                    ShippingMethodFixtures.UPS,
+                    ShippingMethodFixtures.FEDEX
                 )
-            }
-    }
+            )
+        }
 
     @Test
     fun selectedShippingMethodWidget_whenSelected_selectionChanges() {
-        assertEquals(
-            ShippingMethodFixtures.UPS,
-            selectShippingMethodWidget.selectedShippingMethod
-        )
+        assertThat(selectShippingMethodWidget.selectedShippingMethod)
+            .isEqualTo(ShippingMethodFixtures.UPS)
+
         selectShippingMethodWidget.setSelectedShippingMethod(ShippingMethodFixtures.FEDEX)
-        assertEquals(
-            ShippingMethodFixtures.FEDEX,
-            selectShippingMethodWidget.selectedShippingMethod
-        )
+        assertThat(selectShippingMethodWidget.selectedShippingMethod)
+            .isEqualTo(ShippingMethodFixtures.FEDEX)
     }
 }

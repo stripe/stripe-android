@@ -34,9 +34,9 @@ class CountryAutoCompleteTextViewTest {
 
     private val ephemeralKeyProvider: EphemeralKeyProvider = mock()
 
-    private val activityScenarioFactory: ActivityScenarioFactory by lazy {
-        ActivityScenarioFactory(ApplicationProvider.getApplicationContext())
-    }
+    private val activityScenarioFactory = ActivityScenarioFactory(
+        ApplicationProvider.getApplicationContext()
+    )
 
     @BeforeTest
     fun setup() {
