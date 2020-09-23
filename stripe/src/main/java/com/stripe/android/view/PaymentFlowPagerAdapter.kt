@@ -11,6 +11,7 @@ import com.stripe.android.databinding.ShippingInfoPageBinding
 import com.stripe.android.databinding.ShippingMethodPageBinding
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
+import kotlin.properties.Delegates
 
 internal class PaymentFlowPagerAdapter(
     private val context: Context,
@@ -43,20 +44,23 @@ internal class PaymentFlowPagerAdapter(
             notifyDataSetChanged()
         }
 
-    internal var shippingMethods: List<ShippingMethod> = emptyList()
-        set(value) {
-            field = value
-            notifyDataSetChanged()
-        }
+    private var shouldRecreateShippingMethodsScreen = false
 
-    internal var selectedShippingMethod: ShippingMethod? = null
-        set(value) {
-            field = value
-            notifyDataSetChanged()
-        }
+    internal var shippingMethods: List<ShippingMethod> by Delegates.observable(
+        emptyList()
+    ) { _, oldValue, newValue ->
+        shouldRecreateShippingMethodsScreen = newValue != oldValue
+    }
+
+    internal var selectedShippingMethod: ShippingMethod? by Delegates.observable(
+        null
+    ) { _, oldValue, newValue ->
+        shouldRecreateShippingMethodsScreen = newValue != oldValue
+    }
 
     override fun instantiateItem(collection: ViewGroup, position: Int): Any {
-        val viewHolder = when (pages[position]) {
+        val page = pages[position]
+        val viewHolder = when (page) {
             PaymentFlowPage.ShippingInfo -> {
                 PaymentFlowViewHolder.ShippingInformationViewHolder(collection)
             }
@@ -81,6 +85,7 @@ internal class PaymentFlowPagerAdapter(
             }
         }
         collection.addView(viewHolder.itemView)
+        viewHolder.itemView.tag = page
         return viewHolder.itemView
     }
 
@@ -104,7 +109,22 @@ internal class PaymentFlowPagerAdapter(
         return context.getString(pages[position].titleResId)
     }
 
-    internal sealed class PaymentFlowViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    override fun getItemPosition(obj: Any): Int {
+        return if (obj is View && obj.tag == PaymentFlowPage.ShippingMethod &&
+            shouldRecreateShippingMethodsScreen
+        ) {
+            // if the shipping methods screen needs to be updated, return `POSITION_NONE` to
+            // indicate that the item is no longer valid and should be recreated
+            shouldRecreateShippingMethodsScreen = false
+            POSITION_NONE
+        } else {
+            super.getItemPosition(obj)
+        }
+    }
+
+    internal sealed class PaymentFlowViewHolder(
+        itemView: View
+    ) : RecyclerView.ViewHolder(itemView) {
         class ShippingInformationViewHolder(
             viewBinding: ShippingInfoPageBinding
         ) : PaymentFlowViewHolder(viewBinding.root) {
