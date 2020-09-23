@@ -19,13 +19,11 @@ import kotlin.test.assertTrue
 @RunWith(RobolectricTestRunner::class)
 internal class IconTextInputLayoutTest {
 
-    private val activityScenarioFactory: ActivityScenarioFactory by lazy {
-        ActivityScenarioFactory(ApplicationProvider.getApplicationContext())
-    }
+    private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val activityScenarioFactory = ActivityScenarioFactory(context)
 
     @Test
     fun init_successfullyFindsFields() {
-        val context: Context = ApplicationProvider.getApplicationContext()
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
         activityScenarioFactory

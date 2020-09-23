@@ -3,7 +3,6 @@ package com.stripe.android
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.argumentCaptor
@@ -28,13 +27,17 @@ class PaymentSessionViewModelTest {
     private val paymentSessionPrefs: PaymentSessionPrefs = mock()
     private val savedStateHandle: SavedStateHandle = mock()
 
-    private val paymentMethodsListenerCaptor: KArgumentCaptor<CustomerSession.PaymentMethodsRetrievalListener> = argumentCaptor()
-    private val customerRetrievalListenerCaptor: KArgumentCaptor<CustomerSession.CustomerRetrievalListener> = argumentCaptor()
+    private val paymentMethodsListenerCaptor =
+        argumentCaptor<CustomerSession.PaymentMethodsRetrievalListener>()
+    private val customerRetrievalListenerCaptor =
+        argumentCaptor<CustomerSession.CustomerRetrievalListener>()
 
-    private val viewModel: PaymentSessionViewModel by lazy { createViewModel() }
+    private val paymentSessionDatas =
+        mutableListOf<PaymentSessionData>()
+    private val networkStates =
+        mutableListOf<PaymentSessionViewModel.NetworkState>()
 
-    private val paymentSessionDatas: MutableList<PaymentSessionData> = mutableListOf()
-    private val networkStates: MutableList<PaymentSessionViewModel.NetworkState> = mutableListOf()
+    private val viewModel: PaymentSessionViewModel = createViewModel()
 
     @BeforeTest
     fun before() {
@@ -68,8 +71,7 @@ class PaymentSessionViewModelTest {
             )
         ).thenReturn(UPDATED_DATA)
 
-        val viewModel = createViewModel()
-        viewModel.paymentSessionDataLiveData.observeForever {
+        createViewModel().paymentSessionDataLiveData.observeForever {
             paymentSessionDatas.add(it)
         }
 
