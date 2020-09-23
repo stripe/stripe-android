@@ -15,30 +15,28 @@ import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
 class PaymentFlowViewModelTest {
     private val customerSession: CustomerSession = mock()
-
     private val customerRetrievalListener = argumentCaptor<CustomerSession.CustomerRetrievalListener>()
 
-    private val viewModel: PaymentFlowViewModel by lazy {
-        PaymentFlowViewModel(
-            customerSession = customerSession,
-            paymentSessionData = PaymentSessionData(PaymentSessionFixtures.CONFIG)
-        )
-    }
+    private val testDispatcher = TestCoroutineDispatcher()
+    private val viewModel = PaymentFlowViewModel(
+        customerSession = customerSession,
+        paymentSessionData = PaymentSessionData(PaymentSessionFixtures.CONFIG),
+        workContext = testDispatcher
+    )
 
     @Test
     fun saveCustomerShippingInformation_onSuccess_returnsExpectedData() {
-        assertFalse(viewModel.isShippingInfoSubmitted)
+        assertThat(viewModel.isShippingInfoSubmitted)
+            .isFalse()
 
         val result =
             viewModel.saveCustomerShippingInformation(ShippingInfoFixtures.DEFAULT)
@@ -54,8 +52,10 @@ class PaymentFlowViewModelTest {
         }
         customerRetrievalListener.firstValue.onCustomerRetrieved(CustomerFixtures.CUSTOMER)
 
-        assertNotNull(customer)
-        assertTrue(viewModel.isShippingInfoSubmitted)
+        assertThat(customer)
+            .isNotNull()
+        assertThat(viewModel.isShippingInfoSubmitted)
+            .isTrue()
     }
 
     @Test
