@@ -211,21 +211,20 @@ class PaymentFlowActivity : StripeActivity() {
             shippingInformation
         ).observe(
             this,
-            {
-                it.fold(
+            { result ->
+                result.fold(
                     // show shipping methods screen
                     onSuccess = ::onShippingInfoValidated,
 
-                    onFailure = { t ->
-                        // show error on current screen
-                        onShippingInfoError(t.message)
-                    }
+                    // show error on current screen
+                    onFailure = ::onShippingInfoError
                 )
             }
         )
     }
 
-    private fun onShippingInfoError(errorMessage: String?) {
+    private fun onShippingInfoError(error: Throwable) {
+        val errorMessage = error.message
         isProgressBarVisible = false
         if (!errorMessage.isNullOrEmpty()) {
             showError(errorMessage)
