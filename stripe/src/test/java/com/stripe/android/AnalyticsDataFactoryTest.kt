@@ -1,5 +1,6 @@
 package com.stripe.android
 
+import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
@@ -21,9 +22,10 @@ import kotlin.test.assertNotNull
 @RunWith(RobolectricTestRunner::class)
 class AnalyticsDataFactoryTest {
     private val packageManager = mock<PackageManager>()
+    private val context = ApplicationProvider.getApplicationContext<Context>()
 
     private val analyticsDataFactory = AnalyticsDataFactory(
-        ApplicationProvider.getApplicationContext(),
+        context,
         API_KEY
     )
 
@@ -280,6 +282,18 @@ class AnalyticsDataFactoryTest {
                 "99"
             )
         ).containsEntry("3ds2_ui_type", "none")
+    }
+
+    @Test
+    fun `when publishable key is unavailable, create params with undefined key`() {
+        val params = AnalyticsDataFactory(
+            context
+        ) {
+            throw RuntimeException()
+        }.createSourceRetrieveParams("src_123")
+
+        assertThat(params["publishable_key"])
+            .isEqualTo(ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY)
     }
 
     private companion object {

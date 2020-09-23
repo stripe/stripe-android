@@ -8,6 +8,7 @@ import com.stripe.android.AnalyticsDataFactory
 import com.stripe.android.AnalyticsRequest
 import com.stripe.android.AnalyticsRequestExecutor
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.ApiRequest
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.CardNumberFixtures.AMEX_BIN
 import com.stripe.android.CardNumberFixtures.AMEX_NO_SPACES
@@ -839,6 +840,28 @@ internal class CardNumberEditTextTest {
             .hasSize(1)
         assertThat(analyticsRequests.first().params["event"])
             .isEqualTo("stripe_android.card_metadata_loaded_too_slow")
+    }
+
+    @Test
+    fun `onCardMetadataLoadedTooSlow() when publishable key is unavailable uses undefined publishable key`() {
+        val analyticsRequests = mutableListOf<AnalyticsRequest>()
+
+        CardNumberEditText(
+            context,
+            workContext = testDispatcher,
+            cardAccountRangeRepository = cardAccountRangeRepository,
+            analyticsRequestExecutor = {
+                analyticsRequests.add(it)
+            },
+            analyticsRequestFactory = analyticsRequestFactory,
+            analyticsDataFactory = analyticsDataFactory,
+            publishableKeySupplier = {
+                throw RuntimeException()
+            }
+        ).onCardMetadataLoadedTooSlow()
+
+        assertThat(analyticsRequests.first().options.apiKey)
+            .isEqualTo(ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY)
     }
 
     private fun verifyCardBrandBin(

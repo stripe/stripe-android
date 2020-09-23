@@ -292,11 +292,16 @@ class CardNumberEditText internal constructor(
             accountRange?.binRange?.matches(cardNumber) == false
     }
 
-    private fun onCardMetadataLoadedTooSlow() {
+    @JvmSynthetic
+    internal fun onCardMetadataLoadedTooSlow() {
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.create(
                 analyticsDataFactory.createParams(AnalyticsEvent.CardMetadataLoadedTooSlow),
-                ApiRequest.Options(publishableKeySupplier())
+                ApiRequest.Options(
+                    runCatching {
+                        publishableKeySupplier()
+                    }.getOrDefault(ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY)
+                )
             )
         )
     }
