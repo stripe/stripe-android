@@ -42,7 +42,8 @@ import kotlin.properties.Delegates
 /**
  * A single-line card input widget.
  *
- * [PaymentConfiguration.init] must be called before [CardInputWidget] is instantiated.
+ * To enable 19-digit card support, [PaymentConfiguration.init] must be called before
+ * [CardInputWidget] is instantiated.
  *
  * The individual `EditText` views of this widget can be styled by defining a style
  * `Stripe.CardInputWidget.EditText` that extends `Stripe.Base.CardInputWidget.EditText`.

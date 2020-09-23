@@ -23,6 +23,7 @@ This release adds support for 19-digit cards in `CardInputWidget` and `CardMulti
 * [#2873](https://github.com/stripe/stripe-android/pull/2873) Fix `CardInputWidget` field rendering in RTL
 * [#2878](https://github.com/stripe/stripe-android/pull/2878) Remove `Stripe.createToken()`
 * [#2880](https://github.com/stripe/stripe-android/pull/2880) Fix date formatting in `KlarnaSourceParams`
+* [#2887](https://github.com/stripe/stripe-android/pull/2887) Re-render shipping methods screen when shipping methods change
 
 ## 15.1.0 - 2020-08-13
 * [#2671](https://github.com/stripe/stripe-android/pull/2671) Add `cardParams` property to `CardInputWidget` and `CardMultilineWidget`
