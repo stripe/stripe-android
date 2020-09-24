@@ -81,7 +81,7 @@ data class CardParams internal constructor(
 ) : TokenParams(Token.Type.Card, loggingTokens) {
 
     @JvmOverloads
-    internal constructor(
+    constructor(
         /**
          * [card.number](https://stripe.com/docs/api/tokens/create_card#create_card_token-card-number)
          *
