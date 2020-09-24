@@ -39,6 +39,7 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
     @Parcelize
     data class Args internal constructor(
         internal val initialPaymentMethodId: String?,
+        @LayoutRes val paymentMethodsFooterLayoutId: Int,
         @LayoutRes val addPaymentMethodFooterLayoutId: Int,
         internal val isPaymentSessionActive: Boolean,
         internal val paymentMethodTypes: List<PaymentMethod.Type>,
@@ -60,6 +61,9 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
             private var canDeletePaymentMethods: Boolean = true
             private var paymentConfiguration: PaymentConfiguration? = null
             private var windowFlags: Int? = null
+
+            @LayoutRes
+            private var paymentMethodsFooterLayoutId: Int = 0
 
             @LayoutRes
             private var addPaymentMethodFooterLayoutId: Int = 0
@@ -114,6 +118,16 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
             }
 
             /**
+             * @param paymentMethodsFooterLayoutId optional layout id that will be inflated and
+             * displayed beneath the payment method selection list on [PaymentMethodsActivity]
+             */
+            fun setPaymentMethodsFooter(
+                @LayoutRes paymentMethodsFooterLayoutId: Int
+            ): Builder = apply {
+                this.paymentMethodsFooterLayoutId = paymentMethodsFooterLayoutId
+            }
+
+            /**
              * @param addPaymentMethodFooterLayoutId optional layout id that will be inflated and
              * displayed beneath the payment details collection form on [AddPaymentMethodActivity]
              */
@@ -148,6 +162,7 @@ class PaymentMethodsActivityStarter : ActivityStarter<PaymentMethodsActivity, Ar
                     shouldShowGooglePay = shouldShowGooglePay,
                     useGooglePay = useGooglePay,
                     paymentConfiguration = paymentConfiguration,
+                    paymentMethodsFooterLayoutId = paymentMethodsFooterLayoutId,
                     addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId,
                     windowFlags = windowFlags,
                     billingAddressFields = billingAddressFields,
