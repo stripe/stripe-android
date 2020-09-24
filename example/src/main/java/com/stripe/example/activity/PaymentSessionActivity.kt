@@ -119,6 +119,7 @@ class PaymentSessionActivity : AppCompatActivity() {
         return PaymentSession(
             activity = this,
             config = PaymentSessionConfig.Builder()
+                .setPaymentMethodsFooter(R.layout.add_payment_method_footer)
                 .setAddPaymentMethodFooter(R.layout.add_payment_method_footer)
                 .setPrepopulatedShippingInfo(EXAMPLE_SHIPPING_INFO)
                 .setHiddenShippingInfoFields()

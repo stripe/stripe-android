@@ -2,12 +2,20 @@ package com.stripe.android.view
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.text.method.LinkMovementMethod
+import android.text.util.Linkify
 import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.text.util.LinkifyCompat
+import androidx.core.view.ViewCompat
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.CustomerSession
+import com.stripe.android.R
 import com.stripe.android.databinding.PaymentMethodsActivityBinding
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.PaymentMethod
@@ -112,6 +120,15 @@ class PaymentMethodsActivity : AppCompatActivity() {
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowHomeEnabled(true)
+        }
+
+        createFooterView(viewBinding.footerContainer)?.let { footer ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                viewBinding.recycler.accessibilityTraversalBefore = footer.id
+                footer.accessibilityTraversalAfter = viewBinding.recycler.id
+            }
+            viewBinding.footerContainer.addView(footer)
+            viewBinding.footerContainer.visibility = View.VISIBLE
         }
 
         fetchCustomerPaymentMethods()
@@ -258,6 +275,27 @@ class PaymentMethodsActivity : AppCompatActivity() {
         )
 
         finish()
+    }
+
+    private fun createFooterView(
+        contentRoot: ViewGroup
+    ): View? {
+        return if (args.paymentMethodsFooterLayoutId > 0) {
+            val footerView = layoutInflater.inflate(
+                args.paymentMethodsFooterLayoutId,
+                contentRoot,
+                false
+            )
+            footerView.id = R.id.stripe_payment_methods_footer
+            if (footerView is TextView) {
+                LinkifyCompat.addLinks(footerView, Linkify.ALL)
+                ViewCompat.enableAccessibleClickableSpanSupport(footerView)
+                footerView.movementMethod = LinkMovementMethod.getInstance()
+            }
+            footerView
+        } else {
+            null
+        }
     }
 
     override fun onDestroy() {

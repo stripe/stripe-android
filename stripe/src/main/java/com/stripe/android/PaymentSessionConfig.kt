@@ -28,9 +28,15 @@ data class PaymentSessionConfig internal constructor(
     val prepopulatedShippingInfo: ShippingInformation? = null,
     val isShippingInfoRequired: Boolean = false,
     val isShippingMethodRequired: Boolean = false,
+
+    @LayoutRes
+    @get:LayoutRes
+    val paymentMethodsFooterLayoutId: Int = 0,
+
     @LayoutRes
     @get:LayoutRes
     val addPaymentMethodFooterLayoutId: Int = 0,
+
     val paymentMethodTypes: List<PaymentMethod.Type> = listOf(PaymentMethod.Type.Card),
     val shouldShowGooglePay: Boolean = false,
     val allowedShippingCountryCodes: Set<String> = emptySet(),
@@ -105,6 +111,9 @@ data class PaymentSessionConfig internal constructor(
         private var canDeletePaymentMethods: Boolean = true
 
         @LayoutRes
+        private var paymentMethodsFooterLayoutId: Int = 0
+
+        @LayoutRes
         private var addPaymentMethodFooterLayoutId: Int = 0
 
         /**
@@ -162,6 +171,16 @@ data class PaymentSessionConfig internal constructor(
          */
         fun setShippingMethodsRequired(shippingMethodsRequired: Boolean): Builder = apply {
             this.shippingMethodsRequired = shippingMethodsRequired
+        }
+
+        /**
+         * @param paymentMethodsFooterLayoutId optional layout id that will be inflated and
+         * displayed beneath the payment method selection list on [PaymentMethodsActivity]
+         */
+        fun setPaymentMethodsFooter(
+            @LayoutRes paymentMethodsFooterLayoutId: Int
+        ): Builder = apply {
+            this.paymentMethodsFooterLayoutId = paymentMethodsFooterLayoutId
         }
 
         /**
@@ -266,6 +285,7 @@ data class PaymentSessionConfig internal constructor(
                 prepopulatedShippingInfo = shippingInformation,
                 isShippingInfoRequired = shippingInfoRequired,
                 isShippingMethodRequired = shippingMethodsRequired,
+                paymentMethodsFooterLayoutId = paymentMethodsFooterLayoutId,
                 addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId,
                 paymentMethodTypes = paymentMethodTypes,
                 shouldShowGooglePay = shouldShowGooglePay,

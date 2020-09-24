@@ -233,6 +233,7 @@ class PaymentSession @VisibleForTesting internal constructor(
                 .setInitialPaymentMethodId(
                     viewModel.getSelectedPaymentMethodId(selectedPaymentMethodId)
                 )
+                .setPaymentMethodsFooter(config.paymentMethodsFooterLayoutId)
                 .setAddPaymentMethodFooter(config.addPaymentMethodFooterLayoutId)
                 .setIsPaymentSessionActive(true)
                 .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
