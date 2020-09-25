@@ -3,7 +3,7 @@ package com.stripe.android.view
 import android.content.Context
 import android.text.Editable
 import android.text.InputFilter
-import android.text.method.DigitsKeyListener
+import android.text.InputType
 import android.util.AttributeSet
 import com.stripe.android.R
 
@@ -50,7 +50,7 @@ internal class BecsDebitBsbEditText @JvmOverloads constructor(
 
     init {
         filters = arrayOf(InputFilter.LengthFilter(MAX_LENGTH))
-        keyListener = DigitsKeyListener.getInstance(false, true)
+        inputType = InputType.TYPE_CLASS_NUMBER
 
         addTextChangedListener(
             object : StripeTextWatcher() {
@@ -63,7 +63,7 @@ internal class BecsDebitBsbEditText @JvmOverloads constructor(
                         return
                     }
 
-// skip formatting if past the separator
+                    // skip formatting if past the separator
                     if (start > 4) {
                         return
                     }
