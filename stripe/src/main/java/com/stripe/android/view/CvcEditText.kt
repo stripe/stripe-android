@@ -54,7 +54,9 @@ class CvcEditText @JvmOverloads constructor(
         filters = createFilters(CardBrand.Unknown)
 
         inputType = InputType.TYPE_NUMBER_VARIATION_PASSWORD
-        keyListener = DigitsKeyListener.getInstance(false, true)
+
+        // do not allow plus/minus sign or decimal separator
+        keyListener = DigitsKeyListener.getInstance(false, false)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE)
