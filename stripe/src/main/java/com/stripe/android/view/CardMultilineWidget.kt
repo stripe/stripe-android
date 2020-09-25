@@ -19,6 +19,7 @@ import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
@@ -346,15 +347,10 @@ class CardMultilineWidget @JvmOverloads constructor(
         cardBrand = CardBrand.Unknown
         updateBrandUi()
 
-        allFields.forEach {
-            it.addTextChangedListener(
-                object : StripeTextWatcher() {
-                    override fun afterTextChanged(s: Editable?) {
-                        super.afterTextChanged(s)
-                        shouldShowErrorIcon = false
-                    }
-                }
-            )
+        allFields.forEach { field ->
+            field.doAfterTextChanged {
+                shouldShowErrorIcon = false
+            }
         }
 
         cardNumberEditText.isLoadingCallback = {

@@ -2,11 +2,11 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.os.Build
-import android.text.Editable
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
+import androidx.core.widget.doAfterTextChanged
 import com.stripe.android.R
 import com.stripe.android.databinding.BecsDebitWidgetBinding
 import com.stripe.android.model.PaymentMethod
@@ -49,13 +49,6 @@ class BecsDebitWidget @JvmOverloads constructor(
         }
     }
 
-    private val validParamsTextWatcher = object : StripeTextWatcher() {
-        override fun afterTextChanged(s: Editable?) {
-            super.afterTextChanged(s)
-            validParamsCallback.onInputChanged(isInputValid)
-        }
-    }
-
     private val isInputValid: Boolean
         get() {
             val name = viewBinding.nameEditText.fieldText
@@ -80,8 +73,10 @@ class BecsDebitWidget @JvmOverloads constructor(
             viewBinding.emailEditText,
             viewBinding.bsbEditText,
             viewBinding.accountNumberEditText
-        ).forEach {
-            it.addTextChangedListener(validParamsTextWatcher)
+        ).forEach { field ->
+            field.doAfterTextChanged {
+                validParamsCallback.onInputChanged(isInputValid)
+            }
         }
 
         viewBinding.bsbEditText.onBankChangedCallback = { bank ->
@@ -153,13 +148,9 @@ class BecsDebitWidget @JvmOverloads constructor(
         )
 
         setOf(viewBinding.nameEditText, viewBinding.emailEditText).forEach { field ->
-            field.addTextChangedListener(
-                object : StripeTextWatcher() {
-                    override fun afterTextChanged(s: Editable?) {
-                        field.shouldShowError = false
-                    }
-                }
-            )
+            field.doAfterTextChanged {
+                field.shouldShowError = false
+            }
         }
 
         companyName.takeIf { it.isNotBlank() }?.let {

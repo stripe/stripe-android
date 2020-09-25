@@ -1,10 +1,10 @@
 package com.stripe.android.view
 
 import android.content.Context
-import android.text.Editable
 import android.text.InputFilter
 import android.text.method.DigitsKeyListener
 import android.util.AttributeSet
+import androidx.core.widget.doAfterTextChanged
 import com.stripe.android.R
 
 internal class BecsDebitAccountNumberEditText @JvmOverloads constructor(
@@ -35,13 +35,9 @@ internal class BecsDebitAccountNumberEditText @JvmOverloads constructor(
         filters = arrayOf(InputFilter.LengthFilter(MAX_LENGTH))
         keyListener = DigitsKeyListener.getInstance(false, true)
 
-        addTextChangedListener(
-            object : StripeTextWatcher() {
-                override fun afterTextChanged(s: Editable?) {
-                    shouldShowError = false
-                }
-            }
-        )
+        doAfterTextChanged {
+            shouldShowError = false
+        }
     }
 
     internal companion object {

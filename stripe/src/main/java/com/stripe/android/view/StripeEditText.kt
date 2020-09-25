@@ -2,7 +2,6 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.content.res.ColorStateList
-import android.text.Editable
 import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityNodeInfo
@@ -12,6 +11,7 @@ import android.view.inputmethod.InputConnectionWrapper
 import androidx.annotation.ColorInt
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
+import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.textfield.TextInputEditText
 import com.stripe.android.R
 import kotlinx.coroutines.CoroutineScope
@@ -214,13 +214,9 @@ open class StripeEditText @JvmOverloads constructor(
     }
 
     private fun listenForTextChanges() {
-        addTextChangedListener(
-            object : StripeTextWatcher() {
-                override fun afterTextChanged(s: Editable?) {
-                    afterTextChangedListener?.onTextChanged(s?.toString().orEmpty())
-                }
-            }
-        )
+        doAfterTextChanged { editable ->
+            afterTextChangedListener?.onTextChanged(editable?.toString().orEmpty())
+        }
     }
 
     private fun listenForDeleteEmpty() {
