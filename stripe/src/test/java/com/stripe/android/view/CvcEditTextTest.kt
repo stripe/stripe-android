@@ -35,6 +35,15 @@ class CvcEditTextTest {
     }
 
     @Test
+    fun `CvcEditText should remove non-digits from input`() {
+        cvcEditText.append("-1.2")
+        cvcEditText.append("a")
+        cvcEditText.append("3")
+        assertThat(cvcEditText.fieldText)
+            .isEqualTo("123")
+    }
+
+    @Test
     fun cvcValue_withValidInvalidVisaValue_returnsCvcValue() {
         cvcEditText.setText("1234")
         cvcEditText.updateBrand(CardBrand.Visa)

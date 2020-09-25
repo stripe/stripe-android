@@ -5,7 +5,6 @@ import android.os.Build
 import android.text.Editable
 import android.text.InputFilter
 import android.text.InputType
-import android.text.method.DigitsKeyListener
 import android.util.AttributeSet
 import android.view.View
 import com.google.android.material.textfield.TextInputLayout
@@ -53,8 +52,7 @@ class CvcEditText @JvmOverloads constructor(
         maxLines = 1
         filters = createFilters(CardBrand.Unknown)
 
-        inputType = InputType.TYPE_NUMBER_VARIATION_PASSWORD
-        keyListener = DigitsKeyListener.getInstance(false, true)
+        inputType = InputType.TYPE_CLASS_NUMBER
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE)
