@@ -49,6 +49,13 @@ class BecsDebitBsbEditTextTest {
     }
 
     @Test
+    fun `field should remove non-digits from input`() {
+        bsbEditText.setText("212.121")
+        assertThat(bsbEditText.fieldText)
+            .isEqualTo("212-121")
+    }
+
+    @Test
     fun bsb_whenError_updatesErrorrMessage() {
         bsbEditText.bsb
         assertThat(bsbEditText.errorMessage)

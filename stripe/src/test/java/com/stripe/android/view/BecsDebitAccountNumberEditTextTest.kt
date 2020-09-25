@@ -45,4 +45,11 @@ class BecsDebitAccountNumberEditTextTest {
         assertThat(accountNumberEditText.errorMessage)
             .isNull()
     }
+
+    @Test
+    fun `field should remove non-digits from input`() {
+        accountNumberEditText.append("212.121")
+        assertThat(accountNumberEditText.fieldText)
+            .isEqualTo("212121")
+    }
 }
