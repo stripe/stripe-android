@@ -26,6 +26,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.AccessibilityDelegateCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
+import androidx.core.widget.doAfterTextChanged
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardNumber
@@ -86,12 +87,6 @@ class CardInputWidget @JvmOverloads constructor(
         override fun afterTextChanged(s: Editable?) {
             super.afterTextChanged(s)
             cardValidCallback?.onInputChanged(invalidFields.isEmpty(), invalidFields)
-        }
-    }
-    private val inputChangeTextWatcher = object : StripeTextWatcher() {
-        override fun afterTextChanged(s: Editable?) {
-            super.afterTextChanged(s)
-            shouldShowErrorIcon = false
         }
     }
 
@@ -810,7 +805,11 @@ class CardInputWidget @JvmOverloads constructor(
             }
         }
 
-        allFields.forEach { it.addTextChangedListener(inputChangeTextWatcher) }
+        allFields.forEach { field ->
+            field.doAfterTextChanged {
+                shouldShowErrorIcon = false
+            }
+        }
 
         if (shouldRequestFocus) {
             cardNumberEditText.requestFocus()
