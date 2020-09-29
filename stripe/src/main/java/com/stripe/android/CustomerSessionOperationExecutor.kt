@@ -6,9 +6,6 @@ import com.stripe.android.model.ListPaymentMethodsParams
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-/**
- * Class that creates the [Runnable] task for the [CustomerSession] operation.
- */
 internal class CustomerSessionOperationExecutor(
     private val stripeRepository: StripeRepository,
     private val publishableKey: String,
