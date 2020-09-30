@@ -100,13 +100,46 @@ internal class StripePaymentController internal constructor(
         requestOptions: ApiRequest.Options,
         callback: ApiResultCallback<StripeIntent>
     ) {
-        ConfirmStripeIntentTask(
-            stripeRepository,
-            confirmStripeIntentParams,
-            requestOptions,
-            workContext,
-            callback
-        ).execute()
+        CoroutineScope(workContext).launch {
+            val result = runCatching {
+                val intent = when (confirmStripeIntentParams) {
+                    is ConfirmPaymentIntentParams ->
+                        stripeRepository.confirmPaymentIntent(
+                            // mark this request as `use_stripe_sdk=true`
+                            confirmStripeIntentParams
+                                .withShouldUseStripeSdk(shouldUseStripeSdk = true),
+                            requestOptions,
+                            expandFields = EXPAND_PAYMENT_METHOD
+                        )
+                    is ConfirmSetupIntentParams ->
+                        stripeRepository.confirmSetupIntent(
+                            // mark this request as `use_stripe_sdk=true`
+                            confirmStripeIntentParams
+                                .withShouldUseStripeSdk(shouldUseStripeSdk = true),
+                            requestOptions,
+                            expandFields = EXPAND_PAYMENT_METHOD
+                        )
+                    else -> error("Confirmation params must be ConfirmPaymentIntentParams or ConfirmSetupIntentParams")
+                }
+                requireNotNull(intent) { REQUIRED_ERROR }
+            }
+
+            withContext(Dispatchers.Main) {
+                result.fold(
+                    onSuccess = { intent ->
+                        callback.onSuccess(intent)
+                    },
+                    onFailure = { error ->
+                        callback.onError(
+                            when (error) {
+                                is Exception -> error
+                                else -> RuntimeException(error)
+                            }
+                        )
+                    }
+                )
+            }
+        }
     }
 
     override fun startAuth(
@@ -776,37 +809,6 @@ internal class StripePaymentController internal constructor(
         }
     }
 
-    private class ConfirmStripeIntentTask(
-        private val stripeRepository: StripeRepository,
-        params: ConfirmStripeIntentParams,
-        private val requestOptions: ApiRequest.Options,
-        workContext: CoroutineContext,
-        callback: ApiResultCallback<StripeIntent>
-    ) : ApiOperation<StripeIntent>(workContext, callback) {
-        // mark this request as `use_stripe_sdk=true`
-        private val params: ConfirmStripeIntentParams =
-            params.withShouldUseStripeSdk(shouldUseStripeSdk = true)
-
-        @Throws(StripeException::class)
-        override suspend fun getResult(): StripeIntent? {
-            return when (params) {
-                is ConfirmPaymentIntentParams ->
-                    stripeRepository.confirmPaymentIntent(
-                        params,
-                        requestOptions,
-                        expandFields = EXPAND_PAYMENT_METHOD
-                    )
-                is ConfirmSetupIntentParams ->
-                    stripeRepository.confirmSetupIntent(
-                        params,
-                        requestOptions,
-                        expandFields = EXPAND_PAYMENT_METHOD
-                    )
-                else -> null
-            }
-        }
-    }
-
     private class ConfirmStripeIntentCallback constructor(
         private val host: AuthActivityStarter.Host,
         private val requestOptions: ApiRequest.Options,
@@ -1235,5 +1237,7 @@ internal class StripePaymentController internal constructor(
 
         private val EXPAND_PAYMENT_METHOD = listOf("payment_method")
         internal val CHALLENGE_DELAY = TimeUnit.SECONDS.toMillis(2L)
+
+        private const val REQUIRED_ERROR = "API request returned an invalid response."
     }
 }

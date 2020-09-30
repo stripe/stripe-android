@@ -372,7 +372,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun confirmPaymentIntent_withSourceData_canSuccessfulConfirm() {
+    fun confirmPaymentIntent_withSourceData_canSuccessfulConfirm() = testDispatcher.runBlockingTest {
         // put a private key here to simulate the backend
         val clientSecret = "pi_12345_secret_fake"
 
@@ -413,7 +413,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Ignore("requires a secret key")
-    fun disabled_confirmPaymentIntent_withSourceId_canSuccessfulConfirm() {
+    fun disabled_confirmPaymentIntent_withSourceId_canSuccessfulConfirm() = testDispatcher.runBlockingTest {
         val clientSecret = "temporarily put a private key here simulate the backend"
         val publishableKey = "put a public key that matches the private key here"
         val sourceId = "id of the source created on the backend"
