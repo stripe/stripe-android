@@ -1,4 +1,4 @@
-package com.stripe.android.payment_sheet
+package com.stripe.android.paymentsheet
 
 import android.os.Bundle
 import android.view.View
@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentSheetPaymentMethodsListBinding
 
-internal class PaymentSheetPaymentMethodsListFragment : Fragment(R.layout.fragment_payment_sheet_payment_methods_list) {
+internal class PaymentSheetPaymentMethodsListFragment : Fragment(R.layout.fragment_paymentsheet_payment_methods_list) {
     private val viewModel by activityViewModels<PaymentSheetViewModel> {
         PaymentSheetViewModel.Factory(requireActivity().application)
     }

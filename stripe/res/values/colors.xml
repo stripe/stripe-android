@@ -19,7 +19,7 @@
 
     <color name="stripe_card_widget_progress_foreground">#ffffffcc</color>
     <color name="stripe_card_widget_progress_background">#4F566B</color>
-    <color name="stripe_payment_sheet_selected_payment_method">#1AAE9F</color>
-    <color name="stripe_payment_sheet_add_card_tint">#c3cfd9</color>
-    <color name="stripe_payment_sheet_add_card_background">#788896</color>
+    <color name="stripe_paymentsheet_selected_payment_method">#1AAE9F</color>
+    <color name="stripe_paymentsheet_add_card_tint">#c3cfd9</color>
+    <color name="stripe_paymentsheet_add_card_background">#788896</color>
 </resources>

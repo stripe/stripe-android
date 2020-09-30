@@ -4,13 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="@dimen/stripe_payment_sheet_outer_spacing"
-    tools:context=".payment_sheet.PaymentSheetPaymentMethodsListFragment">
+    android:padding="@dimen/stripe_paymentsheet_outer_spacing"
+    tools:context=".paymentsheet.PaymentSheetPaymentMethodsListFragment">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/stripe_payment_sheet_add_payment_method"
+        android:text="@string/stripe_paymentsheet_add_payment_method"
         android:textSize="24sp"
         android:textStyle="bold"
         android:paddingBottom="10dp" />

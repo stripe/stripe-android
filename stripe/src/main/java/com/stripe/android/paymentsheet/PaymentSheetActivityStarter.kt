@@ -1,4 +1,4 @@
-package com.stripe.android.payment_sheet
+package com.stripe.android.paymentsheet
 
 import android.app.Activity
 import android.content.Intent

@@ -1,4 +1,4 @@
-package com.stripe.android.payment_sheet
+package com.stripe.android.paymentsheet
 
 import android.view.LayoutInflater
 import android.view.View
@@ -82,7 +82,7 @@ internal class PaymentSheetPaymentMethodsAdapter(val paymentMethods: List<Paymen
                 // TODO: Get updated card brand icons
                 binding.brandIcon.setImageResource(card.brand.icon)
                 binding.cardNumber.text = itemView.context
-                    .getString(R.string.payment_sheet_payment_method_item_card_number, card.last4)
+                    .getString(R.string.paymentsheet_payment_method_item_card_number, card.last4)
             }
         }
 

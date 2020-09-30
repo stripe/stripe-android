@@ -1,4 +1,4 @@
-package com.stripe.android.payment_sheet
+package com.stripe.android.paymentsheet
 
 import android.os.Bundle
 import android.view.View
@@ -55,10 +55,10 @@ internal class PaymentSheetActivity : AppCompatActivity() {
                 when (it) {
                     PaymentSheetViewModel.TransitionTarget.AddCard -> {
                         setCustomAnimations(
-                            R.anim.stripe_payment_sheet_transition_enter_from_right,
-                            R.anim.stripe_payment_sheet_transition_exit_to_left,
-                            R.anim.stripe_payment_sheet_transition_enter_from_left,
-                            R.anim.stripe_payment_sheet_transition_exit_to_right
+                            R.anim.stripe_paymentsheet_transition_enter_from_right,
+                            R.anim.stripe_paymentsheet_transition_exit_to_left,
+                            R.anim.stripe_paymentsheet_transition_enter_from_left,
+                            R.anim.stripe_paymentsheet_transition_exit_to_right
                         )
                         addToBackStack(null)
                         replace(fragmentContainerId, PaymentSheetAddCardFragment())
