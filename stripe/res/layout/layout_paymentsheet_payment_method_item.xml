@@ -8,8 +8,8 @@
 
     <ImageView
         android:id="@+id/brand_icon"
-        android:layout_width="@dimen/stripe_checkout_payment_method_icon_size"
-        android:layout_height="@dimen/stripe_checkout_payment_method_icon_size"
+        android:layout_width="@dimen/stripe_paymentsheet_payment_method_icon_size"
+        android:layout_height="@dimen/stripe_paymentsheet_payment_method_icon_size"
         android:paddingVertical="4dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -30,7 +30,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/stripe_ic_check_circle"
-        app:tint="@color/stripe_checkout_selected_payment_method"
+        app:tint="@color/stripe_paymentsheet_selected_payment_method"
         app:layout_constraintEnd_toEndOf="@+id/brand_icon"
         app:layout_constraintBottom_toBottomOf="@+id/brand_icon"
         android:paddingBottom="10dp"

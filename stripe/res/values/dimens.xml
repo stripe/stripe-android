@@ -50,9 +50,9 @@
 
     <dimen name="stripe_card_widget_progress_size">12dp</dimen>
 
-    <!-- Checkout -->
-    <dimen name="stripe_checkout_payment_method_icon_size">76dp</dimen>
-    <dimen name="stripe_checkout_outer_spacing">10dp</dimen>
+    <!-- PaymentSheet -->
+    <dimen name="stripe_paymentsheet_payment_method_icon_size">76dp</dimen>
+    <dimen name="stripe_paymentsheet_outer_spacing">10dp</dimen>
 
     <dimen name="stripe_card_number_text_input_layout_progress_start_margin">25dp</dimen>
     <dimen name="stripe_card_number_text_input_layout_progress_top_margin">10dp</dimen>

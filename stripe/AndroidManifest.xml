@@ -26,8 +26,8 @@
             android:theme="@style/StripeDefaultTheme" />
 
         <activity
-            android:name=".checkout.CheckoutActivity"
-            android:theme="@style/StripeCheckoutDefaultTheme" />
+            android:name=".paymentsheet.PaymentSheetActivity"
+            android:theme="@style/StripePaymentSheetDefaultTheme" />
     </application>
 
 </manifest>

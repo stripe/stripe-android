@@ -1,4 +1,4 @@
-package com.stripe.android.checkout
+package com.stripe.android.paymentsheet
 
 import android.app.Application
 import android.content.Intent
@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 import java.lang.IllegalStateException
 import kotlin.coroutines.CoroutineContext
 
-internal class CheckoutViewModel internal constructor(
+internal class PaymentSheetViewModel internal constructor(
     application: Application,
     private val publishableKey: String,
     private val stripeAccountId: String?,
@@ -41,7 +41,7 @@ internal class CheckoutViewModel internal constructor(
     }
 
     fun updatePaymentMethods(intent: Intent) {
-        val args: CheckoutActivityStarter.Args? = CheckoutActivityStarter.Args.fromIntent(intent)
+        val args: PaymentSheetActivityStarter.Args? = PaymentSheetActivityStarter.Args.fromIntent(intent)
         if (args == null) {
             onError(IllegalStateException("Missing activity args"))
         } else {
@@ -96,7 +96,7 @@ internal class CheckoutViewModel internal constructor(
                 publishableKey
             )
 
-            return CheckoutViewModel(application, publishableKey, stripeAccountId, stripeRepository) as T
+            return PaymentSheetViewModel(application, publishableKey, stripeAccountId, stripeRepository) as T
         }
     }
 }

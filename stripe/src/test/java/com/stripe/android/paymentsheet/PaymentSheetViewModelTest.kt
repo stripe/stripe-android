@@ -1,4 +1,4 @@
-package com.stripe.android.checkout
+package com.stripe.android.paymentsheet
 
 import android.content.Intent
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
@@ -20,13 +20,13 @@ import org.robolectric.RobolectricTestRunner
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-internal class CheckoutViewModelTest {
+internal class PaymentSheetViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
     private val intent = Intent().putExtra(
         ActivityStarter.Args.EXTRA,
-        CheckoutActivityStarter.Args(
+        PaymentSheetActivityStarter.Args(
             "client_secret",
             "ephemeral_key",
             "customer_id"
@@ -34,7 +34,7 @@ internal class CheckoutViewModelTest {
     )
     private val stripeRepository: StripeRepository = FakeStripeRepository()
     private val testDispatcher = TestCoroutineDispatcher()
-    private val viewModel = CheckoutViewModel(
+    private val viewModel = PaymentSheetViewModel(
         ApplicationProvider.getApplicationContext(),
         "publishable_key",
         "stripe_account_id",

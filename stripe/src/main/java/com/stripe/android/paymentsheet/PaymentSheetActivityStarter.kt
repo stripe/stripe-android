@@ -1,15 +1,15 @@
-package com.stripe.android.checkout
+package com.stripe.android.paymentsheet
 
 import android.app.Activity
 import android.content.Intent
 import com.stripe.android.view.ActivityStarter
 import kotlinx.android.parcel.Parcelize
 
-internal class CheckoutActivityStarter : ActivityStarter<CheckoutActivity, CheckoutActivityStarter.Args> {
+internal class PaymentSheetActivityStarter : ActivityStarter<PaymentSheetActivity, PaymentSheetActivityStarter.Args> {
 
     internal constructor(activity: Activity) : super(
         activity,
-        CheckoutActivity::class.java,
+        PaymentSheetActivity::class.java,
         REQUEST_CODE
     )
 
