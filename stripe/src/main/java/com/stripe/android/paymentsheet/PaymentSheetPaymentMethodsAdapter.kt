@@ -5,8 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.R
-import com.stripe.android.databinding.LayoutPaymentSheetAddCardItemBinding
-import com.stripe.android.databinding.LayoutPaymentSheetPaymentMethodItemBinding
+import com.stripe.android.databinding.LayoutPaymentsheetAddCardItemBinding
+import com.stripe.android.databinding.LayoutPaymentsheetPaymentMethodItemBinding
 import com.stripe.android.model.PaymentMethod
 import java.lang.IllegalStateException
 
@@ -71,9 +71,9 @@ internal class PaymentSheetPaymentMethodsAdapter(val paymentMethods: List<Paymen
         }
     }
 
-    private class CardViewHolder(private val binding: LayoutPaymentSheetPaymentMethodItemBinding) : RecyclerView.ViewHolder(binding.root) {
+    private class CardViewHolder(private val binding: LayoutPaymentsheetPaymentMethodItemBinding) : RecyclerView.ViewHolder(binding.root) {
         constructor(parent: ViewGroup) : this(
-            LayoutPaymentSheetPaymentMethodItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            LayoutPaymentsheetPaymentMethodItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
 
         fun setPaymentMethod(method: PaymentMethod) {
@@ -92,7 +92,7 @@ internal class PaymentSheetPaymentMethodsAdapter(val paymentMethods: List<Paymen
     }
 
     private class AddCardViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(
-        LayoutPaymentSheetAddCardItemBinding.inflate(LayoutInflater.from(parent.context), parent, false).root
+        LayoutPaymentsheetAddCardItemBinding.inflate(LayoutInflater.from(parent.context), parent, false).root
     )
 
     private enum class ViewType {

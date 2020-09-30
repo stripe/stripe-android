@@ -6,7 +6,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.R
-import com.stripe.android.databinding.FragmentPaymentSheetPaymentMethodsListBinding
+import com.stripe.android.databinding.FragmentPaymentsheetPaymentMethodsListBinding
 
 internal class PaymentSheetPaymentMethodsListFragment : Fragment(R.layout.fragment_paymentsheet_payment_methods_list) {
     private val viewModel by activityViewModels<PaymentSheetViewModel> {
@@ -20,7 +20,7 @@ internal class PaymentSheetPaymentMethodsListFragment : Fragment(R.layout.fragme
             return
         }
 
-        val binding = FragmentPaymentSheetPaymentMethodsListBinding.bind(view)
+        val binding = FragmentPaymentsheetPaymentMethodsListBinding.bind(view)
         binding.recycler.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
 
         viewModel.paymentMethods.observe(viewLifecycleOwner) {
