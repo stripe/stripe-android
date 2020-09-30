@@ -554,7 +554,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         AuthenticationException::class,
         CardException::class
     )
-    override fun addCustomerSource(
+    override suspend fun addCustomerSource(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,
@@ -590,7 +590,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         AuthenticationException::class,
         CardException::class
     )
-    override fun deleteCustomerSource(
+    override suspend fun deleteCustomerSource(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,
@@ -621,7 +621,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         AuthenticationException::class,
         CardException::class
     )
-    override fun attachPaymentMethod(
+    override suspend fun attachPaymentMethod(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,
@@ -655,7 +655,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         AuthenticationException::class,
         CardException::class
     )
-    override fun detachPaymentMethod(
+    override suspend fun detachPaymentMethod(
         publishableKey: String,
         productUsageTokens: Set<String>,
         paymentMethodId: String,
@@ -688,7 +688,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         AuthenticationException::class,
         CardException::class
     )
-    override fun getPaymentMethods(
+    override suspend fun getPaymentMethods(
         listPaymentMethodsParams: ListPaymentMethodsParams,
         publishableKey: String,
         productUsageTokens: Set<String>,
@@ -730,7 +730,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         AuthenticationException::class,
         CardException::class
     )
-    override fun setDefaultCustomerSource(
+    override suspend fun setDefaultCustomerSource(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,
@@ -767,7 +767,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         AuthenticationException::class,
         CardException::class
     )
-    override fun setCustomerShippingInfo(
+    override suspend fun setCustomerShippingInfo(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,
@@ -802,7 +802,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         AuthenticationException::class,
         CardException::class
     )
-    override fun retrieveCustomer(
+    override suspend fun retrieveCustomer(
         customerId: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options

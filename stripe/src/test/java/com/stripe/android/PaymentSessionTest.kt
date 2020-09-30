@@ -369,7 +369,7 @@ class PaymentSessionTest {
             return PaymentMethodFixtures.CARD_PAYMENT_METHOD
         }
 
-        override fun setDefaultCustomerSource(
+        override suspend fun setDefaultCustomerSource(
             customerId: String,
             publishableKey: String,
             productUsageTokens: Set<String>,
@@ -380,7 +380,7 @@ class PaymentSessionTest {
             return SECOND_CUSTOMER
         }
 
-        override fun retrieveCustomer(
+        override suspend fun retrieveCustomer(
             customerId: String,
             productUsageTokens: Set<String>,
             requestOptions: ApiRequest.Options
