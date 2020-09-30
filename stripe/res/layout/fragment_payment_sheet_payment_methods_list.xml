@@ -4,20 +4,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="@dimen/stripe_checkout_outer_spacing"
-    tools:context=".checkout.CheckoutPaymentMethodsListFragment">
+    android:padding="@dimen/stripe_payment_sheet_outer_spacing"
+    tools:context=".payment_sheet.PaymentSheetPaymentMethodsListFragment">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/stripe_checkout_add_payment_method"
+        android:text="@string/stripe_payment_sheet_pay_with_your"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:paddingBottom="10dp" />
+        android:paddingBottom="10dp"
+        />
 
-    <com.stripe.android.view.CardMultilineWidget
-        android:id="@+id/card_multiline_widget"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        />
 
 </LinearLayout>

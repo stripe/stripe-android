@@ -12,7 +12,7 @@
         android:layout_marginBottom="14dp"
         android:layout_width="68dp"
         android:layout_height="44dp"
-        android:background="@drawable/stripe_checkout_add_card_bg">
+        android:background="@drawable/stripe_payment_sheet_add_card_bg">
 
 
         <ImageView
@@ -20,12 +20,12 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:src="@drawable/stripe_ic_add_circle"
-            app:tint="@color/stripe_checkout_add_card_tint" />
+            app:tint="@color/stripe_payment_sheet_add_card_tint" />
 
     </FrameLayout>
 
     <TextView
-        android:text="@string/stripe_checkout_add_payment_method_button"
+        android:text="@string/stripe_payment_sheet_add_payment_method_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="12sp"

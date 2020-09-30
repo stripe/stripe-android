@@ -24,7 +24,7 @@
 
     <Button
         android:id="@+id/buy_button"
-        android:layout_margin="@dimen/stripe_checkout_outer_spacing"
+        android:layout_margin="@dimen/stripe_payment_sheet_outer_spacing"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Pay $25.00"

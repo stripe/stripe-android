@@ -1,16 +1,16 @@
-package com.stripe.android.checkout
+package com.stripe.android.payment_sheet
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.R
-import com.stripe.android.databinding.LayoutCheckoutAddCardItemBinding
-import com.stripe.android.databinding.LayoutCheckoutPaymentMethodItemBinding
+import com.stripe.android.databinding.LayoutPaymentSheetAddCardItemBinding
+import com.stripe.android.databinding.LayoutPaymentSheetPaymentMethodItemBinding
 import com.stripe.android.model.PaymentMethod
 import java.lang.IllegalStateException
 
-internal class CheckoutPaymentMethodsAdapter(val paymentMethods: List<PaymentMethod>, val addCardClickListener: View.OnClickListener) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+internal class PaymentSheetPaymentMethodsAdapter(val paymentMethods: List<PaymentMethod>, val addCardClickListener: View.OnClickListener) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var selectedPaymentMethodId: String? = null
 
     init {
@@ -71,9 +71,9 @@ internal class CheckoutPaymentMethodsAdapter(val paymentMethods: List<PaymentMet
         }
     }
 
-    private class CardViewHolder(private val binding: LayoutCheckoutPaymentMethodItemBinding) : RecyclerView.ViewHolder(binding.root) {
+    private class CardViewHolder(private val binding: LayoutPaymentSheetPaymentMethodItemBinding) : RecyclerView.ViewHolder(binding.root) {
         constructor(parent: ViewGroup) : this(
-            LayoutCheckoutPaymentMethodItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            LayoutPaymentSheetPaymentMethodItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
 
         fun setPaymentMethod(method: PaymentMethod) {
@@ -82,7 +82,7 @@ internal class CheckoutPaymentMethodsAdapter(val paymentMethods: List<PaymentMet
                 // TODO: Get updated card brand icons
                 binding.brandIcon.setImageResource(card.brand.icon)
                 binding.cardNumber.text = itemView.context
-                    .getString(R.string.checkout_payment_method_item_card_number, card.last4)
+                    .getString(R.string.payment_sheet_payment_method_item_card_number, card.last4)
             }
         }
 
@@ -92,7 +92,7 @@ internal class CheckoutPaymentMethodsAdapter(val paymentMethods: List<PaymentMet
     }
 
     private class AddCardViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(
-        LayoutCheckoutAddCardItemBinding.inflate(LayoutInflater.from(parent.context), parent, false).root
+        LayoutPaymentSheetAddCardItemBinding.inflate(LayoutInflater.from(parent.context), parent, false).root
     )
 
     private enum class ViewType {
