@@ -45,6 +45,10 @@ internal class PaymentSheetActivity : AppCompatActivity() {
 
         setupBottomSheet()
 
+        viewModel.selection.observe(this) {
+            viewBinding.buyButton.isEnabled = it != null
+        }
+
         // TODO: Add loading state
         supportFragmentManager.commit {
             replace(fragmentContainerId, PaymentSheetPaymentMethodsListFragment())
