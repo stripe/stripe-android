@@ -974,7 +974,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     /**
      * Analytics event: [AnalyticsEvent.FileCreate]
      */
-    override fun createFile(
+    override suspend fun createFile(
         fileParams: StripeFileParams,
         requestOptions: ApiRequest.Options
     ): StripeFile {

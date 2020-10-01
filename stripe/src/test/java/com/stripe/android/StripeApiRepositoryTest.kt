@@ -759,7 +759,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun createFile_shouldFireExpectedRequests() {
+    fun createFile_shouldFireExpectedRequests() = testDispatcher.runBlockingTest {
         val stripeRepository = create()
 
         stripeRepository.createFile(
@@ -772,7 +772,8 @@ internal class StripeApiRepositoryTest {
 
         verify(stripeApiRequestExecutor, never()).execute(any<ApiRequest>())
         verify(stripeApiRequestExecutor).execute(fileUploadRequestArgumentCaptor.capture())
-        assertNotNull(fileUploadRequestArgumentCaptor.firstValue)
+        assertThat(fileUploadRequestArgumentCaptor.firstValue)
+            .isNotNull()
 
         verifyAnalyticsRequest(AnalyticsEvent.FileCreate)
     }

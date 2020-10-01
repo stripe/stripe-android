@@ -340,7 +340,7 @@ internal interface StripeRepository {
         requestOptions: ApiRequest.Options
     ): Complete3ds2Result
 
-    fun createFile(
+    suspend fun createFile(
         fileParams: StripeFileParams,
         requestOptions: ApiRequest.Options
     ): StripeFile
