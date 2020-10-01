@@ -1,23 +1,22 @@
 package com.stripe.android.paymentsheet
 
-import android.app.Application
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetPaymentMethodsListBinding
-import com.stripe.android.paymentsheet.model.Selection
+import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal class PaymentSheetPaymentMethodsListFragment : Fragment(R.layout.fragment_paymentsheet_payment_methods_list) {
     private val activityViewModel by activityViewModels<PaymentSheetViewModel> {
         PaymentSheetViewModel.Factory(requireActivity().application)
     }
 
-    private val fragmentViewModel by viewModels<ViewModel>()
+    private val fragmentViewModel by viewModels<VM>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -53,7 +52,7 @@ internal class PaymentSheetPaymentMethodsListFragment : Fragment(R.layout.fragme
         }
     }
 
-    internal class ViewModel(application: Application) : AndroidViewModel(application) {
-        internal var selectedPaymentMethod: Selection? = null
+    internal class VM : ViewModel() {
+        internal var selectedPaymentMethod: PaymentSelection? = null
     }
 }

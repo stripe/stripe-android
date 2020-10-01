@@ -8,16 +8,16 @@ import com.stripe.android.R
 import com.stripe.android.databinding.LayoutPaymentsheetAddCardItemBinding
 import com.stripe.android.databinding.LayoutPaymentsheetPaymentMethodItemBinding
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.model.Selection
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import java.lang.IllegalStateException
 
 internal class PaymentSheetPaymentMethodsAdapter(
     val paymentMethods: List<PaymentMethod>,
-    selectedPaymentMethod: Selection?,
-    val paymentMethodSelectedListener: (Selection) -> Unit,
+    selectedPaymentMethod: PaymentSelection?,
+    val paymentMethodSelectedListener: (PaymentSelection) -> Unit,
     val addCardClickListener: View.OnClickListener
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    private var selectedPaymentMethodId: String? = (selectedPaymentMethod as? Selection.Saved)?.paymentMethodId
+    private var selectedPaymentMethodId: String? = (selectedPaymentMethod as? PaymentSelection.Saved)?.paymentMethodId
 
     init {
         setHasStableIds(true)
@@ -33,7 +33,7 @@ internal class PaymentSheetPaymentMethodsAdapter(
             notifyItemChanged(position)
             selectedPaymentMethodId = paymentMethods.getOrNull(position)?.id
             selectedPaymentMethodId?.let {
-                paymentMethodSelectedListener(Selection.Saved(it))
+                paymentMethodSelectedListener(PaymentSelection.Saved(it))
             }
         }
     }
