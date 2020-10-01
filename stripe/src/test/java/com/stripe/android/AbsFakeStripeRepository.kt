@@ -28,7 +28,7 @@ import org.json.JSONObject
 
 internal abstract class AbsFakeStripeRepository : StripeRepository {
 
-    override fun confirmPaymentIntent(
+    override suspend fun confirmPaymentIntent(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         options: ApiRequest.Options,
         expandFields: List<String>
@@ -52,7 +52,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         return null
     }
 
-    override fun confirmSetupIntent(
+    override suspend fun confirmSetupIntent(
         confirmSetupIntentParams: ConfirmSetupIntentParams,
         options: ApiRequest.Options,
         expandFields: List<String>

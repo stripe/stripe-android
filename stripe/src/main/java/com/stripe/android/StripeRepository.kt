@@ -41,7 +41,7 @@ internal interface StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
-    fun confirmPaymentIntent(
+    suspend fun confirmPaymentIntent(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         options: ApiRequest.Options,
         expandFields: List<String> = emptyList()
@@ -77,7 +77,7 @@ internal interface StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
-    fun confirmSetupIntent(
+    suspend fun confirmSetupIntent(
         confirmSetupIntentParams: ConfirmSetupIntentParams,
         options: ApiRequest.Options,
         expandFields: List<String> = emptyList()
