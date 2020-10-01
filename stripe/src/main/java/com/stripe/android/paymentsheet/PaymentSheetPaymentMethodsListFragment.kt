@@ -27,7 +27,7 @@ internal class PaymentSheetPaymentMethodsListFragment : Fragment(R.layout.fragme
 
         // If we're returning to this fragment from elsewhere, we need to reset the selection to whatever
         // the user had selected previously
-        activityViewModel.setSelection(fragmentViewModel.selectedPaymentMethod)
+        activityViewModel.updateSelection(fragmentViewModel.selectedPaymentMethod)
 
         val binding = FragmentPaymentsheetPaymentMethodsListBinding.bind(view)
         binding.recycler.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
@@ -38,7 +38,7 @@ internal class PaymentSheetPaymentMethodsListFragment : Fragment(R.layout.fragme
                 fragmentViewModel.selectedPaymentMethod,
                 paymentMethodSelectedListener = {
                     fragmentViewModel.selectedPaymentMethod = it
-                    activityViewModel.setSelection(it)
+                    activityViewModel.updateSelection(it)
                 },
                 addCardClickListener = {
                     activityViewModel.transitionTo(PaymentSheetViewModel.TransitionTarget.AddCard)

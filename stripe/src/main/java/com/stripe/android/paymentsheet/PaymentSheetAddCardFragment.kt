@@ -18,6 +18,6 @@ internal class PaymentSheetAddCardFragment : Fragment(R.layout.fragment_payments
             return
         }
 
-        activityViewModel.setSelection(null)
+        activityViewModel.updateSelection(null)
     }
 }

@@ -13,7 +13,7 @@ import com.stripe.android.StripeApiRepository
 import com.stripe.android.StripeRepository
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.model.Selection
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -30,11 +30,11 @@ internal class PaymentSheetViewModel internal constructor(
     private val mutableError = MutableLiveData<Throwable>()
     private val mutableTransition = MutableLiveData<TransitionTarget>()
     private val mutablePaymentMethods = MutableLiveData<List<PaymentMethod>>()
-    private val mutableSelection = MutableLiveData<Selection?>()
+    private val mutableSelection = MutableLiveData<PaymentSelection?>()
     internal val paymentMethods: LiveData<List<PaymentMethod>> = mutablePaymentMethods
     internal val error: LiveData<Throwable> = mutableError
     internal val transition: LiveData<TransitionTarget> = mutableTransition
-    internal val selection: LiveData<Selection?> = mutableSelection
+    internal val selection: LiveData<PaymentSelection?> = mutableSelection
 
     fun onError(throwable: Throwable) {
         mutableError.postValue(throwable)
@@ -44,7 +44,7 @@ internal class PaymentSheetViewModel internal constructor(
         mutableTransition.postValue(target)
     }
 
-    fun setSelection(selection: Selection?) {
+    fun updateSelection(selection: PaymentSelection?) {
         mutableSelection.postValue(selection)
     }
 
