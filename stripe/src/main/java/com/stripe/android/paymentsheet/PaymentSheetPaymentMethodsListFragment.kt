@@ -1,17 +1,23 @@
 package com.stripe.android.paymentsheet
 
+import android.app.Application
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.AndroidViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetPaymentMethodsListBinding
+import com.stripe.android.paymentsheet.model.Selection
 
 internal class PaymentSheetPaymentMethodsListFragment : Fragment(R.layout.fragment_paymentsheet_payment_methods_list) {
-    private val viewModel by activityViewModels<PaymentSheetViewModel> {
+    private val activityViewModel by activityViewModels<PaymentSheetViewModel> {
         PaymentSheetViewModel.Factory(requireActivity().application)
     }
+
+    private val fragmentViewModel by viewModels<ViewModel>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -23,15 +29,26 @@ internal class PaymentSheetPaymentMethodsListFragment : Fragment(R.layout.fragme
         val binding = FragmentPaymentsheetPaymentMethodsListBinding.bind(view)
         binding.recycler.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
 
-        viewModel.paymentMethods.observe(viewLifecycleOwner) {
-            binding.recycler.adapter = PaymentSheetPaymentMethodsAdapter(it) {
-                viewModel.transitionTo(PaymentSheetViewModel.TransitionTarget.AddCard)
-            }
+        activityViewModel.paymentMethods.observe(viewLifecycleOwner) { paymentMethods ->
+            binding.recycler.adapter = PaymentSheetPaymentMethodsAdapter(
+                paymentMethods,
+                fragmentViewModel.selectedPaymentMethod,
+                paymentMethodSelectedListener = {
+                    fragmentViewModel.selectedPaymentMethod = it
+                },
+                addCardClickListener = {
+                    activityViewModel.transitionTo(PaymentSheetViewModel.TransitionTarget.AddCard)
+                }
+            )
         }
 
         // Only fetch the payment methods list if we haven't already
-        if (viewModel.paymentMethods.value == null) {
-            viewModel.updatePaymentMethods(requireActivity().intent)
+        if (activityViewModel.paymentMethods.value == null) {
+            activityViewModel.updatePaymentMethods(requireActivity().intent)
         }
+    }
+
+    internal class ViewModel(application: Application) : AndroidViewModel(application) {
+        internal var selectedPaymentMethod: Selection? = null
     }
 }
