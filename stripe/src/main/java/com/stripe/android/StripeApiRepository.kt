@@ -104,7 +104,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         APIConnectionException::class,
         APIException::class
     )
-    override fun confirmPaymentIntent(
+    override suspend fun confirmPaymentIntent(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         options: ApiRequest.Options,
         expandFields: List<String>
@@ -230,7 +230,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         APIConnectionException::class,
         APIException::class
     )
-    override fun confirmSetupIntent(
+    override suspend fun confirmSetupIntent(
         confirmSetupIntentParams: ConfirmSetupIntentParams,
         options: ApiRequest.Options,
         expandFields: List<String>
