@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.app.Application
 import android.content.Intent
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -60,6 +61,11 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
+    @VisibleForTesting
+    internal fun setPaymentMethods(paymentMethods: List<PaymentMethod>) {
+        mutablePaymentMethods.postValue(paymentMethods)
+    }
+
     private fun updatePaymentMethods(
         ephemeralKey: String,
         customerId: String,
@@ -78,9 +84,7 @@ internal class PaymentSheetViewModel internal constructor(
                 )
             }
             result.fold(
-                onSuccess = {
-                    mutablePaymentMethods.postValue(it)
-                },
+                onSuccess = this@PaymentSheetViewModel::setPaymentMethods,
                 onFailure = {
                     onError(it)
                 }

@@ -52,6 +52,8 @@ ext {
     ktlintVersion = '0.39.0'
     materialVersion = '1.2.1'
 
+    fragmentVersion = '1.2.5'
+
     androidTestVersion = '1.3.0'
 }
 
