@@ -286,9 +286,13 @@ internal class CardNumberEditTextTest {
             workContext = testDispatcher,
             cardAccountRangeRepository = NullCardAccountRangeRepository(),
             staticCardAccountRanges = object : StaticCardAccountRanges {
-                override fun match(
+                override fun first(
                     cardNumber: CardNumber.Unvalidated
                 ): AccountRange? = AccountRangeFixtures.UNIONPAY19
+
+                override fun filter(
+                    cardNumber: CardNumber.Unvalidated
+                ): List<AccountRange> = listOf(AccountRangeFixtures.UNIONPAY19)
             },
             analyticsRequestExecutor = analyticsRequestExecutor,
             analyticsRequestFactory = analyticsRequestFactory,
@@ -315,9 +319,13 @@ internal class CardNumberEditTextTest {
             workContext = testDispatcher,
             cardAccountRangeRepository = NullCardAccountRangeRepository(),
             staticCardAccountRanges = object : StaticCardAccountRanges {
-                override fun match(
+                override fun first(
                     cardNumber: CardNumber.Unvalidated
                 ): AccountRange? = null
+
+                override fun filter(
+                    cardNumber: CardNumber.Unvalidated
+                ): List<AccountRange> = emptyList()
             },
             analyticsRequestExecutor = analyticsRequestExecutor,
             analyticsRequestFactory = analyticsRequestFactory,
@@ -747,6 +755,26 @@ internal class CardNumberEditTextTest {
         idleLooper()
         assertThat(repositoryCalls)
             .isEqualTo(0)
+    }
+
+    @Test
+    fun `when first digit matches a single account, show a card brand`() {
+        Dispatchers.setMain(testDispatcher)
+
+        // matches Visa
+        updateCardNumberAndIdle("4")
+        assertThat(lastBrandChangeCallbackInvocation)
+            .isEqualTo(CardBrand.Visa)
+    }
+
+    @Test
+    fun `when first digit matches multiple accounts, don't show a card brand`() {
+        Dispatchers.setMain(testDispatcher)
+
+        // matches Discover and Union Pay
+        updateCardNumberAndIdle("6")
+        assertThat(lastBrandChangeCallbackInvocation)
+            .isEqualTo(CardBrand.Unknown)
     }
 
     @Test

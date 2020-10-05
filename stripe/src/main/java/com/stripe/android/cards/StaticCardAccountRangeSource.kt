@@ -15,6 +15,6 @@ internal class StaticCardAccountRangeSource(
     override suspend fun getAccountRange(
         cardNumber: CardNumber.Unvalidated
     ): AccountRange? {
-        return accountRanges.match(cardNumber)
+        return accountRanges.first(cardNumber)
     }
 }

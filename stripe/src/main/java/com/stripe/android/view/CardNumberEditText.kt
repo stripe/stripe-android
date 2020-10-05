@@ -131,7 +131,7 @@ class CardNumberEditText internal constructor(
 
     internal val panLength: Int
         get() = accountRange?.panLength
-            ?: staticCardAccountRanges.match(unvalidatedCardNumber)?.panLength
+            ?: staticCardAccountRanges.first(unvalidatedCardNumber)?.panLength
             ?: CardNumber.DEFAULT_PAN_LENGTH
 
     private val formattedPanLength: Int
@@ -334,7 +334,14 @@ class CardNumberEditText internal constructor(
             }
 
             val cardNumber = CardNumber.Unvalidated(s?.toString().orEmpty())
-            val staticAccountRange = staticCardAccountRanges.match(cardNumber)
+            val staticAccountRange = staticCardAccountRanges.filter(cardNumber)
+                .let { accountRanges ->
+                    if (accountRanges.size == 1) {
+                        accountRanges.first()
+                    } else {
+                        null
+                    }
+                }
             if (staticAccountRange == null || shouldQueryRepository(staticAccountRange)) {
                 // query for AccountRange data
                 queryAccountRangeRepository(cardNumber)
