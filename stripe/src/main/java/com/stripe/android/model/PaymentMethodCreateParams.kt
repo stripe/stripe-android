@@ -170,6 +170,7 @@ data class PaymentMethodCreateParams internal constructor(
         Alipay("alipay"),
         GrabPay("grabpay"),
         PayPal("paypal"),
+        AfterPay("afterpay_clearpay"),
     }
 
     @Parcelize
@@ -622,6 +623,19 @@ data class PaymentMethodCreateParams internal constructor(
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = Type.PayPal,
+                metadata = metadata
+            )
+        }
+
+        @JvmSynthetic
+        @JvmOverloads
+        internal fun createAfterPay(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = Type.AfterPay,
+                billingDetails = billingDetails,
                 metadata = metadata
             )
         }

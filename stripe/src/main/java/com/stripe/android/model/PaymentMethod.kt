@@ -136,7 +136,8 @@ data class PaymentMethod internal constructor(
         Oxxo("oxxo", isReusable = false),
         Alipay("alipay", isReusable = false),
         GrabPay("grabpay", isReusable = false),
-        PayPal("paypal", isReusable = false);
+        PayPal("paypal", isReusable = false),
+        AfterPay("afterpay_clearpay", isReusable = false);
 
         override fun toString(): String {
             return code
