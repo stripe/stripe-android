@@ -252,7 +252,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         requestOptions: ApiRequest.Options
     ): Complete3ds2Result = Complete3ds2Result(true)
 
-    override fun createFile(
+    override suspend fun createFile(
         fileParams: StripeFileParams,
         requestOptions: ApiRequest.Options
     ): StripeFile {
