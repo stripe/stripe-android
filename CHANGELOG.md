@@ -5,6 +5,7 @@
 * [#2895](https://github.com/stripe/stripe-android/pull/2895) Add support for configuring a footer layout in payment methods screen
 * [#2897](https://github.com/stripe/stripe-android/pull/2897) Only allow digits in `CvcEditText`
 * [#2900](https://github.com/stripe/stripe-android/pull/2900) Only allow digits in BECS BSB and account number fields
+* [#2913](https://github.com/stripe/stripe-android/pull/2913) Add support for Oxxo PaymentMethod
 
 ## 16.0.0 - 2020-09-23
 This release includes several breaking changes. See the [migration guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) for more details.
