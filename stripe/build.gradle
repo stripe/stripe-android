@@ -56,7 +56,7 @@ dependencies {
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
     testImplementation 'com.google.truth:truth:1.0.1'
     testImplementation "androidx.arch.core:core-testing:2.1.0"
-    debugImplementation "androidx.fragment:fragment-testing:$fragmentVersion"
+    testImplementation "androidx.fragment:fragment-testing:$fragmentVersion"
 
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
     androidTestImplementation "androidx.test:rules:$androidTestVersion"
