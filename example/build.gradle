@@ -48,10 +48,10 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidLifecycleVersion"
     implementation "com.google.android.material:material:$materialVersion"
 
-    implementation 'com.google.android.gms:play-services-wallet:18.1.0'
+    implementation 'com.google.android.gms:play-services-wallet:18.1.1'
 
     /* Used for server calls */
-    implementation 'com.squareup.okio:okio:2.8.0'
+    implementation 'com.squareup.okio:okio:2.9.0'
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation 'com.facebook.stetho:stetho:1.5.1'
     implementation 'com.facebook.stetho:stetho-okhttp3:1.5.1'
