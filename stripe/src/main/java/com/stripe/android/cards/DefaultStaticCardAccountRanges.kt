@@ -4,9 +4,13 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
 
 internal class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
-    override fun match(
+    override fun first(
         cardNumber: CardNumber.Unvalidated
-    ) = ACCOUNTS.firstOrNull { it.binRange.matches(cardNumber) }
+    ) = filter(cardNumber).firstOrNull()
+
+    override fun filter(
+        cardNumber: CardNumber.Unvalidated
+    ): List<AccountRange> = ACCOUNTS.filter { it.binRange.matches(cardNumber) }
 
     internal companion object {
         private val VISA_ACCOUNTS =
@@ -59,7 +63,7 @@ internal class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
             )
         }
 
-        private val DISCOVER_ACCOUNTS = setOf(
+        internal val DISCOVER_ACCOUNTS = setOf(
             BinRange(
                 low = "6000000000000000",
                 high = "6099999999999999"
