@@ -223,26 +223,26 @@ class PaymentMethodEndToEndTest {
     }
 
     @Test
-    fun `createPaymentMethod with AfterPay should create expected object`() {
+    fun `createPaymentMethod with Afterpay should create expected object`() {
         val paymentMethod = Stripe(context, ApiKeyFixtures.AFTERPAY_PUBLISHABLE_KEY)
             .createPaymentMethodSynchronous(
-                PaymentMethodCreateParams.createAfterPay(
+                PaymentMethodCreateParams.createAfterpay(
                     billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS
                 )
             )
         assertThat(paymentMethod?.type)
-            .isEqualTo(PaymentMethod.Type.AfterPay)
+            .isEqualTo(PaymentMethod.Type.Afterpay)
     }
 
     @Test
-    fun `createPaymentMethod with AfterPay should require name, email, and address`() {
+    fun `createPaymentMethod with Afterpay should require name, email, and address`() {
         val stripe = Stripe(context, ApiKeyFixtures.AFTERPAY_PUBLISHABLE_KEY)
         val missingNameException = assertFailsWith<InvalidRequestException>(
-            "Name is required to create an AfterPay payment method"
+            "Name is required to create an Afterpay payment method"
         ) {
             stripe
                 .createPaymentMethodSynchronous(
-                    PaymentMethodCreateParams.createAfterPay(
+                    PaymentMethodCreateParams.createAfterpay(
                         billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(name = null)
                     )
                 )
@@ -251,11 +251,11 @@ class PaymentMethodEndToEndTest {
         assertThat(missingNameException.message).isEqualTo("Missing required param: billing_details[name].")
 
         val missingEmailException = assertFailsWith<InvalidRequestException>(
-            "Email is required to create an AfterPay payment method"
+            "Email is required to create an Afterpay payment method"
         ) {
             stripe
                 .createPaymentMethodSynchronous(
-                    PaymentMethodCreateParams.createAfterPay(
+                    PaymentMethodCreateParams.createAfterpay(
                         billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(email = null)
                     )
                 )
@@ -264,11 +264,11 @@ class PaymentMethodEndToEndTest {
         assertThat(missingEmailException.message).isEqualTo("Missing required param: billing_details[email].")
 
         val missingAddressException = assertFailsWith<InvalidRequestException>(
-            "Email is required to create an AfterPay payment method"
+            "Email is required to create an Afterpay payment method"
         ) {
             stripe
                 .createPaymentMethodSynchronous(
-                    PaymentMethodCreateParams.createAfterPay(
+                    PaymentMethodCreateParams.createAfterpay(
                         billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(address = null)
                     )
                 )
