@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.annotation.IdRes
@@ -54,12 +55,13 @@ internal class PaymentSheetActivity : AppCompatActivity() {
             // TODO: Communicate error to caller
             Snackbar.make(viewBinding.coordinator, "Received error: ${it.message}", Snackbar.LENGTH_LONG).show()
         }
+        viewModel.paymentIntentResult.observe(this) {
+            // TOOD: Communicate result to caller
+            animateOut()
+        }
 
         setupBottomSheet()
-
-        viewModel.selection.observe(this) {
-            viewBinding.buyButton.isEnabled = it != null
-        }
+        setupBuyButton()
 
         // TODO: Add loading state
         supportFragmentManager.commit {
@@ -81,6 +83,23 @@ internal class PaymentSheetActivity : AppCompatActivity() {
                     }
                 }
             }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        viewModel.onActivityResult(requestCode, resultCode, data)
+    }
+
+    private fun setupBuyButton() {
+        // TOOD(smaskell): Set text based on currency & amount in payment intent
+        viewModel.selection.observe(this) {
+            // TODO(smaskell): show Google Pay button when GooglePay selected
+            viewBinding.buyButton.isEnabled = it != null
+        }
+        viewBinding.buyButton.setOnClickListener {
+            viewModel.checkout(this)
         }
     }
 

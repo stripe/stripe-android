@@ -1,16 +1,25 @@
 package com.stripe.android.paymentsheet
 
+import android.content.Intent
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.spy
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.AbsFakeStripeRepository
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.ApiRequest
+import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
+import com.stripe.android.view.ActivityStarter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -29,17 +38,36 @@ class PaymentSheetActivityTest {
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
-    private val viewModel = PaymentSheetViewModel(
-        application = ApplicationProvider.getApplicationContext(),
-        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-        stripeAccountId = null,
-        stripeRepository = FakeStripeRepository(),
-        workContext = testCoroutineDispatcher
+    private val paymentIntent: PaymentIntent = mock()
+
+    private val stripeRepository = FakeStripeRepository(paymentIntent)
+
+    private val viewModel = spy(
+        PaymentSheetViewModel(
+            application = ApplicationProvider.getApplicationContext(),
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = null,
+            stripeRepository = stripeRepository,
+            workContext = testCoroutineDispatcher
+        )
+    )
+
+    private val intent = Intent(
+        ApplicationProvider.getApplicationContext(),
+        PaymentSheetActivity::class.java
+    ).putExtra(
+        ActivityStarter.Args.EXTRA,
+        PaymentSheetActivityStarter.Args(
+            "client_secret",
+            "ephemeral_key",
+            "customer_id"
+        )
     )
 
     @BeforeTest
     fun before() {
         Dispatchers.setMain(testCoroutineDispatcher)
+        whenever(paymentIntent.requiresAction()).thenReturn(false)
     }
 
     @Test
@@ -85,8 +113,23 @@ class PaymentSheetActivityTest {
             assertThat(currentFragment(activity)).isInstanceOf(PaymentSheetPaymentMethodsListFragment::class.java)
 
             activity.onBackPressed()
+            idleLooper()
             // animating out
             assertThat(activity.bottomSheetBehavior.state).isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
+        }
+    }
+
+    @Test
+    fun `handles buy button clicks`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            testCoroutineDispatcher.advanceTimeBy(500)
+            idleLooper()
+
+            viewModel.updateSelection(PaymentSelection.Saved("saved_pm"))
+            activity.viewBinding.buyButton.performClick()
+            verify(viewModel).checkout(activity)
         }
     }
 
@@ -101,5 +144,9 @@ class PaymentSheetActivityTest {
         }
     }
 
-    private class FakeStripeRepository : AbsFakeStripeRepository()
+    private class FakeStripeRepository(val paymentIntent: PaymentIntent) : AbsFakeStripeRepository() {
+        override suspend fun confirmPaymentIntent(confirmPaymentIntentParams: ConfirmPaymentIntentParams, options: ApiRequest.Options, expandFields: List<String>): PaymentIntent? {
+            return paymentIntent
+        }
+    }
 }
