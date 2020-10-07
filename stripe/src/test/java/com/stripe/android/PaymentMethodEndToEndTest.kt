@@ -226,12 +226,12 @@ class PaymentMethodEndToEndTest {
     fun `createPaymentMethod with Afterpay should create expected object`() {
         val paymentMethod = Stripe(context, ApiKeyFixtures.AFTERPAY_PUBLISHABLE_KEY)
             .createPaymentMethodSynchronous(
-                PaymentMethodCreateParams.createAfterpay(
+                PaymentMethodCreateParams.createAfterpayClearpay(
                     billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS
                 )
             )
         assertThat(paymentMethod?.type)
-            .isEqualTo(PaymentMethod.Type.Afterpay)
+            .isEqualTo(PaymentMethod.Type.AfterpayClearpay)
     }
 
     @Test
@@ -242,7 +242,7 @@ class PaymentMethodEndToEndTest {
         ) {
             stripe
                 .createPaymentMethodSynchronous(
-                    PaymentMethodCreateParams.createAfterpay(
+                    PaymentMethodCreateParams.createAfterpayClearpay(
                         billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(name = null)
                     )
                 )
@@ -255,7 +255,7 @@ class PaymentMethodEndToEndTest {
         ) {
             stripe
                 .createPaymentMethodSynchronous(
-                    PaymentMethodCreateParams.createAfterpay(
+                    PaymentMethodCreateParams.createAfterpayClearpay(
                         billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(email = null)
                     )
                 )
@@ -268,7 +268,7 @@ class PaymentMethodEndToEndTest {
         ) {
             stripe
                 .createPaymentMethodSynchronous(
-                    PaymentMethodCreateParams.createAfterpay(
+                    PaymentMethodCreateParams.createAfterpayClearpay(
                         billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(address = null)
                     )
                 )
