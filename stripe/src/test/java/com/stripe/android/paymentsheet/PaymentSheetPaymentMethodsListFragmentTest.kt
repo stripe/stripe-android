@@ -112,7 +112,7 @@ class PaymentSheetPaymentMethodsListFragmentTest {
 
     private fun activityViewModel(fragment: PaymentSheetPaymentMethodsListFragment): PaymentSheetViewModel {
         return fragment.activityViewModels<PaymentSheetViewModel> {
-            PaymentSheetViewModel.Factory(fragment.requireActivity().application)
+            PaymentSheetViewModel.Factory { fragment.requireActivity().application }
         }.value
     }
 

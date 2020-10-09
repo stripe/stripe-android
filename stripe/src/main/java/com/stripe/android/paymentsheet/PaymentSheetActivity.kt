@@ -2,10 +2,11 @@ package com.stripe.android.paymentsheet
 
 import android.os.Bundle
 import android.view.View
-import androidx.activity.viewModels
 import androidx.annotation.IdRes
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.commit
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HIDDEN
@@ -16,14 +17,25 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 internal class PaymentSheetActivity : AppCompatActivity() {
-    private val viewBinding by lazy {
-        ActivityCheckoutBinding.inflate(layoutInflater)
-    }
-    private val bottomSheetBehavior by lazy {
+    @VisibleForTesting
+    internal var viewModelFactory: ViewModelProvider.Factory =
+        PaymentSheetViewModel.Factory {
+            application
+        }
+    @VisibleForTesting
+    internal val bottomSheetBehavior by lazy {
         BottomSheetBehavior.from(viewBinding.bottomSheet)
     }
-    private val viewModel by viewModels<PaymentSheetViewModel> {
-        PaymentSheetViewModel.Factory(application)
+    @VisibleForTesting
+    internal val viewBinding by lazy {
+        ActivityCheckoutBinding.inflate(layoutInflater)
+    }
+
+    private val viewModel by lazy {
+        ViewModelProvider(
+            this,
+            viewModelFactory
+        )[PaymentSheetViewModel::class.java]
     }
 
     private val fragmentContainerId: Int

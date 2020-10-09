@@ -97,9 +97,10 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     internal class Factory(
-        private val application: Application
+        private val applicationProvider: () -> Application
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            val application = applicationProvider()
             val config = PaymentConfiguration.getInstance(application)
             val publishableKey = config.publishableKey
             val stripeAccountId = config.stripeAccountId
