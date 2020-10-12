@@ -48,7 +48,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidLifecycleVersion"
     implementation "com.google.android.material:material:$materialVersion"
 
-    implementation 'com.google.android.gms:play-services-wallet:18.1.1'
+    implementation 'com.google.android.gms:play-services-wallet:18.1.2'
 
     /* Used for server calls */
     implementation 'com.squareup.okio:okio:2.9.0'
@@ -62,7 +62,7 @@ dependencies {
 
     implementation 'com.squareup.okhttp3:logging-interceptor:4.9.0'
 
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.4'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.5'
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
