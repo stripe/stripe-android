@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -11,8 +12,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HIDDEN
-import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.R
+import com.stripe.android.StripeIntentResult
 import com.stripe.android.databinding.ActivityCheckoutBinding
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -49,15 +50,27 @@ internal class PaymentSheetActivity : AppCompatActivity() {
 
         // Handle taps outside of bottom sheet
         viewBinding.root.setOnClickListener {
-            animateOut()
+            onUserCancel()
         }
         viewModel.error.observe(this) {
-            // TODO: Communicate error to caller
-            Snackbar.make(viewBinding.coordinator, "Received error: ${it.message}", Snackbar.LENGTH_LONG).show()
+            animateOut(
+                PaymentSheet.CompletionStatus.Failed(
+                    it,
+                    // TODO: Set payment intent if available
+                    paymentIntent = null
+                )
+            )
         }
         viewModel.paymentIntentResult.observe(this) {
-            // TOOD: Communicate result to caller
-            animateOut()
+            when (it.outcome) {
+                StripeIntentResult.Outcome.SUCCEEDED -> {
+                    // TOOD: Show success state before exiting
+                    animateOut(PaymentSheet.CompletionStatus.Succeeded(it.intent))
+                }
+                else -> {
+                    // TODO: Display error state in UI
+                }
+            }
         }
 
         setupBottomSheet()
@@ -127,7 +140,20 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         }
     }
 
-    private fun animateOut() {
+    private fun animateOut(status: PaymentSheet.CompletionStatus) {
+        val resultCode = when (status) {
+            is PaymentSheet.CompletionStatus.Succeeded -> {
+                Activity.RESULT_OK
+            }
+            is PaymentSheet.CompletionStatus.Cancelled,
+            is PaymentSheet.CompletionStatus.Failed -> {
+                Activity.RESULT_CANCELED
+            }
+        }
+        setResult(
+            resultCode,
+            Intent().putExtras(PaymentSheet.Result(status).toBundle())
+        )
         // When the bottom sheet finishes animating to its new state,
         // the callback will finish the activity
         bottomSheetBehavior.state = STATE_HIDDEN
@@ -142,8 +168,18 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         if (supportFragmentManager.backStackEntryCount > 0) {
             super.onBackPressed()
         } else {
-            animateOut()
+            onUserCancel()
         }
+    }
+
+    private fun onUserCancel() {
+        animateOut(
+            PaymentSheet.CompletionStatus.Cancelled(
+                viewModel.error.value,
+                // TODO: set payment intent if available
+                paymentIntent = null
+            )
+        )
     }
 
     private companion object {
