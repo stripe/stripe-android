@@ -13,7 +13,9 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal class PaymentSheetPaymentMethodsListFragment : Fragment(R.layout.fragment_paymentsheet_payment_methods_list) {
     private val activityViewModel by activityViewModels<PaymentSheetViewModel> {
-        PaymentSheetViewModel.Factory(requireActivity().application)
+        PaymentSheetViewModel.Factory {
+            requireActivity().application
+        }
     }
 
     private val fragmentViewModel by viewModels<VM>()

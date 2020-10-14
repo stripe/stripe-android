@@ -10,7 +10,9 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal class PaymentSheetAddCardFragment : Fragment(R.layout.fragment_paymentsheet_add_card) {
     private val activityViewModel by activityViewModels<PaymentSheetViewModel> {
-        PaymentSheetViewModel.Factory(requireActivity().application)
+        PaymentSheetViewModel.Factory {
+            requireActivity().application
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
