@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import android.app.Activity
 import android.content.Intent
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.any
@@ -25,16 +24,12 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.view.ActivityStarter
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentSheetViewModelTest {
     @get:Rule
@@ -50,14 +45,11 @@ internal class PaymentSheetViewModelTest {
     )
     private val stripeRepository: StripeRepository = FakeStripeRepository()
     private val paymentController: PaymentController = mock()
-    private val testDispatcher = TestCoroutineDispatcher()
     private val viewModel = PaymentSheetViewModel(
-        ApplicationProvider.getApplicationContext(),
         "publishable_key",
         "stripe_account_id",
         stripeRepository,
-        paymentController,
-        testDispatcher
+        paymentController
     )
 
     private val activity: Activity = mock()
@@ -70,7 +62,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `updatePaymentMethods should fetch from api repository`() = testDispatcher.runBlockingTest {
+    fun `updatePaymentMethods should fetch from api repository`() {
         var paymentMethods: List<PaymentMethod>? = null
         viewModel.paymentMethods.observeForever {
             paymentMethods = it

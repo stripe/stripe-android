@@ -4,11 +4,11 @@ import android.app.Activity
 import android.app.Application
 import android.content.Intent
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.ApiRequest
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentConfiguration
@@ -22,20 +22,15 @@ import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.view.AuthActivityStarter
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.lang.IllegalStateException
-import kotlin.coroutines.CoroutineContext
 
 internal class PaymentSheetViewModel internal constructor(
-    application: Application,
     private val publishableKey: String,
     private val stripeAccountId: String?,
     private val stripeRepository: StripeRepository,
-    private val paymentController: PaymentController,
-    private val workContext: CoroutineContext = Dispatchers.IO
-) : AndroidViewModel(application) {
+    private val paymentController: PaymentController
+) : ViewModel() {
     private val mutableError = MutableLiveData<Throwable>()
     private val mutableTransition = MutableLiveData<TransitionTarget>()
     private val mutablePaymentMethods = MutableLiveData<List<PaymentMethod>>()
@@ -138,7 +133,7 @@ internal class PaymentSheetViewModel internal constructor(
         customerId: String,
         stripeAccountId: String? = this.stripeAccountId
     ) {
-        CoroutineScope(workContext).launch {
+        viewModelScope.launch {
             val result = kotlin.runCatching {
                 stripeRepository.getPaymentMethods(
                     ListPaymentMethodsParams(
@@ -182,7 +177,7 @@ internal class PaymentSheetViewModel internal constructor(
                 true
             )
 
-            return PaymentSheetViewModel(application, publishableKey, stripeAccountId, stripeRepository, paymentController) as T
+            return PaymentSheetViewModel(publishableKey, stripeAccountId, stripeRepository, paymentController) as T
         }
     }
 }
