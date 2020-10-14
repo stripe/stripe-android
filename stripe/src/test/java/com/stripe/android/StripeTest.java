@@ -107,7 +107,7 @@ public class StripeTest {
     @Test
     public void testVersion() {
         assertEquals(
-                String.format(Locale.ROOT, "AndroidBindings/%s", BuildConfig.VERSION_NAME),
+                String.format(Locale.ROOT, "AndroidBindings/%s", Stripe.VERSION_NAME),
                 Stripe.VERSION
         );
     }

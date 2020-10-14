@@ -19,7 +19,7 @@ class AnalyticsRequestTest {
 
     @Test
     fun factoryCreate_createsExpectedObject() {
-        val sdkVersion = BuildConfig.VERSION_NAME
+        val sdkVersion = Stripe.VERSION_NAME
         val analyticsRequest = factory.create(
             params = AnalyticsDataFactory(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
                 .createPaymentMethodCreationParams(

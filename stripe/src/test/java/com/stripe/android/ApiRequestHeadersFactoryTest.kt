@@ -52,19 +52,25 @@ class ApiRequestHeadersFactoryTest {
         val headers = createHeaders()
 
         val userAgentData = JSONObject(requireNotNull(headers[ApiRequest.HEADER_STRIPE_CLIENT_USER_AGENT]))
-        assertThat(userAgentData.getString("bindings.version")).isEqualTo(BuildConfig.VERSION_NAME)
-        assertThat(userAgentData.getString("lang")).isEqualTo("Java")
-        assertThat(userAgentData.getString("publisher")).isEqualTo("Stripe")
-        assertThat(userAgentData.getString("os.name")).isEqualTo("android")
-        assertThat(userAgentData.getString("os.version").toInt()).isEqualTo(Build.VERSION.SDK_INT)
-        assertThat(userAgentData.getString("http.agent").isNotBlank()).isTrue()
+        assertThat(userAgentData.getString("bindings.version"))
+            .isEqualTo(Stripe.VERSION_NAME)
+        assertThat(userAgentData.getString("lang"))
+            .isEqualTo("Java")
+        assertThat(userAgentData.getString("publisher"))
+            .isEqualTo("Stripe")
+        assertThat(userAgentData.getString("os.name"))
+            .isEqualTo("android")
+        assertThat(userAgentData.getString("os.version").toInt())
+            .isEqualTo(Build.VERSION.SDK_INT)
+        assertThat(userAgentData.getString("http.agent"))
+            .isNotEmpty()
     }
 
     @Test
     fun headers_correctlyAddsExpectedAdditionalParameters() {
         val headers = createHeaders()
 
-        val expectedUserAgent = "Stripe/v1 AndroidBindings/${BuildConfig.VERSION_NAME}"
+        val expectedUserAgent = "Stripe/v1 AndroidBindings/${Stripe.VERSION_NAME}"
         assertThat(headers["User-Agent"]).isEqualTo(expectedUserAgent)
         assertThat(headers["Accept"]).isEqualTo("application/json")
         assertThat(headers["Accept-Charset"]).isEqualTo("UTF-8")

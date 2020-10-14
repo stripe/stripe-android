@@ -34,7 +34,7 @@ internal class FingerprintRequestParamsFactory @VisibleForTesting internal const
     internal fun createParams(fingerprintData: FingerprintData?): Map<String, Any> {
         return mapOf(
             "v2" to 1,
-            "tag" to BuildConfig.VERSION_NAME,
+            "tag" to Stripe.VERSION_NAME,
             "src" to "android-sdk",
             "a" to createFirstMap(),
             "b" to createSecondMap(fingerprintData)

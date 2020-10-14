@@ -304,7 +304,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
             FIELD_OS_RELEASE to Build.VERSION.RELEASE,
             FIELD_OS_VERSION to Build.VERSION.SDK_INT,
             FIELD_DEVICE_TYPE to DEVICE_TYPE,
-            FIELD_BINDINGS_VERSION to BuildConfig.VERSION_NAME
+            FIELD_BINDINGS_VERSION to Stripe.VERSION_NAME
         )
     }
 
