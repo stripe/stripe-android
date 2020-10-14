@@ -6,8 +6,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.spy
-import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.AbsFakeStripeRepository
 import com.stripe.android.ApiKeyFixtures
@@ -20,6 +18,7 @@ import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityStarter
+import com.stripe.android.view.PaymentRelayActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -28,6 +27,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 import kotlin.test.BeforeTest
 
 @ExperimentalCoroutinesApi
@@ -42,14 +42,12 @@ class PaymentSheetActivityTest {
 
     private val stripeRepository = FakeStripeRepository(paymentIntent)
 
-    private val viewModel = spy(
-        PaymentSheetViewModel(
-            application = ApplicationProvider.getApplicationContext(),
-            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            stripeAccountId = null,
-            stripeRepository = stripeRepository,
-            workContext = testCoroutineDispatcher
-        )
+    private val viewModel = PaymentSheetViewModel(
+        application = ApplicationProvider.getApplicationContext(),
+        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+        stripeAccountId = null,
+        stripeRepository = stripeRepository,
+        workContext = testCoroutineDispatcher
     )
 
     private val intent = Intent(
@@ -129,7 +127,11 @@ class PaymentSheetActivityTest {
 
             viewModel.updateSelection(PaymentSelection.Saved("saved_pm"))
             activity.viewBinding.buyButton.performClick()
-            verify(viewModel).checkout(activity)
+
+            // payment intent was confirmed and result will be communicated through PaymentRelayActivity
+            val nextActivity = shadowOf(activity).peekNextStartedActivity()
+            assertThat(nextActivity.component?.className)
+                .isEqualTo(PaymentRelayActivity::class.java.name)
         }
     }
 
