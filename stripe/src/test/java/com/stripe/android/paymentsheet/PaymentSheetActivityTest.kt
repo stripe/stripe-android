@@ -12,6 +12,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.ApiRequest
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -40,7 +41,7 @@ class PaymentSheetActivityTest {
 
     private val paymentIntent: PaymentIntent = mock()
 
-    private val stripeRepository = FakeStripeRepository(paymentIntent)
+    private val stripeRepository = FakeStripeRepository(PaymentIntentFixtures.PI_WITH_SHIPPING)
 
     private val viewModel = PaymentSheetViewModel(
         application = ApplicationProvider.getApplicationContext(),
