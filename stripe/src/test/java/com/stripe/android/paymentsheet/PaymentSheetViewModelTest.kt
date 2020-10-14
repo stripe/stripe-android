@@ -5,16 +5,19 @@ import android.content.Intent
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.doAnswer
+import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.AbsFakeStripeRepository
 import com.stripe.android.ApiRequest
 import com.stripe.android.ApiResultCallback
+import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
-import com.stripe.android.Stripe
 import com.stripe.android.StripeRepository
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ListPaymentMethodsParams
@@ -29,7 +32,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.lang.RuntimeException
 import kotlin.test.BeforeTest
 
 @ExperimentalCoroutinesApi
@@ -47,22 +49,24 @@ internal class PaymentSheetViewModelTest {
         )
     )
     private val stripeRepository: StripeRepository = FakeStripeRepository()
+    private val paymentController: PaymentController = mock()
     private val testDispatcher = TestCoroutineDispatcher()
-    private val stripe: Stripe = mock()
     private val viewModel = PaymentSheetViewModel(
         ApplicationProvider.getApplicationContext(),
         "publishable_key",
         "stripe_account_id",
         stripeRepository,
-        stripe,
+        paymentController,
         testDispatcher
     )
 
     private val activity: Activity = mock()
+    private val callbackCaptor: KArgumentCaptor<ApiResultCallback<PaymentIntentResult>> = argumentCaptor()
 
     @BeforeTest
     fun before() {
         whenever(activity.intent).thenReturn(intent)
+        whenever(paymentController.shouldHandlePaymentResult(any(), any())).thenReturn(true)
     }
 
     @Test
@@ -101,11 +105,19 @@ internal class PaymentSheetViewModelTest {
     fun `checkout should confirm saved payment methods`() {
         viewModel.updateSelection(PaymentSelection.Saved("saved_pm"))
         viewModel.checkout(activity)
-        verify(stripe).confirmPayment(
-            activity,
-            ConfirmPaymentIntentParams.createWithPaymentMethodId(
-                "saved_pm",
-                "client_secret"
+        verify(paymentController).startConfirmAndAuth(
+            any(),
+            eq(
+                ConfirmPaymentIntentParams.createWithPaymentMethodId(
+                    "saved_pm",
+                    "client_secret"
+                )
+            ),
+            eq(
+                ApiRequest.Options(
+                    "publishable_key",
+                    "stripe_account_id",
+                )
             )
         )
     }
@@ -115,11 +127,19 @@ internal class PaymentSheetViewModelTest {
         val createParams: PaymentMethodCreateParams = mock()
         viewModel.updateSelection(PaymentSelection.New(createParams))
         viewModel.checkout(activity)
-        verify(stripe).confirmPayment(
-            activity,
-            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-                createParams,
-                "client_secret"
+        verify(paymentController).startConfirmAndAuth(
+            any(),
+            eq(
+                ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                    createParams,
+                    "client_secret"
+                )
+            ),
+            eq(
+                ApiRequest.Options(
+                    "publishable_key",
+                    "stripe_account_id",
+                )
             )
         )
     }
@@ -137,10 +157,8 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `onActivityResult should update paymentIntentResult`() {
         val paymentIntentResult: PaymentIntentResult = mock()
-        whenever(stripe.onPaymentResult(any(), any(), any())).doAnswer {
-            val callback = it.arguments[2] as ApiResultCallback<PaymentIntentResult>
-            callback.onSuccess(paymentIntentResult)
-            true
+        whenever(paymentController.handlePaymentResult(any(), callbackCaptor.capture())).doAnswer {
+            callbackCaptor.lastValue.onSuccess(paymentIntentResult)
         }
 
         viewModel.onActivityResult(0, 0, intent)
@@ -153,10 +171,8 @@ internal class PaymentSheetViewModelTest {
         viewModel.error.observeForever {
             error = it
         }
-        whenever(stripe.onPaymentResult(any(), any(), any())).doAnswer {
-            val callback = it.arguments[2] as ApiResultCallback<PaymentIntentResult>
-            callback.onError(RuntimeException("some exception"))
-            true
+        whenever(paymentController.handlePaymentResult(any(), callbackCaptor.capture())).doAnswer {
+            callbackCaptor.lastValue.onError(RuntimeException("some exception"))
         }
         viewModel.onActivityResult(0, 0, intent)
         assertThat(error).isNotNull()

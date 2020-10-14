@@ -12,8 +12,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.ApiRequest
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
-import com.stripe.android.Stripe
 import com.stripe.android.StripeApiRepository
 import com.stripe.android.StripePaymentController
 import com.stripe.android.StripeRepository
@@ -21,6 +21,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.view.AuthActivityStarter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -32,7 +33,7 @@ internal class PaymentSheetViewModel internal constructor(
     private val publishableKey: String,
     private val stripeAccountId: String?,
     private val stripeRepository: StripeRepository,
-    private val stripe: Stripe,
+    private val paymentController: PaymentController,
     private val workContext: CoroutineContext = Dispatchers.IO
 ) : AndroidViewModel(application) {
     private val mutableError = MutableLiveData<Throwable>()
@@ -45,32 +46,6 @@ internal class PaymentSheetViewModel internal constructor(
     internal val transition: LiveData<TransitionTarget> = mutableTransition
     internal val selection: LiveData<PaymentSelection?> = mutableSelection
     internal val paymentIntentResult: LiveData<PaymentIntentResult> = mutablePaymentIntentResult
-
-    internal constructor(
-        application: Application,
-        publishableKey: String,
-        stripeAccountId: String?,
-        stripeRepository: StripeRepository,
-        workContext: CoroutineContext = Dispatchers.IO
-    ) : this(
-        application,
-        publishableKey,
-        stripeAccountId,
-        stripeRepository,
-        Stripe(
-            stripeRepository,
-            StripePaymentController(
-                application.applicationContext,
-                publishableKey,
-                stripeRepository,
-                true,
-                workContext = workContext
-            ),
-            publishableKey,
-            stripeAccountId
-        ),
-        workContext = workContext
-    )
 
     fun onError(throwable: Throwable) {
         mutableError.postValue(throwable)
@@ -96,44 +71,53 @@ internal class PaymentSheetViewModel internal constructor(
     fun checkout(activity: Activity) {
         val args = getPaymentSheetActivityArgs(activity.intent) ?: return
         // TODO(smaskell): Show processing indicator
-        when (val selection = selection.value) {
+        val confirmParams = when (val selection = selection.value) {
             PaymentSelection.GooglePay -> TODO("smaskell: handle Google Pay confirmation")
             is PaymentSelection.Saved -> {
                 // TODO(smaskell): Properly set savePaymentMethod/setupFutureUsage
-                stripe.confirmPayment(
-                    activity,
-                    ConfirmPaymentIntentParams.createWithPaymentMethodId(
-                        selection.paymentMethodId,
-                        args.clientSecret
-                    )
+                ConfirmPaymentIntentParams.createWithPaymentMethodId(
+                    selection.paymentMethodId,
+                    args.clientSecret
                 )
             }
             is PaymentSelection.New -> {
-                stripe.confirmPayment(
-                    activity,
-                    ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-                        selection.paymentMethodCreateParams,
-                        args.clientSecret
-                    )
+                ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                    selection.paymentMethodCreateParams,
+                    args.clientSecret
                 )
             }
-            null -> onError(IllegalStateException("checkout called when no payment method selected"))
+            null -> {
+                onError(IllegalStateException("checkout called when no payment method selected"))
+                null
+            }
+        }
+        confirmParams?.let {
+            paymentController.startConfirmAndAuth(
+                AuthActivityStarter.Host.create(activity),
+                it,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
+            )
         }
     }
 
     fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        stripe.onPaymentResult(
-            requestCode, data,
-            object : ApiResultCallback<PaymentIntentResult> {
-                override fun onSuccess(result: PaymentIntentResult) {
-                    mutablePaymentIntentResult.postValue(result)
-                }
+        data?.takeIf { paymentController.shouldHandlePaymentResult(requestCode, it) }?.let {
+            paymentController.handlePaymentResult(
+                it,
+                object : ApiResultCallback<PaymentIntentResult> {
+                    override fun onSuccess(result: PaymentIntentResult) {
+                        mutablePaymentIntentResult.postValue(result)
+                    }
 
-                override fun onError(e: Exception) {
-                    this@PaymentSheetViewModel.onError(e)
+                    override fun onError(e: Exception) {
+                        this@PaymentSheetViewModel.onError(e)
+                    }
                 }
-            }
-        )
+            )
+        }
     }
 
     @VisibleForTesting
@@ -191,8 +175,14 @@ internal class PaymentSheetViewModel internal constructor(
                 application,
                 publishableKey
             )
+            val paymentController = StripePaymentController(
+                application.applicationContext,
+                publishableKey,
+                stripeRepository,
+                true
+            )
 
-            return PaymentSheetViewModel(application, publishableKey, stripeAccountId, stripeRepository) as T
+            return PaymentSheetViewModel(application, publishableKey, stripeAccountId, stripeRepository, paymentController) as T
         }
     }
 }

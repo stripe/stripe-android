@@ -10,6 +10,7 @@ import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.AbsFakeStripeRepository
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.ApiRequest
+import com.stripe.android.StripePaymentController
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -48,6 +49,11 @@ class PaymentSheetActivityTest {
         publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
         stripeAccountId = null,
         stripeRepository = stripeRepository,
+        paymentController = StripePaymentController(
+            ApplicationProvider.getApplicationContext(),
+            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeRepository
+        ),
         workContext = testCoroutineDispatcher
     )
 
