@@ -65,7 +65,7 @@ internal sealed class RequestHeadersFactory {
                 mapOf(
                     "os.name" to "android",
                     "os.version" to Build.VERSION.SDK_INT.toString(),
-                    "bindings.version" to BuildConfig.VERSION_NAME,
+                    "bindings.version" to Stripe.VERSION_NAME,
                     "lang" to "Java",
                     "publisher" to "Stripe",
                     "http.agent" to systemPropertySupplier(PROP_USER_AGENT)

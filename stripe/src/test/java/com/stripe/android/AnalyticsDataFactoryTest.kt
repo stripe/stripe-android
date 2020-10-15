@@ -98,7 +98,7 @@ class AnalyticsDataFactoryTest {
             "os_release" to "9",
             "os_version" to 28,
             "device_type" to "unknown_Android_robolectric",
-            "bindings_version" to BuildConfig.VERSION_NAME,
+            "bindings_version" to Stripe.VERSION_NAME,
             "app_name" to "com.stripe.android.test",
             "app_version" to 0,
             "product_usage" to ATTRIBUTION.toList(),
@@ -195,7 +195,7 @@ class AnalyticsDataFactoryTest {
         assertEquals(versionCode, params[AnalyticsDataFactory.FIELD_APP_VERSION])
         assertEquals(BuildConfig.LIBRARY_PACKAGE_NAME, params[AnalyticsDataFactory.FIELD_APP_NAME])
 
-        assertEquals(BuildConfig.VERSION_NAME, params[AnalyticsDataFactory.FIELD_BINDINGS_VERSION])
+        assertEquals(Stripe.VERSION_NAME, params[AnalyticsDataFactory.FIELD_BINDINGS_VERSION])
         assertEquals(expectedEventName, params[AnalyticsDataFactory.FIELD_EVENT])
         assertEquals(expectedUaName, params[AnalyticsDataFactory.FIELD_ANALYTICS_UA])
 
@@ -223,7 +223,7 @@ class AnalyticsDataFactoryTest {
         assertNotNull(params[AnalyticsDataFactory.FIELD_OS_RELEASE])
         assertNotNull(params[AnalyticsDataFactory.FIELD_OS_NAME])
 
-        assertEquals(BuildConfig.VERSION_NAME, params[AnalyticsDataFactory.FIELD_BINDINGS_VERSION])
+        assertEquals(Stripe.VERSION_NAME, params[AnalyticsDataFactory.FIELD_BINDINGS_VERSION])
         assertEquals(expectedEventName, params[AnalyticsDataFactory.FIELD_EVENT])
         assertEquals(expectedUaName, params[AnalyticsDataFactory.FIELD_ANALYTICS_UA])
 

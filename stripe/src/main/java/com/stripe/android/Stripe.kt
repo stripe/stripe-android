@@ -1715,7 +1715,8 @@ class Stripe internal constructor(
         @JvmField
         val API_VERSION: String = ApiVersion.get().code
 
-        const val VERSION: String = "AndroidBindings/${BuildConfig.VERSION_NAME}"
+        internal const val VERSION_NAME = "16.0.1"
+        const val VERSION: String = "AndroidBindings/$VERSION_NAME"
 
         /**
          * Setter for identifying your plug-in or library.
