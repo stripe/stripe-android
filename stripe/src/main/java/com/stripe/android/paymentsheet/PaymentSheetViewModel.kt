@@ -155,7 +155,12 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     internal enum class TransitionTarget {
-        AddCard
+        // User has saved PM's and is selected
+        SelectSavedPaymentMethod,
+        // User has saved PM's and is adding a new one
+        AddPaymentMethodFull,
+        // User has no saved PM's
+        AddPaymentMethodSheet
     }
 
     internal class Factory(

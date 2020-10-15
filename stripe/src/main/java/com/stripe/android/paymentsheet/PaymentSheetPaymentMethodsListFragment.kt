@@ -43,7 +43,7 @@ internal class PaymentSheetPaymentMethodsListFragment : Fragment(R.layout.fragme
                     activityViewModel.updateSelection(it)
                 },
                 addCardClickListener = {
-                    activityViewModel.transitionTo(PaymentSheetViewModel.TransitionTarget.AddCard)
+                    activityViewModel.transitionTo(PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull)
                 }
             )
         }

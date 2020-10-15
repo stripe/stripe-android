@@ -75,16 +75,14 @@ internal class PaymentSheetActivity : AppCompatActivity() {
 
         setupBottomSheet()
         setupBuyButton()
-
-        // TODO: Add loading state
         supportFragmentManager.commit {
-            replace(fragmentContainerId, PaymentSheetPaymentMethodsListFragment())
+            replace(fragmentContainerId, PaymentSheetLoadingFragment())
         }
 
         viewModel.transition.observe(this) {
             supportFragmentManager.commit {
                 when (it) {
-                    PaymentSheetViewModel.TransitionTarget.AddCard -> {
+                    PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull -> {
                         setCustomAnimations(
                             R.anim.stripe_paymentsheet_transition_enter_from_right,
                             R.anim.stripe_paymentsheet_transition_exit_to_left,
@@ -92,6 +90,12 @@ internal class PaymentSheetActivity : AppCompatActivity() {
                             R.anim.stripe_paymentsheet_transition_exit_to_right
                         )
                         addToBackStack(null)
+                        replace(fragmentContainerId, PaymentSheetAddCardFragment())
+                    }
+                    PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod -> {
+                        replace(fragmentContainerId, PaymentSheetPaymentMethodsListFragment())
+                    }
+                    PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet -> {
                         replace(fragmentContainerId, PaymentSheetAddCardFragment())
                     }
                 }
@@ -182,7 +186,7 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         )
     }
 
-    private companion object {
-        private const val ANIMATE_IN_DELAY = 300L
+    internal companion object {
+        internal const val ANIMATE_IN_DELAY = 300L
     }
 }

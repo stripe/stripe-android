@@ -103,7 +103,7 @@ class PaymentSheetPaymentMethodsListFragmentTest {
             adapter.addCardClickListener.onClick(it.requireView())
             idleLooper()
 
-            assertThat(activityViewModel.transition.value).isEqualTo(PaymentSheetViewModel.TransitionTarget.AddCard)
+            assertThat(activityViewModel.transition.value).isEqualTo(PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull)
         }
     }
 
