@@ -41,7 +41,6 @@ class PaymentSheetActivityTest {
     private val stripeRepository = FakeStripeRepository(PaymentIntentFixtures.PI_WITH_SHIPPING)
 
     private val viewModel = PaymentSheetViewModel(
-        application = ApplicationProvider.getApplicationContext(),
         publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
         stripeAccountId = null,
         stripeRepository = stripeRepository,
@@ -49,8 +48,7 @@ class PaymentSheetActivityTest {
             ApplicationProvider.getApplicationContext(),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeRepository
-        ),
-        workContext = testCoroutineDispatcher
+        )
     )
 
     private val intent = Intent(
