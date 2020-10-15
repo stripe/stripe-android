@@ -14,7 +14,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HIDDEN
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.databinding.ActivityCheckoutBinding
+import com.stripe.android.databinding.ActivityPaymentSheetBinding
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -30,7 +30,7 @@ internal class PaymentSheetActivity : AppCompatActivity() {
     }
     @VisibleForTesting
     internal val viewBinding by lazy {
-        ActivityCheckoutBinding.inflate(layoutInflater)
+        ActivityPaymentSheetBinding.inflate(layoutInflater)
     }
 
     private val viewModel by lazy {
