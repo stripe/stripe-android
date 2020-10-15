@@ -187,7 +187,7 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         )
     }
 
-    private companion object {
-        private const val ANIMATE_IN_DELAY = 300L
+    internal companion object {
+        internal const val ANIMATE_IN_DELAY = 300L
     }
 }
