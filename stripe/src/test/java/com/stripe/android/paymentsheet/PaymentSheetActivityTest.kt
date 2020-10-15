@@ -225,7 +225,12 @@ class PaymentSheetActivityTest {
     }
 
     private class FakeStripeRepository(val paymentIntent: PaymentIntent, val paymentMethods: List<PaymentMethod>) : AbsFakeStripeRepository() {
-        override suspend fun getPaymentMethods(listPaymentMethodsParams: ListPaymentMethodsParams, publishableKey: String, productUsageTokens: Set<String>, requestOptions: ApiRequest.Options): List<PaymentMethod> {
+        override suspend fun getPaymentMethods(
+            listPaymentMethodsParams: ListPaymentMethodsParams,
+            publishableKey: String,
+            productUsageTokens: Set<String>,
+            requestOptions: ApiRequest.Options
+        ): List<PaymentMethod> {
             return paymentMethods
         }
 
