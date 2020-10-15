@@ -158,9 +158,9 @@ internal class PaymentSheetViewModel internal constructor(
         // User has saved PM's and is selected
         SelectSavedPaymentMethod,
         // User has saved PM's and is adding a new one
-        AddCard,
+        AddPaymentMethodFull,
         // User has no saved PM's
-        EnterPaymentMethod
+        AddPaymentMethodSheet
     }
 
     internal class Factory(

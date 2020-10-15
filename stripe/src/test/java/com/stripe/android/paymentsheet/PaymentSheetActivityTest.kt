@@ -118,7 +118,7 @@ class PaymentSheetActivityTest {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
             assertThat(currentFragment(activity)).isInstanceOf(PaymentSheetPaymentMethodsListFragment::class.java)
-            viewModel.transitionTo(PaymentSheetViewModel.TransitionTarget.AddCard)
+            viewModel.transitionTo(PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull)
             idleLooper()
             assertThat(currentFragment(activity)).isInstanceOf(PaymentSheetAddCardFragment::class.java)
 

@@ -83,7 +83,7 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         viewModel.transition.observe(this) {
             supportFragmentManager.commit {
                 when (it) {
-                    PaymentSheetViewModel.TransitionTarget.AddCard -> {
+                    PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull -> {
                         setCustomAnimations(
                             R.anim.stripe_paymentsheet_transition_enter_from_right,
                             R.anim.stripe_paymentsheet_transition_exit_to_left,
@@ -96,7 +96,7 @@ internal class PaymentSheetActivity : AppCompatActivity() {
                     PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod -> {
                         replace(fragmentContainerId, PaymentSheetPaymentMethodsListFragment())
                     }
-                    PaymentSheetViewModel.TransitionTarget.EnterPaymentMethod -> {
+                    PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet -> {
                         replace(fragmentContainerId, PaymentSheetAddCardFragment())
                     }
                 }

@@ -23,7 +23,7 @@ class PaymentSheetLoadingFragment : Fragment(R.layout.fragment_payment_sheet_loa
 
         activityViewModel.paymentMethods.observe(requireActivity()) {
             val target = if (it.isEmpty()) {
-                TransitionTarget.EnterPaymentMethod
+                TransitionTarget.AddPaymentMethodSheet
             } else {
                 TransitionTarget.SelectSavedPaymentMethod
             }
