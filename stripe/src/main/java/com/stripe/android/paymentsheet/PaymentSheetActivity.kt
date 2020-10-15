@@ -76,9 +76,8 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         setupBottomSheet()
         setupBuyButton()
 
-        // TODO: Add loading state
         supportFragmentManager.commit {
-            replace(fragmentContainerId, PaymentSheetPaymentMethodsListFragment())
+            replace(fragmentContainerId, PaymentSheetLoadingFragment())
         }
 
         viewModel.transition.observe(this) {
@@ -92,6 +91,12 @@ internal class PaymentSheetActivity : AppCompatActivity() {
                             R.anim.stripe_paymentsheet_transition_exit_to_right
                         )
                         addToBackStack(null)
+                        replace(fragmentContainerId, PaymentSheetAddCardFragment())
+                    }
+                    PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod -> {
+                        replace(fragmentContainerId, PaymentSheetPaymentMethodsListFragment())
+                    }
+                    PaymentSheetViewModel.TransitionTarget.EnterPaymentMethod -> {
                         replace(fragmentContainerId, PaymentSheetAddCardFragment())
                     }
                 }
