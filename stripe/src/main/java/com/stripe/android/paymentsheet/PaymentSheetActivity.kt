@@ -75,7 +75,6 @@ internal class PaymentSheetActivity : AppCompatActivity() {
 
         setupBottomSheet()
         setupBuyButton()
-
         supportFragmentManager.commit {
             replace(fragmentContainerId, PaymentSheetLoadingFragment())
         }
