@@ -1,16 +1,24 @@
 package com.stripe.android.paymentsheet
 
+import android.content.Intent
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.AbsFakeStripeRepository
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.ApiRequest
+import com.stripe.android.StripePaymentController
+import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
+import com.stripe.android.view.ActivityStarter
+import com.stripe.android.view.PaymentRelayActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -19,6 +27,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 import kotlin.test.BeforeTest
 
 @ExperimentalCoroutinesApi
@@ -29,12 +38,31 @@ class PaymentSheetActivityTest {
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
+    private val stripeRepository = FakeStripeRepository(PaymentIntentFixtures.PI_WITH_SHIPPING)
+
     private val viewModel = PaymentSheetViewModel(
         application = ApplicationProvider.getApplicationContext(),
         publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
         stripeAccountId = null,
-        stripeRepository = FakeStripeRepository(),
+        stripeRepository = stripeRepository,
+        paymentController = StripePaymentController(
+            ApplicationProvider.getApplicationContext(),
+            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeRepository
+        ),
         workContext = testCoroutineDispatcher
+    )
+
+    private val intent = Intent(
+        ApplicationProvider.getApplicationContext(),
+        PaymentSheetActivity::class.java
+    ).putExtra(
+        ActivityStarter.Args.EXTRA,
+        PaymentSheetActivityStarter.Args(
+            "client_secret",
+            "ephemeral_key",
+            "customer_id"
+        )
     )
 
     @BeforeTest
@@ -85,8 +113,28 @@ class PaymentSheetActivityTest {
             assertThat(currentFragment(activity)).isInstanceOf(PaymentSheetPaymentMethodsListFragment::class.java)
 
             activity.onBackPressed()
+            idleLooper()
             // animating out
             assertThat(activity.bottomSheetBehavior.state).isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
+        }
+    }
+
+    @Test
+    fun `handles buy button clicks`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            testCoroutineDispatcher.advanceTimeBy(500)
+            idleLooper()
+
+            viewModel.updateSelection(PaymentSelection.Saved("saved_pm"))
+            activity.viewBinding.buyButton.performClick()
+            idleLooper()
+
+            // payment intent was confirmed and result will be communicated through PaymentRelayActivity
+            val nextActivity = shadowOf(activity).peekNextStartedActivity()
+            assertThat(nextActivity.component?.className)
+                .isEqualTo(PaymentRelayActivity::class.java.name)
         }
     }
 
@@ -101,5 +149,9 @@ class PaymentSheetActivityTest {
         }
     }
 
-    private class FakeStripeRepository : AbsFakeStripeRepository()
+    private class FakeStripeRepository(val paymentIntent: PaymentIntent) : AbsFakeStripeRepository() {
+        override suspend fun confirmPaymentIntent(confirmPaymentIntentParams: ConfirmPaymentIntentParams, options: ApiRequest.Options, expandFields: List<String>): PaymentIntent? {
+            return paymentIntent
+        }
+    }
 }

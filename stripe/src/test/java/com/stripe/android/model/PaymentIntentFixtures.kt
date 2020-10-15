@@ -651,6 +651,7 @@ internal object PaymentIntentFixtures {
         }
         """.trimIndent()
     )
+    val PI_WITH_SHIPPING = PARSER.parse(PI_WITH_SHIPPING_JSON)!!
 
     val OXXO_REQUIRES_ACTION_JSON = JSONObject(
         """
