@@ -8,10 +8,14 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.AbsFakeStripeRepository
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.ApiRequest
+import com.stripe.android.ApiResultCallback
+import com.stripe.android.PaymentController
+import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -38,7 +42,9 @@ class PaymentSheetActivityTest {
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
-    private val stripeRepository = FakeStripeRepository(PaymentIntentFixtures.PI_WITH_SHIPPING)
+    private val paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_WITH_SHIPPING
+
+    private val stripeRepository = FakeStripeRepository(paymentIntent)
 
     private val viewModel = PaymentSheetViewModel(
         publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
@@ -71,7 +77,7 @@ class PaymentSheetActivityTest {
     @Test
     fun `handles clicks outside of bottom sheet`() {
         val scenario = activityScenario()
-        scenario.launch().onActivity { activity ->
+        scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
             testCoroutineDispatcher.advanceTimeBy(500)
             idleLooper()
@@ -81,13 +87,16 @@ class PaymentSheetActivityTest {
             idleLooper()
 
             assertThat(activity.bottomSheetBehavior.state).isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
+            assertThat(PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent)).isEqualTo(
+                PaymentSheet.Result(PaymentSheet.CompletionStatus.Cancelled(null, null))
+            )
         }
     }
 
     @Test
     fun `updates buy button state`() {
         val scenario = activityScenario()
-        scenario.launch().onActivity { activity ->
+        scenario.launch(intent).onActivity { activity ->
             assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
 
             viewModel.updateSelection(PaymentSelection.GooglePay)
@@ -101,7 +110,7 @@ class PaymentSheetActivityTest {
     @Test
     fun `handles fragment transitions`() {
         val scenario = activityScenario()
-        scenario.launch().onActivity { activity ->
+        scenario.launch(intent).onActivity { activity ->
             assertThat(currentFragment(activity)).isInstanceOf(PaymentSheetPaymentMethodsListFragment::class.java)
             viewModel.transitionTo(PaymentSheetViewModel.TransitionTarget.AddCard)
             idleLooper()
@@ -136,6 +145,34 @@ class PaymentSheetActivityTest {
         }
     }
 
+    @Test
+    fun `reports successful payment intent result`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            testCoroutineDispatcher.advanceTimeBy(500)
+            idleLooper()
+
+            viewModel.onActivityResult(
+                StripePaymentController.PAYMENT_REQUEST_CODE, 0,
+                Intent().apply {
+                    putExtras(
+                        PaymentController.Result(
+                            "client_secret",
+                            StripeIntentResult.Outcome.SUCCEEDED
+                        ).toBundle()
+                    )
+                }
+            )
+            idleLooper()
+
+            assertThat(activity.bottomSheetBehavior.state).isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
+            assertThat(PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent)).isEqualTo(
+                PaymentSheet.Result(PaymentSheet.CompletionStatus.Succeeded(paymentIntent))
+            )
+        }
+    }
+
     private fun currentFragment(activity: PaymentSheetActivity) =
         activity.supportFragmentManager.findFragmentById(activity.viewBinding.fragmentContainer.id)
 
@@ -150,6 +187,10 @@ class PaymentSheetActivityTest {
     private class FakeStripeRepository(val paymentIntent: PaymentIntent) : AbsFakeStripeRepository() {
         override suspend fun confirmPaymentIntent(confirmPaymentIntentParams: ConfirmPaymentIntentParams, options: ApiRequest.Options, expandFields: List<String>): PaymentIntent? {
             return paymentIntent
+        }
+
+        override fun retrieveIntent(clientSecret: String, options: ApiRequest.Options, expandFields: List<String>, callback: ApiResultCallback<StripeIntent>) {
+            callback.onSuccess(paymentIntent)
         }
     }
 }
