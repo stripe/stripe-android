@@ -5,8 +5,6 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.AbsFakeStripeRepository
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.ApiRequest
@@ -14,8 +12,6 @@ import com.stripe.android.StripePaymentController
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.AbsFakeStripeRepository
-import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -41,8 +37,6 @@ class PaymentSheetActivityTest {
     val rule = InstantTaskExecutorRule()
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
-
-    private val paymentIntent: PaymentIntent = mock()
 
     private val stripeRepository = FakeStripeRepository(PaymentIntentFixtures.PI_WITH_SHIPPING)
 
@@ -74,7 +68,6 @@ class PaymentSheetActivityTest {
     @BeforeTest
     fun before() {
         Dispatchers.setMain(testCoroutineDispatcher)
-        whenever(paymentIntent.requiresAction()).thenReturn(false)
     }
 
     @Test
@@ -136,6 +129,7 @@ class PaymentSheetActivityTest {
 
             viewModel.updateSelection(PaymentSelection.Saved("saved_pm"))
             activity.viewBinding.buyButton.performClick()
+            idleLooper()
 
             // payment intent was confirmed and result will be communicated through PaymentRelayActivity
             val nextActivity = shadowOf(activity).peekNextStartedActivity()
