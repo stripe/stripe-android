@@ -101,15 +101,15 @@ internal class PaymentSheetActivity : AppCompatActivity() {
                         )
                         addToBackStack(null)
                         replace(fragmentContainerId, PaymentSheetAddCardFragment())
-                        viewModel.updateMode(SheetMode.FULL)
+                        viewModel.updateMode(SheetMode.Full)
                     }
                     PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod -> {
                         replace(fragmentContainerId, PaymentSheetPaymentMethodsListFragment())
-                        viewModel.updateMode(SheetMode.WRAPPED)
+                        viewModel.updateMode(SheetMode.Wrapped)
                     }
                     PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet -> {
                         replace(fragmentContainerId, PaymentSheetAddCardFragment())
-                        viewModel.updateMode(SheetMode.FULL_COLLAPSED)
+                        viewModel.updateMode(SheetMode.FullCollapsed)
                     }
                 }
             }

@@ -32,7 +32,7 @@ internal class PaymentSheetPaymentMethodsListFragment : Fragment(R.layout.fragme
         // the user had selected previously
         activityViewModel.updateSelection(fragmentViewModel.selectedPaymentMethod)
         // reset the mode in case we're returning from the back stack
-        activityViewModel.updateMode(SheetMode.WRAPPED)
+        activityViewModel.updateMode(SheetMode.Wrapped)
 
         val binding = FragmentPaymentsheetPaymentMethodsListBinding.bind(view)
         binding.recycler.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)

@@ -177,9 +177,9 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     internal enum class SheetMode(val height: Int, @BottomSheetBehavior.State val behaviourState: Int) {
-        FULL(MATCH_PARENT, STATE_EXPANDED),
-        FULL_COLLAPSED(MATCH_PARENT, STATE_COLLAPSED),
-        WRAPPED(WRAP_CONTENT, STATE_COLLAPSED)
+        Full(MATCH_PARENT, STATE_EXPANDED),
+        FullCollapsed(MATCH_PARENT, STATE_COLLAPSED),
+        Wrapped(WRAP_CONTENT, STATE_COLLAPSED)
     }
 
     internal class Factory(
