@@ -3,12 +3,19 @@ package com.stripe.android.paymentsheet
 import android.app.Activity
 import android.app.Application
 import android.content.Intent
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_COLLAPSED
+import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
+import com.google.android.material.bottomsheet.BottomSheetBehavior.State
 import com.stripe.android.ApiRequest
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentConfiguration
@@ -33,14 +40,16 @@ internal class PaymentSheetViewModel internal constructor(
 ) : ViewModel() {
     private val mutableError = MutableLiveData<Throwable>()
     private val mutableTransition = MutableLiveData<TransitionTarget>()
+    private val mutableSheetMode = MutableLiveData<SheetMode>()
     private val mutablePaymentMethods = MutableLiveData<List<PaymentMethod>>()
     private val mutableSelection = MutableLiveData<PaymentSelection?>()
     private val mutablePaymentIntentResult = MutableLiveData<PaymentIntentResult>()
-    internal val paymentMethods: LiveData<List<PaymentMethod>> = mutablePaymentMethods
-    internal val error: LiveData<Throwable> = mutableError
+    internal val paymentMethods: LiveData<List<PaymentMethod>> = mutablePaymentMethods.distinctUntilChanged()
+    internal val error: LiveData<Throwable> = mutableError.distinctUntilChanged()
     internal val transition: LiveData<TransitionTarget> = mutableTransition
-    internal val selection: LiveData<PaymentSelection?> = mutableSelection
-    internal val paymentIntentResult: LiveData<PaymentIntentResult> = mutablePaymentIntentResult
+    internal val selection: LiveData<PaymentSelection?> = mutableSelection.distinctUntilChanged()
+    internal val paymentIntentResult: LiveData<PaymentIntentResult> = mutablePaymentIntentResult.distinctUntilChanged()
+    internal val sheetMode: LiveData<SheetMode> = mutableSheetMode.distinctUntilChanged()
 
     fun onError(throwable: Throwable) {
         mutableError.postValue(throwable)
@@ -61,6 +70,10 @@ internal class PaymentSheetViewModel internal constructor(
                 args.customerId
             )
         }
+    }
+
+    fun updateMode(mode: SheetMode) {
+        mutableSheetMode.postValue(mode)
     }
 
     fun checkout(activity: Activity) {
@@ -161,6 +174,12 @@ internal class PaymentSheetViewModel internal constructor(
         AddPaymentMethodFull,
         // User has no saved PM's
         AddPaymentMethodSheet
+    }
+
+    internal enum class SheetMode(val height: Int, @BottomSheetBehavior.State val behaviourState: Int) {
+        FULL(MATCH_PARENT, STATE_EXPANDED),
+        FULL_COLLAPSED(MATCH_PARENT, STATE_COLLAPSED),
+        WRAPPED(WRAP_CONTENT, STATE_COLLAPSED)
     }
 
     internal class Factory(

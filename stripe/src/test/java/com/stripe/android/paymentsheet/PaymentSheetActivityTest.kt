@@ -1,9 +1,13 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Intent
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_COLLAPSED
+import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.AbsFakeStripeRepository
 import com.stripe.android.ApiKeyFixtures
@@ -117,13 +121,25 @@ class PaymentSheetActivityTest {
     fun `handles fragment transitions`() {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            testCoroutineDispatcher.advanceTimeBy(PaymentSheetActivity.ANIMATE_IN_DELAY)
+            idleLooper()
+
             assertThat(currentFragment(activity)).isInstanceOf(PaymentSheetPaymentMethodsListFragment::class.java)
+            assertThat(activity.bottomSheetBehavior.state).isEqualTo(STATE_COLLAPSED)
+            assertThat(activity.viewBinding.bottomSheet.layoutParams.height).isEqualTo(WRAP_CONTENT)
+
             viewModel.transitionTo(PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull)
             idleLooper()
             assertThat(currentFragment(activity)).isInstanceOf(PaymentSheetAddCardFragment::class.java)
+            assertThat(activity.bottomSheetBehavior.state).isEqualTo(STATE_EXPANDED)
+            assertThat(activity.viewBinding.bottomSheet.layoutParams.height).isEqualTo(MATCH_PARENT)
 
             activity.onBackPressed()
+            idleLooper()
             assertThat(currentFragment(activity)).isInstanceOf(PaymentSheetPaymentMethodsListFragment::class.java)
+            assertThat(activity.bottomSheetBehavior.state).isEqualTo(STATE_COLLAPSED)
+            assertThat(activity.viewBinding.bottomSheet.layoutParams.height).isEqualTo(WRAP_CONTENT)
 
             activity.onBackPressed()
             idleLooper()
@@ -201,6 +217,8 @@ class PaymentSheetActivityTest {
             idleLooper()
 
             assertThat(currentFragment(activity)).isInstanceOf(PaymentSheetAddCardFragment::class.java)
+            assertThat(activity.bottomSheetBehavior.state).isEqualTo(STATE_COLLAPSED)
+            assertThat(activity.viewBinding.bottomSheet.layoutParams.height).isEqualTo(MATCH_PARENT)
 
             // make sure loading fragment isn't in back stack
             activity.onBackPressed()
