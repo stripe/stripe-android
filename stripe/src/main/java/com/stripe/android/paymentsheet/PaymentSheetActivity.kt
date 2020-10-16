@@ -11,10 +11,12 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HIDDEN
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.databinding.ActivityPaymentSheetBinding
+import com.stripe.android.paymentsheet.PaymentSheetViewModel.SheetMode
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -72,6 +74,14 @@ internal class PaymentSheetActivity : AppCompatActivity() {
                 }
             }
         }
+        viewModel.sheetMode.observe(this) { mode ->
+            viewBinding.bottomSheet.layoutParams = viewBinding.bottomSheet.layoutParams.apply {
+                height = mode.height
+            }
+            if (bottomSheetBehavior.state != STATE_HIDDEN) {
+                bottomSheetBehavior.state = mode.behaviourState
+            }
+        }
 
         setupBottomSheet()
         setupBuyButton()
@@ -91,12 +101,15 @@ internal class PaymentSheetActivity : AppCompatActivity() {
                         )
                         addToBackStack(null)
                         replace(fragmentContainerId, PaymentSheetAddCardFragment())
+                        viewModel.updateMode(SheetMode.Full)
                     }
                     PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod -> {
                         replace(fragmentContainerId, PaymentSheetPaymentMethodsListFragment())
+                        viewModel.updateMode(SheetMode.Wrapped)
                     }
                     PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet -> {
                         replace(fragmentContainerId, PaymentSheetAddCardFragment())
+                        viewModel.updateMode(SheetMode.FullCollapsed)
                     }
                 }
             }
@@ -128,7 +141,7 @@ internal class PaymentSheetActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             delay(ANIMATE_IN_DELAY)
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            bottomSheetBehavior.state = viewModel.sheetMode.value?.behaviourState ?: STATE_EXPANDED
             bottomSheetBehavior.addBottomSheetCallback(
                 object : BottomSheetBehavior.BottomSheetCallback() {
                     override fun onSlide(bottomSheet: View, slideOffset: Float) {

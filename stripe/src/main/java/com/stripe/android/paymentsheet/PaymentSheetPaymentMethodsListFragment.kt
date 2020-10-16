@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetPaymentMethodsListBinding
+import com.stripe.android.paymentsheet.PaymentSheetViewModel.SheetMode
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal class PaymentSheetPaymentMethodsListFragment : Fragment(R.layout.fragment_paymentsheet_payment_methods_list) {
@@ -30,6 +31,8 @@ internal class PaymentSheetPaymentMethodsListFragment : Fragment(R.layout.fragme
         // If we're returning to this fragment from elsewhere, we need to reset the selection to whatever
         // the user had selected previously
         activityViewModel.updateSelection(fragmentViewModel.selectedPaymentMethod)
+        // reset the mode in case we're returning from the back stack
+        activityViewModel.updateMode(SheetMode.Wrapped)
 
         val binding = FragmentPaymentsheetPaymentMethodsListBinding.bind(view)
         binding.recycler.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
