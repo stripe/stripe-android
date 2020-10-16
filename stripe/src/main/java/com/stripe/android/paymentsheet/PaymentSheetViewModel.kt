@@ -44,11 +44,11 @@ internal class PaymentSheetViewModel internal constructor(
     private val mutablePaymentMethods = MutableLiveData<List<PaymentMethod>>()
     private val mutableSelection = MutableLiveData<PaymentSelection?>()
     private val mutablePaymentIntentResult = MutableLiveData<PaymentIntentResult>()
-    internal val paymentMethods: LiveData<List<PaymentMethod>> = mutablePaymentMethods.distinctUntilChanged()
-    internal val error: LiveData<Throwable> = mutableError.distinctUntilChanged()
+    internal val paymentMethods: LiveData<List<PaymentMethod>> = mutablePaymentMethods
+    internal val error: LiveData<Throwable> = mutableError
     internal val transition: LiveData<TransitionTarget> = mutableTransition
-    internal val selection: LiveData<PaymentSelection?> = mutableSelection.distinctUntilChanged()
-    internal val paymentIntentResult: LiveData<PaymentIntentResult> = mutablePaymentIntentResult.distinctUntilChanged()
+    internal val selection: LiveData<PaymentSelection?> = mutableSelection
+    internal val paymentIntentResult: LiveData<PaymentIntentResult> = mutablePaymentIntentResult
     internal val sheetMode: LiveData<SheetMode> = mutableSheetMode.distinctUntilChanged()
 
     fun onError(throwable: Throwable) {
