@@ -94,10 +94,10 @@ internal class PaymentSheetActivity : AppCompatActivity() {
                 when (it) {
                     PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull -> {
                         setCustomAnimations(
-                            R.anim.stripe_paymentsheet_transition_enter_from_right,
-                            R.anim.stripe_paymentsheet_transition_exit_to_left,
-                            R.anim.stripe_paymentsheet_transition_enter_from_left,
-                            R.anim.stripe_paymentsheet_transition_exit_to_right
+                            R.anim.stripe_paymentsheet_transition_fade_in,
+                            R.anim.stripe_paymentsheet_transition_fade_out,
+                            R.anim.stripe_paymentsheet_transition_fade_in,
+                            R.anim.stripe_paymentsheet_transition_fade_out,
                         )
                         addToBackStack(null)
                         replace(fragmentContainerId, PaymentSheetAddCardFragment())
