@@ -155,7 +155,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         APIConnectionException::class,
         APIException::class
     )
-    override fun retrievePaymentIntent(
+    override suspend fun retrievePaymentIntent(
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String>
