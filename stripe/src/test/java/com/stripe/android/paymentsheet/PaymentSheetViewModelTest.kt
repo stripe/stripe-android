@@ -20,6 +20,8 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeRepository
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ListPaymentMethodsParams
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -48,7 +50,9 @@ internal class PaymentSheetViewModelTest {
             "customer_id"
         )
     )
-    private val stripeRepository: StripeRepository = FakeStripeRepository()
+    private val paymentIntent = PaymentIntentFixtures.PI_WITH_SHIPPING
+
+    private val stripeRepository: StripeRepository = FakeStripeRepository(paymentIntent)
     private val paymentController: PaymentController = mock()
     private val viewModel = PaymentSheetViewModel(
         "publishable_key",
@@ -176,7 +180,53 @@ internal class PaymentSheetViewModelTest {
         assertThat(error).isNotNull()
     }
 
-    private class FakeStripeRepository : AbsFakeStripeRepository() {
+    @Test
+    fun `fetchPaymentIntent should update paymentIntent`() {
+        var retrievedIntent: PaymentIntent? = null
+        viewModel.paymentIntent.observeForever {
+            retrievedIntent = it
+        }
+        viewModel.fetchPaymentIntent(intent)
+        assertThat(retrievedIntent).isEqualTo(paymentIntent)
+    }
+
+    @Test
+    fun `fetchPaymentIntent should propagate errors`() {
+        val exception = RuntimeException("It failed")
+        val viewModel = PaymentSheetViewModel(
+            "publishable_key",
+            "stripe_account_id",
+            object : AbsFakeStripeRepository() {
+                override fun retrievePaymentIntent(clientSecret: String, options: ApiRequest.Options, expandFields: List<String>): PaymentIntent? {
+                    throw exception
+                }
+            },
+            paymentController,
+            workContext = testCoroutineDispatcher
+        )
+        var error: Throwable? = null
+        viewModel.error.observeForever {
+            error = it
+        }
+        viewModel.fetchPaymentIntent(intent)
+        assertThat(error).isEqualTo(exception)
+    }
+
+    @Test
+    fun `fetchPaymentIntent should call onError when no args supplied`() {
+        var error: Throwable? = null
+        viewModel.error.observeForever {
+            error = it
+        }
+        viewModel.fetchPaymentIntent(Intent())
+        assertThat(error).isInstanceOf(IllegalStateException::class.java)
+    }
+
+    private class FakeStripeRepository(val paymentIntent: PaymentIntent) : AbsFakeStripeRepository() {
+        override fun retrievePaymentIntent(clientSecret: String, options: ApiRequest.Options, expandFields: List<String>): PaymentIntent? {
+            return paymentIntent
+        }
+
         override suspend fun getPaymentMethods(
             listPaymentMethodsParams: ListPaymentMethodsParams,
             publishableKey: String,
