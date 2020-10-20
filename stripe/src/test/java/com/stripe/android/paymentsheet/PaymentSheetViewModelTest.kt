@@ -197,7 +197,7 @@ internal class PaymentSheetViewModelTest {
             "publishable_key",
             "stripe_account_id",
             object : AbsFakeStripeRepository() {
-                override fun retrievePaymentIntent(clientSecret: String, options: ApiRequest.Options, expandFields: List<String>): PaymentIntent? {
+                override suspend fun retrievePaymentIntent(clientSecret: String, options: ApiRequest.Options, expandFields: List<String>): PaymentIntent? {
                     throw exception
                 }
             },
@@ -223,7 +223,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     private class FakeStripeRepository(val paymentIntent: PaymentIntent) : AbsFakeStripeRepository() {
-        override fun retrievePaymentIntent(clientSecret: String, options: ApiRequest.Options, expandFields: List<String>): PaymentIntent? {
+        override suspend fun retrievePaymentIntent(clientSecret: String, options: ApiRequest.Options, expandFields: List<String>): PaymentIntent? {
             return paymentIntent
         }
 
