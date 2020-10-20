@@ -25,10 +25,6 @@ internal class BuyButton @JvmOverloads constructor(
 
         isClickable = true
         isEnabled = true
-
-        setOnClickListener {
-            isEnabled = !isEnabled
-        }
     }
 
     fun updateText(text: String) {
