@@ -15,4 +15,14 @@
         android:textSize="16sp"
         android:padding="4dp"/>
 
+    <ImageView
+        android:id="@+id/lock_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/stripe_ic_paymentsheet_buy_button_lock"
+        android:layout_gravity="end|center_vertical"
+        android:visibility="gone"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"/>
+
 </merge>
