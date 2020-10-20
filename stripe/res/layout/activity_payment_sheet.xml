@@ -15,8 +15,6 @@
         android:background="?colorSurface"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-
-
         <androidx.fragment.app.FragmentContainerView
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0"
@@ -25,12 +23,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <Button
+        <com.stripe.android.paymentsheet.BuyButton
             android:id="@+id/buy_button"
             android:layout_margin="@dimen/stripe_paymentsheet_outer_spacing"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:enabled="false"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />

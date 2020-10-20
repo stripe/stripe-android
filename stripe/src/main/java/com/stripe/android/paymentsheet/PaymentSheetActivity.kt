@@ -136,9 +136,11 @@ internal class PaymentSheetActivity : AppCompatActivity() {
                         val currency = Currency.getInstance(
                             currencyCode.toUpperCase(Locale.ROOT)
                         )
-                        viewBinding.buyButton.text = getString(
-                            R.string.stripe_paymentsheet_pay_button,
-                            currencyFormatter.format(amount, currency)
+                        viewBinding.buyButton.updateText(
+                            getString(
+                                R.string.stripe_paymentsheet_pay_button,
+                                currencyFormatter.format(amount, currency)
+                            )
                         )
                     }
                 }
