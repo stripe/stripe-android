@@ -15,7 +15,6 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_COLLAPSED
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
-import com.google.android.material.bottomsheet.BottomSheetBehavior.State
 import com.stripe.android.ApiRequest
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentConfiguration
@@ -29,14 +28,17 @@ import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.view.AuthActivityStarter
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.lang.IllegalStateException
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 internal class PaymentSheetViewModel internal constructor(
     private val publishableKey: String,
     private val stripeAccountId: String?,
     private val stripeRepository: StripeRepository,
-    private val paymentController: PaymentController
+    private val paymentController: PaymentController,
+    private val workContext: CoroutineContext = Dispatchers.IO
 ) : ViewModel() {
     private val mutableError = MutableLiveData<Throwable>()
     private val mutableTransition = MutableLiveData<TransitionTarget>()
@@ -147,23 +149,25 @@ internal class PaymentSheetViewModel internal constructor(
         stripeAccountId: String? = this.stripeAccountId
     ) {
         viewModelScope.launch {
-            val result = kotlin.runCatching {
-                stripeRepository.getPaymentMethods(
-                    ListPaymentMethodsParams(
-                        customerId = customerId,
-                        paymentMethodType = PaymentMethod.Type.Card
-                    ),
-                    publishableKey,
-                    setOf(), // TODO: Add product usage tokens
-                    ApiRequest.Options(ephemeralKey, stripeAccountId)
+            withContext(workContext) {
+                val result = runCatching {
+                    stripeRepository.getPaymentMethods(
+                        ListPaymentMethodsParams(
+                            customerId = customerId,
+                            paymentMethodType = PaymentMethod.Type.Card
+                        ),
+                        publishableKey,
+                        setOf(), // TODO: Add product usage tokens
+                        ApiRequest.Options(ephemeralKey, stripeAccountId)
+                    )
+                }
+                result.fold(
+                    onSuccess = this@PaymentSheetViewModel::setPaymentMethods,
+                    onFailure = {
+                        onError(it)
+                    }
                 )
             }
-            result.fold(
-                onSuccess = this@PaymentSheetViewModel::setPaymentMethods,
-                onFailure = {
-                    onError(it)
-                }
-            )
         }
     }
 

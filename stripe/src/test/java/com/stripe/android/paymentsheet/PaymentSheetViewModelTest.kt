@@ -24,16 +24,21 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.view.ActivityStarter
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentSheetViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
+
+    private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
     private val intent = Intent().putExtra(
         ActivityStarter.Args.EXTRA,
@@ -49,7 +54,8 @@ internal class PaymentSheetViewModelTest {
         "publishable_key",
         "stripe_account_id",
         stripeRepository,
-        paymentController
+        paymentController,
+        workContext = testCoroutineDispatcher
     )
 
     private val activity: Activity = mock()

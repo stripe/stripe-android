@@ -63,8 +63,10 @@ class PaymentSheetActivityTest {
         paymentController = StripePaymentController(
             ApplicationProvider.getApplicationContext(),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            stripeRepository
-        )
+            stripeRepository,
+            workContext = testCoroutineDispatcher
+        ),
+        workContext = testCoroutineDispatcher
     )
 
     private val intent = Intent(
@@ -207,8 +209,10 @@ class PaymentSheetActivityTest {
             paymentController = StripePaymentController(
                 ApplicationProvider.getApplicationContext(),
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                stripeRepository
-            )
+                stripeRepository,
+                workContext = testCoroutineDispatcher
+            ),
+            workContext = testCoroutineDispatcher
         )
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
