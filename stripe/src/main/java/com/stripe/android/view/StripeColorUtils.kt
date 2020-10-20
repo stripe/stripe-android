@@ -1,6 +1,5 @@
 package com.stripe.android.view
 
-import android.R
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.Color
@@ -13,10 +12,10 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 
 internal class StripeColorUtils(private val context: Context) {
-    val colorAccent: Int = getTypedValue(R.attr.colorAccent).data
-    val colorControlNormal: Int = getTypedValue(R.attr.colorControlNormal).data
-    val textColorPrimary: Int = getTypedValue(R.attr.textColorPrimary).data
-    val textColorSecondary: Int = getTypedValue(R.attr.textColorSecondary).data
+    val colorAccent: Int = getTypedValue(android.R.attr.colorAccent).data
+    val colorControlNormal: Int = getTypedValue(android.R.attr.colorControlNormal).data
+    val textColorPrimary: Int = getTypedValue(android.R.attr.textColorPrimary).data
+    val textColorSecondary: Int = getTypedValue(android.R.attr.textColorSecondary).data
 
     private fun getTypedValue(@AttrRes idRes: Int) = TypedValue().also {
         context.theme.resolveAttribute(idRes, it, true)
