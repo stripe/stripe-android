@@ -52,15 +52,15 @@ class PaymentSheetPaymentMethodsListFragmentTest {
         val scenario = launchFragmentInContainer<PaymentSheetPaymentMethodsListFragment>()
         scenario.onFragment {
             val recycler = recyclerView(it)
-            assertThat(recycler.adapter).isNotNull()
+            val adapter = recycler.adapter as PaymentSheetPaymentMethodsAdapter
+            assertThat(adapter.paymentMethods)
+                .isEmpty()
 
             activityViewModel(it).setPaymentMethods(paymentMethods)
             idleLooper()
 
-            assertThat(recycler.adapter).isInstanceOf(PaymentSheetPaymentMethodsAdapter::class.java)
-            val adapter = recycler.adapter as PaymentSheetPaymentMethodsAdapter
-
-            assertThat(adapter.paymentMethods).isEqualTo(paymentMethods)
+            assertThat(adapter.paymentMethods)
+                .isEqualTo(paymentMethods)
         }
     }
 
