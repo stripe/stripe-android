@@ -17,11 +17,9 @@ class PaymentSheetLoadingFragment : Fragment(R.layout.fragment_payment_sheet_loa
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (activity == null) {
-            return
-        }
+        val activity = this.activity ?: return
 
-        activityViewModel.paymentMethods.observe(requireActivity()) { paymentMethods ->
+        activityViewModel.paymentMethods.observe(activity) { paymentMethods ->
             val target = if (paymentMethods.isEmpty()) {
                 TransitionTarget.AddPaymentMethodSheet
             } else {
@@ -29,8 +27,7 @@ class PaymentSheetLoadingFragment : Fragment(R.layout.fragment_payment_sheet_loa
             }
             activityViewModel.transitionTo(target)
         }
-        activityViewModel.updatePaymentMethods(requireActivity().intent)
-
-        // TODO: Fetch payment intent before transitioning
+        activityViewModel.updatePaymentMethods(activity.intent)
+        activityViewModel.fetchPaymentIntent(activity.intent)
     }
 }
