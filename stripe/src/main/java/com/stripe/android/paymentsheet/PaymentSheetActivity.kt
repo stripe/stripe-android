@@ -19,6 +19,8 @@ import com.stripe.android.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.SheetMode
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.Currency
+import java.util.Locale
 
 internal class PaymentSheetActivity : AppCompatActivity() {
     @VisibleForTesting
@@ -26,10 +28,12 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         PaymentSheetViewModel.Factory {
             application
         }
+
     @VisibleForTesting
     internal val bottomSheetBehavior by lazy {
         BottomSheetBehavior.from(viewBinding.bottomSheet)
     }
+
     @VisibleForTesting
     internal val viewBinding by lazy {
         ActivityPaymentSheetBinding.inflate(layoutInflater)
@@ -45,6 +49,8 @@ internal class PaymentSheetActivity : AppCompatActivity() {
     private val fragmentContainerId: Int
         @IdRes
         get() = viewBinding.fragmentContainer.id
+
+    private val currencyFormatter = CurrencyFormatter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,9 +95,9 @@ internal class PaymentSheetActivity : AppCompatActivity() {
             replace(fragmentContainerId, PaymentSheetLoadingFragment())
         }
 
-        viewModel.transition.observe(this) {
+        viewModel.transition.observe(this) { transactionTarget ->
             supportFragmentManager.commit {
-                when (it) {
+                when (transactionTarget) {
                     PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull -> {
                         setCustomAnimations(
                             R.anim.stripe_paymentsheet_transition_fade_in,
@@ -124,7 +130,19 @@ internal class PaymentSheetActivity : AppCompatActivity() {
 
     private fun setupBuyButton() {
         viewModel.paymentIntent.observe(this) { paymentIntent ->
-            // TOOD: Set text based on currency & amount in payment intent
+            if (paymentIntent != null) {
+                paymentIntent.amount?.let { amount ->
+                    paymentIntent.currency?.let { currencyCode ->
+                        val currency = Currency.getInstance(
+                            currencyCode.toUpperCase(Locale.ROOT)
+                        )
+                        viewBinding.buyButton.text = getString(
+                            R.string.stripe_paymentsheet_pay_button,
+                            currencyFormatter.format(amount, currency)
+                        )
+                    }
+                }
+            }
         }
         viewModel.selection.observe(this) {
             // TODO(smaskell): show Google Pay button when GooglePay selected
