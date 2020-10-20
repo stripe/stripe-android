@@ -50,6 +50,8 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         @IdRes
         get() = viewBinding.fragmentContainer.id
 
+    private val currencyFormatter = CurrencyFormatter()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
@@ -93,9 +95,9 @@ internal class PaymentSheetActivity : AppCompatActivity() {
             replace(fragmentContainerId, PaymentSheetLoadingFragment())
         }
 
-        viewModel.transition.observe(this) {
+        viewModel.transition.observe(this) { transactionTarget ->
             supportFragmentManager.commit {
-                when (it) {
+                when (transactionTarget) {
                     PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull -> {
                         setCustomAnimations(
                             R.anim.stripe_paymentsheet_transition_fade_in,
@@ -128,14 +130,17 @@ internal class PaymentSheetActivity : AppCompatActivity() {
 
     private fun setupBuyButton() {
         viewModel.paymentIntent.observe(this) { paymentIntent ->
-            paymentIntent.amount?.let { amount ->
-                paymentIntent.currency?.let { currencyCode ->
-                    val currency = Currency.getInstance(currencyCode.toUpperCase(Locale.ROOT))
-                    val priceString = getString(
-                        R.string.stripe_paymentsheet_pay_button,
-                        CurrencyFormatter().format(amount, currency)
-                    )
-                    viewBinding.buyButton.text = priceString
+            if (paymentIntent != null) {
+                paymentIntent.amount?.let { amount ->
+                    paymentIntent.currency?.let { currencyCode ->
+                        val currency = Currency.getInstance(
+                            currencyCode.toUpperCase(Locale.ROOT)
+                        )
+                        viewBinding.buyButton.text = getString(
+                            R.string.stripe_paymentsheet_pay_button,
+                            currencyFormatter.format(amount, currency)
+                        )
+                    }
                 }
             }
         }

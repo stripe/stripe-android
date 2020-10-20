@@ -54,7 +54,7 @@ internal class PaymentSheetViewModel internal constructor(
     internal val selection: LiveData<PaymentSelection?> = mutableSelection
     internal val paymentIntentResult: LiveData<PaymentIntentResult> = mutablePaymentIntentResult
     internal val sheetMode: LiveData<SheetMode> = mutableSheetMode.distinctUntilChanged()
-    internal val paymentIntent: LiveData<PaymentIntent> = mutablePaymentIntent
+    internal val paymentIntent: LiveData<PaymentIntent?> = mutablePaymentIntent
 
     fun onError(throwable: Throwable) {
         mutableError.postValue(throwable)
@@ -195,8 +195,10 @@ internal class PaymentSheetViewModel internal constructor(
     internal enum class TransitionTarget {
         // User has saved PM's and is selected
         SelectSavedPaymentMethod,
+
         // User has saved PM's and is adding a new one
         AddPaymentMethodFull,
+
         // User has no saved PM's
         AddPaymentMethodSheet
     }
