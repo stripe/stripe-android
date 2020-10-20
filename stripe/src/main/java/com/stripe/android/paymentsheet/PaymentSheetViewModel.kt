@@ -29,11 +29,10 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.view.AuthActivityStarter
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 internal class PaymentSheetViewModel internal constructor(
     private val publishableKey: String,
@@ -84,13 +83,18 @@ internal class PaymentSheetViewModel internal constructor(
 
     fun fetchPaymentIntent(intent: Intent) {
         getPaymentSheetActivityArgs(intent)?.let { args ->
-            CoroutineScope(workContext).launch {
-                kotlin.runCatching {
-                    stripeRepository.retrievePaymentIntent(args.clientSecret, ApiRequest.Options(publishableKey, stripeAccountId))
-                }.fold(
-                    onSuccess = mutablePaymentIntent::postValue,
-                    onFailure = this@PaymentSheetViewModel::onError
-                )
+            viewModelScope.launch {
+                withContext(workContext) {
+                    runCatching {
+                        stripeRepository.retrievePaymentIntent(
+                            args.clientSecret,
+                            ApiRequest.Options(publishableKey, stripeAccountId)
+                        )
+                    }.fold(
+                        onSuccess = mutablePaymentIntent::postValue,
+                        onFailure = this@PaymentSheetViewModel::onError
+                    )
+                }
             }
         }
     }
