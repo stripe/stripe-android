@@ -8,19 +8,19 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-    <TextView
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/stripe_paymentsheet_add_payment_method"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:paddingBottom="10dp" />
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/stripe_paymentsheet_add_payment_method"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:paddingBottom="10dp" />
 
-    <com.stripe.android.view.CardMultilineWidget
-        android:id="@+id/card_multiline_widget"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        <com.stripe.android.view.CardMultilineWidget
+            android:id="@+id/card_multiline_widget"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 </ScrollView>
