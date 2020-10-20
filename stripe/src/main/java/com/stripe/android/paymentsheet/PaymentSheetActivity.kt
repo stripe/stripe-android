@@ -123,7 +123,9 @@ internal class PaymentSheetActivity : AppCompatActivity() {
     }
 
     private fun setupBuyButton() {
-        // TOOD(smaskell): Set text based on currency & amount in payment intent
+        viewModel.paymentIntent.observe(this) { paymentIntent ->
+            // TOOD: Set text based on currency & amount in payment intent
+        }
         viewModel.selection.observe(this) {
             // TODO(smaskell): show Google Pay button when GooglePay selected
             viewBinding.buyButton.isEnabled = it != null

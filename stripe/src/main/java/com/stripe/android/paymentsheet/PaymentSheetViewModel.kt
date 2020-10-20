@@ -25,6 +25,7 @@ import com.stripe.android.StripePaymentController
 import com.stripe.android.StripeRepository
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ListPaymentMethodsParams
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.view.AuthActivityStarter
@@ -40,6 +41,7 @@ internal class PaymentSheetViewModel internal constructor(
     private val paymentController: PaymentController,
     private val workContext: CoroutineContext = Dispatchers.IO
 ) : ViewModel() {
+    private val mutablePaymentIntent = MutableLiveData<PaymentIntent>()
     private val mutableError = MutableLiveData<Throwable>()
     private val mutableTransition = MutableLiveData<TransitionTarget>()
     private val mutableSheetMode = MutableLiveData<SheetMode>()
@@ -52,6 +54,7 @@ internal class PaymentSheetViewModel internal constructor(
     internal val selection: LiveData<PaymentSelection?> = mutableSelection
     internal val paymentIntentResult: LiveData<PaymentIntentResult> = mutablePaymentIntentResult
     internal val sheetMode: LiveData<SheetMode> = mutableSheetMode.distinctUntilChanged()
+    internal val paymentIntent: LiveData<PaymentIntent> = mutablePaymentIntent
 
     fun onError(throwable: Throwable) {
         mutableError.postValue(throwable)
@@ -76,6 +79,24 @@ internal class PaymentSheetViewModel internal constructor(
 
     fun updateMode(mode: SheetMode) {
         mutableSheetMode.postValue(mode)
+    }
+
+    fun fetchPaymentIntent(intent: Intent) {
+        getPaymentSheetActivityArgs(intent)?.let { args ->
+            viewModelScope.launch {
+                withContext(workContext) {
+                    runCatching {
+                        stripeRepository.retrievePaymentIntent(
+                            args.clientSecret,
+                            ApiRequest.Options(publishableKey, stripeAccountId)
+                        )
+                    }.fold(
+                        onSuccess = mutablePaymentIntent::postValue,
+                        onFailure = this@PaymentSheetViewModel::onError
+                    )
+                }
+            }
+        }
     }
 
     fun checkout(activity: Activity) {

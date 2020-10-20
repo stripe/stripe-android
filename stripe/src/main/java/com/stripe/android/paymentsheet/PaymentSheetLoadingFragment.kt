@@ -30,5 +30,7 @@ class PaymentSheetLoadingFragment : Fragment(R.layout.fragment_payment_sheet_loa
             activityViewModel.transitionTo(target)
         }
         activityViewModel.updatePaymentMethods(requireActivity().intent)
+
+        // TODO: Fetch payment intent before transitioning
     }
 }
