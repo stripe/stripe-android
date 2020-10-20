@@ -19,6 +19,8 @@ import com.stripe.android.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.SheetMode
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.Currency
+import java.util.Locale
 
 internal class PaymentSheetActivity : AppCompatActivity() {
     @VisibleForTesting
@@ -26,10 +28,12 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         PaymentSheetViewModel.Factory {
             application
         }
+
     @VisibleForTesting
     internal val bottomSheetBehavior by lazy {
         BottomSheetBehavior.from(viewBinding.bottomSheet)
     }
+
     @VisibleForTesting
     internal val viewBinding by lazy {
         ActivityPaymentSheetBinding.inflate(layoutInflater)
@@ -124,7 +128,16 @@ internal class PaymentSheetActivity : AppCompatActivity() {
 
     private fun setupBuyButton() {
         viewModel.paymentIntent.observe(this) { paymentIntent ->
-            // TOOD: Set text based on currency & amount in payment intent
+            paymentIntent.amount?.let { amount ->
+                paymentIntent.currency?.let { currencyCode ->
+                    val currency = Currency.getInstance(currencyCode.toUpperCase(Locale.ROOT))
+                    val priceString = getString(
+                        R.string.stripe_paymentsheet_pay_button,
+                        CurrencyFormatter().format(amount, currency)
+                    )
+                    viewBinding.buyButton.text = priceString
+                }
+            }
         }
         viewModel.selection.observe(this) {
             // TODO(smaskell): show Google Pay button when GooglePay selected
