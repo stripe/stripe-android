@@ -11,6 +11,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.viewModelScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_COLLAPSED
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
@@ -32,6 +33,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.withContext
 
 internal class PaymentSheetViewModel internal constructor(
     private val publishableKey: String,
@@ -163,24 +165,26 @@ internal class PaymentSheetViewModel internal constructor(
         customerId: String,
         stripeAccountId: String? = this.stripeAccountId
     ) {
-        CoroutineScope(workContext).launch {
-            val result = kotlin.runCatching {
-                stripeRepository.getPaymentMethods(
-                    ListPaymentMethodsParams(
-                        customerId = customerId,
-                        paymentMethodType = PaymentMethod.Type.Card
-                    ),
-                    publishableKey,
-                    setOf(), // TODO: Add product usage tokens
-                    ApiRequest.Options(ephemeralKey, stripeAccountId)
+        viewModelScope.launch {
+            withContext(workContext) {
+                val result = runCatching {
+                    stripeRepository.getPaymentMethods(
+                        ListPaymentMethodsParams(
+                            customerId = customerId,
+                            paymentMethodType = PaymentMethod.Type.Card
+                        ),
+                        publishableKey,
+                        setOf(), // TODO: Add product usage tokens
+                        ApiRequest.Options(ephemeralKey, stripeAccountId)
+                    )
+                }
+                result.fold(
+                    onSuccess = this@PaymentSheetViewModel::setPaymentMethods,
+                    onFailure = {
+                        onError(it)
+                    }
                 )
             }
-            result.fold(
-                onSuccess = this@PaymentSheetViewModel::setPaymentMethods,
-                onFailure = {
-                    onError(it)
-                }
-            )
         }
     }
 

@@ -9,6 +9,7 @@ import androidx.fragment.app.activityViewModels
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddCardBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.view.CardInputListener
 
 internal class PaymentSheetAddCardFragment : Fragment(R.layout.fragment_paymentsheet_add_card) {
     private val activityViewModel by activityViewModels<PaymentSheetViewModel> {
@@ -36,7 +37,20 @@ internal class PaymentSheetAddCardFragment : Fragment(R.layout.fragment_payments
             activityViewModel.updateSelection(selection)
         }
 
-        // If we're in the full expanded mode, request focus on the card number field
+        binding.cardMultilineWidget.setCardInputListener(object : CardInputListener {
+            override fun onFocusChange(focusField: CardInputListener.FocusField) {
+                // If the user focuses any card field, expand to full screen
+                activityViewModel.updateMode(PaymentSheetViewModel.SheetMode.Full)
+            }
+
+            override fun onCardComplete() {}
+
+            override fun onExpirationComplete() {}
+
+            override fun onCvcComplete() {}
+        })
+
+        // If we're launched in full expanded mode, focus the card number field
         // and show the keyboard automatically
         if (activityViewModel.sheetMode.value == PaymentSheetViewModel.SheetMode.Full) {
             binding.cardMultilineWidget.cardNumberEditText.requestFocus()
