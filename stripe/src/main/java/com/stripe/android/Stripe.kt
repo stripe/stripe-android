@@ -368,16 +368,32 @@ class Stripe internal constructor(
         stripeAccountId: String? = this.stripeAccountId,
         callback: ApiResultCallback<PaymentIntent>
     ) {
-        RetrievePaymentIntentTask(
-            stripeRepository,
-            clientSecret,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
-            ),
-            workContext,
-            callback
-        ).execute()
+        CoroutineScope(workContext).launch {
+            val result = runCatching {
+                val intent = stripeRepository.retrievePaymentIntent(
+                    clientSecret,
+                    ApiRequest.Options(
+                        apiKey = publishableKey,
+                        stripeAccount = stripeAccountId
+                    )
+                )
+                requireNotNull(intent) { RuntimeException("The API operation returned neither a result or exception") }
+            }.recoverCatching { throw StripeException.create(it) }
+
+            withContext(Dispatchers.Main) {
+                result.fold(
+                    onSuccess = callback::onSuccess,
+                    onFailure = { error ->
+                        callback.onError(
+                            when (error) {
+                                is Exception -> error
+                                else -> RuntimeException(error)
+                            }
+                        )
+                    }
+                )
+            }
+        }
     }
 
     /**
@@ -404,13 +420,15 @@ class Stripe internal constructor(
         clientSecret: String,
         stripeAccountId: String? = this.stripeAccountId
     ): PaymentIntent? {
-        return stripeRepository.retrievePaymentIntent(
-            PaymentIntent.ClientSecret(clientSecret).value,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
+        return runBlocking {
+            stripeRepository.retrievePaymentIntent(
+                PaymentIntent.ClientSecret(clientSecret).value,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
             )
-        )
+        }
     }
 
     /**
@@ -1682,19 +1700,6 @@ class Stripe internal constructor(
         @Throws(StripeException::class)
         override suspend fun getResult(): Token? {
             return stripeRepository.createToken(tokenParams, options)
-        }
-    }
-
-    private class RetrievePaymentIntentTask(
-        private val stripeRepository: StripeRepository,
-        private val clientSecret: String,
-        private val options: ApiRequest.Options,
-        workContext: CoroutineContext,
-        callback: ApiResultCallback<PaymentIntent>
-    ) : ApiOperation<PaymentIntent>(workContext, callback) {
-        @Throws(StripeException::class)
-        override suspend fun getResult(): PaymentIntent? {
-            return stripeRepository.retrievePaymentIntent(clientSecret, options)
         }
     }
 

@@ -36,7 +36,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         return null
     }
 
-    override fun retrievePaymentIntent(
+    override suspend fun retrievePaymentIntent(
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String>

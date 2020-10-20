@@ -53,7 +53,7 @@ internal interface StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
-    fun retrievePaymentIntent(
+    suspend fun retrievePaymentIntent(
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String> = emptyList()
