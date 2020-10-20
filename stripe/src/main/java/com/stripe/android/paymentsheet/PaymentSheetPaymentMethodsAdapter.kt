@@ -9,14 +9,19 @@ import com.stripe.android.databinding.LayoutPaymentsheetAddCardItemBinding
 import com.stripe.android.databinding.LayoutPaymentsheetPaymentMethodItemBinding
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import java.lang.IllegalStateException
+import kotlin.properties.Delegates
 
 internal class PaymentSheetPaymentMethodsAdapter(
-    val paymentMethods: List<PaymentMethod>,
     selectedPaymentMethod: PaymentSelection?,
     val paymentMethodSelectedListener: (PaymentSelection) -> Unit,
     val addCardClickListener: View.OnClickListener
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    var paymentMethods: List<PaymentMethod> by Delegates.observable(
+        emptyList()
+    ) { _, _, _ ->
+        notifyDataSetChanged()
+    }
+
     private var selectedPaymentMethodId: String? = (selectedPaymentMethod as? PaymentSelection.Saved)?.paymentMethodId
 
     init {
@@ -80,9 +85,13 @@ internal class PaymentSheetPaymentMethodsAdapter(
         }
     }
 
-    private class CardViewHolder(private val binding: LayoutPaymentsheetPaymentMethodItemBinding) : RecyclerView.ViewHolder(binding.root) {
+    private class CardViewHolder(
+        private val binding: LayoutPaymentsheetPaymentMethodItemBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
         constructor(parent: ViewGroup) : this(
-            LayoutPaymentsheetPaymentMethodItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            LayoutPaymentsheetPaymentMethodItemBinding.inflate(
+                LayoutInflater.from(parent.context), parent, false
+            )
         )
 
         fun setPaymentMethod(method: PaymentMethod) {
@@ -101,7 +110,11 @@ internal class PaymentSheetPaymentMethodsAdapter(
     }
 
     private class AddCardViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(
-        LayoutPaymentsheetAddCardItemBinding.inflate(LayoutInflater.from(parent.context), parent, false).root
+        LayoutPaymentsheetAddCardItemBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        ).root
     )
 
     private enum class ViewType {
