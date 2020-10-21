@@ -19,11 +19,13 @@
 
     <color name="stripe_card_widget_progress_foreground">#ffffffcc</color>
     <color name="stripe_card_widget_progress_background">#4F566B</color>
+
     <color name="stripe_paymentsheet_selected_payment_method">#1AAE9F</color>
     <color name="stripe_paymentsheet_add_card_tint">#c3cfd9</color>
     <color name="stripe_paymentsheet_add_card_background">#788896</color>
-    <color name="stripe_paymentsheet_buy_button_default_background">#0074D4</color>
-    <color name="stripe_paymentsheet_buy_button_success_background">#24B47E</color>
-    <color name="stripe_paymentsheet_buy_button_text">@android:color/white</color>
+    <color name="stripe_paymentsheet_buybutton_default_background">#0074D4</color>
+    <color name="stripe_paymentsheet_buybutton_success_background">#24B47E</color>
+    <color name="stripe_paymentsheet_buybutton_text">@android:color/white</color>
+    <color name="stripe_paymentsheet_buybutton_confirming_progress">#ffffff</color>
 
 </resources>

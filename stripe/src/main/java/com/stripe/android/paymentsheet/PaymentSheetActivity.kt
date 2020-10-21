@@ -19,8 +19,6 @@ import com.stripe.android.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.SheetMode
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.Currency
-import java.util.Locale
 
 internal class PaymentSheetActivity : AppCompatActivity() {
     @VisibleForTesting
@@ -50,8 +48,6 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         @IdRes
         get() = viewBinding.fragmentContainer.id
 
-    private val currencyFormatter = CurrencyFormatter()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
@@ -68,17 +64,6 @@ internal class PaymentSheetActivity : AppCompatActivity() {
                     paymentIntent = null
                 )
             )
-        }
-        viewModel.paymentIntentResult.observe(this) {
-            when (it.outcome) {
-                StripeIntentResult.Outcome.SUCCEEDED -> {
-                    // TOOD: Show success state before exiting
-                    animateOut(PaymentSheet.CompletionStatus.Succeeded(it.intent))
-                }
-                else -> {
-                    // TODO: Display error state in UI
-                }
-            }
         }
         viewModel.sheetMode.observe(this) { mode ->
             viewBinding.bottomSheet.layoutParams = viewBinding.bottomSheet.layoutParams.apply {
@@ -129,29 +114,32 @@ internal class PaymentSheetActivity : AppCompatActivity() {
     }
 
     private fun setupBuyButton() {
-        viewModel.paymentIntent.observe(this) { paymentIntent ->
-            if (paymentIntent != null) {
-                paymentIntent.amount?.let { amount ->
-                    paymentIntent.currency?.let { currencyCode ->
-                        val currency = Currency.getInstance(
-                            currencyCode.toUpperCase(Locale.ROOT)
-                        )
-                        viewBinding.buyButton.updateText(
-                            getString(
-                                R.string.stripe_paymentsheet_pay_button,
-                                currencyFormatter.format(amount, currency)
-                            )
-                        )
-                    }
-                }
+        viewModel.viewState.observe(this) { state ->
+            if (state != null) {
+                viewBinding.buyButton.updateState(state)
             }
         }
+
         viewModel.selection.observe(this) {
             // TODO(smaskell): show Google Pay button when GooglePay selected
             viewBinding.buyButton.isEnabled = it != null
         }
         viewBinding.buyButton.setOnClickListener {
             viewModel.checkout(this)
+        }
+
+        viewBinding.buyButton.completed.observe(this) { completed ->
+            if (completed != null) {
+                val result = completed.paymentIntentResult
+                when (result.outcome) {
+                    StripeIntentResult.Outcome.SUCCEEDED -> {
+                        animateOut(PaymentSheet.CompletionStatus.Succeeded(result.intent))
+                    }
+                    else -> {
+                        // TODO(mshafrir-stripe): handle other outcomes
+                    }
+                }
+            }
         }
     }
 

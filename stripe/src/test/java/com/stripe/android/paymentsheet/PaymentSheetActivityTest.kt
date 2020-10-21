@@ -42,7 +42,7 @@ import kotlin.test.BeforeTest
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-class PaymentSheetActivityTest {
+internal class PaymentSheetActivityTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
@@ -93,15 +93,20 @@ class PaymentSheetActivityTest {
             // wait for bottom sheet to animate in
             testCoroutineDispatcher.advanceTimeBy(PaymentSheetActivity.ANIMATE_IN_DELAY)
             idleLooper()
-            assertThat(activity.bottomSheetBehavior.state).isEqualTo(BottomSheetBehavior.STATE_COLLAPSED)
+            assertThat(activity.bottomSheetBehavior.state)
+                .isEqualTo(BottomSheetBehavior.STATE_COLLAPSED)
 
             activity.viewBinding.root.performClick()
             idleLooper()
 
-            assertThat(activity.bottomSheetBehavior.state).isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
-            assertThat(PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent)).isEqualTo(
-                PaymentSheet.Result(PaymentSheet.CompletionStatus.Cancelled(null, null))
-            )
+            assertThat(activity.bottomSheetBehavior.state)
+                .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
+            assertThat(PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent))
+                .isEqualTo(
+                    PaymentSheet.Result(
+                        PaymentSheet.CompletionStatus.Cancelled(null, null)
+                    )
+                )
         }
     }
 
@@ -127,19 +132,24 @@ class PaymentSheetActivityTest {
             testCoroutineDispatcher.advanceTimeBy(PaymentSheetActivity.ANIMATE_IN_DELAY)
             idleLooper()
 
-            assertThat(currentFragment(activity)).isInstanceOf(PaymentSheetPaymentMethodsListFragment::class.java)
+            assertThat(currentFragment(activity))
+                .isInstanceOf(PaymentSheetPaymentMethodsListFragment::class.java)
             assertThat(activity.bottomSheetBehavior.state).isEqualTo(STATE_COLLAPSED)
             assertThat(activity.viewBinding.bottomSheet.layoutParams.height).isEqualTo(WRAP_CONTENT)
 
             viewModel.transitionTo(PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull)
             idleLooper()
-            assertThat(currentFragment(activity)).isInstanceOf(PaymentSheetAddCardFragment::class.java)
-            assertThat(activity.bottomSheetBehavior.state).isEqualTo(STATE_EXPANDED)
-            assertThat(activity.viewBinding.bottomSheet.layoutParams.height).isEqualTo(MATCH_PARENT)
+            assertThat(currentFragment(activity))
+                .isInstanceOf(PaymentSheetAddCardFragment::class.java)
+            assertThat(activity.bottomSheetBehavior.state)
+                .isEqualTo(STATE_EXPANDED)
+            assertThat(activity.viewBinding.bottomSheet.layoutParams.height)
+                .isEqualTo(MATCH_PARENT)
 
             activity.onBackPressed()
             idleLooper()
-            assertThat(currentFragment(activity)).isInstanceOf(PaymentSheetPaymentMethodsListFragment::class.java)
+            assertThat(currentFragment(activity))
+                .isInstanceOf(PaymentSheetPaymentMethodsListFragment::class.java)
             assertThat(activity.bottomSheetBehavior.state).isEqualTo(STATE_COLLAPSED)
             assertThat(activity.viewBinding.bottomSheet.layoutParams.height).isEqualTo(WRAP_CONTENT)
 
@@ -147,9 +157,12 @@ class PaymentSheetActivityTest {
             idleLooper()
             // animating out
             assertThat(activity.bottomSheetBehavior.state).isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
-            assertThat(PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent)).isEqualTo(
-                PaymentSheet.Result(PaymentSheet.CompletionStatus.Cancelled(null, null))
-            )
+            assertThat(PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent))
+                .isEqualTo(
+                    PaymentSheet.Result(
+                        PaymentSheet.CompletionStatus.Cancelled(null, null)
+                    )
+                )
         }
     }
 
@@ -177,7 +190,7 @@ class PaymentSheetActivityTest {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
-            testCoroutineDispatcher.advanceTimeBy(500)
+            testCoroutineDispatcher.advanceTimeBy(1000)
             idleLooper()
 
             viewModel.onActivityResult(
@@ -191,12 +204,15 @@ class PaymentSheetActivityTest {
                     )
                 }
             )
+            testCoroutineDispatcher.advanceTimeBy(1000)
             idleLooper()
 
-            assertThat(activity.bottomSheetBehavior.state).isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
-            assertThat(PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent)).isEqualTo(
-                PaymentSheet.Result(PaymentSheet.CompletionStatus.Succeeded(paymentIntent))
-            )
+            assertThat(activity.bottomSheetBehavior.state)
+                .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
+            assertThat(PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent))
+                .isEqualTo(
+                    PaymentSheet.Result(PaymentSheet.CompletionStatus.Succeeded(paymentIntent))
+                )
         }
     }
 
@@ -220,9 +236,12 @@ class PaymentSheetActivityTest {
             testCoroutineDispatcher.advanceTimeBy(PaymentSheetActivity.ANIMATE_IN_DELAY)
             idleLooper()
 
-            assertThat(currentFragment(activity)).isInstanceOf(PaymentSheetAddCardFragment::class.java)
-            assertThat(activity.bottomSheetBehavior.state).isEqualTo(STATE_COLLAPSED)
-            assertThat(activity.viewBinding.bottomSheet.layoutParams.height).isEqualTo(MATCH_PARENT)
+            assertThat(currentFragment(activity))
+                .isInstanceOf(PaymentSheetAddCardFragment::class.java)
+            assertThat(activity.bottomSheetBehavior.state)
+                .isEqualTo(STATE_COLLAPSED)
+            assertThat(activity.viewBinding.bottomSheet.layoutParams.height)
+                .isEqualTo(MATCH_PARENT)
 
             // make sure loading fragment isn't in back stack
             activity.onBackPressed()
@@ -230,7 +249,9 @@ class PaymentSheetActivityTest {
 
             assertThat(activity.bottomSheetBehavior.state).isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
             assertThat(PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent)).isEqualTo(
-                PaymentSheet.Result(PaymentSheet.CompletionStatus.Cancelled(null, null))
+                PaymentSheet.Result(
+                    PaymentSheet.CompletionStatus.Cancelled(null, null)
+                )
             )
         }
     }
@@ -238,7 +259,9 @@ class PaymentSheetActivityTest {
     private fun currentFragment(activity: PaymentSheetActivity) =
         activity.supportFragmentManager.findFragmentById(activity.viewBinding.fragmentContainer.id)
 
-    private fun activityScenario(viewModel: PaymentSheetViewModel = this.viewModel): InjectableActivityScenario<PaymentSheetActivity> {
+    private fun activityScenario(
+        viewModel: PaymentSheetViewModel = this.viewModel
+    ): InjectableActivityScenario<PaymentSheetActivity> {
         return injectableActivityScenario {
             injectActivity {
                 viewModelFactory = viewModelFactoryFor(viewModel)
@@ -246,7 +269,10 @@ class PaymentSheetActivityTest {
         }
     }
 
-    private class FakeStripeRepository(val paymentIntent: PaymentIntent, val paymentMethods: List<PaymentMethod>) : AbsFakeStripeRepository() {
+    private class FakeStripeRepository(
+        val paymentIntent: PaymentIntent,
+        val paymentMethods: List<PaymentMethod>
+    ) : AbsFakeStripeRepository() {
         override suspend fun getPaymentMethods(
             listPaymentMethodsParams: ListPaymentMethodsParams,
             publishableKey: String,
@@ -256,11 +282,28 @@ class PaymentSheetActivityTest {
             return paymentMethods
         }
 
-        override suspend fun confirmPaymentIntent(confirmPaymentIntentParams: ConfirmPaymentIntentParams, options: ApiRequest.Options, expandFields: List<String>): PaymentIntent? {
+        override suspend fun confirmPaymentIntent(
+            confirmPaymentIntentParams: ConfirmPaymentIntentParams,
+            options: ApiRequest.Options,
+            expandFields: List<String>
+        ): PaymentIntent? {
             return paymentIntent
         }
 
-        override fun retrieveIntent(clientSecret: String, options: ApiRequest.Options, expandFields: List<String>, callback: ApiResultCallback<StripeIntent>) {
+        override suspend fun retrievePaymentIntent(
+            clientSecret: String,
+            options: ApiRequest.Options,
+            expandFields: List<String>
+        ): PaymentIntent? {
+            return paymentIntent
+        }
+
+        override fun retrieveIntent(
+            clientSecret: String,
+            options: ApiRequest.Options,
+            expandFields: List<String>,
+            callback: ApiResultCallback<StripeIntent>
+        ) {
             callback.onSuccess(paymentIntent)
         }
     }

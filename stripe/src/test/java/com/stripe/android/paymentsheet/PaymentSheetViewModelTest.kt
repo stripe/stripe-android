@@ -25,6 +25,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.view.ActivityStarter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -157,14 +158,22 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `onActivityResult should update paymentIntentResult`() {
+    fun `onActivityResult should update ViewState LiveData`() {
         val paymentIntentResult: PaymentIntentResult = mock()
         whenever(paymentController.handlePaymentResult(any(), callbackCaptor.capture())).doAnswer {
             callbackCaptor.lastValue.onSuccess(paymentIntentResult)
         }
 
+        var viewState: ViewState? = null
+        viewModel.viewState.observeForever {
+            viewState = it
+        }
+
         viewModel.onActivityResult(0, 0, intent)
-        assertThat(viewModel.paymentIntentResult.value).isSameInstanceAs(paymentIntentResult)
+        assertThat(viewState)
+            .isEqualTo(
+                ViewState.Completed(paymentIntentResult)
+            )
     }
 
     @Test
@@ -181,13 +190,16 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `fetchPaymentIntent should update paymentIntent`() {
-        var retrievedIntent: PaymentIntent? = null
-        viewModel.paymentIntent.observeForever {
-            retrievedIntent = it
+    fun `fetchPaymentIntent() should update ViewState LiveData`() {
+        var viewState: ViewState? = null
+        viewModel.viewState.observeForever {
+            viewState = it
         }
         viewModel.fetchPaymentIntent(intent)
-        assertThat(retrievedIntent).isEqualTo(paymentIntent)
+        assertThat(viewState)
+            .isEqualTo(
+                ViewState.Ready(amount = 1099, currencyCode = "usd")
+            )
     }
 
     @Test
