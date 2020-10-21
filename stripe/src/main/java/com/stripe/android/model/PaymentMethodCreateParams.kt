@@ -326,18 +326,6 @@ data class PaymentMethodCreateParams internal constructor(
             }.orEmpty()
         }
 
-        class Builder : ObjectBuilder<Upi> {
-            internal var vpa: String? = null
-
-            fun setVpa(vpa: String?): Builder = apply {
-                this.vpa = vpa
-            }
-
-            override fun build(): Upi {
-                return Upi(vpa)
-            }
-        }
-
         private companion object {
             private const val PARAM_VPA: String = "vpa"
         }

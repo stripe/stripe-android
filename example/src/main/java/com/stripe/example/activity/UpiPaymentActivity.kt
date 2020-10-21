@@ -14,8 +14,10 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.example.databinding.UpiPaymentActivityBinding
 
 
-class UPIPaymentActivity : AppCompatActivity() {
-    private lateinit var stripe: Stripe
+class UpiPaymentActivity : AppCompatActivity() {
+    private val stripe by lazy {
+        Stripe(applicationContext, "pk_live_51H7wmsBte6TMTRd45LsWj9e3Kfkw6Kzlf5KhSrewsRydlElo8VarJxoIalKr5ielPeKf8erWZmt0qihjlwNux03y00c1zZpnxb")
+    }
     private val viewBinding: UpiPaymentActivityBinding by lazy {
         UpiPaymentActivityBinding.inflate(layoutInflater)
     }
@@ -26,10 +28,9 @@ class UPIPaymentActivity : AppCompatActivity() {
 
         viewBinding.submit.setOnClickListener {
             val params = PaymentMethodCreateParams.create(
-                upi = PaymentMethodCreateParams.Upi.Builder()
-                    .setVpa(viewBinding.vpa.text.toString())
-                    .build()
-                , billingDetails = PaymentMethod.BillingDetails(
+                upi = PaymentMethodCreateParams.Upi(
+                    vpa = viewBinding.vpa.text.toString()
+                ), billingDetails = PaymentMethod.BillingDetails(
                     name = "Anirudh Bhargava",
                     phone = "8960464240",
                     email = "anirudhb08@gmail.com",
@@ -43,11 +44,8 @@ class UPIPaymentActivity : AppCompatActivity() {
                 )
             )
 
-            stripe = Stripe(applicationContext, "pk_live_51H7wmsBte6TMTRd45LsWj9e3Kfkw6Kzlf5KhSrewsRydlElo8VarJxoIalKr5ielPeKf8erWZmt0qihjlwNux03y00c1zZpnxb")
-//            stripe = Stripe(applicationContext, "pk_test_51H7wmsBte6TMTRd4gph9Wm7gnQOKJwdVTCj30AhtB8MhWtlYj6v9xDn1vdCtKYGAE7cybr6fQdbQQtgvzBihE9cl00tOnrTpL9")
-
             val confirmParams = ConfirmPaymentIntentParams
-                .createWithPaymentMethodCreateParams(params, "pi_1HeJaYBte6TMTRd4WQjmjvar_secret_Gl9DjMwTNqkp3Ga8g9W8gno46")
+                .createWithPaymentMethodCreateParams(params, "pi_1HekzlBte6TMTRd4ndk9lqQv_secret_gYrLPEgcRO3PMg7E1wEC1CJRC")
 
             stripe.confirmPayment(this, confirmParams)
         }
@@ -66,7 +64,7 @@ class UPIPaymentActivity : AppCompatActivity() {
                     print("Payment Successful")
                 } else if (status == StripeIntent.Status.RequiresAction) {
                     if (!(paymentIntent.clientSecret.isNullOrBlank())) {
-                        val intent = Intent(applicationContext, UPIWaitingActivity::class.java)
+                        val intent = Intent(applicationContext, UpiWaitingActivity::class.java)
                         startActivity(intent)
                     }
                 }

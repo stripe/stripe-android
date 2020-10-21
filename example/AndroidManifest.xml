@@ -13,6 +13,7 @@
     <application
         android:icon="@mipmap/ic_launcher"
         android:label="@string/appName"
+        android:name=".ExampleApplication"
         android:theme="@style/AppTheme"
         android:supportsRtl="true"
         tools:ignore="AllowBackup">
@@ -77,7 +78,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.UPIPaymentActivity">
+            android:name=".activity.UpiPaymentActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
             </intent-filter>
@@ -101,7 +102,7 @@
         <activity
             android:name=".activity.CardBrandsActivity" />
         <activity
-            android:name=".activity.UPIWaitingActivity" />
+            android:name=".activity.UpiWaitingActivity" />
 
         <activity android:name=".activity.SimplePaymentMethodConfirmationActivity" />
         <activity android:name=".activity.ConnectExampleActivity" />
