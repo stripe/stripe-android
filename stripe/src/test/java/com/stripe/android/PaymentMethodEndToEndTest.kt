@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.exception.InvalidRequestException
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
@@ -135,6 +136,16 @@ class PaymentMethodEndToEndTest {
         }
         assertThat(exception.message)
             .isEqualTo("Missing required param: billing_details[name].")
+    }
+
+    @Test
+    fun createPaymentMethod_withUpi_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.UPI
+        val paymentMethod =
+            Stripe(context, ApiKeyFixtures.UPI_PUBLISHABLE_KEY)
+                .createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod?.type)
+            .isEqualTo(PaymentMethod.Type.Upi)
     }
 
     @Test

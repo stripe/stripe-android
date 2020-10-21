@@ -66,6 +66,12 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                         SofortJsonParser().parse(it)
                     }
                 )
+            PaymentMethod.Type.Upi ->
+                builder.setUpi(
+                    json.optJSONObject(type.code)?.let {
+                        UpiJsonParser().parse(it)
+                    }
+                )
             else -> {
                 // no-op
             }
@@ -275,6 +281,19 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
 
         private companion object {
             private const val FIELD_COUNTRY = "country"
+        }
+    }
+
+
+    internal class UpiJsonParser : ModelJsonParser<PaymentMethod.Upi> {
+        override fun parse(json: JSONObject): PaymentMethod.Upi? {
+            return PaymentMethod.Upi(
+                vpa = StripeJsonUtils.optString(json, FIELD_VPA)
+            )
+        }
+
+        private companion object {
+            private const val FIELD_VPA = "vpa"
         }
     }
 

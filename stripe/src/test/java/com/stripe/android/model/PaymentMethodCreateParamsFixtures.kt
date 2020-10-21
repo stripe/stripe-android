@@ -89,6 +89,13 @@ internal object PaymentMethodCreateParamsFixtures {
         billingDetails = BILLING_DETAILS
     )
 
+    internal val UPI  = PaymentMethodCreateParams.create(
+        upi = PaymentMethodCreateParams.Upi(
+            vpa = "8960464240@ybl"
+        ),
+        billingDetails = BILLING_DETAILS
+    )
+
     @JvmStatic
     fun createWith(metadata: Map<String, String>): PaymentMethodCreateParams {
         return PaymentMethodCreateParams.create(
