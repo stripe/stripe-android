@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.FrameLayout
 import com.stripe.android.R
 import com.stripe.android.databinding.PaymentSheetBuyButtonBinding
@@ -34,10 +35,16 @@ internal class BuyButton @JvmOverloads constructor(
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
 
-        viewBinding.label.alpha = if (isEnabled) {
+        viewBinding.label.alpha = if (enabled) {
             ALPHA_ENABLED
         } else {
             ALPHA_DISABLED
+        }
+
+        viewBinding.lockIcon.visibility = if (enabled) {
+            View.VISIBLE
+        } else {
+            View.GONE
         }
     }
 
