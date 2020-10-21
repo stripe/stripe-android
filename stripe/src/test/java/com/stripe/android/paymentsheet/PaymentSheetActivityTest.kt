@@ -190,7 +190,7 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
-            testCoroutineDispatcher.advanceTimeBy(1000)
+            testCoroutineDispatcher.advanceTimeBy(500)
             idleLooper()
 
             viewModel.onActivityResult(
@@ -204,7 +204,6 @@ internal class PaymentSheetActivityTest {
                     )
                 }
             )
-            testCoroutineDispatcher.advanceTimeBy(1000)
             idleLooper()
 
             assertThat(activity.bottomSheetBehavior.state)
