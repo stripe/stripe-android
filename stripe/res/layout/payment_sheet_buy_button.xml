@@ -45,7 +45,7 @@
         android:id="@+id/confirmed_icon"
         android:layout_width="@dimen/stripe_paymentsheet_buybutton_icon_size"
         android:layout_height="@dimen/stripe_paymentsheet_buybutton_icon_size"
-        android:src="@drawable/stripe_paymentsheet_buy_button_confirmed"
+        android:src="@drawable/stripe_ic_paymentsheet_buybutton_checkmark"
         android:layout_marginStart="@dimen/stripe_paymentsheet_buybutton_icon_padding"
         android:layout_marginEnd="@dimen/stripe_paymentsheet_buybutton_icon_padding"
         android:layout_gravity="end|center_vertical"
