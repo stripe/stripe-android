@@ -8,7 +8,7 @@ import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.FrameLayout
-import androidx.core.animation.addListener
+import androidx.core.animation.doOnEnd
 import com.stripe.android.R
 import com.stripe.android.databinding.PaymentSheetBuyButtonBinding
 import com.stripe.android.paymentsheet.model.ViewState
@@ -88,11 +88,7 @@ internal class BuyButton @JvmOverloads constructor(
             ).also { animator ->
                 animator.duration =
                     resources.getInteger(android.R.integer.config_shortAnimTime).toLong()
-                animator.addListener(
-                    onEnd = {
-                        onAnimationEnd()
-                    }
-                )
+                animator.doOnEnd { onAnimationEnd() }
             }.start()
         }
     }
