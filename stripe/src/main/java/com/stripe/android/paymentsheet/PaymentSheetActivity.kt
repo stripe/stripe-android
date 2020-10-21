@@ -17,6 +17,7 @@ import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.SheetMode
+import com.stripe.android.paymentsheet.model.ViewState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -115,8 +116,31 @@ internal class PaymentSheetActivity : AppCompatActivity() {
 
     private fun setupBuyButton() {
         viewModel.viewState.observe(this) { state ->
-            if (state != null) {
-                viewBinding.buyButton.updateState(state)
+            when (state) {
+                is ViewState.Ready -> {
+                    viewBinding.buyButton.onReadyState(state)
+                }
+                ViewState.Confirming -> {
+                    viewBinding.buyButton.onConfirmingState()
+                }
+                is ViewState.Completed -> {
+                    viewBinding.buyButton.onCompletedState {
+                        val result = state.paymentIntentResult
+                        when (result.outcome) {
+                            StripeIntentResult.Outcome.SUCCEEDED -> {
+                                animateOut(
+                                    PaymentSheet.CompletionStatus.Succeeded(result.intent)
+                                )
+                            }
+                            else -> {
+                                // TODO(mshafrir-stripe): handle other outcomes
+                            }
+                        }
+                    }
+                }
+                else -> {
+                    // no-op
+                }
             }
         }
 
@@ -126,20 +150,6 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         }
         viewBinding.buyButton.setOnClickListener {
             viewModel.checkout(this)
-        }
-
-        viewBinding.buyButton.completed.observe(this) { completed ->
-            if (completed != null) {
-                val result = completed.paymentIntentResult
-                when (result.outcome) {
-                    StripeIntentResult.Outcome.SUCCEEDED -> {
-                        animateOut(PaymentSheet.CompletionStatus.Succeeded(result.intent))
-                    }
-                    else -> {
-                        // TODO(mshafrir-stripe): handle other outcomes
-                    }
-                }
-            }
         }
     }
 

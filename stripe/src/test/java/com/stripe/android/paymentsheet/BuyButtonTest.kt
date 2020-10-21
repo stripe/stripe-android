@@ -19,8 +19,8 @@ class BuyButtonTest {
     }
 
     @Test
-    fun `updateState() with ready state should update label`() {
-        buyButton.updateState(
+    fun `onReadyState() should update label`() {
+        buyButton.onReadyState(
             ViewState.Ready(amount = 1099, currencyCode = "usd")
         )
         assertThat(
@@ -31,8 +31,8 @@ class BuyButtonTest {
     }
 
     @Test
-    fun `updateState() with confirming state should update label`() {
-        buyButton.updateState(ViewState.Confirming)
+    fun `onConfirmingState() should update label`() {
+        buyButton.onConfirmingState()
         assertThat(
             buyButton.viewBinding.label.text.toString()
         ).isEqualTo(
