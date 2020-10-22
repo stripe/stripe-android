@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.R
 import com.stripe.android.databinding.LayoutPaymentsheetAddCardItemBinding
 import com.stripe.android.databinding.LayoutPaymentsheetPaymentMethodItemBinding
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlin.properties.Delegates
@@ -98,8 +99,13 @@ internal class PaymentSheetPaymentMethodsAdapter(
             // TODO: Communicate error if card data not present
             method.card?.let { card ->
                 // TODO: Get updated card brand icons
-                binding.brandIcon.setImageResource(card.brand.icon)
-                binding.cardNumber.text = itemView.context
+                binding.brandIcon.setImageResource(
+                    when (card.brand) {
+                        CardBrand.Visa -> R.drawable.stripe_ic_paymentsheet_card_visa
+                        else -> R.drawable.stripe_ic_paymentsheet_card_visa
+                    }
+                )
+                binding.label.text = itemView.context
                     .getString(R.string.paymentsheet_payment_method_item_card_number, card.last4)
             }
         }
