@@ -10,10 +10,12 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/stripe_paymentsheet_pay_with_your"
-        android:textSize="24sp"
+        android:text="@string/stripe_paymentsheet_pay_using"
+        android:textColor="@color/stripe_paymentsheet_text"
+        android:textSize="20sp"
+        android:lineSpacingExtra="9sp"
         android:textStyle="bold"
-        android:paddingBottom="10dp"
+        android:layout_marginBottom="10dp"
         />
 
     <androidx.recyclerview.widget.RecyclerView
