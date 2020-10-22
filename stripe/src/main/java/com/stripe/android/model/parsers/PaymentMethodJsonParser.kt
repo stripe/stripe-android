@@ -66,10 +66,10 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                         SofortJsonParser().parse(it)
                     }
                 )
-            PaymentMethod.Type.NetBanking ->
-                builder.setNetBanking(
+            PaymentMethod.Type.Netbanking ->
+                builder.setNetbanking(
                     json.optJSONObject(type.code)?.let {
-                        NetBankingJsonParser().parse(it)
+                        NetbankingJsonParser().parse(it)
                     }
                 )
             else -> {
@@ -220,9 +220,9 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
         }
     }
 
-    internal class NetBankingJsonParser : ModelJsonParser<PaymentMethod.NetBanking> {
-        override fun parse(json: JSONObject): PaymentMethod.NetBanking {
-            return PaymentMethod.NetBanking(
+    internal class NetbankingJsonParser : ModelJsonParser<PaymentMethod.Netbanking> {
+        override fun parse(json: JSONObject): PaymentMethod.Netbanking {
+            return PaymentMethod.Netbanking(
                 bank = StripeJsonUtils.optString(json, FIELD_BANK)
             )
         }

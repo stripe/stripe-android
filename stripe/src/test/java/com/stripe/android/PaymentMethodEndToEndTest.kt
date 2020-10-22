@@ -94,7 +94,7 @@ class PaymentMethodEndToEndTest {
             Stripe(context, ApiKeyFixtures.NETBANKING_PUBLISHABLE_KEY)
                 .createPaymentMethodSynchronous(params)
         assertThat(paymentMethod?.type)
-            .isEqualTo(PaymentMethod.Type.NetBanking)
+            .isEqualTo(PaymentMethod.Type.Netbanking)
     }
 
     @Test

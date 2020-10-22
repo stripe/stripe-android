@@ -90,7 +90,7 @@ internal object PaymentMethodCreateParamsFixtures {
     )
 
     internal val NETBANKING = PaymentMethodCreateParams.create(
-        netBanking = PaymentMethodCreateParams.NetBanking(
+        netbanking = PaymentMethodCreateParams.Netbanking(
             bank = "hdfc"
         ),
         billingDetails = BILLING_DETAILS

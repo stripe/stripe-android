@@ -28,7 +28,7 @@ data class PaymentMethodCreateParams internal constructor(
     private val auBecsDebit: AuBecsDebit? = null,
     private val bacsDebit: BacsDebit? = null,
     private val sofort: Sofort? = null,
-    private val netBanking: NetBanking? = null,
+    private val netbanking: Netbanking? = null,
 
     private val billingDetails: PaymentMethod.BillingDetails? = null,
 
@@ -126,12 +126,12 @@ data class PaymentMethodCreateParams internal constructor(
     )
 
     private constructor(
-        netBanking: NetBanking,
+        netbanking: Netbanking,
         billingDetails: PaymentMethod.BillingDetails?,
         metadata: Map<String, String>?
     ) : this(
-        type = Type.NetBanking,
-        netBanking = netBanking,
+        type = Type.Netbanking,
+        netbanking = netbanking,
         billingDetails = billingDetails,
         metadata = metadata
     )
@@ -160,6 +160,7 @@ data class PaymentMethodCreateParams internal constructor(
                 Type.AuBecsDebit -> auBecsDebit?.toParamMap()
                 Type.BacsDebit -> bacsDebit?.toParamMap()
                 Type.Sofort -> sofort?.toParamMap()
+                Type.Netbanking -> netbanking?.toParamMap()
                 else -> null
             }.takeUnless { it.isNullOrEmpty() }?.let {
                 mapOf(type.code to it)
@@ -183,7 +184,7 @@ data class PaymentMethodCreateParams internal constructor(
         GrabPay("grabpay"),
         PayPal("paypal"),
         AfterpayClearpay("afterpay_clearpay"),
-        NetBanking("netbanking")
+        Netbanking("netbanking")
     }
 
     @Parcelize
@@ -407,12 +408,12 @@ data class PaymentMethodCreateParams internal constructor(
     }
 
     @Parcelize
-    data class NetBanking(
+    data class Netbanking(
         internal var bank: String
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
             return mapOf(
-                PARAM_BANK to bank.toUpperCase(Locale.ROOT)
+                PARAM_BANK to bank.toLowerCase(Locale.ROOT)
             )
         }
 
@@ -546,11 +547,11 @@ data class PaymentMethodCreateParams internal constructor(
         @JvmStatic
         @JvmOverloads
         fun create(
-            netBanking: NetBanking,
+            netbanking: Netbanking,
             billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null
         ): PaymentMethodCreateParams {
-            return PaymentMethodCreateParams(netBanking, billingDetails, metadata)
+            return PaymentMethodCreateParams(netbanking, billingDetails, metadata)
         }
 
         /**
