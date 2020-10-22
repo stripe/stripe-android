@@ -105,6 +105,8 @@ internal class PaymentSheetActivity : AppCompatActivity() {
                 }
             }
         }
+
+        viewBinding.close.setOnClickListener { onUserCancel() }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
