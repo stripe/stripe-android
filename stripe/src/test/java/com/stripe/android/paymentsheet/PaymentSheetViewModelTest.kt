@@ -43,14 +43,6 @@ internal class PaymentSheetViewModelTest {
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
-    private val intent = Intent().putExtra(
-        ActivityStarter.Args.EXTRA,
-        PaymentSheetActivityStarter.Args(
-            "client_secret",
-            "ephemeral_key",
-            "customer_id"
-        )
-    )
     private val paymentIntent = PaymentIntentFixtures.PI_WITH_SHIPPING
 
     private val stripeRepository: StripeRepository = FakeStripeRepository(paymentIntent)
@@ -68,18 +60,29 @@ internal class PaymentSheetViewModelTest {
 
     @BeforeTest
     fun before() {
-        whenever(activity.intent).thenReturn(intent)
+        whenever(activity.intent).thenReturn(DEFAULT_ARGS_INTENT)
         whenever(paymentController.shouldHandlePaymentResult(any(), any())).thenReturn(true)
     }
 
     @Test
-    fun `updatePaymentMethods should fetch from api repository`() {
+    fun `updatePaymentMethods with default args should fetch from API repository`() {
         var paymentMethods: List<PaymentMethod>? = null
         viewModel.paymentMethods.observeForever {
             paymentMethods = it
         }
-        viewModel.updatePaymentMethods(intent)
+        viewModel.updatePaymentMethods(DEFAULT_ARGS_INTENT)
         assertThat(paymentMethods).containsExactly(FAKE_CARD)
+    }
+
+    @Test
+    fun `updatePaymentMethods with guest args should emit empty list`() {
+        var paymentMethods: List<PaymentMethod>? = null
+        viewModel.paymentMethods.observeForever {
+            paymentMethods = it
+        }
+        viewModel.updatePaymentMethods(GUEST_ARGS_INTENT)
+        assertThat(paymentMethods)
+            .isEqualTo(emptyList<PaymentMethod>())
     }
 
     @Test
@@ -169,7 +172,7 @@ internal class PaymentSheetViewModelTest {
             viewState = it
         }
 
-        viewModel.onActivityResult(0, 0, intent)
+        viewModel.onActivityResult(0, 0, DEFAULT_ARGS_INTENT)
         assertThat(viewState)
             .isEqualTo(
                 ViewState.Completed(paymentIntentResult)
@@ -185,7 +188,7 @@ internal class PaymentSheetViewModelTest {
         whenever(paymentController.handlePaymentResult(any(), callbackCaptor.capture())).doAnswer {
             callbackCaptor.lastValue.onError(RuntimeException("some exception"))
         }
-        viewModel.onActivityResult(0, 0, intent)
+        viewModel.onActivityResult(0, 0, DEFAULT_ARGS_INTENT)
         assertThat(error).isNotNull()
     }
 
@@ -195,7 +198,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.viewState.observeForever {
             viewState = it
         }
-        viewModel.fetchPaymentIntent(intent)
+        viewModel.fetchPaymentIntent(DEFAULT_ARGS_INTENT)
         assertThat(viewState)
             .isEqualTo(
                 ViewState.Ready(amount = 1099, currencyCode = "usd")
@@ -209,7 +212,11 @@ internal class PaymentSheetViewModelTest {
             "publishable_key",
             "stripe_account_id",
             object : AbsFakeStripeRepository() {
-                override suspend fun retrievePaymentIntent(clientSecret: String, options: ApiRequest.Options, expandFields: List<String>): PaymentIntent? {
+                override suspend fun retrievePaymentIntent(
+                    clientSecret: String,
+                    options: ApiRequest.Options,
+                    expandFields: List<String>
+                ): PaymentIntent? {
                     throw exception
                 }
             },
@@ -220,7 +227,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.error.observeForever {
             error = it
         }
-        viewModel.fetchPaymentIntent(intent)
+        viewModel.fetchPaymentIntent(DEFAULT_ARGS_INTENT)
         assertThat(error).isEqualTo(exception)
     }
 
@@ -235,7 +242,11 @@ internal class PaymentSheetViewModelTest {
     }
 
     private class FakeStripeRepository(val paymentIntent: PaymentIntent) : AbsFakeStripeRepository() {
-        override suspend fun retrievePaymentIntent(clientSecret: String, options: ApiRequest.Options, expandFields: List<String>): PaymentIntent? {
+        override suspend fun retrievePaymentIntent(
+            clientSecret: String,
+            options: ApiRequest.Options,
+            expandFields: List<String>
+        ): PaymentIntent? {
             return paymentIntent
         }
 
@@ -251,5 +262,27 @@ internal class PaymentSheetViewModelTest {
 
     private companion object {
         val FAKE_CARD = PaymentMethod("fake_pm", created = 0, liveMode = false, type = PaymentMethod.Type.Card)
+
+        private val DEFAULT_ARGS = PaymentSheetActivityStarter.Args.Default(
+            "client_secret",
+            "ephemeral_key",
+            "customer_id"
+        )
+
+        private val GUEST_ARGS = PaymentSheetActivityStarter.Args.Guest(
+            "client_secret"
+        )
+
+        private val DEFAULT_ARGS_INTENT = Intent()
+            .putExtra(
+                ActivityStarter.Args.EXTRA,
+                DEFAULT_ARGS
+            )
+
+        private val GUEST_ARGS_INTENT = Intent()
+            .putExtra(
+                ActivityStarter.Args.EXTRA,
+                GUEST_ARGS
+            )
     }
 }
