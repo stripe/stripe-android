@@ -15,7 +15,13 @@ internal class PaymentSheet(val clientSecret: String, val ephemeralKey: String, 
         // TODO: Use ActivityResultContract and call callback instead of using onActivityResult
         // when androidx.activity:1.2.0 hits GA
         PaymentSheetActivityStarter(activity)
-            .startForResult(PaymentSheetActivityStarter.Args(clientSecret, ephemeralKey, customerId))
+            .startForResult(
+                PaymentSheetActivityStarter.Args.Default(
+                    clientSecret,
+                    ephemeralKey,
+                    customerId
+                )
+            )
     }
 
     internal sealed class CompletionStatus : Parcelable {

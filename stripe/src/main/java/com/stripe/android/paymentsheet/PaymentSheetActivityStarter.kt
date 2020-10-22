@@ -5,20 +5,27 @@ import android.content.Intent
 import com.stripe.android.view.ActivityStarter
 import kotlinx.android.parcel.Parcelize
 
-internal class PaymentSheetActivityStarter : ActivityStarter<PaymentSheetActivity, PaymentSheetActivityStarter.Args> {
+internal class PaymentSheetActivityStarter internal constructor(
+    activity: Activity
+) : ActivityStarter<PaymentSheetActivity, PaymentSheetActivityStarter.Args>(
+    activity,
+    PaymentSheetActivity::class.java,
+    REQUEST_CODE
+) {
+    sealed class Args : ActivityStarter.Args {
+        abstract val clientSecret: String
 
-    internal constructor(activity: Activity) : super(
-        activity,
-        PaymentSheetActivity::class.java,
-        REQUEST_CODE
-    )
+        @Parcelize
+        data class Default(
+            override val clientSecret: String,
+            val ephemeralKey: String,
+            val customerId: String
+        ) : Args()
 
-    @Parcelize
-    internal data class Args(
-        val clientSecret: String,
-        val ephemeralKey: String,
-        val customerId: String
-    ) : ActivityStarter.Args {
+        @Parcelize
+        data class Guest(
+            override val clientSecret: String
+        ) : Args()
 
         internal companion object {
             internal fun fromIntent(intent: Intent): Args? {

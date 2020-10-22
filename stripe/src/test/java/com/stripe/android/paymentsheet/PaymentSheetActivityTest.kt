@@ -74,7 +74,7 @@ internal class PaymentSheetActivityTest {
         PaymentSheetActivity::class.java
     ).putExtra(
         ActivityStarter.Args.EXTRA,
-        PaymentSheetActivityStarter.Args(
+        PaymentSheetActivityStarter.Args.Default(
             "client_secret",
             "ephemeral_key",
             "customer_id"

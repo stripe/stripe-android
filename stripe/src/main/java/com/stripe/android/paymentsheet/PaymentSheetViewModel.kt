@@ -71,11 +71,18 @@ internal class PaymentSheetViewModel internal constructor(
     fun updatePaymentMethods(intent: Intent) {
         getPaymentSheetActivityArgs(
             intent
-        )?.let { (_, ephemeralKey, customerId) ->
-            updatePaymentMethods(
-                ephemeralKey,
-                customerId
-            )
+        )?.let { args ->
+            when (args) {
+                is PaymentSheetActivityStarter.Args.Default -> {
+                    updatePaymentMethods(
+                        args.ephemeralKey,
+                        args.customerId
+                    )
+                }
+                is PaymentSheetActivityStarter.Args.Guest -> {
+                    // don't fetch payment methods
+                }
+            }
         }
     }
 
@@ -84,12 +91,12 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     fun fetchPaymentIntent(intent: Intent) {
-        getPaymentSheetActivityArgs(intent)?.let { (clientSecret) ->
+        getPaymentSheetActivityArgs(intent)?.let { args ->
             viewModelScope.launch {
                 val result = withContext(workContext) {
                     runCatching {
                         val paymentIntent = stripeRepository.retrievePaymentIntent(
-                            clientSecret,
+                            args.clientSecret,
                             ApiRequest.Options(publishableKey, stripeAccountId)
                         )
                         requireNotNull(paymentIntent) {
