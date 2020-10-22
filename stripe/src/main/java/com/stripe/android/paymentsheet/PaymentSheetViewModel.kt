@@ -25,6 +25,7 @@ import com.stripe.android.StripePaymentController
 import com.stripe.android.StripeRepository
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ListPaymentMethodsParams
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
@@ -45,15 +46,16 @@ internal class PaymentSheetViewModel internal constructor(
     private val mutableTransition = MutableLiveData<TransitionTarget>()
     private val mutableSheetMode = MutableLiveData<SheetMode>()
     private val mutablePaymentMethods = MutableLiveData<List<PaymentMethod>>()
+    private val mutablePaymentIntent = MutableLiveData<PaymentIntent?>()
     private val mutableSelection = MutableLiveData<PaymentSelection?>()
     private val mutableViewState = MutableLiveData<ViewState>(null)
 
+    internal val paymentIntent: LiveData<PaymentIntent?> = mutablePaymentIntent
     internal val paymentMethods: LiveData<List<PaymentMethod>> = mutablePaymentMethods
     internal val error: LiveData<Throwable> = mutableError
     internal val transition: LiveData<TransitionTarget> = mutableTransition
     internal val selection: LiveData<PaymentSelection?> = mutableSelection
     internal val sheetMode: LiveData<SheetMode> = mutableSheetMode.distinctUntilChanged()
-
     internal val viewState: LiveData<ViewState> = mutableViewState.distinctUntilChanged()
 
     fun onError(throwable: Throwable) {
@@ -106,6 +108,8 @@ internal class PaymentSheetViewModel internal constructor(
                 }
                 result.fold(
                     onSuccess = { paymentIntent ->
+                        mutablePaymentIntent.value = paymentIntent
+
                         val amount = paymentIntent.amount
                         val currencyCode = paymentIntent.currency
                         if (amount != null && currencyCode != null) {
@@ -115,7 +119,11 @@ internal class PaymentSheetViewModel internal constructor(
                             onError(IllegalStateException("PaymentIntent is invalid."))
                         }
                     },
-                    onFailure = this@PaymentSheetViewModel::onError
+                    onFailure = {
+                        mutablePaymentIntent.value = null
+
+                        onError(it)
+                    }
                 )
             }
         }
