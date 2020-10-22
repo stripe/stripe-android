@@ -88,6 +88,16 @@ class PaymentMethodEndToEndTest {
     }
 
     @Test
+    fun createPaymentMethod_withNetBanking_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.NETBANKING
+        val paymentMethod =
+            Stripe(context, ApiKeyFixtures.NETBANKING_PUBLISHABLE_KEY)
+                .createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod?.type)
+            .isEqualTo(PaymentMethod.Type.NetBanking)
+    }
+
+    @Test
     fun createPaymentMethod_withGiropay_shouldCreateObject() {
         val params = PaymentMethodCreateParamsFixtures.GIROPAY
         val paymentMethod =
