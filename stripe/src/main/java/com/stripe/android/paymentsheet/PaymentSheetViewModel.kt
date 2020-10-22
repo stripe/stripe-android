@@ -201,7 +201,7 @@ internal class PaymentSheetViewModel internal constructor(
                             paymentMethodType = PaymentMethod.Type.Card
                         ),
                         publishableKey,
-                        setOf(), // TODO: Add product usage tokens
+                        PRODUCT_USAGE,
                         ApiRequest.Options(ephemeralKey, stripeAccountId)
                     )
                 }
@@ -261,5 +261,9 @@ internal class PaymentSheetViewModel internal constructor(
                 paymentController
             ) as T
         }
+    }
+
+    private companion object {
+        private val PRODUCT_USAGE = setOf("PaymentSheet")
     }
 }
