@@ -9,7 +9,7 @@
         android:id="@+id/label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/stripe_paymentsheet_buy_button_text"
+        android:textColor="@color/stripe_paymentsheet_buybutton_text"
         android:gravity="center_horizontal|center_vertical"
         android:lineSpacingExtra="5sp"
         android:textSize="16sp"
@@ -22,7 +22,35 @@
         android:src="@drawable/stripe_ic_paymentsheet_buy_button_lock"
         android:layout_gravity="end|center_vertical"
         android:visibility="gone"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"/>
+        android:layout_marginStart="@dimen/stripe_paymentsheet_buybutton_icon_padding"
+        android:layout_marginEnd="@dimen/stripe_paymentsheet_buybutton_icon_padding"
+        android:contentDescription="@null"
+        />
+
+    <ProgressBar
+        android:id="@+id/confirming_icon"
+        android:background="@android:color/transparent"
+        android:indeterminate="true"
+        android:indeterminateTint="@color/stripe_paymentsheet_buybutton_confirming_progress"
+        android:indeterminateTintMode="src_in"
+        android:layout_gravity="end|center_vertical"
+        android:layout_width="@dimen/stripe_paymentsheet_buybutton_icon_size"
+        android:layout_height="@dimen/stripe_paymentsheet_buybutton_icon_size"
+        android:layout_marginStart="@dimen/stripe_paymentsheet_buybutton_icon_padding"
+        android:layout_marginEnd="@dimen/stripe_paymentsheet_buybutton_icon_padding"
+        android:visibility="gone"
+        />
+
+    <ImageView
+        android:id="@+id/confirmed_icon"
+        android:layout_width="@dimen/stripe_paymentsheet_buybutton_icon_size"
+        android:layout_height="@dimen/stripe_paymentsheet_buybutton_icon_size"
+        android:src="@drawable/stripe_ic_paymentsheet_buybutton_checkmark"
+        android:layout_marginStart="@dimen/stripe_paymentsheet_buybutton_icon_padding"
+        android:layout_marginEnd="@dimen/stripe_paymentsheet_buybutton_icon_padding"
+        android:layout_gravity="end|center_vertical"
+        android:visibility="invisible"
+        android:contentDescription="@null"
+        />
 
 </merge>

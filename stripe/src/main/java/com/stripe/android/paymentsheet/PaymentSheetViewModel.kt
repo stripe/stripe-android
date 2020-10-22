@@ -25,9 +25,9 @@ import com.stripe.android.StripePaymentController
 import com.stripe.android.StripeRepository
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ListPaymentMethodsParams
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.view.AuthActivityStarter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -41,20 +41,20 @@ internal class PaymentSheetViewModel internal constructor(
     private val paymentController: PaymentController,
     private val workContext: CoroutineContext = Dispatchers.IO
 ) : ViewModel() {
-    private val mutablePaymentIntent = MutableLiveData<PaymentIntent>()
     private val mutableError = MutableLiveData<Throwable>()
     private val mutableTransition = MutableLiveData<TransitionTarget>()
     private val mutableSheetMode = MutableLiveData<SheetMode>()
     private val mutablePaymentMethods = MutableLiveData<List<PaymentMethod>>()
     private val mutableSelection = MutableLiveData<PaymentSelection?>()
-    private val mutablePaymentIntentResult = MutableLiveData<PaymentIntentResult>()
+    private val mutableViewState = MutableLiveData<ViewState>(null)
+
     internal val paymentMethods: LiveData<List<PaymentMethod>> = mutablePaymentMethods
     internal val error: LiveData<Throwable> = mutableError
     internal val transition: LiveData<TransitionTarget> = mutableTransition
     internal val selection: LiveData<PaymentSelection?> = mutableSelection
-    internal val paymentIntentResult: LiveData<PaymentIntentResult> = mutablePaymentIntentResult
     internal val sheetMode: LiveData<SheetMode> = mutableSheetMode.distinctUntilChanged()
-    internal val paymentIntent: LiveData<PaymentIntent?> = mutablePaymentIntent
+
+    internal val viewState: LiveData<ViewState> = mutableViewState.distinctUntilChanged()
 
     fun onError(throwable: Throwable) {
         mutableError.postValue(throwable)
@@ -69,10 +69,12 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     fun updatePaymentMethods(intent: Intent) {
-        getPaymentSheetActivityArgs(intent)?.let { args ->
+        getPaymentSheetActivityArgs(
+            intent
+        )?.let { (_, ephemeralKey, customerId) ->
             updatePaymentMethods(
-                args.ephemeralKey,
-                args.customerId
+                ephemeralKey,
+                customerId
             )
         }
     }
@@ -82,26 +84,39 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     fun fetchPaymentIntent(intent: Intent) {
-        getPaymentSheetActivityArgs(intent)?.let { args ->
+        getPaymentSheetActivityArgs(intent)?.let { (clientSecret) ->
             viewModelScope.launch {
-                withContext(workContext) {
+                val result = withContext(workContext) {
                     runCatching {
-                        stripeRepository.retrievePaymentIntent(
-                            args.clientSecret,
+                        val paymentIntent = stripeRepository.retrievePaymentIntent(
+                            clientSecret,
                             ApiRequest.Options(publishableKey, stripeAccountId)
                         )
-                    }.fold(
-                        onSuccess = mutablePaymentIntent::postValue,
-                        onFailure = this@PaymentSheetViewModel::onError
-                    )
+                        requireNotNull(paymentIntent) {
+                            "Could not parse PaymentIntent."
+                        }
+                    }
                 }
+                result.fold(
+                    onSuccess = { paymentIntent ->
+                        val amount = paymentIntent.amount
+                        val currencyCode = paymentIntent.currency
+                        if (amount != null && currencyCode != null) {
+                            mutableViewState.value = ViewState.Ready(amount, currencyCode)
+                        } else {
+                            // TODO(mshafrir-stripe): improve error message
+                            onError(IllegalStateException("PaymentIntent is invalid."))
+                        }
+                    },
+                    onFailure = this@PaymentSheetViewModel::onError
+                )
             }
         }
     }
 
     fun checkout(activity: Activity) {
         val args = getPaymentSheetActivityArgs(activity.intent) ?: return
-        // TODO(smaskell): Show processing indicator
+
         val confirmParams = when (val selection = selection.value) {
             PaymentSelection.GooglePay -> TODO("smaskell: handle Google Pay confirmation")
             is PaymentSelection.Saved -> {
@@ -123,6 +138,7 @@ internal class PaymentSheetViewModel internal constructor(
             }
         }
         confirmParams?.let {
+            mutableViewState.value = ViewState.Confirming
             paymentController.startConfirmAndAuth(
                 AuthActivityStarter.Host.create(activity),
                 it,
@@ -140,7 +156,7 @@ internal class PaymentSheetViewModel internal constructor(
                 it,
                 object : ApiResultCallback<PaymentIntentResult> {
                     override fun onSuccess(result: PaymentIntentResult) {
-                        mutablePaymentIntentResult.postValue(result)
+                        mutableViewState.value = ViewState.Completed(result)
                     }
 
                     override fun onError(e: Exception) {
@@ -170,8 +186,8 @@ internal class PaymentSheetViewModel internal constructor(
         stripeAccountId: String? = this.stripeAccountId
     ) {
         viewModelScope.launch {
-            withContext(workContext) {
-                val result = runCatching {
+            val result = withContext(workContext) {
+                runCatching {
                     stripeRepository.getPaymentMethods(
                         ListPaymentMethodsParams(
                             customerId = customerId,
@@ -182,13 +198,13 @@ internal class PaymentSheetViewModel internal constructor(
                         ApiRequest.Options(ephemeralKey, stripeAccountId)
                     )
                 }
-                result.fold(
-                    onSuccess = this@PaymentSheetViewModel::setPaymentMethods,
-                    onFailure = {
-                        onError(it)
-                    }
-                )
             }
+            result.fold(
+                onSuccess = this@PaymentSheetViewModel::setPaymentMethods,
+                onFailure = {
+                    onError(it)
+                }
+            )
         }
     }
 
@@ -203,7 +219,10 @@ internal class PaymentSheetViewModel internal constructor(
         AddPaymentMethodSheet
     }
 
-    internal enum class SheetMode(val height: Int, @BottomSheetBehavior.State val behaviourState: Int) {
+    internal enum class SheetMode(
+        val height: Int,
+        @BottomSheetBehavior.State val behaviourState: Int
+    ) {
         Full(MATCH_PARENT, STATE_EXPANDED),
         FullCollapsed(MATCH_PARENT, STATE_COLLAPSED),
         Wrapped(WRAP_CONTENT, STATE_COLLAPSED)
@@ -228,7 +247,12 @@ internal class PaymentSheetViewModel internal constructor(
                 true
             )
 
-            return PaymentSheetViewModel(publishableKey, stripeAccountId, stripeRepository, paymentController) as T
+            return PaymentSheetViewModel(
+                publishableKey,
+                stripeAccountId,
+                stripeRepository,
+                paymentController
+            ) as T
         }
     }
 }

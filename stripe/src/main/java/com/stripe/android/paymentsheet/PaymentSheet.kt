@@ -21,8 +21,10 @@ internal class PaymentSheet(val clientSecret: String, val ephemeralKey: String, 
     internal sealed class CompletionStatus : Parcelable {
         @Parcelize
         data class Succeeded(val paymentIntent: PaymentIntent) : CompletionStatus()
+
         @Parcelize
         data class Failed(val error: Throwable, val paymentIntent: PaymentIntent?) : CompletionStatus()
+
         @Parcelize
         data class Cancelled(val mostRecentError: Throwable?, val paymentIntent: PaymentIntent?) : CompletionStatus()
     }
