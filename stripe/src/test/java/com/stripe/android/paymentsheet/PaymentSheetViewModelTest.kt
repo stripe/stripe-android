@@ -75,14 +75,14 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `updatePaymentMethods with guest args should not fetch from API repository`() {
-        var count = 0
+    fun `updatePaymentMethods with guest args should emit empty list`() {
+        var paymentMethods: List<PaymentMethod>? = null
         viewModel.paymentMethods.observeForever {
-            count++
+            paymentMethods = it
         }
         viewModel.updatePaymentMethods(GUEST_ARGS_INTENT)
-        assertThat(count)
-            .isEqualTo(0)
+        assertThat(paymentMethods)
+            .isEqualTo(emptyList<PaymentMethod>())
     }
 
     @Test

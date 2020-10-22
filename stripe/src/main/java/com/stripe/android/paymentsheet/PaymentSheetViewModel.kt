@@ -80,7 +80,7 @@ internal class PaymentSheetViewModel internal constructor(
                     )
                 }
                 is PaymentSheetActivityStarter.Args.Guest -> {
-                    // don't fetch payment methods
+                    mutablePaymentMethods.postValue(emptyList())
                 }
             }
         }
