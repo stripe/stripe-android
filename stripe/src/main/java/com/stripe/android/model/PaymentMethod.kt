@@ -137,7 +137,8 @@ data class PaymentMethod internal constructor(
         Alipay("alipay", isReusable = false),
         GrabPay("grabpay", isReusable = false),
         PayPal("paypal", isReusable = false),
-        AfterpayClearpay("afterpay_clearpay", isReusable = false);
+        AfterpayClearpay("afterpay_clearpay", isReusable = false),
+        Netbanking("netbanking", isReusable = false);
 
         override fun toString(): String {
             return code
@@ -167,6 +168,7 @@ data class PaymentMethod internal constructor(
         private var auBecsDebit: AuBecsDebit? = null
         private var bacsDebit: BacsDebit? = null
         private var sofort: Sofort? = null
+        private var netbanking: Netbanking? = null
 
         fun setId(id: String?): Builder = apply {
             this.id = id
@@ -226,6 +228,10 @@ data class PaymentMethod internal constructor(
 
         fun setSofort(sofort: Sofort?): Builder = apply {
             this.sofort = sofort
+        }
+
+        fun setNetbanking(netbanking: Netbanking?): Builder = apply {
+            this.netbanking = netbanking
         }
 
         override fun build(): PaymentMethod {
@@ -659,6 +665,16 @@ data class PaymentMethod internal constructor(
     @Parcelize
     data class Sofort internal constructor(
         @JvmField val country: String?
+    ) : StripeModel
+
+    @Parcelize
+    data class Netbanking internal constructor(
+        /**
+         * The customer’s bank.
+         *
+         * [netbanking.bank](https://stripe.com/docs/payments/netbanking/banks)
+         */
+        @JvmField val bank: String?
     ) : StripeModel
 
     companion object {

@@ -28,6 +28,7 @@ data class PaymentMethodCreateParams internal constructor(
     private val auBecsDebit: AuBecsDebit? = null,
     private val bacsDebit: BacsDebit? = null,
     private val sofort: Sofort? = null,
+    private val netbanking: Netbanking? = null,
 
     private val billingDetails: PaymentMethod.BillingDetails? = null,
 
@@ -124,6 +125,17 @@ data class PaymentMethodCreateParams internal constructor(
         metadata = metadata
     )
 
+    private constructor(
+        netbanking: Netbanking,
+        billingDetails: PaymentMethod.BillingDetails?,
+        metadata: Map<String, String>?
+    ) : this(
+        type = Type.Netbanking,
+        netbanking = netbanking,
+        billingDetails = billingDetails,
+        metadata = metadata
+    )
+
     override fun toParamMap(): Map<String, Any> {
         return mapOf(
             PARAM_TYPE to type.code
@@ -148,6 +160,7 @@ data class PaymentMethodCreateParams internal constructor(
                 Type.AuBecsDebit -> auBecsDebit?.toParamMap()
                 Type.BacsDebit -> bacsDebit?.toParamMap()
                 Type.Sofort -> sofort?.toParamMap()
+                Type.Netbanking -> netbanking?.toParamMap()
                 else -> null
             }.takeUnless { it.isNullOrEmpty() }?.let {
                 mapOf(type.code to it)
@@ -171,6 +184,7 @@ data class PaymentMethodCreateParams internal constructor(
         GrabPay("grabpay"),
         PayPal("paypal"),
         AfterpayClearpay("afterpay_clearpay"),
+        Netbanking("netbanking")
     }
 
     @Parcelize
@@ -393,6 +407,21 @@ data class PaymentMethodCreateParams internal constructor(
         }
     }
 
+    @Parcelize
+    data class Netbanking(
+        internal var bank: String
+    ) : StripeParamsModel, Parcelable {
+        override fun toParamMap(): Map<String, Any> {
+            return mapOf(
+                PARAM_BANK to bank.toLowerCase(Locale.ROOT)
+            )
+        }
+
+        private companion object {
+            private const val PARAM_BANK = "bank"
+        }
+    }
+
     companion object {
         private const val PARAM_TYPE = "type"
         private const val PARAM_BILLING_DETAILS = "billing_details"
@@ -510,6 +539,19 @@ data class PaymentMethodCreateParams internal constructor(
             metadata: Map<String, String>? = null
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(sofort, billingDetails, metadata)
+        }
+
+        /**
+         * @return params for creating a [PaymentMethod.Type.NetBanking] payment method
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun create(
+            netbanking: Netbanking,
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(netbanking, billingDetails, metadata)
         }
 
         /**
