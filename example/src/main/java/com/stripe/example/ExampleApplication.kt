@@ -1,6 +1,7 @@
 package com.stripe.example
 
 import android.app.Application
+import android.os.Build
 import android.os.StrictMode
 import com.facebook.stetho.Stetho
 import com.stripe.android.CustomerSession
@@ -32,9 +33,13 @@ class ExampleApplication : Application() {
         StrictMode.setVmPolicy(
             StrictMode.VmPolicy.Builder()
                 .detectLeakedSqlLiteObjects()
-                .detectLeakedClosableObjects()
                 .penaltyLog()
                 .penaltyDeath()
+                .also {
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+                        it.detectLeakedClosableObjects()
+                    }
+                }
                 .build()
         )
 
