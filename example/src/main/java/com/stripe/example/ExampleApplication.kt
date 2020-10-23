@@ -37,6 +37,8 @@ class ExampleApplication : Application() {
                 .penaltyDeath()
                 .also {
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+                        // this resulted in a crash when launching a transparent Activity in API 30
+                        // > E InputDispatcher: channel ~ Channel is unrecoverably broken and will be disposed!
                         it.detectLeakedClosableObjects()
                     }
                 }
