@@ -6,8 +6,6 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_COLLAPSED
-import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.AbsFakeStripeRepository
 import com.stripe.android.ApiKeyFixtures
@@ -48,7 +46,7 @@ internal class PaymentSheetActivityTest {
 
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
-    private val paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_WITH_SHIPPING
+    private val paymentIntent = PaymentIntentFixtures.PI_WITH_SHIPPING
 
     private val paymentMethods = listOf(
         PaymentMethod("payment_method_id", 0, false, PaymentMethod.Type.Card)
@@ -107,7 +105,10 @@ internal class PaymentSheetActivityTest {
                 PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent)
             ).isEqualTo(
                 PaymentSheet.Result(
-                    PaymentSheet.CompletionStatus.Cancelled(null, null)
+                    PaymentSheet.CompletionStatus.Cancelled(
+                        null,
+                        paymentIntent
+                    )
                 )
             )
         }
@@ -138,7 +139,7 @@ internal class PaymentSheetActivityTest {
             assertThat(currentFragment(activity))
                 .isInstanceOf(PaymentSheetPaymentMethodsListFragment::class.java)
             assertThat(activity.bottomSheetBehavior.state)
-                .isEqualTo(STATE_COLLAPSED)
+                .isEqualTo(BottomSheetBehavior.STATE_COLLAPSED)
             assertThat(activity.viewBinding.bottomSheet.layoutParams.height)
                 .isEqualTo(WRAP_CONTENT)
 
@@ -147,7 +148,7 @@ internal class PaymentSheetActivityTest {
             assertThat(currentFragment(activity))
                 .isInstanceOf(PaymentSheetAddCardFragment::class.java)
             assertThat(activity.bottomSheetBehavior.state)
-                .isEqualTo(STATE_EXPANDED)
+                .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
             assertThat(activity.viewBinding.bottomSheet.layoutParams.height)
                 .isEqualTo(MATCH_PARENT)
 
@@ -156,7 +157,7 @@ internal class PaymentSheetActivityTest {
             assertThat(currentFragment(activity))
                 .isInstanceOf(PaymentSheetPaymentMethodsListFragment::class.java)
             assertThat(activity.bottomSheetBehavior.state)
-                .isEqualTo(STATE_COLLAPSED)
+                .isEqualTo(BottomSheetBehavior.STATE_COLLAPSED)
             assertThat(activity.viewBinding.bottomSheet.layoutParams.height)
                 .isEqualTo(WRAP_CONTENT)
 
@@ -169,7 +170,10 @@ internal class PaymentSheetActivityTest {
                 PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent)
             ).isEqualTo(
                 PaymentSheet.Result(
-                    PaymentSheet.CompletionStatus.Cancelled(null, null)
+                    PaymentSheet.CompletionStatus.Cancelled(
+                        null,
+                        paymentIntent
+                    )
                 )
             )
         }
@@ -219,7 +223,9 @@ internal class PaymentSheetActivityTest {
                 .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
             assertThat(PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent))
                 .isEqualTo(
-                    PaymentSheet.Result(PaymentSheet.CompletionStatus.Succeeded(paymentIntent))
+                    PaymentSheet.Result(
+                        PaymentSheet.CompletionStatus.Succeeded(paymentIntent)
+                    )
                 )
         }
     }
@@ -248,7 +254,7 @@ internal class PaymentSheetActivityTest {
             assertThat(currentFragment(activity))
                 .isInstanceOf(PaymentSheetAddCardFragment::class.java)
             assertThat(activity.bottomSheetBehavior.state)
-                .isEqualTo(STATE_COLLAPSED)
+                .isEqualTo(BottomSheetBehavior.STATE_COLLAPSED)
             assertThat(activity.viewBinding.bottomSheet.layoutParams.height)
                 .isEqualTo(MATCH_PARENT)
 
@@ -262,7 +268,10 @@ internal class PaymentSheetActivityTest {
                 PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent)
             ).isEqualTo(
                 PaymentSheet.Result(
-                    PaymentSheet.CompletionStatus.Cancelled(null, null)
+                    PaymentSheet.CompletionStatus.Cancelled(
+                        null,
+                        paymentIntent
+                    )
                 )
             )
         }
