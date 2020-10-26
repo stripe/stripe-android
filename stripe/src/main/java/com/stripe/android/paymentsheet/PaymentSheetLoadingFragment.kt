@@ -17,9 +17,15 @@ class PaymentSheetLoadingFragment : Fragment(R.layout.fragment_payment_sheet_loa
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val activity = this.activity ?: return
+        val activity = this.activity
+        if (activity == null) {
+            activityViewModel.onError(
+                IllegalStateException("Could not launch PaymentSheet.")
+            )
+            return
+        }
 
-        activityViewModel.paymentMethods.observe(activity) { paymentMethods ->
+        activityViewModel.paymentMethods.observe(viewLifecycleOwner) { paymentMethods ->
             val target = if (paymentMethods.isEmpty()) {
                 TransitionTarget.AddPaymentMethodSheet
             } else {
