@@ -212,8 +212,7 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         animateOut(
             PaymentSheet.CompletionStatus.Cancelled(
                 viewModel.error.value,
-                // TODO: set payment intent if available
-                paymentIntent = null
+                paymentIntent = viewModel.paymentIntent.value
             )
         )
     }
