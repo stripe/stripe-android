@@ -77,12 +77,6 @@
                 <action android:name="android.intent.action.VIEW"/>
             </intent-filter>
         </activity>
-        <activity
-            android:name=".activity.UpiPaymentActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-            </intent-filter>
-        </activity>
 
         <activity
             android:name=".activity.PaymentAuthActivity" />
@@ -102,8 +96,6 @@
             android:name=".activity.KlarnaSourceActivity" />
         <activity
             android:name=".activity.CardBrandsActivity" />
-        <activity
-            android:name=".activity.UpiWaitingActivity" />
 
         <activity android:name=".activity.SimplePaymentMethodConfirmationActivity" />
         <activity android:name=".activity.ConnectExampleActivity" />
