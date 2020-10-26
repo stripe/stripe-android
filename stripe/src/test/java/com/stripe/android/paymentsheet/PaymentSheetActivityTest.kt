@@ -54,6 +54,7 @@ internal class PaymentSheetActivityTest {
         PaymentMethod("payment_method_id", 0, false, PaymentMethod.Type.Card)
     )
 
+    private val googlePayRepository = FakeGooglePayRepository(true)
     private val stripeRepository = FakeStripeRepository(paymentIntent, paymentMethods)
 
     private val viewModel = PaymentSheetViewModel(
@@ -66,6 +67,7 @@ internal class PaymentSheetActivityTest {
             stripeRepository,
             workContext = testCoroutineDispatcher
         ),
+        googlePayRepository = googlePayRepository,
         workContext = testCoroutineDispatcher
     )
 
@@ -101,12 +103,13 @@ internal class PaymentSheetActivityTest {
 
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
-            assertThat(PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent))
-                .isEqualTo(
-                    PaymentSheet.Result(
-                        PaymentSheet.CompletionStatus.Cancelled(null, null)
-                    )
+            assertThat(
+                PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent)
+            ).isEqualTo(
+                PaymentSheet.Result(
+                    PaymentSheet.CompletionStatus.Cancelled(null, null)
                 )
+            )
         }
     }
 
@@ -134,8 +137,10 @@ internal class PaymentSheetActivityTest {
 
             assertThat(currentFragment(activity))
                 .isInstanceOf(PaymentSheetPaymentMethodsListFragment::class.java)
-            assertThat(activity.bottomSheetBehavior.state).isEqualTo(STATE_COLLAPSED)
-            assertThat(activity.viewBinding.bottomSheet.layoutParams.height).isEqualTo(WRAP_CONTENT)
+            assertThat(activity.bottomSheetBehavior.state)
+                .isEqualTo(STATE_COLLAPSED)
+            assertThat(activity.viewBinding.bottomSheet.layoutParams.height)
+                .isEqualTo(WRAP_CONTENT)
 
             viewModel.transitionTo(PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull)
             idleLooper()
@@ -150,19 +155,23 @@ internal class PaymentSheetActivityTest {
             idleLooper()
             assertThat(currentFragment(activity))
                 .isInstanceOf(PaymentSheetPaymentMethodsListFragment::class.java)
-            assertThat(activity.bottomSheetBehavior.state).isEqualTo(STATE_COLLAPSED)
-            assertThat(activity.viewBinding.bottomSheet.layoutParams.height).isEqualTo(WRAP_CONTENT)
+            assertThat(activity.bottomSheetBehavior.state)
+                .isEqualTo(STATE_COLLAPSED)
+            assertThat(activity.viewBinding.bottomSheet.layoutParams.height)
+                .isEqualTo(WRAP_CONTENT)
 
             activity.onBackPressed()
             idleLooper()
             // animating out
-            assertThat(activity.bottomSheetBehavior.state).isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
-            assertThat(PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent))
-                .isEqualTo(
-                    PaymentSheet.Result(
-                        PaymentSheet.CompletionStatus.Cancelled(null, null)
-                    )
+            assertThat(activity.bottomSheetBehavior.state)
+                .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
+            assertThat(
+                PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent)
+            ).isEqualTo(
+                PaymentSheet.Result(
+                    PaymentSheet.CompletionStatus.Cancelled(null, null)
                 )
+            )
         }
     }
 
@@ -227,6 +236,7 @@ internal class PaymentSheetActivityTest {
                 stripeRepository,
                 workContext = testCoroutineDispatcher
             ),
+            googlePayRepository = googlePayRepository,
             workContext = testCoroutineDispatcher
         )
         val scenario = activityScenario(viewModel)
@@ -246,8 +256,11 @@ internal class PaymentSheetActivityTest {
             activity.onBackPressed()
             idleLooper()
 
-            assertThat(activity.bottomSheetBehavior.state).isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
-            assertThat(PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent)).isEqualTo(
+            assertThat(activity.bottomSheetBehavior.state)
+                .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
+            assertThat(
+                PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent)
+            ).isEqualTo(
                 PaymentSheet.Result(
                     PaymentSheet.CompletionStatus.Cancelled(null, null)
                 )
