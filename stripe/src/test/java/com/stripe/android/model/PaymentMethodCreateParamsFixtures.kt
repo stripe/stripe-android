@@ -91,7 +91,7 @@ internal object PaymentMethodCreateParamsFixtures {
 
     internal val UPI = PaymentMethodCreateParams.create(
         upi = PaymentMethodCreateParams.Upi(
-            vpa = "8960464240@ybl"
+            vpa = "vpa@hdfcbank"
         ),
         billingDetails = BILLING_DETAILS
     )
