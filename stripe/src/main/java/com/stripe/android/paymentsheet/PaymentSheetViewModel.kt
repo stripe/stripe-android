@@ -11,6 +11,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_COLLAPSED
@@ -31,6 +32,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.view.AuthActivityStarter
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
@@ -40,7 +42,8 @@ internal class PaymentSheetViewModel internal constructor(
     private val stripeAccountId: String?,
     private val stripeRepository: StripeRepository,
     private val paymentController: PaymentController,
-    private val workContext: CoroutineContext = Dispatchers.IO
+    private val googlePayRepository: GooglePayRepository,
+    private val workContext: CoroutineContext
 ) : ViewModel() {
     private val mutableError = MutableLiveData<Throwable>()
     private val mutableTransition = MutableLiveData<TransitionTarget>()
@@ -182,6 +185,14 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
+    fun isGooglePayReady() = liveData {
+        emit(
+            withContext(workContext) {
+                googlePayRepository.isReady().first()
+            }
+        )
+    }
+
     @VisibleForTesting
     internal fun setPaymentMethods(paymentMethods: List<PaymentMethod>) {
         mutablePaymentMethods.postValue(paymentMethods)
@@ -261,12 +272,15 @@ internal class PaymentSheetViewModel internal constructor(
                 stripeRepository,
                 true
             )
+            val googlePayRepository = DefaultGooglePayRepository()
 
             return PaymentSheetViewModel(
                 publishableKey,
                 stripeAccountId,
                 stripeRepository,
-                paymentController
+                paymentController,
+                googlePayRepository,
+                Dispatchers.IO
             ) as T
         }
     }

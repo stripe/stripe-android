@@ -30,10 +30,10 @@ import com.stripe.android.view.ActivityStarter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -45,6 +45,7 @@ internal class PaymentSheetViewModelTest {
 
     private val paymentIntent = PaymentIntentFixtures.PI_WITH_SHIPPING
 
+    private val googlePayRepository = FakeGooglePayRepository(true)
     private val stripeRepository: StripeRepository = FakeStripeRepository(paymentIntent)
     private val paymentController: PaymentController = mock()
     private val viewModel = PaymentSheetViewModel(
@@ -52,6 +53,7 @@ internal class PaymentSheetViewModelTest {
         "stripe_account_id",
         stripeRepository,
         paymentController,
+        googlePayRepository,
         workContext = testCoroutineDispatcher
     )
 
@@ -221,6 +223,7 @@ internal class PaymentSheetViewModelTest {
                 }
             },
             paymentController,
+            googlePayRepository,
             workContext = testCoroutineDispatcher
         )
         var error: Throwable? = null
@@ -239,6 +242,16 @@ internal class PaymentSheetViewModelTest {
         }
         viewModel.fetchPaymentIntent(Intent())
         assertThat(error).isInstanceOf(IllegalStateException::class.java)
+    }
+
+    @Test
+    fun `isGooglePayReady() should emit expected value`() {
+        var isReady: Boolean? = null
+        viewModel.isGooglePayReady().observeForever {
+            isReady = it
+        }
+        assertThat(isReady)
+            .isTrue()
     }
 
     private class FakeStripeRepository(val paymentIntent: PaymentIntent) : AbsFakeStripeRepository() {
