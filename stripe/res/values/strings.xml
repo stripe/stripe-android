@@ -185,6 +185,7 @@
     <string name="stripe_paymentsheet_pay_using" tools:ignore="MissingTranslation">Pay using</string>
     <string name="stripe_paymentsheet_add_payment_method" tools:ignore="MissingTranslation">Add payment method</string>
     <string name="stripe_paymentsheet_add_payment_method_button" tools:ignore="MissingTranslation">+ Add new</string>
+    <string name="stripe_paymentsheet_save_this_card" tools:ignore="MissingTranslation">Save this card</string>
 
     <!-- The payment amount (e.g. "Pay $25.00") -->
     <string name="stripe_paymentsheet_pay_button_amount" tools:ignore="MissingTranslation">Pay %s</string>
