@@ -76,8 +76,7 @@
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
                 android:imeOptions="actionNext"
-                android:inputType="date"
-                android:maxLength="5"
+                android:digits="@string/stripe_expiration_date_allowlist"
                 android:hint="@string/expiry_date_hint"
                 style="@style/Stripe.CardInputWidget.EditText"
                 />

@@ -3,6 +3,8 @@ package com.stripe.android.view
 import android.content.Context
 import android.os.Build
 import android.text.Editable
+import android.text.InputFilter
+import android.text.InputType
 import android.util.AttributeSet
 import android.view.View
 import android.widget.EditText
@@ -20,6 +22,13 @@ class ExpiryDateEditText @JvmOverloads constructor(
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     init {
+        inputType = InputType.TYPE_CLASS_NUMBER
+        filters = listOf(
+            InputFilter.LengthFilter(
+                context.resources.getInteger(R.integer.stripe_date_length)
+            )
+        ).toTypedArray()
+
         setErrorMessage(resources.getString(R.string.invalid_expiry_year))
         listenForTextChanges()
 
