@@ -66,6 +66,21 @@ internal class PaymentSheetActivity : AppCompatActivity() {
             )
         }
         viewModel.sheetMode.observe(this) { mode ->
+            when (mode) {
+                SheetMode.Full,
+                SheetMode.FullCollapsed -> {
+                    viewBinding.close.visibility = View.GONE
+                    viewBinding.back.visibility = View.VISIBLE
+                }
+                SheetMode.Wrapped -> {
+                    viewBinding.close.visibility = View.VISIBLE
+                    viewBinding.back.visibility = View.GONE
+                }
+                else -> {
+                    // mode == null
+                }
+            }
+
             viewBinding.bottomSheet.layoutParams = viewBinding.bottomSheet.layoutParams.apply {
                 height = mode.height
             }
@@ -107,6 +122,9 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         }
 
         viewBinding.close.setOnClickListener { onUserCancel() }
+        viewBinding.back.setOnClickListener {
+            viewModel.transitionTo(PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod)
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

@@ -180,6 +180,7 @@
     </string>
 
     <!-- Payment Sheet -->
+    <string name="stripe_paymentsheet_back" tools:ignore="MissingTranslation">Back</string>
     <string name="stripe_paymentsheet_close" tools:ignore="MissingTranslation">Close</string>
     <string name="stripe_paymentsheet_pay_using" tools:ignore="MissingTranslation">Pay using</string>
     <string name="stripe_paymentsheet_add_payment_method" tools:ignore="MissingTranslation">Add payment method</string>
