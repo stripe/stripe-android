@@ -49,8 +49,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:imeOptions="actionNext"
-                android:inputType="date"
-                android:maxLength="@integer/stripe_date_length"
+                android:digits="@string/stripe_expiration_date_allowlist"
                 android:nextFocusDown="@+id/et_cvc"
                 android:nextFocusForward="@+id/et_cvc"
                 />
