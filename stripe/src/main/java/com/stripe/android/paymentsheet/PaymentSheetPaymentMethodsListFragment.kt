@@ -41,7 +41,13 @@ internal class PaymentSheetPaymentMethodsListFragment : Fragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val activity = this.activity ?: return
+        val activity = this.activity
+        if (activity == null) {
+            activityViewModel.onError(
+                IllegalStateException("Could not launch PaymentSheet.")
+            )
+            return
+        }
 
         // If we're returning to this fragment from elsewhere, we need to reset the selection to
         // whatever the user had selected previously

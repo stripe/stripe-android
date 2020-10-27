@@ -61,8 +61,7 @@ internal class PaymentSheetActivity : AppCompatActivity() {
             animateOut(
                 PaymentSheet.CompletionStatus.Failed(
                     it,
-                    // TODO: Set payment intent if available
-                    paymentIntent = null
+                    paymentIntent = viewModel.paymentIntent.value
                 )
             )
         }
@@ -106,6 +105,8 @@ internal class PaymentSheetActivity : AppCompatActivity() {
                 }
             }
         }
+
+        viewBinding.close.setOnClickListener { onUserCancel() }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -213,8 +214,7 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         animateOut(
             PaymentSheet.CompletionStatus.Cancelled(
                 viewModel.error.value,
-                // TODO: set payment intent if available
-                paymentIntent = null
+                paymentIntent = viewModel.paymentIntent.value
             )
         )
     }

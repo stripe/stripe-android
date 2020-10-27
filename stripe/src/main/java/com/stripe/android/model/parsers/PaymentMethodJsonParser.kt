@@ -72,6 +72,12 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                         UpiJsonParser().parse(it)
                     }
                 )
+            PaymentMethod.Type.Netbanking ->
+                builder.setNetbanking(
+                    json.optJSONObject(type.code)?.let {
+                        NetbankingJsonParser().parse(it)
+                    }
+                )
             else -> {
                 // no-op
             }
@@ -216,6 +222,18 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
 
         private companion object {
             private const val FIELD_ACCOUNT_HOLDER_TYPE = "account_holder_type"
+            private const val FIELD_BANK = "bank"
+        }
+    }
+
+    internal class NetbankingJsonParser : ModelJsonParser<PaymentMethod.Netbanking> {
+        override fun parse(json: JSONObject): PaymentMethod.Netbanking {
+            return PaymentMethod.Netbanking(
+                bank = StripeJsonUtils.optString(json, FIELD_BANK)
+            )
+        }
+
+        private companion object {
             private const val FIELD_BANK = "bank"
         }
     }

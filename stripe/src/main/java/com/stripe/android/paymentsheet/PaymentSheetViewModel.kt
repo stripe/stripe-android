@@ -11,6 +11,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_COLLAPSED
@@ -25,11 +26,13 @@ import com.stripe.android.StripePaymentController
 import com.stripe.android.StripeRepository
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ListPaymentMethodsParams
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.view.AuthActivityStarter
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
@@ -39,21 +42,23 @@ internal class PaymentSheetViewModel internal constructor(
     private val stripeAccountId: String?,
     private val stripeRepository: StripeRepository,
     private val paymentController: PaymentController,
-    private val workContext: CoroutineContext = Dispatchers.IO
+    private val googlePayRepository: GooglePayRepository,
+    private val workContext: CoroutineContext
 ) : ViewModel() {
     private val mutableError = MutableLiveData<Throwable>()
     private val mutableTransition = MutableLiveData<TransitionTarget>()
     private val mutableSheetMode = MutableLiveData<SheetMode>()
     private val mutablePaymentMethods = MutableLiveData<List<PaymentMethod>>()
+    private val mutablePaymentIntent = MutableLiveData<PaymentIntent?>()
     private val mutableSelection = MutableLiveData<PaymentSelection?>()
     private val mutableViewState = MutableLiveData<ViewState>(null)
 
+    internal val paymentIntent: LiveData<PaymentIntent?> = mutablePaymentIntent
     internal val paymentMethods: LiveData<List<PaymentMethod>> = mutablePaymentMethods
     internal val error: LiveData<Throwable> = mutableError
     internal val transition: LiveData<TransitionTarget> = mutableTransition
     internal val selection: LiveData<PaymentSelection?> = mutableSelection
     internal val sheetMode: LiveData<SheetMode> = mutableSheetMode.distinctUntilChanged()
-
     internal val viewState: LiveData<ViewState> = mutableViewState.distinctUntilChanged()
 
     fun onError(throwable: Throwable) {
@@ -71,11 +76,18 @@ internal class PaymentSheetViewModel internal constructor(
     fun updatePaymentMethods(intent: Intent) {
         getPaymentSheetActivityArgs(
             intent
-        )?.let { (_, ephemeralKey, customerId) ->
-            updatePaymentMethods(
-                ephemeralKey,
-                customerId
-            )
+        )?.let { args ->
+            when (args) {
+                is PaymentSheetActivityStarter.Args.Default -> {
+                    updatePaymentMethods(
+                        args.ephemeralKey,
+                        args.customerId
+                    )
+                }
+                is PaymentSheetActivityStarter.Args.Guest -> {
+                    mutablePaymentMethods.postValue(emptyList())
+                }
+            }
         }
     }
 
@@ -84,12 +96,12 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     fun fetchPaymentIntent(intent: Intent) {
-        getPaymentSheetActivityArgs(intent)?.let { (clientSecret) ->
+        getPaymentSheetActivityArgs(intent)?.let { args ->
             viewModelScope.launch {
                 val result = withContext(workContext) {
                     runCatching {
                         val paymentIntent = stripeRepository.retrievePaymentIntent(
-                            clientSecret,
+                            args.clientSecret,
                             ApiRequest.Options(publishableKey, stripeAccountId)
                         )
                         requireNotNull(paymentIntent) {
@@ -99,6 +111,8 @@ internal class PaymentSheetViewModel internal constructor(
                 }
                 result.fold(
                     onSuccess = { paymentIntent ->
+                        mutablePaymentIntent.value = paymentIntent
+
                         val amount = paymentIntent.amount
                         val currencyCode = paymentIntent.currency
                         if (amount != null && currencyCode != null) {
@@ -108,7 +122,11 @@ internal class PaymentSheetViewModel internal constructor(
                             onError(IllegalStateException("PaymentIntent is invalid."))
                         }
                     },
-                    onFailure = this@PaymentSheetViewModel::onError
+                    onFailure = {
+                        mutablePaymentIntent.value = null
+
+                        onError(it)
+                    }
                 )
             }
         }
@@ -167,6 +185,14 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
+    fun isGooglePayReady() = liveData {
+        emit(
+            withContext(workContext) {
+                googlePayRepository.isReady().first()
+            }
+        )
+    }
+
     @VisibleForTesting
     internal fun setPaymentMethods(paymentMethods: List<PaymentMethod>) {
         mutablePaymentMethods.postValue(paymentMethods)
@@ -194,7 +220,7 @@ internal class PaymentSheetViewModel internal constructor(
                             paymentMethodType = PaymentMethod.Type.Card
                         ),
                         publishableKey,
-                        setOf(), // TODO: Add product usage tokens
+                        PRODUCT_USAGE,
                         ApiRequest.Options(ephemeralKey, stripeAccountId)
                     )
                 }
@@ -246,13 +272,20 @@ internal class PaymentSheetViewModel internal constructor(
                 stripeRepository,
                 true
             )
+            val googlePayRepository = DefaultGooglePayRepository()
 
             return PaymentSheetViewModel(
                 publishableKey,
                 stripeAccountId,
                 stripeRepository,
-                paymentController
+                paymentController,
+                googlePayRepository,
+                Dispatchers.IO
             ) as T
         }
+    }
+
+    private companion object {
+        private val PRODUCT_USAGE = setOf("PaymentSheet")
     }
 }

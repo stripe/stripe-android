@@ -51,4 +51,16 @@
 
     <style name="Stripe.BecsDebitWidget.MandateAcceptanceTextView"
         parent="Stripe.Base.BecsDebitWidget.MandateAcceptanceTextView" />
+
+    <style name="StripePaymentSheetPaymentMethodsIconContainer">
+        <item name="android:layout_width">@dimen/stripe_paymentsheet_paymentmethod_icon_width</item>
+        <item name="android:layout_height">@dimen/stripe_paymentsheet_paymentmethod_icon_height</item>
+    </style>
+
+    <style name="StripePaymentSheetPaymentMethodsLabel">
+        <item name="android:textColor">@color/stripe_paymentsheet_text</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:lineSpacingExtra">1sp</item>
+    </style>
 </resources>
