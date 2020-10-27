@@ -29,7 +29,16 @@
                 android:src="@drawable/stripe_ic_paymentsheet_close"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:contentDescription="@string/stripe_paymentsheet_close"/>
+                android:contentDescription="@string/stripe_paymentsheet_close"
+                android:visibility="gone"/>
+
+            <ImageView
+                android:id="@+id/back"
+                android:src="@drawable/stripe_ic_paymentsheet_back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/stripe_paymentsheet_back"
+                android:visibility="gone"/>
         </FrameLayout>
 
         <androidx.fragment.app.FragmentContainerView
