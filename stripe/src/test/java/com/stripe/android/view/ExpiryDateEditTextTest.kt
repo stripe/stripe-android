@@ -2,16 +2,16 @@ package com.stripe.android.view
 
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
+import com.stripe.android.model.ExpirationDate
 import com.stripe.android.testharness.ViewTestUtils
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -26,11 +26,6 @@ class ExpiryDateEditTextTest {
             R.style.StripeDefaultTheme
         )
     )
-
-    @BeforeTest
-    fun setup() {
-        expiryDateEditText.setText("")
-    }
 
     @Test
     fun afterInputTwoDigits_textContainsSlash() {
@@ -51,8 +46,10 @@ class ExpiryDateEditTextTest {
     @Test
     fun inputSingleDigit_whenDigitIsZeroOrOne_doesNotPrependZero() {
         expiryDateEditText.append("1")
-        assertEquals("1", expiryDateEditText.text.toString())
-        assertEquals(1, expiryDateEditText.selectionStart)
+        assertThat(expiryDateEditText.text.toString())
+            .isEqualTo("1")
+        assertThat(expiryDateEditText.selectionStart)
+            .isEqualTo(1)
     }
 
     @Test
@@ -81,9 +78,10 @@ class ExpiryDateEditTextTest {
         expiryDateEditText.append("1")
         expiryDateEditText.append("2")
         expiryDateEditText.append("3")
+
         ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
-        val text = expiryDateEditText.text.toString()
-        assertEquals("12/", text)
+        assertThat(expiryDateEditText.text.toString())
+            .isEqualTo("12/")
     }
 
     @Test
@@ -220,25 +218,30 @@ class ExpiryDateEditTextTest {
         assertFalse(expiryDateEditText.shouldShowError)
 
         // The date is no longer "in error", but it still shouldn't have triggered the listener.
-        assertEquals(0, invocations)
+        assertThat(invocations)
+            .isEqualTo(0)
     }
 
     @Test
-    fun getValidDateFields_whenDataIsValid_returnsExpectedValues() {
+    fun validatedDate_whenDataIsValid_returnsExpectedValues() {
         // This test will be invalid if run after the year 2050. Please update the code.
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
 
         expiryDateEditText.append("12")
         expiryDateEditText.append("50")
 
-        val retrievedDate = expiryDateEditText.validDateFields
-        assertNotNull(retrievedDate)
-        assertEquals(12, retrievedDate.first)
-        assertEquals(2050, retrievedDate.second)
+        assertThat(
+            expiryDateEditText.validatedDate
+        ).isEqualTo(
+            ExpirationDate.Validated(
+                month = 12,
+                year = 2050
+            )
+        )
     }
 
     @Test
-    fun getValidDateFields_whenDateIsValidFormatButExpired_returnsNull() {
+    fun validatedDate_whenDateIsValidFormatButExpired_returnsNull() {
         // This test will be invalid if run after the year 2050. Please update the code.
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2080)
 
@@ -246,17 +249,19 @@ class ExpiryDateEditTextTest {
         expiryDateEditText.append("12")
         // 12/12 is an invalid date until 2080, at which point it will be interpreted as 12/2112
 
-        assertNull(expiryDateEditText.validDateFields)
+        assertThat(expiryDateEditText.validatedDate)
+            .isNull()
     }
 
     @Test
-    fun getValidDateFields_whenDateIsIncomplete_returnsNull() {
+    fun validatedDate_whenDateIsIncomplete_returnsNull() {
         expiryDateEditText.append("4")
-        assertNull(expiryDateEditText.validDateFields)
+        assertThat(expiryDateEditText.validatedDate)
+            .isNull()
     }
 
     @Test
-    fun getValidDateFields_whenDateIsValidAndThenChangedToInvalid_returnsNull() {
+    fun validatedDate_whenDateIsValidAndThenChangedToInvalid_returnsNull() {
         // This test will be invalid if run after the year 2050. Please update the code.
         assertTrue(Calendar.getInstance().get(Calendar.YEAR) < 2050)
 
@@ -264,6 +269,6 @@ class ExpiryDateEditTextTest {
         expiryDateEditText.append("50")
         ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
 
-        assertNull(expiryDateEditText.validDateFields)
+        assertNull(expiryDateEditText.validatedDate)
     }
 }

@@ -36,6 +36,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
+import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import kotlin.properties.Delegates
@@ -97,7 +98,7 @@ class CardInputWidget @JvmOverloads constructor(
                     cardNumberEditText.validatedCardNumber == null
                 },
                 CardValidCallback.Fields.Expiry.takeIf {
-                    expiryDateEditText.validDateFields == null
+                    expiryDateEditText.validatedDate == null
                 },
                 CardValidCallback.Fields.Cvc.takeIf {
                     this.cvc == null
@@ -218,11 +219,11 @@ class CardInputWidget @JvmOverloads constructor(
     override val cardParams: CardParams?
         get() {
             val cardNumber = cardNumberEditText.validatedCardNumber
-            val cardDate = expiryDateEditText.validDateFields
+            val expirationDate = expiryDateEditText.validatedDate
             val cvc = this.cvc
 
             cardNumberEditText.shouldShowError = cardNumber == null
-            expiryDateEditText.shouldShowError = cardDate == null
+            expiryDateEditText.shouldShowError = expirationDate == null
             cvcEditText.shouldShowError = cvc == null
             postalCodeEditText.shouldShowError =
                 (postalCodeRequired || usZipCodeRequired) &&
@@ -241,7 +242,7 @@ class CardInputWidget @JvmOverloads constructor(
                 cardNumber == null -> {
                     cardNumberEditText.requestFocus()
                 }
-                cardDate == null -> {
+                expirationDate == null -> {
                     expiryDateEditText.requestFocus()
                 }
                 cvc == null -> {
@@ -255,8 +256,8 @@ class CardInputWidget @JvmOverloads constructor(
                     return CardParams(
                         setOf(LOGGING_TOKEN),
                         number = cardNumber.value,
-                        expMonth = cardDate.first,
-                        expYear = cardDate.second,
+                        expMonth = expirationDate.month,
+                        expYear = expirationDate.year,
                         cvc = cvc.value,
                         address = Address.Builder()
                             .setPostalCode(postalCodeValue.takeUnless { it.isNullOrBlank() })
@@ -278,11 +279,11 @@ class CardInputWidget @JvmOverloads constructor(
     override val cardBuilder: Card.Builder?
         get() {
             val cardNumber = cardNumberEditText.validatedCardNumber
-            val cardDate = expiryDateEditText.validDateFields
+            val expirationDate = expiryDateEditText.validatedDate
             val cvc = this.cvc
 
             cardNumberEditText.shouldShowError = cardNumber == null
-            expiryDateEditText.shouldShowError = cardDate == null
+            expiryDateEditText.shouldShowError = expirationDate == null
             cvcEditText.shouldShowError = cvc == null
             postalCodeEditText.shouldShowError =
                 (postalCodeRequired || usZipCodeRequired) &&
@@ -301,7 +302,7 @@ class CardInputWidget @JvmOverloads constructor(
                 cardNumber == null -> {
                     cardNumberEditText.requestFocus()
                 }
-                cardDate == null -> {
+                expirationDate == null -> {
                     expiryDateEditText.requestFocus()
                 }
                 cvc == null -> {
@@ -314,8 +315,8 @@ class CardInputWidget @JvmOverloads constructor(
                     shouldShowErrorIcon = false
                     return Card.Builder(
                         number = cardNumber.value,
-                        expMonth = cardDate.first,
-                        expYear = cardDate.second,
+                        expMonth = expirationDate.month,
+                        expYear = expirationDate.year,
                         cvc = cvc.value
                     )
                         .addressZip(postalCodeValue)
@@ -471,7 +472,9 @@ class CardInputWidget @JvmOverloads constructor(
         @IntRange(from = 1, to = 12) month: Int,
         @IntRange(from = 0, to = 9999) year: Int
     ) {
-        expiryDateEditText.setText(DateUtils.createDateStringFromIntegerInput(month, year))
+        expiryDateEditText.setText(
+            ExpirationDate.Unvalidated(month, year).getDisplayString()
+        )
     }
 
     /**

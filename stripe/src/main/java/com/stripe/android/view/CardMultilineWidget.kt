@@ -29,6 +29,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
+import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import java.math.BigDecimal
@@ -76,7 +77,7 @@ class CardMultilineWidget @JvmOverloads constructor(
                     validatedCardNumber == null
                 },
                 CardValidCallback.Fields.Expiry.takeIf {
-                    expiryDate == null
+                    expirationDate == null
                 },
                 CardValidCallback.Fields.Cvc.takeIf {
                     cvcEditText.cvc == null
@@ -198,7 +199,7 @@ class CardMultilineWidget @JvmOverloads constructor(
 
             shouldShowErrorIcon = false
 
-            val cardDate = requireNotNull(expiryDateEditText.validDateFields)
+            val expirationDate = requireNotNull(expiryDateEditText.validatedDate)
             val cvcValue = cvcEditText.text?.toString()
             val postalCode = postalCodeEditText.text?.toString()
                 .takeIf { shouldShowPostalCode }
@@ -206,8 +207,8 @@ class CardMultilineWidget @JvmOverloads constructor(
             return CardParams(
                 setOf(CARD_MULTILINE_TOKEN),
                 number = validatedCardNumber?.value.orEmpty(),
-                expMonth = cardDate.first,
-                expYear = cardDate.second,
+                expMonth = expirationDate.month,
+                expYear = expirationDate.year,
                 cvc = cvcValue,
                 address = Address.Builder()
                     .setPostalCode(postalCode.takeUnless { it.isNullOrBlank() })
@@ -229,15 +230,15 @@ class CardMultilineWidget @JvmOverloads constructor(
 
             shouldShowErrorIcon = false
 
-            val cardDate = requireNotNull(expiryDateEditText.validDateFields)
+            val expirationDate = requireNotNull(expiryDateEditText.validatedDate)
             val cvcValue = cvcEditText.text?.toString()
             val postalCode = postalCodeEditText.text?.toString()
                 .takeIf { shouldShowPostalCode }
 
             return Card.Builder(
                 number = validatedCardNumber?.value,
-                expMonth = cardDate.first,
-                expYear = cardDate.second,
+                expMonth = expirationDate.month,
+                expYear = expirationDate.year,
                 cvc = cvcValue
             )
                 .addressZip(postalCode)
@@ -249,10 +250,8 @@ class CardMultilineWidget @JvmOverloads constructor(
             return cardNumberEditText.validatedCardNumber
         }
 
-    private val expiryDate: Pair<Int, Int>?
-        get() {
-            return expiryDateEditText.validDateFields
-        }
+    private val expirationDate: ExpirationDate.Validated?
+        get() = expiryDateEditText.validatedDate
 
     private val allFields: Collection<StripeEditText>
         get() {
@@ -413,7 +412,7 @@ class CardMultilineWidget @JvmOverloads constructor(
      */
     fun validateAllFields(): Boolean {
         val cardNumberIsValid = validatedCardNumber != null
-        val expiryIsValid = expiryDate != null
+        val expiryIsValid = expirationDate != null
         val cvcIsValid = cvcEditText.cvc != null
         cardNumberEditText.shouldShowError = !cardNumberIsValid
         expiryDateEditText.shouldShowError = !expiryIsValid
@@ -465,7 +464,9 @@ class CardMultilineWidget @JvmOverloads constructor(
         @IntRange(from = 1, to = 12) month: Int,
         @IntRange(from = 0, to = 9999) year: Int
     ) {
-        expiryDateEditText.setText(DateUtils.createDateStringFromIntegerInput(month, year))
+        expiryDateEditText.setText(
+            ExpirationDate.Unvalidated(month, year).getDisplayString()
+        )
     }
 
     override fun setCvcCode(cvcCode: String?) {
