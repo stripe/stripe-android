@@ -188,8 +188,14 @@ internal class PaymentSheetActivityTest {
             idleLooper()
 
             viewModel.updateSelection(PaymentSelection.Saved("saved_pm"))
+            assertThat(activity.viewBinding.buyButton.isEnabled)
+                .isTrue()
+
             activity.viewBinding.buyButton.performClick()
             idleLooper()
+
+            assertThat(activity.viewBinding.buyButton.isEnabled)
+                .isFalse()
 
             // payment intent was confirmed and result will be communicated through PaymentRelayActivity
             val nextActivity = shadowOf(activity).peekNextStartedActivity()

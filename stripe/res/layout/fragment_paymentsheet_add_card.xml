@@ -14,11 +14,18 @@
             android:id="@+id/add_card_header"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/stripe_paymentsheet_add_payment_method"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:paddingBottom="10dp"
+            android:text="@string/stripe_paymentsheet_add_payment_method_title"
+            style="@style/StripePaymentSheetTitle"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/card_multiline_widget"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/stripe_paymentsheet_add_payment_method_card_information"
+            style="@style/StripePaymentSheetLabel"
+            app:layout_constraintTop_toBottomOf="@+id/add_card_header"
             app:layout_constraintBottom_toTopOf="@+id/card_multiline_widget"
             app:layout_constraintStart_toStartOf="parent" />
 
@@ -30,6 +37,15 @@
             app:layout_constraintBottom_toTopOf="@+id/save_card_checkbox"
             app:layout_constraintStart_toStartOf="parent" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/stripe_paymentsheet_add_payment_method_country_or_region"
+            style="@style/StripePaymentSheetLabel"
+            app:layout_constraintTop_toBottomOf="@+id/card_multiline_widget"
+            app:layout_constraintBottom_toTopOf="@+id/save_card_checkbox"
+            app:layout_constraintStart_toStartOf="parent" />
+
         <com.google.android.material.checkbox.MaterialCheckBox
             android:id="@+id/save_card_checkbox"
             android:layout_width="wrap_content"
@@ -37,16 +53,7 @@
             android:checked="true"
             app:layout_constraintTop_toBottomOf="@+id/card_multiline_widget"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <TextView
-            android:id="@+id/save_card_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/stripe_paymentsheet_save_this_card"
-            android:labelFor="@+id/save_card_checkbox"
-            app:layout_constraintTop_toTopOf="@+id/save_card_checkbox"
-            app:layout_constraintBaseline_toBaselineOf="@+id/save_card_checkbox"
-            app:layout_constraintStart_toEndOf="@+id/save_card_checkbox" />
+            app:layout_constraintStart_toStartOf="parent"
+            android:text="@string/stripe_paymentsheet_save_this_card"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
