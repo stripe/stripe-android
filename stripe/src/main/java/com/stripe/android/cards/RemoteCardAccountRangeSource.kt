@@ -7,11 +7,9 @@ import com.stripe.android.AnalyticsRequestExecutor
 import com.stripe.android.ApiRequest
 import com.stripe.android.StripeRepository
 import com.stripe.android.model.AccountRange
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
-@ExperimentalCoroutinesApi
 internal class RemoteCardAccountRangeSource(
     private val stripeRepository: StripeRepository,
     private val requestOptions: ApiRequest.Options,
