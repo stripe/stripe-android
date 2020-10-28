@@ -673,7 +673,7 @@ data class PaymentMethodCreateParams internal constructor(
             )
         }
 
-        @JvmSynthetic
+        @JvmStatic
         @JvmOverloads
         fun createOxxo(
             billingDetails: PaymentMethod.BillingDetails,
@@ -686,7 +686,7 @@ data class PaymentMethodCreateParams internal constructor(
             )
         }
 
-        @JvmSynthetic
+        @JvmStatic
         @JvmOverloads
         fun createAlipay(
             metadata: Map<String, String>? = null
@@ -697,7 +697,7 @@ data class PaymentMethodCreateParams internal constructor(
             )
         }
 
-        @JvmSynthetic
+        @JvmStatic
         @JvmOverloads
         fun createPayPal(
             metadata: Map<String, String>? = null
