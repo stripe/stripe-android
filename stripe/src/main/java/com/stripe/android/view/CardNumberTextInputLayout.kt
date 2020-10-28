@@ -2,6 +2,7 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.core.view.children
 import androidx.core.view.updateLayoutParams
@@ -32,6 +33,9 @@ internal class CardNumberTextInputLayout @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+
+        // remove parent from the progress view if already attached earlier
+        (progressView.parent as? ViewGroup)?.removeView(progressView)
 
         // add the progress view to the `TextInputLayout`'s `FrameLayout` container
         (children.first() as FrameLayout).addView(progressView)
