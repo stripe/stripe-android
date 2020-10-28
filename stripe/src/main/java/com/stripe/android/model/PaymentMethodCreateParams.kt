@@ -570,7 +570,7 @@ data class PaymentMethodCreateParams internal constructor(
             return PaymentMethodCreateParams(sofort, billingDetails, metadata)
         }
 
-        @JvmSynthetic
+        @JvmStatic
         @JvmOverloads
         fun create(
             upi: Upi,
