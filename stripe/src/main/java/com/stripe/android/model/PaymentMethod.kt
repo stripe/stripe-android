@@ -113,7 +113,9 @@ data class PaymentMethod internal constructor(
 
     @JvmField val bacsDebit: BacsDebit? = null,
 
-    @JvmField val sofort: Sofort? = null
+    @JvmField val sofort: Sofort? = null,
+
+    @JvmField val upi: Upi? = null
 ) : StripeModel {
 
     @Parcelize
@@ -129,6 +131,7 @@ data class PaymentMethod internal constructor(
         AuBecsDebit("au_becs_debit", isReusable = true),
         BacsDebit("bacs_debit", isReusable = true),
         Sofort("sofort", isReusable = false),
+        Upi("upi", isReusable = false),
         P24("p24", isReusable = false),
         Bancontact("bancontact", isReusable = false),
         Giropay("giropay", isReusable = false),
@@ -169,6 +172,7 @@ data class PaymentMethod internal constructor(
         private var bacsDebit: BacsDebit? = null
         private var sofort: Sofort? = null
         private var netbanking: Netbanking? = null
+        private var upi: Upi? = null
 
         fun setId(id: String?): Builder = apply {
             this.id = id
@@ -232,6 +236,10 @@ data class PaymentMethod internal constructor(
 
         fun setNetbanking(netbanking: Netbanking?): Builder = apply {
             this.netbanking = netbanking
+        }
+
+        fun setUpi(upi: Upi?): Builder = apply {
+            this.upi = upi
         }
 
         override fun build(): PaymentMethod {
@@ -665,6 +673,11 @@ data class PaymentMethod internal constructor(
     @Parcelize
     data class Sofort internal constructor(
         @JvmField val country: String?
+    ) : StripeModel
+
+    @Parcelize
+    data class Upi internal constructor(
+        @JvmField val vpa: String?
     ) : StripeModel
 
     @Parcelize

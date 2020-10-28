@@ -28,6 +28,7 @@ data class PaymentMethodCreateParams internal constructor(
     private val auBecsDebit: AuBecsDebit? = null,
     private val bacsDebit: BacsDebit? = null,
     private val sofort: Sofort? = null,
+    private val upi: Upi? = null,
     private val netbanking: Netbanking? = null,
 
     private val billingDetails: PaymentMethod.BillingDetails? = null,
@@ -126,6 +127,17 @@ data class PaymentMethodCreateParams internal constructor(
     )
 
     private constructor(
+        upi: Upi,
+        billingDetails: PaymentMethod.BillingDetails?,
+        metadata: Map<String, String>?
+    ) : this(
+        type = Type.Upi,
+        upi = upi,
+        billingDetails = billingDetails,
+        metadata = metadata
+    )
+
+    private constructor(
         netbanking: Netbanking,
         billingDetails: PaymentMethod.BillingDetails?,
         metadata: Map<String, String>?
@@ -160,6 +172,7 @@ data class PaymentMethodCreateParams internal constructor(
                 Type.AuBecsDebit -> auBecsDebit?.toParamMap()
                 Type.BacsDebit -> bacsDebit?.toParamMap()
                 Type.Sofort -> sofort?.toParamMap()
+                Type.Upi -> upi?.toParamMap()
                 Type.Netbanking -> netbanking?.toParamMap()
                 else -> null
             }.takeUnless { it.isNullOrEmpty() }?.let {
@@ -184,6 +197,7 @@ data class PaymentMethodCreateParams internal constructor(
         GrabPay("grabpay"),
         PayPal("paypal"),
         AfterpayClearpay("afterpay_clearpay"),
+        Upi("upi"),
         Netbanking("netbanking")
     }
 
@@ -313,6 +327,21 @@ data class PaymentMethodCreateParams internal constructor(
 
         private companion object {
             private const val PARAM_BANK: String = "bank"
+        }
+    }
+
+    @Parcelize
+    data class Upi(
+        private val vpa: String?
+    ) : StripeParamsModel, Parcelable {
+        override fun toParamMap(): Map<String, Any> {
+            return vpa?.let {
+                mapOf(PARAM_VPA to it)
+            }.orEmpty()
+        }
+
+        private companion object {
+            private const val PARAM_VPA: String = "vpa"
         }
     }
 
@@ -539,6 +568,16 @@ data class PaymentMethodCreateParams internal constructor(
             metadata: Map<String, String>? = null
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(sofort, billingDetails, metadata)
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun create(
+            upi: Upi,
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(upi, billingDetails, metadata)
         }
 
         /**
