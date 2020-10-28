@@ -86,10 +86,4 @@
     <string name="connect_example">Connect Example</string>
     <string name="simple_payment_method_example">Simple PaymentMethod Confirmation Example</string>
 
-    <!-- Net Banking -->
-    <string-array name="country_arrays">
-        <item>HDFC</item>
-        <item>ICICI</item>
-    </string-array>
-
 </resources>
