@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 16.0.2 - unreleased
+* [#2930](https://github.com/stripe/stripe-android/pull/2930) Upgrade Android Gradle Plugin to `4.1.0`
+* [#2936](https://github.com/stripe/stripe-android/pull/2936) Upgrade Gradle to `6.7`
+* [#2955](https://github.com/stripe/stripe-android/pull/2955) Add support for UPI payment method
+* [#2965](https://github.com/stripe/stripe-android/pull/2965) Add support for Netbanking payment method
+* [#2976](https://github.com/stripe/stripe-android/pull/2976) Update `ExpiryDateEditText` input allowlist
+* [#2979](https://github.com/stripe/stripe-android/pull/2979) Upgrade constraintlayout to `2.0.3`
+* [#2981](https://github.com/stripe/stripe-android/pull/2981) Fix `PaymentMethodCreateParams` annotations on create methods
+
 ## 16.0.1 - 2020-10-06 
 * [#2894](https://github.com/stripe/stripe-android/pull/2894) Make `CardParams` constructor public
 * [#2895](https://github.com/stripe/stripe-android/pull/2895) Add support for configuring a footer layout in payment methods screen
