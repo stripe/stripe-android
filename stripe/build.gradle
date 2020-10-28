@@ -30,7 +30,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:$androidLifecycleVersion"
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
     implementation "androidx.fragment:fragment-ktx:$fragmentVersion"
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.2'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.3'
 
     // Api for this import because we use reflection to alter TextInputLayout
     api "com.google.android.material:material:$materialVersion"
