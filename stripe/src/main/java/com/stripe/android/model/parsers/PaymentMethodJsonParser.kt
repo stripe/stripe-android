@@ -302,7 +302,6 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
         }
     }
 
-
     internal class UpiJsonParser : ModelJsonParser<PaymentMethod.Upi> {
         override fun parse(json: JSONObject): PaymentMethod.Upi? {
             return PaymentMethod.Upi(
