@@ -150,8 +150,18 @@ class PaymentSession @VisibleForTesting internal constructor(
      * @return `true` if the activity result was handled by this function,
      * otherwise `false`
      */
-    fun handlePaymentData(requestCode: Int, resultCode: Int, data: Intent): Boolean {
-        if (!VALID_REQUEST_CODES.contains(requestCode)) {
+    fun handlePaymentData(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ): Boolean {
+        // validate Intent
+        if (data == null) {
+            return false
+        }
+
+        // validate requestCode
+        if (!isValidRequestCode(requestCode)) {
             return false
         }
 
@@ -323,6 +333,10 @@ class PaymentSession @VisibleForTesting internal constructor(
         internal const val PRODUCT_TOKEN: String = "PaymentSession"
 
         internal const val EXTRA_PAYMENT_SESSION_DATA: String = "extra_payment_session_data"
+
+        private fun isValidRequestCode(
+            requestCode: Int
+        ) = VALID_REQUEST_CODES.contains(requestCode)
 
         private val VALID_REQUEST_CODES = setOf(
             PaymentMethodsActivityStarter.REQUEST_CODE,
