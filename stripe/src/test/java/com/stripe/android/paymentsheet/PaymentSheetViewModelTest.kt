@@ -23,7 +23,7 @@ import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.view.ActivityStarter
@@ -103,6 +103,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.error.observeForever {
             error = it
         }
+
         val activity: Activity = mock()
         whenever(activity.intent).thenReturn(Intent())
         viewModel.checkout(activity)
@@ -118,7 +119,7 @@ internal class PaymentSheetViewModelTest {
             eq(
                 ConfirmPaymentIntentParams.createWithPaymentMethodId(
                     "saved_pm",
-                    "client_secret"
+                    FAKE_CLIENT_SECRET
                 )
             ),
             eq(
@@ -132,15 +133,17 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `checkout should confirm new payment methods`() {
-        val createParams: PaymentMethodCreateParams = mock()
-        viewModel.updateSelection(PaymentSelection.New(createParams))
+        viewModel.updateSelection(
+            PaymentSelection.New(PaymentMethodCreateParamsFixtures.DEFAULT_CARD)
+        )
         viewModel.checkout(activity)
         verify(paymentController).startConfirmAndAuth(
             any(),
             eq(
                 ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-                    createParams,
-                    "client_secret"
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    FAKE_CLIENT_SECRET,
+                    setupFutureUsage = null
                 )
             ),
             eq(
@@ -150,6 +153,22 @@ internal class PaymentSheetViewModelTest {
                 )
             )
         )
+    }
+
+    @Test
+    fun `createConfirmParams() when savePaymentMethod is true should create params with setupFutureUsage = OnSession`() {
+        viewModel.shouldSavePaymentMethod = true
+        viewModel.updateSelection(
+            PaymentSelection.New(PaymentMethodCreateParamsFixtures.DEFAULT_CARD)
+        )
+        assertThat(viewModel.createConfirmParams(FAKE_CLIENT_SECRET))
+            .isEqualTo(
+                ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    FAKE_CLIENT_SECRET,
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
+                )
+            )
     }
 
     @Test
@@ -274,17 +293,22 @@ internal class PaymentSheetViewModelTest {
     }
 
     private companion object {
-        val FAKE_CARD = PaymentMethod("fake_pm", created = 0, liveMode = false, type = PaymentMethod.Type.Card)
+        val FAKE_CARD = PaymentMethod(
+            "fake_pm",
+            created = 0,
+            liveMode = false,
+            type = PaymentMethod.Type.Card
+        )
+
+        private const val FAKE_CLIENT_SECRET = "client_secret"
 
         private val DEFAULT_ARGS = PaymentSheetActivityStarter.Args.Default(
-            "client_secret",
+            FAKE_CLIENT_SECRET,
             "ephemeral_key",
             "customer_id"
         )
 
-        private val GUEST_ARGS = PaymentSheetActivityStarter.Args.Guest(
-            "client_secret"
-        )
+        private val GUEST_ARGS = PaymentSheetActivityStarter.Args.Guest(FAKE_CLIENT_SECRET)
 
         private val DEFAULT_ARGS_INTENT = Intent()
             .putExtra(

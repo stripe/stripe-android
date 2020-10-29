@@ -11,11 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/stripe_paymentsheet_pay_using"
-        android:textColor="@color/stripe_paymentsheet_text"
-        android:textSize="20sp"
-        android:lineSpacingExtra="9sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="10dp"
+        style="@style/StripePaymentSheetTitle"
         />
 
     <androidx.recyclerview.widget.RecyclerView

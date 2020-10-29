@@ -52,6 +52,7 @@ internal class PaymentSheetViewModel internal constructor(
     private val mutablePaymentIntent = MutableLiveData<PaymentIntent?>()
     private val mutableSelection = MutableLiveData<PaymentSelection?>()
     private val mutableViewState = MutableLiveData<ViewState>(null)
+    private val mutableProcessing = MutableLiveData(false)
 
     internal val paymentIntent: LiveData<PaymentIntent?> = mutablePaymentIntent
     internal val paymentMethods: LiveData<List<PaymentMethod>> = mutablePaymentMethods
@@ -60,6 +61,9 @@ internal class PaymentSheetViewModel internal constructor(
     internal val selection: LiveData<PaymentSelection?> = mutableSelection
     internal val sheetMode: LiveData<SheetMode> = mutableSheetMode.distinctUntilChanged()
     internal val viewState: LiveData<ViewState> = mutableViewState.distinctUntilChanged()
+    internal val processing = mutableProcessing.distinctUntilChanged()
+
+    internal var shouldSavePaymentMethod: Boolean = false
 
     fun onError(throwable: Throwable) {
         mutableError.postValue(throwable)
@@ -133,38 +137,58 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     fun checkout(activity: Activity) {
+        mutableProcessing.value = true
+
         val args = getPaymentSheetActivityArgs(activity.intent) ?: return
 
-        val confirmParams = when (val selection = selection.value) {
+        val confirmParams = createConfirmParams(args.clientSecret)
+
+        when {
+            confirmParams != null -> {
+                mutableViewState.value = ViewState.Confirming
+                paymentController.startConfirmAndAuth(
+                    AuthActivityStarter.Host.create(activity),
+                    confirmParams,
+                    ApiRequest.Options(
+                        apiKey = publishableKey,
+                        stripeAccount = stripeAccountId
+                    )
+                )
+            }
+            else -> {
+                onError(
+                    IllegalStateException("checkout called when no payment method selected")
+                )
+            }
+        }
+    }
+
+    @VisibleForTesting
+    internal fun createConfirmParams(
+        clientSecret: String
+    ): ConfirmPaymentIntentParams? {
+        return when (val selection = selection.value) {
             PaymentSelection.GooglePay -> TODO("smaskell: handle Google Pay confirmation")
             is PaymentSelection.Saved -> {
                 // TODO(smaskell): Properly set savePaymentMethod/setupFutureUsage
                 ConfirmPaymentIntentParams.createWithPaymentMethodId(
                     selection.paymentMethodId,
-                    args.clientSecret
+                    clientSecret
                 )
             }
             is PaymentSelection.New -> {
                 ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                     selection.paymentMethodCreateParams,
-                    args.clientSecret
+                    clientSecret,
+                    setupFutureUsage = when (shouldSavePaymentMethod) {
+                        true -> ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
+                        false -> null
+                    }
                 )
             }
             null -> {
-                onError(IllegalStateException("checkout called when no payment method selected"))
                 null
             }
-        }
-        confirmParams?.let {
-            mutableViewState.value = ViewState.Confirming
-            paymentController.startConfirmAndAuth(
-                AuthActivityStarter.Host.create(activity),
-                it,
-                ApiRequest.Options(
-                    apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
-                )
-            )
         }
     }
 

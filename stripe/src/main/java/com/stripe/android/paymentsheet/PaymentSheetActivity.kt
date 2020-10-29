@@ -170,6 +170,13 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         viewBinding.buyButton.setOnClickListener {
             viewModel.checkout(this)
         }
+
+        viewModel.processing.observe(this) { isProcessing ->
+            viewBinding.close.isEnabled = !isProcessing
+            viewBinding.back.isEnabled = !isProcessing
+
+            viewBinding.buyButton.isEnabled = !isProcessing
+        }
     }
 
     private fun setupBottomSheet() {
