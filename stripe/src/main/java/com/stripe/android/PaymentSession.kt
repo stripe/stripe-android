@@ -155,7 +155,9 @@ class PaymentSession @VisibleForTesting internal constructor(
         resultCode: Int,
         data: Intent?
     ): Boolean {
-        if (data == null || !VALID_REQUEST_CODES.contains(requestCode)) {
+        if (data == null) {
+            return false
+        } else if (!isValidRequestCode(requestCode)) {
             return false
         }
 
@@ -327,6 +329,10 @@ class PaymentSession @VisibleForTesting internal constructor(
         internal const val PRODUCT_TOKEN: String = "PaymentSession"
 
         internal const val EXTRA_PAYMENT_SESSION_DATA: String = "extra_payment_session_data"
+
+        private fun isValidRequestCode(
+            requestCode: Int
+        ) = VALID_REQUEST_CODES.contains(requestCode)
 
         private val VALID_REQUEST_CODES = setOf(
             PaymentMethodsActivityStarter.REQUEST_CODE,
