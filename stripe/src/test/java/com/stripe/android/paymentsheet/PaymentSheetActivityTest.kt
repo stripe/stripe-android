@@ -66,6 +66,7 @@ internal class PaymentSheetActivityTest {
             workContext = testCoroutineDispatcher
         ),
         googlePayRepository = googlePayRepository,
+        args = PaymentSheetFixtures.DEFAULT_ARGS,
         workContext = testCoroutineDispatcher
     )
 
@@ -249,8 +250,10 @@ internal class PaymentSheetActivityTest {
                 workContext = testCoroutineDispatcher
             ),
             googlePayRepository = googlePayRepository,
+            args = PaymentSheetFixtures.DEFAULT_ARGS,
             workContext = testCoroutineDispatcher
         )
+
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
