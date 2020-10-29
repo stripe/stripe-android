@@ -150,8 +150,12 @@ class PaymentSession @VisibleForTesting internal constructor(
      * @return `true` if the activity result was handled by this function,
      * otherwise `false`
      */
-    fun handlePaymentData(requestCode: Int, resultCode: Int, data: Intent): Boolean {
-        if (!VALID_REQUEST_CODES.contains(requestCode)) {
+    fun handlePaymentData(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ): Boolean {
+        if (data == null || !VALID_REQUEST_CODES.contains(requestCode)) {
             return false
         }
 
