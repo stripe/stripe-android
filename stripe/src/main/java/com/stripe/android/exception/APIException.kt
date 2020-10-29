@@ -18,9 +18,9 @@ class APIException(
     cause = cause,
     message = message
 ) {
-    internal constructor(exception: Exception) : this(
-        message = exception.message,
-        cause = exception
+    internal constructor(throwable: Throwable) : this(
+        message = throwable.message,
+        cause = throwable
     )
 
     internal companion object {

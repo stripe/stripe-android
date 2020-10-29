@@ -3,7 +3,6 @@ package com.stripe.android.exception
 import com.stripe.android.StripeError
 import org.json.JSONException
 import java.io.IOException
-import java.lang.IllegalArgumentException
 import java.util.Objects
 
 /**
@@ -43,7 +42,7 @@ abstract class StripeException(
     }
 
     internal companion object {
-        fun create(throwable: Throwable): Throwable {
+        fun create(throwable: Throwable): StripeException {
             return when (throwable) {
                 is StripeException -> throwable
                 is JSONException -> APIException(throwable)
@@ -52,7 +51,7 @@ abstract class StripeException(
                     message = throwable.message,
                     cause = throwable
                 )
-                else -> throwable
+                else -> APIException(throwable)
             }
         }
     }

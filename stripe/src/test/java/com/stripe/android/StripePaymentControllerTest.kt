@@ -806,7 +806,7 @@ class StripePaymentControllerTest {
     }
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {
-        override fun retrieveSetupIntent(
+        override suspend fun retrieveSetupIntent(
             clientSecret: String,
             options: ApiRequest.Options,
             expandFields: List<String>
@@ -824,15 +824,12 @@ class StripePaymentControllerTest {
             callback.onSuccess(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT)
         }
 
-        override fun retrieveSource(
+        override suspend fun retrieveSource(
             sourceId: String,
             clientSecret: String,
-            options: ApiRequest.Options,
-            callback: ApiResultCallback<Source>
-        ) {
-            callback.onSuccess(
-                SourceFixtures.SOURCE_CARD.copy(status = Source.Status.Chargeable)
-            )
+            options: ApiRequest.Options
+        ): Source? {
+            return SourceFixtures.SOURCE_CARD.copy(status = Source.Status.Chargeable)
         }
     }
 

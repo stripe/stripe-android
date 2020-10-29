@@ -355,13 +355,7 @@ class Stripe internal constructor(
      * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      * @param callback a [ApiResultCallback] to receive the result or error
      */
-    @Throws(
-        APIException::class,
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class
-    )
-    @WorkerThread
+    @UiThread
     @JvmOverloads
     fun retrievePaymentIntent(
         clientSecret: String,
@@ -383,13 +377,8 @@ class Stripe internal constructor(
             withContext(Dispatchers.Main) {
                 result.fold(
                     onSuccess = callback::onSuccess,
-                    onFailure = { error ->
-                        callback.onError(
-                            when (error) {
-                                is Exception -> error
-                                else -> RuntimeException(error)
-                            }
-                        )
+                    onFailure = {
+                        callback.onError(StripeException.create(it))
                     }
                 )
             }
@@ -697,13 +686,15 @@ class Stripe internal constructor(
         clientSecret: String,
         stripeAccountId: String? = this.stripeAccountId
     ): SetupIntent? {
-        return stripeRepository.retrieveSetupIntent(
-            SetupIntent.ClientSecret(clientSecret).value,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
+        return runBlocking {
+            stripeRepository.retrieveSetupIntent(
+                SetupIntent.ClientSecret(clientSecret).value,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
             )
-        )
+        }
     }
 
     /**
@@ -1040,14 +1031,16 @@ class Stripe internal constructor(
         @Size(min = 1) clientSecret: String,
         stripeAccountId: String? = this.stripeAccountId
     ): Source? {
-        return stripeRepository.retrieveSource(
-            sourceId,
-            clientSecret,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
+        return runBlocking {
+            stripeRepository.retrieveSource(
+                sourceId,
+                clientSecret,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
             )
-        )
+        }
     }
 
     //

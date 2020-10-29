@@ -89,7 +89,7 @@ internal interface StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
-    fun retrieveSetupIntent(
+    suspend fun retrieveSetupIntent(
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String> = emptyList()
@@ -138,21 +138,11 @@ internal interface StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
-    fun retrieveSource(
+    suspend fun retrieveSource(
         sourceId: String,
         clientSecret: String,
         options: ApiRequest.Options
     ): Source?
-
-    /**
-     * Retrieve a [Source] asynchronously
-     */
-    fun retrieveSource(
-        sourceId: String,
-        clientSecret: String,
-        options: ApiRequest.Options,
-        callback: ApiResultCallback<Source>
-    )
 
     @Throws(
         AuthenticationException::class,

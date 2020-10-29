@@ -60,7 +60,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         return null
     }
 
-    override fun retrieveSetupIntent(
+    override suspend fun retrieveSetupIntent(
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String>
@@ -99,20 +99,12 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         return null
     }
 
-    override fun retrieveSource(
+    override suspend fun retrieveSource(
         sourceId: String,
         clientSecret: String,
         options: ApiRequest.Options
     ): Source? {
         return null
-    }
-
-    override fun retrieveSource(
-        sourceId: String,
-        clientSecret: String,
-        options: ApiRequest.Options,
-        callback: ApiResultCallback<Source>
-    ) {
     }
 
     override fun createPaymentMethod(
