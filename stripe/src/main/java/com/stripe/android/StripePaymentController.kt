@@ -264,6 +264,12 @@ internal class StripePaymentController internal constructor(
             return
         }
 
+        val clientSecret = getClientSecret(data)
+        if (clientSecret.isNullOrBlank()) {
+            callback.onError(IllegalArgumentException(CLIENT_SECRET_INTENT_ERROR))
+            return
+        }
+
         val shouldCancelSource = result.shouldCancelSource
         val sourceId = result.sourceId.orEmpty()
         @StripeIntentResult.Outcome val flowOutcome = result.flowOutcome
@@ -274,7 +280,7 @@ internal class StripePaymentController internal constructor(
         )
 
         stripeRepository.retrieveIntent(
-            getClientSecret(data),
+            clientSecret,
             requestOptions,
             expandFields = EXPAND_PAYMENT_METHOD,
             callback = createPaymentIntentCallback(
@@ -307,6 +313,12 @@ internal class StripePaymentController internal constructor(
             return
         }
 
+        val clientSecret = getClientSecret(data)
+        if (clientSecret.isNullOrBlank()) {
+            callback.onError(IllegalArgumentException(CLIENT_SECRET_INTENT_ERROR))
+            return
+        }
+
         val shouldCancelSource = result.shouldCancelSource
         val sourceId = result.sourceId.orEmpty()
         @StripeIntentResult.Outcome val flowOutcome = result.flowOutcome
@@ -317,7 +329,7 @@ internal class StripePaymentController internal constructor(
         )
 
         stripeRepository.retrieveIntent(
-            getClientSecret(data),
+            clientSecret,
             requestOptions,
             expandFields = EXPAND_PAYMENT_METHOD,
             callback = createSetupIntentCallback(
@@ -1231,13 +1243,15 @@ internal class StripePaymentController internal constructor(
         }
 
         @JvmSynthetic
-        internal fun getClientSecret(data: Intent): String {
-            return requireNotNull(PaymentController.Result.fromIntent(data)?.clientSecret)
+        internal fun getClientSecret(data: Intent): String? {
+            return PaymentController.Result.fromIntent(data)?.clientSecret
         }
 
         private val EXPAND_PAYMENT_METHOD = listOf("payment_method")
         internal val CHALLENGE_DELAY = TimeUnit.SECONDS.toMillis(2L)
 
         private const val REQUIRED_ERROR = "API request returned an invalid response."
+
+        private const val CLIENT_SECRET_INTENT_ERROR = "Invalid client_secret value in result Intent."
     }
 }
