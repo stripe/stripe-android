@@ -155,9 +155,13 @@ class PaymentSession @VisibleForTesting internal constructor(
         resultCode: Int,
         data: Intent?
     ): Boolean {
+        // validate Intent
         if (data == null) {
             return false
-        } else if (!isValidRequestCode(requestCode)) {
+        }
+
+        // validate requestCode
+        if (!isValidRequestCode(requestCode)) {
             return false
         }
 
