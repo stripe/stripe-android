@@ -10,6 +10,7 @@ import android.view.View
 import android.widget.EditText
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.R
+import com.stripe.android.model.ExpirationDate
 import kotlin.math.min
 
 /**
@@ -53,21 +54,17 @@ class ExpiryDateEditText @JvmOverloads constructor(
      * The return value is given as a [Pair], where the first entry is the two-digit month
      * (from 01-12) and the second entry is the four-digit year (2017, not 17).
      */
+    @Deprecated("Use validatedDate")
     val validDateFields: Pair<Int, Int>?
-        get() {
-            val rawInput = text?.toString().takeIf { isDateValid } ?: return null
-            val rawNumericInput = rawInput.replace("/".toRegex(), "")
-            val dateFields = DateUtils.separateDateStringParts(rawNumericInput)
+        get() = validatedDate?.let {
+            Pair(it.month, it.year)
+        }
 
-            return try {
-                Pair(
-                    dateFields[0].toInt(),
-                    DateUtils.convertTwoDigitYearToFour(dateFields[1].toInt())
-                )
-            } catch (numEx: NumberFormatException) {
-                // Given that the date should already be valid when getting to this method, we
-                // should not hit this exception. Returning null to indicate error if we do.
-                null
+    val validatedDate: ExpirationDate.Validated?
+        get() {
+            return when (isDateValid) {
+                true -> ExpirationDate.Unvalidated.create(fieldText).validate()
+                false -> null
             }
         }
 
@@ -82,22 +79,13 @@ class ExpiryDateEditText @JvmOverloads constructor(
                 private var ignoreChanges = false
                 private var latestChangeStart: Int = 0
                 private var latestInsertionSize: Int = 0
-                private var parts: Array<String> = arrayOf("", "")
+                private var expirationDate = ExpirationDate.Unvalidated(
+                    month = "",
+                    year = ""
+                )
 
                 private var newCursorPosition: Int? = null
                 private var formattedDate: String? = null
-
-// two-digit month
-                val month: String
-                    get() {
-                        return parts[0]
-                    }
-
-// two-digit year
-                val year: String
-                    get() {
-                        return parts[1]
-                    }
 
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
                     if (ignoreChanges) {
@@ -140,23 +128,25 @@ class ExpiryDateEditText @JvmOverloads constructor(
                         rawNumericInput = rawNumericInput.substring(0, 1)
                     }
 
-// Date input is MM/YY, so the separated parts will be {MM, YY}
-                    parts = DateUtils.separateDateStringParts(rawNumericInput)
+                    val expirationDate =
+                        ExpirationDate.Unvalidated.create(rawNumericInput).also {
+                            this.expirationDate = it
+                        }
 
-                    if (!DateUtils.isValidMonth(month)) {
+                    if (!expirationDate.isMonthValid) {
                         inErrorState = true
                     }
 
                     val formattedDateBuilder = StringBuilder()
-                        .append(month)
+                        .append(expirationDate.month)
 
-                    if (month.length == 2 && latestInsertionSize > 0 &&
+                    if (expirationDate.month.length == 2 && latestInsertionSize > 0 &&
                         !inErrorState || rawNumericInput.length > 2
                     ) {
                         formattedDateBuilder.append("/")
                     }
 
-                    formattedDateBuilder.append(year)
+                    formattedDateBuilder.append(expirationDate.year)
 
                     val formattedDate = formattedDateBuilder.toString()
                     this.newCursorPosition = updateSelectionIndex(
@@ -183,18 +173,19 @@ class ExpiryDateEditText @JvmOverloads constructor(
 
                     ignoreChanges = false
 
-// Note: we want to show an error state if the month is invalid or the
-// final, complete date is in the past. We don't want to show an error state for
-// incomplete entries.
+                    // Note: we want to show an error state if the month is invalid or the
+                    // final, complete date is in the past. We don't want to show an error state for
+                    // incomplete entries.
 
-// This covers the case where the user has entered a month of 15, for instance.
-                    var shouldShowError = month.length == 2 &&
-                        !DateUtils.isValidMonth(month)
+                    // This covers the case where the user has entered a month of 15, for instance.
+                    val month = expirationDate.month
+                    val year = expirationDate.year
+                    var shouldShowError = month.length == 2 && !expirationDate.isMonthValid
 
-// Note that we have to check the parts array because afterTextChanged has odd
-// behavior when it comes to pasting, where a paste of "1212" triggers this
-// function for the strings "12/12" (what it actually becomes) and "1212",
-// so we might not be properly catching an error state.
+                    // Note that we have to check the parts array because afterTextChanged has odd
+                    // behavior when it comes to pasting, where a paste of "1212" triggers this
+                    // function for the strings "12/12" (what it actually becomes) and "1212",
+                    // so we might not be properly catching an error state.
                     if (month.length == 2 && year.length == 2) {
                         val wasComplete = isDateValid
                         updateInputValues(month, year)
