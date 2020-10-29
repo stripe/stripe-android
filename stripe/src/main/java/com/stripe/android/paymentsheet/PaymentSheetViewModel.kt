@@ -63,7 +63,7 @@ internal class PaymentSheetViewModel internal constructor(
     internal val viewState: LiveData<ViewState> = mutableViewState.distinctUntilChanged()
     internal val processing = mutableProcessing.distinctUntilChanged()
 
-    internal var savePaymentMethod: Boolean = false
+    internal var shouldSavePaymentMethod: Boolean = false
 
     fun onError(throwable: Throwable) {
         mutableError.postValue(throwable)
@@ -180,7 +180,10 @@ internal class PaymentSheetViewModel internal constructor(
                 ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                     selection.paymentMethodCreateParams,
                     clientSecret,
-                    savePaymentMethod = savePaymentMethod
+                    setupFutureUsage = when (shouldSavePaymentMethod) {
+                        true -> ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
+                        false -> null
+                    }
                 )
             }
             null -> {

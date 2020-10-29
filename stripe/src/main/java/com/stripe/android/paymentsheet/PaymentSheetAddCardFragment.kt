@@ -64,9 +64,9 @@ internal class PaymentSheetAddCardFragment : Fragment(R.layout.fragment_payments
             binding.cardMultilineWidget.isEnabled = !isProcessing
         }
 
-        activityViewModel.savePaymentMethod = binding.saveCardCheckbox.isChecked
+        activityViewModel.shouldSavePaymentMethod = binding.saveCardCheckbox.isChecked
         binding.saveCardCheckbox.setOnCheckedChangeListener { _, isChecked ->
-            activityViewModel.savePaymentMethod = isChecked
+            activityViewModel.shouldSavePaymentMethod = isChecked
         }
     }
 }

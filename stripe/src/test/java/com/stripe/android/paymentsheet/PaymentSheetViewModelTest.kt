@@ -143,7 +143,7 @@ internal class PaymentSheetViewModelTest {
                 ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                     FAKE_CLIENT_SECRET,
-                    savePaymentMethod = false
+                    setupFutureUsage = null
                 )
             ),
             eq(
@@ -156,8 +156,8 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `createConfirmParams() when savePaymentMethod is true should create params with savePaymentMethod = true`() {
-        viewModel.savePaymentMethod = true
+    fun `createConfirmParams() when savePaymentMethod is true should create params with setupFutureUsage = OnSession`() {
+        viewModel.shouldSavePaymentMethod = true
         viewModel.updateSelection(
             PaymentSelection.New(PaymentMethodCreateParamsFixtures.DEFAULT_CARD)
         )
@@ -166,7 +166,7 @@ internal class PaymentSheetViewModelTest {
                 ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                     FAKE_CLIENT_SECRET,
-                    savePaymentMethod = true
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
                 )
             )
     }
