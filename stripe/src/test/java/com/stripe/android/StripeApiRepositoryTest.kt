@@ -265,7 +265,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun retrieveSource_shouldFireAnalytics_andReturnSource() {
+    fun retrieveSource_shouldFireAnalytics_andReturnSource() = testDispatcher.runBlockingTest {
         val stripeResponse = StripeResponse(
             200,
             SourceFixtures.SOURCE_CARD_JSON.toString(),
@@ -779,7 +779,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun apiRequest_withErrorResponse_onUnsupportedSdkVersion_shouldNotBeTranslated() {
+    fun apiRequest_withErrorResponse_onUnsupportedSdkVersion_shouldNotBeTranslated() = testDispatcher.runBlockingTest {
         Locale.setDefault(Locale.JAPAN)
 
         val stripeRepository = StripeApiRepository(
@@ -801,7 +801,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun apiRequest_withErrorResponse_onSupportedSdkVersion_shouldBeTranslated() {
+    fun apiRequest_withErrorResponse_onSupportedSdkVersion_shouldBeTranslated() = testDispatcher.runBlockingTest {
         Locale.setDefault(Locale.JAPAN)
 
         val stripeRepository = StripeApiRepository(

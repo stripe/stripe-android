@@ -130,12 +130,7 @@ internal class StripePaymentController internal constructor(
                         callback.onSuccess(intent)
                     },
                     onFailure = { error ->
-                        callback.onError(
-                            when (error) {
-                                is Exception -> error
-                                else -> RuntimeException(error)
-                            }
-                        )
+                        callback.onError(StripeException.create(error))
                     }
                 )
             }
@@ -177,20 +172,28 @@ internal class StripePaymentController internal constructor(
             )
         )
 
-        stripeRepository.retrieveSource(
-            sourceId = source.id.orEmpty(),
-            clientSecret = source.clientSecret.orEmpty(),
-            options = requestOptions,
-            callback = object : ApiResultCallback<Source> {
-                override fun onSuccess(result: Source) {
-                    onSourceRetrieved(host, result, requestOptions)
-                }
-
-                override fun onError(e: Exception) {
-                    handleError(host, SOURCE_REQUEST_CODE, e)
-                }
+        CoroutineScope(workContext).launch {
+            val result = runCatching {
+                requireNotNull(
+                    stripeRepository.retrieveSource(
+                        sourceId = source.id.orEmpty(),
+                        clientSecret = source.clientSecret.orEmpty(),
+                        options = requestOptions,
+                    )
+                )
             }
-        )
+
+            withContext(Dispatchers.Main) {
+                result.fold(
+                    onSuccess = { retrievedSourced ->
+                        onSourceRetrieved(host, retrievedSourced, requestOptions)
+                    },
+                    onFailure = {
+                        handleError(host, SOURCE_REQUEST_CODE, it)
+                    }
+                )
+            }
+        }
     }
 
     private fun onSourceRetrieved(
@@ -365,7 +368,22 @@ internal class StripePaymentController internal constructor(
             )
         )
 
-        stripeRepository.retrieveSource(sourceId, clientSecret, requestOptions, callback)
+        CoroutineScope(workContext).launch {
+            val sourceResult = runCatching {
+                requireNotNull(
+                    stripeRepository.retrieveSource(sourceId, clientSecret, requestOptions)
+                )
+            }
+
+            withContext(Dispatchers.Main) {
+                sourceResult.fold(
+                    onSuccess = callback::onSuccess,
+                    onFailure = {
+                        callback.onError(StripeException.create(it))
+                    }
+                )
+            }
+        }
     }
 
     override fun authenticateAlipay(
@@ -814,7 +832,7 @@ internal class StripePaymentController internal constructor(
                         callback.onSuccess(it)
                     },
                     onFailure = {
-                        callback.onError(RuntimeException(it))
+                        callback.onError(StripeException.create(it))
                     }
                 )
             }
@@ -1213,15 +1231,12 @@ internal class StripePaymentController internal constructor(
         private fun handleError(
             host: AuthActivityStarter.Host,
             requestCode: Int,
-            exception: Exception
+            throwable: Throwable
         ) {
             PaymentRelayStarter.create(host, requestCode)
                 .start(
                     PaymentRelayStarter.Args.create(
-                        when (exception) {
-                            is StripeException -> exception
-                            else -> APIException(exception)
-                        }
+                        StripeException.create(throwable)
                     )
                 )
         }

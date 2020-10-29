@@ -279,7 +279,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         APIConnectionException::class,
         APIException::class
     )
-    override fun retrieveSetupIntent(
+    override suspend fun retrieveSetupIntent(
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String>
@@ -423,7 +423,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         APIConnectionException::class,
         APIException::class
     )
-    override fun retrieveSource(
+    override suspend fun retrieveSource(
         sourceId: String,
         clientSecret: String,
         options: ApiRequest.Options
@@ -448,15 +448,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             // This particular kind of exception should not be possible from a Source API endpoint.
             throw APIException.create(unexpected)
         }
-    }
-
-    override fun retrieveSource(
-        sourceId: String,
-        clientSecret: String,
-        options: ApiRequest.Options,
-        callback: ApiResultCallback<Source>
-    ) {
-        RetrieveSourceTask(this, sourceId, clientSecret, options, callback).execute()
     }
 
     /**
@@ -1228,20 +1219,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     )
                 else -> null
             }
-        }
-    }
-
-    private class RetrieveSourceTask constructor(
-        private val stripeRepository: StripeRepository,
-        private val sourceId: String,
-        private val clientSecret: String,
-        private val requestOptions: ApiRequest.Options,
-        callback: ApiResultCallback<Source>
-    ) : ApiOperation<Source>(callback = callback) {
-
-        @Throws(StripeException::class)
-        override suspend fun getResult(): Source? {
-            return stripeRepository.retrieveSource(sourceId, clientSecret, requestOptions)
         }
     }
 
