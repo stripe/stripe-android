@@ -140,21 +140,39 @@ internal class StripePaymentController internal constructor(
     override fun startAuth(
         host: AuthActivityStarter.Host,
         clientSecret: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        type: PaymentController.StripeIntentType
     ) {
-        stripeRepository.retrieveIntent(
-            clientSecret,
-            requestOptions,
-            callback = object : ApiResultCallback<StripeIntent> {
-                override fun onSuccess(result: StripeIntent) {
-                    handleNextAction(host, result, requestOptions)
+        CoroutineScope(workContext).launch {
+            val stripeIntentResult = runCatching {
+                val stripeIntent = when (type) {
+                    PaymentController.StripeIntentType.PaymentIntent -> {
+                        stripeRepository.retrievePaymentIntent(
+                            clientSecret,
+                            requestOptions
+                        )
+                    }
+                    PaymentController.StripeIntentType.SetupIntent -> {
+                        stripeRepository.retrieveSetupIntent(
+                            clientSecret,
+                            requestOptions
+                        )
+                    }
                 }
-
-                override fun onError(e: Exception) {
-                    handleError(host, PAYMENT_REQUEST_CODE, e)
-                }
+                requireNotNull(stripeIntent)
             }
-        )
+
+            withContext(Dispatchers.Main) {
+                stripeIntentResult.fold(
+                    onSuccess = { stripeIntent ->
+                        handleNextAction(host, stripeIntent, requestOptions)
+                    },
+                    onFailure = {
+                        handleError(host, PAYMENT_REQUEST_CODE, it)
+                    }
+                )
+            }
+        }
     }
 
     override fun startAuthenticateSource(
@@ -173,7 +191,7 @@ internal class StripePaymentController internal constructor(
         )
 
         CoroutineScope(workContext).launch {
-            val result = runCatching {
+            val sourceResult = runCatching {
                 requireNotNull(
                     stripeRepository.retrieveSource(
                         sourceId = source.id.orEmpty(),
@@ -184,7 +202,7 @@ internal class StripePaymentController internal constructor(
             }
 
             withContext(Dispatchers.Main) {
-                result.fold(
+                sourceResult.fold(
                     onSuccess = { retrievedSourced ->
                         onSourceRetrieved(host, retrievedSourced, requestOptions)
                     },
@@ -282,18 +300,36 @@ internal class StripePaymentController internal constructor(
             stripeAccount = result.stripeAccountId
         )
 
-        stripeRepository.retrieveIntent(
-            clientSecret,
-            requestOptions,
-            expandFields = EXPAND_PAYMENT_METHOD,
-            callback = createPaymentIntentCallback(
-                requestOptions,
-                flowOutcome,
-                sourceId,
-                shouldCancelSource,
-                callback
-            )
-        )
+        CoroutineScope(workContext).launch {
+            val paymentIntentResult = runCatching {
+                requireNotNull(
+                    stripeRepository.retrievePaymentIntent(
+                        clientSecret,
+                        requestOptions,
+                        expandFields = EXPAND_PAYMENT_METHOD
+                    )
+                )
+            }
+
+            withContext(Dispatchers.Main) {
+                val paymentIntentCallback = createPaymentIntentCallback(
+                    requestOptions,
+                    flowOutcome,
+                    sourceId,
+                    shouldCancelSource,
+                    callback
+                )
+
+                paymentIntentResult.fold(
+                    onSuccess = {
+                        paymentIntentCallback.onSuccess(it)
+                    },
+                    onFailure = {
+                        paymentIntentCallback.onError(StripeException.create(it))
+                    }
+                )
+            }
+        }
     }
 
     /**
@@ -331,18 +367,36 @@ internal class StripePaymentController internal constructor(
             stripeAccount = result.stripeAccountId
         )
 
-        stripeRepository.retrieveIntent(
-            clientSecret,
-            requestOptions,
-            expandFields = EXPAND_PAYMENT_METHOD,
-            callback = createSetupIntentCallback(
-                requestOptions,
-                flowOutcome,
-                sourceId,
-                shouldCancelSource,
-                callback
-            )
-        )
+        CoroutineScope(workContext).launch {
+            val setupIntentResult = runCatching {
+                requireNotNull(
+                    stripeRepository.retrieveSetupIntent(
+                        clientSecret,
+                        requestOptions,
+                        expandFields = EXPAND_PAYMENT_METHOD
+                    )
+                )
+            }
+
+            withContext(Dispatchers.Main) {
+                val setupIntentCallback = createSetupIntentCallback(
+                    requestOptions,
+                    flowOutcome,
+                    sourceId,
+                    shouldCancelSource,
+                    callback
+                )
+
+                setupIntentResult.fold(
+                    onSuccess = {
+                        setupIntentCallback.onSuccess(it)
+                    },
+                    onFailure = {
+                        callback.onError(StripeException.create(it))
+                    }
+                )
+            }
+        }
     }
 
     override fun handleSourceResult(
@@ -403,18 +457,36 @@ internal class StripePaymentController internal constructor(
             requestOptions,
             object : ApiResultCallback<AlipayAuthResult> {
                 override fun onSuccess(result: AlipayAuthResult) {
-                    stripeRepository.retrieveIntent(
-                        intent.clientSecret.orEmpty(),
-                        requestOptions,
-                        expandFields = EXPAND_PAYMENT_METHOD,
-                        callback = createPaymentIntentCallback(
-                            requestOptions,
-                            result.outcome,
-                            "",
-                            false,
-                            callback
-                        )
-                    )
+                    CoroutineScope(workContext).launch {
+                        val paymentIntentResult = runCatching {
+                            requireNotNull(
+                                stripeRepository.retrievePaymentIntent(
+                                    intent.clientSecret.orEmpty(),
+                                    requestOptions,
+                                    expandFields = EXPAND_PAYMENT_METHOD
+                                )
+                            )
+                        }
+
+                        withContext(Dispatchers.Main) {
+                            val paymentIntentCallback = createPaymentIntentCallback(
+                                requestOptions,
+                                result.outcome,
+                                "",
+                                false,
+                                callback
+                            )
+
+                            paymentIntentResult.fold(
+                                onSuccess = {
+                                    paymentIntentCallback.onSuccess(it)
+                                },
+                                onFailure = {
+                                    paymentIntentCallback.onError(StripeException.create(it))
+                                }
+                            )
+                        }
+                    }
                 }
 
                 override fun onError(e: Exception) {
@@ -480,24 +552,43 @@ internal class StripePaymentController internal constructor(
         sourceId: String,
         shouldCancelSource: Boolean = false,
         callback: ApiResultCallback<PaymentIntentResult>
-    ): ApiResultCallback<StripeIntent> {
+    ): ApiResultCallback<PaymentIntent> {
         return object : ApiResultCallback<StripeIntent> {
             override fun onSuccess(result: StripeIntent) {
                 if (result is PaymentIntent) {
                     if (shouldCancelSource && result.requiresAction()) {
                         logger.debug("Canceling source '$sourceId' for PaymentIntent")
-                        stripeRepository.cancelIntent(
-                            result,
-                            sourceId,
-                            requestOptions,
-                            createPaymentIntentCallback(
-                                requestOptions,
-                                flowOutcome,
-                                sourceId,
-                                false, // don't attempt to cancel source again!
-                                callback
-                            )
-                        )
+
+                        CoroutineScope(workContext).launch {
+                            val paymentIntentResult = runCatching {
+                                requireNotNull(
+                                    stripeRepository.cancelPaymentIntentSource(
+                                        result.id.orEmpty(),
+                                        sourceId,
+                                        requestOptions,
+                                    )
+                                )
+                            }
+
+                            withContext(Dispatchers.Main) {
+                                val paymentIntentCallback = createPaymentIntentCallback(
+                                    requestOptions,
+                                    flowOutcome,
+                                    sourceId,
+                                    false, // don't attempt to cancel source again!
+                                    callback
+                                )
+
+                                paymentIntentResult.fold(
+                                    onSuccess = paymentIntentCallback::onSuccess,
+                                    onFailure = {
+                                        paymentIntentCallback.onError(
+                                            StripeException.create(it)
+                                        )
+                                    }
+                                )
+                            }
+                        }
                     } else {
                         logger.debug("Dispatching PaymentIntentResult for ${result.id}")
                         callback.onSuccess(
@@ -566,33 +657,52 @@ internal class StripePaymentController internal constructor(
         @StripeIntentResult.Outcome flowOutcome: Int,
         sourceId: String,
         shouldCancelSource: Boolean = false,
-        resultCallback: ApiResultCallback<SetupIntentResult>
-    ): ApiResultCallback<StripeIntent> {
+        callback: ApiResultCallback<SetupIntentResult>
+    ): ApiResultCallback<SetupIntent> {
         return object : ApiResultCallback<StripeIntent> {
             override fun onSuccess(result: StripeIntent) {
                 if (result is SetupIntent) {
                     if (shouldCancelSource && result.requiresAction()) {
                         logger.debug("Canceling source '$sourceId' for SetupIntent")
-                        stripeRepository.cancelIntent(
-                            result,
-                            sourceId,
-                            requestOptions,
-                            createSetupIntentCallback(
-                                requestOptions,
-                                flowOutcome,
-                                sourceId,
-                                false, // don't attempt to cancel source again!
-                                resultCallback
-                            )
-                        )
+
+                        CoroutineScope(workContext).launch {
+                            val setupIntentResult = runCatching {
+                                requireNotNull(
+                                    stripeRepository.cancelSetupIntentSource(
+                                        result.id.orEmpty(),
+                                        sourceId,
+                                        requestOptions,
+                                    )
+                                )
+                            }
+
+                            withContext(Dispatchers.Main) {
+                                val setupIntentCallback = createSetupIntentCallback(
+                                    requestOptions,
+                                    flowOutcome,
+                                    sourceId,
+                                    false, // don't attempt to cancel source again!
+                                    callback
+                                )
+
+                                setupIntentResult.fold(
+                                    onSuccess = setupIntentCallback::onSuccess,
+                                    onFailure = {
+                                        setupIntentCallback.onError(
+                                            StripeException.create(it)
+                                        )
+                                    }
+                                )
+                            }
+                        }
                     } else {
                         logger.debug("Dispatching SetupIntentResult for ${result.id}")
-                        resultCallback.onSuccess(
+                        callback.onSuccess(
                             SetupIntentResult(result, flowOutcome, getFailureMessage(result, flowOutcome))
                         )
                     }
                 } else {
-                    resultCallback.onError(
+                    callback.onError(
                         IllegalArgumentException(
                             "Expected a SetupIntent, received a ${result.javaClass.simpleName}"
                         )
@@ -601,7 +711,7 @@ internal class StripePaymentController internal constructor(
             }
 
             override fun onError(e: Exception) {
-                resultCallback.onError(e)
+                callback.onError(e)
             }
         }
     }

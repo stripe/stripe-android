@@ -21,7 +21,6 @@ import com.stripe.android.exception.APIException
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceFixtures
@@ -53,7 +52,7 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
-class StripePaymentControllerTest {
+internal class StripePaymentControllerTest {
 
     private val activity: Activity = mock()
     private val threeDs2Service: StripeThreeDs2Service = mock()
@@ -75,7 +74,6 @@ class StripePaymentControllerTest {
     private val intentArgumentCaptor: KArgumentCaptor<Intent> = argumentCaptor()
     private val analyticsRequestArgumentCaptor: KArgumentCaptor<AnalyticsRequest> = argumentCaptor()
     private val setupIntentResultArgumentCaptor: KArgumentCaptor<SetupIntentResult> = argumentCaptor()
-    private val apiResultStripeIntentArgumentCaptor: KArgumentCaptor<ApiResultCallback<StripeIntent>> = argumentCaptor()
     private val sourceArgumentCaptor: KArgumentCaptor<Source> = argumentCaptor()
 
     private val testDispatcher = TestCoroutineDispatcher()
@@ -84,6 +82,7 @@ class StripePaymentControllerTest {
 
     @BeforeTest
     fun setup() {
+        Dispatchers.setMain(testDispatcher)
         runBlocking {
             whenever(transaction.createAuthenticationRequestParameters())
                 .thenReturn(Stripe3ds2Fixtures.AREQ_PARAMS)
@@ -93,7 +92,7 @@ class StripePaymentControllerTest {
     }
 
     @Test
-    fun handleNextAction_withMastercardAnd3ds2_shouldStart3ds2ChallengeFlow() = testDispatcher.runBlockingTest {
+    internal fun handleNextAction_withMastercardAnd3ds2_shouldStart3ds2ChallengeFlow() = testDispatcher.runBlockingTest {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
         val dsPublicKey = Stripe3ds2Fingerprint(paymentIntent.nextActionData as StripeIntent.NextActionData.SdkData.Use3DS2)
             .directoryServerEncryption
@@ -547,7 +546,8 @@ class StripePaymentControllerTest {
 
     @Test
     fun handleSetupResult_shouldCallbackOnSuccess() {
-        assertThat(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.clientSecret).isNotNull()
+        assertThat(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT.clientSecret)
+            .isNotNull()
 
         val intent = Intent().putExtras(
             PaymentController.Result(
@@ -558,7 +558,8 @@ class StripePaymentControllerTest {
 
         controller.handleSetupResult(intent, setupAuthResultCallback)
 
-        verify(setupAuthResultCallback).onSuccess(setupIntentResultArgumentCaptor.capture())
+        verify(setupAuthResultCallback)
+            .onSuccess(setupIntentResultArgumentCaptor.capture())
         val result = setupIntentResultArgumentCaptor.firstValue
         assertThat(result.outcome).isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
         assertThat(result.intent).isEqualTo(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT)
@@ -674,10 +675,16 @@ class StripePaymentControllerTest {
     }
 
     @Test
-    fun handlePaymentResult_whenSourceShouldBeCanceled_onlyCallsCancelIntentOnce() {
+    fun handlePaymentResult_whenSourceShouldBeCanceled_onlyCallsCancelIntentOnce() = testDispatcher.runBlockingTest {
+        // use a PaymentIntent in `requires_action` state
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_3DS1
+
         val clientSecret = paymentIntent.clientSecret.orEmpty()
-        val stripeRepository: StripeRepository = mock()
+        val stripeRepository = mock<StripeRepository>()
+        whenever(stripeRepository.retrievePaymentIntent(any(), any(), any()))
+            .thenReturn(paymentIntent)
+        whenever(stripeRepository.cancelPaymentIntentSource(any(), any(), any()))
+            .thenReturn(paymentIntent)
         val sourceId = "src_1Ff87qCRMbs6FrXfPABTYaEd"
 
         val intent = Intent().putExtras(
@@ -691,22 +698,17 @@ class StripePaymentControllerTest {
         createController(stripeRepository)
             .handlePaymentResult(intent, paymentAuthResultCallback)
 
-        verify(stripeRepository).retrieveIntent(
+        verify(stripeRepository).retrievePaymentIntent(
             eq(clientSecret),
             eq(REQUEST_OPTIONS),
-            eq(listOf("payment_method")),
-            apiResultStripeIntentArgumentCaptor.capture()
+            eq(listOf("payment_method"))
         )
-        // return a PaymentIntent in `requires_action` state
-        apiResultStripeIntentArgumentCaptor.firstValue.onSuccess(paymentIntent)
 
-        verify(stripeRepository).cancelIntent(
-            eq(paymentIntent),
+        verify(stripeRepository).cancelPaymentIntentSource(
+            eq(paymentIntent.id.orEmpty()),
             eq(sourceId),
-            eq(REQUEST_OPTIONS),
-            apiResultStripeIntentArgumentCaptor.capture()
+            eq(REQUEST_OPTIONS)
         )
-        apiResultStripeIntentArgumentCaptor.secondValue.onSuccess(paymentIntent)
 
         // verify that cancelIntent is only called once
         verifyNoMoreInteractions(stripeRepository)
@@ -810,27 +812,19 @@ class StripePaymentControllerTest {
             clientSecret: String,
             options: ApiRequest.Options,
             expandFields: List<String>
-        ): SetupIntent {
-            return SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT
-        }
+        ) = SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT
 
-        override fun retrieveIntent(
+        override suspend fun retrievePaymentIntent(
             clientSecret: String,
             options: ApiRequest.Options,
-            expandFields: List<String>,
-            callback: ApiResultCallback<StripeIntent>
-        ) {
-            super.retrieveIntent(clientSecret, options, expandFields, callback)
-            callback.onSuccess(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT)
-        }
+            expandFields: List<String>
+        ) = PaymentIntentFixtures.PI_REQUIRES_REDIRECT
 
         override suspend fun retrieveSource(
             sourceId: String,
             clientSecret: String,
             options: ApiRequest.Options
-        ): Source? {
-            return SourceFixtures.SOURCE_CARD.copy(status = Source.Status.Chargeable)
-        }
+        ) = SourceFixtures.SOURCE_CARD.copy(status = Source.Status.Chargeable)
     }
 
     private fun verifyAnalytics(event: AnalyticsEvent) {

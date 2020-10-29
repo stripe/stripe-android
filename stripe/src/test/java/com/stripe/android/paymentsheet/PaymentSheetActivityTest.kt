@@ -10,7 +10,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.AbsFakeStripeRepository
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.ApiRequest
-import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentController
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController
@@ -19,7 +18,6 @@ import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -323,15 +321,6 @@ internal class PaymentSheetActivityTest {
             expandFields: List<String>
         ): PaymentIntent? {
             return paymentIntent
-        }
-
-        override fun retrieveIntent(
-            clientSecret: String,
-            options: ApiRequest.Options,
-            expandFields: List<String>,
-            callback: ApiResultCallback<StripeIntent>
-        ) {
-            callback.onSuccess(paymentIntent)
         }
     }
 }

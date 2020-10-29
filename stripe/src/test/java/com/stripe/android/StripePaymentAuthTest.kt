@@ -11,6 +11,7 @@ import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -18,9 +19,7 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.AuthActivityStarter
 import org.junit.runner.RunWith
-import org.mockito.Mockito.`when`
 import org.robolectric.RobolectricTestRunner
-import java.lang.RuntimeException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -77,7 +76,8 @@ class StripePaymentAuthTest {
         verify(paymentController).startAuth(
             hostArgumentCaptor.capture(),
             eq(clientSecret),
-            eq(REQUEST_OPTIONS)
+            eq(REQUEST_OPTIONS),
+            eq(PaymentController.StripeIntentType.PaymentIntent)
         )
         assertEquals(activity, hostArgumentCaptor.firstValue.activity)
     }
@@ -91,7 +91,8 @@ class StripePaymentAuthTest {
         verify(paymentController).startAuth(
             hostArgumentCaptor.capture(),
             eq(clientSecret),
-            eq(REQUEST_OPTIONS)
+            eq(REQUEST_OPTIONS),
+            eq(PaymentController.StripeIntentType.SetupIntent)
         )
         assertEquals(activity, hostArgumentCaptor.firstValue.activity)
     }
@@ -99,13 +100,13 @@ class StripePaymentAuthTest {
     @Test
     fun onPaymentResult_whenShouldHandleResultIsTrue_shouldCallHandleResult() {
         val data = Intent()
-        `when`(
+        whenever(
             paymentController.shouldHandlePaymentResult(
                 StripePaymentController.PAYMENT_REQUEST_CODE,
                 data
             )
-        )
-            .thenReturn(true)
+        ).thenReturn(true)
+
         val stripe = createStripe()
         stripe.onPaymentResult(
             StripePaymentController.PAYMENT_REQUEST_CODE,
@@ -119,13 +120,13 @@ class StripePaymentAuthTest {
     @Test
     fun onSetupResult_whenShouldHandleResultIsTrue_shouldCallHandleResult() {
         val data = Intent()
-        `when`(
+        whenever(
             paymentController.shouldHandleSetupResult(
                 StripePaymentController.SETUP_REQUEST_CODE,
                 data
             )
-        )
-            .thenReturn(true)
+        ).thenReturn(true)
+
         val stripe = createStripe()
         stripe.onSetupResult(
             StripePaymentController.SETUP_REQUEST_CODE,

@@ -729,7 +729,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun cancelPaymentIntentSource_whenAlreadyCanceled_throwsInvalidRequestException() {
+    fun cancelPaymentIntentSource_whenAlreadyCanceled_throwsInvalidRequestException() = testDispatcher.runBlockingTest {
         val exception = assertFailsWith<InvalidRequestException> {
             stripeApiRepository.cancelPaymentIntentSource(
                 "pi_1FejpSH8dsfnfKo38L276wr6",
