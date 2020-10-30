@@ -97,7 +97,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         return null
     }
 
-    override fun createToken(
+    override suspend fun createToken(
         tokenParams: TokenParams,
         options: ApiRequest.Options
     ): Token? {

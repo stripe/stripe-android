@@ -147,7 +147,7 @@ internal interface StripeRepository {
         APIException::class,
         CardException::class
     )
-    fun createToken(
+    suspend fun createToken(
         tokenParams: TokenParams,
         options: ApiRequest.Options
     ): Token?
