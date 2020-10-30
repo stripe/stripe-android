@@ -24,7 +24,6 @@ import com.stripe.android.model.Stripe3ds2AuthParams
 import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.StripeFile
 import com.stripe.android.model.StripeFileParams
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import org.json.JSONException
@@ -65,7 +64,7 @@ internal interface StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
-    fun cancelPaymentIntentSource(
+    suspend fun cancelPaymentIntentSource(
         paymentIntentId: String,
         sourceId: String,
         options: ApiRequest.Options
@@ -101,25 +100,11 @@ internal interface StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
-    fun cancelSetupIntentSource(
+    suspend fun cancelSetupIntentSource(
         setupIntentId: String,
         sourceId: String,
         options: ApiRequest.Options
     ): SetupIntent?
-
-    fun retrieveIntent(
-        clientSecret: String,
-        options: ApiRequest.Options,
-        expandFields: List<String> = emptyList(),
-        callback: ApiResultCallback<StripeIntent>
-    )
-
-    fun cancelIntent(
-        stripeIntent: StripeIntent,
-        sourceId: String,
-        options: ApiRequest.Options,
-        callback: ApiResultCallback<StripeIntent>
-    )
 
     @Throws(
         AuthenticationException::class,

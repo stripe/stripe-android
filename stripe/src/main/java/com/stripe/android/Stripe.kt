@@ -239,7 +239,8 @@ class Stripe internal constructor(
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId
-            )
+            ),
+            PaymentController.StripeIntentType.PaymentIntent
         )
     }
 
@@ -268,7 +269,8 @@ class Stripe internal constructor(
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId
-            )
+            ),
+            PaymentController.StripeIntentType.PaymentIntent
         )
     }
 
@@ -292,7 +294,8 @@ class Stripe internal constructor(
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId
-            )
+            ),
+            PaymentController.StripeIntentType.PaymentIntent
         )
     }
 
@@ -321,7 +324,8 @@ class Stripe internal constructor(
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId
-            )
+            ),
+            PaymentController.StripeIntentType.PaymentIntent
         )
     }
 
@@ -527,7 +531,8 @@ class Stripe internal constructor(
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId
-            )
+            ),
+            PaymentController.StripeIntentType.SetupIntent
         )
     }
 
@@ -554,7 +559,8 @@ class Stripe internal constructor(
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId
-            )
+            ),
+            PaymentController.StripeIntentType.SetupIntent
         )
     }
 
@@ -577,7 +583,8 @@ class Stripe internal constructor(
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId
-            )
+            ),
+            PaymentController.StripeIntentType.SetupIntent
         )
     }
 
@@ -604,7 +611,8 @@ class Stripe internal constructor(
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId
-            )
+            ),
+            PaymentController.StripeIntentType.SetupIntent
         )
     }
 

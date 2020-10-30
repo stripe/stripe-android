@@ -31,7 +31,8 @@ internal interface PaymentController {
     fun startAuth(
         host: AuthActivityStarter.Host,
         clientSecret: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        type: StripeIntentType
     )
 
     fun startAuthenticateSource(
@@ -101,6 +102,11 @@ internal interface PaymentController {
         authenticator: AlipayAuthenticator,
         callback: ApiResultCallback<PaymentIntentResult>
     )
+
+    enum class StripeIntentType {
+        PaymentIntent,
+        SetupIntent
+    }
 
     /**
      * Represents the result of a [PaymentController] operation.
