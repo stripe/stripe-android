@@ -806,14 +806,16 @@ class Stripe internal constructor(
         idempotencyKey: String? = null,
         stripeAccountId: String? = this.stripeAccountId
     ): PaymentMethod? {
-        return stripeRepository.createPaymentMethod(
-            paymentMethodCreateParams,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId,
-                idempotencyKey = idempotencyKey
+        return runBlocking {
+            stripeRepository.createPaymentMethod(
+                paymentMethodCreateParams,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId,
+                    idempotencyKey = idempotencyKey
+                )
             )
-        )
+        }
     }
 
     //
@@ -959,14 +961,16 @@ class Stripe internal constructor(
         idempotencyKey: String? = null,
         stripeAccountId: String? = this.stripeAccountId
     ): Source? {
-        return stripeRepository.createSource(
-            params,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId,
-                idempotencyKey = idempotencyKey
+        return runBlocking {
+            stripeRepository.createSource(
+                params,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId,
+                    idempotencyKey = idempotencyKey
+                )
             )
-        )
+        }
     }
 
     /**

@@ -112,7 +112,7 @@ internal interface StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
-    fun createSource(
+    suspend fun createSource(
         sourceParams: SourceParams,
         options: ApiRequest.Options
     ): Source?
@@ -135,7 +135,7 @@ internal interface StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
-    fun createPaymentMethod(
+    suspend fun createPaymentMethod(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         options: ApiRequest.Options
     ): PaymentMethod?
