@@ -234,7 +234,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         return StripeFile()
     }
 
-    override fun retrieveObject(url: String, requestOptions: ApiRequest.Options): JSONObject {
-        return JSONObject()
-    }
+    override suspend fun retrieveObject(
+        url: String,
+        requestOptions: ApiRequest.Options
+    ) = JSONObject()
 }

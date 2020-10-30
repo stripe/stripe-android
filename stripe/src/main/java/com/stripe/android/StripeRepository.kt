@@ -320,7 +320,7 @@ internal interface StripeRepository {
         requestOptions: ApiRequest.Options
     ): StripeFile
 
-    fun retrieveObject(
+    suspend fun retrieveObject(
         url: String,
         requestOptions: ApiRequest.Options
     ): JSONObject
