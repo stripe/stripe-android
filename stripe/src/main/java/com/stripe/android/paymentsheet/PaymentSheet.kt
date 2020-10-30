@@ -10,18 +10,38 @@ import com.stripe.android.view.ActivityStarter
 import com.stripe.android.view.AddPaymentMethodActivityStarter.Result
 import kotlinx.android.parcel.Parcelize
 
-internal class PaymentSheet(val clientSecret: String, val ephemeralKey: String, val customerId: String) {
+internal class PaymentSheet internal constructor(
+    private val args: PaymentSheetActivityStarter.Args
+) {
+    /**
+     * Create PaymentSheet with a Customer
+     */
+    constructor(
+        clientSecret: String,
+        ephemeralKey: String,
+        customerId: String
+    ) : this(
+        PaymentSheetActivityStarter.Args.Default(
+            clientSecret,
+            ephemeralKey,
+            customerId
+        )
+    )
+
+    /**
+     * Create PaymentSheet without a Customer
+     */
+    constructor(
+        clientSecret: String
+    ) : this(
+        PaymentSheetActivityStarter.Args.Guest(clientSecret)
+    )
+
     fun confirm(activity: ComponentActivity, callback: (CompletionStatus) -> Unit) {
         // TODO: Use ActivityResultContract and call callback instead of using onActivityResult
         // when androidx.activity:1.2.0 hits GA
         PaymentSheetActivityStarter(activity)
-            .startForResult(
-                PaymentSheetActivityStarter.Args.Default(
-                    clientSecret,
-                    ephemeralKey,
-                    customerId
-                )
-            )
+            .startForResult(args)
     }
 
     internal sealed class CompletionStatus : Parcelable {
