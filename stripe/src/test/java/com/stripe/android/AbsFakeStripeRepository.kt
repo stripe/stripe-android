@@ -75,7 +75,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         return null
     }
 
-    override fun createSource(
+    override suspend fun createSource(
         sourceParams: SourceParams,
         options: ApiRequest.Options
     ): Source? {
@@ -90,7 +90,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         return null
     }
 
-    override fun createPaymentMethod(
+    override suspend fun createPaymentMethod(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         options: ApiRequest.Options
     ): PaymentMethod? {

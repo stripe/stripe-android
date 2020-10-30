@@ -362,7 +362,7 @@ class PaymentSessionTest {
     }
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {
-        override fun createPaymentMethod(
+        override suspend fun createPaymentMethod(
             paymentMethodCreateParams: PaymentMethodCreateParams,
             options: ApiRequest.Options
         ): PaymentMethod {

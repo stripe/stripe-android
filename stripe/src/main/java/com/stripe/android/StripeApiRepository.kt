@@ -353,7 +353,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         APIConnectionException::class,
         APIException::class
     )
-    override fun createSource(
+    override suspend fun createSource(
         sourceParams: SourceParams,
         options: ApiRequest.Options
     ): Source? {
@@ -432,7 +432,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         APIConnectionException::class,
         APIException::class
     )
-    override fun createPaymentMethod(
+    override suspend fun createPaymentMethod(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         options: ApiRequest.Options
     ): PaymentMethod? {
