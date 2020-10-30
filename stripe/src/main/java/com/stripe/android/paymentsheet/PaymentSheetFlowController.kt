@@ -1,43 +1,46 @@
 package com.stripe.android.paymentsheet
 
-internal class PaymentSheetFlowController private constructor(
-    private val args: PaymentSheetActivityStarter.Args
-) {
+import android.content.Context
+import androidx.activity.ComponentActivity
+import com.stripe.android.paymentsheet.model.PaymentOption
 
-    internal companion object {
+internal interface PaymentSheetFlowController {
+
+    fun presentPaymentOptions(
+        activity: ComponentActivity,
+        onComplete: (PaymentOption?) -> Unit
+    )
+
+    fun confirmPayment(
+        activity: ComponentActivity,
+        onComplete: (PaymentSheet.CompletionStatus) -> Unit
+    )
+
+    companion object {
         fun create(
+            context: Context,
             clientSecret: String,
             ephemeralKey: String,
             customerId: String,
             onComplete: (PaymentSheetFlowController) -> Unit
         ) {
-            val flowController = PaymentSheetFlowController(
-                PaymentSheetActivityStarter.Args.Default(
-                    clientSecret,
-                    ephemeralKey,
-                    customerId
-                )
+            PaymentSheetFlowControllerFactory(context).create(
+                clientSecret,
+                ephemeralKey,
+                customerId,
+                onComplete
             )
-
-            // load payment methods
-            // load default payment option
-
-            onComplete(flowController)
         }
 
         fun create(
+            context: Context,
             clientSecret: String,
             onComplete: (PaymentSheetFlowController) -> Unit
         ) {
-            val flowController = PaymentSheetFlowController(
-                PaymentSheetActivityStarter.Args.Guest(
-                    clientSecret
-                )
+            PaymentSheetFlowControllerFactory(context).create(
+                clientSecret,
+                onComplete
             )
-
-            // load default payment option
-
-            onComplete(flowController)
         }
     }
 }

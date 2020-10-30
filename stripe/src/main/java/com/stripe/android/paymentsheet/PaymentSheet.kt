@@ -7,7 +7,6 @@ import androidx.activity.ComponentActivity
 import androidx.core.os.bundleOf
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.view.ActivityStarter
-import com.stripe.android.view.AddPaymentMethodActivityStarter.Result
 import kotlinx.android.parcel.Parcelize
 
 internal class PaymentSheet internal constructor(
