@@ -455,6 +455,7 @@ internal class StripePaymentController internal constructor(
             authenticator,
             stripeRepository,
             requestOptions,
+            workContext,
             object : ApiResultCallback<AlipayAuthResult> {
                 override fun onSuccess(result: AlipayAuthResult) {
                     CoroutineScope(workContext).launch {
@@ -501,8 +502,12 @@ internal class StripePaymentController internal constructor(
         private val authenticator: AlipayAuthenticator,
         private val apiRepository: StripeRepository,
         private val requestOptions: ApiRequest.Options,
+        private val workContext: CoroutineContext,
         callback: ApiResultCallback<AlipayAuthResult>
-    ) : ApiOperation<AlipayAuthResult>(callback = callback) {
+    ) : ApiOperation<AlipayAuthResult>(
+        workContext = workContext,
+        callback = callback
+    ) {
         override suspend fun getResult(): AlipayAuthResult {
             if (intent.paymentMethod?.liveMode == false) {
                 throw IllegalArgumentException(

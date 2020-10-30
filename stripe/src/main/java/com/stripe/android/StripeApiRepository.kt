@@ -957,7 +957,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         CardException::class,
         AuthenticationException::class
     )
-    override fun retrieveObject(url: String, requestOptions: ApiRequest.Options): JSONObject {
+    override suspend fun retrieveObject(
+        url: String,
+        requestOptions: ApiRequest.Options
+    ): JSONObject {
         if (!StripeUrlUtils.isStripeUrl(url)) {
             throw IllegalArgumentException("Unrecognized domain: $url")
         }
