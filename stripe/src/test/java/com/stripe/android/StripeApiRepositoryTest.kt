@@ -822,7 +822,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun createCardToken_withAttribution_shouldPopulateProductUsage() {
+    fun createCardToken_withAttribution_shouldPopulateProductUsage() = testDispatcher.runBlockingTest {
         val stripeResponse = StripeResponse(
             200,
             TokenFixtures.CARD_TOKEN_JSON.toString(),
@@ -841,7 +841,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun createBankToken_shouldNotPopulateProductUsage() {
+    fun createBankToken_shouldNotPopulateProductUsage() = testDispatcher.runBlockingTest {
         val stripeResponse = StripeResponse(
             200,
             TokenFixtures.BANK_TOKEN_JSON.toString(),

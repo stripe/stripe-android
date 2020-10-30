@@ -483,7 +483,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         CardException::class,
         APIException::class
     )
-    override fun createToken(
+    override suspend fun createToken(
         tokenParams: TokenParams,
         options: ApiRequest.Options
     ): Token? {
