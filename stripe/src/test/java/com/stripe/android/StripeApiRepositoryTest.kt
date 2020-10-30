@@ -747,7 +747,7 @@ internal class StripeApiRepositoryTest {
     @Test
     fun createSource_whenUnknownHostExceptionThrown_convertsToAPIConnectionException() = testDispatcher.runBlockingTest {
         whenever(stripeApiRequestExecutor.execute(any<ApiRequest>()))
-            .thenThrow(UnknownHostException())
+            .thenAnswer { throw UnknownHostException() }
 
         assertFailsWith<APIConnectionException> {
             create().createSource(

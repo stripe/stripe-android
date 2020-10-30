@@ -188,7 +188,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         return null
     }
 
-    override fun retrieveIssuingCardPin(
+    override suspend fun retrieveIssuingCardPin(
         cardId: String,
         verificationId: String,
         userOneTimeCode: String,
@@ -197,7 +197,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         return ""
     }
 
-    override fun updateIssuingCardPin(
+    override suspend fun updateIssuingCardPin(
         cardId: String,
         newPin: String,
         verificationId: String,
