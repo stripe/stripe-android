@@ -19,6 +19,7 @@ import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.InvalidRequestException
+import com.stripe.android.model.AlipayAuthResult
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
@@ -28,6 +29,7 @@ import com.stripe.android.model.Stripe3ds2AuthResultFixtures
 import com.stripe.android.model.Stripe3ds2Fingerprint
 import com.stripe.android.model.Stripe3ds2FingerprintTest
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.networking.AlipayRepository
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.transaction.CompletionEvent
 import com.stripe.android.stripe3ds2.transaction.ErrorMessage
@@ -63,6 +65,8 @@ internal class StripePaymentControllerTest {
     private val paymentRelayStarter: PaymentRelayStarter = mock()
     private val analyticsRequestExecutor: AnalyticsRequestExecutor = mock()
     private val challengeProgressActivityStarter: StripePaymentController.ChallengeProgressActivityStarter = mock()
+    private val alipayRepository = FakeAlipayRepostiory()
+
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val analyticsDataFactory = AnalyticsDataFactory(
         context,
@@ -789,6 +793,29 @@ internal class StripePaymentControllerTest {
         assertThat(actualResult).isEqualTo(expectedResult)
     }
 
+    @Test
+    fun `authenticateAlipay() should return expected outcome`() = testDispatcher.runBlockingTest {
+        var actualResult: Result<PaymentIntentResult>? = null
+        createController().authenticateAlipay(
+            PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION,
+            null,
+            mock(),
+            object : ApiResultCallback<PaymentIntentResult> {
+                override fun onSuccess(result: PaymentIntentResult) {
+                    actualResult = Result.success(result)
+                }
+
+                override fun onError(e: Exception) {
+                    actualResult = Result.failure(e)
+                }
+            }
+        )
+
+        val paymentIntentResult = requireNotNull(actualResult?.getOrNull())
+        assertThat(paymentIntentResult.outcome)
+            .isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
+    }
+
     private fun createController(
         stripeRepository: StripeRepository = FakeStripeRepository()
     ): PaymentController {
@@ -803,6 +830,7 @@ internal class StripePaymentControllerTest {
             analyticsRequestExecutor,
             analyticsDataFactory,
             challengeProgressActivityStarter,
+            alipayRepository,
             testDispatcher
         )
     }
@@ -834,6 +862,14 @@ internal class StripePaymentControllerTest {
         assertThat(
             analyticsRequest.compactParams?.get(AnalyticsDataFactory.FIELD_EVENT)
         ).isEqualTo(event.toString())
+    }
+
+    private class FakeAlipayRepostiory : AlipayRepository {
+        override suspend fun authenticate(
+            intent: StripeIntent,
+            authenticator: AlipayAuthenticator,
+            requestOptions: ApiRequest.Options
+        ) = AlipayAuthResult(StripeIntentResult.Outcome.SUCCEEDED)
     }
 
     private companion object {
