@@ -6,7 +6,6 @@ import android.content.res.Resources
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.StripeException
-import com.stripe.android.model.AlipayAuthResult
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -18,6 +17,8 @@ import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.Stripe3ds2Fingerprint
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.NextActionData.RedirectToUrl
+import com.stripe.android.networking.AlipayRepository
+import com.stripe.android.networking.DefaultAlipayRepository
 import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl
@@ -63,6 +64,7 @@ internal class StripePaymentController internal constructor(
         AnalyticsDataFactory(context.applicationContext, publishableKey),
     private val challengeProgressActivityStarter: ChallengeProgressActivityStarter =
         ChallengeProgressActivityStarter.Default(),
+    private val alipayRepository: AlipayRepository = DefaultAlipayRepository(stripeRepository),
     private val workContext: CoroutineContext = Dispatchers.IO,
     private val resources: Resources = context.applicationContext.resources
 ) : PaymentController {
@@ -450,104 +452,33 @@ internal class StripePaymentController internal constructor(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId
         )
-        AlipayAuthenticationTask(
-            intent,
-            authenticator,
-            stripeRepository,
-            requestOptions,
-            workContext,
-            object : ApiResultCallback<AlipayAuthResult> {
-                override fun onSuccess(result: AlipayAuthResult) {
-                    CoroutineScope(workContext).launch {
-                        val paymentIntentResult = runCatching {
-                            requireNotNull(
-                                stripeRepository.retrievePaymentIntent(
-                                    intent.clientSecret.orEmpty(),
-                                    requestOptions,
-                                    expandFields = EXPAND_PAYMENT_METHOD
-                                )
-                            )
+
+        CoroutineScope(workContext).launch {
+            runCatching {
+                alipayRepository.authenticate(intent, authenticator, requestOptions)
+            }.mapCatching { alipayAuth ->
+                val paymentIntent = requireNotNull(
+                    stripeRepository.retrievePaymentIntent(
+                        intent.clientSecret.orEmpty(),
+                        requestOptions,
+                        expandFields = EXPAND_PAYMENT_METHOD
+                    )
+                )
+                PaymentIntentResult(
+                    paymentIntent,
+                    alipayAuth.outcome,
+                    getFailureMessage(paymentIntent, alipayAuth.outcome)
+                )
+            }.let { result ->
+                withContext(Dispatchers.Main) {
+                    result.fold(
+                        onSuccess = callback::onSuccess,
+                        onFailure = {
+                            callback.onError(StripeException.create(it))
                         }
-
-                        withContext(Dispatchers.Main) {
-                            val paymentIntentCallback = createPaymentIntentCallback(
-                                requestOptions,
-                                result.outcome,
-                                "",
-                                false,
-                                callback
-                            )
-
-                            paymentIntentResult.fold(
-                                onSuccess = {
-                                    paymentIntentCallback.onSuccess(it)
-                                },
-                                onFailure = {
-                                    paymentIntentCallback.onError(StripeException.create(it))
-                                }
-                            )
-                        }
-                    }
-                }
-
-                override fun onError(e: Exception) {
-                    callback.onError(e)
+                    )
                 }
             }
-        ).execute()
-    }
-
-    internal class AlipayAuthenticationTask(
-        private val intent: StripeIntent,
-        private val authenticator: AlipayAuthenticator,
-        private val apiRepository: StripeRepository,
-        private val requestOptions: ApiRequest.Options,
-        private val workContext: CoroutineContext,
-        callback: ApiResultCallback<AlipayAuthResult>
-    ) : ApiOperation<AlipayAuthResult>(
-        workContext = workContext,
-        callback = callback
-    ) {
-        override suspend fun getResult(): AlipayAuthResult {
-            if (intent.paymentMethod?.liveMode == false) {
-                throw IllegalArgumentException(
-                    "Attempted to authenticate test mode " +
-                        "PaymentIntent with the Alipay SDK.\n" +
-                        "The Alipay SDK does not support test mode payments."
-                )
-            }
-
-            val nextActionData = intent.nextActionData
-            if (nextActionData is StripeIntent.NextActionData.AlipayRedirect) {
-                val output =
-                    authenticator.onAuthenticationRequest(nextActionData.data)
-                return AlipayAuthResult(
-                    when (output[RESULT_FIELD]) {
-                        RESULT_CODE_SUCCESS -> {
-                            nextActionData.authCompleteUrl?.let {
-                                runCatching {
-                                    apiRepository.retrieveObject(it, requestOptions)
-                                }
-                            }
-                            StripeIntentResult.Outcome.SUCCEEDED
-                        }
-                        RESULT_CODE_FAILED -> StripeIntentResult.Outcome.FAILED
-                        RESULT_CODE_CANCELLED -> StripeIntentResult.Outcome.CANCELED
-                        else -> StripeIntentResult.Outcome.UNKNOWN
-                    }
-                )
-            } else {
-                throw RuntimeException("Unable to authenticate Payment Intent with Alipay SDK")
-            }
-        }
-
-        companion object {
-            private const val RESULT_FIELD = "resultStatus"
-
-            // https://intl.alipay.com/docs/ac/3rdpartryqrcode/standard_4
-            private const val RESULT_CODE_SUCCESS = "9000"
-            private const val RESULT_CODE_CANCELLED = "6001"
-            private const val RESULT_CODE_FAILED = "4000"
         }
     }
 
