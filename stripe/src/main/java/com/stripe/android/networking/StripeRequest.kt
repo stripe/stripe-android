@@ -1,4 +1,4 @@
-package com.stripe.android
+package com.stripe.android.networking
 
 import com.stripe.android.exception.InvalidRequestException
 import java.io.OutputStream

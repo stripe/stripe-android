@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.AbsFakeStripeRepository
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentSessionPrefs
+import com.stripe.android.networking.AbsFakeStripeRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher

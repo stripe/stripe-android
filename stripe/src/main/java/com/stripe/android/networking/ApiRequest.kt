@@ -1,6 +1,10 @@
-package com.stripe.android
+package com.stripe.android.networking
 
 import android.os.Parcelable
+import com.stripe.android.ApiKeyValidator
+import com.stripe.android.ApiVersion
+import com.stripe.android.AppInfo
+import com.stripe.android.Stripe
 import com.stripe.android.exception.InvalidRequestException
 import kotlinx.android.parcel.Parcelize
 import java.io.UnsupportedEncodingException

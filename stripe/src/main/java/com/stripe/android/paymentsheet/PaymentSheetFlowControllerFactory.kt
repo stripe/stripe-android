@@ -1,13 +1,13 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Context
-import com.stripe.android.ApiRequest
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentSessionPrefs
 import com.stripe.android.StripeApiRepository
-import com.stripe.android.StripeRepository
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

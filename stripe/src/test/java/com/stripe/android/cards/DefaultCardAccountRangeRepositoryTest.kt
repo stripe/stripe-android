@@ -9,12 +9,12 @@ import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.AnalyticsDataFactory
 import com.stripe.android.AnalyticsRequest
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.ApiRequest
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.StripeApiRepository
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
+import com.stripe.android.networking.ApiRequest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect

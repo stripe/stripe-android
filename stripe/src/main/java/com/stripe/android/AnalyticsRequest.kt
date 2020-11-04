@@ -1,5 +1,9 @@
 package com.stripe.android
 
+import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.RequestHeadersFactory
+import com.stripe.android.networking.StripeRequest
+
 internal data class AnalyticsRequest(
     override val params: Map<String, *>,
     internal val options: ApiRequest.Options,

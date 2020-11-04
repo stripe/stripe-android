@@ -1,4 +1,4 @@
-package com.stripe.android
+package com.stripe.android.model
 
 import com.stripe.android.stripe3ds2.transaction.AuthenticationRequestParameters
 import java.util.UUID

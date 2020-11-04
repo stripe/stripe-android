@@ -1,4 +1,4 @@
-package com.stripe.android
+package com.stripe.android.networking
 
 import java.net.URLDecoder
 import kotlin.test.Test

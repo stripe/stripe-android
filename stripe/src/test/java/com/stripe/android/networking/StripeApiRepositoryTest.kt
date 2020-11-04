@@ -1,4 +1,4 @@
-package com.stripe.android
+package com.stripe.android.networking
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
@@ -13,6 +13,15 @@ import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.nhaarman.mockitokotlin2.whenever
+import com.stripe.android.AnalyticsEvent
+import com.stripe.android.AnalyticsRequest
+import com.stripe.android.AnalyticsRequestExecutor
+import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.FileFactory
+import com.stripe.android.FingerprintDataFixtures
+import com.stripe.android.FingerprintDataRepository
+import com.stripe.android.FingerprintParamsUtils
+import com.stripe.android.StripeApiRepository
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.BankAccountTokenParamsFixtures
@@ -29,6 +38,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SourceFixtures
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Stripe3ds2AuthParams
+import com.stripe.android.model.Stripe3ds2Fixtures
 import com.stripe.android.model.StripeFileFixtures
 import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeFilePurpose
