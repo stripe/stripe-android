@@ -8,6 +8,7 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
+import com.stripe.android.networking.ApiRequest
 import com.stripe.android.stripe3ds2.transaction.ProtocolErrorEvent
 import com.stripe.android.stripe3ds2.transaction.RuntimeErrorEvent
 import com.stripe.android.utils.ContextUtils.packageInfo

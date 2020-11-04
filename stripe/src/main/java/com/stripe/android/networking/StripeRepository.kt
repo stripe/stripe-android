@@ -1,4 +1,4 @@
-package com.stripe.android
+package com.stripe.android.networking
 
 import com.stripe.android.cards.Bin
 import com.stripe.android.exception.APIConnectionException
@@ -24,7 +24,6 @@ import com.stripe.android.model.Stripe3ds2AuthParams
 import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.StripeFile
 import com.stripe.android.model.StripeFileParams
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import org.json.JSONException
@@ -65,7 +64,7 @@ internal interface StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
-    fun cancelPaymentIntentSource(
+    suspend fun cancelPaymentIntentSource(
         paymentIntentId: String,
         sourceId: String,
         options: ApiRequest.Options
@@ -101,25 +100,11 @@ internal interface StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
-    fun cancelSetupIntentSource(
+    suspend fun cancelSetupIntentSource(
         setupIntentId: String,
         sourceId: String,
         options: ApiRequest.Options
     ): SetupIntent?
-
-    fun retrieveIntent(
-        clientSecret: String,
-        options: ApiRequest.Options,
-        expandFields: List<String> = emptyList(),
-        callback: ApiResultCallback<StripeIntent>
-    )
-
-    fun cancelIntent(
-        stripeIntent: StripeIntent,
-        sourceId: String,
-        options: ApiRequest.Options,
-        callback: ApiResultCallback<StripeIntent>
-    )
 
     @Throws(
         AuthenticationException::class,
@@ -127,7 +112,7 @@ internal interface StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
-    fun createSource(
+    suspend fun createSource(
         sourceParams: SourceParams,
         options: ApiRequest.Options
     ): Source?
@@ -150,7 +135,7 @@ internal interface StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
-    fun createPaymentMethod(
+    suspend fun createPaymentMethod(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         options: ApiRequest.Options
     ): PaymentMethod?
@@ -162,7 +147,7 @@ internal interface StripeRepository {
         APIException::class,
         CardException::class
     )
-    fun createToken(
+    suspend fun createToken(
         tokenParams: TokenParams,
         options: ApiRequest.Options
     ): Token?
@@ -293,7 +278,7 @@ internal interface StripeRepository {
         CardException::class,
         JSONException::class
     )
-    fun retrieveIssuingCardPin(
+    suspend fun retrieveIssuingCardPin(
         cardId: String,
         verificationId: String,
         userOneTimeCode: String,
@@ -307,7 +292,7 @@ internal interface StripeRepository {
         APIException::class,
         CardException::class
     )
-    fun updateIssuingCardPin(
+    suspend fun updateIssuingCardPin(
         cardId: String,
         newPin: String,
         verificationId: String,
@@ -335,7 +320,7 @@ internal interface StripeRepository {
         requestOptions: ApiRequest.Options
     ): StripeFile
 
-    fun retrieveObject(
+    suspend fun retrieveObject(
         url: String,
         requestOptions: ApiRequest.Options
     ): JSONObject

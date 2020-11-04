@@ -32,8 +32,11 @@ import com.stripe.android.model.SourceParams
 import com.stripe.android.model.StripeFile
 import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.StripeModel
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
+import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.view.AuthActivityStarter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -239,7 +242,8 @@ class Stripe internal constructor(
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId
-            )
+            ),
+            PaymentController.StripeIntentType.PaymentIntent
         )
     }
 
@@ -268,7 +272,8 @@ class Stripe internal constructor(
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId
-            )
+            ),
+            PaymentController.StripeIntentType.PaymentIntent
         )
     }
 
@@ -292,7 +297,8 @@ class Stripe internal constructor(
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId
-            )
+            ),
+            PaymentController.StripeIntentType.PaymentIntent
         )
     }
 
@@ -321,7 +327,8 @@ class Stripe internal constructor(
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId
-            )
+            ),
+            PaymentController.StripeIntentType.PaymentIntent
         )
     }
 
@@ -362,26 +369,14 @@ class Stripe internal constructor(
         stripeAccountId: String? = this.stripeAccountId,
         callback: ApiResultCallback<PaymentIntent>
     ) {
-        CoroutineScope(workContext).launch {
-            val result = runCatching {
-                val intent = stripeRepository.retrievePaymentIntent(
-                    clientSecret,
-                    ApiRequest.Options(
-                        apiKey = publishableKey,
-                        stripeAccount = stripeAccountId
-                    )
+        executeAsync(callback) {
+            stripeRepository.retrievePaymentIntent(
+                clientSecret,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
                 )
-                requireNotNull(intent) { RuntimeException("The API operation returned neither a result or exception") }
-            }.recoverCatching { throw StripeException.create(it) }
-
-            withContext(Dispatchers.Main) {
-                result.fold(
-                    onSuccess = callback::onSuccess,
-                    onFailure = {
-                        callback.onError(StripeException.create(it))
-                    }
-                )
-            }
+            )
         }
     }
 
@@ -527,7 +522,8 @@ class Stripe internal constructor(
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId
-            )
+            ),
+            PaymentController.StripeIntentType.SetupIntent
         )
     }
 
@@ -554,7 +550,8 @@ class Stripe internal constructor(
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId
-            )
+            ),
+            PaymentController.StripeIntentType.SetupIntent
         )
     }
 
@@ -577,7 +574,8 @@ class Stripe internal constructor(
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId
-            )
+            ),
+            PaymentController.StripeIntentType.SetupIntent
         )
     }
 
@@ -604,7 +602,8 @@ class Stripe internal constructor(
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId
-            )
+            ),
+            PaymentController.StripeIntentType.SetupIntent
         )
     }
 
@@ -650,16 +649,15 @@ class Stripe internal constructor(
         stripeAccountId: String? = this.stripeAccountId,
         callback: ApiResultCallback<SetupIntent>
     ) {
-        RetrieveSetupIntentTask(
-            stripeRepository,
-            clientSecret,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
-            ),
-            workContext,
-            callback
-        ).execute()
+        executeAsync(callback) {
+            stripeRepository.retrieveSetupIntent(
+                clientSecret,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
+            )
+        }
     }
 
     /**
@@ -758,17 +756,16 @@ class Stripe internal constructor(
         stripeAccountId: String? = this.stripeAccountId,
         callback: ApiResultCallback<PaymentMethod>
     ) {
-        CreatePaymentMethodTask(
-            stripeRepository,
-            paymentMethodCreateParams,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId,
-                idempotencyKey = idempotencyKey
-            ),
-            workContext,
-            callback
-        ).execute()
+        executeAsync(callback) {
+            stripeRepository.createPaymentMethod(
+                paymentMethodCreateParams,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId,
+                    idempotencyKey = idempotencyKey
+                )
+            )
+        }
     }
 
     /**
@@ -798,14 +795,16 @@ class Stripe internal constructor(
         idempotencyKey: String? = null,
         stripeAccountId: String? = this.stripeAccountId
     ): PaymentMethod? {
-        return stripeRepository.createPaymentMethod(
-            paymentMethodCreateParams,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId,
-                idempotencyKey = idempotencyKey
+        return runBlocking {
+            stripeRepository.createPaymentMethod(
+                paymentMethodCreateParams,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId,
+                    idempotencyKey = idempotencyKey
+                )
             )
-        )
+        }
     }
 
     //
@@ -905,17 +904,16 @@ class Stripe internal constructor(
         stripeAccountId: String? = this.stripeAccountId,
         callback: ApiResultCallback<Source>
     ) {
-        CreateSourceTask(
-            stripeRepository,
-            sourceParams,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId,
-                idempotencyKey = idempotencyKey
-            ),
-            workContext,
-            callback
-        ).execute()
+        executeAsync(callback) {
+            stripeRepository.createSource(
+                sourceParams,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId,
+                    idempotencyKey = idempotencyKey
+                )
+            )
+        }
     }
 
     /**
@@ -951,14 +949,16 @@ class Stripe internal constructor(
         idempotencyKey: String? = null,
         stripeAccountId: String? = this.stripeAccountId
     ): Source? {
-        return stripeRepository.createSource(
-            params,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId,
-                idempotencyKey = idempotencyKey
+        return runBlocking {
+            stripeRepository.createSource(
+                params,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId,
+                    idempotencyKey = idempotencyKey
+                )
             )
-        )
+        }
     }
 
     /**
@@ -986,17 +986,16 @@ class Stripe internal constructor(
         stripeAccountId: String? = this.stripeAccountId,
         callback: ApiResultCallback<Source>
     ) {
-        RetrieveSourceTask(
-            stripeRepository,
-            sourceId,
-            clientSecret,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
-            ),
-            workContext,
-            callback
-        ).execute()
+        executeAsync(callback) {
+            stripeRepository.retrieveSource(
+                sourceId,
+                clientSecret,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
+            )
+        }
     }
 
     /**
@@ -1109,14 +1108,16 @@ class Stripe internal constructor(
         stripeAccountId: String? = this.stripeAccountId
     ): Token? {
         return try {
-            stripeRepository.createToken(
-                accountParams,
-                ApiRequest.Options(
-                    apiKey = publishableKey,
-                    stripeAccount = stripeAccountId,
-                    idempotencyKey = idempotencyKey
+            runBlocking {
+                stripeRepository.createToken(
+                    accountParams,
+                    ApiRequest.Options(
+                        apiKey = publishableKey,
+                        stripeAccount = stripeAccountId,
+                        idempotencyKey = idempotencyKey
+                    )
                 )
-            )
+            }
         } catch (exception: CardException) {
             // Should never occur. CardException is only for card related requests.
             null
@@ -1187,14 +1188,16 @@ class Stripe internal constructor(
         idempotencyKey: String? = null,
         stripeAccountId: String? = this.stripeAccountId
     ): Token? {
-        return stripeRepository.createToken(
-            bankAccountTokenParams,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId,
-                idempotencyKey = idempotencyKey
+        return runBlocking {
+            stripeRepository.createToken(
+                bankAccountTokenParams,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId,
+                    idempotencyKey = idempotencyKey
+                )
             )
-        )
+        }
     }
 
     /**
@@ -1257,14 +1260,16 @@ class Stripe internal constructor(
         idempotencyKey: String? = null,
         stripeAccountId: String? = this.stripeAccountId
     ): Token? {
-        return stripeRepository.createToken(
-            PiiTokenParams(personalId),
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId,
-                idempotencyKey = idempotencyKey
+        return runBlocking {
+            stripeRepository.createToken(
+                PiiTokenParams(personalId),
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId,
+                    idempotencyKey = idempotencyKey
+                )
             )
-        )
+        }
     }
 
     /**
@@ -1359,14 +1364,16 @@ class Stripe internal constructor(
         idempotencyKey: String? = null,
         stripeAccountId: String? = this.stripeAccountId
     ): Token? {
-        return stripeRepository.createToken(
-            card,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId,
-                idempotencyKey = idempotencyKey
+        return runBlocking {
+            stripeRepository.createToken(
+                card,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId,
+                    idempotencyKey = idempotencyKey
+                )
             )
-        )
+        }
     }
 
     /**
@@ -1403,14 +1410,16 @@ class Stripe internal constructor(
         idempotencyKey: String? = null,
         stripeAccountId: String? = this.stripeAccountId
     ): Token? {
-        return stripeRepository.createToken(
-            cardParams,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId,
-                idempotencyKey = idempotencyKey
+        return runBlocking {
+            stripeRepository.createToken(
+                cardParams,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId,
+                    idempotencyKey = idempotencyKey
+                )
             )
-        )
+        }
     }
 
     /**
@@ -1473,14 +1482,16 @@ class Stripe internal constructor(
         idempotencyKey: String? = null,
         stripeAccountId: String? = this.stripeAccountId
     ): Token? {
-        return stripeRepository.createToken(
-            CvcTokenParams(cvc),
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId,
-                idempotencyKey = idempotencyKey
+        return runBlocking {
+            stripeRepository.createToken(
+                CvcTokenParams(cvc),
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId,
+                    idempotencyKey = idempotencyKey
+                )
             )
-        )
+        }
     }
 
     /**
@@ -1540,14 +1551,16 @@ class Stripe internal constructor(
         idempotencyKey: String? = null,
         stripeAccountId: String? = this.stripeAccountId
     ): Token? {
-        return stripeRepository.createToken(
-            params,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId,
-                idempotencyKey = idempotencyKey
+        return runBlocking {
+            stripeRepository.createToken(
+                params,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId,
+                    idempotencyKey = idempotencyKey
+                )
             )
-        )
+        }
     }
 
     private fun createToken(
@@ -1556,17 +1569,16 @@ class Stripe internal constructor(
         idempotencyKey: String? = null,
         callback: ApiResultCallback<Token>
     ) {
-        CreateTokenTask(
-            stripeRepository,
-            tokenParams,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId,
-                idempotencyKey = idempotencyKey
-            ),
-            workContext,
-            callback
-        ).execute()
+        executeAsync(callback) {
+            stripeRepository.createToken(
+                tokenParams,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId,
+                    idempotencyKey = idempotencyKey
+                )
+            )
+        }
     }
 
     /**
@@ -1586,33 +1598,15 @@ class Stripe internal constructor(
         stripeAccountId: String? = this.stripeAccountId,
         callback: ApiResultCallback<StripeFile>
     ) {
-        CoroutineScope(workContext).launch {
-            val result = runCatching {
-                stripeRepository.createFile(
-                    fileParams,
-                    ApiRequest.Options(
-                        apiKey = publishableKey,
-                        stripeAccount = stripeAccountId,
-                        idempotencyKey = idempotencyKey
-                    )
+        executeAsync(callback) {
+            stripeRepository.createFile(
+                fileParams,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId,
+                    idempotencyKey = idempotencyKey
                 )
-            }
-
-            withContext(Dispatchers.Main) {
-                result.fold(
-                    onSuccess = { file ->
-                        callback.onSuccess(file)
-                    },
-                    onFailure = { error ->
-                        callback.onError(
-                            when (error) {
-                                is Exception -> error
-                                else -> RuntimeException(error)
-                            }
-                        )
-                    }
-                )
-            }
+            )
         }
     }
 
@@ -1643,70 +1637,30 @@ class Stripe internal constructor(
         }
     }
 
-    private class CreateSourceTask(
-        private val stripeRepository: StripeRepository,
-        private val sourceParams: SourceParams,
-        private val options: ApiRequest.Options,
-        workContext: CoroutineContext,
-        callback: ApiResultCallback<Source>
-    ) : ApiOperation<Source>(workContext, callback) {
-        @Throws(StripeException::class)
-        override suspend fun getResult(): Source? {
-            return stripeRepository.createSource(sourceParams, options)
+    private fun <T : StripeModel> executeAsync(
+        callback: ApiResultCallback<T>,
+        apiMethod: suspend () -> T?
+    ) {
+        CoroutineScope(workContext).launch {
+            val result = runCatching {
+                requireNotNull(apiMethod())
+            }
+            dispatchResult(result, callback)
         }
     }
 
-    private class RetrieveSourceTask(
-        private val stripeRepository: StripeRepository,
-        private val sourceId: String,
-        private val clientSecret: String,
-        private val options: ApiRequest.Options,
-        workContext: CoroutineContext,
-        callback: ApiResultCallback<Source>
-    ) : ApiOperation<Source>(workContext, callback) {
-        @Throws(StripeException::class)
-        override suspend fun getResult(): Source? {
-            return stripeRepository.retrieveSource(sourceId, clientSecret, options)
-        }
-    }
-
-    private class CreatePaymentMethodTask(
-        private val stripeRepository: StripeRepository,
-        private val paymentMethodCreateParams: PaymentMethodCreateParams,
-        private val options: ApiRequest.Options,
-        workContext: CoroutineContext,
-        callback: ApiResultCallback<PaymentMethod>
-    ) : ApiOperation<PaymentMethod>(workContext, callback) {
-        @Throws(StripeException::class)
-        override suspend fun getResult(): PaymentMethod? {
-            return stripeRepository.createPaymentMethod(paymentMethodCreateParams, options)
-        }
-    }
-
-    private class CreateTokenTask(
-        private val stripeRepository: StripeRepository,
-        private val tokenParams: TokenParams,
-        private val options: ApiRequest.Options,
-        workContext: CoroutineContext,
-        callback: ApiResultCallback<Token>
-    ) : ApiOperation<Token>(workContext, callback) {
-        @Throws(StripeException::class)
-        override suspend fun getResult(): Token? {
-            return stripeRepository.createToken(tokenParams, options)
-        }
-    }
-
-    private class RetrieveSetupIntentTask(
-        private val stripeRepository: StripeRepository,
-        private val clientSecret: String,
-        private val options: ApiRequest.Options,
-        workContext: CoroutineContext,
-        callback: ApiResultCallback<SetupIntent>
-    ) : ApiOperation<SetupIntent>(workContext, callback) {
-        @Throws(StripeException::class)
-        override suspend fun getResult(): SetupIntent? {
-            return stripeRepository.retrieveSetupIntent(clientSecret, options)
-        }
+    private suspend fun <T : StripeModel> dispatchResult(
+        result: Result<T>,
+        callback: ApiResultCallback<T>
+    ) = withContext(Dispatchers.Main) {
+        result.fold(
+            onSuccess = {
+                callback.onSuccess(it)
+            },
+            onFailure = {
+                callback.onError(StripeException.create(it))
+            }
+        )
     }
 
     companion object {

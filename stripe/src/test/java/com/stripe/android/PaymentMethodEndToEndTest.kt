@@ -7,14 +7,20 @@ import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.networking.ApiRequest
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class PaymentMethodEndToEndTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val testDispatcher = TestCoroutineDispatcher()
 
     @Test
     fun createPaymentMethod_withBacsDebit_shouldCreateObject() {
@@ -212,7 +218,7 @@ class PaymentMethodEndToEndTest {
     }
 
     @Test
-    fun createPaymentMethod_withGrabPay_shouldCreateObject() {
+    fun createPaymentMethod_withGrabPay_shouldCreateObject() = testDispatcher.runBlockingTest {
         val repository = StripeApiRepository(
             context,
             ApiKeyFixtures.GRABPAY_PUBLISHABLE_KEY
@@ -228,7 +234,7 @@ class PaymentMethodEndToEndTest {
     }
 
     @Test
-    fun `createPaymentMethod() with PayPal PaymentMethod should create expected object`() {
+    fun `createPaymentMethod() with PayPal PaymentMethod should create expected object`() = testDispatcher.runBlockingTest {
         val paymentMethod = StripeApiRepository(
             context,
             ApiKeyFixtures.PAYPAL_PUBLISHABLE_KEY

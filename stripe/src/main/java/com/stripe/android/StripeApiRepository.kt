@@ -11,7 +11,6 @@ import com.stripe.android.exception.CardException
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.exception.PermissionException
 import com.stripe.android.exception.RateLimitException
-import com.stripe.android.exception.StripeException
 import com.stripe.android.model.Complete3ds2Result
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -26,9 +25,9 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Stripe3ds2AuthParams
 import com.stripe.android.model.Stripe3ds2AuthResult
+import com.stripe.android.model.StripeErrorJsonParser
 import com.stripe.android.model.StripeFile
 import com.stripe.android.model.StripeFileParams
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeModel
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
@@ -43,6 +42,11 @@ import com.stripe.android.model.parsers.SourceJsonParser
 import com.stripe.android.model.parsers.Stripe3ds2AuthResultJsonParser
 import com.stripe.android.model.parsers.StripeFileJsonParser
 import com.stripe.android.model.parsers.TokenJsonParser
+import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.ApiRequestExecutor
+import com.stripe.android.networking.FileUploadRequest
+import com.stripe.android.networking.StripeRepository
+import com.stripe.android.networking.StripeResponse
 import com.stripe.android.utils.StripeUrlUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -192,7 +196,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         APIConnectionException::class,
         APIException::class
     )
-    override fun cancelPaymentIntentSource(
+    override suspend fun cancelPaymentIntentSource(
         paymentIntentId: String,
         sourceId: String,
         options: ApiRequest.Options
@@ -318,7 +322,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         APIConnectionException::class,
         APIException::class
     )
-    override fun cancelSetupIntentSource(
+    override suspend fun cancelSetupIntentSource(
         setupIntentId: String,
         sourceId: String,
         options: ApiRequest.Options
@@ -340,31 +344,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
-    override fun retrieveIntent(
-        clientSecret: String,
-        options: ApiRequest.Options,
-        expandFields: List<String>,
-        callback: ApiResultCallback<StripeIntent>
-    ) {
-        RetrieveIntentTask(
-            this,
-            clientSecret,
-            options,
-            expandFields,
-            callback
-        ).execute()
-    }
-
-    override fun cancelIntent(
-        stripeIntent: StripeIntent,
-        sourceId: String,
-        options: ApiRequest.Options,
-        callback: ApiResultCallback<StripeIntent>
-    ) {
-        CancelIntentTask(this, stripeIntent, sourceId, options, callback)
-            .execute()
-    }
-
     /**
      * Create a [Source] using the input [SourceParams].
      *
@@ -380,7 +359,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         APIConnectionException::class,
         APIException::class
     )
-    override fun createSource(
+    override suspend fun createSource(
         sourceParams: SourceParams,
         options: ApiRequest.Options
     ): Source? {
@@ -459,7 +438,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         APIConnectionException::class,
         APIException::class
     )
-    override fun createPaymentMethod(
+    override suspend fun createPaymentMethod(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         options: ApiRequest.Options
     ): PaymentMethod? {
@@ -510,7 +489,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         CardException::class,
         APIException::class
     )
-    override fun createToken(
+    override suspend fun createToken(
         tokenParams: TokenParams,
         options: ApiRequest.Options
     ): Token? {
@@ -826,7 +805,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         CardException::class,
         JSONException::class
     )
-    override fun retrieveIssuingCardPin(
+    override suspend fun retrieveIssuingCardPin(
         cardId: String,
         verificationId: String,
         userOneTimeCode: String,
@@ -857,7 +836,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         AuthenticationException::class,
         CardException::class
     )
-    override fun updateIssuingCardPin(
+    override suspend fun updateIssuingCardPin(
         cardId: String,
         newPin: String,
         verificationId: String,
@@ -984,7 +963,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         CardException::class,
         AuthenticationException::class
     )
-    override fun retrieveObject(url: String, requestOptions: ApiRequest.Options): JSONObject {
+    override suspend fun retrieveObject(
+        url: String,
+        requestOptions: ApiRequest.Options
+    ): JSONObject {
         if (!StripeUrlUtils.isStripeUrl(url)) {
             throw IllegalArgumentException("Unrecognized domain: $url")
         }
@@ -1041,7 +1023,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
-    private fun <ModelType : StripeModel> fetchStripeModel(
+    private suspend fun <ModelType : StripeModel> fetchStripeModel(
         apiRequest: ApiRequest,
         jsonParser: ModelJsonParser<ModelType>
     ): ModelType? {
@@ -1059,10 +1041,13 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     internal fun makeApiRequest(apiRequest: ApiRequest): StripeResponse {
         val dnsCacheData = disableDnsCache()
 
-        val response = try {
+        val response = runCatching {
             stripeApiRequestExecutor.execute(apiRequest)
-        } catch (ex: IOException) {
-            throw APIConnectionException.create(ex, apiRequest.baseUrl)
+        }.getOrElse {
+            throw when (it) {
+                is IOException -> APIConnectionException.create(it, apiRequest.baseUrl)
+                else -> it
+            }
         }
 
         if (response.isError) {
@@ -1085,10 +1070,13 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     internal fun makeFileUploadRequest(fileUploadRequest: FileUploadRequest): StripeResponse {
         val dnsCacheData = disableDnsCache()
 
-        val response = try {
+        val response = runCatching {
             stripeApiRequestExecutor.execute(fileUploadRequest)
-        } catch (ex: IOException) {
-            throw APIConnectionException.create(ex, fileUploadRequest.baseUrl)
+        }.getOrElse {
+            throw when (it) {
+                is IOException -> APIConnectionException.create(it, fileUploadRequest.baseUrl)
+                else -> it
+            }
         }
 
         if (response.isError) {
@@ -1164,62 +1152,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     ): Map<String, Any> {
         return mapOf("client_secret" to clientSecret)
             .plus(createExpandParam(expandFields))
-    }
-
-    private class RetrieveIntentTask constructor(
-        private val stripeRepository: StripeRepository,
-        private val clientSecret: String,
-        private val requestOptions: ApiRequest.Options,
-        private val expandFields: List<String>,
-        callback: ApiResultCallback<StripeIntent>
-    ) : ApiOperation<StripeIntent>(callback = callback) {
-
-        @Throws(StripeException::class)
-        override suspend fun getResult(): StripeIntent? {
-            return when {
-                clientSecret.startsWith("pi_") ->
-                    stripeRepository.retrievePaymentIntent(
-                        clientSecret,
-                        requestOptions,
-                        expandFields
-                    )
-                clientSecret.startsWith("seti_") ->
-                    stripeRepository.retrieveSetupIntent(
-                        clientSecret,
-                        requestOptions,
-                        expandFields
-                    )
-                else -> null
-            }
-        }
-    }
-
-    private class CancelIntentTask constructor(
-        private val stripeRepository: StripeRepository,
-        private val stripeIntent: StripeIntent,
-        private val sourceId: String,
-        private val requestOptions: ApiRequest.Options,
-        callback: ApiResultCallback<StripeIntent>
-    ) : ApiOperation<StripeIntent>(callback = callback) {
-
-        @Throws(StripeException::class)
-        override suspend fun getResult(): StripeIntent? {
-            return when (stripeIntent) {
-                is PaymentIntent ->
-                    stripeRepository.cancelPaymentIntentSource(
-                        stripeIntent.id.orEmpty(),
-                        sourceId,
-                        requestOptions
-                    )
-                is SetupIntent ->
-                    stripeRepository.cancelSetupIntentSource(
-                        stripeIntent.id.orEmpty(),
-                        sourceId,
-                        requestOptions
-                    )
-                else -> null
-            }
-        }
     }
 
     internal companion object {

@@ -16,22 +16,23 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_COLLAPSED
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
-import com.stripe.android.ApiRequest
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeApiRepository
 import com.stripe.android.StripePaymentController
-import com.stripe.android.StripeRepository
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.view.AuthActivityStarter
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -203,11 +204,7 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     fun isGooglePayReady() = liveData {
-        emit(
-            withContext(workContext) {
-                googlePayRepository.isReady().first()
-            }
-        )
+        emit(googlePayRepository.isReady().filterNotNull().first())
     }
 
     @VisibleForTesting
@@ -278,12 +275,12 @@ internal class PaymentSheetViewModel internal constructor(
                 publishableKey
             )
             val paymentController = StripePaymentController(
-                application.applicationContext,
+                application,
                 publishableKey,
                 stripeRepository,
                 true
             )
-            val googlePayRepository = DefaultGooglePayRepository()
+            val googlePayRepository = DefaultGooglePayRepository(application)
 
             return PaymentSheetViewModel(
                 publishableKey,

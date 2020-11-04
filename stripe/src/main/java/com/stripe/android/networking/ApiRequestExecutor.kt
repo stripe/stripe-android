@@ -1,15 +1,12 @@
-package com.stripe.android
+package com.stripe.android.networking
 
+import com.stripe.android.Logger
 import com.stripe.android.exception.APIConnectionException
-import com.stripe.android.exception.InvalidRequestException
 import java.io.IOException
-import java.net.UnknownHostException
 
 internal interface ApiRequestExecutor {
-    @Throws(APIConnectionException::class, InvalidRequestException::class, UnknownHostException::class)
     fun execute(request: ApiRequest): StripeResponse
 
-    @Throws(APIConnectionException::class, InvalidRequestException::class, UnknownHostException::class)
     fun execute(request: FileUploadRequest): StripeResponse
 
     /**
@@ -20,12 +17,10 @@ internal interface ApiRequestExecutor {
     ) : ApiRequestExecutor {
         private val connectionFactory = ConnectionFactory.Default()
 
-        @Throws(APIConnectionException::class, InvalidRequestException::class, UnknownHostException::class)
         override fun execute(request: ApiRequest): StripeResponse {
             return executeInternal(request)
         }
 
-        @Throws(APIConnectionException::class, InvalidRequestException::class, UnknownHostException::class)
         override fun execute(request: FileUploadRequest): StripeResponse {
             return executeInternal(request)
         }

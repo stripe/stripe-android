@@ -1,8 +1,10 @@
-package com.stripe.android
+package com.stripe.android.networking
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.FileFactory
 import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeFilePurpose
 import org.junit.runner.RunWith

@@ -1,4 +1,4 @@
-package com.stripe.android
+package com.stripe.android.networking
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.exception.APIException

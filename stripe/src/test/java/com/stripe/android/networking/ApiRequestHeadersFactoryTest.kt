@@ -1,7 +1,12 @@
-package com.stripe.android
+package com.stripe.android.networking
 
 import android.os.Build
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.ApiVersion
+import com.stripe.android.AppInfo
+import com.stripe.android.AppInfoFixtures
+import com.stripe.android.Stripe
 import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

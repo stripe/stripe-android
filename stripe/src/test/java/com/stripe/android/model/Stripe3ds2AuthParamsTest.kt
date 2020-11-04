@@ -1,7 +1,6 @@
-package com.stripe.android
+package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.Stripe3ds2AuthParams
 import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

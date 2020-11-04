@@ -8,6 +8,7 @@ import com.stripe.android.exception.StripeException
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.networking.ApiRequest
 import com.stripe.android.view.AuthActivityStarter
 import kotlinx.android.parcel.Parceler
 import kotlinx.android.parcel.Parcelize
@@ -31,7 +32,8 @@ internal interface PaymentController {
     fun startAuth(
         host: AuthActivityStarter.Host,
         clientSecret: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        type: StripeIntentType
     )
 
     fun startAuthenticateSource(
@@ -101,6 +103,11 @@ internal interface PaymentController {
         authenticator: AlipayAuthenticator,
         callback: ApiResultCallback<PaymentIntentResult>
     )
+
+    enum class StripeIntentType {
+        PaymentIntent,
+        SetupIntent
+    }
 
     /**
      * Represents the result of a [PaymentController] operation.

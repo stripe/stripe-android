@@ -3,6 +3,7 @@ package com.stripe.android
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.InvalidRequestException
+import com.stripe.android.networking.ConnectionFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

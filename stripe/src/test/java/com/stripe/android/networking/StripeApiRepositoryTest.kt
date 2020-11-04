@@ -1,4 +1,4 @@
-package com.stripe.android
+package com.stripe.android.networking
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
@@ -13,6 +13,15 @@ import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.nhaarman.mockitokotlin2.whenever
+import com.stripe.android.AnalyticsEvent
+import com.stripe.android.AnalyticsRequest
+import com.stripe.android.AnalyticsRequestExecutor
+import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.FileFactory
+import com.stripe.android.FingerprintDataFixtures
+import com.stripe.android.FingerprintDataRepository
+import com.stripe.android.FingerprintParamsUtils
+import com.stripe.android.StripeApiRepository
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.BankAccountTokenParamsFixtures
@@ -29,6 +38,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SourceFixtures
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Stripe3ds2AuthParams
+import com.stripe.android.model.Stripe3ds2Fixtures
 import com.stripe.android.model.StripeFileFixtures
 import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeFilePurpose
@@ -198,7 +208,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun createSource_shouldLogSourceCreation_andReturnSource() {
+    fun createSource_shouldLogSourceCreation_andReturnSource() = testDispatcher.runBlockingTest {
         val source = stripeApiRepository.createSource(
             SourceParams.createCardParams(CARD_PARAMS),
             DEFAULT_OPTIONS
@@ -209,7 +219,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun createCardSource_withAttribution_shouldPopulateProductUsage() {
+    fun createCardSource_withAttribution_shouldPopulateProductUsage() = testDispatcher.runBlockingTest {
         val stripeResponse = StripeResponse(
             200,
             SourceFixtures.SOURCE_CARD_JSON.toString(),
@@ -229,7 +239,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun createAlipaySource_withAttribution_shouldPopulateProductUsage() {
+    fun createAlipaySource_withAttribution_shouldPopulateProductUsage() = testDispatcher.runBlockingTest {
         val stripeResponse = StripeResponse(
             200,
             SourceFixtures.ALIPAY_JSON.toString(),
@@ -253,7 +263,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun createSource_withConnectAccount_keepsHeaderInAccount() {
+    fun createSource_withConnectAccount_keepsHeaderInAccount() = testDispatcher.runBlockingTest {
         val connectAccountId = "acct_1Acj2PBUgO3KuWzz"
         val source = stripeApiRepository.createSource(
             SourceParams.createCardParams(CARD_PARAMS),
@@ -443,7 +453,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun createSource_createsObjectAndLogs() {
+    fun createSource_createsObjectAndLogs() = testDispatcher.runBlockingTest {
         val stripeApiRepository = StripeApiRepository(
             context,
             DEFAULT_OPTIONS.apiKey,
@@ -729,7 +739,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun cancelPaymentIntentSource_whenAlreadyCanceled_throwsInvalidRequestException() {
+    fun cancelPaymentIntentSource_whenAlreadyCanceled_throwsInvalidRequestException() = testDispatcher.runBlockingTest {
         val exception = assertFailsWith<InvalidRequestException> {
             stripeApiRepository.cancelPaymentIntentSource(
                 "pi_1FejpSH8dsfnfKo38L276wr6",
@@ -745,10 +755,9 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun createSource_whenUnknownHostExceptionThrown_convertsToAPIConnectionException() {
-        whenever(stripeApiRequestExecutor.execute(any<ApiRequest>())).thenAnswer {
-            throw UnknownHostException()
-        }
+    fun createSource_whenUnknownHostExceptionThrown_convertsToAPIConnectionException() = testDispatcher.runBlockingTest {
+        whenever(stripeApiRequestExecutor.execute(any<ApiRequest>()))
+            .thenAnswer { throw UnknownHostException() }
 
         assertFailsWith<APIConnectionException> {
             create().createSource(
@@ -823,7 +832,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun createCardToken_withAttribution_shouldPopulateProductUsage() {
+    fun createCardToken_withAttribution_shouldPopulateProductUsage() = testDispatcher.runBlockingTest {
         val stripeResponse = StripeResponse(
             200,
             TokenFixtures.CARD_TOKEN_JSON.toString(),
@@ -842,7 +851,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun createBankToken_shouldNotPopulateProductUsage() {
+    fun createBankToken_shouldNotPopulateProductUsage() = testDispatcher.runBlockingTest {
         val stripeResponse = StripeResponse(
             200,
             TokenFixtures.BANK_TOKEN_JSON.toString(),
@@ -861,7 +870,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun createCardPaymentMethod_withAttribution_shouldPopulateProductUsage() {
+    fun createCardPaymentMethod_withAttribution_shouldPopulateProductUsage() = testDispatcher.runBlockingTest {
         val stripeResponse = StripeResponse(
             200,
             PaymentMethodFixtures.CARD_JSON.toString(),
@@ -885,7 +894,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun createSepaDebitPaymentMethod_shouldNotPopulateProductUsage() {
+    fun createSepaDebitPaymentMethod_shouldNotPopulateProductUsage() = testDispatcher.runBlockingTest {
         val stripeResponse = StripeResponse(
             200,
             PaymentMethodFixtures.SEPA_DEBIT_JSON.toString(),

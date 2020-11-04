@@ -1,4 +1,4 @@
-package com.stripe.android
+package com.stripe.android.networking
 
 import com.stripe.android.cards.Bin
 import com.stripe.android.exception.APIException
@@ -21,7 +21,6 @@ import com.stripe.android.model.Stripe3ds2AuthParams
 import com.stripe.android.model.Stripe3ds2AuthResultFixtures
 import com.stripe.android.model.StripeFile
 import com.stripe.android.model.StripeFileParams
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import org.json.JSONObject
@@ -44,7 +43,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         return null
     }
 
-    override fun cancelPaymentIntentSource(
+    override suspend fun cancelPaymentIntentSource(
         paymentIntentId: String,
         sourceId: String,
         options: ApiRequest.Options
@@ -68,7 +67,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         return null
     }
 
-    override fun cancelSetupIntentSource(
+    override suspend fun cancelSetupIntentSource(
         setupIntentId: String,
         sourceId: String,
         options: ApiRequest.Options
@@ -76,23 +75,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         return null
     }
 
-    override fun retrieveIntent(
-        clientSecret: String,
-        options: ApiRequest.Options,
-        expandFields: List<String>,
-        callback: ApiResultCallback<StripeIntent>
-    ) {
-    }
-
-    override fun cancelIntent(
-        stripeIntent: StripeIntent,
-        sourceId: String,
-        options: ApiRequest.Options,
-        callback: ApiResultCallback<StripeIntent>
-    ) {
-    }
-
-    override fun createSource(
+    override suspend fun createSource(
         sourceParams: SourceParams,
         options: ApiRequest.Options
     ): Source? {
@@ -107,14 +90,14 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         return null
     }
 
-    override fun createPaymentMethod(
+    override suspend fun createPaymentMethod(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         options: ApiRequest.Options
     ): PaymentMethod? {
         return null
     }
 
-    override fun createToken(
+    override suspend fun createToken(
         tokenParams: TokenParams,
         options: ApiRequest.Options
     ): Token? {
@@ -205,7 +188,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         return null
     }
 
-    override fun retrieveIssuingCardPin(
+    override suspend fun retrieveIssuingCardPin(
         cardId: String,
         verificationId: String,
         userOneTimeCode: String,
@@ -214,7 +197,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         return ""
     }
 
-    override fun updateIssuingCardPin(
+    override suspend fun updateIssuingCardPin(
         cardId: String,
         newPin: String,
         verificationId: String,
@@ -251,7 +234,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         return StripeFile()
     }
 
-    override fun retrieveObject(url: String, requestOptions: ApiRequest.Options): JSONObject {
-        return JSONObject()
-    }
+    override suspend fun retrieveObject(
+        url: String,
+        requestOptions: ApiRequest.Options
+    ) = JSONObject()
 }
