@@ -1,6 +1,9 @@
-package com.stripe.android
+package com.stripe.android.networking
 
 import android.os.Build
+import com.stripe.android.ApiVersion
+import com.stripe.android.AppInfo
+import com.stripe.android.Stripe
 import org.json.JSONObject
 import java.util.Locale
 

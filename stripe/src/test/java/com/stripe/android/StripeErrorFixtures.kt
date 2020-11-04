@@ -1,5 +1,6 @@
 package com.stripe.android
 
+import com.stripe.android.model.StripeErrorJsonParser
 import org.json.JSONObject
 
 internal object StripeErrorFixtures {

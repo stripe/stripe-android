@@ -5,10 +5,10 @@ import com.stripe.android.AnalyticsDataFactory
 import com.stripe.android.AnalyticsEvent
 import com.stripe.android.AnalyticsRequest
 import com.stripe.android.AnalyticsRequestExecutor
-import com.stripe.android.ApiRequest
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.StripeApiRepository
 import com.stripe.android.model.AccountRange
+import com.stripe.android.networking.ApiRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 

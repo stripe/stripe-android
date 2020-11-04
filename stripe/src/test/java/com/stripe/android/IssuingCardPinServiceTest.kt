@@ -5,6 +5,11 @@ import com.nhaarman.mockitokotlin2.argThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.ApiRequestExecutor
+import com.stripe.android.networking.ApiRequestMatcher
+import com.stripe.android.networking.StripeRequest
+import com.stripe.android.networking.StripeResponse
 import com.stripe.android.testharness.TestEphemeralKeyProvider
 import org.json.JSONObject
 import org.junit.runner.RunWith

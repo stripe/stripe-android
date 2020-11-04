@@ -1,4 +1,4 @@
-package com.stripe.android
+package com.stripe.android.networking
 
 import java.io.Closeable
 import java.io.IOException
