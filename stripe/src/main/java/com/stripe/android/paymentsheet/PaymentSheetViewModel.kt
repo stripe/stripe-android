@@ -32,6 +32,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.view.AuthActivityStarter
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -210,11 +211,7 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     fun isGooglePayReady() = liveData {
-        emit(
-            withContext(workContext) {
-                googlePayRepository.isReady().first()
-            }
-        )
+        emit(googlePayRepository.isReady().filterNotNull().first())
     }
 
     @VisibleForTesting
@@ -291,12 +288,12 @@ internal class PaymentSheetViewModel internal constructor(
                 publishableKey
             )
             val paymentController = StripePaymentController(
-                application.applicationContext,
+                application,
                 publishableKey,
                 stripeRepository,
                 true
             )
-            val googlePayRepository = DefaultGooglePayRepository()
+            val googlePayRepository = DefaultGooglePayRepository(application)
 
             return PaymentSheetViewModel(
                 publishableKey,
