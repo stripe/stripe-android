@@ -799,7 +799,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         CardException::class,
         JSONException::class
     )
-    override fun retrieveIssuingCardPin(
+    override suspend fun retrieveIssuingCardPin(
         cardId: String,
         verificationId: String,
         userOneTimeCode: String,
@@ -830,7 +830,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         AuthenticationException::class,
         CardException::class
     )
-    override fun updateIssuingCardPin(
+    override suspend fun updateIssuingCardPin(
         cardId: String,
         newPin: String,
         verificationId: String,
@@ -1017,7 +1017,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
-    private fun <ModelType : StripeModel> fetchStripeModel(
+    private suspend fun <ModelType : StripeModel> fetchStripeModel(
         apiRequest: ApiRequest,
         jsonParser: ModelJsonParser<ModelType>
     ): ModelType? {
@@ -1035,10 +1035,13 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     internal fun makeApiRequest(apiRequest: ApiRequest): StripeResponse {
         val dnsCacheData = disableDnsCache()
 
-        val response = try {
+        val response = runCatching {
             stripeApiRequestExecutor.execute(apiRequest)
-        } catch (ex: IOException) {
-            throw APIConnectionException.create(ex, apiRequest.baseUrl)
+        }.getOrElse {
+            throw when (it) {
+                is IOException -> APIConnectionException.create(it, apiRequest.baseUrl)
+                else -> it
+            }
         }
 
         if (response.isError) {
@@ -1061,10 +1064,13 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     internal fun makeFileUploadRequest(fileUploadRequest: FileUploadRequest): StripeResponse {
         val dnsCacheData = disableDnsCache()
 
-        val response = try {
+        val response = runCatching {
             stripeApiRequestExecutor.execute(fileUploadRequest)
-        } catch (ex: IOException) {
-            throw APIConnectionException.create(ex, fileUploadRequest.baseUrl)
+        }.getOrElse {
+            throw when (it) {
+                is IOException -> APIConnectionException.create(it, fileUploadRequest.baseUrl)
+                else -> it
+            }
         }
 
         if (response.isError) {
