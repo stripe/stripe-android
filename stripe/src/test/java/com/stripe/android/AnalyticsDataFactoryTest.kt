@@ -10,6 +10,7 @@ import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
+import com.stripe.android.networking.ApiRequest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test

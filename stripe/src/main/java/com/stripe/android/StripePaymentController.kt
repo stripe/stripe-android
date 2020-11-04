@@ -18,7 +18,9 @@ import com.stripe.android.model.Stripe3ds2Fingerprint
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.NextActionData.RedirectToUrl
 import com.stripe.android.networking.AlipayRepository
+import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.DefaultAlipayRepository
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl

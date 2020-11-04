@@ -1,5 +1,6 @@
-package com.stripe.android
+package com.stripe.android.networking
 
+import com.stripe.android.StripeError
 import com.stripe.android.exception.InvalidRequestException
 import java.io.UnsupportedEncodingException
 import java.net.URLEncoder

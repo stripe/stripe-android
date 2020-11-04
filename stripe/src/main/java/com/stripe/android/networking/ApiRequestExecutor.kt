@@ -1,5 +1,6 @@
-package com.stripe.android
+package com.stripe.android.networking
 
+import com.stripe.android.Logger
 import com.stripe.android.exception.APIConnectionException
 import java.io.IOException
 
