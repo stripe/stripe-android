@@ -1,7 +1,7 @@
-package com.stripe.android
+package com.stripe.android.networking
 
+import com.stripe.android.FingerprintData
 import com.stripe.android.model.parsers.FingerprintDataJsonParser
-import com.stripe.android.networking.ConnectionFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.Calendar

@@ -1,14 +1,14 @@
 package com.stripe.android.cards
 
 import android.content.Context
-import com.stripe.android.AnalyticsDataFactory
 import com.stripe.android.AnalyticsEvent
-import com.stripe.android.AnalyticsRequest
-import com.stripe.android.AnalyticsRequestExecutor
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.StripeApiRepository
 import com.stripe.android.model.AccountRange
+import com.stripe.android.networking.AnalyticsDataFactory
+import com.stripe.android.networking.AnalyticsRequest
+import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.StripeApiRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 

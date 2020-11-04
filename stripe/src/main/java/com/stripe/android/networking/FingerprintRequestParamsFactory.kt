@@ -1,9 +1,11 @@
-package com.stripe.android
+package com.stripe.android.networking
 
 import android.content.Context
 import android.os.Build
 import android.util.DisplayMetrics
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.FingerprintData
+import com.stripe.android.Stripe
 import com.stripe.android.utils.ContextUtils.packageInfo
 import java.math.BigDecimal
 import java.math.MathContext

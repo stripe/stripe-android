@@ -1,8 +1,6 @@
-package com.stripe.android
+package com.stripe.android.networking
 
 import com.stripe.android.model.StripeJsonUtils
-import com.stripe.android.networking.RequestHeadersFactory
-import com.stripe.android.networking.StripeRequest
 
 /**
  * A class representing a fingerprint request.
