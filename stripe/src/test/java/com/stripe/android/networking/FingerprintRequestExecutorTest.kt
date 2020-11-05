@@ -1,11 +1,10 @@
-package com.stripe.android
+package com.stripe.android.networking
 
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
-import com.stripe.android.networking.ConnectionFactory
-import com.stripe.android.networking.StripeConnection
+import com.stripe.android.FingerprintDataFixtures
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
@@ -19,7 +18,7 @@ import kotlin.test.Test
 class FingerprintRequestExecutorTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
-    private val fingerprintRequestFactory = FingerprintRequestFactory(
+    private val fingerprintRequestFactory = FingerprintRequestFactory.Default(
         context = ApplicationProvider.getApplicationContext()
     )
 

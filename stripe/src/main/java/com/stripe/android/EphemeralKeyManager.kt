@@ -129,7 +129,9 @@ internal class EphemeralKeyManager(
         return ephemeralKey.expires < nowPlusBuffer
     }
 
-    internal interface Factory : Factory1<KeyManagerListener, EphemeralKeyManager> {
+    internal fun interface Factory {
+        fun create(arg: KeyManagerListener): EphemeralKeyManager
+
         class Default(
             private val keyProvider: EphemeralKeyProvider,
             private val shouldPrefetchEphemeralKey: Boolean,

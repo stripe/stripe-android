@@ -19,6 +19,7 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.ApiRequestExecutor
+import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.view.AuthActivityStarter
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

@@ -1,10 +1,10 @@
-package com.stripe.android
+package com.stripe.android.networking
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.networking.ApiRequest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test

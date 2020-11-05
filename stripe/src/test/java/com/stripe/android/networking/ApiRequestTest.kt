@@ -4,7 +4,6 @@ import android.net.Uri
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.FingerprintDataFixtures
-import com.stripe.android.StripeApiRepository
 import com.stripe.android.model.CardParamsFixtures
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

@@ -8,6 +8,9 @@
 * [#2976](https://github.com/stripe/stripe-android/pull/2976) Update `ExpiryDateEditText` input allowlist
 * [#2979](https://github.com/stripe/stripe-android/pull/2979) Upgrade constraintlayout to `2.0.3`
 * [#2981](https://github.com/stripe/stripe-android/pull/2981) Fix `PaymentMethodCreateParams` annotations on create methods
+* [#3010](https://github.com/stripe/stripe-android/pull/3010) Upgrade `stripe-3ds2-android` to `4.1.1`
+    * Upgrade `bcprov-jdk15to18` to `1.6.7`
+    * Upgrade `nimbus-jose-jwt` to `9.1.2`
 
 ## 16.0.1 - 2020-10-06 
 * [#2894](https://github.com/stripe/stripe-android/pull/2894) Make `CardParams` constructor public
