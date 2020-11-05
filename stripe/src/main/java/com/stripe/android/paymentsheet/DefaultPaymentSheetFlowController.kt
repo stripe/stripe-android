@@ -21,12 +21,12 @@ internal class DefaultPaymentSheetFlowController internal constructor(
 
     override fun confirmPayment(
         activity: ComponentActivity,
-        onComplete: (PaymentSheet.CompletionStatus) -> Unit
+        onComplete: (PaymentResult) -> Unit
     ) {
         // TODO(mshafrir-stripe): implement
 
         onComplete(
-            PaymentSheet.CompletionStatus.Cancelled(null, null)
+            PaymentResult.Cancelled(null, null)
         )
     }
 }

@@ -59,7 +59,7 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         }
         viewModel.error.observe(this) {
             animateOut(
-                PaymentSheet.CompletionStatus.Failed(
+                PaymentResult.Failed(
                     it,
                     paymentIntent = viewModel.paymentIntent.value
                 )
@@ -148,7 +148,7 @@ internal class PaymentSheetActivity : AppCompatActivity() {
                         when (result.outcome) {
                             StripeIntentResult.Outcome.SUCCEEDED -> {
                                 animateOut(
-                                    PaymentSheet.CompletionStatus.Succeeded(result.intent)
+                                    PaymentResult.Succeeded(result.intent)
                                 )
                             }
                             else -> {
@@ -203,13 +203,13 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         }
     }
 
-    private fun animateOut(status: PaymentSheet.CompletionStatus) {
+    private fun animateOut(status: PaymentResult) {
         val resultCode = when (status) {
-            is PaymentSheet.CompletionStatus.Succeeded -> {
+            is PaymentResult.Succeeded -> {
                 Activity.RESULT_OK
             }
-            is PaymentSheet.CompletionStatus.Cancelled,
-            is PaymentSheet.CompletionStatus.Failed -> {
+            is PaymentResult.Cancelled,
+            is PaymentResult.Failed -> {
                 Activity.RESULT_CANCELED
             }
         }
@@ -237,7 +237,7 @@ internal class PaymentSheetActivity : AppCompatActivity() {
 
     private fun onUserCancel() {
         animateOut(
-            PaymentSheet.CompletionStatus.Cancelled(
+            PaymentResult.Cancelled(
                 viewModel.error.value,
                 paymentIntent = viewModel.paymentIntent.value
             )

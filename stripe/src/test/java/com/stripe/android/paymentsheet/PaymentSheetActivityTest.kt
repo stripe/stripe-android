@@ -103,7 +103,7 @@ internal class PaymentSheetActivityTest {
                 PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent)
             ).isEqualTo(
                 PaymentSheet.Result(
-                    PaymentSheet.CompletionStatus.Cancelled(
+                    PaymentResult.Cancelled(
                         null,
                         paymentIntent
                     )
@@ -168,7 +168,7 @@ internal class PaymentSheetActivityTest {
                 PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent)
             ).isEqualTo(
                 PaymentSheet.Result(
-                    PaymentSheet.CompletionStatus.Cancelled(
+                    PaymentResult.Cancelled(
                         null,
                         paymentIntent
                     )
@@ -228,7 +228,7 @@ internal class PaymentSheetActivityTest {
             assertThat(PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent))
                 .isEqualTo(
                     PaymentSheet.Result(
-                        PaymentSheet.CompletionStatus.Succeeded(paymentIntent)
+                        PaymentResult.Succeeded(paymentIntent)
                     )
                 )
         }
@@ -272,7 +272,7 @@ internal class PaymentSheetActivityTest {
                 PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent)
             ).isEqualTo(
                 PaymentSheet.Result(
-                    PaymentSheet.CompletionStatus.Cancelled(
+                    PaymentResult.Cancelled(
                         null,
                         paymentIntent
                     )

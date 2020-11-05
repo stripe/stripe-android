@@ -13,7 +13,7 @@ internal interface PaymentSheetFlowController {
 
     fun confirmPayment(
         activity: ComponentActivity,
-        onComplete: (PaymentSheet.CompletionStatus) -> Unit
+        onComplete: (PaymentResult) -> Unit
     )
 
     companion object {
