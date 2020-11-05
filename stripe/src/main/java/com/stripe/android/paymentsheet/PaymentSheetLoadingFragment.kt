@@ -9,21 +9,18 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel.TransitionTarget
 
 class PaymentSheetLoadingFragment : Fragment(R.layout.fragment_payment_sheet_loading) {
     private val activityViewModel by activityViewModels<PaymentSheetViewModel> {
-        PaymentSheetViewModel.Factory {
-            requireActivity().application
-        }
+        PaymentSheetViewModel.Factory(
+            { requireActivity().application },
+            {
+                requireNotNull(
+                    requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
+                )
+            }
+        )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        val activity = this.activity
-        if (activity == null) {
-            activityViewModel.onError(
-                IllegalStateException("Could not launch PaymentSheet.")
-            )
-            return
-        }
 
         activityViewModel.paymentMethods.observe(viewLifecycleOwner) { paymentMethods ->
             val target = if (paymentMethods.isEmpty()) {
@@ -33,7 +30,7 @@ class PaymentSheetLoadingFragment : Fragment(R.layout.fragment_payment_sheet_loa
             }
             activityViewModel.transitionTo(target)
         }
-        activityViewModel.updatePaymentMethods(activity.intent)
-        activityViewModel.fetchPaymentIntent(activity.intent)
+        activityViewModel.updatePaymentMethods()
+        activityViewModel.fetchPaymentIntent()
     }
 }

@@ -13,9 +13,14 @@ import com.stripe.android.view.CardInputListener
 
 internal class PaymentSheetAddCardFragment : Fragment(R.layout.fragment_paymentsheet_add_card) {
     private val activityViewModel by activityViewModels<PaymentSheetViewModel> {
-        PaymentSheetViewModel.Factory {
-            requireActivity().application
-        }
+        PaymentSheetViewModel.Factory(
+            { requireActivity().application },
+            {
+                requireNotNull(
+                    requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
+                )
+            }
+        )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
