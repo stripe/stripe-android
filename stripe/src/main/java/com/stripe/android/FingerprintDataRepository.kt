@@ -1,6 +1,8 @@
 package com.stripe.android
 
 import android.content.Context
+import com.stripe.android.networking.FingerprintRequestExecutor
+import com.stripe.android.networking.FingerprintRequestFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,7 +31,7 @@ internal interface FingerprintDataRepository {
             context: Context
         ) : this(
             localStore = FingerprintDataStore.Default(context),
-            fingerprintRequestFactory = FingerprintRequestFactory(context),
+            fingerprintRequestFactory = FingerprintRequestFactory.Default(context),
             workContext = Dispatchers.IO
         )
 

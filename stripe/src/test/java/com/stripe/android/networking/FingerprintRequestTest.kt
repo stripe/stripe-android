@@ -1,8 +1,8 @@
-package com.stripe.android
+package com.stripe.android.networking
 
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.networking.RequestHeadersFactory
+import com.stripe.android.FingerprintDataFixtures
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.io.ByteArrayOutputStream

@@ -1,5 +1,6 @@
-package com.stripe.android
+package com.stripe.android.networking
 
+import com.stripe.android.FingerprintData
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 

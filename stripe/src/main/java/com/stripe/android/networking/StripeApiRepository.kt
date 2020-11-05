@@ -1,8 +1,15 @@
-package com.stripe.android
+package com.stripe.android.networking
 
 import android.content.Context
 import android.util.Pair
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.AnalyticsEvent
+import com.stripe.android.ApiVersion
+import com.stripe.android.AppInfo
+import com.stripe.android.FingerprintData
+import com.stripe.android.FingerprintDataRepository
+import com.stripe.android.Logger
+import com.stripe.android.Stripe
 import com.stripe.android.cards.Bin
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
@@ -42,11 +49,6 @@ import com.stripe.android.model.parsers.SourceJsonParser
 import com.stripe.android.model.parsers.Stripe3ds2AuthResultJsonParser
 import com.stripe.android.model.parsers.StripeFileJsonParser
 import com.stripe.android.model.parsers.TokenJsonParser
-import com.stripe.android.networking.ApiRequest
-import com.stripe.android.networking.ApiRequestExecutor
-import com.stripe.android.networking.FileUploadRequest
-import com.stripe.android.networking.StripeRepository
-import com.stripe.android.networking.StripeResponse
 import com.stripe.android.utils.StripeUrlUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
