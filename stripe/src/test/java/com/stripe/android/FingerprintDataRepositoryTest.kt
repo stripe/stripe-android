@@ -50,7 +50,7 @@ class FingerprintDataRepositoryTest {
                 context,
                 testDispatcher
             ),
-            fingerprintRequestFactory = FingerprintRequestFactory(context),
+            fingerprintRequestFactory = FingerprintRequestFactory.Default(context),
             fingerprintRequestExecutor = object : FingerprintRequestExecutor {
                 override suspend fun execute(request: FingerprintRequest) = expectedFingerprintData
             },

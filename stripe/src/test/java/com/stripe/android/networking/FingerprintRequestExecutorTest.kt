@@ -18,7 +18,7 @@ import kotlin.test.Test
 class FingerprintRequestExecutorTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
-    private val fingerprintRequestFactory = FingerprintRequestFactory(
+    private val fingerprintRequestFactory = FingerprintRequestFactory.Default(
         context = ApplicationProvider.getApplicationContext()
     )
 

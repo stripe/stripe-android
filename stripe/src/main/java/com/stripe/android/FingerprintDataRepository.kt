@@ -31,7 +31,7 @@ internal interface FingerprintDataRepository {
             context: Context
         ) : this(
             localStore = FingerprintDataStore.Default(context),
-            fingerprintRequestFactory = FingerprintRequestFactory(context),
+            fingerprintRequestFactory = FingerprintRequestFactory.Default(context),
             workContext = Dispatchers.IO
         )
 
