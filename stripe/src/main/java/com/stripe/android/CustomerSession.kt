@@ -9,6 +9,8 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.Source
 import com.stripe.android.model.Source.SourceType
+import com.stripe.android.networking.StripeApiRepository
+import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancelChildren

@@ -8,11 +8,7 @@ import android.text.InputType
 import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.AnalyticsDataFactory
 import com.stripe.android.AnalyticsEvent
-import com.stripe.android.AnalyticsRequest
-import com.stripe.android.AnalyticsRequestExecutor
-import com.stripe.android.ApiRequest
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardAccountRangeRepository
@@ -24,6 +20,10 @@ import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.cards.StaticCardAccountRanges
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
+import com.stripe.android.networking.AnalyticsDataFactory
+import com.stripe.android.networking.AnalyticsRequest
+import com.stripe.android.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.ApiRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

@@ -6,6 +6,9 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.EphemeralKeyManager.KeyManagerListener
 import com.stripe.android.Stripe.Companion.appInfo
 import com.stripe.android.exception.InvalidRequestException
+import com.stripe.android.networking.StripeApiRepository
+import com.stripe.android.networking.StripeRepository
+import kotlinx.coroutines.runBlocking
 
 /**
  * Methods for retrieval / update of a Stripe Issuing card
@@ -131,12 +134,14 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
         listener: IssuingCardPinRetrievalListener
     ) {
         runCatching {
-            val pin = stripeRepository.retrieveIssuingCardPin(
-                operation.cardId,
-                operation.verificationId,
-                operation.userOneTimeCode,
-                ephemeralKey.secret
-            )
+            val pin = runBlocking {
+                stripeRepository.retrieveIssuingCardPin(
+                    operation.cardId,
+                    operation.verificationId,
+                    operation.userOneTimeCode,
+                    ephemeralKey.secret
+                )
+            }
             listener.onIssuingCardPinRetrieved(pin)
         }.recover {
             onRetrievePinError(it, listener)
@@ -203,13 +208,15 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
         listener: IssuingCardPinUpdateListener
     ) {
         runCatching {
-            stripeRepository.updateIssuingCardPin(
-                operation.cardId,
-                operation.newPin,
-                operation.verificationId,
-                operation.userOneTimeCode,
-                ephemeralKey.secret
-            )
+            runBlocking {
+                stripeRepository.updateIssuingCardPin(
+                    operation.cardId,
+                    operation.newPin,
+                    operation.verificationId,
+                    operation.userOneTimeCode,
+                    ephemeralKey.secret
+                )
+            }
             listener.onIssuingCardPinUpdated()
         }.recover {
             onUpdatePinError(it, listener)
