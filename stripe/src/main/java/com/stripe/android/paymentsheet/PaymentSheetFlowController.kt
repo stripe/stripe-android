@@ -16,13 +16,23 @@ internal interface PaymentSheetFlowController {
         onComplete: (PaymentResult) -> Unit
     )
 
+    sealed class Result {
+        class Success(
+            val paymentSheetFlowController: PaymentSheetFlowController
+        ) : Result()
+
+        class Failure(
+            val error: Throwable
+        ) : Result()
+    }
+
     companion object {
         fun create(
             context: Context,
             clientSecret: String,
             ephemeralKey: String,
             customerId: String,
-            onComplete: (PaymentSheetFlowController) -> Unit
+            onComplete: (Result) -> Unit
         ) {
             PaymentSheetFlowControllerFactory(context).create(
                 clientSecret,
@@ -35,7 +45,7 @@ internal interface PaymentSheetFlowController {
         fun create(
             context: Context,
             clientSecret: String,
-            onComplete: (PaymentSheetFlowController) -> Unit
+            onComplete: (Result) -> Unit
         ) {
             PaymentSheetFlowControllerFactory(context).create(
                 clientSecret,

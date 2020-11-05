@@ -35,17 +35,17 @@ class PaymentSheetFlowControllerFactoryTest {
 
     @Test
     fun `create() in default mode should create expected object`() {
-        var flowController: PaymentSheetFlowController? = null
+        var result: PaymentSheetFlowController.Result? = null
         factory.create(
             "client_secret",
             "eph_key",
             "cus_123"
         ) {
-            flowController = it
+            result = it
         }
 
-        assertThat(flowController)
-            .isNotNull()
+        assertThat(result)
+            .isInstanceOf(PaymentSheetFlowController.Result::class.java)
     }
 
     private class FakePaymentSessionPrefs : PaymentSessionPrefs {
