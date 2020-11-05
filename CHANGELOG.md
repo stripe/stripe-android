@@ -6,8 +6,12 @@
 * [#2955](https://github.com/stripe/stripe-android/pull/2955) Add support for UPI payment method
 * [#2965](https://github.com/stripe/stripe-android/pull/2965) Add support for Netbanking payment method
 * [#2976](https://github.com/stripe/stripe-android/pull/2976) Update `ExpiryDateEditText` input allowlist
-* [#2979](https://github.com/stripe/stripe-android/pull/2979) Upgrade constraintlayout to `2.0.3`
+* [#2977](https://github.com/stripe/stripe-android/pull/2977) Fix crash in `CardNumberTextInputLayout`
 * [#2981](https://github.com/stripe/stripe-android/pull/2981) Fix `PaymentMethodCreateParams` annotations on create methods
+* [#2988](https://github.com/stripe/stripe-android/pull/2988) Update `PaymentSession.handlePaymentData()` to take a nullable `Intent`
+* [#2989](https://github.com/stripe/stripe-android/pull/2989) Handle null `client_secret` in result `Intent`
+* [#2995](https://github.com/stripe/stripe-android/pull/2995) Upgrade constraintlayout to `2.0.4`
+* [#3006](https://github.com/stripe/stripe-android/pull/3006) Upgrade coroutines to `1.4.1`
 * [#3010](https://github.com/stripe/stripe-android/pull/3010) Upgrade `stripe-3ds2-android` to `4.1.1`
     * Upgrade `bcprov-jdk15to18` to `1.6.7`
     * Upgrade `nimbus-jose-jwt` to `9.1.2`
