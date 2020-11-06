@@ -9,6 +9,7 @@ import androidx.fragment.app.activityViewModels
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddCardBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.view.CardInputListener
 
 internal class PaymentSheetAddCardFragment : Fragment(R.layout.fragment_paymentsheet_add_card) {
@@ -45,7 +46,7 @@ internal class PaymentSheetAddCardFragment : Fragment(R.layout.fragment_payments
         binding.cardMultilineWidget.setCardInputListener(object : CardInputListener {
             override fun onFocusChange(focusField: CardInputListener.FocusField) {
                 // If the user focuses any card field, expand to full screen
-                activityViewModel.updateMode(PaymentSheetViewModel.SheetMode.Full)
+                activityViewModel.updateMode(SheetMode.Full)
             }
 
             override fun onCardComplete() {}
@@ -57,7 +58,7 @@ internal class PaymentSheetAddCardFragment : Fragment(R.layout.fragment_payments
 
         // If we're launched in full expanded mode, focus the card number field
         // and show the keyboard automatically
-        if (activityViewModel.sheetMode.value == PaymentSheetViewModel.SheetMode.Full) {
+        if (activityViewModel.sheetMode.value == SheetMode.Full) {
             binding.cardMultilineWidget.cardNumberEditText.requestFocus()
             getSystemService(requireContext(), InputMethodManager::class.java)?.apply {
                 showSoftInput(binding.cardMultilineWidget.cardNumberEditText, InputMethodManager.SHOW_IMPLICIT)

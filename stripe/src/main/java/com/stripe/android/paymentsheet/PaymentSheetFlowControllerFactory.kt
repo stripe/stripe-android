@@ -113,7 +113,7 @@ internal class PaymentSheetFlowControllerFactory(
             onSuccess = { paymentMethods ->
                 Result.Success(
                     DefaultPaymentSheetFlowController(
-                        PaymentSheetActivityStarter.Args.Default(
+                        DefaultPaymentSheetFlowController.Args.Default(
                             clientSecret,
                             ephemeralKey,
                             customerId
@@ -134,7 +134,7 @@ internal class PaymentSheetFlowControllerFactory(
     ): Result {
         return Result.Success(
             DefaultPaymentSheetFlowController(
-                PaymentSheetActivityStarter.Args.Guest(
+                DefaultPaymentSheetFlowController.Args.Guest(
                     clientSecret
                 ),
                 emptyList(),
