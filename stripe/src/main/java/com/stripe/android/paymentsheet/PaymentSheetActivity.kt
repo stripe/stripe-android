@@ -7,6 +7,7 @@ import android.view.View
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -24,9 +25,10 @@ import kotlinx.coroutines.launch
 internal class PaymentSheetActivity : AppCompatActivity() {
     @VisibleForTesting
     internal var viewModelFactory: ViewModelProvider.Factory =
-        PaymentSheetViewModel.Factory {
-            application
-        }
+        PaymentSheetViewModel.Factory(
+            { application },
+            { requireNotNull(starterArgs) }
+        )
 
     @VisibleForTesting
     internal val bottomSheetBehavior by lazy {
@@ -49,8 +51,26 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         @IdRes
         get() = viewBinding.fragmentContainer.id
 
+    private val starterArgs: PaymentSheetActivityStarter.Args? by lazy {
+        PaymentSheetActivityStarter.Args.fromIntent(intent)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val starterArgs = this.starterArgs
+        if (starterArgs == null) {
+            setPaymentSheetResult(
+                PaymentResult.Failed(
+                    IllegalArgumentException("PaymentSheet started without arguments."),
+                    null
+                )
+            )
+            finish()
+            return
+        }
+        val fragmentArgs = bundleOf(EXTRA_STARTER_ARGS to starterArgs)
+
         setContentView(viewBinding.root)
 
         // Handle taps outside of bottom sheet
@@ -92,7 +112,12 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         setupBottomSheet()
         setupBuyButton()
         supportFragmentManager.commit {
-            replace(fragmentContainerId, PaymentSheetLoadingFragment())
+            replace(
+                fragmentContainerId,
+                PaymentSheetLoadingFragment().also {
+                    it.arguments = fragmentArgs
+                }
+            )
         }
 
         viewModel.transition.observe(this) { transactionTarget ->
@@ -106,15 +131,30 @@ internal class PaymentSheetActivity : AppCompatActivity() {
                             R.anim.stripe_paymentsheet_transition_fade_out,
                         )
                         addToBackStack(null)
-                        replace(fragmentContainerId, PaymentSheetAddCardFragment())
+                        replace(
+                            fragmentContainerId,
+                            PaymentSheetAddCardFragment().also {
+                                it.arguments = fragmentArgs
+                            }
+                        )
                         viewModel.updateMode(SheetMode.Full)
                     }
                     PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod -> {
-                        replace(fragmentContainerId, PaymentSheetPaymentMethodsListFragment())
+                        replace(
+                            fragmentContainerId,
+                            PaymentSheetPaymentMethodsListFragment().also {
+                                it.arguments = fragmentArgs
+                            }
+                        )
                         viewModel.updateMode(SheetMode.Wrapped)
                     }
                     PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet -> {
-                        replace(fragmentContainerId, PaymentSheetAddCardFragment())
+                        replace(
+                            fragmentContainerId,
+                            PaymentSheetAddCardFragment().also {
+                                it.arguments = fragmentArgs
+                            }
+                        )
                         viewModel.updateMode(SheetMode.FullCollapsed)
                     }
                 }
@@ -203,8 +243,20 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         }
     }
 
-    private fun animateOut(status: PaymentResult) {
-        val resultCode = when (status) {
+    private fun animateOut(
+        paymentResult: PaymentResult
+    ) {
+        setPaymentSheetResult(paymentResult)
+
+        // When the bottom sheet finishes animating to its new state,
+        // the callback will finish the activity
+        bottomSheetBehavior.state = STATE_HIDDEN
+    }
+
+    private fun setPaymentSheetResult(
+        paymentResult: PaymentResult
+    ) {
+        val resultCode = when (paymentResult) {
             is PaymentResult.Succeeded -> {
                 Activity.RESULT_OK
             }
@@ -215,11 +267,9 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         }
         setResult(
             resultCode,
-            Intent().putExtras(PaymentSheet.Result(status).toBundle())
+            Intent()
+                .putExtras(PaymentSheet.Result(paymentResult).toBundle())
         )
-        // When the bottom sheet finishes animating to its new state,
-        // the callback will finish the activity
-        bottomSheetBehavior.state = STATE_HIDDEN
     }
 
     override fun finish() {
@@ -246,5 +296,7 @@ internal class PaymentSheetActivity : AppCompatActivity() {
 
     internal companion object {
         internal const val ANIMATE_IN_DELAY = 300L
+
+        internal const val EXTRA_STARTER_ARGS = "com.stripe.android.paymentsheet.extra_starter_args"
     }
 }

@@ -17,7 +17,7 @@ buildscript {
 }
 
 plugins {
-    id 'io.codearte.nexus-staging' version '0.21.2'
+    id 'io.codearte.nexus-staging' version '0.22.0'
 }
 
 allprojects {

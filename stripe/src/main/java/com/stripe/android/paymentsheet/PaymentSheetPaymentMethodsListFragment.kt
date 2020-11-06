@@ -16,9 +16,14 @@ internal class PaymentSheetPaymentMethodsListFragment : Fragment(
     R.layout.fragment_paymentsheet_payment_methods_list
 ) {
     private val activityViewModel by activityViewModels<PaymentSheetViewModel> {
-        PaymentSheetViewModel.Factory {
-            requireActivity().application
-        }
+        PaymentSheetViewModel.Factory(
+            { requireActivity().application },
+            {
+                requireNotNull(
+                    requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
+                )
+            }
+        )
     }
 
     private val fragmentViewModel by viewModels<PaymentMethodsViewModel>()
@@ -41,14 +46,6 @@ internal class PaymentSheetPaymentMethodsListFragment : Fragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val activity = this.activity
-        if (activity == null) {
-            activityViewModel.onError(
-                IllegalStateException("Could not launch PaymentSheet.")
-            )
-            return
-        }
-
         // If we're returning to this fragment from elsewhere, we need to reset the selection to
         // whatever the user had selected previously
         activityViewModel.updateSelection(fragmentViewModel.selectedPaymentMethod)
@@ -69,7 +66,7 @@ internal class PaymentSheetPaymentMethodsListFragment : Fragment(
 
         // Only fetch the payment methods list if we haven't already
         if (activityViewModel.paymentMethods.value == null) {
-            activityViewModel.updatePaymentMethods(activity.intent)
+            activityViewModel.updatePaymentMethods()
         }
     }
 

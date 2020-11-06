@@ -44,6 +44,7 @@ internal class PaymentSheetViewModel internal constructor(
     private val stripeRepository: StripeRepository,
     private val paymentController: PaymentController,
     private val googlePayRepository: GooglePayRepository,
+    private val args: PaymentSheetActivityStarter.Args,
     private val workContext: CoroutineContext
 ) : ViewModel() {
     private val mutableError = MutableLiveData<Throwable>()
@@ -78,20 +79,16 @@ internal class PaymentSheetViewModel internal constructor(
         mutableSelection.postValue(selection)
     }
 
-    fun updatePaymentMethods(intent: Intent) {
-        getPaymentSheetActivityArgs(
-            intent
-        )?.let { args ->
-            when (args) {
-                is PaymentSheetActivityStarter.Args.Default -> {
-                    updatePaymentMethods(
-                        args.ephemeralKey,
-                        args.customerId
-                    )
-                }
-                is PaymentSheetActivityStarter.Args.Guest -> {
-                    mutablePaymentMethods.postValue(emptyList())
-                }
+    fun updatePaymentMethods() {
+        when (args) {
+            is PaymentSheetActivityStarter.Args.Default -> {
+                updatePaymentMethods(
+                    args.ephemeralKey,
+                    args.customerId
+                )
+            }
+            is PaymentSheetActivityStarter.Args.Guest -> {
+                mutablePaymentMethods.postValue(emptyList())
             }
         }
     }
@@ -100,47 +97,43 @@ internal class PaymentSheetViewModel internal constructor(
         mutableSheetMode.postValue(mode)
     }
 
-    fun fetchPaymentIntent(intent: Intent) {
-        getPaymentSheetActivityArgs(intent)?.let { args ->
-            viewModelScope.launch {
-                val result = withContext(workContext) {
-                    runCatching {
-                        val paymentIntent = stripeRepository.retrievePaymentIntent(
-                            args.clientSecret,
-                            ApiRequest.Options(publishableKey, stripeAccountId)
-                        )
-                        requireNotNull(paymentIntent) {
-                            "Could not parse PaymentIntent."
-                        }
+    fun fetchPaymentIntent() {
+        viewModelScope.launch {
+            val result = withContext(workContext) {
+                runCatching {
+                    val paymentIntent = stripeRepository.retrievePaymentIntent(
+                        args.clientSecret,
+                        ApiRequest.Options(publishableKey, stripeAccountId)
+                    )
+                    requireNotNull(paymentIntent) {
+                        "Could not parse PaymentIntent."
                     }
                 }
-                result.fold(
-                    onSuccess = { paymentIntent ->
-                        mutablePaymentIntent.value = paymentIntent
-
-                        val amount = paymentIntent.amount
-                        val currencyCode = paymentIntent.currency
-                        if (amount != null && currencyCode != null) {
-                            mutableViewState.value = ViewState.Ready(amount, currencyCode)
-                        } else {
-                            // TODO(mshafrir-stripe): improve error message
-                            onError(IllegalStateException("PaymentIntent is invalid."))
-                        }
-                    },
-                    onFailure = {
-                        mutablePaymentIntent.value = null
-
-                        onError(it)
-                    }
-                )
             }
+            result.fold(
+                onSuccess = { paymentIntent ->
+                    mutablePaymentIntent.value = paymentIntent
+
+                    val amount = paymentIntent.amount
+                    val currencyCode = paymentIntent.currency
+                    if (amount != null && currencyCode != null) {
+                        mutableViewState.value = ViewState.Ready(amount, currencyCode)
+                    } else {
+                        // TODO(mshafrir-stripe): improve error message
+                        onError(IllegalStateException("PaymentIntent is invalid."))
+                    }
+                },
+                onFailure = {
+                    mutablePaymentIntent.value = null
+
+                    onError(it)
+                }
+            )
         }
     }
 
     fun checkout(activity: Activity) {
         mutableProcessing.value = true
-
-        val args = getPaymentSheetActivityArgs(activity.intent) ?: return
 
         val confirmParams = createConfirmParams(args.clientSecret)
 
@@ -219,14 +212,6 @@ internal class PaymentSheetViewModel internal constructor(
         mutablePaymentMethods.postValue(paymentMethods)
     }
 
-    private fun getPaymentSheetActivityArgs(intent: Intent): PaymentSheetActivityStarter.Args? {
-        val args: PaymentSheetActivityStarter.Args? = PaymentSheetActivityStarter.Args.fromIntent(intent)
-        if (args == null) {
-            onError(IllegalStateException("Missing activity args"))
-        }
-        return args
-    }
-
     private fun updatePaymentMethods(
         ephemeralKey: String,
         customerId: String,
@@ -276,10 +261,12 @@ internal class PaymentSheetViewModel internal constructor(
     }
 
     internal class Factory(
-        private val applicationProvider: () -> Application
+        private val applicationSupplier: () -> Application,
+        private val starterArgsSupplier: () -> PaymentSheetActivityStarter.Args
     ) : ViewModelProvider.Factory {
+
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            val application = applicationProvider()
+            val application = applicationSupplier()
             val config = PaymentConfiguration.getInstance(application)
             val publishableKey = config.publishableKey
             val stripeAccountId = config.stripeAccountId
@@ -301,6 +288,7 @@ internal class PaymentSheetViewModel internal constructor(
                 stripeRepository,
                 paymentController,
                 googlePayRepository,
+                starterArgsSupplier(),
                 Dispatchers.IO
             ) as T
         }

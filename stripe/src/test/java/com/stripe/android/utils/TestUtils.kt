@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import org.robolectric.Shadows
 
-object TestUtils {
+internal object TestUtils {
     @JvmStatic
     fun idleLooper() = Shadows.shadowOf(Looper.getMainLooper()).idle()
 

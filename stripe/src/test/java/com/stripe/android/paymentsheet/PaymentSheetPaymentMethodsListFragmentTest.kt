@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet
 
+import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
@@ -36,7 +38,7 @@ class PaymentSheetPaymentMethodsListFragmentTest {
     fun `resets payment method selection when shown`() {
         val savedPaymentMethod = PaymentSelection.Saved("test_payment_method")
 
-        val scenario = launchFragmentInContainer<PaymentSheetPaymentMethodsListFragment>()
+        val scenario = createScenario()
         scenario.onFragment {
             assertThat(activityViewModel(it).selection.value).isNull()
             fragmentViewModel(it).selectedPaymentMethod = savedPaymentMethod
@@ -49,8 +51,7 @@ class PaymentSheetPaymentMethodsListFragmentTest {
 
     @Test
     fun `sets up adapter`() {
-        val scenario = launchFragmentInContainer<PaymentSheetPaymentMethodsListFragment>()
-        scenario.onFragment {
+        createScenario().onFragment {
             val recycler = recyclerView(it)
             val adapter = recycler.adapter as PaymentSheetPaymentMethodsAdapter
             assertThat(adapter.paymentMethods)
@@ -68,8 +69,7 @@ class PaymentSheetPaymentMethodsListFragmentTest {
     fun `updates selection on click`() {
         val savedPaymentMethod = PaymentSelection.Saved("test_payment_method")
 
-        val scenario = launchFragmentInContainer<PaymentSheetPaymentMethodsListFragment>()
-        scenario.onFragment {
+        createScenario().onFragment {
             val activityViewModel = activityViewModel(it)
             activityViewModel.setPaymentMethods(paymentMethods)
             idleLooper()
@@ -89,8 +89,7 @@ class PaymentSheetPaymentMethodsListFragmentTest {
     fun `posts transition when add card clicked`() {
         val savedPaymentMethod = PaymentSelection.Saved("test_payment_method")
 
-        val scenario = launchFragmentInContainer<PaymentSheetPaymentMethodsListFragment>()
-        scenario.onFragment {
+        createScenario().onFragment {
             val activityViewModel = activityViewModel(it)
             assertThat(activityViewModel.transition.value).isNull()
 
@@ -112,11 +111,22 @@ class PaymentSheetPaymentMethodsListFragmentTest {
 
     private fun activityViewModel(fragment: PaymentSheetPaymentMethodsListFragment): PaymentSheetViewModel {
         return fragment.activityViewModels<PaymentSheetViewModel> {
-            PaymentSheetViewModel.Factory { fragment.requireActivity().application }
+            PaymentSheetViewModel.Factory(
+                { fragment.requireActivity().application },
+                { PaymentSheetFixtures.DEFAULT_ARGS }
+            )
         }.value
     }
 
     private fun fragmentViewModel(fragment: PaymentSheetPaymentMethodsListFragment): PaymentSheetPaymentMethodsListFragment.PaymentMethodsViewModel {
         return fragment.viewModels<PaymentSheetPaymentMethodsListFragment.PaymentMethodsViewModel>().value
+    }
+
+    private fun createScenario(): FragmentScenario<PaymentSheetPaymentMethodsListFragment> {
+        return launchFragmentInContainer<PaymentSheetPaymentMethodsListFragment>(
+            bundleOf(
+                PaymentSheetActivity.EXTRA_STARTER_ARGS to PaymentSheetFixtures.DEFAULT_ARGS
+            )
+        )
     }
 }
