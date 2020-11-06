@@ -61,7 +61,7 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         val starterArgs = this.starterArgs
         if (starterArgs == null) {
             setPaymentSheetResult(
-                PaymentSheet.CompletionStatus.Failed(
+                PaymentResult.Failed(
                     IllegalArgumentException("PaymentSheet started without arguments."),
                     null
                 )
@@ -79,7 +79,7 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         }
         viewModel.error.observe(this) {
             animateOut(
-                PaymentSheet.CompletionStatus.Failed(
+                PaymentResult.Failed(
                     it,
                     paymentIntent = viewModel.paymentIntent.value
                 )
@@ -188,7 +188,7 @@ internal class PaymentSheetActivity : AppCompatActivity() {
                         when (result.outcome) {
                             StripeIntentResult.Outcome.SUCCEEDED -> {
                                 animateOut(
-                                    PaymentSheet.CompletionStatus.Succeeded(result.intent)
+                                    PaymentResult.Succeeded(result.intent)
                                 )
                             }
                             else -> {
@@ -243,27 +243,32 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         }
     }
 
-    private fun animateOut(status: PaymentSheet.CompletionStatus) {
-        setPaymentSheetResult(status)
+    private fun animateOut(
+        paymentResult: PaymentResult
+    ) {
+        setPaymentSheetResult(paymentResult)
 
         // When the bottom sheet finishes animating to its new state,
         // the callback will finish the activity
         bottomSheetBehavior.state = STATE_HIDDEN
     }
 
-    private fun setPaymentSheetResult(status: PaymentSheet.CompletionStatus) {
-        val resultCode = when (status) {
-            is PaymentSheet.CompletionStatus.Succeeded -> {
+    private fun setPaymentSheetResult(
+        paymentResult: PaymentResult
+    ) {
+        val resultCode = when (paymentResult) {
+            is PaymentResult.Succeeded -> {
                 Activity.RESULT_OK
             }
-            is PaymentSheet.CompletionStatus.Cancelled,
-            is PaymentSheet.CompletionStatus.Failed -> {
+            is PaymentResult.Cancelled,
+            is PaymentResult.Failed -> {
                 Activity.RESULT_CANCELED
             }
         }
         setResult(
             resultCode,
-            Intent().putExtras(PaymentSheet.Result(status).toBundle())
+            Intent()
+                .putExtras(PaymentSheet.Result(paymentResult).toBundle())
         )
     }
 
@@ -282,7 +287,7 @@ internal class PaymentSheetActivity : AppCompatActivity() {
 
     private fun onUserCancel() {
         animateOut(
-            PaymentSheet.CompletionStatus.Cancelled(
+            PaymentResult.Cancelled(
                 viewModel.error.value,
                 paymentIntent = viewModel.paymentIntent.value
             )
