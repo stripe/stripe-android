@@ -150,8 +150,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
                 }
             )
         } else if (data != null && requestCode == StripeGooglePayLauncher.REQUEST_CODE) {
-            val googlePayResult = StripeGooglePayLauncher.Result.fromIntent(data) ?: return
-            when (googlePayResult) {
+            when (val googlePayResult = StripeGooglePayLauncher.Result.fromIntent(data)) {
                 is StripeGooglePayLauncher.Result.PaymentIntent -> {
                     eventReporter.onPaymentSuccess(PaymentSelection.GooglePay)
                     callback.onSuccess(googlePayResult.paymentIntentResult)

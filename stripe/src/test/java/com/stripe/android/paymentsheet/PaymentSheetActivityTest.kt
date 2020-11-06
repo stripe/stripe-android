@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.content.Context
 import android.content.Intent
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
@@ -27,7 +28,6 @@ import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
-import com.stripe.android.view.ActivityStarter
 import com.stripe.android.view.PaymentRelayActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -48,6 +48,7 @@ internal class PaymentSheetActivityTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
+    private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testCoroutineDispatcher = TestCoroutineDispatcher()
 
     private val paymentMethods = listOf(
@@ -63,7 +64,7 @@ internal class PaymentSheetActivityTest {
         stripeAccountId = null,
         stripeRepository = stripeRepository,
         paymentController = StripePaymentController(
-            ApplicationProvider.getApplicationContext(),
+            context,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeRepository,
             workContext = testCoroutineDispatcher
@@ -75,11 +76,10 @@ internal class PaymentSheetActivityTest {
         workContext = testCoroutineDispatcher
     )
 
-    private val intent = Intent(
-        ApplicationProvider.getApplicationContext(),
-        PaymentSheetActivity::class.java
-    ).putExtra(
-        ActivityStarter.Args.EXTRA,
+    private val contract = PaymentSheetContract()
+
+    private val intent = contract.createIntent(
+        context,
         PaymentSheetContract.Args(
             "client_secret",
             PaymentSheetFixtures.CONFIG_CUSTOMER
@@ -91,7 +91,7 @@ internal class PaymentSheetActivityTest {
         Dispatchers.setMain(testCoroutineDispatcher)
 
         PaymentConfiguration.init(
-            ApplicationProvider.getApplicationContext(),
+            context,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
     }
@@ -117,13 +117,11 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
             assertThat(
-                PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent)
+                contract.parseResult(0, shadowOf(activity).resultIntent)
             ).isEqualTo(
-                PaymentSheet.Result(
-                    PaymentResult.Cancelled(
-                        null,
-                        PAYMENT_INTENT
-                    )
+                PaymentResult.Cancelled(
+                    null,
+                    PAYMENT_INTENT
                 )
             )
         }
@@ -181,14 +179,13 @@ internal class PaymentSheetActivityTest {
             // animating out
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
+
             assertThat(
-                PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent)
+                contract.parseResult(0, shadowOf(activity).resultIntent)
             ).isEqualTo(
-                PaymentSheet.Result(
-                    PaymentResult.Cancelled(
-                        null,
-                        PAYMENT_INTENT
-                    )
+                PaymentResult.Cancelled(
+                    null,
+                    PAYMENT_INTENT
                 )
             )
         }
@@ -244,11 +241,9 @@ internal class PaymentSheetActivityTest {
 
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
-            assertThat(PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent))
+            assertThat(contract.parseResult(0, shadowOf(activity).resultIntent))
                 .isEqualTo(
-                    PaymentSheet.Result(
-                        PaymentResult.Succeeded(PAYMENT_INTENT)
-                    )
+                    PaymentResult.Succeeded(PAYMENT_INTENT)
                 )
         }
     }
@@ -260,7 +255,7 @@ internal class PaymentSheetActivityTest {
             stripeAccountId = null,
             stripeRepository = FakeStripeRepository(PAYMENT_INTENT, listOf()),
             paymentController = StripePaymentController(
-                ApplicationProvider.getApplicationContext(),
+                context,
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 stripeRepository,
                 workContext = testCoroutineDispatcher
@@ -292,13 +287,11 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
             assertThat(
-                PaymentSheet.Result.fromIntent(shadowOf(activity).resultIntent)
+                contract.parseResult(0, shadowOf(activity).resultIntent)
             ).isEqualTo(
-                PaymentSheet.Result(
-                    PaymentResult.Cancelled(
-                        null,
-                        PAYMENT_INTENT
-                    )
+                PaymentResult.Cancelled(
+                    null,
+                    PAYMENT_INTENT
                 )
             )
         }
