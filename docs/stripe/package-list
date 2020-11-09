@@ -7,6 +7,7 @@ com.stripe.android.exception
 com.stripe.android.model
 com.stripe.android.model.parsers
 com.stripe.android.model.wallets
+com.stripe.android.networking
 com.stripe.android.paymentsheet
 com.stripe.android.paymentsheet.model
 com.stripe.android.utils

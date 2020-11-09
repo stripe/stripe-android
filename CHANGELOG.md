@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 16.1.0 - unreleased
+## 16.1.0 - 2020-11-06
 * [#2930](https://github.com/stripe/stripe-android/pull/2930) Upgrade Android Gradle Plugin to `4.1.0`
 * [#2936](https://github.com/stripe/stripe-android/pull/2936) Upgrade Gradle to `6.7`
 * [#2955](https://github.com/stripe/stripe-android/pull/2955) Add support for UPI payment method

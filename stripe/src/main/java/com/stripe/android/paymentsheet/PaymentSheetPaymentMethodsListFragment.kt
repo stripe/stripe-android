@@ -9,8 +9,8 @@ import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetPaymentMethodsListBinding
-import com.stripe.android.paymentsheet.PaymentSheetViewModel.SheetMode
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.SheetMode
 
 internal class PaymentSheetPaymentMethodsListFragment : Fragment(
     R.layout.fragment_paymentsheet_payment_methods_list
