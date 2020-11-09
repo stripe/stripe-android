@@ -29,7 +29,10 @@ internal data class StripeResponse internal constructor(
     internal val isOk: Boolean = code == HttpURLConnection.HTTP_OK
     internal val isError: Boolean = code < 200 || code >= 300
 
-    internal val requestId: String? = getHeaderValue(REQUEST_ID_HEADER)?.firstOrNull()
+    internal val requestId: RequestId? = RequestId.fromString(
+        getHeaderValue(REQUEST_ID_HEADER)?.firstOrNull()
+    )
+
     private val contentType: String? = getHeaderValue(CONTENT_TYPE_HEADER)?.firstOrNull()
 
     internal val responseJson: JSONObject

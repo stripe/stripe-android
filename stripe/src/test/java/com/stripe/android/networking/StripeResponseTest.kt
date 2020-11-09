@@ -16,7 +16,9 @@ class StripeResponseTest {
         )
 
         assertThat(response.requestId)
-            .isEqualTo("req_12345")
+            .isEqualTo(
+                RequestId("req_12345")
+            )
     }
 
     @Test
@@ -28,7 +30,9 @@ class StripeResponseTest {
         )
 
         assertThat(response.requestId)
-            .isEqualTo("req_12345")
+            .isEqualTo(
+                RequestId("req_12345")
+            )
     }
 
     @Test
