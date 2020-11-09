@@ -996,7 +996,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         APIException::class
     )
     private fun handleApiError(response: StripeResponse) {
-        val requestId = response.requestId
+        val requestId = response.requestId?.value
         val responseCode = response.code
         val stripeError = StripeErrorJsonParser().parse(response.responseJson)
         when (responseCode) {
