@@ -96,6 +96,8 @@
             android:name=".activity.KlarnaSourceActivity" />
         <activity
             android:name=".activity.CardBrandsActivity" />
+        <activity
+            android:name=".activity.NetbankingPaymentActivity" />
 
         <activity android:name=".activity.SimplePaymentMethodConfirmationActivity" />
         <activity android:name=".activity.ConnectExampleActivity" />
