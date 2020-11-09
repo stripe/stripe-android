@@ -2,10 +2,18 @@ package com.stripe.example.activity
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.example.StripeFactory
 import com.stripe.example.activity.UpiPaymentActivity.Companion.EXTRA_CLIENT_SECRET
 import com.stripe.example.databinding.UpiWaitingActivityBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class UpiWaitingActivity : AppCompatActivity() {
     private val stripe by lazy { StripeFactory(application).create() }
@@ -23,19 +31,22 @@ class UpiWaitingActivity : AppCompatActivity() {
             return
         }
 
-        Thread(
-            Runnable {
-                var paymentIntent = stripe.retrievePaymentIntentSynchronous(clientSecret)
-                while (paymentIntent != null && paymentIntent.status == StripeIntent.Status.RequiresAction) {
-                    Thread.sleep(5000)
-                    paymentIntent = stripe.retrievePaymentIntentSynchronous(clientSecret)
-                }
-
-                if (paymentIntent != null) {
-                    print(paymentIntent.status)
-                    viewBinding.paymentStatus.text = paymentIntent.status.toString()
+        CoroutineScope(Dispatchers.IO).launch {
+            while (isActive) {
+                val paymentIntent = stripe.retrievePaymentIntentSynchronous(clientSecret)
+                if (paymentIntent?.status == StripeIntent.Status.Succeeded) {
+                    onSuccess(paymentIntent)
+                    cancel()
+                } else {
+                    delay(5000)
                 }
             }
-        ).start()
+        }
+    }
+
+    private suspend fun onSuccess(
+        paymentIntent: PaymentIntent
+    ) = withContext(Dispatchers.Main) {
+        viewBinding.paymentStatus.text = paymentIntent.status.toString()
     }
 }

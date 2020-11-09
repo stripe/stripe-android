@@ -87,4 +87,8 @@
     <string name="connect_example">Connect Example</string>
     <string name="simple_payment_method_example">Simple PaymentMethod Confirmation Example</string>
 
+    <!-- <UPI> -->
+    <string name="vpa_layout_hint">Virtual Payment Address (VPA)</string>
+    <string name="vpa_input_hint">something@stripeupi</string>
+
 </resources>

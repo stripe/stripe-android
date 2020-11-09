@@ -2,7 +2,7 @@ package com.stripe.example.activity
 
 import android.content.Intent
 import android.os.Bundle
-import com.stripe.android.ApiResultCallback
+import androidx.lifecycle.Observer
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
@@ -22,6 +22,7 @@ class UpiPaymentActivity : StripeIntentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
+        viewModel.status.observe(this, Observer(viewBinding.status::setText))
         viewBinding.submit.setOnClickListener {
             val params = PaymentMethodCreateParams.create(
                 upi = PaymentMethodCreateParams.Upi(
@@ -46,31 +47,16 @@ class UpiPaymentActivity : StripeIntentActivity() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        // Handle the result of stripe.confirmPayment
-        stripe.onPaymentResult(
-            requestCode,
-            data,
-            object : ApiResultCallback<PaymentIntentResult> {
-                override fun onSuccess(
-                    result: PaymentIntentResult
-                ) {
-                    val paymentIntent = result.intent
-                    startActivity(
-                        Intent(this@UpiPaymentActivity, UpiWaitingActivity::class.java)
-                            .putExtra(EXTRA_CLIENT_SECRET, paymentIntent.clientSecret)
-                    )
-                }
-
-                override fun onError(e: Exception) {
-                    // TODO: remove this print statement. Check what is the best way to handle this
-                    // To reach this path use vpa = payment.failure@stripeupi
-                    print("Payment failed")
-                }
-            }
+    override fun onConfirmSuccess(result: PaymentIntentResult) {
+        val paymentIntent = result.intent
+        startActivity(
+            Intent(this@UpiPaymentActivity, UpiWaitingActivity::class.java)
+                .putExtra(EXTRA_CLIENT_SECRET, paymentIntent.clientSecret)
         )
+    }
+
+    override fun onConfirmError(throwable: Throwable) {
+        viewModel.status.value += "\n\nException: " + throwable.message
     }
 
     internal companion object {
