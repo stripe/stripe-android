@@ -1,4 +1,4 @@
-package com.stripe.example.activity;
+package com.stripe.example.activity
 
 import android.content.Intent
 import android.os.Bundle
@@ -7,10 +7,8 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.model.StripeIntent
 import com.stripe.example.StripeFactory
 import com.stripe.example.databinding.UpiPaymentActivityBinding
-
 
 class UpiPaymentActivity : StripeIntentActivity() {
     private val stripe by lazy {
@@ -28,48 +26,54 @@ class UpiPaymentActivity : StripeIntentActivity() {
             val params = PaymentMethodCreateParams.create(
                 upi = PaymentMethodCreateParams.Upi(
                     vpa = viewBinding.vpa.text.toString()
-                ), billingDetails = PaymentMethod.BillingDetails(
-                name = "Jenny Rosen",
-                phone = "(555) 555-5555",
-                email = "jenny@example.com",
-                address = Address.Builder()
-                    .setCity("San Francisco")
-                    .setCountry("US")
-                    .setLine1("123 Market St")
-                    .setLine2("#345")
-                    .setPostalCode("94107")
-                    .setState("CA")
-                    .build()
-            )
+                ),
+                billingDetails = PaymentMethod.BillingDetails(
+                    name = "Jenny Rosen",
+                    phone = "(555) 555-5555",
+                    email = "jenny@example.com",
+                    address = Address.Builder()
+                        .setCity("San Francisco")
+                        .setCountry("US")
+                        .setLine1("123 Market St")
+                        .setLine2("#345")
+                        .setPostalCode("94107")
+                        .setState("CA")
+                        .build()
+                )
             )
 
             createAndConfirmPaymentIntent("in", params)
         }
-
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         // Handle the result of stripe.confirmPayment
-        stripe.onPaymentResult(requestCode, data, object : ApiResultCallback<PaymentIntentResult> {
-            override fun onSuccess(result: PaymentIntentResult) {
-                val paymentIntent = result.intent
-                startActivity(Intent(this@UpiPaymentActivity, UpiWaitingActivity::class.java)
-                    .putExtra(EXTRA_CLIENT_SECRET, paymentIntent.clientSecret))
-            }
+        stripe.onPaymentResult(
+            requestCode,
+            data,
+            object : ApiResultCallback<PaymentIntentResult> {
+                override fun onSuccess(
+                    result: PaymentIntentResult
+                ) {
+                    val paymentIntent = result.intent
+                    startActivity(
+                        Intent(this@UpiPaymentActivity, UpiWaitingActivity::class.java)
+                            .putExtra(EXTRA_CLIENT_SECRET, paymentIntent.clientSecret)
+                    )
+                }
 
-            override fun onError(e: Exception) {
-                // TODO: remove this print statement. Check what is the best way to handle this
-                // To reach this path use vpa = payment.failure@stripeupi
-                print("Payment failed")
+                override fun onError(e: Exception) {
+                    // TODO: remove this print statement. Check what is the best way to handle this
+                    // To reach this path use vpa = payment.failure@stripeupi
+                    print("Payment failed")
+                }
             }
-        })
+        )
     }
 
     internal companion object {
         const val EXTRA_CLIENT_SECRET = "extra_client_secret"
     }
-
-
 }

@@ -23,18 +23,19 @@ class UpiWaitingActivity : AppCompatActivity() {
             return
         }
 
-        Thread(Runnable {
-            var paymentIntent = stripe.retrievePaymentIntentSynchronous(clientSecret)
-            while(paymentIntent != null && paymentIntent.status == StripeIntent.Status.RequiresAction) {
-                Thread.sleep(5000)
-                paymentIntent = stripe.retrievePaymentIntentSynchronous(clientSecret)
-            }
+        Thread(
+            Runnable {
+                var paymentIntent = stripe.retrievePaymentIntentSynchronous(clientSecret)
+                while (paymentIntent != null && paymentIntent.status == StripeIntent.Status.RequiresAction) {
+                    Thread.sleep(5000)
+                    paymentIntent = stripe.retrievePaymentIntentSynchronous(clientSecret)
+                }
 
-            if (paymentIntent != null) {
-                print(paymentIntent.status)
-                viewBinding.paymentStatus.text = paymentIntent.status.toString()
+                if (paymentIntent != null) {
+                    print(paymentIntent.status)
+                    viewBinding.paymentStatus.text = paymentIntent.status.toString()
+                }
             }
-        }).start()
-
+        ).start()
     }
 }
