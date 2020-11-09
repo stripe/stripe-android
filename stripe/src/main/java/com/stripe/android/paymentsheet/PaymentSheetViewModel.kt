@@ -3,8 +3,6 @@ package com.stripe.android.paymentsheet
 import android.app.Activity
 import android.app.Application
 import android.content.Intent
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -13,9 +11,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_COLLAPSED
-import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
@@ -30,6 +25,7 @@ import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
+import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.view.AuthActivityStarter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
@@ -249,15 +245,6 @@ internal class PaymentSheetViewModel internal constructor(
 
         // User has no saved PM's
         AddPaymentMethodSheet
-    }
-
-    internal enum class SheetMode(
-        val height: Int,
-        @BottomSheetBehavior.State val behaviourState: Int
-    ) {
-        Full(MATCH_PARENT, STATE_EXPANDED),
-        FullCollapsed(MATCH_PARENT, STATE_COLLAPSED),
-        Wrapped(WRAP_CONTENT, STATE_COLLAPSED)
     }
 
     internal class Factory(
