@@ -33,12 +33,12 @@ class UpiPaymentActivity : StripeIntentActivity() {
                 phone = "(555) 555-5555",
                 email = "jenny@example.com",
                 address = Address.Builder()
-                    .setCity("Jaipur")
-                    .setCountry("IN")
+                    .setCity("San Francisco")
+                    .setCountry("US")
                     .setLine1("123 Market St")
                     .setLine2("#345")
-                    .setPostalCode("302033")
-                    .setState("RJ")
+                    .setPostalCode("94107")
+                    .setState("CA")
                     .build()
             )
             )
