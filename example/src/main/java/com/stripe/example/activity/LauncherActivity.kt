@@ -93,6 +93,10 @@ class LauncherActivity : AppCompatActivity() {
                 SofortPaymentMethodActivity::class.java
             ),
             Item(
+                "Upi Confirmation Example",
+                UpiPaymentActivity::class.java
+            ),
+            Item(
                 activity.getString(R.string.card_brands),
                 CardBrandsActivity::class.java
             ),
