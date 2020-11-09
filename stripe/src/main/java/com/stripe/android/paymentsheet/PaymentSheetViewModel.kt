@@ -40,7 +40,7 @@ internal class PaymentSheetViewModel internal constructor(
     private val stripeRepository: StripeRepository,
     private val paymentController: PaymentController,
     private val googlePayRepository: GooglePayRepository,
-    private val args: PaymentSheetActivityStarter.Args,
+    internal val args: PaymentSheetActivityStarter.Args,
     private val workContext: CoroutineContext
 ) : ViewModel() {
     private val mutableError = MutableLiveData<Throwable>()

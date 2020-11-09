@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.CheckBox
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -32,9 +33,12 @@ internal class PaymentSheetAddCardFragment : Fragment(R.layout.fragment_payments
         }
 
         val binding = FragmentPaymentsheetAddCardBinding.bind(view)
-        binding.cardMultilineWidget.setCardValidCallback { isValid, _ ->
+        val cardMultilineWidget = binding.cardMultilineWidget
+        val saveCardCheckbox = binding.saveCardCheckbox
+
+        cardMultilineWidget.setCardValidCallback { isValid, _ ->
             val selection = if (isValid) {
-                binding.cardMultilineWidget.paymentMethodCreateParams?.let {
+                cardMultilineWidget.paymentMethodCreateParams?.let {
                     PaymentSelection.New(it)
                 }
             } else {
@@ -43,7 +47,7 @@ internal class PaymentSheetAddCardFragment : Fragment(R.layout.fragment_payments
             activityViewModel.updateSelection(selection)
         }
 
-        binding.cardMultilineWidget.setCardInputListener(object : CardInputListener {
+        cardMultilineWidget.setCardInputListener(object : CardInputListener {
             override fun onFocusChange(focusField: CardInputListener.FocusField) {
                 // If the user focuses any card field, expand to full screen
                 activityViewModel.updateMode(SheetMode.Full)
@@ -59,19 +63,28 @@ internal class PaymentSheetAddCardFragment : Fragment(R.layout.fragment_payments
         // If we're launched in full expanded mode, focus the card number field
         // and show the keyboard automatically
         if (activityViewModel.sheetMode.value == SheetMode.Full) {
-            binding.cardMultilineWidget.cardNumberEditText.requestFocus()
+            cardMultilineWidget.cardNumberEditText.requestFocus()
             getSystemService(requireContext(), InputMethodManager::class.java)?.apply {
-                showSoftInput(binding.cardMultilineWidget.cardNumberEditText, InputMethodManager.SHOW_IMPLICIT)
+                showSoftInput(cardMultilineWidget.cardNumberEditText, InputMethodManager.SHOW_IMPLICIT)
             }
         }
 
         activityViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
-            binding.saveCardCheckbox.isEnabled = !isProcessing
-            binding.cardMultilineWidget.isEnabled = !isProcessing
+            saveCardCheckbox.isEnabled = !isProcessing
+            cardMultilineWidget.isEnabled = !isProcessing
         }
 
-        activityViewModel.shouldSavePaymentMethod = binding.saveCardCheckbox.isChecked
-        binding.saveCardCheckbox.setOnCheckedChangeListener { _, isChecked ->
+        setupSaveCardCheckbox(saveCardCheckbox)
+    }
+
+    private fun setupSaveCardCheckbox(saveCardCheckbox: CheckBox) {
+        saveCardCheckbox.visibility = when (activityViewModel.args) {
+            is PaymentSheetActivityStarter.Args.Default -> View.VISIBLE
+            is PaymentSheetActivityStarter.Args.Guest -> View.GONE
+        }
+
+        activityViewModel.shouldSavePaymentMethod = saveCardCheckbox.isShown && saveCardCheckbox.isChecked
+        saveCardCheckbox.setOnCheckedChangeListener { _, isChecked ->
             activityViewModel.shouldSavePaymentMethod = isChecked
         }
     }
