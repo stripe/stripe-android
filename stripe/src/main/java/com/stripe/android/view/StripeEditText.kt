@@ -182,8 +182,6 @@ open class StripeEditText @JvmOverloads constructor(
     private fun setHintSafely(hint: CharSequence) {
         runCatching {
             setHint(hint)
-        }.recover {
-            it
         }
     }
 

@@ -58,32 +58,37 @@ internal class EphemeralKeyManager(
             return
         }
         runCatching {
-            val ephemeralKey = EphemeralKeyJsonParser().parse(JSONObject(key))
-            this.ephemeralKey = ephemeralKey
-            listener.onKeyUpdate(ephemeralKey, operation)
-        }.recover {
-            val errorMessage = when (it) {
-                is JSONException -> {
-                    """
-                    Received an ephemeral key that could not be parsed. See https://stripe.com/docs/mobile/android/basic for more details.
-                    
-                    ${it.message}
-                    """.trimIndent()
-                }
-                else -> {
-                    """
-                    Received an invalid ephemeral key. See https://stripe.com/docs/mobile/android/basic for more details.
-                    
-                    ${it.message}
-                    """.trimIndent()
-                }
+            EphemeralKeyJsonParser().parse(JSONObject(key)).also {
+                this.ephemeralKey = it
             }
-            listener.onKeyError(
-                operation.id,
-                HttpURLConnection.HTTP_INTERNAL_ERROR,
-                errorMessage
-            )
-        }
+        }.fold(
+            onSuccess = { ephemeralKey ->
+                listener.onKeyUpdate(ephemeralKey, operation)
+            },
+            onFailure = {
+                val errorMessage = when (it) {
+                    is JSONException -> {
+                        """
+                        Received an ephemeral key that could not be parsed. See https://stripe.com/docs/mobile/android/basic for more details.
+                        
+                        ${it.message}
+                        """.trimIndent()
+                    }
+                    else -> {
+                        """
+                        Received an invalid ephemeral key. See https://stripe.com/docs/mobile/android/basic for more details.
+                        
+                        ${it.message}
+                        """.trimIndent()
+                    }
+                }
+                listener.onKeyError(
+                    operation.id,
+                    HttpURLConnection.HTTP_INTERNAL_ERROR,
+                    errorMessage
+                )
+            }
+        )
     }
 
     private fun updateKeyError(operationId: String, errorCode: Int, errorMessage: String) {

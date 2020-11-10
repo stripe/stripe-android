@@ -134,7 +134,7 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
         listener: IssuingCardPinRetrievalListener
     ) {
         runCatching {
-            val pin = runBlocking {
+            runBlocking {
                 stripeRepository.retrieveIssuingCardPin(
                     operation.cardId,
                     operation.verificationId,
@@ -142,10 +142,12 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
                     ephemeralKey.secret
                 )
             }
-            listener.onIssuingCardPinRetrieved(pin)
-        }.recover {
-            onRetrievePinError(it, listener)
-        }
+        }.fold(
+            onSuccess = listener::onIssuingCardPinRetrieved,
+            onFailure = {
+                onRetrievePinError(it, listener)
+            }
+        )
     }
 
     private fun onRetrievePinError(
@@ -217,10 +219,14 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
                     ephemeralKey.secret
                 )
             }
-            listener.onIssuingCardPinUpdated()
-        }.recover {
-            onUpdatePinError(it, listener)
-        }
+        }.fold(
+            onSuccess = {
+                listener.onIssuingCardPinUpdated()
+            },
+            onFailure = {
+                onUpdatePinError(it, listener)
+            }
+        )
     }
 
     private fun onUpdatePinError(throwable: Throwable, listener: IssuingCardPinUpdateListener) {
