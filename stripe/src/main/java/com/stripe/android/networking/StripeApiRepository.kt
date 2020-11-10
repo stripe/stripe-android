@@ -66,7 +66,7 @@ import kotlin.coroutines.CoroutineContext
  */
 internal class StripeApiRepository @JvmOverloads internal constructor(
     context: Context,
-    publishableKey: String,
+    private val publishableKey: String,
     private val appInfo: AppInfo? = null,
     private val logger: Logger = Logger.noop(),
     private val stripeApiRequestExecutor: ApiRequestExecutor = ApiRequestExecutor.Default(logger),
@@ -815,7 +815,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     ): String {
         fireAnalyticsRequest(
             AnalyticsEvent.IssuingRetrievePin,
-            ephemeralKeySecret
+            publishableKey
         )
 
         val response = makeApiRequest(
@@ -847,7 +847,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     ) {
         fireAnalyticsRequest(
             AnalyticsEvent.IssuingUpdatePin,
-            ephemeralKeySecret
+            publishableKey
         )
 
         makeApiRequest(
