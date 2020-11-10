@@ -132,8 +132,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             fireAnalyticsRequest(
                 analyticsDataFactory.createPaymentIntentConfirmationParams(
                     paymentMethodType
-                ),
-                options.apiKey
+                )
             )
 
             return fetchStripeModel(
@@ -168,8 +167,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
         fireFingerprintRequest()
         fireAnalyticsRequest(
-            analyticsDataFactory.createPaymentIntentRetrieveParams(paymentIntentId),
-            options.apiKey
+            analyticsDataFactory.createPaymentIntentRetrieveParams(paymentIntentId)
         )
 
         try {
@@ -202,7 +200,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options
     ): PaymentIntent? {
         fireFingerprintRequest()
-        fireAnalyticsRequest(AnalyticsEvent.PaymentIntentCancelSource, options.apiKey)
+        fireAnalyticsRequest(AnalyticsEvent.PaymentIntentCancelSource)
 
         try {
             return fetchStripeModel(
@@ -247,8 +245,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             analyticsDataFactory.createSetupIntentConfirmationParams(
                 confirmSetupIntentParams.paymentMethodCreateParams?.typeCode,
                 setupIntentId
-            ),
-            options.apiKey
+            )
         )
 
         try {
@@ -295,8 +292,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             fireAnalyticsRequest(
                 analyticsDataFactory.createSetupIntentRetrieveParams(
                     setupIntentId
-                ),
-                options.apiKey
+                )
             )
 
             return fetchStripeModel(
@@ -327,7 +323,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         sourceId: String,
         options: ApiRequest.Options
     ): SetupIntent? {
-        fireAnalyticsRequest(AnalyticsEvent.SetupIntentCancelSource, options.apiKey)
+        fireAnalyticsRequest(AnalyticsEvent.SetupIntentCancelSource)
 
         try {
             return fetchStripeModel(
@@ -368,8 +364,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             analyticsDataFactory.createSourceCreationParams(
                 sourceParams.type,
                 sourceParams.attribution
-            ),
-            options.apiKey
+            )
         )
 
         try {
@@ -410,8 +405,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         val apiUrl = getRetrieveSourceApiUrl(sourceId)
 
         fireAnalyticsRequest(
-            analyticsDataFactory.createSourceRetrieveParams(sourceId),
-            options.apiKey
+            analyticsDataFactory.createSourceRetrieveParams(sourceId)
         )
 
         try {
@@ -460,8 +454,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     paymentMethod?.id,
                     paymentMethod?.type,
                     productUsageTokens = paymentMethodCreateParams.attribution
-                ),
-                options.apiKey
+                )
             )
 
             return paymentMethod
@@ -499,8 +492,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             analyticsDataFactory.createTokenCreationParams(
                 productUsageTokens = tokenParams.attribution,
                 tokenType = tokenParams.tokenType
-            ),
-            options.apiKey
+            )
         )
 
         return fetchStripeModel(
@@ -536,8 +528,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             analyticsDataFactory.createAddSourceParams(
                 productUsageTokens,
                 sourceType
-            ),
-            publishableKey
+            )
         )
 
         return fetchStripeModel(
@@ -568,8 +559,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         requestOptions: ApiRequest.Options
     ): Source? {
         fireAnalyticsRequest(
-            analyticsDataFactory.createDeleteSourceParams(productUsageTokens),
-            publishableKey
+            analyticsDataFactory.createDeleteSourceParams(productUsageTokens)
         )
 
         return fetchStripeModel(
@@ -601,8 +591,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         fireFingerprintRequest()
         fireAnalyticsRequest(
             analyticsDataFactory
-                .createAttachPaymentMethodParams(productUsageTokens),
-            publishableKey
+                .createAttachPaymentMethodParams(productUsageTokens)
         )
 
         return fetchStripeModel(
@@ -633,8 +622,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     ): PaymentMethod? {
         fireAnalyticsRequest(
             analyticsDataFactory
-                .createDetachPaymentMethodParams(productUsageTokens),
-            publishableKey
+                .createDetachPaymentMethodParams(productUsageTokens)
         )
 
         return fetchStripeModel(
@@ -676,8 +664,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             analyticsDataFactory.createParams(
                 AnalyticsEvent.CustomerRetrievePaymentMethods,
                 productUsageTokens = productUsageTokens
-            ),
-            publishableKey
+            )
         )
 
         return try {
@@ -713,8 +700,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 event = AnalyticsEvent.CustomerSetDefaultSource,
                 productUsageTokens = productUsageTokens,
                 sourceType = sourceType
-            ),
-            publishableKey
+            )
         )
 
         return fetchStripeModel(
@@ -748,8 +734,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             analyticsDataFactory.createParams(
                 AnalyticsEvent.CustomerSetShippingInfo,
                 productUsageTokens = productUsageTokens
-            ),
-            publishableKey
+            )
         )
 
         return fetchStripeModel(
@@ -781,8 +766,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             analyticsDataFactory.createParams(
                 AnalyticsEvent.CustomerRetrieve,
                 productUsageTokens = productUsageTokens
-            ),
-            requestOptions.apiKey
+            )
         )
 
         return fetchStripeModel(
@@ -812,8 +796,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         ephemeralKeySecret: String
     ): String {
         fireAnalyticsRequest(
-            AnalyticsEvent.IssuingRetrievePin,
-            publishableKey
+            AnalyticsEvent.IssuingRetrievePin
         )
 
         val response = makeApiRequest(
@@ -844,8 +827,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         ephemeralKeySecret: String
     ) {
         fireAnalyticsRequest(
-            AnalyticsEvent.IssuingUpdatePin,
-            publishableKey
+            AnalyticsEvent.IssuingUpdatePin
         )
 
         makeApiRequest(
@@ -893,8 +875,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             }
         }.onFailure {
             fireAnalyticsRequest(
-                AnalyticsEvent.CardMetadataLoadFailure,
-                options.apiKey
+                AnalyticsEvent.CardMetadataLoadFailure
             )
         }.getOrNull()
     }
@@ -912,8 +893,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             analyticsDataFactory.createAuthParams(
                 AnalyticsEvent.Auth3ds2Start,
                 stripeIntentId
-            ),
-            requestOptions.apiKey
+            )
         )
 
         val response = makeApiRequest(
@@ -951,7 +931,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         val response = makeFileUploadRequest(
             FileUploadRequest(fileParams, requestOptions, appInfo)
         )
-        fireAnalyticsRequest(AnalyticsEvent.FileCreate, requestOptions.apiKey)
+        fireAnalyticsRequest(AnalyticsEvent.FileCreate)
         return StripeFileJsonParser().parse(response.responseJson)
     }
 
@@ -1123,26 +1103,19 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     private fun fireAnalyticsRequest(
-        event: AnalyticsEvent,
-        publishableKey: String
+        event: AnalyticsEvent
     ) {
         fireAnalyticsRequest(
-            analyticsDataFactory.createParams(event),
-            publishableKey
+            analyticsDataFactory.createParams(event)
         )
     }
 
     @VisibleForTesting
     internal fun fireAnalyticsRequest(
-        params: Map<String, Any>,
-        publishableKey: String
+        params: Map<String, Any>
     ) {
         makeAnalyticsRequest(
-            analyticsRequestFactory.create(
-                params,
-                ApiRequest.Options(publishableKey),
-                appInfo
-            )
+            analyticsRequestFactory.create(params)
         )
     }
 

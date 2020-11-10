@@ -192,8 +192,7 @@ internal class StripePaymentController internal constructor(
                 analyticsDataFactory.createAuthSourceParams(
                     AnalyticsEvent.AuthSourceStart,
                     source.id
-                ),
-                requestOptions
+                )
             )
         )
 
@@ -232,8 +231,7 @@ internal class StripePaymentController internal constructor(
                     analyticsDataFactory.createAuthSourceParams(
                         AnalyticsEvent.AuthSourceRedirect,
                         source.id
-                    ),
-                    requestOptions
+                    )
                 )
             )
 
@@ -424,8 +422,7 @@ internal class StripePaymentController internal constructor(
                 analyticsDataFactory.createAuthSourceParams(
                     AnalyticsEvent.AuthSourceResult,
                     sourceId
-                ),
-                requestOptions
+                )
             )
         )
 
@@ -675,8 +672,7 @@ internal class StripePaymentController internal constructor(
                             analyticsDataFactory.createAuthParams(
                                 AnalyticsEvent.Auth3ds2Fingerprint,
                                 stripeIntent.id.orEmpty()
-                            ),
-                            requestOptions
+                            )
                         )
                     )
                     try {
@@ -696,8 +692,7 @@ internal class StripePaymentController internal constructor(
                             analyticsDataFactory.createAuthParams(
                                 AnalyticsEvent.Auth3ds1Sdk,
                                 stripeIntent.id.orEmpty()
-                            ),
-                            requestOptions
+                            )
                         )
                     )
                     beginWebAuth(
@@ -717,8 +712,7 @@ internal class StripePaymentController internal constructor(
                             analyticsDataFactory.createAuthParams(
                                 AnalyticsEvent.AuthRedirect,
                                 stripeIntent.id.orEmpty()
-                            ),
-                            requestOptions
+                            )
                         )
                     )
 
@@ -744,8 +738,7 @@ internal class StripePaymentController internal constructor(
                             analyticsDataFactory.createAuthParams(
                                 AnalyticsEvent.AuthRedirect,
                                 stripeIntent.id.orEmpty()
-                            ),
-                            requestOptions
+                            )
                         )
                     )
 
@@ -940,8 +933,7 @@ internal class StripePaymentController internal constructor(
                         analyticsDataFactory.createAuthParams(
                             AnalyticsEvent.Auth3ds2Fallback,
                             stripeIntent.id.orEmpty()
-                        ),
-                        requestOptions
+                        )
                     )
                 )
                 beginWebAuth(
@@ -991,8 +983,7 @@ internal class StripePaymentController internal constructor(
                     analyticsDataFactory.createAuthParams(
                         AnalyticsEvent.Auth3ds2Frictionless,
                         stripeIntent.id.orEmpty()
-                    ),
-                    requestOptions
+                    )
                 )
             )
             paymentRelayStarter.start(PaymentRelayStarter.Args.create(stripeIntent))
@@ -1058,8 +1049,7 @@ internal class StripePaymentController internal constructor(
                         AnalyticsEvent.Auth3ds2ChallengeCompleted,
                         stripeIntent.id.orEmpty(),
                         uiTypeCode
-                    ),
-                    requestOptions
+                    )
                 )
             )
             notifyCompletion(onReceiverCompleted)
@@ -1076,8 +1066,7 @@ internal class StripePaymentController internal constructor(
                         AnalyticsEvent.Auth3ds2ChallengeCanceled,
                         stripeIntent.id.orEmpty(),
                         uiTypeCode
-                    ),
-                    requestOptions
+                    )
                 )
             )
             notifyCompletion(onReceiverCompleted)
@@ -1094,8 +1083,7 @@ internal class StripePaymentController internal constructor(
                         AnalyticsEvent.Auth3ds2ChallengeTimedOut,
                         stripeIntent.id.orEmpty(),
                         uiTypeCode
-                    ),
-                    requestOptions
+                    )
                 )
             )
             notifyCompletion(onReceiverCompleted)
@@ -1111,8 +1099,7 @@ internal class StripePaymentController internal constructor(
                     analyticsDataFactory.create3ds2ChallengeErrorParams(
                         stripeIntent.id.orEmpty(),
                         protocolErrorEvent
-                    ),
-                    requestOptions
+                    )
                 )
             )
             notifyCompletion(onReceiverCompleted)
@@ -1128,8 +1115,7 @@ internal class StripePaymentController internal constructor(
                     analyticsDataFactory.create3ds2ChallengeErrorParams(
                         stripeIntent.id.orEmpty(),
                         runtimeErrorEvent
-                    ),
-                    requestOptions
+                    )
                 )
             )
             notifyCompletion(onReceiverCompleted)
@@ -1142,8 +1128,7 @@ internal class StripePaymentController internal constructor(
                         AnalyticsEvent.Auth3ds2ChallengePresented,
                         stripeIntent.id.orEmpty(),
                         transaction.initialChallengeUiType.orEmpty()
-                    ),
-                    requestOptions
+                    )
                 )
             )
 

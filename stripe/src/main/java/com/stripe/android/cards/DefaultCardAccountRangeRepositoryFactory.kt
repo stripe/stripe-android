@@ -69,8 +69,7 @@ internal class DefaultCardAccountRangeRepositoryFactory(
                     DefaultCardAccountRangeStore(appContext),
                     AnalyticsRequestExecutor.Default(),
                     AnalyticsRequest.Factory(),
-                    AnalyticsDataFactory(appContext, publishableKey),
-                    publishableKey
+                    AnalyticsDataFactory(appContext, publishableKey)
                 )
             },
             onFailure = {
@@ -88,8 +87,7 @@ internal class DefaultCardAccountRangeRepositoryFactory(
                 AnalyticsDataFactory(
                     appContext,
                     publishableKey
-                ).createParams(event),
-                ApiRequest.Options(publishableKey)
+                ).createParams(event)
             )
         )
     }

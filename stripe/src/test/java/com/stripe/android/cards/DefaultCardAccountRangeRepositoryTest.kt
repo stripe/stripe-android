@@ -209,8 +209,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
             store,
             { },
             AnalyticsRequest.Factory(),
-            AnalyticsDataFactory(application, publishableKey),
-            publishableKey
+            AnalyticsDataFactory(application, publishableKey)
         )
     }
 

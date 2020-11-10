@@ -35,7 +35,6 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.networking.AnalyticsDataFactory
 import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.testharness.ViewTestUtils
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
@@ -85,7 +84,6 @@ internal class CardNumberEditTextTest {
     private val analyticsRequestExecutor = AnalyticsRequestExecutor {}
     private val analyticsRequestFactory = AnalyticsRequest.Factory()
     private val analyticsDataFactory = AnalyticsDataFactory(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
-    private val publishableKeySupplier = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY }
 
     private val cardNumberEditText = CardNumberEditText(
         context,
@@ -93,8 +91,7 @@ internal class CardNumberEditTextTest {
         cardAccountRangeRepository = cardAccountRangeRepository,
         analyticsRequestExecutor = analyticsRequestExecutor,
         analyticsRequestFactory = analyticsRequestFactory,
-        analyticsDataFactory = analyticsDataFactory,
-        publishableKeySupplier = publishableKeySupplier
+        analyticsDataFactory = analyticsDataFactory
     ).also {
         it.completionCallback = completionCallback
         it.brandChangeCallback = brandChangeCallback
@@ -263,8 +260,7 @@ internal class CardNumberEditTextTest {
             cardAccountRangeRepository = NullCardAccountRangeRepository(),
             analyticsRequestExecutor = analyticsRequestExecutor,
             analyticsRequestFactory = analyticsRequestFactory,
-            analyticsDataFactory = analyticsDataFactory,
-            publishableKeySupplier = publishableKeySupplier
+            analyticsDataFactory = analyticsDataFactory
         )
 
         var callbacks = 0
@@ -296,8 +292,7 @@ internal class CardNumberEditTextTest {
             },
             analyticsRequestExecutor = analyticsRequestExecutor,
             analyticsRequestFactory = analyticsRequestFactory,
-            analyticsDataFactory = analyticsDataFactory,
-            publishableKeySupplier = publishableKeySupplier
+            analyticsDataFactory = analyticsDataFactory
         )
 
         var callbacks = 0
@@ -329,8 +324,7 @@ internal class CardNumberEditTextTest {
             },
             analyticsRequestExecutor = analyticsRequestExecutor,
             analyticsRequestFactory = analyticsRequestFactory,
-            analyticsDataFactory = analyticsDataFactory,
-            publishableKeySupplier = publishableKeySupplier
+            analyticsDataFactory = analyticsDataFactory
         )
 
         cardNumberEditText.setText("6216828050000000000")
@@ -348,8 +342,7 @@ internal class CardNumberEditTextTest {
             cardAccountRangeRepository = NullCardAccountRangeRepository(),
             analyticsRequestExecutor = analyticsRequestExecutor,
             analyticsRequestFactory = analyticsRequestFactory,
-            analyticsDataFactory = analyticsDataFactory,
-            publishableKeySupplier = publishableKeySupplier
+            analyticsDataFactory = analyticsDataFactory
         )
 
         cardNumberEditText.setText(UNIONPAY_NO_SPACES)
@@ -709,8 +702,7 @@ internal class CardNumberEditTextTest {
                         cardAccountRangeRepository = DelayedCardAccountRangeRepository(),
                         analyticsRequestExecutor = analyticsRequestExecutor,
                         analyticsRequestFactory = analyticsRequestFactory,
-                        analyticsDataFactory = analyticsDataFactory,
-                        publishableKeySupplier = publishableKeySupplier
+                        analyticsDataFactory = analyticsDataFactory
                     )
 
                     val root = activity.findViewById<ViewGroup>(R.id.add_payment_method_card).also {
@@ -747,8 +739,7 @@ internal class CardNumberEditTextTest {
             },
             analyticsRequestExecutor = analyticsRequestExecutor,
             analyticsRequestFactory = analyticsRequestFactory,
-            analyticsDataFactory = analyticsDataFactory,
-            publishableKeySupplier = publishableKeySupplier
+            analyticsDataFactory = analyticsDataFactory
         )
 
         cardNumberEditText.setText(VISA_BIN)
@@ -797,8 +788,7 @@ internal class CardNumberEditTextTest {
             },
             analyticsRequestExecutor = analyticsRequestExecutor,
             analyticsRequestFactory = analyticsRequestFactory,
-            analyticsDataFactory = analyticsDataFactory,
-            publishableKeySupplier = publishableKeySupplier
+            analyticsDataFactory = analyticsDataFactory
         )
 
         // 620000 - valid BIN, call repo
@@ -859,8 +849,7 @@ internal class CardNumberEditTextTest {
                 analyticsRequests.add(it)
             },
             analyticsRequestFactory = analyticsRequestFactory,
-            analyticsDataFactory = analyticsDataFactory,
-            publishableKeySupplier = publishableKeySupplier
+            analyticsDataFactory = analyticsDataFactory
         )
         cardNumberEditText.setText(UNIONPAY_NO_SPACES)
         idleLooper()
@@ -868,28 +857,6 @@ internal class CardNumberEditTextTest {
             .hasSize(1)
         assertThat(analyticsRequests.first().params["event"])
             .isEqualTo("stripe_android.card_metadata_loaded_too_slow")
-    }
-
-    @Test
-    fun `onCardMetadataLoadedTooSlow() when publishable key is unavailable uses undefined publishable key`() {
-        val analyticsRequests = mutableListOf<AnalyticsRequest>()
-
-        CardNumberEditText(
-            context,
-            workContext = testDispatcher,
-            cardAccountRangeRepository = cardAccountRangeRepository,
-            analyticsRequestExecutor = {
-                analyticsRequests.add(it)
-            },
-            analyticsRequestFactory = analyticsRequestFactory,
-            analyticsDataFactory = analyticsDataFactory,
-            publishableKeySupplier = {
-                throw RuntimeException()
-            }
-        ).onCardMetadataLoadedTooSlow()
-
-        assertThat(analyticsRequests.first().options.apiKey)
-            .isEqualTo(ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY)
     }
 
     private fun verifyCardBrandBin(
