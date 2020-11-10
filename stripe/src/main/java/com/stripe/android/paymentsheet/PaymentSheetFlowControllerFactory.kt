@@ -36,8 +36,7 @@ internal class PaymentSheetFlowControllerFactory(
     ) : this(
         StripeApiRepository(
             context,
-            config.publishableKey,
-            workContext = workContext
+            config.publishableKey
         ),
         config,
         PaymentSessionPrefs.Default(context),
