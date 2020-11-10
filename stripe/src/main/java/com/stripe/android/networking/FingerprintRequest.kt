@@ -9,11 +9,11 @@ internal class FingerprintRequest(
     override val params: Map<String, Any>,
     guid: String
 ) : StripeRequest() {
-    override val method: Method = Method.POST
-    override val baseUrl: String = URL
-    override val mimeType: MimeType = MimeType.Json
-    override val headersFactory: RequestHeadersFactory = RequestHeadersFactory.Default(
-        mapOf("Cookie" to "m=$guid")
+    override val method = Method.POST
+    override val baseUrl = URL
+    override val mimeType = MimeType.Json
+    override val headersFactory = RequestHeadersFactory.Fingerprint(
+        guid = guid
     )
 
     override val body: String
