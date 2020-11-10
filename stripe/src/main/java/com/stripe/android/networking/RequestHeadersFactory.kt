@@ -100,6 +100,11 @@ internal sealed class RequestHeadersFactory {
         }
     }
 
+    object Analytics : RequestHeadersFactory() {
+        override val userAgent = getUserAgent(Stripe.VERSION)
+        override val extraHeaders = emptyMap<String, String>()
+    }
+
     internal companion object {
         internal fun getUserAgent(sdkVersion: String = Stripe.VERSION) = "Stripe/v1 $sdkVersion"
 

@@ -6,7 +6,6 @@ import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.AppInfoFixtures
 import com.stripe.android.Logger
 import com.stripe.android.Stripe
 import com.stripe.android.model.PaymentMethod
@@ -30,9 +29,7 @@ class AnalyticsRequestTest {
                     "pm_12345",
                     PaymentMethod.Type.Card,
                     emptySet()
-                ),
-            options = ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-            appInfo = AppInfoFixtures.DEFAULT
+                )
         )
         assertThat(analyticsRequest.headers)
             .isEqualTo(
@@ -63,8 +60,7 @@ class AnalyticsRequestTest {
                     "pm_12345",
                     PaymentMethod.Type.Card,
                     emptySet()
-                ),
-            ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                )
         )
 
         verify(logger).info(
