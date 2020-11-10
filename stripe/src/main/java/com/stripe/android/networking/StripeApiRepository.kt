@@ -18,10 +18,12 @@ import com.stripe.android.exception.CardException
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.exception.PermissionException
 import com.stripe.android.exception.RateLimitException
+import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.Complete3ds2Result
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.Customer
+import com.stripe.android.model.FpxBankStatuses
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -50,8 +52,6 @@ import com.stripe.android.model.parsers.Stripe3ds2AuthResultJsonParser
 import com.stripe.android.model.parsers.StripeFileJsonParser
 import com.stripe.android.model.parsers.TokenJsonParser
 import com.stripe.android.utils.StripeUrlUtils
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -59,7 +59,6 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import java.security.Security
 import java.util.Locale
-import kotlin.coroutines.CoroutineContext
 
 /**
  * An implementation of [StripeRepository] that makes network requests to the Stripe API.
@@ -77,7 +76,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     private val analyticsDataFactory: AnalyticsDataFactory =
         AnalyticsDataFactory(context, publishableKey),
     private val fingerprintParamsUtils: FingerprintParamsUtils = FingerprintParamsUtils(),
-    private val workContext: CoroutineContext = Dispatchers.IO,
     apiVersion: String = ApiVersion.get().code,
     sdkVersion: String = Stripe.VERSION
 ) : StripeRepository {
@@ -864,8 +862,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
     override suspend fun getFpxBankStatus(
         options: ApiRequest.Options
-    ) = withContext(workContext) {
-        makeApiRequest(
+    ): FpxBankStatuses {
+        return makeApiRequest(
             apiRequestFactory.createGet(
                 getApiUrl("fpx/bank_statuses"),
 
@@ -882,8 +880,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun getCardMetadata(
         bin: Bin,
         options: ApiRequest.Options
-    ) = withContext(workContext) {
-        runCatching {
+    ): CardMetadata? {
+        return runCatching {
             makeApiRequest(
                 apiRequestFactory.createGet(
                     getEdgeUrl("card-metadata"),
