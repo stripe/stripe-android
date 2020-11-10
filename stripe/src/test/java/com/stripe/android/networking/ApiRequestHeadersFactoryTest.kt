@@ -105,6 +105,17 @@ class ApiRequestHeadersFactoryTest {
             )
     }
 
+    @Test
+    fun `Fingerprint#create() should return expected map`() {
+        val guid = UUID.randomUUID().toString()
+        val headers = RequestHeadersFactory.Fingerprint(guid).create()
+        assertThat(
+            headers
+        ).containsKey("User-Agent")
+        assertThat(headers["Cookie"])
+            .isEqualTo("m=$guid")
+    }
+
     private fun createHeaders(
         locale: Locale = Locale.getDefault(),
         options: ApiRequest.Options = OPTIONS,

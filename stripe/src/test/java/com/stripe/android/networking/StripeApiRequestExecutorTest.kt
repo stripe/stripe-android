@@ -5,6 +5,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.io.ByteArrayOutputStream
 import java.io.UnsupportedEncodingException
+import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
@@ -17,7 +18,9 @@ class StripeApiRequestExecutorTest {
             override val baseUrl: String = ApiRequest.API_HOST
             override val params: Map<String, *>? = null
             override val mimeType: MimeType = MimeType.Form
-            override val headersFactory = RequestHeadersFactory.Default()
+            override val headersFactory = RequestHeadersFactory.Fingerprint(
+                UUID.randomUUID().toString()
+            )
 
             override val body: String
                 get() {
