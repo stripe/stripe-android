@@ -34,7 +34,7 @@ internal class BuyButton @JvmOverloads constructor(
 
     private val currencyFormatter = CurrencyFormatter()
 
-    private val mutableCompletedAnimation = MutableLiveData<ViewState.Completed>(null)
+    private val mutableCompletedAnimation = MutableLiveData<ViewState.Completed>()
     internal val completedAnimation = mutableCompletedAnimation.distinctUntilChanged()
 
     init {
