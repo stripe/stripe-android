@@ -19,7 +19,7 @@ internal class FpxViewModel internal constructor(
     internal var selectedPosition: Int? = null
 
     @JvmSynthetic
-    internal fun getFpxBankStatues() = liveData<FpxBankStatuses> {
+    internal fun getFpxBankStatues() = liveData {
         emit(
             runCatching {
                 stripeRepository.getFpxBankStatus(ApiRequest.Options(publishableKey))

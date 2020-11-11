@@ -839,18 +839,21 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun getFpxBankStatus(
         options: ApiRequest.Options
     ): FpxBankStatuses {
-        return makeApiRequest(
-            apiRequestFactory.createGet(
-                getApiUrl("fpx/bank_statuses"),
+        return runCatching {
+            requireNotNull(
+                fetchStripeModel(
+                    apiRequestFactory.createGet(
+                        getApiUrl("fpx/bank_statuses"),
 
-                // don't pass connected account
-                options.copy(stripeAccount = null),
+                        // don't pass connected account
+                        options.copy(stripeAccount = null),
 
-                mapOf("account_holder_type" to "individual")
+                        mapOf("account_holder_type" to "individual")
+                    ),
+                    FpxBankStatusesJsonParser()
+                )
             )
-        ).let {
-            FpxBankStatusesJsonParser().parse(it.responseJson)
-        }
+        }.getOrDefault(FpxBankStatuses())
     }
 
     override suspend fun getCardMetadata(
@@ -858,15 +861,14 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options
     ): CardMetadata? {
         return runCatching {
-            makeApiRequest(
+            fetchStripeModel(
                 apiRequestFactory.createGet(
                     getEdgeUrl("card-metadata"),
                     options.copy(stripeAccount = null),
                     mapOf("key" to options.apiKey, "bin_prefix" to bin.value)
-                )
-            ).let {
-                CardMetadataJsonParser(bin).parse(it.responseJson)
-            }
+                ),
+                CardMetadataJsonParser(bin)
+            )
         }.onFailure {
             fireAnalyticsRequest(
                 AnalyticsEvent.CardMetadataLoadFailure
@@ -882,7 +884,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         authParams: Stripe3ds2AuthParams,
         stripeIntentId: String,
         requestOptions: ApiRequest.Options
-    ): Stripe3ds2AuthResult {
+    ): Stripe3ds2AuthResult? {
         fireAnalyticsRequest(
             analyticsDataFactory.createAuthParams(
                 AnalyticsEvent.Auth3ds2Start,
@@ -890,15 +892,14 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             )
         )
 
-        val response = makeApiRequest(
+        return fetchStripeModel(
             apiRequestFactory.createPost(
                 getApiUrl("3ds2/authenticate"),
                 requestOptions,
                 authParams.toParamMap()
-            )
+            ),
+            Stripe3ds2AuthResultJsonParser()
         )
-
-        return Stripe3ds2AuthResultJsonParser().parse(response.responseJson)
     }
 
     override suspend fun complete3ds2Auth(

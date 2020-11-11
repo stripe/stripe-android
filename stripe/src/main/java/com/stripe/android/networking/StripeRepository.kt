@@ -308,7 +308,7 @@ internal interface StripeRepository {
         authParams: Stripe3ds2AuthParams,
         stripeIntentId: String,
         requestOptions: ApiRequest.Options
-    ): Stripe3ds2AuthResult
+    ): Stripe3ds2AuthResult?
 
     suspend fun complete3ds2Auth(
         sourceId: String,
