@@ -135,12 +135,16 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
     ) {
         runCatching {
             runBlocking {
-                stripeRepository.retrieveIssuingCardPin(
-                    operation.cardId,
-                    operation.verificationId,
-                    operation.userOneTimeCode,
-                    ephemeralKey.secret
-                )
+                requireNotNull(
+                    stripeRepository.retrieveIssuingCardPin(
+                        operation.cardId,
+                        operation.verificationId,
+                        operation.userOneTimeCode,
+                        ephemeralKey.secret
+                    )
+                ) {
+                    "Could not retrieve issuing card PIN."
+                }
             }
         }.fold(
             onSuccess = listener::onIssuingCardPinRetrieved,
