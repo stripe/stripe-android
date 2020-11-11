@@ -12,15 +12,11 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
-import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HIDDEN
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.SheetMode
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 internal class PaymentSheetActivity : AppCompatActivity() {
     @VisibleForTesting
@@ -33,6 +29,14 @@ internal class PaymentSheetActivity : AppCompatActivity() {
     @VisibleForTesting
     internal val bottomSheetBehavior by lazy {
         BottomSheetBehavior.from(viewBinding.bottomSheet)
+    }
+
+    private val bottomSheetController: BottomSheetController by lazy {
+        BottomSheetController(
+            bottomSheetBehavior = bottomSheetBehavior,
+            sheetModeLiveData = viewModel.sheetMode,
+            lifecycleScope
+        )
     }
 
     @VisibleForTesting
@@ -104,12 +108,17 @@ internal class PaymentSheetActivity : AppCompatActivity() {
             viewBinding.bottomSheet.layoutParams = viewBinding.bottomSheet.layoutParams.apply {
                 height = mode.height
             }
-            if (bottomSheetBehavior.state != STATE_HIDDEN) {
-                bottomSheetBehavior.state = mode.behaviourState
-            }
+
+            bottomSheetController.updateState(mode)
         }
 
-        setupBottomSheet()
+        bottomSheetController.shouldFinish.observe(this) { shouldFinish ->
+            if (shouldFinish) {
+                finish()
+            }
+        }
+        bottomSheetController.setup()
+
         setupBuyButton()
         supportFragmentManager.commit {
             replace(
@@ -219,38 +228,11 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupBottomSheet() {
-        bottomSheetBehavior.peekHeight = BottomSheetBehavior.PEEK_HEIGHT_AUTO
-        bottomSheetBehavior.isHideable = true
-        // Start hidden and then animate in after delay
-        bottomSheetBehavior.state = STATE_HIDDEN
-
-        lifecycleScope.launch {
-            delay(ANIMATE_IN_DELAY)
-            bottomSheetBehavior.state = viewModel.sheetMode.value?.behaviourState ?: STATE_EXPANDED
-            bottomSheetBehavior.addBottomSheetCallback(
-                object : BottomSheetBehavior.BottomSheetCallback() {
-                    override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                    }
-
-                    override fun onStateChanged(bottomSheet: View, newState: Int) {
-                        if (newState == STATE_HIDDEN) {
-                            finish()
-                        }
-                    }
-                }
-            )
-        }
-    }
-
     private fun animateOut(
         paymentResult: PaymentResult
     ) {
         setPaymentSheetResult(paymentResult)
-
-        // When the bottom sheet finishes animating to its new state,
-        // the callback will finish the activity
-        bottomSheetBehavior.state = STATE_HIDDEN
+        bottomSheetController.hide()
     }
 
     private fun setPaymentSheetResult(
