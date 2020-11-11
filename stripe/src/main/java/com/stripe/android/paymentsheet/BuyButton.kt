@@ -9,6 +9,8 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.FrameLayout
 import androidx.core.animation.doOnEnd
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.distinctUntilChanged
 import com.stripe.android.R
 import com.stripe.android.databinding.PaymentSheetBuyButtonBinding
 import com.stripe.android.paymentsheet.model.ViewState
@@ -31,6 +33,9 @@ internal class BuyButton @JvmOverloads constructor(
     private val confirmedIcon = viewBinding.confirmedIcon
 
     private val currencyFormatter = CurrencyFormatter()
+
+    private val mutableCompletedAnimation = MutableLiveData<ViewState.Completed>()
+    internal val completedAnimation = mutableCompletedAnimation.distinctUntilChanged()
 
     init {
         setBackgroundResource(R.drawable.stripe_paymentsheet_buy_button_default_background)
@@ -60,20 +65,16 @@ internal class BuyButton @JvmOverloads constructor(
         )
     }
 
-    fun onCompletedState(
-        onAnimationEnd: () -> Unit
-    ) {
+    fun onCompletedState(state: ViewState.Completed) {
         setBackgroundResource(R.drawable.stripe_paymentsheet_buy_button_confirmed_background)
 
         fadeOut(viewBinding.label)
         fadeOut(viewBinding.confirmingIcon)
 
-        animateConfirmedIcon(onAnimationEnd)
+        animateConfirmedIcon(state)
     }
 
-    private fun animateConfirmedIcon(
-        onAnimationEnd: () -> Unit
-    ) {
+    private fun animateConfirmedIcon(state: ViewState.Completed) {
         val iconCenter = confirmedIcon.left + (confirmedIcon.right - confirmedIcon.left) / 2f
         val targetX = iconCenter - width / 2f
 
@@ -88,7 +89,9 @@ internal class BuyButton @JvmOverloads constructor(
             ).also { animator ->
                 animator.duration =
                     resources.getInteger(android.R.integer.config_shortAnimTime).toLong()
-                animator.doOnEnd { onAnimationEnd() }
+                animator.doOnEnd {
+                    mutableCompletedAnimation.value = state
+                }
             }.start()
         }
     }
@@ -106,6 +109,20 @@ internal class BuyButton @JvmOverloads constructor(
             View.VISIBLE
         } else {
             View.GONE
+        }
+    }
+
+    fun updateState(state: ViewState) {
+        when (state) {
+            is ViewState.Ready -> {
+                onReadyState(state)
+            }
+            ViewState.Confirming -> {
+                onConfirmingState()
+            }
+            is ViewState.Completed -> {
+                onCompletedState(state)
+            }
         }
     }
 
