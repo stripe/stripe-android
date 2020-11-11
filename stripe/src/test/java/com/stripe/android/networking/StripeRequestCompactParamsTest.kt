@@ -1,5 +1,6 @@
 package com.stripe.android.networking
 
+import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -65,13 +66,15 @@ class StripeRequestCompactParamsTest {
         return FakeRequest(params).compactParams.orEmpty()
     }
 
-    private class FakeRequest internal constructor(
+    private class FakeRequest(
         override val params: Map<String, *>?
     ) : StripeRequest() {
         override val method: Method = Method.POST
         override val baseUrl: String = "https://example.com"
         override val mimeType: MimeType = MimeType.Form
         override val body: String = ""
-        override val headersFactory = RequestHeadersFactory.Default()
+        override val headersFactory = RequestHeadersFactory.Fingerprint(
+            guid = UUID.randomUUID().toString()
+        )
     }
 }

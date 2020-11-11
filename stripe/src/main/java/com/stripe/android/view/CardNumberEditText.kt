@@ -23,7 +23,6 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.networking.AnalyticsDataFactory
 import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.ApiRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -47,8 +46,7 @@ class CardNumberEditText internal constructor(
     private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequest.Factory,
-    private val analyticsDataFactory: AnalyticsDataFactory,
-    private val publishableKeySupplier: () -> String
+    private val analyticsDataFactory: AnalyticsDataFactory
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     @JvmOverloads
@@ -87,9 +85,7 @@ class CardNumberEditText internal constructor(
         AnalyticsDataFactory(
             context,
             publishableKeySupplier = publishableKeySupplier
-        ),
-
-        publishableKeySupplier
+        )
     )
 
     @VisibleForTesting
@@ -296,12 +292,7 @@ class CardNumberEditText internal constructor(
     internal fun onCardMetadataLoadedTooSlow() {
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.create(
-                analyticsDataFactory.createParams(AnalyticsEvent.CardMetadataLoadedTooSlow),
-                ApiRequest.Options(
-                    runCatching {
-                        publishableKeySupplier()
-                    }.getOrDefault(ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY)
-                )
+                analyticsDataFactory.createParams(AnalyticsEvent.CardMetadataLoadedTooSlow)
             )
         )
     }

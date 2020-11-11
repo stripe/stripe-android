@@ -93,6 +93,10 @@
         <activity
             android:name=".activity.SofortPaymentMethodActivity" />
         <activity
+            android:name=".activity.UpiPaymentActivity" />
+        <activity
+            android:name=".activity.UpiWaitingActivity" />
+        <activity
             android:name=".activity.KlarnaSourceActivity" />
         <activity
             android:name=".activity.CardBrandsActivity" />

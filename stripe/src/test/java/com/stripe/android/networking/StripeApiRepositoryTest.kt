@@ -65,8 +65,7 @@ internal class StripeApiRepositoryTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val stripeApiRepository = StripeApiRepository(
         context,
-        DEFAULT_OPTIONS.apiKey,
-        workContext = testDispatcher
+        DEFAULT_OPTIONS.apiKey
     )
     private val fileFactory = FileFactory(context)
 
@@ -351,8 +350,7 @@ internal class StripeApiRepositoryTest {
         // This is the one and only test where we actually log something, because
         // we are testing whether or not we log.
         stripeApiRepository.fireAnalyticsRequest(
-            emptyMap(),
-            DEFAULT_OPTIONS.apiKey
+            emptyMap()
         )
     }
 
@@ -470,8 +468,7 @@ internal class StripeApiRepositoryTest {
     fun fireAnalyticsRequest_whenShouldLogRequestIsFalse_doesNotCreateAConnection() {
         val stripeApiRepository = create()
         stripeApiRepository.fireAnalyticsRequest(
-            emptyMap(),
-            DEFAULT_OPTIONS.apiKey
+            emptyMap()
         )
         verifyNoMoreInteractions(stripeApiRequestExecutor)
     }

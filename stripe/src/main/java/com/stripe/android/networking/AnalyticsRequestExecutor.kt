@@ -44,7 +44,7 @@ internal fun interface AnalyticsRequestExecutor {
             CoroutineScope(workContext).launch {
                 runCatching {
                     execute(request)
-                }.recover {
+                }.onFailure {
                     logger.error("Exception while making analytics request", it)
                 }
             }

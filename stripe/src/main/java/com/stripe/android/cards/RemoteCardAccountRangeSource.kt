@@ -16,8 +16,7 @@ internal class RemoteCardAccountRangeSource(
     private val cardAccountRangeStore: CardAccountRangeStore,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequest.Factory,
-    private val analyticsDataFactory: AnalyticsDataFactory,
-    private val publishableKey: String
+    private val analyticsDataFactory: AnalyticsDataFactory
 ) : CardAccountRangeSource {
 
     private val mutableLoading = MutableStateFlow(false)
@@ -57,8 +56,7 @@ internal class RemoteCardAccountRangeSource(
     private fun onCardMetadataMissingRange() {
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.create(
-                analyticsDataFactory.createParams(AnalyticsEvent.CardMetadataMissingRange),
-                ApiRequest.Options(publishableKey)
+                analyticsDataFactory.createParams(AnalyticsEvent.CardMetadataMissingRange)
             )
         )
     }

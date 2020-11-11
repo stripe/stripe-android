@@ -1,11 +1,13 @@
 package com.stripe.android.paymentsheet
 
+import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentOption
+import kotlinx.android.parcel.Parcelize
 
 internal class DefaultPaymentSheetFlowController internal constructor(
-    private val args: PaymentSheetActivityStarter.Args,
+    private val args: Args,
     private val paymentMethods: List<PaymentMethod>,
     private val defaultPaymentMethodId: String?
 ) : PaymentSheetFlowController {
@@ -14,7 +16,21 @@ internal class DefaultPaymentSheetFlowController internal constructor(
         activity: ComponentActivity,
         onComplete: (PaymentOption?) -> Unit
     ) {
-        // TODO(mshafrir-stripe): implement
+        PaymentOptionsActivityStarter(activity)
+            .startForResult(
+                when (args) {
+                    is Args.Default -> {
+                        PaymentOptionsActivityStarter.Args.Default(
+                            paymentMethods = paymentMethods,
+                            ephemeralKey = args.ephemeralKey,
+                            customerId = args.customerId
+                        )
+                    }
+                    is Args.Guest -> {
+                        PaymentOptionsActivityStarter.Args.Guest
+                    }
+                }
+            )
 
         onComplete(null)
     }
@@ -28,5 +44,21 @@ internal class DefaultPaymentSheetFlowController internal constructor(
         onComplete(
             PaymentResult.Cancelled(null, null)
         )
+    }
+
+    sealed class Args : Parcelable {
+        abstract val clientSecret: String
+
+        @Parcelize
+        data class Default(
+            override val clientSecret: String,
+            val ephemeralKey: String,
+            val customerId: String
+        ) : Args()
+
+        @Parcelize
+        data class Guest(
+            override val clientSecret: String
+        ) : Args()
     }
 }

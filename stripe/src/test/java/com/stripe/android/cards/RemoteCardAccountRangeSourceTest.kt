@@ -42,8 +42,7 @@ internal class RemoteCardAccountRangeSourceTest {
             AnalyticsDataFactory(
                 ApplicationProvider.getApplicationContext(),
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
-            ),
-            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+            )
         )
 
         assertThat(
@@ -78,8 +77,7 @@ internal class RemoteCardAccountRangeSourceTest {
             AnalyticsDataFactory(
                 ApplicationProvider.getApplicationContext(),
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
-            ),
-            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+            )
         )
 
         assertThat(
@@ -106,8 +104,7 @@ internal class RemoteCardAccountRangeSourceTest {
             AnalyticsDataFactory(
                 ApplicationProvider.getApplicationContext(),
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
-            ),
-            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+            )
         )
 
         assertThat(
@@ -150,8 +147,7 @@ internal class RemoteCardAccountRangeSourceTest {
             AnalyticsDataFactory(
                 ApplicationProvider.getApplicationContext(),
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
-            ),
-            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+            )
         )
 
         remoteCardAccountRangeSource.getAccountRange(

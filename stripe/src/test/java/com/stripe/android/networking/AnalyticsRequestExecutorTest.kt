@@ -16,7 +16,7 @@ class AnalyticsRequestExecutorTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
     @Test
-    fun execute_withFingerprintRequest_shouldReturnSuccessfully() {
+    fun execute_shouldReturnSuccessfully() {
         val responseCode = analyticsRequestExecutor.execute(
             AnalyticsRequest.Factory().create(
                 AnalyticsDataFactory(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
@@ -24,8 +24,7 @@ class AnalyticsRequestExecutorTest {
                         "pm_12345",
                         PaymentMethod.Type.Card,
                         emptySet()
-                    ),
-                ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                    )
             )
         )
         assertThat(responseCode)

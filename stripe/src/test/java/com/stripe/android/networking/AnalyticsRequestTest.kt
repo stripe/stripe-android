@@ -6,7 +6,6 @@ import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.AppInfoFixtures
 import com.stripe.android.Logger
 import com.stripe.android.Stripe
 import com.stripe.android.model.PaymentMethod
@@ -30,22 +29,12 @@ class AnalyticsRequestTest {
                     "pm_12345",
                     PaymentMethod.Type.Card,
                     emptySet()
-                ),
-            options = ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
-            appInfo = AppInfoFixtures.DEFAULT
+                )
         )
         assertThat(analyticsRequest.headers)
             .isEqualTo(
                 mapOf(
-                    "Accept" to "application/json",
-                    "X-Stripe-Client-User-Agent" to
-                        """
-                    {"os.name":"android","os.version":"28","bindings.version":"$sdkVersion","lang":"Java","publisher":"Stripe","http.agent":"","application":{"name":"MyAwesomePlugin","version":"1.2.34","url":"https:\/\/myawesomeplugin.info","partner_id":"pp_partner_1234"}}
-                        """.trimIndent(),
-                    "Stripe-Version" to "2020-03-02",
-                    "Authorization" to "Bearer pk_test_123",
-                    "Accept-Language" to "en-US",
-                    "User-Agent" to "Stripe/v1 AndroidBindings/$sdkVersion MyAwesomePlugin/1.2.34 (https://myawesomeplugin.info)",
+                    "User-Agent" to "Stripe/v1 AndroidBindings/$sdkVersion",
                     "Accept-Charset" to "UTF-8"
                 )
             )
@@ -63,8 +52,7 @@ class AnalyticsRequestTest {
                     "pm_12345",
                     PaymentMethod.Type.Card,
                     emptySet()
-                ),
-            ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                )
         )
 
         verify(logger).info(

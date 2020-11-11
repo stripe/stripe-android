@@ -88,11 +88,21 @@ internal sealed class RequestHeadersFactory {
         }
     }
 
-    class Default(
-        override val extraHeaders: Map<String, String> = emptyMap(),
-        sdkVersion: String = Stripe.VERSION
+    class Fingerprint(
+        guid: String
     ) : RequestHeadersFactory() {
-        override val userAgent: String = getUserAgent(sdkVersion)
+        override val extraHeaders = mapOf(HEADER_COOKIE to "m=$guid")
+
+        override val userAgent = getUserAgent(Stripe.VERSION)
+
+        private companion object {
+            private const val HEADER_COOKIE = "Cookie"
+        }
+    }
+
+    object Analytics : RequestHeadersFactory() {
+        override val userAgent = getUserAgent(Stripe.VERSION)
+        override val extraHeaders = emptyMap<String, String>()
     }
 
     internal companion object {
