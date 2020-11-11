@@ -12,10 +12,10 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.stripe.android.PaymentIntentResult
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.databinding.ActivityPaymentSheetBinding
-import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.SheetMode
 
 internal class PaymentSheetActivity : AppCompatActivity() {
@@ -183,38 +183,19 @@ internal class PaymentSheetActivity : AppCompatActivity() {
     }
 
     private fun setupBuyButton() {
+        viewBinding.buyButton.completedAnimation.observe(this) { completedState ->
+            completedState?.paymentIntentResult?.let(::onActionCompleted)
+        }
+
         viewModel.viewState.observe(this) { state ->
-            when (state) {
-                is ViewState.Ready -> {
-                    viewBinding.buyButton.onReadyState(state)
-                }
-                ViewState.Confirming -> {
-                    viewBinding.buyButton.onConfirmingState()
-                }
-                is ViewState.Completed -> {
-                    viewBinding.buyButton.onCompletedState {
-                        val result = state.paymentIntentResult
-                        when (result.outcome) {
-                            StripeIntentResult.Outcome.SUCCEEDED -> {
-                                animateOut(
-                                    PaymentResult.Succeeded(result.intent)
-                                )
-                            }
-                            else -> {
-                                // TODO(mshafrir-stripe): handle other outcomes
-                            }
-                        }
-                    }
-                }
-                else -> {
-                    // no-op
-                }
+            if (state != null) {
+                viewBinding.buyButton.updateState(state)
             }
         }
 
-        viewModel.selection.observe(this) {
+        viewModel.selection.observe(this) { paymentSelection ->
             // TODO(smaskell): show Google Pay button when GooglePay selected
-            viewBinding.buyButton.isEnabled = it != null
+            viewBinding.buyButton.isEnabled = paymentSelection != null
         }
         viewBinding.buyButton.setOnClickListener {
             viewModel.checkout(this)
@@ -225,6 +206,19 @@ internal class PaymentSheetActivity : AppCompatActivity() {
             viewBinding.back.isEnabled = !isProcessing
 
             viewBinding.buyButton.isEnabled = !isProcessing
+        }
+    }
+
+    private fun onActionCompleted(paymentIntentResult: PaymentIntentResult) {
+        when (paymentIntentResult.outcome) {
+            StripeIntentResult.Outcome.SUCCEEDED -> {
+                animateOut(
+                    PaymentResult.Succeeded(paymentIntentResult.intent)
+                )
+            }
+            else -> {
+                // TODO(mshafrir-stripe): handle other outcomes
+            }
         }
     }
 
