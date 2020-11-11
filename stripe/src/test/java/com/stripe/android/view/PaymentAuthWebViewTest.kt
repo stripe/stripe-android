@@ -1,15 +1,16 @@
 package com.stripe.android.view
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.webkit.WebView
 import android.widget.ProgressBar
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
+import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.FakeLogger
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never
@@ -24,7 +25,6 @@ class PaymentAuthWebViewTest {
     private val activity: Activity = mock()
     private val progressBar: ProgressBar = mock()
     private val webView: WebView = mock()
-    private val packageManager: PackageManager = mock()
 
     private val intentArgumentCaptor: KArgumentCaptor<Intent> = argumentCaptor()
 
@@ -112,6 +112,9 @@ class PaymentAuthWebViewTest {
 
     @Test
     fun shouldOverrideUrlLoading_withUnsupportedDeeplink_shouldFinish() {
+        whenever(activity.startActivity(any()))
+            .thenThrow(ActivityNotFoundException())
+
         val url = "deep://link"
         val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
         paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, url)
@@ -128,12 +131,14 @@ class PaymentAuthWebViewTest {
 
     @Test
     fun shouldOverrideUrlLoading_withIntentUri_shouldParseUri() {
+        whenever(activity.startActivity(any()))
+            .thenThrow(ActivityNotFoundException())
+
         val deepLink = "intent://example.com/#Intent;scheme=https;action=android.intent.action.VIEW;end"
         val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
         paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, deepLink)
-        verify(packageManager).resolveActivity(
-            intentArgumentCaptor.capture(),
-            eq(PackageManager.MATCH_DEFAULT_ONLY)
+        verify(activity).startActivity(
+            intentArgumentCaptor.capture()
         )
         val intent = intentArgumentCaptor.firstValue
         assertEquals("https://example.com/", intent.dataString)
@@ -165,7 +170,6 @@ class PaymentAuthWebViewTest {
     ): PaymentAuthWebView.PaymentAuthWebViewClient {
         return PaymentAuthWebView.PaymentAuthWebViewClient(
             activity,
-            packageManager,
             FakeLogger(),
             progressBar,
             clientSecret,
