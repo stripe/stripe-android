@@ -43,6 +43,7 @@ import com.stripe.android.model.TokenParams
 import com.stripe.android.model.parsers.CardMetadataJsonParser
 import com.stripe.android.model.parsers.CustomerJsonParser
 import com.stripe.android.model.parsers.FpxBankStatusesJsonParser
+import com.stripe.android.model.parsers.IssuingCardPinJsonParser
 import com.stripe.android.model.parsers.ModelJsonParser
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
@@ -788,19 +789,20 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         verificationId: String,
         userOneTimeCode: String,
         ephemeralKeySecret: String
-    ): String {
+    ): String? {
         fireAnalyticsRequest(
             AnalyticsEvent.IssuingRetrievePin
         )
 
-        val response = makeApiRequest(
+        val issuingCardPin = fetchStripeModel(
             apiRequestFactory.createGet(
                 getIssuingCardPinUrl(cardId),
                 ApiRequest.Options(ephemeralKeySecret),
                 mapOf("verification" to createVerificationParam(verificationId, userOneTimeCode))
-            )
+            ),
+            IssuingCardPinJsonParser()
         )
-        return response.responseJson.getString("pin")
+        return issuingCardPin?.pin
     }
 
     /**

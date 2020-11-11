@@ -283,7 +283,7 @@ internal interface StripeRepository {
         verificationId: String,
         userOneTimeCode: String,
         ephemeralKeySecret: String
-    ): String
+    ): String?
 
     @Throws(
         AuthenticationException::class,
