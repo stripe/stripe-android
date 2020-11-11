@@ -1,5 +1,4 @@
 package com.stripe.example.activity
-import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.ArrayAdapter
@@ -9,7 +8,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.example.databinding.NetbankingPaymentActivityBinding
 
-class NetbankingPaymentActivity : StripeIntentActivity(){
+class NetbankingPaymentActivity : StripeIntentActivity() {
     private val viewBinding: NetbankingPaymentActivityBinding by lazy {
         NetbankingPaymentActivityBinding.inflate(layoutInflater)
     }
@@ -22,7 +21,7 @@ class NetbankingPaymentActivity : StripeIntentActivity(){
         viewModel.status.observe(this, Observer(viewBinding.status::setText))
 
         val adapter = ArrayAdapter(this, android.R.layout.expandable_list_content, arrayListOf("hdfc", "icici", "sbi", "axis", "hdfc_fake"))
-        viewBinding.bankName.threshold = 0;
+        viewBinding.bankName.threshold = 0
         viewBinding.bankName.setAdapter(adapter)
 
         viewBinding.submit.setOnClickListener {
@@ -47,7 +46,6 @@ class NetbankingPaymentActivity : StripeIntentActivity(){
 
             createAndConfirmPaymentIntent("in", params)
         }
-
     }
 
     private fun enableUi(enabled: Boolean) {
