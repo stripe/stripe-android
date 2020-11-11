@@ -193,7 +193,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         verificationId: String,
         userOneTimeCode: String,
         ephemeralKeySecret: String
-    ): String {
+    ): String? {
         return ""
     }
 
