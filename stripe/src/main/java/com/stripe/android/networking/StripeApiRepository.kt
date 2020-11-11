@@ -19,7 +19,6 @@ import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.exception.PermissionException
 import com.stripe.android.exception.RateLimitException
 import com.stripe.android.model.CardMetadata
-import com.stripe.android.model.Complete3ds2Result
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.Customer
@@ -905,15 +904,15 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun complete3ds2Auth(
         sourceId: String,
         requestOptions: ApiRequest.Options
-    ): Complete3ds2Result {
-        val response = makeApiRequest(
+    ): Stripe3ds2AuthResult? {
+        return fetchStripeModel(
             apiRequestFactory.createPost(
                 getApiUrl("3ds2/challenge_complete"),
                 requestOptions,
                 mapOf("source" to sourceId)
-            )
+            ),
+            Stripe3ds2AuthResultJsonParser()
         )
-        return Complete3ds2Result(response.isOk)
     }
 
     /**
