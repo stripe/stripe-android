@@ -46,13 +46,13 @@ import com.stripe.android.model.parsers.FpxBankStatusesJsonParser
 import com.stripe.android.model.parsers.ModelJsonParser
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
+import com.stripe.android.model.parsers.PaymentMethodsListJsonParser
 import com.stripe.android.model.parsers.SetupIntentJsonParser
 import com.stripe.android.model.parsers.SourceJsonParser
 import com.stripe.android.model.parsers.Stripe3ds2AuthResultJsonParser
 import com.stripe.android.model.parsers.StripeFileJsonParser
 import com.stripe.android.model.parsers.TokenJsonParser
 import com.stripe.android.utils.StripeUrlUtils
-import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
@@ -652,12 +652,13 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
     ): List<PaymentMethod> {
-        val response = makeApiRequest(
+        val paymentMethodsList = fetchStripeModel(
             apiRequestFactory.createGet(
                 paymentMethodsUrl,
                 requestOptions,
                 listPaymentMethodsParams.toParamMap()
-            )
+            ),
+            PaymentMethodsListJsonParser()
         )
 
         fireAnalyticsRequest(
@@ -667,14 +668,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             )
         )
 
-        return try {
-            val data = response.responseJson.optJSONArray("data") ?: JSONArray()
-            (0 until data.length()).mapNotNull {
-                PaymentMethodJsonParser().parse(data.optJSONObject(it))
-            }
-        } catch (e: JSONException) {
-            emptyList()
-        }
+        return paymentMethodsList?.paymentMethods.orEmpty()
     }
 
     /**

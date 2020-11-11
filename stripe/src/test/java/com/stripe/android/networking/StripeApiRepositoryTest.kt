@@ -639,10 +639,14 @@ internal class StripeApiRepositoryTest {
                 emptySet(),
                 ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
             )
-        assertEquals(3, paymentMethods.size)
-        assertEquals("pm_1EVNYJCRMbs6FrXfG8n52JaK", paymentMethods[0].id)
-        assertEquals("pm_1EVNXtCRMbs6FrXfTlZGIdGq", paymentMethods[1].id)
-        assertEquals("src_1EVO8DCRMbs6FrXf2Dspj49a", paymentMethods[2].id)
+        assertThat(paymentMethods)
+            .hasSize(3)
+        assertThat(paymentMethods.map { it.id })
+            .containsExactly(
+                "pm_1EVNYJCRMbs6FrXfG8n52JaK",
+                "pm_1EVNXtCRMbs6FrXfTlZGIdGq",
+                "src_1EVO8DCRMbs6FrXf2Dspj49a"
+            )
 
         verifyAnalyticsRequest(
             AnalyticsEvent.CustomerRetrievePaymentMethods,
@@ -693,7 +697,8 @@ internal class StripeApiRepositoryTest {
                 emptySet(),
                 ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
             )
-        assertTrue(paymentMethods.isEmpty())
+        assertThat(paymentMethods)
+            .isEmpty()
     }
 
     @Test
