@@ -1,19 +1,15 @@
 package com.stripe.example.activity
-import android.content.Intent
+import android.content.Context
 import android.os.Bundle
+import android.view.View
 import android.widget.ArrayAdapter
-import com.stripe.android.ApiResultCallback
-import com.stripe.android.PaymentIntentResult
+import androidx.lifecycle.Observer
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.example.StripeFactory
 import com.stripe.example.databinding.NetbankingPaymentActivityBinding
 
 class NetbankingPaymentActivity : StripeIntentActivity(){
-    private val stripe by lazy {
-        StripeFactory(application).create()
-    }
     private val viewBinding: NetbankingPaymentActivityBinding by lazy {
         NetbankingPaymentActivityBinding.inflate(layoutInflater)
     }
@@ -22,38 +18,40 @@ class NetbankingPaymentActivity : StripeIntentActivity(){
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
-        val banks = arrayOf("hdfc", "icici")
-        viewBinding.autoCompleteTextView.threshold = 1
+        viewModel.inProgress.observe(this, { enableUi(!it) })
+        viewModel.status.observe(this, Observer(viewBinding.status::setText))
 
-        val arrayAdapter = ArrayAdapter(applicationContext, 0, banks)
-        viewBinding.autoCompleteTextView.setAdapter(arrayAdapter)
+        val adapter = ArrayAdapter(this, android.R.layout.expandable_list_content, arrayListOf("hdfc", "icici", "sbi", "axis", "hdfc_fake"))
+        viewBinding.bankName.threshold = 0;
+        viewBinding.bankName.setAdapter(adapter)
+
+        viewBinding.submit.setOnClickListener {
+            val params = PaymentMethodCreateParams.create(
+                netbanking = PaymentMethodCreateParams.Netbanking(
+                    bank = viewBinding.bankName.text.toString()
+                ),
+                billingDetails = PaymentMethod.BillingDetails(
+                    name = "Jenny Rosen",
+                    phone = "(555) 555-5555",
+                    email = "jenny@example.com",
+                    address = Address.Builder()
+                        .setCity("San Francisco")
+                        .setCountry("US")
+                        .setLine1("123 Market St")
+                        .setLine2("#345")
+                        .setPostalCode("94107")
+                        .setState("CA")
+                        .build()
+                )
+            )
+
+            createAndConfirmPaymentIntent("in", params)
+        }
 
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        // Handle the result of stripe.confirmPayment
-        stripe.onPaymentResult(
-            requestCode,
-            data,
-            object : ApiResultCallback<PaymentIntentResult> {
-                override fun onSuccess(
-                    result: PaymentIntentResult
-                ) {
-                    val paymentIntent = result.intent
-                }
-
-                override fun onError(e: Exception) {
-                    // TODO: remove this print statement. Check what is the best way to handle this
-                    // To reach this path use vpa = payment.failure@stripeupi
-                    print("Payment failed")
-                }
-            }
-        )
-    }
-
-    internal companion object {
-        const val EXTRA_CLIENT_SECRET = "extra_client_secret"
+    private fun enableUi(enabled: Boolean) {
+        viewBinding.submit.isEnabled = enabled
+        viewBinding.progressBar.visibility = if (enabled) View.INVISIBLE else View.VISIBLE
     }
 }
