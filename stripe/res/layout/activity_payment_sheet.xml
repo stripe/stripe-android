@@ -15,31 +15,14 @@
         android:paddingTop="@dimen/stripe_paymentsheet_padding_top"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-        <FrameLayout
+        <com.stripe.android.paymentsheet.ui.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
             app:layout_constraintBottom_toTopOf="@+id/fragment_container"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <ImageView
-                android:id="@+id/close"
-                android:src="@drawable/stripe_ic_paymentsheet_close"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/stripe_paymentsheet_close"
-                android:visibility="gone"/>
-
-            <ImageView
-                android:id="@+id/back"
-                android:src="@drawable/stripe_ic_paymentsheet_back"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/stripe_paymentsheet_back"
-                android:visibility="gone"/>
-        </FrameLayout>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.fragment.app.FragmentContainerView
             app:layout_constraintTop_toBottomOf="@id/toolbar"

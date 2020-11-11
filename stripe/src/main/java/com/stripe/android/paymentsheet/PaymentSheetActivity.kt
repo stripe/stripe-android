@@ -19,6 +19,7 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.SheetMode
+import com.stripe.android.paymentsheet.ui.Toolbar
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -89,12 +90,10 @@ internal class PaymentSheetActivity : AppCompatActivity() {
             when (mode) {
                 SheetMode.Full,
                 SheetMode.FullCollapsed -> {
-                    viewBinding.close.visibility = View.GONE
-                    viewBinding.back.visibility = View.VISIBLE
+                    viewBinding.toolbar.showBack()
                 }
                 SheetMode.Wrapped -> {
-                    viewBinding.close.visibility = View.VISIBLE
-                    viewBinding.back.visibility = View.GONE
+                    viewBinding.toolbar.showClose()
                 }
                 else -> {
                     // mode == null
@@ -161,9 +160,17 @@ internal class PaymentSheetActivity : AppCompatActivity() {
             }
         }
 
-        viewBinding.close.setOnClickListener { onUserCancel() }
-        viewBinding.back.setOnClickListener {
-            viewModel.transitionTo(PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod)
+        viewBinding.toolbar.action.observe(this) { action ->
+            when (action) {
+                Toolbar.Action.Close -> {
+                    onUserCancel()
+                }
+                Toolbar.Action.Back -> {
+                    viewModel.transitionTo(
+                        PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod
+                    )
+                }
+            }
         }
     }
 
@@ -212,8 +219,7 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         }
 
         viewModel.processing.observe(this) { isProcessing ->
-            viewBinding.close.isEnabled = !isProcessing
-            viewBinding.back.isEnabled = !isProcessing
+            viewBinding.toolbar.updateProcessing(isProcessing)
 
             viewBinding.buyButton.isEnabled = !isProcessing
         }
