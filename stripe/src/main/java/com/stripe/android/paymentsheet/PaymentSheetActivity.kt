@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.annotation.IdRes
@@ -237,17 +236,8 @@ internal class PaymentSheetActivity : AppCompatActivity() {
     private fun setPaymentSheetResult(
         paymentResult: PaymentResult
     ) {
-        val resultCode = when (paymentResult) {
-            is PaymentResult.Succeeded -> {
-                Activity.RESULT_OK
-            }
-            is PaymentResult.Cancelled,
-            is PaymentResult.Failed -> {
-                Activity.RESULT_CANCELED
-            }
-        }
         setResult(
-            resultCode,
+            paymentResult.resultCode,
             Intent()
                 .putExtras(PaymentSheet.Result(paymentResult).toBundle())
         )
