@@ -849,10 +849,12 @@ internal class StripePaymentController internal constructor(
             )
 
             val start3ds2AuthResult = runCatching {
-                stripeRepository.start3ds2Auth(
-                    authParams,
-                    stripeIntent.id.orEmpty(),
-                    requestOptions
+                requireNotNull(
+                    stripeRepository.start3ds2Auth(
+                        authParams,
+                        stripeIntent.id.orEmpty(),
+                        requestOptions
+                    )
                 )
             }
 
