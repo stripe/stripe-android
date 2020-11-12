@@ -11,9 +11,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.PaymentIntentResult
-import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.databinding.ActivityPaymentSheetBinding
+import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.ui.Toolbar
 
@@ -131,10 +131,10 @@ internal class PaymentSheetActivity : AppCompatActivity() {
                 when (transactionTarget) {
                     PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull -> {
                         setCustomAnimations(
-                            R.anim.stripe_paymentsheet_transition_fade_in,
-                            R.anim.stripe_paymentsheet_transition_fade_out,
-                            R.anim.stripe_paymentsheet_transition_fade_in,
-                            R.anim.stripe_paymentsheet_transition_fade_out,
+                            AnimationConstants.FADE_IN,
+                            AnimationConstants.FADE_OUT,
+                            AnimationConstants.FADE_IN,
+                            AnimationConstants.FADE_OUT
                         )
                         addToBackStack(null)
                         replace(
