@@ -41,6 +41,12 @@ internal enum class AnalyticsEvent(internal val code: String) {
     // 3DS1
     Auth3ds1Sdk("3ds1_sdk"),
 
+    // FPX
+    FpxBankStatusesRetrieve("retrieve_fpx_bank_statuses"),
+
+    // Get an arbitrary Stripe URL
+    StripeUrlRetrieve("retrieve_stripe_url"),
+
     // 3DS2
     Auth3ds2Fingerprint("3ds2_fingerprint"),
     Auth3ds2Start("3ds2_authenticate"),
