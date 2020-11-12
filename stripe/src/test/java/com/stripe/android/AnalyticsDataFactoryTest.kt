@@ -8,10 +8,12 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
 import com.stripe.android.networking.AnalyticsDataFactory
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.RequestId
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -38,7 +40,8 @@ class AnalyticsDataFactoryTest {
 
         val params = analyticsDataFactory.createTokenCreationParams(
             ATTRIBUTION,
-            Token.Type.Pii
+            Token.Type.Pii,
+            REQUEST_ID
         )
         // Size is SIZE-1 because tokens don't have a source_type field
         assertThat(params)
@@ -55,7 +58,8 @@ class AnalyticsDataFactoryTest {
 
         val params = analyticsDataFactory.createTokenCreationParams(
             ATTRIBUTION,
-            Token.Type.CvcUpdate
+            Token.Type.CvcUpdate,
+            REQUEST_ID
         )
         // Size is SIZE-1 because tokens don't have a source_type field
         assertThat(params)
@@ -68,7 +72,8 @@ class AnalyticsDataFactoryTest {
     fun getSourceCreationParams_withValidInput_createsCorrectMap() {
         val loggingParams = analyticsDataFactory.createSourceCreationParams(
             Source.SourceType.SEPA_DEBIT,
-            ATTRIBUTION
+            ATTRIBUTION,
+            REQUEST_ID
         )
 
         // Size is SIZE-1 because tokens don't have a token_type field
@@ -95,8 +100,9 @@ class AnalyticsDataFactoryTest {
         assertThat(
             analyticsDataFactory
                 .createPaymentMethodCreationParams(
-                    PaymentMethod.Type.Card,
-                    ATTRIBUTION
+                    PaymentMethodCreateParams.Type.Card,
+                    ATTRIBUTION,
+                    REQUEST_ID
                 )
         ).isEqualTo(
             mapOf(
@@ -111,7 +117,8 @@ class AnalyticsDataFactoryTest {
                 "app_name" to "com.stripe.android.test",
                 "app_version" to 0,
                 "product_usage" to ATTRIBUTION.toList(),
-                "source_type" to "card"
+                "source_type" to "card",
+                "request_id" to "req_123"
             )
         )
     }
@@ -120,7 +127,8 @@ class AnalyticsDataFactoryTest {
     fun createPaymentIntentConfirmationParams_withValidInput_createsCorrectMap() {
         val loggingParams =
             analyticsDataFactory.createPaymentIntentConfirmationParams(
-                PaymentMethod.Type.Card.code
+                PaymentMethod.Type.Card.code,
+                REQUEST_ID
             )
 
         assertThat(loggingParams)
@@ -140,7 +148,8 @@ class AnalyticsDataFactoryTest {
     @Test
     fun getPaymentIntentRetrieveParams_withValidInput_createsCorrectMap() {
         val loggingParams = analyticsDataFactory.createParams(
-            AnalyticsEvent.PaymentIntentRetrieve
+            AnalyticsEvent.PaymentIntentRetrieve,
+            REQUEST_ID
         )
         assertThat(loggingParams)
             .hasSize(AnalyticsDataFactory.VALID_PARAM_FIELDS.size - 2)
@@ -159,7 +168,8 @@ class AnalyticsDataFactoryTest {
     fun getSetupIntentConfirmationParams_withValidInput_createsCorrectMap() {
         val params = analyticsDataFactory.createSetupIntentConfirmationParams(
             PaymentMethod.Type.Card.code,
-            "seti_12345"
+            "seti_12345",
+            REQUEST_ID
         )
         assertThat(params[AnalyticsDataFactory.FIELD_SOURCE_TYPE])
             .isEqualTo("card")
@@ -182,7 +192,8 @@ class AnalyticsDataFactoryTest {
             AnalyticsDataFactory(packageManager, packageInfo, packageName) { API_KEY }
                 .createTokenCreationParams(
                     ATTRIBUTION,
-                    Token.Type.Card
+                    Token.Type.Card,
+                    REQUEST_ID
                 )
         assertThat(params)
             .hasSize(AnalyticsDataFactory.VALID_PARAM_FIELDS.size - 1)
@@ -212,7 +223,8 @@ class AnalyticsDataFactoryTest {
         val expectedUaName = AnalyticsDataFactory.ANALYTICS_UA
 
         val params = analyticsDataFactory.createSourceCreationParams(
-            Source.SourceType.SEPA_DEBIT
+            Source.SourceType.SEPA_DEBIT,
+            requestId = REQUEST_ID
         )
         assertThat(params)
             .hasSize(AnalyticsDataFactory.VALID_PARAM_FIELDS.size - 2)
@@ -290,7 +302,10 @@ class AnalyticsDataFactoryTest {
             context
         ) {
             throw RuntimeException()
-        }.createSourceRetrieveParams("src_123")
+        }.createSourceRetrieveParams(
+            "src_123",
+            requestId = REQUEST_ID
+        )
 
         assertThat(params["publishable_key"])
             .isEqualTo(ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY)
@@ -299,5 +314,6 @@ class AnalyticsDataFactoryTest {
     private companion object {
         private const val API_KEY = "pk_abc123"
         private val ATTRIBUTION = setOf("CardInputView")
+        private val REQUEST_ID = RequestId("req_123")
     }
 }

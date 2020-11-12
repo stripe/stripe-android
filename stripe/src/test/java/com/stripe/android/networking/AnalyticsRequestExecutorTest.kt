@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -21,8 +21,9 @@ class AnalyticsRequestExecutorTest {
             AnalyticsRequest.Factory().create(
                 AnalyticsDataFactory(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
                     .createPaymentMethodCreationParams(
-                        PaymentMethod.Type.Card,
-                        emptySet()
+                        PaymentMethodCreateParams.Type.Card,
+                        emptySet(),
+                        RequestId("req_123")
                     )
             )
         )

@@ -8,7 +8,7 @@ import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.Logger
 import com.stripe.android.Stripe
-import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -26,8 +26,9 @@ class AnalyticsRequestTest {
         val analyticsRequest = factory.create(
             params = AnalyticsDataFactory(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
                 .createPaymentMethodCreationParams(
-                    PaymentMethod.Type.Card,
-                    emptySet()
+                    PaymentMethodCreateParams.Type.Card,
+                    emptySet(),
+                    REQUEST_ID
                 )
         )
         assertThat(analyticsRequest.headers)
@@ -40,7 +41,7 @@ class AnalyticsRequestTest {
         val requestUrl = analyticsRequest.url
 
         assertThat(requestUrl)
-            .isEqualTo("https://q.stripe.com?app_name=com.stripe.android.test&publishable_key=pk_test_123&app_version=0&bindings_version=16.1.0&os_version=28&analytics_ua=analytics.stripe_android-1.0&os_name=REL&os_release=9&device_type=unknown_Android_robolectric&source_type=card&event=stripe_android.payment_method_creation")
+            .isEqualTo("https://q.stripe.com?publishable_key=pk_test_123&app_version=0&bindings_version=16.1.0&os_version=28&os_release=9&device_type=unknown_Android_robolectric&source_type=card&app_name=com.stripe.android.test&analytics_ua=analytics.stripe_android-1.0&os_name=REL&event=stripe_android.payment_method_creation&request_id=req_123")
     }
 
     @Test
@@ -48,13 +49,18 @@ class AnalyticsRequestTest {
         factory.create(
             AnalyticsDataFactory(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
                 .createPaymentMethodCreationParams(
-                    PaymentMethod.Type.Card,
-                    emptySet()
+                    PaymentMethodCreateParams.Type.Card,
+                    emptySet(),
+                    REQUEST_ID
                 )
         )
 
         verify(logger).info(
             "Event: stripe_android.payment_method_creation"
         )
+    }
+
+    private companion object {
+        val REQUEST_ID = RequestId("req_123")
     }
 }

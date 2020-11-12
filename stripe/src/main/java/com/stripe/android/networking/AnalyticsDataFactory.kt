@@ -7,7 +7,7 @@ import android.os.Build
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.AnalyticsEvent
 import com.stripe.android.Stripe
-import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
 import com.stripe.android.stripe3ds2.transaction.ProtocolErrorEvent
@@ -49,6 +49,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     ): Map<String, Any> {
         return createParams(
             event,
+            requestId = null,
             extraParams = createIntentParam(intentId)
         )
     }
@@ -60,6 +61,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     ): Map<String, Any> {
         return createParams(
             event,
+            requestId = null,
             extraParams = sourceId?.let { mapOf(FIELD_SOURCE_ID to it) }
         )
     }
@@ -72,6 +74,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     ): Map<String, Any> {
         return createParams(
             event,
+            requestId = null,
             extraParams = createIntentParam(intentId)
                 .plus(
                     FIELD_3DS2_UI_TYPE to
@@ -87,6 +90,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.Auth3ds2ChallengeErrored,
+            requestId = null,
             extraParams = createIntentParam(intentId)
                 .plus(
                     FIELD_ERROR_DATA to mapOf(
@@ -115,6 +119,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
 
         return createParams(
             AnalyticsEvent.Auth3ds2ChallengeErrored,
+            requestId = null,
             extraParams = createIntentParam(intentId)
                 .plus(FIELD_ERROR_DATA to errorData)
         )
@@ -123,10 +128,12 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createTokenCreationParams(
         productUsageTokens: Set<String>?,
-        tokenType: Token.Type
+        tokenType: Token.Type,
+        requestId: RequestId?
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.TokenCreate,
+            requestId = requestId,
             productUsageTokens = productUsageTokens,
             tokenType = tokenType
         )
@@ -134,11 +141,13 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createPaymentMethodCreationParams(
-        paymentMethodType: PaymentMethod.Type?,
-        productUsageTokens: Set<String>?
+        paymentMethodType: PaymentMethodCreateParams.Type?,
+        productUsageTokens: Set<String>?,
+        requestId: RequestId?
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.PaymentMethodCreate,
+            requestId = requestId,
             sourceType = paymentMethodType?.code,
             productUsageTokens = productUsageTokens
         )
@@ -147,19 +156,25 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createSourceCreationParams(
         @Source.SourceType sourceType: String,
-        productUsageTokens: Set<String>? = null
+        productUsageTokens: Set<String>? = null,
+        requestId: RequestId?
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.SourceCreate,
+            requestId = requestId,
             productUsageTokens = productUsageTokens,
             sourceType = sourceType
         )
     }
 
     @JvmSynthetic
-    internal fun createSourceRetrieveParams(sourceId: String): Map<String, Any> {
+    internal fun createSourceRetrieveParams(
+        sourceId: String,
+        requestId: RequestId?
+    ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.SourceRetrieve,
+            requestId = requestId,
             extraParams = mapOf(FIELD_SOURCE_ID to sourceId)
         )
     }
@@ -167,10 +182,12 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createAddSourceParams(
         productUsageTokens: Set<String>? = null,
-        @Source.SourceType sourceType: String
+        @Source.SourceType sourceType: String,
+        requestId: RequestId?,
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.CustomerAddSource,
+            requestId = requestId,
             productUsageTokens = productUsageTokens,
             sourceType = sourceType
         )
@@ -178,50 +195,60 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createDeleteSourceParams(
-        productUsageTokens: Set<String>?
+        productUsageTokens: Set<String>?,
+        requestId: RequestId?
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.CustomerDeleteSource,
+            requestId = requestId,
             productUsageTokens = productUsageTokens
         )
     }
 
     @JvmSynthetic
     internal fun createAttachPaymentMethodParams(
-        productUsageTokens: Set<String>?
+        productUsageTokens: Set<String>?,
+        requestId: RequestId?,
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.CustomerAttachPaymentMethod,
+            requestId = requestId,
             productUsageTokens = productUsageTokens
         )
     }
 
     @JvmSynthetic
     internal fun createDetachPaymentMethodParams(
-        productUsageTokens: Set<String>?
+        productUsageTokens: Set<String>?,
+        requestId: RequestId?,
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.CustomerDetachPaymentMethod,
+            requestId = requestId,
             productUsageTokens = productUsageTokens
         )
     }
 
     @JvmSynthetic
     internal fun createPaymentIntentConfirmationParams(
-        paymentMethodType: String? = null
+        paymentMethodType: String? = null,
+        requestId: RequestId?
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.PaymentIntentConfirm,
+            requestId = requestId,
             sourceType = paymentMethodType
         )
     }
 
     @JvmSynthetic
     internal fun createPaymentIntentRetrieveParams(
-        intentId: String
+        intentId: String,
+        requestId: RequestId?
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.PaymentIntentRetrieve,
+            requestId = requestId,
             extraParams = createIntentParam(intentId)
         )
     }
@@ -229,10 +256,12 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createSetupIntentConfirmationParams(
         paymentMethodType: String?,
-        intentId: String
+        intentId: String,
+        requestId: RequestId?
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.SetupIntentConfirm,
+            requestId = requestId,
             sourceType = paymentMethodType,
             extraParams = createIntentParam(intentId)
         )
@@ -240,17 +269,28 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createSetupIntentRetrieveParams(
-        intentId: String
+        intentId: String,
+        requestId: RequestId?
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.SetupIntentRetrieve,
+            requestId = requestId,
             extraParams = createIntentParam(intentId)
         )
     }
 
     @JvmSynthetic
     internal fun createParams(
+        event: AnalyticsEvent
+    ) = createParams(
+        event,
+        requestId = null
+    )
+
+    @JvmSynthetic
+    internal fun createParams(
         event: AnalyticsEvent,
+        requestId: RequestId?,
         productUsageTokens: Set<String>? = null,
         @Source.SourceType sourceType: String? = null,
         tokenType: Token.Type? = null,
@@ -265,6 +305,11 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
             )
             .plus(sourceType?.let { mapOf(FIELD_SOURCE_TYPE to it) }.orEmpty())
             .plus(createTokenTypeParam(sourceType, tokenType))
+            .plus(
+                requestId?.let {
+                    mapOf(FIELD_REQUEST_ID to it.value)
+                }.orEmpty()
+            )
             .plus(extraParams.orEmpty())
     }
 
@@ -357,6 +402,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
         internal const val FIELD_OS_RELEASE = "os_release"
         internal const val FIELD_OS_VERSION = "os_version"
         internal const val FIELD_PUBLISHABLE_KEY = "publishable_key"
+        internal const val FIELD_REQUEST_ID = "request_id"
         internal const val FIELD_SOURCE_ID = "source_id"
         internal const val FIELD_SOURCE_TYPE = "source_type"
         internal const val FIELD_3DS2_UI_TYPE = "3ds2_ui_type"
@@ -366,7 +412,8 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
         internal val VALID_PARAM_FIELDS: Set<String> = setOf(
             FIELD_ANALYTICS_UA, FIELD_APP_NAME, FIELD_APP_VERSION, FIELD_BINDINGS_VERSION,
             FIELD_DEVICE_TYPE, FIELD_EVENT, FIELD_OS_VERSION, FIELD_OS_NAME, FIELD_OS_RELEASE,
-            FIELD_PRODUCT_USAGE, FIELD_PUBLISHABLE_KEY, FIELD_SOURCE_TYPE, FIELD_TOKEN_TYPE
+            FIELD_PRODUCT_USAGE, FIELD_PUBLISHABLE_KEY, FIELD_REQUEST_ID,
+            FIELD_SOURCE_TYPE, FIELD_TOKEN_TYPE
         )
 
         private const val ANALYTICS_PREFIX = "analytics"
