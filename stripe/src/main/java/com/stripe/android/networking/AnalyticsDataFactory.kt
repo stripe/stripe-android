@@ -134,17 +134,13 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createPaymentMethodCreationParams(
-        paymentMethodId: String?,
         paymentMethodType: PaymentMethod.Type?,
         productUsageTokens: Set<String>?
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.PaymentMethodCreate,
             sourceType = paymentMethodType?.code,
-            productUsageTokens = productUsageTokens,
-            extraParams = paymentMethodId?.let {
-                mapOf(FIELD_PAYMENT_METHOD_ID to it)
-            }
+            productUsageTokens = productUsageTokens
         )
     }
 
@@ -237,12 +233,8 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     ): Map<String, Any> {
         return createParams(
             AnalyticsEvent.SetupIntentConfirm,
+            sourceType = paymentMethodType,
             extraParams = createIntentParam(intentId)
-                .plus(
-                    paymentMethodType?.let {
-                        mapOf(FIELD_PAYMENT_METHOD_TYPE to it)
-                    }.orEmpty()
-                )
         )
     }
 
@@ -364,8 +356,6 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
         internal const val FIELD_OS_NAME = "os_name"
         internal const val FIELD_OS_RELEASE = "os_release"
         internal const val FIELD_OS_VERSION = "os_version"
-        internal const val FIELD_PAYMENT_METHOD_ID = "payment_method_id"
-        internal const val FIELD_PAYMENT_METHOD_TYPE = "payment_method_type"
         internal const val FIELD_PUBLISHABLE_KEY = "publishable_key"
         internal const val FIELD_SOURCE_ID = "source_id"
         internal const val FIELD_SOURCE_TYPE = "source_type"

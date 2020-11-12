@@ -26,7 +26,6 @@ class AnalyticsRequestTest {
         val analyticsRequest = factory.create(
             params = AnalyticsDataFactory(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
                 .createPaymentMethodCreationParams(
-                    "pm_12345",
                     PaymentMethod.Type.Card,
                     emptySet()
                 )
@@ -41,7 +40,7 @@ class AnalyticsRequestTest {
         val requestUrl = analyticsRequest.url
 
         assertThat(requestUrl)
-            .isEqualTo("https://q.stripe.com?publishable_key=pk_test_123&app_version=0&bindings_version=$sdkVersion&os_version=28&os_release=9&device_type=unknown_Android_robolectric&source_type=card&app_name=com.stripe.android.test&payment_method_id=pm_12345&analytics_ua=analytics.stripe_android-1.0&os_name=REL&event=stripe_android.payment_method_creation")
+            .isEqualTo("https://q.stripe.com?app_name=com.stripe.android.test&publishable_key=pk_test_123&app_version=0&bindings_version=16.1.0&os_version=28&analytics_ua=analytics.stripe_android-1.0&os_name=REL&os_release=9&device_type=unknown_Android_robolectric&source_type=card&event=stripe_android.payment_method_creation")
     }
 
     @Test
@@ -49,7 +48,6 @@ class AnalyticsRequestTest {
         factory.create(
             AnalyticsDataFactory(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
                 .createPaymentMethodCreationParams(
-                    "pm_12345",
                     PaymentMethod.Type.Card,
                     emptySet()
                 )
