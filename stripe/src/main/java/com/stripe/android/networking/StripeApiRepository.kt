@@ -853,7 +853,9 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     FpxBankStatusesJsonParser()
                 )
             )
-        }.getOrDefault(FpxBankStatuses())
+        }.getOrDefault(FpxBankStatuses()).also {
+            fireAnalyticsRequest(AnalyticsEvent.FpxBankStatusesRetrieve)
+        }
     }
 
     override suspend fun getCardMetadata(
@@ -951,6 +953,9 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 requestOptions
             )
         )
+
+        fireAnalyticsRequest(AnalyticsEvent.StripeUrlRetrieve)
+
         return response.responseJson
     }
 
