@@ -1,7 +1,6 @@
 package com.stripe.android.networking
 
 import android.content.Context
-import android.util.Pair
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.AnalyticsEvent
 import com.stripe.android.ApiVersion
@@ -1029,7 +1028,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             handleApiError(response)
         }
 
-        resetDnsCacheTtl(dnsCacheData)
+        resetDnsCache(dnsCacheData)
 
         return response
     }
@@ -1058,7 +1057,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             handleApiError(response)
         }
 
-        resetDnsCacheTtl(dnsCacheData)
+        resetDnsCache(dnsCacheData)
 
         return response
     }
@@ -1067,28 +1066,24 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         analyticsRequestExecutor.executeAsync(request)
     }
 
-    private fun disableDnsCache(): Pair<Boolean, String> {
-        return try {
-            val originalDNSCacheTtl = Security.getProperty(DNS_CACHE_TTL_PROPERTY_NAME)
+    private fun disableDnsCache(): DnsCacheData {
+        return runCatching {
+            val originalDnsCacheTtl = Security.getProperty(DNS_CACHE_TTL_PROPERTY_NAME)
             // disable DNS cache
             Security.setProperty(DNS_CACHE_TTL_PROPERTY_NAME, "0")
-            Pair.create(true, originalDNSCacheTtl)
-        } catch (se: SecurityException) {
-            Pair.create(false, null)
-        }
+            DnsCacheData.Success(originalDnsCacheTtl)
+        }.getOrDefault(
+            DnsCacheData.Failure
+        )
     }
 
-    /**
-     * @param dnsCacheData first object - flag to reset [DNS_CACHE_TTL_PROPERTY_NAME]
-     * second object - the original DNS cache TTL value
-     */
-    private fun resetDnsCacheTtl(dnsCacheData: Pair<Boolean, String>) {
-        if (dnsCacheData.first) {
+    private fun resetDnsCache(dnsCacheData: DnsCacheData) {
+        if (dnsCacheData is DnsCacheData.Success) {
             // value unspecified by implementation
             // DNS_CACHE_TTL_PROPERTY_NAME of -1 = cache forever
             Security.setProperty(
                 DNS_CACHE_TTL_PROPERTY_NAME,
-                dnsCacheData.second ?: "-1"
+                dnsCacheData.originalDnsCacheTtl ?: "-1"
             )
         }
     }
@@ -1120,6 +1115,14 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     ): Map<String, Any> {
         return mapOf("client_secret" to clientSecret)
             .plus(createExpandParam(expandFields))
+    }
+
+    private sealed class DnsCacheData {
+        data class Success(
+            val originalDnsCacheTtl: String?
+        ) : DnsCacheData()
+
+        object Failure : DnsCacheData()
     }
 
     internal companion object {
