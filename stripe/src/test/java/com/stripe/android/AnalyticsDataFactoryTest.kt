@@ -92,31 +92,28 @@ class AnalyticsDataFactoryTest {
 
     @Test
     fun getPaymentMethodCreationParams() {
-        val expectedParams = mapOf(
-            "analytics_ua" to "analytics.stripe_android-1.0",
-            "event" to "stripe_android.payment_method_creation",
-            "publishable_key" to "pk_abc123",
-            "os_name" to "REL",
-            "os_release" to "9",
-            "os_version" to 28,
-            "device_type" to "unknown_Android_robolectric",
-            "bindings_version" to Stripe.VERSION_NAME,
-            "app_name" to "com.stripe.android.test",
-            "app_version" to 0,
-            "product_usage" to ATTRIBUTION.toList(),
-            "source_type" to "card",
-            "payment_method_id" to "pm_12345"
-        )
-
-        val actualParams = analyticsDataFactory
-            .createPaymentMethodCreationParams(
-                "pm_12345",
-                PaymentMethod.Type.Card,
-                ATTRIBUTION
+        assertThat(
+            analyticsDataFactory
+                .createPaymentMethodCreationParams(
+                    PaymentMethod.Type.Card,
+                    ATTRIBUTION
+                )
+        ).isEqualTo(
+            mapOf(
+                "analytics_ua" to "analytics.stripe_android-1.0",
+                "event" to "stripe_android.payment_method_creation",
+                "publishable_key" to "pk_abc123",
+                "os_name" to "REL",
+                "os_release" to "9",
+                "os_version" to 28,
+                "device_type" to "unknown_Android_robolectric",
+                "bindings_version" to Stripe.VERSION_NAME,
+                "app_name" to "com.stripe.android.test",
+                "app_version" to 0,
+                "product_usage" to ATTRIBUTION.toList(),
+                "source_type" to "card"
             )
-
-        assertThat(actualParams)
-            .isEqualTo(expectedParams)
+        )
     }
 
     @Test
@@ -164,7 +161,8 @@ class AnalyticsDataFactoryTest {
             PaymentMethod.Type.Card.code,
             "seti_12345"
         )
-        assertEquals("card", params[AnalyticsDataFactory.FIELD_PAYMENT_METHOD_TYPE])
+        assertThat(params[AnalyticsDataFactory.FIELD_SOURCE_TYPE])
+            .isEqualTo("card")
     }
 
     @Test

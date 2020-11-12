@@ -21,7 +21,6 @@ class AnalyticsRequestExecutorTest {
             AnalyticsRequest.Factory().create(
                 AnalyticsDataFactory(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
                     .createPaymentMethodCreationParams(
-                        "pm_12345",
                         PaymentMethod.Type.Card,
                         emptySet()
                     )

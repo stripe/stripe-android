@@ -38,7 +38,6 @@ import com.stripe.android.networking.ApiRequestExecutor;
 import com.stripe.android.networking.FakeAnalyticsRequestExecutor;
 import com.stripe.android.networking.StripeApiRepository;
 import com.stripe.android.networking.StripeRepository;
-import com.stripe.android.networking.StripeRequest;
 
 import java.io.File;
 import java.util.HashMap;
@@ -1131,13 +1130,13 @@ public class StripeTest {
 
         verify(analyticsRequestExecutor)
                 .executeAsync(analyticsRequestArgumentCaptor.capture());
-        final StripeRequest analyticsRequest = analyticsRequestArgumentCaptor.getValue();
-        assertEquals(AnalyticsRequest.HOST, analyticsRequest.getBaseUrl());
-        assertEquals(
-                createdPaymentMethod.id,
+        final AnalyticsRequest analyticsRequest = analyticsRequestArgumentCaptor.getValue();
+        assertThat(analyticsRequest.getBaseUrl())
+                .isEqualTo(AnalyticsRequest.HOST);
+        assertThat(
                 Objects.requireNonNull(analyticsRequest.getParams())
-                        .get(AnalyticsDataFactory.FIELD_PAYMENT_METHOD_ID)
-        );
+                        .get(AnalyticsDataFactory.FIELD_SOURCE_TYPE)
+        ).isEqualTo("card");
     }
 
     @Test
@@ -1164,13 +1163,15 @@ public class StripeTest {
 
         verify(analyticsRequestExecutor)
                 .executeAsync(analyticsRequestArgumentCaptor.capture());
-        final StripeRequest analyticsRequest = analyticsRequestArgumentCaptor.getValue();
-        assertEquals(AnalyticsRequest.HOST, analyticsRequest.getBaseUrl());
-        assertEquals(
-                createdPaymentMethod.id,
+
+        final AnalyticsRequest analyticsRequest = analyticsRequestArgumentCaptor.getValue();
+        assertThat(analyticsRequest.getBaseUrl())
+                .isEqualTo(AnalyticsRequest.HOST);
+
+        assertThat(
                 Objects.requireNonNull(analyticsRequest.getParams())
-                        .get(AnalyticsDataFactory.FIELD_PAYMENT_METHOD_ID)
-        );
+                        .get(AnalyticsDataFactory.FIELD_SOURCE_TYPE)
+        ).isEqualTo("ideal");
     }
 
     @Test
@@ -1194,13 +1195,12 @@ public class StripeTest {
 
         verify(analyticsRequestExecutor)
                 .executeAsync(analyticsRequestArgumentCaptor.capture());
-        final StripeRequest analyticsRequest = analyticsRequestArgumentCaptor.getValue();
+        final AnalyticsRequest analyticsRequest = analyticsRequestArgumentCaptor.getValue();
         assertEquals(AnalyticsRequest.HOST, analyticsRequest.getBaseUrl());
-        assertEquals(
-                createdPaymentMethod.id,
+        assertThat(
                 Objects.requireNonNull(analyticsRequest.getParams())
-                        .get(AnalyticsDataFactory.FIELD_PAYMENT_METHOD_ID)
-        );
+                        .get(AnalyticsDataFactory.FIELD_SOURCE_TYPE)
+        ).isEqualTo("fpx");
     }
 
     @Test
