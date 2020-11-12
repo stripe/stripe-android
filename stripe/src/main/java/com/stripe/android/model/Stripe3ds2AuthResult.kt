@@ -5,14 +5,14 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 internal data class Stripe3ds2AuthResult internal constructor(
     val id: String?,
-    private val objectType: String?,
     val ares: Ares? = null,
     val created: Long?,
     val source: String?,
     val state: String? = null,
     private val liveMode: Boolean = false,
     val error: ThreeDS2Error? = null,
-    val fallbackRedirectUrl: String? = null
+    val fallbackRedirectUrl: String? = null,
+    val creq: String? = null
 ) : StripeModel {
     @Parcelize
     internal data class Ares internal constructor(

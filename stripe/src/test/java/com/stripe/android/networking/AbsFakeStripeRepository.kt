@@ -4,7 +4,6 @@ import com.stripe.android.cards.Bin
 import com.stripe.android.exception.APIException
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.CardMetadata
-import com.stripe.android.model.Complete3ds2Result
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.Customer
@@ -225,7 +224,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun complete3ds2Auth(
         sourceId: String,
         requestOptions: ApiRequest.Options
-    ): Complete3ds2Result = Complete3ds2Result(true)
+    ) = Stripe3ds2AuthResultFixtures.CHALLENGE_COMPLETION
 
     override suspend fun createFile(
         fileParams: StripeFileParams,

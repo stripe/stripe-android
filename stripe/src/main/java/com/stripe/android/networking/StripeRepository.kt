@@ -7,7 +7,6 @@ import com.stripe.android.exception.AuthenticationException
 import com.stripe.android.exception.CardException
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.CardMetadata
-import com.stripe.android.model.Complete3ds2Result
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.Customer
@@ -313,7 +312,7 @@ internal interface StripeRepository {
     suspend fun complete3ds2Auth(
         sourceId: String,
         requestOptions: ApiRequest.Options
-    ): Complete3ds2Result
+    ): Stripe3ds2AuthResult?
 
     suspend fun createFile(
         fileParams: StripeFileParams,
