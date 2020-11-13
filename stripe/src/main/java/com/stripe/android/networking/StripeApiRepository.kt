@@ -121,26 +121,21 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             PaymentIntent.ClientSecret(confirmPaymentIntentParams.clientSecret).paymentIntentId
         )
 
-        try {
-            fireFingerprintRequest()
+        fireFingerprintRequest()
 
-            return fetchStripeModel(
-                apiRequestFactory.createPost(apiUrl, options, params),
-                PaymentIntentJsonParser()
-            ) { requestId ->
-                val paymentMethodType =
-                    confirmPaymentIntentParams.paymentMethodCreateParams?.typeCode
-                        ?: confirmPaymentIntentParams.sourceParams?.type
-                fireAnalyticsRequest(
-                    analyticsDataFactory.createPaymentIntentConfirmationParams(
-                        paymentMethodType,
-                        requestId = requestId
-                    )
+        return fetchStripeModel(
+            apiRequestFactory.createPost(apiUrl, options, params),
+            PaymentIntentJsonParser()
+        ) { requestId ->
+            val paymentMethodType =
+                confirmPaymentIntentParams.paymentMethodCreateParams?.typeCode
+                    ?: confirmPaymentIntentParams.sourceParams?.type
+            fireAnalyticsRequest(
+                analyticsDataFactory.createPaymentIntentConfirmationParams(
+                    paymentMethodType,
+                    requestId = requestId
                 )
-            }
-        } catch (unexpected: CardException) {
-            // This particular kind of exception should not be possible from a Source API endpoint.
-            throw APIException.create(unexpected)
+            )
         }
     }
 
@@ -166,25 +161,20 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
         fireFingerprintRequest()
 
-        try {
-            return fetchStripeModel(
-                apiRequestFactory.createGet(
-                    getRetrievePaymentIntentUrl(paymentIntentId),
-                    options,
-                    createClientSecretParam(clientSecret, expandFields)
-                ),
-                PaymentIntentJsonParser()
-            ) { requestId ->
-                fireAnalyticsRequest(
-                    analyticsDataFactory.createPaymentIntentRetrieveParams(
-                        paymentIntentId,
-                        requestId = requestId
-                    )
+        return fetchStripeModel(
+            apiRequestFactory.createGet(
+                getRetrievePaymentIntentUrl(paymentIntentId),
+                options,
+                createClientSecretParam(clientSecret, expandFields)
+            ),
+            PaymentIntentJsonParser()
+        ) { requestId ->
+            fireAnalyticsRequest(
+                analyticsDataFactory.createPaymentIntentRetrieveParams(
+                    paymentIntentId,
+                    requestId = requestId
                 )
-            }
-        } catch (unexpected: CardException) {
-            // This particular kind of exception should not be possible from a Source API endpoint.
-            throw APIException.create(unexpected)
+            )
         }
     }
 
@@ -204,23 +194,18 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     ): PaymentIntent? {
         fireFingerprintRequest()
 
-        try {
-            return fetchStripeModel(
-                apiRequestFactory.createPost(
-                    getCancelPaymentIntentSourceUrl(paymentIntentId),
-                    options,
-                    mapOf("source" to sourceId)
-                ),
-                PaymentIntentJsonParser()
-            ) { requestId ->
-                fireAnalyticsRequest(
-                    AnalyticsEvent.PaymentIntentCancelSource,
-                    requestId
-                )
-            }
-        } catch (unexpected: CardException) {
-            // This particular kind of exception should not be possible from a Source API endpoint.
-            throw APIException.create(unexpected)
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                getCancelPaymentIntentSourceUrl(paymentIntentId),
+                options,
+                mapOf("source" to sourceId)
+            ),
+            PaymentIntentJsonParser()
+        ) { requestId ->
+            fireAnalyticsRequest(
+                AnalyticsEvent.PaymentIntentCancelSource,
+                requestId
+            )
         }
     }
 
@@ -249,30 +234,25 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
         fireFingerprintRequest()
 
-        try {
-            return fetchStripeModel(
-                apiRequestFactory.createPost(
-                    getConfirmSetupIntentUrl(setupIntentId),
-                    options,
-                    fingerprintParamsUtils.addFingerprintData(
-                        confirmSetupIntentParams.toParamMap()
-                            .plus(createExpandParam(expandFields)),
-                        fingerprintData
-                    )
-                ),
-                SetupIntentJsonParser()
-            ) { requestId ->
-                fireAnalyticsRequest(
-                    analyticsDataFactory.createSetupIntentConfirmationParams(
-                        confirmSetupIntentParams.paymentMethodCreateParams?.typeCode,
-                        setupIntentId,
-                        requestId = requestId
-                    )
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                getConfirmSetupIntentUrl(setupIntentId),
+                options,
+                fingerprintParamsUtils.addFingerprintData(
+                    confirmSetupIntentParams.toParamMap()
+                        .plus(createExpandParam(expandFields)),
+                    fingerprintData
                 )
-            }
-        } catch (unexpected: CardException) {
-            // This particular kind of exception should not be possible from a Source API endpoint.
-            throw APIException.create(unexpected)
+            ),
+            SetupIntentJsonParser()
+        ) { requestId ->
+            fireAnalyticsRequest(
+                analyticsDataFactory.createSetupIntentConfirmationParams(
+                    confirmSetupIntentParams.paymentMethodCreateParams?.typeCode,
+                    setupIntentId,
+                    requestId = requestId
+                )
+            )
         }
     }
 
@@ -296,27 +276,22 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     ): SetupIntent? {
         val setupIntentId = SetupIntent.ClientSecret(clientSecret).setupIntentId
 
-        try {
-            fireFingerprintRequest()
+        fireFingerprintRequest()
 
-            return fetchStripeModel(
-                apiRequestFactory.createGet(
-                    getRetrieveSetupIntentUrl(setupIntentId),
-                    options,
-                    createClientSecretParam(clientSecret, expandFields)
-                ),
-                SetupIntentJsonParser()
-            ) { requestId ->
-                fireAnalyticsRequest(
-                    analyticsDataFactory.createSetupIntentRetrieveParams(
-                        setupIntentId,
-                        requestId = requestId
-                    )
+        return fetchStripeModel(
+            apiRequestFactory.createGet(
+                getRetrieveSetupIntentUrl(setupIntentId),
+                options,
+                createClientSecretParam(clientSecret, expandFields)
+            ),
+            SetupIntentJsonParser()
+        ) { requestId ->
+            fireAnalyticsRequest(
+                analyticsDataFactory.createSetupIntentRetrieveParams(
+                    setupIntentId,
+                    requestId = requestId
                 )
-            }
-        } catch (unexpected: CardException) {
-            // This particular kind of exception should not be possible from a Source API endpoint.
-            throw APIException.create(unexpected)
+            )
         }
     }
 
@@ -334,23 +309,18 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         sourceId: String,
         options: ApiRequest.Options
     ): SetupIntent? {
-        try {
-            return fetchStripeModel(
-                apiRequestFactory.createPost(
-                    getCancelSetupIntentSourceUrl(setupIntentId),
-                    options,
-                    mapOf("source" to sourceId)
-                ),
-                SetupIntentJsonParser()
-            ) { requestId ->
-                fireAnalyticsRequest(
-                    AnalyticsEvent.SetupIntentCancelSource,
-                    requestId
-                )
-            }
-        } catch (unexpected: CardException) {
-            // This particular kind of exception should not be possible from a Source API endpoint.
-            throw APIException.create(unexpected)
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                getCancelSetupIntentSourceUrl(setupIntentId),
+                options,
+                mapOf("source" to sourceId)
+            ),
+            SetupIntentJsonParser()
+        ) { requestId ->
+            fireAnalyticsRequest(
+                AnalyticsEvent.SetupIntentCancelSource,
+                requestId
+            )
         }
     }
 
@@ -375,27 +345,22 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     ): Source? {
         fireFingerprintRequest()
 
-        try {
-            return fetchStripeModel(
-                apiRequestFactory.createPost(
-                    sourcesUrl,
-                    options,
-                    sourceParams.toParamMap()
-                        .plus(fingerprintData?.params.orEmpty())
-                ),
-                SourceJsonParser()
-            ) { requestId ->
-                fireAnalyticsRequest(
-                    analyticsDataFactory.createSourceCreationParams(
-                        sourceParams.type,
-                        sourceParams.attribution,
-                        requestId = requestId
-                    )
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                sourcesUrl,
+                options,
+                sourceParams.toParamMap()
+                    .plus(fingerprintData?.params.orEmpty())
+            ),
+            SourceJsonParser()
+        ) { requestId ->
+            fireAnalyticsRequest(
+                analyticsDataFactory.createSourceCreationParams(
+                    sourceParams.type,
+                    sourceParams.attribution,
+                    requestId = requestId
                 )
-            }
-        } catch (unexpected: CardException) {
-            // This particular kind of exception should not be possible from a Source API endpoint.
-            throw APIException.create(unexpected)
+            )
         }
     }
 
@@ -418,25 +383,20 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         options: ApiRequest.Options
     ): Source? {
-        try {
-            return fetchStripeModel(
-                apiRequestFactory.createGet(
-                    getRetrieveSourceApiUrl(sourceId),
-                    options,
-                    SourceParams.createRetrieveSourceParams(clientSecret)
-                ),
-                SourceJsonParser()
-            ) { requestId ->
-                fireAnalyticsRequest(
-                    analyticsDataFactory.createSourceRetrieveParams(
-                        sourceId,
-                        requestId
-                    )
+        return fetchStripeModel(
+            apiRequestFactory.createGet(
+                getRetrieveSourceApiUrl(sourceId),
+                options,
+                SourceParams.createRetrieveSourceParams(clientSecret)
+            ),
+            SourceJsonParser()
+        ) { requestId ->
+            fireAnalyticsRequest(
+                analyticsDataFactory.createSourceRetrieveParams(
+                    sourceId,
+                    requestId
                 )
-            }
-        } catch (unexpected: CardException) {
-            // This particular kind of exception should not be possible from a Source API endpoint.
-            throw APIException.create(unexpected)
+            )
         }
     }
 
@@ -455,27 +415,22 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     ): PaymentMethod? {
         fireFingerprintRequest()
 
-        try {
-            return fetchStripeModel(
-                apiRequestFactory.createPost(
-                    paymentMethodsUrl,
-                    options,
-                    paymentMethodCreateParams.toParamMap()
-                        .plus(fingerprintData?.params.orEmpty())
-                ),
-                PaymentMethodJsonParser()
-            ) { requestId ->
-                fireAnalyticsRequest(
-                    analyticsDataFactory.createPaymentMethodCreationParams(
-                        paymentMethodCreateParams.type,
-                        productUsageTokens = paymentMethodCreateParams.attribution,
-                        requestId = requestId
-                    )
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                paymentMethodsUrl,
+                options,
+                paymentMethodCreateParams.toParamMap()
+                    .plus(fingerprintData?.params.orEmpty())
+            ),
+            PaymentMethodJsonParser()
+        ) { requestId ->
+            fireAnalyticsRequest(
+                analyticsDataFactory.createPaymentMethodCreationParams(
+                    paymentMethodCreateParams.type,
+                    productUsageTokens = paymentMethodCreateParams.attribution,
+                    requestId = requestId
                 )
-            }
-        } catch (unexpected: CardException) {
-            // This particular kind of exception should not be possible from a Source API endpoint.
-            throw APIException.create(unexpected)
+            )
         }
     }
 
