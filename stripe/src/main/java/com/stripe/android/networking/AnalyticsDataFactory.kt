@@ -45,11 +45,12 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
     @JvmSynthetic
     internal fun createAuthParams(
         event: AnalyticsEvent,
-        intentId: String
+        intentId: String,
+        requestId: RequestId? = null
     ): Map<String, Any> {
         return createParams(
             event,
-            requestId = null,
+            requestId = requestId,
             extraParams = createIntentParam(intentId)
         )
     }
