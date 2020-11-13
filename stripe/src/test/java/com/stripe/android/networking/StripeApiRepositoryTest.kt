@@ -357,6 +357,7 @@ internal class StripeApiRepositoryTest {
     @Test
     fun requestData_withConnectAccount_shouldReturnCorrectResponseHeaders() {
         val connectAccountId = "acct_1Acj2PBUgO3KuWzz"
+        var requestId: RequestId? = null
         val response = stripeApiRepository.makeApiRequest(
             DEFAULT_API_REQUEST_FACTORY.createPost(
                 StripeApiRepository.sourcesUrl,
@@ -366,11 +367,18 @@ internal class StripeApiRepositoryTest {
                 ),
                 SourceParams.createCardParams(CARD_PARAMS).toParamMap()
             )
-        )
+        ) {
+            requestId = it
+        }
         assertNotNull(response)
+        assertThat(requestId)
+            .isNotNull()
 
-        val accountsHeader = response.getHeaderValue(STRIPE_ACCOUNT_RESPONSE_HEADER)
-        requireNotNull(accountsHeader, { "Stripe API response should contain 'Stripe-Account' header" })
+        val accountsHeader = requireNotNull(
+            response.getHeaderValue(STRIPE_ACCOUNT_RESPONSE_HEADER)
+        ) {
+            "Stripe API response should contain 'Stripe-Account' header"
+        }
         assertThat(accountsHeader)
             .containsExactly(connectAccountId)
     }

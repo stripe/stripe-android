@@ -124,20 +124,20 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         try {
             fireFingerprintRequest()
 
-            val paymentMethodType =
-                confirmPaymentIntentParams.paymentMethodCreateParams?.typeCode
-                    ?: confirmPaymentIntentParams.sourceParams?.type
-
-            fireAnalyticsRequest(
-                analyticsDataFactory.createPaymentIntentConfirmationParams(
-                    paymentMethodType
-                )
-            )
-
             return fetchStripeModel(
                 apiRequestFactory.createPost(apiUrl, options, params),
                 PaymentIntentJsonParser()
-            )
+            ) { requestId ->
+                val paymentMethodType =
+                    confirmPaymentIntentParams.paymentMethodCreateParams?.typeCode
+                        ?: confirmPaymentIntentParams.sourceParams?.type
+                fireAnalyticsRequest(
+                    analyticsDataFactory.createPaymentIntentConfirmationParams(
+                        paymentMethodType,
+                        requestId = requestId
+                    )
+                )
+            }
         } catch (unexpected: CardException) {
             // This particular kind of exception should not be possible from a Source API endpoint.
             throw APIException.create(unexpected)
@@ -165,9 +165,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         val paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId
 
         fireFingerprintRequest()
-        fireAnalyticsRequest(
-            analyticsDataFactory.createPaymentIntentRetrieveParams(paymentIntentId)
-        )
 
         try {
             return fetchStripeModel(
@@ -177,7 +174,14 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     createClientSecretParam(clientSecret, expandFields)
                 ),
                 PaymentIntentJsonParser()
-            )
+            ) { requestId ->
+                fireAnalyticsRequest(
+                    analyticsDataFactory.createPaymentIntentRetrieveParams(
+                        paymentIntentId,
+                        requestId = requestId
+                    )
+                )
+            }
         } catch (unexpected: CardException) {
             // This particular kind of exception should not be possible from a Source API endpoint.
             throw APIException.create(unexpected)
@@ -199,7 +203,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options
     ): PaymentIntent? {
         fireFingerprintRequest()
-        fireAnalyticsRequest(AnalyticsEvent.PaymentIntentCancelSource)
 
         try {
             return fetchStripeModel(
@@ -209,7 +212,12 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     mapOf("source" to sourceId)
                 ),
                 PaymentIntentJsonParser()
-            )
+            ) { requestId ->
+                fireAnalyticsRequest(
+                    AnalyticsEvent.PaymentIntentCancelSource,
+                    requestId
+                )
+            }
         } catch (unexpected: CardException) {
             // This particular kind of exception should not be possible from a Source API endpoint.
             throw APIException.create(unexpected)
@@ -240,12 +248,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             SetupIntent.ClientSecret(confirmSetupIntentParams.clientSecret).setupIntentId
 
         fireFingerprintRequest()
-        fireAnalyticsRequest(
-            analyticsDataFactory.createSetupIntentConfirmationParams(
-                confirmSetupIntentParams.paymentMethodCreateParams?.typeCode,
-                setupIntentId
-            )
-        )
 
         try {
             return fetchStripeModel(
@@ -259,7 +261,15 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     )
                 ),
                 SetupIntentJsonParser()
-            )
+            ) { requestId ->
+                fireAnalyticsRequest(
+                    analyticsDataFactory.createSetupIntentConfirmationParams(
+                        confirmSetupIntentParams.paymentMethodCreateParams?.typeCode,
+                        setupIntentId,
+                        requestId = requestId
+                    )
+                )
+            }
         } catch (unexpected: CardException) {
             // This particular kind of exception should not be possible from a Source API endpoint.
             throw APIException.create(unexpected)
@@ -288,11 +298,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
         try {
             fireFingerprintRequest()
-            fireAnalyticsRequest(
-                analyticsDataFactory.createSetupIntentRetrieveParams(
-                    setupIntentId
-                )
-            )
 
             return fetchStripeModel(
                 apiRequestFactory.createGet(
@@ -301,7 +306,14 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     createClientSecretParam(clientSecret, expandFields)
                 ),
                 SetupIntentJsonParser()
-            )
+            ) { requestId ->
+                fireAnalyticsRequest(
+                    analyticsDataFactory.createSetupIntentRetrieveParams(
+                        setupIntentId,
+                        requestId = requestId
+                    )
+                )
+            }
         } catch (unexpected: CardException) {
             // This particular kind of exception should not be possible from a Source API endpoint.
             throw APIException.create(unexpected)
@@ -322,8 +334,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         sourceId: String,
         options: ApiRequest.Options
     ): SetupIntent? {
-        fireAnalyticsRequest(AnalyticsEvent.SetupIntentCancelSource)
-
         try {
             return fetchStripeModel(
                 apiRequestFactory.createPost(
@@ -332,7 +342,12 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     mapOf("source" to sourceId)
                 ),
                 SetupIntentJsonParser()
-            )
+            ) { requestId ->
+                fireAnalyticsRequest(
+                    AnalyticsEvent.SetupIntentCancelSource,
+                    requestId
+                )
+            }
         } catch (unexpected: CardException) {
             // This particular kind of exception should not be possible from a Source API endpoint.
             throw APIException.create(unexpected)
@@ -359,12 +374,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options
     ): Source? {
         fireFingerprintRequest()
-        fireAnalyticsRequest(
-            analyticsDataFactory.createSourceCreationParams(
-                sourceParams.type,
-                sourceParams.attribution
-            )
-        )
 
         try {
             return fetchStripeModel(
@@ -375,7 +384,15 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                         .plus(fingerprintData?.params.orEmpty())
                 ),
                 SourceJsonParser()
-            )
+            ) { requestId ->
+                fireAnalyticsRequest(
+                    analyticsDataFactory.createSourceCreationParams(
+                        sourceParams.type,
+                        sourceParams.attribution,
+                        requestId = requestId
+                    )
+                )
+            }
         } catch (unexpected: CardException) {
             // This particular kind of exception should not be possible from a Source API endpoint.
             throw APIException.create(unexpected)
@@ -401,21 +418,22 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         options: ApiRequest.Options
     ): Source? {
-        val apiUrl = getRetrieveSourceApiUrl(sourceId)
-
-        fireAnalyticsRequest(
-            analyticsDataFactory.createSourceRetrieveParams(sourceId)
-        )
-
         try {
             return fetchStripeModel(
                 apiRequestFactory.createGet(
-                    apiUrl,
+                    getRetrieveSourceApiUrl(sourceId),
                     options,
                     SourceParams.createRetrieveSourceParams(clientSecret)
                 ),
                 SourceJsonParser()
-            )
+            ) { requestId ->
+                fireAnalyticsRequest(
+                    analyticsDataFactory.createSourceRetrieveParams(
+                        sourceId,
+                        requestId
+                    )
+                )
+            }
         } catch (unexpected: CardException) {
             // This particular kind of exception should not be possible from a Source API endpoint.
             throw APIException.create(unexpected)
@@ -438,7 +456,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         fireFingerprintRequest()
 
         try {
-            val paymentMethod = fetchStripeModel(
+            return fetchStripeModel(
                 apiRequestFactory.createPost(
                     paymentMethodsUrl,
                     options,
@@ -446,16 +464,15 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                         .plus(fingerprintData?.params.orEmpty())
                 ),
                 PaymentMethodJsonParser()
-            )
-
-            fireAnalyticsRequest(
-                analyticsDataFactory.createPaymentMethodCreationParams(
-                    paymentMethod?.type,
-                    productUsageTokens = paymentMethodCreateParams.attribution
+            ) { requestId ->
+                fireAnalyticsRequest(
+                    analyticsDataFactory.createPaymentMethodCreationParams(
+                        paymentMethodCreateParams.type,
+                        productUsageTokens = paymentMethodCreateParams.attribution,
+                        requestId = requestId
+                    )
                 )
-            )
-
-            return paymentMethod
+            }
         } catch (unexpected: CardException) {
             // This particular kind of exception should not be possible from a Source API endpoint.
             throw APIException.create(unexpected)
@@ -486,13 +503,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     ): Token? {
         fireFingerprintRequest()
 
-        fireAnalyticsRequest(
-            analyticsDataFactory.createTokenCreationParams(
-                productUsageTokens = tokenParams.attribution,
-                tokenType = tokenParams.tokenType
-            )
-        )
-
         return fetchStripeModel(
             apiRequestFactory.createPost(
                 tokensUrl,
@@ -501,7 +511,15 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     .plus(fingerprintData?.params.orEmpty())
             ),
             TokenJsonParser()
-        )
+        ) { requestId ->
+            fireAnalyticsRequest(
+                analyticsDataFactory.createTokenCreationParams(
+                    productUsageTokens = tokenParams.attribution,
+                    tokenType = tokenParams.tokenType,
+                    requestId = requestId
+                )
+            )
+        }
     }
 
     /**
@@ -522,13 +540,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         @Source.SourceType sourceType: String,
         requestOptions: ApiRequest.Options
     ): Source? {
-        fireAnalyticsRequest(
-            analyticsDataFactory.createAddSourceParams(
-                productUsageTokens,
-                sourceType
-            )
-        )
-
         return fetchStripeModel(
             apiRequestFactory.createPost(
                 getAddCustomerSourceUrl(customerId),
@@ -536,7 +547,15 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 mapOf("source" to sourceId)
             ),
             SourceJsonParser()
-        )
+        ) { requestId ->
+            fireAnalyticsRequest(
+                analyticsDataFactory.createAddSourceParams(
+                    productUsageTokens,
+                    sourceType,
+                    requestId = requestId
+                )
+            )
+        }
     }
 
     /**
@@ -556,17 +575,20 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         sourceId: String,
         requestOptions: ApiRequest.Options
     ): Source? {
-        fireAnalyticsRequest(
-            analyticsDataFactory.createDeleteSourceParams(productUsageTokens)
-        )
-
         return fetchStripeModel(
             apiRequestFactory.createDelete(
                 getDeleteCustomerSourceUrl(customerId, sourceId),
                 requestOptions
             ),
             SourceJsonParser()
-        )
+        ) { requestId ->
+            fireAnalyticsRequest(
+                analyticsDataFactory.createDeleteSourceParams(
+                    productUsageTokens,
+                    requestId = requestId
+                )
+            )
+        }
     }
 
     /**
@@ -587,10 +609,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         requestOptions: ApiRequest.Options
     ): PaymentMethod? {
         fireFingerprintRequest()
-        fireAnalyticsRequest(
-            analyticsDataFactory
-                .createAttachPaymentMethodParams(productUsageTokens)
-        )
 
         return fetchStripeModel(
             apiRequestFactory.createPost(
@@ -599,7 +617,15 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 mapOf("customer" to customerId)
             ),
             PaymentMethodJsonParser()
-        )
+        ) { requestId ->
+            fireAnalyticsRequest(
+                analyticsDataFactory
+                    .createAttachPaymentMethodParams(
+                        productUsageTokens,
+                        requestId = requestId
+                    )
+            )
+        }
     }
 
     /**
@@ -618,18 +644,21 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         paymentMethodId: String,
         requestOptions: ApiRequest.Options
     ): PaymentMethod? {
-        fireAnalyticsRequest(
-            analyticsDataFactory
-                .createDetachPaymentMethodParams(productUsageTokens)
-        )
-
         return fetchStripeModel(
             apiRequestFactory.createPost(
                 getDetachPaymentMethodUrl(paymentMethodId),
                 requestOptions
             ),
             PaymentMethodJsonParser()
-        )
+        ) { requestId ->
+            fireAnalyticsRequest(
+                analyticsDataFactory
+                    .createDetachPaymentMethodParams(
+                        productUsageTokens,
+                        requestId = requestId
+                    )
+            )
+        }
     }
 
     /**
@@ -657,14 +686,15 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 listPaymentMethodsParams.toParamMap()
             ),
             PaymentMethodsListJsonParser()
-        )
-
-        fireAnalyticsRequest(
-            analyticsDataFactory.createParams(
-                AnalyticsEvent.CustomerRetrievePaymentMethods,
-                productUsageTokens = productUsageTokens
+        ) { requestId ->
+            fireAnalyticsRequest(
+                analyticsDataFactory.createParams(
+                    AnalyticsEvent.CustomerRetrievePaymentMethods,
+                    requestId = requestId,
+                    productUsageTokens = productUsageTokens
+                )
             )
-        )
+        }
 
         return paymentMethodsList?.paymentMethods.orEmpty()
     }
@@ -687,14 +717,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         @Source.SourceType sourceType: String,
         requestOptions: ApiRequest.Options
     ): Customer? {
-        fireAnalyticsRequest(
-            analyticsDataFactory.createParams(
-                event = AnalyticsEvent.CustomerSetDefaultSource,
-                productUsageTokens = productUsageTokens,
-                sourceType = sourceType
-            )
-        )
-
         return fetchStripeModel(
             apiRequestFactory.createPost(
                 getRetrieveCustomerUrl(customerId),
@@ -702,7 +724,16 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 mapOf("default_source" to sourceId)
             ),
             CustomerJsonParser()
-        )
+        ) { requestId ->
+            fireAnalyticsRequest(
+                analyticsDataFactory.createParams(
+                    event = AnalyticsEvent.CustomerSetDefaultSource,
+                    requestId = requestId,
+                    productUsageTokens = productUsageTokens,
+                    sourceType = sourceType
+                )
+            )
+        }
     }
 
     /**
@@ -722,13 +753,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         shippingInformation: ShippingInformation,
         requestOptions: ApiRequest.Options
     ): Customer? {
-        fireAnalyticsRequest(
-            analyticsDataFactory.createParams(
-                AnalyticsEvent.CustomerSetShippingInfo,
-                productUsageTokens = productUsageTokens
-            )
-        )
-
         return fetchStripeModel(
             apiRequestFactory.createPost(
                 getRetrieveCustomerUrl(customerId),
@@ -736,7 +760,15 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 mapOf("shipping" to shippingInformation.toParamMap())
             ),
             CustomerJsonParser()
-        )
+        ) { requestId ->
+            fireAnalyticsRequest(
+                analyticsDataFactory.createParams(
+                    AnalyticsEvent.CustomerSetShippingInfo,
+                    requestId = requestId,
+                    productUsageTokens = productUsageTokens
+                )
+            )
+        }
     }
 
     /**
@@ -754,20 +786,21 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
     ): Customer? {
-        fireAnalyticsRequest(
-            analyticsDataFactory.createParams(
-                AnalyticsEvent.CustomerRetrieve,
-                productUsageTokens = productUsageTokens
-            )
-        )
-
         return fetchStripeModel(
             apiRequestFactory.createGet(
                 getRetrieveCustomerUrl(customerId),
                 requestOptions
             ),
             CustomerJsonParser()
-        )
+        ) { requestId ->
+            fireAnalyticsRequest(
+                analyticsDataFactory.createParams(
+                    AnalyticsEvent.CustomerRetrieve,
+                    requestId = requestId,
+                    productUsageTokens = productUsageTokens
+                )
+            )
+        }
     }
 
     /**
@@ -787,10 +820,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         userOneTimeCode: String,
         ephemeralKeySecret: String
     ): String? {
-        fireAnalyticsRequest(
-            AnalyticsEvent.IssuingRetrievePin
-        )
-
         val issuingCardPin = fetchStripeModel(
             apiRequestFactory.createGet(
                 getIssuingCardPinUrl(cardId),
@@ -798,7 +827,13 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 mapOf("verification" to createVerificationParam(verificationId, userOneTimeCode))
             ),
             IssuingCardPinJsonParser()
-        )
+        ) { requestId ->
+            fireAnalyticsRequest(
+                AnalyticsEvent.IssuingRetrievePin,
+                requestId
+            )
+        }
+
         return issuingCardPin?.pin
     }
 
@@ -819,10 +854,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         userOneTimeCode: String,
         ephemeralKeySecret: String
     ) {
-        fireAnalyticsRequest(
-            AnalyticsEvent.IssuingUpdatePin
-        )
-
         makeApiRequest(
             apiRequestFactory.createPost(
                 getIssuingCardPinUrl(cardId),
@@ -832,29 +863,37 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     "pin" to newPin
                 )
             )
-        )
+        ) { requestId ->
+            fireAnalyticsRequest(
+                AnalyticsEvent.IssuingUpdatePin,
+                requestId
+            )
+        }
     }
 
     override suspend fun getFpxBankStatus(
         options: ApiRequest.Options
     ): FpxBankStatuses {
         return runCatching {
-            requireNotNull(
-                fetchStripeModel(
-                    apiRequestFactory.createGet(
-                        getApiUrl("fpx/bank_statuses"),
+            val fpxBankStatuses = fetchStripeModel(
+                apiRequestFactory.createGet(
+                    getApiUrl("fpx/bank_statuses"),
 
-                        // don't pass connected account
-                        options.copy(stripeAccount = null),
+                    // don't pass connected account
+                    options.copy(stripeAccount = null),
 
-                        mapOf("account_holder_type" to "individual")
-                    ),
-                    FpxBankStatusesJsonParser()
+                    mapOf("account_holder_type" to "individual")
+                ),
+                FpxBankStatusesJsonParser()
+            ) { requestId ->
+                fireAnalyticsRequest(
+                    AnalyticsEvent.FpxBankStatusesRetrieve,
+                    requestId
                 )
-            )
-        }.getOrDefault(FpxBankStatuses()).also {
-            fireAnalyticsRequest(AnalyticsEvent.FpxBankStatusesRetrieve)
-        }
+            }
+
+            requireNotNull(fpxBankStatuses)
+        }.getOrDefault(FpxBankStatuses())
     }
 
     override suspend fun getCardMetadata(
@@ -869,10 +908,13 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     mapOf("key" to options.apiKey, "bin_prefix" to bin.value)
                 ),
                 CardMetadataJsonParser(bin)
-            )
+            ) {
+                // no-op
+            }
         }.onFailure {
             fireAnalyticsRequest(
-                AnalyticsEvent.CardMetadataLoadFailure
+                AnalyticsEvent.CardMetadataLoadFailure,
+                null
             )
         }.getOrNull()
     }
@@ -886,13 +928,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         stripeIntentId: String,
         requestOptions: ApiRequest.Options
     ): Stripe3ds2AuthResult? {
-        fireAnalyticsRequest(
-            analyticsDataFactory.createAuthParams(
-                AnalyticsEvent.Auth3ds2Start,
-                stripeIntentId
-            )
-        )
-
         return fetchStripeModel(
             apiRequestFactory.createPost(
                 getApiUrl("3ds2/authenticate"),
@@ -900,7 +935,14 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 authParams.toParamMap()
             ),
             Stripe3ds2AuthResultJsonParser()
-        )
+        ) {
+            fireAnalyticsRequest(
+                analyticsDataFactory.createAuthParams(
+                    AnalyticsEvent.Auth3ds2Start,
+                    stripeIntentId
+                )
+            )
+        }
     }
 
     override suspend fun complete3ds2Auth(
@@ -914,7 +956,9 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 mapOf("source" to sourceId)
             ),
             Stripe3ds2AuthResultJsonParser()
-        )
+        ) {
+            // no-op
+        }
     }
 
     /**
@@ -926,8 +970,12 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     ): StripeFile {
         val response = makeFileUploadRequest(
             FileUploadRequest(fileParams, requestOptions, appInfo)
-        )
-        fireAnalyticsRequest(AnalyticsEvent.FileCreate)
+        ) { requestId ->
+            fireAnalyticsRequest(
+                AnalyticsEvent.FileCreate,
+                requestId
+            )
+        }
         return StripeFileJsonParser().parse(response.responseJson)
     }
 
@@ -951,9 +999,12 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 url,
                 requestOptions
             )
-        )
-
-        fireAnalyticsRequest(AnalyticsEvent.StripeUrlRetrieve)
+        ) { requestId ->
+            fireAnalyticsRequest(
+                AnalyticsEvent.StripeUrlRetrieve,
+                requestId
+            )
+        }
 
         return response.responseJson
     }
@@ -1004,9 +1055,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
     private suspend fun <ModelType : StripeModel> fetchStripeModel(
         apiRequest: ApiRequest,
-        jsonParser: ModelJsonParser<ModelType>
+        jsonParser: ModelJsonParser<ModelType>,
+        onResponse: (RequestId?) -> Unit
     ): ModelType? {
-        return jsonParser.parse(makeApiRequest(apiRequest).responseJson)
+        return jsonParser.parse(makeApiRequest(apiRequest, onResponse).responseJson)
     }
 
     @VisibleForTesting
@@ -1017,11 +1069,16 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         CardException::class,
         APIException::class
     )
-    internal fun makeApiRequest(apiRequest: ApiRequest): StripeResponse {
+    internal fun makeApiRequest(
+        apiRequest: ApiRequest,
+        onResponse: (RequestId?) -> Unit
+    ): StripeResponse {
         val dnsCacheData = disableDnsCache()
 
         val response = runCatching {
             stripeApiRequestExecutor.execute(apiRequest)
+        }.also {
+            onResponse(it.getOrNull()?.requestId)
         }.getOrElse {
             throw when (it) {
                 is IOException -> APIConnectionException.create(it, apiRequest.baseUrl)
@@ -1046,11 +1103,16 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         CardException::class,
         APIException::class
     )
-    internal fun makeFileUploadRequest(fileUploadRequest: FileUploadRequest): StripeResponse {
+    internal fun makeFileUploadRequest(
+        fileUploadRequest: FileUploadRequest,
+        onResponse: (RequestId?) -> Unit
+    ): StripeResponse {
         val dnsCacheData = disableDnsCache()
 
         val response = runCatching {
             stripeApiRequestExecutor.execute(fileUploadRequest)
+        }.also {
+            onResponse(it.getOrNull()?.requestId)
         }.getOrElse {
             throw when (it) {
                 is IOException -> APIConnectionException.create(it, fileUploadRequest.baseUrl)
@@ -1065,10 +1127,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         resetDnsCache(dnsCacheData)
 
         return response
-    }
-
-    private fun makeAnalyticsRequest(request: AnalyticsRequest) {
-        analyticsRequestExecutor.executeAsync(request)
     }
 
     private fun disableDnsCache(): DnsCacheData {
@@ -1098,10 +1156,14 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     private fun fireAnalyticsRequest(
-        event: AnalyticsEvent
+        event: AnalyticsEvent,
+        requestId: RequestId?
     ) {
         fireAnalyticsRequest(
-            analyticsDataFactory.createParams(event)
+            analyticsDataFactory.createParams(
+                event,
+                requestId
+            )
         )
     }
 
@@ -1109,7 +1171,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     internal fun fireAnalyticsRequest(
         params: Map<String, Any>
     ) {
-        makeAnalyticsRequest(
+        analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.create(params)
         )
     }
