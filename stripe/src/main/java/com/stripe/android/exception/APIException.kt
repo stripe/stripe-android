@@ -22,17 +22,4 @@ class APIException(
         message = throwable.message,
         cause = throwable
     )
-
-    internal companion object {
-        @JvmSynthetic
-        internal fun create(e: CardException): APIException {
-            return APIException(
-                stripeError = e.stripeError,
-                requestId = e.requestId,
-                statusCode = e.statusCode,
-                message = e.message,
-                cause = e
-            )
-        }
-    }
 }
