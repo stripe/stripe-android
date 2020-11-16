@@ -236,15 +236,17 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
-    internal enum class TransitionTarget {
+    internal enum class TransitionTarget(
+        val sheetMode: SheetMode
+    ) {
         // User has saved PM's and is selected
-        SelectSavedPaymentMethod,
+        SelectSavedPaymentMethod(SheetMode.Wrapped),
 
         // User has saved PM's and is adding a new one
-        AddPaymentMethodFull,
+        AddPaymentMethodFull(SheetMode.Full),
 
         // User has no saved PM's
-        AddPaymentMethodSheet
+        AddPaymentMethodSheet(SheetMode.FullCollapsed)
     }
 
     internal class Factory(

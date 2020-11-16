@@ -126,44 +126,9 @@ internal class PaymentSheetActivity : AppCompatActivity() {
             )
         }
 
-        viewModel.transition.observe(this) { transactionTarget ->
-            supportFragmentManager.commit {
-                when (transactionTarget) {
-                    PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull -> {
-                        setCustomAnimations(
-                            AnimationConstants.FADE_IN,
-                            AnimationConstants.FADE_OUT,
-                            AnimationConstants.FADE_IN,
-                            AnimationConstants.FADE_OUT
-                        )
-                        addToBackStack(null)
-                        replace(
-                            fragmentContainerId,
-                            PaymentSheetAddCardFragment().also {
-                                it.arguments = fragmentArgs
-                            }
-                        )
-                        viewModel.updateMode(SheetMode.Full)
-                    }
-                    PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod -> {
-                        replace(
-                            fragmentContainerId,
-                            PaymentSheetPaymentMethodsListFragment().also {
-                                it.arguments = fragmentArgs
-                            }
-                        )
-                        viewModel.updateMode(SheetMode.Wrapped)
-                    }
-                    PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet -> {
-                        replace(
-                            fragmentContainerId,
-                            PaymentSheetAddCardFragment().also {
-                                it.arguments = fragmentArgs
-                            }
-                        )
-                        viewModel.updateMode(SheetMode.FullCollapsed)
-                    }
-                }
+        viewModel.transition.observe(this) { transitionTarget ->
+            if (transitionTarget != null) {
+                onTransitionTarget(transitionTarget, fragmentArgs)
             }
         }
 
@@ -179,6 +144,48 @@ internal class PaymentSheetActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun onTransitionTarget(
+        transitionTarget: PaymentSheetViewModel.TransitionTarget,
+        fragmentArgs: Bundle
+    ) {
+        supportFragmentManager.commit {
+            when (transitionTarget) {
+                PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull -> {
+                    setCustomAnimations(
+                        AnimationConstants.FADE_IN,
+                        AnimationConstants.FADE_OUT,
+                        AnimationConstants.FADE_IN,
+                        AnimationConstants.FADE_OUT
+                    )
+                    addToBackStack(null)
+                    replace(
+                        fragmentContainerId,
+                        PaymentSheetAddCardFragment().also {
+                            it.arguments = fragmentArgs
+                        }
+                    )
+                }
+                PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod -> {
+                    replace(
+                        fragmentContainerId,
+                        PaymentSheetPaymentMethodsListFragment().also {
+                            it.arguments = fragmentArgs
+                        }
+                    )
+                }
+                PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet -> {
+                    replace(
+                        fragmentContainerId,
+                        PaymentSheetAddCardFragment().also {
+                            it.arguments = fragmentArgs
+                        }
+                    )
+                }
+            }
+        }
+        viewModel.updateMode(transitionTarget.sheetMode)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
