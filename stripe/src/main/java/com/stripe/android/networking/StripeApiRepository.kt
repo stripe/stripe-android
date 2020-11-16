@@ -890,11 +890,12 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 authParams.toParamMap()
             ),
             Stripe3ds2AuthResultJsonParser()
-        ) {
+        ) { requestId ->
             fireAnalyticsRequest(
                 analyticsDataFactory.createAuthParams(
                     AnalyticsEvent.Auth3ds2Start,
-                    stripeIntentId
+                    stripeIntentId,
+                    requestId
                 )
             )
         }
