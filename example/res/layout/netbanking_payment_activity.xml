@@ -19,19 +19,12 @@
             style="?android:attr/progressBarStyleHorizontal"
             />
 
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+        <Spinner
+            android:id="@+id/bank_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Bank">
-
-            <AutoCompleteTextView
-                android:id="@+id/bank_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="Bank" />
-        </com.google.android.material.textfield.TextInputLayout>
+            android:layout_weight="1"
+            android:hint="Bank" />
 
         <Button
             android:id="@+id/submit"

@@ -20,14 +20,16 @@ class NetbankingPaymentActivity : StripeIntentActivity() {
         viewModel.inProgress.observe(this, { enableUi(!it) })
         viewModel.status.observe(this, Observer(viewBinding.status::setText))
 
-        val adapter = ArrayAdapter(this, android.R.layout.expandable_list_content, arrayListOf("hdfc", "icici", "sbi", "axis", "hdfc_fake"))
-        viewBinding.bankName.threshold = 0
-        viewBinding.bankName.setAdapter(adapter)
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayListOf("HDFC", "ICICI", "SBI", "Axis")).also { adapter ->
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+
+        viewBinding.bankName.adapter = adapter
 
         viewBinding.submit.setOnClickListener {
             val params = PaymentMethodCreateParams.create(
                 netbanking = PaymentMethodCreateParams.Netbanking(
-                    bank = viewBinding.bankName.text.toString()
+                    bank = viewBinding.bankName.selectedItem.toString()
                 ),
                 billingDetails = PaymentMethod.BillingDetails(
                     name = "Jenny Rosen",
