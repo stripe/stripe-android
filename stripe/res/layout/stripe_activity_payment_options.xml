@@ -14,6 +14,24 @@
         android:background="?colorSurface"
         android:paddingTop="@dimen/stripe_paymentsheet_padding_top"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+        <com.stripe.android.paymentsheet.ui.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
+            app:layout_constraintBottom_toTopOf="@+id/fragment_container"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.fragment.app.FragmentContainerView
+            app:layout_constraintTop_toBottomOf="@id/toolbar"
+            app:layout_constraintVertical_bias="0.0"
+            app:layout_constraintBottom_toTopOf="@+id/buy_button"
+            android:id="@+id/fragment_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
         <com.stripe.android.paymentsheet.BuyButton
             android:id="@+id/buy_button"
             android:layout_margin="@dimen/stripe_paymentsheet_outer_spacing"
@@ -22,6 +40,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

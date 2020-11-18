@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import android.content.Intent
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.utils.InjectableActivityScenario
@@ -17,6 +16,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -33,7 +33,7 @@ class PaymentOptionsActivityTest {
     )
 
     @Test
-    fun `activity launches successfully in Guest mode`() {
+    fun `click outside of bottom sheet should return cancel result`() {
         val intent = Intent(
             ApplicationProvider.getApplicationContext(),
             PaymentOptionsActivity::class.java
@@ -47,8 +47,15 @@ class PaymentOptionsActivityTest {
             // wait for bottom sheet to animate in
             testCoroutineDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
             idleLooper()
-            assertThat(activity.bottomSheetBehavior.state)
-                .isEqualTo(BottomSheetBehavior.STATE_COLLAPSED)
+
+            activity.viewBinding.root.performClick()
+            idleLooper()
+
+            assertThat(
+                PaymentOptionResult.fromIntent(Shadows.shadowOf(activity).resultIntent)
+            ).isEqualTo(
+                PaymentOptionResult.Cancelled(null)
+            )
         }
     }
 
