@@ -28,8 +28,8 @@ internal class PaymentSheetPaymentMethodsListFragment : Fragment(
 
     private val fragmentViewModel by viewModels<PaymentMethodsViewModel>()
 
-    private val adapter: PaymentSheetPaymentMethodsAdapter by lazy {
-        PaymentSheetPaymentMethodsAdapter(
+    private val adapter: PaymentMethodsAdapter by lazy {
+        PaymentMethodsAdapter(
             fragmentViewModel.selectedPaymentMethod,
             paymentMethodSelectedListener = {
                 fragmentViewModel.selectedPaymentMethod = it
