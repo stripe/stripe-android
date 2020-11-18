@@ -17,7 +17,7 @@ import com.stripe.android.paymentsheet.ui.BasePaymentSheetActivity
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.ui.Toolbar
 
-internal class PaymentSheetActivity : BasePaymentSheetActivity() {
+internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() {
     @VisibleForTesting
     internal var viewModelFactory: ViewModelProvider.Factory =
         PaymentSheetViewModel.Factory(
@@ -63,7 +63,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity() {
 
         val starterArgs = this.starterArgs
         if (starterArgs == null) {
-            setPaymentSheetResult(
+            setActivityResult(
                 PaymentResult.Failed(
                     IllegalArgumentException("PaymentSheet started without arguments."),
                     null
@@ -233,20 +233,11 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity() {
         }
     }
 
-    private fun animateOut(
-        paymentResult: PaymentResult
-    ) {
-        setPaymentSheetResult(paymentResult)
-        bottomSheetController.hide()
-    }
-
-    private fun setPaymentSheetResult(
-        paymentResult: PaymentResult
-    ) {
+    override fun setActivityResult(result: PaymentResult) {
         setResult(
-            paymentResult.resultCode,
+            result.resultCode,
             Intent()
-                .putExtras(PaymentSheet.Result(paymentResult).toBundle())
+                .putExtras(PaymentSheet.Result(result).toBundle())
         )
     }
 
@@ -259,9 +250,11 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity() {
         )
     }
 
-    internal companion object {
-        internal const val ANIMATE_IN_DELAY = 300L
+    override fun hideSheet() {
+        bottomSheetController.hide()
+    }
 
-        internal const val EXTRA_STARTER_ARGS = "com.stripe.android.paymentsheet.extra_starter_args"
+    internal companion object {
+        internal const val EXTRA_STARTER_ARGS = BasePaymentSheetActivity.EXTRA_STARTER_ARGS
     }
 }

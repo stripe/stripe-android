@@ -26,7 +26,7 @@ internal class BottomSheetController(
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
 
         lifecycleScope.launch {
-            delay(PaymentSheetActivity.ANIMATE_IN_DELAY)
+            delay(ANIMATE_IN_DELAY)
             bottomSheetBehavior.state = sheetModeLiveData.value?.behaviourState ?: BottomSheetBehavior.STATE_EXPANDED
             bottomSheetBehavior.addBottomSheetCallback(
                 object : BottomSheetBehavior.BottomSheetCallback() {
@@ -53,5 +53,9 @@ internal class BottomSheetController(
         // When the bottom sheet finishes animating to its new state,
         // the callback will finish the activity
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+    }
+
+    internal companion object {
+        const val ANIMATE_IN_DELAY = 300L
     }
 }
