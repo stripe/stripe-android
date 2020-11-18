@@ -2,7 +2,10 @@ package com.stripe.android.paymentsheet
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
+import androidx.core.os.bundleOf
+import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -51,6 +54,10 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
         )
     }
 
+    private val fragmentContainerId: Int
+        @IdRes
+        get() = viewBinding.fragmentContainer.id
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -59,6 +66,7 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
             finish()
             return
         }
+        val fragmentArgs = bundleOf(EXTRA_STARTER_ARGS to starterArgs)
 
         setContentView(viewBinding.root)
 
@@ -98,6 +106,22 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
         }
         bottomSheetController.setup()
 
+        setupPrimaryButton()
+
+        viewModel.transition.observe(this) { transitionTarget ->
+            if (transitionTarget != null) {
+                onTransitionTarget(transitionTarget, fragmentArgs)
+            }
+        }
+
+        viewModel.transitionTo(
+            if (starterArgs.paymentMethods.isEmpty()) {
+                PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodSheet
+            } else {
+                PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod
+            }
+        )
+
         viewBinding.toolbar.action.observe(this) { action ->
             if (action != null) {
                 when (action) {
@@ -110,6 +134,30 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
                 }
             }
         }
+    }
+
+    private fun setupPrimaryButton() {
+        // TODO: implement
+    }
+
+    private fun onTransitionTarget(
+        transitionTarget: PaymentOptionsViewModel.TransitionTarget,
+        fragmentArgs: Bundle
+    ) {
+        supportFragmentManager.commit {
+            when (transitionTarget) {
+                PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodFull -> {
+                    // TODO: implement
+                }
+                PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod -> {
+                    // TODO: implement
+                }
+                PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodSheet -> {
+                    // TODO: implement
+                }
+            }
+        }
+        viewModel.updateMode(transitionTarget.sheetMode)
     }
 
     override fun setActivityResult(result: PaymentOptionResult) {
