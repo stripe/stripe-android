@@ -3,13 +3,13 @@ package com.stripe.android.paymentsheet
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
-import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.databinding.StripeActivityPaymentOptionsBinding
+import com.stripe.android.paymentsheet.ui.BasePaymentSheetActivity
 
 /**
  * An `Activity` for selecting a payment option.
  */
-class PaymentOptionsActivity : AppCompatActivity() {
+internal class PaymentOptionsActivity : BasePaymentSheetActivity() {
     @VisibleForTesting
     internal val viewBinding by lazy {
         StripeActivityPaymentOptionsBinding.inflate(layoutInflater)
@@ -31,5 +31,9 @@ class PaymentOptionsActivity : AppCompatActivity() {
         }
 
         setContentView(viewBinding.root)
+    }
+
+    override fun onUserCancel() {
+        // TODO(mshafrir-stripe): implement
     }
 }
