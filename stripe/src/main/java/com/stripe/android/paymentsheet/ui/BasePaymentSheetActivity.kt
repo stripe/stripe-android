@@ -2,8 +2,10 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.appcompat.app.AppCompatActivity
 
-internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
+internal abstract class BasePaymentSheetActivity<ResultType> : AppCompatActivity() {
     abstract fun onUserCancel()
+    abstract fun hideSheet()
+    abstract fun setActivityResult(result: ResultType)
 
     override fun finish() {
         super.finish()
@@ -16,5 +18,16 @@ internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
         } else {
             onUserCancel()
         }
+    }
+
+    protected fun animateOut(
+        result: ResultType
+    ) {
+        setActivityResult(result)
+        hideSheet()
+    }
+
+    protected companion object {
+        const val EXTRA_STARTER_ARGS = "com.stripe.android.paymentsheet.extra_starter_args"
     }
 }

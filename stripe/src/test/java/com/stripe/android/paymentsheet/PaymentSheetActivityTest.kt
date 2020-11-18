@@ -90,7 +90,7 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
-            testCoroutineDispatcher.advanceTimeBy(PaymentSheetActivity.ANIMATE_IN_DELAY)
+            testCoroutineDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
             idleLooper()
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_COLLAPSED)
@@ -132,7 +132,7 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
-            testCoroutineDispatcher.advanceTimeBy(PaymentSheetActivity.ANIMATE_IN_DELAY)
+            testCoroutineDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
             idleLooper()
 
             assertThat(currentFragment(activity))
@@ -183,7 +183,7 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
-            testCoroutineDispatcher.advanceTimeBy(PaymentSheetActivity.ANIMATE_IN_DELAY)
+            testCoroutineDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
             idleLooper()
 
             viewModel.updateSelection(PaymentSelection.Saved("saved_pm"))
@@ -255,7 +255,7 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
-            testCoroutineDispatcher.advanceTimeBy(PaymentSheetActivity.ANIMATE_IN_DELAY)
+            testCoroutineDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
             idleLooper()
 
             assertThat(currentFragment(activity))
