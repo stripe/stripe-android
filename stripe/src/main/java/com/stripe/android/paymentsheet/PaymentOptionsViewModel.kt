@@ -1,34 +1,19 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.distinctUntilChanged
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.ui.SheetMode
+import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 
 internal class PaymentOptionsViewModel(
     private val publishableKey: String,
     private val stripeAccountId: String?,
     private val args: PaymentOptionsActivityStarter.Args,
-) : ViewModel() {
-    private val mutableError = MutableLiveData<Throwable>()
-    private val mutableSheetMode = MutableLiveData<SheetMode>()
-    private val mutableTransition = MutableLiveData<TransitionTarget>()
-
-    internal val error: LiveData<Throwable> = mutableError
-    internal val sheetMode: LiveData<SheetMode> = mutableSheetMode.distinctUntilChanged()
-    internal val transition: LiveData<TransitionTarget> = mutableTransition
-
-    fun transitionTo(target: TransitionTarget) {
-        mutableTransition.postValue(target)
-    }
-
-    fun updateMode(mode: SheetMode) {
-        mutableSheetMode.postValue(mode)
-    }
+) : SheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
+    isGuestMode = args is PaymentOptionsActivityStarter.Args.Guest
+) {
 
     internal enum class TransitionTarget(
         val sheetMode: SheetMode
