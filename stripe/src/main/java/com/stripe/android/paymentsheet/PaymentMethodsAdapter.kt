@@ -12,7 +12,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlin.properties.Delegates
 
-internal class PaymentSheetPaymentMethodsAdapter(
+internal class PaymentMethodsAdapter(
     selectedPaymentMethod: PaymentSelection?,
     val paymentMethodSelectedListener: (PaymentSelection) -> Unit,
     val addCardClickListener: View.OnClickListener
