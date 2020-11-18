@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
@@ -14,10 +13,11 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.ui.AnimationConstants
+import com.stripe.android.paymentsheet.ui.BasePaymentSheetActivity
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.ui.Toolbar
 
-internal class PaymentSheetActivity : AppCompatActivity() {
+internal class PaymentSheetActivity : BasePaymentSheetActivity() {
     @VisibleForTesting
     internal var viewModelFactory: ViewModelProvider.Factory =
         PaymentSheetViewModel.Factory(
@@ -250,20 +250,7 @@ internal class PaymentSheetActivity : AppCompatActivity() {
         )
     }
 
-    override fun finish() {
-        super.finish()
-        overridePendingTransition(0, 0)
-    }
-
-    override fun onBackPressed() {
-        if (supportFragmentManager.backStackEntryCount > 0) {
-            super.onBackPressed()
-        } else {
-            onUserCancel()
-        }
-    }
-
-    private fun onUserCancel() {
+    override fun onUserCancel() {
         animateOut(
             PaymentResult.Cancelled(
                 viewModel.error.value,
