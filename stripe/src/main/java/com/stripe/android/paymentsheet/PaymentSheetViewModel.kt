@@ -8,7 +8,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.ApiResultCallback
@@ -43,16 +42,14 @@ internal class PaymentSheetViewModel internal constructor(
     private val googlePayRepository: GooglePayRepository,
     internal val args: PaymentSheetActivityStarter.Args,
     private val workContext: CoroutineContext
-) : SheetViewModel<PaymentSheetViewModel.TransitionTarget>(
+) : SheetViewModel<PaymentSheetViewModel.TransitionTarget, ViewState>(
     isGuestMode = args is PaymentSheetActivityStarter.Args.Guest
 ) {
     private val mutablePaymentMethods = MutableLiveData<List<PaymentMethod>>()
     private val mutablePaymentIntent = MutableLiveData<PaymentIntent?>()
-    private val mutableViewState = MutableLiveData<ViewState>(null)
 
     internal val paymentIntent: LiveData<PaymentIntent?> = mutablePaymentIntent
     internal val paymentMethods: LiveData<List<PaymentMethod>> = mutablePaymentMethods
-    internal val viewState: LiveData<ViewState> = mutableViewState.distinctUntilChanged()
 
     fun updatePaymentMethods() {
         when (args) {

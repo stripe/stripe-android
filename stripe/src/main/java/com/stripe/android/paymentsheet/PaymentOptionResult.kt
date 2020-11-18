@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.os.bundleOf
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.view.ActivityStarter
 import kotlinx.android.parcel.Parcelize
 
@@ -17,9 +16,7 @@ internal sealed class PaymentOptionResult(
     }
 
     @Parcelize
-    data class Succeeded(
-        val paymentMethod: PaymentMethod
-    ) : PaymentOptionResult(Activity.RESULT_OK)
+    object Succeeded : PaymentOptionResult(Activity.RESULT_OK)
 
     @Parcelize
     data class Failed(

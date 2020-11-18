@@ -10,7 +10,7 @@ import com.stripe.android.paymentsheet.ui.SheetMode
 /**
  * Base `ViewModel` for activities that use `BottomSheet`.
  */
-internal abstract class SheetViewModel<TransitionTargetType>(
+internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
     internal val isGuestMode: Boolean
 ) : ViewModel() {
 
@@ -28,6 +28,9 @@ internal abstract class SheetViewModel<TransitionTargetType>(
 
     protected val mutableProcessing = MutableLiveData(false)
     val processing = mutableProcessing.distinctUntilChanged()
+
+    protected val mutableViewState = MutableLiveData<ViewStateType>(null)
+    internal val viewState: LiveData<ViewStateType> = mutableViewState.distinctUntilChanged()
 
     internal var shouldSavePaymentMethod: Boolean = false
 

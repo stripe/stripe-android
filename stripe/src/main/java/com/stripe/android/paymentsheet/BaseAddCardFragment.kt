@@ -17,7 +17,7 @@ import com.stripe.android.view.CardInputListener
  * A `Fragment` for adding new card payment method.
  */
 internal abstract class BaseAddCardFragment : Fragment(R.layout.fragment_paymentsheet_add_card) {
-    abstract val sheetViewModel: SheetViewModel<*>
+    abstract val sheetViewModel: SheetViewModel<*, *>
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
