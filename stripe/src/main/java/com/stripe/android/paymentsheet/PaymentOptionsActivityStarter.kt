@@ -14,15 +14,20 @@ internal class PaymentOptionsActivityStarter internal constructor(
     REQUEST_CODE
 ) {
     sealed class Args : ActivityStarter.Args {
+        abstract val paymentMethods: List<PaymentMethod>
+
         @Parcelize
         data class Default(
-            val paymentMethods: List<PaymentMethod>,
+            override val paymentMethods: List<PaymentMethod>,
             val ephemeralKey: String,
             val customerId: String
         ) : Args()
 
         @Parcelize
-        object Guest : Args()
+        object Guest : Args() {
+            override val paymentMethods: List<PaymentMethod>
+                get() = emptyList()
+        }
 
         internal companion object {
             internal fun fromIntent(intent: Intent): Args? {
