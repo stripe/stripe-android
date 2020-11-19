@@ -26,6 +26,7 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.SheetMode
+import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 import com.stripe.android.view.AuthActivityStarter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
@@ -42,38 +43,16 @@ internal class PaymentSheetViewModel internal constructor(
     private val googlePayRepository: GooglePayRepository,
     internal val args: PaymentSheetActivityStarter.Args,
     private val workContext: CoroutineContext
-) : ViewModel() {
-    private val mutableError = MutableLiveData<Throwable>()
-    private val mutableTransition = MutableLiveData<TransitionTarget>()
-    private val mutableSheetMode = MutableLiveData<SheetMode>()
+) : SheetViewModel<PaymentSheetViewModel.TransitionTarget>(
+    isGuestMode = args is PaymentSheetActivityStarter.Args.Guest
+) {
     private val mutablePaymentMethods = MutableLiveData<List<PaymentMethod>>()
     private val mutablePaymentIntent = MutableLiveData<PaymentIntent?>()
-    private val mutableSelection = MutableLiveData<PaymentSelection?>()
     private val mutableViewState = MutableLiveData<ViewState>(null)
-    private val mutableProcessing = MutableLiveData(false)
 
     internal val paymentIntent: LiveData<PaymentIntent?> = mutablePaymentIntent
     internal val paymentMethods: LiveData<List<PaymentMethod>> = mutablePaymentMethods
-    internal val error: LiveData<Throwable> = mutableError
-    internal val transition: LiveData<TransitionTarget> = mutableTransition
-    internal val selection: LiveData<PaymentSelection?> = mutableSelection
-    internal val sheetMode: LiveData<SheetMode> = mutableSheetMode.distinctUntilChanged()
     internal val viewState: LiveData<ViewState> = mutableViewState.distinctUntilChanged()
-    internal val processing = mutableProcessing.distinctUntilChanged()
-
-    internal var shouldSavePaymentMethod: Boolean = false
-
-    fun onError(throwable: Throwable) {
-        mutableError.postValue(throwable)
-    }
-
-    fun transitionTo(target: TransitionTarget) {
-        mutableTransition.postValue(target)
-    }
-
-    fun updateSelection(selection: PaymentSelection?) {
-        mutableSelection.postValue(selection)
-    }
 
     fun updatePaymentMethods() {
         when (args) {
@@ -87,10 +66,6 @@ internal class PaymentSheetViewModel internal constructor(
                 mutablePaymentMethods.postValue(emptyList())
             }
         }
-    }
-
-    fun updateMode(mode: SheetMode) {
-        mutableSheetMode.postValue(mode)
     }
 
     fun fetchPaymentIntent() {
