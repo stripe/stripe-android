@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.model
 internal sealed class PaymentOptionViewState {
     object Ready : PaymentOptionViewState()
 
-    object Confirming : PaymentOptionViewState()
+    object Processing : PaymentOptionViewState()
 
     object Completed : PaymentOptionViewState()
 }
