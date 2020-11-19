@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.databinding.StripeActivityPaymentOptionsBinding
+import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BasePaymentSheetActivity
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.ui.Toolbar
@@ -147,13 +148,31 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
         supportFragmentManager.commit {
             when (transitionTarget) {
                 PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodFull -> {
-                    // TODO: implement
+                    setCustomAnimations(
+                        AnimationConstants.FADE_IN,
+                        AnimationConstants.FADE_OUT,
+                        AnimationConstants.FADE_IN,
+                        AnimationConstants.FADE_OUT
+                    )
+                    addToBackStack(null)
+
+                    replace(
+                        fragmentContainerId,
+                        PaymentOptionsAddCardFragment().also {
+                            it.arguments = fragmentArgs
+                        }
+                    )
                 }
                 PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod -> {
                     // TODO: implement
                 }
                 PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodSheet -> {
-                    // TODO: implement
+                    replace(
+                        fragmentContainerId,
+                        PaymentOptionsAddCardFragment().also {
+                            it.arguments = fragmentArgs
+                        }
+                    )
                 }
             }
         }
@@ -178,5 +197,9 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
 
     override fun hideSheet() {
         bottomSheetController.hide()
+    }
+
+    internal companion object {
+        internal const val EXTRA_STARTER_ARGS = BasePaymentSheetActivity.EXTRA_STARTER_ARGS
     }
 }
