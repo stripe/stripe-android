@@ -4,7 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.view.ActivityStarter
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 internal class PaymentOptionsActivityStarter internal constructor(
     activity: Activity

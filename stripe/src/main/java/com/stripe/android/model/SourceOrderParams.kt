@@ -2,7 +2,7 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import com.stripe.android.model.SourceOrderParams.Item.Type
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * Information about the items and shipping associated with the source. Required for transactional

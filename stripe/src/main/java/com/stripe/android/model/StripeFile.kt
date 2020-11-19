@@ -1,6 +1,6 @@
 package com.stripe.android.model
 
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * [The file object](https://stripe.com/docs/api/files/object)

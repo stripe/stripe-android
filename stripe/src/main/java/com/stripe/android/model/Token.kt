@@ -2,7 +2,7 @@ package com.stripe.android.model
 
 import com.stripe.android.model.Token.Type
 import com.stripe.android.model.parsers.TokenJsonParser
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import java.util.Date
 

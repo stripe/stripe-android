@@ -1,7 +1,7 @@
 package com.stripe.android
 
 import com.stripe.android.model.StripeModel
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 

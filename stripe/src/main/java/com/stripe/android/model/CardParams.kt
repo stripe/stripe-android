@@ -1,6 +1,6 @@
 package com.stripe.android.model
 
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * [Create a card token](https://stripe.com/docs/api/tokens/create_card)

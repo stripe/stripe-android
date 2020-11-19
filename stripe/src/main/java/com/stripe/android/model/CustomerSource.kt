@@ -1,6 +1,6 @@
 package com.stripe.android.model
 
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * Model of the "data" object inside a [Customer] "source" object.

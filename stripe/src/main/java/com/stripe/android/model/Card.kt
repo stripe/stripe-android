@@ -5,7 +5,7 @@ import androidx.annotation.Size
 import com.stripe.android.CardUtils
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.parsers.CardJsonParser
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import java.util.Calendar
 

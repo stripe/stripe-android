@@ -4,7 +4,7 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentOption
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 internal class DefaultPaymentSheetFlowController internal constructor(
     private val args: Args,

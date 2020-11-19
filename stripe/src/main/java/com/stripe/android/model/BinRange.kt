@@ -1,7 +1,7 @@
 package com.stripe.android.model
 
 import com.stripe.android.cards.CardNumber
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class BinRange(

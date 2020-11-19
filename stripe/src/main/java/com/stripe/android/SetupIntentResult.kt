@@ -1,7 +1,7 @@
 package com.stripe.android
 
 import com.stripe.android.model.SetupIntent
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * A model representing the result of a [SetupIntent] confirmation via [Stripe.confirmSetupIntent]

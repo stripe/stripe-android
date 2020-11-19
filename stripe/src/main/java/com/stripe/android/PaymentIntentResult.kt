@@ -1,7 +1,7 @@
 package com.stripe.android
 
 import com.stripe.android.model.PaymentIntent
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * A model representing the result of a [PaymentIntent] confirmation via [Stripe.confirmPayment]

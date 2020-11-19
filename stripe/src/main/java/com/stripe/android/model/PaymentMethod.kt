@@ -4,7 +4,7 @@ import android.os.Parcelable
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.wallets.Wallet
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 
 /**

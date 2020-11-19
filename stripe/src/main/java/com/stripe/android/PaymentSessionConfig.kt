@@ -14,7 +14,7 @@ import com.stripe.android.view.PaymentMethodsActivity
 import com.stripe.android.view.SelectShippingMethodWidget
 import com.stripe.android.view.ShippingInfoWidget
 import com.stripe.android.view.ShippingInfoWidget.CustomizableShippingField
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import java.io.Serializable
 import java.util.Locale
 

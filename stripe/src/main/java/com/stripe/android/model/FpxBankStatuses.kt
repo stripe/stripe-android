@@ -1,7 +1,7 @@
 package com.stripe.android.model
 
 import com.stripe.android.view.FpxBank
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.jetbrains.annotations.TestOnly
 
 @Parcelize

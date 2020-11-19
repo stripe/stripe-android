@@ -13,7 +13,7 @@ import com.stripe.android.view.PaymentMethodsActivityStarter.Args
 import com.stripe.android.view.PaymentMethodsActivityStarter.Companion.REQUEST_CODE
 import com.stripe.android.view.PaymentMethodsActivityStarter.Result
 import com.stripe.android.view.PaymentMethodsActivityStarter.Result.Companion.fromIntent
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * A class to start [PaymentMethodsActivity]. Arguments for the activity can be specified

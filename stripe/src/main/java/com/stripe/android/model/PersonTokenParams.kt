@@ -2,7 +2,7 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import com.stripe.android.ObjectBuilder
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * Creates a single-use token that represents the details for a person. Use this when creating or

@@ -6,7 +6,7 @@ import androidx.fragment.app.Fragment
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.PaymentSessionConfig
 import com.stripe.android.PaymentSessionData
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 class PaymentFlowActivityStarter :
     ActivityStarter<PaymentFlowActivity, PaymentFlowActivityStarter.Args> {

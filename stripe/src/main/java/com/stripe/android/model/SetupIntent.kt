@@ -1,7 +1,7 @@
 package com.stripe.android.model
 
 import com.stripe.android.model.parsers.SetupIntentJsonParser
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import java.util.regex.Pattern
 

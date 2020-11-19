@@ -3,7 +3,7 @@ package com.stripe.android.model
 import android.net.Uri
 import android.os.Parcelable
 import com.stripe.android.utils.StripeUrlUtils
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * An interface for methods available in [PaymentIntent] and [SetupIntent]
