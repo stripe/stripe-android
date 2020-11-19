@@ -118,9 +118,9 @@ class PaymentSheetPaymentMethodsListFragmentTest {
         }.value
     }
 
-    private fun fragmentViewModel(fragment: PaymentSheetPaymentMethodsListFragment): PaymentSheetPaymentMethodsListFragment.PaymentMethodsViewModel {
-        return fragment.viewModels<PaymentSheetPaymentMethodsListFragment.PaymentMethodsViewModel>().value
-    }
+    private fun fragmentViewModel(
+        fragment: PaymentSheetPaymentMethodsListFragment
+    ) = fragment.viewModels<BasePaymentMethodsListFragment.PaymentMethodsViewModel>().value
 
     private fun createScenario(): FragmentScenario<PaymentSheetPaymentMethodsListFragment> {
         return launchFragmentInContainer<PaymentSheetPaymentMethodsListFragment>(
