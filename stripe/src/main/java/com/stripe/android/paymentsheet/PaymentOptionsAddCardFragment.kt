@@ -4,7 +4,7 @@ import androidx.fragment.app.activityViewModels
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 
 internal class PaymentOptionsAddCardFragment : BaseAddCardFragment() {
-    override val sheetViewModel: SheetViewModel<*> by activityViewModels<PaymentOptionsViewModel> {
+    override val sheetViewModel: SheetViewModel<PaymentOptionsViewModel.TransitionTarget> by activityViewModels<PaymentOptionsViewModel> {
         PaymentOptionsViewModel.Factory(
             { requireActivity().application },
             {
