@@ -205,9 +205,8 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
     }
 
     private fun onActionCompleted() {
-        // TODO(mshafrir-stripe): handle other outcomes
-
-        animateOut(PaymentOptionResult.Succeeded)
+        // TODO(mshafrir-stripe): replace GooglePay placeholder and handle other outcomes
+        animateOut(PaymentOptionResult.Succeeded.GooglePay)
     }
 
     override fun setActivityResult(result: PaymentOptionResult) {
