@@ -32,7 +32,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <com.stripe.android.paymentsheet.BuyButton
+        <com.stripe.android.paymentsheet.ui.BuyButton
             android:id="@+id/buy_button"
             android:layout_margin="@dimen/stripe_paymentsheet_outer_spacing"
             android:layout_width="match_parent"

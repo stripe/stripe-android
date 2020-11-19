@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.model.ViewState
+import com.stripe.android.paymentsheet.ui.BuyButton
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -14,7 +15,7 @@ class BuyButtonTest {
     @Test
     fun `disabling button should update label alpha`() {
         buyButton.isEnabled = false
-        assertThat(buyButton.viewBinding.label.alpha)
+        assertThat(buyButton.label.alpha)
             .isEqualTo(0.5f)
     }
 
@@ -24,7 +25,7 @@ class BuyButtonTest {
             ViewState.Ready(amount = 1099, currencyCode = "usd")
         )
         assertThat(
-            buyButton.viewBinding.label.text.toString()
+            buyButton.label.text.toString()
         ).isEqualTo(
             "Pay $10.99"
         )
@@ -34,7 +35,7 @@ class BuyButtonTest {
     fun `onConfirmingState() should update label`() {
         buyButton.onConfirmingState()
         assertThat(
-            buyButton.viewBinding.label.text.toString()
+            buyButton.label.text.toString()
         ).isEqualTo(
             "Processing…"
         )

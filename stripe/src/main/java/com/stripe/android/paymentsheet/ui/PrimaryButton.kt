@@ -1,66 +1,57 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.paymentsheet.ui
 
 import android.animation.ObjectAnimator
 import android.content.Context
 import android.util.AttributeSet
-import android.view.LayoutInflater
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.FrameLayout
+import android.widget.TextView
 import androidx.core.animation.doOnEnd
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.distinctUntilChanged
 import com.stripe.android.R
-import com.stripe.android.databinding.PaymentSheetBuyButtonBinding
+import com.stripe.android.paymentsheet.CurrencyFormatter
 import com.stripe.android.paymentsheet.model.ViewState
 import java.util.Currency
 import java.util.Locale
 
 /**
- * Buy button for PaymentSheet.
+ * The primary call to action button.
  */
-internal class BuyButton @JvmOverloads constructor(
+internal abstract class PrimaryButton @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
-    internal val viewBinding = PaymentSheetBuyButtonBinding.inflate(
-        LayoutInflater.from(context),
-        this
-    )
-
-    private val confirmedIcon = viewBinding.confirmedIcon
+    abstract val label: TextView
+    abstract val lockIcon: View
+    abstract val confirmingIcon: View
+    abstract val confirmedIcon: View
 
     private val currencyFormatter = CurrencyFormatter()
 
     private val mutableCompletedAnimation = MutableLiveData<ViewState.Completed>()
     internal val completedAnimation = mutableCompletedAnimation.distinctUntilChanged()
 
-    init {
-        setBackgroundResource(R.drawable.stripe_paymentsheet_buy_button_default_background)
-
-        isClickable = true
-        isEnabled = false
-    }
-
     fun onReadyState(state: ViewState.Ready) {
-        viewBinding.confirmingIcon.visibility = View.GONE
+        confirmingIcon.visibility = View.GONE
 
         val currency = Currency.getInstance(
             state.currencyCode.toUpperCase(Locale.ROOT)
         )
-        viewBinding.label.text = resources.getString(
+        label.text = resources.getString(
             R.string.stripe_paymentsheet_pay_button_amount,
             currencyFormatter.format(state.amount, currency)
         )
     }
 
     fun onConfirmingState() {
-        viewBinding.lockIcon.visibility = View.GONE
-        viewBinding.confirmingIcon.visibility = View.VISIBLE
+        lockIcon.visibility = View.GONE
+        confirmingIcon.visibility = View.VISIBLE
 
-        viewBinding.label.text = resources.getString(
+        label.text = resources.getString(
             R.string.stripe_paymentsheet_pay_button_processing
         )
     }
@@ -68,8 +59,8 @@ internal class BuyButton @JvmOverloads constructor(
     fun onCompletedState(state: ViewState.Completed) {
         setBackgroundResource(R.drawable.stripe_paymentsheet_buy_button_confirmed_background)
 
-        fadeOut(viewBinding.label)
-        fadeOut(viewBinding.confirmingIcon)
+        fadeOut(label)
+        fadeOut(confirmingIcon)
 
         animateConfirmedIcon(state)
     }
@@ -78,7 +69,7 @@ internal class BuyButton @JvmOverloads constructor(
         val iconCenter = confirmedIcon.left + (confirmedIcon.right - confirmedIcon.left) / 2f
         val targetX = iconCenter - width / 2f
 
-        fadeIn(viewBinding.confirmedIcon) {
+        fadeIn(confirmedIcon) {
 
             // slide the icon to the horizontal center of the view
             ObjectAnimator.ofFloat(
@@ -99,13 +90,13 @@ internal class BuyButton @JvmOverloads constructor(
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
 
-        viewBinding.label.alpha = if (enabled) {
+        label.alpha = if (enabled) {
             ALPHA_ENABLED
         } else {
             ALPHA_DISABLED
         }
 
-        viewBinding.lockIcon.visibility = if (enabled) {
+        lockIcon.visibility = if (enabled) {
             View.VISIBLE
         } else {
             View.GONE
