@@ -107,7 +107,7 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
         }
         bottomSheetController.setup()
 
-        setupPrimaryButton()
+        setupAddButton(viewBinding.addButton)
 
         viewModel.transition.observe(this) { transitionTarget ->
             if (transitionTarget != null) {
@@ -137,8 +137,31 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
         }
     }
 
-    private fun setupPrimaryButton() {
-        // TODO: implement
+    private fun setupAddButton(addButton: BuyButton) {
+        addButton.completedAnimation.observe(this) { completedState ->
+            onActionCompleted()
+        }
+
+        viewModel.viewState.observe(this) { state ->
+            if (state != null) {
+                // TODO(mshafrir-stripe): update button state
+                // addButton.updateState(state)
+            }
+        }
+
+        viewModel.selection.observe(this) { paymentSelection ->
+            // TODO(smaskell): show Google Pay button when GooglePay selected
+            addButton.isEnabled = paymentSelection != null
+        }
+        addButton.setOnClickListener {
+            viewModel.selectPaymentOption(this)
+        }
+
+        viewModel.processing.observe(this) { isProcessing ->
+            viewBinding.toolbar.updateProcessing(isProcessing)
+
+            addButton.isEnabled = !isProcessing
+        }
     }
 
     private fun onTransitionTarget(
@@ -177,6 +200,12 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
             }
         }
         viewModel.updateMode(transitionTarget.sheetMode)
+    }
+
+    private fun onActionCompleted() {
+        // TODO(mshafrir-stripe): handle other outcomes
+
+        animateOut(PaymentOptionResult.Succeeded)
     }
 
     override fun setActivityResult(result: PaymentOptionResult) {

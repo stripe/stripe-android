@@ -1,9 +1,11 @@
 package com.stripe.android.paymentsheet
 
+import android.app.Activity
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.paymentsheet.model.PaymentOptionViewState
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 
@@ -11,9 +13,14 @@ internal class PaymentOptionsViewModel(
     private val publishableKey: String,
     private val stripeAccountId: String?,
     private val args: PaymentOptionsActivityStarter.Args,
-) : SheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
+) : SheetViewModel<PaymentOptionsViewModel.TransitionTarget, PaymentOptionViewState>(
     isGuestMode = args is PaymentOptionsActivityStarter.Args.Guest
 ) {
+    fun selectPaymentOption(
+        activity: Activity
+    ) {
+        // TODO(mshafrir-stripe): implement
+    }
 
     internal enum class TransitionTarget(
         val sheetMode: SheetMode
