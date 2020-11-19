@@ -1,19 +1,16 @@
 package com.stripe.android.paymentsheet
 
-import android.animation.ObjectAnimator
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
 import android.widget.FrameLayout
-import androidx.core.animation.doOnEnd
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.distinctUntilChanged
 import com.stripe.android.R
 import com.stripe.android.databinding.PaymentSheetBuyButtonBinding
 import com.stripe.android.paymentsheet.model.ViewState
+import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import java.util.Currency
 import java.util.Locale
 
@@ -25,6 +22,8 @@ internal class BuyButton @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
+    private val animator = PrimaryButtonAnimator(context)
+
     internal val viewBinding = PaymentSheetBuyButtonBinding.inflate(
         LayoutInflater.from(context),
         this
@@ -68,31 +67,15 @@ internal class BuyButton @JvmOverloads constructor(
     fun onCompletedState(state: ViewState.Completed) {
         setBackgroundResource(R.drawable.stripe_paymentsheet_buy_button_confirmed_background)
 
-        fadeOut(viewBinding.label)
-        fadeOut(viewBinding.confirmingIcon)
+        animator.fadeOut(viewBinding.label)
+        animator.fadeOut(viewBinding.confirmingIcon)
 
         animateConfirmedIcon(state)
     }
 
     private fun animateConfirmedIcon(state: ViewState.Completed) {
-        val iconCenter = confirmedIcon.left + (confirmedIcon.right - confirmedIcon.left) / 2f
-        val targetX = iconCenter - width / 2f
-
-        fadeIn(viewBinding.confirmedIcon) {
-
-            // slide the icon to the horizontal center of the view
-            ObjectAnimator.ofFloat(
-                confirmedIcon,
-                "translationX",
-                0f,
-                -targetX
-            ).also { animator ->
-                animator.duration =
-                    resources.getInteger(android.R.integer.config_shortAnimTime).toLong()
-                animator.doOnEnd {
-                    mutableCompletedAnimation.value = state
-                }
-            }.start()
+        animator.fadeIn(confirmedIcon, width) {
+            mutableCompletedAnimation.value = state
         }
     }
 
@@ -124,55 +107,6 @@ internal class BuyButton @JvmOverloads constructor(
                 onCompletedState(state)
             }
         }
-    }
-
-    private fun fadeIn(view: View, onAnimationEnd: () -> Unit) {
-        view.startAnimation(
-            AnimationUtils.loadAnimation(
-                context,
-                R.anim.stripe_paymentsheet_transition_fade_in
-            ).also { animation ->
-                animation.setAnimationListener(
-                    object : Animation.AnimationListener {
-                        override fun onAnimationStart(p0: Animation?) {
-                            view.visibility = View.VISIBLE
-                        }
-
-                        override fun onAnimationEnd(p0: Animation?) {
-                            view.visibility = View.VISIBLE
-                            onAnimationEnd()
-                        }
-
-                        override fun onAnimationRepeat(p0: Animation?) {
-                        }
-                    }
-                )
-            }
-        )
-    }
-
-    private fun fadeOut(view: View) {
-        view.startAnimation(
-            AnimationUtils.loadAnimation(
-                context,
-                R.anim.stripe_paymentsheet_transition_fade_out
-            ).also { animation ->
-                animation.setAnimationListener(
-                    object : Animation.AnimationListener {
-                        override fun onAnimationStart(p0: Animation?) {
-                            view.visibility = View.VISIBLE
-                        }
-
-                        override fun onAnimationEnd(p0: Animation?) {
-                            view.visibility = View.INVISIBLE
-                        }
-
-                        override fun onAnimationRepeat(p0: Animation?) {
-                        }
-                    }
-                )
-            }
-        )
     }
 
     private companion object {
