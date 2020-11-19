@@ -1,7 +1,7 @@
 package com.stripe.android.model
 
 import androidx.annotation.Size
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * [The bank account object](https://stripe.com/docs/api/customer_bank_accounts/object)

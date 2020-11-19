@@ -1,8 +1,8 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
-    id 'kotlin-android-extensions'
     id 'checkstyle'
+    id 'org.jetbrains.kotlin.plugin.parcelize'
 }
 
 assemble.dependsOn('lint')
@@ -165,10 +165,6 @@ android {
     buildFeatures {
         viewBinding true
     }
-}
-
-androidExtensions {
-    features = []
 }
 
 task ktlint(type: JavaExec, group: "verification") {

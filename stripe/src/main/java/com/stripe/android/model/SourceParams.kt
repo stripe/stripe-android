@@ -5,7 +5,7 @@ import androidx.annotation.IntRange
 import androidx.annotation.Size
 import com.stripe.android.model.Source.Companion.asSourceType
 import com.stripe.android.model.Source.SourceType
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.Objects

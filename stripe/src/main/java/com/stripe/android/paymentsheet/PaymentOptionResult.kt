@@ -7,7 +7,7 @@ import android.os.Parcelable
 import androidx.core.os.bundleOf
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.view.ActivityStarter
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 internal sealed class PaymentOptionResult(
     val resultCode: Int

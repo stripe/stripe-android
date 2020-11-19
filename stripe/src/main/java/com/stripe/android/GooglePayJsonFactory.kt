@@ -2,7 +2,7 @@ package com.stripe.android
 
 import android.content.Context
 import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.Currency

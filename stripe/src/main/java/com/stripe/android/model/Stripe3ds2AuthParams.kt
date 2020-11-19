@@ -2,7 +2,7 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import androidx.annotation.VisibleForTesting
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.json.JSONArray
 import org.json.JSONObject
 

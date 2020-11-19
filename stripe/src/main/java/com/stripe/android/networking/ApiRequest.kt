@@ -6,7 +6,7 @@ import com.stripe.android.ApiVersion
 import com.stripe.android.AppInfo
 import com.stripe.android.Stripe
 import com.stripe.android.exception.InvalidRequestException
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import java.io.UnsupportedEncodingException
 
 /**

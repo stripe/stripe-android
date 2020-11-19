@@ -1,7 +1,7 @@
 package com.stripe.android.model
 
 import androidx.annotation.Size
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import java.util.Currency
 
 /**

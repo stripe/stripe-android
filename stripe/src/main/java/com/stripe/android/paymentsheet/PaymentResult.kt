@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet
 import android.app.Activity
 import android.os.Parcelable
 import com.stripe.android.model.PaymentIntent
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 internal sealed class PaymentResult(
     val resultCode: Int

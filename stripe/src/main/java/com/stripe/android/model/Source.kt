@@ -4,8 +4,8 @@ import androidx.annotation.StringDef
 import com.stripe.android.model.Source.Flow
 import com.stripe.android.model.Source.SourceType
 import com.stripe.android.model.parsers.SourceJsonParser
-import kotlinx.android.parcel.Parcelize
-import kotlinx.android.parcel.RawValue
+import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.RawValue
 import org.json.JSONObject
 
 /**

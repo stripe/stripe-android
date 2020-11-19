@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet
 import android.app.Activity
 import android.content.Intent
 import com.stripe.android.view.ActivityStarter
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 internal class PaymentSheetActivityStarter internal constructor(
     activity: Activity

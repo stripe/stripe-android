@@ -2,7 +2,7 @@ package com.stripe.android.model
 
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.parsers.AddressJsonParser
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import java.util.Locale
 

@@ -5,7 +5,7 @@ import androidx.core.os.bundleOf
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 import com.stripe.android.view.AuthActivityStarter
 import com.stripe.android.view.PaymentAuthWebViewActivity
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * A class that manages starting a [PaymentAuthWebViewActivity] instance with the correct

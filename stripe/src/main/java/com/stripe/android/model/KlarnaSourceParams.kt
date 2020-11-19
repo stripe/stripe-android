@@ -2,7 +2,7 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import com.stripe.android.model.KlarnaSourceParams.LineItem
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * Model representing parameters for creating a Klarna Source.

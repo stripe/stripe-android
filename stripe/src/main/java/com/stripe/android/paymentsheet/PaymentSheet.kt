@@ -5,7 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.core.os.bundleOf
 import com.stripe.android.view.ActivityStarter
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 internal class PaymentSheet internal constructor(
     private val args: PaymentSheetActivityStarter.Args
