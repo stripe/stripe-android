@@ -1,9 +1,13 @@
 package com.stripe.android.paymentsheet
 
+import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import com.stripe.android.R
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentOption
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.parcelize.Parcelize
 
 internal class DefaultPaymentSheetFlowController internal constructor(
@@ -14,6 +18,7 @@ internal class DefaultPaymentSheetFlowController internal constructor(
     internal val paymentMethods: List<PaymentMethod>,
     private val defaultPaymentMethodId: String?
 ) : PaymentSheetFlowController {
+    private var paymentSelection: PaymentSelection? = null
 
     override fun presentPaymentOptions(
         activity: ComponentActivity,
@@ -36,6 +41,22 @@ internal class DefaultPaymentSheetFlowController internal constructor(
             )
 
         onComplete(null)
+    }
+
+    override fun onPaymentOptionResult(intent: Intent?): PaymentOption? {
+        val paymentSelection =
+            (PaymentOptionResult.fromIntent(intent) as? PaymentOptionResult.Succeeded)?.paymentSelection
+        return paymentSelection?.let(::createPaymentOption)
+    }
+
+    private fun createPaymentOption(
+        paymentSelection: PaymentSelection
+    ): PaymentOption {
+        // TODO(mshafrir-stripe): derive PaymentOption from PaymentSelection
+        return PaymentOption(
+            drawableResourceId = R.drawable.stripe_ic_visa,
+            label = CardBrand.Visa.displayName
+        )
     }
 
     override fun confirmPayment(

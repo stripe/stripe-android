@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentOptionViewState
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import org.junit.Rule
@@ -48,6 +49,8 @@ class PaymentOptionsViewModelTest {
     }
 
     private companion object {
-        private val SELECTION_SAVED_PAYMENT_METHOD = PaymentSelection.Saved("pm_123")
+        private val SELECTION_SAVED_PAYMENT_METHOD = PaymentSelection.Saved(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        )
     }
 }

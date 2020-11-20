@@ -35,8 +35,8 @@ internal sealed class PaymentOptionResult(
         private const val EXTRA_RESULT = ActivityStarter.Result.EXTRA
 
         @JvmSynthetic
-        internal fun fromIntent(intent: Intent): PaymentOptionResult? {
-            return intent.getParcelableExtra(EXTRA_RESULT)
+        internal fun fromIntent(intent: Intent?): PaymentOptionResult? {
+            return intent?.getParcelableExtra(EXTRA_RESULT)
         }
     }
 }
