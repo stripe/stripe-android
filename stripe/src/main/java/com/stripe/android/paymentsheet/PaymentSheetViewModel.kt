@@ -45,11 +45,9 @@ internal class PaymentSheetViewModel internal constructor(
 ) : SheetViewModel<PaymentSheetViewModel.TransitionTarget, ViewState>(
     isGuestMode = args is PaymentSheetActivityStarter.Args.Guest
 ) {
-    private val mutablePaymentMethods = MutableLiveData<List<PaymentMethod>>()
     private val mutablePaymentIntent = MutableLiveData<PaymentIntent?>()
 
     internal val paymentIntent: LiveData<PaymentIntent?> = mutablePaymentIntent
-    internal val paymentMethods: LiveData<List<PaymentMethod>> = mutablePaymentMethods
 
     fun updatePaymentMethods() {
         when (args) {

@@ -50,6 +50,10 @@ internal abstract class BasePaymentMethodsListFragment : Fragment(
             false
         )
         binding.recycler.adapter = adapter
+
+        sheetViewModel.paymentMethods.observe(viewLifecycleOwner) { paymentMethods ->
+            adapter.paymentMethods = paymentMethods
+        }
     }
 
     internal class PaymentMethodsViewModel : ViewModel() {

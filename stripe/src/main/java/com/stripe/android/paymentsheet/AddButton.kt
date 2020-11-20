@@ -37,14 +37,14 @@ internal class AddButton @JvmOverloads constructor(
 
         isClickable = true
         isEnabled = false
-    }
-
-    fun onReadyState() {
-        viewBinding.confirmingIcon.visibility = View.GONE
 
         viewBinding.label.text = resources.getString(
             R.string.stripe_paymentsheet_add_button_label,
         )
+    }
+
+    fun onReadyState() {
+        viewBinding.confirmingIcon.visibility = View.GONE
     }
 
     fun onProcessingState() {
