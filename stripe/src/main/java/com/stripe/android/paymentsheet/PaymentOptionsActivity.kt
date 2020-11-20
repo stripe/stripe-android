@@ -156,7 +156,7 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
             addButton.isEnabled = paymentSelection != null
         }
         addButton.setOnClickListener {
-            viewModel.selectPaymentOption(this)
+            viewModel.selectPaymentOption()
         }
 
         viewModel.processing.observe(this) { isProcessing ->
