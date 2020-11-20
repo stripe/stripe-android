@@ -139,15 +139,14 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
         }
     }
 
-    private fun setupAddButton(addButton: BuyButton) {
+    private fun setupAddButton(addButton: AddButton) {
         addButton.completedAnimation.observe(this) { completedState ->
             onActionCompleted()
         }
 
         viewModel.viewState.observe(this) { state ->
             if (state != null) {
-                // TODO(mshafrir-stripe): update button state
-                // addButton.updateState(state)
+                addButton.updateState(state)
             }
         }
 
