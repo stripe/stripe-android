@@ -193,6 +193,8 @@
     <string name="stripe_paymentsheet_pay_button_amount" tools:ignore="MissingTranslation">Pay %s</string>
     <string name="stripe_paymentsheet_pay_button_processing" tools:ignore="MissingTranslation">Processing…</string>
 
+    <string name="stripe_paymentsheet_add_button_label" tools:ignore="MissingTranslation">Add</string>
+
     <!-- Failure Reason -->
     <string name="stripe_failure_reason_authentication" tools:ignore="MissingTranslation">We are unable to authenticate your payment method. Please choose a different payment method and try again.</string>
     <string name="stripe_failure_reason_timed_out" tools:ignore="MissingTranslation">Timed out authenticating your payment method -- try again</string>
