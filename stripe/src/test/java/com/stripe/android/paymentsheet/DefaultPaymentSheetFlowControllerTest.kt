@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.R
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import org.junit.runner.RunWith
@@ -40,7 +41,7 @@ class DefaultPaymentSheetFlowControllerTest {
         val paymentOption = flowController.onPaymentOptionResult(
             Intent().putExtras(
                 PaymentOptionResult.Succeeded(
-                    PaymentSelection.Saved("pm_123")
+                    PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
                 ).toBundle()
             )
         )
