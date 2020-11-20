@@ -16,6 +16,7 @@ import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -186,7 +187,9 @@ internal class PaymentSheetActivityTest {
             testCoroutineDispatcher.advanceTimeBy(BottomSheetController.ANIMATE_IN_DELAY)
             idleLooper()
 
-            viewModel.updateSelection(PaymentSelection.Saved("saved_pm"))
+            viewModel.updateSelection(
+                PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            )
             assertThat(activity.viewBinding.buyButton.isEnabled)
                 .isTrue()
 

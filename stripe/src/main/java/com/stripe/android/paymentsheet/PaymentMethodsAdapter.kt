@@ -23,7 +23,7 @@ internal class PaymentMethodsAdapter(
         notifyDataSetChanged()
     }
 
-    private var selectedPaymentMethodId: String? = (selectedPaymentMethod as? PaymentSelection.Saved)?.paymentMethodId
+    private var selectedPaymentMethod: PaymentMethod? = (selectedPaymentMethod as? PaymentSelection.Saved)?.paymentMethod
 
     init {
         setHasStableIds(true)
@@ -31,14 +31,14 @@ internal class PaymentMethodsAdapter(
 
     private fun updateSelectedPaymentMethod(position: Int) {
         val currentlySelectedPosition = paymentMethods.indexOfFirst {
-            it.id == selectedPaymentMethodId
+            it.id == selectedPaymentMethod?.id
         }
         if (currentlySelectedPosition != position) {
             // selected a new Payment Method
             notifyItemChanged(currentlySelectedPosition)
             notifyItemChanged(position)
-            selectedPaymentMethodId = paymentMethods.getOrNull(position)?.id
-            selectedPaymentMethodId?.let {
+            selectedPaymentMethod = paymentMethods.getOrNull(position)
+            selectedPaymentMethod?.let {
                 paymentMethodSelectedListener(PaymentSelection.Saved(it))
             }
         }
@@ -79,7 +79,7 @@ internal class PaymentMethodsAdapter(
         if (holder is CardViewHolder) {
             val paymentMethod = paymentMethods[position]
             holder.setPaymentMethod(paymentMethod)
-            holder.setSelected(paymentMethod.id == selectedPaymentMethodId)
+            holder.setSelected(paymentMethod.id == selectedPaymentMethod?.id)
             holder.itemView.setOnClickListener {
                 updateSelectedPaymentMethod(holder.adapterPosition)
             }

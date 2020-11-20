@@ -134,7 +134,7 @@ internal class PaymentSheetViewModel internal constructor(
             is PaymentSelection.Saved -> {
                 // TODO(smaskell): Properly set savePaymentMethod/setupFutureUsage
                 ConfirmPaymentIntentParams.createWithPaymentMethodId(
-                    selection.paymentMethodId,
+                    selection.paymentMethod.id.orEmpty(),
                     clientSecret
                 )
             }

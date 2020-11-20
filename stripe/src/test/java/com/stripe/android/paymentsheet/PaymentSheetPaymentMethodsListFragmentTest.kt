@@ -12,6 +12,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Before
@@ -36,7 +37,7 @@ class PaymentSheetPaymentMethodsListFragmentTest {
 
     @Test
     fun `resets payment method selection when shown`() {
-        val savedPaymentMethod = PaymentSelection.Saved("test_payment_method")
+        val savedPaymentMethod = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
         val scenario = createScenario()
         scenario.onFragment {
@@ -67,7 +68,7 @@ class PaymentSheetPaymentMethodsListFragmentTest {
 
     @Test
     fun `updates selection on click`() {
-        val savedPaymentMethod = PaymentSelection.Saved("test_payment_method")
+        val savedPaymentMethod = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
         createScenario().onFragment {
             val activityViewModel = activityViewModel(it)
@@ -87,7 +88,7 @@ class PaymentSheetPaymentMethodsListFragmentTest {
 
     @Test
     fun `posts transition when add card clicked`() {
-        val savedPaymentMethod = PaymentSelection.Saved("test_payment_method")
+        val savedPaymentMethod = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
         createScenario().onFragment {
             val activityViewModel = activityViewModel(it)

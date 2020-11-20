@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.model
 
 import android.os.Parcelable
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import kotlinx.parcelize.Parcelize
 
@@ -10,7 +11,7 @@ internal sealed class PaymentSelection : Parcelable {
 
     @Parcelize
     data class Saved(
-        val paymentMethodId: String
+        val paymentMethod: PaymentMethod
     ) : PaymentSelection()
 
     @Parcelize
