@@ -5,5 +5,7 @@ internal sealed class PaymentOptionViewState {
 
     object Processing : PaymentOptionViewState()
 
-    object Completed : PaymentOptionViewState()
+    data class Completed(
+        val paymentSelection: PaymentSelection
+    ) : PaymentOptionViewState()
 }
