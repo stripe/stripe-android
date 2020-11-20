@@ -19,7 +19,9 @@ internal class PaymentOptionsViewModel(
     fun selectPaymentOption(
         activity: Activity
     ) {
-        // TODO(mshafrir-stripe): implement
+        selection.value?.let { paymentSelection ->
+            mutableViewState.value = PaymentOptionViewState.Completed(paymentSelection)
+        }
     }
 
     internal enum class TransitionTarget(

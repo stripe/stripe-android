@@ -142,7 +142,7 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
 
     private fun setupAddButton(addButton: AddButton) {
         addButton.completedAnimation.observe(this) { completedState ->
-            onActionCompleted()
+            completedState?.paymentSelection?.let(::onActionCompleted)
         }
 
         viewModel.viewState.observe(this) { state ->
@@ -204,10 +204,9 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
         viewModel.updateMode(transitionTarget.sheetMode)
     }
 
-    private fun onActionCompleted() {
-        // TODO(mshafrir-stripe): replace GooglePay placeholder and handle other outcomes
+    private fun onActionCompleted(paymentSelection: PaymentSelection) {
         animateOut(
-            PaymentOptionResult.Succeeded(PaymentSelection.GooglePay)
+            PaymentOptionResult.Succeeded(paymentSelection)
         )
     }
 

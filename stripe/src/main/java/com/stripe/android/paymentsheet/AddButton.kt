@@ -56,13 +56,13 @@ internal class AddButton @JvmOverloads constructor(
         )
     }
 
-    fun onCompletedState() {
+    fun onCompletedState(state: PaymentOptionViewState.Completed) {
         setBackgroundResource(R.drawable.stripe_paymentsheet_buy_button_confirmed_background)
 
         animator.fadeOut(viewBinding.label)
         animator.fadeOut(viewBinding.confirmingIcon)
 
-        animateConfirmedIcon(PaymentOptionViewState.Completed)
+        animateConfirmedIcon(state)
     }
 
     private fun animateConfirmedIcon(state: PaymentOptionViewState.Completed) {
@@ -95,8 +95,8 @@ internal class AddButton @JvmOverloads constructor(
             PaymentOptionViewState.Processing -> {
                 onProcessingState()
             }
-            PaymentOptionViewState.Completed -> {
-                onCompletedState()
+            is PaymentOptionViewState.Completed -> {
+                onCompletedState(state)
             }
         }
     }
