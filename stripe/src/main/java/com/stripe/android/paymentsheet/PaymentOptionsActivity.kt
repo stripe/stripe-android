@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.databinding.StripeActivityPaymentOptionsBinding
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BasePaymentSheetActivity
 import com.stripe.android.paymentsheet.ui.SheetMode
@@ -209,9 +210,10 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
     }
 
     private fun onActionCompleted() {
-        // TODO(mshafrir-stripe): handle other outcomes
-
-        animateOut(PaymentOptionResult.Succeeded)
+        // TODO(mshafrir-stripe): replace GooglePay placeholder and handle other outcomes
+        animateOut(
+            PaymentOptionResult.Succeeded(PaymentSelection.GooglePay)
+        )
     }
 
     override fun setActivityResult(result: PaymentOptionResult) {
