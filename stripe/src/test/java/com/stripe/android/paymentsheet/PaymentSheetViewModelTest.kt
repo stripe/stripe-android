@@ -109,13 +109,15 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `checkout() should confirm saved payment methods`() {
-        viewModel.updateSelection(PaymentSelection.Saved("saved_pm"))
+        viewModel.updateSelection(
+            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
         viewModel.checkout(mock())
         verify(paymentController).startConfirmAndAuth(
             any(),
             eq(
                 ConfirmPaymentIntentParams.createWithPaymentMethodId(
-                    "saved_pm",
+                    requireNotNull(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id),
                     CLIENT_SECRET
                 )
             ),
