@@ -189,7 +189,12 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
                     )
                 }
                 PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod -> {
-                    // TODO: implement
+                    replace(
+                        fragmentContainerId,
+                        PaymentOptionsListFragment().also {
+                            it.arguments = fragmentArgs
+                        }
+                    )
                 }
                 PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodSheet -> {
                     replace(
