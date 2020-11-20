@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Context
+import android.content.Intent
 import androidx.activity.ComponentActivity
 import com.stripe.android.paymentsheet.model.PaymentOption
 
@@ -10,6 +11,8 @@ internal interface PaymentSheetFlowController {
         activity: ComponentActivity,
         onComplete: (PaymentOption?) -> Unit
     )
+
+    fun onPaymentOptionResult(intent: Intent?): PaymentOption?
 
     fun confirmPayment(
         activity: ComponentActivity,
