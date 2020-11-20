@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.app.Activity
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -16,9 +15,7 @@ internal class PaymentOptionsViewModel(
 ) : SheetViewModel<PaymentOptionsViewModel.TransitionTarget, PaymentOptionViewState>(
     isGuestMode = args is PaymentOptionsActivityStarter.Args.Guest
 ) {
-    fun selectPaymentOption(
-        activity: Activity
-    ) {
+    fun selectPaymentOption() {
         selection.value?.let { paymentSelection ->
             mutableViewState.value = PaymentOptionViewState.Completed(paymentSelection)
         }
