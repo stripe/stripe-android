@@ -8,7 +8,10 @@ import kotlinx.parcelize.Parcelize
 
 internal class DefaultPaymentSheetFlowController internal constructor(
     private val args: Args,
-    private val paymentMethods: List<PaymentMethod>,
+    // the allowed payment method types
+    internal val paymentMethodTypes: List<PaymentMethod.Type>,
+    // the customer's existing payment methods
+    internal val paymentMethods: List<PaymentMethod>,
     private val defaultPaymentMethodId: String?
 ) : PaymentSheetFlowController {
 

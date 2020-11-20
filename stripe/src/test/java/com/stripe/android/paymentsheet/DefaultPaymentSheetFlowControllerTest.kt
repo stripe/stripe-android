@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentOption
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -18,8 +19,9 @@ class DefaultPaymentSheetFlowControllerTest {
                 "ephkey",
                 "cus_123"
             ),
-            emptyList(),
-            null
+            paymentMethodTypes = listOf(PaymentMethod.Type.Card),
+            paymentMethods = emptyList(),
+            defaultPaymentMethodId = null
         )
 
         var paymentOption: PaymentOption? = null
