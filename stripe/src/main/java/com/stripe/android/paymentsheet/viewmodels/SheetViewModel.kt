@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.distinctUntilChanged
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.SheetMode
 
@@ -13,9 +14,11 @@ import com.stripe.android.paymentsheet.ui.SheetMode
 internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
     internal val isGuestMode: Boolean
 ) : ViewModel() {
-
     private val mutableError = MutableLiveData<Throwable>()
     internal val error: LiveData<Throwable> = mutableError
+
+    protected val mutablePaymentMethods = MutableLiveData<List<PaymentMethod>>()
+    internal val paymentMethods: LiveData<List<PaymentMethod>> = mutablePaymentMethods
 
     private val mutableTransition = MutableLiveData<TransitionTargetType>()
     internal val transition: LiveData<TransitionTargetType> = mutableTransition
