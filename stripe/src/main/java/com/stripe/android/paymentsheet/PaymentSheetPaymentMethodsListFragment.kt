@@ -27,10 +27,6 @@ internal class PaymentSheetPaymentMethodsListFragment : BasePaymentMethodsListFr
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        activityViewModel.paymentMethods.observe(viewLifecycleOwner) { paymentMethods ->
-            adapter.paymentMethods = paymentMethods
-        }
-
         // Only fetch the payment methods list if we haven't already
         if (activityViewModel.paymentMethods.value == null) {
             activityViewModel.updatePaymentMethods()

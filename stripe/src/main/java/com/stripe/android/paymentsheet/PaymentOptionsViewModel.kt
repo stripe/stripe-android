@@ -15,6 +15,10 @@ internal class PaymentOptionsViewModel(
 ) : SheetViewModel<PaymentOptionsViewModel.TransitionTarget, PaymentOptionViewState>(
     isGuestMode = args is PaymentOptionsActivityStarter.Args.Guest
 ) {
+    init {
+        mutablePaymentMethods.value = args.paymentMethods
+    }
+
     fun selectPaymentOption() {
         selection.value?.let { paymentSelection ->
             mutableViewState.value = PaymentOptionViewState.Completed(paymentSelection)

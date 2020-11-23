@@ -15,8 +15,6 @@ import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.cards.DefaultStaticCardAccountRanges
-import com.stripe.android.cards.LegacyCardAccountRangeRepository
-import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.cards.StaticCardAccountRanges
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
@@ -73,12 +71,7 @@ class CardNumberEditText internal constructor(
         attrs,
         defStyleAttr,
         workContext,
-
-        when (USE_DEFAULT_CARD_ACCOUNT_RANGE_REPO) {
-            true -> DefaultCardAccountRangeRepositoryFactory(context).create()
-            false -> LegacyCardAccountRangeRepository(StaticCardAccountRangeSource())
-        },
-
+        DefaultCardAccountRangeRepositoryFactory(context).create(),
         DefaultStaticCardAccountRanges(),
         AnalyticsRequestExecutor.Default(),
         AnalyticsRequest.Factory(),
@@ -181,7 +174,9 @@ class CardNumberEditText internal constructor(
 
         loadingJob = CoroutineScope(workContext).launch {
             cardAccountRangeRepository.loading.collect {
-                isLoadingCallback(it)
+                withContext(Dispatchers.Main) {
+                    isLoadingCallback(it)
+                }
             }
         }
     }
@@ -443,9 +438,5 @@ class CardNumberEditText internal constructor(
             CardBrand.UnionPay -> true
             else -> false
         }
-    }
-
-    private companion object {
-        private const val USE_DEFAULT_CARD_ACCOUNT_RANGE_REPO = true
     }
 }

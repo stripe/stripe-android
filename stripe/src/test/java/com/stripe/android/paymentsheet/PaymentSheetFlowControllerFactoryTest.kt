@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
@@ -22,19 +24,22 @@ import kotlin.test.Test
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class PaymentSheetFlowControllerFactoryTest {
+    private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = TestCoroutineDispatcher()
 
     private val factory = PaymentSheetFlowControllerFactory(
+        context,
         FakeStripeRepository(),
-        PaymentConfiguration(
-            ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
-        ),
+        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        null,
         FakePaymentSessionPrefs(),
         testDispatcher
     )
 
     @BeforeTest
     fun before() {
+        PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+
         Dispatchers.setMain(testDispatcher)
     }
 
