@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 16.1.1 - unreleased
+* [#3028](https://github.com/stripe/stripe-android/pull/3028) Upgrade Android Gradle Plugin to 4.1.1
+* [#3035](https://github.com/stripe/stripe-android/pull/3035) Update handling of deeplinks in `PaymentAuthWebViewClient`
+* [#3046](https://github.com/stripe/stripe-android/pull/3046) Upgrade Gradle to 6.7.1
+* [#3056](https://github.com/stripe/stripe-android/pull/3056) Upgrade Kotlin to 1.4.20
+* [#3058](https://github.com/stripe/stripe-android/pull/3058) Migrate to Kotlin Parcelize plugin
+
 ## 16.1.0 - 2020-11-06
 * [#2930](https://github.com/stripe/stripe-android/pull/2930) Upgrade Android Gradle Plugin to `4.1.0`
 * [#2936](https://github.com/stripe/stripe-android/pull/2936) Upgrade Gradle to `6.7`
