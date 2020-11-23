@@ -26,7 +26,7 @@ internal class DefaultRepository(
         flowOf(
             sharedPrefs.getString(PREF_EK, null)?.let { ephemeralKey ->
                 sharedPrefs.getString(PREF_CUSTOMER, null)?.let { customerId ->
-                    PaymentSheetViewModel.EphemeralKey(ephemeralKey, customerId)
+                    EphemeralKey(ephemeralKey, customerId)
                 }
             }
         )
@@ -39,7 +39,7 @@ internal class DefaultRepository(
                     .createEphemeralKey(hashMapOf("api_version" to "2020-03-02"))
                     .string()
             }.mapCatching { response ->
-                PaymentSheetViewModel.EphemeralKey.fromJson(org.json.JSONObject(response))
+                EphemeralKey.fromJson(org.json.JSONObject(response))
             }.onSuccess { (key, customer) ->
                 sharedPrefs.edit()
                     .putString(PREF_EK, key)
