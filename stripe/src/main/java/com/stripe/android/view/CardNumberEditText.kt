@@ -181,7 +181,9 @@ class CardNumberEditText internal constructor(
 
         loadingJob = CoroutineScope(workContext).launch {
             cardAccountRangeRepository.loading.collect {
-                isLoadingCallback(it)
+                withContext(Dispatchers.Main) {
+                    isLoadingCallback(it)
+                }
             }
         }
     }
