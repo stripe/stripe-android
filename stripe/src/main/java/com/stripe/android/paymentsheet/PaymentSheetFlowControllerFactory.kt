@@ -2,7 +2,9 @@ package com.stripe.android.paymentsheet
 
 import android.content.Context
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.PaymentController
 import com.stripe.android.PaymentSessionPrefs
+import com.stripe.android.StripePaymentController
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.ApiRequest
@@ -15,8 +17,10 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 internal class PaymentSheetFlowControllerFactory(
+    private val context: Context,
     private val stripeRepository: StripeRepository,
-    private val config: PaymentConfiguration,
+    private val publishableKey: String,
+    private val stripeAccountId: String?,
     private val paymentSessionPrefs: PaymentSessionPrefs,
     private val workContext: CoroutineContext
 ) {
@@ -34,11 +38,13 @@ internal class PaymentSheetFlowControllerFactory(
         config: PaymentConfiguration,
         workContext: CoroutineContext
     ) : this(
+        context,
         StripeApiRepository(
             context,
             config.publishableKey
         ),
-        config,
+        config.publishableKey,
+        config.stripeAccountId,
         PaymentSessionPrefs.Default(context),
         workContext
     )
@@ -98,9 +104,9 @@ internal class PaymentSheetFlowControllerFactory(
                     customerId = customerId,
                     paymentMethodType = PaymentMethod.Type.Card
                 ),
-                config.publishableKey,
+                publishableKey,
                 PRODUCT_USAGE,
-                ApiRequest.Options(ephemeralKey, config.stripeAccountId)
+                ApiRequest.Options(ephemeralKey, stripeAccountId)
             )
         }
 
@@ -112,6 +118,9 @@ internal class PaymentSheetFlowControllerFactory(
             onSuccess = { paymentMethods ->
                 Result.Success(
                     DefaultPaymentSheetFlowController(
+                        createPaymentController(),
+                        publishableKey,
+                        stripeAccountId,
                         DefaultPaymentSheetFlowController.Args.Default(
                             clientSecret,
                             ephemeralKey,
@@ -133,12 +142,27 @@ internal class PaymentSheetFlowControllerFactory(
     ): Result {
         return Result.Success(
             DefaultPaymentSheetFlowController(
+                createPaymentController(),
+                publishableKey,
+                stripeAccountId,
                 DefaultPaymentSheetFlowController.Args.Guest(
                     clientSecret
                 ),
                 emptyList(),
                 null
             )
+        )
+    }
+
+    private fun createPaymentController(): PaymentController {
+        val config = PaymentConfiguration.getInstance(context)
+        val publishableKey = config.publishableKey
+        val stripeAccountId = config.stripeAccountId
+        return StripePaymentController(
+            context,
+            publishableKey,
+            stripeRepository,
+            true
         )
     }
 

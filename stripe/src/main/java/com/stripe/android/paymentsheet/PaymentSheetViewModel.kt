@@ -15,14 +15,13 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripePaymentController
-import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.ConfirmParamsFactory
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
@@ -45,8 +44,9 @@ internal class PaymentSheetViewModel internal constructor(
 ) : SheetViewModel<PaymentSheetViewModel.TransitionTarget, ViewState>(
     isGuestMode = args is PaymentSheetActivityStarter.Args.Guest
 ) {
-    private val mutablePaymentIntent = MutableLiveData<PaymentIntent?>()
+    private val confirmParamsFactory = ConfirmParamsFactory()
 
+    private val mutablePaymentIntent = MutableLiveData<PaymentIntent?>()
     internal val paymentIntent: LiveData<PaymentIntent?> = mutablePaymentIntent
 
     fun updatePaymentMethods() {
@@ -101,7 +101,13 @@ internal class PaymentSheetViewModel internal constructor(
     fun checkout(activity: Activity) {
         mutableProcessing.value = true
 
-        val confirmParams = createConfirmParams(args.clientSecret)
+        val confirmParams = selection.value?.let { paymentSelection ->
+            confirmParamsFactory.create(
+                args.clientSecret,
+                paymentSelection,
+                shouldSavePaymentMethod
+            )
+        }
 
         when {
             confirmParams != null -> {
@@ -119,35 +125,6 @@ internal class PaymentSheetViewModel internal constructor(
                 onError(
                     IllegalStateException("checkout called when no payment method selected")
                 )
-            }
-        }
-    }
-
-    @VisibleForTesting
-    internal fun createConfirmParams(
-        clientSecret: String
-    ): ConfirmPaymentIntentParams? {
-        return when (val selection = selection.value) {
-            PaymentSelection.GooglePay -> TODO("smaskell: handle Google Pay confirmation")
-            is PaymentSelection.Saved -> {
-                // TODO(smaskell): Properly set savePaymentMethod/setupFutureUsage
-                ConfirmPaymentIntentParams.createWithPaymentMethodId(
-                    selection.paymentMethod.id.orEmpty(),
-                    clientSecret
-                )
-            }
-            is PaymentSelection.New -> {
-                ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-                    selection.paymentMethodCreateParams,
-                    clientSecret,
-                    setupFutureUsage = when (shouldSavePaymentMethod) {
-                        true -> ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
-                        false -> null
-                    }
-                )
-            }
-            null -> {
-                null
             }
         }
     }
