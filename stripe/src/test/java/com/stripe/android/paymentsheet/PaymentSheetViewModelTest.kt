@@ -155,22 +155,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `createConfirmParams() when savePaymentMethod is true should create params with setupFutureUsage = OnSession`() {
-        viewModel.shouldSavePaymentMethod = true
-        viewModel.updateSelection(
-            PaymentSelection.New(PaymentMethodCreateParamsFixtures.DEFAULT_CARD)
-        )
-        assertThat(viewModel.createConfirmParams(CLIENT_SECRET))
-            .isEqualTo(
-                ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                    CLIENT_SECRET,
-                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
-                )
-            )
-    }
-
-    @Test
     fun `checkout() should call onError when no payment method selected`() {
         var error: Throwable? = null
         viewModel.error.observeForever {

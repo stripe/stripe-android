@@ -3,17 +3,25 @@ package com.stripe.android.paymentsheet
 import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import com.stripe.android.PaymentController
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.networking.ApiRequest
+import com.stripe.android.paymentsheet.model.ConfirmParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.view.AuthActivityStarter
 import kotlinx.parcelize.Parcelize
 
 internal class DefaultPaymentSheetFlowController internal constructor(
+    private val paymentController: PaymentController,
+    private val publishableKey: String,
+    private val stripeAccountId: String?,
     private val args: Args,
     private val paymentMethods: List<PaymentMethod>,
     private val defaultPaymentMethodId: String?
 ) : PaymentSheetFlowController {
+    private val confirmParamsFactory = ConfirmParamsFactory()
     private val paymentOptionFactory = PaymentOptionFactory()
 
     private var paymentSelection: PaymentSelection? = null
@@ -51,7 +59,26 @@ internal class DefaultPaymentSheetFlowController internal constructor(
         activity: ComponentActivity,
         onComplete: (PaymentResult) -> Unit
     ) {
-        // TODO(mshafrir-stripe): implement
+
+        val confirmParams = confirmParamsFactory.create(
+            args.clientSecret,
+            paymentSelection,
+            // TODO(mshafrir-stripe): set correct value
+            shouldSavePaymentMethod = false
+        )
+
+        if (confirmParams != null) {
+            paymentController.startConfirmAndAuth(
+                AuthActivityStarter.Host.create(activity),
+                confirmParams,
+                ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
+            )
+        } else {
+            // TODO(mshafrir-stripe): handle error
+        }
 
         onComplete(
             PaymentResult.Cancelled(null, null)

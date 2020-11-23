@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet
 
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentSessionPrefs
 import com.stripe.android.networking.AbsFakeStripeRepository
 import kotlinx.coroutines.Dispatchers
@@ -20,10 +20,10 @@ class PaymentSheetFlowControllerFactoryTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
     private val factory = PaymentSheetFlowControllerFactory(
+        ApplicationProvider.getApplicationContext(),
         FakeStripeRepository(),
-        PaymentConfiguration(
-            ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
-        ),
+        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        null,
         FakePaymentSessionPrefs(),
         testDispatcher
     )

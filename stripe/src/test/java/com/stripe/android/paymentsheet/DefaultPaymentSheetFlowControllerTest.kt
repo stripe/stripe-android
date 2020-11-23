@@ -3,6 +3,9 @@ package com.stripe.android.paymentsheet
 import android.content.Intent
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
+import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.PaymentController
 import com.stripe.android.R
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodFixtures
@@ -14,8 +17,11 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class DefaultPaymentSheetFlowControllerTest {
-
+    private val paymentController = mock<PaymentController>()
     private val flowController = DefaultPaymentSheetFlowController(
+        paymentController,
+        ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+        null,
         DefaultPaymentSheetFlowController.Args.Default(
             "client_secret",
             "ephkey",
@@ -63,5 +69,12 @@ class DefaultPaymentSheetFlowControllerTest {
         )
         assertThat(paymentOption)
             .isNull()
+    }
+
+    @Test
+    fun `confirmPayment() without paymentSelection should not call paymentController`() {
+        verifyNoMoreInteractions(paymentController)
+        flowController.confirmPayment(mock()) {
+        }
     }
 }
