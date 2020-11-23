@@ -9,9 +9,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlin.coroutines.CoroutineContext
 
 abstract class BaseViewModel(
-    application: Application
+    application: Application,
+    protected val workContext: CoroutineContext = Dispatchers.IO
 ) : AndroidViewModel(application) {
     protected val resources: Resources = application.resources
-    protected val workContext: CoroutineContext = Dispatchers.IO
     protected val backendApi: BackendApi = BackendApiFactory(application).create()
 }
