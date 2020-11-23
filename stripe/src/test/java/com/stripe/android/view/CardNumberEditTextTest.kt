@@ -26,7 +26,6 @@ import com.stripe.android.R
 import com.stripe.android.cards.AccountRangeFixtures
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardNumber
-import com.stripe.android.cards.LegacyCardAccountRangeRepository
 import com.stripe.android.cards.NullCardAccountRangeRepository
 import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.cards.StaticCardAccountRanges
@@ -77,9 +76,7 @@ internal class CardNumberEditTextTest {
         lastBrandChangeCallbackInvocation = it
     }
 
-    private val cardAccountRangeRepository = LegacyCardAccountRangeRepository(
-        StaticCardAccountRangeSource()
-    )
+    private val cardAccountRangeRepository = FakeCardAccountRangeRepository()
 
     private val analyticsRequestExecutor = AnalyticsRequestExecutor {}
     private val analyticsRequestFactory = AnalyticsRequest.Factory()
@@ -881,6 +878,19 @@ internal class CardNumberEditTextTest {
         ): AccountRange? {
             delay(TimeUnit.SECONDS.toMillis(10))
             return null
+        }
+
+        override val loading: Flow<Boolean> = flowOf(false)
+    }
+
+    private class FakeCardAccountRangeRepository : CardAccountRangeRepository {
+        private val staticCardAccountRangeSource = StaticCardAccountRangeSource()
+        override suspend fun getAccountRange(
+            cardNumber: CardNumber.Unvalidated
+        ): AccountRange? {
+            return cardNumber.bin?.let {
+                staticCardAccountRangeSource.getAccountRange(cardNumber)
+            }
         }
 
         override val loading: Flow<Boolean> = flowOf(false)
