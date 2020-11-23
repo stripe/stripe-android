@@ -101,11 +101,13 @@ internal class PaymentSheetViewModel internal constructor(
     fun checkout(activity: Activity) {
         mutableProcessing.value = true
 
-        val confirmParams = confirmParamsFactory.create(
-            args.clientSecret,
-            selection.value,
-            shouldSavePaymentMethod
-        )
+        val confirmParams = selection.value?.let { paymentSelection ->
+            confirmParamsFactory.create(
+                args.clientSecret,
+                paymentSelection,
+                shouldSavePaymentMethod
+            )
+        }
 
         when {
             confirmParams != null -> {

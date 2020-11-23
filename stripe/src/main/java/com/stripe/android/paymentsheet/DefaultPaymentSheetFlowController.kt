@@ -60,12 +60,14 @@ internal class DefaultPaymentSheetFlowController internal constructor(
         onComplete: (PaymentResult) -> Unit
     ) {
 
-        val confirmParams = confirmParamsFactory.create(
-            args.clientSecret,
-            paymentSelection,
-            // TODO(mshafrir-stripe): set correct value
-            shouldSavePaymentMethod = false
-        )
+        val confirmParams = paymentSelection?.let {
+            confirmParamsFactory.create(
+                args.clientSecret,
+                it,
+                // TODO(mshafrir-stripe): set correct value
+                shouldSavePaymentMethod = false
+            )
+        }
 
         if (confirmParams != null) {
             paymentController.startConfirmAndAuth(

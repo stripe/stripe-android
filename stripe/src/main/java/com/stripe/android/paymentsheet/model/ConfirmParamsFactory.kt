@@ -6,9 +6,9 @@ internal class ConfirmParamsFactory {
 
     internal fun create(
         clientSecret: String,
-        paymentSelection: PaymentSelection?,
+        paymentSelection: PaymentSelection,
         shouldSavePaymentMethod: Boolean
-    ): ConfirmPaymentIntentParams? {
+    ): ConfirmPaymentIntentParams {
         return when (paymentSelection) {
             PaymentSelection.GooglePay -> TODO("smaskell: handle Google Pay confirmation")
 
@@ -29,9 +29,6 @@ internal class ConfirmParamsFactory {
                         false -> null
                     }
                 )
-            }
-            null -> {
-                null
             }
         }
     }
