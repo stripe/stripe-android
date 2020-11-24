@@ -5,7 +5,6 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View.OnFocusChangeListener
 import android.widget.AdapterView
-import android.widget.AutoCompleteTextView
 import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.ConfigurationCompat
@@ -23,6 +22,7 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
             LayoutInflater.from(context),
             this
         )
+    private val countryTextInputLayout = viewBinding.countryTextInputLayout
 
     private val countryAdapter = CountryAdapter(
         context,
@@ -63,26 +63,17 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
         updateInitialCountry()
 
         val errorMessage = resources.getString(R.string.address_country_invalid)
-        countryAutocomplete.validator = object : AutoCompleteTextView.Validator {
-            override fun fixText(invalidText: CharSequence?): CharSequence {
-                return invalidText ?: ""
-            }
 
-            override fun isValid(text: CharSequence?): Boolean {
-                val validCountry = countryAdapter.unfilteredCountries.firstOrNull {
-                    it.name == text.toString()
-                }
+        countryAutocomplete.validator = CountryAutoCompleteTextViewValidator(
+            countryAdapter
+        ) { country ->
+            selectedCountry = country
 
-                selectedCountry = validCountry
-
-                if (validCountry != null) {
-                    clearError()
-                } else {
-                    viewBinding.countryTextInputLayout.error = errorMessage
-                    viewBinding.countryTextInputLayout.isErrorEnabled = true
-                }
-
-                return validCountry != null
+            if (country != null) {
+                clearError()
+            } else {
+                countryTextInputLayout.error = errorMessage
+                countryTextInputLayout.isErrorEnabled = true
             }
         }
     }
