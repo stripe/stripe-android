@@ -31,6 +31,7 @@ import com.stripe.android.stripe3ds2.transaction.CompletionEvent
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.ProtocolErrorEvent
 import com.stripe.android.stripe3ds2.transaction.RuntimeErrorEvent
+import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.stripe3ds2.transaction.Stripe3ds2ActivityStarterHost
 import com.stripe.android.stripe3ds2.transaction.StripeChallengeStatusReceiver
 import com.stripe.android.stripe3ds2.transaction.Transaction
@@ -826,7 +827,8 @@ internal class StripePaymentController internal constructor(
             activity,
             stripe3ds2Fingerprint.directoryServerName,
             false,
-            config.stripe3ds2Config.uiCustomization.uiCustomization
+            config.stripe3ds2Config.uiCustomization.uiCustomization,
+            transaction.sdkTransactionId
         )
 
         CoroutineScope(workContext).launch {
@@ -837,7 +839,7 @@ internal class StripePaymentController internal constructor(
                 stripe3ds2Fingerprint.source,
                 areqParams.sdkAppId,
                 areqParams.sdkReferenceNumber,
-                areqParams.sdkTransactionId,
+                areqParams.sdkTransactionId.value,
                 areqParams.deviceData,
                 areqParams.sdkEphemeralPublicKey,
                 areqParams.messageVersion,
@@ -1202,7 +1204,8 @@ internal class StripePaymentController internal constructor(
             context: Context,
             directoryServerName: String,
             cancelable: Boolean,
-            uiCustomization: StripeUiCustomization
+            uiCustomization: StripeUiCustomization,
+            sdkTransactionId: SdkTransactionId
         )
 
         class Default : ChallengeProgressActivityStarter {
@@ -1210,13 +1213,15 @@ internal class StripePaymentController internal constructor(
                 context: Context,
                 directoryServerName: String,
                 cancelable: Boolean,
-                uiCustomization: StripeUiCustomization
+                uiCustomization: StripeUiCustomization,
+                sdkTransactionId: SdkTransactionId
             ) {
                 ChallengeProgressActivity.show(
                     context,
                     directoryServerName,
                     cancelable,
-                    uiCustomization
+                    uiCustomization,
+                    sdkTransactionId
                 )
             }
         }

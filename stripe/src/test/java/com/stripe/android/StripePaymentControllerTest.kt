@@ -45,6 +45,7 @@ import com.stripe.android.stripe3ds2.transaction.ErrorMessage
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.ProtocolErrorEvent
 import com.stripe.android.stripe3ds2.transaction.RuntimeErrorEvent
+import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.stripe3ds2.transaction.Stripe3ds2ActivityStarterHost
 import com.stripe.android.stripe3ds2.transaction.Transaction
 import com.stripe.android.utils.ParcelUtils
@@ -58,6 +59,7 @@ import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.UUID
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -67,7 +69,13 @@ internal class StripePaymentControllerTest {
 
     private val activity: Activity = mock()
     private val threeDs2Service: StripeThreeDs2Service = mock()
-    private val transaction: Transaction = mock()
+    private val sdkTransactionId = mock<SdkTransactionId>().also {
+        whenever(it.value).thenReturn(UUID.randomUUID().toString())
+    }
+    private val transaction: Transaction = mock<Transaction>().also {
+        whenever(it.sdkTransactionId)
+            .thenReturn(sdkTransactionId)
+    }
     private val paymentAuthResultCallback: ApiResultCallback<PaymentIntentResult> = mock()
     private val setupAuthResultCallback: ApiResultCallback<SetupIntentResult> = mock()
     private val sourceCallback: ApiResultCallback<Source> = mock()
@@ -98,7 +106,7 @@ internal class StripePaymentControllerTest {
         Dispatchers.setMain(testDispatcher)
         runBlocking {
             whenever(transaction.createAuthenticationRequestParameters())
-                .thenReturn(Stripe3ds2Fixtures.AREQ_PARAMS)
+                .thenReturn(Stripe3ds2Fixtures.createAreqParams(sdkTransactionId))
         }
         whenever(activity.applicationContext)
             .thenReturn(context)
@@ -145,7 +153,8 @@ internal class StripePaymentControllerTest {
             eq(activity),
             eq("mastercard"),
             eq(false),
-            any()
+            any(),
+            eq(sdkTransactionId)
         )
 
         verify(analyticsRequestExecutor)
@@ -198,7 +207,8 @@ internal class StripePaymentControllerTest {
             eq(activity),
             eq("american_express"),
             eq(false),
-            any()
+            any(),
+            eq(sdkTransactionId)
         )
     }
 
@@ -312,7 +322,7 @@ internal class StripePaymentControllerTest {
     @Test
     fun test3ds2Receiver_whenCompleted_shouldFireAnalyticsRequest() {
         val completionEvent = CompletionEvent(
-            sdkTransactionId = "8dd3413f-0b45-4234-bc45-6cc40fb1b0f1",
+            sdkTransactionId = sdkTransactionId,
             transactionStatus = "C"
         )
 
@@ -440,7 +450,7 @@ internal class StripePaymentControllerTest {
     @Test
     fun test3ds2Receiver_whenProtocolError_shouldFireAnalyticsRequest() {
         val protocolErrorEvent = ProtocolErrorEvent(
-            sdkTransactionId = "8dd3413f-0b45-4234-bc45-6cc40fb1b0f1",
+            sdkTransactionId = sdkTransactionId,
             errorMessage = ErrorMessage(
                 errorCode = "201",
                 errorDescription = "Required element missing",
@@ -475,7 +485,7 @@ internal class StripePaymentControllerTest {
                 mapOf(
                     "type" to "protocol_error_event",
                     "error_code" to "201",
-                    "sdk_trans_id" to "8dd3413f-0b45-4234-bc45-6cc40fb1b0f1",
+                    "sdk_trans_id" to sdkTransactionId.value,
                     "error_description" to "Required element missing",
                     "error_details" to "eci",
                     "trans_id" to "047f76a6-d1d4-48a2-aa65-786abb6f7f46"
