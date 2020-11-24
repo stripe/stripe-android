@@ -2,21 +2,20 @@ package com.stripe.example.paymentsheet
 
 import android.app.Application
 import android.content.SharedPreferences
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.liveData
 import com.stripe.example.module.BackendApiFactory
+import com.stripe.example.module.StripeIntentViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.flow.singleOrNull
 import kotlin.coroutines.CoroutineContext
 
 internal class PaymentSheetViewModel(
+    application: Application,
     private val repository: Repository
-) : ViewModel() {
-    val inProgress = MutableLiveData<Boolean>()
-    val status = MutableLiveData<String>()
+) : StripeIntentViewModel(application) {
 
     fun clearKeys() {
         repository.clearKeys()
@@ -66,6 +65,7 @@ internal class PaymentSheetViewModel(
             )
 
             return PaymentSheetViewModel(
+                application,
                 repository
             ) as T
         }
