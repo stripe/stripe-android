@@ -11,7 +11,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.os.ConfigurationCompat
 import com.stripe.android.R
 import com.stripe.android.databinding.CountryAutocompleteViewBinding
-import java.util.Locale
 
 internal class CountryAutoCompleteTextView @JvmOverloads constructor(
     context: Context,
@@ -109,7 +108,7 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
      * the full country display name.
      */
     internal fun setCountrySelected(countryCode: String) {
-        updateUiForCountryEntered(getDisplayCountry(countryCode))
+        updateUiForCountryEntered(CountryUtils.getDisplayCountry(countryCode))
     }
 
     @VisibleForTesting
@@ -132,11 +131,6 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
             selectedCountry = country
             countryChangeCallback(country)
         }
-    }
-
-    private fun getDisplayCountry(countryCode: String): String {
-        return CountryUtils.getCountryByCode(countryCode)?.name
-            ?: Locale("", countryCode).displayCountry
     }
 
     internal fun validateCountry() {
