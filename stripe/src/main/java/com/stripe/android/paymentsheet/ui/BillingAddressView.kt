@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
@@ -15,6 +14,7 @@ import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.ShapeAppearanceModel
 import com.stripe.android.R
 import com.stripe.android.databinding.StripeBillingAddressLayoutBinding
+import com.stripe.android.databinding.StripeCountryDropdownItemBinding
 import com.stripe.android.view.Country
 import com.stripe.android.view.CountryAdapter
 import com.stripe.android.view.CountryAutoCompleteTextViewValidator
@@ -34,8 +34,15 @@ internal class BillingAddressView @JvmOverloads constructor(
         context,
         CountryUtils.getOrderedCountries(
             ConfigurationCompat.getLocales(context.resources.configuration)[0]
-        )
-    )
+        ),
+        R.layout.stripe_country_dropdown_item
+    ) {
+        StripeCountryDropdownItemBinding.inflate(
+            LayoutInflater.from(context),
+            it,
+            false
+        ).root
+    }
 
     internal val countryView = viewBinding.country
     private val postalCodeView = viewBinding.postalCode
