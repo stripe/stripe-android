@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import com.stripe.android.stripe3ds2.transaction.AuthenticationRequestParameters
+import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import java.util.UUID
 
 internal object Stripe3ds2Fixtures {
@@ -12,12 +13,16 @@ internal object Stripe3ds2Fixtures {
     private const val SDK_REFERENCE_NUMBER = "3DS_LOA_SDK_STIN_12345"
     private const val SDK_EPHEMERAL_PUBLIC_KEY = "{\"kty\":\"EC\",\"use\":\"sig\",\"crv\":\"P-256\",\"kid\":\"b23da28b-d611-46a8-93af-44ad57ce9c9d\",\"x\":\"hSwyaaAp3ppSGkpt7d9G8wnp3aIXelsZVo05EPpqetg\",\"y\":\"OUVOv9xPh5RYWapla0oz3vCJWRRXlDmppy5BGNeSl-A\"}"
 
-    val AREQ_PARAMS = AuthenticationRequestParameters(
-        deviceData = DEVICE_DATA,
-        messageVersion = MESSAGE_VERSION,
-        sdkAppId = SDK_APP_ID,
-        sdkEphemeralPublicKey = SDK_EPHEMERAL_PUBLIC_KEY,
-        sdkReferenceNumber = SDK_REFERENCE_NUMBER,
-        sdkTransactionId = SDK_TRANSACTION_ID
-    )
+    fun createAreqParams(
+        sdkTransactionId: SdkTransactionId
+    ): AuthenticationRequestParameters {
+        return AuthenticationRequestParameters(
+            deviceData = DEVICE_DATA,
+            messageVersion = MESSAGE_VERSION,
+            sdkAppId = SDK_APP_ID,
+            sdkEphemeralPublicKey = SDK_EPHEMERAL_PUBLIC_KEY,
+            sdkReferenceNumber = SDK_REFERENCE_NUMBER,
+            sdkTransactionId = sdkTransactionId
+        )
+    }
 }

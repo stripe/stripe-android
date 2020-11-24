@@ -111,7 +111,7 @@ internal class AnalyticsDataFactory @VisibleForTesting internal constructor(
         val errorMessage = protocolErrorEvent.errorMessage
         val errorData = mapOf(
             "type" to "protocol_error_event",
-            "sdk_trans_id" to protocolErrorEvent.sdkTransactionId,
+            "sdk_trans_id" to protocolErrorEvent.sdkTransactionId?.value,
             "error_code" to errorMessage.errorCode,
             "error_description" to errorMessage.errorDescription,
             "error_details" to errorMessage.errorDetails,
