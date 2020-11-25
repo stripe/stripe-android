@@ -1,5 +1,6 @@
 package com.stripe.android.view
 
+import android.app.Activity
 import android.content.Context
 import android.view.View
 import android.widget.LinearLayout
@@ -29,10 +30,8 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
 import com.stripe.android.utils.TestUtils.idleLooper
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
@@ -48,10 +47,22 @@ import kotlin.test.Test
 internal class CardMultilineWidgetTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
-    private lateinit var cardMultilineWidget: CardMultilineWidget
-    private lateinit var noZipCardMultilineWidget: CardMultilineWidget
-    private lateinit var fullGroup: WidgetControlGroup
-    private lateinit var noZipGroup: WidgetControlGroup
+    private val cardMultilineWidget: CardMultilineWidget by lazy {
+        activityScenarioFactory.createView {
+            createWidget(it, shouldShowPostalCode = true)
+        }
+    }
+    private val noZipCardMultilineWidget: CardMultilineWidget by lazy {
+        activityScenarioFactory.createView {
+            createWidget(it, shouldShowPostalCode = false)
+        }
+    }
+    private val fullGroup: WidgetControlGroup by lazy {
+        WidgetControlGroup(cardMultilineWidget, testDispatcher)
+    }
+    private val noZipGroup: WidgetControlGroup by lazy {
+        WidgetControlGroup(noZipCardMultilineWidget, testDispatcher)
+    }
 
     private val fullCardListener: CardInputListener = mock()
     private val noZipCardListener: CardInputListener = mock()
@@ -66,8 +77,6 @@ internal class CardMultilineWidgetTest {
         // The input date here will be invalid after 2050. Please update the test.
         assertThat(Calendar.getInstance().get(Calendar.YEAR) < 2050)
             .isTrue()
-
-        Dispatchers.setMain(testDispatcher)
 
         CustomerSession.instance = mock()
 
@@ -86,33 +95,18 @@ internal class CardMultilineWidgetTest {
             BinFixtures.DINERSCLUB14,
             listOf(AccountRangeFixtures.DINERSCLUB14)
         )
+    }
 
-        activityScenarioFactory
-            .createAddPaymentMethodActivity()
-            .use { activityScenario ->
-                activityScenario.onActivity { activity ->
-                    cardMultilineWidget = activity.findViewById(R.id.card_multiline_widget)
-                    fullGroup = WidgetControlGroup(cardMultilineWidget, testDispatcher)
-
-                    fullGroup.cardNumberEditText.setText("")
-
-                    cardMultilineWidget.setCardNumberTextWatcher(EMPTY_WATCHER)
-                    cardMultilineWidget.setExpiryDateTextWatcher(EMPTY_WATCHER)
-                    cardMultilineWidget.setCvcNumberTextWatcher(EMPTY_WATCHER)
-                    cardMultilineWidget.setPostalCodeTextWatcher(EMPTY_WATCHER)
-                    cardMultilineWidget.paymentMethodBillingDetailsBuilder
-                }
-            }
-
-        activityScenarioFactory
-            .createAddPaymentMethodActivity()
-            .use { activityScenario ->
-                activityScenario.onActivity {
-                    noZipCardMultilineWidget = it.findViewById(R.id.card_multiline_widget)
-                    noZipCardMultilineWidget.setShouldShowPostalCode(false)
-                    noZipGroup = WidgetControlGroup(noZipCardMultilineWidget, testDispatcher)
-                }
-            }
+    private fun createWidget(
+        activity: Activity,
+        shouldShowPostalCode: Boolean
+    ): CardMultilineWidget {
+        return CardMultilineWidget(
+            activity,
+            shouldShowPostalCode = shouldShowPostalCode
+        ).also {
+            it.cardNumberEditText.workContext = testDispatcher
+        }
     }
 
     @Test
@@ -817,7 +811,15 @@ internal class CardMultilineWidgetTest {
 
     @Test
     fun onFinishInflate_shouldSetPostalCodeInputLayoutHint() {
-        assertThat(cardMultilineWidget.postalInputLayout.hint)
+        var inflatedCardMultilineWidget: CardMultilineWidget? = null
+        activityScenarioFactory
+            .createAddPaymentMethodActivity()
+            .use { activityScenario ->
+                activityScenario.onActivity { activity ->
+                    inflatedCardMultilineWidget = activity.findViewById(R.id.card_multiline_widget)
+                }
+            }
+        assertThat(requireNotNull(inflatedCardMultilineWidget).postalInputLayout.hint)
             .isEqualTo("Postal code")
     }
 

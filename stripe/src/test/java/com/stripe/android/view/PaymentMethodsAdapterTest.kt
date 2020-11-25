@@ -12,10 +12,12 @@ import com.stripe.android.model.PaymentMethodFixtures
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.mockito.Mockito.times
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -40,6 +42,11 @@ class PaymentMethodsAdapterTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         paymentMethodsAdapter.registerAdapterDataObserver(adapterDataObserver)
+    }
+
+    @AfterTest
+    fun cleanup() {
+        Dispatchers.resetMain()
     }
 
     @Test

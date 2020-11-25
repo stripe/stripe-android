@@ -8,15 +8,12 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.model.AlipayAuthResult
 import com.stripe.android.model.PaymentIntentFixtures
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
-import kotlinx.coroutines.test.setMain
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.BeforeTest
 import kotlin.test.assertFailsWith
 
 @ExperimentalCoroutinesApi
@@ -26,11 +23,6 @@ internal class DefaultAlipayRepositoryTest {
     private val repository = DefaultAlipayRepository(stripeRepository)
 
     private val testDispatcher = TestCoroutineDispatcher()
-
-    @BeforeTest
-    fun setup() {
-        Dispatchers.setMain(testDispatcher)
-    }
 
     @Test
     fun `authenticate() should handle success`() = testDispatcher.runBlockingTest {
