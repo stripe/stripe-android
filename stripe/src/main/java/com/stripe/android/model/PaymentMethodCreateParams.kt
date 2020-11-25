@@ -280,12 +280,13 @@ data class PaymentMethodCreateParams internal constructor(
 
     @Parcelize
     data class Ideal(
-        private val bank: String?
+        var bank: String?
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
             return bank?.let { mapOf(PARAM_BANK to it) }.orEmpty()
         }
 
+        @Deprecated("Ideal#bank is now visible and mutable.")
         class Builder : ObjectBuilder<Ideal> {
             internal var bank: String? = null
 
@@ -305,7 +306,7 @@ data class PaymentMethodCreateParams internal constructor(
 
     @Parcelize
     data class Fpx(
-        private val bank: String?
+        var bank: String?
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
             return bank?.let {
@@ -313,6 +314,7 @@ data class PaymentMethodCreateParams internal constructor(
             }.orEmpty()
         }
 
+        @Deprecated("Fpx#bank is now visible and mutable.")
         class Builder : ObjectBuilder<Fpx> {
             internal var bank: String? = null
 
@@ -347,7 +349,7 @@ data class PaymentMethodCreateParams internal constructor(
 
     @Parcelize
     data class SepaDebit(
-        private val iban: String?
+        var iban: String?
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
             return iban?.let {
@@ -355,6 +357,7 @@ data class PaymentMethodCreateParams internal constructor(
             }.orEmpty()
         }
 
+        @Deprecated("SepaDebit#iban is now visible and mutable.")
         class Builder : ObjectBuilder<SepaDebit> {
             private var iban: String? = null
 
