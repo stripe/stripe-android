@@ -9,7 +9,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.R
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
@@ -23,25 +22,17 @@ class ViewWidthAnimatorTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val activityScenarioFactory = ActivityScenarioFactory(context)
 
-    private lateinit var view: View
+    private val view: View by lazy {
+        activityScenarioFactory.createView { activity ->
+            Button(activity).also { button ->
+                button.layoutParams = ViewGroup.LayoutParams(START_WIDTH, 100)
+            }
+        }
+    }
 
     @BeforeTest
     fun setup() {
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-
-        activityScenarioFactory
-            .createAddPaymentMethodActivity()
-            .use { activityScenario ->
-                activityScenario.onActivity { activity ->
-                    activity.findViewById<ViewGroup>(R.id.add_payment_method_card).let { root ->
-                        root.removeAllViews()
-                        view = Button(activity).also {
-                            it.layoutParams = ViewGroup.LayoutParams(START_WIDTH, 100)
-                        }
-                        root.addView(view)
-                    }
-                }
-            }
     }
 
     @Test
