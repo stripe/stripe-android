@@ -15,6 +15,7 @@ import com.google.android.material.shape.ShapeAppearanceModel
 import com.stripe.android.R
 import com.stripe.android.databinding.StripeBillingAddressLayoutBinding
 import com.stripe.android.databinding.StripeCountryDropdownItemBinding
+import com.stripe.android.model.Address
 import com.stripe.android.view.Country
 import com.stripe.android.view.CountryAdapter
 import com.stripe.android.view.CountryAutoCompleteTextViewValidator
@@ -44,8 +45,19 @@ internal class BillingAddressView @JvmOverloads constructor(
         ).root
     }
 
+    internal val address: Address
+        get() {
+            return Address(
+                country = countryView.text.toString(),
+                postalCode = postalCodeView.text.toString()
+            )
+        }
+
+    @VisibleForTesting
     internal val countryView = viewBinding.country
-    private val postalCodeView = viewBinding.postalCode
+
+    @VisibleForTesting
+    internal val postalCodeView = viewBinding.postalCode
 
     private var selectedCountry: Country? = null
 
