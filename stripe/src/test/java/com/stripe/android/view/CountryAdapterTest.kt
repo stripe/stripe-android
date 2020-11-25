@@ -1,5 +1,7 @@
 package com.stripe.android.view
 
+import android.content.Context
+import android.widget.TextView
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import org.junit.runner.RunWith
@@ -12,13 +14,15 @@ import kotlin.test.Test
  */
 @RunWith(RobolectricTestRunner::class)
 class CountryAdapterTest {
-
+    private val context = ApplicationProvider.getApplicationContext<Context>()
     private val orderedCountries = CountryUtils.getOrderedCountries(Locale.US)
     private val countryAdapter =
         CountryAdapter(
             ApplicationProvider.getApplicationContext(),
             orderedCountries
-        )
+        ) {
+            TextView(context)
+        }
 
     private val suggestions: List<Country>
         get() {

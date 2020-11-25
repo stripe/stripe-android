@@ -83,7 +83,7 @@ class PaymentSheetAddCardFragmentTest {
             bundleOf(
                 PaymentSheetActivity.EXTRA_STARTER_ARGS to PaymentSheetFixtures.DEFAULT_ARGS
             ),
-            R.style.StripeDefaultTheme
+            R.style.StripePaymentSheetDefaultTheme
         )
     }
 }

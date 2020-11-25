@@ -10,6 +10,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.os.ConfigurationCompat
 import com.stripe.android.R
 import com.stripe.android.databinding.CountryAutocompleteViewBinding
+import com.stripe.android.databinding.CountryTextViewBinding
 
 internal class CountryAutoCompleteTextView @JvmOverloads constructor(
     context: Context,
@@ -23,12 +24,19 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
         )
     private val countryTextInputLayout = viewBinding.countryTextInputLayout
 
+    private val layoutInflater = LayoutInflater.from(context)
     private val countryAdapter = CountryAdapter(
         context,
         CountryUtils.getOrderedCountries(
             ConfigurationCompat.getLocales(context.resources.configuration)[0]
         )
-    )
+    ) {
+        CountryTextViewBinding.inflate(
+            layoutInflater,
+            it,
+            false
+        ).root
+    }
 
     @VisibleForTesting
     internal val countryAutocomplete = viewBinding.countryAutocomplete

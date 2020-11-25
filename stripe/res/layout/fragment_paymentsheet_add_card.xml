@@ -38,20 +38,29 @@
             app:layout_constraintStart_toStartOf="parent" />
 
         <TextView
+            android:id="@+id/billing_address_label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/stripe_paymentsheet_add_payment_method_country_or_region"
             style="@style/StripePaymentSheetLabel"
             app:layout_constraintTop_toBottomOf="@+id/card_multiline_widget"
-            app:layout_constraintBottom_toTopOf="@+id/save_card_checkbox"
+            app:layout_constraintBottom_toTopOf="@+id/billing_address"
             app:layout_constraintStart_toStartOf="parent" />
+
+        <com.stripe.android.paymentsheet.ui.BillingAddressView
+            android:id="@+id/billing_address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/billing_address_label"
+            app:layout_constraintBottom_toTopOf="@+id/save_card_checkbox"
+            app:layout_constraintStart_toStartOf="parent"/>
 
         <com.google.android.material.checkbox.MaterialCheckBox
             android:id="@+id/save_card_checkbox"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:checked="true"
-            app:layout_constraintTop_toBottomOf="@+id/card_multiline_widget"
+            app:layout_constraintTop_toBottomOf="@+id/billing_address"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             android:text="@string/stripe_paymentsheet_save_this_card"/>

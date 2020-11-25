@@ -1,5 +1,7 @@
 package com.stripe.android.view
 
+import android.content.Context
+import android.widget.TextView
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import org.junit.runner.RunWith
@@ -9,10 +11,13 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class CountryAutoCompleteTextViewValidatorTest {
+    private val context = ApplicationProvider.getApplicationContext<Context>()
     private val countryAdapter = CountryAdapter(
-        ApplicationProvider.getApplicationContext(),
+        context,
         CountryUtils.getOrderedCountries(Locale.US)
-    )
+    ) {
+        TextView(context)
+    }
 
     @Test
     fun `isValid() returns expected results`() {

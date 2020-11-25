@@ -30,5 +30,6 @@
     <color name="stripe_paymentsheet_buybutton_success_background">#24B47E</color>
     <color name="stripe_paymentsheet_buybutton_text">@android:color/white</color>
     <color name="stripe_paymentsheet_buybutton_confirming_progress">#ffffff</color>
+    <color name="stripe_paymentsheet_form_border">#44000000</color>
 
 </resources>
