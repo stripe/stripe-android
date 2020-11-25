@@ -10,6 +10,8 @@ com.stripe.android.model.wallets
 com.stripe.android.networking
 com.stripe.android.paymentsheet
 com.stripe.android.paymentsheet.model
+com.stripe.android.paymentsheet.ui
+com.stripe.android.paymentsheet.viewmodels
 com.stripe.android.utils
 com.stripe.android.view
 com.stripe.android.view.i18n
