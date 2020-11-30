@@ -44,7 +44,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
-import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.LooperMode
@@ -130,7 +129,6 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun calculateCursorPosition_whenAmEx_increasesIndexWhenGoingPastTheSpaces() = testDispatcher.runBlockingTest {
-        Dispatchers.setMain(testDispatcher)
         cardNumberEditText.onAccountRangeResult(
             AccountRangeFixtures.AMERICANEXPRESS
         )
@@ -145,7 +143,6 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun calculateCursorPosition_whenDinersClub16_decreasesIndexWhenDeletingPastTheSpaces() = testDispatcher.runBlockingTest {
-        Dispatchers.setMain(testDispatcher)
         cardNumberEditText.onAccountRangeResult(
             AccountRangeFixtures.DINERSCLUB16
         )
@@ -163,7 +160,6 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun calculateCursorPosition_whenDeletingNotOnGaps_doesNotDecreaseIndex() = testDispatcher.runBlockingTest {
-        Dispatchers.setMain(testDispatcher)
         cardNumberEditText.onAccountRangeResult(
             AccountRangeFixtures.DINERSCLUB14
         )
@@ -175,7 +171,6 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun calculateCursorPosition_whenAmEx_decreasesIndexWhenDeletingPastTheSpaces() = testDispatcher.runBlockingTest {
-        Dispatchers.setMain(testDispatcher)
         cardNumberEditText.onAccountRangeResult(
             AccountRangeFixtures.AMERICANEXPRESS
         )
@@ -190,7 +185,6 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun calculateCursorPosition_whenSelectionInTheMiddle_increasesIndexOverASpace() = testDispatcher.runBlockingTest {
-        Dispatchers.setMain(testDispatcher)
         cardNumberEditText.onAccountRangeResult(
             AccountRangeFixtures.VISA
         )
@@ -229,7 +223,6 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun setText_whenTextIsValidCommonLengthNumber_changesCardValidState() {
-        Dispatchers.setMain(testDispatcher)
         updateCardNumberAndIdle(VISA_WITH_SPACES)
 
         assertThat(cardNumberEditText.isCardNumberValid)
@@ -240,7 +233,6 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun setText_whenTextIsSpacelessValidNumber_changesToSpaceNumberAndValidates() {
-        Dispatchers.setMain(testDispatcher)
         updateCardNumberAndIdle(VISA_NO_SPACES)
 
         assertThat(cardNumberEditText.isCardNumberValid)
@@ -367,7 +359,6 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun `full Amex typed typed at once should change isCardNumberValid to true and invoke completion callback`() {
-        Dispatchers.setMain(testDispatcher)
         updateCardNumberAndIdle(AMEX_NO_SPACES)
         idleLooper()
 
@@ -747,8 +738,6 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun `when first digit matches a single account, show a card brand`() {
-        Dispatchers.setMain(testDispatcher)
-
         // matches Visa
         updateCardNumberAndIdle("4")
         assertThat(lastBrandChangeCallbackInvocation)
@@ -757,8 +746,6 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun `when first digit matches multiple accounts, don't show a card brand`() {
-        Dispatchers.setMain(testDispatcher)
-
         // matches Discover and Union Pay
         updateCardNumberAndIdle("6")
         assertThat(lastBrandChangeCallbackInvocation)
@@ -767,8 +754,6 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun `getAccountRange() should only be called when necessary`() {
-        Dispatchers.setMain(testDispatcher)
-
         var repositoryCalls = 0
         val cardNumberEditText = CardNumberEditText(
             context,

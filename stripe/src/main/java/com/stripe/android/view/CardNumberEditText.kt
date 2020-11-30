@@ -159,7 +159,7 @@ class CardNumberEditText internal constructor(
     @JvmSynthetic
     internal var isLoadingCallback: (Boolean) -> Unit = {}
 
-    private val loadingJob: Job
+    private var loadingJob: Job? = null
 
     init {
         inputType = InputType.TYPE_CLASS_NUMBER
@@ -171,7 +171,10 @@ class CardNumberEditText internal constructor(
         }
 
         updateLengthFilter()
+    }
 
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
         loadingJob = CoroutineScope(workContext).launch {
             cardAccountRangeRepository.loading.collect {
                 withContext(Dispatchers.Main) {
@@ -187,7 +190,9 @@ class CardNumberEditText internal constructor(
         }
 
     override fun onDetachedFromWindow() {
-        loadingJob.cancel()
+        loadingJob?.cancel()
+        loadingJob = null
+
         cancelAccountRangeRepositoryJob()
 
         super.onDetachedFromWindow()
