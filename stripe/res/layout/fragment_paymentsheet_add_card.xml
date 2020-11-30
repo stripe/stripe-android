@@ -35,7 +35,8 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@+id/add_card_header"
             app:layout_constraintBottom_toTopOf="@+id/save_card_checkbox"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:shouldShowPostalCode="false" />
 
         <TextView
             android:id="@+id/billing_address_label"

@@ -31,7 +31,7 @@ data class PaymentMethodCreateParams internal constructor(
     private val upi: Upi? = null,
     private val netbanking: Netbanking? = null,
 
-    private val billingDetails: PaymentMethod.BillingDetails? = null,
+    internal val billingDetails: PaymentMethod.BillingDetails? = null,
 
     private val metadata: Map<String, String>? = null,
     private val productUsage: Set<String> = emptySet()
