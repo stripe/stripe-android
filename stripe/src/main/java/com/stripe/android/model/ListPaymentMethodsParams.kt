@@ -6,7 +6,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal data class ListPaymentMethodsParams(
     private val customerId: String,
-    private val paymentMethodType: PaymentMethod.Type,
+    internal val paymentMethodType: PaymentMethod.Type,
     private val limit: Int? = null,
     private val endingBefore: String? = null,
     private val startingAfter: String? = null

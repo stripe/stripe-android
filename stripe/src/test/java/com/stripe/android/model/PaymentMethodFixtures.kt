@@ -406,4 +406,13 @@ internal object PaymentMethodFixtures {
             paymentMethod
         }
     }
+
+    fun createPaymentMethod(type: PaymentMethod.Type): PaymentMethod {
+        return PaymentMethod(
+            id = "pm_123",
+            type = type,
+            created = ThreadLocalRandom.current().nextLong(1L, 10000000L),
+            liveMode = false
+        )
+    }
 }

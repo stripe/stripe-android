@@ -8,6 +8,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentController
 import com.stripe.android.R
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -27,8 +28,9 @@ class DefaultPaymentSheetFlowControllerTest {
             "ephkey",
             "cus_123"
         ),
-        emptyList(),
-        null
+        paymentMethodTypes = listOf(PaymentMethod.Type.Card),
+        paymentMethods = emptyList(),
+        defaultPaymentMethodId = null
     )
 
     @Test

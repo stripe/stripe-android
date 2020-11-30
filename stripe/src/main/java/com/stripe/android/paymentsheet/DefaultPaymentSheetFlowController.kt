@@ -18,7 +18,10 @@ internal class DefaultPaymentSheetFlowController internal constructor(
     private val publishableKey: String,
     private val stripeAccountId: String?,
     private val args: Args,
-    private val paymentMethods: List<PaymentMethod>,
+    // the allowed payment method types
+    internal val paymentMethodTypes: List<PaymentMethod.Type>,
+    // the customer's existing payment methods
+    internal val paymentMethods: List<PaymentMethod>,
     private val defaultPaymentMethodId: String?
 ) : PaymentSheetFlowController {
     private val confirmParamsFactory = ConfirmParamsFactory()

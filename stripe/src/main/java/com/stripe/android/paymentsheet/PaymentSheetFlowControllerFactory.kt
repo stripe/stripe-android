@@ -6,6 +6,7 @@ import com.stripe.android.PaymentController
 import com.stripe.android.PaymentSessionPrefs
 import com.stripe.android.StripePaymentController
 import com.stripe.android.model.ListPaymentMethodsParams
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
@@ -98,38 +99,37 @@ internal class PaymentSheetFlowControllerFactory(
         ephemeralKey: String,
         customerId: String
     ): Result {
-        val result = runCatching {
-            stripeRepository.getPaymentMethods(
-                ListPaymentMethodsParams(
-                    customerId = customerId,
-                    paymentMethodType = PaymentMethod.Type.Card
-                ),
-                publishableKey,
-                PRODUCT_USAGE,
-                ApiRequest.Options(ephemeralKey, stripeAccountId)
-            )
-        }
-
+        // load default payment option
         val defaultPaymentMethodId = paymentSessionPrefs.getPaymentMethodId(customerId)
 
-        // load default payment option
-
-        return result.fold(
-            onSuccess = { paymentMethods ->
-                Result.Success(
-                    DefaultPaymentSheetFlowController(
-                        createPaymentController(),
-                        publishableKey,
-                        stripeAccountId,
-                        DefaultPaymentSheetFlowController.Args.Default(
-                            clientSecret,
-                            ephemeralKey,
-                            customerId
-                        ),
-                        paymentMethods,
-                        defaultPaymentMethodId
+        return runCatching {
+            requireNotNull(retrievePaymentIntent(clientSecret))
+        }.fold(
+            onSuccess = { paymentIntent ->
+                val paymentMethodTypes = paymentIntent.paymentMethodTypes.mapNotNull {
+                    PaymentMethod.Type.fromCode(it)
+                }
+                retrieveAllPaymentMethods(
+                    types = paymentMethodTypes,
+                    customerId = customerId,
+                    ephemeralKey = ephemeralKey
+                ).let { paymentMethods ->
+                    Result.Success(
+                        DefaultPaymentSheetFlowController(
+                            paymentController = createPaymentController(),
+                            args = DefaultPaymentSheetFlowController.Args.Default(
+                                clientSecret,
+                                ephemeralKey,
+                                customerId
+                            ),
+                            publishableKey = publishableKey,
+                            stripeAccountId = stripeAccountId,
+                            paymentMethodTypes = paymentMethodTypes,
+                            paymentMethods = paymentMethods,
+                            defaultPaymentMethodId = defaultPaymentMethodId
+                        )
                     )
-                )
+                }
             },
             onFailure = {
                 Result.Failure(it)
@@ -140,16 +140,78 @@ internal class PaymentSheetFlowControllerFactory(
     private suspend fun createWithGuestArgs(
         clientSecret: String
     ): Result {
-        return Result.Success(
-            DefaultPaymentSheetFlowController(
-                createPaymentController(),
-                publishableKey,
-                stripeAccountId,
-                DefaultPaymentSheetFlowController.Args.Guest(
-                    clientSecret
+        return runCatching {
+            requireNotNull(retrievePaymentIntent(clientSecret))
+        }.fold(
+            onSuccess = { paymentIntent ->
+                val paymentMethodTypes = paymentIntent.paymentMethodTypes
+                    .mapNotNull {
+                        PaymentMethod.Type.fromCode(it)
+                    }
+
+                Result.Success(
+                    DefaultPaymentSheetFlowController(
+                        createPaymentController(),
+                        publishableKey,
+                        stripeAccountId,
+                        DefaultPaymentSheetFlowController.Args.Guest(
+                            clientSecret
+                        ),
+                        paymentMethodTypes = paymentMethodTypes,
+                        paymentMethods = emptyList(),
+                        defaultPaymentMethodId = null
+                    )
+                )
+            },
+            onFailure = {
+                Result.Failure(it)
+            }
+        )
+    }
+
+    private suspend fun retrieveAllPaymentMethods(
+        types: List<PaymentMethod.Type>,
+        customerId: String,
+        ephemeralKey: String
+    ): List<PaymentMethod> {
+        return types.flatMap { type ->
+            retrievePaymentMethodsByType(
+                type,
+                customerId,
+                ephemeralKey
+            )
+        }
+    }
+
+    /**
+     * Return empty list on failure.
+     */
+    private suspend fun retrievePaymentMethodsByType(
+        type: PaymentMethod.Type,
+        customerId: String,
+        ephemeralKey: String
+    ): List<PaymentMethod> {
+        return runCatching {
+            stripeRepository.getPaymentMethods(
+                ListPaymentMethodsParams(
+                    customerId = customerId,
+                    paymentMethodType = type
                 ),
-                emptyList(),
-                null
+                publishableKey,
+                PRODUCT_USAGE,
+                ApiRequest.Options(ephemeralKey, stripeAccountId)
+            )
+        }.getOrDefault(emptyList())
+    }
+
+    private suspend fun retrievePaymentIntent(
+        clientSecret: String
+    ): PaymentIntent? {
+        return stripeRepository.retrievePaymentIntent(
+            clientSecret,
+            ApiRequest.Options(
+                publishableKey,
+                stripeAccountId
             )
         )
     }
