@@ -13,7 +13,7 @@ import java.util.Locale
 @Parcelize
 data class Address internal constructor(
     val city: String? = null,
-    val country: String? = null,
+    val country: String? = null, // two-character country code
     val line1: String? = null,
     val line2: String? = null,
     val postalCode: String? = null,

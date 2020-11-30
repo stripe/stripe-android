@@ -48,7 +48,7 @@ internal class BillingAddressView @JvmOverloads constructor(
     internal val address: Address
         get() {
             return Address(
-                country = countryView.text.toString(),
+                country = selectedCountry?.code,
                 postalCode = postalCodeView.text.toString()
             )
         }

@@ -12,6 +12,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -76,13 +77,14 @@ class PaymentSheetAddCardFragmentTest {
             fragment.cardMultilineWidget.setCvcCode("123")
             fragment.billingAddressView.countryView.setText("United States")
             fragment.billingAddressView.postalCodeView.setText("94107")
+            idleLooper()
 
             val params = requireNotNull(fragment.paymentMethodParams)
             assertThat(params.billingDetails)
                 .isEqualTo(
                     PaymentMethod.BillingDetails(
                         Address(
-                            country = "United States",
+                            country = "US",
                             postalCode = "94107"
                         )
                     )
