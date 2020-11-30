@@ -11,5 +11,7 @@ class PermissionException(
     stripeError: StripeError,
     requestId: String? = null
 ) : StripeException(
-    stripeError, requestId, HttpURLConnection.HTTP_FORBIDDEN
+    stripeError,
+    requestId,
+    HttpURLConnection.HTTP_FORBIDDEN
 )

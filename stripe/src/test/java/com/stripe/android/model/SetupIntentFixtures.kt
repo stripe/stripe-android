@@ -34,8 +34,10 @@ internal object SetupIntentFixtures {
         """.trimIndent()
     )
 
-    internal val SI_WITH_LAST_PAYMENT_ERROR = requireNotNull(PARSER.parse(JSONObject(
-        """
+    internal val SI_WITH_LAST_PAYMENT_ERROR = requireNotNull(
+        PARSER.parse(
+            JSONObject(
+                """
         {
             "id": "seti_1EqTSZGMT9dGPIDGVzCUs6dV",
             "object": "setup_intent",
@@ -104,11 +106,15 @@ internal object SetupIntentFixtures {
             "status": "requires_action",
             "usage": "off_session"
         }
-        """.trimIndent()
-    )))
+                """.trimIndent()
+            )
+        )
+    )
 
-    internal val CANCELLED = requireNotNull(PARSER.parse(JSONObject(
-        """
+    internal val CANCELLED = requireNotNull(
+        PARSER.parse(
+            JSONObject(
+                """
         {
             "id": "seti_1FCoS9CRMbs6FrXfxFQOp8Mm",
             "object": "setup_intent",
@@ -135,8 +141,10 @@ internal object SetupIntentFixtures {
             "status": "canceled",
             "usage": "off_session"
         }
-        """.trimIndent()
-    )))
+                """.trimIndent()
+            )
+        )
+    )
 
     internal val EXPANDED_PAYMENT_METHOD = JSONObject(
         """

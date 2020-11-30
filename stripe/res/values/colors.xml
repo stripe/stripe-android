@@ -16,4 +16,20 @@
 
     <color name="stripe_swipe_start_payment_method">#DFDEDF</color>
     <color name="stripe_swipe_threshold_payment_method">#D5473F</color>
+
+    <color name="stripe_card_widget_progress_foreground">#ffffffcc</color>
+    <color name="stripe_card_widget_progress_background">#4F566B</color>
+
+    <!-- Payment Sheet -->
+    <color name="stripe_paymentsheet_title_text">#303030</color>
+    <color name="stripe_paymentsheet_selected_payment_method">#1EA672</color>
+    <color name="stripe_paymentsheet_payment_method_label_text">#303030</color>
+    <color name="stripe_paymentsheet_add_card_tint">#697386</color>
+    <color name="stripe_paymentsheet_add_card_background">#E3E8EE</color>
+    <color name="stripe_paymentsheet_buybutton_default_background">#0074D4</color>
+    <color name="stripe_paymentsheet_buybutton_success_background">#24B47E</color>
+    <color name="stripe_paymentsheet_buybutton_text">@android:color/white</color>
+    <color name="stripe_paymentsheet_buybutton_confirming_progress">#ffffff</color>
+    <color name="stripe_paymentsheet_form_border">#44000000</color>
+
 </resources>

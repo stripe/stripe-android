@@ -1,10 +1,8 @@
 package com.stripe.android.view
 
+import com.google.common.truth.Truth.assertThat
 import java.util.Locale
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 /**
  * Test class for [CountryUtils]
@@ -12,18 +10,35 @@ import kotlin.test.assertTrue
 class CountryUtilsTest {
 
     @Test
-    fun postalCodeCountryTest() {
-        assertTrue(CountryUtils.doesCountryUsePostalCode("US"))
-        assertTrue(CountryUtils.doesCountryUsePostalCode("UK"))
-        assertTrue(CountryUtils.doesCountryUsePostalCode("CA"))
-        assertFalse(CountryUtils.doesCountryUsePostalCode("DM"))
+    fun `doesCountryUsePostalCode() should return expected result`() {
+        assertThat(CountryUtils.doesCountryUsePostalCode("US"))
+            .isTrue()
+        assertThat(CountryUtils.doesCountryUsePostalCode("UK"))
+            .isTrue()
+        assertThat(CountryUtils.doesCountryUsePostalCode("CA"))
+            .isTrue()
+        assertThat(CountryUtils.doesCountryUsePostalCode("DM"))
+            .isFalse()
     }
 
     @Test
     fun getOrderedCountries() {
-        assertEquals(
-            Locale.getDefault().country,
+        assertThat(
             CountryUtils.getOrderedCountries(Locale.getDefault())[0].code
+        ).isEqualTo(
+            Locale.getDefault().country
         )
+    }
+
+    @Test
+    fun `getDisplayCountry() should return expected result`() {
+        assertThat(CountryUtils.getDisplayCountry("US"))
+            .isEqualTo("United States")
+        assertThat(CountryUtils.getDisplayCountry("UK"))
+            .isEqualTo("UK")
+        assertThat(CountryUtils.getDisplayCountry("CA"))
+            .isEqualTo("Canada")
+        assertThat(CountryUtils.getDisplayCountry("DM"))
+            .isEqualTo("Dominica")
     }
 }

@@ -89,9 +89,6 @@ page at http://checkstyle.sourceforge.net/config.html -->
             <property name="severity" value="warning"/>
             <property name="allowMissingParamTags" value="true"/>
             <property name="allowMissingReturnTag" value="true"/>
-            <property name="allowMissingThrowsTags" value="true"/>
-            <property name="allowThrowsTagsForSubclasses" value="true"/>
-            <property name="allowUndeclaredRTE" value="true"/>
         </module>
 
         <module name="MissingJavadocMethod" />

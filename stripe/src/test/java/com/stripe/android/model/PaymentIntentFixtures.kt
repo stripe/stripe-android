@@ -37,9 +37,6 @@ internal object PaymentIntentFixtures {
             "invoice": null,
             "last_payment_error": null,
             "livemode": true,
-            "metadata": {
-                "order_id": "5278735C-1F40-407D-933A-286E463E72D8"
-            },
             "next_action": {
                 "type": "use_stripe_sdk",
                 "use_stripe_sdk": {
@@ -94,8 +91,9 @@ internal object PaymentIntentFixtures {
 
     val PI_REQUIRES_MASTERCARD_3DS2 = PARSER.parse(PI_REQUIRES_MASTERCARD_3DS2_JSON)!!
 
-    val PI_REQUIRES_AMEX_3DS2 = PARSER.parse(JSONObject(
-        """
+    val PI_REQUIRES_AMEX_3DS2 = PARSER.parse(
+        JSONObject(
+            """
         {
             "id": "pi_1EceMnCRMbs6FrXfCXdF8dnx",
             "object": "payment_intent",
@@ -153,11 +151,13 @@ internal object PaymentIntentFixtures {
             "transfer_data": null,
             "transfer_group": null
         }
-        """.trimIndent()
-    ))!!
+            """.trimIndent()
+        )
+    )!!
 
-    val PI_REQUIRES_3DS1 = PARSER.parse(JSONObject(
-        """
+    val PI_REQUIRES_3DS1 = PARSER.parse(
+        JSONObject(
+            """
         {
             "id": "pi_1EceMnCRMbs6FrXfCXdF8dnx",
             "object": "payment_intent",
@@ -207,11 +207,13 @@ internal object PaymentIntentFixtures {
             "transfer_data": null,
             "transfer_group": null
         }
-        """.trimIndent()
-    ))!!
+            """.trimIndent()
+        )
+    )!!
 
-    val PI_REQUIRES_REDIRECT = PARSER.parse(JSONObject(
-        """
+    val PI_REQUIRES_REDIRECT = PARSER.parse(
+        JSONObject(
+            """
         {
             "id": "pi_1EZlvVCRMbs6FrXfKpq2xMmy",
             "object": "payment_intent",
@@ -261,11 +263,13 @@ internal object PaymentIntentFixtures {
             "transfer_data": null,
             "transfer_group": null
         }
-        """.trimIndent()
-    ))!!
+            """.trimIndent()
+        )
+    )!!
 
-    val PI_WITH_LAST_PAYMENT_ERROR = PARSER.parse(JSONObject(
-        """
+    val PI_WITH_LAST_PAYMENT_ERROR = PARSER.parse(
+        JSONObject(
+            """
         {
             "id": "pi_1F7J1aCRMbs6FrXfaJcvbxF6",
             "object": "payment_intent",
@@ -336,11 +340,13 @@ internal object PaymentIntentFixtures {
             "source": null,
             "status": "requires_payment_method"
         }
-        """.trimIndent()
-    ))!!
+            """.trimIndent()
+        )
+    )!!
 
-    val CANCELLED = PARSER.parse(JSONObject(
-        """
+    val CANCELLED = PARSER.parse(
+        JSONObject(
+            """
         {
             "id": "pi_1FCpMECRMbs6FrXfVulorSf5",
             "object": "payment_intent",
@@ -368,9 +374,7 @@ internal object PaymentIntentFixtures {
             "invoice": null,
             "last_payment_error": null,
             "livemode": false,
-            "metadata": {
-                "order_id": "5278735C-1F40-407D-933A-286E463E72D8"
-            },
+            "metadata": null,
             "next_action": null,
             "on_behalf_of": null,
             "payment_method": null,
@@ -406,11 +410,13 @@ internal object PaymentIntentFixtures {
             "transfer_data": null,
             "transfer_group": null
         }
-        """.trimIndent()
-    ))!!
+            """.trimIndent()
+        )
+    )!!
 
-    val PAYMENT_INTENT_WITH_CANCELED_3DS1_SOURCE = PARSER.parse(JSONObject(
-        """
+    val PAYMENT_INTENT_WITH_CANCELED_3DS1_SOURCE = PARSER.parse(
+        JSONObject(
+            """
         {
             "id": "pi_1FeqH9CRMbs6FrXfcqqpoC2H",
             "object": "payment_intent",
@@ -479,10 +485,11 @@ internal object PaymentIntentFixtures {
             "source": null,
             "status": "requires_payment_method"
         }
-        """.trimIndent()
-    ))
+            """.trimIndent()
+        )
+    )
 
-    val EXPANDED_PAYMENT_METHOD = JSONObject(
+    val EXPANDED_PAYMENT_METHOD_JSON = JSONObject(
         """
         {
             "id": "pi_1GSTxJCRMbs",
@@ -560,4 +567,249 @@ internal object PaymentIntentFixtures {
         }
         """.trimIndent()
     )
+
+    val PI_WITH_SHIPPING_JSON = JSONObject(
+        """
+        {
+            "id": "pi_1GYda2CRMbs",
+            "object": "payment_intent",
+            "amount": 1099,
+            "canceled_at": null,
+            "cancellation_reason": null,
+            "capture_method": "automatic",
+            "client_secret": "pi_1GYda2CRMbs_secret_Z2zduomY0",
+            "confirmation_method": "automatic",
+            "created": 1587066058,
+            "currency": "usd",
+            "description": "Example PaymentIntent",
+            "last_payment_error": null,
+            "livemode": false,
+            "next_action": null,
+            "payment_method": {
+                "id": "pm_1GYda7CRMbs6FrX",
+                "object": "payment_method",
+                "billing_details": {
+                    "address": {
+                        "city": "San Francisco",
+                        "country": "US",
+                        "line1": "123 Market St",
+                        "line2": "#345",
+                        "postal_code": "94107",
+                        "state": "CA"
+                    },
+                    "email": null,
+                    "name": "Jenny Rosen",
+                    "phone": null
+                },
+                "card": {
+                    "brand": "visa",
+                    "checks": {
+                        "address_line1_check": null,
+                        "address_postal_code_check": null,
+                        "cvc_check": null
+                    },
+                    "country": "US",
+                    "exp_month": 12,
+                    "exp_year": 2025,
+                    "funding": "credit",
+                    "generated_from": null,
+                    "last4": "4242",
+                    "three_d_secure_usage": {
+                        "supported": true
+                    },
+                    "wallet": {
+                        "dynamic_last4": "4242",
+                        "google_pay": {},
+                        "type": "google_pay"
+                    }
+                },
+                "created": 1587066063,
+                "customer": null,
+                "livemode": false,
+                "metadata": {},
+                "type": "card"
+            },
+            "payment_method_types": ["card"],
+            "receipt_email": null,
+            "setup_future_usage": null,
+            "shipping": {
+                "address": {
+                    "city": "San Francisco",
+                    "country": "US",
+                    "line1": "123 Market St",
+                    "line2": "#345",
+                    "postal_code": "94107",
+                    "state": "CA"
+                },
+                "carrier": "UPS",
+                "name": "Jenny Rosen",
+                "phone": "1-800-555-1234",
+                "tracking_number": "12345"
+            },
+            "source": null,
+            "status": "succeeded"
+        }
+        """.trimIndent()
+    )
+    val PI_WITH_SHIPPING = PARSER.parse(PI_WITH_SHIPPING_JSON)!!
+
+    val OXXO_REQUIRES_ACTION_JSON = JSONObject(
+        """
+        {
+            "id": "pi_1Ga0nFLYnbCF8",
+            "object": "payment_intent",
+            "amount": 1000,
+            "canceled_at": null,
+            "cancellation_reason": null,
+            "capture_method": "automatic",
+            "client_secret": "pi_1Ga0nFLYnbCF8_secret_Vd75bObmsTyGR4k",
+            "confirmation_method": "automatic",
+            "created": 1587393617,
+            "currency": "mxn",
+            "description": null,
+            "last_payment_error": null,
+            "livemode": false,
+            "next_action": {
+                "display_oxxo_details": {
+                    "expires_after": 1587704399,
+                    "number": "12345678901234657890123456789012",
+                    "hosted_voucher_url": "https://payments.stripe.com/oxxo/voucher/vchr_test_YWNjdF8xR1hhNUZIU0wxMEo5d3F2LHZjaHJfSGJIOGVMYmNmQlkyMUJ5OU1WTU5uMVYxdDNta1Q2RQ0000gtenGCef"
+                },
+                "type": "display_oxxo_details"
+            },
+            "payment_method": "pm_1Ga11MLYnbC",
+            "payment_method_types": [
+                "oxxo"
+            ],
+            "receipt_email": null,
+            "setup_future_usage": null,
+            "shipping": null,
+            "source": null,
+            "status": "requires_action"
+        }
+        """.trimIndent()
+    )
+    val OXXO_REQUIES_ACTION = PARSER.parse(OXXO_REQUIRES_ACTION_JSON)!!
+
+    val ALIPAY_REQUIRES_ACTION_JSON = JSONObject(
+        """
+        {
+          "id": "pi_1HDEFVKlwPmebFhpCobFP55H",
+          "object": "payment_intent",
+          "amount": 100,
+          "canceled_at": null,
+          "cancellation_reason": null,
+          "capture_method": "automatic",
+          "client_secret": "pi_1HDEFVKlwPmebFhpCobFP55H_secret_XW8sADccCxtusewAwn5z9kAiw",
+          "confirmation_method": "automatic",
+          "created": 1596740133,
+          "currency": "usd",
+          "description": "Example PaymentIntent",
+          "last_payment_error": null,
+          "livemode": true,
+          "next_action": {
+            "alipay_handle_redirect": {
+              "native_data": "_input_charset=utf-8&app_pay=Y&currency=USD&forex_biz=FP&notify_url=https%3A%2F%2Fhooks.stripe.com%2Falipay%2Falipay%2Fhook%2F6255d30b067c8f7a162c79c654483646%2Fsrc_1HDEFWKlwPmebFhp6tcpln8T&out_trade_no=src_1HDEFWKlwPmebFhp6tcpln8T&partner=2088621828244481&payment_type=1&product_code=NEW_WAP_OVERSEAS_SELLER&return_url=https%3A%2F%2Fhooks.stripe.com%2Fadapter%2Falipay%2Fredirect%2Fcomplete%2Fsrc_1HDEFWKlwPmebFhp6tcpln8T%2Fsrc_client_secret_S6H9mVMKK6qxk9YxsUvbH55K&secondary_merchant_id=acct_1EqOyCKlwPmebFhp&secondary_merchant_industry=5734&secondary_merchant_name=Yuki-Test&sendFormat=normal&service=create_forex_trade_wap&sign=b691876a7f0bd889530f54a271d314d5&sign_type=MD5&subject=Yuki-Test&supplier=Yuki-Test&timeout_rule=20m&total_fee=1.00",
+              "native_url": null,
+              "return_url": "example://return_url",
+              "url": "https://hooks.stripe.com/redirect/authenticate/src_1HDEFWKlwPmebFhp6tcpln8T?client_secret=src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K"
+            },
+            "type": "alipay_handle_redirect"
+          },
+          "payment_method": {
+            "id": "pm_1HDEFVKlwPmebFhpKYYkSm8H",
+            "object": "payment_method",
+            "alipay": {},
+            "billing_details": {
+              "address": {
+                "city": null,
+                "country": null,
+                "line1": null,
+                "line2": null,
+                "postal_code": null,
+                "state": null
+              },
+              "email": null,
+              "name": null,
+              "phone": null
+            },
+            "created": 1596740133,
+            "customer": null,
+            "livemode": true,
+            "type": "alipay"
+          },
+          "payment_method_types": [
+            "alipay"
+          ],
+          "receipt_email": null,
+          "setup_future_usage": null,
+          "shipping": null,
+          "source": null,
+          "status": "requires_action"
+        }
+        """.trimIndent()
+    )
+
+    val ALIPAY_REQUIRES_ACTION = PARSER.parse(ALIPAY_REQUIRES_ACTION_JSON)!!
+
+    val ALIPAY_TEST_MODE_JSON = JSONObject(
+        """
+        {
+          "id": "pi_1HDEFVKlwPmebFhpCobFP55H",
+          "object": "payment_intent",
+          "amount": 100,
+          "canceled_at": null,
+          "cancellation_reason": null,
+          "capture_method": "automatic",
+          "client_secret": "pi_1HDEFVKlwPmebFhpCobFP55H_secret_XW8sADccCxtusewAwn5z9kAiw",
+          "confirmation_method": "automatic",
+          "created": 1596740133,
+          "currency": "usd",
+          "description": "Example PaymentIntent",
+          "last_payment_error": null,
+          "livemode": true,
+          "next_action": {
+            "alipay_handle_redirect": {
+              "native_data": null,
+              "native_url": null,
+              "return_url": "example://return_url",
+              "url": "https://hooks.stripe.com/redirect/authenticate/src_1HDEFWKlwPmebFhp6tcpln8T?client_secret=src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K"
+            },
+            "type": "alipay_handle_redirect"
+          },
+          "payment_method": {
+            "id": "pm_1HDEFVKlwPmebFhpKYYkSm8H",
+            "object": "payment_method",
+            "alipay": {},
+            "billing_details": {
+              "address": {
+                "city": null,
+                "country": null,
+                "line1": null,
+                "line2": null,
+                "postal_code": null,
+                "state": null
+              },
+              "email": null,
+              "name": null,
+              "phone": null
+            },
+            "created": 1596740133,
+            "customer": null,
+            "livemode": false,
+            "type": "alipay"
+          },
+          "payment_method_types": [
+            "alipay"
+          ],
+          "receipt_email": null,
+          "setup_future_usage": null,
+          "shipping": null,
+          "source": null,
+          "status": "requires_action"
+        }
+        """.trimIndent()
+    )
+
+    val ALIPAY_TEST_MODE = PARSER.parse(ALIPAY_TEST_MODE_JSON)!!
 }

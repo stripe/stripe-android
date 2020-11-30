@@ -3,7 +3,7 @@ package com.stripe.android
 import androidx.annotation.IntDef
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
-import java.util.Objects
+import com.stripe.android.model.StripeModel
 
 /**
  * A model representing the result of a [StripeIntent] confirmation or authentication attempt
@@ -12,12 +12,14 @@ import java.util.Objects
  * [intent] is a [StripeIntent] retrieved after confirmation/authentication succeeded or failed.
  */
 abstract class StripeIntentResult<T : StripeIntent> internal constructor(
-    val intent: T,
-    @Outcome outcome: Int
-) {
+    @Outcome private val outcomeFromFlow: Int
+) : StripeModel {
+    abstract val intent: T
+
     @Outcome
     @get:Outcome
-    val outcome: Int = determineOutcome(intent.status, outcome)
+    val outcome: Int
+        get() = determineOutcome(intent.status, outcomeFromFlow)
 
     @StripeIntentResult.Outcome
     private fun determineOutcome(
@@ -51,22 +53,6 @@ abstract class StripeIntentResult<T : StripeIntent> internal constructor(
                 return Outcome.UNKNOWN
             }
         }
-    }
-
-    override fun equals(other: Any?): Boolean {
-        return when {
-            this === other -> true
-            other is StripeIntentResult<*> -> typedEquals(other)
-            else -> false
-        }
-    }
-
-    private fun typedEquals(setupIntentResult: StripeIntentResult<*>): Boolean {
-        return intent == setupIntentResult.intent && outcome == setupIntentResult.outcome
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(intent, outcome)
     }
 
     /**

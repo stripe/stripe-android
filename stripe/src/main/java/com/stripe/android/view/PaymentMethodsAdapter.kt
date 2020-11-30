@@ -3,8 +3,6 @@ package com.stripe.android.view
 import android.app.Activity
 import android.content.Context
 import android.content.res.ColorStateList
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +13,12 @@ import com.stripe.android.R
 import com.stripe.android.databinding.GooglePayRowBinding
 import com.stripe.android.databinding.MaskedCardRowBinding
 import com.stripe.android.model.PaymentMethod
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 /**
  * A [RecyclerView.Adapter] that holds a set of [MaskedCardView] items for a given set
@@ -25,7 +29,9 @@ internal class PaymentMethodsAdapter constructor(
     private val addableTypes: List<PaymentMethod.Type> = listOf(PaymentMethod.Type.Card),
     initiallySelectedPaymentMethodId: String? = null,
     private val shouldShowGooglePay: Boolean = false,
-    private val useGooglePay: Boolean = false
+    private val useGooglePay: Boolean = false,
+    private val canDeletePaymentMethods: Boolean = true,
+    private val workContext: CoroutineContext = Dispatchers.IO
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     internal val paymentMethods = mutableListOf<PaymentMethod>()
@@ -38,7 +44,6 @@ internal class PaymentMethodsAdapter constructor(
         }
 
     internal var listener: Listener? = null
-    private val handler = Handler(Looper.getMainLooper())
     private val googlePayCount = 1.takeIf { shouldShowGooglePay } ?: 0
 
     init {
@@ -75,7 +80,8 @@ internal class PaymentMethodsAdapter constructor(
                     PaymentMethod.Type.Fpx -> ViewType.AddFpx.ordinal
                     else ->
                         throw IllegalArgumentException(
-                            "Unsupported PaymentMethod type: ${paymentMethodType.code}")
+                            "Unsupported PaymentMethod type: ${paymentMethodType.code}"
+                        )
                 }
             }
         }
@@ -122,10 +128,15 @@ internal class PaymentMethodsAdapter constructor(
         }
     }
 
-    private fun onPositionClicked(position: Int) {
+    @JvmSynthetic
+    internal fun onPositionClicked(position: Int) {
         updateSelectedPaymentMethod(position)
-        handler.post {
-            listener?.onPaymentMethodClick(getPaymentMethodAtPosition(position))
+        CoroutineScope(workContext).launch {
+            delay(0)
+
+            withContext(Dispatchers.Main) {
+                listener?.onPaymentMethodClick(getPaymentMethodAtPosition(position))
+            }
         }
     }
 
@@ -176,14 +187,17 @@ internal class PaymentMethodsAdapter constructor(
         parent: ViewGroup
     ): ViewHolder.PaymentMethodViewHolder {
         val viewHolder = ViewHolder.PaymentMethodViewHolder(parent)
-        ViewCompat.addAccessibilityAction(
-            viewHolder.itemView,
-            parent.context.getString(R.string.delete_payment_method)
-        ) { _, _ ->
-            listener?.onDeletePaymentMethodAction(
-                paymentMethod = getPaymentMethodAtPosition(viewHolder.adapterPosition)
-            )
-            true
+
+        if (canDeletePaymentMethods) {
+            ViewCompat.addAccessibilityAction(
+                viewHolder.itemView,
+                parent.context.getString(R.string.delete_payment_method)
+            ) { _, _ ->
+                listener?.onDeletePaymentMethodAction(
+                    paymentMethod = getPaymentMethodAtPosition(viewHolder.adapterPosition)
+                )
+                true
+            }
         }
         return viewHolder
     }

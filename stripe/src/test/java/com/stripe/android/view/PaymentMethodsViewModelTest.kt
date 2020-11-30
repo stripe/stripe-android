@@ -1,6 +1,7 @@
 package com.stripe.android.view
 
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.eq
@@ -12,12 +13,9 @@ import com.stripe.android.PaymentSession
 import com.stripe.android.exception.APIException
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentMethodsViewModelTest {
@@ -26,15 +24,16 @@ class PaymentMethodsViewModelTest {
     private val listenerArgumentCaptor: KArgumentCaptor<CustomerSession.PaymentMethodsRetrievalListener> = argumentCaptor()
     private val viewModel = PaymentMethodsViewModel(
         application = ApplicationProvider.getApplicationContext(),
-        customerSession = customerSession,
+        customerSession = Result.success(customerSession),
         startedFromPaymentSession = true
     )
 
     @Test
     fun getPaymentMethods_whenSuccess_returnsExpectedPaymentMethods() {
-        val paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-
-        val liveData = viewModel.getPaymentMethods()
+        var paymentMethods: List<PaymentMethod> = emptyList()
+        viewModel.getPaymentMethods().observeForever {
+            paymentMethods = it.getOrThrow()
+        }
 
         verify(customerSession).getPaymentMethods(
             eq(PaymentMethod.Type.Card),
@@ -49,14 +48,16 @@ class PaymentMethodsViewModelTest {
             listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         )
 
-        val result =
-            liveData.value as PaymentMethodsViewModel.Result.Success
-        assertEquals(paymentMethods, result.paymentMethods)
+        assertThat(paymentMethods)
+            .isEqualTo(listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
     }
 
     @Test
     fun getPaymentMethods_whenError_returnsExpectedException() {
-        val liveData = viewModel.getPaymentMethods()
+        var throwable: Throwable? = null
+        viewModel.getPaymentMethods().observeForever {
+            throwable = it.exceptionOrNull()
+        }
 
         verify(customerSession).getPaymentMethods(
             eq(PaymentMethod.Type.Card),
@@ -68,12 +69,13 @@ class PaymentMethodsViewModelTest {
         )
 
         listenerArgumentCaptor.firstValue.onError(
-            404, "error!", null
+            404,
+            "error!",
+            null
         )
 
-        val result =
-            liveData.value as PaymentMethodsViewModel.Result.Error
-        assertTrue(result.exception is APIException)
+        assertThat(throwable)
+            .isInstanceOf(APIException::class.java)
     }
 
     @Test
@@ -82,8 +84,10 @@ class PaymentMethodsViewModelTest {
         viewModel.snackbarData.observeForever { values.add(it) }
 
         viewModel.onPaymentMethodAdded(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        assertEquals("Added Visa ending in 4242", values[0])
-        assertNull(values[1])
+        assertThat(values[0])
+            .isEqualTo("Added Visa ending in 4242")
+        assertThat(values[1])
+            .isNull()
     }
 
     @Test
@@ -92,8 +96,26 @@ class PaymentMethodsViewModelTest {
         viewModel.snackbarData.observeForever { values.add(it) }
 
         viewModel.onPaymentMethodRemoved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        assertEquals("Removed Visa ending in 4242", values[0])
-        assertNull(values[1])
+        assertThat(values[0])
+            .isEqualTo("Removed Visa ending in 4242")
+        assertThat(values[1])
+            .isNull()
+    }
+
+    @Test
+    fun `getPaymentMethods() with CustomerSession failure should return failure result`() {
+        var result: Result<List<PaymentMethod>>? = null
+        PaymentMethodsViewModel(
+            application = ApplicationProvider.getApplicationContext(),
+            customerSession = Result.failure(RuntimeException("failure")),
+            startedFromPaymentSession = true
+        ).getPaymentMethods().observeForever {
+            result = it
+        }
+
+        requireNotNull(result)
+        assertThat(result?.isFailure)
+            .isTrue()
     }
 
     private companion object {

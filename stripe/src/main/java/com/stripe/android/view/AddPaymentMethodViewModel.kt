@@ -1,5 +1,6 @@
 package com.stripe.android.view
 
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,10 +14,10 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.view.i18n.ErrorMessageTranslator
 import com.stripe.android.view.i18n.TranslatorManager
+import java.lang.RuntimeException
 
 internal class AddPaymentMethodViewModel(
     private val stripe: Stripe,
-    private val customerSession: CustomerSession,
     private val args: AddPaymentMethodActivityStarter.Args,
     private val errorMessageTranslator: ErrorMessageTranslator =
         TranslatorManager.getErrorMessageTranslator()
@@ -29,31 +30,40 @@ internal class AddPaymentMethodViewModel(
 
     internal fun createPaymentMethod(
         params: PaymentMethodCreateParams
-    ): LiveData<PaymentMethodResult> {
-        val resultData = MutableLiveData<PaymentMethodResult>()
+    ): LiveData<Result<PaymentMethod>> {
+        val resultData = MutableLiveData<Result<PaymentMethod>>()
         stripe.createPaymentMethod(
-            paymentMethodCreateParams = params.copy(productUsage = productUsage),
+            paymentMethodCreateParams = updatedPaymentMethodCreateParams(params),
             callback = object : ApiResultCallback<PaymentMethod> {
                 override fun onSuccess(result: PaymentMethod) {
-                    resultData.value = PaymentMethodResult.Success(result)
+                    resultData.value = Result.success(result)
                 }
 
                 override fun onError(e: Exception) {
-                    resultData.value = PaymentMethodResult.Error(e.localizedMessage.orEmpty())
+                    resultData.value = Result.failure(e)
                 }
-            })
+            }
+        )
         return resultData
     }
 
+    @VisibleForTesting
+    internal fun updatedPaymentMethodCreateParams(
+        params: PaymentMethodCreateParams
+    ) = params.copy(productUsage = productUsage)
+
     @JvmSynthetic
-    internal fun attachPaymentMethod(paymentMethod: PaymentMethod): LiveData<PaymentMethodResult> {
-        val resultData = MutableLiveData<PaymentMethodResult>()
+    internal fun attachPaymentMethod(
+        customerSession: CustomerSession,
+        paymentMethod: PaymentMethod
+    ): LiveData<Result<PaymentMethod>> {
+        val resultData = MutableLiveData<Result<PaymentMethod>>()
         customerSession.attachPaymentMethod(
             paymentMethodId = paymentMethod.id.orEmpty(),
             productUsage = productUsage,
             listener = object : CustomerSession.PaymentMethodRetrievalListener {
                 override fun onPaymentMethodRetrieved(paymentMethod: PaymentMethod) {
-                    resultData.value = PaymentMethodResult.Success(paymentMethod)
+                    resultData.value = Result.success(paymentMethod)
                 }
 
                 override fun onError(
@@ -61,11 +71,13 @@ internal class AddPaymentMethodViewModel(
                     errorMessage: String,
                     stripeError: StripeError?
                 ) {
-                    resultData.value = PaymentMethodResult.Error(
-                        errorMessageTranslator.translate(
-                            errorCode,
-                            errorMessage,
-                            stripeError
+                    resultData.value = Result.failure(
+                        RuntimeException(
+                            errorMessageTranslator.translate(
+                                errorCode,
+                                errorMessage,
+                                stripeError
+                            )
                         )
                     )
                 }
@@ -74,20 +86,12 @@ internal class AddPaymentMethodViewModel(
         return resultData
     }
 
-    sealed class PaymentMethodResult {
-        data class Success(val paymentMethod: PaymentMethod) : PaymentMethodResult()
-        data class Error(val errorMessage: String) : PaymentMethodResult()
-    }
-
     internal class Factory(
         private val stripe: Stripe,
-        private val customerSession: CustomerSession,
         private val args: AddPaymentMethodActivityStarter.Args
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return AddPaymentMethodViewModel(
-                stripe, customerSession, args
-            ) as T
+            return AddPaymentMethodViewModel(stripe, args) as T
         }
     }
 }

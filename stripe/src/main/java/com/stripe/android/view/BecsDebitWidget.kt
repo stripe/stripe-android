@@ -2,11 +2,11 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.os.Build
-import android.text.Editable
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
+import androidx.core.widget.doAfterTextChanged
 import com.stripe.android.R
 import com.stripe.android.databinding.BecsDebitWidgetBinding
 import com.stripe.android.model.PaymentMethod
@@ -40,16 +40,12 @@ class BecsDebitWidget @JvmOverloads constructor(
         )
     }
 
+    /**
+     * See [ValidParamsCallback].
+     */
     var validParamsCallback: ValidParamsCallback = object : ValidParamsCallback {
         override fun onInputChanged(isValid: Boolean) {
             // no-op default implementation
-        }
-    }
-
-    private val validParamsTextWatcher = object : StripeTextWatcher() {
-        override fun afterTextChanged(s: Editable?) {
-            super.afterTextChanged(s)
-            validParamsCallback.onInputChanged(isInputValid)
         }
     }
 
@@ -60,8 +56,10 @@ class BecsDebitWidget @JvmOverloads constructor(
             val bsbNumber = viewBinding.bsbEditText.bsb
             val accountNumber = viewBinding.accountNumberEditText.accountNumber
 
-            return !(name.isBlank() || email.isNullOrBlank() || bsbNumber.isNullOrBlank() ||
-                accountNumber.isNullOrBlank())
+            return !(
+                name.isBlank() || email.isNullOrBlank() || bsbNumber.isNullOrBlank() ||
+                    accountNumber.isNullOrBlank()
+                )
         }
 
     init {
@@ -75,8 +73,10 @@ class BecsDebitWidget @JvmOverloads constructor(
             viewBinding.emailEditText,
             viewBinding.bsbEditText,
             viewBinding.accountNumberEditText
-        ).forEach {
-            it.addTextChangedListener(validParamsTextWatcher)
+        ).forEach { field ->
+            field.doAfterTextChanged {
+                validParamsCallback.onInputChanged(isInputValid)
+            }
         }
 
         viewBinding.bsbEditText.onBankChangedCallback = { bank ->
@@ -148,11 +148,9 @@ class BecsDebitWidget @JvmOverloads constructor(
         )
 
         setOf(viewBinding.nameEditText, viewBinding.emailEditText).forEach { field ->
-            field.addTextChangedListener(object : StripeTextWatcher() {
-                override fun afterTextChanged(s: Editable?) {
-                    field.shouldShowError = false
-                }
-            })
+            field.doAfterTextChanged {
+                field.shouldShowError = false
+            }
         }
 
         companyName.takeIf { it.isNotBlank() }?.let {
@@ -173,7 +171,10 @@ class BecsDebitWidget @JvmOverloads constructor(
 
     private fun applyAttributes(attrs: AttributeSet) {
         val typedArray = context.theme.obtainStyledAttributes(
-            attrs, R.styleable.BecsDebitWidget, 0, 0
+            attrs,
+            R.styleable.BecsDebitWidget,
+            0,
+            0
         )
 
         try {
@@ -189,8 +190,8 @@ class BecsDebitWidget @JvmOverloads constructor(
     }
 
     /**
-     * @return if the customer's input is valid, will return a [PaymentMethodCreateParams] instance;
-     * otherwise, will return `null`
+     * If the input is valid, will return a [PaymentMethodCreateParams] instance;
+     * otherwise, will return `null`.
      */
     val params: PaymentMethodCreateParams?
         get() {
@@ -205,7 +206,8 @@ class BecsDebitWidget @JvmOverloads constructor(
             viewBinding.accountNumberEditText.shouldShowError = accountNumber.isNullOrBlank()
 
             if (name.isBlank() || email.isNullOrBlank() || bsbNumber.isNullOrBlank() ||
-                accountNumber.isNullOrBlank()) {
+                accountNumber.isNullOrBlank()
+            ) {
                 return null
             }
 
@@ -221,6 +223,9 @@ class BecsDebitWidget @JvmOverloads constructor(
             )
         }
 
+    /**
+     * An interface for a callback object that will be called when the user's input changes.
+     */
     interface ValidParamsCallback {
         /**
          * @param isValid if the current input is valid

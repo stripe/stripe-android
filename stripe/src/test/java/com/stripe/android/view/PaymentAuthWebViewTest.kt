@@ -1,22 +1,23 @@
 package com.stripe.android.view
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.webkit.WebView
 import android.widget.ProgressBar
 import com.nhaarman.mockitokotlin2.KArgumentCaptor
+import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.FakeLogger
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentAuthWebViewTest {
@@ -24,7 +25,6 @@ class PaymentAuthWebViewTest {
     private val activity: Activity = mock()
     private val progressBar: ProgressBar = mock()
     private val webView: WebView = mock()
-    private val packageManager: PackageManager = mock()
 
     private val intentArgumentCaptor: KArgumentCaptor<Intent> = argumentCaptor()
 
@@ -66,32 +66,40 @@ class PaymentAuthWebViewTest {
     @Test
     fun shouldOverrideUrlLoading_withoutReturnUrl_shouldNotAutoFinishActivity() {
         val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
-        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView,
-            "https://example.com")
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(
+            webView,
+            "https://example.com"
+        )
         verify(activity, never()).finish()
     }
 
     @Test
     fun shouldOverrideUrlLoading_withKnownReturnUrl_shouldFinish() {
         val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
-        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView,
-            "stripejs://use_stripe_sdk/return_url")
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(
+            webView,
+            "stripejs://use_stripe_sdk/return_url"
+        )
         verify(activity).finish()
     }
 
     @Test
     fun onPageFinished_wit3DSecureCompleteUrl_shouldFinish() {
         val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
-        paymentAuthWebViewClient.onPageFinished(webView,
-            "https://hooks.stripe.com/3d_secure/complete/tdsrc_1ExLWoCRMbs6FrXfjPJRYtng")
+        paymentAuthWebViewClient.onPageFinished(
+            webView,
+            "https://hooks.stripe.com/3d_secure/complete/tdsrc_1ExLWoCRMbs6FrXfjPJRYtng"
+        )
         verify(activity).finish()
     }
 
     @Test
     fun onPageFinished_witRedirectCompleteUrl_shouldFinish() {
         val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
-        paymentAuthWebViewClient.onPageFinished(webView,
-            "https://hooks.stripe.com/redirect/complete/src_1ExLWoCRMbs6FrXfjPJRYtng")
+        paymentAuthWebViewClient.onPageFinished(
+            webView,
+            "https://hooks.stripe.com/redirect/complete/src_1ExLWoCRMbs6FrXfjPJRYtng"
+        )
         verify(activity).finish()
     }
 
@@ -104,6 +112,9 @@ class PaymentAuthWebViewTest {
 
     @Test
     fun shouldOverrideUrlLoading_withUnsupportedDeeplink_shouldFinish() {
+        whenever(activity.startActivity(any()))
+            .thenThrow(ActivityNotFoundException())
+
         val url = "deep://link"
         val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
         paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, url)
@@ -111,13 +122,23 @@ class PaymentAuthWebViewTest {
     }
 
     @Test
+    fun shouldOverloadUrlLoading_withAlipayDeeplink_shouldNotFinishActivity() {
+        val url = "alipays://link"
+        val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
+        paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, url)
+        verify(activity, never()).finish()
+    }
+
+    @Test
     fun shouldOverrideUrlLoading_withIntentUri_shouldParseUri() {
+        whenever(activity.startActivity(any()))
+            .thenThrow(ActivityNotFoundException())
+
         val deepLink = "intent://example.com/#Intent;scheme=https;action=android.intent.action.VIEW;end"
         val paymentAuthWebViewClient = createWebViewClient("pi_123_secret_456")
         paymentAuthWebViewClient.shouldOverrideUrlLoading(webView, deepLink)
-        verify(packageManager).resolveActivity(
-            intentArgumentCaptor.capture(),
-            eq(PackageManager.MATCH_DEFAULT_ONLY)
+        verify(activity).startActivity(
+            intentArgumentCaptor.capture()
         )
         val intent = intentArgumentCaptor.firstValue
         assertEquals("https://example.com/", intent.dataString)
@@ -149,7 +170,6 @@ class PaymentAuthWebViewTest {
     ): PaymentAuthWebView.PaymentAuthWebViewClient {
         return PaymentAuthWebView.PaymentAuthWebViewClient(
             activity,
-            packageManager,
             FakeLogger(),
             progressBar,
             clientSecret,

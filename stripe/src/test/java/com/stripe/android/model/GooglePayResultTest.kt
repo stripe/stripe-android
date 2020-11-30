@@ -21,7 +21,7 @@ class GooglePayResultTest {
         )
 
         assertEquals("tok_1F4VSjBbvEcIpqUbSsbEtBap", result.token?.id)
-        assertEquals("card", result.token?.type)
+        assertEquals(Token.Type.Card, result.token?.type)
 
         assertEquals(expectedAddress, result.address)
 
@@ -37,7 +37,7 @@ class GooglePayResultTest {
         )
 
         assertEquals("tok_1F4ACMCRMbs6FrXf6fPqLnN7", result.token?.id)
-        assertEquals("card", result.token?.type)
+        assertEquals(Token.Type.Card, result.token?.type)
         assertNull(result.address)
         assertNull(result.name)
         assertNull(result.email)

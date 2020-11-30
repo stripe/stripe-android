@@ -10,30 +10,38 @@ import com.stripe.android.model.ShippingMethod
 import com.stripe.android.view.AddPaymentMethodActivity
 import com.stripe.android.view.BillingAddressFields
 import com.stripe.android.view.PaymentFlowActivity
+import com.stripe.android.view.PaymentMethodsActivity
 import com.stripe.android.view.SelectShippingMethodWidget
 import com.stripe.android.view.ShippingInfoWidget
 import com.stripe.android.view.ShippingInfoWidget.CustomizableShippingField
+import kotlinx.parcelize.Parcelize
 import java.io.Serializable
 import java.util.Locale
-import kotlinx.android.parcel.Parcelize
 
 /**
  * Configuration for [PaymentSession].
  */
 @Parcelize
 data class PaymentSessionConfig internal constructor(
-    val hiddenShippingInfoFields: List<String> = emptyList(),
-    val optionalShippingInfoFields: List<String> = emptyList(),
+    val hiddenShippingInfoFields: List<CustomizableShippingField> = emptyList(),
+    val optionalShippingInfoFields: List<CustomizableShippingField> = emptyList(),
     val prepopulatedShippingInfo: ShippingInformation? = null,
     val isShippingInfoRequired: Boolean = false,
     val isShippingMethodRequired: Boolean = false,
+
+    @LayoutRes
+    @get:LayoutRes
+    val paymentMethodsFooterLayoutId: Int = 0,
+
     @LayoutRes
     @get:LayoutRes
     val addPaymentMethodFooterLayoutId: Int = 0,
+
     val paymentMethodTypes: List<PaymentMethod.Type> = listOf(PaymentMethod.Type.Card),
     val shouldShowGooglePay: Boolean = false,
     val allowedShippingCountryCodes: Set<String> = emptySet(),
     val billingAddressFields: BillingAddressFields = DEFAULT_BILLING_ADDRESS_FIELDS,
+    val canDeletePaymentMethods: Boolean = true,
 
     internal val shouldPrefetchCustomer: Boolean = true,
     internal val shippingInformationValidator: ShippingInformationValidator = DefaultShippingInfoValidator(),
@@ -90,8 +98,8 @@ data class PaymentSessionConfig internal constructor(
         private var billingAddressFields: BillingAddressFields = DEFAULT_BILLING_ADDRESS_FIELDS
         private var shippingInfoRequired = true
         private var shippingMethodsRequired = true
-        private var hiddenShippingInfoFields: List<String>? = null
-        private var optionalShippingInfoFields: List<String>? = null
+        private var hiddenShippingInfoFields: List<CustomizableShippingField>? = null
+        private var optionalShippingInfoFields: List<CustomizableShippingField>? = null
         private var shippingInformation: ShippingInformation? = null
         private var paymentMethodTypes: List<PaymentMethod.Type> = listOf(PaymentMethod.Type.Card)
         private var shouldShowGooglePay: Boolean = false
@@ -100,6 +108,10 @@ data class PaymentSessionConfig internal constructor(
         private var shippingMethodsFactory: ShippingMethodsFactory? = null
         private var windowFlags: Int? = null
         private var shouldPrefetchCustomer: Boolean = true
+        private var canDeletePaymentMethods: Boolean = true
+
+        @LayoutRes
+        private var paymentMethodsFooterLayoutId: Int = 0
 
         @LayoutRes
         private var addPaymentMethodFooterLayoutId: Int = 0
@@ -119,7 +131,7 @@ data class PaymentSessionConfig internal constructor(
          * empty. Note that not all fields can be hidden, such as country or name.
          */
         fun setHiddenShippingInfoFields(
-            @CustomizableShippingField vararg hiddenShippingInfoFields: String
+            vararg hiddenShippingInfoFields: CustomizableShippingField
         ): Builder = apply {
             this.hiddenShippingInfoFields = listOf(*hiddenShippingInfoFields)
         }
@@ -129,7 +141,7 @@ data class PaymentSessionConfig internal constructor(
          * optional in the [ShippingInfoWidget]
          */
         fun setOptionalShippingInfoFields(
-            @CustomizableShippingField vararg optionalShippingInfoFields: String
+            vararg optionalShippingInfoFields: CustomizableShippingField
         ): Builder = apply {
             this.optionalShippingInfoFields = listOf(*optionalShippingInfoFields)
         }
@@ -159,6 +171,16 @@ data class PaymentSessionConfig internal constructor(
          */
         fun setShippingMethodsRequired(shippingMethodsRequired: Boolean): Builder = apply {
             this.shippingMethodsRequired = shippingMethodsRequired
+        }
+
+        /**
+         * @param paymentMethodsFooterLayoutId optional layout id that will be inflated and
+         * displayed beneath the payment method selection list on [PaymentMethodsActivity]
+         */
+        fun setPaymentMethodsFooter(
+            @LayoutRes paymentMethodsFooterLayoutId: Int
+        ): Builder = apply {
+            this.paymentMethodsFooterLayoutId = paymentMethodsFooterLayoutId
         }
 
         /**
@@ -193,6 +215,14 @@ data class PaymentSessionConfig internal constructor(
          */
         fun setShouldShowGooglePay(shouldShowGooglePay: Boolean): Builder = apply {
             this.shouldShowGooglePay = shouldShowGooglePay
+        }
+
+        /**
+         * @param canDeletePaymentMethods controls whether the user can
+         * delete a payment method by swiping on it in [PaymentMethodsActivity]. Defaults to true.
+         */
+        fun setCanDeletePaymentMethods(canDeletePaymentMethods: Boolean): Builder = apply {
+            this.canDeletePaymentMethods = canDeletePaymentMethods
         }
 
         /**
@@ -255,6 +285,7 @@ data class PaymentSessionConfig internal constructor(
                 prepopulatedShippingInfo = shippingInformation,
                 isShippingInfoRequired = shippingInfoRequired,
                 isShippingMethodRequired = shippingMethodsRequired,
+                paymentMethodsFooterLayoutId = paymentMethodsFooterLayoutId,
                 addPaymentMethodFooterLayoutId = addPaymentMethodFooterLayoutId,
                 paymentMethodTypes = paymentMethodTypes,
                 shouldShowGooglePay = shouldShowGooglePay,
@@ -264,7 +295,8 @@ data class PaymentSessionConfig internal constructor(
                 shippingMethodsFactory = shippingMethodsFactory,
                 windowFlags = windowFlags,
                 billingAddressFields = billingAddressFields,
-                shouldPrefetchCustomer = shouldPrefetchCustomer
+                shouldPrefetchCustomer = shouldPrefetchCustomer,
+                canDeletePaymentMethods = canDeletePaymentMethods
             )
         }
     }

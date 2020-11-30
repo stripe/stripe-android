@@ -2,15 +2,19 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage
-import com.stripe.android.model.ConfirmPaymentIntentParams.Shipping
+import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN_URL
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_STRIPE_SDK
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
+/**
+ * Model representing parameters for [confirming a PaymentIntent](https://stripe.com/docs/api/payment_intents/confirm).
+ */
 data class ConfirmPaymentIntentParams internal constructor(
     val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
 
@@ -18,7 +22,7 @@ data class ConfirmPaymentIntentParams internal constructor(
      * ID of the payment method (a PaymentMethod, Card, or compatible Source object) to attach to
      * this PaymentIntent.
      *
-     * [payment_method](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-payment_method)
+     * See [payment_method](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-payment_method).
      */
     val paymentMethodId: String? = null,
     val sourceParams: SourceParams? = null,
@@ -37,7 +41,7 @@ data class ConfirmPaymentIntentParams internal constructor(
      * Refer to our docs to [accept a payment](https://stripe.com/docs/payments/accept-a-payment)
      * and learn about how `client_secret` should be handled.
      *
-     * [client_secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret)
+     * See [client_secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret).
      */
     override val clientSecret: String,
 
@@ -47,9 +51,9 @@ data class ConfirmPaymentIntentParams internal constructor(
      * can alternatively supply an application URI scheme. This parameter is only used for cards
      * and other redirect-based payment methods.
      *
-     * [return_url](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-return_url)
+     * See [return_url](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-return_url).
      */
-    val returnUrl: String? = null,
+    var returnUrl: String? = null,
 
     /**
      * If the PaymentIntent has a `payment_method` and a `customer` or if you’re attaching a payment
@@ -59,52 +63,61 @@ data class ConfirmPaymentIntentParams internal constructor(
      * If the payment method is already saved to a customer, this does nothing. If this type of
      * payment method cannot be saved to a customer, the request will error.
      *
-     * [save_payment_method](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-save_payment_method)
+     * See [save_payment_method](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-save_payment_method).
      */
-    private val savePaymentMethod: Boolean? = null,
+    var savePaymentMethod: Boolean? = null,
 
     /**
      * Set to `true` only when using manual confirmation and the iOS or Android SDKs to handle
      * additional authentication steps.
      *
-     * [use_stripe_sdk](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-use_stripe_sdk)
+     * See [use_stripe_sdk](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-use_stripe_sdk).
      */
     private val useStripeSdk: Boolean = false,
 
     /**
      * Payment-method-specific configuration for this PaymentIntent.
      *
-     * [payment_method_options](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-payment_method_options)
+     * See [payment_method_options](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-payment_method_options).
      */
-    private val paymentMethodOptions: PaymentMethodOptionsParams? = null,
+    var paymentMethodOptions: PaymentMethodOptionsParams? = null,
 
     /**
      * ID of the mandate to be used for this payment.
      *
-     * [mandate](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-mandate)
+     * See [mandate](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-mandate).
      */
-    private val mandateId: String? = null,
+    var mandateId: String? = null,
 
     /**
      * This hash contains details about the Mandate to create.
      *
-     * [mandate_data](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-mandate_data)
+     * See [mandate_data](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-mandate_data).
      */
-    private val mandateData: MandateDataParams? = null,
+    var mandateData: MandateDataParams? = null,
 
     /**
-     * See [SetupFutureUsage]
+     * Indicates that you intend to make future payments with this PaymentIntent’s payment method.
      *
-     * [setup_future_usage](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-setup_future_usage)
+     * See [SetupFutureUsage] for more information.
+     *
+     * See [setup_future_usage](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-setup_future_usage).
      */
-    private val setupFutureUsage: SetupFutureUsage? = null,
+    var setupFutureUsage: SetupFutureUsage? = null,
 
     /**
-     * See [Shipping]
+     * Shipping information for this PaymentIntent.
      *
-     * [shipping](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-shipping)
+     * See [shipping](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-shipping).
      */
-    private val shipping: Shipping? = null
+    var shipping: Shipping? = null,
+
+    /**
+     * Email address that the receipt for the resulting payment will be sent to.
+     *
+     * See [receipt_email](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-receipt_email).
+     */
+    var receiptEmail: String? = null
 ) : ConfirmStripeIntentParams {
 
     fun shouldSavePaymentMethod(): Boolean {
@@ -148,10 +161,14 @@ data class ConfirmPaymentIntentParams internal constructor(
             }.orEmpty()
         ).plus(
             shipping?.let {
-                mapOf(PARAM_SHIPPING to shipping.toParamMap())
+                mapOf(PARAM_SHIPPING to it.toParamMap())
             }.orEmpty()
         ).plus(
             paymentMethodParamMap
+        ).plus(
+            receiptEmail?.let {
+                mapOf(PARAM_RECEIPT_EMAIL to it)
+            }.orEmpty()
         ).plus(
             extraParams.orEmpty()
         )
@@ -192,21 +209,23 @@ data class ConfirmPaymentIntentParams internal constructor(
         }
 
     /**
-     * [setup_future_usage](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-setup_future_usage)
+     * Indicates that you intend to make future payments with this PaymentIntent’s payment method.
      *
-     * Use `on_session` if you intend to only reuse the payment method when your customer is
-     * present in your checkout flow. Use `off_session` if your customer may or may not be in
-     * your checkout flow.
+     * Providing this parameter will
+     * [attach the payment method](https://stripe.com/docs/payments/save-during-payment) to the
+     * PaymentIntent’s Customer, if present, after the PaymentIntent is confirmed and any required
+     * actions from the user are complete. If no Customer was provided, the payment method can still
+     * be [attached](https://stripe.com/docs/api/payment_methods/attach) to a Customer after the
+     * transaction completes.
      *
-     * Stripe uses `setup_future_usage` to dynamically optimize your payment flow and comply with
-     * regional legislation and network rules. For example, if your customer is impacted by
-     * [SCA](https://stripe.com/docs/strong-customer-authentication), using `off_session` will
-     * ensure that they are authenticated while processing this PaymentIntent. You will then be
-     * able to collect [off-session payments](https://stripe.com/docs/payments/cards/charging-saved-cards#off-session-payments-with-saved-cards)
-     * for this customer.
+     * When processing card payments, Stripe also uses `setup_future_usage` to dynamically optimize
+     * your payment flow and comply with regional legislation and network rules, such as
+     * [SCA](https://stripe.com/docs/strong-customer-authentication).
      *
      * If `setup_future_usage` is already set, you may only update the value
-     * from `on_session` to `off_session`.
+     * from [OnSession] to [OffSession].
+     *
+     * See [setup_future_usage](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-setup_future_usage).
      */
     enum class SetupFutureUsage(
         internal val code: String
@@ -291,13 +310,13 @@ data class ConfirmPaymentIntentParams internal constructor(
     }
 
     companion object {
-        const val PARAM_SOURCE_DATA: String = "source_data"
-
-        internal const val PARAM_SOURCE_ID = "source"
-        internal const val PARAM_SAVE_PAYMENT_METHOD = "save_payment_method"
-        internal const val PARAM_PAYMENT_METHOD_OPTIONS = "payment_method_options"
-        private const val PARAM_SETUP_FUTURE_USAGE = "setup_future_usage"
+        private const val PARAM_PAYMENT_METHOD_OPTIONS = "payment_method_options"
+        private const val PARAM_RECEIPT_EMAIL = "receipt_email"
+        private const val PARAM_SAVE_PAYMENT_METHOD = "save_payment_method"
         private const val PARAM_SHIPPING = "shipping"
+        private const val PARAM_SETUP_FUTURE_USAGE = "setup_future_usage"
+        internal const val PARAM_SOURCE_DATA: String = "source_data"
+        private const val PARAM_SOURCE_ID = "source"
 
         /**
          * Create a [ConfirmPaymentIntentParams] without a payment method.
@@ -480,6 +499,26 @@ data class ConfirmPaymentIntentParams internal constructor(
                 savePaymentMethod = savePaymentMethod,
                 extraParams = extraParams,
                 shipping = shipping
+            )
+        }
+
+        /**
+         * Create the parameters necessary for confirming a [PaymentIntent] with Alipay
+         *
+         * @param clientSecret client secret from the PaymentIntent that is to be confirmed
+         * @param returnUrl the URL the customer should be redirected to after the authorization
+         * process
+         */
+        @JvmStatic
+        fun createAlipay(
+            clientSecret: String
+        ): ConfirmPaymentIntentParams {
+            return ConfirmPaymentIntentParams(
+                clientSecret = clientSecret,
+                paymentMethodCreateParams = PaymentMethodCreateParams.createAlipay(),
+                // return_url is no longer used by is still required by the backend
+                // TODO(smaskell): remove this when no longer required
+                returnUrl = "stripe://return_url"
             )
         }
     }

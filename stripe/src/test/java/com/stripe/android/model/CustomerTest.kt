@@ -1,14 +1,13 @@
 package com.stripe.android.model
 
-import com.stripe.android.model.CardTest.Companion.JSON_CARD_USD
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.parsers.CustomerJsonParser
+import org.json.JSONObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import org.json.JSONException
-import org.json.JSONObject
 
 /**
  * Test class for [Customer] model object.
@@ -39,11 +38,11 @@ class CustomerTest {
     }
 
     @Test
-    @Throws(JSONException::class)
     fun fromJson_whenCustomerHasApplePay_returnsCustomerWithoutApplePaySources() {
         val customer = parse(createTestCustomerObjectWithApplePaySource())
         assertNotNull(customer)
-        assertEquals(2, customer.sources.size)
+        assertThat(customer.sources)
+            .hasSize(2)
         // Note that filtering the apple_pay sources intentionally does not change the total
         // count value.
         assertEquals(5, customer.totalCount)
@@ -59,7 +58,6 @@ class CustomerTest {
         )
     }
 
-    @Throws(JSONException::class)
     private fun createTestCustomerObjectWithApplePaySource(): JSONObject {
         val rawJsonCustomer = CustomerFixtures.CUSTOMER_JSON
         val sourcesObject = rawJsonCustomer.getJSONObject("sources")
@@ -71,11 +69,13 @@ class CustomerTest {
             // convenient for the test because it is not an apple pay source.
             put(SourceFixtures.CUSTOMER_SOURCE_CARD_JSON)
             put(SourceFixtures.ALIPAY_JSON)
-            put(JSONObject(JSON_CARD_USD.toString()))
-            put(JSONObject(JSON_CARD_USD.toString()).apply {
-                put("id", "card_id55555")
-                put("tokenization_method", "apple_pay")
-            })
+            put(JSONObject(CardFixtures.CARD_USD_JSON.toString()))
+            put(
+                JSONObject(CardFixtures.CARD_USD_JSON.toString()).apply {
+                    put("id", "card_id55555")
+                    put("tokenization_method", "apple_pay")
+                }
+            )
         }
 
         sourcesObject.put("data", sourcesArray)
@@ -84,8 +84,10 @@ class CustomerTest {
         rawJsonCustomer.put("sources", sourcesObject)
 
         // Verify JSON manipulation
-        assertEquals(5,
-            rawJsonCustomer.getJSONObject("sources").getJSONArray("data").length())
+        assertEquals(
+            5,
+            rawJsonCustomer.getJSONObject("sources").getJSONArray("data").length()
+        )
 
         return JSONObject(rawJsonCustomer.toString())
     }

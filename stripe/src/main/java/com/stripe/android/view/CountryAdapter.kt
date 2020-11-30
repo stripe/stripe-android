@@ -2,7 +2,6 @@ package com.stripe.android.view
 
 import android.app.Activity
 import android.content.Context
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
@@ -18,8 +17,10 @@ import java.util.Locale
  */
 internal class CountryAdapter(
     context: Context,
-    internal var unfilteredCountries: List<Country>
-) : ArrayAdapter<Country>(context, R.layout.country_text_view) {
+    internal var unfilteredCountries: List<Country>,
+    itemLayoutId: Int = R.layout.country_text_view,
+    private val textViewFactory: (ViewGroup) -> TextView
+) : ArrayAdapter<Country>(context, itemLayoutId) {
     private val countryFilter: CountryFilter = CountryFilter(
         unfilteredCountries,
         this,
@@ -46,14 +47,11 @@ internal class CountryAdapter(
     }
 
     override fun getView(i: Int, view: View?, viewGroup: ViewGroup): View {
-        return if (view is TextView) {
-            view.text = getItem(i).name
-            view
-        } else {
-            val countryText = LayoutInflater.from(context).inflate(
-                R.layout.country_text_view, viewGroup, false) as TextView
+        return when (view) {
+            is TextView -> view
+            else -> textViewFactory(viewGroup)
+        }.also { countryText ->
             countryText.text = getItem(i).name
-            countryText
         }
     }
 
@@ -83,7 +81,7 @@ internal class CountryAdapter(
     }
 
     private class CountryFilter(
-        internal var unfilteredCountries: List<Country>,
+        var unfilteredCountries: List<Country>,
         private val adapter: CountryAdapter,
         activity: Activity?
     ) : Filter() {

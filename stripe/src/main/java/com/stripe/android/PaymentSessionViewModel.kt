@@ -18,8 +18,7 @@ internal class PaymentSessionViewModel(
     private val savedStateHandle: SavedStateHandle,
     paymentSessionData: PaymentSessionData,
     private val customerSession: CustomerSession,
-    private val paymentSessionPrefs: PaymentSessionPrefs =
-        PaymentSessionPrefs.create(application.applicationContext)
+    private val paymentSessionPrefs: PaymentSessionPrefs = PaymentSessionPrefs.Default(application)
 ) : AndroidViewModel(application) {
 
     var paymentSessionData: PaymentSessionData = paymentSessionData
@@ -82,7 +81,9 @@ internal class PaymentSessionViewModel(
                 ) {
                     mutableNetworkState.value = NetworkState.Inactive
                     resultData.value = FetchCustomerResult.Error(
-                        errorCode, errorMessage, stripeError
+                        errorCode,
+                        errorMessage,
+                        stripeError
                     )
                 }
             }

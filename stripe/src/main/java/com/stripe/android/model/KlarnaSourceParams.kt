@@ -2,10 +2,12 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import com.stripe.android.model.KlarnaSourceParams.LineItem
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
- * [Klarna Payments with Sources](https://stripe.com/docs/sources/klarna)
+ * Model representing parameters for creating a Klarna Source.
+ *
+ * See [Klarna Payments with Sources](https://stripe.com/docs/sources/klarna)
  *
  * Note:
  * The optional fields [billingEmail], [billingPhone], [billingAddress], [billingFirstName],
@@ -95,10 +97,11 @@ data class KlarnaSourceParams @JvmOverloads constructor(
             PARAM_PURCHASE_COUNTRY to purchaseCountry
         ).plus(
             customPaymentMethods.takeIf { it.isNotEmpty() }?.let { klarnaCustomPaymentMethods ->
-                mapOf(PARAM_CUSTOM_PAYMENT_METHODS to
-                    klarnaCustomPaymentMethods.toList()
-                        .sortedBy { it.ordinal }
-                        .joinToString(",") { it.code }
+                mapOf(
+                    PARAM_CUSTOM_PAYMENT_METHODS to
+                        klarnaCustomPaymentMethods.toList()
+                            .sortedBy { it.ordinal }
+                            .joinToString(",") { it.code }
                 )
             }.orEmpty()
         ).plus(
@@ -112,9 +115,9 @@ data class KlarnaSourceParams @JvmOverloads constructor(
         ).plus(
             billingDob?.let {
                 mapOf(
-                    PARAM_DOB_DAY to it.day,
-                    PARAM_DOB_MONTH to it.month,
-                    PARAM_DOB_YEAR to it.year
+                    PARAM_DOB_DAY to it.day.toString().padStart(2, '0'),
+                    PARAM_DOB_MONTH to it.month.toString().padStart(2, '0'),
+                    PARAM_DOB_YEAR to it.year.toString()
                 )
             }.orEmpty()
         )

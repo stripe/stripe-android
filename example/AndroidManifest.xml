@@ -11,7 +11,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
-        android:icon="@drawable/ic_launcher"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/appName"
         android:name=".ExampleApplication"
         android:theme="@style/AppTheme"
@@ -93,9 +93,21 @@
         <activity
             android:name=".activity.SofortPaymentMethodActivity" />
         <activity
+            android:name=".activity.UpiPaymentActivity" />
+        <activity
+            android:name=".activity.UpiWaitingActivity" />
+        <activity
             android:name=".activity.KlarnaSourceActivity" />
         <activity
             android:name=".activity.CardBrandsActivity" />
+        <activity
+            android:name=".activity.NetbankingPaymentActivity" />
+
+        <activity android:name=".activity.SimplePaymentMethodConfirmationActivity" />
+        <activity android:name=".activity.ConnectExampleActivity" />
+
+        <activity android:name=".activity.LaunchPaymentSheetCompleteActivity" />
+        <activity android:name=".activity.LaunchPaymentSheetCustomActivity" />
     </application>
 
 </manifest>

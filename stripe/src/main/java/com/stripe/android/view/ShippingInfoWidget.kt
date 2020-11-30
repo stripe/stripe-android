@@ -9,7 +9,6 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
-import androidx.annotation.StringDef
 import com.stripe.android.R
 import com.stripe.android.databinding.AddressWidgetBinding
 import com.stripe.android.model.Address
@@ -32,8 +31,28 @@ class ShippingInfoWidget @JvmOverloads constructor(
         )
     }
     private val postalCodeValidator: PostalCodeValidator = PostalCodeValidator()
-    private var optionalShippingInfoFields: List<String> = emptyList()
-    private var hiddenShippingInfoFields: List<String> = emptyList()
+
+    /**
+     * Address fields that should be optional.
+     */
+    var optionalFields: List<CustomizableShippingField> = emptyList()
+        set(value) {
+            field = value
+
+            renderLabels()
+            countryAutoCompleteTextView.selectedCountry?.let(::updateConfigForCountry)
+        }
+
+    /**
+     * Address fields that should be hidden. Hidden fields are automatically optional.
+     */
+    var hiddenFields: List<CustomizableShippingField> = emptyList()
+        set(value) {
+            field = value
+
+            renderLabels()
+            countryAutoCompleteTextView.selectedCountry?.let(::updateConfigForCountry)
+        }
 
     private val countryAutoCompleteTextView = viewBinding.countryAutocompleteAaw
     private val addressLine1TextInputLayout = viewBinding.tlAddressLine1Aaw
@@ -86,23 +105,13 @@ class ShippingInfoWidget @JvmOverloads constructor(
      * Constants that can be used to mark fields in this widget as optional or hidden.
      * Some fields cannot be hidden.
      */
-    @Retention(AnnotationRetention.SOURCE)
-    @StringDef(CustomizableShippingField.ADDRESS_LINE_ONE_FIELD,
-        CustomizableShippingField.ADDRESS_LINE_TWO_FIELD,
-        CustomizableShippingField.CITY_FIELD,
-        CustomizableShippingField.POSTAL_CODE_FIELD,
-        CustomizableShippingField.STATE_FIELD,
-        CustomizableShippingField.PHONE_FIELD)
-    annotation class CustomizableShippingField {
-        companion object {
-            const val ADDRESS_LINE_ONE_FIELD: String = "address_line_one"
-            // address line two is optional by default
-            const val ADDRESS_LINE_TWO_FIELD: String = "address_line_two"
-            const val CITY_FIELD: String = "city"
-            const val POSTAL_CODE_FIELD: String = "postal_code"
-            const val STATE_FIELD: String = "state"
-            const val PHONE_FIELD: String = "phone"
-        }
+    enum class CustomizableShippingField {
+        Line1,
+        Line2, // optional by default
+        City,
+        PostalCode,
+        State,
+        Phone
     }
 
     init {
@@ -116,27 +125,6 @@ class ShippingInfoWidget @JvmOverloads constructor(
         }
 
         initView()
-    }
-
-    /**
-     * @param optionalAddressFields address fields that should be optional.
-     */
-    fun setOptionalFields(optionalAddressFields: List<String>?) {
-        optionalShippingInfoFields = optionalAddressFields.orEmpty()
-        renderLabels()
-
-        countryAutoCompleteTextView.selectedCountry?.let(::updateConfigForCountry)
-    }
-
-    /**
-     * @param hiddenAddressFields address fields that should be hidden. Hidden fields are
-     * automatically optional.
-     */
-    fun setHiddenFields(hiddenAddressFields: List<String>?) {
-        hiddenShippingInfoFields = hiddenAddressFields.orEmpty()
-        renderLabels()
-
-        countryAutoCompleteTextView.selectedCountry?.let(::updateConfigForCountry)
     }
 
     /**
@@ -188,28 +176,28 @@ class ShippingInfoWidget @JvmOverloads constructor(
         val isPostalCodeValid = postalCodeValidator.isValid(
             postalCode,
             selectedCountry?.code,
-            optionalShippingInfoFields,
-            hiddenShippingInfoFields
+            optionalFields,
+            hiddenFields
         )
         postalCodeEditText.shouldShowError = !isPostalCodeValid
 
         val requiredAddressLine1Empty = address.isEmpty() &&
-            isFieldRequired(CustomizableShippingField.ADDRESS_LINE_ONE_FIELD)
+            isFieldRequired(CustomizableShippingField.Line1)
         addressEditText.shouldShowError = requiredAddressLine1Empty
 
         val requiredCityEmpty = city.isEmpty() &&
-            isFieldRequired(CustomizableShippingField.CITY_FIELD)
+            isFieldRequired(CustomizableShippingField.City)
         cityEditText.shouldShowError = requiredCityEmpty
 
         val requiredNameEmpty = name.isEmpty()
         nameEditText.shouldShowError = requiredNameEmpty
 
         val requiredStateEmpty = state.isEmpty() &&
-            isFieldRequired(CustomizableShippingField.STATE_FIELD)
+            isFieldRequired(CustomizableShippingField.State)
         stateEditText.shouldShowError = requiredStateEmpty
 
         val requiredPhoneNumberEmpty = phoneNumber.isEmpty() &&
-            isFieldRequired(CustomizableShippingField.PHONE_FIELD)
+            isFieldRequired(CustomizableShippingField.Phone)
         phoneNumberEditText.shouldShowError = requiredPhoneNumberEmpty
 
         return isPostalCodeValid && !requiredAddressLine1Empty && !requiredCityEmpty &&
@@ -217,16 +205,16 @@ class ShippingInfoWidget @JvmOverloads constructor(
             selectedCountry != null
     }
 
-    private fun isFieldRequired(@CustomizableShippingField field: String): Boolean {
+    private fun isFieldRequired(field: CustomizableShippingField): Boolean {
         return !isFieldOptional(field) && !isFieldHidden(field)
     }
 
-    private fun isFieldOptional(@CustomizableShippingField field: String): Boolean {
-        return optionalShippingInfoFields.contains(field)
+    private fun isFieldOptional(field: CustomizableShippingField): Boolean {
+        return optionalFields.contains(field)
     }
 
-    private fun isFieldHidden(@CustomizableShippingField field: String): Boolean {
-        return hiddenShippingInfoFields.contains(field)
+    private fun isFieldHidden(field: CustomizableShippingField): Boolean {
+        return hiddenFields.contains(field)
     }
 
     private fun initView() {
@@ -249,20 +237,24 @@ class ShippingInfoWidget @JvmOverloads constructor(
         addressEditText.setErrorMessage(resources.getString(R.string.address_required))
         cityEditText.setErrorMessage(resources.getString(R.string.address_city_required))
         nameEditText.setErrorMessage(resources.getString(R.string.address_name_required))
-        phoneNumberEditText.setErrorMessage(resources.getString(R.string
-            .address_phone_number_required))
+        phoneNumberEditText.setErrorMessage(
+            resources.getString(
+                R.string
+                    .address_phone_number_required
+            )
+        )
     }
 
     private fun renderLabels() {
         nameTextInputLayout.hint = resources.getString(R.string.address_label_name)
         cityTextInputLayout.hint =
-            if (isFieldOptional(CustomizableShippingField.CITY_FIELD)) {
+            if (isFieldOptional(CustomizableShippingField.City)) {
                 resources.getString(R.string.address_label_city_optional)
             } else {
                 resources.getString(R.string.address_label_city)
             }
         phoneNumberTextInputLayout.hint =
-            if (isFieldOptional(CustomizableShippingField.PHONE_FIELD)) {
+            if (isFieldOptional(CustomizableShippingField.Phone)) {
                 resources.getString(R.string.address_label_phone_number_optional)
             } else {
                 resources.getString(R.string.address_label_phone_number)
@@ -271,22 +263,22 @@ class ShippingInfoWidget @JvmOverloads constructor(
     }
 
     private fun hideHiddenFields() {
-        if (isFieldHidden(CustomizableShippingField.ADDRESS_LINE_ONE_FIELD)) {
+        if (isFieldHidden(CustomizableShippingField.Line1)) {
             addressLine1TextInputLayout.visibility = View.GONE
         }
-        if (isFieldHidden(CustomizableShippingField.ADDRESS_LINE_TWO_FIELD)) {
+        if (isFieldHidden(CustomizableShippingField.Line2)) {
             addressLine2TextInputLayout.visibility = View.GONE
         }
-        if (isFieldHidden(CustomizableShippingField.STATE_FIELD)) {
+        if (isFieldHidden(CustomizableShippingField.State)) {
             stateTextInputLayout.visibility = View.GONE
         }
-        if (isFieldHidden(CustomizableShippingField.CITY_FIELD)) {
+        if (isFieldHidden(CustomizableShippingField.City)) {
             cityTextInputLayout.visibility = View.GONE
         }
-        if (isFieldHidden(CustomizableShippingField.POSTAL_CODE_FIELD)) {
+        if (isFieldHidden(CustomizableShippingField.PostalCode)) {
             postalCodeTextInputLayout.visibility = View.GONE
         }
-        if (isFieldHidden(CustomizableShippingField.PHONE_FIELD)) {
+        if (isFieldHidden(CustomizableShippingField.Phone)) {
             phoneNumberTextInputLayout.visibility = View.GONE
         }
     }
@@ -303,7 +295,8 @@ class ShippingInfoWidget @JvmOverloads constructor(
 
         postalCodeTextInputLayout.visibility =
             if (CountryUtils.doesCountryUsePostalCode(country.code) &&
-                !isFieldHidden(CustomizableShippingField.POSTAL_CODE_FIELD)) {
+                !isFieldHidden(CustomizableShippingField.PostalCode)
+            ) {
                 View.VISIBLE
             } else {
                 View.GONE
@@ -319,21 +312,23 @@ class ShippingInfoWidget @JvmOverloads constructor(
 
     private fun renderUSForm() {
         addressLine1TextInputLayout.hint =
-            if (isFieldOptional(CustomizableShippingField.ADDRESS_LINE_ONE_FIELD)) {
+            if (isFieldOptional(CustomizableShippingField.Line1)) {
                 resources.getString(R.string.address_label_address_optional)
             } else {
                 resources.getString(R.string.address_label_address)
             }
-        addressLine2TextInputLayout.hint = resources.getString(R.string
-            .address_label_apt_optional)
+        addressLine2TextInputLayout.hint = resources.getString(
+            R.string
+                .address_label_apt_optional
+        )
         postalCodeTextInputLayout.hint =
-            if (isFieldOptional(CustomizableShippingField.POSTAL_CODE_FIELD)) {
+            if (isFieldOptional(CustomizableShippingField.PostalCode)) {
                 resources.getString(R.string.address_label_zip_code_optional)
             } else {
                 resources.getString(R.string.address_label_zip_code)
             }
         stateTextInputLayout.hint =
-            if (isFieldOptional(CustomizableShippingField.STATE_FIELD)) {
+            if (isFieldOptional(CustomizableShippingField.State)) {
                 resources.getString(R.string.address_label_state_optional)
             } else {
                 resources.getString(R.string.address_label_state)
@@ -344,7 +339,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
 
     private fun renderGreatBritainForm() {
         addressLine1TextInputLayout.hint =
-            if (isFieldOptional(CustomizableShippingField.ADDRESS_LINE_ONE_FIELD)) {
+            if (isFieldOptional(CustomizableShippingField.Line1)) {
                 resources.getString(R.string.address_label_address_line1_optional)
             } else {
                 resources.getString(R.string.address_label_address_line1)
@@ -353,13 +348,13 @@ class ShippingInfoWidget @JvmOverloads constructor(
             R.string.address_label_address_line2_optional
         )
         postalCodeTextInputLayout.hint =
-            if (isFieldOptional(CustomizableShippingField.POSTAL_CODE_FIELD)) {
+            if (isFieldOptional(CustomizableShippingField.PostalCode)) {
                 resources.getString(R.string.address_label_postcode_optional)
             } else {
                 resources.getString(R.string.address_label_postcode)
             }
         stateTextInputLayout.hint =
-            if (isFieldOptional(CustomizableShippingField.STATE_FIELD)) {
+            if (isFieldOptional(CustomizableShippingField.State)) {
                 resources.getString(R.string.address_label_county_optional)
             } else {
                 resources.getString(R.string.address_label_county)
@@ -370,34 +365,42 @@ class ShippingInfoWidget @JvmOverloads constructor(
 
     private fun renderCanadianForm() {
         addressLine1TextInputLayout.hint =
-            if (isFieldOptional(CustomizableShippingField.ADDRESS_LINE_ONE_FIELD)) {
+            if (isFieldOptional(CustomizableShippingField.Line1)) {
                 resources.getString(R.string.address_label_address_optional)
             } else {
                 resources.getString(R.string.address_label_address)
             }
         addressLine2TextInputLayout.hint = resources.getString(R.string.address_label_apt_optional)
         postalCodeTextInputLayout.hint =
-            if (isFieldOptional(CustomizableShippingField.POSTAL_CODE_FIELD)) {
+            if (isFieldOptional(CustomizableShippingField.PostalCode)) {
                 resources.getString(R.string.address_label_postal_code_optional)
             } else {
                 resources.getString(R.string.address_label_postal_code)
             }
         stateTextInputLayout.hint =
-            if (isFieldOptional(CustomizableShippingField.STATE_FIELD)) {
+            if (isFieldOptional(CustomizableShippingField.State)) {
                 resources.getString(R.string.address_label_province_optional)
             } else {
                 resources.getString(R.string.address_label_province)
             }
 
-        postalCodeEditText.setErrorMessage(resources.getString(R.string
-            .address_postal_code_invalid))
-        stateEditText.setErrorMessage(resources.getString(R.string
-            .address_province_required))
+        postalCodeEditText.setErrorMessage(
+            resources.getString(
+                R.string
+                    .address_postal_code_invalid
+            )
+        )
+        stateEditText.setErrorMessage(
+            resources.getString(
+                R.string
+                    .address_province_required
+            )
+        )
     }
 
     private fun renderInternationalForm() {
         addressLine1TextInputLayout.hint =
-            if (isFieldOptional(CustomizableShippingField.ADDRESS_LINE_ONE_FIELD)) {
+            if (isFieldOptional(CustomizableShippingField.Line1)) {
                 resources.getString(R.string.address_label_address_line1_optional)
             } else {
                 resources.getString(R.string.address_label_address_line1)
@@ -406,22 +409,30 @@ class ShippingInfoWidget @JvmOverloads constructor(
             resources.getString(R.string.address_label_address_line2_optional)
 
         postalCodeTextInputLayout.hint =
-            if (isFieldOptional(CustomizableShippingField.POSTAL_CODE_FIELD)) {
+            if (isFieldOptional(CustomizableShippingField.PostalCode)) {
                 resources.getString(R.string.address_label_zip_postal_code_optional)
             } else {
                 resources.getString(R.string.address_label_zip_postal_code)
             }
 
         stateTextInputLayout.hint =
-            if (isFieldOptional(CustomizableShippingField.STATE_FIELD)) {
+            if (isFieldOptional(CustomizableShippingField.State)) {
                 resources.getString(R.string.address_label_region_generic_optional)
             } else {
                 resources.getString(R.string.address_label_region_generic)
             }
 
-        postalCodeEditText.setErrorMessage(resources.getString(R.string
-            .address_zip_postal_invalid))
-        stateEditText.setErrorMessage(resources.getString(R.string
-            .address_region_generic_required))
+        postalCodeEditText.setErrorMessage(
+            resources.getString(
+                R.string
+                    .address_zip_postal_invalid
+            )
+        )
+        stateEditText.setErrorMessage(
+            resources.getString(
+                R.string
+                    .address_region_generic_required
+            )
+        )
     }
 }

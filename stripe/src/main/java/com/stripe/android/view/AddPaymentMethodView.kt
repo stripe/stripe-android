@@ -12,8 +12,8 @@ internal abstract class AddPaymentMethodView constructor(
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
     /**
-     * @return a [PaymentMethodCreateParams] if the customer input for the given payment
-     * method type is valid; otherwise, `null`
+     * A [PaymentMethodCreateParams] if the customer's input for the given payment
+     * method type is valid; otherwise, `null`.
      */
     abstract val createParams: PaymentMethodCreateParams?
 

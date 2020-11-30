@@ -22,8 +22,10 @@ internal object CustomerFixtures {
         """.trimIndent()
     )
 
-    val CUSTOMER_WITH_SHIPPING = requireNotNull(CustomerJsonParser().parse(JSONObject(
-        """
+    val CUSTOMER_WITH_SHIPPING = requireNotNull(
+        CustomerJsonParser().parse(
+            JSONObject(
+                """
         {
             "id": "cus_AQsHpvKfKwJDrF",
             "object": "customer",
@@ -50,13 +52,17 @@ internal object CustomerFixtures {
                 "url": "/v1/customers/cus_AQsHpvKfKwJDrF/sources"
             }
         }
-        """.trimIndent()
-    )))
+                """.trimIndent()
+            )
+        )
+    )
 
     val CUSTOMER = requireNotNull(CustomerJsonParser().parse(CUSTOMER_JSON))
 
-    val OTHER_CUSTOMER = requireNotNull(CustomerJsonParser().parse(JSONObject(
-        """
+    val OTHER_CUSTOMER = requireNotNull(
+        CustomerJsonParser().parse(
+            JSONObject(
+                """
         {
             "id": "cus_ABC123",
             "object": "customer",
@@ -71,6 +77,8 @@ internal object CustomerFixtures {
                 "url": "/v1/customers/cus_ABC123/sources"
             }
         }
-        """.trimIndent()
-    )))
+                """.trimIndent()
+            )
+        )
+    )
 }

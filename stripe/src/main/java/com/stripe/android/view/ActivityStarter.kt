@@ -16,36 +16,31 @@ abstract class ActivityStarter<TargetActivityType : Activity, ArgsType : Activit
     private val activity: Activity,
     private val fragment: Fragment? = null,
     private val targetClass: Class<TargetActivityType>,
-    private val defaultArgs: ArgsType,
     private val requestCode: Int
 ) {
     internal constructor(
         activity: Activity,
         targetClass: Class<TargetActivityType>,
-        args: ArgsType,
         requestCode: Int
     ) : this(
         activity = activity,
+        fragment = null,
         targetClass = targetClass,
-        defaultArgs = args,
         requestCode = requestCode
     )
 
     internal constructor(
         fragment: Fragment,
         targetClass: Class<TargetActivityType>,
-        args: ArgsType,
         requestCode: Int
     ) : this(
         activity = fragment.requireActivity(),
         fragment = fragment,
         targetClass = targetClass,
-        defaultArgs = args,
         requestCode = requestCode
     )
 
-    @JvmOverloads
-    fun startForResult(args: ArgsType = defaultArgs) {
+    fun startForResult(args: ArgsType) {
         val intent = Intent(activity, targetClass)
             .putExtra(Args.EXTRA, args)
 

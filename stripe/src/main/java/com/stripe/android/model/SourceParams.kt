@@ -5,32 +5,35 @@ import androidx.annotation.IntRange
 import androidx.annotation.Size
 import com.stripe.android.model.Source.Companion.asSourceType
 import com.stripe.android.model.Source.SourceType
-import java.util.Objects
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.json.JSONException
 import org.json.JSONObject
+import java.util.Objects
 
 /**
  * Represents a grouping of parameters needed to create a [Source] object on the server.
  */
 class SourceParams private constructor(
     /**
-     * @return a custom type of this Source, if one has been set
+     * The type of the source to create.
      */
     @SourceType val typeRaw: String,
 
+    /**
+     * A set of identifiers representing the component that created this instance.
+     */
     internal val attribution: Set<String> = emptySet()
 ) : StripeParamsModel {
 
     /**
-     * @return The type of the source to create.
+     * The type of the source to create.
      */
     @get:SourceType
     @SourceType
     val type: String = asSourceType(typeRaw)
 
     /**
-     * @return Amount associated with the source. This is the amount for which the source will
+     * Amount associated with the source. This is the amount for which the source will
      * be chargeable once ready. Required for `single_use` sources. Not supported for `receiver`
      * type sources, where charge amount may not be specified until funds land.
      *
@@ -41,13 +44,13 @@ class SourceParams private constructor(
         private set
 
     /**
-     * @return a [Map] of the parameters specific to this type of source
+     * A [Map] of the parameters specific to the Source type.
      */
     var apiParameterMap: Map<String, Any?>? = null
         private set
 
     /**
-     * @return Three-letter ISO code for the currency associated with the source.
+     * Three-letter ISO code for the currency associated with the source.
      * This is the currency for which the source will be chargeable once ready.
      *
      * See [currency](https://stripe.com/docs/api/sources/create#create_source-currency)
@@ -70,7 +73,8 @@ class SourceParams private constructor(
         private set
 
     /**
-     * @return the custom metadata set on these params
+     * Set of key-value pairs that you can attach to an object. This can be useful for storing
+     * additional information about the object in a structured format.
      */
     var metaData: Map<String, String>? = null
         private set
@@ -78,7 +82,7 @@ class SourceParams private constructor(
     private var extraParams: Map<String, Any> = emptyMap()
 
     /**
-     * @return An optional token used to create the source. When passed, token properties will
+     * An optional token used to create the source. When passed, token properties will
      * override source parameters.
      *
      * See [token](https://stripe.com/docs/api/sources/create#create_source-token)
@@ -86,15 +90,13 @@ class SourceParams private constructor(
     private var token: String? = null
 
     /**
-     * @return Either `reusable` or `single_use`. Whether this source should be reusable or not.
+     * Either `reusable` or `single_use`. Whether this source should be reusable or not.
      * Some source types may or may not be reusable by construction, while others may leave the
      * option at creation. If an incompatible value is passed, an error will be returned.
      *
      * See [usage](https://stripe.com/docs/api/sources/create#create_source-usage)
      */
-    @get:Source.Usage
-    @Source.Usage
-    var usage: String? = null
+    var usage: Source.Usage? = null
         private set
 
     private var weChatParams: WeChatParams? = null
@@ -185,7 +187,7 @@ class SourceParams private constructor(
      *
      * See [usage](https://stripe.com/docs/api/sources/create#create_source-usage)
      */
-    fun setUsage(@Source.Usage usage: String): SourceParams = apply {
+    fun setUsage(usage: Source.Usage): SourceParams = apply {
         this.usage = usage
     }
 
@@ -236,7 +238,7 @@ class SourceParams private constructor(
             )
             .plus(
                 usage?.let {
-                    mapOf(PARAM_USAGE to it)
+                    mapOf(PARAM_USAGE to it.code)
                 }.orEmpty()
             )
             .plus(extraParams)
@@ -273,8 +275,10 @@ class SourceParams private constructor(
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(amount, apiParameterMap, currency, typeRaw, owner, metaData,
-            returnUrl, extraParams, token, usage, type, weChatParams)
+        return Objects.hash(
+            amount, apiParameterMap, currency, typeRaw, owner, metaData,
+            returnUrl, extraParams, token, usage, type, weChatParams
+        )
     }
 
     override fun equals(other: Any?): Boolean {
@@ -297,14 +301,15 @@ class SourceParams private constructor(
             Objects.equals(token, params.token) &&
             Objects.equals(usage, params.usage) &&
             Objects.equals(type, params.type) &&
-            Objects.equals(weChatParams, params.weChatParams)
+            Objects.equals(weChatParams, params.weChatParams) &&
+            Objects.equals(attribution, params.attribution)
     }
 
     /**
-     * [owner](https://stripe.com/docs/api/sources/create#create_source-owner) param
-     *
      * Information about the owner of the payment instrument that may be used or required by
      * particular source types.
+     *
+     * See [owner](https://stripe.com/docs/api/sources/create#create_source-owner).
      */
     @Parcelize
     data class OwnerParams @JvmOverloads constructor(
@@ -436,7 +441,7 @@ class SourceParams private constructor(
             return SourceParams(SourceType.ALIPAY)
                 .setCurrency(currency)
                 .setReturnUrl(returnUrl)
-                .setUsage(Source.Usage.REUSABLE)
+                .setUsage(Source.Usage.Reusable)
                 .setOwner(
                     OwnerParams(
                         email = email,
@@ -560,7 +565,7 @@ class SourceParams private constructor(
                 .setExtraParams(
                     mapOf(
                         PARAM_KLARNA to klarnaParams.toParamMap(),
-                        PARAM_FLOW to Source.SourceFlow.REDIRECT,
+                        PARAM_FLOW to Source.Flow.Redirect.code,
                         PARAM_SOURCE_ORDER to sourceOrderParams.toParamMap()
                     )
                 )
@@ -635,7 +640,15 @@ class SourceParams private constructor(
          */
         @JvmStatic
         fun createSourceFromTokenParams(tokenId: String): SourceParams {
-            return SourceParams(SourceType.CARD)
+            return createSourceFromTokenParams(tokenId, emptySet())
+        }
+
+        @JvmSynthetic
+        internal fun createSourceFromTokenParams(
+            tokenId: String,
+            attribution: Set<String>
+        ): SourceParams {
+            return SourceParams(SourceType.CARD, attribution)
                 .setToken(tokenId)
         }
 
@@ -647,6 +660,7 @@ class SourceParams private constructor(
          *
          * @see [Card Payments with Sources](https://stripe.com/docs/sources/cards)
          */
+        @Deprecated("Use createCardParams with CardParams argument.")
         @JvmStatic
         fun createCardParams(card: Card): SourceParams {
             return SourceParams(SourceType.CARD, card.loggingTokens)
@@ -675,6 +689,34 @@ class SourceParams private constructor(
         }
 
         /**
+         * Create Card Source params.
+         *
+         * @param cardParams A [CardParams] object containing the details necessary for the source.
+         * @return a [SourceParams] object that can be used to create a card source.
+         *
+         * @see [Card Payments with Sources](https://stripe.com/docs/sources/cards)
+         */
+        @JvmStatic
+        fun createCardParams(cardParams: CardParams): SourceParams {
+            return SourceParams(SourceType.CARD, cardParams.attribution)
+                .setApiParameterMap(
+                    mapOf(
+                        PARAM_NUMBER to cardParams.number,
+                        PARAM_EXP_MONTH to cardParams.expMonth,
+                        PARAM_EXP_YEAR to cardParams.expYear,
+                        PARAM_CVC to cardParams.cvc
+                    )
+                )
+                .setOwner(
+                    OwnerParams(
+                        address = cardParams.address,
+                        name = cardParams.name
+                    )
+                )
+                .setMetaData(cardParams.metadata)
+        }
+
+        /**
          * @param googlePayPaymentData a [JSONObject] derived from Google Pay's
          * [PaymentData#toJson()](https://developers.google.com/pay/api/android/reference/client#tojson)
          */
@@ -684,16 +726,21 @@ class SourceParams private constructor(
             googlePayPaymentData: JSONObject
         ): SourceParams {
             val googlePayResult = GooglePayResult.fromJson(googlePayPaymentData)
-            return SourceParams(SourceType.CARD)
-                .setToken(requireNotNull(googlePayResult.token?.id))
-                .setOwner(
-                    OwnerParams(
-                        address = googlePayResult.address,
-                        email = googlePayResult.email,
-                        name = googlePayResult.name,
-                        phone = googlePayResult.phoneNumber
-                    )
+            val token = googlePayResult.token
+
+            return createSourceFromTokenParams(
+                tokenId = token?.id.orEmpty(),
+                attribution = setOfNotNull(
+                    token?.card?.tokenizationMethod?.toString()
                 )
+            ).setOwner(
+                OwnerParams(
+                    address = googlePayResult.address,
+                    email = googlePayResult.email,
+                    name = googlePayResult.name,
+                    phone = googlePayResult.phoneNumber
+                )
+            )
         }
 
         /**
@@ -970,7 +1017,8 @@ class SourceParams private constructor(
         fun createVisaCheckoutParams(callId: String): SourceParams {
             return SourceParams(SourceType.CARD)
                 .setApiParameterMap(
-                    mapOf(PARAM_VISA_CHECKOUT to mapOf(PARAM_CALL_ID to callId)))
+                    mapOf(PARAM_VISA_CHECKOUT to mapOf(PARAM_CALL_ID to callId))
+                )
         }
 
         /**

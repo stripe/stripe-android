@@ -41,6 +41,12 @@ internal enum class AnalyticsEvent(internal val code: String) {
     // 3DS1
     Auth3ds1Sdk("3ds1_sdk"),
 
+    // FPX
+    FpxBankStatusesRetrieve("retrieve_fpx_bank_statuses"),
+
+    // Get an arbitrary Stripe URL
+    StripeUrlRetrieve("retrieve_stripe_url"),
+
     // 3DS2
     Auth3ds2Fingerprint("3ds2_fingerprint"),
     Auth3ds2Start("3ds2_authenticate"),
@@ -58,7 +64,14 @@ internal enum class AnalyticsEvent(internal val code: String) {
     // Source Authentication
     AuthSourceStart("auth_source_start"),
     AuthSourceRedirect("auth_source_redirect"),
-    AuthSourceResult("auth_source_result");
+    AuthSourceResult("auth_source_result"),
+
+    CardMetadataPublishableKeyAvailable("card_metadata_pk_available"),
+    CardMetadataPublishableKeyUnavailable("card_metadata_pk_unavailable"),
+
+    CardMetadataLoadedTooSlow("card_metadata_loaded_too_slow"),
+    CardMetadataLoadFailure("card_metadata_load_failure"),
+    CardMetadataMissingRange("card_metadata_missing_range");
 
     override fun toString(): String {
         return "$PREFIX.$code"

@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.CustomerSession
@@ -28,7 +27,6 @@ import com.stripe.example.databinding.LaunchPaymentSessionFragmentBinding
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
-import java.lang.ref.WeakReference
 
 class FragmentExamplesFragment : Fragment() {
     private val viewBinding: LaunchPaymentSessionFragmentBinding by lazy {
@@ -52,15 +50,15 @@ class FragmentExamplesFragment : Fragment() {
             config = PaymentSessionConfig.Builder()
                 .setShippingMethodsRequired(false)
                 .setHiddenShippingInfoFields(
-                    ShippingInfoWidget.CustomizableShippingField.PHONE_FIELD,
-                    ShippingInfoWidget.CustomizableShippingField.CITY_FIELD
+                    ShippingInfoWidget.CustomizableShippingField.Phone,
+                    ShippingInfoWidget.CustomizableShippingField.City
                 )
                 .build()
         )
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         initPaymentSession(createCustomerSession())
         viewBinding.launchPaymentSession.setOnClickListener {
@@ -68,6 +66,41 @@ class FragmentExamplesFragment : Fragment() {
         }
         viewBinding.launchPaymentAuth.setOnClickListener { createPaymentIntent() }
         viewBinding.launchSetupAuth.setOnClickListener { createSetupIntent() }
+
+        viewModel.paymentIntentResultLiveData.observe(
+            viewLifecycleOwner,
+            { result ->
+                result.fold(
+                    onSuccess = {
+                        val status = getString(
+                            R.string.payment_intent_status,
+                            it.intent.status
+                        )
+                        updateStatus("$status; Outcome: ${it.outcome}")
+                    },
+                    onFailure = ::onError
+                )
+                onConfirmationComplete()
+            }
+        )
+
+        viewModel.setupIntentResultLiveData.observe(
+            viewLifecycleOwner,
+            { result ->
+                result.fold(
+                    onSuccess = {
+                        val paymentIntent = it.intent
+                        val status = getString(
+                            R.string.setup_intent_status,
+                            paymentIntent.status
+                        )
+                        updateStatus("$status; Outcome: ${it.outcome}")
+                    },
+                    onFailure = ::onError
+                )
+                onConfirmationComplete()
+            }
+        )
     }
 
     override fun onCreateView(
@@ -83,11 +116,6 @@ class FragmentExamplesFragment : Fragment() {
         super.onPause()
     }
 
-    override fun onDestroy() {
-        viewModel.dispose()
-        super.onDestroy()
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -97,11 +125,10 @@ class FragmentExamplesFragment : Fragment() {
             data != null && paymentSession.handlePaymentData(requestCode, resultCode, data)
         if (isPaymentSessionResult) {
             Toast.makeText(
-                    requireActivity(),
-                    "Received PaymentSession result",
-                    Toast.LENGTH_SHORT
-                )
-                .show()
+                requireActivity(),
+                "Received PaymentSession result",
+                Toast.LENGTH_SHORT
+            ).show()
             viewBinding.progressBar.visibility = View.INVISIBLE
             return
         }
@@ -109,7 +136,15 @@ class FragmentExamplesFragment : Fragment() {
         val isPaymentResult = stripe.onPaymentResult(
             requestCode,
             data,
-            PaymentAuthResultListener(this)
+            callback = object : ApiResultCallback<PaymentIntentResult> {
+                override fun onSuccess(result: PaymentIntentResult) {
+                    viewModel.paymentIntentResultLiveData.value = Result.success(result)
+                }
+
+                override fun onError(e: Exception) {
+                    viewModel.paymentIntentResultLiveData.value = Result.failure(e)
+                }
+            }
         )
         if (isPaymentResult) {
             return
@@ -118,7 +153,15 @@ class FragmentExamplesFragment : Fragment() {
         val isSetupResult = stripe.onSetupResult(
             requestCode,
             data,
-            SetupAuthResultListener(this)
+            callback = object : ApiResultCallback<SetupIntentResult> {
+                override fun onSuccess(result: SetupIntentResult) {
+                    viewModel.setupIntentResultLiveData.value = Result.success(result)
+                }
+
+                override fun onError(e: Exception) {
+                    viewModel.setupIntentResultLiveData.value = Result.failure(e)
+                }
+            }
         )
         if (isSetupResult) {
             return
@@ -132,8 +175,11 @@ class FragmentExamplesFragment : Fragment() {
 
         viewModel.createPaymentIntent().observe(
             viewLifecycleOwner,
-            Observer {
-                onCreatePaymentIntentResponse(it)
+            {
+                it.fold(
+                    onSuccess = ::onCreatePaymentIntentResponse,
+                    onFailure = ::onError
+                )
             }
         )
     }
@@ -145,82 +191,66 @@ class FragmentExamplesFragment : Fragment() {
 
         viewModel.createSetupIntent().observe(
             viewLifecycleOwner,
-            Observer {
-                onCreateSetupIntentResponse(it)
+            {
+                it.fold(
+                    onSuccess = ::onCreateSetupIntentResponse,
+                    onFailure = ::onError
+                )
             }
         )
     }
 
-    private fun onAuthComplete() {
+    private fun onConfirmationComplete() {
         viewBinding.launchPaymentAuth.isEnabled = true
         viewBinding.progressBar.visibility = View.INVISIBLE
     }
 
     private fun onCreatePaymentIntentResponse(response: JSONObject) {
         try {
-            val status = getString(
-                R.string.payment_intent_status,
-                response.getString("status")
-            )
-            viewBinding.status.append(
-                """
-
-
-                $status
-                """.trimIndent()
+            updateStatus(
+                getString(
+                    R.string.payment_intent_status,
+                    response.getString("status")
+                )
             )
             confirmPaymentIntent(response.getString("secret"))
         } catch (e: IOException) {
-            viewBinding.status.append(e.message)
+            onError(e)
         } catch (e: JSONException) {
-            viewBinding.status.append(e.message)
+            onError(e)
         }
     }
 
     private fun onCreateSetupIntentResponse(response: JSONObject) {
         try {
-            val status = getString(
-                R.string.setup_intent_status,
-                response.getString("status")
-            )
-            viewBinding.status.append(
-                """
-
-
-                $status
-                """.trimIndent()
+            updateStatus(
+                getString(
+                    R.string.setup_intent_status,
+                    response.getString("status")
+                )
             )
             confirmSetupIntent(response.getString("secret"))
         } catch (e: IOException) {
-            viewBinding.status.append(e.message)
+            onError(e)
         } catch (e: JSONException) {
-            viewBinding.status.append(e.message)
+            onError(e)
         }
     }
 
     private fun confirmPaymentIntent(paymentIntentClientSecret: String) {
-        viewBinding.status.append(
-            """
-
-
-            Starting payment authentication
-            """.trimIndent()
-        )
-        stripe.confirmPayment(this,
+        updateStatus("Starting payment authentication")
+        stripe.confirmPayment(
+            this,
             ConfirmPaymentIntentParams.createWithPaymentMethodId(
                 PAYMENT_METHOD_3DS2_REQUIRED,
                 paymentIntentClientSecret,
-                RETURN_URL))
+                RETURN_URL
+            )
+        )
     }
 
     private fun confirmSetupIntent(setupIntentClientSecret: String) {
-        viewBinding.status.append(
-            """
-
-
-            Starting payment authentication
-            """.trimIndent()
-        )
+        updateStatus("Starting payment setup authentication")
         stripe.confirmSetupIntent(
             this,
             ConfirmSetupIntentParams.create(
@@ -253,7 +283,8 @@ class FragmentExamplesFragment : Fragment() {
                                 stripeError: StripeError?
                             ) {
                             }
-                        })
+                        }
+                    )
                 }
             }
         )
@@ -277,82 +308,12 @@ class FragmentExamplesFragment : Fragment() {
         return customerSession
     }
 
-    private class PaymentAuthResultListener internal constructor(
-        fragment: FragmentExamplesFragment
-    ) : ApiResultCallback<PaymentIntentResult> {
-        private val fragmentRef: WeakReference<FragmentExamplesFragment> = WeakReference(fragment)
-
-        override fun onSuccess(result: PaymentIntentResult) {
-            fragmentRef.get()?.let { fragment ->
-                val paymentIntent = result.intent
-                val status = fragment.getString(
-                    R.string.payment_intent_status,
-                    paymentIntent.status
-                )
-                fragment.viewBinding.status.append(
-                    """
-
-
-                    Outcome: ${result.outcome}
-                    
-                    $status
-                    """.trimIndent()
-                )
-                fragment.onAuthComplete()
-            }
-        }
-
-        override fun onError(e: Exception) {
-            fragmentRef.get()?.let { fragment ->
-                fragment.viewBinding.status.append(
-                    """
-
-                  
-                    Exception: ${e.message}
-                    """.trimIndent()
-                )
-                fragment.onAuthComplete()
-            }
-        }
+    private fun onError(throwable: Throwable) {
+        updateStatus(throwable.message.orEmpty())
     }
 
-    private class SetupAuthResultListener internal constructor(
-        fragment: FragmentExamplesFragment
-    ) : ApiResultCallback<SetupIntentResult> {
-        private val fragmentRef: WeakReference<FragmentExamplesFragment> = WeakReference(fragment)
-
-        override fun onSuccess(result: SetupIntentResult) {
-            fragmentRef.get()?.let { fragment ->
-                val paymentIntent = result.intent
-                val status = fragment.getString(
-                    R.string.setup_intent_status,
-                    paymentIntent.status
-                )
-                fragment.viewBinding.status.append(
-                    """
-
-
-                    Outcome: ${result.outcome}
-                    
-                    $status
-                    """.trimIndent()
-                )
-                fragment.onAuthComplete()
-            }
-        }
-
-        override fun onError(e: Exception) {
-            fragmentRef.get()?.let { fragment ->
-                fragment.viewBinding.status.append(
-                    """
-
-                  
-                    Exception: ${e.message}
-                    """.trimIndent()
-                )
-                fragment.onAuthComplete()
-            }
-        }
+    private fun updateStatus(message: String) {
+        viewBinding.status.append("\n\n\n$message")
     }
 
     private companion object {

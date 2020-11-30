@@ -17,6 +17,9 @@ import com.stripe.android.PaymentSessionData
 import com.stripe.android.PaymentSessionFixtures
 import com.stripe.android.R
 import com.stripe.android.model.ShippingMethod
+import org.junit.runner.RunWith
+import org.mockito.Mockito.`when`
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -24,9 +27,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.junit.runner.RunWith
-import org.mockito.Mockito.`when`
-import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentFlowActivityTest {
@@ -35,17 +35,15 @@ class PaymentFlowActivityTest {
     private val shippingInformationValidator: PaymentSessionConfig.ShippingInformationValidator = mock()
     private val shippingMethodsFactory: PaymentSessionConfig.ShippingMethodsFactory = mock()
 
-    private val context: Context by lazy {
-        ApplicationProvider.getApplicationContext<Context>()
-    }
-    private val activityScenarioFactory: ActivityScenarioFactory by lazy {
-        ActivityScenarioFactory(ApplicationProvider.getApplicationContext())
-    }
+    private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val activityScenarioFactory = ActivityScenarioFactory(context)
 
     @BeforeTest
     fun setup() {
-        PaymentConfiguration.init(ApplicationProvider.getApplicationContext(),
-            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        PaymentConfiguration.init(
+            ApplicationProvider.getApplicationContext(),
+            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+        )
         CustomerSession.initCustomerSession(context, ephemeralKeyProvider)
     }
 
@@ -179,10 +177,20 @@ class PaymentFlowActivityTest {
     private companion object {
         private val SHIPPING_INFO = ShippingInfoFixtures.DEFAULT
         private val SHIPPING_METHODS = arrayListOf(
-            ShippingMethod("UPS Ground", "ups-ground",
-                0, "USD", "Arrives in 3-5 days"),
-            ShippingMethod("FedEx", "fedex",
-                599, "USD", "Arrives tomorrow")
+            ShippingMethod(
+                "UPS Ground",
+                "ups-ground",
+                0,
+                "USD",
+                "Arrives in 3-5 days"
+            ),
+            ShippingMethod(
+                "FedEx",
+                "fedex",
+                599,
+                "USD",
+                "Arrives tomorrow"
+            )
         )
 
         private fun createStarterArgs(

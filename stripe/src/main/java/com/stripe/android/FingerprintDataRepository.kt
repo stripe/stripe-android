@@ -1,10 +1,13 @@
 package com.stripe.android
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
-import androidx.lifecycle.Observer
+import com.stripe.android.networking.FingerprintRequestExecutor
+import com.stripe.android.networking.FingerprintRequestFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.Calendar
+import kotlin.coroutines.CoroutineContext
 
 internal interface FingerprintDataRepository {
     fun refresh()
@@ -12,11 +15,11 @@ internal interface FingerprintDataRepository {
     fun save(fingerprintData: FingerprintData)
 
     class Default(
-        private val store: FingerprintDataStore,
+        private val localStore: FingerprintDataStore,
         private val fingerprintRequestFactory: FingerprintRequestFactory,
         private val fingerprintRequestExecutor: FingerprintRequestExecutor =
             FingerprintRequestExecutor.Default(),
-        private val handler: Handler = Handler(Looper.getMainLooper())
+        private val workContext: CoroutineContext
     ) : FingerprintDataRepository {
         private var cachedFingerprintData: FingerprintData? = null
 
@@ -27,43 +30,46 @@ internal interface FingerprintDataRepository {
         constructor(
             context: Context
         ) : this(
-            store = FingerprintDataStore.Default(context),
-            fingerprintRequestFactory = FingerprintRequestFactory(context)
+            localStore = FingerprintDataStore.Default(context),
+            fingerprintRequestFactory = FingerprintRequestFactory.Default(context),
+            workContext = Dispatchers.IO
         )
 
         override fun refresh() {
-            handler.post {
-                val liveData = store.get()
-                // LiveData observation must occur on the main thread
-                liveData.observeForever(object : Observer<FingerprintData> {
-                    override fun onChanged(localFingerprintData: FingerprintData) {
-                        if (localFingerprintData.isExpired(timestampSupplier())) {
+            if (Stripe.advancedFraudSignalsEnabled) {
+                CoroutineScope(workContext).launch {
+                    localStore.get().let { localFingerprintData ->
+                        if (localFingerprintData == null ||
+                            localFingerprintData.isExpired(timestampSupplier())
+                        ) {
                             fingerprintRequestExecutor.execute(
                                 request = fingerprintRequestFactory.create(
-                                    localFingerprintData.guid
+                                    localFingerprintData
                                 )
-                            ) { remoteFingerprintData ->
-                                remoteFingerprintData?.let {
-                                    save(it)
-                                }
-                                liveData.removeObserver(this)
-                            }
+                            )
                         } else {
-                            cachedFingerprintData = localFingerprintData
-                            liveData.removeObserver(this)
+                            localFingerprintData
+                        }
+                    }.let { fingerprintData ->
+                        if (cachedFingerprintData != fingerprintData) {
+                            fingerprintData?.let {
+                                save(it)
+                            }
                         }
                     }
-                })
+                }
             }
         }
 
         override fun get(): FingerprintData? {
-            return cachedFingerprintData
+            return cachedFingerprintData.takeIf {
+                Stripe.advancedFraudSignalsEnabled
+            }
         }
 
         override fun save(fingerprintData: FingerprintData) {
             cachedFingerprintData = fingerprintData
-            store.save(fingerprintData)
+            localStore.save(fingerprintData)
         }
     }
 }

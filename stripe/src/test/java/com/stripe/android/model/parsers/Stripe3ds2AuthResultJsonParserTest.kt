@@ -1,13 +1,12 @@
 package com.stripe.android.model.parsers
 
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Stripe3ds2AuthResult
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
+import com.stripe.android.model.Stripe3ds2AuthResultFixtures
 import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class Stripe3ds2AuthResultJsonParserTest {
@@ -15,143 +14,153 @@ class Stripe3ds2AuthResultJsonParserTest {
     @Test
     fun parse_validData_createsObject() {
         val result = parse(AUTH_RESULT_JSON)
-        assertTrue(result.ares?.isChallenge == true)
+        assertThat(result.ares?.isChallenge)
+            .isTrue()
 
-        val expectedResult = Stripe3ds2AuthResult(
-            id = "threeds2_1Ecwz3CRMbs6FrXfThtfogua",
-            objectType = "three_d_secure_2",
-            liveMode = false,
-            created = 1558541285L,
-            source = "src_1Ecwz1CRMbs6FrXfUwt98lxf",
-            state = "challenge_required",
-            ares = Stripe3ds2AuthResult.Ares(
-                acsChallengeMandated = "Y",
-                acsTransId = "dd23c757-211a-4c1b-add5-06a1450a642e",
-                acsSignedContent = "eyJhbGciOiJFUzI1NiJ9.asdfasf.asdfasdfa",
-                authenticationType = "02",
-                messageType = "ARes",
-                messageVersion = "2.1.0",
-                sdkTransId = "20158862-9d9d-4d71-83d4-9e65554ed92c",
-                threeDSServerTransId = "e8ea0b42-0e74-42b2-92b4-1b27005f0596",
-                transStatus = "C"
+        assertThat(result)
+            .isEqualTo(
+                Stripe3ds2AuthResult(
+                    id = "threeds2_1Ecwz3CRMbs6FrXfThtfogua",
+                    liveMode = false,
+                    created = 1558541285L,
+                    source = "src_1Ecwz1CRMbs6FrXfUwt98lxf",
+                    state = "challenge_required",
+                    ares = Stripe3ds2AuthResult.Ares(
+                        acsChallengeMandated = "Y",
+                        acsTransId = "dd23c757-211a-4c1b-add5-06a1450a642e",
+                        acsSignedContent = "eyJhbGciOiJFUzI1NiJ9.asdfasf.asdfasdfa",
+                        authenticationType = "02",
+                        messageType = "ARes",
+                        messageVersion = "2.1.0",
+                        sdkTransId = "20158862-9d9d-4d71-83d4-9e65554ed92c",
+                        threeDSServerTransId = "e8ea0b42-0e74-42b2-92b4-1b27005f0596",
+                        transStatus = "C"
+                    )
+                )
             )
-        )
-
-        assertEquals(expectedResult, result)
     }
 
     @Test
     fun parse_dataWithMessageExtensions_createsObject() {
-        val jsonResult = parse(AUTH_RESULT_WITH_EXTENSIONS_JSON)
-
-        val extensions = listOf(
-            Stripe3ds2AuthResult.MessageExtension(
-                name = "extension1",
-                id = "ID1",
-                criticalityIndicator = true,
-                data = mapOf("key1" to "value1")
-            ),
-            Stripe3ds2AuthResult.MessageExtension(
-                name = "extension2",
-                id = "ID2",
-                criticalityIndicator = true,
-                data = mapOf(
-                    "key1" to "value1",
-                    "key2" to "value2"
+        assertThat(parse(AUTH_RESULT_WITH_EXTENSIONS_JSON))
+            .isEqualTo(
+                Stripe3ds2AuthResult(
+                    id = "threeds2_1Ecwz3CRMbs6FrXfThtfogua",
+                    liveMode = false,
+                    created = 1558541285L,
+                    source = "src_1Ecwz1CRMbs6FrXfUwt98lxf",
+                    state = "challenge_required",
+                    ares = Stripe3ds2AuthResult.Ares(
+                        acsChallengeMandated = "Y",
+                        acsTransId = "dd23c757-211a-4c1b-add5-06a1450a642e",
+                        acsSignedContent = "eyJhbGciOiJFUzI1NiJ9.asdfasf.asdfasdfa",
+                        authenticationType = "02",
+                        messageType = "ARes",
+                        messageVersion = "2.1.0",
+                        messageExtension = listOf(
+                            Stripe3ds2AuthResult.MessageExtension(
+                                name = "extension1",
+                                id = "ID1",
+                                criticalityIndicator = true,
+                                data = mapOf("key1" to "value1")
+                            ),
+                            Stripe3ds2AuthResult.MessageExtension(
+                                name = "extension2",
+                                id = "ID2",
+                                criticalityIndicator = true,
+                                data = mapOf(
+                                    "key1" to "value1",
+                                    "key2" to "value2"
+                                )
+                            ),
+                            Stripe3ds2AuthResult.MessageExtension(
+                                name = "sharedData",
+                                id = "ID3",
+                                criticalityIndicator = false,
+                                data = mapOf("key" to "IkpTT05EYXRhIjogew0KImRhdGExIjogInNkYXRhIg0KfQ==")
+                            )
+                        ),
+                        sdkTransId = "20158862-9d9d-4d71-83d4-9e65554ed92c",
+                        threeDSServerTransId = "e8ea0b42-0e74-42b2-92b4-1b27005f0596"
+                    )
                 )
-            ),
-            Stripe3ds2AuthResult.MessageExtension(
-                name = "sharedData",
-                id = "ID3",
-                criticalityIndicator = false,
-                data = mapOf("key" to "IkpTT05EYXRhIjogew0KImRhdGExIjogInNkYXRhIg0KfQ==")
             )
-        )
-
-        val expectedResult = Stripe3ds2AuthResult(
-            id = "threeds2_1Ecwz3CRMbs6FrXfThtfogua",
-            objectType = "three_d_secure_2",
-            liveMode = false,
-            created = 1558541285L,
-            source = "src_1Ecwz1CRMbs6FrXfUwt98lxf",
-            state = "challenge_required",
-            ares = Stripe3ds2AuthResult.Ares(
-                acsChallengeMandated = "Y",
-                acsTransId = "dd23c757-211a-4c1b-add5-06a1450a642e",
-                acsSignedContent = "eyJhbGciOiJFUzI1NiJ9.asdfasf.asdfasdfa",
-                authenticationType = "02",
-                messageType = "ARes",
-                messageVersion = "2.1.0",
-                messageExtension = extensions,
-                sdkTransId = "20158862-9d9d-4d71-83d4-9e65554ed92c",
-                threeDSServerTransId = "e8ea0b42-0e74-42b2-92b4-1b27005f0596"
-            )
-        )
-
-        assertEquals(expectedResult, jsonResult)
     }
 
     @Test
     fun parse_errorData_createsObjectWithError() {
-        val jsonResult = parse(AUTH_RESULT_ERROR_JSON)
-
-        val expectedResult = Stripe3ds2AuthResult(
-            id = "threeds2_1Ecwz3CRMbs6FrXfThtfogua",
-            objectType = "three_d_secure_2",
-            liveMode = false,
-            created = 1558541285L,
-            source = "src_1Ecwz1CRMbs6FrXfUwt98lxf",
-            state = "challenge_required",
-            ares = Stripe3ds2AuthResult.Ares(
-                acsChallengeMandated = "Y",
-                acsTransId = "dd23c757-211a-4c1b-add5-06a1450a642e",
-                acsSignedContent = "eyJhbGciOiJFUzI1NiJ9.asdfasf.asdfasdfa",
-                authenticationType = "02",
-                messageType = "ARes",
-                messageVersion = "2.1.0",
-                sdkTransId = "20158862-9d9d-4d71-83d4-9e65554ed92c",
-                threeDSServerTransId = "e8ea0b42-0e74-42b2-92b4-1b27005f0596"
-            ),
-            error = Stripe3ds2AuthResult.ThreeDS2Error(
-                threeDSServerTransId = "e8ea0b42-0e74-42b2-92b4-1b27005f0596",
-                acsTransId = "dd23c757-211a-4c1b-add5-06a1450a642e",
-                dsTransId = "ff23c757-211a-4c1b-add5-06a1450a642e",
-                errorCode = "error code 1234",
-                errorComponent = "error component",
-                errorDetail = "error detail",
-                errorDescription = "error description",
-                errorMessageType = "error message type",
-                messageType = "Error",
-                messageVersion = "2.1.0",
-                sdkTransId = "20158862-9d9d-4d71-83d4-9e65554ed92c"
+        assertThat(parse(AUTH_RESULT_ERROR_JSON))
+            .isEqualTo(
+                Stripe3ds2AuthResult(
+                    id = "threeds2_1Ecwz3CRMbs6FrXfThtfogua",
+                    liveMode = false,
+                    created = 1558541285L,
+                    source = "src_1Ecwz1CRMbs6FrXfUwt98lxf",
+                    state = "challenge_required",
+                    ares = Stripe3ds2AuthResult.Ares(
+                        acsChallengeMandated = "Y",
+                        acsTransId = "dd23c757-211a-4c1b-add5-06a1450a642e",
+                        acsSignedContent = "eyJhbGciOiJFUzI1NiJ9.asdfasf.asdfasdfa",
+                        authenticationType = "02",
+                        messageType = "ARes",
+                        messageVersion = "2.1.0",
+                        sdkTransId = "20158862-9d9d-4d71-83d4-9e65554ed92c",
+                        threeDSServerTransId = "e8ea0b42-0e74-42b2-92b4-1b27005f0596"
+                    ),
+                    error = Stripe3ds2AuthResult.ThreeDS2Error(
+                        threeDSServerTransId = "e8ea0b42-0e74-42b2-92b4-1b27005f0596",
+                        acsTransId = "dd23c757-211a-4c1b-add5-06a1450a642e",
+                        dsTransId = "ff23c757-211a-4c1b-add5-06a1450a642e",
+                        errorCode = "error code 1234",
+                        errorComponent = "error component",
+                        errorDetail = "error detail",
+                        errorDescription = "error description",
+                        errorMessageType = "error message type",
+                        messageType = "Error",
+                        messageVersion = "2.1.0",
+                        sdkTransId = "20158862-9d9d-4d71-83d4-9e65554ed92c"
+                    )
+                )
             )
-        )
-
-        assertEquals(expectedResult, jsonResult)
     }
 
     @Test
     fun parse_invalidElementFormatJson_shouldPopulateErrorField() {
         val result = parse(AUTH_RESULT_ERROR_INVALID_ELEMENT_FORMAT_JSON)
-        assertNull(result.ares)
-        assertNull(result.fallbackRedirectUrl)
+        assertThat(result.ares)
+            .isNull()
+        assertThat(result.fallbackRedirectUrl)
+            .isNull()
+
         val error = result.error
-        assertEquals("sdkMaxTimeout", error?.errorDetail)
-        assertEquals(
-            "Format or value of one or more Data Elements is Invalid according to the Specification",
-            error?.errorDescription
-        )
+        assertThat(error?.errorDetail)
+            .isEqualTo("sdkMaxTimeout")
+        assertThat(error?.errorDescription)
+            .isEqualTo(
+                "Format or value of one or more Data Elements is Invalid according to the Specification"
+            )
     }
 
     @Test
     fun parse_fallbackRedirectUrl_shouldReturnValidRedirectData() {
         val result = parse(AUTH_RESULT_FALLBACK_REDIRECT_URL_JSON)
-        assertNull(result.ares)
-        assertNull(result.error)
+        assertThat(result.ares)
+            .isNull()
+        assertThat(result.error)
+            .isNull()
 
-        assertEquals(
-            "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW",
-            result.fallbackRedirectUrl
+        assertThat(result.fallbackRedirectUrl)
+            .isEqualTo(
+                "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW"
+            )
+    }
+
+    @Test
+    fun `parse with creq field should return expected value`() {
+        assertThat(
+            parse(Stripe3ds2AuthResultFixtures.CHALLENGE_COMPLETION_JSON).creq
+        ).isEqualTo(
+            "eyJ0aHJlZURTU2VydmVyVHJhbnNJRCI6IjA4NDAwMTRiLWY1YTgtNDA5My04MzdkLTgxOTA3YmJmMmU2MiIsImFjc1RyYW5zSUQiOiIwZjdkMTU0MC1mYTM2LTQ2OWYtYmQ5ZC03ZjIxYzkzMmU2MjEiLCJjaGFsbGVuZ2VXaW5kb3dTaXplIjoiMDUiLCJtZXNzYWdlVHlwZSI6IkNSZXEiLCJtZXNzYWdlVmVyc2lvbiI6IjIuMS4wIn0="
         )
     }
 

@@ -1,6 +1,177 @@
 # CHANGELOG
 
-## 14.3.0 - unreleased
+## 16.1.1 - 2020-11-25
+* [#3028](https://github.com/stripe/stripe-android/pull/3028) Upgrade Android Gradle Plugin to `4.1.1`
+* [#3035](https://github.com/stripe/stripe-android/pull/3035) Update handling of deeplinks in `PaymentAuthWebViewClient`
+* [#3046](https://github.com/stripe/stripe-android/pull/3046) Upgrade Gradle to `6.7.1`
+* [#3056](https://github.com/stripe/stripe-android/pull/3056) Upgrade Kotlin to `1.4.20`
+* [#3058](https://github.com/stripe/stripe-android/pull/3058) Migrate to Kotlin Parcelize plugin
+* [#3072](https://github.com/stripe/stripe-android/pull/3072) Fix crash in card widgets
+* [#3083](https://github.com/stripe/stripe-android/pull/3083) Upgrade `stripe-3ds2-android` to `4.1.2`
+    * Fix crash
+
+## 16.1.0 - 2020-11-06
+* [#2930](https://github.com/stripe/stripe-android/pull/2930) Upgrade Android Gradle Plugin to `4.1.0`
+* [#2936](https://github.com/stripe/stripe-android/pull/2936) Upgrade Gradle to `6.7`
+* [#2955](https://github.com/stripe/stripe-android/pull/2955) Add support for UPI payment method
+* [#2965](https://github.com/stripe/stripe-android/pull/2965) Add support for Netbanking payment method
+* [#2976](https://github.com/stripe/stripe-android/pull/2976) Update `ExpiryDateEditText` input allowlist
+* [#2977](https://github.com/stripe/stripe-android/pull/2977) Fix crash in `CardNumberTextInputLayout`
+* [#2981](https://github.com/stripe/stripe-android/pull/2981) Fix `PaymentMethodCreateParams` annotations on create methods
+* [#2988](https://github.com/stripe/stripe-android/pull/2988) Update `PaymentSession.handlePaymentData()` to take a nullable `Intent`
+* [#2989](https://github.com/stripe/stripe-android/pull/2989) Handle null `client_secret` in result `Intent`
+* [#2995](https://github.com/stripe/stripe-android/pull/2995) Upgrade constraintlayout to `2.0.4`
+* [#3006](https://github.com/stripe/stripe-android/pull/3006) Upgrade coroutines to `1.4.1`
+* [#3010](https://github.com/stripe/stripe-android/pull/3010) Upgrade `stripe-3ds2-android` to `4.1.1`
+    * Upgrade `bcprov-jdk15to18` to `1.6.7`
+    * Upgrade `nimbus-jose-jwt` to `9.1.2`
+
+## 16.0.1 - 2020-10-06 
+* [#2894](https://github.com/stripe/stripe-android/pull/2894) Make `CardParams` constructor public
+* [#2895](https://github.com/stripe/stripe-android/pull/2895) Add support for configuring a footer layout in payment methods screen
+* [#2897](https://github.com/stripe/stripe-android/pull/2897) Only allow digits in `CvcEditText`
+* [#2900](https://github.com/stripe/stripe-android/pull/2900) Only allow digits in BECS BSB and account number fields
+* [#2913](https://github.com/stripe/stripe-android/pull/2913) Add support for Oxxo PaymentMethod
+
+## 16.0.0 - 2020-09-23
+This release includes several breaking changes. See the [migration guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) for more details.
+
+This release adds support for 19-digit cards in `CardInputWidget` and `CardMultilineWidget`.
+
+* [#2715](https://github.com/stripe/stripe-android/pull/2715) Add support for GrabPay PaymentMethod
+* [#2721](https://github.com/stripe/stripe-android/pull/2721) Upgrade Kotlin coroutines to `1.3.9`
+* [#2735](https://github.com/stripe/stripe-android/pull/2735) Upgrade Android Gradle Plugin to `4.0.1`
+* [#2766](https://github.com/stripe/stripe-android/pull/2766) Upgrade Gradle to `6.6.1`
+* [#2821](https://github.com/stripe/stripe-android/pull/2821) Support pasting a 19 digit PAN in `CardNumberEditText`
+* [#2836](https://github.com/stripe/stripe-android/pull/2836) Handle `CustomerSession` failure in `PaymentMethodsActivity`
+* [#2837](https://github.com/stripe/stripe-android/pull/2837) Upgrade Kotlin to `1.4.10`
+* [#2841](https://github.com/stripe/stripe-android/pull/2841) Add new string translations
+    * Adds support for several new languages
+* [#2847](https://github.com/stripe/stripe-android/pull/2847) Update `CardInputWidget` text size for `ldpi` screens
+* [#2854](https://github.com/stripe/stripe-android/pull/2854) Upgrade `com.google.android.material:material` to `1.2.1`
+* [#2867](https://github.com/stripe/stripe-android/pull/2867) Upgrade 3DS2 SDK to `4.1.0`
+    * Upgrade `material-components` to `1.2.1`
+    * Upgrade `com.nimbusds:nimbus-jose-jwt` to `9.0.1`
+    * Guard against crash when `TransactionTimer` is unavailable
+* [#2873](https://github.com/stripe/stripe-android/pull/2873) Fix `CardInputWidget` field rendering in RTL
+* [#2878](https://github.com/stripe/stripe-android/pull/2878) Remove `Stripe.createToken()`
+* [#2880](https://github.com/stripe/stripe-android/pull/2880) Fix date formatting in `KlarnaSourceParams`
+* [#2887](https://github.com/stripe/stripe-android/pull/2887) Re-render shipping methods screen when shipping methods change
+
+## 15.1.0 - 2020-08-13
+* [#2671](https://github.com/stripe/stripe-android/pull/2671) Add `cardParams` property to `CardInputWidget` and `CardMultilineWidget`
+* [#2675](https://github.com/stripe/stripe-android/pull/2675) Add `CardParams` methods to `Stripe`
+* [#2677](https://github.com/stripe/stripe-android/pull/2677) Deprecate `Card.create()`
+* [#2679](https://github.com/stripe/stripe-android/pull/2679) Add missing `TokenizationMethod` values
+    * `TokenizationMethod.Masterpass` and `TokenizationMethod.VisaCheckout`
+* [#2692](https://github.com/stripe/stripe-android/pull/2692) Add support for Alipay PaymentMethod
+    * See `Stripe#confirmAlipayPayment()`
+* [#2693](https://github.com/stripe/stripe-android/pull/2693) Upgrade `androidx.appcompat:appcompat` to `1.2.0`
+* [#2696](https://github.com/stripe/stripe-android/pull/2696) Upgrade to Gradle `6.6`
+* [#2704](https://github.com/stripe/stripe-android/pull/2704) Deprecate metadata field on retrieved API objects
+    * See `MIGRATING.md` for more details
+* [#2708](https://github.com/stripe/stripe-android/pull/2708) Bump 3DS2 SDK to `4.0.5`
+    * Fix crash related to SDK app id
+    * Upgrade `com.nimbusds:nimbus-jose-jwt` to `8.20`
+
+## 15.0.2 - 2020-08-03
+* [#2666](https://github.com/stripe/stripe-android/pull/2666) Bump 3DS2 SDK to `4.0.4`
+* [#2671](https://github.com/stripe/stripe-android/pull/2671) Add `cardParams` property to `CardInputWidget` and `CardMultilineWidget`
+* [#2674](https://github.com/stripe/stripe-android/pull/2674) Add `SourceParams` creation method for `CardParams`
+* [#2675](https://github.com/stripe/stripe-android/pull/2675) Add `CardParams` methods to `Stripe` class
+* [#2679](https://github.com/stripe/stripe-android/pull/2679) Add missing `TokenizationMethod` values
+    * Add `Masterpass` and `VisaCheckout`
+* [#2681](https://github.com/stripe/stripe-android/pull/2681) Mark code using `Card` for card object creation as `@Deprecated`
+
+## 15.0.1 - 2020-07-28
+* [#2641](https://github.com/stripe/stripe-android/pull/2641) Add support for Bank Account as source on `Customer` object
+* [#2643](https://github.com/stripe/stripe-android/pull/2643) Add missing fields to `Customer` model
+* [#2646](https://github.com/stripe/stripe-android/pull/2646) Allow `CardMultilineWidget`'s `TextInputLayout`s to be styled
+* [#2649](https://github.com/stripe/stripe-android/pull/2649) Add `@JvmOverloads` to `GooglePayJsonFactory` methods
+* [#2651](https://github.com/stripe/stripe-android/pull/2651) Update Kotlin coroutines to `1.3.8`
+* [#2657](https://github.com/stripe/stripe-android/pull/2657) Fix HTML select option rendering in `WebView`
+
+## 15.0.0 - 2020-07-09 
+This release includes several breaking changes.
+See the [migration guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) for more details.
+
+* [#2542](https://github.com/stripe/stripe-android/pull/2542) Use `CustomerSession.stripeAccountId` in `AddPaymentMethodActivity`
+* [#2543](https://github.com/stripe/stripe-android/pull/2543) Target JVM 1.8
+* [#2544](https://github.com/stripe/stripe-android/pull/2544) Remove deprecated code related to `BankAccount` and `ActivityStarter`
+* [#2545](https://github.com/stripe/stripe-android/pull/2545) Remove deprecated `AccountParams.create()` method
+* [#2546](https://github.com/stripe/stripe-android/pull/2546) Remove deprecated `next_action` data objects from `PaymentIntent` and `SetupIntent`
+* [#2547](https://github.com/stripe/stripe-android/pull/2547) Convert `BankAccount.BankAccountType` to `BankAccount.Type` enum
+* [#2554](https://github.com/stripe/stripe-android/pull/2554) Update `PaymentAuthWebViewActivity`'s back button behavior
+* [#2551](https://github.com/stripe/stripe-android/pull/2551) Fix `StrictMode` `DiskReadViolation` violations
+* [#2555](https://github.com/stripe/stripe-android/pull/2555) Improve `PaymentAuthWebViewActivity`
+* [#2559](https://github.com/stripe/stripe-android/pull/2559) Represent `PaymentIntent`'s `confirmationMethod` and `captureMethod` as enums
+* [#2561](https://github.com/stripe/stripe-android/pull/2561) Make `CardInputListener.FocusField` an enum
+* [#2562](https://github.com/stripe/stripe-android/pull/2562) Make `SourceTypeModel.Card.ThreeDSecureStatus` an enum
+* [#2563](https://github.com/stripe/stripe-android/pull/2563) Make `PaymentMethod.Card#brand` a `CardBrand`
+* [#2566](https://github.com/stripe/stripe-android/pull/2566) Make `Token.Type` an enum
+* [#2569](https://github.com/stripe/stripe-android/pull/2569) Refactor `Source` class and related classes
+* [#2572](https://github.com/stripe/stripe-android/pull/2572) Fix `StrictMode` `DiskReadViolation` violations when starting 3DS2
+* [#2577](https://github.com/stripe/stripe-android/pull/2577) Make `CustomerSource#tokenizationMethod` a `TokenizationMethod?`
+* [#2579](https://github.com/stripe/stripe-android/pull/2579) Make `PaymentMethod.Card.Networks` fields public
+* [#2587](https://github.com/stripe/stripe-android/pull/2587) Fix BouncyCastle Proguard rule
+* [#2594](https://github.com/stripe/stripe-android/pull/2594) Fix vector icon references in layout files
+    * Reduce SDK size by ~30kb
+    * Fix Google Pay icon in `PaymentMethodsActivity`
+* [#2595](https://github.com/stripe/stripe-android/pull/2595) Bump SDK `minSdkVersion` to `21`
+* [#2599](https://github.com/stripe/stripe-android/pull/2599) Remove `StripeSSLSocketFactory`
+* [#2604](https://github.com/stripe/stripe-android/pull/2604) Add `stripeAccountId` to `PaymentConfiguration` and use in `AddPaymentMethodActivity`
+* [#2609](https://github.com/stripe/stripe-android/pull/2609) Refactor `AddPaymentMethodActivity.Result`
+* [#2610](https://github.com/stripe/stripe-android/pull/2610) Remove `PaymentSession` and `CustomerSession`'s "Activity" Listeners
+* [#2611](https://github.com/stripe/stripe-android/pull/2611) Target API 30
+* [#2617](https://github.com/stripe/stripe-android/pull/2617) Convert `CustomizableShippingField` to enum
+* [#2623](https://github.com/stripe/stripe-android/pull/2623) Update Gradle to `6.5.1`
+* [#2557](https://github.com/stripe/stripe-android/pull/2634) Update 3DS2 SDK to `4.0.3`
+
+## 14.5.0 - 2020-06-04
+* [#2453](https://github.com/stripe/stripe-android/pull/2453) Add `ConfirmPaymentIntentParams#receiptEmail`
+* [#2458](https://github.com/stripe/stripe-android/pull/2458) Remove INTERAC from `GooglePayJsonFactory.DEFAULT_CARD_NETWORKS`
+* [#2462](https://github.com/stripe/stripe-android/pull/2462) Capitalize currency code in `GooglePayJsonFactory`
+* [#2466](https://github.com/stripe/stripe-android/pull/2466) Deprecate `ActivityStarter.startForResult()` with no args
+* [#2467](https://github.com/stripe/stripe-android/pull/2467) Update `CardBrand.MasterCard` regex
+* [#2475](https://github.com/stripe/stripe-android/pull/2475) Support `android:focusedByDefault` in `CardInputWidget`
+    * Fixes #2463 on Android API level 26 and above
+* [#2483](https://github.com/stripe/stripe-android/pull/2483) Fix formatting of `maxTimeout` value in `Stripe3ds2AuthParams`
+* [#2494](https://github.com/stripe/stripe-android/pull/2494) Support starting 3DS2 challenge flow from a Fragment
+* [#2496](https://github.com/stripe/stripe-android/pull/2496) Deprecate `StripeIntent.stripeSdkData`
+* [#2497](https://github.com/stripe/stripe-android/pull/2497) Deprecate `StripeIntent.redirectData`
+* [#2513](https://github.com/stripe/stripe-android/pull/2513) Add `canDeletePaymentMethods` to `PaymentSessionConfig`
+    * `canDeletePaymentMethods` controls whether the user can delete a payment method
+      by swiping on it in `PaymentMethodsActivity`
+* [#2525](https://github.com/stripe/stripe-android/pull/2525) Upgrade Android Gradle Plugin to 4.0.0
+* [#2531](https://github.com/stripe/stripe-android/pull/2531) Update 3DS2 SDK to 3.0.2
+    * Fix bug in 3DS2 SDK where multi-screen challenges were not correctly returning result to starting Activity/Fragment
+* [#2536](https://github.com/stripe/stripe-android/pull/2536) Update Gradle to 6.5
+
+## 14.4.1 - 2020-04-30
+* [#2441](https://github.com/stripe/stripe-android/pull/2441) Catch `IllegalArgumentException` in `ApiOperation`
+* [#2442](https://github.com/stripe/stripe-android/pull/2442) Capitalize `GooglePayJsonFactory`'s `allowedCountryCodes`
+* [#2445](https://github.com/stripe/stripe-android/pull/2445) Bump 3DS2 SDK to `2.7.8`
+    * Downgrade BouncyCastle to `1.64`
+
+## 14.4.0 - 2020-04-28
+* [#2379](https://github.com/stripe/stripe-android/pull/2379) Add optional `stripeAccountId` param to most `Stripe` methods
+    * This enables passing a `Stripe-Account` header on a per-request basis
+* [#2398](https://github.com/stripe/stripe-android/pull/2398) Add optional `stripeAccountId` param to `Stripe#confirmPayment()`
+* [#2405](https://github.com/stripe/stripe-android/pull/2405) Add optional `stripeAccountId` param to `Stripe#confirmSetupIntent()`
+* [#2406](https://github.com/stripe/stripe-android/pull/2406) Add optional `stripeAccountId` param to `Stripe#authenticateSource()`
+* [#2408](https://github.com/stripe/stripe-android/pull/2408) Update `PaymentMethod.Type#isReusable` values
+* [#2412](https://github.com/stripe/stripe-android/pull/2412) Make `StripeIntentResult` implement `Parcelable`
+* [#2413](https://github.com/stripe/stripe-android/pull/2413) Create `Stripe#retrievePaymentIntent()` and `Stripe#retrieveSetupIntent()` async methods
+* [#2421](https://github.com/stripe/stripe-android/pull/2421) Capitalize `countryCode` in `GooglePayJsonFactory`
+* [#2429](https://github.com/stripe/stripe-android/pull/2429) Fix SDK source paths and source publishing
+* [#2430](https://github.com/stripe/stripe-android/pull/2430) Add `GooglePayJsonFactory.isJcbEnabled`
+    * Enables JCB as an allowed card network. By default, JCB is disabled.
+* [#2435](https://github.com/stripe/stripe-android/pull/2435) Bump 3DS2 SDK to `2.7.7`
+    * On 3DS2 challenge screen, handle system back button tap as cancel button tap
+* [#2436](https://github.com/stripe/stripe-android/pull/2436) Add `advancedFraudSignalsEnabled` property
+    * See [Advanced fraud detection](https://stripe.com/docs/disputes/prevention/advanced-fraud-detection) for more details
+
+## 14.3.0 - 2020-04-20
 * [#2334](https://github.com/stripe/stripe-android/pull/2334) Add support for BACS Debit in `PaymentMethodCreateParams`
 * [#2335](https://github.com/stripe/stripe-android/pull/2335) Add support for BACS Debit Payment Method
 * [#2336](https://github.com/stripe/stripe-android/pull/2336) Improve `ShippingInfoWidget`
@@ -11,6 +182,18 @@
 * [#2343](https://github.com/stripe/stripe-android/pull/2343) Update `CardBrand.JCB` regex
 * [#2362](https://github.com/stripe/stripe-android/pull/2362) Add support for parsing `shippingInformation` in `GooglePayResult`
 * [#2365](https://github.com/stripe/stripe-android/pull/2365) Convert png assets to webp to reduce asset size
+* [#2373](https://github.com/stripe/stripe-android/pull/2373) Set default `billingAddressFields` to `BillingAddressFields.PostalCode`
+* [#2381](https://github.com/stripe/stripe-android/pull/2381) Add support for SOFORT PaymentMethod
+* [#2384](https://github.com/stripe/stripe-android/pull/2384) Add support for P24 PaymentMethod
+* [#2389](https://github.com/stripe/stripe-android/pull/2389) Add support for Bancontact PaymentMethod
+* [#2390](https://github.com/stripe/stripe-android/pull/2390) Bump Kotlin version to `1.3.72`
+* [#2392](https://github.com/stripe/stripe-android/pull/2392) Add `shipping` property to `PaymentIntent`
+* [#2394](https://github.com/stripe/stripe-android/pull/2394) Add support for Giropay PaymentMethod
+* [#2395](https://github.com/stripe/stripe-android/pull/2395) Add support for EPS PaymentMethod
+* [#2396](https://github.com/stripe/stripe-android/pull/2396) Expose `klarna` property on `Source`
+* [#2401](https://github.com/stripe/stripe-android/pull/2401) Bump 3DS2 SDK to `2.7.4`
+    * Add new translations for 3DS2 SDK strings
+    * Upgrade BouncyCastle to `1.65`
 
 ## 14.2.1 - 2020-03-26
 * [#2299](https://github.com/stripe/stripe-android/pull/2299) Make `SourceParams.OwnerParams` constructor public and properties mutable
@@ -92,6 +275,13 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
     * Move `SourceSepaDebitData` subclass to `SourceTypeModel.SepaDebit`
     * Change type of `Source#sourceTypeModel` to `SourceTypeModel?`
 
+## 13.3.0 - 2020-05-15
+* Update 3DS2 SDK to v2.3.7
+* Update dependencies
+* Add `advancedFraudSignalsEnabled` property
+  * See [Advanced fraud detection](https://stripe.com/docs/disputes/prevention/advanced-fraud-detection) for more details
+* Include sources
+
 ## 13.2.0 - 2020-02-03
 * [#2112](https://github.com/stripe/stripe-android/pull/2112) Enable adding Mandate to confirm params
 * [#2113](https://github.com/stripe/stripe-android/pull/2113) Enable requiring postal code in `CardInputWidget` and `CardMultilineWidget`
@@ -125,7 +315,7 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
     * Fix "Postal Code" field being partially cut off on some screens
 * [#2066](https://github.com/stripe/stripe-android/pull/2066) Add support for uploading a file to Stripe
     * See `Stripe#createFile()` and `Stripe#createFileSynchronous()`
- * [#2071](https://github.com/stripe/stripe-android/pull/2071) Fix accessibility issues on Payment Methods selection screen
+* [#2071](https://github.com/stripe/stripe-android/pull/2071) Fix accessibility issues on Payment Methods selection screen
     * Mark `View`s representing existing payment methods and add a new payment method action as focusable and clickable
 
 
@@ -245,6 +435,13 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
       [account token](https://stripe.com/docs/api/tokens/create_account).
       Use these instead of creating raw maps representing the data.
     * `AccountParams.createAccountParams()` is now deprecated. Use the appropriate `AccountParams.create()` method.
+
+## 12.9.0 - 2020-05-15
+* Update 3DS2 SDK to v2.3.7
+* Update dependencies
+* Add `advancedFraudSignalsEnabled` property
+  * See [Advanced fraud detection](https://stripe.com/docs/disputes/prevention/advanced-fraud-detection) for more details
+* Include sources
 
 ## 12.8.2 - 2019-12-20
 * [#1974](https://github.com/stripe/stripe-android/pull/1974) Add `PaymentSessionConfig#shouldPrefetchCustomer`
@@ -405,6 +602,13 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 * [#1701](https://github.com/stripe/stripe-android/pull/1701) Payment Intent API requests (i.e. requests to `/v1/payment_intents`) now return localized error messages
 * [#1706](https://github.com/stripe/stripe-android/pull/1706) Add `Card#toPaymentMethodsParams()` to create a `PaymentMethodCreateParams` instance that includes both card and billing details
 
+## 11.3.0 - 2020-05-15
+* Update 3DS2 SDK to v2.3.7
+* Update dependencies
+* Add `advancedFraudSignalsEnabled` property
+  * See [Advanced fraud detection](https://stripe.com/docs/disputes/prevention/advanced-fraud-detection) for more details
+* Include sources
+
 ## 11.2.2 - 2019-10-11
 * [#1686](https://github.com/stripe/stripe-android/pull/1686) Fix native crash on some devices in 3DS1 payment authentication WebView
 * [#1690](https://github.com/stripe/stripe-android/pull/1690) Bump API version to `2019-10-08`
@@ -519,6 +723,13 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 * [#1506](https://github.com/stripe/stripe-android/pull/1506) Remove `Stripe#createToken()` with `Executor` argument
 * [#1514](https://github.com/stripe/stripe-android/pull/1514) Bump API version to `2019-09-09`
 
+## 10.5.0 - 2020-05-15
+* Update 3DS2 SDK to v1.3.1
+* Update dependencies
+* Add `advancedFraudSignalsEnabled` property
+  * See [Advanced fraud detection](https://stripe.com/docs/disputes/prevention/advanced-fraud-detection) for more details
+* Include sources
+
 ## 10.4.6 - 2019-10-14
 * Apply hot-fixes from 11.x
     * Update BouncyCastle Proguard rules.
@@ -623,24 +834,24 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
     * Improve accessibility of select options on 3DS2 challenge screen by setting minimum height to 48dp
 
 ## 10.2.1 - 2019-08-06
-* [#1314](https://github.com/stripe/stripe-android/pull/1314) Expose pinned API version via [Stripe.API_VERSION](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#API_VERSION)
-* [#1315](https://github.com/stripe/stripe-android/pull/1315) Create [SourceParams#createCardParamsFromGooglePay()](https://stripe.dev/stripe-android/com/stripe/android/model/SourceParams.html#createCardParamsFromGooglePay-org.json.JSONObject-)
-* [#1316](https://github.com/stripe/stripe-android/pull/1316) Fix issue where `InvalidRequestException` is thrown when confirming a Setup Intent using [ConfirmSetupIntentParams#create(PaymentMethodCreateParams, String)](https://stripe.dev/stripe-android/com/stripe/android/model/ConfirmSetupIntentParams.html#create-com.stripe.android.model.PaymentMethodCreateParams-java.lang.String-)
+* [#1314](https://github.com/stripe/stripe-android/pull/1314) Expose pinned API version via [Stripe.API_VERSION](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/-companion/index.html#com.stripe.android/Stripe.Companion/API_VERSION/#/PointingToDeclaration/)
+* [#1315](https://github.com/stripe/stripe-android/pull/1315) Create [SourceParams#createCardParamsFromGooglePay()](https://stripe.dev/stripe-android/stripe/com.stripe.android.model/-source-params/-companion/create-card-params-from-google-pay.html)
+* [#1316](https://github.com/stripe/stripe-android/pull/1316) Fix issue where `InvalidRequestException` is thrown when confirming a Setup Intent using [ConfirmSetupIntentParams#create()](https://stripe.dev/stripe-android/stripe/com.stripe.android.model/-confirm-setup-intent-params/-companion/create.html)
 
 ## 10.2.0 - 2019-08-05
 * [#1275](https://github.com/stripe/stripe-android/pull/1275) Add support for launching `PaymentSession` from a `Fragment`
-    * [PaymentSession(Fragment)](https://stripe.dev/stripe-android/com/stripe/android/PaymentSession.html#PaymentSession-android.support.v4.app.Fragment-)
+    * [PaymentSession(Fragment)](https://stripe.dev/stripe-android/stripe/com.stripe.android/-payment-session/index.html#com.stripe.android/PaymentSession/<init>/#androidx.fragment.app.Fragment#com.stripe.android.PaymentSessionConfig/PointingToDeclaration/)
 * [#1288](https://github.com/stripe/stripe-android/pull/1288) Upgrade Android Gradle Plugin to `3.5.0-rc02`
 * [#1289](https://github.com/stripe/stripe-android/pull/1289) Add support for launching payment confirmation/authentication flow from a `Fragment`
-    * [Stripe#confirmPayment(Fragment, ConfirmPaymentIntentParams)](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#confirmPayment-android.support.v4.app.Fragment-com.stripe.android.model.ConfirmPaymentIntentParams-)
-    * [Stripe#authenticatePayment(Fragment, String)](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#authenticatePayment-android.support.v4.app.Fragment-java.lang.String-)
-    * [Stripe#confirmSetupIntent(Fragment, ConfirmSetupIntentParams)](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#confirmSetupIntent-android.support.v4.app.Fragment-com.stripe.android.model.ConfirmSetupIntentParams-)
-    * [Stripe#authenticateSetup(Fragment, String)](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#authenticateSetup-android.support.v4.app.Fragment-java.lang.String-)
+    * [Stripe#confirmPayment(Fragment, ConfirmPaymentIntentParams)](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/confirm-payment.html)
+    * [Stripe#authenticatePayment(Fragment, String)](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/authenticate-payment.html)
+    * [Stripe#confirmSetupIntent(Fragment, ConfirmSetupIntentParams)](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/confirm-setup-intent.html)
+    * [Stripe#authenticateSetup(Fragment, String)](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/authenticate-setup.html)
 * [#1290](https://github.com/stripe/stripe-android/pull/1290) Convert [samplestore app](https://github.com/stripe/stripe-android/tree/master/samplestore) to Kotlin
 * [#1297](https://github.com/stripe/stripe-android/pull/1297) Convert [example app](https://github.com/stripe/stripe-android/tree/master/example) to Kotlin
-* [#1300](https://github.com/stripe/stripe-android/pull/1300) Rename [StripeIntentResult#getStatus()](https://stripe.dev/stripe-android/com/stripe/android/StripeIntentResult.html#getStatus--) to [StripeIntentResult#getOutcome()](https://stripe.dev/stripe-android/com/stripe/android/StripeIntentResult.html#getOutcome--)
-* [#1302](https://github.com/stripe/stripe-android/pull/1302) Add [GooglePayConfig#getTokenizationSpecification()](https://stripe.dev/stripe-android/com/stripe/android/GooglePayConfig.html#getTokenizationSpecification--) to configure Google Pay to use Stripe as the gateway
-* [#1304](https://github.com/stripe/stripe-android/pull/1304) Add [PaymentMethodCreateParams#createFromGooglePay()](https://stripe.dev/stripe-android/com/stripe/android/model/PaymentMethodCreateParams.html#createFromGooglePay-org.json.JSONObject-) to create `PaymentMethodCreateParams` from a Google Pay [PaymentData](https://developers.google.com/android/reference/com/google/android/gms/wallet/PaymentData) object
+* [#1300](https://github.com/stripe/stripe-android/pull/1300) Rename `StripeIntentResult#getStatus()` to [StripeIntentResult#getOutcome()](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe-intent-result/index.html#com.stripe.android/StripeIntentResult/outcome/#/PointingToDeclaration/)
+* [#1302](https://github.com/stripe/stripe-android/pull/1302) Add [GooglePayConfig#getTokenizationSpecification()](https://stripe.dev/stripe-android/stripe/com.stripe.android/-google-pay-config/index.html#com.stripe.android/GooglePayConfig/tokenizationSpecification/#/PointingToDeclaration/) to configure Google Pay to use Stripe as the gateway
+* [#1304](https://github.com/stripe/stripe-android/pull/1304) Add [PaymentMethodCreateParams#createFromGooglePay()](https://stripe.dev/stripe-android/stripe/com.stripe.android.model/-payment-method-create-params/-companion/create-from-google-pay.html) to create `PaymentMethodCreateParams` from a Google Pay [PaymentData](https://developers.google.com/android/reference/com/google/android/gms/wallet/PaymentData) object
 
 ## 10.1.1 - 2019-07-31
 * [#1275](https://github.com/stripe/stripe-android/pull/1275) Fix `StripeIntentResult.Status` logic
@@ -678,16 +889,23 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 ## 10.0.0 - 2019-07-19
 * Add support for 3DS2 authentication through the Payment Intents API and Setup Intents API. See [Supporting 3D Secure Authentication on Android](https://stripe.com/docs/mobile/android/authentication).
     * Payment Intents - see our guide for [Using Payment Intents on Android](https://stripe.com/docs/payments/payment-intents/android)
-        * [Stripe#confirmPayment()](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#confirmPayment-android.app.Activity-com.stripe.android.model.ConfirmPaymentIntentParams-) for automatic confirmation
-        * [Stripe#authenticatePayment()](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#authenticatePayment-android.app.Activity-java.lang.String-) for manual confirmation
+        * [Stripe#confirmPayment()](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/confirm-payment.html) for automatic confirmation
+        * [Stripe#authenticatePayment()](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/authenticate-payment.html) for manual confirmation
     * Setup Intents - see our guide for [Saving card details without a payment](https://stripe.com/docs/payments/cards/saving-cards#saving-card-without-payment)
-        * [Stripe#confirmSetupIntent()](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#confirmSetupIntent-android.app.Activity-com.stripe.android.model.ConfirmSetupIntentParams-) for automatic confirmation
-        * [Stripe#authenticateSetup()](https://stripe.dev/stripe-android/com/stripe/android/Stripe.html#authenticateSetup-android.app.Activity-java.lang.String-) for manual confirmation
-    * [PaymentAuthConfig](https://stripe.dev/stripe-android/com/stripe/android/PaymentAuthConfig.html) for optional authentication customization
+        * [Stripe#confirmSetupIntent()](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/confirm-setup-intent.html) for automatic confirmation
+        * [Stripe#authenticateSetup()](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/authenticate-setup.html) for manual confirmation
+    * [PaymentAuthConfig](https://stripe.dev/stripe-android/stripe/com.stripe.android/-payment-auth-config/index.html) for optional authentication customization
 * Add support for the Setup Intents API. See [Saving card details without a payment](https://stripe.com/docs/payments/cards/saving-cards#saving-card-without-payment).
-    * Use [ConfirmSetupIntentParams](https://stripe.dev/stripe-android/com/stripe/android/model/ConfirmSetupIntentParams.html) to confirm a SetupIntent
+    * Use [ConfirmSetupIntentParams](https://stripe.dev/stripe-android/stripe/com.stripe.android.model/-confirm-setup-intent-params/index.html) to confirm a SetupIntent
 * [#1172](https://github.com/stripe/stripe-android/pull/1172) Refactor `PaymentIntentParams`
 * [#1173](https://github.com/stripe/stripe-android/pull/1173) Inline all `StringDef` values
+
+## 9.4.0 - 2020-05-15
+* Update 3DS2 SDK to v1.3.1
+* Update dependencies
+* Add `advancedFraudSignalsEnabled` property
+  * See [Advanced fraud detection](https://stripe.com/docs/disputes/prevention/advanced-fraud-detection) for more details
+* Include sources
 
 ## 9.3.8 - 2019-07-16
 * [#1193](https://github.com/stripe/stripe-android/pull/1193) Fix `RuntimeException` related to 3DS2

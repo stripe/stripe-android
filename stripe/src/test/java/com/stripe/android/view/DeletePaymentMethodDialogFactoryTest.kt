@@ -10,15 +10,15 @@ import com.nhaarman.mockitokotlin2.verify
 import com.stripe.android.CustomerSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import kotlin.test.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class DeletePaymentMethodDialogFactoryTest {
 
     private val customerSession: CustomerSession = mock()
-    private val context: Context = ApplicationProvider.getApplicationContext<Context>()
+    private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Test
     fun onDeletedPaymentMethod_shouldCallDetachPaymentMethodAndCallback() {
@@ -27,7 +27,7 @@ class DeletePaymentMethodDialogFactoryTest {
             context,
             mock(),
             CardDisplayTextFactory(context),
-            customerSession,
+            Result.success(customerSession),
             setOf(PaymentMethodsActivity.PRODUCT_TOKEN)
         ) {
             callbackPaymentMethod = it

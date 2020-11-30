@@ -1,11 +1,13 @@
 package com.stripe.android
 
-import java.util.UUID
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.StripeJsonUtils
 import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.UUID
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
 class GooglePayJsonFactoryTest {
@@ -16,7 +18,8 @@ class GooglePayJsonFactoryTest {
     @Test
     fun testCreateIsReadyToPayRequestJson_withoutArgs() {
         val isReadyToPayRequestJson = factory.createIsReadyToPayRequest()
-        val expectedJson = JSONObject("""
+        val expectedJson = JSONObject(
+            """
             {
                 "apiVersion": 2,
                 "apiVersionMinor": 0,
@@ -24,7 +27,7 @@ class GooglePayJsonFactoryTest {
                     "type": "CARD",
                     "parameters": {
                         "allowedAuthMethods": ["PAN_ONLY", "CRYPTOGRAM_3DS"],
-                        "allowedCardNetworks": ["AMEX", "DISCOVER", "INTERAC", "JCB", "MASTERCARD", "VISA"]
+                        "allowedCardNetworks": ["AMEX", "DISCOVER", "MASTERCARD", "VISA"]
                     },
                     "tokenizationSpecification": {
                         "type": "PAYMENT_GATEWAY",
@@ -36,7 +39,8 @@ class GooglePayJsonFactoryTest {
                     }
                 }]
             }
-        """.trimIndent())
+            """.trimIndent()
+        )
         assertEquals(expectedJson.toString(), isReadyToPayRequestJson.toString())
     }
 
@@ -50,7 +54,8 @@ class GooglePayJsonFactoryTest {
             ),
             existingPaymentMethodRequired = true
         )
-        val expectedJson = JSONObject("""
+        val expectedJson = JSONObject(
+            """
             {
                 "apiVersion": 2,
                 "apiVersionMinor": 0,
@@ -58,7 +63,7 @@ class GooglePayJsonFactoryTest {
                     "type": "CARD",
                     "parameters": {
                         "allowedAuthMethods": ["PAN_ONLY", "CRYPTOGRAM_3DS"],
-                        "allowedCardNetworks": ["AMEX", "DISCOVER", "INTERAC", "JCB", "MASTERCARD", "VISA"],
+                        "allowedCardNetworks": ["AMEX", "DISCOVER", "MASTERCARD", "VISA"],
                         "billingAddressRequired": true,
                         "billingAddressParameters": {
                             "phoneNumberRequired": true,
@@ -76,14 +81,17 @@ class GooglePayJsonFactoryTest {
                 }],
                 "existingPaymentMethodRequired": true
             }
-        """.trimIndent())
-        assertEquals(expectedJson.toString(), isReadyToPayRequestJson.toString())
+            """.trimIndent()
+        )
+        assertThat(isReadyToPayRequestJson.toString())
+            .isEqualTo(expectedJson.toString())
     }
 
     @Test
     fun testCreatePaymentMethodRequestJson() {
         val transactionId = UUID.randomUUID().toString()
-        val expectedJson = JSONObject("""
+        val expectedJson = JSONObject(
+            """
             {
                 "apiVersion": 2,
                 "apiVersionMinor": 0,
@@ -91,7 +99,7 @@ class GooglePayJsonFactoryTest {
                     "type": "CARD",
                     "parameters": {
                         "allowedAuthMethods": ["PAN_ONLY", "CRYPTOGRAM_3DS"],
-                        "allowedCardNetworks": ["AMEX", "DISCOVER", "INTERAC", "JCB", "MASTERCARD", "VISA"],
+                        "allowedCardNetworks": ["AMEX", "DISCOVER", "MASTERCARD", "VISA"],
                         "billingAddressRequired": true,
                         "billingAddressParameters": {
                             "phoneNumberRequired": true,
@@ -126,7 +134,8 @@ class GooglePayJsonFactoryTest {
                     "merchantName": "Widget Store"
                 }
             }
-        """.trimIndent())
+            """.trimIndent()
+        )
 
         val createPaymentDataRequestJson = factory.createPaymentDataRequest(
             transactionInfo = GooglePayJsonFactory.TransactionInfo(
@@ -154,5 +163,95 @@ class GooglePayJsonFactoryTest {
         )
 
         assertEquals(expectedJson.toString(), createPaymentDataRequestJson.toString())
+    }
+
+    @Test
+    fun countryCode_shouldBeCapitalized() {
+        val createPaymentDataRequestJson = factory.createPaymentDataRequest(
+            transactionInfo = GooglePayJsonFactory.TransactionInfo(
+                currencyCode = "USD",
+                totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
+                countryCode = "us"
+            )
+        )
+        val countryCode = createPaymentDataRequestJson
+            .getJSONObject("transactionInfo")
+            .getString("countryCode")
+        assertThat(countryCode)
+            .isEqualTo("US")
+    }
+
+    @Test
+    fun currencyCode_shouldBeCapitalized() {
+        val createPaymentDataRequestJson = factory.createPaymentDataRequest(
+            transactionInfo = GooglePayJsonFactory.TransactionInfo(
+                currencyCode = "usd",
+                totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final
+            )
+        )
+        val currencyCode = createPaymentDataRequestJson
+            .getJSONObject("transactionInfo")
+            .getString("currencyCode")
+        assertThat(currencyCode)
+            .isEqualTo("USD")
+    }
+
+    @Test
+    fun shippingAddressAllowedCountryCodes_shouldBeCapitalized() {
+        val createPaymentDataRequestJson = factory.createPaymentDataRequest(
+            transactionInfo = GooglePayJsonFactory.TransactionInfo(
+                currencyCode = "USD",
+                totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
+                totalPrice = 500,
+                countryCode = "US",
+                totalPriceLabel = "Your total price"
+            ),
+            shippingAddressParameters = GooglePayJsonFactory.ShippingAddressParameters(
+                isRequired = true,
+                allowedCountryCodes = setOf("us", "de")
+            )
+        )
+
+        val allowedCountryCodes = createPaymentDataRequestJson
+            .getJSONObject("shippingAddressParameters")
+            .getJSONArray("allowedCountryCodes")
+            .let {
+                StripeJsonUtils.jsonArrayToList(it)
+            }
+
+        assertThat(allowedCountryCodes)
+            .containsExactly("US", "DE")
+    }
+
+    @Test
+    fun allowedCardNetworks_whenJcbDisabled_shouldNotIncludeJcb() {
+        val allowedCardNetworks = factory.createIsReadyToPayRequest()
+            .getJSONArray("allowedPaymentMethods")
+            .getJSONObject(0)
+            .getJSONObject("parameters")
+            .getJSONArray("allowedCardNetworks")
+            .let {
+                StripeJsonUtils.jsonArrayToList(it)
+            }
+
+        assertThat(allowedCardNetworks)
+            .isEqualTo(listOf("AMEX", "DISCOVER", "MASTERCARD", "VISA"))
+    }
+
+    @Test
+    fun allowedCardNetworks_whenJcbEnabled_shouldIncludeJcb() {
+        val allowedCardNetworks =
+            GooglePayJsonFactory(googlePayConfig, isJcbEnabled = true)
+                .createIsReadyToPayRequest()
+                .getJSONArray("allowedPaymentMethods")
+                .getJSONObject(0)
+                .getJSONObject("parameters")
+                .getJSONArray("allowedCardNetworks")
+                .let {
+                    StripeJsonUtils.jsonArrayToList(it)
+                }
+
+        assertThat(allowedCardNetworks)
+            .isEqualTo(listOf("AMEX", "DISCOVER", "MASTERCARD", "VISA", "JCB"))
     }
 }

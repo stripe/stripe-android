@@ -9,8 +9,8 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.AuthActivityStarter
 import com.stripe.android.view.PaymentRelayActivity
-import kotlinx.android.parcel.Parceler
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parceler
+import kotlinx.parcelize.Parcelize
 
 /**
  * Starts an instance of [PaymentRelayStarter].
@@ -28,10 +28,13 @@ internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter
                     val extras = PaymentController.Result(
                         clientSecret = args.stripeIntent?.clientSecret,
                         source = args.source,
-                        exception = args.exception
+                        exception = args.exception,
+                        stripeAccountId = args.stripeAccountId
                     ).toBundle()
                     host.startActivityForResult(
-                        PaymentRelayActivity::class.java, extras, requestCode
+                        PaymentRelayActivity::class.java,
+                        extras,
+                        requestCode
                     )
                 }
             }
@@ -42,17 +45,18 @@ internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter
     data class Args internal constructor(
         val stripeIntent: StripeIntent? = null,
         val source: Source? = null,
-        val exception: StripeException? = null
+        val exception: StripeException? = null,
+        val stripeAccountId: String? = null
     ) : Parcelable {
         internal companion object : Parceler<Args> {
             @JvmSynthetic
-            internal fun create(stripeIntent: StripeIntent): Args {
-                return Args(stripeIntent = stripeIntent)
+            internal fun create(stripeIntent: StripeIntent, stripeAccountId: String? = null): Args {
+                return Args(stripeIntent = stripeIntent, stripeAccountId = stripeAccountId)
             }
 
             @JvmSynthetic
-            internal fun create(source: Source): Args {
-                return Args(source = source)
+            internal fun create(source: Source, stripeAccountId: String? = null): Args {
+                return Args(source = source, stripeAccountId = stripeAccountId)
             }
 
             @JvmSynthetic
@@ -64,7 +68,8 @@ internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter
                 return Args(
                     stripeIntent = readStripeIntent(parcel),
                     source = parcel.readParcelable(Source::class.java.classLoader),
-                    exception = parcel.readSerializable() as? StripeException?
+                    exception = parcel.readSerializable() as? StripeException?,
+                    stripeAccountId = parcel.readString()
                 )
             }
 
@@ -72,6 +77,7 @@ internal interface PaymentRelayStarter : AuthActivityStarter<PaymentRelayStarter
                 writeStripeIntent(parcel, stripeIntent)
                 parcel.writeParcelable(source, 0)
                 parcel.writeSerializable(exception)
+                parcel.writeString(stripeAccountId)
             }
 
             private fun readStripeIntent(parcel: Parcel): StripeIntent? {

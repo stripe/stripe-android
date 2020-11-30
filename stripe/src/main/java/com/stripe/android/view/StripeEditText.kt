@@ -2,9 +2,6 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.content.res.ColorStateList
-import android.os.Build
-import android.os.Handler
-import android.text.Editable
 import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityNodeInfo
@@ -14,8 +11,16 @@ import android.view.inputmethod.InputConnectionWrapper
 import androidx.annotation.ColorInt
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
+import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.textfield.TextInputEditText
 import com.stripe.android.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Extension of [TextInputEditText] that listens for users pressing the delete key when
@@ -27,8 +32,10 @@ import com.stripe.android.R
 open class StripeEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle
+    defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle,
+    private val workContext: CoroutineContext = Dispatchers.IO
 ) : TextInputEditText(context, attrs, defStyleAttr) {
+    internal val job = Job()
 
     protected var isLastKeyDelete: Boolean = false
 
@@ -71,14 +78,14 @@ open class StripeEditText @JvmOverloads constructor(
 
     @ColorInt
     private var defaultErrorColor: Int = 0
+
     @ColorInt
     private var errorColor: Int? = null
 
-    private val hintHandler: Handler = Handler()
     private var errorMessageListener: ErrorMessageListener? = null
 
     /**
-     * @return the color used for error text.
+     * The color used for error text.
      */
     // It's possible that we need to verify this value again
     // in case the user programmatically changes the text color.
@@ -159,9 +166,13 @@ open class StripeEditText @JvmOverloads constructor(
      * @param delayMilliseconds a delay period, measured in milliseconds
      */
     fun setHintDelayed(hint: CharSequence, delayMilliseconds: Long) {
-        hintHandler.postDelayed({
-            setHintSafely(hint)
-        }, delayMilliseconds)
+        CoroutineScope(workContext).launch {
+            delay(delayMilliseconds)
+
+            withContext(Dispatchers.Main) {
+                setHintSafely(hint)
+            }
+        }
     }
 
     /**
@@ -169,9 +180,8 @@ open class StripeEditText @JvmOverloads constructor(
      * [known issue on Samsung devices](https://issuetracker.google.com/issues/37127697).
      */
     private fun setHintSafely(hint: CharSequence) {
-        try {
+        runCatching {
             setHint(hint)
-        } catch (e: NullPointerException) {
         }
     }
 
@@ -179,15 +189,12 @@ open class StripeEditText @JvmOverloads constructor(
         super.onInitializeAccessibilityNodeInfo(info)
         info.isContentInvalid = shouldShowError
         accessibilityText?.let { info.text = it }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            info.error = errorMessage.takeIf { shouldShowError }
-        }
+        info.error = errorMessage.takeIf { shouldShowError }
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        // Passing a null token removes all callbacks and messages to the handler.
-        hintHandler.removeCallbacksAndMessages(null)
+        job.cancel()
     }
 
     private fun determineDefaultErrorColor() {
@@ -205,11 +212,9 @@ open class StripeEditText @JvmOverloads constructor(
     }
 
     private fun listenForTextChanges() {
-        addTextChangedListener(object : StripeTextWatcher() {
-            override fun afterTextChanged(s: Editable?) {
-                afterTextChangedListener?.onTextChanged(s?.toString().orEmpty())
-            }
-        })
+        doAfterTextChanged { editable ->
+            afterTextChangedListener?.onTextChanged(editable?.toString().orEmpty())
+        }
     }
 
     private fun listenForDeleteEmpty() {
@@ -227,15 +232,15 @@ open class StripeEditText @JvmOverloads constructor(
         return keyCode == KeyEvent.KEYCODE_DEL && event.action == KeyEvent.ACTION_DOWN
     }
 
-    interface DeleteEmptyListener {
+    fun interface DeleteEmptyListener {
         fun onDeleteEmpty()
     }
 
-    interface AfterTextChangedListener {
+    fun interface AfterTextChangedListener {
         fun onTextChanged(text: String)
     }
 
-    interface ErrorMessageListener {
+    fun interface ErrorMessageListener {
         fun displayErrorMessage(message: String?)
     }
 

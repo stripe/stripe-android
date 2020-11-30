@@ -1,11 +1,11 @@
 package com.stripe.android
 
 import com.stripe.android.model.parsers.EphemeralKeyJsonParser
+import org.json.JSONException
+import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
-import org.json.JSONException
-import org.json.JSONObject
 
 internal class EphemeralKeyManager(
     private val ephemeralKeyProvider: EphemeralKeyProvider,
@@ -57,27 +57,38 @@ internal class EphemeralKeyManager(
             )
             return
         }
-        try {
-            val ephemeralKey = EphemeralKeyJsonParser().parse(JSONObject(key))
-            this.ephemeralKey = ephemeralKey
-            listener.onKeyUpdate(ephemeralKey, operation)
-        } catch (e: JSONException) {
-            listener.onKeyError(
-                operation.id,
-                HttpURLConnection.HTTP_INTERNAL_ERROR,
-                "EphemeralKeyUpdateListener.onKeyUpdate was passed " +
-                    "a value that could not be JSON parsed: [${e.localizedMessage}]. " +
-                    "The raw body from Stripe's response should be passed."
-            )
-        } catch (e: Exception) {
-            listener.onKeyError(
-                operation.id,
-                HttpURLConnection.HTTP_INTERNAL_ERROR,
-                "EphemeralKeyUpdateListener.onKeyUpdate was passed " +
-                    "a JSON String that was invalid: [${e.localizedMessage}]. " +
-                    "The raw body from Stripe's response should be passed."
-            )
-        }
+        runCatching {
+            EphemeralKeyJsonParser().parse(JSONObject(key)).also {
+                this.ephemeralKey = it
+            }
+        }.fold(
+            onSuccess = { ephemeralKey ->
+                listener.onKeyUpdate(ephemeralKey, operation)
+            },
+            onFailure = {
+                val errorMessage = when (it) {
+                    is JSONException -> {
+                        """
+                        Received an ephemeral key that could not be parsed. See https://stripe.com/docs/mobile/android/basic for more details.
+                        
+                        ${it.message}
+                        """.trimIndent()
+                    }
+                    else -> {
+                        """
+                        Received an invalid ephemeral key. See https://stripe.com/docs/mobile/android/basic for more details.
+                        
+                        ${it.message}
+                        """.trimIndent()
+                    }
+                }
+                listener.onKeyError(
+                    operation.id,
+                    HttpURLConnection.HTTP_INTERNAL_ERROR,
+                    errorMessage
+                )
+            }
+        )
     }
 
     private fun updateKeyError(operationId: String, errorCode: Int, errorMessage: String) {
@@ -98,7 +109,7 @@ internal class EphemeralKeyManager(
         )
     }
 
-    private class ClientKeyUpdateListener internal constructor(
+    private class ClientKeyUpdateListener(
         private val ephemeralKeyManager: EphemeralKeyManager,
         private val operation: EphemeralOperation
     ) : EphemeralKeyUpdateListener {
@@ -123,7 +134,9 @@ internal class EphemeralKeyManager(
         return ephemeralKey.expires < nowPlusBuffer
     }
 
-    internal interface Factory : Factory1<KeyManagerListener, EphemeralKeyManager> {
+    internal fun interface Factory {
+        fun create(arg: KeyManagerListener): EphemeralKeyManager
+
         class Default(
             private val keyProvider: EphemeralKeyProvider,
             private val shouldPrefetchEphemeralKey: Boolean,

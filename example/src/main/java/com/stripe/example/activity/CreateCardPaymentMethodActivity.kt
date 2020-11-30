@@ -5,30 +5,27 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.stripe.android.Stripe
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.view.CardValidCallback
-import com.stripe.example.StripeFactory
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.example.databinding.CreateCardPaymentMethodActivityBinding
 import com.stripe.example.databinding.PaymentMethodItemBinding
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
 
 class CreateCardPaymentMethodActivity : AppCompatActivity() {
     private val viewBinding: CreateCardPaymentMethodActivityBinding by lazy {
         CreateCardPaymentMethodActivityBinding.inflate(layoutInflater)
     }
 
-    private val compositeDisposable = CompositeDisposable()
+    private val viewModel: PaymentMethodViewModel by lazy {
+        ViewModelProvider(
+            this,
+            ViewModelProvider.AndroidViewModelFactory(application)
+        )[PaymentMethodViewModel::class.java]
+    }
 
     private val adapter: PaymentMethodsAdapter = PaymentMethodsAdapter()
-    private val stripe: Stripe by lazy {
-        StripeFactory(this).create()
-    }
     private val snackbarController: SnackbarController by lazy {
         SnackbarController(viewBinding.coordinator)
     }
@@ -44,40 +41,32 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
         viewBinding.paymentMethods.layoutManager = LinearLayoutManager(this)
         viewBinding.paymentMethods.adapter = adapter
 
-        viewBinding.cardMultilineWidget.setCardValidCallback(object : CardValidCallback {
-            override fun onInputChanged(
-                isValid: Boolean,
-                invalidFields: Set<CardValidCallback.Fields>
-            ) {
-                // added as an example - no-op
-            }
-        })
+        viewBinding.cardMultilineWidget.setCardValidCallback { isValid, invalidFields ->
+            // added as an example - no-op
+        }
 
         viewBinding.createButton.setOnClickListener {
             keyboardController.hide()
-            createPaymentMethod()
+
+            viewBinding.cardMultilineWidget.paymentMethodCreateParams?.let {
+                createPaymentMethod(it)
+            }
         }
     }
 
-    private fun createPaymentMethod() {
-        val paymentMethodCreateParams =
-            viewBinding.cardMultilineWidget.paymentMethodCreateParams ?: return
-
-        // Note: using this style of Observable creation results in us having a method that
-        // will not be called until we subscribe to it.
-        val createPaymentMethodObservable = Observable.fromCallable {
-            stripe.createPaymentMethodSynchronous(paymentMethodCreateParams)
-        }
-
-        compositeDisposable.add(createPaymentMethodObservable
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe { onCreatePaymentMethodStart() }
-            .doOnComplete { onCreatePaymentMethodCompleted() }
-            .subscribe(
-                { onCreatedPaymentMethod(it) },
-                { showSnackbar(it.localizedMessage.orEmpty()) }
-            )
+    private fun createPaymentMethod(params: PaymentMethodCreateParams) {
+        onCreatePaymentMethodStart()
+        viewModel.createPaymentMethod(params).observe(
+            this,
+            { result ->
+                onCreatePaymentMethodCompleted()
+                result.fold(
+                    onSuccess = ::onCreatedPaymentMethod,
+                    onFailure = {
+                        showSnackbar(it.message.orEmpty())
+                    }
+                )
+            }
         )
     }
 
@@ -104,14 +93,9 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
         }
     }
 
-    override fun onDestroy() {
-        compositeDisposable.dispose()
-        super.onDestroy()
-    }
-
     private class PaymentMethodsAdapter :
         RecyclerView.Adapter<PaymentMethodsAdapter.PaymentMethodViewHolder>() {
-        internal val paymentMethods: MutableList<PaymentMethod> = mutableListOf()
+        val paymentMethods: MutableList<PaymentMethod> = mutableListOf()
 
         init {
             setHasStableIds(true)
@@ -139,13 +123,13 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
             return requireNotNull(paymentMethods[position].id).hashCode().toLong()
         }
 
-        internal class PaymentMethodViewHolder internal constructor(
+        class PaymentMethodViewHolder internal constructor(
             private val viewBinding: PaymentMethodItemBinding
         ) : RecyclerView.ViewHolder(viewBinding.root) {
             internal fun setPaymentMethod(paymentMethod: PaymentMethod) {
                 val card = paymentMethod.card
                 viewBinding.paymentMethodId.text = paymentMethod.id
-                viewBinding.brand.text = card?.brand.orEmpty()
+                viewBinding.brand.text = card?.brand?.displayName.orEmpty()
                 viewBinding.last4.text = card?.last4.orEmpty()
             }
         }

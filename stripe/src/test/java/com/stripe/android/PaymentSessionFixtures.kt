@@ -13,26 +13,28 @@ internal object PaymentSessionFixtures {
 
         // hide the phone field on the shipping information form
         .setHiddenShippingInfoFields(
-            ShippingInfoWidget.CustomizableShippingField.ADDRESS_LINE_TWO_FIELD
+            ShippingInfoWidget.CustomizableShippingField.Line2
         )
 
         // make the address line 2 field optional
         .setOptionalShippingInfoFields(
-            ShippingInfoWidget.CustomizableShippingField.PHONE_FIELD
+            ShippingInfoWidget.CustomizableShippingField.Phone
         )
 
         // specify an address to pre-populate the shipping information form
-        .setPrepopulatedShippingInfo(ShippingInformation(
-            Address.Builder()
-                .setLine1("123 Market St")
-                .setCity("San Francisco")
-                .setState("CA")
-                .setPostalCode("94107")
-                .setCountry("US")
-                .build(),
-            "Jenny Rosen",
-            "4158675309"
-        ))
+        .setPrepopulatedShippingInfo(
+            ShippingInformation(
+                Address.Builder()
+                    .setLine1("123 Market St")
+                    .setCity("San Francisco")
+                    .setState("CA")
+                    .setPostalCode("94107")
+                    .setCountry("US")
+                    .build(),
+                "Jenny Rosen",
+                "4158675309"
+            )
+        )
 
         // collect shipping information
         .setShippingInfoRequired(true)
@@ -52,6 +54,10 @@ internal object PaymentSessionFixtures {
         )
         .setBillingAddressFields(BillingAddressFields.Full)
         .setShouldPrefetchCustomer(true)
+
+        // Enable PaymentMethod Deletion from PaymentMethodActivity
+        // This is default behavior
+        .setCanDeletePaymentMethods(true)
 
         .setShippingInformationValidator(FakeShippingInformationValidator())
         .setShippingMethodsFactory(FakeShippingMethodsFactory())
@@ -77,10 +83,20 @@ internal object PaymentSessionFixtures {
     private class FakeShippingMethodsFactory : PaymentSessionConfig.ShippingMethodsFactory {
         override fun create(shippingInformation: ShippingInformation): List<ShippingMethod> {
             return listOf(
-                ShippingMethod("UPS Ground", "ups-ground",
-                    0, "USD", "Arrives in 3-5 days"),
-                ShippingMethod("FedEx", "fedex",
-                    599, "USD", "Arrives tomorrow")
+                ShippingMethod(
+                    "UPS Ground",
+                    "ups-ground",
+                    0,
+                    "USD",
+                    "Arrives in 3-5 days"
+                ),
+                ShippingMethod(
+                    "FedEx",
+                    "fedex",
+                    599,
+                    "USD",
+                    "Arrives tomorrow"
+                )
             )
         }
     }

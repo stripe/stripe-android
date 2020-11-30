@@ -311,4 +311,10 @@ class CardBrandTest {
         assertThat(CardBrand.fromCardNumber("352800"))
             .isEqualTo(CardBrand.JCB)
     }
+
+    @Test
+    fun fromCardNumber_withMaestroBin_shouldReturnMastercard() {
+        assertThat(CardBrand.fromCardNumber("561243"))
+            .isEqualTo(CardBrand.MasterCard)
+    }
 }

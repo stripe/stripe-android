@@ -5,12 +5,12 @@ import com.stripe.android.model.SourceFixtures.DELETED_CARD_JSON
 import com.stripe.android.model.SourceFixtures.DOGE_COIN
 import com.stripe.android.model.SourceFixtures.EXAMPLE_JSON_SOURCE_CUSTOM_TYPE
 import com.stripe.android.model.parsers.SourceJsonParser
+import org.json.JSONObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.json.JSONObject
 
 /**
  * Test class for [Source] model.

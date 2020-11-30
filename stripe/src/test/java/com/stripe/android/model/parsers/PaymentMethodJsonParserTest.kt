@@ -79,7 +79,7 @@ class PaymentMethodJsonParserTest {
                     ),
                     billingDetails = PaymentMethod.BillingDetails(
                         name = "Jenny Rosen",
-                        email = "jrosen@example.com",
+                        email = "jenny.rosen@example.com",
                         address = Address()
                     )
                 )

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/StripePaymentSheetTextInputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:labelFor="@+id/country"
+        app:helperTextEnabled="false">
+
+        <AutoCompleteTextView
+            android:id="@+id/country"
+            style="@style/StripePaymentSheetTextInputEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingVertical="13dp"
+            android:paddingHorizontal="12dp" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <View style="@style/StripePaymentSheetFormDivider" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/StripePaymentSheetTextInputLayout"
+        android:hint="@string/address_label_zip_code"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/postal_code"
+            style="@style/StripePaymentSheetTextInputEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPostalAddress" />
+    </com.google.android.material.textfield.TextInputLayout>
+</merge>

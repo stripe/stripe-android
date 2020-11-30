@@ -9,7 +9,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="12dp">
+        android:padding="12dp"
+        android:paddingBottom="80dp">
 
         <com.stripe.android.view.BecsDebitWidget
             android:id="@+id/element"
@@ -18,13 +19,22 @@
             app:companyName="@string/becs_company_name" />
 
         <Button
-            android:id="@+id/submit"
+            android:id="@+id/pay_button"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="20dp"
             android:enabled="false"
-            android:text="@string/confirm_with_becs_debit" />
+            android:text="@string/pay_with_becs_debit" />
+
+        <Button
+            android:id="@+id/save_button"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="10dp"
+            android:enabled="false"
+            android:text="@string/save_with_becs_debit" />
 
         <TextView
             android:id="@+id/status"

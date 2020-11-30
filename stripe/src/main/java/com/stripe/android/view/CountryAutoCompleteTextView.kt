@@ -5,13 +5,12 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View.OnFocusChangeListener
 import android.widget.AdapterView
-import android.widget.AutoCompleteTextView
 import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.ConfigurationCompat
 import com.stripe.android.R
 import com.stripe.android.databinding.CountryAutocompleteViewBinding
-import java.util.Locale
+import com.stripe.android.databinding.CountryTextViewBinding
 
 internal class CountryAutoCompleteTextView @JvmOverloads constructor(
     context: Context,
@@ -23,19 +22,27 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
             LayoutInflater.from(context),
             this
         )
+    private val countryTextInputLayout = viewBinding.countryTextInputLayout
 
+    private val layoutInflater = LayoutInflater.from(context)
     private val countryAdapter = CountryAdapter(
         context,
         CountryUtils.getOrderedCountries(
             ConfigurationCompat.getLocales(context.resources.configuration)[0]
         )
-    )
+    ) {
+        CountryTextViewBinding.inflate(
+            layoutInflater,
+            it,
+            false
+        ).root
+    }
 
     @VisibleForTesting
     internal val countryAutocomplete = viewBinding.countryAutocomplete
 
     /**
-     * @return 2 digit country code of the country selected by this input.
+     * The 2 digit country code of the country selected by this input.
      */
     @VisibleForTesting
     var selectedCountry: Country?
@@ -63,26 +70,17 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
         updateInitialCountry()
 
         val errorMessage = resources.getString(R.string.address_country_invalid)
-        countryAutocomplete.validator = object : AutoCompleteTextView.Validator {
-            override fun fixText(invalidText: CharSequence?): CharSequence {
-                return invalidText ?: ""
-            }
 
-            override fun isValid(text: CharSequence?): Boolean {
-                val validCountry = countryAdapter.unfilteredCountries.firstOrNull {
-                    it.name == text.toString()
-                }
+        countryAutocomplete.validator = CountryAutoCompleteTextViewValidator(
+            countryAdapter
+        ) { country ->
+            selectedCountry = country
 
-                selectedCountry = validCountry
-
-                if (validCountry != null) {
-                    clearError()
-                } else {
-                    viewBinding.countryTextInputLayout.error = errorMessage
-                    viewBinding.countryTextInputLayout.isErrorEnabled = true
-                }
-
-                return validCountry != null
+            if (country != null) {
+                clearError()
+            } else {
+                countryTextInputLayout.error = errorMessage
+                countryTextInputLayout.isErrorEnabled = true
             }
         }
     }
@@ -109,7 +107,7 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
      * the full country display name.
      */
     internal fun setCountrySelected(countryCode: String) {
-        updateUiForCountryEntered(getDisplayCountry(countryCode))
+        updateUiForCountryEntered(CountryUtils.getDisplayCountry(countryCode))
     }
 
     @VisibleForTesting
@@ -132,11 +130,6 @@ internal class CountryAutoCompleteTextView @JvmOverloads constructor(
             selectedCountry = country
             countryChangeCallback(country)
         }
-    }
-
-    private fun getDisplayCountry(countryCode: String): String {
-        return CountryUtils.getCountryByCode(countryCode)?.name
-            ?: Locale("", countryCode).displayCountry
     }
 
     internal fun validateCountry() {

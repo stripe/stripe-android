@@ -4,7 +4,7 @@ import android.os.Parcelable
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.Source
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 internal sealed class EphemeralOperation : Parcelable {
     internal abstract val id: String

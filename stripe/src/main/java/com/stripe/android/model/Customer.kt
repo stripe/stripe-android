@@ -1,8 +1,7 @@
 package com.stripe.android.model
 
 import com.stripe.android.model.parsers.CustomerJsonParser
-import kotlinx.android.parcel.Parcelize
-import org.json.JSONException
+import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 
 /**
@@ -16,7 +15,10 @@ data class Customer internal constructor(
     val sources: List<CustomerSource>,
     val hasMore: Boolean,
     val totalCount: Int?,
-    val url: String?
+    val url: String?,
+    val description: String?,
+    val email: String?,
+    val liveMode: Boolean
 ) : StripeModel {
 
     fun getSourceById(sourceId: String): CustomerSource? {
@@ -30,11 +32,10 @@ data class Customer internal constructor(
                 return null
             }
 
-            return try {
-                fromJson(JSONObject(jsonString))
-            } catch (ignored: JSONException) {
-                null
-            }
+            return runCatching { JSONObject(jsonString) }
+                .getOrNull()?.let {
+                    fromJson(it)
+                }
         }
 
         @JvmStatic

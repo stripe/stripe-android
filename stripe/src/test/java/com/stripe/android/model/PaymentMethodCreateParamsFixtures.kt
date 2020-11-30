@@ -18,15 +18,15 @@ internal object PaymentMethodCreateParamsFixtures {
 
     @JvmField
     internal val BILLING_DETAILS = PaymentMethod.BillingDetails(
-        name = "Home",
-        email = "me@example.com",
+        name = "Jenny Rosen",
+        email = "jenny.rosen@example.com",
         phone = "1-800-555-1234",
         address = Address(
-            line1 = "123 Main St",
-            city = "Los Angeles",
+            line1 = "1234 Main St",
+            city = "San Francisco",
             state = "CA",
             country = "US",
-            postalCode = "90012"
+            postalCode = "94111"
         )
     )
 
@@ -70,6 +70,36 @@ internal object PaymentMethodCreateParamsFixtures {
     )
 
     internal val P24 = PaymentMethodCreateParams.createP24(
+        billingDetails = BILLING_DETAILS
+    )
+
+    internal val BANCONTACT = PaymentMethodCreateParams.createBancontact(
+        billingDetails = BILLING_DETAILS
+    )
+
+    internal val GIROPAY = PaymentMethodCreateParams.createGiropay(
+        billingDetails = BILLING_DETAILS
+    )
+
+    internal val EPS = PaymentMethodCreateParams.createEps(
+        billingDetails = BILLING_DETAILS
+    )
+
+    internal val GRABPAY = PaymentMethodCreateParams.createGrabPay(
+        billingDetails = BILLING_DETAILS
+    )
+
+    internal val UPI = PaymentMethodCreateParams.create(
+        upi = PaymentMethodCreateParams.Upi(
+            vpa = "vpa@hdfcbank"
+        ),
+        billingDetails = BILLING_DETAILS
+    )
+
+    internal val NETBANKING = PaymentMethodCreateParams.create(
+        netbanking = PaymentMethodCreateParams.Netbanking(
+            bank = "hdfc"
+        ),
         billingDetails = BILLING_DETAILS
     )
 

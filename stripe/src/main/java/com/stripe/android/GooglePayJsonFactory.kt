@@ -2,27 +2,47 @@ package com.stripe.android
 
 import android.content.Context
 import android.os.Parcelable
-import java.util.Currency
-import java.util.Locale
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.Currency
+import java.util.Locale
 
 /**
  * A factory for generating [Google Pay JSON request objects](https://developers.google.com/pay/api/android/reference/request-objects)
  * for Google Pay API version 2.0.
  */
 class GooglePayJsonFactory constructor(
-    private val googlePayConfig: GooglePayConfig
+    private val googlePayConfig: GooglePayConfig,
+
+    /**
+     * Enable JCB as an allowed card network. By default, JCB is disabled.
+     *
+     * JCB currently can only be accepted in Japan.
+     */
+    private val isJcbEnabled: Boolean = false
 ) {
     /**
      * [PaymentConfiguration] must be instantiated before calling this.
      */
-    constructor(context: Context) : this(GooglePayConfig(context))
+    constructor(
+        context: Context,
+
+        /**
+         * Enable JCB as an allowed card network. By default, JCB is disabled.
+         *
+         * JCB currently can only be accepted in Japan.
+         */
+        isJcbEnabled: Boolean = false
+    ) : this(
+        googlePayConfig = GooglePayConfig(context),
+        isJcbEnabled = isJcbEnabled
+    )
 
     /**
      * [IsReadyToPayRequest](https://developers.google.com/pay/api/android/reference/request-objects#IsReadyToPayRequest)
      */
+    @JvmOverloads
     fun createIsReadyToPayRequest(
         /**
          * Configure additional fields to be returned for a requested billing address.
@@ -39,7 +59,8 @@ class GooglePayJsonFactory constructor(
         return JSONObject()
             .put("apiVersion", API_VERSION)
             .put("apiVersionMinor", API_VERSION_MINOR)
-            .put("allowedPaymentMethods",
+            .put(
+                "allowedPaymentMethods",
                 JSONArray()
                     .put(createCardPaymentMethod(billingAddressParameters))
             )
@@ -53,6 +74,7 @@ class GooglePayJsonFactory constructor(
     /**
      * [PaymentDataRequest](https://developers.google.com/pay/api/android/reference/request-objects#PaymentDataRequest)
      */
+    @JvmOverloads
     fun createPaymentDataRequest(
         /**
          * Details about the authorization of the transaction based upon whether the user agrees to
@@ -84,7 +106,8 @@ class GooglePayJsonFactory constructor(
         return JSONObject()
             .put("apiVersion", API_VERSION)
             .put("apiVersionMinor", API_VERSION_MINOR)
-            .put("allowedPaymentMethods",
+            .put(
+                "allowedPaymentMethods",
                 JSONArray()
                     .put(createCardPaymentMethod(billingAddressParameters))
             )
@@ -93,14 +116,17 @@ class GooglePayJsonFactory constructor(
             .apply {
                 if (shippingAddressParameters?.isRequired == true) {
                     put("shippingAddressRequired", true)
-                    put("shippingAddressParameters",
+                    put(
+                        "shippingAddressParameters",
                         createShippingAddressParameters(shippingAddressParameters)
                     )
                 }
 
                 if (merchantInfo != null && !merchantInfo.merchantName.isNullOrEmpty()) {
-                    put("merchantInfo", JSONObject()
-                        .put("merchantName", merchantInfo.merchantName)
+                    put(
+                        "merchantInfo",
+                        JSONObject()
+                            .put("merchantName", merchantInfo.merchantName)
                     )
                 }
             }
@@ -110,11 +136,11 @@ class GooglePayJsonFactory constructor(
         transactionInfo: TransactionInfo
     ): JSONObject {
         return JSONObject()
-            .put("currencyCode", transactionInfo.currencyCode)
+            .put("currencyCode", transactionInfo.currencyCode.toUpperCase(Locale.ROOT))
             .put("totalPriceStatus", transactionInfo.totalPriceStatus.code)
             .apply {
                 transactionInfo.countryCode?.let {
-                    put("countryCode", it)
+                    put("countryCode", it.toUpperCase(Locale.ROOT))
                 }
 
                 transactionInfo.transactionId?.let {
@@ -122,9 +148,11 @@ class GooglePayJsonFactory constructor(
                 }
 
                 transactionInfo.totalPrice?.let {
-                    put("totalPrice",
+                    put(
+                        "totalPrice",
                         PayWithGoogleUtils.getPriceString(
-                            it, Currency.getInstance(transactionInfo.currencyCode)
+                            it,
+                            Currency.getInstance(transactionInfo.currencyCode)
                         )
                     )
                 }
@@ -143,10 +171,14 @@ class GooglePayJsonFactory constructor(
         shippingAddressParameters: ShippingAddressParameters
     ): JSONObject {
         return JSONObject()
-            .put("allowedCountryCodes",
-                JSONArray(shippingAddressParameters.allowedCountryCodes))
-            .put("phoneNumberRequired",
-                shippingAddressParameters.phoneNumberRequired)
+            .put(
+                "allowedCountryCodes",
+                JSONArray(shippingAddressParameters.normalizedAllowedCountryCodes)
+            )
+            .put(
+                "phoneNumberRequired",
+                shippingAddressParameters.phoneNumberRequired
+            )
     }
 
     private fun createCardPaymentMethod(
@@ -156,10 +188,13 @@ class GooglePayJsonFactory constructor(
             .apply {
                 if (billingAddressParameters?.isRequired == true) {
                     put("billingAddressRequired", true)
-                    put("billingAddressParameters",
+                    put(
+                        "billingAddressParameters",
                         JSONObject()
-                            .put("phoneNumberRequired",
-                                billingAddressParameters.isPhoneNumberRequired)
+                            .put(
+                                "phoneNumberRequired",
+                                billingAddressParameters.isPhoneNumberRequired
+                            )
                             .put("format", billingAddressParameters.format.code)
                     )
                 }
@@ -174,7 +209,14 @@ class GooglePayJsonFactory constructor(
     private fun createBaseCardPaymentMethodParams(): JSONObject {
         return JSONObject()
             .put("allowedAuthMethods", JSONArray(ALLOWED_AUTH_METHODS))
-            .put("allowedCardNetworks", JSONArray(ALLOWED_CARD_NETWORKS))
+            .put(
+                "allowedCardNetworks",
+                JSONArray(
+                    DEFAULT_CARD_NETWORKS.plus(
+                        listOf(JCB_CARD_NETWORK).takeIf { isJcbEnabled } ?: emptyList()
+                    )
+                )
+            )
     }
 
     /**
@@ -241,11 +283,12 @@ class GooglePayJsonFactory constructor(
         internal val transactionId: String? = null,
 
         /**
-         * Total monetary value of the transaction with an optional decimal precision of two
-         * decimal places. This field is required unless totalPriceStatus is set to
-         * NOT_CURRENTLY_KNOWN.
+         * Total monetary value of the transaction.
          *
-         * The format of the string should follow the regex format: ^[0-9]+(\.[0-9][0-9])?$
+         * This field is required unless [totalPriceStatus] is set to [TotalPriceStatus.NotCurrentlyKnown].
+         *
+         * The value of this field is represented in the [smallest currency unit](https://stripe.com/docs/currencies#zero-decimal).
+         * For example, when [currencyCode] is `"USD"`, a value of `100` represents 100 cents ($1.00).
          */
         internal val totalPrice: Int? = null,
 
@@ -312,16 +355,26 @@ class GooglePayJsonFactory constructor(
          * ISO 3166-1 alpha-2 country code values of the countries where shipping is allowed.
          * If this object isn't specified, all shipping address countries are allowed.
          */
-        internal val allowedCountryCodes: Set<String> = emptySet(),
+        private val allowedCountryCodes: Set<String> = emptySet(),
 
         /**
          * Set to true if a phone number is required for the provided shipping address.
          */
         internal val phoneNumberRequired: Boolean = false
     ) : Parcelable {
+        /**
+         * Normalized form of [allowedCountryCodes] (i.e. capitalized country codes)
+         */
+        internal val normalizedAllowedCountryCodes: Set<String>
+            get() {
+                return allowedCountryCodes.map {
+                    it.toUpperCase(Locale.ROOT)
+                }.toSet()
+            }
+
         init {
             val countryCodes = Locale.getISOCountries()
-            allowedCountryCodes.forEach { allowedShippingCountryCode ->
+            normalizedAllowedCountryCodes.forEach { allowedShippingCountryCode ->
                 require(
                     countryCodes.any { allowedShippingCountryCode == it }
                 ) {
@@ -344,14 +397,15 @@ class GooglePayJsonFactory constructor(
         internal val merchantName: String? = null
     ) : Parcelable
 
-    companion object {
+    private companion object {
         private const val API_VERSION = 2
         private const val API_VERSION_MINOR = 0
 
         private const val CARD_PAYMENT_METHOD = "CARD"
 
         private val ALLOWED_AUTH_METHODS = listOf("PAN_ONLY", "CRYPTOGRAM_3DS")
-        private val ALLOWED_CARD_NETWORKS =
-            listOf("AMEX", "DISCOVER", "INTERAC", "JCB", "MASTERCARD", "VISA")
+        private val DEFAULT_CARD_NETWORKS =
+            listOf("AMEX", "DISCOVER", "MASTERCARD", "VISA")
+        private const val JCB_CARD_NETWORK = "JCB"
     }
 }

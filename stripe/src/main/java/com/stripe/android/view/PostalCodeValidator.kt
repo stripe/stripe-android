@@ -11,15 +11,16 @@ internal class PostalCodeValidator {
     fun isValid(
         postalCode: String,
         countryCode: String?,
-        optionalShippingInfoFields: List<String>,
-        hiddenShippingInfoFields: List<String>
+        optionalShippingInfoFields: List<ShippingInfoWidget.CustomizableShippingField>,
+        hiddenShippingInfoFields: List<ShippingInfoWidget.CustomizableShippingField>
     ): Boolean {
         if (countryCode == null) {
             return false
         }
 
         return if (postalCode.isEmpty() &&
-            isPostalCodeNotRequired(optionalShippingInfoFields, hiddenShippingInfoFields)) {
+            isPostalCodeNotRequired(optionalShippingInfoFields, hiddenShippingInfoFields)
+        ) {
             // user has configured postal code as optional or hidden and customer has not inputted
             // a postal code
             true
@@ -42,13 +43,13 @@ internal class PostalCodeValidator {
         )
 
         private fun isPostalCodeNotRequired(
-            optionalShippingInfoFields: List<String>,
-            hiddenShippingInfoFields: List<String>
+            optionalShippingInfoFields: List<ShippingInfoWidget.CustomizableShippingField>,
+            hiddenShippingInfoFields: List<ShippingInfoWidget.CustomizableShippingField>
         ): Boolean {
             return optionalShippingInfoFields.contains(
-                ShippingInfoWidget.CustomizableShippingField.POSTAL_CODE_FIELD
+                ShippingInfoWidget.CustomizableShippingField.PostalCode
             ) || hiddenShippingInfoFields.contains(
-                ShippingInfoWidget.CustomizableShippingField.POSTAL_CODE_FIELD
+                ShippingInfoWidget.CustomizableShippingField.PostalCode
             )
         }
     }

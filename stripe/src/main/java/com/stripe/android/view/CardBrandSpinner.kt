@@ -52,6 +52,7 @@ internal class CardBrandSpinner @JvmOverloads constructor(
     fun setCardBrands(cardBrands: List<CardBrand>) {
         cardBrandsAdapter.clear()
         cardBrandsAdapter.addAll(cardBrands)
+        cardBrandsAdapter.notifyDataSetChanged()
         setSelection(0)
 
         // enable dropdown selector if there are multiple card brands, disable otherwise
@@ -103,7 +104,9 @@ internal class CardBrandSpinner @JvmOverloads constructor(
                 it.text = cardBrand.displayName
                 it.setCompoundDrawablesRelativeWithIntrinsicBounds(
                     createCardBrandDrawable(cardBrand),
-                    null, null, null
+                    null,
+                    null,
+                    null
                 )
             }
 

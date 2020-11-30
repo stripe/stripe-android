@@ -4,7 +4,7 @@ import android.os.Parcelable
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * A data class representing the state of the associated [PaymentSession].
@@ -36,7 +36,7 @@ data class PaymentSessionData internal constructor(
     val shippingMethod: ShippingMethod? = null,
 
     /**
-     * @return the selected payment method for the associated [PaymentSession]
+     * The selected payment method for the associated [PaymentSession].
      */
     val paymentMethod: PaymentMethod? = null,
 

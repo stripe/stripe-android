@@ -15,13 +15,16 @@ import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.model.Customer
 import com.stripe.android.model.CustomerFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.networking.AbsFakeStripeRepository
+import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.testharness.TestEphemeralKeyProvider
+import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.view.ActivityScenarioFactory
 import com.stripe.android.view.ActivityStarter
 import com.stripe.android.view.BillingAddressFields
@@ -29,30 +32,25 @@ import com.stripe.android.view.PaymentFlowActivity
 import com.stripe.android.view.PaymentFlowActivityStarter
 import com.stripe.android.view.PaymentMethodsActivity
 import com.stripe.android.view.PaymentMethodsActivityStarter
-import java.util.concurrent.ThreadPoolExecutor
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
-/**
- * Test class for [PaymentSession]
- */
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class PaymentSessionTest {
+    private val testDispatcher = TestCoroutineDispatcher()
 
     private val ephemeralKeyProvider = TestEphemeralKeyProvider()
 
-    private val threadPoolExecutor: ThreadPoolExecutor = mock()
-    private val paymentSessionListener: PaymentSession.PaymentSessionListener = mock()
-    private val customerSession: CustomerSession = mock()
+    private val paymentSessionListener = mock<PaymentSession.PaymentSessionListener>()
+    private val customerSession = mock<CustomerSession>()
     private val paymentMethodsActivityStarter:
         ActivityStarter<PaymentMethodsActivity, PaymentMethodsActivityStarter.Args> = mock()
     private val paymentFlowActivityStarter:
@@ -68,9 +66,6 @@ class PaymentSessionTest {
     @BeforeTest
     fun setup() {
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-        whenever(threadPoolExecutor.execute(any())).thenAnswer {
-            it.getArgument<Runnable>(0).run()
-        }
         CustomerSession.instance = createCustomerSession()
     }
 
@@ -78,20 +73,21 @@ class PaymentSessionTest {
     fun init_addsPaymentSessionToken_andFetchesCustomer() {
         CustomerSession.instance = customerSession
         createActivity { activity ->
-            val paymentSession = PaymentSession(activity, DEFAULT_CONFIG.copy(
-                shouldPrefetchCustomer = true
-            ))
+            val paymentSession = PaymentSession(
+                activity,
+                DEFAULT_CONFIG.copy(
+                    shouldPrefetchCustomer = true
+                )
+            )
             paymentSession.init(paymentSessionListener)
+            idleLooper()
 
             verify(customerSession).retrieveCurrentCustomer(
                 productUsageArgumentCaptor.capture(),
                 any()
             )
 
-            assertEquals(
-                setOf(PaymentSession.PRODUCT_TOKEN),
-                productUsageArgumentCaptor.firstValue
-            )
+            assertThat(productUsageArgumentCaptor.firstValue).isEqualTo(setOf(PaymentSession.PRODUCT_TOKEN))
 
             verify(paymentSessionListener)
                 .onCommunicatingStateChanged(eq(true))
@@ -106,6 +102,8 @@ class PaymentSessionTest {
         createActivity {
             val paymentSession = PaymentSession(it, DEFAULT_CONFIG)
             paymentSession.init(paymentSessionListener)
+            idleLooper()
+
             verify(paymentSessionListener)
                 .onCommunicatingStateChanged(true)
             verify(paymentSessionListener)
@@ -126,15 +124,17 @@ class PaymentSessionTest {
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
             val handled = paymentSession.handlePaymentData(
-                PaymentMethodsActivityStarter.REQUEST_CODE, RESULT_OK,
-                Intent().putExtras(result.toBundle()))
-            assertTrue(handled)
+                PaymentMethodsActivityStarter.REQUEST_CODE,
+                RESULT_OK,
+                Intent().putExtras(result.toBundle())
+            )
+            assertThat(handled).isTrue()
 
             verify(paymentSessionListener)
                 .onPaymentSessionDataChanged(paymentSessionDataArgumentCaptor.capture())
             val data = paymentSessionDataArgumentCaptor.firstValue
-            assertEquals(PaymentMethodFixtures.CARD_PAYMENT_METHOD, data.paymentMethod)
-            assertFalse(data.useGooglePay)
+            assertThat(data.paymentMethod).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            assertThat(data.useGooglePay).isFalse()
         }
     }
 
@@ -151,15 +151,17 @@ class PaymentSessionTest {
                 useGooglePay = true
             )
             val handled = paymentSession.handlePaymentData(
-                PaymentMethodsActivityStarter.REQUEST_CODE, RESULT_OK,
-                Intent().putExtras(result.toBundle()))
-            assertTrue(handled)
+                PaymentMethodsActivityStarter.REQUEST_CODE,
+                RESULT_OK,
+                Intent().putExtras(result.toBundle())
+            )
+            assertThat(handled).isTrue()
 
             verify(paymentSessionListener)
                 .onPaymentSessionDataChanged(paymentSessionDataArgumentCaptor.capture())
             val data = paymentSessionDataArgumentCaptor.firstValue
-            assertNull(data.paymentMethod)
-            assertTrue(data.useGooglePay)
+            assertThat(data.paymentMethod).isNull()
+            assertThat(data.useGooglePay).isTrue()
         }
     }
 
@@ -181,7 +183,7 @@ class PaymentSessionTest {
 
             val args =
                 PaymentMethodsActivityStarter.Args.create(intent)
-            assertEquals(BillingAddressFields.Full, args.billingAddressFields)
+            assertThat(args.billingAddressFields).isEqualTo(BillingAddressFields.Full)
         }
     }
 
@@ -228,10 +230,8 @@ class PaymentSessionTest {
             verify(paymentMethodsActivityStarter).startForResult(
                 paymentMethodsActivityStarterArgsCaptor.capture()
             )
-            assertEquals(
-                "pm_123456789",
-                paymentMethodsActivityStarterArgsCaptor.firstValue.initialPaymentMethodId
-            )
+            assertThat(paymentMethodsActivityStarterArgsCaptor.firstValue.initialPaymentMethodId)
+                .isEqualTo("pm_123456789")
         }
     }
 
@@ -249,10 +249,8 @@ class PaymentSessionTest {
             verify(paymentMethodsActivityStarter).startForResult(
                 paymentMethodsActivityStarterArgsCaptor.capture()
             )
-            assertEquals(
-                "pm_987",
-                paymentMethodsActivityStarterArgsCaptor.firstValue.initialPaymentMethodId
-            )
+            assertThat(paymentMethodsActivityStarterArgsCaptor.firstValue.initialPaymentMethodId)
+                .isEqualTo("pm_987")
         }
     }
 
@@ -271,10 +269,8 @@ class PaymentSessionTest {
             verify(paymentSessionListener, times(2))
                 .onPaymentSessionDataChanged(paymentSessionDataArgumentCaptor.capture())
 
-            assertEquals(
-                paymentSessionDataArgumentCaptor.allValues[0],
-                paymentSessionDataArgumentCaptor.allValues[1]
-            )
+            assertThat(paymentSessionDataArgumentCaptor.allValues[1])
+                .isEqualTo(paymentSessionDataArgumentCaptor.allValues[0])
         }
     }
 
@@ -282,7 +278,7 @@ class PaymentSessionTest {
     fun handlePaymentData_withInvalidRequestCode_aborts() {
         createActivity {
             val paymentSession = createPaymentSession(it)
-            assertFalse(paymentSession.handlePaymentData(-1, RESULT_CANCELED, Intent()))
+            assertThat(paymentSession.handlePaymentData(-1, RESULT_CANCELED, Intent())).isFalse()
             verify(customerSession, never()).retrieveCurrentCustomer(any())
         }
     }
@@ -291,13 +287,13 @@ class PaymentSessionTest {
     fun handlePaymentData_withPaymentMethodsActivityRequestCodeAndCanceledResult_doesNotRetrieveCustomer() {
         createActivity {
             val paymentSession = createPaymentSession(it)
-            assertFalse(
+            assertThat(
                 paymentSession.handlePaymentData(
                     PaymentMethodsActivityStarter.REQUEST_CODE,
                     RESULT_CANCELED,
                     Intent()
                 )
-            )
+            ).isFalse()
             verify(customerSession, never()).retrieveCurrentCustomer(any())
         }
     }
@@ -306,8 +302,13 @@ class PaymentSessionTest {
     fun handlePaymentData_withPaymentFlowActivityRequestCodeAndCanceledResult_retrievesCustomer() {
         createActivity {
             val paymentSession = createPaymentSession(it)
-            assertFalse(paymentSession.handlePaymentData(PaymentFlowActivityStarter.REQUEST_CODE,
-                RESULT_CANCELED, Intent()))
+            assertThat(
+                paymentSession.handlePaymentData(
+                    PaymentFlowActivityStarter.REQUEST_CODE,
+                    RESULT_CANCELED,
+                    Intent()
+                )
+            ).isFalse()
             verify(customerSession).retrieveCurrentCustomer(
                 eq(setOf(PaymentSession.PRODUCT_TOKEN)),
                 any()
@@ -342,7 +343,7 @@ class PaymentSessionTest {
             stripeRepository,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             "acct_abc123",
-            threadPoolExecutor = threadPoolExecutor,
+            workContext = testDispatcher,
             ephemeralKeyManagerFactory = EphemeralKeyManager.Factory.Default(
                 keyProvider = ephemeralKeyProvider,
                 shouldPrefetchEphemeralKey = true
@@ -359,19 +360,19 @@ class PaymentSessionTest {
         callback: (ActivityScenario<out ComponentActivity>) -> Unit
     ) {
         activityScenarioFactory.create<PaymentMethodsActivity>(
-            PaymentMethodsActivityStarter.Args.DEFAULT
+            PaymentMethodsActivityStarter.Args.Builder().build()
         ).use(callback)
     }
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {
-        override fun createPaymentMethod(
+        override suspend fun createPaymentMethod(
             paymentMethodCreateParams: PaymentMethodCreateParams,
             options: ApiRequest.Options
         ): PaymentMethod {
             return PaymentMethodFixtures.CARD_PAYMENT_METHOD
         }
 
-        override fun setDefaultCustomerSource(
+        override suspend fun setDefaultCustomerSource(
             customerId: String,
             publishableKey: String,
             productUsageTokens: Set<String>,
@@ -382,7 +383,7 @@ class PaymentSessionTest {
             return SECOND_CUSTOMER
         }
 
-        override fun retrieveCustomer(
+        override suspend fun retrieveCustomer(
             customerId: String,
             productUsageTokens: Set<String>,
             requestOptions: ApiRequest.Options

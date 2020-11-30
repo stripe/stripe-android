@@ -6,11 +6,10 @@ import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
-import com.stripe.android.model.PaymentMethod
-import kotlin.test.Test
-import kotlin.test.assertTrue
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Test
+import kotlin.test.assertTrue
 
 /**
  * Test class for [IconTextInputLayout] to ensure that the Reflection doesn't break
@@ -20,27 +19,22 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 internal class IconTextInputLayoutTest {
 
-    private val activityScenarioFactory: ActivityScenarioFactory by lazy {
-        ActivityScenarioFactory(ApplicationProvider.getApplicationContext())
-    }
+    private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val activityScenarioFactory = ActivityScenarioFactory(context)
 
     @Test
     fun init_successfullyFindsFields() {
-        val context: Context = ApplicationProvider.getApplicationContext()
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
-        activityScenarioFactory.create<AddPaymentMethodActivity>(
-            AddPaymentMethodActivityStarter.Args.Builder()
-                .setPaymentMethodType(PaymentMethod.Type.Card)
-                .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
-                .build()
-        ).use { activityScenario ->
-            activityScenario.onActivity {
-                val iconTextInputLayout = it
-                    .findViewById<CardMultilineWidget>(R.id.card_multiline_widget)
-                    .findViewById<IconTextInputLayout>(R.id.tl_card_number)
-                assertTrue(iconTextInputLayout.hasObtainedCollapsingTextHelper())
+        activityScenarioFactory
+            .createAddPaymentMethodActivity()
+            .use { activityScenario ->
+                activityScenario.onActivity {
+                    val iconTextInputLayout = it
+                        .findViewById<CardMultilineWidget>(R.id.card_multiline_widget)
+                        .findViewById<IconTextInputLayout>(R.id.tl_card_number)
+                    assertTrue(iconTextInputLayout.hasObtainedCollapsingTextHelper())
+                }
             }
-        }
     }
 }

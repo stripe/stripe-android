@@ -12,17 +12,16 @@ import com.stripe.android.PaymentSession
 import com.stripe.android.R
 import com.stripe.android.StripeError
 import com.stripe.android.exception.APIException
-import com.stripe.android.exception.StripeException
 import com.stripe.android.model.PaymentMethod
 
 internal class PaymentMethodsViewModel(
     application: Application,
-    private val customerSession: CustomerSession,
+    private val customerSession: Result<CustomerSession>,
     internal var selectedPaymentMethodId: String? = null,
     private val startedFromPaymentSession: Boolean
 ) : AndroidViewModel(application) {
-    private val context = application.applicationContext
-    private val cardDisplayTextFactory = CardDisplayTextFactory(context)
+    private val resources = application.resources
+    private val cardDisplayTextFactory = CardDisplayTextFactory(application)
 
     internal val productUsage: Set<String> = listOfNotNull(
         PaymentSession.PRODUCT_TOKEN.takeIf { startedFromPaymentSession },
@@ -56,7 +55,7 @@ internal class PaymentMethodsViewModel(
         @StringRes stringRes: Int
     ): String? {
         return paymentMethod.card?.let { paymentMethodId ->
-            context.getString(
+            resources.getString(
                 stringRes,
                 cardDisplayTextFactory.createUnstyled(paymentMethodId)
             )
@@ -64,46 +63,50 @@ internal class PaymentMethodsViewModel(
     }
 
     @JvmSynthetic
-    internal fun getPaymentMethods(): LiveData<Result> {
-        val resultData = MutableLiveData<Result>()
+    internal fun getPaymentMethods(): LiveData<Result<List<PaymentMethod>>> {
+        val resultData = MutableLiveData<Result<List<PaymentMethod>>>()
         progressData.value = true
-        customerSession.getPaymentMethods(
-            paymentMethodType = PaymentMethod.Type.Card,
-            productUsage = productUsage,
-            listener = object : CustomerSession.PaymentMethodsRetrievalListener {
-                override fun onPaymentMethodsRetrieved(paymentMethods: List<PaymentMethod>) {
-                    resultData.value = Result.Success(paymentMethods)
-                    progressData.value = false
-                }
 
-                override fun onError(
-                    errorCode: Int,
-                    errorMessage: String,
-                    stripeError: StripeError?
-                ) {
-                    resultData.value = Result.Error(
-                        APIException(
-                            stripeError = stripeError,
-                            statusCode = errorCode,
-                            message = errorMessage
-                        )
-                    )
-                    progressData.value = false
-                }
+        customerSession.fold(
+            onSuccess = {
+                it.getPaymentMethods(
+                    paymentMethodType = PaymentMethod.Type.Card,
+                    productUsage = productUsage,
+                    listener = object : CustomerSession.PaymentMethodsRetrievalListener {
+                        override fun onPaymentMethodsRetrieved(paymentMethods: List<PaymentMethod>) {
+                            resultData.value = Result.success(paymentMethods)
+                            progressData.value = false
+                        }
+
+                        override fun onError(
+                            errorCode: Int,
+                            errorMessage: String,
+                            stripeError: StripeError?
+                        ) {
+                            resultData.value = Result.failure(
+                                APIException(
+                                    stripeError = stripeError,
+                                    statusCode = errorCode,
+                                    message = errorMessage
+                                )
+                            )
+                            progressData.value = false
+                        }
+                    }
+                )
+            },
+            onFailure = {
+                resultData.value = Result.failure(it)
+                progressData.value = false
             }
         )
 
         return resultData
     }
 
-    internal sealed class Result {
-        data class Success(val paymentMethods: List<PaymentMethod>) : Result()
-        data class Error(val exception: StripeException) : Result()
-    }
-
     internal class Factory(
         private val application: Application,
-        private val customerSession: CustomerSession,
+        private val customerSession: Result<CustomerSession>,
         private val initialPaymentMethodId: String?,
         private val startedFromPaymentSession: Boolean
     ) : ViewModelProvider.Factory {

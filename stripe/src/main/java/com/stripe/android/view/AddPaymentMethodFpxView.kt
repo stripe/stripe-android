@@ -61,10 +61,8 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
             itemAnimator = DefaultItemAnimator()
         }
 
-        viewModel.fpxBankStatuses.observe(activity, Observer {
-            onFpxBankStatusesUpdated(it)
-        })
-        viewModel.loadFpxBankStatues()
+        viewModel.getFpxBankStatues()
+            .observe(activity, Observer(::onFpxBankStatusesUpdated))
 
         viewModel.selectedPosition?.let {
             fpxAdapter.updateSelected(it)

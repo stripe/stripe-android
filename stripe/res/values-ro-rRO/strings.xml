@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="acc_label_card_number">Număr card</string>
+    <string name="acc_label_card_number_node">%s, Număr card</string>
+    <string name="acc_label_cvc_node">%s, Cod de securitate card</string>
+    <string name="acc_label_expiry_date">Data de expirare</string>
+    <string name="acc_label_expiry_date_node">%s, Data de expirare</string>
+    <string name="acc_label_zip">Cod poștal</string>
+    <string name="acc_label_zip_short">Cod poștal</string>
+    <string name="add_card">Adăugați un nou card de debit sau de credit pentru a face achiziții în această aplicație.</string>
+    <string name="added">%s adăugat</string>
+    <string name="address_city_required">Introduceți orașul în care locuiți</string>
+    <string name="address_country_invalid">Țara dvs. nu este validă</string>
+    <string name="address_county_required">Introduceți județul în care locuiți</string>
+    <string name="address_label_address">Adresa</string>
+    <string name="address_label_address_line1">Rândul 1 pentru adresă</string>
+    <string name="address_label_address_line1_optional">Rândul 1 pentru adresă (opțional)</string>
+    <string name="address_label_address_line2">Rândul 2 pentru adresă</string>
+    <string name="address_label_address_line2_optional">Rândul 2 pentru adresă (opțional)</string>
+    <string name="address_label_address_optional">Adresă (opțional)</string>
+    <string name="address_label_apt">Apartament </string>
+    <string name="address_label_apt_optional">Apartament (opțional)</string>
+    <string name="address_label_city">Oraș</string>
+    <string name="address_label_city_optional">Oraș (opțional)</string>
+    <string name="address_label_country">Țară</string>
+    <string name="address_label_county">Județ</string>
+    <string name="address_label_county_optional">Județ (opțional)</string>
+    <string name="address_label_name">Nume</string>
+    <string name="address_label_name_optional">Nume (opțional)</string>
+    <string name="address_label_phone_number">Număr de telefon</string>
+    <string name="address_label_phone_number_optional">Număr de telefon (opțional)</string>
+    <string name="address_label_postal_code">Cod poștal</string>
+    <string name="address_label_postal_code_optional">Cod poștal (opțional)</string>
+    <string name="address_label_postcode">Cod poștal</string>
+    <string name="address_label_postcode_optional">Cod poștal (opțional)</string>
+    <string name="address_label_province">Provincie</string>
+    <string name="address_label_province_optional">Provincie (opțional)</string>
+    <string name="address_label_region_generic">Stat</string>
+    <string name="address_label_region_generic_optional">Stat (opțional)</string>
+    <string name="address_label_state">Stat</string>
+    <string name="address_label_state_optional">Stat (opțional)</string>
+    <string name="address_label_zip_code">Cod poștal</string>
+    <string name="address_label_zip_code_optional">Cod poștal (opțional)</string>
+    <string name="address_label_zip_postal_code">Cod poștal</string>
+    <string name="address_label_zip_postal_code_optional">Cod poștal (opțional)</string>
+    <string name="address_name_required">Introduceți numele dvs.</string>
+    <string name="address_phone_number_required">Introduceți numărul dvs. de telefon</string>
+    <string name="address_postal_code_invalid">Codul dvs. poștal nu este valid</string>
+    <string name="address_postcode_invalid">Codul dvs. poștal nu este valid</string>
+    <string name="address_province_required">Introduceți provincia în care locuiți</string>
+    <string name="address_region_generic_required">Introduceți statul/provincia/regiunea în care locuiți</string>
+    <string name="address_required">Introduceți adresa dvs.</string>
+    <string name="address_shipping_address">Adresa de expediere</string>
+    <string name="address_state_required">Introduceți statul în care locuiți</string>
+    <string name="address_zip_invalid">Codul dvs. poștal nu este valid.</string>
+    <string name="address_zip_postal_invalid">Codul dvs. poștal nu este valid</string>
+    <string name="becs_mandate_acceptance">
+    Prin furnizarea detaliilor contului dvs. bancar și confirmarea acestei plăți, sunteți de acord cu această
+    Solicitare Direct Debit și cu acordul de serviciu privind Solicitarea Direct Debit și autorizați
+    Plățile Stripe Australia Pty Ltd ACN 160 180 343 număr ID utilizator Direct Debit 507156
+    („Stripe”) trebuie să vă debiteze contul prin intermediul Sistemului electronic de compensare colectivă (BECS)
+    în numele %1$s („Comerciantul”) pentru orice sume comunicate separat către dvs.
+    de către Comerciant. Certificați faptul că sunteți fie un titular de cont, fie un semnatar
+    autorizat în contul enumerat mai sus.
+    </string>
+    <string name="becs_widget_account_number">Număr cont</string>
+    <string name="becs_widget_account_number_required">Este necesar numărul dvs. de cont.</string>
+    <string name="becs_widget_bsb">Număr BSB</string>
+    <string name="becs_widget_bsb_incomplete">Numărul BSB pe care l-ați introdus nu este complet.</string>
+    <string name="becs_widget_bsb_invalid">Numărul BSB pe care l-ați introdus nu este valid.</string>
+    <string name="becs_widget_email">Adresa de e-mail</string>
+    <string name="becs_widget_email_required">Este necesară adresa dvs. de e-mail.</string>
+    <string name="becs_widget_name">Nume</string>
+    <string name="becs_widget_name_required">Este necesar numele dvs.</string>
+    <string name="close">Închidere</string>
+    <string name="delete_payment_method">Ștergeți metoda de plată?</string>
+    <string name="delete_payment_method_prompt_title">Ștergeți metoda de plată?</string>
+    <string name="expiry_date_hint">LL/AA</string>
+    <string name="expiry_label_short">Data de expirare</string>
+    <string name="fpx_bank_offline">%s - Offline</string>
+    <string name="google_pay">Google Pay</string>
+    <string name="invalid_card_number">Numărul cardului dvs. nu este valid.</string>
+    <string name="invalid_cvc">Codul de securitate al cardului dvs. nu este valid.</string>
+    <string name="invalid_expiry_month">Luna de expirare a cardului dvs. nu este validă.</string>
+    <string name="invalid_expiry_year">Anul de expirare al cardului dvs. nu este valid.</string>
+    <string name="invalid_shipping_information">Adresa de expediere nu este validă</string>
+    <string name="invalid_zip">Codul dvs. poștal nu este complet.</string>
+    <string name="no_payment_methods">Nu există metode de plată.</string>
+    <string name="payment_method_add_new_card">Adăugare card nou...</string>
+    <string name="payment_method_add_new_fpx">Selectare cont bancar (FPX)…</string>
+    <string name="price_free">Gratis</string>
+    <string name="removed">%s eliminat</string>
+    <string name="secure_checkout">Validare securizată</string>
+    <string name="title_add_a_card">Adăugare card</string>
+    <string name="title_add_an_address">Adăugare adresă</string>
+    <string name="title_bank_account">Cont bancar</string>
+    <string name="title_payment_method">Metoda de plată</string>
+    <string name="title_select_shipping_method">Selectare metodă de plată</string>
+</resources>

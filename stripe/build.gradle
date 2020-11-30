@@ -1,9 +1,9 @@
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
-    id 'kotlin-android-extensions'
     id 'checkstyle'
-    id 'org.jetbrains.dokka-android'
+    id 'org.jetbrains.dokka'
+    id 'org.jetbrains.kotlin.plugin.parcelize'
 
     id 'maven'
     id 'signing'
@@ -23,50 +23,62 @@ configurations {
 
 dependencies {
     implementation 'androidx.annotation:annotation:1.1.0'
-    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
-    implementation "androidx.lifecycle:lifecycle-viewmodel:$androidLifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidLifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:$androidLifecycleVersion"
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
+    implementation "androidx.fragment:fragment-ktx:$fragmentVersion"
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+
+    implementation 'com.google.android.gms:play-services-wallet:18.1.2'
 
     // Api for this import because we use reflection to alter TextInputLayout
-    api 'com.google.android.material:material:1.1.0'
+    api "com.google.android.material:material:$materialVersion"
 
-    implementation "com.stripe:stripe-3ds2-android:2.7.2"
+    implementation "com.stripe:stripe-3ds2-android:4.1.2"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
 
     javadocDeps 'androidx.annotation:annotation:1.1.0'
-    javadocDeps 'androidx.appcompat:appcompat:1.1.0'
-    javadocDeps 'com.google.android.material:material:1.1.0'
+    javadocDeps 'androidx.appcompat:appcompat:1.2.0'
+    javadocDeps "com.google.android.material:material:$materialVersion"
 
-    testImplementation 'junit:junit:4.13'
-    testImplementation "org.mockito:mockito-core:3.3.3"
-    testImplementation 'org.robolectric:robolectric:4.3.1'
-    testImplementation 'androidx.test:core:1.2.0'
-    testImplementation 'org.json:json:20190722'
+    testImplementation 'junit:junit:4.13.1'
+    testImplementation "org.mockito:mockito-core:3.6.0"
+    testImplementation 'org.robolectric:robolectric:4.4'
+    testImplementation "androidx.test:core:$androidTestVersion"
+    testImplementation 'org.json:json:20201115'
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlinVersion"
-    testImplementation 'com.google.truth:truth:1.0.1'
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
+    testImplementation 'com.google.truth:truth:1.1'
+    testImplementation "androidx.arch.core:core-testing:2.1.0"
+    testImplementation "androidx.fragment:fragment-testing:$fragmentVersion"
 
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    androidTestImplementation 'androidx.test:rules:1.2.0'
-    androidTestImplementation 'androidx.test:runner:1.2.0'
-    androidTestUtil 'androidx.test:orchestrator:1.2.0'
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
+    androidTestImplementation "androidx.test:rules:$androidTestVersion"
+    androidTestImplementation "androidx.test:runner:$androidTestVersion"
+    androidTestUtil "androidx.test:orchestrator:$androidTestVersion"
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
+
+    dokkaHtmlPlugin("org.jetbrains.dokka:dokka-base:$dokkaVersion")
 }
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
     defaultConfig {
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion rootProject.ext.compileSdkVersion
         consumerProguardFiles 'proguard-rules.txt'
+
+        vectorDrawables.useSupportLibrary = true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments clearPackageData: 'true'
@@ -77,6 +89,9 @@ android {
             res.srcDirs = ['res']
             assets.srcDirs = ['assets']
         }
+        main.kotlin.srcDirs += 'src/main/java'
+        main.java.srcDirs += 'src/main/java'
+
         test {
 
         }
@@ -95,19 +110,21 @@ android {
         lintConfig file("../settings/lint.xml")
     }
 
-    dokka {
-        outputFormat = 'html'
+    dokkaHtml {
         outputDirectory = "${project.rootDir}/docs/"
     }
 
-    viewBinding {
-        enabled = true
+    buildFeatures {
+        viewBinding true
     }
-}
 
-androidExtensions {
-    features = ['parcelize']
-    experimental = true
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 }
 
 task ktlint(type: JavaExec, group: "verification") {
