@@ -1,10 +1,13 @@
 package com.stripe.android.paymentsheet
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.CheckBox
 import androidx.annotation.VisibleForTesting
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import com.stripe.android.R
@@ -20,7 +23,7 @@ import com.stripe.android.view.CardMultilineWidget
 /**
  * A `Fragment` for adding new card payment method.
  */
-internal abstract class BaseAddCardFragment : Fragment(R.layout.fragment_paymentsheet_add_card) {
+internal abstract class BaseAddCardFragment : Fragment() {
     abstract val sheetViewModel: SheetViewModel<*, *>
 
     private var _viewBinding: FragmentPaymentsheetAddCardBinding? = null
@@ -47,6 +50,21 @@ internal abstract class BaseAddCardFragment : Fragment(R.layout.fragment_payment
                 PaymentMethodCreateParams.createCard(it)
             }
         }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val themedInflater = inflater.cloneInContext(
+            ContextThemeWrapper(requireActivity(), R.style.StripePaymentSheetAddCardTheme)
+        )
+        return themedInflater.inflate(
+            R.layout.fragment_paymentsheet_add_card,
+            container,
+            false
+        )
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

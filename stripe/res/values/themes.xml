@@ -23,4 +23,10 @@
     </style>
 
     <style name="StripePaymentSheetDefaultTheme" parent="StripePaymentSheetBaseTheme" />
+
+    <!-- Required so that keyboard does not cover bottom sheet -->
+    <style name="StripePaymentSheetAddCardTheme">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
+    </style>
 </resources>
