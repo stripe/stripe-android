@@ -10,24 +10,44 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <TextView
-            android:id="@+id/add_card_header"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/top_container"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/stripe_paymentsheet_add_payment_method_title"
-            style="@style/StripePaymentSheetTitle"
+            android:orientation="vertical"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/card_multiline_widget"
+            app:layout_constraintBottom_toTopOf="@+id/card_info_label"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintVertical_bias="0"
-            app:layout_constraintVertical_chainStyle="spread_inside"/>
+            app:layout_constraintVertical_chainStyle="spread_inside">
+            <TextView
+                android:id="@+id/add_card_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/stripe_paymentsheet_add_payment_method_title"
+                style="@style/StripePaymentSheetTitle"/>
+
+            <com.stripe.android.paymentsheet.ui.GooglePayButton
+                android:id="@+id/google_pay_button"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <com.stripe.android.paymentsheet.ui.GooglePayDivider
+                android:id="@+id/google_pay_divider"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
 
         <TextView
+            android:id="@+id/card_info_label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/stripe_paymentsheet_add_payment_method_card_information"
             style="@style/StripePaymentSheetLabel"
-            app:layout_constraintTop_toBottomOf="@+id/add_card_header"
+            app:layout_constraintTop_toBottomOf="@+id/top_container"
             app:layout_constraintBottom_toTopOf="@+id/card_multiline_widget"
             app:layout_constraintStart_toStartOf="parent" />
 
@@ -35,8 +55,8 @@
             android:id="@+id/card_multiline_widget"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@+id/add_card_header"
-            app:layout_constraintBottom_toTopOf="@+id/save_card_checkbox"
+            app:layout_constraintTop_toBottomOf="@+id/card_info_label"
+            app:layout_constraintBottom_toTopOf="@+id/billing_address_label"
             app:layout_constraintStart_toStartOf="parent"
             app:shouldShowPostalCode="false" />
 
