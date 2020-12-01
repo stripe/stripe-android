@@ -107,6 +107,17 @@ class PaymentSheetPaymentMethodsListFragmentTest {
         }
     }
 
+    @Test
+    fun `updateHeader() should update header view`() {
+        createScenario().onFragment { fragment ->
+            assertThat(fragment.header.text.toString())
+                .isEqualTo("Pay using")
+            fragment.updateHeader(amount = 1099, currencyCode = "usd")
+            assertThat(fragment.header.text.toString())
+                .isEqualTo("Pay $10.99 using")
+        }
+    }
+
     private fun recyclerView(it: PaymentSheetPaymentMethodsListFragment) =
         it.requireView().findViewById<RecyclerView>(R.id.recycler)
 

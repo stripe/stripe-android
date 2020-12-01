@@ -2,7 +2,12 @@ package com.stripe.android.paymentsheet
 
 import android.os.Bundle
 import android.view.View
+import android.widget.TextView
+import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.activityViewModels
+import com.stripe.android.R
+import java.util.Currency
+import java.util.Locale
 
 internal class PaymentSheetPaymentMethodsListFragment : BasePaymentMethodsListFragment() {
     private val activityViewModel by activityViewModels<PaymentSheetViewModel> {
@@ -18,6 +23,10 @@ internal class PaymentSheetPaymentMethodsListFragment : BasePaymentMethodsListFr
 
     override val sheetViewModel: PaymentSheetViewModel by lazy { activityViewModel }
 
+    private val currencyFormatter = CurrencyFormatter()
+
+    internal val header: TextView by lazy { viewBinding.header }
+
     override fun transitionToAddPaymentMethod() {
         activityViewModel.transitionTo(
             PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull
@@ -31,5 +40,27 @@ internal class PaymentSheetPaymentMethodsListFragment : BasePaymentMethodsListFr
         if (activityViewModel.paymentMethods.value == null) {
             activityViewModel.updatePaymentMethods()
         }
+
+        viewBinding.header.setText(R.string.stripe_paymentsheet_pay_using)
+        activityViewModel.paymentIntent
+            .observe(viewLifecycleOwner) { paymentIntent ->
+                if (paymentIntent == null) {
+                    // ignore null
+                } else if (paymentIntent.currency != null && paymentIntent.amount != null) {
+                    updateHeader(paymentIntent.amount, paymentIntent.currency)
+                }
+            }
+    }
+
+    @VisibleForTesting
+    internal fun updateHeader(
+        amount: Long,
+        currencyCode: String
+    ) {
+        val currency = Currency.getInstance(currencyCode.toUpperCase(Locale.ROOT))
+        header.text = getString(
+            R.string.stripe_paymentsheet_pay_using_with_amount,
+            currencyFormatter.format(amount, currency)
+        )
     }
 }

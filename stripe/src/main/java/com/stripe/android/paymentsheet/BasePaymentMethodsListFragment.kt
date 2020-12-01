@@ -32,6 +32,9 @@ internal abstract class BasePaymentMethodsListFragment : Fragment(
         )
     }
 
+    private var _viewBinding: FragmentPaymentsheetPaymentMethodsListBinding? = null
+    protected val viewBinding get() = requireNotNull(_viewBinding)
+
     abstract fun transitionToAddPaymentMethod()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -43,17 +46,22 @@ internal abstract class BasePaymentMethodsListFragment : Fragment(
         // reset the mode in case we're returning from the back stack
         sheetViewModel.updateMode(SheetMode.Wrapped)
 
-        val binding = FragmentPaymentsheetPaymentMethodsListBinding.bind(view)
-        binding.recycler.layoutManager = LinearLayoutManager(
+        _viewBinding = FragmentPaymentsheetPaymentMethodsListBinding.bind(view)
+        viewBinding.recycler.layoutManager = LinearLayoutManager(
             activity,
             LinearLayoutManager.HORIZONTAL,
             false
         )
-        binding.recycler.adapter = adapter
+        viewBinding.recycler.adapter = adapter
 
         sheetViewModel.paymentMethods.observe(viewLifecycleOwner) { paymentMethods ->
             adapter.paymentMethods = paymentMethods
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _viewBinding = null
     }
 
     internal class PaymentMethodsViewModel : ViewModel() {
