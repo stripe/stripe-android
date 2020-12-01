@@ -47,15 +47,6 @@ internal class AddButton @JvmOverloads constructor(
         viewBinding.confirmingIcon.visibility = View.GONE
     }
 
-    fun onProcessingState() {
-        viewBinding.lockIcon.visibility = View.GONE
-        viewBinding.confirmingIcon.visibility = View.VISIBLE
-
-        viewBinding.label.text = resources.getString(
-            R.string.stripe_paymentsheet_pay_button_processing
-        )
-    }
-
     fun onCompletedState(state: PaymentOptionViewState.Completed) {
         viewBinding.lockIcon.visibility = View.GONE
         viewBinding.confirmingIcon.visibility = View.VISIBLE
