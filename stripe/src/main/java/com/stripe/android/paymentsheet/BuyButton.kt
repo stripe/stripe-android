@@ -4,12 +4,12 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.FrameLayout
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.distinctUntilChanged
 import com.stripe.android.R
 import com.stripe.android.databinding.PaymentSheetBuyButtonBinding
 import com.stripe.android.paymentsheet.model.ViewState
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import java.util.Currency
 import java.util.Locale
@@ -21,7 +21,7 @@ internal class BuyButton @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : FrameLayout(context, attrs, defStyleAttr) {
+) : PrimaryButton<ViewState>(context, attrs, defStyleAttr) {
     private val animator = PrimaryButtonAnimator(context)
 
     internal val viewBinding = PaymentSheetBuyButtonBinding.inflate(
@@ -95,16 +95,16 @@ internal class BuyButton @JvmOverloads constructor(
         }
     }
 
-    fun updateState(state: ViewState) {
-        when (state) {
+    override fun updateState(viewState: ViewState) {
+        when (viewState) {
             is ViewState.Ready -> {
-                onReadyState(state)
+                onReadyState(viewState)
             }
             ViewState.Confirming -> {
                 onConfirmingState()
             }
             is ViewState.Completed -> {
-                onCompletedState(state)
+                onCompletedState(viewState)
             }
         }
     }
