@@ -8,9 +8,9 @@
     tools:context=".paymentsheet.PaymentSheetPaymentMethodsListFragment">
 
     <TextView
+        android:id="@+id/header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/stripe_paymentsheet_pay_using"
         style="@style/StripePaymentSheetTitle"
         />
 
