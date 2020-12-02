@@ -17,6 +17,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripePaymentController
+import com.stripe.android.googlepay.StripeGooglePayLauncher
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -25,6 +26,7 @@ import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.model.AddPaymentMethodConfig
 import com.stripe.android.paymentsheet.model.ConfirmParamsFactory
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
@@ -139,30 +141,41 @@ internal class PaymentSheetViewModel internal constructor(
     fun checkout(activity: Activity) {
         mutableProcessing.value = true
 
-        val confirmParams = selection.value?.let { paymentSelection ->
-            confirmParamsFactory.create(
-                args.clientSecret,
-                paymentSelection,
-                shouldSavePaymentMethod
-            )
-        }
-
-        when {
-            confirmParams != null -> {
-                mutableViewState.value = ViewState.Confirming
-                paymentController.startConfirmAndAuth(
-                    AuthActivityStarter.Host.create(activity),
-                    confirmParams,
-                    ApiRequest.Options(
-                        apiKey = publishableKey,
-                        stripeAccount = stripeAccountId
+        if (selection.value == PaymentSelection.GooglePay) {
+            paymentIntent.value?.let { paymentIntent ->
+                StripeGooglePayLauncher(activity).startForResult(
+                    StripeGooglePayLauncher.Args(
+                        paymentIntent = paymentIntent,
+                        countryCode = "US" // TODO(mshafrir-stripe): don't hardcode country
                     )
                 )
             }
-            else -> {
-                onError(
-                    IllegalStateException("checkout called when no payment method selected")
+        } else {
+            val confirmParams = selection.value?.let { paymentSelection ->
+                confirmParamsFactory.create(
+                    args.clientSecret,
+                    paymentSelection,
+                    shouldSavePaymentMethod
                 )
+            }
+
+            when {
+                confirmParams != null -> {
+                    mutableViewState.value = ViewState.Confirming
+                    paymentController.startConfirmAndAuth(
+                        AuthActivityStarter.Host.create(activity),
+                        confirmParams,
+                        ApiRequest.Options(
+                            apiKey = publishableKey,
+                            stripeAccount = stripeAccountId
+                        )
+                    )
+                }
+                else -> {
+                    onError(
+                        IllegalStateException("checkout called when no payment method selected")
+                    )
+                }
             }
         }
     }
@@ -181,6 +194,24 @@ internal class PaymentSheetViewModel internal constructor(
                     }
                 }
             )
+        }
+
+        if (requestCode == StripeGooglePayLauncher.REQUEST_CODE &&
+            resultCode == Activity.RESULT_OK && data != null
+        ) {
+            onGooglePayResult(data)
+        }
+    }
+
+    private fun onGooglePayResult(data: Intent) {
+        val googlePayResult = StripeGooglePayLauncher.Result.fromIntent(data)
+        when (googlePayResult) {
+            is StripeGooglePayLauncher.Result.PaymentIntent -> {
+                mutableViewState.value = ViewState.Completed(googlePayResult.paymentIntentResult)
+            }
+            else -> {
+                // TODO(mshafrir-stripe): handle error
+            }
         }
     }
 
