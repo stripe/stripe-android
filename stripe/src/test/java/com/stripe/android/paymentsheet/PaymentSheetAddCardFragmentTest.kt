@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.widget.CheckBox
 import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
@@ -11,7 +12,10 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.model.Address
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.model.AddPaymentMethodConfig
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Before
 import org.junit.Test
@@ -89,6 +93,41 @@ class PaymentSheetAddCardFragmentTest {
                         )
                     )
                 )
+        }
+    }
+
+    @Test
+    fun `when isGooglePayEnabled=true should configure Google Pay button`() {
+        createScenario().onFragment { fragment ->
+            val activityViewModel = activityViewModel(
+                fragment,
+                PaymentSheetFixtures.DEFAULT_ARGS
+            )
+
+            fragment.onConfigReady(
+                AddPaymentMethodConfig(
+                    paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
+                    paymentMethods = emptyList(),
+                    isGooglePayReady = true
+                )
+            )
+            idleLooper()
+
+            val paymentSelections = mutableListOf<PaymentSelection>()
+            activityViewModel.selection.observeForever { paymentSelection ->
+                if (paymentSelection != null) {
+                    paymentSelections.add(paymentSelection)
+                }
+            }
+
+            assertThat(fragment.googlePayButton.isVisible)
+                .isTrue()
+
+            fragment.googlePayButton.performClick()
+            idleLooper()
+
+            assertThat(paymentSelections)
+                .containsExactly(PaymentSelection.GooglePay)
         }
     }
 

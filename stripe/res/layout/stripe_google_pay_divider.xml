@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_margin="12dp"
+        android:background="@color/stripe_paymentsheet_googlepay_divider_line" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="2dp"
+        android:background="@color/stripe_paymentsheet_googlepay_divider_background"
+        android:textColor="@color/stripe_paymentsheet_googlepay_divider_text"
+        android:layout_centerHorizontal="true"
+        android:textSize="14sp"
+        android:text="@string/stripe_paymentsheet_or_pay_with" />
+</merge>

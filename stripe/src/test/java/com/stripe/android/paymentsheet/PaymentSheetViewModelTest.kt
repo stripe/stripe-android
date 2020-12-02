@@ -23,6 +23,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentsheet.model.AddPaymentMethodConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.ViewState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -241,13 +242,32 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `isGooglePayReady() should emit expected value`() {
+    fun `isGooglePayReady should emit expected value`() {
         var isReady: Boolean? = null
-        viewModel.isGooglePayReady().observeForever {
+        viewModel.isGooglePayReady.observeForever {
             isReady = it
         }
+        viewModel.fetchIsGooglePayReady()
         assertThat(isReady)
             .isTrue()
+    }
+
+    @Test
+    fun `fetchAddPaymentMethodConfig() when all data is ready should emit value`() {
+        viewModel.fetchPaymentIntent()
+        viewModel.fetchIsGooglePayReady()
+        viewModel.updatePaymentMethods()
+
+        val configs = mutableListOf<AddPaymentMethodConfig>()
+        viewModel.fetchAddPaymentMethodConfig().observeForever { config ->
+            if (config != null) {
+                configs.add(config)
+            }
+        }
+        viewModel.fetchAddPaymentMethodConfig()
+
+        assertThat(configs)
+            .hasSize(1)
     }
 
     private class FakeStripeRepository(
@@ -257,7 +277,7 @@ internal class PaymentSheetViewModelTest {
             clientSecret: String,
             options: ApiRequest.Options,
             expandFields: List<String>
-        ): PaymentIntent? {
+        ): PaymentIntent {
             return paymentIntent
         }
 

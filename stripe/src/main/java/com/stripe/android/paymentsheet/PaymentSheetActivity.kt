@@ -72,7 +72,10 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
             finish()
             return
         }
-        val fragmentArgs = bundleOf(EXTRA_STARTER_ARGS to starterArgs)
+
+        viewModel.fetchIsGooglePayReady()
+        viewModel.updatePaymentMethods()
+        viewModel.fetchPaymentIntent()
 
         setContentView(viewBinding.root)
 
@@ -120,15 +123,16 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         supportFragmentManager.commit {
             replace(
                 fragmentContainerId,
-                PaymentSheetLoadingFragment().also {
-                    it.arguments = fragmentArgs
-                }
+                PaymentSheetLoadingFragment()
             )
         }
 
         viewModel.transition.observe(this) { transitionTarget ->
             if (transitionTarget != null) {
-                onTransitionTarget(transitionTarget, fragmentArgs)
+                onTransitionTarget(
+                    transitionTarget,
+                    bundleOf(EXTRA_STARTER_ARGS to starterArgs)
+                )
             }
         }
 
@@ -142,6 +146,17 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
                         PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod
                     )
                 }
+            }
+        }
+
+        viewModel.fetchAddPaymentMethodConfig().observe(this) { config ->
+            if (config != null) {
+                val target = if (config.paymentMethods.isEmpty()) {
+                    PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet
+                } else {
+                    PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod
+                }
+                viewModel.transitionTo(target)
             }
         }
     }
