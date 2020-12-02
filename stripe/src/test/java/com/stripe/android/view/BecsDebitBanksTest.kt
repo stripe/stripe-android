@@ -30,7 +30,7 @@ class BecsDebitBanksTest {
     @Test
     fun shouldIncludeTestBank_shouldConditionallyAddTestBank() {
         val testBank = BecsDebitBanks(
-            context = ApplicationProvider.getApplicationContext<Context>(),
+            context = ApplicationProvider.getApplicationContext(),
             shouldIncludeTestBank = true
         ).byPrefix("STRIPE")
         assertThat(testBank)
