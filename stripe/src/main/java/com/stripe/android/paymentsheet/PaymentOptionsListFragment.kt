@@ -19,6 +19,9 @@ internal class PaymentOptionsListFragment : BasePaymentMethodsListFragment() {
 
     override val sheetViewModel: PaymentOptionsViewModel by lazy { activityViewModel }
 
+    // TODO(mshafrir-stripe): implement
+    override val shouldShowGooglePay: Boolean = false
+
     override fun transitionToAddPaymentMethod() {
         activityViewModel.transitionTo(
             PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodFull

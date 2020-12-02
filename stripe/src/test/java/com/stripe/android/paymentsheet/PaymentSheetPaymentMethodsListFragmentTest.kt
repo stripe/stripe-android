@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.core.os.bundleOf
+import androidx.core.view.children
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
@@ -42,11 +43,12 @@ class PaymentSheetPaymentMethodsListFragmentTest {
         val scenario = createScenario()
         scenario.onFragment {
             assertThat(activityViewModel(it).selection.value).isNull()
-            fragmentViewModel(it).selectedPaymentMethod = savedPaymentMethod
+            fragmentViewModel(it).currentPaymentSelection = savedPaymentMethod
         }
         scenario.recreate()
         scenario.onFragment {
-            assertThat(activityViewModel(it).selection.value).isEqualTo(savedPaymentMethod)
+            assertThat(activityViewModel(it).selection.value)
+                .isEqualTo(savedPaymentMethod)
         }
     }
 
@@ -81,15 +83,15 @@ class PaymentSheetPaymentMethodsListFragmentTest {
             adapter.paymentMethodSelectedListener(savedPaymentMethod)
             idleLooper()
 
-            assertThat(fragmentViewModel(it).selectedPaymentMethod).isEqualTo(savedPaymentMethod)
-            assertThat(activityViewModel.selection.value).isEqualTo(savedPaymentMethod)
+            assertThat(fragmentViewModel(it).currentPaymentSelection)
+                .isEqualTo(savedPaymentMethod)
+            assertThat(activityViewModel.selection.value)
+                .isEqualTo(savedPaymentMethod)
         }
     }
 
     @Test
     fun `posts transition when add card clicked`() {
-        val savedPaymentMethod = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-
         createScenario().onFragment {
             val activityViewModel = activityViewModel(it)
             assertThat(activityViewModel.transition.value).isNull()
@@ -103,7 +105,28 @@ class PaymentSheetPaymentMethodsListFragmentTest {
             adapter.addCardClickListener.onClick(it.requireView())
             idleLooper()
 
-            assertThat(activityViewModel.transition.value).isEqualTo(PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull)
+            assertThat(activityViewModel.transition.value)
+                .isEqualTo(PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull)
+        }
+    }
+
+    @Test
+    fun `click on GooglePay item should update selection`() {
+        createScenario().onFragment { fragment ->
+            val activityViewModel = activityViewModel(fragment)
+            activityViewModel.setPaymentMethods(paymentMethods)
+            idleLooper()
+
+            val recycler = recyclerView(fragment)
+            val adapter = recycler.adapter as PaymentMethodsAdapter
+            adapter.shouldShowGooglePay = true
+            idleLooper()
+
+            val googlePayView = recycler.children.toList()[1]
+            googlePayView.performClick()
+
+            assertThat(activityViewModel.selection.value)
+                .isEqualTo(PaymentSelection.GooglePay)
         }
     }
 
@@ -121,7 +144,9 @@ class PaymentSheetPaymentMethodsListFragmentTest {
     private fun recyclerView(it: PaymentSheetPaymentMethodsListFragment) =
         it.requireView().findViewById<RecyclerView>(R.id.recycler)
 
-    private fun activityViewModel(fragment: PaymentSheetPaymentMethodsListFragment): PaymentSheetViewModel {
+    private fun activityViewModel(
+        fragment: PaymentSheetPaymentMethodsListFragment
+    ): PaymentSheetViewModel {
         return fragment.activityViewModels<PaymentSheetViewModel> {
             PaymentSheetViewModel.Factory(
                 { fragment.requireActivity().application },
