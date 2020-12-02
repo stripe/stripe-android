@@ -50,6 +50,6 @@ internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
     }
 
     fun updateSelection(selection: PaymentSelection?) {
-        mutableSelection.postValue(selection)
+        mutableSelection.value = selection
     }
 }

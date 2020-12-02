@@ -46,6 +46,6 @@ internal class PaymentSheetAddCardFragment : BaseAddCardFragment() {
 
     private fun launchGooglePay() {
         sheetViewModel.updateSelection(PaymentSelection.GooglePay)
-        // TODO(mshafrir-stripe): start Google Pay
+        sheetViewModel.checkout(requireActivity())
     }
 }
