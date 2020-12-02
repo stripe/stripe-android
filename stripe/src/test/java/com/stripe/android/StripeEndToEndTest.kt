@@ -215,7 +215,11 @@ internal class StripeEndToEndTest {
     private fun createStripeWithTestScope(
         publishableKey: String = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     ): Stripe {
-        val stripeRepository = StripeApiRepository(context, publishableKey)
+        val stripeRepository = StripeApiRepository(
+            context,
+            publishableKey,
+            workContext = testDispatcher
+        )
         return Stripe(
             stripeRepository = stripeRepository,
             paymentController = StripePaymentController.create(
