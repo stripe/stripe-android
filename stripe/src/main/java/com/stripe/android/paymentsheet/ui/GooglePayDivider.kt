@@ -3,20 +3,19 @@ package com.stripe.android.paymentsheet.ui
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.widget.FrameLayout
-import com.stripe.android.databinding.StripeGooglePayButtonBlackBinding
+import android.widget.RelativeLayout
+import com.stripe.android.databinding.StripeGooglePayDividerBinding
 
-class GooglePayButton @JvmOverloads constructor(
+internal class GooglePayDivider @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : FrameLayout(context, attrs, defStyleAttr) {
+) : RelativeLayout(context, attrs, defStyleAttr) {
 
     init {
-        StripeGooglePayButtonBlackBinding.inflate(
+        StripeGooglePayDividerBinding.inflate(
             LayoutInflater.from(context),
-            this,
-            true
+            this
         )
     }
 }

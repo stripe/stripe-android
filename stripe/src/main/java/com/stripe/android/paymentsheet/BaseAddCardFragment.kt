@@ -27,7 +27,7 @@ internal abstract class BaseAddCardFragment : Fragment() {
     abstract val sheetViewModel: SheetViewModel<*, *>
 
     private var _viewBinding: FragmentPaymentsheetAddCardBinding? = null
-    private val viewBinding get() = requireNotNull(_viewBinding)
+    protected val viewBinding get() = requireNotNull(_viewBinding)
 
     @VisibleForTesting
     internal val cardMultilineWidget: CardMultilineWidget by lazy {
