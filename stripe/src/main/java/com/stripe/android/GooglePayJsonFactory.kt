@@ -152,7 +152,9 @@ class GooglePayJsonFactory constructor(
                         "totalPrice",
                         PayWithGoogleUtils.getPriceString(
                             it,
-                            Currency.getInstance(transactionInfo.currencyCode)
+                            Currency.getInstance(
+                                transactionInfo.currencyCode.toUpperCase(Locale.ROOT)
+                            )
                         )
                     )
                 }
