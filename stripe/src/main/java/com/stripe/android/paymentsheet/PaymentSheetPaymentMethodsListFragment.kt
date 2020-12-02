@@ -23,6 +23,10 @@ internal class PaymentSheetPaymentMethodsListFragment : BasePaymentMethodsListFr
 
     override val sheetViewModel: PaymentSheetViewModel by lazy { activityViewModel }
 
+    override val shouldShowGooglePay: Boolean by lazy {
+        sheetViewModel.isGooglePayReady.value == true
+    }
+
     private val currencyFormatter = CurrencyFormatter()
 
     internal val header: TextView by lazy { viewBinding.header }

@@ -17,19 +17,23 @@ internal abstract class BasePaymentMethodsListFragment : Fragment(
 ) {
     abstract val sheetViewModel: SheetViewModel<*, *>
 
-    private val fragmentViewModel by viewModels<PaymentMethodsViewModel>()
+    abstract val shouldShowGooglePay: Boolean
+
+    internal val fragmentViewModel by viewModels<PaymentMethodsViewModel>()
 
     protected val adapter: PaymentMethodsAdapter by lazy {
         PaymentMethodsAdapter(
-            fragmentViewModel.selectedPaymentMethod,
+            fragmentViewModel.currentPaymentSelection,
             paymentMethodSelectedListener = {
-                fragmentViewModel.selectedPaymentMethod = it
+                fragmentViewModel.currentPaymentSelection = it
                 sheetViewModel.updateSelection(it)
             },
             addCardClickListener = {
                 transitionToAddPaymentMethod()
             }
-        )
+        ).also {
+            it.shouldShowGooglePay = shouldShowGooglePay
+        }
     }
 
     private var _viewBinding: FragmentPaymentsheetPaymentMethodsListBinding? = null
@@ -42,7 +46,7 @@ internal abstract class BasePaymentMethodsListFragment : Fragment(
 
         // If we're returning to this fragment from elsewhere, we need to reset the selection to
         // whatever the user had selected previously
-        sheetViewModel.updateSelection(fragmentViewModel.selectedPaymentMethod)
+        sheetViewModel.updateSelection(fragmentViewModel.currentPaymentSelection)
         // reset the mode in case we're returning from the back stack
         sheetViewModel.updateMode(SheetMode.Wrapped)
 
@@ -65,6 +69,6 @@ internal abstract class BasePaymentMethodsListFragment : Fragment(
     }
 
     internal class PaymentMethodsViewModel : ViewModel() {
-        internal var selectedPaymentMethod: PaymentSelection? = null
+        internal var currentPaymentSelection: PaymentSelection? = null
     }
 }
