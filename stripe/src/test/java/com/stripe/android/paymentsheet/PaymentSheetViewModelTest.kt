@@ -242,6 +242,37 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun `fetchPaymentIntent() should fail if confirmationMethod=manual`() {
+        val viewModel = PaymentSheetViewModel(
+            "publishable_key",
+            "stripe_account_id",
+            object : AbsFakeStripeRepository() {
+                override suspend fun retrievePaymentIntent(
+                    clientSecret: String,
+                    options: ApiRequest.Options,
+                    expandFields: List<String>
+                ): PaymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.copy(
+                    confirmationMethod = PaymentIntent.ConfirmationMethod.Manual
+                )
+            },
+            paymentController,
+            googlePayRepository,
+            DEFAULT_ARGS,
+            workContext = testCoroutineDispatcher
+        )
+        var error: Throwable? = null
+        viewModel.error.observeForever {
+            error = it
+        }
+        viewModel.fetchPaymentIntent()
+        assertThat(error?.message)
+            .isEqualTo(
+                "PaymentIntent with confirmation_method='automatic' is required.\n" +
+                    "See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-confirmation_method."
+            )
+    }
+
+    @Test
     fun `isGooglePayReady should emit expected value`() {
         var isReady: Boolean? = null
         viewModel.isGooglePayReady.observeForever {
@@ -271,7 +302,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     private class FakeStripeRepository(
-        val paymentIntent: PaymentIntent
+        var paymentIntent: PaymentIntent
     ) : AbsFakeStripeRepository() {
         override suspend fun retrievePaymentIntent(
             clientSecret: String,
