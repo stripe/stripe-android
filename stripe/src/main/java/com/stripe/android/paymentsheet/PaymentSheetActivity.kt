@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -12,6 +13,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.databinding.ActivityPaymentSheetBinding
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BasePaymentSheetActivity
 import com.stripe.android.paymentsheet.ui.SheetMode
@@ -221,9 +223,17 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         }
 
         viewModel.selection.observe(this) { paymentSelection ->
-            // TODO(smaskell): show Google Pay button when GooglePay selected
+            val shouldShowGooglePay = paymentSelection == PaymentSelection.GooglePay
+
+            viewBinding.googlePayButton.isVisible = shouldShowGooglePay
+            viewBinding.buyButton.isVisible = !shouldShowGooglePay
             viewBinding.buyButton.isEnabled = paymentSelection != null
         }
+
+        viewBinding.googlePayButton.setOnClickListener {
+            viewModel.checkout(this)
+        }
+
         viewBinding.buyButton.setOnClickListener {
             viewModel.checkout(this)
         }

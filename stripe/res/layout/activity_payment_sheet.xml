@@ -21,7 +21,7 @@
             android:orientation="vertical"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/buy_button"
+            app:layout_constraintBottom_toTopOf="@+id/button_container"
             app:layout_constraintVertical_bias="0">
             <com.stripe.android.paymentsheet.ui.Toolbar
                 android:id="@+id/toolbar"
@@ -36,14 +36,25 @@
                 android:layout_weight="1" />
         </LinearLayout>
 
-        <com.stripe.android.paymentsheet.BuyButton
-            android:id="@+id/buy_button"
-            android:layout_margin="@dimen/stripe_paymentsheet_outer_spacing"
+        <FrameLayout
+            android:id="@+id/button_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_margin="@dimen/stripe_paymentsheet_outer_spacing"
             app:layout_constraintVertical_bias="1"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent">
+            <com.stripe.android.paymentsheet.BuyButton
+                android:id="@+id/buy_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <com.stripe.android.paymentsheet.ui.GooglePayButton
+                android:id="@+id/google_pay_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"/>
+        </FrameLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
