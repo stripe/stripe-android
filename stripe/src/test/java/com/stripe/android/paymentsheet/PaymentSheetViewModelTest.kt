@@ -47,12 +47,14 @@ internal class PaymentSheetViewModelTest {
     private val googlePayRepository = FakeGooglePayRepository(true)
     private val stripeRepository: StripeRepository = FakeStripeRepository(paymentIntent)
     private val paymentController: PaymentController = mock()
+    private val prefsRepository = mock<PrefsRepository>()
     private val viewModel = PaymentSheetViewModel(
         "publishable_key",
         "stripe_account_id",
         stripeRepository,
         paymentController,
         googlePayRepository,
+        prefsRepository,
         DEFAULT_ARGS,
         workContext = testCoroutineDispatcher
     )
@@ -84,6 +86,7 @@ internal class PaymentSheetViewModelTest {
             stripeRepository,
             paymentController,
             googlePayRepository,
+            prefsRepository,
             GUEST_ARGS,
             workContext = testCoroutineDispatcher
         )
@@ -104,16 +107,19 @@ internal class PaymentSheetViewModelTest {
         }
 
         viewModel.checkout(mock())
+
+        verify(prefsRepository).savePaymentSelection(null)
         assertThat(error)
             .isInstanceOf(IllegalStateException::class.java)
     }
 
     @Test
     fun `checkout() should confirm saved payment methods`() {
-        viewModel.updateSelection(
-            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        )
+        val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        viewModel.updateSelection(paymentSelection)
         viewModel.checkout(mock())
+
+        verify(prefsRepository).savePaymentSelection(paymentSelection)
         verify(paymentController).startConfirmAndAuth(
             any(),
             eq(
@@ -133,10 +139,11 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `checkout() should confirm new payment methods`() {
-        viewModel.updateSelection(
-            PaymentSelection.New(PaymentMethodCreateParamsFixtures.DEFAULT_CARD)
-        )
+        val paymentSelection = PaymentSelection.New(PaymentMethodCreateParamsFixtures.DEFAULT_CARD)
+        viewModel.updateSelection(paymentSelection)
         viewModel.checkout(mock())
+
+        verify(prefsRepository).savePaymentSelection(paymentSelection)
         verify(paymentController).startConfirmAndAuth(
             any(),
             eq(
@@ -229,6 +236,7 @@ internal class PaymentSheetViewModelTest {
             },
             paymentController,
             googlePayRepository,
+            prefsRepository,
             DEFAULT_ARGS,
             workContext = testCoroutineDispatcher
         )
@@ -257,6 +265,7 @@ internal class PaymentSheetViewModelTest {
             },
             paymentController,
             googlePayRepository,
+            prefsRepository,
             DEFAULT_ARGS,
             workContext = testCoroutineDispatcher
         )

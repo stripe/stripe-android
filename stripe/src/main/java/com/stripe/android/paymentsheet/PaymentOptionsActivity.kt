@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
@@ -32,12 +33,7 @@ internal class PaymentOptionsActivity : BasePaymentSheetActivity<PaymentOptionRe
             { requireNotNull(starterArgs) }
         )
 
-    private val viewModel by lazy {
-        ViewModelProvider(
-            this,
-            viewModelFactory
-        )[PaymentOptionsViewModel::class.java]
-    }
+    private val viewModel: PaymentOptionsViewModel by viewModels { viewModelFactory }
 
     private val starterArgs: PaymentOptionsActivityStarter.Args? by lazy {
         PaymentOptionsActivityStarter.Args.fromIntent(intent)

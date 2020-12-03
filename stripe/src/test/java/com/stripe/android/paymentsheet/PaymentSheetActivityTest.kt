@@ -7,6 +7,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
+import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentController
 import com.stripe.android.StripeIntentResult
@@ -67,6 +68,7 @@ internal class PaymentSheetActivityTest {
             workContext = testCoroutineDispatcher
         ),
         googlePayRepository = googlePayRepository,
+        prefsRepository = mock(),
         args = PaymentSheetFixtures.DEFAULT_ARGS,
         workContext = testCoroutineDispatcher
     )
@@ -258,6 +260,7 @@ internal class PaymentSheetActivityTest {
                 workContext = testCoroutineDispatcher
             ),
             googlePayRepository = googlePayRepository,
+            prefsRepository = mock(),
             args = PaymentSheetFixtures.DEFAULT_ARGS,
             workContext = testCoroutineDispatcher
         )
@@ -324,16 +327,12 @@ internal class PaymentSheetActivityTest {
             confirmPaymentIntentParams: ConfirmPaymentIntentParams,
             options: ApiRequest.Options,
             expandFields: List<String>
-        ): PaymentIntent? {
-            return paymentIntent
-        }
+        ): PaymentIntent = paymentIntent
 
         override suspend fun retrievePaymentIntent(
             clientSecret: String,
             options: ApiRequest.Options,
             expandFields: List<String>
-        ): PaymentIntent? {
-            return paymentIntent
-        }
+        ): PaymentIntent = paymentIntent
     }
 }

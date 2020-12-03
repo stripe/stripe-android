@@ -16,6 +16,7 @@ import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
+import com.stripe.android.PaymentSessionPrefs
 import com.stripe.android.StripePaymentController
 import com.stripe.android.googlepay.StripeGooglePayLauncher
 import com.stripe.android.model.ListPaymentMethodsParams
@@ -44,6 +45,7 @@ internal class PaymentSheetViewModel internal constructor(
     private val stripeRepository: StripeRepository,
     private val paymentController: PaymentController,
     private val googlePayRepository: GooglePayRepository,
+    private val prefsRepository: PrefsRepository,
     internal val args: PaymentSheetActivityStarter.Args,
     private val workContext: CoroutineContext
 ) : SheetViewModel<PaymentSheetViewModel.TransitionTarget, ViewState>(
@@ -153,6 +155,8 @@ internal class PaymentSheetViewModel internal constructor(
 
     fun checkout(activity: Activity) {
         mutableProcessing.value = true
+
+        prefsRepository.savePaymentSelection(selection.value)
 
         if (selection.value == PaymentSelection.GooglePay) {
             paymentIntent.value?.let { paymentIntent ->
@@ -305,13 +309,28 @@ internal class PaymentSheetViewModel internal constructor(
             )
             val googlePayRepository = DefaultGooglePayRepository(application)
 
+            val starterArgs = starterArgsSupplier()
+
+            val prefsRepository = when (starterArgs) {
+                is PaymentSheetActivityStarter.Args.Default -> {
+                    DefaultPrefsRepository(
+                        starterArgs.customerId,
+                        PaymentSessionPrefs.Default(application)
+                    )
+                }
+                is PaymentSheetActivityStarter.Args.Guest -> {
+                    PrefsRepository.Noop()
+                }
+            }
+
             return PaymentSheetViewModel(
                 publishableKey,
                 stripeAccountId,
                 stripeRepository,
                 paymentController,
                 googlePayRepository,
-                starterArgsSupplier(),
+                prefsRepository,
+                starterArgs,
                 Dispatchers.IO
             ) as T
         }
