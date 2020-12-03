@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
@@ -45,12 +46,7 @@ internal class PaymentSheetActivity : BasePaymentSheetActivity<PaymentResult>() 
         ActivityPaymentSheetBinding.inflate(layoutInflater)
     }
 
-    private val viewModel by lazy {
-        ViewModelProvider(
-            this,
-            viewModelFactory
-        )[PaymentSheetViewModel::class.java]
-    }
+    private val viewModel: PaymentSheetViewModel by viewModels { viewModelFactory }
 
     private val fragmentContainerId: Int
         @IdRes

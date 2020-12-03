@@ -21,6 +21,7 @@
     <color name="stripe_card_widget_progress_background">#4F566B</color>
 
     <!-- Payment Sheet -->
+    <color name="stripe_paymentsheet_background">#ffffff</color>
     <color name="stripe_paymentsheet_title_text">#303030</color>
     <color name="stripe_paymentsheet_selected_payment_method">#1EA672</color>
     <color name="stripe_paymentsheet_payment_method_label_text">#303030</color>
@@ -31,8 +32,9 @@
     <color name="stripe_paymentsheet_buybutton_text">@android:color/white</color>
     <color name="stripe_paymentsheet_buybutton_confirming_progress">#ffffff</color>
     <color name="stripe_paymentsheet_form_border">#44000000</color>
+    <color name="stripe_paymentsheet_textinput_color">#E61A1A1A</color>
 
-    <color name="stripe_paymentsheet_googlepay_divider_line">#E7E7E7</color>
+    <color name="stripe_paymentsheet_googlepay_divider_line">#1F000000</color>
     <color name="stripe_paymentsheet_googlepay_divider_background">@android:color/white</color>
-    <color name="stripe_paymentsheet_googlepay_divider_text">#757575</color>
+    <color name="stripe_paymentsheet_googlepay_divider_text">#99000000</color>
 </resources>
