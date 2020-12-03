@@ -65,7 +65,8 @@ internal class StripeApiRepositoryTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val stripeApiRepository = StripeApiRepository(
         context,
-        DEFAULT_OPTIONS.apiKey
+        DEFAULT_OPTIONS.apiKey,
+        workContext = testDispatcher
     )
     private val fileFactory = FileFactory(context)
 
@@ -355,7 +356,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun requestData_withConnectAccount_shouldReturnCorrectResponseHeaders() {
+    fun requestData_withConnectAccount_shouldReturnCorrectResponseHeaders() = testDispatcher.runBlockingTest {
         val connectAccountId = "acct_1Acj2PBUgO3KuWzz"
         var requestId: RequestId? = null
         val response = stripeApiRepository.makeApiRequest(
@@ -459,6 +460,7 @@ internal class StripeApiRepositoryTest {
         val stripeApiRepository = StripeApiRepository(
             context,
             DEFAULT_OPTIONS.apiKey,
+            workContext = testDispatcher,
             stripeApiRequestExecutor = ApiRequestExecutor.Default(),
             analyticsRequestExecutor = analyticsRequestExecutor,
             fingerprintDataRepository = fingerprintDataRepository
@@ -800,6 +802,7 @@ internal class StripeApiRepositoryTest {
         val stripeRepository = StripeApiRepository(
             context,
             DEFAULT_OPTIONS.apiKey,
+            workContext = testDispatcher,
             sdkVersion = "AndroidBindings/13.0.0"
         )
 
@@ -822,6 +825,7 @@ internal class StripeApiRepositoryTest {
         val stripeRepository = StripeApiRepository(
             context,
             DEFAULT_OPTIONS.apiKey,
+            workContext = testDispatcher,
             sdkVersion = "AndroidBindings/14.0.0"
         )
 
@@ -960,6 +964,7 @@ internal class StripeApiRepositoryTest {
         return StripeApiRepository(
             context,
             DEFAULT_OPTIONS.apiKey,
+            workContext = testDispatcher,
             stripeApiRequestExecutor = stripeApiRequestExecutor,
             analyticsRequestExecutor = analyticsRequestExecutor,
             fingerprintDataRepository = fingerprintDataRepository,

@@ -1,6 +1,5 @@
 package com.stripe.android
 
-import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -13,11 +12,11 @@ class GooglePayConfigTest {
     @Test
     fun getTokenizationSpecification_withoutConnectedAccount() {
         PaymentConfiguration.init(
-            ApplicationProvider.getApplicationContext<Context>(),
+            ApplicationProvider.getApplicationContext(),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
         val tokenizationSpec =
-            GooglePayConfig(ApplicationProvider.getApplicationContext<Context>())
+            GooglePayConfig(ApplicationProvider.getApplicationContext())
                 .tokenizationSpecification
         val params = tokenizationSpec.getJSONObject("parameters")
         assertEquals(

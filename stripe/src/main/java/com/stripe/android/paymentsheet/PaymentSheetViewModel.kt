@@ -16,6 +16,7 @@ import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
+import com.stripe.android.PaymentSessionPrefs
 import com.stripe.android.StripePaymentController
 import com.stripe.android.googlepay.StripeGooglePayLauncher
 import com.stripe.android.model.ListPaymentMethodsParams
@@ -42,6 +43,7 @@ internal class PaymentSheetViewModel internal constructor(
     private val stripeRepository: StripeRepository,
     private val paymentController: PaymentController,
     googlePayRepository: GooglePayRepository,
+    private val prefsRepository: PrefsRepository,
     internal val args: PaymentSheetActivityStarter.Args,
     workContext: CoroutineContext
 ) : SheetViewModel<PaymentSheetViewModel.TransitionTarget, ViewState>(
@@ -114,18 +116,7 @@ internal class PaymentSheetViewModel internal constructor(
                 }
             }
             result.fold(
-                onSuccess = { paymentIntent ->
-                    mutablePaymentIntent.value = paymentIntent
-
-                    val amount = paymentIntent.amount
-                    val currencyCode = paymentIntent.currency
-                    if (amount != null && currencyCode != null) {
-                        mutableViewState.value = ViewState.Ready(amount, currencyCode)
-                    } else {
-                        // TODO(mshafrir-stripe): improve error message
-                        onError(IllegalStateException("PaymentIntent is invalid."))
-                    }
-                },
+                onSuccess = ::onPaymentIntentResponse,
                 onFailure = {
                     mutablePaymentIntent.value = null
 
@@ -135,8 +126,34 @@ internal class PaymentSheetViewModel internal constructor(
         }
     }
 
+    private fun onPaymentIntentResponse(paymentIntent: PaymentIntent) {
+        if (paymentIntent.confirmationMethod == PaymentIntent.ConfirmationMethod.Automatic) {
+            mutablePaymentIntent.value = paymentIntent
+
+            val amount = paymentIntent.amount
+            val currencyCode = paymentIntent.currency
+            if (amount != null && currencyCode != null) {
+                mutableViewState.value = ViewState.Ready(amount, currencyCode)
+            } else {
+                // TODO(mshafrir-stripe): improve error message
+                onError(IllegalStateException("PaymentIntent is invalid."))
+            }
+        } else {
+            onError(
+                IllegalArgumentException(
+                    """
+                    PaymentIntent with confirmation_method='automatic' is required.
+                    See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-confirmation_method.
+                    """.trimIndent()
+                )
+            )
+        }
+    }
+
     fun checkout(activity: Activity) {
         mutableProcessing.value = true
+
+        prefsRepository.savePaymentSelection(selection.value)
 
         if (selection.value == PaymentSelection.GooglePay) {
             paymentIntent.value?.let { paymentIntent ->
@@ -279,13 +296,28 @@ internal class PaymentSheetViewModel internal constructor(
             )
             val googlePayRepository = DefaultGooglePayRepository(application)
 
+            val starterArgs = starterArgsSupplier()
+
+            val prefsRepository = when (starterArgs) {
+                is PaymentSheetActivityStarter.Args.Default -> {
+                    DefaultPrefsRepository(
+                        starterArgs.customerId,
+                        PaymentSessionPrefs.Default(application)
+                    )
+                }
+                is PaymentSheetActivityStarter.Args.Guest -> {
+                    PrefsRepository.Noop()
+                }
+            }
+
             return PaymentSheetViewModel(
                 publishableKey,
                 stripeAccountId,
                 stripeRepository,
                 paymentController,
                 googlePayRepository,
-                starterArgsSupplier(),
+                prefsRepository,
+                starterArgs,
                 Dispatchers.IO
             ) as T
         }
