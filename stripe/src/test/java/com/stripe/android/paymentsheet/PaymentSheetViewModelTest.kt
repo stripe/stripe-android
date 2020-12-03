@@ -13,6 +13,7 @@ import com.nhaarman.mockitokotlin2.whenever
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
+import com.stripe.android.StripeIntentResult
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
@@ -175,7 +176,10 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `onActivityResult() should update ViewState LiveData`() {
-        val paymentIntentResult: PaymentIntentResult = mock()
+        val paymentIntentResult = PaymentIntentResult(
+            intent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
+            outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED
+        )
         whenever(paymentController.handlePaymentResult(any(), callbackCaptor.capture())).doAnswer {
             callbackCaptor.lastValue.onSuccess(paymentIntentResult)
         }

@@ -17,6 +17,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.PaymentSessionPrefs
+import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController
 import com.stripe.android.googlepay.StripeGooglePayLauncher
 import com.stripe.android.model.ListPaymentMethodsParams
@@ -203,7 +204,7 @@ internal class PaymentSheetViewModel internal constructor(
                 it,
                 object : ApiResultCallback<PaymentIntentResult> {
                     override fun onSuccess(result: PaymentIntentResult) {
-                        mutableViewState.value = ViewState.Completed(result)
+                        onPaymentIntentResult(result)
                     }
 
                     override fun onError(e: Exception) {
@@ -217,6 +218,18 @@ internal class PaymentSheetViewModel internal constructor(
             resultCode == Activity.RESULT_OK && data != null
         ) {
             onGooglePayResult(data)
+        }
+    }
+
+    private fun onPaymentIntentResult(paymentIntentResult: PaymentIntentResult) {
+        when (paymentIntentResult.outcome) {
+            StripeIntentResult.Outcome.SUCCEEDED -> {
+                mutableViewState.value = ViewState.Completed(paymentIntentResult)
+            }
+            else -> {
+                // TODO(mshafrir-stripe): show relevant error messages in sheet
+                onPaymentIntentResponse(paymentIntentResult.intent)
+            }
         }
     }
 
