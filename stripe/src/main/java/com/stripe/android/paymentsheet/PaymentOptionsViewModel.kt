@@ -12,8 +12,10 @@ internal class PaymentOptionsViewModel(
     private val publishableKey: String,
     private val stripeAccountId: String?,
     private val args: PaymentOptionsActivityStarter.Args,
+    googlePayRepository: GooglePayRepository
 ) : SheetViewModel<PaymentOptionsViewModel.TransitionTarget, PaymentOptionViewState>(
-    isGuestMode = args is PaymentOptionsActivityStarter.Args.Guest
+    isGuestMode = args is PaymentOptionsActivityStarter.Args.Guest,
+    googlePayRepository = googlePayRepository
 ) {
     init {
         mutablePaymentMethods.value = args.paymentMethods
@@ -48,11 +50,13 @@ internal class PaymentOptionsViewModel(
             val config = PaymentConfiguration.getInstance(application)
             val publishableKey = config.publishableKey
             val stripeAccountId = config.stripeAccountId
+            val googlePayRepository = DefaultGooglePayRepository(application)
 
             return PaymentOptionsViewModel(
                 publishableKey,
                 stripeAccountId,
-                starterArgsSupplier()
+                starterArgsSupplier(),
+                googlePayRepository
             ) as T
         }
     }

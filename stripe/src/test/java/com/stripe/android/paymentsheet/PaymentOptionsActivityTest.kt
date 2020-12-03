@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.nhaarman.mockitokotlin2.mock
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -29,7 +30,8 @@ class PaymentOptionsActivityTest {
     private val viewModel = PaymentOptionsViewModel(
         publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
         stripeAccountId = null,
-        args = PaymentOptionsActivityStarter.Args.Guest
+        args = PaymentOptionsActivityStarter.Args.Guest,
+        googlePayRepository = mock()
     )
 
     @Test

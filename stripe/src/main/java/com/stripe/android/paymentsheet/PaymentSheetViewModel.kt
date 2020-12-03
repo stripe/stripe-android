@@ -34,8 +34,6 @@ import com.stripe.android.paymentsheet.ui.SheetMode
 import com.stripe.android.paymentsheet.viewmodels.SheetViewModel
 import com.stripe.android.view.AuthActivityStarter
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
@@ -45,20 +43,19 @@ internal class PaymentSheetViewModel internal constructor(
     private val stripeAccountId: String?,
     private val stripeRepository: StripeRepository,
     private val paymentController: PaymentController,
-    private val googlePayRepository: GooglePayRepository,
+    googlePayRepository: GooglePayRepository,
     private val prefsRepository: PrefsRepository,
     internal val args: PaymentSheetActivityStarter.Args,
-    private val workContext: CoroutineContext
+    workContext: CoroutineContext
 ) : SheetViewModel<PaymentSheetViewModel.TransitionTarget, ViewState>(
-    isGuestMode = args is PaymentSheetActivityStarter.Args.Guest
+    isGuestMode = args is PaymentSheetActivityStarter.Args.Guest,
+    googlePayRepository = googlePayRepository,
+    workContext = workContext
 ) {
     private val confirmParamsFactory = ConfirmParamsFactory()
 
     private val mutablePaymentIntent = MutableLiveData<PaymentIntent?>()
     internal val paymentIntent: LiveData<PaymentIntent?> = mutablePaymentIntent
-
-    private val mutableIsGooglePayReady = MutableLiveData<Boolean>()
-    internal val isGooglePayReady: LiveData<Boolean> = mutableIsGooglePayReady.distinctUntilChanged()
 
     fun fetchAddPaymentMethodConfig() = liveData {
         emitSource(
@@ -241,16 +238,6 @@ internal class PaymentSheetViewModel internal constructor(
             }
             else -> {
                 // TODO(mshafrir-stripe): handle error
-            }
-        }
-    }
-
-    fun fetchIsGooglePayReady() {
-        viewModelScope.launch {
-            withContext(workContext) {
-                mutableIsGooglePayReady.postValue(
-                    googlePayRepository.isReady().filterNotNull().first()
-                )
             }
         }
     }

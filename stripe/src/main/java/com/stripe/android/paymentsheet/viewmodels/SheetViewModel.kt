@@ -4,18 +4,31 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.GooglePayRepository
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.SheetMode
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Base `ViewModel` for activities that use `BottomSheet`.
  */
 internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
-    internal val isGuestMode: Boolean
+    internal val isGuestMode: Boolean,
+    private val googlePayRepository: GooglePayRepository,
+    protected val workContext: CoroutineContext = Dispatchers.IO
 ) : ViewModel() {
     private val mutableError = MutableLiveData<Throwable>()
     internal val error: LiveData<Throwable> = mutableError
+
+    private val mutableIsGooglePayReady = MutableLiveData<Boolean>()
+    internal val isGooglePayReady: LiveData<Boolean> = mutableIsGooglePayReady.distinctUntilChanged()
 
     protected val mutablePaymentMethods = MutableLiveData<List<PaymentMethod>>()
     internal val paymentMethods: LiveData<List<PaymentMethod>> = mutablePaymentMethods
@@ -36,6 +49,18 @@ internal abstract class SheetViewModel<TransitionTargetType, ViewStateType>(
     internal val viewState: LiveData<ViewStateType> = mutableViewState.distinctUntilChanged()
 
     internal var shouldSavePaymentMethod: Boolean = false
+
+    fun fetchIsGooglePayReady() {
+        if (isGooglePayReady.value == null) {
+            viewModelScope.launch {
+                withContext(workContext) {
+                    mutableIsGooglePayReady.postValue(
+                        googlePayRepository.isReady().filterNotNull().first()
+                    )
+                }
+            }
+        }
+    }
 
     fun updateMode(mode: SheetMode) {
         mutableSheetMode.postValue(mode)
